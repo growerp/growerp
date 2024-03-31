@@ -20,26 +20,24 @@ import 'package:flutter_flow_chart/flutter_flow_chart.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-class WorkFlowMainMenu extends StatefulWidget {
+class WorkflowEditorMainMenu extends StatefulWidget {
   final Task workflow;
   final Dashboard dashboard;
   final Offset position;
-  const WorkFlowMainMenu(this.workflow, this.dashboard, this.position,
+  const WorkflowEditorMainMenu(this.workflow, this.dashboard, this.position,
       {super.key});
   @override
-  WorkFlowMainMenuState createState() => WorkFlowMainMenuState();
+  WorkflowEditorMainMenuState createState() => WorkflowEditorMainMenuState();
 }
 
-class WorkFlowMainMenuState extends State<WorkFlowMainMenu> {
-  late TaskBloc _taskBloc;
+class WorkflowEditorMainMenuState extends State<WorkflowEditorMainMenu> {
+  late TaskWorkflowTemplateBloc _workflowTemplateBloc;
   late List<FlowElement> elementsSave;
 
   @override
   void initState() {
     super.initState();
-    _taskBloc = context.read<TaskBloc>();
-    _taskBloc.add(const TaskFetch(isForDropDown: true, limit: 3));
-    elementsSave = List.of(widget.dashboard.elements);
+    _workflowTemplateBloc = context.read<TaskWorkflowTemplateBloc>();
   }
 
   @override
@@ -138,7 +136,7 @@ class WorkFlowMainMenuState extends State<WorkFlowMainMenu> {
           child: ElevatedButton(
               child: const Text('Save'),
               onPressed: () {
-                context.read<TaskBloc>().add(TaskUpdate(widget.workflow));
+                _workflowTemplateBloc.add(TaskUpdate(widget.workflow));
                 Navigator.pop(context);
               }),
         ),

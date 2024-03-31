@@ -20,8 +20,7 @@ import 'package:growerp_user_company/growerp_user_company.dart';
 import 'menu_options.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import 'views/workflow_editor.dart';
-import 'views/workflow_runner.dart';
+import 'views/views.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (debug.kDebugMode) {
@@ -41,7 +40,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
               ));
     case '/editWorkflow':
       return MaterialPageRoute(
-          builder: (context) => WorkflowDialog(settings.arguments as Task));
+          builder: (context) =>
+              WorkflowEditorDialog(settings.arguments as Task));
     case '/workflowRunner':
       return MaterialPageRoute(
           builder: (context) =>

@@ -12,38 +12,39 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
-import '../../../../growerp_core.dart';
-
-class TaskDialog extends StatefulWidget {
+class WorkflowDialog extends StatefulWidget {
   final Task task;
-  const TaskDialog(this.task, {super.key});
+  const WorkflowDialog(this.task, {super.key});
   @override
-  TaskDialogState createState() => TaskDialogState();
+  WorkflowDialogState createState() => WorkflowDialogState();
 }
 
-class TaskDialogState extends State<TaskDialog> {
+class WorkflowDialogState extends State<WorkflowDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _routingController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _taskSearchBoxController =
+      TextEditingController();
 
-  TaskStatus? _status;
-  late TaskBloc _taskBloc;
+  late TaskStatus _status;
+  late TaskWorkflowTemplateBloc _taskBloc;
+  Task? _selectedTask = Task();
 
   @override
   void initState() {
     super.initState();
-    if (widget.task.taskType == TaskType.todo) {
-      _status = widget.task.statusId ?? TaskStatus.planning;
-    }
+    _status = widget.task.statusId ?? TaskStatus.planning;
     _nameController.text = widget.task.taskName;
     _descriptionController.text = widget.task.description;
     _routingController.text = widget.task.routing ?? '';
-    _taskBloc = context.read<TaskBloc>();
+    _taskBloc = context.read<TaskWorkflowTemplateBloc>();
   }
 
   @override
@@ -51,7 +52,7 @@ class TaskDialogState extends State<TaskDialog> {
     return Scaffold(
         backgroundColor: Colors.transparent,
         body: Dialog(
-            key: const Key('TaskDialog'),
+            key: const Key('WorkflowDialog'),
             insetPadding: const EdgeInsets.all(10),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
@@ -77,12 +78,11 @@ class TaskDialogState extends State<TaskDialog> {
                   }
                 },
                 child: popUp(
-                  context: context,
-                  title: '${widget.task.taskType} Information',
-                  height: 400,
-                  width: 400,
-                  child: _showForm(isPhone(context)),
-                ))));
+                    context: context,
+                    child: _showForm(isPhone(context)),
+                    title: '${widget.task.taskType} Information',
+                    height: 400,
+                    width: 400))));
   }
 
   Widget _showForm(isPhone) {
@@ -189,6 +189,52 @@ class TaskDialogState extends State<TaskDialog> {
                               '/workflowRunner',
                               arguments: widget.task))),
                 const SizedBox(width: 10),
+                BlocBuilder<TaskWorkflowTemplateBloc, TaskState>(
+                    builder: (context, state) {
+                  switch (state.status) {
+                    case TaskBlocStatus.failure:
+                      return const FatalErrorForm(
+                          message: 'server connection problem');
+                    case TaskBlocStatus.success:
+                      return DropdownSearch<Task>(
+                        key: const Key('taskDropDown'),
+                        selectedItem: _selectedTask,
+                        popupProps: PopupProps.menu(
+                          showSearchBox: true,
+                          searchFieldProps: TextFieldProps(
+                            autofocus: true,
+                            decoration:
+                                const InputDecoration(labelText: 'Task id'),
+                            controller: _taskSearchBoxController,
+                          ),
+                          title: popUp(
+                            context: context,
+                            title: 'Select Task',
+                            height: 50,
+                          ),
+                        ),
+                        dropdownDecoratorProps: const DropDownDecoratorProps(
+                          dropdownSearchDecoration: InputDecoration(
+                            labelText: 'Task',
+                          ),
+                        ),
+                        itemAsString: (Task? u) =>
+                            " ${u!.taskName}", // invisible char for test
+                        onChanged: (Task? newValue) {
+                          _selectedTask = newValue ?? Task();
+                        },
+                        asyncItems: (String filter) {
+                          _taskBloc.add(TaskFetch(
+                              searchString: filter, isForDropDown: true));
+                          return Future.value(state.tasks);
+                        },
+                        validator: (value) =>
+                            value == null ? 'field required' : null,
+                      );
+                    default:
+                      return const Center(child: CircularProgressIndicator());
+                  }
+                }),
                 Expanded(
                     child: ElevatedButton(
                         key: const Key('update'),

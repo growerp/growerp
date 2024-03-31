@@ -42,6 +42,7 @@ class Task extends Equatable with _$Task {
     // from workflow editor
     @Default("") String jsonImage,
     @Default([]) List<Task> workflowTasks, // workflowTasks / links
+    Task? taskTemplate,
     // workflow task link to the view
     String? routing,
     String? flowElementId,

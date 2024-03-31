@@ -1743,7 +1743,7 @@ along with this software (see the LICENSE.md file). If not, see
     </view-entity>
 
     <!-- task views -->
-    <view-entity entity-name="TaskAndParties" package="growerp.task">
+    <view-entity entity-name="TaskSubTasksLinksAndParties" package="growerp.task">
         <member-entity entity-alias="WE" entity-name="mantle.work.effort.WorkEffort" />
         <member-entity entity-alias="WEP" entity-name="mantle.work.effort.WorkEffortParty"
             join-from-alias="WE" join-optional="true">

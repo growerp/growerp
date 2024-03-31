@@ -20,6 +20,7 @@ Widget popUp(
     String title = '',
     double height = 400,
     double? width,
+    double padding = 10,
     required BuildContext context}) {
   if (width == null) {
     isPhone(context) ? width = 350 : width = 700;
@@ -43,7 +44,7 @@ Widget popUp(
                       style: const TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold)))),
           Expanded(
-              child: Padding(padding: const EdgeInsets.all(10), child: child)),
+              child: Padding(padding: EdgeInsets.all(padding), child: child)),
         ])),
     const Positioned(top: 15, right: 15, child: DialogCloseButton())
   ]);

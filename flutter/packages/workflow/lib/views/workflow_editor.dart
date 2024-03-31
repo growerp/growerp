@@ -4,13 +4,11 @@ import 'package:flutter_flow_chart/flutter_flow_chart.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import 'flowchart_menus.dart';
-import 'workflow_context_menu.dart';
-import 'workflow_main_menu.dart';
+import 'views.dart';
 
-class WorkflowDialog extends StatelessWidget {
+class WorkflowEditorDialog extends StatelessWidget {
   final Task workflow;
-  const WorkflowDialog(this.workflow, {super.key});
+  const WorkflowEditorDialog(this.workflow, {super.key});
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -39,21 +37,21 @@ class WorkFlowEditor extends StatefulWidget {
 
 class _WorkFlowEditorState extends State<WorkFlowEditor> {
   late Dashboard dashboard;
-  late TaskBloc workflowBloc;
-  late TaskBloc taskBloc;
+  late TaskWorkflowTemplateBloc workflowTemplateBloc;
+  late TaskWorkflowTaskTemplateBloc taskTemplateBloc;
   List<Task> tasks = [];
 
   @override
   void initState() {
     super.initState();
-    workflowBloc = context.read<TaskWorkflowTemplateBloc>() as TaskBloc;
-    taskBloc = context.read<TaskWorkflowTaskTemplateBloc>() as TaskBloc;
+    workflowTemplateBloc = context.read<TaskWorkflowTemplateBloc>() as TaskBloc;
+    taskTemplateBloc = context.read<TaskWorkflowTaskTemplateBloc>() as TaskBloc;
     if (widget.workflow.jsonImage.isEmpty) {
       dashboard = Dashboard();
     } else {
       dashboard = Dashboard.fromJson(widget.workflow.jsonImage);
     }
-    tasks = widget.workflow.workflowTasks;
+    tasks = List.of(widget.workflow.workflowTasks);
   }
 
   @override
@@ -62,43 +60,48 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
       List<Task> newTasks = [];
       for (FlowElement element in elements) {
         var index = tasks.indexWhere((el) => el.flowElementId == element.id);
-        newTasks.add(Task(
-            flowElementId: element.id,
-            routing: index != -1 ? tasks[index].routing : ''));
+        if (index == -1) {
+          newTasks.add(Task(flowElementId: element.id));
+        } else {
+          newTasks.add(tasks[index].copyWith(flowElementId: element.id));
+        }
       }
       return newTasks;
     }
 
-    return PopScope(
-        onPopInvoked: (value) {
-          debugPrint("====$tasks $value");
-        },
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text('Workflow Editor'),
-          ),
-          backgroundColor: Colors.black12,
-          body: Container(
-            constraints: const BoxConstraints.expand(),
+    return Scaffold(
+        backgroundColor: Colors.transparent,
+        floatingActionButton: FloatingActionButton(
+            onPressed: dashboard.recenter,
+            child: const Icon(Icons.center_focus_strong)),
+        body: Center(
+          child: popUp(
+            context: context,
+            title: widget.workflow.taskName,
+            padding: 0,
+            height: MediaQuery.of(context).size.height - 50,
+            width: MediaQuery.of(context).size.width - 50,
             child: FlowChart(
               dashboard: dashboard,
               onDashboardTapped: ((context, position) async {
                 debugPrint('Dashboard tapped $position');
+              }),
+              onDashboardSecondaryTapped: (context, position) async {
+                debugPrint('Dashboard right clicked $position');
                 // copy flowdata into workflow tasks
                 tasks = syncTasks(dashboard.elements, tasks);
                 await showDialog(
                     barrierDismissible: true,
                     context: context,
                     builder: (BuildContext context) => BlocProvider.value(
-                        value: taskBloc,
-                        child: WorkFlowMainMenu(
-                            widget.workflow.copyWith(workflowTasks: tasks),
+                        value: workflowTemplateBloc,
+                        child: WorkflowEditorMainMenu(
+                            widget.workflow.copyWith(
+                                workflowTasks: tasks,
+                                jsonImage: dashboard.toJson()),
                             dashboard,
                             position)));
                 tasks = syncTasks(dashboard.elements, tasks);
-              }),
-              onDashboardSecondaryTapped: (context, position) async {
-                debugPrint('Dashboard right clicked $position');
               },
               onDashboardLongtTapped: ((context, position) {
                 debugPrint('Dashboard long tapped $position');
@@ -125,9 +128,13 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
                     builder: (BuildContext context) {
                       index = tasks
                           .indexWhere((el) => el.flowElementId == element.id);
+                      if (index == -1) {
+                        return const Center(
+                            child: Text('Could not find element!'));
+                      }
                       return BlocProvider.value(
-                          value: taskBloc,
-                          child: WorkFlowContextMenu(
+                          value: taskTemplateBloc,
+                          child: WorkflowEditorContextMenu(
                             (newTask) {
                               task = newTask;
                             },
@@ -157,9 +164,6 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
               },
             ),
           ),
-          floatingActionButton: FloatingActionButton(
-              onPressed: dashboard.recenter,
-              child: const Icon(Icons.center_focus_strong)),
         ));
   }
 }

@@ -221,7 +221,8 @@ along with this software (see the LICENSE.md file). If not, see
                         value="InvoiceReceived,InvoiceApproved" />
                     <select-field field-name="toPartyId,invoiceCount,unpaidTotal,currencyUomId" />
                 </entity-find>
-                <entity-find-count entity-name="growerp.task.TaskAndParties" count-field="allTasks">
+                <entity-find-count entity-name="growerp.task.TaskSubTasksLinksAndParties"
+                    count-field="allTasks">
                     <econdition field-name="ownerPartyId" from="ownerPartyId" />
                     <econdition field-name="statusId" operator="in"
                         from="['WeApproved','WeInPlanning','WeInProgress']" />

@@ -21,36 +21,37 @@ import 'package:flutter_flow_chart/flutter_flow_chart.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-class WorkFlowContextMenu extends StatefulWidget {
+class WorkflowEditorContextMenu extends StatefulWidget {
   final ValueChanged<Task> onTaskChanged;
   final Task workflow;
   final Dashboard dashboard;
   final FlowElement element;
   final Task task;
-  const WorkFlowContextMenu(this.onTaskChanged, this.workflow, this.dashboard,
-      this.element, this.task,
+  const WorkflowEditorContextMenu(this.onTaskChanged, this.workflow,
+      this.dashboard, this.element, this.task,
       {super.key});
   @override
-  WorkFlowContextMenuState createState() => WorkFlowContextMenuState();
+  WorkflowEditorContextMenuState createState() =>
+      WorkflowEditorContextMenuState();
 }
 
-class WorkFlowContextMenuState extends State<WorkFlowContextMenu> {
+class WorkflowEditorContextMenuState extends State<WorkflowEditorContextMenu> {
   final _taskDialogformKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _routingController = TextEditingController();
   final TextEditingController _taskSearchBoxController =
       TextEditingController();
-  late TaskBloc _taskBloc;
-  Task? _selectedTask = Task();
+  late TaskWorkflowTaskTemplateBloc _taskTemplateBloc;
+  Task? _selectedTemplate = Task();
 
   @override
   void initState() {
     super.initState();
-    _taskBloc = context.read<TaskBloc>();
-    _taskBloc.add(const TaskFetch(isForDropDown: true, limit: 3));
+    _taskTemplateBloc = context.read<TaskWorkflowTaskTemplateBloc>();
+    _taskTemplateBloc.add(const TaskFetch(isForDropDown: true, limit: 3));
     _routingController.text = widget.task.routing ?? '';
     _nameController.text = widget.element.text;
-    // _selectedTask = widget.task.workflowTaskTemplate;
+    _selectedTemplate = widget.task.taskTemplate;
   }
 
   @override
@@ -108,8 +109,8 @@ class WorkFlowContextMenuState extends State<WorkFlowContextMenu> {
               ),
               TextFormField(
                 key: const Key('name'),
-                decoration:
-                    const InputDecoration(labelText: 'Workflow Task Name'),
+                decoration: const InputDecoration(
+                    labelText: 'Workflow Template Task Name'),
                 controller: _nameController,
                 validator: (value) {
                   if (value!.isEmpty) return 'Please enter a task name?';
@@ -118,15 +119,16 @@ class WorkFlowContextMenuState extends State<WorkFlowContextMenu> {
               ),
               TextFormField(
                 key: const Key('routing'),
-                decoration:
-                    const InputDecoration(labelText: 'Workflow Routing'),
+                decoration: const InputDecoration(
+                    labelText: 'Workflow Template task Routing'),
                 controller: _routingController,
                 validator: (value) {
                   if (value!.isEmpty) return 'Please enter routing?';
                   return null;
                 },
               ),
-              BlocBuilder<TaskBloc, TaskState>(builder: (context, state) {
+              BlocBuilder<TaskWorkflowTaskTemplateBloc, TaskState>(
+                  builder: (context, state) {
                 switch (state.status) {
                   case TaskBlocStatus.failure:
                     return const FatalErrorForm(
@@ -134,7 +136,7 @@ class WorkFlowContextMenuState extends State<WorkFlowContextMenu> {
                   case TaskBlocStatus.success:
                     return DropdownSearch<Task>(
                       key: const Key('taskDropDown'),
-                      selectedItem: _selectedTask,
+                      selectedItem: _selectedTemplate,
                       popupProps: PopupProps.menu(
                         showSearchBox: true,
                         searchFieldProps: TextFieldProps(
@@ -145,22 +147,22 @@ class WorkFlowContextMenuState extends State<WorkFlowContextMenu> {
                         ),
                         title: popUp(
                           context: context,
-                          title: 'Select Task',
+                          title: 'Select Workflow Task Template',
                           height: 50,
                         ),
                       ),
                       dropdownDecoratorProps: const DropDownDecoratorProps(
                         dropdownSearchDecoration: InputDecoration(
-                          labelText: 'Task',
+                          labelText: 'Workflow Task Template',
                         ),
                       ),
                       itemAsString: (Task? u) =>
                           " ${u!.taskName}", // invisible char for test
                       onChanged: (Task? newValue) {
-                        _selectedTask = newValue ?? Task();
+                        _selectedTemplate = newValue ?? Task();
                       },
                       asyncItems: (String filter) {
-                        _taskBloc.add(TaskFetch(
+                        _taskTemplateBloc.add(TaskFetch(
                             searchString: filter, isForDropDown: true));
                         return Future.value(state.tasks);
                       },
@@ -179,7 +181,7 @@ class WorkFlowContextMenuState extends State<WorkFlowContextMenu> {
                   onPressed: () {
                     widget.onTaskChanged(widget.task.copyWith(
                         taskName: _nameController.text,
-                        //workflowTaskTemplate: _selectedTask,
+                        taskTemplate: _selectedTemplate,
                         routing: _routingController.text));
                     Navigator.of(context).pop();
                   }),

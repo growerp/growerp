@@ -118,6 +118,10 @@ along with this software (see the LICENSE.md file). If not, see
                             <parameter name="flowElementId" />
                             <parameter name="routing" />
                         </parameter>
+                        <parameter name="taskTemplate" type="Map">
+                            <parameter name="taskId" />
+                            <parameter name="routing" />
+                        </parameter>
                     </parameter>
                 </parameter>
             </parameter>
@@ -130,7 +134,9 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- only check status for a list -->
             <if
-                condition="open == 'true' &amp;&amp; !taskId &amp;&amp; taskType != 'workflowTemplate'">
+                condition="open == 'true' &amp;&amp; !taskId 
+                    &amp;&amp; taskType != 'workflowTemplate' 
+                    &amp;&amp; taskType != 'workflowTaskTemplate'">
                 <set field="openStatusList"
                     from="['WeApproved','WeInPlanning','WeInProgress']" />
             </if>
@@ -152,7 +158,7 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="workEffortType" from="typeConvert[taskType]" />
             <if condition="taskId">
                 <!-- single task -->
-                <entity-find list="entries" entity-name="growerp.task.TaskAndParties">
+                <entity-find list="entries" entity-name="growerp.task.TaskSubTasksLinksAndParties">
                     <econdition field-name="workEffortId" from="taskId" />
                     <econdition field-name="ownerPartyId" />
                 </entity-find>
@@ -163,7 +169,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <else>
                     <!-- by type -->
                     <entity-find offset="start" limit="limit" list="entries"
-                        entity-name="growerp.task.TaskAndParties">
+                        entity-name="growerp.task.TaskSubTasksLinksAndParties">
                         <econdition field-name="workEffortTypeEnumId" from="workEffortType" />
                         <econdition field-name="workEffortId" from="taskId"
                             ignore-if-empty="true" />
@@ -230,6 +236,8 @@ along with this software (see the LICENSE.md file). If not, see
                             <!-- get workflow task links-->
                             <entity-find entity-name="mantle.work.effort.WorkEffortAssoc"
                                 list="links">
+                                <econdition field-name="workEffortAssocTypeEnumId"
+                                    value="WeatWorkflowTaskLink" />
                                 <econdition field-name="workEffortId" from="child.workEffortId" />
                             </entity-find>
                             <set field="linksOut" from="[]" />
@@ -240,12 +248,30 @@ along with this software (see the LICENSE.md file). If not, see
                             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                                 in-map="[docType: 'task', statusId: child.statusId]"
                                 out-map="context" />
+                            <!-- when workflowTemplatetask get workflowTasktemplate-->
+                            <entity-find
+                                entity-name="mantle.work.effort.WorkEffortAssocAndTo"
+                                list="templates">
+                                <econdition field-name="workEffortAssocTypeEnumId"
+                                    value="WeatWorkflowTaskTemplate" />
+                                <econdition field-name="workEffortId" from="child.workEffortId" />
+                            </entity-find>
+                            <if condition="templates">
+                                <set field="taskTemplate"
+                                    from="[
+                                        taskId: templates[0].workEffortId,
+                                        routing: templates[0].routing]" />
+                                <else>
+                                    <set field="taskTemplate" from="null" />
+                                </else>
+                            </if>
                             <set field="workflowTask"
                                 from="[taskId: child.workEffortId,
                                     taskName: child.workEffortName,
                                     flowElementId: child.flowElementId,
                                     routing: child.routing,
                                     statusId: convertedStatusId,
+                                    taskTemplate: taskTemplate,
                                     workflowTasks: linksOut]"
                             />
                             <script>workflowTasks.add(workflowTask)</script>
@@ -377,6 +403,10 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="flowElementId" />
                         <parameter name="routing" />
                     </parameter>
+                    <parameter name="taskTemplate" type="Map">
+                        <parameter name="taskId" />
+                        <parameter name="routing" />
+                    </parameter>
                 </parameter>
             </parameter>
         </in-parameters>
@@ -414,6 +444,10 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="flowElementId" />
                         <parameter name="routing" />
                     </parameter>
+                    <parameter name="taskTemplate" type="Map">
+                        <parameter name="taskId" />
+                        <parameter name="routing" />
+                    </parameter>
                 </parameter>
             </parameter>
         </out-parameters>
@@ -428,10 +462,6 @@ along with this software (see the LICENSE.md file). If not, see
                     workflowTaskTemplate: 'WetWorkflowTaskTemplate',
                     todo: 'WetTask']"
                 type="NewMap" />
-            <!-- create task -->
-            <if condition="!task.statusId || task.statusId.isEmpty()">
-                <set field="task.statusId" value="planning" />
-            </if>
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                 in-map="[docType: 'task', statusId: task.statusId]" out-map="context" />
             <if condition="typeConvert[task.taskType] != 'WetWorkflowTemplate'">
@@ -442,14 +472,14 @@ along with this software (see the LICENSE.md file). If not, see
                     parentWorkEffortId: task.parentTaskId,
                     workEffortTypeEnumId: typeConvert[task.taskType],
                     workEffortName: task.taskName,
-                    infoUrl: task.routing,
                     statusId: statusId,
                     description: task.description,
                     ownerPartyId: ownerPartyId,
                     actualStartDate: task.startDate ?
                         task.startDate.substring(0,18) : null,
                     actualCompletionDate: task.endDate ?
-                        task.endDate.substring(0,18) : null
+                        task.endDate.substring(0,18) : null,
+                    routing: task.routing,
                  ]"
                 out-map="context" />
             <!-- employee owner -->
@@ -515,6 +545,7 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="task" from="tasks[0]" />
         </actions>
     </service>
+
     <service verb="update" noun="Task">
         <description> Update a task within a project</description>
         <in-parameters>
@@ -534,7 +565,19 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="workflowTasks" type="List">
                     <parameter name="taskId" />
                     <parameter name="flowElementId" />
+                    <parameter name="taskName" />
                     <parameter name="routing" />
+                    <parameter name="statusId" />
+                    <!-- links between tasks -->
+                    <parameter name="workflowTasks" type="List">
+                        <parameter name="taskId" />
+                        <parameter name="flowElementId" />
+                        <parameter name="routing" />
+                    </parameter>
+                    <parameter name="taskTemplate" type="Map">
+                        <parameter name="taskId" />
+                        <parameter name="routing" />
+                    </parameter>
                 </parameter>
             </parameter>
         </in-parameters>
@@ -573,12 +616,14 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="flowElementId" />
                         <parameter name="routing" />
                     </parameter>
+                    <parameter name="taskTemplate" type="Map">
+                        <parameter name="taskId" />
+                        <parameter name="routing" />
+                    </parameter>
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
-            <log
-                message="======updating task: ${task.taskId} with routings: ${task.workflowTasks?.routing}" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="growerp.100.TaskServices100.get#Task"
@@ -740,6 +785,10 @@ along with this software (see the LICENSE.md file). If not, see
                 </iterate>
                 <!-- delete sub tasks-->
                 <iterate list="oldTasks" entry="oldTask">
+                    <!-- delete reference to tasktemplate -->
+                    <entity-delete-by-condition entity-name="mantle.work.effort.WorkEffortAssoc">
+                        <econdition field-name="workEffortId" from="oldTask.workEffortId" />
+                    </entity-delete-by-condition>
                     <entity-delete-by-condition entity-name="mantle.work.effort.WorkEffort">
                         <econdition field-name="workEffortTypeEnumId"
                             value="WetWorkflowTemplateTask" />
@@ -771,6 +820,12 @@ along with this software (see the LICENSE.md file). If not, see
                 from="(Map) new groovy.json.JsonSlurper().parseText(task.jsonImage)"
                 type="NewMap" />
             <set field="wfIds" from="[:]" />
+            <if condition="task.taskType == 'workflowTemplate'">
+                <set field="taskType" value="workflowTemplateTask" />
+            </if>
+            <if condition="task.taskType == 'workflow'">
+                <set field="taskType" value="workflowTask" />
+            </if>
             <iterate list='jsonImageDecoded["elements"]' entry="element">
                 <!-- create workflow tasks -->
                 <set field="extraTask"
@@ -784,12 +839,6 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="convertedStatusId" value="WeInPlanning" />
                     </if>
                 </if>
-                <if condition="task.taskType == 'workflowTemplate'">
-                    <set field="taskType" value="workflowTemplateTask" />
-                </if>
-                <if condition="task.taskType == 'workflow'">
-                    <set field="taskType" value="workflowTask" />
-                </if>
                 <service-call name="create#mantle.work.effort.WorkEffort"
                     in-map="[flowElementId: element.id,
                            ownerPartyId: ownerPartyId,
@@ -800,6 +849,16 @@ along with this software (see the LICENSE.md file). If not, see
                            parentWorkEffortId: task.taskId]"
                     out-map="context" />
                 <set field="wfIds[element.id]" from="workEffortId" />
+                <log
+                    message="processing: wfTemplate: ${task.taskId} wfTask: ${workEffortId} ${element.text} template: ${extraTask.taskTemplate?.taskId} routing: ${extraTask.taskTemplate?.routing} " />
+                <if condition="taskType == 'workflowTemplateTask' &amp;&amp; extraTask.taskTemplate">
+                    <!-- add relation from workflowTemplateTask to workflowTaskTemplate-->
+                    <service-call name="create#mantle.work.effort.WorkEffortAssoc"
+                        in-map="[workEffortId: workEffortId,
+                                toWorkEffortId: extraTask.taskTemplate.taskId,
+                                workEffortAssocTypeEnumId: 'WeatWorkflowTaskTemplate' ]" />
+                </if>
+
             </iterate>
             <!-- add workflow task links in WorkEffortAssoc-->
             <iterate list='jsonImageDecoded["elements"]' entry="element">
@@ -807,7 +866,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="create#mantle.work.effort.WorkEffortAssoc"
                         in-map="[workEffortId: wfIds[link.destElementId],
                            toWorkEffortId: wfIds[element.id],
-                           workEffortAssocTypeEnumId: 'WeatDependsOn' ]" />
+                           workEffortAssocTypeEnumId: 'WeatWorkflowTaskLink' ]" />
                 </iterate>
             </iterate>
         </actions>

@@ -58,6 +58,8 @@ class TaskListItem extends StatelessWidget {
               Expanded(
                   child: Text("${task.rate}",
                       key: Key('rate$index'), textAlign: TextAlign.center)),
+            if (task.taskType == TaskType.workflowTaskTemplate)
+              Expanded(child: Text(task.routing ?? '')),
           ],
         ),
         onTap: () async {

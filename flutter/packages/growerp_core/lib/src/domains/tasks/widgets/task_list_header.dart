@@ -76,6 +76,8 @@ class _TaskListHeaderState extends State<TaskListHeader> {
                     const Expanded(
                         child:
                             Text("From/To Party", textAlign: TextAlign.center)),
+                  if (widget.taskType == TaskType.workflowTaskTemplate)
+                    const Expanded(child: Text("Routing")),
                 ]),
                 const Divider(),
               ]),

@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "2 End User documentation/7 Accounting/7 Item Type.md",
+                "file": "4 Applications/4 workflow/Workflow data organization.md",
                 "mode": "source",
                 "source": false
               }
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "2 End User documentation/7 Accounting/7 Item Type.md",
+                "file": "4 Applications/4 workflow/Workflow data organization.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "2 End User documentation/7 Accounting/7 Item Type.md",
+                "file": "4 Applications/4 workflow/Workflow data organization.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "2 End User documentation/7 Accounting/7 Item Type.md"
+                "file": "4 Applications/4 workflow/Workflow data organization.md"
               }
             }
           },
@@ -168,8 +168,13 @@
   },
   "active": "cd2ba6fa8750f0f9",
   "lastOpenFiles": [
-    "2 End User documentation/7 Accounting/6 Payment Type.md",
+    "4 Applications/3 Freelance/1 Introduction.md",
+    "4 Applications/4 workflow/Workflow data organization.md",
+    "3 Technical documentation/2 Flutter frontend & development.md",
+    "4 Applications/4 workflow",
+    "4 Applications/4 Workflow.md",
     "2 End User documentation/7 Accounting/7 Item Type.md",
+    "2 End User documentation/7 Accounting/6 Payment Type.md",
     "1 Introduction/5 Road Map and Releases.md",
     "1 Introduction/4 Getting started.md",
     "2 End User documentation/7 Accounting/9 Account Class reference.md",
@@ -194,16 +199,11 @@
     "2 End User documentation/2 Website/3 Publish products.md",
     "2 End User documentation/6 inventory management/1 Introduction.md",
     "2 End User documentation/6 inventory management",
-    "2 End User documentation/2 Website/2 Used fields.md",
-    "2 End User documentation/2 Website/1 Introduction.md",
-    "2 End User documentation/2 Website/Untitled.md",
     "2 End User documentation/2 Website",
-    "2 End User documentation/7 Accounting.md",
     "2 End User documentation/1 Introduction",
     "2 End User documentation/7 Accounting",
     "4 Applications/3 Freelance",
     "4 Applications/1 Admin",
-    "4 Applications/2 Hotel",
-    "4 Applications"
+    "4 Applications/2 Hotel"
   ]
 }
