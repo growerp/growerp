@@ -87,7 +87,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
           start: start,
           searchString: event.searchString,
           limit: event.limit,
-          taskId: event.taskId);
+          taskId: event.taskId,
+          isForDropDown: event.isForDropDown);
       if (event.taskId.isEmpty) {
         return emit(state.copyWith(
           status: TaskBlocStatus.success,

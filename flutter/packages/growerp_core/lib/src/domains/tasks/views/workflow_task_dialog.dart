@@ -18,14 +18,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 
-class WorkflowDialog extends StatefulWidget {
+class WorkflowTaskDialog extends StatefulWidget {
   final Task task;
-  const WorkflowDialog(this.task, {super.key});
+  const WorkflowTaskDialog(this.task, {super.key});
   @override
-  WorkflowDialogState createState() => WorkflowDialogState();
+  WorkflowTaskDialogState createState() => WorkflowTaskDialogState();
 }
 
-class WorkflowDialogState extends State<WorkflowDialog> {
+class WorkflowTaskDialogState extends State<WorkflowTaskDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _routingController = TextEditingController();
@@ -52,7 +52,7 @@ class WorkflowDialogState extends State<WorkflowDialog> {
     return Scaffold(
         backgroundColor: Colors.transparent,
         body: Dialog(
-            key: const Key('WorkflowDialog'),
+            key: const Key('WorkflowTaskDialog'),
             insetPadding: const EdgeInsets.all(10),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
@@ -80,7 +80,7 @@ class WorkflowDialogState extends State<WorkflowDialog> {
                 child: popUp(
                     context: context,
                     child: _showForm(isPhone(context)),
-                    title: '${widget.task.taskType} Information',
+                    title: '${widget.task.taskType} Information workflowtask',
                     height: 400,
                     width: 400))));
   }

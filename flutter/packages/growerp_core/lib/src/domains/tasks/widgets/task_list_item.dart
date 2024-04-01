@@ -68,7 +68,10 @@ class TaskListItem extends StatelessWidget {
               context: context,
               builder: (BuildContext context) {
                 return BlocProvider.value(
-                    value: taskBloc, child: TaskDialog(task));
+                    value: taskBloc,
+                    child: task.taskType == TaskType.workflow
+                        ? WorkflowDialog(task)
+                        : TaskDialog(task));
               });
         },
         trailing: IconButton(

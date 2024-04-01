@@ -160,8 +160,10 @@ class TaskListState extends State<TaskList> {
                         builder: (BuildContext context) {
                           return BlocProvider.value(
                               value: _taskBloc,
-                              child:
-                                  TaskDialog(Task(taskType: widget.taskType)));
+                              child: widget.taskType == TaskType.workflow
+                                  ? const WorkflowDialog(null)
+                                  : TaskDialog(
+                                      Task(taskType: widget.taskType)));
                         });
                   },
                   tooltip: widget.taskType == TaskType.workflow

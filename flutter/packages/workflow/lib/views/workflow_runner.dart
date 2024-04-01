@@ -36,8 +36,7 @@ class WorkflowRunner extends StatelessWidget {
             case TaskBlocStatus.success:
               HelperFunctions.showMessage(
                   context, '${state.message}', Colors.green);
-              Navigator.of(context)
-                  .popUntil(ModalRoute.withName('/workflowTemplates'));
+              Navigator.of(context).popUntil(ModalRoute.withName('/workflows'));
               Navigator.of(context).pop();
               break;
             case TaskBlocStatus.failure:

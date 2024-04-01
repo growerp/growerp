@@ -187,10 +187,26 @@ along with this software (see the LICENSE.md file). If not, see
                     </entity-find>
                 </else>
             </if>
-            <if
-                condition="workEffortType == 'WetWorkflow' ||
-                            workEffortType == 'WetWorkflowTemplate'">
+            <if condition="isForDropDown">
                 <then>
+                    <iterate entry="entry" list="entries">
+                        <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                            in-map="[docType: 'task', statusId: entry.statusId]"
+                            out-map="context" />
+                        <set field="workEffortOut"
+                            from="[
+                                taskId: entry.workEffortId,
+                                taskType: typeConvert[entry.workEffortTypeEnumId],
+                                taskName: entry.workEffortName,
+                                statusId: convertedStatusId,
+                            ]" />
+                        <script>tasks.add(workEffortOut)</script>
+                    </iterate>
+                </then>
+                <else-if
+                    condition="workEffortType == 'WetWorkflow' ||
+                            workEffortType == 'WetWorkflowTemplate'">
+
                     <iterate entry="entry" list="entries">
                         <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                             in-map="[docType: 'task', statusId: entry.statusId]"
@@ -279,7 +295,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="workEffortOut.workflowTasks" from="workflowTasks" />
                         <script>tasks.add(workEffortOut)</script>
                     </iterate>
-                </then>
+                </else-if>
                 <else-if
                     condition="workEffortType == 'WetWorkflowTask'">
                     <iterate entry="entry" list="entries">

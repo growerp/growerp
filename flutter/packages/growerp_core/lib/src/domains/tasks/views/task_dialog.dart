@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,9 +31,11 @@ class TaskDialogState extends State<TaskDialog> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _routingController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-
+  final TextEditingController _workflowSearchBoxController =
+      TextEditingController();
   TaskStatus? _status;
   late TaskBloc _taskBloc;
+  Task? _selectedWorkflow = Task();
 
   @override
   void initState() {
@@ -96,26 +99,29 @@ class TaskDialogState extends State<TaskDialog> {
                       style: const TextStyle(
                           fontSize: 10, fontWeight: FontWeight.bold))),
               const SizedBox(height: 30),
-              TextFormField(
-                key: const Key('name'),
-                decoration:
-                    InputDecoration(labelText: '${widget.task.taskType} Name'),
-                controller: _nameController,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter a ${widget.task.taskType} name?';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                key: const Key('description'),
-                maxLines: 3,
-                decoration: const InputDecoration(labelText: 'Description'),
-                controller: _descriptionController,
-              ),
+              if (widget.task.taskType != TaskType.workflow)
+                TextFormField(
+                  key: const Key('name'),
+                  decoration: InputDecoration(
+                      labelText: '${widget.task.taskType} Name'),
+                  controller: _nameController,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter a ${widget.task.taskType} name?';
+                    }
+                    return null;
+                  },
+                ),
+              if (widget.task.taskType != TaskType.workflow)
+                TextFormField(
+                  key: const Key('description'),
+                  maxLines: 3,
+                  decoration: const InputDecoration(labelText: 'Description'),
+                  controller: _descriptionController,
+                ),
               if (widget.task.taskType != TaskType.workflowTemplate &&
-                  widget.task.taskType != TaskType.workflowTaskTemplate)
+                  widget.task.taskType != TaskType.workflowTaskTemplate &&
+                  widget.task.taskType != TaskType.workflow)
                 Padding(
                     padding: const EdgeInsets.only(top: 10),
                     child: DropdownButtonFormField<TaskStatus>(
@@ -137,7 +143,8 @@ class TaskDialogState extends State<TaskDialog> {
                           });
                         },
                         isExpanded: true)),
-              if (widget.task.taskType != TaskType.workflowTemplate)
+              if (widget.task.taskType != TaskType.workflowTemplate &&
+                  widget.task.taskType != TaskType.workflow)
                 Padding(
                     padding: const EdgeInsets.only(top: 10),
                     child: TextFormField(
@@ -153,26 +160,25 @@ class TaskDialogState extends State<TaskDialog> {
                         })),
               const SizedBox(height: 20),
               Row(children: [
-                Visibility(
-                    visible: widget.task.taskId.isNotEmpty &&
-                        widget.task.taskType == TaskType.todo,
-                    child: ElevatedButton(
-                        key: const Key('TimeEntries'),
-                        child: const Text('TimeEntries'),
-                        onPressed: () async {
-                          await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                    value: _taskBloc,
-                                    child: TimeEntryListDialog(
-                                        widget.task.taskId,
-                                        widget.task.timeEntries));
-                              });
-                        })),
+                if (widget.task.taskId.isNotEmpty &&
+                    widget.task.taskType == TaskType.todo)
+                  ElevatedButton(
+                      key: const Key('TimeEntries'),
+                      child: const Text('TimeEntries'),
+                      onPressed: () async {
+                        await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return BlocProvider.value(
+                                  value: _taskBloc,
+                                  child: TimeEntryListDialog(widget.task.taskId,
+                                      widget.task.timeEntries));
+                            });
+                      }),
                 if (widget.task.taskType == TaskType.workflowTemplate &&
-                    widget.task.taskId.isNotEmpty)
+                    widget.task.taskId.isNotEmpty &&
+                    widget.task.taskType != TaskType.workflow)
                   Expanded(
                       child: ElevatedButton(
                           key: const Key('editWorkflow'),
@@ -189,24 +195,72 @@ class TaskDialogState extends State<TaskDialog> {
                               '/workflowRunner',
                               arguments: widget.task))),
                 const SizedBox(width: 10),
-                Expanded(
-                    child: ElevatedButton(
-                        key: const Key('update'),
-                        child: Text(
-                            widget.task.taskId.isEmpty ? 'Create' : 'Update'),
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            _taskBloc.add(TaskUpdate(
-                              widget.task.copyWith(
-                                taskId: widget.task.taskId,
-                                taskName: _nameController.text,
-                                description: _descriptionController.text,
-                                routing: _routingController.text,
-                                statusId: _status,
-                              ),
-                            ));
-                          }
-                        })),
+                if (widget.task.taskType != TaskType.workflow)
+                  Expanded(
+                      child: ElevatedButton(
+                          key: const Key('update'),
+                          child: Text(
+                              widget.task.taskId.isEmpty ? 'Create' : 'Update'),
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              _taskBloc.add(TaskUpdate(
+                                widget.task.copyWith(
+                                  taskId: widget.task.taskId,
+                                  taskName: _nameController.text,
+                                  description: _descriptionController.text,
+                                  routing: _routingController.text,
+                                  statusId: _status,
+                                ),
+                              ));
+                            }
+                          })),
+                if (widget.task.taskType == TaskType.workflow)
+                  BlocBuilder<TaskWorkflowBloc, TaskState>(
+                      builder: (context, state) {
+                    switch (state.status) {
+                      case TaskBlocStatus.failure:
+                        return const FatalErrorForm(
+                            message: 'server connection problem');
+                      case TaskBlocStatus.success:
+                        return DropdownSearch<Task>(
+                          key: const Key('taskDropDown'),
+                          selectedItem: _selectedWorkflow,
+                          popupProps: PopupProps.menu(
+                            showSearchBox: true,
+                            searchFieldProps: TextFieldProps(
+                              autofocus: true,
+                              decoration:
+                                  const InputDecoration(labelText: 'Task id'),
+                              controller: _workflowSearchBoxController,
+                            ),
+                            title: popUp(
+                              context: context,
+                              title: 'Select Workflow Task Template',
+                              height: 50,
+                            ),
+                          ),
+                          dropdownDecoratorProps: const DropDownDecoratorProps(
+                            dropdownSearchDecoration: InputDecoration(
+                              labelText: 'Workflow Task Template',
+                            ),
+                          ),
+                          itemAsString: (Task? u) =>
+                              " ${u!.taskName}", // invisible char for test
+                          onChanged: (Task? newValue) {
+                            _selectedWorkflow = newValue ?? Task();
+                          },
+                          asyncItems: (String filter) {
+                            _taskBloc.add(TaskFetch(
+                                searchString: filter, isForDropDown: true));
+                            return Future.value(state.tasks);
+                          },
+                          validator: (value) =>
+                              value == null ? 'field required' : null,
+                        );
+                      default:
+                        return const Center(child: CircularProgressIndicator());
+                    }
+                  }),
               ]),
             ])));
   }
