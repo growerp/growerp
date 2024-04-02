@@ -84,6 +84,14 @@ class WorkflowDialogNextState extends State<WorkflowDialogNext> {
                     child: Center(
                       child: Column(
                         children: [
+                          Center(
+                              child: Text(
+                                  'Workflow #${widget.workflow == null ? " New" : widget.workflow!.taskId}',
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 10,
+                                  ),
+                                  key: const Key('header'))),
                           widget.workflow == null
                               ? BlocBuilder<TaskWorkflowTemplateBloc,
                                   TaskState>(builder: (context, state) {

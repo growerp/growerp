@@ -276,6 +276,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <set field="taskTemplate"
                                     from="[
                                         taskId: templates[0].workEffortId,
+                                        taskName: templates[0].workEffortName,
                                         routing: templates[0].routing]" />
                                 <else>
                                     <set field="taskTemplate" from="null" />
@@ -663,9 +664,7 @@ along with this software (see the LICENSE.md file). If not, see
                     task.taskName &amp;&amp; oldTask.taskName != task.taskName ||
                     task.description &amp;&amp; oldTask.description != task.description ||
                     task.statusId &amp;&amp; oldTask.statusId != task.statusId ||
-                    task.startDate &amp;&amp; oldTask.startDate != task.startDate ||
-                    task.routing &amp;&amp; oldTask.routing != task.routing ||
-                    task.endDate &amp;&amp; oldTask.endDate != task.endDate">
+                    task.routing &amp;&amp; oldTask.routing != task.routing">
                 <if condition="task.taskType != 'workflowTemplate'">
                     <set field="statusId" from="convertedStatusId" />
                 </if>
@@ -676,8 +675,7 @@ along with this software (see the LICENSE.md file). If not, see
                         statusId: statusId,
                         description: task.description,
                         routing: task.routing,
-                        actualStartDate: task.startDate ? task.startDate.substring(0,18) : null,
-                        actualCompletionDate: task.endDate ? task.endDate.substring(0,18) : null
+                        actualCompletionDate: statusId == 'WeComplete'? ec.user.nowTimestamp : null,
                     ]" />
             </if>
 

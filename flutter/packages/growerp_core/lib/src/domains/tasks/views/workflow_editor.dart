@@ -4,8 +4,6 @@ import 'package:flutter_flow_chart/flutter_flow_chart.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import 'views.dart';
-
 class WorkflowEditorDialog extends StatelessWidget {
   final Task workflow;
   const WorkflowEditorDialog(this.workflow, {super.key});

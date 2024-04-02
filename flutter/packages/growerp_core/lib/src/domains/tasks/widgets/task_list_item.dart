@@ -45,16 +45,13 @@ class TaskListItem extends StatelessWidget {
                   child: Text(task.description,
                       key: Key('description$index'),
                       textAlign: TextAlign.left)),
-            if (task.taskType != TaskType.workflowTemplate &&
-                task.taskType != TaskType.workflowTaskTemplate)
+            if (task.taskType == TaskType.todo)
               Text(
                   task.unInvoicedHours != null
                       ? task.unInvoicedHours!.toString()
                       : '0',
                   key: Key('unInvoicedHours$index')),
-            if (!isPhone(context) &&
-                task.taskType != TaskType.workflowTemplate &&
-                task.taskType != TaskType.workflowTaskTemplate)
+            if (!isPhone(context) && task.taskType == TaskType.todo)
               Expanded(
                   child: Text("${task.rate}",
                       key: Key('rate$index'), textAlign: TextAlign.center)),
