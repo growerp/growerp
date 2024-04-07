@@ -15,11 +15,8 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-
-import '../../common/functions/helper_functions.dart';
-import '../../../extensions.dart';
-import '../../domains.dart';
 
 class TimeEntryDialog extends StatefulWidget {
   final TimeEntry timeEntry;

@@ -411,14 +411,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.0"
-  flutter_lints:
-    dependency: transitive
-    description:
-      name: flutter_lints
-      sha256: e2a421b7e59244faef694ba7b30562e489c2b489866e505074eb005cd7060db7
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.1"
   flutter_localizations:
     dependency: "direct main"
     description: flutter
@@ -764,14 +756,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.8.1"
-  lints:
-    dependency: transitive
-    description:
-      name: lints
-      sha256: cbf8d4b858bb0134ef3ef87841abdf8d63bfc255c266b7bf6b39daa1085c4290
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
   lists:
     dependency: transitive
     description:
@@ -1297,6 +1281,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.11.1"
+  star_menu:
+    dependency: transitive
+    description:
+      name: star_menu
+      sha256: a027b168c66f19dda41df0755f2ab9ab00e36532d52cdaa0e02b6225e9f90e2d
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0"
   stream_channel:
     dependency: transitive
     description:

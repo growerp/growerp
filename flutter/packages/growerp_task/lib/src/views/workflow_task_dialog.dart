@@ -18,6 +18,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 
+import '../../growerp_task.dart';
+
 class WorkflowTaskDialog extends StatefulWidget {
   final Task task;
   const WorkflowTaskDialog(this.task, {super.key});

@@ -12,7 +12,8 @@ class WorkflowRunner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     RestClient restClient = context.read<RestClient>();
-    TaskBloc taskBloc = TaskBloc(restClient, workflow.taskType)
+    TaskBloc taskBloc = TaskBloc(
+        restClient, workflow.taskType, context.read<Map<String, Widget>>())
       ..add(TaskWorkflowNext(workflow.taskId));
     return BlocProvider<TaskBloc>(
         create: (context) => taskBloc..add(TaskWorkflowNext(workflow.taskId)),

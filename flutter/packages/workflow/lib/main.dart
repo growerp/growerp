@@ -14,6 +14,7 @@
 
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'menu_options.dart';
@@ -24,6 +25,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'router.dart' as router;
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+
+import 'views/workflow_db_form.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,9 +71,14 @@ Future main() async {
     router: router.generateRoute,
     menuOptions: menuOptions,
     extraDelegates: extraDelegates,
+    screens: workflowScreens..addAll(orderAccountingWorkflowScreens),
   ));
 }
 
 List<LocalizationsDelegate<dynamic>> extraDelegates = const [
   UserCompanyLocalizations.delegate,
 ];
+
+Map<String, Widget> workflowScreens = {
+  'workflowDbForm': const WorkflowDbForm(),
+};

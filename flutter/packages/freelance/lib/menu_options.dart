@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_task/growerp_task.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'views/forms.dart' as local;

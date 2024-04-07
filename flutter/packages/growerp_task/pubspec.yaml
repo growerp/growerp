@@ -1,61 +1,37 @@
-name: workflow
-version: 0.0.1+1
-repository: https://github.com/growerp/growerp
-homepage: https://www.growerp.com
-publish_to: none
+name: growerp_task
+description: "A new Flutter package project."
+version: 0.0.1
+homepage:
 
-environment: 
+environment:
   sdk: '>=3.2.6 <4.0.0'
-  flutter: '>=1.17.0'
-  
-dependencies: 
-  flutter: 
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
     sdk: flutter
   growerp_core: ^1.2.4
-  growerp_task: ^1.0.0
-  growerp_user_company: ^1.2.1
-  growerp_order_accounting: ^1.2.1
-  decimal: ^2.1.0
-  flutter_bloc: ^8.1.4
+  growerp_models: ^1.2.1
   flutter_localizations: 
     sdk: flutter
-  global_configuration: ^2.0.0
   intl: ^0.18.1
-  shared_preferences: ^2.0.6
-  package_info_plus: ^5.0.1
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
-  flutter_flow_chart: ^2.1.4
-  flow_builder: ^0.0.10
-  star_menu: ^4.0.0
-  path_provider: ^2.0.11
-  flutter_colorpicker: ^1.0.3
+  flutter_bloc: ^8.1.4
+  equatable: ^2.0.5
+  responsive_framework: ^1.4.0
+  global_configuration: ^2.0.0
+  dropdown_search: ^5.0.6
 
-dev_dependencies: 
+dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_driver: 
-    sdk: flutter
-  integration_test: 
-    sdk: flutter
-  webdriver: ^3.0.2
-  test: ^1.19.5
+  flutter_lints: ^3.0.1
 
 flutter:
   uses-material-design: true
   assets: 
-    - assets/cfg/
-    - packages/growerp_core/images/select.png
-    - packages/growerp_core/images/selectGrey.png
-    - packages/growerp_core/images/rect.png
-    - packages/growerp_core/images/oval.png
-    - packages/growerp_core/images/diamond.png
+    - packages/growerp_core/images/about.png
     - packages/growerp_core/images/aboutGrey.png
     - packages/growerp_core/images/accounting.png
-    - packages/growerp_core/images/workflow.png
-    - packages/growerp_core/images/workflowGrey.png
-    - packages/growerp_core/images/tasks.png
-    - packages/growerp_core/images/tasksGrey.png
     - packages/growerp_core/images/category.png
     - packages/growerp_core/images/categoryGrey.png
     - packages/growerp_core/images/addImage.png
@@ -81,6 +57,8 @@ flutter:
     - packages/growerp_core/images/chatGrey.png
     - packages/growerp_core/images/dashBoardGrey.png
     - packages/growerp_core/images/growerp512x512.png
+    - packages/growerp_core/images/growerpDark100.png
+    - packages/growerp_core/images/growerp100.png
     - packages/growerp_core/images/info.png
     - packages/growerp_core/images/productsGrey.png
     - packages/growerp_core/images/usersGrey.png
@@ -95,13 +73,10 @@ flutter:
     - packages/growerp_core/images/export.png
     - packages/growerp_core/images/growerp.jpg
     - packages/growerp_core/images/growerpDark.jpg
-    - packages/growerp_core/images/growerp100.png
-    - packages/growerp_core/images/growerpDark100.png
     - packages/growerp_core/images/myInfo.png
     - packages/growerp_core/images/search.png
     - packages/growerp_core/images/chat.png
     - packages/growerp_core/images/chatGrey.png
     - packages/growerp_core/images/info.png
     - packages/growerp_core/images/infoGrey.png
-flutter_intl: 
-  enabled: true
+

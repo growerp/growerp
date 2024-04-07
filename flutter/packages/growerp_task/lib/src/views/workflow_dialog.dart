@@ -24,9 +24,11 @@ class WorkflowDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<TaskWorkflowTemplateBloc>(
-      create: (BuildContext context) =>
-          TaskBloc(context.read<RestClient>(), TaskType.workflowTemplate)
-            ..add(const TaskFetch(isForDropDown: true)),
+      create: (BuildContext context) => TaskBloc(
+        context.read<RestClient>(),
+        TaskType.workflowTemplate,
+        context.read<Map<String, Widget>>(),
+      )..add(const TaskFetch(isForDropDown: true)),
       child: WorkflowDialogNext(workflow),
     );
   }

@@ -38,7 +38,6 @@ dependencies:
 
   stream_transform: ^2.1.0
   collection: ^1.16.0
-  flutter_lints: ^3.0.1
   json_annotation: ^4.7.0
   dio: ^5.4.1
   credit_card_validator: ^2.0.1
@@ -72,6 +71,7 @@ dev_dependencies:
     sdk: flutter
   json_serializable: ^6.7.1
   retrofit_generator: ^8.0.5
+  flutter_lints: ^3.0.1
   lint_hard: ^4.0.0
 flutter: 
   uses-material-design: true

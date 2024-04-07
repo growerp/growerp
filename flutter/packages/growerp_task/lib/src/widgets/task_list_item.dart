@@ -16,9 +16,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:growerp_core/src/domains/common/functions/functions.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import '../tasks.dart';
+
+import '../../growerp_task.dart';
 
 class TaskListItem extends StatelessWidget {
   const TaskListItem({super.key, required this.task, required this.index});

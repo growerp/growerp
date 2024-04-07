@@ -22,8 +22,6 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
 
-import '../workflow_tasks/workflow_tasks.dart';
-
 part 'task_event.dart';
 part 'task_state.dart';
 
@@ -48,7 +46,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
         TaskWorkflowBloc,
         TaskWorkflowTemplateBloc,
         TaskWorkflowTaskTemplateBloc {
-  TaskBloc(this.restClient, this.taskType) : super(const TaskState()) {
+  TaskBloc(this.restClient, this.taskType, this.screens)
+      : super(const TaskState()) {
     on<TaskFetch>(_onTaskFetch,
         transformer: taskDroppable(const Duration(milliseconds: 100)));
     on<TaskUpdate>(_onTaskUpdate);
@@ -63,6 +62,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
 
   final RestClient restClient;
   final TaskType taskType;
+  final Map<String, Widget>? screens;
   int start = 0;
 
   /// general fetch of task type entities
@@ -346,11 +346,12 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
       Widget? child;
       if (nextTask.routing != null) {
         List<String> routings = nextTask.routing!.split(',');
-        Map<String, Widget> screens = {
-          'selectScreen': SelectWorkflowTask(routings.sublist(1)),
-          'textScreen': TextWorkflowTask(routings.sublist(1)),
-        };
-        child = screens[routings[0]]!;
+//        Map<String, Widget> localScreens = {
+//          'selectScreen': SelectWorkflowTask(routings.sublist(1)),
+//          'textScreen': TextWorkflowTask(routings.sublist(1)),
+//        };
+        child = screens?[
+            routings[0]]; // first parameter is class. next are parameters
       }
 
       menuOptions.first = menuOptions.first.copyWith(

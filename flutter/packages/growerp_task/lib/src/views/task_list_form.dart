@@ -17,6 +17,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../../growerp_task.dart';
+import '../widgets/widgets.dart';
+
 class TaskListForm extends StatelessWidget {
   final TaskType taskType;
   const TaskListForm(this.taskType, {super.key});
@@ -27,27 +30,27 @@ class TaskListForm extends StatelessWidget {
     switch (taskType) {
       case TaskType.todo:
         return BlocProvider<TaskToDoBloc>(
-          create: (context) => TaskBloc(restClient, taskType),
+          create: (context) => TaskBloc(restClient, taskType, {}),
           child: TaskList(taskType),
         );
       case TaskType.workflow:
         return BlocProvider<TaskWorkflowBloc>(
-          create: (context) => TaskBloc(restClient, taskType),
+          create: (context) => TaskBloc(restClient, taskType, {}),
           child: TaskList(taskType),
         );
       case TaskType.workflowTemplate:
         return BlocProvider<TaskWorkflowTemplateBloc>(
-          create: (context) => TaskBloc(restClient, taskType),
+          create: (context) => TaskBloc(restClient, taskType, {}),
           child: TaskList(taskType),
         );
       case TaskType.workflowTaskTemplate:
         return BlocProvider<TaskWorkflowTaskTemplateBloc>(
-          create: (context) => TaskBloc(restClient, taskType),
+          create: (context) => TaskBloc(restClient, taskType, {}),
           child: TaskList(taskType),
         );
       default:
         return BlocProvider<TaskBloc>(
-          create: (context) => TaskBloc(restClient, taskType),
+          create: (context) => TaskBloc(restClient, taskType, {}),
           child: TaskList(taskType),
         );
     }

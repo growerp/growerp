@@ -34,19 +34,27 @@ class ShowFinDocDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     RestClient restClient = context.read<RestClient>();
-    return BlocProvider<FinDocBloc>(
-        create: (context) => FinDocBloc(
-            restClient, finDoc.sales, finDoc.docType!, context.read<String>())
-          ..add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!)),
-        child: BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
-          if (state.status == FinDocStatus.success) {
-            return RepositoryProvider.value(
-                value: restClient,
-                child: FinDocDialog(finDoc: state.finDocs[0]));
-          } else {
-            return const LoadingIndicator();
-          }
-        }));
+    FinDocBloc? finDocBloc = FinDocBloc(
+        restClient, finDoc.sales, finDoc.docType!, context.read<String>());
+    Widget child =
+        BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
+      if (state.status == FinDocStatus.success) {
+        return RepositoryProvider.value(
+            value: restClient, child: FinDocDialog(finDoc: state.finDocs[0]));
+      } else {
+        return const LoadingIndicator();
+      }
+    });
+    if (finDoc.id() == null) {
+      return BlocProvider<FinDocBloc>(
+          create: (context) => finDocBloc, child: FinDocDialog(finDoc: finDoc));
+    } else {
+      return BlocProvider<FinDocBloc>(
+          create: (context) => finDocBloc
+            ..add(
+                FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!)),
+          child: child);
+    }
   }
 }
 

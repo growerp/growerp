@@ -13,9 +13,8 @@
  */
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-
-import '../../integration_test.dart';
 
 class TaskTest {
   static Future<void> createNewTask(WidgetTester tester, Task task) async {

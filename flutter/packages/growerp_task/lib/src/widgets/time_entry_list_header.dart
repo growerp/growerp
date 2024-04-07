@@ -12,8 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import '../../../../growerp_core.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 class TimeEntryListHeader extends StatelessWidget {
   const TimeEntryListHeader({super.key, required this.taskBloc});

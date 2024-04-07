@@ -4,6 +4,8 @@ import 'package:flutter_flow_chart/flutter_flow_chart.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../../growerp_task.dart';
+
 class WorkflowEditorDialog extends StatelessWidget {
   final Task workflow;
   const WorkflowEditorDialog(this.workflow, {super.key});
@@ -12,12 +14,12 @@ class WorkflowEditorDialog extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<TaskWorkflowTemplateBloc>(
-          create: (BuildContext context) =>
-              TaskBloc(context.read<RestClient>(), TaskType.workflowTemplate),
+          create: (BuildContext context) => TaskBloc(
+              context.read<RestClient>(), TaskType.workflowTemplate, {}),
         ),
         BlocProvider<TaskWorkflowTaskTemplateBloc>(
           create: (BuildContext context) => TaskBloc(
-              context.read<RestClient>(), TaskType.workflowTaskTemplate),
+              context.read<RestClient>(), TaskType.workflowTaskTemplate, {}),
         ),
       ],
       child: WorkFlowEditor(workflow),
