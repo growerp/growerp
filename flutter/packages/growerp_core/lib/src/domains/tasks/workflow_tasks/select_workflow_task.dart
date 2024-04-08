@@ -4,7 +4,7 @@ import 'package:growerp_core/growerp_core.dart';
 
 class SelectWorkflowTask extends StatelessWidget {
   final List<String> selectText;
-  const SelectWorkflowTask(this.selectText, {Key? key}) : super(key: key);
+  const SelectWorkflowTask(this.selectText, {super.key});
 
   @override
   Widget build(BuildContext context) {

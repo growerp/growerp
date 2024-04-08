@@ -22,6 +22,8 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
 
+import '../workflow_tasks/workflow_tasks.dart';
+
 part 'task_event.dart';
 part 'task_state.dart';
 
@@ -346,12 +348,13 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
       Widget? child;
       if (nextTask.routing != null) {
         List<String> routings = nextTask.routing!.split(',');
-//        Map<String, Widget> localScreens = {
-//          'selectScreen': SelectWorkflowTask(routings.sublist(1)),
-//          'textScreen': TextWorkflowTask(routings.sublist(1)),
-//        };
-        child = screens?[
-            routings[0]]; // first parameter is class. next are parameters
+
+        Map<String, Widget> localScreens = {
+          'selectScreen': SelectWorkflowTask(routings.sublist(1)),
+          'textScreen': TextWorkflowTask(routings.sublist(1)),
+        };
+        // first parameter is class. next are parameters
+        child = localScreens[routings[0]] ?? screens?[routings[0]];
       }
 
       menuOptions.first = menuOptions.first.copyWith(
