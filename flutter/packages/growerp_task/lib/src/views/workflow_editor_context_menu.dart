@@ -127,7 +127,7 @@ class WorkflowEditorContextMenuState extends State<WorkflowEditorContextMenu> {
                   return null;
                 },
               ),
-              BlocBuilder<TaskWorkflowTaskTemplateBloc, TaskState>(
+/*              BlocBuilder<TaskWorkflowTaskTemplateBloc, TaskState>(
                   builder: (context, state) {
                 switch (state.status) {
                   case TaskBlocStatus.failure:
@@ -174,6 +174,7 @@ class WorkflowEditorContextMenuState extends State<WorkflowEditorContextMenu> {
                 }
               }),
               const SizedBox(height: 20),
+*/
               ElevatedButton(
                   key: const Key('update'),
                   child: Text(

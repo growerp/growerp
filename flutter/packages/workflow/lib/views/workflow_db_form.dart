@@ -31,9 +31,9 @@ class WorkflowDbForm extends StatelessWidget {
               ["Currently active workflows", "Workflows start here"]),
           makeDashboardItem('dbWorkflowTemplates', context, menuOptions[2],
               ["Workflow definitions"]),
-          makeDashboardItem('dbWorkflowTemplateTasks', context, menuOptions[3],
-              ["Workflow Task definitions"]),
-          makeDashboardItem('dbToDos', context, menuOptions[4], [
+//          makeDashboardItem('dbWorkflowTemplateTasks', context, menuOptions[3],
+//              ["Workflow Task definitions"]),
+          makeDashboardItem('dbToDos', context, menuOptions[3], [
             authenticate.company!.name!.length > 20
                 ? "${authenticate.company!.name!.substring(0, 20)}..."
                 : "${authenticate.company!.name}",

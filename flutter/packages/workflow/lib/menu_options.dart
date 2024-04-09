@@ -45,7 +45,7 @@ List<MenuOption> menuOptions = [
     writeGroups: [UserGroup.admin, UserGroup.employee],
     child: const TaskListForm(TaskType.workflowTemplate),
   ),
-  MenuOption(
+/*  MenuOption(
     image: "packages/growerp_core/images/workflow.png",
     selectedImage: "packages/growerp_core/images/workflow.png",
     title: "Workflow Task Templates",
@@ -54,6 +54,7 @@ List<MenuOption> menuOptions = [
     writeGroups: [UserGroup.admin, UserGroup.employee],
     child: const TaskListForm(TaskType.workflowTaskTemplate),
   ),
+*/
   MenuOption(
     image: "packages/growerp_core/images/tasksGrey.png",
     selectedImage: "packages/growerp_core/images/tasks.png",
