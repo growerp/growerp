@@ -853,7 +853,6 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="convertedStatusId" value="WeInPlanning" />
                     </if>
                 </if>
-                <log message="===update wftask: ${element.text} rout: ${extraTask?.routing}" />
                 <service-call name="create#mantle.work.effort.WorkEffort"
                     in-map="[flowElementId: element.id,
                            ownerPartyId: ownerPartyId,

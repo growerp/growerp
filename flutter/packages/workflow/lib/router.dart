@@ -66,7 +66,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           settings: settings,
           builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 4, tabIndex: 0));
+              menuList: menuOptions, menuIndex: 3, tabIndex: 0));
     case '/company':
       return MaterialPageRoute(
           settings: settings,

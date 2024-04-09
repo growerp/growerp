@@ -3065,7 +3065,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <!-- add task -->
                     <set field="taskIn"
                         from="[taskType: task.taskType,
-                        name: task.name
+                        name: task.name,
+                        statusId: 'planning',
                     ]" />
                     <service-call name="growerp.100.TaskServices100.create#Task"
                         in-map="[task: taskIn]" out-map="context" />

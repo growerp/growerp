@@ -144,8 +144,7 @@ class TaskDialogState extends State<TaskDialog> {
                           });
                         },
                         isExpanded: true)),
-              if (widget.task.taskType != TaskType.workflowTemplate &&
-                  widget.task.taskType != TaskType.workflow)
+              if (widget.task.taskType == TaskType.workflowTaskTemplate)
                 Padding(
                     padding: const EdgeInsets.only(top: 10),
                     child: TextFormField(
