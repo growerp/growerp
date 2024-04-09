@@ -211,7 +211,8 @@ class MyFinDocState extends State<FinDocPage> {
             key: const Key('listView1'),
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: popUp(
-              title: "${finDoc.docType} #${finDoc.pseudoId ?? ' new'}",
+              title: "${finDoc.sales ? 'Sales' : 'Purchase'} ${finDoc.docType} "
+                  "#${finDoc.pseudoId ?? ' new'}",
               height: 650,
               width: isPhone ? 400 : 800,
               context: context,

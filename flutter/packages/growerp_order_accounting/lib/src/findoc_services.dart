@@ -13,6 +13,8 @@ class FinDocServices {
 }
 
 Map<String, Widget> orderAccountingScreens = {
-  'orderEntry':
+  'salesOrderEntry':
       ShowFinDocDialog(FinDoc(docType: FinDocType.order, sales: true)),
+  'purchaseOrderEntry':
+      ShowFinDocDialog(FinDoc(docType: FinDocType.order, sales: false)),
 };
