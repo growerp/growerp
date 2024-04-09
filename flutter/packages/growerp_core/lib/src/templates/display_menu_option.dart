@@ -173,34 +173,36 @@ class MenuOptionState extends State<DisplayMenuOption>
           }));
     }
 
-    Widget workflowBar = ColoredBox(
-        color: Colors.green,
-        child: Row(children: [
-          ElevatedButton(
+    Widget workflowBar = SizedBox(
+        child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+/*          ElevatedButton(
             child: const Text('Previous'),
             onPressed: () {
               taskBloc.add(TaskWorkflowPrevious(widget.workflow!.taskId));
             },
           ),
-          ElevatedButton(
-            child: const Text('Cancel'),
-            onPressed: () {
-              taskBloc.add(TaskWorkflowCancel(widget.workflow!.taskId));
-            },
-          ),
-          ElevatedButton(
+*/
+      ElevatedButton(
+        child: const Text('Cancel'),
+        onPressed: () {
+          taskBloc.add(TaskWorkflowCancel(widget.workflow!.taskId));
+        },
+      ),
+/*          ElevatedButton(
             child: const Text('Suspend'),
             onPressed: () {
               taskBloc.add(TaskWorkflowSuspend(widget.workflow!.taskId));
             },
           ),
-          ElevatedButton(
-            child: const Text('Next'),
-            onPressed: () {
-              taskBloc.add(TaskWorkflowNext(widget.workflow!.taskId));
-            },
-          ),
-        ]));
+*/
+      const SizedBox(width: 10),
+      ElevatedButton(
+        child: const Text('Next'),
+        onPressed: () {
+          taskBloc.add(TaskWorkflowNext(widget.workflow!.taskId));
+        },
+      ),
+    ]));
 
     Widget simplePage(bool isPhone) {
       displayMOFormKey =
