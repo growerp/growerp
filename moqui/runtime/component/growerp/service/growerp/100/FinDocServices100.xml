@@ -1961,6 +1961,9 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="acctgTransId" from="finDoc.transactionId" />
                     </entity-delete-by-condition>
                     <iterate list="finDoc.items" entry="item">
+                        <if condition="!item.price">
+                            <continue />
+                        </if>
                         <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
                             in-map="[   acctgTransId: finDoc.transactionId,
                                         glAccountId: item.glAccount.glAccountId,

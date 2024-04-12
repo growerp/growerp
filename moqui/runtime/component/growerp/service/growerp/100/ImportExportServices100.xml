@@ -124,34 +124,56 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="acctgTransId" from="transList[0].acctgTransId" />
                 </entity-delete-by-condition>
             </if>
-            <!-- delete existing ledger -->
-            <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization"
-                list="glAccountsOrg">
-                <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
-                <select-field field-name="glAccountId" />
-            </entity-find>
-            <entity-delete-by-condition
-                entity-name="mantle.ledger.account.GlAccountOrganization">
-                <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
-            </entity-delete-by-condition>
-            <entity-delete-by-condition
-                entity-name="mantle.ledger.account.GlAccount">
-                <econdition field-name="glAccountId" operator="in" from="glAccountsOrg" />
-            </entity-delete-by-condition>
-            <!-- delete item types-->
-            <entity-delete-by-condition entity-name="mantle.ledger.config.ItemTypeGlAccount">
-                <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
-            </entity-delete-by-condition>
-            <!-- delete payment types-->
-            <entity-delete-by-condition entity-name="mantle.ledger.config.PaymentTypeGlAccount">
-                <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
-            </entity-delete-by-condition>
+            <!-- delete existing ledger only if input file has account description and class 
+                when not assume an update of the initial posting values-->
+            <if
+                condition="!glAccounts[0].accountName.isEmpty() &amp;&amp; !glAccounts[0].accountClass.description.isEmpty()">
+                <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization"
+                    list="glAccountsOrg">
+                    <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
+                    <select-field field-name="glAccountId" />
+                </entity-find>
+                <entity-delete-by-condition
+                    entity-name="mantle.ledger.account.GlAccountOrganization">
+                    <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
+                </entity-delete-by-condition>
+                <entity-delete-by-condition
+                    entity-name="mantle.ledger.account.GlAccount">
+                    <econdition field-name="glAccountId" operator="in" from="glAccountsOrg" />
+                </entity-delete-by-condition>
+                <!-- delete item types-->
+                <entity-delete-by-condition entity-name="mantle.ledger.config.ItemTypeGlAccount">
+                    <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
+                </entity-delete-by-condition>
+                <!-- delete payment types-->
+                <entity-delete-by-condition entity-name="mantle.ledger.config.PaymentTypeGlAccount">
+                    <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
+                </entity-delete-by-condition>
+            </if>
             <!-- create new accounts and collect posted balances for new transactions-->
             <set field="transactions" from="[]" />
             <iterate list="glAccounts" entry="newGlAccount">
-                <service-call name="growerp.100.AccountingServices100.create#GlAccount"
-                    in-map="[glAccount: newGlAccount]"
-                    out-map="createdGlAccount" />
+                <if condition="newGlAccount.accountCode.isEmpty()">
+                    <continue />
+                </if>
+                <!-- check if glaccount exist update just posted value is present -->
+                <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization"
+                    list="glAccountsOrg">
+                    <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
+                    <econdition field-name="accountCode" from="newGlAccount.accountCode" />
+                </entity-find>
+                <if condition="!glAccountsOrg">
+                    <service-call name="growerp.100.AccountingServices100.create#GlAccount"
+                        in-map="[glAccount: newGlAccount]"
+                        out-map="createdGlAccount" />
+                    <set field="newGlAccountId" from="createdGlAccount.glAccount.glAccountId" />
+                    <set field="isDebit" from="createdGlAccount.glAccount.isDebit" />
+                    <else>
+                        <set field="newGlAccountId" from="glAccountsOrg[0].glAccountId" />
+                        <set field="isDebit" from="glAccountsOrg[0].isDebit == 'Y' ? true : false"
+                            type="Boolean" />
+                    </else>
+                </if>
                 <!-- collect posted balances -->
                 <if condition="newGlAccount.postedBalance">
                     <set field="isPositive" value="true" type="Boolean" />
@@ -159,9 +181,10 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="isPositive" value="false" type="Boolean" />
                     </if>
                     <script>transactions.add([
-                        isDebit: createdGlAccount.glAccount.isDebit == isPositive ? createdGlAccount.glAccount.isDebit : !createdGlAccount.glAccount.isDebit,
+                        isDebit: isDebit == isPositive 
+                            ? isDebit : !isDebit,
                         price: new BigDecimal(newGlAccount.postedBalance.replace('-','')),
-                        glAccount: [glAccountId: createdGlAccount.glAccount.glAccountId],
+                        glAccount: [glAccountId: newGlAccountId],
                         ])</script>
                 </if>
             </iterate>
@@ -488,9 +511,9 @@ along with this software (see the LICENSE.md file). If not, see
                                         <econdition field-name="otherPartyId"
                                             from="finDoc.otherCompany.partyId" />
                                         <econdition field-name="transactionDate" operator="greater"
-                                            from="Timestamp(Date.parse('yyyy-MM-dd', finDoc.creationDate).getTime)" />
+                                            from="Timestamp(Date.parse('yyyy-MM-dd', finDoc.creationDate).getTime())" />
                                         <econdition field-name="transactionDate" operator="less"
-                                            from="Timestamp(Date.parse('yyyy-MM-dd', finDoc.creationDate).add(7)).getTime)" />
+                                            from="Timestamp(Date.parse('yyyy-MM-dd', finDoc.creationDate).add(7).getTime())" />
                                     </entity-find>
                                 </if>
                                 <if condition="!transactions[0].invoiceId">
@@ -527,30 +550,25 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[pseudoId: finDocItems[0].pseudoId, docType: finDocItems[0].docType,
                                 classificationId: classificationId]" />
             <log
-                message="importing ${finDocs[0].sales == true ? 'Sales' : 'Purchase'} ${finDocItems[0].docType} ${finDocItems?.size()} finDocItems" />
+                message="importing ${finDocs[0]?.sales == true ? 'Sales' : 'Purchase'} ${finDocItems[0].docType} ${finDocItems?.size()} finDocItems" />
             <set field="index" value="0" type="Integer" />
             <iterate list="finDocItems" entry="item">
                 <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
-                    <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
-                        in-map="[pseudoId: lastItem.pseudoId, docType: lastItem.docType,
-                                classificationId: classificationId]" />
+                    <!-- new pseudo id so save lastItem-->
                     <script>ec.user.setEffectiveTime(Timestamp.valueOf("${finDoc.creationDate} 00:00:00"))</script>
-                    <if condition="!finDocs.isEmpty()">
-                        <set field="finDocs[0].items" from="itemsOut" />
-                        <if condition="finDocs[0].docType == 'transaction'">
-                            <set field="finDocs[0].isPosted" value="true" type="Boolean" />
-                        </if>
-                        <if condition="finDocs[0].docType == 'payment'">
-                            <service-call name="growerp.100.ImportExportServices100.import#Payment"
-                                in-map="[finDoc: finDocs[0], classificationId: classificationId]" />
-                            <else>
-                                <service-call name="growerp.100.FinDocServices100.update#FinDoc"
-                                    in-map="[finDoc: finDocs[0], classificationId: classificationId]" />
-                            </else>
-                        </if>
+                    <!-- add items collected below to findoc[0] already got below-->
+                    <set field="finDoc.items" from="itemsOut" />
+                    <if condition="finDoc.docType == 'transaction'">
+                        <set field="finDoc.isPosted" value="true" type="Boolean" />
+                    </if>
+                    <if condition="finDoc.docType == 'payment'">
+                        <service-call name="growerp.100.ImportExportServices100.import#Payment"
+                            in-map="[finDoc: finDoc, classificationId: classificationId]" />
                         <else>
-                            <return error="true"
-                                message="Could not find ${item.docType} ${item.pseudoId}!" />
+                            <log
+                                message="===import findocItems: ${finDoc.pseudoId} items price: ${finDoc.items?.price}" />
+                            <service-call name="growerp.100.FinDocServices100.update#FinDoc"
+                                in-map="[finDoc: finDoc, classificationId: classificationId]" />
                         </else>
                     </if>
                     <set field="itemsOut" from="[]" />
@@ -583,6 +601,12 @@ along with this software (see the LICENSE.md file). If not, see
                             <log level="warn"
                                 message="id: ${item.pseudoId} could not find item accountCode ${item.glAccount.accountCode} for company: $companyPartyId" />
                         </else>
+                    </if>
+                    <if condition="finDocs[0].docType == 'transaction'">
+                        <if condition="item.isDebit == null">
+                            <set field="item.isDebit"
+                                from="glAccounts[0].isDebit == 'Y' ? true : false" />
+                        </if>
                     </if>
                 </if>
                 <if condition="item.pseudoProductId">
