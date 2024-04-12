@@ -1048,10 +1048,6 @@ along with this software (see the LICENSE.md file). If not, see
                                     operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="transactionId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
-                                <econdition field-name="otherCompanyPartyId" ignore-case="true"
-                                    operator="like" from="search" ignore-if-empty="true" />
-                                <econdition field-name="otherCompanyPseudoId" ignore-case="true"
-                                    operator="like" from="search" ignore-if-empty="true" />
                             </econditions>
                             <econdition field-name="journalId" from="journal?.journalId"
                                 ignore-if-empty="true" />
@@ -1106,7 +1102,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="transactionTotal" value="0" type="BigDecimal" />
                 <entity-find entity-name="growerp.account.AcctgEntryAndGlAccount" list="entries">
                     <econdition field-name="transactionId" operator="in" from="finDocIds" />
-                    <order-by field-name="accountCode" />
+                    <order-by field-name="transactionId,accountCode" />
                 </entity-find>
                 <iterate list="entries" entry="item">
                     <!-- add items to a single transaction when transactionId changes-->
@@ -1960,10 +1956,12 @@ along with this software (see the LICENSE.md file). If not, see
                         entity-name="mantle.ledger.transaction.AcctgTransEntry">
                         <econdition field-name="acctgTransId" from="finDoc.transactionId" />
                     </entity-delete-by-condition>
+                    <log message="attempt to create ${finDoc.items?.size()} items" />
                     <iterate list="finDoc.items" entry="item">
                         <if condition="!item.price">
                             <continue />
                         </if>
+                        <log message="===adding item: ${finDoc.transactionId}" />
                         <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
                             in-map="[   acctgTransId: finDoc.transactionId,
                                         glAccountId: item.glAccount.glAccountId,
