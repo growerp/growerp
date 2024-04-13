@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 
 class SelectWorkflowTask extends StatelessWidget {
+  final String workflowId;
   final List<String> selectText;
-  const SelectWorkflowTask(this.selectText, {super.key});
+  const SelectWorkflowTask(this.workflowId, this.selectText, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,7 @@ class SelectWorkflowTask extends StatelessWidget {
             context
                 .read<TaskBloc>()
                 .add(TaskSetReturnString(newValue.first.toString()));
-            Navigator.of(context).pop();
+            context.read<TaskBloc>().add(TaskWorkflowNext(workflowId));
           }),
     ));
   }

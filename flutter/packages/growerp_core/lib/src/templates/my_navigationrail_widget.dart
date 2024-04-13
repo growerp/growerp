@@ -91,9 +91,11 @@ Widget myNavigationRail(
                           if (menu[index].route != null) {
                             if (menu[index].route == "/") {
                               Navigator.of(context).pushNamedAndRemoveUntil(
-                                  '/', (Route<dynamic> route) => false);
+                                  '/', (Route<dynamic> route) => false,
+                                  arguments: menu[index].arguments);
                             } else {
-                              Navigator.pushNamed(context, menu[index].route!);
+                              Navigator.pushNamed(context, menu[index].route!,
+                                  arguments: menu[index].arguments);
                             }
                           }
                         },

@@ -182,7 +182,7 @@ class TaskDialogState extends State<TaskDialog> {
                   Expanded(
                       child: ElevatedButton(
                           key: const Key('editWorkflow'),
-                          child: const Text('Edit Workflow'),
+                          child: const Text('Edit Diagram'),
                           onPressed: () => Navigator.of(context).pushNamed(
                               '/editWorkflow',
                               arguments: widget.task))),

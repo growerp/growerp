@@ -48,6 +48,7 @@ class TopApp extends StatelessWidget {
   final List<MenuOption> menuOptions;
   final List<LocalizationsDelegate> extraDelegates;
   final List<BlocProvider> blocProviders;
+  final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
   final List<LocalizationsDelegate> localizationsDelegates = [
     CoreLocalizations.delegate,
@@ -107,6 +108,7 @@ class TopApp extends StatelessWidget {
                           }
                         },
                         child: MaterialApp(
+                            navigatorKey: _rootNavigatorKey,
                             title: title,
                             supportedLocales: const [
                               Locale('en'),

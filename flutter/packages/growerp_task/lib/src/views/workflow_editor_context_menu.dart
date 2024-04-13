@@ -14,7 +14,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:dropdown_search/dropdown_search.dart';
+//import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_flow_chart/flutter_flow_chart.dart';
@@ -39,8 +39,8 @@ class WorkflowEditorContextMenuState extends State<WorkflowEditorContextMenu> {
   final _taskDialogformKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _routingController = TextEditingController();
-  final TextEditingController _taskSearchBoxController =
-      TextEditingController();
+  //final TextEditingController _taskSearchBoxController =
+  //    TextEditingController();
   late TaskWorkflowTaskTemplateBloc _taskTemplateBloc;
   Task? _selectedTemplate = Task();
 

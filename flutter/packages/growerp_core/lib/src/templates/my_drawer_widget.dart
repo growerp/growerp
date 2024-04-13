@@ -22,22 +22,15 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
   AuthBloc authBloc = context.read<AuthBloc>();
   Authenticate? auth = authBloc.state.authenticate;
   UserGroup? groupId = auth?.user?.userGroup;
-  List options = [];
+  List<MenuOption> options = [];
   for (var option in menu) {
     {
       if (option.readGroups.contains(groupId)) {
-        options.add({
-          "route": option.route,
-          "selImage":
-              option.selectedImage ?? 'packages/growerp_core/images/select.png',
-          "title": option.title,
-        });
+        options.add(option);
       }
     }
   }
-  options.add({
-    "route": 'theme',
-  });
+  options.add(MenuOption(route: 'theme', title: 'Theme', readGroups: []));
   bool loggedIn = auth?.apiKey != null;
   if (loggedIn && isPhone) {
     return Drawer(
@@ -71,7 +64,7 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
                           )),
                     ])));
           }
-          if (options[i - 1]["route"] == "theme") {
+          if (options[i - 1].route == "theme") {
             return InkWell(
                 key: const Key('theme'),
                 onTap: () => themeBloc.add(ThemeSwitch()),
@@ -82,22 +75,22 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
                   const Text("Theme"),
                 ]));
           }
-          //debugPrint("===tap=====tap${options[i - 1]["route"]}==========");
           return ListTile(
-              key: Key('tap${options[i - 1]["route"]}'),
+              key: Key('tap${options[i - 1].route}'),
               contentPadding: const EdgeInsets.all(5.0),
-              title: Text(options[i - 1]["title"]),
+              title: Text(options[i - 1].title),
               leading: Image.asset(
-                options[i - 1]["selImage"] ??
+                options[i - 1].selectedImage ??
                     'packages/growerp_core/images/select.png',
               ),
               onTap: () {
-                if (options[i - 1]["route"] == "/") {
+                if (options[i - 1].route == "/") {
                   Navigator.of(context).pushNamedAndRemoveUntil(
-                      '/', (Route<dynamic> route) => false);
+                      '/', (Route<dynamic> route) => false,
+                      arguments: options[i - 1].arguments);
                 } else {
-                  Navigator.pushNamed(context, options[i - 1]["route"],
-                      arguments: options[i - 1]["tab"]);
+                  Navigator.pushNamed(context, options[i - 1].route!,
+                      arguments: options[i - 1].arguments);
                 }
               });
         },

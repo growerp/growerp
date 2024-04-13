@@ -22,7 +22,8 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
 
-import '../workflow_tasks/workflow_tasks.dart';
+import '../workflow/workflow_menu_options.dart';
+import '../workflow/workflow_tasks/workflow_tasks.dart';
 
 part 'task_event.dart';
 part 'task_state.dart';
@@ -209,20 +210,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
   ) async {
     try {
       emit(state.copyWith(status: TaskBlocStatus.loading));
-      List<MenuOption> menuOptions = [
-        MenuOption(
-          title: "demo workflow",
-          route: '/',
-          readGroups: [UserGroup.admin, UserGroup.employee],
-          child: const Text("Hello world1"),
-        ),
-        MenuOption(
-          title: "demo1 workflow",
-          route: '/',
-          readGroups: [UserGroup.admin, UserGroup.employee],
-          child: const Text("Hello world2"),
-        ),
-      ];
+
       // get workflow
       Tasks resultTasks = await restClient.getTask(taskId: event.workflowId);
       Task currentWorkflow = resultTasks.tasks.first;
@@ -267,15 +255,13 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
                 statusId: TaskStatus.progress,
                 workflowTasks: newTasks));
       } else {
-        // workflow is now created from template so get next task
-
+        // workflow is now created, check return code last task if any
         // find just finished task within workflow by statusId
         int lastTaskIndex = currentWorkflow.workflowTasks
             .indexWhere((task) => task.statusId == TaskStatus.progress);
 
         // check return string from last task currently just a number
-        int? nextTaskIndex = int.tryParse(state.returnString);
-        nextTaskIndex ??= 0; // if not found set to 0
+        int? nextTaskIndex = int.tryParse(state.returnString) ?? 0;
         // reset value
         add(const TaskSetReturnString(""));
 
@@ -336,34 +322,48 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
         }
       }
 
-      // show title of current task
+      // get task to be executed
       Task nextTask = currentWorkflow.workflowTasks.firstWhere(
         (task) => task.statusId == TaskStatus.progress,
         orElse: () => Task(),
       );
       if (nextTask.taskId.isEmpty) {
-        debugPrint("system error: no started Task found!");
+        debugPrint("system error: no next Task found!");
       }
+
+      // get screen location first local, the if not found from
+      // repository screens
 
       Widget? child;
       if (nextTask.routing != null) {
         List<String> routings = nextTask.routing!.split(',');
 
         Map<String, Widget> localScreens = {
-          'selectScreen': SelectWorkflowTask(routings.sublist(1)),
+          'selectScreen':
+              SelectWorkflowTask(currentWorkflow.taskId, routings.sublist(1)),
           'textScreen': TextWorkflowTask(routings.sublist(1)),
         };
         // first parameter is class. next are parameters
         child = localScreens[routings[0]] ?? screens?[routings[0]];
       }
 
-      menuOptions.first = menuOptions.first.copyWith(
+      // setup menuOptions use workflowMenuOptions.dart as basis
+      workflowMenuOptions.first = workflowMenuOptions.first.copyWith(
         title: nextTask.taskName,
         child: child ?? Text(nextTask.routing ?? 'no routing'),
+        arguments: {
+          'menuList': workflowMenuOptions,
+          'workflow': currentWorkflow,
+        },
       );
 
+      workflowMenuOptions[1] = workflowMenuOptions[1].copyWith(
+        child: WorkflowDiagram(
+            currentWorkflow.taskName, currentWorkflow.jsonImage),
+        arguments: workflowMenuOptions,
+      );
       emit(state.copyWith(
-        menuOptions: menuOptions,
+        menuOptions: workflowMenuOptions,
         currentWorkflow: currentWorkflow,
         message:
             "Workflow ${state.currentWorkflow == null ? 'Started' : 'Next task'}"

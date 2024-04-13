@@ -25,6 +25,7 @@ class MenuOption {
   final String title; // a the top of the page
   final String?
       route; // route path required to show this item from other Menuoptions
+  final Object? arguments; // optional arguments to used with route
   final List<TabItem>? tabItems; // top/bottom tabs
   final Widget? child; // when no tabs this is single page
   final List<UserGroup> readGroups; // user groups who can read
@@ -35,6 +36,7 @@ class MenuOption {
     this.selectedImage,
     required this.title,
     this.route,
+    this.arguments,
     this.tabItems,
     this.child,
     required this.readGroups,
@@ -46,6 +48,7 @@ class MenuOption {
     String? selectedImage,
     String? title,
     String? route,
+    Object? arguments,
     List<TabItem>? tabItems,
     Widget? child,
     List<UserGroup>? readGroups,
@@ -56,6 +59,7 @@ class MenuOption {
       selectedImage: selectedImage ?? this.selectedImage,
       title: title ?? this.title,
       route: route ?? this.route,
+      arguments: arguments ?? this.arguments,
       tabItems: tabItems ?? this.tabItems,
       child: child ?? this.child,
       readGroups: readGroups ?? this.readGroups,
@@ -65,5 +69,7 @@ class MenuOption {
 
   @override
   String toString() => 'MenuOption name: $title route: $route '
+      'arguments: ${arguments.toString()} '
+      'child: ${child.toString()} '
       'tabItems# ${tabItems != null ? tabItems!.length : "0"}';
 }

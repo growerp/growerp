@@ -188,7 +188,7 @@ class WorkflowTaskDialogState extends State<WorkflowTaskDialog> {
                           key: const Key('startWorkflow'),
                           child: const Text('Start Workflow'),
                           onPressed: () => Navigator.of(context).pushNamed(
-                              '/workflowRunner',
+                              '/workflowRunner/',
                               arguments: widget.task))),
                 const SizedBox(width: 10),
                 BlocBuilder<TaskWorkflowTemplateBloc, TaskState>(

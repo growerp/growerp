@@ -12,9 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:flutter/foundation.dart' as debug;
 import 'package:flutter/material.dart';
 import 'package:growerp_task/growerp_task.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
@@ -24,12 +22,9 @@ import 'package:growerp_models/growerp_models.dart';
 import 'views/views.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
-  if (debug.kDebugMode) {
-    if (kDebugMode) {
-      debugPrint('>>>NavigateTo { ${settings.name} '
-          'with: ${settings.arguments.toString()} }');
-    }
-  }
+  debugPrint('>>>Root NavigateTo { ${settings.name} '
+      'with: ${settings.arguments.toString()} }');
+
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
@@ -45,6 +40,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
               WorkflowEditorDialog(settings.arguments as Task));
     case '/workflowRunner':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) =>
               WorkflowRunner(workflow: settings.arguments as Task));
     case '/workflows':

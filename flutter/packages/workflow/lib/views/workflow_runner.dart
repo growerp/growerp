@@ -3,11 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import '../menu_options.dart';
+import '../workflow_router.dart';
 
 class WorkflowRunner extends StatelessWidget {
-  const WorkflowRunner({super.key, required this.workflow});
+  WorkflowRunner({super.key, required this.workflow});
   final Task workflow;
+  final _workflowNavigatorKey = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
@@ -23,21 +24,10 @@ class WorkflowRunner extends StatelessWidget {
             debugPrint("===nav appserver ${item.name} ${item.args}");
           }
           switch (state.status) {
-            case TaskBlocStatus.workflowAction:
-              await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => BlocProvider.value(
-                          value: taskBloc,
-                          child: DisplayMenuOption(
-                              workflow: state.currentWorkflow,
-                              menuList: state.menuOptions,
-                              menuIndex: 0))));
-              taskBloc.add(TaskWorkflowNext(state.currentWorkflow!.taskId));
             case TaskBlocStatus.success:
               HelperFunctions.showMessage(
                   context, '${state.message}', Colors.green);
-              Navigator.of(context).popUntil(ModalRoute.withName('/workflows'));
+              Navigator.of(context).pop();
             case TaskBlocStatus.failure:
               HelperFunctions.showMessage(
                   context, '${state.message}', Colors.red);
@@ -49,11 +39,24 @@ class WorkflowRunner extends StatelessWidget {
           }
         }, builder: (context, state) {
           switch (state.status) {
-            case TaskBlocStatus.success:
-              return DisplayMenuOption(
-                menuList: menuOptions,
-                menuIndex: 0,
-              );
+            case TaskBlocStatus.workflowAction:
+              // start new navigator with own router
+              // need to update however the parameters for
+              return Navigator(
+                  key: _workflowNavigatorKey,
+                  initialRoute: '/',
+                  onGenerateRoute: workflowGenerateRoute,
+                  onGenerateInitialRoutes:
+                      (NavigatorState navigator, String initialRouteName) {
+                    return [
+                      navigator.widget.onGenerateRoute!(
+                          RouteSettings(name: '/', arguments: {
+                        'menuList': state.menuOptions,
+                        'menuIndex': 0,
+                        'workflow': state.currentWorkflow,
+                      }))!,
+                    ];
+                  });
             case TaskBlocStatus.loading:
             case TaskBlocStatus.initial:
               return const LoadingIndicator();
