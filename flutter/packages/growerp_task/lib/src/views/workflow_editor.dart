@@ -85,6 +85,19 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
               dashboard: dashboard,
               onDashboardTapped: ((context, position) async {
                 debugPrint('Dashboard tapped $position');
+                tasks = syncTasks(dashboard.elements, tasks);
+                await showDialog(
+                    barrierDismissible: true,
+                    context: context,
+                    builder: (BuildContext context) => BlocProvider.value(
+                        value: workflowTemplateBloc,
+                        child: WorkflowEditorMainMenu(
+                            widget.workflow.copyWith(
+                                workflowTasks: tasks,
+                                jsonImage: dashboard.toJson()),
+                            dashboard,
+                            position)));
+                tasks = syncTasks(dashboard.elements, tasks);
               }),
               onDashboardSecondaryTapped: (context, position) async {
                 debugPrint('Dashboard right clicked $position');
@@ -103,9 +116,6 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
                             position)));
                 tasks = syncTasks(dashboard.elements, tasks);
               },
-              onDashboardLongtTapped: ((context, position) {
-                debugPrint('Dashboard long tapped $position');
-              }),
               onDashboardSecondaryLongTapped: ((context, position) {
                 debugPrint(
                     'Dashboard long tapped with mouse right click $position');

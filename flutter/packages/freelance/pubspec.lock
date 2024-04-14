@@ -439,10 +439,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_flow_chart
-      sha256: ff7da34b5f6340087fc66e45ee586a336d71744b1318da0bb3cc06d69378fdc6
+      sha256: "94275a451a2eaeffbc2587a66ef7ad37bcf5b109f995a0318df635623b58e8f2"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.4"
+    version: "2.2.0"
   flutter_highlight:
     dependency: transitive
     description:
@@ -1524,10 +1524,10 @@ packages:
     dependency: transitive
     description:
       name: uuid
-      sha256: cd210a09f7c18cbe5a02511718e0334de6559871052c90a90c0cca46a4aa81c8
+      sha256: "814e9e88f21a176ae1359149021870e87f7cddaf633ab678a5d2b0bff7fd1ba8"
       url: "https://pub.dev"
     source: hosted
-    version: "4.3.3"
+    version: "4.4.0"
   validators2:
     dependency: transitive
     description:
