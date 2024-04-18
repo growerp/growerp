@@ -31,21 +31,6 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
 
   final RestClient restClient;
 
-  Future<LedgerReport> callApi(ReportType reportType,
-      {String periodName = ''}) async {
-    switch (reportType) {
-      case ReportType.ledger:
-        return await restClient.getLedger();
-      case ReportType.sheet:
-        return await restClient.getBalanceSheet(periodName: periodName);
-      case ReportType.summary:
-        return await restClient.getBalanceSummary(periodName: periodName);
-      default:
-        // ignore: null_argument_to_non_null_type
-        return Future.value(null);
-    }
-  }
-
   Future<void> _onLedgerFetch(
     LedgerFetch event,
     Emitter<LedgerState> emit,
@@ -54,16 +39,29 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
       // start from record zero for initial and refresh
       emit(state.copyWith(status: LedgerStatus.loading));
 
-      //    if (state.timePeriods.isEmpty) {
-      //      add(LedgerTimePeriods());
-      //    }
+      final TimePeriods timePeriods = await restClient.getTimePeriod();
 
-      final compResult =
-          await callApi(event.reportType, periodName: event.periodName);
+      late final LedgerReport result;
+      switch (event.reportType) {
+        case ReportType.ledger:
+          result = await restClient.getLedger();
+          break;
+        case ReportType.sheet:
+          result =
+              await restClient.getBalanceSheet(periodName: event.periodName);
+          break;
+        case ReportType.summary:
+          result =
+              await restClient.getBalanceSummary(periodName: event.periodName);
+          break;
+        default:
+          result = LedgerReport();
+      }
 
       return emit(state.copyWith(
         status: LedgerStatus.success,
-        ledgerReport: compResult,
+        ledgerReport: result,
+        timePeriods: timePeriods.timePeriods,
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
