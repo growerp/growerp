@@ -209,7 +209,6 @@ along with this software (see the LICENSE.md file). If not, see
                 type="NewMap" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <log message="===timeperiod year: $year periodType: $periodType party:${companyPartyId}" />
             <entity-find entity-name="growerp.party.time.TimePeriodChildAndType" list="periods">
                 <econdition field-name="partyId" from="companyPartyId" />
                 <econdition field-name="timePeriodTypeId" from="typeConvert[periodType]" />
@@ -230,7 +229,6 @@ along with this software (see the LICENSE.md file). If not, see
                                     ]); 
                 </script>
             </iterate>
-            <log message="====# found ${timePeriods?.size()}" />
         </actions>
     </service>
 
@@ -352,10 +350,14 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find-one entity-name="mantle.party.Organization" value-field="company">
                 <field-map field-name="partyId" from="companyPartyId" />
             </entity-find-one>
+            <set field="typeConvert"
+                from="['Y':'FiscalYear','Q':'FiscalQuarter','M':'FiscalMonth',
+                    'FiscalYear': 'Y','FiscalQuarter':'Q','FiscalMonth':'M']"
+                type="NewMap" />
             <set field="ledgerReport"
-                from="[
-                period: [periodId: periods[0].timePeriodId,
+                from="[ period: [periodId: periods[0].timePeriodId,
                                     periodName: periods[0].periodName,
+                                    periodType: typeConvert[periods[0].timePeriodTypeId],
                                     fromDate: periods[0].fromDate.toString(),
                                     thruDate: periods[0].thruDate.toString(),
                                     isClosed: periods[0].isClosed == 'Y' ? true : false,
@@ -431,7 +433,6 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <log message="===getting balance sheet for period: $periodName" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call in-map="organizationPartyId: companyPartyId"

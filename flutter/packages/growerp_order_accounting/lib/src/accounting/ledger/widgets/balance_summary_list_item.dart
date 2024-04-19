@@ -35,32 +35,42 @@ class BalanceSummaryListItem extends StatelessWidget {
         child: Text(
             glAccount.accountName!.isEmpty ? '?' : glAccount.accountName![0]),
       ),
-      title: Row(
-        children: <Widget>[
-          Expanded(
-              flex: 2,
-              child: Text("${glAccount.accountCode} ${glAccount.accountName}",
-                  key: Key("code$index"))),
-          Expanded(
-              child: Text(
-                  Constant.numberFormat.format(DecimalIntl(
-                      Decimal.parse(glAccount.beginningBalance.toString()))),
-                  textAlign: TextAlign.right)),
-          Expanded(
-              child: Text(
-                  Constant.numberFormat.format(DecimalIntl(
-                      Decimal.parse(glAccount.postedDebits.toString()))),
-                  textAlign: TextAlign.right)),
-          Expanded(
-              child: Text(
-                  Constant.numberFormat.format(DecimalIntl(
-                      Decimal.parse(glAccount.postedCredits.toString()))),
-                  textAlign: TextAlign.right)),
-          Expanded(
-              child: Text(
-                  Constant.numberFormat.format(DecimalIntl(
-                      Decimal.parse(glAccount.postedBalance.toString()))),
-                  textAlign: TextAlign.right)),
+      title: Column(
+        children: [
+          if (isPhone(context)) Text("${glAccount.accountName}"),
+          Row(
+            children: <Widget>[
+              Expanded(
+                  child:
+                      Text("${glAccount.accountCode}", key: Key("code$index"))),
+              if (!isPhone(context))
+                Expanded(
+                    child: Text("${glAccount.accountName}",
+                        key: Key("name$index"))),
+              Expanded(
+                  child: Text(
+                      Constant.numberFormat.format(DecimalIntl(Decimal.parse(
+                          glAccount.beginningBalance.toString()))),
+                      textAlign: TextAlign.right)),
+              if (!isPhone(context))
+                Expanded(
+                    child: Text(
+                        Constant.numberFormat.format(DecimalIntl(
+                            Decimal.parse(glAccount.postedDebits.toString()))),
+                        textAlign: TextAlign.right)),
+              if (!isPhone(context))
+                Expanded(
+                    child: Text(
+                        Constant.numberFormat.format(DecimalIntl(
+                            Decimal.parse(glAccount.postedCredits.toString()))),
+                        textAlign: TextAlign.right)),
+              Expanded(
+                  child: Text(
+                      Constant.numberFormat.format(DecimalIntl(
+                          Decimal.parse(glAccount.postedBalance.toString()))),
+                      textAlign: TextAlign.right)),
+            ],
+          ),
         ],
       ),
       onTap: () async {

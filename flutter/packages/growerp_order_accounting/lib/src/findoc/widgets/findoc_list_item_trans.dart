@@ -107,9 +107,11 @@ class FinDocListItemTrans extends StatelessWidget {
                     key: Key("status$index")),
               ])
             : null,
-        trailing: SizedBox(
-            width: isPhone ? 96 : 195,
-            child: itemButtons(context, paymentMethod, finDocBloc, repos)),
+        trailing: finDoc.isPosted == false && isPhone
+            ? SizedBox(
+                width: isPhone ? 96 : 195,
+                child: itemButtons(context, paymentMethod, finDocBloc, repos))
+            : null,
         children: items(context, finDoc));
   }
 

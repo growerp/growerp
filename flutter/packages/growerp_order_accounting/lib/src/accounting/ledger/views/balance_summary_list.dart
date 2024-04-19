@@ -13,10 +13,12 @@
  */
 // ignore_for_file: depend_on_referenced_packages
 
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../accounting.dart';
@@ -43,20 +45,26 @@ class BalanceSummaryList extends StatefulWidget {
 class BalanceSummaryListState extends State<BalanceSummaryList> {
   final _itemScrollController = ItemScrollController();
   final _itemPositionsListener = ItemPositionsListener.create();
+  final TextEditingController _periodSearchBoxController =
+      TextEditingController();
+  NumberFormat formatter = new NumberFormat("00");
   late bool search;
-  late LedgerBloc _balanceSummaryBloc;
+  late LedgerBloc _ledgerBloc;
   late bool started;
-  late String periodName;
+  late TimePeriod _selectedPeriod;
 
   @override
   void initState() {
     super.initState();
     started = false;
     search = false;
-    _balanceSummaryBloc = context.read<LedgerBloc>();
-    periodName = 'Y${DateTime.now().year}';
-    _balanceSummaryBloc
-        .add(LedgerFetch(ReportType.summary, periodName: periodName));
+    _selectedPeriod =
+        TimePeriod(periodName: 'Y${DateTime.now().year}', periodType: 'Y');
+    _ledgerBloc = context.read<LedgerBloc>()
+      ..add(LedgerFetch(ReportType.summary,
+          periodName: _selectedPeriod.periodName));
+    _selectedPeriod =
+        TimePeriod(periodName: 'Y${DateTime.now().year}', periodType: 'Y');
   }
 
   @override
@@ -78,78 +86,113 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
         builder: (context, state) {
           switch (state.status) {
             case LedgerStatus.success:
-              var next = 'Y${int.parse(periodName.substring(1)) + 1}';
-              var prev = 'Y${int.parse(periodName.substring(1)) - 1}';
+              _selectedPeriod = state.ledgerReport!.period!;
               return Scaffold(
-                  floatingActionButton: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        if (state.timePeriods
-                            .any((item) => item.periodName == next))
-                          FloatingActionButton.extended(
-                              heroTag: 'next',
-                              key: const Key("next"),
-                              onPressed: () async {
-                                periodName = next;
-                                _balanceSummaryBloc.add(LedgerFetch(
-                                    ReportType.summary,
-                                    periodName: periodName));
-                                periodName = next;
-                              },
-                              tooltip: 'Next Year',
-                              icon: const Icon(Icons.arrow_right),
-                              label: Text(next)),
-                        const SizedBox(height: 10),
-                        if (state.timePeriods
-                            .any((item) => item.periodName == prev))
-                          FloatingActionButton.extended(
-                              heroTag: 'previous',
-                              key: const Key("previous"),
-                              onPressed: () async {
-                                periodName = prev;
-                                _balanceSummaryBloc.add(LedgerFetch(
-                                    ReportType.summary,
-                                    periodName: periodName));
-                                periodName = prev;
-                              },
-                              tooltip: 'Previous year',
-                              icon: const Icon(Icons.arrow_left),
-                              label: Text(prev)),
-                      ]),
-                  body: RefreshIndicator(
-                      onRefresh: (() async => context.read<LedgerBloc>().add(
-                          LedgerFetch(ReportType.summary,
-                              periodName: periodName))),
-                      child: ScrollablePositionedList.builder(
-                        key: const Key('listView'),
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: state.ledgerReport!.glAccounts.length + 1,
-                        itemScrollController: _itemScrollController,
-                        itemPositionsListener: _itemPositionsListener,
-                        itemBuilder: (BuildContext context, int index) {
-                          if (index == 0) {
-                            return Column(children: [
-                              BalanceSummaryListHeader(
-                                  _itemScrollController, state.ledgerReport!),
-                              Visibility(
-                                  visible:
-                                      state.ledgerReport!.glAccounts.isEmpty,
-                                  child: Center(
-                                      heightFactor: 20,
-                                      child: Text(
-                                          started
-                                              ? 'No balanceSummary.accountList found'
-                                              : '',
-                                          key: const Key('empty'),
-                                          textAlign: TextAlign.center)))
-                            ]);
-                          }
-                          index--;
-                          return BalanceSummaryListItem(
-                              glAccount: state.ledgerReport!.glAccounts[index],
-                              index: index);
+                  body: Column(
+                children: [
+                  Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                    SizedBox(
+                      width: 150,
+                      child: DropdownSearch<TimePeriod>(
+                        key: const Key('periodDropDown'),
+                        selectedItem: _selectedPeriod,
+                        popupProps: PopupProps.menu(
+                          showSearchBox: true,
+                          searchFieldProps: TextFieldProps(
+                            autofocus: true,
+                            decoration:
+                                InputDecoration(labelText: 'Time period'),
+                            controller: _periodSearchBoxController,
+                          ),
+                          title: popUp(
+                            context: context,
+                            title: 'Select period',
+                            height: 50,
+                          ),
+                        ),
+                        dropdownDecoratorProps: DropDownDecoratorProps(
+                          dropdownSearchDecoration: InputDecoration(
+                            labelText: 'Time period',
+                          ),
+                        ),
+                        itemAsString: (TimePeriod? u) =>
+                            " ${u!.periodName}", // invisible char for test
+                        onChanged: (TimePeriod? newValue) {
+                          setState(() => _selectedPeriod = newValue!);
+                          _ledgerBloc.add(LedgerFetch(ReportType.summary,
+                              periodName: newValue!.periodName));
                         },
-                      )));
+                        items: state.timePeriods,
+                        validator: (value) =>
+                            value == null ? 'field required' : null,
+                      ),
+                    ),
+                    if (_selectedPeriod.periodType != 'Y')
+                      ElevatedButton(
+                          child: const Text('Y'),
+                          onPressed: () => _ledgerBloc.add(LedgerFetch(
+                              ReportType.summary,
+                              periodName:
+                                  _selectedPeriod.periodName.substring(0, 5)))),
+                    if (_selectedPeriod.periodType != 'Q')
+                      ElevatedButton(
+                          child: const Text('Q'),
+                          onPressed: () {
+                            String currentQuarter =
+                                "${formatter.format(DateTime.now().month / 4 + 1)}";
+                            _ledgerBloc.add(LedgerFetch(ReportType.summary,
+                                periodName:
+                                    '${_selectedPeriod.periodName.substring(0, 5)}'
+                                    'q$currentQuarter'));
+                          }),
+                    if (_selectedPeriod.periodType != 'M')
+                      ElevatedButton(
+                          child: const Text('M'),
+                          onPressed: () => _ledgerBloc.add(LedgerFetch(
+                              ReportType.summary,
+                              periodName:
+                                  '${_selectedPeriod.periodName.substring(0, 5)}'
+                                  'm${formatter.format(DateTime.now().month)}'))),
+                  ]),
+                  BalanceSummaryListHeader(_itemScrollController,
+                      state.ledgerReport!, isPhone(context)),
+                  Expanded(
+                    child: RefreshIndicator(
+                        onRefresh: (() async => _ledgerBloc.add(LedgerFetch(
+                            ReportType.summary,
+                            periodName: _selectedPeriod.periodName))),
+                        child: ScrollablePositionedList.builder(
+                          key: const Key('listView'),
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: state.ledgerReport!.glAccounts.length + 1,
+                          itemScrollController: _itemScrollController,
+                          itemPositionsListener: _itemPositionsListener,
+                          itemBuilder: (BuildContext context, int index) {
+                            if (index == 0) {
+                              return Column(children: [
+                                Visibility(
+                                    visible:
+                                        state.ledgerReport!.glAccounts.isEmpty,
+                                    child: Center(
+                                        heightFactor: 20,
+                                        child: Text(
+                                            started
+                                                ? 'No balanceSummary.accountList found'
+                                                : '',
+                                            key: const Key('empty'),
+                                            textAlign: TextAlign.center)))
+                              ]);
+                            }
+                            index--;
+                            return BalanceSummaryListItem(
+                                glAccount:
+                                    state.ledgerReport!.glAccounts[index],
+                                index: index);
+                          },
+                        )),
+                  ),
+                ],
+              ));
             case LedgerStatus.failure:
               return const FatalErrorForm(
                   message: 'failed to get Balance Summary');
