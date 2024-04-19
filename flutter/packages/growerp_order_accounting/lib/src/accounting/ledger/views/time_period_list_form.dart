@@ -39,13 +39,15 @@ class TimePeriodListState extends State<TimePeriodList> {
   late LedgerBloc _ledgerBloc;
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
+  late String periodType;
 
   @override
   void initState() {
     super.initState();
+    periodType = 'Y';
     entityName = classificationId == 'AppHotel' ? 'Room' : 'TimePeriod';
     _ledgerBloc = context.read<LedgerBloc>();
-    _ledgerBloc.add(LedgerTimePeriods());
+    _ledgerBloc.add(LedgerTimePeriods(periodType: periodType));
   }
 
   @override
@@ -70,12 +72,22 @@ class TimePeriodListState extends State<TimePeriodList> {
                   child: Text('failed to fetch timePeriods: ${state.message}'));
             case LedgerStatus.success:
               return Scaffold(
-                  floatingActionButton: FloatingActionButton(
+                  floatingActionButton: FloatingActionButton.extended(
                       heroTag: "timePeriodNew",
-                      key: const Key("addNew"),
-                      onPressed: () async {},
-                      tooltip: CoreLocalizations.of(context)!.addNew,
-                      child: const Icon(Icons.add)),
+                      key: const Key("changePeriod"),
+                      onPressed: () async {
+                        setState(() {
+                          if (periodType == 'Y')
+                            periodType = 'Q';
+                          else if (periodType == 'Q')
+                            periodType = 'M';
+                          else if (periodType == 'M') periodType = 'Y';
+                        });
+                        _ledgerBloc
+                            .add(LedgerTimePeriods(periodType: periodType));
+                      },
+                      tooltip: 'Change period type(Y/Q/M)',
+                      label: const Text('Y/Q/M')),
                   body: Column(children: [
                     const TimePeriodListHeader(),
                     Expanded(

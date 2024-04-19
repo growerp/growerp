@@ -383,7 +383,10 @@ abstract class RestClient {
 
   @GET("rest/s1/growerp/100/TimePeriod")
   @Extra({'requireApiKey': true})
-  Future<TimePeriods> getTimePeriod();
+  Future<TimePeriods> getTimePeriod({
+    @Query('periodType') String? periodType = 'Y',
+    @Query('year') String? year,
+  });
 
   @PATCH("rest/s1/growerp/100/TimePeriod")
   @Extra({'requireApiKey': true})
@@ -501,6 +504,7 @@ abstract class RestClient {
     @Query('start') int? start,
     @Query('limit') int? limit,
     @Query('open') bool? open,
+    @Query('my') bool? my,
     @Query('isForDropDown') bool? isForDropDown,
     @Query('search') String? searchString,
   });
@@ -515,6 +519,25 @@ abstract class RestClient {
   @Extra({'requireApiKey': true})
   Future<Task> updateTask({
     @Field() required Task task,
+  });
+
+  // user workflow
+  @GET("rest/s1/growerp/100/UserWorkflow")
+  @Extra({'requireApiKey': true})
+  Future<Tasks> getUserWorkflow({
+    @Query('taskType') TaskType? taskType,
+  });
+
+  @POST("rest/s1/growerp/100/UserWorkflow")
+  @Extra({'requireApiKey': true})
+  Future<Task> createUserWorkflow({
+    @Field() required String workflowId,
+  });
+
+  @DELETE("rest/s1/growerp/100/UserWorkflow")
+  @Extra({'requireApiKey': true})
+  Future<Task> deleteUserWorkflow({
+    @Field() required String workflowId,
   });
 
   // time entry

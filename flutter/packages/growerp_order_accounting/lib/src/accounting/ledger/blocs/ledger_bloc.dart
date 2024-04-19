@@ -38,8 +38,22 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
     try {
       // start from record zero for initial and refresh
       emit(state.copyWith(status: LedgerStatus.loading));
-
-      final TimePeriods timePeriods = await restClient.getTimePeriod();
+      String periodType = 'Y', year = DateTime.now().year.toString();
+      // get periodType from periodname
+      if (event.periodName.isNotEmpty) {
+        if (event.periodName.contains('q'))
+          periodType = 'Q';
+        else if (event.periodName.contains('m'))
+          periodType = 'M';
+        else
+          periodType = 'Y';
+        if (periodType != 'Y')
+          year = event.periodName.substring(1, 5);
+        else
+          year = ''; // get all years
+      }
+      final TimePeriods timePeriods =
+          await restClient.getTimePeriod(year: year, periodType: periodType);
 
       late final LedgerReport result;
       switch (event.reportType) {
@@ -74,7 +88,8 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
     Emitter<LedgerState> emit,
   ) async {
     try {
-      TimePeriods result = await restClient.getTimePeriod();
+      TimePeriods result =
+          await restClient.getTimePeriod(periodType: event.periodType);
       return emit(state.copyWith(
         timePeriods: result.timePeriods,
         status: LedgerStatus.success,

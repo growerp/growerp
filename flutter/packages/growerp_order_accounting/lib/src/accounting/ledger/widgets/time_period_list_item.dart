@@ -55,7 +55,7 @@ class TimePeriodListItem extends StatelessWidget {
           }));
     }
 */
-    if (!timePeriod.hasNextPeriod) {
+    if (!timePeriod.hasNextPeriod && timePeriod.periodType == 'Y') {
       buttons.add(IconButton(
           key: Key('next$index'),
           icon: const Icon(Icons.arrow_forward),

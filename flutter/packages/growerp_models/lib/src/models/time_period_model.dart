@@ -23,7 +23,7 @@ class TimePeriod with _$TimePeriod {
   factory TimePeriod({
     @Default('') String periodId,
     @Default('') String periodName,
-    @Default('') String periodType,
+    @Default('') String periodType, // Y/M/Q
     DateTime? fromDate,
     DateTime? thruDate,
     @Default(false) bool hasPreviousPeriod,

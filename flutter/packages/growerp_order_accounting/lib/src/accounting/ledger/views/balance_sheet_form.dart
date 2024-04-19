@@ -14,9 +14,11 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:decimal/intl.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_simple_treeview/flutter_simple_treeview.dart';
+import 'package:intl/intl.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -44,26 +46,30 @@ class BalanceSheetListForm extends StatefulWidget {
 }
 
 class BalanceSheetFormState extends State<BalanceSheetListForm> {
+  final TextEditingController _periodSearchBoxController =
+      TextEditingController();
+  NumberFormat formatter = new NumberFormat("00");
   TreeController? _controller;
   Iterable<TreeNode> _nodes = [];
   late int level;
-  late LedgerBloc _balanceSheetBloc;
-  late String periodName;
+  late LedgerBloc _ledgerBloc;
   late bool expanded;
   var assets = Decimal.parse('0');
   var equity = Decimal.parse('0');
   var distribution = Decimal.parse('0');
   var liability = Decimal.parse('0');
   var income = Decimal.parse('0');
+  late TimePeriod _selectedPeriod;
 
   @override
   void initState() {
     super.initState();
     _controller = TreeController(allNodesExpanded: false);
-    _balanceSheetBloc = context.read<LedgerBloc>();
-    periodName = 'Y${DateTime.now().year}';
-    _balanceSheetBloc
-        .add(LedgerFetch(ReportType.sheet, periodName: periodName));
+    _ledgerBloc = context.read<LedgerBloc>();
+    _selectedPeriod =
+        TimePeriod(periodName: 'Y${DateTime.now().year}', periodType: 'Y');
+    _ledgerBloc.add(
+        LedgerFetch(ReportType.sheet, periodName: _selectedPeriod.periodName));
     level = 0;
     expanded = false;
     _controller!.expandNode(const Key('ASSETS'));
@@ -134,9 +140,8 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
     }, builder: (context, state) {
       switch (state.status) {
         case LedgerStatus.success:
+          _selectedPeriod = state.ledgerReport!.period!;
           _nodes = convert(state.ledgerReport!.glAccounts);
-          var next = 'Y${int.parse(periodName.substring(1)) + 1}';
-          var prev = 'Y${int.parse(periodName.substring(1)) - 1}';
           List totals = [
             {"text": "Total Assets", "amount": assets},
             {
@@ -146,50 +151,80 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
             {"text": "Total Liability + Equity", "amount": liability + equity},
             {"text": "Total Unbooked net income", "amount": income},
             {
-              "text": "Liability + Equity + Unbooked Net Income",
+              "text": "Liability + Equity + Unbd. Net Income",
               "amount": liability + equity + income
             },
           ];
           return Scaffold(
-              floatingActionButton:
-                  Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                if (state.timePeriods.any((item) => item.periodName == next))
-                  FloatingActionButton.extended(
-                      heroTag: 'next',
-                      key: const Key("next"),
-                      onPressed: () async {
-                        _balanceSheetBloc.add(
-                            LedgerFetch(ReportType.sheet, periodName: next));
-                        periodName = next;
-                      },
-                      tooltip: 'Next Year',
-                      icon: const Icon(Icons.arrow_right),
-                      label: Text(next)),
-                const SizedBox(height: 10),
-                if (state.timePeriods.any((item) => item.periodName == prev))
-                  FloatingActionButton.extended(
-                      heroTag: 'previous',
-                      key: const Key("previous"),
-                      onPressed: () async {
-                        _balanceSheetBloc.add(
-                            LedgerFetch(ReportType.sheet, periodName: prev));
-                        periodName = prev;
-                      },
-                      tooltip: 'Previous year',
-                      icon: const Icon(Icons.arrow_left),
-                      label: Text(prev)),
-              ]),
               body: RefreshIndicator(
                   onRefresh: (() async => context.read<LedgerBloc>().add(
-                      LedgerFetch(ReportType.sheet, periodName: periodName))),
+                      LedgerFetch(ReportType.sheet,
+                          periodName: _selectedPeriod.periodName))),
                   child: ListView(children: <Widget>[
                     const SizedBox(height: 10),
                     Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                      Text(
-                          "Time period: ${state.ledgerReport?.period!.periodName}: "),
-                      Text(
-                          "${state.ledgerReport?.period!.fromDate.toString().substring(0, 10)} "
-                          " - ${state.ledgerReport?.period!.thruDate.toString().substring(0, 10)}   "),
+                      SizedBox(
+                        width: 150,
+                        child: DropdownSearch<TimePeriod>(
+                          key: const Key('periodDropDown'),
+                          selectedItem: _selectedPeriod,
+                          popupProps: PopupProps.menu(
+                            showSearchBox: true,
+                            searchFieldProps: TextFieldProps(
+                              autofocus: true,
+                              decoration:
+                                  InputDecoration(labelText: 'Time period'),
+                              controller: _periodSearchBoxController,
+                            ),
+                            title: popUp(
+                              context: context,
+                              title: 'Select period',
+                              height: 50,
+                            ),
+                          ),
+                          dropdownDecoratorProps: DropDownDecoratorProps(
+                            dropdownSearchDecoration: InputDecoration(
+                              labelText: 'Time period',
+                            ),
+                          ),
+                          itemAsString: (TimePeriod? u) =>
+                              " ${u!.periodName}", // invisible char for test
+                          onChanged: (TimePeriod? newValue) {
+                            setState(() => _selectedPeriod = newValue!);
+                            _ledgerBloc.add(LedgerFetch(ReportType.sheet,
+                                periodName: newValue!.periodName));
+                          },
+                          items: state.timePeriods,
+                          validator: (value) =>
+                              value == null ? 'field required' : null,
+                        ),
+                      ),
+                      if (_selectedPeriod.periodType != 'Y')
+                        ElevatedButton(
+                            child: const Text('Y'),
+                            onPressed: () => _ledgerBloc.add(LedgerFetch(
+                                ReportType.sheet,
+                                periodName: _selectedPeriod.periodName
+                                    .substring(0, 5)))),
+                      if (_selectedPeriod.periodType != 'Q')
+                        ElevatedButton(
+                            child: const Text('Q'),
+                            onPressed: () {
+                              String currentQuarter =
+                                  "${formatter.format(DateTime.now().month / 4 + 1)}";
+                              _ledgerBloc.add(LedgerFetch(ReportType.sheet,
+                                  periodName:
+                                      '${_selectedPeriod.periodName.substring(0, 5)}'
+                                      'q$currentQuarter'));
+                            }),
+                      if (_selectedPeriod.periodType != 'M')
+                        ElevatedButton(
+                            child: const Text('M'),
+                            onPressed: () => _ledgerBloc.add(LedgerFetch(
+                                ReportType.sheet,
+                                periodName:
+                                    '${_selectedPeriod.periodName.substring(0, 5)}'
+                                    'm${formatter.format(DateTime.now().month)}'))),
                       if (!expanded)
                         ElevatedButton(
                           child: const Text('Exp.'),
@@ -227,7 +262,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                       padding: const EdgeInsets.all(30.0),
                       child: Table(
                           columnWidths: const <int, TableColumnWidth>{
-                            0: FixedColumnWidth(300),
+                            0: FixedColumnWidth(250),
                             1: FixedColumnWidth(100)
                           },
                           defaultVerticalAlignment:

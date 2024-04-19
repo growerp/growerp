@@ -30,7 +30,11 @@ class LedgerFetch extends LedgerEvent {
   List<Object> get props => [reportType, periodName];
 }
 
-class LedgerTimePeriods extends LedgerEvent {}
+class LedgerTimePeriods extends LedgerEvent {
+  final String periodType;
+
+  const LedgerTimePeriods({this.periodType = 'Y'});
+}
 
 class LedgerTimePeriodsUpdate extends LedgerEvent {
   final bool? createNext;

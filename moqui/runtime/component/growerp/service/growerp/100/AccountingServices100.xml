@@ -186,11 +186,16 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="TimePeriod">
         <description>Get the accounting periods valid for this company</description>
+        <in-parameters>
+            <parameter name="periodType" default-value="Y" /><!-- Y/Q/M -->
+            <parameter name="year" /><!-- YYYY -->
+        </in-parameters>
         <out-parameters>
             <parameter name="timePeriods" type="List">
                 <parameter name="timePeriod" type="Map">
                     <parameter name="periodId" />
                     <parameter name="periodName" />
+                    <parameter name="periodType" /><!-- Y/Q/M -->
                     <parameter name="fromDate" />
                     <parameter name="thruDate" />
                     <parameter name="isClosed" type="Boolean" />
@@ -198,11 +203,17 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <set field="typeConvert"
+                from="['Y':'FiscalYear','Q':'FiscalQuarter','M':'FiscalMonth',
+                        'FiscalYear': 'Y','FiscalQuarter':'Q','FiscalMonth':'M']"
+                type="NewMap" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <log message="===timeperiod year: $year periodType: $periodType party:${companyPartyId}" />
             <entity-find entity-name="growerp.party.time.TimePeriodChildAndType" list="periods">
                 <econdition field-name="partyId" from="companyPartyId" />
-                <econdition field-name="timePeriodTypeId" value="FiscalYear" />
+                <econdition field-name="timePeriodTypeId" from="typeConvert[periodType]" />
+                <econdition field-name="periodName" operator="like" value="%${year}%" />
                 <order-by field-name="periodName" />
             </entity-find>
             <set field="timePeriods" from="[]" />
@@ -210,7 +221,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <script>
                     timePeriods.add([periodId: p.timePeriodId,
                                     periodName: p.periodName,
-                                    periodType: p.description,
+                                    periodType: typeConvert[p.timePeriodTypeId],
                                     fromDate: p.fromDate.toString(),
                                     thruDate: p.thruDate.toString(),
                                     isClosed: p.isClosed == 'Y' ? true : false,
@@ -219,6 +230,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     ]); 
                 </script>
             </iterate>
+            <log message="====# found ${timePeriods?.size()}" />
         </actions>
     </service>
 
@@ -400,6 +412,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="timePeriod" type="Map">
                     <parameter name="periodId" />
                     <parameter name="periodName" />
+                    <parameter name="periodType" />
                     <parameter name="fromDate" />
                     <parameter name="thruDate" />
                     <parameter name="isClosed" type="Boolean" />
@@ -418,6 +431,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <log message="===getting balance sheet for period: $periodName" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call in-map="organizationPartyId: companyPartyId"
@@ -427,7 +441,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="periodName" from="periodName" />
             </entity-find>
             <if condition="!periods">
-                <return error="true" message="Balance sheet, period: $periodId not found" />
+                <return error="true" message="Balance sheet, period: $periodName not found" />
             </if>
             <service-call
                 name="mantle.ledger.LedgerReportServices.run#BalanceSheet"
@@ -490,10 +504,15 @@ along with this software (see the LICENSE.md file). If not, see
                 if(classInfoById.DISTRIBUTION) distribution = showClass(classInfoById.DISTRIBUTION, 1);
                 def incomeAmount = [accountCode: 'INCOME', postedBalance: netIncomeOut.totalBalance.ALL.toString()];
             </script>
+            <set field="typeConvert"
+                from="['Y':'FiscalYear','Q':'FiscalQuarter','M':'FiscalMonth',
+                    'FiscalYear': 'Y','FiscalQuarter':'Q','FiscalMonth':'M']"
+                type="NewMap" />
             <set field="ledgerReport"
                 from="[
                 period: [periodId: periods[0].timePeriodId,
                                     periodName: periods[0].periodName,
+                                    periodType: typeConvert[periods[0].timePeriodTypeId],
                                     fromDate: periods[0].fromDate.toString(),
                                     thruDate: periods[0].thruDate.toString(),
                                     isClosed: periods[0].isClosed == 'Y' ? true : false,
