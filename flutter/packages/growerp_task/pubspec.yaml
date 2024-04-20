@@ -20,6 +20,7 @@ dependencies:
   responsive_framework: ^1.4.0
   global_configuration: ^2.0.0
   dropdown_search: ^5.0.6
+  flutter_flow_chart: ^2.2.0
 
 dev_dependencies:
   flutter_test:

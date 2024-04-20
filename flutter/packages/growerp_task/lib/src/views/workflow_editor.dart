@@ -75,12 +75,14 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
             onPressed: dashboard.recenter,
             child: const Icon(Icons.center_focus_strong)),
         body: Center(
-          child: popUp(
-            context: context,
-            title: widget.workflow.taskName,
-            padding: 0,
-            height: MediaQuery.of(context).size.height - 50,
-            width: MediaQuery.of(context).size.width - 50,
+            child: popUp(
+          context: context,
+          title: widget.workflow.taskName,
+          padding: 0,
+          height: MediaQuery.of(context).size.height - 50,
+          width: MediaQuery.of(context).size.width - 50,
+          child: Container(
+            constraints: const BoxConstraints.expand(),
             child: FlowChart(
               dashboard: dashboard,
               onDashboardTapped: ((context, position) async {
@@ -174,6 +176,6 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
               },
             ),
           ),
-        ));
+        )));
   }
 }
