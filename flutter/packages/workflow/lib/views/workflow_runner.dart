@@ -61,8 +61,7 @@ class WorkflowRunner extends StatelessWidget {
             case TaskBlocStatus.initial:
               return const LoadingIndicator();
             default:
-              return FatalErrorForm(
-                  message: state.message ?? 'server connection problem!');
+              throw Exception('server connection problem!');
           }
         }));
   }

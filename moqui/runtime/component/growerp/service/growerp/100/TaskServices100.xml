@@ -70,14 +70,100 @@ along with this software (see the LICENSE.md file). If not, see
             </script>
         </actions>
     </service>
+
+    <service verb="get" noun="UserWorkflows">
+        <description>Get userworkflows by type</description>
+        <in-parameters>
+            <parameter name="taskType" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="tasks" type="List">
+                <parameter name="taskId" />
+                <parameter name="taskName" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="typeConvert"
+                from="[workflow: 'WetWorkflow', WetWorkflow: 'workflow',
+                workflowTemplate: 'WetWorkflowTemplate',
+                WetWorkflowTemplate: 'workflowTemplate',
+                workflowTemplateTask: 'WetWorkflowTemplateTask',
+                WetWorkflowTemplateTask: 'workflowTemplateTask',
+                workflowTaskTemplate: 'WetWorkflowTaskTemplate',
+                WetWorkflowTaskTemplate: 'workflowTaskTemplate',
+                todo: 'WetTask', WetTask: 'todo']"
+                type="NewMap" />
+            <entity-find entity-name="growerp.party.WorkEffortAndParty"
+                list="taskList">
+                <econdition field-name="userPartyId" from="userPartyId" />
+                <econdition field-name="taskType" from="typeConvert[taskType]" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find>
+            <set field="tasks" from="[]" />
+            <iterate list="taskList" entry="task">
+                <script>tasks.add([taskId: task.taskId, taskName: task.taskName])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="UserWorkflow">
+        <description>Create a userworkflow</description>
+        <in-parameters>
+            <parameter name="workflowId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="tasks" type="List">
+                <parameter name="taskId" />
+                <parameter name="taskName" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="create#mantle.work.effort.WorkEffortParty">
+                <field-map field-name="partyId" from="userPartyId" />
+                <field-map field-name="workEffortId" from="workflowId" />
+                <field-map field-name="roleTypeId" value="Employee" />
+            </service-call>
+            <service-call name="growerp.100.TaskServices100.get#UserWorkflows"
+                in-map="[taskType: 'workflowTemplate']"
+                out-map="context" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="UserWorkflow">
+        <description>Delete a user workflow</description>
+        <in-parameters>
+            <parameter name="workflowId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="tasks" type="List">
+                <parameter name="taskId" />
+                <parameter name="taskName" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-delete-by-condition entity-name="mantle.work.effort.WorkEffortParty">
+                <econdition field-name="partyId" from="userPartyId" />
+                <econdition field-name="workEffortId" from="workflowId" />
+            </entity-delete-by-condition>
+        </actions>
+    </service>
+
     <service verb="get" noun="Task">
         <description> get a single or multiple tasks</description>
         <in-parameters>
             <parameter name="taskId" />
             <parameter name="taskType" /><!-- workflow, workflowTask, toDo, etc ignored when
             taskId-->
-            <parameter name="my" default-value="true" /> <!-- my task only? (true/false) -->
-            <parameter name="open" default-value="true" /> <!-- open tasks only? (true/false)-->
+            <parameter name="my" default-value="true" type="Boolean" /> <!-- my task only?
+            (true/false) -->
+            <parameter name="open" default-value="true" type="Boolean" /> <!-- open tasks only?
+            (true/false)-->
             <parameter name="start" default-value="0" type="Integer" />
             <parameter name="limit" default-value="20" type="Integer" />
             <parameter name="isForDropDown" type="Boolean" />
@@ -134,14 +220,14 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- only check status for a list -->
             <if
-                condition="open == 'true' &amp;&amp; !taskId 
+                condition="open == true &amp;&amp; !taskId 
                     &amp;&amp; taskType != 'workflowTemplate' 
                     &amp;&amp; taskType != 'workflowTaskTemplate'">
                 <set field="openStatusList"
                     from="['WeApproved','WeInPlanning','WeInProgress']" />
             </if>
-            <if condition="my == 'true'">
-                <set field="employeePartyId" from="ec.user.userAccount.partyId" />
+            <if condition="my == true">
+                <set field="employeePartyId" from="userPartyId" />
             </if>
             <set field="tasks" from="[]" />
             <!-- translate frontend Task type with backend-->
@@ -500,13 +586,15 @@ along with this software (see the LICENSE.md file). If not, see
                  ]"
                 out-map="context" />
             <!-- employee owner -->
-            <service-call name="create#mantle.work.effort.WorkEffortParty"
-                in-map="[
+            <if condition="task.taskType != 'workflowTemplate'">
+                <service-call name="create#mantle.work.effort.WorkEffortParty"
+                    in-map="[
                     workEffortId: workEffortId,
                     partyId: ec.user.userAccount.partyId,
                     roleTypeId: 'Owner',
                     statusId: 'WeptAssigned'
                 ]" />
+            </if>
             <if condition="task.customerUser">
                 <set field="userRoleTypeid" value="CustomerContactPerson" />
                 <set field="companyRoleTypeid" value="Customer" />
@@ -668,8 +756,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="task.taskType != 'workflowTemplate'">
                     <set field="statusId" from="convertedStatusId" />
                 </if>
-                <service-call name="update#mantle.work.effort.WorkEffort"
-                    in-map="[
+                <if condition="task.taskType != 'workflowTemplate'">
+                    <service-call name="update#mantle.work.effort.WorkEffort"
+                        in-map="[
                         workEffortId: task.taskId,
                         workEffortName: task.taskName,
                         statusId: statusId,
@@ -677,6 +766,7 @@ along with this software (see the LICENSE.md file). If not, see
                         routing: task.routing,
                         actualCompletionDate: statusId == 'WeComplete'? ec.user.nowTimestamp : null,
                     ]" />
+                </if>
             </if>
 
             <if
@@ -863,12 +953,8 @@ along with this software (see the LICENSE.md file). If not, see
                            parentWorkEffortId: task.taskId]"
                     out-map="context" />
                 <set field="wfIds[element.id]" from="workEffortId" />
-                <log
-                    message="processing: wfTemplate: ${task.taskId} wfTask: ${workEffortId} ${element.text} template: ${extraTask.taskTemplate?.taskId} routing: ${extraTask.taskTemplate?.routing} " />
                 <if condition="taskType == 'workflowTemplateTask' &amp;&amp; extraTask.taskTemplate">
                     <!-- add relation from workflowTemplateTask to workflowTaskTemplate-->
-                    <log
-                        message="===create template link from ${workEffortId} to ${extraTask.taskTemplate?.taskId}" />
                     <service-call name="create#mantle.work.effort.WorkEffortAssoc"
                         in-map="[workEffortId: workEffortId,
                                 toWorkEffortId: extraTask.taskTemplate.taskId,

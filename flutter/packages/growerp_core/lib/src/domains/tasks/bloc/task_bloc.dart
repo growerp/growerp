@@ -61,6 +61,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
     on<TaskWorkflowCancel>(_onTaskWorkflowCancel);
     on<TaskWorkflowSuspend>(_onTaskWorkflowSuspend);
     on<TaskSetReturnString>(_onTaskSetReturnString);
+    on<TaskGetUserWorkflows>(_onTaskGetUserWorkflows);
+    on<TaskCreateUserWorkflow>(_onTaskCreateUserWorkflow);
+    on<TaskDeleteUserWorkflow>(_onTaskDeleteUserWorkflow);
   }
 
   final RestClient restClient;
@@ -87,6 +90,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
       emit(state.copyWith(status: TaskBlocStatus.loading));
       Tasks compResult = await restClient.getTask(
           taskType: taskType,
+          my: event.my,
           start: start,
           searchString: event.searchString,
           limit: event.limit,
@@ -434,5 +438,59 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
     return emit(state.copyWith(
       returnString: event.returnString,
     ));
+  }
+
+  Future<void> _onTaskGetUserWorkflows(
+    TaskGetUserWorkflows event,
+    Emitter<TaskState> emit,
+  ) async {
+    emit(state.copyWith(status: TaskBlocStatus.loading));
+    try {
+      Tasks result = await restClient.getUserWorkflow(taskType: event.taskType);
+      return emit(state.copyWith(
+          status: TaskBlocStatus.success, myTasks: result.tasks));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+    }
+  }
+
+  Future<void> _onTaskCreateUserWorkflow(
+    TaskCreateUserWorkflow event,
+    Emitter<TaskState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: TaskBlocStatus.loading));
+      Tasks result =
+          await restClient.createUserWorkflow(workflowId: event.workflowId);
+      return emit(state.copyWith(
+          status: TaskBlocStatus.success,
+          myTasks: result.tasks,
+          message: 'workflow added'));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+    }
+  }
+
+  Future<void> _onTaskDeleteUserWorkflow(
+    TaskDeleteUserWorkflow event,
+    Emitter<TaskState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: TaskBlocStatus.loading));
+      await restClient.deleteUserWorkflow(workflowId: event.workflowId);
+      List<Task> tasks = List.of(state.tasks);
+      int index =
+          tasks.indexWhere((element) => element.taskId == event.workflowId);
+      if (index != -1) tasks.removeAt(index);
+      return emit(state.copyWith(
+          status: TaskBlocStatus.success,
+          myTasks: tasks,
+          message: 'Workflow deleted'));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+    }
   }
 }

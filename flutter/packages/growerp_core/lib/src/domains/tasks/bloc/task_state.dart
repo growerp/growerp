@@ -21,6 +21,7 @@ class TaskState extends Equatable {
     this.status = TaskBlocStatus.initial,
     this.message,
     this.tasks = const <Task>[],
+    this.myTasks = const <Task>[],
     this.hasReachedMax = false,
     this.searchString = '',
     this.menuOptions = const <MenuOption>[],
@@ -31,6 +32,7 @@ class TaskState extends Equatable {
   final TaskBlocStatus status;
   final String? message;
   final List<Task> tasks;
+  final List<Task> myTasks;
   final bool hasReachedMax; // all records retrieved
   final String searchString;
   final List<MenuOption> menuOptions;
@@ -41,6 +43,7 @@ class TaskState extends Equatable {
     TaskBlocStatus? status,
     String? message,
     List<Task>? tasks,
+    List<Task>? myTasks,
     bool? hasReachedMax,
     String? searchString,
     bool? search,
@@ -52,6 +55,7 @@ class TaskState extends Equatable {
       status: status ?? this.status,
       message: message,
       tasks: tasks ?? this.tasks,
+      myTasks: myTasks ?? this.myTasks,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,
       menuOptions: menuOptions ?? this.menuOptions,
@@ -70,6 +74,7 @@ class TaskState extends Equatable {
   List<Object> get props => [
         status,
         tasks,
+        myTasks,
         menuOptions,
         hasReachedMax,
         searchString,

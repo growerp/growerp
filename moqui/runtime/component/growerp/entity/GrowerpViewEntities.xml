@@ -1792,6 +1792,23 @@ along with this software (see the LICENSE.md file). If not, see
     <alias name="invoiceId" entity-alias="TE"/-->
     </view-entity>
 
+    <view-entity entity-name="WorkEffortAndParty" package="growerp.party">
+        <member-entity entity-alias="WE" entity-name="mantle.work.effort.WorkEffort" />
+        <member-entity
+            entity-alias="PARTY" entity-name="mantle.work.effort.WorkEffortParty"
+            join-from-alias="WE" join-optional="true">
+            <key-map field-name="workEffortId" />
+        </member-entity>
+        <alias name="taskId" field="workEffortId" entity-alias="WE" />
+        <alias name="ownerPartyId" entity-alias="WE" />
+        <alias name="taskType" field="workEffortTypeEnumId" entity-alias="WE" />
+        <alias name="taskName" field="workEffortName" entity-alias="WE" />
+        <alias name="taskType" field="workEffortTypeEnumId" entity-alias="WE" />
+        <alias name="userPartyId" field="partyId" entity-alias="PARTY" />
+        <alias name="roleTypeId" entity-alias="PARTY" />
+        <alias name="fromDate" entity-alias="PARTY" />
+    </view-entity>
+
     <view-entity entity-name="ProductStoreAndWebsiteContent" package="growerp.website">
         <member-entity entity-alias="PS" entity-name="mantle.product.store.ProductStore" />
         <member-entity entity-alias="WS" entity-name="moqui.resource.wiki.WikiSpace"

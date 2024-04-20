@@ -75,6 +75,9 @@ class TopApp extends StatelessWidget {
                   create: (context) =>
                       AuthBloc(chatServer, restClient, classificationId)
                         ..add(AuthLoad())),
+              BlocProvider<TaskWorkflowTemplateBloc>(
+                  create: (context) => TaskBloc(restClient,
+                      TaskType.workflowTemplate, <String, Widget>{})),
               BlocProvider<ChatRoomBloc>(
                 create: (context) => ChatRoomBloc(context.read<RestClient>(),
                     chatServer, context.read<AuthBloc>())

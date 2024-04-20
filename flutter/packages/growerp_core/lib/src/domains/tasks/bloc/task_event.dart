@@ -21,12 +21,15 @@ abstract class TaskEvent extends Equatable {
 }
 
 class TaskFetch extends TaskEvent {
-  const TaskFetch(
-      {this.limit = 20,
-      this.searchString = '',
-      this.refresh = false,
-      this.isForDropDown = false,
-      this.taskId = ''});
+  const TaskFetch({
+    this.limit = 20,
+    this.my = true,
+    this.searchString = '',
+    this.refresh = false,
+    this.isForDropDown = false,
+    this.taskId = '',
+  });
+  final bool my;
   final String searchString;
   final bool refresh;
   final int limit;
@@ -74,4 +77,19 @@ class TaskWorkflowSuspend extends TaskEvent {
 class TaskSetReturnString extends TaskEvent {
   const TaskSetReturnString(this.returnString);
   final String returnString;
+}
+
+class TaskGetUserWorkflows extends TaskEvent {
+  const TaskGetUserWorkflows(this.taskType);
+  final TaskType taskType;
+}
+
+class TaskCreateUserWorkflow extends TaskEvent {
+  const TaskCreateUserWorkflow(this.workflowId);
+  final String workflowId;
+}
+
+class TaskDeleteUserWorkflow extends TaskEvent {
+  const TaskDeleteUserWorkflow(this.workflowId);
+  final String workflowId;
 }

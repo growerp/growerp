@@ -27,8 +27,6 @@ class BalanceSummaryListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //   var repos = context.read<AccountingAPIRepository>();
-    //   final balanceSummaryBloc = context.read<BalanceSummaryBloc>();
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: Colors.green,

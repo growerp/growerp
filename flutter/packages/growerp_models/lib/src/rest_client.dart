@@ -530,7 +530,7 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/UserWorkflow")
   @Extra({'requireApiKey': true})
-  Future<Task> createUserWorkflow({
+  Future<Tasks> createUserWorkflow({
     @Field() required String workflowId,
   });
 

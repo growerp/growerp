@@ -18,31 +18,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 
-class WorkflowDialog extends StatelessWidget {
+class WorkflowDialog extends StatefulWidget {
   const WorkflowDialog(this.workflow, {super.key});
   final Task? workflow;
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider<TaskWorkflowTemplateBloc>(
-      create: (BuildContext context) => TaskBloc(
-        context.read<RestClient>(),
-        TaskType.workflowTemplate,
-        context.read<Map<String, Widget>>(),
-      )..add(const TaskFetch(isForDropDown: true)),
-      child: WorkflowDialogNext(workflow),
-    );
-  }
-}
-
-class WorkflowDialogNext extends StatefulWidget {
-  const WorkflowDialogNext(this.workflow, {super.key});
-  final Task? workflow;
 
   @override
-  WorkflowDialogNextState createState() => WorkflowDialogNextState();
+  WorkflowDialogState createState() => WorkflowDialogState();
 }
 
-class WorkflowDialogNextState extends State<WorkflowDialogNext> {
+class WorkflowDialogState extends State<WorkflowDialog> {
   final TextEditingController _taskSearchBoxController =
       TextEditingController();
   late TaskBloc taskBloc;
@@ -51,7 +35,9 @@ class WorkflowDialogNextState extends State<WorkflowDialogNext> {
   @override
   void initState() {
     super.initState();
-    taskBloc = context.read<TaskWorkflowTemplateBloc>() as TaskBloc;
+    taskBloc = context.read<TaskWorkflowTemplateBloc>() as TaskBloc
+      // get a MY workflow templates
+      ..add(const TaskGetUserWorkflows(TaskType.workflowTemplate));
   }
 
   @override
