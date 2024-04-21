@@ -118,7 +118,18 @@ class WorkflowDashboardState extends State<WorkflowDashboard> {
                 asyncItems: (String filter) {
                   taskBloc.add(
                       TaskFetch(searchString: filter, isForDropDown: true));
-                  return Future.value(taskState.tasks);
+                  // remove already selected workflows
+                  List<Task> notUsedTasks = [];
+                  for (Task task in taskState.tasks) {
+                    if (taskState.myTasks
+                        .firstWhere((el) => el.taskId == task.taskId,
+                            orElse: () => Task())
+                        .taskId
+                        .isEmpty) {
+                      notUsedTasks.add(task);
+                    }
+                  }
+                  return Future.value(notUsedTasks);
                 },
                 validator: (value) => value == null ? 'field required' : null,
               ),
