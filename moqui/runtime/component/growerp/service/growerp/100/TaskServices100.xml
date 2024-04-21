@@ -80,6 +80,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="tasks" type="List">
                 <parameter name="taskId" />
                 <parameter name="taskName" />
+                <parameter name="jsonImage" />
             </parameter>
         </out-parameters>
         <actions>
@@ -103,7 +104,21 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <set field="tasks" from="[]" />
             <iterate list="taskList" entry="task">
-                <script>tasks.add([taskId: task.taskId, taskName: task.taskName])</script>
+                <!-- get editor content -->
+                <set field="contentText" from="null" />
+                <entity-find entity-name="mantle.work.effort.WorkEffortContent"
+                    list="contentList">
+                    <econdition field-name="workEffortId" from="task.taskId" />
+                    <econdition field-name="contentTypeEnumId" value="WectCreatedMedia" />
+                </entity-find>
+                <if condition="contentList">
+                    <set field="contentRef"
+                        from="ec.resource.getLocationReference(contentList[0].contentLocation)" />
+                    <if condition="contentRef != null">
+                        <set field="contentText" from="contentRef.getText()" />
+                    </if>
+                </if>
+                <script>tasks.add([taskId: task.taskId, taskName: task.taskName,jsonImage: contentText])</script>
             </iterate>
         </actions>
     </service>
