@@ -569,6 +569,13 @@ packages:
       relative: true
     source: path
     version: "1.2.1"
+  growerp_task:
+    dependency: "direct main"
+    description:
+      path: "../growerp_task"
+      relative: true
+    source: path
+    version: "0.0.1"
   growerp_user_company:
     dependency: "direct main"
     description:

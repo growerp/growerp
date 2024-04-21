@@ -5,13 +5,13 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 
 class WorkflowDashboard extends StatefulWidget {
-  const WorkflowDashboard({Key? key}) : super(key: key);
+  const WorkflowDashboard({super.key});
 
   @override
-  _WorkflowDashboardState createState() => _WorkflowDashboardState();
+  WorkflowDashboardState createState() => WorkflowDashboardState();
 }
 
-class _WorkflowDashboardState extends State<WorkflowDashboard> {
+class WorkflowDashboardState extends State<WorkflowDashboard> {
   late TaskBloc taskBloc;
   final TextEditingController _taskSearchBoxController =
       TextEditingController();
@@ -36,23 +36,60 @@ class _WorkflowDashboardState extends State<WorkflowDashboard> {
         case TaskBlocStatus.success:
           {
             for (Task workflow in taskState.myTasks) {
-              chips.add(InputChip(
-                label: Text(
-                  workflow.taskName,
-                  key: Key('addWorkflow'),
-                ),
-                deleteIcon: const Icon(
-                  Icons.cancel,
-                  key: Key("deleteChip"),
-                ),
-                onDeleted: () async {
-                  taskBloc.add(TaskDeleteUserWorkflow(workflow.taskId));
-                },
-                onPressed: () async {
-                  Navigator.of(context)
-                      .pushNamed('/workflowRunner', arguments: workflow);
-                },
-              ));
+              chips.add(Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
+                        style: BorderStyle.solid,
+                        width: 1.5),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      InputChip(
+                        shape: const LinearBorder(side: BorderSide.none),
+                        label: Text(
+                          workflow.taskName,
+                          key: const Key('addWorkflow'),
+                        ),
+                        deleteIcon: const Icon(
+                          Icons.cancel,
+                          key: Key("deleteChip"),
+                        ),
+                        onDeleted: () async {
+                          taskBloc.add(TaskDeleteUserWorkflow(workflow.taskId));
+                        },
+                        onPressed: () async {
+                          Navigator.of(context).pushNamed('/workflowRunner',
+                              arguments: workflow);
+                        },
+                      ),
+                      CircleAvatar(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.onBackground,
+                        radius: 10,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: const Icon(
+                            Icons.show_chart,
+                            size: 20,
+                          ),
+                          color: Theme.of(context).colorScheme.primary,
+                          onPressed: () async {
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return WorkflowDiagram(
+                                      workflow.taskName, workflow.jsonImage);
+                                });
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 5)
+                    ],
+                  )));
             }
             chips.add(SizedBox(
               width: 250,
@@ -87,13 +124,13 @@ class _WorkflowDashboardState extends State<WorkflowDashboard> {
             ));
           }
           return Padding(
-              padding: EdgeInsets.only(right: 20),
+              padding: const EdgeInsets.only(right: 20, top: 10),
               child: Wrap(spacing: 10, children: chips));
         case TaskBlocStatus.failure:
           return HelperFunctions.showMessage(
               context, 'Error: ${taskState.message}', Colors.red);
         default:
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
       }
     });
   }

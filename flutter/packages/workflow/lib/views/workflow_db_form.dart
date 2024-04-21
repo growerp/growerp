@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:workflow/views/workflow_dashboard.dart';
+import 'package:growerp_task/src/widgets/workflow_dashboard.dart';
 import '../menu_options.dart';
 
 class WorkflowDbForm extends StatelessWidget {
