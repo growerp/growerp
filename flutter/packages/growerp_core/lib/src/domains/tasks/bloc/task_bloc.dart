@@ -480,7 +480,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
     try {
       emit(state.copyWith(status: TaskBlocStatus.loading));
       await restClient.deleteUserWorkflow(workflowId: event.workflowId);
-      List<Task> tasks = List.of(state.tasks);
+      List<Task> tasks = List.of(state.myTasks);
       int index =
           tasks.indexWhere((element) => element.taskId == event.workflowId);
       if (index != -1) tasks.removeAt(index);
