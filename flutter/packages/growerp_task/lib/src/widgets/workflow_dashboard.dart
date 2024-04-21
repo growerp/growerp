@@ -45,6 +45,7 @@ class WorkflowDashboardState extends State<WorkflowDashboard> {
                         width: 1.5),
                   ),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       InputChip(

@@ -42,6 +42,8 @@ flutter:
   uses-material-design: true
   assets: 
     - assets/cfg/
+    - packages/growerp_core/images/select.png
+    - packages/growerp_core/images/selectGrey.png
     - packages/growerp_core/images/aboutGrey.png
     - packages/growerp_core/images/accounting.png
     - packages/growerp_core/images/category.png

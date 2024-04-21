@@ -13,8 +13,6 @@ dependencies:
     sdk: flutter
   growerp_core: ^1.2.4
   growerp_task: ^1.0.0
-  growerp_user_company: ^1.2.1
-  growerp_order_accounting: ^1.2.1
   decimal: ^2.1.0
   flutter_bloc: ^8.1.4
   flutter_localizations: 
