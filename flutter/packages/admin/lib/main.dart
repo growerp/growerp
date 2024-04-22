@@ -64,6 +64,7 @@ Future main() async {
   }
 
   await Hive.initFlutter();
+  Map<String, Widget> screens = orderAccountingScreens;
 
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
@@ -74,6 +75,7 @@ Future main() async {
     router: router.generateRoute,
     menuOptions: menuOptions,
     extraDelegates: extraDelegates,
+    screens: screens,
   ));
 }
 
