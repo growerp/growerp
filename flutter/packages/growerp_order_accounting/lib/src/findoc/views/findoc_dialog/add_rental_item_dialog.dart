@@ -24,8 +24,8 @@ import 'package:growerp_models/growerp_models.dart';
 import '../../../../growerp_order_accounting.dart';
 
 /// [addRentalItemDialog] add a rental order item [FinDocItem]
-Future addRentalItemDialog(BuildContext context, ProductBloc productBloc,
-    FinDocBloc finDocBloc) async {
+Future addRentalItemDialog(BuildContext context,
+    DataFetchBloc<Products> productBloc, FinDocBloc finDocBloc) async {
   final priceController = TextEditingController();
   final itemDescriptionController = TextEditingController();
   final quantityController = TextEditingController();

@@ -32,7 +32,7 @@ Future addProductItemDialog(BuildContext context) async {
   GlAccount? selectedGlAccount;
   Product? selectedProduct;
   GlAccountBloc glAccountBloc = context.read<GlAccountBloc>();
-  ProductBloc productBloc = context.read<ProductBloc>();
+  DataFetchBloc<Products> productBloc = context.read<DataFetchBloc<Products>>();
   String classificationId = context.read<String>();
 
   return showDialog<FinDocItem>(
@@ -60,14 +60,17 @@ Future addProductItemDialog(BuildContext context) async {
                                 child: SingleChildScrollView(
                                     key: const Key('listView3'),
                                     child: Column(children: <Widget>[
-                                      BlocBuilder<ProductBloc, ProductState>(
-                                          builder: (context, productState) {
-                                        switch (productState.status) {
-                                          case ProductStatus.failure:
+                                      BlocBuilder<DataFetchBloc<Products>,
+                                              DataFetchState>(
+                                          builder: (context, state) {
+                                        switch (state.status) {
+                                          case DataFetchStatus.failure:
                                             return const FatalErrorForm(
                                                 message:
                                                     'server connection problem');
-                                          case ProductStatus.success:
+                                          case DataFetchStatus.loading:
+                                            return CircularProgressIndicator();
+                                          case DataFetchStatus.success:
                                             return DropdownSearch<Product>(
                                               selectedItem: selectedProduct,
                                               popupProps: PopupProps.menu(
@@ -100,21 +103,26 @@ Future addProductItemDialog(BuildContext context) async {
                                               itemAsString: (Product? u) =>
                                                   " ${u!.productName}[${u.pseudoId}]",
                                               asyncItems: (String filter) {
-                                                productBloc.add(ProductFetch(
-                                                    searchString: filter,
-                                                    limit: 3,
-                                                    isForDropDown: true,
-                                                    assetClassId:
-                                                        classificationId ==
-                                                                'AppHotel'
-                                                            ? 'Hotel Room'
-                                                            : ''));
+                                                productBloc.add(GetDataEvent(
+                                                    () => context
+                                                        .read<RestClient>()
+                                                        .getProduct(
+                                                            searchString:
+                                                                filter,
+                                                            limit: 3,
+                                                            isForDropDown: true,
+                                                            assetClassId:
+                                                                classificationId ==
+                                                                        'AppHotel'
+                                                                    ? 'Hotel Room'
+                                                                    : '')));
                                                 return Future.delayed(
                                                     const Duration(
                                                         milliseconds: 100), () {
                                                   return Future.value(
-                                                      productBloc
-                                                          .state.products);
+                                                      (productBloc.state.data
+                                                              as Products)
+                                                          .products);
                                                 });
                                               },
                                               compareFn: (item, sItem) =>

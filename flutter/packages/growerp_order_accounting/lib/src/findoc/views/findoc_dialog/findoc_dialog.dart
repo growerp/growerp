@@ -78,9 +78,8 @@ class FinDocDialog extends StatelessWidget {
         BlocProvider<CompanyBloc>(
             create: (context) => CompanyBloc(context.read<RestClient>(),
                 Role.customer, context.read<AuthBloc>())),
-        BlocProvider<ProductBloc>(
-            create: (context) => ProductBloc(
-                context.read<RestClient>(), context.read<String>())),
+        BlocProvider<DataFetchBloc<Products>>(
+            create: (context) => DataFetchBloc<Products>()),
         BlocProvider<GlAccountBloc>(
             create: (context) => GlAccountBloc(context.read<RestClient>())),
       ], child: FinDocPage(finDoc));
@@ -96,9 +95,8 @@ class FinDocDialog extends StatelessWidget {
       BlocProvider<CompanyBloc>(
           create: (context) => CompanyBloc(context.read<RestClient>(),
               Role.supplier, context.read<AuthBloc>())),
-      BlocProvider<ProductBloc>(
-          create: (context) =>
-              ProductBloc(context.read<RestClient>(), context.read<String>())),
+      BlocProvider<DataFetchBloc<Products>>(
+          create: (context) => DataFetchBloc<Products>()),
       BlocProvider<GlAccountBloc>(
           create: (context) => GlAccountBloc(context.read<RestClient>())),
     ], child: FinDocPage(finDoc));
@@ -118,7 +116,7 @@ class MyFinDocState extends State<FinDocPage> {
   final _companySearchBoxController = TextEditingController();
   late CartBloc _cartBloc;
   late CompanyBloc _companyBloc;
-  late ProductBloc _productBloc;
+  late DataFetchBloc<Products> _productBloc;
   late GlAccountBloc _glAccountBloc;
   late FinDocBloc _finDocBloc;
   late String classificationId;
@@ -140,8 +138,11 @@ class MyFinDocState extends State<FinDocPage> {
     _companyBloc.add(const CompanyFetch(limit: 3));
     _glAccountBloc = context.read<GlAccountBloc>();
     _glAccountBloc.add(const GlAccountFetch(limit: 3));
-    _productBloc = context.read<ProductBloc>();
-    _productBloc.add(const ProductFetch(limit: 3, isForDropDown: true));
+    _productBloc = context.read<DataFetchBloc<Products>>()
+      ..add(GetDataEvent(() => context.read<RestClient>().getProduct(
+          limit: 3,
+          isForDropDown: true,
+          assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : '')));
     _descriptionController.text = finDocUpdated.description ?? "";
     if (finDoc.sales) {
       _cartBloc = context.read<SalesCartBloc>() as CartBloc;
