@@ -2,21 +2,29 @@
 
 GrowERP is an open source multi platform ERP application you can use right now!
 
-We have now started a production admin version:
+### PRODUCTION admin version:
 - Web:     https://admin.growerp.com
 - Android: https://play.google.com/store/apps/details?id=org.growerp.admin
 - IOS:     https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755
 
-We also created a vertical app for Hotel owners: 
+Hotel application: 
 - Web:     https://hotel.growerp.org
 - Android: https://play.google.com/store/apps/details?id=org.growerp.hotel
 - IOS:     https://apps.apple.com/app/growerp-hotel-open-source/id1531267095 
+
+### TEST NEXT admin version:
+- Web:     https://admin.growerp.org
+
+Hotel application: 
+- Web:     https://hotel.growerp.org
 
 When the application is started, create a new company, select demo data or an empty system and look around!
 
 Documentation available at https://www.growerp.com
 
 ## Install GrowERP locally using global growerp command
+## <span style="color:red">required flutter version 3.16.9</span> 
+
 ```sh
 dart pub global activate growerp
 growerp install

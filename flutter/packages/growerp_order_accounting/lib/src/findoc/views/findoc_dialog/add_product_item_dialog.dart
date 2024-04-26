@@ -118,7 +118,7 @@ Future addProductItemDialog(BuildContext context) async {
                                                                     : '')));
                                                 return Future.delayed(
                                                     const Duration(
-                                                        milliseconds: 100), () {
+                                                        milliseconds: 150), () {
                                                   return Future.value(
                                                       (productBloc.state.data
                                                               as Products)
