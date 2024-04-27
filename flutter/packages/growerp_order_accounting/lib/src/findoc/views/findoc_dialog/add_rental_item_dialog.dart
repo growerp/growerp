@@ -98,26 +98,22 @@ Future addRentalItemDialog(BuildContext context,
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: <Widget>[
-                                      BlocBuilder<ProductBloc, ProductState>(
-                                          builder: (context, productState) {
-                                        switch (productState.status) {
-                                          case ProductStatus.failure:
+                                      BlocBuilder<DataFetchBloc<Products>,
+                                              DataFetchState>(
+                                          builder: (context, state) {
+                                        switch (state.status) {
+                                          case DataFetchStatus.failure:
                                             return const FatalErrorForm(
                                                 message:
                                                     'server connection problem');
-                                          case ProductStatus.success:
-                                            rentalDays =
-                                                productState.occupancyDates;
+                                          case DataFetchStatus.loading:
+                                            return CircularProgressIndicator();
+                                          case DataFetchStatus.success:
                                             return DropdownSearch<Product>(
-                                              key: const Key('product'),
                                               selectedItem: selectedProduct,
-                                              dropdownDecoratorProps:
-                                                  const DropDownDecoratorProps(
-                                                      dropdownSearchDecoration:
-                                                          InputDecoration(
-                                                              labelText:
-                                                                  'Product')),
                                               popupProps: PopupProps.menu(
+                                                showSelectedItems: true,
+                                                isFilterOnline: true,
                                                 showSearchBox: true,
                                                 searchFieldProps:
                                                     TextFieldProps(
@@ -138,20 +134,41 @@ Future addRentalItemDialog(BuildContext context,
                                                   height: 50,
                                                 ),
                                               ),
+                                              dropdownDecoratorProps:
+                                                  const DropDownDecoratorProps(
+                                                      dropdownSearchDecoration:
+                                                          InputDecoration(
+                                                              labelText:
+                                                                  'Product')),
+                                              key: const Key('product'),
                                               itemAsString: (Product? u) =>
-                                                  " ${u!.productName}",
+                                                  " ${u!.productName}[${u.pseudoId}]",
                                               asyncItems: (String filter) {
-                                                context.read<ProductBloc>().add(
-                                                    ProductFetch(
-                                                        searchString: filter,
-                                                        assetClassId:
-                                                            classificationId ==
-                                                                    'AppHotel'
-                                                                ? 'Hotel Room'
-                                                                : ''));
-                                                return Future.value(
-                                                    productState.products);
+                                                productBloc.add(GetDataEvent(
+                                                    () => context
+                                                        .read<RestClient>()
+                                                        .getProduct(
+                                                            searchString:
+                                                                filter,
+                                                            limit: 3,
+                                                            isForDropDown: true,
+                                                            assetClassId:
+                                                                classificationId ==
+                                                                        'AppHotel'
+                                                                    ? 'Hotel Room'
+                                                                    : '')));
+                                                return Future.delayed(
+                                                    const Duration(
+                                                        milliseconds: 150), () {
+                                                  return Future.value(
+                                                      (productBloc.state.data
+                                                              as Products)
+                                                          .products);
+                                                });
                                               },
+                                              compareFn: (item, sItem) =>
+                                                  item.pseudoId ==
+                                                  sItem.pseudoId,
                                               onChanged:
                                                   (Product? newValue) async {
                                                 selectedProduct = newValue;
@@ -160,10 +177,12 @@ Future addRentalItemDialog(BuildContext context,
                                                     .toString();
                                                 itemDescriptionController.text =
                                                     "${newValue.productName}";
-                                                context.read<ProductBloc>().add(
-                                                    ProductRentalOccupancy(
-                                                        productId: newValue
-                                                            .productId));
+                                                productBloc.add(GetDataEvent(
+                                                    () => context
+                                                        .read<RestClient>()
+                                                        .getDailyRentalOccupancy(
+                                                            productId: newValue
+                                                                .productId)));
                                                 while (!whichDayOk(startDate)) {
                                                   startDate = startDate.add(
                                                       const Duration(days: 1));
@@ -171,7 +190,7 @@ Future addRentalItemDialog(BuildContext context,
                                               },
                                               validator: (value) =>
                                                   value == null
-                                                      ? 'Select product?'
+                                                      ? "Select a product?"
                                                       : null,
                                             );
                                           default:

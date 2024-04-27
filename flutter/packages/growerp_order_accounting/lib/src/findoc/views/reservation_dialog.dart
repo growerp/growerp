@@ -32,9 +32,8 @@ class ReservationDialog extends StatelessWidget {
     return BlocProvider<UserBloc>(
         create: (context) =>
             UserBloc(context.read<RestClient>(), Role.customer),
-        child: BlocProvider<ProductBloc>(
-            create: (context) =>
-                ProductBloc(context.read<RestClient>(), context.read<String>()),
+        child: BlocProvider<DataFetchBloc<Products>>(
+            create: (context) => DataFetchBloc<Products>(),
             child: ReservationForm(finDoc: finDoc, original: original)));
   }
 }
@@ -55,7 +54,7 @@ class ReservationDialogState extends State<ReservationForm> {
   late UserBloc _userBloc;
   User? _selectedUser;
   bool loading = false;
-  late ProductBloc _productBloc;
+  late DataFetchBloc<Products> _productBloc;
   Product? _selectedProduct;
   late DateTime _selectedDate;
   List<String> rentalDays = [];
@@ -73,8 +72,11 @@ class ReservationDialogState extends State<ReservationForm> {
     _selectedUser = widget.finDoc.otherUser;
     _userBloc = context.read<UserBloc>();
     _userBloc.add(const UserFetch());
-    _productBloc = context.read<ProductBloc>();
-    _productBloc.add(const ProductFetch());
+    _productBloc = context.read<DataFetchBloc<Products>>()
+      ..add(GetDataEvent(() => context.read<RestClient>().getProduct(
+          limit: 3,
+          isForDropDown: true,
+          assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : '')));
     if (widget.finDoc.items.isNotEmpty) {
       _selectedProduct = Product(
           productId: widget.finDoc.items[0].productId!,
@@ -225,63 +227,78 @@ class ReservationDialogState extends State<ReservationForm> {
                     }
                   }),
                   const SizedBox(height: 20),
-                  BlocBuilder<ProductBloc, ProductState>(
-                      builder: (context, productState) {
-                    switch (productState.status) {
-                      case ProductStatus.failure:
+                  BlocBuilder<DataFetchBloc<Products>, DataFetchState>(
+                      builder: (context, state) {
+                    switch (state.status) {
+                      case DataFetchStatus.failure:
                         return const FatalErrorForm(
                             message: 'server connection problem');
-                      case ProductStatus.success:
-                        rentalDays = productState.occupancyDates;
+                      case DataFetchStatus.loading:
+                        return CircularProgressIndicator();
+                      case DataFetchStatus.success:
                         return DropdownSearch<Product>(
                           selectedItem: _selectedProduct,
                           popupProps: PopupProps.menu(
+                            showSelectedItems: true,
+                            isFilterOnline: true,
                             showSearchBox: true,
                             searchFieldProps: TextFieldProps(
                               autofocus: true,
-                              decoration:
-                                  const InputDecoration(labelText: "Room type"),
+                              decoration: InputDecoration(
+                                labelText: classificationId == 'AppHotel'
+                                    ? 'Room Type'
+                                    : 'Product',
+                              ),
                               controller: _productSearchBoxController,
                             ),
                             title: popUp(
                               context: context,
-                              title:
-                                  "Select ${classificationId == 'AppHotel' ? 'room type' : 'product'}",
+                              title: 'Select product',
                               height: 50,
                             ),
                           ),
-                          dropdownDecoratorProps: DropDownDecoratorProps(
-                              dropdownSearchDecoration: InputDecoration(
-                            labelText: classificationId == 'AppHotel'
-                                ? 'Room Type'
-                                : 'Product',
-                          )),
+                          dropdownDecoratorProps: const DropDownDecoratorProps(
+                              dropdownSearchDecoration:
+                                  InputDecoration(labelText: 'Product')),
                           key: const Key('product'),
-                          itemAsString: (Product? u) => " ${u!.productName}",
+                          itemAsString: (Product? u) =>
+                              " ${u!.productName}[${u.pseudoId}]",
                           asyncItems: (String filter) {
-                            _productBloc.add(ProductFetch(
-                                searchString: filter,
-                                assetClassId: classificationId == 'AppHotel'
-                                    ? 'Hotel Room'
-                                    : ''));
-                            return Future.value(
-                              productState.products,
-                            );
+                            _productBloc.add(GetDataEvent(() => context
+                                .read<RestClient>()
+                                .getProduct(
+                                    searchString: filter,
+                                    limit: 3,
+                                    isForDropDown: true,
+                                    assetClassId: classificationId == 'AppHotel'
+                                        ? 'Hotel Room'
+                                        : '')));
+                            return Future.delayed(
+                                const Duration(milliseconds: 150), () {
+                              return Future.value(
+                                  (_productBloc.state.data as Products)
+                                      .products);
+                            });
                           },
+                          compareFn: (item, sItem) =>
+                              item.pseudoId == sItem.pseudoId,
                           onChanged: (Product? newValue) async {
                             _selectedProduct = newValue;
                             _priceController.text =
                                 newValue!.listPrice.toString();
-                            _productBloc.add(ProductRentalOccupancy(
-                                productId: newValue.productId));
+                            _productBloc.add(GetDataEvent(() => context
+                                .read<RestClient>()
+                                .getDailyRentalOccupancy(
+                                    productId: newValue.productId)));
                             await Future.delayed(
-                                const Duration(milliseconds: 800));
-                            setState(() {
-                              _selectedDate = firstFreeDate();
+                                const Duration(milliseconds: 800), () {
+                              setState(() {
+                                _selectedDate = firstFreeDate();
+                              });
                             });
                           },
                           validator: (value) =>
-                              value == null ? 'field required' : null,
+                              value == null ? "Select a product?" : null,
                         );
                       default:
                         return const Center(child: CircularProgressIndicator());

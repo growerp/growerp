@@ -39,12 +39,10 @@ class WebsiteForm extends StatelessWidget {
           create: (BuildContext context) =>
               WebsiteBloc(context.read<RestClient>())..add(WebsiteFetch()),
         ),
-        BlocProvider<CategoryBloc>(
-            create: (BuildContext context) => CategoryBloc(
-                context.read<RestClient>(), context.read<String>())),
-        BlocProvider<ProductBloc>(
-            create: (BuildContext context) => ProductBloc(
-                context.read<RestClient>(), context.read<String>())),
+        BlocProvider<DataFetchBloc<Products>>(
+            create: (context) => DataFetchBloc<Products>()),
+        BlocProvider<DataFetchBloc<Categories>>(
+            create: (context) => DataFetchBloc<Categories>()),
       ], child: const WebsitePage()));
 }
 
@@ -57,8 +55,8 @@ class WebsitePage extends StatefulWidget {
 
 class WebsiteFormState extends State<WebsitePage> {
   late WebsiteBloc _websiteBloc;
-  late CategoryBloc _categoryBloc;
-  late ProductBloc _productBloc;
+  late DataFetchBloc<Products> _productBloc;
+  late DataFetchBloc<Categories> _categoryBloc;
   List<Content> _updatedContent = [];
   List<Category> _selectedCategories = [];
   final _urlController = TextEditingController();
@@ -76,10 +74,14 @@ class WebsiteFormState extends State<WebsitePage> {
   void initState() {
     super.initState();
     _websiteBloc = context.read<WebsiteBloc>();
-    _categoryBloc = context.read<CategoryBloc>()
-      ..add(const CategoryFetch(isForDropDown: true, limit: 3));
-    _productBloc = context.read<ProductBloc>()
-      ..add(const ProductFetch(isForDropDown: true, limit: 3));
+    _categoryBloc = context.read<DataFetchBloc<Categories>>()
+      ..add(GetDataEvent(() => context
+          .read<RestClient>()
+          .getCategory(limit: 3, isForDropDown: true)));
+    _productBloc = context.read<DataFetchBloc<Products>>()
+      ..add(GetDataEvent(() => context
+          .read<RestClient>()
+          .getProduct(limit: 3, isForDropDown: true)));
   }
 
   @override
@@ -485,12 +487,14 @@ class WebsiteFormState extends State<WebsitePage> {
               )),
           child: Wrap(runSpacing: 10, spacing: 10, children: imageButtons)),
       for (Category category in state.website!.websiteCategories)
-        BlocBuilder<ProductBloc, ProductState>(
+        BlocBuilder<DataFetchBloc<Products>, DataFetchState>(
             builder: (context, productState) {
           switch (productState.status) {
-            case ProductStatus.failure:
+            case DataFetchStatus.failure:
               return const FatalErrorForm(message: 'server connection problem');
-            case ProductStatus.success:
+            case DataFetchStatus.loading:
+              return const CircularProgressIndicator();
+            case DataFetchStatus.success:
               return DropdownSearch<Product>.multiSelection(
                 key: Key("addProduct${category.categoryName}"),
                 dropdownDecoratorProps: DropDownDecoratorProps(
@@ -525,18 +529,24 @@ class WebsiteFormState extends State<WebsitePage> {
                   ),
                 ),
                 selectedItems: category.products,
-                itemAsString: (item) => item.productName ?? '?',
+                itemAsString: (Product? u) =>
+                    " ${u!.productName}[${u.pseudoId}]",
                 asyncItems: (String filter) {
-                  _productBloc.add(ProductFetch(
-                    searchString: filter,
-                    limit: 3,
-                    isForDropDown: true,
-                  ));
-                  return Future.delayed(const Duration(milliseconds: 100), () {
-                    return Future.value(_productBloc.state.products);
+                  _productBloc.add(GetDataEvent(() => context
+                      .read<RestClient>()
+                      .getProduct(
+                          searchString: filter,
+                          limit: 3,
+                          isForDropDown: true,
+                          assetClassId: context.read<String>() == 'AppHotel'
+                              ? 'Hotel Room'
+                              : '')));
+                  return Future.delayed(const Duration(milliseconds: 150), () {
+                    return Future.value(
+                        (_productBloc.state.data as Products).products);
                   });
                 },
-                compareFn: (item, sItem) => item.productId == sItem.productId,
+                compareFn: (item, sItem) => item.pseudoId == sItem.pseudoId,
                 onChanged: (List<Product>? newValue) {
                   List<Category> newCats =
                       List.of(state.website!.websiteCategories);
@@ -552,12 +562,14 @@ class WebsiteFormState extends State<WebsitePage> {
               return const Center(child: CircularProgressIndicator());
           }
         }),
-      BlocBuilder<CategoryBloc, CategoryState>(
-          builder: (context, productState) {
-        switch (productState.status) {
-          case CategoryStatus.failure:
+      BlocBuilder<DataFetchBloc<Categories>, DataFetchState>(
+          builder: (context, categoryState) {
+        switch (categoryState.status) {
+          case DataFetchStatus.failure:
             return const FatalErrorForm(message: 'server connection problem');
-          case CategoryStatus.success:
+          case DataFetchStatus.loading:
+            return const CircularProgressIndicator();
+          case DataFetchStatus.success:
             return DropdownSearch<Category>.multiSelection(
               key: const Key("addShopCategory}"),
               dropdownDecoratorProps: DropDownDecoratorProps(
@@ -595,13 +607,15 @@ class WebsiteFormState extends State<WebsitePage> {
               itemAsString: (Category item) => item.categoryName.truncate(15),
               selectedItems: _selectedCategories,
               asyncItems: (String filter) {
-                _categoryBloc.add(CategoryFetch(
-                  searchString: filter,
-                  limit: 3,
-                  isForDropDown: true,
-                ));
+                _categoryBloc.add(
+                    GetDataEvent(() => context.read<RestClient>().getCategory(
+                          searchString: filter,
+                          limit: 3,
+                          isForDropDown: true,
+                        )));
                 return Future.delayed(const Duration(milliseconds: 100), () {
-                  return Future.value(_categoryBloc.state.categories);
+                  return Future.value(
+                      (_categoryBloc.state.data as Categories).categories);
                 });
               },
               compareFn: (item, sItem) => item.categoryId == sItem.categoryId,

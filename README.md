@@ -2,7 +2,8 @@
 
 GrowERP is an open source multi platform ERP application you can use right now!
 
-### PRODUCTION admin version:
+### PRODUCTION version:
+Admin application
 - Web:     https://admin.growerp.com
 - Android: https://play.google.com/store/apps/details?id=org.growerp.admin
 - IOS:     https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755
@@ -12,7 +13,8 @@ Hotel application:
 - Android: https://play.google.com/store/apps/details?id=org.growerp.hotel
 - IOS:     https://apps.apple.com/app/growerp-hotel-open-source/id1531267095 
 
-### TEST NEXT admin version:
+### TEST NEXT version:
+Admin application
 - Web:     https://admin.growerp.org
 
 Hotel application: 
