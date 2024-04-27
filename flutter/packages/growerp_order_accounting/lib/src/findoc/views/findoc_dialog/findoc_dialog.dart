@@ -75,9 +75,8 @@ class FinDocDialog extends StatelessWidget {
                 finDocBloc: finDocBloc,
                 restClient: restClient)
               ..add(CartFetch(finDoc))),
-        BlocProvider<CompanyBloc>(
-            create: (context) => CompanyBloc(context.read<RestClient>(),
-                Role.customer, context.read<AuthBloc>())),
+        BlocProvider<DataFetchBloc<Companies>>(
+            create: (context) => DataFetchBloc<Companies>()),
         BlocProvider<DataFetchBloc<Products>>(
             create: (context) => DataFetchBloc<Products>()),
         BlocProvider<GlAccountBloc>(
@@ -92,9 +91,8 @@ class FinDocDialog extends StatelessWidget {
               finDocBloc: finDocBloc,
               restClient: restClient)
             ..add(CartFetch(finDoc))),
-      BlocProvider<CompanyBloc>(
-          create: (context) => CompanyBloc(context.read<RestClient>(),
-              Role.supplier, context.read<AuthBloc>())),
+      BlocProvider<DataFetchBloc<Companies>>(
+          create: (context) => DataFetchBloc<Companies>()),
       BlocProvider<DataFetchBloc<Products>>(
           create: (context) => DataFetchBloc<Products>()),
       BlocProvider<GlAccountBloc>(
@@ -115,7 +113,7 @@ class MyFinDocState extends State<FinDocPage> {
   final _descriptionController = TextEditingController();
   final _companySearchBoxController = TextEditingController();
   late CartBloc _cartBloc;
-  late CompanyBloc _companyBloc;
+  late DataFetchBloc<Companies> _companyBloc;
   late DataFetchBloc<Products> _productBloc;
   late GlAccountBloc _glAccountBloc;
   late FinDocBloc _finDocBloc;
@@ -134,8 +132,10 @@ class MyFinDocState extends State<FinDocPage> {
     _isPosted = finDocUpdated.isPosted ?? false;
     _selectedCompany = finDocUpdated.otherCompany ?? finDocUpdated.otherCompany;
     _finDocBloc = context.read<FinDocBloc>();
-    _companyBloc = context.read<CompanyBloc>();
-    _companyBloc.add(const CompanyFetch(limit: 3));
+    _companyBloc = context.read<DataFetchBloc<Companies>>()
+      ..add(GetDataEvent(() => context.read<RestClient>().getCompany(
+          limit: 3,
+          role: widget.finDoc.sales ? Role.customer : Role.supplier)));
     _glAccountBloc = context.read<GlAccountBloc>();
     _glAccountBloc.add(const GlAccountFetch(limit: 3));
     _productBloc = context.read<DataFetchBloc<Products>>()
@@ -237,13 +237,15 @@ class MyFinDocState extends State<FinDocPage> {
         Expanded(
             child: Padding(
           padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-          child:
-              BlocBuilder<CompanyBloc, CompanyState>(builder: (context, state) {
+          child: BlocBuilder<DataFetchBloc<Companies>, DataFetchState>(
+              builder: (context, state) {
             switch (state.status) {
-              case CompanyStatus.failure:
+              case DataFetchStatus.failure:
                 return const FatalErrorForm(
                     message: 'server connection problem');
-              case CompanyStatus.success:
+              case DataFetchStatus.loading:
+                return CircularProgressIndicator();
+              case DataFetchStatus.success:
                 return DropdownSearch<Company>(
                   selectedItem: _selectedCompany,
                   popupProps: PopupProps.menu(
@@ -271,8 +273,20 @@ class MyFinDocState extends State<FinDocPage> {
                       finDocUpdated.sales == true ? 'customer' : 'supplier'),
                   itemAsString: (Company? u) => "${u!.name}",
                   asyncItems: (String filter) {
-                    _companyBloc.add(CompanyFetch(searchString: filter));
-                    return Future.value(state.companies);
+                    _companyBloc.add(GetDataEvent(() => context
+                        .read<RestClient>()
+                        .getCompany(
+                            searchString: filter,
+                            limit: 3,
+                            isForDropDown: true,
+                            role: widget.finDoc.sales
+                                ? Role.customer
+                                : Role.supplier)));
+                    return Future.delayed(const Duration(milliseconds: 150),
+                        () {
+                      return Future.value(
+                          (_companyBloc.state.data as Companies).companies);
+                    });
                   },
                   onChanged: (Company? newValue) {
                     setState(() {

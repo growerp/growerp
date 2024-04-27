@@ -27,13 +27,15 @@ class CompanyFetch extends CompanyEvent {
       this.companyPartyId = '',
       this.limit = 20,
       this.isForDropDown = false,
-      this.ownerPartyId = ''});
+      this.ownerPartyId = '',
+      this.role});
   final bool refresh;
   final String companyPartyId;
   final String ownerPartyId;
   final String searchString;
   final int limit;
   final bool isForDropDown;
+  final Role? role;
   @override
   List<Object> get props => [refresh, searchString, limit, companyPartyId];
   @override

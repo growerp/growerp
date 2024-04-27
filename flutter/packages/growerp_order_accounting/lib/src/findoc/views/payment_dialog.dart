@@ -55,9 +55,8 @@ class PaymentDialog extends StatelessWidget {
     if (finDoc.sales) {
       return MultiBlocProvider(
           providers: [
-            BlocProvider<CompanyBloc>(
-                create: (context) => CompanyBloc(context.read<RestClient>(),
-                    Role.customer, context.read<AuthBloc>())),
+            BlocProvider<DataFetchBloc<Companies>>(
+                create: (context) => DataFetchBloc<Companies>()),
             BlocProvider<GlAccountBloc>(
                 create: (context) => GlAccountBloc(context.read<RestClient>())),
           ],
@@ -65,9 +64,8 @@ class PaymentDialog extends StatelessWidget {
               PaymentDialogFull(finDoc: finDoc, paymentMethod: paymentMethod));
     }
     return MultiBlocProvider(providers: [
-      BlocProvider<CompanyBloc>(
-          create: (context) => CompanyBloc(context.read<RestClient>(),
-              Role.supplier, context.read<AuthBloc>())),
+      BlocProvider<DataFetchBloc<Companies>>(
+          create: (context) => DataFetchBloc<Companies>()),
       BlocProvider<GlAccountBloc>(
           create: (context) => GlAccountBloc(context.read<RestClient>())),
     ], child: PaymentDialogFull(finDoc: finDoc, paymentMethod: paymentMethod));
@@ -91,7 +89,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
   GlAccount? _selectedGlAccount;
   Company? _selectedCompany;
   PaymentType? _selectedPaymentType;
-  late CompanyBloc _companyBloc;
+  late DataFetchBloc<Companies> _companyBloc;
   late GlAccountBloc _accountBloc;
 
   late bool isPhone;
@@ -122,8 +120,10 @@ class PaymentDialogState extends State<PaymentDialogFull> {
         : finDocUpdated.paymentInstrument!;
     _finDocBloc = context.read<FinDocBloc>();
     _finDocBloc.add(FinDocGetPaymentTypes(sales: finDoc.sales));
-    _companyBloc = context.read<CompanyBloc>();
-    _companyBloc.add(const CompanyFetch(limit: 3));
+    _companyBloc = context.read<DataFetchBloc<Companies>>()
+      ..add(GetDataEvent(() => context.read<RestClient>().getCompany(
+          limit: 3,
+          role: widget.finDoc.sales ? Role.customer : Role.supplier)));
     _accountBloc = context.read<GlAccountBloc>();
     _accountBloc.add(const GlAccountFetch(limit: 3));
   }
@@ -197,12 +197,15 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                 controller: _pseudoIdController,
                 keyboardType: TextInputType.number,
               ),
-              BlocBuilder<CompanyBloc, CompanyState>(builder: (context, state) {
+              BlocBuilder<DataFetchBloc<Companies>, DataFetchState>(
+                  builder: (context, state) {
                 switch (state.status) {
-                  case CompanyStatus.failure:
+                  case DataFetchStatus.failure:
                     return const FatalErrorForm(
                         message: 'server connection problem');
-                  case CompanyStatus.success:
+                  case DataFetchStatus.loading:
+                    return CircularProgressIndicator();
+                  case DataFetchStatus.success:
                     return DropdownSearch<Company>(
                       selectedItem: _selectedCompany,
                       popupProps: PopupProps.menu(
@@ -231,8 +234,20 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                       key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
                       itemAsString: (Company? u) => " ${u!.name}",
                       asyncItems: (String filter) {
-                        _companyBloc.add(CompanyFetch(searchString: filter));
-                        return Future.value(state.companies);
+                        _companyBloc.add(GetDataEvent(() => context
+                            .read<RestClient>()
+                            .getCompany(
+                                searchString: filter,
+                                limit: 3,
+                                isForDropDown: true,
+                                role: widget.finDoc.sales
+                                    ? Role.customer
+                                    : Role.supplier)));
+                        return Future.delayed(const Duration(milliseconds: 150),
+                            () {
+                          return Future.value(
+                              (_companyBloc.state.data as Companies).companies);
+                        });
                       },
                       onChanged: (Company? newValue) {
                         setState(() {

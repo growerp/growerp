@@ -6,7 +6,10 @@ import 'package:growerp_models/growerp_models.dart';
 part 'data_fetch.state.dart';
 part 'data_fetch.event.dart';
 
-class DataFetchBloc<T> extends Bloc<DataFetchBlocEvent, DataFetchState> {
+mixin DataFetchBlocOther<T> on Bloc<DataFetchBlocEvent, DataFetchState> {}
+
+class DataFetchBloc<T> extends Bloc<DataFetchBlocEvent, DataFetchState>
+    with DataFetchBlocOther<T> {
   DataFetchBloc() : super(const DataFetchState()) {
     on<GetDataEvent<T>>(
         (GetDataEvent event, Emitter<DataFetchState> emit) async {

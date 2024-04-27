@@ -29,12 +29,12 @@ class ReservationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<UserBloc>(
-        create: (context) =>
-            UserBloc(context.read<RestClient>(), Role.customer),
-        child: BlocProvider<DataFetchBloc<Products>>(
-            create: (context) => DataFetchBloc<Products>(),
-            child: ReservationForm(finDoc: finDoc, original: original)));
+    return MultiBlocProvider(providers: [
+      BlocProvider<DataFetchBloc<Users>>(
+          create: (context) => DataFetchBloc<Users>()),
+      BlocProvider<DataFetchBloc<Products>>(
+          create: (context) => DataFetchBloc<Products>())
+    ], child: ReservationForm(finDoc: finDoc, original: original));
   }
 }
 
@@ -51,7 +51,7 @@ class ReservationForm extends StatefulWidget {
 
 class ReservationDialogState extends State<ReservationForm> {
   final _userSearchBoxController = TextEditingController();
-  late UserBloc _userBloc;
+  late DataFetchBloc<Users> _userBloc;
   User? _selectedUser;
   bool loading = false;
   late DataFetchBloc<Products> _productBloc;
@@ -70,8 +70,10 @@ class ReservationDialogState extends State<ReservationForm> {
   void initState() {
     super.initState();
     _selectedUser = widget.finDoc.otherUser;
-    _userBloc = context.read<UserBloc>();
-    _userBloc.add(const UserFetch());
+    _userBloc = context.read<DataFetchBloc<Users>>()
+      ..add(GetDataEvent(() => context.read<RestClient>().getUser(
+          limit: 3,
+          role: widget.finDoc.sales ? Role.customer : Role.supplier)));
     _productBloc = context.read<DataFetchBloc<Products>>()
       ..add(GetDataEvent(() => context.read<RestClient>().getProduct(
           limit: 3,
@@ -182,12 +184,15 @@ class ReservationDialogState extends State<ReservationForm> {
             child: Form(
                 key: _formKey,
                 child: ListView(key: const Key('listView'), children: <Widget>[
-                  BlocBuilder<UserBloc, UserState>(builder: (context, state) {
+                  BlocBuilder<DataFetchBloc<Users>, DataFetchState>(
+                      builder: (context, state) {
                     switch (state.status) {
-                      case UserStatus.failure:
+                      case DataFetchStatus.failure:
                         return const FatalErrorForm(
                             message: 'server connection problem');
-                      case UserStatus.success:
+                      case DataFetchStatus.loading:
+                        return CircularProgressIndicator();
+                      case DataFetchStatus.success:
                         return DropdownSearch<User>(
                           selectedItem: _selectedUser,
                           popupProps: PopupProps.menu(
@@ -211,8 +216,20 @@ class ReservationDialogState extends State<ReservationForm> {
                           itemAsString: (User? u) =>
                               " ${u!.firstName} ${u.lastName}, ${u.company!.name}",
                           asyncItems: (String filter) {
-                            _userBloc.add(UserFetch(searchString: filter));
-                            return Future.value(state.users);
+                            _userBloc.add(GetDataEvent(() => context
+                                .read<RestClient>()
+                                .getUser(
+                                    searchString: filter,
+                                    limit: 3,
+                                    isForDropDown: true,
+                                    role: widget.finDoc.sales
+                                        ? Role.customer
+                                        : Role.supplier)));
+                            return Future.delayed(
+                                const Duration(milliseconds: 150), () {
+                              return Future.value(
+                                  (_userBloc.state.data as Users).users);
+                            });
                           },
                           onChanged: (User? newValue) {
                             setState(() {

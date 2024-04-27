@@ -29,12 +29,10 @@ class OpportunityDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<LeadBloc>(
-            create: (BuildContext context) =>
-                UserBloc(context.read<RestClient>(), Role.lead)),
-        BlocProvider<EmployeeBloc>(
-            create: (BuildContext context) =>
-                UserBloc(context.read<RestClient>(), Role.company)),
+        BlocProvider<DataFetchBloc<Users>>(
+            create: (context) => DataFetchBloc<Users>()),
+        BlocProvider<DataFetchBlocOther<Users>>(
+            create: (context) => DataFetchBloc<Users>()),
       ],
       child: OpportunityDialogFull(opportunity),
     );
@@ -62,16 +60,18 @@ class OpportunityDialogState extends State<OpportunityDialogFull> {
   User? _selectedAccount;
   User? _selectedLead;
   late OpportunityBloc _opportunityBloc;
-  late EmployeeBloc _employeeBloc;
-  late LeadBloc _leadBloc;
+  late DataFetchBloc<Users> _employeeBloc;
+  late DataFetchBlocOther<Users> _leadBloc;
 
   @override
   void initState() {
     super.initState();
-    _employeeBloc = context.read<EmployeeBloc>();
-    _employeeBloc.add(const UserFetch());
-    _leadBloc = context.read<LeadBloc>();
-    _leadBloc.add(const UserFetch());
+    _employeeBloc = context.read<DataFetchBloc<Users>>()
+      ..add(GetDataEvent(() =>
+          context.read<RestClient>().getUser(limit: 3, role: Role.company)));
+    _leadBloc = context.read<DataFetchBlocOther<Users>>()
+      ..add(GetDataEvent(
+          () => context.read<RestClient>().getUser(limit: 3, role: Role.lead)));
     _opportunityBloc = context.read<OpportunityBloc>();
     _nameController.text = widget.opportunity.opportunityName ?? '';
     _descriptionController.text = widget.opportunity.description ?? '';
@@ -190,12 +190,14 @@ class OpportunityDialogState extends State<OpportunityDialogFull> {
         },
         isExpanded: true,
       ),
-      BlocBuilder<LeadBloc, UserState>(
+      BlocBuilder<DataFetchBlocOther<Users>, DataFetchState>(
         builder: (context, state) {
           switch (state.status) {
-            case UserStatus.failure:
+            case DataFetchStatus.failure:
               return const FatalErrorForm(message: 'server connection problem');
-            case UserStatus.success:
+            case DataFetchStatus.loading:
+              return CircularProgressIndicator();
+            case DataFetchStatus.success:
               return DropdownSearch<User>(
                 selectedItem: _selectedLead,
                 popupProps: PopupProps.menu(
@@ -220,8 +222,16 @@ class OpportunityDialogState extends State<OpportunityDialogFull> {
                 itemAsString: (User? u) => " ${u?.firstName} ${u?.lastName} "
                     "${u?.company!.name}",
                 asyncItems: (String filter) {
-                  _leadBloc.add(UserFetch(searchString: filter));
-                  return Future.value(state.users);
+                  _leadBloc.add(GetDataEvent(() => context
+                      .read<RestClient>()
+                      .getUser(
+                          searchString: filter,
+                          limit: 3,
+                          isForDropDown: true,
+                          role: Role.lead)));
+                  return Future.delayed(const Duration(milliseconds: 150), () {
+                    return Future.value((_leadBloc.state.data as Users).users);
+                  });
                 },
                 onChanged: (User? newValue) {
                   _selectedLead = newValue;
@@ -232,12 +242,14 @@ class OpportunityDialogState extends State<OpportunityDialogFull> {
           }
         },
       ),
-      BlocBuilder<EmployeeBloc, UserState>(
+      BlocBuilder<DataFetchBloc<Users>, DataFetchState>(
         builder: (context, state) {
           switch (state.status) {
-            case UserStatus.failure:
+            case DataFetchStatus.failure:
               return const FatalErrorForm(message: 'server connection problem');
-            case UserStatus.success:
+            case DataFetchStatus.loading:
+              return CircularProgressIndicator();
+            case DataFetchStatus.success:
               return DropdownSearch<User>(
                   selectedItem: _selectedAccount,
                   popupProps: PopupProps.menu(
@@ -261,8 +273,18 @@ class OpportunityDialogState extends State<OpportunityDialogFull> {
                   itemAsString: (User? u) => " ${u?.firstName} ${u?.lastName} "
                       "${u?.company!.name}",
                   asyncItems: (String filter) {
-                    _employeeBloc.add(UserFetch(searchString: filter));
-                    return Future.value(state.users);
+                    _employeeBloc.add(GetDataEvent(() => context
+                        .read<RestClient>()
+                        .getUser(
+                            searchString: filter,
+                            limit: 3,
+                            isForDropDown: true,
+                            role: Role.company)));
+                    return Future.delayed(const Duration(milliseconds: 150),
+                        () {
+                      return Future.value(
+                          (_employeeBloc.state.data as Users).users);
+                    });
                   },
                   onChanged: (User? newValue) {
                     _selectedAccount = newValue;

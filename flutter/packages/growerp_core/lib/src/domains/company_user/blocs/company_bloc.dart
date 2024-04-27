@@ -71,7 +71,7 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
     }
     try {
       Companies compResult = await restClient.getCompany(
-          role: role,
+          role: event.role ?? role,
           companyPartyId: event.companyPartyId,
           ownerPartyId: event.ownerPartyId,
           searchString: event.searchString,

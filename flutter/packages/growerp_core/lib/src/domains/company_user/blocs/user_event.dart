@@ -25,12 +25,14 @@ class UserFetch extends UserEvent {
   final String searchString;
   final bool refresh;
   final int limit;
+  final Role? role;
 
   const UserFetch(
       {this.limit = 20,
       this.userGroup,
       this.searchString = '',
-      this.refresh = false});
+      this.refresh = false,
+      this.role});
 
   @override
   List<Object> get props => [searchString, refresh];
