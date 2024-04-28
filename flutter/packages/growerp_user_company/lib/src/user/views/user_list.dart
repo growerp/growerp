@@ -17,57 +17,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
-import '../views/views.dart';
-import '../widgets/widgets.dart';
-
-class UserListForm extends StatelessWidget {
-  final Role? role;
-  const UserListForm({
-    super.key,
-    this.role,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    RestClient restClient = context.read<RestClient>();
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state.status == AuthStatus.failure) {
-        return const FatalErrorForm(message: 'Internet or server problem?');
-      }
-      switch (role) {
-        case Role.lead:
-          return BlocProvider<LeadBloc>(
-              create: (context) =>
-                  UserBloc(restClient, role)..add(const UserFetch()),
-              child: UserList(role));
-        case Role.customer:
-          return BlocProvider<CustomerBloc>(
-              create: (context) =>
-                  UserBloc(restClient, role)..add(const UserFetch()),
-              child: UserList(role));
-        case Role.supplier:
-          return BlocProvider<SupplierBloc>(
-              create: (context) =>
-                  UserBloc(restClient, role)..add(const UserFetch()),
-              child: UserList(role));
-        case Role.company:
-          return BlocProvider<EmployeeBloc>(
-              create: (context) =>
-                  UserBloc(restClient, role)..add(const UserFetch()),
-              child: UserList(role));
-        default:
-          return BlocProvider<UserBloc>(
-              create: (context) =>
-                  UserBloc(restClient, role)..add(const UserFetch()),
-              child: UserList(role));
-      }
-    });
-  }
-}
+import '../../../growerp_user_company.dart';
 
 class UserList extends StatefulWidget {
-  const UserList(this.role, {super.key});
-
+  const UserList({this.role, this.key});
+  final Key? key;
   final Role? role;
 
   @override
@@ -93,19 +47,23 @@ class UserListState extends State<UserList> {
     _authBloc = context.read<AuthBloc>();
     switch (widget.role) {
       case Role.company:
-        _userBloc = context.read<EmployeeBloc>() as UserBloc;
+        _userBloc = (context.read<EmployeeBloc>() as UserBloc)
+          ..add(const UserFetch());
         break;
       case Role.supplier:
-        _userBloc = context.read<SupplierBloc>() as UserBloc;
+        _userBloc = (context.read<SupplierBloc>() as UserBloc)
+          ..add(const UserFetch());
         break;
       case Role.customer:
-        _userBloc = context.read<CustomerBloc>() as UserBloc;
+        _userBloc = (context.read<CustomerBloc>() as UserBloc)
+          ..add(const UserFetch());
         break;
       case Role.lead:
-        _userBloc = context.read<LeadBloc>() as UserBloc;
+        (_userBloc = context.read<LeadBloc>() as UserBloc)
+          ..add(const UserFetch());
         break;
       default:
-        _userBloc = context.read<UserBloc>();
+        _userBloc = (context.read<UserBloc>())..add(const UserFetch());
     }
   }
 

@@ -23,23 +23,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import '../../company/views/views.dart';
-
-class ShowUserDialog extends StatelessWidget {
-  final User user;
-  const ShowUserDialog(this.user, {super.key});
-  @override
-  Widget build(BuildContext context) {
-    return MultiBlocProvider(providers: [
-      BlocProvider<UserBloc>(
-          create: (context) =>
-              UserBloc(context.read<RestClient>(), Role.company)),
-      BlocProvider<CompanyBloc>(
-          create: (context) => CompanyBloc(context.read<RestClient>(),
-              Role.company, context.read<AuthBloc>())),
-    ], child: UserDialogStateFull(user));
-  }
-}
+import '../../../growerp_user_company.dart';
 
 class UserDialog extends StatelessWidget {
   final User user;
@@ -47,8 +31,8 @@ class UserDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<CompanyBloc>(
-        create: (context) => CompanyBloc(context.read<RestClient>(),
-            user.company!.role, context.read<AuthBloc>()),
+        create: (context) =>
+            CompanyBloc(context.read<RestClient>(), user.company!.role),
         child: UserDialogStateFull(user));
   }
 }

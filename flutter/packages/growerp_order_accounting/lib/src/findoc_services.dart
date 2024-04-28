@@ -4,7 +4,7 @@ import 'findoc/views/views.dart';
 
 class FinDocServices {
   void OrderEntry(FinDoc) {
-    ShowFinDocDialog(FinDoc());
+    FinDocDialog(FinDoc());
   }
 
   void ReceiveShipment(FinDoc) {
@@ -14,7 +14,7 @@ class FinDocServices {
 
 Map<String, Widget> orderAccountingScreens = {
   'salesOrderEntry':
-      ShowFinDocDialog(FinDoc(docType: FinDocType.order, sales: true)),
+      FinDocDialog(FinDoc(docType: FinDocType.order, sales: true)),
   'purchaseOrderEntry':
-      ShowFinDocDialog(FinDoc(docType: FinDocType.order, sales: false)),
+      FinDocDialog(FinDoc(docType: FinDocType.order, sales: false)),
 };

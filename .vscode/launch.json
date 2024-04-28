@@ -54,6 +54,13 @@
             "program": "lib/main.dart",
         },
         {
+            "name": "Freelance mobile (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/freelance",
+            "program": "lib/main.dart",
+        },
+        {
             "name": "Hotel mobile (lib/main.dart)",
             "type": "dart",
             "request": "launch",

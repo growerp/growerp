@@ -33,9 +33,12 @@ void main() {
   });
 
   testWidgets('''GlAccount test''', (tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
         OrderAccountingLocalizations.localizationsDelegates,
         title: 'GlAccount test',
+        restClient: restClient,
+        blocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
         clear: true); // use data from previous run, ifnone same as true
 
     //delete the ledger accounts

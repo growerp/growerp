@@ -18,7 +18,6 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../growerp_task.dart';
-import '../widgets/widgets.dart';
 
 class TimeEntryListDialog extends StatefulWidget {
   final String taskId;

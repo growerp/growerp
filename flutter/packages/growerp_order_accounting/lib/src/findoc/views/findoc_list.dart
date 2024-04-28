@@ -20,97 +20,6 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../findoc.dart';
 
-/// listing financial documents and orders
-class FinDocListForm extends StatelessWidget {
-  const FinDocListForm({
-    super.key,
-    required this.sales,
-    required this.docType,
-    this.onlyRental = false,
-    this.status,
-    this.additionalItemButtonName,
-    this.additionalItemButtonRoute,
-    this.journalId,
-  });
-
-  final bool sales;
-  final FinDocType docType;
-  final bool onlyRental;
-  final String? status;
-  final String? additionalItemButtonName;
-  final String? additionalItemButtonRoute;
-  final String? journalId;
-
-  @override
-  Widget build(BuildContext context) {
-    RestClient restClient = context.read<RestClient>();
-    String classificationId = context.read<String>();
-    Widget finDocList = FinDocList(
-      key: key,
-      sales: sales,
-      docType: docType,
-      onlyRental: onlyRental,
-      status: status,
-      additionalItemButtonName: additionalItemButtonName,
-      additionalItemButtonRoute: additionalItemButtonRoute,
-      journalId: journalId,
-    );
-    switch (docType) {
-      case FinDocType.order:
-        if (sales) {
-          return BlocProvider<SalesOrderBloc>(
-              create: (context) =>
-                  FinDocBloc(restClient, sales, docType, classificationId),
-              child: finDocList);
-        }
-        return BlocProvider<PurchaseOrderBloc>(
-            create: (BuildContext context) =>
-                FinDocBloc(restClient, sales, docType, classificationId),
-            child: finDocList);
-      case FinDocType.invoice:
-        if (sales) {
-          return BlocProvider<SalesInvoiceBloc>(
-              create: (context) =>
-                  FinDocBloc(restClient, sales, docType, classificationId),
-              child: finDocList);
-        }
-        return BlocProvider<PurchaseInvoiceBloc>(
-            create: (BuildContext context) =>
-                FinDocBloc(restClient, sales, docType, classificationId),
-            child: finDocList);
-      case FinDocType.payment:
-        if (sales) {
-          return BlocProvider<SalesPaymentBloc>(
-              create: (context) =>
-                  FinDocBloc(restClient, sales, docType, classificationId),
-              child: finDocList);
-        }
-        return BlocProvider<PurchasePaymentBloc>(
-            create: (BuildContext context) =>
-                FinDocBloc(restClient, sales, docType, classificationId),
-            child: finDocList);
-      case FinDocType.shipment:
-        if (sales) {
-          return BlocProvider<OutgoingShipmentBloc>(
-              create: (context) =>
-                  FinDocBloc(restClient, sales, docType, classificationId),
-              child: finDocList);
-        }
-        return BlocProvider<IncomingShipmentBloc>(
-            create: (BuildContext context) =>
-                FinDocBloc(restClient, sales, docType, classificationId),
-            child: finDocList);
-      case FinDocType.transaction:
-        return BlocProvider<TransactionBloc>(
-            create: (context) =>
-                FinDocBloc(restClient, sales, docType, classificationId),
-            child: finDocList);
-      default:
-        return Center(child: Text("FinDoc type: ${docType.name} not allowed"));
-    }
-  }
-}
-
 class FinDocList extends StatefulWidget {
   const FinDocList({
     super.key,
@@ -315,10 +224,9 @@ class FinDocListState extends State<FinDocList> {
                                             finDoc: FinDoc(
                                                 sales: widget.sales,
                                                 docType: widget.docType))
-                                        : FinDocDialog(
-                                            finDoc: FinDoc(
-                                                sales: widget.sales,
-                                                docType: widget.docType)));
+                                        : FinDocDialog(FinDoc(
+                                            sales: widget.sales,
+                                            docType: widget.docType)));
                               });
                         },
                         tooltip: 'Add New',

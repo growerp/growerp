@@ -20,19 +20,19 @@ import 'package:growerp_models/growerp_models.dart';
 
 class UserTest {
   static Future<void> selectEmployees(WidgetTester tester) async {
-    await selectUsers(tester, 'dbCompany', 'UserListFormEmployee', '2');
+    await selectUsers(tester, 'dbCompany', 'UserListEmployee', '2');
   }
 
   static Future<void> selectLeads(WidgetTester tester) async {
-    await selectUsers(tester, 'dbCrm', 'UserListFormLead', '2');
+    await selectUsers(tester, 'dbCrm', 'UserListLead', '2');
   }
 
   static Future<void> selectCustomers(WidgetTester tester) async {
-    await selectUsers(tester, 'dbOrders', 'UserListFormCustomer', '2');
+    await selectUsers(tester, 'dbOrders', 'UserListCustomer', '2');
   }
 
   static Future<void> selectSuppliers(WidgetTester tester) async {
-    await selectUsers(tester, 'dbOrders', 'UserListFormSupplier', '4');
+    await selectUsers(tester, 'dbOrders', 'UserListSupplier', '4');
   }
 
   static Future<void> selectUsers(WidgetTester tester, String option,

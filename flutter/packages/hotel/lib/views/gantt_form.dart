@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -22,37 +23,16 @@ import 'package:horizontal_data_table/horizontal_data_table.dart';
 
 enum Period { day, week, month }
 
-class GanttForm extends StatelessWidget {
-  const GanttForm({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<AssetBloc>(
-            create: (context) =>
-                AssetBloc(context.read<RestClient>(), context.read<String>())),
-        BlocProvider<ProductBloc>(
-            create: (context) => ProductBloc(
-                context.read<RestClient>(), context.read<String>())),
-        BlocProvider<FinDocBloc>(
-            create: (context) => FinDocBloc(context.read<RestClient>(), true,
-                FinDocType.order, context.read<String>())),
-      ],
-      child: const GanttFormFull(),
-    );
-  }
-}
-
-class GanttFormFull extends StatefulWidget {
-  const GanttFormFull({
+class GanttForm extends StatefulWidget {
+  const GanttForm({
     super.key,
   });
 
   @override
-  State<GanttFormFull> createState() => _GanttFormFullState();
+  State<GanttForm> createState() => _GanttFormState();
 }
 
-class _GanttFormFullState extends State<GanttFormFull> {
+class _GanttFormState extends State<GanttForm> {
   late DateTime ganttFromDate;
   late Period columnPeriod; //day,  week, month
   late FinDocBloc _finDocBloc;

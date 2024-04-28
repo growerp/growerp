@@ -148,8 +148,7 @@ class FinDocListItemTrans extends StatelessWidget {
                   return RepositoryProvider.value(
                       value: repos,
                       child: BlocProvider.value(
-                          value: finDocBloc,
-                          child: FinDocDialog(finDoc: finDoc)));
+                          value: finDocBloc, child: FinDocDialog(finDoc)));
                 });
           },
         ),
@@ -199,7 +198,7 @@ class FinDocListItemTrans extends StatelessWidget {
                   builder: (BuildContext context) => type == FinDocType.payment
                       ? ShowPaymentDialog(
                           FinDoc(paymentId: id, sales: sales, docType: type))
-                      : ShowFinDocDialog(type == FinDocType.invoice
+                      : FinDocDialog(type == FinDocType.invoice
                           ? FinDoc(invoiceId: id, sales: sales, docType: type)
                           : type == FinDocType.shipment
                               ? FinDoc(

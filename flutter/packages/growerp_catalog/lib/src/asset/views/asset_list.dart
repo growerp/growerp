@@ -18,16 +18,6 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../asset.dart';
 
-class AssetListForm extends StatelessWidget {
-  const AssetListForm({super.key});
-  @override
-  Widget build(BuildContext context) => BlocProvider<AssetBloc>(
-        create: (context) =>
-            AssetBloc(context.read<RestClient>(), context.read<String>()),
-        child: const AssetList(),
-      );
-}
-
 class AssetList extends StatefulWidget {
   const AssetList({super.key});
   @override

@@ -67,19 +67,24 @@ Future main() async {
   Map<String, Widget> screens = orderAccountingScreens;
 
   Bloc.observer = AppBlocObserver();
+  RestClient restClient = RestClient(await buildDioClient());
+  ChatServer chatServer = ChatServer();
+  String classificationId = GlobalConfiguration().get("classificationId");
+
   runApp(TopApp(
-    restClient: RestClient(await buildDioClient()),
-    classificationId: 'AppAdmin',
-    chatServer: ChatServer(),
+    restClient: restClient,
+    classificationId: classificationId,
+    chatServer: chatServer,
     title: 'GrowERP administrator.',
     router: router.generateRoute,
     menuOptions: menuOptions,
-    extraDelegates: extraDelegates,
+    extraDelegates: delegates,
+    extraBlocProviders: getAdminBlocProviders(restClient, classificationId),
     screens: screens,
   ));
 }
 
-List<LocalizationsDelegate<dynamic>> extraDelegates = const [
+List<LocalizationsDelegate> delegates = [
   UserCompanyLocalizations.delegate,
   CatalogLocalizations.delegate,
   InventoryLocalizations.delegate,
@@ -88,3 +93,14 @@ List<LocalizationsDelegate<dynamic>> extraDelegates = const [
   MarketingLocalizations.delegate,
   InventoryLocalizations.delegate,
 ];
+
+List<BlocProvider> getAdminBlocProviders(restClient, classificationId) {
+  return [
+    ...getInventoryBlocProviders(restClient),
+    ...getUserCompanyBlocProviders(restClient, classificationId),
+    ...getCatalogBlocProviders(restClient, classificationId),
+    ...getOrderAccountingBlocProviders(restClient, classificationId),
+    ...getMarketingBlocProviders(restClient),
+    ...getWebsiteBlocProviders(restClient),
+  ];
+}

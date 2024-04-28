@@ -43,7 +43,7 @@ class ShowCompanyDialog extends StatelessWidget {
     if (company.partyId == null || company.partyId != '_NEW_') {
       // display (main) company
       return BlocProvider<CompanyBloc>(
-          create: (context) => CompanyBloc(restClient, company.role, authBloc)
+          create: (context) => CompanyBloc(restClient, company.role)
             ..add(CompanyFetch(
                 companyPartyId:
                     company.partyId == null ? companyPartyId : company.partyId!,
@@ -58,7 +58,7 @@ class ShowCompanyDialog extends StatelessWidget {
     }
     return BlocProvider<CompanyBloc>(
         // new company, empty screen
-        create: (context) => CompanyBloc(restClient, company.role, authBloc)
+        create: (context) => CompanyBloc(restClient, company.role)
           ..add(const CompanyFetch(limit: 0)),
         child: CompanyDialog(
           Company(role: company.role),
@@ -248,7 +248,7 @@ class CompanyFormState extends State<CompanyDialog> {
               barrierDismissible: true,
               context: context,
               builder: (BuildContext context) {
-                return ShowUserDialog(employee.copyWith(company: company));
+                return UserDialog(employee.copyWith(company: company));
               });
           if (result != null) {
             setState(() {
@@ -286,7 +286,7 @@ class CompanyFormState extends State<CompanyDialog> {
               barrierDismissible: true,
               context: context,
               builder: (BuildContext context) {
-                return ShowUserDialog(User(company: company));
+                return UserDialog(User(company: company));
               });
           if (result != null) {
             setState(() {

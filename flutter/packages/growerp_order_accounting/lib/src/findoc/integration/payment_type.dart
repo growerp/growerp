@@ -19,8 +19,7 @@ import 'package:growerp_models/growerp_models.dart';
 class PaymentTypeTest {
   static Future<void> selectPaymentType(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
-    await CommonTest.selectOption(
-        tester, 'acctSetup', 'PaymentTypeListForm', '3');
+    await CommonTest.selectOption(tester, 'acctSetup', 'PaymentTypeList', '3');
   }
 
   static bool showAll(WidgetTester tester) {

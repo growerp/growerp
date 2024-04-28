@@ -19,6 +19,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
+import '../../../get_core_bloc_providers.dart';
 import '../../../services/chat_server.dart';
 import '../../../styles/color_schemes.dart';
 import '../../domains.dart';
@@ -34,7 +35,7 @@ class TopApp extends StatelessWidget {
     required this.router,
     required this.menuOptions,
     this.extraDelegates = const [],
-    this.blocProviders = const [],
+    this.extraBlocProviders = const [],
     this.screens = const {},
   });
 
@@ -47,7 +48,7 @@ class TopApp extends StatelessWidget {
   final Route<dynamic> Function(RouteSettings) router;
   final List<MenuOption> menuOptions;
   final List<LocalizationsDelegate> extraDelegates;
-  final List<BlocProvider> blocProviders;
+  final List<BlocProvider> extraBlocProviders;
   final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
   final List<LocalizationsDelegate> localizationsDelegates = [
@@ -68,102 +69,64 @@ class TopApp extends StatelessWidget {
         ],
         child: MultiBlocProvider(
             providers: [
-              if (blocProviders.isNotEmpty)
-                BlocProvider<ThemeBloc>(
-                    create: (context) => ThemeBloc()..add(ThemeSwitch())),
-              BlocProvider<AuthBloc>(
-                  create: (context) =>
-                      AuthBloc(chatServer, restClient, classificationId)
-                        ..add(AuthLoad())),
-              BlocProvider<TaskWorkflowTemplateBloc>(
-                  create: (context) => TaskBloc(restClient,
-                      TaskType.workflowTemplate, <String, Widget>{})),
-              BlocProvider<ChatRoomBloc>(
-                create: (context) => ChatRoomBloc(context.read<RestClient>(),
-                    chatServer, context.read<AuthBloc>())
-                  ..add(ChatRoomFetch()),
-              ),
-              BlocProvider<ChatMessageBloc>(
-                  create: (context) => ChatMessageBloc(
-                      context.read<RestClient>(),
-                      chatServer,
-                      context.read<AuthBloc>())),
+              ...getCoreBlocProviders(
+                  restClient, chatServer, classificationId, screens),
+              ...extraBlocProviders
             ],
-            child: Builder(builder: (context) {
-              return MultiBlocProvider(
-                  // this list cannot be empty
-                  providers: blocProviders.isNotEmpty
-                      ? blocProviders
-                      : [
-                          BlocProvider<ThemeBloc>(
-                              create: (context) =>
-                                  ThemeBloc()..add(ThemeSwitch()))
-                        ],
-                  child: BlocBuilder<ThemeBloc, ThemeState>(
-                      builder: (context, state) {
-                    localizationsDelegates.addAll(extraDelegates);
-                    return GestureDetector(
-                        onTap: () {
-                          FocusScopeNode currentFocus = FocusScope.of(context);
+            child:
+                BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
+              localizationsDelegates.addAll(extraDelegates);
+              return GestureDetector(
+                  onTap: () {
+                    FocusScopeNode currentFocus = FocusScope.of(context);
 
-                          if (!currentFocus.hasPrimaryFocus) {
-                            currentFocus.unfocus();
+                    if (!currentFocus.hasPrimaryFocus) {
+                      currentFocus.unfocus();
+                    }
+                  },
+                  child: MaterialApp(
+                      navigatorKey: _rootNavigatorKey,
+                      title: title,
+                      supportedLocales: const [Locale('en'), Locale('th')],
+                      scrollBehavior: const MaterialScrollBehavior().copyWith(
+                        dragDevices: {
+                          PointerDeviceKind.mouse,
+                          PointerDeviceKind.touch,
+                        },
+                      ),
+                      debugShowCheckedModeBanner: false,
+                      localizationsDelegates: localizationsDelegates,
+                      builder: (context, child) => ResponsiveBreakpoints
+                              .builder(child: child!, breakpoints: [
+                            const Breakpoint(start: 0, end: 500, name: MOBILE),
+                            const Breakpoint(
+                                start: 451, end: 800, name: TABLET),
+                            const Breakpoint(
+                                start: 801, end: 1920, name: DESKTOP),
+                            const Breakpoint(
+                                start: 1921, end: double.infinity, name: '4K'),
+                          ]),
+                      themeMode: state.themeMode,
+                      theme: ThemeData(
+                          useMaterial3: true, colorScheme: lightColorScheme),
+                      darkTheme: ThemeData(
+                          useMaterial3: true, colorScheme: darkColorScheme),
+                      onGenerateRoute: router,
+                      navigatorObservers: [AppNavObserver()],
+                      home: BlocBuilder<AuthBloc, AuthState>(
+                        builder: (context, authState) {
+                          switch (authState.status) {
+                            case AuthStatus.initial:
+                            case AuthStatus.loading:
+                              return const SplashForm();
+                            case AuthStatus.changeIp:
+                              return const ChangeIpForm();
+                            default:
+                              return HomeForm(
+                                  menuOptions: menuOptions, title: title);
                           }
                         },
-                        child: MaterialApp(
-                            navigatorKey: _rootNavigatorKey,
-                            title: title,
-                            supportedLocales: const [
-                              Locale('en'),
-                              Locale('th')
-                            ],
-                            scrollBehavior:
-                                const MaterialScrollBehavior().copyWith(
-                              dragDevices: {
-                                PointerDeviceKind.mouse,
-                                PointerDeviceKind.touch,
-                              },
-                            ),
-                            debugShowCheckedModeBanner: false,
-                            localizationsDelegates: localizationsDelegates,
-                            builder: (context, child) =>
-                                ResponsiveBreakpoints.builder(
-                                    child: child!,
-                                    breakpoints: [
-                                      const Breakpoint(
-                                          start: 0, end: 500, name: MOBILE),
-                                      const Breakpoint(
-                                          start: 451, end: 800, name: TABLET),
-                                      const Breakpoint(
-                                          start: 801, end: 1920, name: DESKTOP),
-                                      const Breakpoint(
-                                          start: 1921,
-                                          end: double.infinity,
-                                          name: '4K'),
-                                    ]),
-                            themeMode: state.themeMode,
-                            theme: ThemeData(
-                                useMaterial3: true,
-                                colorScheme: lightColorScheme),
-                            darkTheme: ThemeData(
-                                useMaterial3: true,
-                                colorScheme: darkColorScheme),
-                            onGenerateRoute: router,
-                            navigatorObservers: [AppNavObserver()],
-                            home: BlocBuilder<AuthBloc, AuthState>(
-                              builder: (context, state) {
-                                switch (state.status) {
-                                  case AuthStatus.loading:
-                                    return const SplashForm();
-                                  case AuthStatus.changeIp:
-                                    return const ChangeIpForm();
-                                  default:
-                                    return HomeForm(
-                                        menuOptions: menuOptions, title: title);
-                                }
-                              },
-                            )));
-                  }));
+                      )));
             })));
   }
 }

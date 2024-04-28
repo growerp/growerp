@@ -51,7 +51,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const UserListForm(
+        form: const UserList(
           key: Key('Employee'),
           role: Role.company,
         ),
@@ -78,7 +78,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const UserListForm(
+        form: const UserList(
           key: Key('Lead'),
           role: Role.lead,
         ),
@@ -86,7 +86,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.business),
       ),
       TabItem(
-        form: const CompanyListForm(
+        form: const CompanyList(
           key: Key('CompanyLead'),
           role: Role.lead,
         ),
@@ -94,7 +94,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.business),
       ),
       TabItem(
-        form: const UserListForm(
+        form: const UserList(
           key: Key('Customer'),
           role: Role.customer,
         ),
@@ -102,7 +102,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.school),
       ),
       TabItem(
-        form: const CompanyListForm(
+        form: const CompanyList(
           key: Key('CompanyCustomer'),
           role: Role.customer,
         ),
@@ -125,17 +125,17 @@ List<MenuOption> menuOptions = [
       ],
       tabItems: [
         TabItem(
-          form: const ProductListForm(),
+          form: const ProductList(),
           label: 'Products',
           icon: const Icon(Icons.home),
         ),
         TabItem(
-          form: const AssetListForm(),
+          form: const AssetList(),
           label: 'Assets',
           icon: const Icon(Icons.money),
         ),
         TabItem(
-          form: const CategoryListForm(),
+          form: const CategoryList(),
           label: 'Categories',
           icon: const Icon(Icons.business),
         ),
@@ -149,13 +149,13 @@ List<MenuOption> menuOptions = [
     writeGroups: [UserGroup.admin],
     tabItems: [
       TabItem(
-        form: const FinDocListForm(
+        form: const FinDocList(
             key: Key('SalesOrder'), sales: true, docType: FinDocType.order),
         label: 'Sales orders',
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const CompanyListForm(
+        form: const CompanyList(
           key: Key('Customer'),
           role: Role.customer,
         ),
@@ -163,13 +163,13 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.business),
       ),
       TabItem(
-        form: const FinDocListForm(
+        form: const FinDocList(
             key: Key('PurchaseOrder'), sales: false, docType: FinDocType.order),
         label: 'Purchase orders',
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const CompanyListForm(
+        form: const CompanyList(
           key: Key('Supplier'),
           role: Role.supplier,
         ),
@@ -186,7 +186,7 @@ List<MenuOption> menuOptions = [
     readGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
-        form: const FinDocListForm(
+        form: const FinDocList(
             key: Key('ShipmentsOut'),
             sales: true,
             docType: FinDocType.shipment),
@@ -194,7 +194,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.send),
       ),
       TabItem(
-        form: const FinDocListForm(
+        form: const FinDocList(
             key: Key('ShipmentsIn'),
             sales: false,
             docType: FinDocType.shipment),
@@ -202,7 +202,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.call_received),
       ),
       TabItem(
-        form: const LocationListForm(
+        form: const LocationList(
           key: Key('Locations'),
         ),
         label: '\nWH Locations',

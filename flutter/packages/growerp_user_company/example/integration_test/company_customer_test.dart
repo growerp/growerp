@@ -20,6 +20,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -31,13 +32,17 @@ void main() {
 
   Future<void> selectCustomers(WidgetTester tester) async {
     await CommonTest.selectOption(
-        tester, 'dbCompanies', 'CompanyListFormCustomer', '2');
+        tester, 'dbCompanies', 'CompanyListCustomer', '2');
   }
 
   testWidgets('''GrowERP company customer test''', (tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         UserCompanyLocalizations.localizationsDelegates,
-        title: "customer company test", clear: true);
+        title: "customer company test",
+        restClient: restClient,
+        blocProviders: getUserCompanyBlocProviders(restClient, 'AppAdmin'),
+        clear: true);
     await CommonTest.createCompanyAndAdmin(tester);
     await selectCustomers(tester); // create
     await CompanyTest.enterCompanyData(tester, customerCompanies.sublist(0, 2));

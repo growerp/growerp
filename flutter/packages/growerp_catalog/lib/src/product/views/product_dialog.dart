@@ -20,36 +20,23 @@ import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:global_configuration/global_configuration.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../../../growerp_catalog.dart';
+
 final GlobalKey<ScaffoldMessengerState> productDialogKey =
     GlobalKey<ScaffoldMessengerState>();
 
-class ProductDialog extends StatelessWidget {
+class ProductDialog extends StatefulWidget {
   final Product product;
   const ProductDialog(this.product, {super.key});
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (BuildContext context) =>
-          CategoryBloc(context.read<RestClient>(), context.read<String>())
-            ..add(const CategoryFetch(isForDropDown: true)),
-      child: ProductDialogFull(product),
-    );
-  }
-}
-
-class ProductDialogFull extends StatefulWidget {
-  final Product product;
-  const ProductDialogFull(this.product, {super.key});
   @override
   ProductDialogState createState() => ProductDialogState();
 }
 
-class ProductDialogState extends State<ProductDialogFull> {
+class ProductDialogState extends State<ProductDialog> {
   late final GlobalKey<FormState> _productDialogFormKey;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _idController = TextEditingController();
@@ -60,6 +47,7 @@ class ProductDialogState extends State<ProductDialogFull> {
 
   late bool useWarehouse;
   late ProductBloc _productBloc;
+
   String? _selectedTypeId;
   XFile? _imageFile;
   dynamic _pickImageError;
@@ -73,6 +61,10 @@ class ProductDialogState extends State<ProductDialogFull> {
   void initState() {
     super.initState();
     _productBloc = context.read<ProductBloc>();
+    context
+        .read<CategoryBloc>()
+        .add(const CategoryFetch(isForDropDown: true, limit: 3));
+    classificationId = context.read<String>();
     _nameController.text = widget.product.productName ?? '';
     _idController.text = widget.product.pseudoId;
     _descriptionController.text = widget.product.description ?? '';
@@ -86,7 +78,6 @@ class ProductDialogState extends State<ProductDialogFull> {
         : widget.product.assetCount.toString();
     _selectedCategories = List.of(widget.product.categories);
     _selectedTypeId = widget.product.productTypeId;
-    classificationId = GlobalConfiguration().get("classificationId");
     useWarehouse = widget.product.useWarehouse;
     _productDialogFormKey = GlobalKey<FormState>();
   }

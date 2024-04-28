@@ -25,15 +25,20 @@ Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
 
-  Bloc.observer = AppBlocObserver();
   await Hive.initFlutter();
+  Bloc.observer = AppBlocObserver();
+  RestClient restClient = RestClient(await buildDioClient());
+  ChatServer chatServer = ChatServer();
+
   runApp(TopApp(
-    restClient: RestClient(await buildDioClient()),
+    restClient: restClient,
     classificationId: 'AppAdmin',
-    chatServer: ChatServer(),
+    chatServer: chatServer,
     title: 'GrowERP package: growerp_core.',
     router: generateRoute,
     menuOptions: menuOptions,
+    extraBlocProviders:
+        getCoreBlocProviders(restClient, chatServer, 'AppAdmin', {}),
   ));
 }
 

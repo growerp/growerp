@@ -15,13 +15,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/src/findoc/findoc.dart';
 
 import '../../accounting/accounting.dart';
 
-class PaymentTypeListForm extends StatelessWidget {
-  const PaymentTypeListForm({super.key});
+/*
+class PaymentTypeList extends StatelessWidget {
+  const PaymentTypeList({super.key});
   @override
   Widget build(BuildContext context) => MultiBlocProvider(
         providers: [
@@ -35,7 +35,7 @@ class PaymentTypeListForm extends StatelessWidget {
         child: const PaymentTypeList(),
       );
 }
-
+*/
 class PaymentTypeList extends StatefulWidget {
   const PaymentTypeList({super.key});
   @override

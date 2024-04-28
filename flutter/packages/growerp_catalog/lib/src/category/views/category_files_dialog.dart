@@ -19,6 +19,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart' as foundation;
 
+import '../blocs/category_bloc.dart';
+
 final GlobalKey<ScaffoldMessengerState> categoryFilesDialogKey =
     GlobalKey<ScaffoldMessengerState>();
 

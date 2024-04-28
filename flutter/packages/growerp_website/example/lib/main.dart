@@ -26,16 +26,19 @@ Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
   await Hive.initFlutter();
+  RestClient restClient = RestClient(await buildDioClient());
+  ChatServer chatServer = ChatServer();
 
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
-    restClient: RestClient(await buildDioClient()),
+    restClient: restClient,
     classificationId: 'AppAdmin',
-    chatServer: ChatServer(),
+    chatServer: chatServer,
     title: "GrowERP Website",
     router: generateRoute,
     menuOptions: menuOptions,
     extraDelegates: const [WebsiteLocalizations.delegate],
+    extraBlocProviders: getWebsiteBlocProviders(restClient),
   ));
 }
 

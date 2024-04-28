@@ -20,7 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 class CategoryTest {
   static Future<void> selectCategories(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbCatalog', 'CategoryListForm', '3');
+    await CommonTest.selectOption(tester, 'dbCatalog', 'CategoryList', '3');
   }
 
   static Future<void> addCategories(

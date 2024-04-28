@@ -23,16 +23,17 @@ import 'package:hotel/router.dart' as router;
 import 'package:hotel/menu_option_data.dart';
 import 'package:hotel/main.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 import 'room_rental_test.dart';
 
 Future<void> selectCheckInOut(WidgetTester tester) async {
-  await CommonTest.selectOption(tester, '/checkInOut', 'FinDocListFormCheckIn');
+  await CommonTest.selectOption(tester, '/checkInOut', 'FinDocListCheckIn');
 }
 
 Future<void> selectCheckOut(WidgetTester tester) async {
   await CommonTest.selectOption(
-      tester, '/checkInOut', 'FinDocListFormCheckOut', '2');
+      tester, '/checkInOut', 'FinDocListCheckOut', '2');
 }
 
 void main() {
@@ -47,13 +48,16 @@ void main() {
   });
 
   testWidgets("Test checkin >>>>>", (WidgetTester tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       clear: true,
+      restClient: restClient,
       title: 'Hotel reservation Test',
       tester,
       router.generateRoute,
       menuOptions,
       delegates,
+      blocProviders: getHotelBlocProviders(restClient, 'AppHotel'),
     );
     await CommonTest.createCompanyAndAdmin(tester, testData: {
       "products": productsHotel,
@@ -72,16 +76,19 @@ void main() {
   }, skip: false);
 
   testWidgets("Test checkout >>>>>", (WidgetTester tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     // change current time so reservation show in checkout
     CustomizableDateTime.customTime =
         DateTime.now().add(const Duration(days: 1));
     await CommonTest.startTestApp(
       clear: true,
-      title: 'Hotel reservation Checkout Test',
+      restClient: restClient,
+      title: 'Hotel Checkout Test',
       tester,
       router.generateRoute,
       menuOptions,
       delegates,
+      blocProviders: getHotelBlocProviders(restClient, 'AppAdmin'),
     );
     await selectCheckOut(tester);
     expect(find.byKey(const Key('id0')), findsNWidgets(1));
@@ -93,15 +100,18 @@ void main() {
 
   testWidgets("Test empty checkin and checkout >>>>>",
       (WidgetTester tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     CustomizableDateTime.customTime =
         DateTime.now().add(const Duration(days: 1));
     await CommonTest.startTestApp(
       clear: true,
+      restClient: restClient,
       title: 'Hotel reservation empty checkin/out Test',
       tester,
       router.generateRoute,
       menuOptions,
       delegates,
+      blocProviders: getHotelBlocProviders(restClient, 'AppHotel'),
     );
     await selectCheckInOut(tester);
     expect(find.byKey(const Key('id0')), findsNothing);

@@ -20,14 +20,14 @@ class InvoiceTest {
   static Future<void> selectPurchaseInvoices(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
     await CommonTest.selectOption(
-        tester, 'acctPurchase', 'FinDocListFormPurchaseInvoice');
+        tester, 'acctPurchase', 'FinDocListPurchaseInvoice');
     await tester.pumpAndSettle(const Duration(seconds: 3));
   }
 
   static Future<void> selectSalesInvoices(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
     await CommonTest.selectOption(
-        tester, 'acctSales', 'FinDocListFormSalesInvoice');
+        tester, 'acctSales', 'FinDocListSalesInvoice');
   }
 
   static Future<void> addInvoices(WidgetTester tester, List<FinDoc> invoices,

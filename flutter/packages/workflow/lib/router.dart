@@ -74,7 +74,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case '/user':
       return MaterialPageRoute(
           settings: settings,
-          builder: (context) => ShowUserDialog(settings.arguments as User));
+          builder: (context) => UserDialog(settings.arguments as User));
     case '/crm':
       return MaterialPageRoute(
           settings: settings,

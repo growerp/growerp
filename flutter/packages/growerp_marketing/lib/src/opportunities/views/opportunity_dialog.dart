@@ -22,31 +22,14 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/opportunity_bloc.dart';
 
-class OpportunityDialog extends StatelessWidget {
+class OpportunityDialog extends StatefulWidget {
   final Opportunity opportunity;
   const OpportunityDialog(this.opportunity, {super.key});
-  @override
-  Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<DataFetchBloc<Users>>(
-            create: (context) => DataFetchBloc<Users>()),
-        BlocProvider<DataFetchBlocOther<Users>>(
-            create: (context) => DataFetchBloc<Users>()),
-      ],
-      child: OpportunityDialogFull(opportunity),
-    );
-  }
-}
-
-class OpportunityDialogFull extends StatefulWidget {
-  final Opportunity opportunity;
-  const OpportunityDialogFull(this.opportunity, {super.key});
   @override
   OpportunityDialogState createState() => OpportunityDialogState();
 }
 
-class OpportunityDialogState extends State<OpportunityDialogFull> {
+class OpportunityDialogState extends State<OpportunityDialog> {
   final _formKeyOpportunity = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();

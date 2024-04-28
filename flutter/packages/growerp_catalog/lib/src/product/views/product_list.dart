@@ -14,21 +14,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../product.dart';
-
-class ProductListForm extends StatelessWidget {
-  const ProductListForm({super.key});
-
-  @override
-  Widget build(BuildContext context) => BlocProvider<ProductBloc>(
-      create: (BuildContext context) =>
-          ProductBloc(context.read<RestClient>(), context.read<String>()),
-      child: const ProductList());
-}
 
 class ProductList extends StatefulWidget {
   const ProductList({super.key});
@@ -39,7 +28,7 @@ class ProductList extends StatefulWidget {
 class ProductListState extends State<ProductList> {
   final _scrollController = ScrollController();
   late ProductBloc _productBloc;
-  String classificationId = GlobalConfiguration().getValue("classificationId");
+  late String classificationId;
   late String entityName;
   late bool started;
   late int limit;
@@ -48,10 +37,10 @@ class ProductListState extends State<ProductList> {
   void initState() {
     super.initState();
     started = false;
-    entityName = classificationId == 'AppHotel' ? 'Room Type' : 'Product';
     _scrollController.addListener(_onScroll);
-    _productBloc = context.read<ProductBloc>();
-    _productBloc.add(const ProductFetch());
+    _productBloc = context.read<ProductBloc>()..add(const ProductFetch());
+    classificationId = context.read<String>();
+    entityName = classificationId == 'AppHotel' ? 'Room Type' : 'Product';
   }
 
   @override

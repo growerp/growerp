@@ -68,7 +68,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
       Users compResult = await restClient.getUser(
           start: start,
           limit: event.limit,
-          role: event.role ?? role,
+          role: role,
           searchString: event.searchString);
 
       return emit(state.copyWith(

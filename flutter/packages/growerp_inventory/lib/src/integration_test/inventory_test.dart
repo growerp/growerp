@@ -19,17 +19,17 @@ import 'package:growerp_models/growerp_models.dart';
 class InventoryTest {
   static Future<void> selectIncomingShipments(WidgetTester tester) async {
     await CommonTest.selectOption(
-        tester, 'dbInventory', 'FinDocListFormShipmentsIn', '2');
+        tester, 'dbInventory', 'FinDocListShipmentsIn', '2');
   }
 
   static Future<void> selectOutgoingShipments(WidgetTester tester) async {
     await CommonTest.selectOption(
-        tester, 'dbInventory', 'FinDocListFormShipmentsOut', '1');
+        tester, 'dbInventory', 'FinDocListShipmentsOut', '1');
   }
 
   static Future<void> selectWareHouseLocations(WidgetTester tester) async {
     await CommonTest.selectOption(
-        tester, 'dbInventory', 'LocationListFormLocations', '3');
+        tester, 'dbInventory', 'LocationListLocations', '3');
   }
 
   static Future<void> checkIncomingShipments(WidgetTester tester) async {

@@ -23,6 +23,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:admin/router.dart' as router;
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 /// the full business roundtrip for physical products
 /// purchase products and receive in warehouse
@@ -38,13 +39,15 @@ void main() {
   });
 
   testWidgets('''GrowERP roundtrip Purchase test''', (tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       title: "RoundTrip Demo",
       clear: false, // use data from previous run, ifnone same as true
       tester,
       router.generateRoute,
       menuOptions,
-      extraDelegates,
+      delegates, restClient: restClient,
+      blocProviders: getAdminBlocProviders(restClient, 'AppAdmin'),
     );
     await CommonTest.createCompanyAndAdmin(tester, testData: {
       "products": products.sublist(0, 2), // will add categories too
@@ -71,9 +74,12 @@ void main() {
   }, skip: false);
 
   testWidgets('''GrowERP roundtrip sales test''', (tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     // no clear because dependend on purchase test
     await CommonTest.startTestApp(
-        tester, router.generateRoute, menuOptions, extraDelegates,
+        tester, router.generateRoute, menuOptions, delegates,
+        restClient: restClient,
+        blocProviders: getAdminBlocProviders(restClient, 'AppAdmin'),
         clear: false); // have to use data from previous testWidget
     await CommonTest.gotoMainMenu(tester);
     await OrderTest.selectSalesOrders(tester);

@@ -21,28 +21,17 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-class CategoryDialog extends StatelessWidget {
+import '../../product/blocs/product_bloc.dart';
+import '../blocs/category_bloc.dart';
+
+class CategoryDialog extends StatefulWidget {
   final Category category;
   const CategoryDialog(this.category, {super.key});
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (BuildContext context) =>
-          ProductBloc(context.read<RestClient>(), context.read<String>())
-            ..add(const ProductFetch(isForDropDown: true)),
-      child: CategoryDialogFull(category),
-    );
-  }
-}
-
-class CategoryDialogFull extends StatefulWidget {
-  final Category category;
-  const CategoryDialogFull(this.category, {super.key});
   @override
   CategoryDialogState createState() => CategoryDialogState();
 }
 
-class CategoryDialogState extends State<CategoryDialogFull> {
+class CategoryDialogState extends State<CategoryDialog> {
   final _categoryDialogFormKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descrController = TextEditingController();

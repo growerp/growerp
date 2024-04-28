@@ -24,6 +24,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
+
 import '../../../../growerp_core.dart';
 import '../../../../test_data.dart';
 
@@ -38,6 +39,7 @@ class CommonTest {
       List<MenuOption> menuOptions,
       List<LocalizationsDelegate> extraDelegates,
       {List<BlocProvider>? blocProviders,
+      required RestClient restClient,
       bool clear = false,
       String title = "Growerp testing..."}) async {
     int seq = Random.secure().nextInt(1024);
@@ -50,14 +52,14 @@ class CommonTest {
 
     Bloc.observer = AppBlocObserver();
     runApp(TopApp(
-      restClient: RestClient(await buildDioClient()),
+      restClient: restClient,
       classificationId: classificationId,
       chatServer: ChatServer(),
       router: router,
       title: title,
       menuOptions: menuOptions,
       extraDelegates: extraDelegates,
-      blocProviders: blocProviders ?? [],
+      extraBlocProviders: blocProviders ?? [],
     ));
     await tester.pump(const Duration());
     await tester.pumpAndSettle(const Duration(seconds: waitTime));

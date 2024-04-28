@@ -18,11 +18,11 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../growerp_task.dart';
-import '../widgets/widgets.dart';
 
+/*
 class TaskListForm extends StatelessWidget {
   final TaskType taskType;
-  const TaskListForm(this.taskType, {super.key});
+  const TaskList(this.taskType, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +56,7 @@ class TaskListForm extends StatelessWidget {
     }
   }
 }
-
+*/
 class TaskList extends StatefulWidget {
   final TaskType taskType;
   const TaskList(this.taskType, {super.key});

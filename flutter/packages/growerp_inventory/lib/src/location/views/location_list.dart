@@ -20,19 +20,6 @@ import 'package:growerp_models/growerp_models.dart';
 import '../location.dart';
 import '../widgets/widgets.dart';
 
-class LocationListForm extends StatelessWidget {
-  const LocationListForm({super.key});
-
-  @override
-  Widget build(BuildContext context) => RepositoryProvider(
-      create: (context) => context.read<RestClient>(),
-      child: BlocProvider<LocationBloc>(
-          create: (BuildContext context) =>
-              LocationBloc(context.read<RestClient>())
-                ..add(const LocationFetch()),
-          child: const LocationList()));
-}
-
 class LocationList extends StatefulWidget {
   const LocationList({super.key});
 
@@ -50,7 +37,7 @@ class LocationListState extends State<LocationList> {
   @override
   void initState() {
     super.initState();
-    _locationBloc = context.read<LocationBloc>();
+    _locationBloc = context.read<LocationBloc>()..add(const LocationFetch());
     _scrollController.addListener(_onScroll);
   }
 

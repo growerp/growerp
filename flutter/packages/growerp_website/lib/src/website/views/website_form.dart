@@ -28,32 +28,13 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../../../growerp_website.dart';
 
-class WebsiteForm extends StatelessWidget {
+class WebsiteForm extends StatefulWidget {
   const WebsiteForm({super.key});
-
-  @override
-  Widget build(BuildContext context) => RepositoryProvider(
-      create: (context) => context.read<RestClient>(),
-      child: MultiBlocProvider(providers: [
-        BlocProvider<WebsiteBloc>(
-          create: (BuildContext context) =>
-              WebsiteBloc(context.read<RestClient>())..add(WebsiteFetch()),
-        ),
-        BlocProvider<DataFetchBloc<Products>>(
-            create: (context) => DataFetchBloc<Products>()),
-        BlocProvider<DataFetchBloc<Categories>>(
-            create: (context) => DataFetchBloc<Categories>()),
-      ], child: const WebsitePage()));
-}
-
-class WebsitePage extends StatefulWidget {
-  const WebsitePage({super.key});
-
   @override
   WebsiteFormState createState() => WebsiteFormState();
 }
 
-class WebsiteFormState extends State<WebsitePage> {
+class WebsiteFormState extends State<WebsiteForm> {
   late WebsiteBloc _websiteBloc;
   late DataFetchBloc<Products> _productBloc;
   late DataFetchBloc<Categories> _categoryBloc;
@@ -73,7 +54,7 @@ class WebsiteFormState extends State<WebsitePage> {
   @override
   void initState() {
     super.initState();
-    _websiteBloc = context.read<WebsiteBloc>();
+    _websiteBloc = context.read<WebsiteBloc>()..add(WebsiteFetch());
     _categoryBloc = context.read<DataFetchBloc<Categories>>()
       ..add(GetDataEvent(() => context
           .read<RestClient>()
@@ -541,7 +522,7 @@ class WebsiteFormState extends State<WebsitePage> {
                           assetClassId: context.read<String>() == 'AppHotel'
                               ? 'Hotel Room'
                               : '')));
-                  return Future.delayed(const Duration(milliseconds: 150), () {
+                  return Future.delayed(const Duration(milliseconds: 250), () {
                     return Future.value(
                         (_productBloc.state.data as Products).products);
                   });

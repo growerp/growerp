@@ -34,7 +34,7 @@ List<MenuOption> menuOptions = [
     route: '/workflows',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin, UserGroup.employee],
-    child: const TaskListForm(TaskType.workflow),
+    child: const TaskList(TaskType.workflow),
   ),
   MenuOption(
     image: "packages/growerp_core/images/workflow.png",
@@ -43,7 +43,7 @@ List<MenuOption> menuOptions = [
     route: '/workflowTemplates',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin, UserGroup.employee],
-    child: const TaskListForm(TaskType.workflowTemplate),
+    child: const TaskList(TaskType.workflowTemplate),
   ),
 /*  MenuOption(
     image: "packages/growerp_core/images/workflow.png",
@@ -52,7 +52,7 @@ List<MenuOption> menuOptions = [
     route: '/workflowTaskTemplates',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin, UserGroup.employee],
-    child: const TaskListForm(TaskType.workflowTaskTemplate),
+    child: const TaskList(TaskType.workflowTaskTemplate),
   ),
 */
   MenuOption(
@@ -62,6 +62,6 @@ List<MenuOption> menuOptions = [
     route: '/toDo',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin, UserGroup.employee],
-    child: const TaskListForm(TaskType.todo),
+    child: const TaskList(TaskType.todo),
   ),
 ];

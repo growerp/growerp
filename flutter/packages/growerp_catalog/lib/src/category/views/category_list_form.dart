@@ -18,16 +18,6 @@ import 'package:growerp_core/growerp_core.dart';
 import '../category.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-class CategoryListForm extends StatelessWidget {
-  const CategoryListForm({super.key});
-
-  @override
-  Widget build(BuildContext context) => BlocProvider<CategoryBloc>(
-      create: (BuildContext context) =>
-          CategoryBloc(context.read<RestClient>(), context.read<String>()),
-      child: const CategoryList());
-}
-
 class CategoryList extends StatefulWidget {
   const CategoryList({super.key});
 

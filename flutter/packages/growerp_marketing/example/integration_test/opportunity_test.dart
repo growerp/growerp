@@ -7,6 +7,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 import 'package:growerp_marketing/src/opportunities/integration_test/data.dart';
 
@@ -19,9 +20,13 @@ void main() {
   });
 
   testWidgets('''GrowERP opportunity test''', (tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         MarketingLocalizations.localizationsDelegates,
-        clear: true, title: "Opportunity test");
+        restClient: restClient,
+        blocProviders: getMarketingBlocProviders(restClient),
+        clear: true,
+        title: "Opportunity test");
     await CommonTest.createCompanyAndAdmin(tester, testData: {
       "users": administrators.sublist(0, 2) + leads.sublist(0, 2)
     });

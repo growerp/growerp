@@ -21,12 +21,13 @@ import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:inventory_example/main.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   Future<void> selectLocation(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbInventory', 'LocationListForm');
+    await CommonTest.selectOption(tester, 'dbInventory', 'LocationList');
   }
 
   setUp(() async {
@@ -35,8 +36,11 @@ void main() {
   });
 
   testWidgets('''GrowERP inventory test''', (tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         InventoryLocalizations.localizationsDelegates,
+        restClient: restClient,
+        blocProviders: getInventoryBlocProviders(restClient),
         title: "Inventory location test",
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester, testData: {

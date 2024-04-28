@@ -29,26 +29,26 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 Future<void> selectRoomTypes(WidgetTester tester) async {
-  await CommonTest.selectOption(tester, '/rooms', 'ProductListForm', '2');
+  await CommonTest.selectOption(tester, '/rooms', 'ProductList', '2');
 }
 
 Future<void> selectRooms(WidgetTester tester) async {
-  await CommonTest.selectOption(tester, '/rooms', 'AssetListForm');
+  await CommonTest.selectOption(tester, '/rooms', 'AssetList');
 }
 
 Future<void> selectUserCustomers(WidgetTester tester) async {
   await CommonTest.selectOption(
-      tester, '/reservations', 'UserListFormCustomer', '2');
+      tester, '/reservations', 'UserListCustomer', '2');
 }
 
 Future<void> selectCompanyCustomers(WidgetTester tester) async {
   await CommonTest.selectOption(
-      tester, '/reservations', 'CompanyListFormCustomer', '3');
+      tester, '/reservations', 'CompanyListCustomer', '3');
 }
 
 Future<void> selectReservations(WidgetTester tester) async {
   await CommonTest.selectOption(
-      tester, '/reservations', 'FinDocListFormSalesOrder');
+      tester, '/reservations', 'FinDocListSalesOrder');
 }
 
 void main() {
@@ -68,6 +68,7 @@ void main() {
   });
 
   testWidgets("Test room types", (WidgetTester tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       clear: true,
       title: 'Hotel Room type Test',
@@ -75,6 +76,8 @@ void main() {
       router.generateRoute,
       menuOptions,
       delegates,
+      restClient: restClient,
+      blocProviders: getHotelBlocProviders(restClient, 'AppAdmin'),
     );
     await CommonTest.createCompanyAndAdmin(tester);
     await selectRoomTypes(tester);
@@ -83,6 +86,7 @@ void main() {
   }, skip: false);
 
   testWidgets("test rooms", (WidgetTester tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       clear: true,
       title: 'Hotel Room Test',
@@ -90,6 +94,8 @@ void main() {
       router.generateRoute,
       menuOptions,
       delegates,
+      restClient: restClient,
+      blocProviders: getHotelBlocProviders(restClient, 'AppAdmin'),
     );
     await CommonTest.createCompanyAndAdmin(tester,
         testData: {"products": productsHotel});
@@ -99,20 +105,23 @@ void main() {
   }, skip: false);
 
   testWidgets("test customer company", (WidgetTester tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
-      clear: true,
-      title: 'Hotel customer,company Test',
-      tester,
-      router.generateRoute,
-      menuOptions,
-      delegates,
-    );
+        clear: true,
+        title: 'Hotel customer,company Test',
+        tester,
+        router.generateRoute,
+        menuOptions,
+        delegates,
+        restClient: restClient,
+        blocProviders: getHotelBlocProviders(restClient, 'AppAdmin'));
     await CommonTest.createCompanyAndAdmin(tester);
     await selectCompanyCustomers(tester);
     await CompanyTest.enterCompanyData(tester, customerCompanies);
   }, skip: false);
 
   testWidgets("test customer contact", (WidgetTester tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       clear: true,
       title: 'Hotel customer,contacts Test',
@@ -120,6 +129,8 @@ void main() {
       router.generateRoute,
       menuOptions,
       delegates,
+      restClient: restClient,
+      blocProviders: getHotelBlocProviders(restClient, 'AppAdmin'),
     );
     await CommonTest.createCompanyAndAdmin(tester);
     await selectUserCustomers(tester);
@@ -127,6 +138,7 @@ void main() {
   }, skip: false);
 
   testWidgets("test room reservation", (WidgetTester tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       clear: true,
       title: 'Hotel reservation Test',
@@ -134,6 +146,8 @@ void main() {
       router.generateRoute,
       menuOptions,
       delegates,
+      restClient: restClient,
+      blocProviders: getHotelBlocProviders(restClient, 'AppAdmin'),
     );
     await CommonTest.createCompanyAndAdmin(tester, testData: {
       "assets": roomsHotel, // will also add products

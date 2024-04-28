@@ -464,7 +464,7 @@ List<Product> products = [
     //  image: Uint8List.fromList('R0lGODlhAQABAAAAACwAAAAAAQABAAA='.codeUnits),
     price: Decimal.parse('23.99'),
     listPrice: Decimal.parse('27.99'),
-    assetClassId: 'AsClsInventoryFin',
+    assetClassId: 'Hotel Room',
     categories: [categories[0]],
     productTypeId: productTypes[0], // must be zero: shippable good
     description: 'This is a dummy description of first product',
@@ -475,7 +475,7 @@ List<Product> products = [
     //  image: Uint8List.fromList('R0lGODlhAQABAAAAACwAAAAAAQABAAA='.codeUnits),
     price: Decimal.parse('73.99'),
     listPrice: Decimal.parse('73.99'),
-    assetClassId: 'AsClsInventoryFin',
+    assetClassId: 'Hotel Room',
     categories: [categories[0], categories[1]],
     productTypeId: productTypes[0], // must be zero: shippable good
     description: 'This is a dummy description of second product',
@@ -486,7 +486,7 @@ List<Product> products = [
     //  image: Uint8List.fromList('R0lGODlhAQABAAAAACwAAAAAAQABAAA='.codeUnits),
     price: Decimal.parse('93.99'),
     listPrice: Decimal.parse('99.99'),
-    assetClassId: 'AsClsInventoryFin',
+    assetClassId: 'Hotel Room',
     categories: [categories[0]], // only category 0 or rental test fails
     productTypeId: productTypes[2],
     description: 'This is a dummy description of third product',
@@ -838,7 +838,7 @@ List<Product> productsHotel = [
     productName: 'Single Room',
     description: 'The Single bed room',
     productTypeId: productTypes[2], //rental
-    assetClassId: 'AsClsInventoryFin',
+    assetClassId: 'Hotel Room',
     listPrice: Decimal.parse('60'),
     price: Decimal.parse('50'),
     categories: [Category(categoryName: "rooms")],
@@ -847,7 +847,7 @@ List<Product> productsHotel = [
     productName: 'Standard Room',
     description: 'The Standard room',
     productTypeId: productTypes[2], //rental
-    assetClassId: 'AsClsInventoryFin',
+    assetClassId: 'Hotel Room',
     listPrice: Decimal.parse('90'),
     price: Decimal.parse('80'),
     categories: [Category(categoryName: "rooms")],
@@ -856,7 +856,7 @@ List<Product> productsHotel = [
     productName: 'Deluxe Room',
     description: 'The Deluxe room offering',
     productTypeId: productTypes[2], //rental
-    assetClassId: 'AsClsInventoryFin',
+    assetClassId: 'Hotel Room',
     listPrice: Decimal.parse('180'),
     price: Decimal.parse('170'),
     categories: [Category(categoryName: "rooms")],
@@ -865,7 +865,7 @@ List<Product> productsHotel = [
     productName: 'Suite',
     description: 'The Suite',
     productTypeId: productTypes[2], //rental
-    assetClassId: 'AsClsInventoryFin',
+    assetClassId: 'Hotel Room',
     listPrice: Decimal.parse('380'),
     price: Decimal.parse('360'),
     categories: [Category(categoryName: "rooms")],
@@ -874,7 +874,7 @@ List<Product> productsHotel = [
     productName: 'Appartment',
     description: 'The living,  two bedroom appartment',
     productTypeId: productTypes[2], //rental
-    assetClassId: 'AsClsInventoryFin',
+    assetClassId: 'Hotel Room',
     listPrice: Decimal.parse('480'),
     price: Decimal.parse('460'),
     categories: [Category(categoryName: "rooms")],

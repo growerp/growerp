@@ -16,7 +16,6 @@ import 'package:decimal/decimal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:intl/intl.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -33,7 +32,7 @@ Future addRentalItemDialog(BuildContext context,
   Product? selectedProduct;
   DateTime startDate = CustomizableDateTime.current;
   List<String> rentalDays = [];
-  String classificationId = GlobalConfiguration().get("classificationId");
+  String classificationId = context.read<String>();
 
   return showDialog<FinDocItem>(
       context: context,
@@ -70,6 +69,11 @@ Future addRentalItemDialog(BuildContext context,
                       child: StatefulBuilder(
                         builder: (BuildContext context, StateSetter setState) {
                           Future<void> selectDate(BuildContext context) async {
+                            productBloc.add(GetDataEvent(() => context
+                                .read<RestClient>()
+                                .getDailyRentalOccupancy(
+                                    productId: selectedProduct!.productId)));
+
                             final DateTime? picked = await showDatePicker(
                               context: context,
                               initialDate: firstFreeDate(),
@@ -231,13 +235,24 @@ Future addRentalItemDialog(BuildContext context,
                                           ),
                                           const SizedBox(width: 10),
                                           ElevatedButton(
-                                            key: const Key('setDate'),
-                                            child: const Text(
-                                              'Select date',
-                                            ),
-                                            onPressed: () =>
-                                                selectDate(context),
-                                          ),
+                                              key: const Key('setDate'),
+                                              child: const Text(
+                                                'Select date',
+                                              ),
+                                              onPressed: () async {
+                                                List prods = (context
+                                                        .read<
+                                                            DataFetchBloc<
+                                                                Products>>()
+                                                        .state
+                                                        .data as Products)
+                                                    .products;
+                                                if (prods.isNotEmpty)
+                                                  rentalDays =
+                                                      prods[0].fullDates;
+                                                return await selectDate(
+                                                    context);
+                                              }),
                                         ],
                                       ),
                                       TextFormField(

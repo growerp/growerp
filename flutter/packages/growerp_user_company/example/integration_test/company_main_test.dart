@@ -20,6 +20,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -30,9 +31,13 @@ void main() {
   });
 
   testWidgets('''GrowERP main company test''', (tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         UserCompanyLocalizations.localizationsDelegates,
-        title: "growerp_user_company: main company test", clear: true);
+        restClient: restClient,
+        title: "growerp_user_company: main company test",
+        blocProviders: getUserCompanyBlocProviders(restClient, 'AppAdmin'),
+        clear: true);
     await CommonTest.createCompanyAndAdmin(tester);
     await CommonTest.selectMainCompany(tester);
     await CompanyTest.checkCompany(tester);

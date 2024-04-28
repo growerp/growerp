@@ -1292,10 +1292,10 @@ packages:
     dependency: transitive
     description:
       name: star_menu
-      sha256: a027b168c66f19dda41df0755f2ab9ab00e36532d52cdaa0e02b6225e9f90e2d
+      sha256: f29c7d255677c49ec2412ec2d17220d967f54b72b9e6afc5688fe122ea4d1d78
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.0"
+    version: "4.0.1"
   stream_channel:
     dependency: transitive
     description:

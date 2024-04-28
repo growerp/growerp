@@ -62,8 +62,8 @@ dev_dependencies:
   mockito: ^5.0.2
   very_good_analysis: ^5.1.0
   bloc_test: ^9.0.1
-  build_runner: ^2.1.11
   mobx_codegen: ^2.0.4
+  build_runner: ^2.1.11
   json_serializable: ^6.7.1
   freezed: ^2.0.3
 flutter: 

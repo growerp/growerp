@@ -21,13 +21,13 @@ class PaymentTest {
   static Future<void> selectPurchasePayments(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
     await CommonTest.selectOption(
-        tester, 'acctPurchase', 'FinDocListFormPurchasePayment', '2');
+        tester, 'acctPurchase', 'FinDocListPurchasePayment', '2');
   }
 
   static Future<void> selectSalesPayments(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
     await CommonTest.selectOption(
-        tester, 'acctSales', 'FinDocListFormSalesPayment', '2');
+        tester, 'acctSales', 'FinDocListSalesPayment', '2');
   }
 
   static Future<void> addPayments(WidgetTester tester, List<FinDoc> payments,

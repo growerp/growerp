@@ -21,12 +21,12 @@ import 'package:growerp_models/growerp_models.dart';
 class OrderTest {
   static Future<void> selectPurchaseOrders(WidgetTester tester) async {
     await CommonTest.selectOption(
-        tester, 'dbOrders', 'FinDocListFormPurchaseOrder', '3');
+        tester, 'dbOrders', 'FinDocListPurchaseOrder', '3');
   }
 
   static Future<void> selectSalesOrders(WidgetTester tester) async {
     await CommonTest.selectOption(
-        tester, 'dbOrders', 'FinDocListFormSalesOrder', '1');
+        tester, 'dbOrders', 'FinDocListSalesOrder', '1');
   }
 
   static Future<void> createPurchaseOrder(

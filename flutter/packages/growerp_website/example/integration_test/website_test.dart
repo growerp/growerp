@@ -21,6 +21,7 @@ import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -36,9 +37,12 @@ void main() {
 
   var testName = '''GrowERP website test''';
   testWidgets(testName, (tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         WebsiteLocalizations.localizationsDelegates,
         title: testName,
+        restClient: restClient,
+        blocProviders: getWebsiteBlocProviders(restClient),
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester, testData: {
       // related categories also created

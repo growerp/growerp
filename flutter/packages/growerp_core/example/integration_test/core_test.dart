@@ -19,6 +19,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -29,9 +30,10 @@ void main() {
   });
 
   testWidgets('''GrowERP Core test''', (tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         CoreLocalizations.localizationsDelegates,
-        clear: true, title: "Core Test");
+        restClient: restClient, clear: true, title: "Core Test");
 
     await CommonTest.createCompanyAndAdmin(tester);
     await CommonTest.checkCompanyAndAdmin(tester);

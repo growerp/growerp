@@ -66,23 +66,34 @@ Future main() async {
   await Hive.initFlutter();
 
   Bloc.observer = AppBlocObserver();
+  RestClient restClient = RestClient(await buildDioClient());
+  ChatServer chatServer = ChatServer();
+  String classificationId = GlobalConfiguration().get("classificationId");
+
+  Bloc.observer = AppBlocObserver();
   runApp(TopApp(
-    restClient: RestClient(await buildDioClient()),
-    classificationId: 'AppFreelance',
-    chatServer: ChatServer(),
+    restClient: restClient,
+    classificationId: classificationId,
+    chatServer: chatServer,
     title: 'GrowERP Freelance.',
     router: router.generateRoute,
     menuOptions: menuOptions,
-    extraDelegates: extraDelegates,
+    extraDelegates: [
+      UserCompanyLocalizations.delegate,
+      CatalogLocalizations.delegate,
+      InventoryLocalizations.delegate,
+      OrderAccountingLocalizations.delegate,
+      WebsiteLocalizations.delegate,
+      MarketingLocalizations.delegate,
+      InventoryLocalizations.delegate,
+    ],
+    extraBlocProviders: [
+      ...getInventoryBlocProviders(restClient),
+      ...getUserCompanyBlocProviders(restClient, classificationId),
+      ...getCatalogBlocProviders(restClient, classificationId),
+      ...getOrderAccountingBlocProviders(restClient, classificationId),
+      ...getMarketingBlocProviders(restClient),
+      ...getWebsiteBlocProviders(restClient),
+    ],
   ));
 }
-
-List<LocalizationsDelegate<dynamic>> extraDelegates = const [
-  UserCompanyLocalizations.delegate,
-  CatalogLocalizations.delegate,
-  InventoryLocalizations.delegate,
-  OrderAccountingLocalizations.delegate,
-  WebsiteLocalizations.delegate,
-  MarketingLocalizations.delegate,
-  InventoryLocalizations.delegate,
-];

@@ -158,7 +158,7 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
           )),
       if (widget.ledgerJournal.journalId.isNotEmpty)
         Flexible(
-          child: FinDocListForm(
+          child: FinDocList(
             sales: true,
             docType: FinDocType.transaction,
             journalId: widget.ledgerJournal.journalId,

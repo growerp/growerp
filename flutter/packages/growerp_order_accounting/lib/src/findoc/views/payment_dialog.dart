@@ -29,22 +29,19 @@ class ShowPaymentDialog extends StatelessWidget {
   const ShowPaymentDialog(this.finDoc, {super.key, this.dialog = true});
   @override
   Widget build(BuildContext context) {
-    RestClient repos = context.read<RestClient>();
-    return BlocProvider<FinDocBloc>(
-        create: (context) => FinDocBloc(
-            repos, finDoc.sales, finDoc.docType!, context.read<String>())
-          ..add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!)),
-        child: BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
-          if (state.status == FinDocStatus.success) {
-            return RepositoryProvider.value(
-                value: repos, child: PaymentDialog(finDoc: state.finDocs[0]));
-          } else {
-            return const LoadingIndicator();
-          }
-        }));
+    context.read<FinDocBloc>()
+      ..add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!));
+    return BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
+      if (state.status == FinDocStatus.success) {
+        return PaymentDialog(finDoc: state.finDocs[0]);
+      } else {
+        return const LoadingIndicator();
+      }
+    });
   }
 }
 
+/*
 class PaymentDialog extends StatelessWidget {
   final FinDoc finDoc;
   final PaymentMethod? paymentMethod;
@@ -61,27 +58,26 @@ class PaymentDialog extends StatelessWidget {
                 create: (context) => GlAccountBloc(context.read<RestClient>())),
           ],
           child:
-              PaymentDialogFull(finDoc: finDoc, paymentMethod: paymentMethod));
+              PaymentDialog(finDoc: finDoc, paymentMethod: paymentMethod));
     }
     return MultiBlocProvider(providers: [
       BlocProvider<DataFetchBloc<Companies>>(
           create: (context) => DataFetchBloc<Companies>()),
       BlocProvider<GlAccountBloc>(
           create: (context) => GlAccountBloc(context.read<RestClient>())),
-    ], child: PaymentDialogFull(finDoc: finDoc, paymentMethod: paymentMethod));
+    ], child: PaymentDialog(finDoc: finDoc, paymentMethod: paymentMethod));
   }
 }
-
-class PaymentDialogFull extends StatefulWidget {
+*/
+class PaymentDialog extends StatefulWidget {
   final FinDoc finDoc;
   final PaymentMethod? paymentMethod;
-  const PaymentDialogFull(
-      {required this.finDoc, this.paymentMethod, super.key});
+  const PaymentDialog({required this.finDoc, this.paymentMethod, super.key});
   @override
   PaymentDialogState createState() => PaymentDialogState();
 }
 
-class PaymentDialogState extends State<PaymentDialogFull> {
+class PaymentDialogState extends State<PaymentDialog> {
   final GlobalKey<FormState> paymentDialogFormKey = GlobalKey<FormState>();
   late FinDoc finDoc; // incoming finDoc
   late FinDoc finDocUpdated;

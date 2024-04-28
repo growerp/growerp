@@ -27,77 +27,43 @@ import 'add_product_item_dialog.dart';
 import 'add_rental_item_dialog.dart';
 import 'add_transaction_item_dialog.dart';
 
-class ShowFinDocDialog extends StatelessWidget {
-  final FinDoc finDoc;
-  final bool dialog;
-  const ShowFinDocDialog(this.finDoc, {super.key, this.dialog = true});
-  @override
-  Widget build(BuildContext context) {
-    RestClient restClient = context.read<RestClient>();
-    FinDocBloc? finDocBloc = FinDocBloc(
-        restClient, finDoc.sales, finDoc.docType!, context.read<String>());
-    Widget child =
-        BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
-      if (state.status == FinDocStatus.success) {
-        return RepositoryProvider.value(
-            value: restClient, child: FinDocDialog(finDoc: state.finDocs[0]));
-      } else {
-        return const LoadingIndicator();
-      }
-    });
-    if (finDoc.id() == null) {
-      return BlocProvider<FinDocBloc>(
-          create: (context) => finDocBloc, child: FinDocDialog(finDoc: finDoc));
-    } else {
-      return BlocProvider<FinDocBloc>(
-          create: (context) => finDocBloc
-            ..add(
-                FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!)),
-          child: child);
-    }
-  }
-}
-
 class FinDocDialog extends StatelessWidget {
   final FinDoc finDoc;
-  const FinDocDialog({required this.finDoc, super.key});
+  const FinDocDialog(this.finDoc, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    FinDocBloc finDocBloc = context.read<FinDocBloc>();
     RestClient restClient = context.read<RestClient>();
     if (finDoc.sales) {
-      return MultiBlocProvider(providers: [
-        BlocProvider<SalesCartBloc>(
-            create: (context) => CartBloc(
-                docType: finDoc.docType!,
-                sales: true,
-                finDocBloc: finDocBloc,
-                restClient: restClient)
-              ..add(CartFetch(finDoc))),
-        BlocProvider<DataFetchBloc<Companies>>(
-            create: (context) => DataFetchBloc<Companies>()),
-        BlocProvider<DataFetchBloc<Products>>(
-            create: (context) => DataFetchBloc<Products>()),
-        BlocProvider<GlAccountBloc>(
-            create: (context) => GlAccountBloc(context.read<RestClient>())),
-      ], child: FinDocPage(finDoc));
-    }
-    return MultiBlocProvider(providers: [
-      BlocProvider<PurchaseCartBloc>(
+      return BlocProvider<SalesCartBloc>(
           create: (context) => CartBloc(
               docType: finDoc.docType!,
-              sales: false,
-              finDocBloc: finDocBloc,
+              sales: true,
+              finDocBloc: finDoc.docType == FinDocType.order
+                  ? context.read<SalesOrderBloc>() as FinDocBloc
+                  : finDoc.docType == FinDocType.invoice
+                      ? context.read<SalesInvoiceBloc>() as FinDocBloc
+                      : finDoc.docType == FinDocType.shipment
+                          ? context.read<OutgoingShipmentBloc>() as FinDocBloc
+                          : context.read<TransactionBloc>() as FinDocBloc,
               restClient: restClient)
-            ..add(CartFetch(finDoc))),
-      BlocProvider<DataFetchBloc<Companies>>(
-          create: (context) => DataFetchBloc<Companies>()),
-      BlocProvider<DataFetchBloc<Products>>(
-          create: (context) => DataFetchBloc<Products>()),
-      BlocProvider<GlAccountBloc>(
-          create: (context) => GlAccountBloc(context.read<RestClient>())),
-    ], child: FinDocPage(finDoc));
+            ..add(CartFetch(finDoc)),
+          child: FinDocPage(finDoc));
+    }
+    return BlocProvider<PurchaseCartBloc>(
+        create: (context) => CartBloc(
+            docType: finDoc.docType!,
+            sales: false,
+            finDocBloc: finDoc.docType == FinDocType.order
+                ? context.read<PurchaseOrderBloc>() as FinDocBloc
+                : finDoc.docType == FinDocType.invoice
+                    ? context.read<PurchaseInvoiceBloc>() as FinDocBloc
+                    : finDoc.docType == FinDocType.shipment
+                        ? context.read<IncomingShipmentBloc>() as FinDocBloc
+                        : context.read<TransactionBloc>() as FinDocBloc,
+            restClient: restClient)
+          ..add(CartFetch(finDoc)),
+        child: FinDocPage(finDoc));
   }
 }
 
@@ -132,6 +98,9 @@ class MyFinDocState extends State<FinDocPage> {
     _isPosted = finDocUpdated.isPosted ?? false;
     _selectedCompany = finDocUpdated.otherCompany ?? finDocUpdated.otherCompany;
     _finDocBloc = context.read<FinDocBloc>();
+    if (finDoc.id() != null)
+      _finDocBloc
+          .add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!));
     _companyBloc = context.read<DataFetchBloc<Companies>>()
       ..add(GetDataEvent(() => context.read<RestClient>().getCompany(
           limit: 3,

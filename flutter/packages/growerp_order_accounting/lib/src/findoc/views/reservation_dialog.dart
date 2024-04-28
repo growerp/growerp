@@ -22,6 +22,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../findoc.dart';
 
+/*
 class ReservationDialog extends StatelessWidget {
   final FinDoc finDoc;
   final FinDoc? original;
@@ -37,19 +38,19 @@ class ReservationDialog extends StatelessWidget {
     ], child: ReservationForm(finDoc: finDoc, original: original));
   }
 }
-
-class ReservationForm extends StatefulWidget {
+*/
+class ReservationDialog extends StatefulWidget {
   /// original order
   final FinDoc? original;
 
   /// extracted single item order
   final FinDoc finDoc;
-  const ReservationForm({super.key, required this.finDoc, this.original});
+  const ReservationDialog({super.key, required this.finDoc, this.original});
   @override
   ReservationDialogState createState() => ReservationDialogState();
 }
 
-class ReservationDialogState extends State<ReservationForm> {
+class ReservationDialogState extends State<ReservationDialog> {
   final _userSearchBoxController = TextEditingController();
   late DataFetchBloc<Users> _userBloc;
   User? _selectedUser;
@@ -78,7 +79,8 @@ class ReservationDialogState extends State<ReservationForm> {
       ..add(GetDataEvent(() => context.read<RestClient>().getProduct(
           limit: 3,
           isForDropDown: true,
-          assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : '')));
+//          assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : '',
+          classificationId: classificationId)));
     if (widget.finDoc.items.isNotEmpty) {
       _selectedProduct = Product(
           productId: widget.finDoc.items[0].productId!,

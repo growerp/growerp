@@ -19,7 +19,7 @@ import 'package:growerp_models/growerp_models.dart';
 class ItemTypeTest {
   static Future<void> selectItemType(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
-    await CommonTest.selectOption(tester, 'acctSetup', 'ItemTypeListForm', '2');
+    await CommonTest.selectOption(tester, 'acctSetup', 'ItemTypeList', '2');
   }
 
   static bool showAll(WidgetTester tester) {

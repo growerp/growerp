@@ -21,7 +21,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 class AssetTest {
   static Future<void> selectAsset(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbCatalog', 'AssetListForm', '2');
+    await CommonTest.selectOption(tester, 'dbCatalog', 'AssetList', '2');
   }
 
   static Future<void> addAssets(WidgetTester tester, List<Asset> assets,

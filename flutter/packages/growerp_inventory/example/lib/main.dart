@@ -25,17 +25,21 @@ import 'package:hive_flutter/hive_flutter.dart';
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
-  Bloc.observer = AppBlocObserver();
   await Hive.initFlutter();
+  Bloc.observer = AppBlocObserver();
+  RestClient restClient = RestClient(await buildDioClient());
+  ChatServer chatServer = ChatServer();
 
   runApp(TopApp(
-      restClient: RestClient(await buildDioClient()),
-      classificationId: 'AppAdmin',
-      chatServer: ChatServer(),
-      title: 'GrowERP package: growerp_inventory.',
-      router: generateRoute,
-      menuOptions: menuOptions,
-      extraDelegates: const [InventoryLocalizations.delegate]));
+    restClient: restClient,
+    classificationId: 'AppAdmin',
+    chatServer: chatServer,
+    title: 'GrowERP package: growerp_inventory.',
+    router: generateRoute,
+    menuOptions: menuOptions,
+    extraDelegates: const [InventoryLocalizations.delegate],
+    extraBlocProviders: getInventoryBlocProviders(restClient),
+  ));
 }
 
 // Menu definition
@@ -67,7 +71,7 @@ List<MenuOption> menuOptions = [
         UserGroup.admin,
         UserGroup.employee,
       ],
-      child: const LocationListForm()),
+      child: const LocationList()),
 ];
 
 // routing

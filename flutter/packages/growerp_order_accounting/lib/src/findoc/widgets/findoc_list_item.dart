@@ -266,7 +266,7 @@ class FinDocListItem extends StatelessWidget {
                                         finDoc: finDoc,
                                         paymentMethod: paymentMethod,
                                       )
-                                    : FinDocDialog(finDoc: finDoc)));
+                                    : FinDocDialog(finDoc)));
                   });
             },
           ),
@@ -344,7 +344,7 @@ class FinDocListItem extends StatelessWidget {
                   builder: (BuildContext context) => type == FinDocType.payment
                       ? ShowPaymentDialog(
                           FinDoc(paymentId: id, sales: sales, docType: type))
-                      : ShowFinDocDialog(type == FinDocType.invoice
+                      : FinDocDialog(type == FinDocType.invoice
                           ? FinDoc(invoiceId: id, sales: sales, docType: type)
                           : type == FinDocType.shipment
                               ? FinDoc(

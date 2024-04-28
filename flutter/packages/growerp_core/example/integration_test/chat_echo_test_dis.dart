@@ -20,6 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +32,12 @@ void main() {
 
   testWidgets("prepare empty system for chat test>>>>>>",
       (WidgetTester tester) async {
-    await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+    RestClient restClient = RestClient(await buildDioClient());
+    await CommonTest.startTestApp(
+        tester,
+        generateRoute,
+        menuOptions,
+        restClient: restClient,
         CoreLocalizations.localizationsDelegates,
         clear: true); // use data from previous run, ifnone same as true
     // userlogin in mainadmin data.dart should be used for chatecho
@@ -41,8 +47,10 @@ void main() {
   }, skip: true);
 // now start chatEco_main.dart with the userlog in when the company created
   testWidgets("Chatroom maintenance>>>>>>", (WidgetTester tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         CoreLocalizations.localizationsDelegates,
+        restClient: restClient,
         clear: true); // use data from previous run, ifnone same as true
     // chatrooms screen
     await CommonTest.tapByTooltip(tester, 'Chat');
@@ -71,8 +79,10 @@ void main() {
   }, skip: true);
   testWidgets("chat with chat echo in other process>>>>>>",
       (WidgetTester tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         CoreLocalizations.localizationsDelegates,
+        restClient: restClient,
         clear: true); // use data from previous run, ifnone same as true
 //    await CommonTest.logout(tester);
 //    await CommonTest.login(tester,

@@ -4,3 +4,4 @@ export 'src/accounting/integration/integration.dart';
 export 'src/findoc/integration/integration.dart';
 export 'src/l10n/generated/order_accounting_localizations.dart';
 export 'src/findoc_services.dart';
+export 'src/get_order_accounting_bloc_providers.dart';

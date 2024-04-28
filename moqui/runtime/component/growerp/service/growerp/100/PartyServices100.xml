@@ -2477,6 +2477,8 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="counterMax" default="1" type="Integer" />
         </in-parameters>
         <actions>
+            <log
+                message="creating demo data for app: $classificationId for owner: $ownerPartyId and company: $companyPartyId" />
             <!-- get single productStore/website for main company -->
             <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />

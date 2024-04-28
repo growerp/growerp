@@ -70,20 +70,25 @@ Future main() async {
   debugPrint("=== current date: ${CustomizableDateTime.current}");
 
   await Hive.initFlutter();
+  Bloc.observer = AppBlocObserver();
+  RestClient restClient = RestClient(await buildDioClient());
+  ChatServer chatServer = ChatServer();
+  String classificationId = GlobalConfiguration().get("classificationId");
 
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
-    restClient: RestClient(await buildDioClient()),
-    classificationId: 'AppHotel',
-    chatServer: ChatServer(),
+    restClient: restClient,
+    classificationId: classificationId,
+    chatServer: chatServer,
     title: 'GrowERP Hotel.',
     router: router.generateRoute,
     menuOptions: menuOptions,
     extraDelegates: delegates,
+    extraBlocProviders: getHotelBlocProviders(restClient, classificationId),
   ));
 }
 
-List<LocalizationsDelegate<dynamic>> delegates = const [
+List<LocalizationsDelegate> delegates = [
   UserCompanyLocalizations.delegate,
   CatalogLocalizations.delegate,
   InventoryLocalizations.delegate,
@@ -92,3 +97,14 @@ List<LocalizationsDelegate<dynamic>> delegates = const [
   MarketingLocalizations.delegate,
   InventoryLocalizations.delegate,
 ];
+
+List<BlocProvider> getHotelBlocProviders(restClient, classificationId) {
+  return [
+    ...getInventoryBlocProviders(restClient),
+    ...getUserCompanyBlocProviders(restClient, classificationId),
+    ...getCatalogBlocProviders(restClient, classificationId),
+    ...getOrderAccountingBlocProviders(restClient, classificationId),
+    ...getMarketingBlocProviders(restClient),
+    ...getWebsiteBlocProviders(restClient),
+  ];
+}

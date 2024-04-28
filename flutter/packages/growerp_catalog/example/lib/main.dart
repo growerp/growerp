@@ -27,16 +27,20 @@ Future main() async {
   await GlobalConfiguration().loadFromAsset('app_settings');
 
   await Hive.initFlutter();
-
   Bloc.observer = AppBlocObserver();
+  RestClient restClient = RestClient(await buildDioClient());
+  ChatServer chatServer = ChatServer();
+  Bloc.observer = AppBlocObserver();
+
   runApp(TopApp(
     restClient: RestClient(await buildDioClient()),
     classificationId: 'AppAdmin',
-    chatServer: ChatServer(),
+    chatServer: chatServer,
     title: 'GrowERP Catalog.',
     router: generateRoute,
     menuOptions: menuOptions,
     extraDelegates: const [CatalogLocalizations.delegate],
+    extraBlocProviders: getCatalogBlocProviders(restClient, 'AppAdmin'),
   ));
 }
 
@@ -65,17 +69,17 @@ List<MenuOption> menuOptions = [
       ],
       tabItems: [
         TabItem(
-          form: const ProductListForm(),
+          form: const ProductList(),
           label: 'Products',
           icon: const Icon(Icons.home),
         ),
         TabItem(
-          form: const AssetListForm(),
+          form: const AssetList(),
           label: 'Assets',
           icon: const Icon(Icons.money),
         ),
         TabItem(
-          form: const CategoryListForm(),
+          form: const CategoryList(),
           label: 'Catgs',
           icon: const Icon(Icons.business),
         ),

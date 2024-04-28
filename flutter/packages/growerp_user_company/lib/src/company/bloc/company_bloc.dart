@@ -21,8 +21,6 @@ import 'package:growerp_models/growerp_models.dart';
 
 import 'package:stream_transform/stream_transform.dart';
 
-import '../../../domains/domains.dart';
-
 part 'company_event.dart';
 part 'company_state.dart';
 
@@ -39,8 +37,7 @@ EventTransformer<E> companyDroppable<E>(Duration duration) {
 
 class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
     with CompanyLeadBloc, CompanyCustomerBloc, CompanySupplierBloc {
-  CompanyBloc(this.restClient, this.role, this.authBloc)
-      : super(const CompanyState()) {
+  CompanyBloc(this.restClient, this.role) : super(const CompanyState()) {
     on<CompanyFetch>(_onCompanyFetch,
         transformer: companyDroppable(const Duration(milliseconds: 100)));
     on<CompanyUpdate>(_onCompanyUpdate);
@@ -49,7 +46,6 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
 
   final RestClient restClient;
   final Role? role;
-  final AuthBloc authBloc;
   int start = 0;
 
   Future<void> _onCompanyFetch(
@@ -71,7 +67,7 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
     }
     try {
       Companies compResult = await restClient.getCompany(
-          role: event.role ?? role,
+          role: role,
           companyPartyId: event.companyPartyId,
           ownerPartyId: event.ownerPartyId,
           searchString: event.searchString,
@@ -109,10 +105,10 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
         } else {
           companies.add(compResult);
         }
-        if (authBloc.state.authenticate!.company!.partyId ==
-            compResult.partyId) {
-          authBloc.add(AuthLoad());
-        }
+//        if (authBloc.state.authenticate!.company!.partyId ==
+//            compResult.partyId) {
+//        authBloc.add(AuthLoad());
+//        }
         return emit(state.copyWith(
             status: CompanyStatus.success,
             companies: companies,

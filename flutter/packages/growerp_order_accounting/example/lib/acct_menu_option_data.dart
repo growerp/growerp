@@ -39,7 +39,7 @@ List<MenuOption> acctMenuOptions = [
       ],
       tabItems: [
         TabItem(
-          form: const FinDocListForm(
+          form: const FinDocList(
               key: Key("SalesInvoice"),
               sales: true,
               docType: FinDocType.invoice),
@@ -47,7 +47,7 @@ List<MenuOption> acctMenuOptions = [
           icon: const Icon(Icons.home),
         ),
         TabItem(
-          form: const FinDocListForm(
+          form: const FinDocList(
               key: Key("SalesPayment"),
               sales: true,
               docType: FinDocType.payment),
@@ -68,7 +68,7 @@ List<MenuOption> acctMenuOptions = [
       ],
       tabItems: [
         TabItem(
-          form: const FinDocListForm(
+          form: const FinDocList(
               key: Key("PurchaseInvoice"),
               sales: false,
               docType: FinDocType.invoice),
@@ -76,7 +76,7 @@ List<MenuOption> acctMenuOptions = [
           icon: const Icon(Icons.home),
         ),
         TabItem(
-          form: const FinDocListForm(
+          form: const FinDocList(
               key: Key("PurchasePayment"),
               sales: false,
               docType: FinDocType.payment),
@@ -107,7 +107,7 @@ List<MenuOption> acctMenuOptions = [
           icon: const Icon(Icons.format_list_bulleted),
         ),
         TabItem(
-          form: const FinDocListForm(
+          form: const FinDocList(
               key: Key("Transaction"),
               sales: true,
               docType: FinDocType.transaction),
@@ -132,7 +132,7 @@ List<MenuOption> acctMenuOptions = [
           icon: const Icon(Icons.list),
         ),
         TabItem(
-          form: const BalanceSummaryListForm(),
+          form: const BalanceSummaryList(),
           label: "\nBalance Summary",
           icon: const Icon(Icons.list),
         ),
@@ -155,12 +155,12 @@ List<MenuOption> acctMenuOptions = [
           icon: const Icon(Icons.list),
         ),
         TabItem(
-          form: const ItemTypeListForm(),
+          form: const ItemTypeList(),
           label: "Item Types",
           icon: const Icon(Icons.list),
         ),
         TabItem(
-          form: const PaymentTypeListForm(),
+          form: const PaymentTypeList(),
           label: "Paymt Types",
           icon: const Icon(Icons.list),
         ),

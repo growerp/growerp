@@ -23,17 +23,22 @@ import 'package:hive_flutter/hive_flutter.dart';
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
-  Bloc.observer = AppBlocObserver();
   await Hive.initFlutter();
+  Bloc.observer = AppBlocObserver();
+  RestClient restClient = RestClient(await buildDioClient());
+  ChatServer chatServer = ChatServer();
+  String classificationId = GlobalConfiguration().get("classificationId");
 
   runApp(TopApp(
-    restClient: RestClient(await buildDioClient()),
-    classificationId: 'AppAdmin',
-    chatServer: ChatServer(),
+    restClient: restClient,
+    classificationId: classificationId,
+    chatServer: chatServer,
     title: 'GrowERP package: growerp_user_company.',
     router: generateRoute,
     menuOptions: menuOptions,
     extraDelegates: const [UserCompanyLocalizations.delegate],
+    extraBlocProviders:
+        getUserCompanyBlocProviders(restClient, classificationId),
   ));
 }
 
@@ -66,7 +71,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const CompanyListForm(
+        form: const CompanyList(
           key: Key('Customer'),
           role: Role.customer,
         ),
@@ -74,7 +79,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const CompanyListForm(
+        form: const CompanyList(
           key: Key('Lead'),
           role: Role.lead,
         ),
@@ -82,7 +87,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const CompanyListForm(
+        form: const CompanyList(
           key: Key('Supplier'),
           role: Role.supplier,
         ),
@@ -90,7 +95,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const CompanyListForm(
+        form: const CompanyList(
           key: Key('All'),
           role: null,
         ),
@@ -108,7 +113,7 @@ List<MenuOption> menuOptions = [
     writeGroups: [UserGroup.admin],
     tabItems: [
       TabItem(
-        form: const UserListForm(
+        form: const UserList(
           key: Key('Employee'),
           role: Role.company,
         ),
@@ -116,7 +121,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.business),
       ),
       TabItem(
-        form: const UserListForm(
+        form: const UserList(
           key: Key('Lead'),
           role: Role.lead,
         ),
@@ -124,7 +129,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.business),
       ),
       TabItem(
-        form: const UserListForm(
+        form: const UserList(
           key: Key('Customer'),
           role: Role.customer,
         ),
@@ -132,7 +137,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.school),
       ),
       TabItem(
-        form: const UserListForm(
+        form: const UserList(
           key: Key('Supplier'),
           role: Role.supplier,
         ),
@@ -140,7 +145,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.business),
       ),
       TabItem(
-        form: const UserListForm(
+        form: const UserList(
           key: Key('Unknown'),
           role: Role.unknown,
         ),
@@ -148,7 +153,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.business),
       ),
       TabItem(
-        form: const UserListForm(
+        form: const UserList(
           key: Key('All'),
           role: null,
         ),
@@ -174,7 +179,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
               ShowCompanyDialog(settings.arguments as Company));
     case '/user':
       return MaterialPageRoute(
-          builder: (context) => ShowUserDialog(settings.arguments as User));
+          builder: (context) => UserDialog(settings.arguments as User));
     case '/companies':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(

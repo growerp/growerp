@@ -50,7 +50,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const UserListForm(
+        form: const UserList(
           key: Key('Employee'),
           role: Role.company,
         ),
@@ -72,12 +72,12 @@ List<MenuOption> menuOptions = [
     readGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
-        form: const AssetListForm(),
+        form: const AssetList(),
         label: "Names",
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const ProductListForm(),
+        form: const ProductList(),
         label: "Types",
         icon: const Icon(Icons.home),
       ),
@@ -97,7 +97,7 @@ List<MenuOption> menuOptions = [
       ],
       tabItems: [
         TabItem(
-          form: const FinDocListForm(
+          form: const FinDocList(
               key: Key("SalesOrder"),
               sales: true,
               docType: FinDocType.order,
@@ -106,7 +106,7 @@ List<MenuOption> menuOptions = [
           icon: const Icon(Icons.home),
         ),
         TabItem(
-          form: const UserListForm(
+          form: const UserList(
             key: Key('Customer'),
             role: Role.customer,
           ),
@@ -114,7 +114,7 @@ List<MenuOption> menuOptions = [
           icon: const Icon(Icons.school),
         ),
         TabItem(
-          form: const CompanyListForm(
+          form: const CompanyList(
             key: Key('Customer'),
             role: Role.customer,
           ),
@@ -136,7 +136,7 @@ List<MenuOption> menuOptions = [
       ],
       tabItems: [
         TabItem(
-          form: const FinDocListForm(
+          form: const FinDocList(
               key: Key("Check-In"),
               sales: true,
               docType: FinDocType.order,
@@ -146,7 +146,7 @@ List<MenuOption> menuOptions = [
           icon: const Icon(Icons.home),
         ),
         TabItem(
-          form: const FinDocListForm(
+          form: const FinDocList(
               key: Key("Check-Out"),
               sales: true,
               docType: FinDocType.order,

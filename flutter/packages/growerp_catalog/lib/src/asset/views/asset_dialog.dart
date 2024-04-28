@@ -23,28 +23,17 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-class AssetDialog extends StatelessWidget {
+import '../../product/product.dart';
+import '../asset.dart';
+
+class AssetDialog extends StatefulWidget {
   final Asset asset;
   const AssetDialog(this.asset, {super.key});
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (BuildContext context) =>
-          ProductBloc(context.read<RestClient>(), context.read<String>())
-            ..add(const ProductFetch(isForDropDown: true)),
-      child: AssetDialogFull(asset),
-    );
-  }
-}
-
-class AssetDialogFull extends StatefulWidget {
-  final Asset asset;
-  const AssetDialogFull(this.asset, {super.key});
   @override
   AssetDialogState createState() => AssetDialogState();
 }
 
-class AssetDialogState extends State<AssetDialogFull> {
+class AssetDialogState extends State<AssetDialog> {
   final _assetDialogformKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _quantityOnHandController =

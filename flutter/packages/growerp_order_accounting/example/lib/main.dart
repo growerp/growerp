@@ -26,17 +26,20 @@ import 'package:hive_flutter/hive_flutter.dart';
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
-  Bloc.observer = AppBlocObserver();
   await Hive.initFlutter();
+  RestClient restClient = RestClient(await buildDioClient());
+  ChatServer chatServer = ChatServer();
+  Bloc.observer = AppBlocObserver();
 
   runApp(TopApp(
-    restClient: RestClient(await buildDioClient()),
+    restClient: restClient,
     classificationId: 'AppAdmin',
-    chatServer: ChatServer(),
+    chatServer: chatServer,
     title: 'GrowERP Order and Accounting.',
     router: generateRoute,
     menuOptions: menuOptions,
     extraDelegates: const [OrderAccountingLocalizations.delegate],
+    extraBlocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
   ));
 }
 
@@ -60,13 +63,13 @@ List<MenuOption> menuOptions = [
     writeGroups: [UserGroup.admin],
     tabItems: [
       TabItem(
-        form: const FinDocListForm(
+        form: const FinDocList(
             key: Key('SalesOrder'), sales: true, docType: FinDocType.order),
         label: '\nSales orders',
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const FinDocListForm(
+        form: const FinDocList(
             key: Key('PurchaseOrder'), sales: false, docType: FinDocType.order),
         label: '\nPurchase orders',
         icon: const Icon(Icons.home),

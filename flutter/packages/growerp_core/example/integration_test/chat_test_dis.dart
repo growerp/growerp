@@ -20,6 +20,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -31,8 +32,10 @@ void main() {
 
   // not implemented yet, use integration_test/chat_test.dart and lib/chatEcho_main.dart
   testWidgets('''GrowERP chat test''', (tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         CoreLocalizations.localizationsDelegates,
+        restClient: restClient,
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester);
     //  await UserTest.selectEmployees(tester);

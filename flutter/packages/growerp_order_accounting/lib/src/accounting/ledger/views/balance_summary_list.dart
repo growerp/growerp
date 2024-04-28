@@ -23,18 +23,6 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../accounting.dart';
 
-class BalanceSummaryListForm extends StatelessWidget {
-  const BalanceSummaryListForm({super.key});
-
-  @override
-  Widget build(BuildContext context) => RepositoryProvider(
-      create: (context) => context.read<RestClient>(),
-      child: BlocProvider<LedgerBloc>(
-          create: (BuildContext context) =>
-              LedgerBloc(context.read<RestClient>()),
-          child: const BalanceSummaryList()));
-}
-
 class BalanceSummaryList extends StatefulWidget {
   const BalanceSummaryList({super.key});
 

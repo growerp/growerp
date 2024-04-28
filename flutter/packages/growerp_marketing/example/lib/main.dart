@@ -25,17 +25,20 @@ import 'package:hive_flutter/hive_flutter.dart';
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
-  Bloc.observer = AppBlocObserver();
   await Hive.initFlutter();
+  Bloc.observer = AppBlocObserver();
+  RestClient restClient = RestClient(await buildDioClient());
+  ChatServer chatServer = ChatServer();
 
   runApp(TopApp(
-    restClient: RestClient(await buildDioClient()),
+    restClient: restClient,
     classificationId: 'AppAdmin',
-    chatServer: ChatServer(),
+    chatServer: chatServer,
     title: 'GrowERP.',
     router: generateRoute,
     menuOptions: menuOptions,
     extraDelegates: const [MarketingLocalizations.delegate],
+    extraBlocProviders: getMarketingBlocProviders(restClient),
   ));
 }
 

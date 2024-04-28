@@ -21,48 +21,8 @@ import 'package:growerp_models/growerp_models.dart';
 import '../company.dart';
 import '../widgets/widgets.dart';
 
-class CompanyListForm extends StatelessWidget {
-  final Role? role;
-  const CompanyListForm({
-    super.key,
-    required this.role,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    RestClient restClient = context.read<RestClient>();
-    AuthBloc authBloc = context.read<AuthBloc>();
-    switch (role) {
-      case Role.lead:
-        return BlocProvider<CompanyLeadBloc>(
-            create: (context) => CompanyBloc(
-                  restClient,
-                  role,
-                  authBloc,
-                )..add(const CompanyFetch()),
-            child: CompanyList(role));
-      case Role.customer:
-        return BlocProvider<CompanyCustomerBloc>(
-            create: (context) => CompanyBloc(restClient, role, authBloc)
-              ..add(const CompanyFetch()),
-            child: CompanyList(role));
-      case Role.supplier:
-        return BlocProvider<CompanySupplierBloc>(
-            create: (context) => CompanyBloc(restClient, role, authBloc)
-              ..add(const CompanyFetch()),
-            child: CompanyList(role));
-      default:
-        return BlocProvider<CompanyBloc>(
-            create: (context) => CompanyBloc(restClient, role, authBloc)
-              ..add(const CompanyFetch()),
-            child: CompanyList(role));
-    }
-  }
-}
-
 class CompanyList extends StatefulWidget {
-  const CompanyList(this.role, {super.key});
-
+  const CompanyList({required this.role, super.key});
   final Role? role;
 
   @override
@@ -86,16 +46,19 @@ class CompanyListState extends State<CompanyList> {
     _scrollController.addListener(_onScroll);
     switch (widget.role) {
       case Role.supplier:
-        _companyBloc = context.read<CompanySupplierBloc>() as CompanyBloc;
+        _companyBloc = context.read<CompanySupplierBloc>() as CompanyBloc
+          ..add(const CompanyFetch());
         break;
       case Role.customer:
-        _companyBloc = context.read<CompanyCustomerBloc>() as CompanyBloc;
+        _companyBloc = context.read<CompanyCustomerBloc>() as CompanyBloc
+          ..add(const CompanyFetch());
         break;
       case Role.lead:
-        _companyBloc = context.read<CompanyLeadBloc>() as CompanyBloc;
+        _companyBloc = context.read<CompanyLeadBloc>() as CompanyBloc
+          ..add(const CompanyFetch());
         break;
       default:
-        _companyBloc = context.read<CompanyBloc>();
+        _companyBloc = context.read<CompanyBloc>()..add(const CompanyFetch());
     }
   }
 
