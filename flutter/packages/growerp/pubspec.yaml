@@ -9,7 +9,7 @@ platforms:
   windows:
 executables: 
   growerp:
-  csvToCsv:
+  convertToCsv:
 environment: 
   sdk: '>=3.2.6 <4.0.0'
 dependencies: 

@@ -34,10 +34,14 @@ List<String> getFileNames(FileType fileType) {
       break;
     case FileType.finDocInvoicePurchase:
     case FileType.finDocInvoicePurchaseItem:
-    case FileType.finDocPaymentPurchase:
-    case FileType.finDocPaymentPurchaseItem:
+      searchFiles.add('2b1-purchases_journal.csv');
+      break;
     case FileType.finDocInvoiceSale:
     case FileType.finDocInvoiceSaleItem:
+      searchFiles.add('3c1-receipts_journal.csv');
+      break;
+    case FileType.finDocPaymentPurchase:
+    case FileType.finDocPaymentPurchaseItem:
     case FileType.finDocPaymentSale:
     case FileType.finDocPaymentSaleItem:
     case FileType.category:

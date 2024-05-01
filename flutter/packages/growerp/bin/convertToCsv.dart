@@ -73,7 +73,7 @@ Future<void> main(List<String> args) async {
       exit(1);
     }
     var outputDirectory = modifiedArgs[0];
-    logger.i("csvToCsv command: directory ${outputDirectory} "
+    logger.i("convertToCsv command: directory ${outputDirectory} "
         "startDate: ${startDate.toString()}  "
         "endDate: ${endDate.toString()} -f ${requestedFileType?.name}");
   }
@@ -153,7 +153,7 @@ Future<void> main(List<String> args) async {
         if (fileInput.endsWith('.csv') && row == inputCsvFile.first)
           continue; // header line
         List<String> convertedRow =
-            convertCsvRow(fileType, row, fileInput, images, startDate);
+            convertRow(fileType, row, fileInput, images, startDate);
         if (convertedRow.isNotEmpty) convertedRows.add(convertedRow);
       }
       logger.i(
@@ -229,8 +229,8 @@ Future<void> main(List<String> args) async {
             List<String> newRow = List.from(row);
             // replace by sequential number
             newRow[0] = (seqNumber++).toString();
-            print(
-                "==T=new row: ${newRow[0]} ${newRow[8]} ===oldrow: ${row[0]} ${row[8]}");
+//            print(
+//                "==T=new row: ${newRow[0]} ${newRow[8]} ===oldrow: ${row[0]} ${row[8]}");
             headerRows.add(newRow);
           }
           lastRow = row;
@@ -262,8 +262,8 @@ Future<void> main(List<String> args) async {
           }
           List<String> newRow = List.from(row);
           newRow[0] = seqNumber.toString();
-          print(
-              "==I=new row: ${newRow[0]} ${newRow[8]} ===oldrow: ${row[0]} ${row[8]}");
+          // print(
+          //    "==I=new row: ${newRow[0]} ${newRow[8]} ===oldrow: ${row[0]} ${row[8]}");
           itemRows.add(newRow);
           lastRow = row;
         }

@@ -1957,12 +1957,12 @@ along with this software (see the LICENSE.md file). If not, see
                         entity-name="mantle.ledger.transaction.AcctgTransEntry">
                         <econdition field-name="acctgTransId" from="finDoc.transactionId" />
                     </entity-delete-by-condition>
-                    <log message="attempt to create ${finDoc.items?.size()} items" />
                     <iterate list="finDoc.items" entry="item">
                         <if condition="!item.price">
                             <continue />
                         </if>
-                        <log message="===adding item: ${finDoc.transactionId}" />
+                        <!--log
+                        message="===adding item: ${finDoc.transactionId}" /-->
                         <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
                             in-map="[   acctgTransId: finDoc.transactionId,
                                         glAccountId: item.glAccount.glAccountId,

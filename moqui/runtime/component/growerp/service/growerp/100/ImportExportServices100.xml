@@ -438,7 +438,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
             </if>
             <iterate list="finDocs" entry="finDoc">
-                <log message="processing ${finDoc.pseudoId}" />
                 <script>ec.user.setEffectiveTime(Timestamp.valueOf(finDoc.creationDate))</script>
                 <!-- find partyId of other company-->
                 <if condition="!finDoc.otherCompany.pseudoId &amp;&amp; finDoc.otherCompany.name">
@@ -451,8 +450,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="ownerPartyId" from="ownerPartyId" />
                     </entity-find>
                     <if condition="parties">
-                        <log
-                            message="=====result from: ${finDoc.otherCompany.pseudoId} to ${parties[0].partyId}" />
+                        <!--log
+                            message="=====result from: ${finDoc.otherCompany.pseudoId} to ${parties[0].partyId}" /-->
                         <set field="finDoc.otherCompany.partyId" from="parties[0].partyId" />
                         <else-if
                             condition="finDoc.otherCompany.pseudoId &amp;&amp; finDoc.otherCompany.name">
@@ -487,7 +486,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="finDoc.reference">
                     <if condition="finDoc.docType == 'invoice'">
                         <!-- find transaction for invoice-->
-                        <log message="find transaction for reference: ${finDoc.reference}" />
                         <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
                             list="transactions" for-update="true">
                             <econdition field-name="organizationPartyId" from="companyPartyId" />
@@ -546,8 +544,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <service-call name="growerp.100.ImportExportServices100.import#Payment"
                             in-map="[finDoc: finDoc, classificationId: classificationId]" />
                         <else>
-                            <log
-                                message="===import findocItems: ${finDoc.pseudoId} items price: ${finDoc.items?.price}" />
+                            <!--log
+                                message="===import findocItems: ${finDoc.pseudoId} items price: ${finDoc.items?.price}" /-->
                             <service-call name="growerp.100.FinDocServices100.update#FinDoc"
                                 in-map="[finDoc: finDoc, classificationId: classificationId]" />
                         </else>

@@ -3,7 +3,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'file_type_model.dart';
 
 /// specify columns to columns mapping for every row here
-List<String> convertCsvRow(FileType fileType, List<String> columnsFrom,
+List<String> convertRow(FileType fileType, List<String> columnsFrom,
     String fileName, List<List<String>> images, DateTime? startDate) {
   List<String> columnsTo = [];
   List<String> ids = []; //keep id's to avoid duplicates
@@ -23,6 +23,17 @@ List<String> convertCsvRow(FileType fileType, List<String> columnsFrom,
 
   String dateConvert(String date) {
     if (date.isEmpty) return '';
+    if (date.contains('/')) {
+      // csv file
+      var dateList = date.split('/');
+      var prefix;
+      if (dateList[2] == '99')
+        prefix = '19';
+      else
+        prefix = '20';
+      return "${prefix}${dateList[2]}-${dateList[0].padLeft(2, '0')}-${dateList[1].padLeft(2, '0')}";
+    }
+    // spreadsheet file
     return date.substring(0, 10);
   }
 
@@ -235,7 +246,7 @@ List<String> convertCsvRow(FileType fileType, List<String> columnsFrom,
       if (columnsFrom.length < 33) return [];
 
       columnsTo.add(
-          "${dateConvert(columnsFrom[10])}-${columnsFrom[0]}"); // will be replaced by sequential id
+          "${dateConvert(columnsFrom[5])}-${columnsFrom[3]}"); // will be replaced by sequential id
       columnsTo.add('Order');
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[29]); // product id
@@ -256,7 +267,7 @@ List<String> convertCsvRow(FileType fileType, List<String> columnsFrom,
 
       // just use to combine items, need to replace by seq num
       columnsTo.add(
-          "${dateConvert(columnsFrom[5])}-${columnsFrom[0]}"); // will be replaced by sequential id
+          "${dateConvert(columnsFrom[5])}-${columnsFrom[3]}"); // will be replaced by sequential id
       columnsTo.add('false');
       columnsTo.add('Invoice');
       columnsTo.add('converted');
@@ -276,7 +287,7 @@ List<String> convertCsvRow(FileType fileType, List<String> columnsFrom,
       // 26: descr, 27: accountCode, 28: price, 29: amount, 30: terms
       if (columnsFrom.length < 28) return [];
       columnsTo.add(
-          "${dateConvert(columnsFrom[5])}-${columnsFrom[0]}"); // will be replaced by sequential id
+          "${dateConvert(columnsFrom[5])}-${columnsFrom[3]}"); // will be replaced by sequential id
       columnsTo.add('Invoice');
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[25]); // product id
@@ -374,15 +385,15 @@ List<String> convertCsvRow(FileType fileType, List<String> columnsFrom,
 
       // just use to combine items, need to replace by seq num
       columnsTo.add(
-          "${dateConvert(columnsFrom[6])}-${columnsFrom[0]}"); // will be replaced by sequential id
+          "${dateConvert(columnsFrom[5])}-${columnsFrom[4]}"); // will be replaced by sequential id
       columnsTo.add('true');
       columnsTo.add('Invoice');
       columnsTo.add('converted');
-      columnsTo.add(dateConvert(columnsFrom[6]));
+      columnsTo.add(dateConvert(columnsFrom[5]));
       columnsTo.add('');
       columnsTo.add(columnsFrom[1]);
       columnsTo.add(columnsFrom[2]);
-      columnsTo.add(columnsFrom[3]); // put refnum here
+      columnsTo.add(columnsFrom[4]); // put refnum here
       return columnsTo;
 
     case FileType.finDocInvoiceSaleItem:
@@ -392,7 +403,7 @@ List<String> convertCsvRow(FileType fileType, List<String> columnsFrom,
       // 32: descr, 33: accountCode, 34: price, 36: amount, 30: terms
       if (columnsFrom.length < 30) return [];
       columnsTo.add(
-          "${dateConvert(columnsFrom[6])}-${columnsFrom[0]}"); // will be replaced by sequential id
+          "${dateConvert(columnsFrom[5])}-${columnsFrom[4]}"); // will be replaced by sequential id
       columnsTo.add('Invoice');
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[30]); // product id

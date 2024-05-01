@@ -90,7 +90,7 @@
             ]
         },
         {
-            "name": "csvToCSv",
+            "name": "convertToCSv",
             "type": "dart",
             "request": "launch",
             "cwd": "flutter/packages/growerp/bin",
