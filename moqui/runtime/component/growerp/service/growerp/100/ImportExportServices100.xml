@@ -497,25 +497,6 @@ along with this software (see the LICENSE.md file). If not, see
                             <log level="warn"
                                 message="Import : could not find invoice ${result.finDoc.invoiceId} reference ${finDoc.reference}" />
                             <else>
-                                <!-- check company name-->
-                                <if
-                                    condition="finDoc.otherCompany.partyId == transactions[0].otherPartyId">
-                                    <log
-                                        message="transaction found but company wrong: trans: ${transactions[0].otherPartyId} invoice: ${finDoc.otherCompany.partyId}" />
-                                    <!-- search for one week after invoice date-->
-                                    <entity-find
-                                        entity-name="mantle.ledger.transaction.AcctgTrans"
-                                        list="transactions1" for-update="true">
-                                        <econdition field-name="organizationPartyId"
-                                            from="companyPartyId" />
-                                        <econdition field-name="otherPartyId"
-                                            from="finDoc.otherCompany.partyId" />
-                                        <econdition field-name="transactionDate" operator="greater"
-                                            from="Timestamp(Date.parse('yyyy-MM-dd', finDoc.creationDate).getTime())" />
-                                        <econdition field-name="transactionDate" operator="less"
-                                            from="Timestamp(Date.parse('yyyy-MM-dd', finDoc.creationDate).add(7).getTime())" />
-                                    </entity-find>
-                                </if>
                                 <if condition="!transactions[0].invoiceId">
                                     <!-- ok found empty transaction -->
                                     <set field="transactions[0].invoiceId"

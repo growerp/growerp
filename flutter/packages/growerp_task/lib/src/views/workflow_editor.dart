@@ -118,10 +118,6 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
                             position)));
                 tasks = syncTasks(dashboard.elements, tasks);
               },
-              onDashboardSecondaryLongTapped: ((context, position) {
-                debugPrint(
-                    'Dashboard long tapped with mouse right click $position');
-              }),
               onElementLongPressed: (context, position, element) {
                 debugPrint('Element with "${element.text}" text '
                     'long pressed');

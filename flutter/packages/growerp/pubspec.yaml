@@ -13,7 +13,7 @@ executables:
 environment: 
   sdk: '>=3.2.6 <4.0.0'
 dependencies: 
-  dcli: ^3.3.5
+  dcli: ^3.2.0
   dio: ^5.4.1
   fast_csv: ^0.2.6
   get_it: ^7.6.4
@@ -22,6 +22,7 @@ dependencies:
   logger: ^2.0.2+1
   retrofit: ^4.0.3
   pretty_dio_logger: ^1.3.1
+  spreadsheet_decoder: ^2.2.0
 
 dev_dependencies:
   lint_hard: ^4.0.0

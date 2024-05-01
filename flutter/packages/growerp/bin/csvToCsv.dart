@@ -19,6 +19,7 @@ import 'package:dcli/dcli.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
 import 'package:growerp_models/growerp_models.dart';
 import 'package:logger/logger.dart';
+import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 import '../lib/src/src.dart';
 
 var logger = Logger(filter: MyFilter());
@@ -113,28 +114,46 @@ Future<void> main(List<String> args) async {
     }
     if (files.isEmpty) {
       logger.e(
-          "No ${searchFiles.join()} csv files found in directory ${args[0]}, skipping");
+          "No ${searchFiles.join()} files found in directory ${args[0]}, skipping");
     }
 
-    // convert rows
+    // convert from CSV or XLSX or ODF to CSV rows
+    List<List<String>> inputCsvFile = [];
     List<List<String>> convertedRows = [];
     for (String fileInput in files) {
+      String fileContent = '';
       logger.i("Processing filetype: ${fileType.name} file: ${fileInput}");
-      // parse raw csv file string
-      String contentString = File(fileInput).readAsStringSync();
+      if (fileInput.endsWith('.csv')) {
+        // parse raw csv file string
+        fileContent = File(fileInput).readAsStringSync();
+      }
+      if (fileInput.endsWith('.ods') || fileInput.endsWith('.xlsx')) {
+        // convert spreadsheet to csv
+        var bytes = File(fileInput).readAsBytesSync();
+        var decoder = SpreadsheetDecoder.decodeBytes(bytes);
+        final buffer = StringBuffer();
+        decoder.tables.forEach((key, value) {
+          value.rows.forEach((row) {
+            List<String> rows = [];
+            row.forEach((element) {
+              rows.add(element == null ? '' : '$element');
+            });
+            buffer.write(createCsvRow(rows, row.length));
+          });
+        });
+        fileContent = buffer.toString();
+      }
       // general changes in content
-      contentString = convertFile(fileType, contentString, fileInput);
-
-      // parse input file
-      List<List<String>> inputCsvFile = fast_csv.parse(contentString);
-      // convert rows
+      fileContent = convertFile(fileType, fileContent, fileInput);
+      // parse input file and convert rows
       int index = 0;
+      inputCsvFile = fast_csv.parse(fileContent);
       for (final row in inputCsvFile) {
         if (++index % 10000 == 0) print("processing row: $index");
-        if (row == inputCsvFile.first) continue; // header line
+        if (fileInput.endsWith('.csv') && row == inputCsvFile.first)
+          continue; // header line
         List<String> convertedRow =
             convertCsvRow(fileType, row, fileInput, images, startDate);
-        // print("==old: $row new: $convertedRow");
         if (convertedRow.isNotEmpty) convertedRows.add(convertedRow);
       }
       logger.i(
@@ -210,6 +229,8 @@ Future<void> main(List<String> args) async {
             List<String> newRow = List.from(row);
             // replace by sequential number
             newRow[0] = (seqNumber++).toString();
+            print(
+                "==T=new row: ${newRow[0]} ${newRow[8]} ===oldrow: ${row[0]} ${row[8]}");
             headerRows.add(newRow);
           }
           lastRow = row;
@@ -241,6 +262,8 @@ Future<void> main(List<String> args) async {
           }
           List<String> newRow = List.from(row);
           newRow[0] = seqNumber.toString();
+          print(
+              "==I=new row: ${newRow[0]} ${newRow[8]} ===oldrow: ${row[0]} ${row[8]}");
           itemRows.add(newRow);
           lastRow = row;
         }

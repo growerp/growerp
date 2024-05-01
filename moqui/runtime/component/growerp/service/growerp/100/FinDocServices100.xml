@@ -544,10 +544,10 @@ along with this software (see the LICENSE.md file). If not, see
                         entity-name="growerp.account.InvoiceItemsAndParties" list="items">
                         <econdition field-name="invoiceId" from="finDocId" ignore-if-empty="true" />
                         <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
-                        <econdition field-name="fromPartyId" from="vendorPartyId"
-                            ignore-if-empty="true" />
-                        <econdition field-name="toPartyId" from="customerPartyId"
-                            ignore-if-empty="true" />
+                        <econditions combine="or">
+                            <econdition field-name="fromPartyId" from="companyPartyId" />
+                            <econdition field-name="toPartyId" from="companyPartyId" />
+                        </econditions>
                         <order-by field-name="invoiceItemSeqId" />
                     </entity-find>
                     <if condition="!items">
@@ -701,10 +701,10 @@ along with this software (see the LICENSE.md file). If not, see
                         entity-name="growerp.order.PaymentAndInfo" list="items">
                         <econdition field-name="paymentId" from="finDocId" ignore-if-empty="true" />
                         <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
-                        <econdition field-name="fromPartyId" from="customerPartyId"
-                            ignore-if-empty="true" />
-                        <econdition field-name="toPartyId" from="vendorPartyId"
-                            ignore-if-empty="true" />
+                        <econditions combine="or">
+                            <econdition field-name="fromPartyId" from="companyPartyId" />
+                            <econdition field-name="toPartyId" from="companyPartyId" />
+                        </econditions>
                     </entity-find>
                     <!-- sales field is optional with single document-->
                     <if condition="items &amp;&amp; sales == null">
@@ -1845,7 +1845,8 @@ along with this software (see the LICENSE.md file). If not, see
                         </econditions>
                     </entity-find>
                     <if condition="!check">
-                        <return message="Update Invoice ${finDoc.invoiceId} not found!" />
+                        <return
+                            message="Update Invoice ${finDoc.invoiceId} for company: ${companyPartyId} not found!" />
                     </if>
                     <service-call name="growerp.100.FinDocServices100.update#Invoice"
                         in-map="[invoice: finDoc]" />
