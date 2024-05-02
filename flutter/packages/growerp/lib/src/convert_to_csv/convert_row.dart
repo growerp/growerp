@@ -304,8 +304,9 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 12: memo // contains reference to invoice/order,  13: cash accountCode,
       // 14: total amount, 18: date cleared, 20: acct Transaction invoiceId, 21: discount Amount
       if (columnsFrom.length < 21) return [];
+      // date/checknumber is key here because checknumber is reference in ledger
       columnsTo.add(
-          "${dateConvert(columnsFrom[11])}-${columnsFrom[0]}"); // will be replaced by sequential id
+          "${dateConvert(columnsFrom[11])}-${columnsFrom[10]}"); // will be replaced by sequential id
       columnsTo.add('false');
       columnsTo.add('Payment');
       columnsTo.add('converted');
@@ -316,7 +317,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add(columnsFrom[20] != ''
           ? columnsFrom[20]
           : columnsFrom[12]); // trans invoice id in reference
-      columnsTo.add(columnsFrom[10]);
+      columnsTo.add(columnsFrom[10]); // checknumber
       String amount = columnsFrom[14].replaceAll('-', ''); // check number
       columnsTo.add(amount); // total amount
       if (amount == '0' || amount == '' || double.tryParse(amount) == null)
@@ -329,7 +330,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 24: productId, 23: quantity, 25: description 26: accountCode, 28: price
       if (columnsFrom.length < 28) return [];
       columnsTo.add(
-          "${dateConvert(columnsFrom[11])}-${columnsFrom[0]}"); // will be replaced by sequential id
+          "${dateConvert(columnsFrom[11])}-${columnsFrom[10]}"); // will be replaced by sequential id
       columnsTo.add('Payment');
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[24]); // product id
@@ -423,7 +424,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       if (columnsFrom.length < 22) return [];
 
       columnsTo.add(
-          "${dateConvert(columnsFrom[5])}-${columnsFrom[0]}"); // will be replaced by sequential id
+          "${dateConvert(columnsFrom[5])}-${columnsFrom[4]}"); // will be replaced by sequential id
       columnsTo.add('true');
       columnsTo.add('Payment');
       columnsTo.add('converted');
@@ -431,7 +432,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add('');
       columnsTo.add(columnsFrom[1]);
       columnsTo.add(columnsFrom[2]);
-      columnsTo.add(columnsFrom[4]); // trans invoice id in reference
+      columnsTo.add(columnsFrom[4]); // ledger reference
       columnsTo.add('');
       String amount = columnsFrom[21].replaceAll('-', ''); // check number
       columnsTo.add(amount); // total amount

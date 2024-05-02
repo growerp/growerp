@@ -873,6 +873,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="typeId" field="acctgTransTypeEnumId" entity-alias="ATX" />
         <alias name="transactionDate" entity-alias="ATX" />
         <alias name="isPosted" entity-alias="ATX" />
+        <alias name="reference" field="theirAcctgTransId" entity-alias="ATX" />
         <alias name="journalId" field="glJournalId" entity-alias="JRNL" />
         <alias name="journalName" field="glJournalName" entity-alias="JRNL" />
         <alias name="entryId" field="acctgTransEntrySeqId" entity-alias="ATE" />

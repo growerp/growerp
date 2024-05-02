@@ -493,7 +493,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </entity-find>
                         <if condition="!transactions">
                             <log level="warn"
-                                message="Import : could not find invoice ${result.finDoc.invoiceId} reference ${finDoc.reference}" />
+                                message="Import : could not find ${finDoc.sales?'sales':'purchase'} invoice ${result.finDoc.invoiceId} reference ${finDoc.reference}" />
                             <else>
                                 <if condition="!transactions[0].invoiceId">
                                     <!-- ok found empty transaction -->
@@ -502,11 +502,63 @@ along with this software (see the LICENSE.md file). If not, see
                                     <entity-update value-field="transactions[0]" />
                                     <else>
                                         <log level="warn"
-                                            message="Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has invoiceId: ${transactions[0].invoiceId} cannot add ${result.finDoc.invoiceId} reference: ${finDoc.reference} otherCompany: ${finDoc.otherCompany.partyId} trans: ${transactions[0].otherPartyId}" />
+                                            message="Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has invoiceId: ${transactions[0].invoiceId} cannot add ${finDoc.sales?'sales':'purchase'} ${result.finDoc.invoiceId} reference: ${finDoc.reference} otherCompany: ${finDoc.otherCompany.partyId} trans other partyId: ${transactions[0].otherPartyId}" />
                                     </else>
                                 </if>
                             </else>
                         </if>
+                    </if>
+                    <!-- incoming payments /receipts-->
+                    <if condition="finDoc.docType == 'payment'">
+                        <!-- find transaction for payment-->
+                        <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
+                            list="transactions" for-update="true">
+                            <econdition field-name="organizationPartyId" from="companyPartyId" />
+                            <econdition field-name="theirAcctgTransId" from="finDoc.reference" />
+                            <econdition field-name="otherPartyId" from="finDoc.otherCompany.partyId" />
+                        </entity-find>
+                        <if condition="!transactions">
+                            <log level="warn"
+                                message="Import : could not find ${finDoc.sales?'sales':'purchase'} payment ${result.finDoc.paymentId} reference ${finDoc.reference}  otherCompany: ${finDoc.otherCompany.partyId} " />
+                            <else>
+                                <if condition="!transactions[0].paymentId">
+                                    <!-- ok found empty transaction -->
+                                    <set field="transactions[0].paymentId"
+                                        from="result.finDoc.paymentId" />
+                                    <entity-update value-field="transactions[0]" />
+                                    <else>
+                                        <log level="warn"
+                                            message="Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has ${finDoc.sales?'sales':'purchase'} paymentId: ${transactions[0].paymentId} cannot add ${result.finDoc.paymentId} reference: ${finDoc.reference} otherCompany: ${finDoc.otherCompany.partyId} trans other partyId: ${transactions[0].otherPartyId}" />
+                                    </else>
+                                </if>
+                            </else>
+                        </if>
+                    </if>
+                </if>
+                <!-- for payment use check number as reference into the ledger -->
+                <if
+                    condition="finDoc.docType == 'payment' &amp;&amp; finDoc.paymentMethod?.checkNumber">
+                    <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
+                        list="transactions" for-update="true">
+                        <econdition field-name="organizationPartyId" from="companyPartyId" />
+                        <econdition field-name="theirAcctgTransId"
+                            from="finDoc.paymentMethod?.checkNumber" />
+                    </entity-find>
+                    <if condition="!transactions">
+                        <log level="warn"
+                            message="Import : could not find ${finDoc.sales?'sales':'purchase'} payment ${result.finDoc.paymentId} checknumber ${finDoc.paymentMethod?.checkNumber}" />
+                        <else>
+                            <if condition="!transactions[0].paymentId">
+                                <!-- ok found empty transaction -->
+                                <set field="transactions[0].paymentId"
+                                    from="result.finDoc.invoiceId" />
+                                <entity-update value-field="transactions[0]" />
+                                <else>
+                                    <log level="warn"
+                                        message="Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has invoiceId: ${transactions[0].invoiceId} cannot add ${result.finDoc.sales?'sales':'purchase'} ${result.finDoc.invoiceId} reference: ${finDoc.reference} otherCompany: ${finDoc.otherCompany.partyId} trans: ${transactions[0].otherPartyId}" />
+                                </else>
+                            </if>
+                        </else>
                     </if>
                 </if>
             </iterate>
@@ -540,16 +592,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="finDoc.docType == 'transaction'">
                         <set field="finDoc.isPosted" value="true" type="Boolean" />
                     </if>
-                    <if condition="finDoc.docType == 'payment'">
-                        <service-call name="growerp.100.ImportExportServices100.import#Payment"
-                            in-map="[finDoc: finDoc, classificationId: classificationId]" />
-                        <else>
-                            <!--log
-                                message="===import findocItems: ${finDoc.pseudoId} items price: ${finDoc.items?.price}" /-->
-                            <service-call name="growerp.100.FinDocServices100.update#FinDoc"
-                                in-map="[finDoc: finDoc, classificationId: classificationId]" />
-                        </else>
-                    </if>
+                    <!--log
+                    message="===import findocItems: ${finDoc.pseudoId} items price:
+                    ${finDoc.items?.price}" /-->
+                    <service-call name="growerp.100.FinDocServices100.update#FinDoc"
+                        in-map="[finDoc: finDoc, classificationId: classificationId]" />
                     <set field="itemsOut" from="[]" />
                 </if>
                 <if condition="!lastItem || lastItem.pseudoId != item.pseudoId">
@@ -643,14 +690,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="finDocs[0].isPosted" value="true" type="Boolean" />
                     </if>
                     <!-- add findoc items-->
-                    <if condition="finDocs[0].docType == 'payment'">
-                        <service-call name="growerp.100.ImportExportServices100.import#Payment"
-                            in-map="[finDoc: finDocs[0], classificationId: classificationId]" />
-                        <else>
-                            <service-call name="growerp.100.FinDocServices100.update#FinDoc"
-                                in-map="[finDoc: finDocs[0], classificationId: classificationId]" />
-                        </else>
-                    </if>
+                    <service-call name="growerp.100.FinDocServices100.update#FinDoc"
+                        in-map="[finDoc: finDocs[0], classificationId: classificationId]" />
                     <else>
                         <return error="true"
                             message="Could not find ${item.docType} ${item.pseudoId}!" />
@@ -663,62 +704,6 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- end of service result -->
             <if condition="!ec.message.hasError()">
                 <message type="success">${finDocItems?.size()} findoc items ${finDocItems[0].docType} imported</message>
-            </if>
-        </actions>
-    </service>
-
-    <service verb="import" noun="Payment" transaction-timeout="3600">
-        <description>Special import for payment. some other ERP system allow items
-            on payments like on a invoice, not in growerp/moqui so we need to make an
-            extra invoice for this.
-        </description>
-        <in-parameters>
-            <parameter name="finDoc" required="true" type="Map" />
-            <parameter name="classificationId" required="true" />
-        </in-parameters>
-        <actions>
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <service-call name="growerp.100.FinDocServices100.update#FinDoc"
-                in-map="[finDoc: finDoc, classificationId: classificationId]"
-                out-map="payment" />
-
-            <if condition="!finDoc.reference &amp;&amp; finDoc.items.size() &gt; 1">
-                <!-- if no related invoice and items, convert to invoice and create -->
-                <service-call name="growerp.100.FinDocServices100.create#FinDoc"
-                    in-map="[finDoc: finDoc + [docType: 'invoice', sales: !finDoc.sales]]"
-                    out-map="invoice" />
-                <service-call
-                    name="mantle.account.PaymentServices.apply#InvoicePayment"
-                    in-map="[paymentId: payment.finDoc.paymentId,
-                            invoiceId: invoice.finDoc.invoiceId]" />
-                <else>
-                    <!-- reference points to existing transaction which could contain
-                        invoiceId-->
-                    <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
-                        list="transactions" for-update="true">
-                        <econdition field-name="organizationPartyId" from="companyPartyId" />
-                        <econdition field-name="theirAcctgTransId" from="finDoc.reference" />
-                    </entity-find>
-                    <if condition="!transactions">
-                        <log level="warn"
-                            message="could not find invoice transaction of payment reference ${finDoc.reference}" />
-                        <else>
-                            <if condition="!transactions[0].invoiceId">
-                                <log level="warn"
-                                    message="Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} does not have a related invoiceId: ${finDoc.reference}" />
-                                <else>
-                                    <!-- connect payment to invoice-->
-                                    <service-call
-                                        name="mantle.account.PaymentServices.apply#InvoicePayment"
-                                        in-map="[paymentId: payment.finDoc.paymentId,
-                                                invoiceId: transactions[0].invoiceId]" />
-                                </else>
-                            </if>
-                        </else>
-                    </if>
-
-                </else>
             </if>
         </actions>
     </service>
