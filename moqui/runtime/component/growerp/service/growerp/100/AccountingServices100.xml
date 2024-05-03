@@ -209,10 +209,15 @@ along with this software (see the LICENSE.md file). If not, see
                 type="NewMap" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="year">
+                <set field="year" value="%${year}%" />
+            </if>
+            <log message="get time period $periodType comp: $companyPartyId year: $year" />
             <entity-find entity-name="growerp.party.time.TimePeriodChildAndType" list="periods">
                 <econdition field-name="partyId" from="companyPartyId" />
                 <econdition field-name="timePeriodTypeId" from="typeConvert[periodType]" />
-                <econdition field-name="periodName" operator="like" value="%${year}%" />
+                <econdition field-name="periodName" operator="like" from="year"
+                    ignore-if-empty="true" />
                 <order-by field-name="periodName" />
             </entity-find>
             <set field="timePeriods" from="[]" />
@@ -450,8 +455,6 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="glAccountCodeMask"
                 from="partyAcctgPreference?.glAccountCodeMask ?: ec.user.getPreference('GlAccountCodeMask')" />
             <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')" />
-            <!--log
-            message="====run balance sheet out: ${classInfoById}"/-->
             <script>
                 def currencyFormat = currencyFormat ?: "#,##0.00";
 
