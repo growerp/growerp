@@ -4,37 +4,30 @@ Let us know if you have suggestions at support@growerp.com
 
 ## Functional requests
 
-* Follow up emails for users not logging on anymore
-* Create an accounting setup to:
-	* Select the ledger organization or upload your own.
-		* Default as is now
-		* USA version
-		* Thailand BOI version.
-	* Be able to maintain the automatic posting configuration.
-	* Access to the error journal of failed postings
-	* automatically add new timeperiod in new year
-* Extend the growerp.com website to offer growerp as a SAAS
-* Update the freelancer app
+* Update the freelancer app with a project manager
 * Create a manufacturing app
 * Create a logistic app
-
 ## Technical internal requests
 * Introduction of a new router: [go_router](https://pub.dev/packages/go_router)
-* [Reusable blocs](https://itnext.io/flutter-blocs-at-scale-2-keeping-blocs-lean-1b659536e3ec)
 * [Dart macros](https://news.ycombinator.com/item?id=39174612) to replace `freezed` and `json_serializable`
 * Separate the order/accounting package
-* Move flutter chat and tasking into their own package.
+* Move flutter chat into their own package.
 * Deep linking into the Android/IOS apps so they can also be used with your own backend.
 * Keep the system updated with the latest Flutter/dart releases, [Flutter roadmap is here](https://github.com/flutter/flutter/wiki/Roadmap)
 * [Wasm, Web Assembly is upcoming](https://docs.flutter.dev/development/platform-integration/web/wasm)
 
 # Releases
 
-## Conversion framework && Test-ability release February 1024(v1.4.0)
-1. Running all integration tests in a single docker compose file with back-end and database
-2. Created a data conversion framework: a 2 step process to import existing data.
-3. Documents(invoice/payment/order/transaction) now have sequential or customized numbering.
-4. Started a Accounting setup, first option 'Time periods'
+## Conversion Framework & Workflow(Exp) release May 10 2024 (v1.4.0 for Flutter 3.16.9)
+1. Created an initial version of a workflow system with graphical editor in a new package growerp_tasks.
+2. Created a data conversion framework: a 2 step process to import existing data from CSV or spreadsheet (ODS/XSLS)
+3. Documents(invoice/payment/order/transaction) and  product/category now have sequential or customized numbering.
+4. Added an accounting setup: Time periods, payment and invoice type for auto posting
+5. Added accounting reports: balance sheet and balance summary with period selection.
+6. Improved system result/confirmation messages.
+7. Refactored BlocProviders and moved blocs into their own package.
+8. Background automated integration test in the flutter directory using docker.
+9. Fully automated installation at the test system growerp.org using Docker.
 ## Small fix release December 15, 2023(v1.3.0)
 1. Fixed the general growerp install command
 2. fixed reset password.

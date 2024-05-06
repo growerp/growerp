@@ -443,6 +443,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <service name="growerp.100.ImportExportServices100.export#Website" />
                 </method>
             </resource>
+            <resource name="finalizeImport">
+                <method type="post">
+                    <service name="growerp.100.ImportExportServices100.finalize#Import" />
+                </method>
+            </resource>
         </resource>
     </resource>
     <!-- Antwebsystems website -->

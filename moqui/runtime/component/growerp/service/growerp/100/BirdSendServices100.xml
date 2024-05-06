@@ -50,7 +50,7 @@ along with this software (see the LICENSE.md file). If not, see
                 Map result = sendGET("v1/sequences")
 
                 if (result?.data == null) {
-                    logger.info("Getting sequences from birdsend did not work, result: $result");
+                    logger.info("Getting sequences from birdsend did not work Api Key expired?, result: $result");
                     return
                 }
 

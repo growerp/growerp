@@ -341,6 +341,11 @@ abstract class RestClient {
   Future<void> importFinDocItem(
       @Field() List<FinDocItem> finDocItems, @Field() String classificationId);
 
+  // finalize import
+  @POST("rest/s1/growerp/100/ImportExport/finalizeImport")
+  @Extra({'requireApiKey': true})
+  Future<void> finalizeImport();
+
   // Inventory locations
   @GET("rest/s1/growerp/100/Location")
   @Extra({'requireApiKey': true})

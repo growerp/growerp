@@ -210,6 +210,13 @@ Future<void> main(List<String> args) async {
               "Importing filetype: ${fileType.name} Error: ${getDioError(e)}");
         }
         break;
+      //===================== finalize imported documents=====================
+      case 'finalize':
+        final client = RestClient(await buildDioClient(backendUrl,
+            timeout: Duration(seconds: timeout), miniLog: true));
+        await login(client);
+        client.finalizeImport();
+        break;
       //============================= export =================================
       case 'export':
         FileType fileType = FileType.unknown;

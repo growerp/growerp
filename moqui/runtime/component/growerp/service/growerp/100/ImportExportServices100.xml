@@ -708,6 +708,82 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="finalize" noun="Import">
+        <description> Post imported findocs of which the status is not finalized and already have a link
+            in the ledger so the status will update but will not change the ledger</description>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <!-- invoices -->
+            <entity-find entity-name="mantle.account.invoice.Invoice" for-update="true"
+                list="invoices">
+                <econditions combine="or">
+                    <econdition field-name="fromPartyId" from="companyPartyId" />
+                    <econdition field-name="toPartyId" from="companyPartyId" />
+                </econditions>
+                <econdition field-name="statusId" value="InvoiceInProcess" />
+                <econdition field-name="statusId" value="InvoiceIncoming" />
+            </entity-find>
+            <set field="updatedCount" value="0" type="Integer" />
+            <set field="notFoundCount" value="0" type="Integer" />
+            <iterate list="invoices" entry="invoice">
+                <!-- check if referenced in the ledger-->
+                <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transList">
+                    <econdition field-name="organizationPartyId" from="companyPartyId" />
+                    <econdition field-name="invoiceId" from="invoice.invoiceId" />
+                </entity-find>
+                <if condition="transList">
+                    <if condition="invoice.statusId == 'InvoiceInProcess'">
+                        <set field="statusId1" value="InvoiceFinalized" />
+                        <set field="statusId2" value="InvoiceSend" />
+                        <else>
+                            <set field="statusId1" value="InvoiceReceived" />
+                            <set field="statusId2" value="InvoiceApproved" />
+                        </else>
+                    </if>
+                    <service-call name="update#mantle.account.invoice.Invoice"
+                        in-map="[invoiceId: invoice.invoiceId, statusId: statusId1]" />
+                    <service-call name="update#mantle.account.invoice.Invoice"
+                        in-map="[invoiceId: invoice.invoiceId, statusId: statusId2]" />
+                    <set field="updatedCount" from="updatedCount++" />
+                    <else>
+                        <set field="notFoundCount" from="notFoundCount++" />
+                    </else>
+                </if>
+            </iterate>
+            <log
+                message="${invoices.size()} not completed invoices found ${updatedCount} updated, ${notFoundCount} not found in ledger" />
+            <!-- payments -->
+            <entity-find entity-name="mantle.account.payment.Payment" for-update="true"
+                list="payments">
+                <econditions combine="or">
+                    <econdition field-name="fromPartyId" from="companyPartyId" />
+                    <econdition field-name="toPartyId" from="companyPartyId" />
+                </econditions>
+                <econdition field-name="statusId" value="PmntPromised" />
+            </entity-find>
+            <set field="updatedCount" value="0" type="Integer" />
+            <iterate list="payments" entry="payment">
+                <!-- check if referenced in the ledger-->
+                <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transList">
+                    <econdition field-name="organizationPartyId" from="companyPartyId" />
+                    <econdition field-name="paymentId" from="payment.paymentId" />
+                </entity-find>
+                <if condition="transList">
+                    <set field="payment.statusId" value="PmntConfirmed" />
+                    <service-call name="update#mantle.account.payment.Payment"
+                        in-map="[paymentId: payment.paymentId, statusId: statusId1]" />
+                    <set field="updatedCount" from="updatedCount++" />
+                    <else>
+                        <set field="notFoundCount" from="notFoundCount++" />
+                    </else>
+                </if>
+            </iterate>
+            <log
+                message="${payments.size()} not completed payments found ${updatedCount} updated, ${notFoundCount} not found in ledger" />
+        </actions>
+    </service>
+
     <!-- depreciated, just used by the screens-->
     <service verb="import" noun="Entities">
         <description> Import general entities</description>
