@@ -447,6 +447,10 @@ abstract class RestClient {
     @Query('periodName') String? periodName,
   });
 
+  @GET("rest/s1/growerp/100/OperatingRevenueExpenseChart")
+  @Extra({'requireApiKey': true})
+  Future<LedgerReport> getOperatingRevenueExpenseChart();
+
   @GET("rest/s1/growerp/100/AccountClass")
   @Extra({'requireApiKey': true})
   Future<AccountClasses> getAccountClass({

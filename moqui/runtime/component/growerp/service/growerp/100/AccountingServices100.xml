@@ -524,6 +524,37 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="get" noun="OperatingRevenueExpenseChart">
+        <description>Create data for the above report</description>
+        <actions>
+            <script>
+                datasets = [
+                        [classGroupEnumId:'EngGlcNetRevenue'],
+                        [label:'Cost of Sales', classes:['COST_OF_SALES'], stack:'Expense'],
+                        [label:'Sales Expense', classes:['SALES_EXPENSE'], stack:'Expense'],
+                        [label:'Gen/Admin Expense', classes:['GEN_ADMIN_EXPENSE'], stack:'Expense'],
+                        [label:'Other Expense', classes:['CONTRIBUTIONS', 'NON_CASH_EXPENSE'], stack:'Expense'],
+                        [classGroupEnumId:'EngGlcNetOpIncome', type:'line', fill:false]
+                ]
+            </script>
+            <service-call name="mantle.party.TimeServices.find#PartyTimePeriodGroups"
+                out-map="periodsOut"
+                in-map="[partyId:organizationPartyId, timePeriodTypeId:timePeriodTypeId, thruDate:thruDate, groups:(periods?:13)]" />
+            <if condition="periodsOut.timePeriodGroups">
+                <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummary"
+                    out-map="context"
+                    in-map="[organizationPartyId:organizationPartyId, timePeriodGroups:periodsOut.timePeriodGroups, datasets:datasets]" />
+
+                <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummaryRows"
+                    out-map="context" in-map="context" />
+                <set field="revenueExpenseCsv" from="rowsList.collect({ it.join(',') }).join('\n')" />
+                <iterate list="rowsList" entry="row">
+                    <log message="Row ${row_index}: ${row}" />
+                </iterate>
+            </if>
+        </actions>
+    </service>
+
     <service verb="get" noun="Ledger">
         <out-parameters>
             <parameter name="ledgerReport" type="Map">
