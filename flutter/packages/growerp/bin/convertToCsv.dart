@@ -227,8 +227,11 @@ Future<void> main(List<String> args) async {
           if (row[0].isEmpty) continue;
           if (lastRow.isEmpty || row[0] != lastRow[0]) {
             List<String> newRow = List.from(row);
-            // replace by sequential number
-            newRow[0] = (seqNumber++).toString();
+            // replace by sequential number when not invoice
+            if (fileType != FileType.finDocInvoiceSale &&
+                fileType != FileType.finDocInvoicePurchase) {
+              newRow[0] = (seqNumber++).toString();
+            }
 //            print(
 //                "==T=new row: ${newRow[0]} ${newRow[8]} ===oldrow: ${row[0]} ${row[8]}");
             headerRows.add(newRow);
@@ -261,7 +264,11 @@ Future<void> main(List<String> args) async {
             seqNumber++;
           }
           List<String> newRow = List.from(row);
-          newRow[0] = seqNumber.toString();
+          // replace by sequential number when not invoice
+          if (fileType != FileType.finDocInvoiceSaleItem &&
+              fileType != FileType.finDocInvoicePurchaseItem) {
+            newRow[0] = seqNumber.toString();
+          }
           // print(
           //    "==I=new row: ${newRow[0]} ${newRow[8]} ===oldrow: ${row[0]} ${row[8]}");
           itemRows.add(newRow);

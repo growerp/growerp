@@ -537,9 +537,11 @@ along with this software (see the LICENSE.md file). If not, see
                         [classGroupEnumId:'EngGlcNetOpIncome', type:'line', fill:false]
                 ]
             </script>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="mantle.party.TimeServices.find#PartyTimePeriodGroups"
                 out-map="periodsOut"
-                in-map="[partyId:organizationPartyId, timePeriodTypeId:timePeriodTypeId, thruDate:thruDate, groups:(periods?:13)]" />
+                in-map="[partyId:companyPartyId, timePeriodTypeId:timePeriodTypeId, thruDate:thruDate, groups:(periods?:13)]" />
             <if condition="periodsOut.timePeriodGroups">
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummary"
                     out-map="context"

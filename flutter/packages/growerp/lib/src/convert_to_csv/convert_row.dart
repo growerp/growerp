@@ -266,8 +266,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       if (columnsFrom.length < 18) return [];
 
       // just use to combine items, need to replace by seq num
-      columnsTo.add(
-          "${dateConvert(columnsFrom[5])}-${columnsFrom[3]}"); // will be replaced by sequential id
+      columnsTo.add(columnsFrom[3]); // will be replaced by sequential id
       columnsTo.add('false');
       columnsTo.add('Invoice');
       columnsTo.add('converted');
@@ -286,8 +285,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 7: item number, 24: quantity, 25: productId,
       // 26: descr, 27: accountCode, 28: price, 29: amount, 30: terms
       if (columnsFrom.length < 28) return [];
-      columnsTo.add(
-          "${dateConvert(columnsFrom[5])}-${columnsFrom[3]}"); // will be replaced by sequential id
+      columnsTo.add(columnsFrom[3]); // will be replaced by sequential id
       columnsTo.add('Invoice');
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[25]); // product id
@@ -322,6 +320,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add(amount); // total amount
       if (amount == '0' || amount == '' || double.tryParse(amount) == null)
         return []; // ignore records with zero/invalid amounts
+      columnsTo.add(columnsFrom[20]); // for invoice in classification
       return columnsTo;
 
     case FileType.finDocPaymentPurchaseItem: // just a single record for amount
@@ -385,16 +384,17 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 32: descr, 33: accountCode, 34: price, 36: amount, 30: terms
 
       // just use to combine items, need to replace by seq num
-      columnsTo.add(
-          "${dateConvert(columnsFrom[5])}-${columnsFrom[4]}"); // will be replaced by sequential id
+      columnsTo.add(columnsFrom[3]);
       columnsTo.add('true');
       columnsTo.add('Invoice');
       columnsTo.add('converted');
-      columnsTo.add(dateConvert(columnsFrom[5]));
+      columnsTo.add(dateConvert(columnsFrom[6]));
       columnsTo.add('');
       columnsTo.add(columnsFrom[1]);
       columnsTo.add(columnsFrom[2]);
-      columnsTo.add(columnsFrom[4]); // put refnum here
+      columnsTo.add(columnsFrom[3]); // put refnum here
+      columnsTo.add('');
+      columnsTo.add('');
       return columnsTo;
 
     case FileType.finDocInvoiceSaleItem:
@@ -403,8 +403,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 28: quantity, 30: productId,
       // 32: descr, 33: accountCode, 34: price, 36: amount, 30: terms
       if (columnsFrom.length < 30) return [];
-      columnsTo.add(
-          "${dateConvert(columnsFrom[5])}-${columnsFrom[4]}"); // will be replaced by sequential id
+      columnsTo.add(columnsFrom[3]); // will be replaced by sequential id
       columnsTo.add('Invoice');
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[30]); // product id
@@ -436,6 +435,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add('');
       String amount = columnsFrom[21].replaceAll('-', ''); // check number
       columnsTo.add(amount); // total amount
+      columnsTo.add(columnsFrom[14]); // for invoice in classification
       return columnsTo;
 
     case FileType.finDocPaymentSaleItem: // just a single record for amount

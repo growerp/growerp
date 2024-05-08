@@ -483,8 +483,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <service-call name="growerp.100.FinDocServices100.create#FinDoc"
                     in-map="[finDoc: finDoc, classificationId: classificationId]" out-map="result" />
                 <!-- create references-->
-                <if condition="finDoc.reference">
-                    <if condition="finDoc.docType == 'invoice'">
+                <if condition="finDoc.docType == 'invoice'">
+                    <if condition="finDoc.reference">
                         <!-- find transaction for invoice-->
                         <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
                             list="transactions" for-update="true">
@@ -508,36 +508,39 @@ along with this software (see the LICENSE.md file). If not, see
                             </else>
                         </if>
                     </if>
-                    <!-- incoming payments /receipts-->
-                    <if condition="finDoc.docType == 'payment'">
-                        <!-- find transaction for payment-->
-                        <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
-                            list="transactions" for-update="true">
-                            <econdition field-name="organizationPartyId" from="companyPartyId" />
-                            <econdition field-name="theirAcctgTransId" from="finDoc.reference" />
-                            <econdition field-name="otherPartyId" from="finDoc.otherCompany.partyId" />
-                        </entity-find>
-                        <if condition="!transactions">
-                            <log level="warn"
-                                message="Import : could not find ${finDoc.sales?'sales':'purchase'} payment ${result.finDoc.paymentId} reference ${finDoc.reference}  otherCompany: ${finDoc.otherCompany.partyId} " />
-                            <else>
-                                <if condition="!transactions[0].paymentId">
-                                    <!-- ok found empty transaction -->
-                                    <set field="transactions[0].paymentId"
-                                        from="result.finDoc.paymentId" />
-                                    <entity-update value-field="transactions[0]" />
-                                    <else>
-                                        <log level="warn"
-                                            message="Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has ${finDoc.sales?'sales':'purchase'} paymentId: ${transactions[0].paymentId} cannot add ${result.finDoc.paymentId} reference: ${finDoc.reference} otherCompany: ${finDoc.otherCompany.partyId} trans other partyId: ${transactions[0].otherPartyId}" />
-                                    </else>
-                                </if>
-                            </else>
-                        </if>
+                </if>
+                <!-- incoming receipts-->
+                <if condition="finDoc.docType == 'payment' &amp;&amp; finDoc.sale == true">
+                    <!-- find transaction for payment-->
+                    <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
+                        list="transactions" for-update="true">
+                        <econdition field-name="organizationPartyId" from="companyPartyId" />
+                        <econdition field-name="theirAcctgTransId" from="finDoc.reference" />
+                        <econdition field-name="otherPartyId" from="finDoc.otherCompany.partyId" />
+                    </entity-find>
+                    <if condition="!transactions">
+                        <log level="warn"
+                            message="Import : could not find ${finDoc.sales?'sales':'purchase'} payment ${result.finDoc.paymentId} reference ${finDoc.reference}  otherCompany: ${finDoc.otherCompany.partyId} " />
+                        <else>
+                            <if condition="!transactions[0].paymentId">
+                                <!-- ok found empty transaction -->
+                                <set field="transactions[0].paymentId"
+                                    from="result.finDoc.paymentId" />
+                                <entity-update value-field="transactions[0]" />
+                                <else>
+                                    <log level="warn"
+                                        message="Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has ${finDoc.sales?'sales':'purchase'} paymentId: ${transactions[0].paymentId} cannot add ${result.finDoc.paymentId} reference: ${finDoc.reference} otherCompany: ${finDoc.otherCompany.partyId} trans other partyId: ${transactions[0].otherPartyId}" />
+                                </else>
+                            </if>
+                        </else>
                     </if>
                 </if>
                 <!-- for payment use check number as reference into the ledger -->
                 <if
                     condition="finDoc.docType == 'payment' &amp;&amp; finDoc.paymentMethod?.checkNumber">
+                    <!--log
+                        message="===looking for tranaction for payment with checknumber:
+                    ${finDoc.paymentMethod?.checkNumber}" /-->
                     <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
                         list="transactions" for-update="true">
                         <econdition field-name="organizationPartyId" from="companyPartyId" />
@@ -551,13 +554,44 @@ along with this software (see the LICENSE.md file). If not, see
                             <if condition="!transactions[0].paymentId">
                                 <!-- ok found empty transaction -->
                                 <set field="transactions[0].paymentId"
-                                    from="result.finDoc.invoiceId" />
+                                    from="result.finDoc.paymentId" />
                                 <entity-update value-field="transactions[0]" />
                                 <else>
                                     <log level="warn"
-                                        message="Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has invoiceId: ${transactions[0].invoiceId} cannot add ${result.finDoc.sales?'sales':'purchase'} ${result.finDoc.invoiceId} reference: ${finDoc.reference} otherCompany: ${finDoc.otherCompany.partyId} trans: ${transactions[0].otherPartyId}" />
+                                        message="Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has paymentId: ${transactions[0].paymentId} cannot add ${result.finDoc.sales?'sales':'purchase'} ${result.finDoc.paymentId} checkNr: ${finDoc.paymentMethod?.checkNumber} otherCompany: ${finDoc.otherCompany.partyId} trans: ${transactions[0].otherPartyId}" />
                                 </else>
                             </if>
+                        </else>
+                    </if>
+                </if>
+                <!-- try to find invoice for payment -->
+                <if condition="finDoc.docType == 'payment'">
+                    <if condition="finDoc.sales == true">
+                        <set field="fromPartyId" from="companyPartyId" />
+                        <set field="toPartyId" from="null" />
+                        <set field="pseudoId" from="finDoc.classificationId" />
+                        <else>
+                            <set field="toPartyId" from="companyPartyId" />
+                            <set field="fromPartyId" from="null" />
+                            <set field="pseudoId" from="finDoc.reference" />
+                        </else>
+                    </if>
+                    <!--log
+                        message="===looking for invoice: pseudoId: ${pseudoId} from ${fromPartyId} to: ${toPartyId} refnum:
+                    ${paymentRefNum}" /-->
+                    <entity-find entity-name="mantle.account.invoice.Invoice" limit="1"
+                        list="invoiceFound">
+                        <econdition field-name="pseudoId" from="pseudoId" />
+                        <econdition field-name="fromPartyId" ignore-if-empty="true" />
+                        <econdition field-name="toPartyId" ignore-if-empty="true" />
+                    </entity-find>
+                    <if condition="invoiceFound">
+                        <service-call
+                            name="mantle.account.PaymentServices.apply#PaymentForInvoice"
+                            in-map="[invoiceId: invoiceFound[0].invoiceId, paymentId: result.finDoc.paymentId]" />
+                        <else>
+                            <log
+                                message="could not find an invoice ${pseudoId} to apply for payment: ${result.finDoc.paymentId} amount: ${result.finDoc.grandTotal}" />
                         </else>
                     </if>
                 </if>
@@ -587,7 +621,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
                     <!-- new pseudo id so save lastItem-->
                     <script>ec.user.setEffectiveTime(Timestamp.valueOf("${finDoc.creationDate} 00:00:00"))</script>
-                    <!-- add items collected below to findoc[0] already got below-->
+                    <!-- add items collected below to finDoc[0] already got below-->
                     <set field="finDoc.items" from="itemsOut" />
                     <if condition="finDoc.docType == 'transaction'">
                         <set field="finDoc.isPosted" value="true" type="Boolean" />
@@ -712,8 +746,8 @@ along with this software (see the LICENSE.md file). If not, see
         <description> Post imported findocs of which the status is not finalized and already have a link
             in the ledger so the status will update but will not change the ledger</description>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
-                out-map="context" />
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <!-- invoices -->
             <entity-find entity-name="mantle.account.invoice.Invoice" for-update="true"
                 list="invoices">
@@ -745,9 +779,9 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="[invoiceId: invoice.invoiceId, statusId: statusId1]" />
                     <service-call name="update#mantle.account.invoice.Invoice"
                         in-map="[invoiceId: invoice.invoiceId, statusId: statusId2]" />
-                    <set field="updatedCount" from="updatedCount++" />
+                    <set field="updatedCount" from="updatedCount + 1" />
                     <else>
-                        <set field="notFoundCount" from="notFoundCount++" />
+                        <set field="notFoundCount" from="notFoundCount + 1" />
                     </else>
                 </if>
             </iterate>
@@ -763,6 +797,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="statusId" value="PmntPromised" />
             </entity-find>
             <set field="updatedCount" value="0" type="Integer" />
+            <set field="notFoundCount" value="0" type="Integer" />
             <iterate list="payments" entry="payment">
                 <!-- check if referenced in the ledger-->
                 <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transList">
@@ -772,10 +807,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="transList">
                     <set field="payment.statusId" value="PmntConfirmed" />
                     <service-call name="update#mantle.account.payment.Payment"
-                        in-map="[paymentId: payment.paymentId, statusId: statusId1]" />
-                    <set field="updatedCount" from="updatedCount++" />
+                        in-map="[paymentId: payment.paymentId, statusId: statusId]" />
+                    <set field="updatedCount" from="updatedCount + 1" />
                     <else>
-                        <set field="notFoundCount" from="notFoundCount++" />
+                        <set field="notFoundCount" from="notFoundCount + 1" />
                     </else>
                 </if>
             </iterate>

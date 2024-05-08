@@ -20,7 +20,7 @@ Sub commands:
   4. build the flutter system
   5. package 'admin' can now be started with flutter run.
   
-### Import:
+### import:
   will upload data like ledger(glaccount), customers products etc from the terminal
   Also has a helper program csvToCsv to convert your csv files to the
     GrowERP format.
@@ -29,7 +29,14 @@ Sub commands:
   * -u -p user/password optional, will remember from last time
   * -url the base url of the backend, local host is default
   * -f optional filetype, is missing will process all filetype in the specified dir
-### Export: (partly developed)
+
+### finalize:
+  After all imports, this will finalize the import
+  1. complete all documents which have been posted in the ledger
+  2. complete order of which the invoice is completed
+  3. complete past time periods
+
+### export: (partly developed)
   will create CSV files for growerp entities in the current 'growerp'
   directory, if not exist will create it.
   #### Parameters:

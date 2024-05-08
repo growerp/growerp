@@ -112,6 +112,7 @@ class FinDoc with _$FinDoc {
 //      "status: $status! otherUser: $otherUser! Items: ${items!.length}";
 
   String? displayStatus(String classificationId) {
+    if (status == null) return '??';
     if (docType != FinDocType.order) {
       return finDocStatusValues[status.toString()];
     }
@@ -143,7 +144,7 @@ Map<String, String> finDocStatusValuesHotel = {
 
 String finDocCsvFormat = "Id, Sales, finDocType, descr, date, "
     "other user Id, other company Id, other company Name, reference number, "
-    "check number(blank is cash), totalAmount \r\n";
+    "check number(blank is cash), totalAmount, Invoice/Payment, \r\n";
 List<String> finDocCsvTitles = finDocCsvFormat.split(',');
 int finDocCsvLength = finDocItemCsvTitles.length;
 
@@ -158,8 +159,8 @@ List<FinDoc> CsvToFinDocs(String csvFile, Logger logger) {
       finDocs.add(
         FinDoc(
           pseudoId: row[0],
-          docType: FinDocType.tryParse(row[2]),
           sales: row[1] == 'false' ? false : true,
+          docType: FinDocType.tryParse(row[2]),
           description: row[3],
           creationDate: DateTime.tryParse(row[4]),
           otherUser: User(pseudoId: row[5]),
@@ -173,6 +174,7 @@ List<FinDoc> CsvToFinDocs(String csvFile, Logger logger) {
           grandTotal: row[10] != 'null' && row[10].isNotEmpty
               ? Decimal.parse(row[10].replaceAll(',', ''))
               : null,
+          classificationId: row[11], // for invoice/payment matching
         ),
       );
     } catch (e) {

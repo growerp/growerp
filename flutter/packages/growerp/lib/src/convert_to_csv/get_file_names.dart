@@ -38,7 +38,7 @@ List<String> getFileNames(FileType fileType) {
       break;
     case FileType.finDocInvoiceSale:
     case FileType.finDocInvoiceSaleItem:
-      searchFiles.add('3c1-receipts_journal.csv');
+      searchFiles.add('3b1-sales_journal.csv');
       break;
     case FileType.finDocPaymentPurchase:
       searchFiles.add('2c1-payments_journal.csv');

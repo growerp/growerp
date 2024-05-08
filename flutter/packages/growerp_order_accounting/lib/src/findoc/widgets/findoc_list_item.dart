@@ -86,7 +86,7 @@ class FinDocListItem extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(finDoc.otherUser?.company!.name.truncate(25) ?? '',
+            Text(finDoc.otherUser?.company!.name.truncate(20) ?? '',
                 key: Key("otherUser$index")),
             Row(
               children: [
