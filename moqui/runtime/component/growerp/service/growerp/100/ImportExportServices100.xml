@@ -595,6 +595,35 @@ along with this software (see the LICENSE.md file). If not, see
                         </else>
                     </if>
                 </if>
+                <!-- link orders to invoice -->
+                <if condition="finDoc.docType == 'order' &amp;&amp; finDoc.reference">
+                    <!-- try to find invoice for payment -->
+                    <set field="pseudoId" from="finDoc.reference" />
+                    <if condition="finDoc.sales == true">
+                        <set field="fromPartyId" from="companyPartyId" />
+                        <set field="toPartyId" from="null" />
+                        <else>
+                            <set field="toPartyId" from="companyPartyId" />
+                            <set field="fromPartyId" from="null" />
+                        </else>
+                    </if>
+                    <log
+                        message="===looking for invoice from order:${result.finDoc.orderId} inv pseudoId: ${pseudoId} from ${fromPartyId} to: ${toPartyId}" />
+                    <entity-find entity-name="mantle.account.invoice.Invoice" limit="1"
+                        list="invoiceFound">
+                        <econdition field-name="pseudoId" from="pseudoId" />
+                        <econdition field-name="fromPartyId" ignore-if-empty="true" />
+                        <econdition field-name="toPartyId" ignore-if-empty="true" />
+                    </entity-find>
+                    <if condition="invoiceFound">
+                        <service-call name="create#mantle.order.OrderItemBilling"
+                            in-map="[orderId: result.finDoc.orderId, invoiceId: invoiceFound.invoiceId]" />
+                        <else>
+                            <log
+                                message="could not find an invoice ${pseudoId} from order: ${result.finDoc.orderId}" />
+                        </else>
+                    </if>
+                </if>
             </iterate>
             <if condition="!ec.message.hasError()">
                 <message type="success">${finDocs?.size()} finDocs  ${finDocs[0].docType} imported</message>

@@ -32,6 +32,7 @@ String convertFile(FileType fileType, String string, String fileName) {
               '89500,Discount for Early Payment,Expenses (contra),');
       break;
     default:
+      string = string.replaceAll('�', '°');
   }
 
   /// filename dependent changes here

@@ -43,20 +43,22 @@ List<String> getFileNames(FileType fileType) {
     case FileType.finDocPaymentPurchase:
       searchFiles.add('2c1-payments_journal.csv');
       break;
-    case FileType.finDocPaymentPurchaseItem:
-      // items here are references to invoices
-      break;
     case FileType.finDocPaymentSale:
       searchFiles.add('3c1-receipts_journal.csv');
       break;
+    case FileType.finDocOrderPurchase:
+    case FileType.finDocOrderPurchaseItem:
+      searchFiles.add('2a1-purchase_order_journal.csv');
+      break;
+    case FileType.finDocOrderSale:
+    case FileType.finDocOrderSaleItem:
+      searchFiles.add('3a1-sales_order_journal.csv');
+      break;
     case FileType.finDocPaymentSaleItem:
+    case FileType.finDocPaymentPurchaseItem:
     case FileType.category:
     case FileType.asset:
     case FileType.website:
-    case FileType.finDocOrderPurchase:
-    case FileType.finDocOrderPurchaseItem:
-    case FileType.finDocOrderSale:
-    case FileType.finDocOrderSaleItem:
       break;
     default:
       logger.w("No files found for fileType: ${fileType.name}");

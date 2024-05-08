@@ -229,7 +229,9 @@ Future<void> main(List<String> args) async {
             List<String> newRow = List.from(row);
             // replace by sequential number when not invoice
             if (fileType != FileType.finDocInvoiceSale &&
-                fileType != FileType.finDocInvoicePurchase) {
+                fileType != FileType.finDocInvoicePurchase &&
+                fileType != FileType.finDocOrderSale &&
+                fileType != FileType.finDocOrderPurchase) {
               newRow[0] = (seqNumber++).toString();
             }
 //            print(
@@ -266,7 +268,9 @@ Future<void> main(List<String> args) async {
           List<String> newRow = List.from(row);
           // replace by sequential number when not invoice
           if (fileType != FileType.finDocInvoiceSaleItem &&
-              fileType != FileType.finDocInvoicePurchaseItem) {
+              fileType != FileType.finDocInvoicePurchaseItem &&
+              fileType != FileType.finDocOrderSaleItem &&
+              fileType != FileType.finDocOrderPurchaseItem) {
             newRow[0] = seqNumber.toString();
           }
           // print(
