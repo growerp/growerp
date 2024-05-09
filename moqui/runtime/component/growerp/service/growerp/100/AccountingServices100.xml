@@ -545,7 +545,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="periodsOut.timePeriodGroups">
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummary"
                     out-map="context"
-                    in-map="[organizationPartyId:organizationPartyId, timePeriodGroups:periodsOut.timePeriodGroups, datasets:datasets]" />
+                    in-map="[organizationPartyId:companyPartyId, timePeriodGroups:periodsOut.timePeriodGroups, datasets:datasets]" />
 
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummaryRows"
                     out-map="context" in-map="context" />
