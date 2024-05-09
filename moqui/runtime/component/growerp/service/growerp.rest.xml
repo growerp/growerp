@@ -315,7 +315,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.AccountingServices100.get#BalanceSummary" />
             </method>
         </resource>
-        <resource name="BalanceSummary">
+        <resource name="OperatingRevenueExpenseChart">
             <method type="get">
                 <service name="growerp.100.AccountingServices100.get#OperatingRevenueExpenseChart" />
             </method>
