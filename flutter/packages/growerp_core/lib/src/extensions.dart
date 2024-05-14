@@ -19,6 +19,9 @@
 //  CustomizableDateTime.customTime =
 //      DateTime.now().add(const Duration(days: 1));
 
+import 'package:decimal/decimal.dart';
+import 'package:intl/intl.dart';
+
 extension CustomizableDateTime on DateTime {
   static DateTime? _customTime;
   static DateTime get current {
@@ -55,5 +58,18 @@ extension DateOnlyCompare on DateTime {
 extension DateOnly on DateTime {
   String dateOnly() {
     return "$year-$month-$day";
+  }
+}
+
+extension UsCurrency on Decimal {
+  String currency() {
+    return NumberFormat("#,###.00", "en_US").format(double.parse(toString()));
+  }
+}
+
+extension LastChar on String {
+  String lastChar(int length) {
+    if (this.length <= length) return '';
+    return substring(this.length - length);
   }
 }

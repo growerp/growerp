@@ -13,198 +13,156 @@
  */
 
 import 'package:collection/collection.dart';
-import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:global_configuration/global_configuration.dart';
+import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
+import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
-import '../findoc.dart';
+import '../../../growerp_order_accounting.dart';
 
-class FinDocListItem extends StatelessWidget {
-  const FinDocListItem({
-    super.key,
-    required this.finDoc,
-    required this.index,
-    required this.sales,
-    required this.docType,
-    required this.isPhone,
-    required this.onlyRental,
-    this.additionalItemButton,
-    this.paymentMethod,
-  });
+List<TableViewCell> getDataTiles(
+  BuildContext context,
+  FinDoc finDoc,
+  int index,
+  FinDocBloc finDocBloc,
+) {
+  bool isPhone = isAPhone(context);
 
-  final FinDoc finDoc;
-  final int index;
-  final bool sales;
-  final FinDocType docType;
-  final bool isPhone;
-  final bool onlyRental;
-  final Widget? additionalItemButton;
-  final PaymentMethod? paymentMethod;
-
-  @override
-  Widget build(BuildContext context) {
-    FinDocBloc finDocBloc = context.read<FinDocBloc>();
-    RestClient repos = context.read<RestClient>();
-    String classificationId = GlobalConfiguration().get("classificationId");
-    List<Widget> titleFields = [];
-    if (isPhone) {
-      titleFields = [
-        Text(finDoc.pseudoId ?? '', key: Key('id$index')),
-        const Expanded(child: SizedBox(width: 10)),
-        Text(classificationId == 'AppHotel'
-            ? finDoc.items[0].rentalFromDate != null
-                ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
-                : '???'
-            : "${finDoc.creationDate?.toString().substring(0, 11)}"),
-      ];
-    } else {
-      titleFields = [
-        Text(finDoc.pseudoId ?? '', key: Key('id$index')),
-        const Expanded(child: SizedBox(width: 10)),
-        Text(classificationId == 'AppHotel' &&
-                finDoc.items[0].rentalFromDate != null
-            ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
-            : "${finDoc.creationDate?.toString().substring(0, 11)}"),
-        const Expanded(child: SizedBox(width: 10)),
-        Text(finDoc.otherCompany?.name ?? '', key: Key("otherUser$index")),
-        const Expanded(child: SizedBox(width: 10)),
-        if (finDoc.docType != FinDocType.shipment)
-          Text(finDoc.grandTotal.toString(), key: Key("grandTotal$index")),
-        if (finDoc.docType != FinDocType.shipment)
-          const Expanded(child: SizedBox(width: 10)),
-        Text(finDoc.displayStatus(classificationId)!, key: Key("status$index")),
-        const Expanded(child: SizedBox(width: 10)),
-        Text(finDoc.otherCompany!.email ?? '             '),
-      ];
-    }
-
-    List<Widget> subTitleFields = [];
-    if (isPhone) {
-      subTitleFields = [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  /*context
+          .read<AuthBloc>()
+          .state
+          .authenticate
+          ?.company!
+          .currency!
+          .currencyId,
+    */
+  String classificationId = context.read<String>();
+  List<Widget> tableCells = [];
+  if (isPhone) {
+    tableCells = <Widget>[
+      CircleAvatar(
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        child: Text(
+          finDoc.pseudoId!.lastChar(3),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+        ),
+      ),
+      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(
           children: [
-            Text(finDoc.otherUser?.company!.name.truncate(20) ?? '',
-                key: Key("otherUser$index")),
-            Row(
-              children: [
-                Text(
-                    finDoc.status != null
-                        ? finDoc.displayStatus(classificationId)!
-                        : '??',
-                    key: Key("status$index")),
-                const SizedBox(width: 10),
-                if (finDoc.docType != FinDocType.shipment)
-                  Text(
-                      finDoc.grandTotal != null
-                          ? finDoc.grandTotal.toString()
-                          : '',
-                      key: Key("grandTotal$index")),
-                if (finDoc.docType != FinDocType.shipment)
-                  const SizedBox(width: 10),
-                Text(finDoc.items.length.toString(),
-                    key: Key("itemsLength$index")),
-              ],
-            )
+            Text(finDoc.pseudoId ?? '', key: Key('id$index')),
+            SizedBox(width: 10),
+            Text(classificationId == 'AppHotel'
+                ? finDoc.items[0].rentalFromDate != null
+                    ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
+                    : '???'
+                : "${finDoc.creationDate?.toString().substring(0, 11)}"),
           ],
         ),
-      ];
-    } else {
-      subTitleFields = [];
-    }
-
-    List<Widget> fields = [
-      Text(finDoc.id() ?? '', key: Key('id$index')),
-      const Expanded(child: SizedBox(width: 10)),
-      const Expanded(child: SizedBox(width: 10)),
-      Text(finDoc.items.length.toString()),
+        Text(finDoc.otherCompany?.name.truncate(25) ?? '',
+            key: Key("otherUser$index")),
+        Row(
+          children: [
+            Text(
+                finDoc.status != null
+                    ? finDoc.displayStatus(classificationId)!
+                    : '??',
+                key: Key("status$index")),
+            const SizedBox(width: 10),
+            if (finDoc.docType != FinDocType.shipment)
+              Text(
+                  finDoc.grandTotal != null
+                      ? "${finDoc.grandTotal!.currency()}"
+                      : '',
+                  key: Key("grandTotal$index")),
+            if (finDoc.docType != FinDocType.shipment)
+              const SizedBox(width: 10),
+            Text(finDoc.items.length.toString(), key: Key("itemsLength$index")),
+          ],
+        )
+      ]),
     ];
-    if (!isPhone) {
-      fields.addAll([
-        const Expanded(child: SizedBox(width: 10)),
-        Text(classificationId == 'AppHotel' &&
-                finDoc.items[0].rentalFromDate != null
-            ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
-            : "${finDoc.creationDate?.toString().substring(0, 11)}"),
-        const Expanded(child: SizedBox(width: 10)),
-        if (finDoc.docType != FinDocType.shipment)
-          Text("${finDoc.grandTotal}", key: Key("grandTotal$index")),
-        if (finDoc.docType != FinDocType.shipment)
-          const Expanded(child: SizedBox(width: 10)),
-        Text("${finDoc.displayStatus(classificationId)}",
-            key: Key("status$index")),
-        const Expanded(child: SizedBox(width: 10)),
-        Text(
-          finDoc.otherCompany?.email ?? '',
-          key: Key('email$index'),
-        ),
-        const Divider(),
-      ]);
-    }
-
-    return ExpansionTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.green,
-          child: Text(finDoc.otherCompany?.name!.substring(0, 1) ?? ''),
-        ),
-        title: Row(children: titleFields),
-        subtitle: Row(children: subTitleFields),
-        trailing: SizedBox(
-          width: isPhone ? 70 : 195,
-          child: docType == FinDocType.shipment
-              ? (sales
-                  ? IconButton(
-                      key: Key('nextStatus$index'),
-                      icon: const Icon(Icons.send),
-                      tooltip:
-                          FinDocStatusVal.nextStatus(finDoc.status!).toString(),
-                      onPressed: () {
-                        finDocBloc.add(FinDocUpdate(finDoc.copyWith(
-                            status:
-                                FinDocStatusVal.nextStatus(finDoc.status!))));
-                      })
-                  : IconButton(
-                      key: Key('nextStatus$index'),
-                      icon: const Icon(Icons.call_received),
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return RepositoryProvider.value(
-                                  value: repos,
-                                  child: BlocProvider.value(
-                                      value: finDocBloc,
-                                      child: ShipmentReceiveDialog(finDoc)));
-                            });
-                      }))
-              : classificationId == 'AppHotel' &&
-                      finDoc.status == FinDocStatusVal.approved
-                  ? IconButton(
-                      key: Key('nextStatus$index'),
-                      icon: const Icon(Icons.check_box_sharp),
-                      tooltip:
-                          FinDocStatusVal.nextStatus(finDoc.status!).toString(),
-                      onPressed: () {
-                        finDocBloc.add(FinDocUpdate(finDoc.copyWith(
-                            status:
-                                FinDocStatusVal.nextStatus(finDoc.status!))));
-                      })
-                  : finDoc.status != null &&
-                          FinDocStatusVal.statusFixed(finDoc.status!) == false
-                      ? itemButtons(context, paymentMethod, finDocBloc, repos)
-                      : finDoc.sales == true &&
-                              finDoc.status == FinDocStatusVal.approved
-                          ? additionalItemButton
-                          : null,
-        ),
-        children: items(context, finDoc));
+  } else {
+    tableCells = <Widget>[
+      Text(finDoc.pseudoId ?? '', key: Key('id$index')),
+      Text(classificationId == 'AppHotel' &&
+              finDoc.items[0].rentalFromDate != null
+          ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
+          : "${finDoc.creationDate?.toString().substring(0, 11)}"),
+      Text(finDoc.otherCompany?.name ?? '', key: Key("otherUser$index")),
+      if (finDoc.docType != FinDocType.shipment)
+        Text("${finDoc.grandTotal!.currency()}",
+            textAlign: TextAlign.right, key: Key("grandTotal$index")),
+      Text(finDoc.displayStatus(classificationId)!, key: Key("status$index")),
+      Text(finDoc.otherCompany!.email ?? '             '),
+    ];
   }
 
-  Widget? itemButtons(BuildContext context, PaymentMethod? paymentMethod,
-      FinDocBloc finDocBloc, RestClient repos) {
+  List<Widget> subtableCells = [];
+  if (isPhone) {
+    subtableCells = [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(finDoc.otherUser?.company!.name.truncate(20) ?? '',
+              key: Key("otherUser$index")),
+          Row(
+            children: [
+              Text(
+                  finDoc.status != null
+                      ? finDoc.displayStatus(classificationId)!
+                      : '??',
+                  key: Key("status$index")),
+              const SizedBox(width: 10),
+              if (finDoc.docType != FinDocType.shipment)
+                Text(
+                    finDoc.grandTotal != null
+                        ? "${finDoc.grandTotal!.currency()}"
+                        : '',
+                    key: Key("grandTotal$index")),
+              if (finDoc.docType != FinDocType.shipment)
+                const SizedBox(width: 10),
+              Text(finDoc.items.length.toString(),
+                  key: Key("itemsLength$index")),
+            ],
+          )
+        ],
+      ),
+    ];
+  } else {
+    subtableCells = [];
+  }
+
+  List<Widget> fields = [
+    Text(finDoc.id() ?? '', key: Key('id$index')),
+    SizedBox(width: 10),
+    SizedBox(width: 10),
+    Text(finDoc.items.length.toString()),
+  ];
+  if (!isPhone) {
+    fields.addAll([
+      SizedBox(width: 10),
+      Text(classificationId == 'AppHotel' &&
+              finDoc.items[0].rentalFromDate != null
+          ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
+          : "${finDoc.creationDate?.toString().substring(0, 11)}"),
+      SizedBox(width: 10),
+      if (finDoc.docType != FinDocType.shipment)
+        Text("${finDoc.grandTotal}", key: Key("grandTotal$index")),
+      if (finDoc.docType != FinDocType.shipment) SizedBox(width: 10),
+      Text("${finDoc.displayStatus(classificationId)}",
+          key: Key("status$index")),
+      SizedBox(width: 10),
+      Text(
+        finDoc.otherCompany?.email ?? '',
+        key: Key('email$index'),
+      ),
+      const Divider(),
+    ]);
+  }
+
+  Widget? itemButtons(BuildContext context, FinDocBloc finDocBloc) {
     if (finDoc.salesChannel != 'Web' ||
         (finDoc.salesChannel == 'Web' &&
             finDoc.status != FinDocStatusVal.inPreparation)) {
@@ -243,34 +201,6 @@ class FinDocListItem extends StatelessWidget {
                     status: FinDocStatusVal.nextStatus(finDoc.status!))));
               }),
         ),
-        SizedBox(
-          width: 30,
-          child: IconButton(
-            icon: const Icon(Icons.edit),
-            key: Key('edit$index'),
-            tooltip: 'Edit ${finDoc.docType}',
-            onPressed: () async {
-              await showDialog(
-                  barrierDismissible: true,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return RepositoryProvider.value(
-                        value: repos,
-                        child: BlocProvider.value(
-                            value: finDocBloc,
-                            child: onlyRental == true
-                                ? ReservationDialog(
-                                    finDoc: finDoc, original: finDoc)
-                                : finDoc.docType == FinDocType.payment
-                                    ? PaymentDialog(
-                                        finDoc: finDoc,
-                                        paymentMethod: paymentMethod,
-                                      )
-                                    : FinDocDialog(finDoc)));
-                  });
-            },
-          ),
-        ),
       ]);
     }
     return null;
@@ -291,32 +221,31 @@ class FinDocListItem extends StatelessWidget {
       finDocItems = List.from(finDoc.items.mapIndexed((index, e) =>
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             const SizedBox(width: 50),
-            Expanded(
-                child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.green,
-                      maxRadius: 10,
-                      child: Text(e.itemSeqId.toString()),
-                    ),
-                    title: Text(
-                        // blank required before and after productId for automated test
-                        finDoc.docType == FinDocType.shipment
-                            ? "Product: ${e.description}[${e.productId}] "
+            ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.green,
+                  maxRadius: 10,
+                  child: Text(e.itemSeqId.toString()),
+                ),
+                title: Text(
+                    // blank required before and after productId for automated test
+                    finDoc.docType == FinDocType.shipment
+                        ? "Product: ${e.description}[${e.productId}] "
+                            "Quantity: ${e.quantity.toString()} "
+                        : finDoc.docType == FinDocType.order ||
+                                finDoc.docType == FinDocType.invoice &&
+                                    e.quantity != null
+                            ? "ProductId: ${e.productId} $r${e.description}$r"
                                 "Quantity: ${e.quantity.toString()} "
-                            : finDoc.docType == FinDocType.order ||
-                                    finDoc.docType == FinDocType.invoice &&
-                                        e.quantity != null
-                                ? "ProductId: ${e.productId} $r${e.description}$r"
-                                    "Quantity: ${e.quantity.toString()} "
-                                    "Price: ${e.price.toString()} "
-                                    "SubTotal: ${(e.quantity! * e.price!).toString()}$r"
-                                    "${e.rentalFromDate == null ? '' : " "
-                                        "Rental: ${e.rentalFromDate.toString().substring(0, 10)}/"
-                                        "${e.rentalThruDate.toString().substring(0, 10)}"}\n"
-                                    "${finDoc.docType == FinDocType.invoice ? 'Overr.GLAccount: ${e.glAccount?.accountCode ?? ''}' : ''}$r"
-                                    "${finDoc.docType == FinDocType.invoice || finDoc.docType == FinDocType.order ? 'ItemType: ${e.itemType!.itemTypeName}' : ''}\n"
-                                : '', // payment: no items
-                        key: Key('itemLine$index'))))
+                                "Price: ${e.price.toString()} "
+                                "SubTotal: ${(e.quantity! * e.price!).toString()}$r"
+                                "${e.rentalFromDate == null ? '' : " "
+                                    "Rental: ${e.rentalFromDate.toString().substring(0, 10)}/"
+                                    "${e.rentalThruDate.toString().substring(0, 10)}"}\n"
+                                "${finDoc.docType == FinDocType.invoice ? 'Overr.GLAccount: ${e.glAccount?.accountCode ?? ''}' : ''}$r"
+                                "${finDoc.docType == FinDocType.invoice || finDoc.docType == FinDocType.order ? 'ItemType: ${e.itemType!.itemTypeName}' : ''}\n"
+                            : '', // payment: no items
+                    key: Key('itemLine$index')))
           ])));
     }
     if (finDoc.address != null) {
@@ -394,4 +323,78 @@ class FinDocListItem extends StatelessWidget {
 
     return finDocItems;
   }
+
+  List<TableViewCell> tableViewCells = [];
+  for (int fieldIndex = 0; fieldIndex < tableCells.length; fieldIndex++) {
+/*    if (isPhone) {
+      tableViewCells.add(TableViewCell(
+        child: ListTile(
+          isThreeLine: true,
+          leading: CircleAvatar(
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+            child: Text(
+              finDoc.pseudoId!.lastChar(3),
+              style:
+                  TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+            ),
+          ),
+          title: tableCells[fieldIndex],
+          subtitle: subtableCells.length <= fieldIndex
+              ? Text('')
+              : subtableCells[fieldIndex],
+          trailing: SizedBox(
+            width: isPhone ? 70 : 195,
+            child: finDoc.docType == FinDocType.shipment
+                ? (finDoc.sales
+                    ? IconButton(
+                        key: Key('nextStatus$index'),
+                        icon: const Icon(Icons.send),
+                        tooltip: FinDocStatusVal.nextStatus(finDoc.status!)
+                            .toString(),
+                        onPressed: () {
+                          finDocBloc.add(FinDocUpdate(finDoc.copyWith(
+                              status:
+                                  FinDocStatusVal.nextStatus(finDoc.status!))));
+                        })
+                    : IconButton(
+                        key: Key('nextStatus$index'),
+                        icon: const Icon(Icons.call_received),
+                        onPressed: () async {
+                          await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BlocProvider.value(
+                                    value: finDocBloc,
+                                    child: ShipmentReceiveDialog(finDoc));
+                              });
+                        }))
+                : classificationId == 'AppHotel' &&
+                        finDoc.status == FinDocStatusVal.approved
+                    ? IconButton(
+                        key: Key('nextStatus$index'),
+                        icon: const Icon(Icons.check_box_sharp),
+                        tooltip: FinDocStatusVal.nextStatus(finDoc.status!)
+                            .toString(),
+                        onPressed: () {
+                          finDocBloc.add(FinDocUpdate(finDoc.copyWith(
+                              status:
+                                  FinDocStatusVal.nextStatus(finDoc.status!))));
+                        })
+                    : finDoc.status != null &&
+                            FinDocStatusVal.statusFixed(finDoc.status!) == false
+                        ? itemButtons(context, finDocBloc)
+                        : null,
+          ),
+          //  children: items(context, finDoc),
+        ),
+      ));
+    } else {
+  */
+    tableViewCells.add(TableViewCell(child: tableCells[fieldIndex]));
+  }
+//  }
+  tableViewCells
+      .add(TableViewCell(child: itemButtons(context, finDocBloc) ?? Text('')));
+  return tableViewCells;
 }

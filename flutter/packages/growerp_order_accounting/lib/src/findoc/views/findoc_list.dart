@@ -15,9 +15,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
+
 import '../findoc.dart';
 
 class FinDocList extends StatefulWidget {
@@ -58,8 +59,12 @@ class FinDocListState extends State<FinDocList> {
   late int limit;
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
+  late bool isPhone;
   bool hasReachedMax = false;
   late FinDocBloc _finDocBloc;
+  late final ScrollController _verticalController = ScrollController();
+  late final ScrollController _horizontalController = ScrollController();
+  List<List<TableViewCell>> tableViewRows = [];
 
   @override
   void initState() {
@@ -98,12 +103,37 @@ class FinDocListState extends State<FinDocList> {
     _finDocBloc.add(const FinDocFetch(limit: 15));
   }
 
+  TableViewCell _buildCell(BuildContext context, TableVicinity vicinity) {
+    if (vicinity.row == 0) {
+      return getHeaderTiles(context, finDocs[0])[vicinity.column];
+    }
+    if (vicinity.column == 0) {
+      return tableViewRows[vicinity.row - 1][0];
+    }
+    return tableViewRows[vicinity.row - 1][vicinity.column];
+  }
+
+  TableSpan? _buildColumnSpan(int index) {
+    return buildColumnSpan(index, isPhone, context);
+  }
+
+  TableSpan? _buildRowSpan(int index) {
+    return buildRowSpan(index, isPhone, finDocs.length, context);
+  }
+
   @override
   Widget build(BuildContext context) {
     limit = (MediaQuery.of(context).size.height / 100).round();
-
+    isPhone = isAPhone(context);
     Widget finDocsPage() {
-      bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
+      if (finDocs.isEmpty)
+        return Center(
+            heightFactor: 20,
+            child: Text(
+                widget.journalId != null
+                    ? "no journal entries found"
+                    : "no (${widget.docType == FinDocType.transaction ? 'unposted' : 'open'})${widget.docType == FinDocType.shipment ? "${widget.sales ? 'outgoing' : 'incoming'} " : "${widget.docType == FinDocType.transaction ? '' : widget.sales ? 'sales' : 'purchase'} "}${entityName}s found!",
+                textAlign: TextAlign.center));
       return Column(children: [
         widget.docType == FinDocType.transaction
             ? FinDocListHeaderTrans(
@@ -111,49 +141,26 @@ class FinDocListState extends State<FinDocList> {
                 sales: widget.sales,
                 docType: widget.docType,
                 finDocBloc: _finDocBloc)
-            : FinDocListHeader(
-                isPhone: isPhone,
-                sales: widget.sales,
-                docType: widget.docType,
-                finDocBloc: _finDocBloc),
+            : Container(),
         Expanded(
             child: RefreshIndicator(
-                onRefresh: (() async =>
-                    _finDocBloc.add(const FinDocFetch(refresh: true))),
-                child: ListView.builder(
-                    key: const Key('listView'),
-                    shrinkWrap: true,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount:
-                        hasReachedMax ? finDocs.length + 1 : finDocs.length + 2,
-                    controller: _scrollController,
-                    itemBuilder: (BuildContext context, int index) {
-                      if (index == 0) {
-                        return Visibility(
-                            visible: finDocs.isEmpty,
-                            child: Center(
-                                heightFactor: 20,
-                                child: Text(
-                                    widget.journalId != null
-                                        ? "no journal entries found"
-                                        : "no (${widget.docType == FinDocType.transaction ? 'unposted' : 'open'})${widget.docType == FinDocType.shipment ? "${widget.sales ? 'outgoing' : 'incoming'} " : "${widget.docType == FinDocType.transaction ? '' : widget.sales ? 'sales' : 'purchase'} "}${entityName}s found!",
-                                    textAlign: TextAlign.center)));
-                      }
-                      index--;
-                      return index >= finDocs.length
-                          ? const BottomLoader()
-                          : Dismissible(
-                              key: const Key('finDocItem'),
-                              direction: DismissDirection.startToEnd,
-                              child: BlocProvider.value(
-                                  value: _finDocBloc,
-                                  child:
-                                      widget.docType == FinDocType.transaction
-                                          ? getFinDocListItemTrans(
-                                              index, isPhone, context)
-                                          : getFinDocListItem(
-                                              index, isPhone, context)));
-                    })))
+          onRefresh: (() async =>
+              _finDocBloc.add(const FinDocFetch(refresh: true))),
+          child: TableView.builder(
+            diagonalDragBehavior: DiagonalDragBehavior.free,
+            verticalDetails:
+                ScrollableDetails.vertical(controller: _verticalController),
+            horizontalDetails:
+                ScrollableDetails.horizontal(controller: _horizontalController),
+            cellBuilder: _buildCell,
+            //    columnCount: getHeaderTiles(context, finDocs[0]).length,
+            columnBuilder: _buildColumnSpan,
+            pinnedColumnCount: 1,
+            //    rowCount: finDocs.length + 1,
+            rowBuilder: _buildRowSpan,
+            pinnedRowCount: 1,
+          ),
+        ))
       ]);
     }
 
@@ -181,6 +188,12 @@ class FinDocListState extends State<FinDocList> {
           case FinDocStatus.success:
             finDocs = state.finDocs;
             hasReachedMax = state.hasReachedMax;
+            // generate table cells
+            for (int row = 0; row < finDocs.length; row++) {
+              tableViewRows
+                  .add(getDataTiles(context, finDocs[row], row, _finDocBloc));
+            }
+
             // if rental (hotelroom) need to show checkin/out orders
             if (widget.onlyRental && widget.status != null) {
               if (widget.status == FinDocStatusVal.created.toString()) {
@@ -277,6 +290,7 @@ class FinDocListState extends State<FinDocList> {
     });
   }
 
+/*
   FinDocListItem getFinDocListItem(
       int index, bool isPhone, BuildContext context) {
     return FinDocListItem(
@@ -324,7 +338,7 @@ class FinDocListState extends State<FinDocList> {
           : null,
     );
   }
-
+*/
   @override
   void dispose() {
     _scrollController

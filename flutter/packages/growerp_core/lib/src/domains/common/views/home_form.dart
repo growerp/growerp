@@ -22,7 +22,6 @@ import 'package:global_configuration/global_configuration.dart';
 import '../../../l10n/generated/core_localizations.dart';
 import '../../../templates/templates.dart';
 import '../../domains.dart';
-import '../functions/helper_functions.dart';
 
 class HomeForm extends StatefulWidget {
   final List<MenuOption> menuOptions;

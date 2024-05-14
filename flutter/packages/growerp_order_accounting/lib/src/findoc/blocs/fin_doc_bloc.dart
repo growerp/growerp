@@ -100,9 +100,9 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     try {
       ItemTypes itemTypes = ItemTypes();
       PaymentTypes paymentTypes = PaymentTypes();
-      if (docType == FinDocType.payment) {
+      if (docType == FinDocType.payment && state.paymentTypes.isEmpty) {
         paymentTypes = await restClient.getPaymentTypes(sales: sales);
-      } else {
+      } else if (state.itemTypes.isEmpty) {
         itemTypes = await restClient.getItemTypes(sales: sales);
       }
       FinDocs result = await restClient.getFinDoc(

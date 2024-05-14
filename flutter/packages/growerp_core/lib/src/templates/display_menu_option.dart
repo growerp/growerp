@@ -231,13 +231,14 @@ class MenuOptionState extends State<DisplayMenuOption>
     Widget tabPage(bool isPhone) {
       displayMOFormKey =
           tabList[tabIndex].toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-      Color tabSelectedBackground = Theme.of(context).colorScheme.onTertiary;
+      Color tabSelectedBackground = Theme.of(context).colorScheme.onSecondary;
       //debugPrint("==3-tab= current form key: $displayMOFormKey");
       List<Widget> tabChildren = [
         Expanded(
             child: isPhone
                 ? Center(key: Key(displayMOFormKey), child: tabList[tabIndex])
                 : TabBarView(
+                    physics: const NeverScrollableScrollPhysics(),
                     key: Key(displayMOFormKey),
                     controller: _controller,
                     children: tabList,

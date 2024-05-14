@@ -12,110 +12,128 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:global_configuration/global_configuration.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import '../findoc.dart';
+import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
-class FinDocListHeader extends StatefulWidget {
-  const FinDocListHeader({
-    super.key,
-    required this.sales,
-    required this.docType,
-    required this.isPhone,
-    required this.finDocBloc,
-  });
-  final bool sales;
-  final FinDocType docType;
-  final bool isPhone;
-  final FinDocBloc finDocBloc;
+List<TableViewCell> getHeaderTiles(BuildContext context, FinDoc finDoc) {
+  bool isPhone = isAPhone(context);
+  String classificationId = context.read<String>();
 
-  @override
-  State<FinDocListHeader> createState() => _FinDocListHeaderState();
+  late List<Widget> tableCells;
+  if (isPhone)
+    tableCells = [
+      CircleAvatar(
+        //    radius: 20,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        child: Icon(Icons.search_sharp,
+            size: 25, color: Theme.of(context).colorScheme.onSecondary),
+      ),
+      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Text('${finDoc.docType} Id'),
+          SizedBox(width: 10),
+          Text(classificationId == 'AppHotel'
+              ? 'Reserv. Date'
+              : 'Creation Date'),
+        ]),
+        Text(finDoc.sales ? 'Customer' : 'Supplier'),
+        Row(
+          children: [
+            Text('Status'),
+            SizedBox(width: 10),
+            if (finDoc.docType != FinDocType.shipment) Text('Total'),
+            SizedBox(width: 10),
+            Text('#Items'),
+          ],
+        ),
+      ]),
+      const Text(''),
+    ];
+  else
+    tableCells = [
+      Text('${finDoc.docType} Id'),
+      Text(classificationId == 'AppHotel' ? 'Reserv. Date' : 'Creation Date'),
+      Text(finDoc.sales ? 'Customer' : 'Supplier'),
+      if (finDoc.docType != FinDocType.shipment)
+        const Text(
+          "Total",
+          textAlign: TextAlign.right,
+        ),
+      const Text("Status"),
+      const Text("Email Address"),
+      const Text(""),
+    ];
+
+  List<TableViewCell> tableViewCells = [];
+  for (int index = 0; index < tableCells.length; index++) {
+    tableViewCells.add(TableViewCell(child: tableCells[index]));
+  }
+  return tableViewCells;
 }
 
-class _FinDocListHeaderState extends State<FinDocListHeader> {
-  String searchString = '';
-  bool search = false;
-  @override
-  Widget build(BuildContext context) {
-    String classificationId = GlobalConfiguration().get("classificationId");
-    List<Widget> titleFields = [];
-    if (widget.isPhone) {
-      titleFields = [
-        Text('${widget.docType} Id'),
-        const Expanded(child: SizedBox(width: 10)),
-        Text(classificationId == 'AppHotel' ? 'Reserv. Date' : 'Creation Date'),
-        const Expanded(child: SizedBox(width: 10)),
-      ];
-    } else {
-      titleFields = [
-        Text('${widget.docType} Id'),
-        const Expanded(child: SizedBox(width: 10)),
-        Text(classificationId == 'AppHotel' ? 'Reserv. Date' : 'Creation Date'),
-        const Expanded(child: SizedBox(width: 30)),
-        Text(widget.sales ? 'Customer' : 'Supplier'),
-        const Expanded(child: SizedBox(width: 30)),
-        if (widget.docType != FinDocType.shipment) const Text("Total"),
-        if (widget.docType != FinDocType.shipment)
-          const Expanded(child: SizedBox(width: 30)),
-        const Text("Status"),
-        const Expanded(child: SizedBox(width: 30)),
-        const Text("Email Address"),
-      ];
+// general settings
+var padding = SpanPadding(trailing: 5, leading: 5);
+SpanDecoration? getBackGround(BuildContext context, int index) {
+  return index == 0
+      ? SpanDecoration(color: Theme.of(context).colorScheme.tertiaryContainer)
+      : null;
+}
+
+// column width
+double getColumnWidth(int index, bool isPhone) {
+  if (isPhone)
+    switch (index) {
+      case 0:
+        return 40;
+      case 1:
+        return 250;
+      default:
+        return 100;
     }
 
-    List<Widget> subTitleFields = [];
-    widget.isPhone
-        ? subTitleFields = [
-            Column(
-              children: [
-                Text(widget.sales ? 'Customer' : 'Supplier'),
-                const Row(
-                  children: [
-                    Text('Status'),
-                    SizedBox(width: 10),
-                    Text('Total'),
-                    SizedBox(width: 10),
-                    Text('#Items'),
-                  ],
-                ),
-              ],
-            ),
-          ]
-        : subTitleFields = [];
-
-    return ListTile(
-        leading: GestureDetector(
-            key: const Key('search'),
-            onTap: (() =>
-                setState(() => search ? search = false : search = true)),
-            child: const Icon(Icons.search_sharp, size: 40)),
-        title: search
-            ? Row(children: <Widget>[
-                Expanded(
-                    child: TextField(
-                  key: const Key('searchField'),
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      hintText: 'search with ID'),
-                  onChanged: ((value) => setState(() {
-                        searchString = value;
-                      })),
-                )),
-                ElevatedButton(
-                    key: const Key('searchButton'),
-                    child: const Text('search'),
-                    onPressed: () {
-                      widget.finDocBloc
-                          .add(FinDocFetch(searchString: searchString));
-                    })
-              ])
-            : Row(children: titleFields),
-        subtitle: Row(children: subTitleFields),
-        trailing: SizedBox(width: widget.isPhone ? 40 : 195));
+  switch (index) {
+    case 0:
+      return 60;
+    case 2:
+      return 300;
+    case 6:
+      return 200;
+    default:
+      return 100;
   }
+}
+
+// row definition
+TableSpan? buildRowSpan(
+    int index, bool isPhone, int length, BuildContext context) {
+  if (index >= length) return null;
+
+  return TableSpan(
+    padding: padding,
+    backgroundDecoration: getBackGround(context, index),
+    extent: FixedTableSpanExtent(isPhone ? 75 : 25),
+    recognizerFactories: <Type, GestureRecognizerFactory>{
+      TapGestureRecognizer:
+          GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+        () => TapGestureRecognizer(),
+        (TapGestureRecognizer t) => t.onTap = () => print('Tap row $index'),
+      ),
+    },
+  );
+}
+
+// Column Definition
+TableSpan? buildColumnSpan(int index, bool isPhone, BuildContext context) {
+  if (isPhone && index > 2)
+    return null;
+  else if (index > 6) return null;
+  return TableSpan(
+    backgroundDecoration: getBackGround(context, index),
+    extent: FixedTableSpanExtent(getColumnWidth(index, isPhone)),
+    padding: padding,
+  );
 }
