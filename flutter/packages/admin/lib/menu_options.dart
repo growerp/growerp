@@ -74,7 +74,7 @@ List<MenuOption> menuOptions = [
     tabItems: [
       TabItem(
         form: const OpportunityListForm(),
-        label: '        My\nOpportunities',
+        label: 'My Opportunities',
         icon: const Icon(Icons.home),
       ),
       TabItem(
@@ -82,7 +82,7 @@ List<MenuOption> menuOptions = [
           key: Key('Lead'),
           role: Role.lead,
         ),
-        label: '   Lead\nContacs',
+        label: '   Lead Contacs',
         icon: const Icon(Icons.business),
       ),
       TabItem(
@@ -90,7 +90,7 @@ List<MenuOption> menuOptions = [
           key: Key('CompanyLead'),
           role: Role.lead,
         ),
-        label: '     Lead\nCompanies',
+        label: '     Lead Companies',
         icon: const Icon(Icons.business),
       ),
       TabItem(
@@ -98,7 +98,7 @@ List<MenuOption> menuOptions = [
           key: Key('Customer'),
           role: Role.customer,
         ),
-        label: 'Customer\nContacts',
+        label: 'Customer Contacts',
         icon: const Icon(Icons.school),
       ),
       TabItem(
@@ -106,7 +106,7 @@ List<MenuOption> menuOptions = [
           key: Key('CompanyCustomer'),
           role: Role.customer,
         ),
-        label: 'Customer\nCompanies',
+        label: 'Customer Companies',
         icon: const Icon(Icons.school),
       ),
     ],
@@ -143,7 +143,7 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: 'packages/growerp_core/images/orderGrey.png',
     selectedImage: 'packages/growerp_core/images/order.png',
-    title: 'Orders\n',
+    title: 'Orders',
     route: '/orders',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin],
@@ -190,7 +190,7 @@ List<MenuOption> menuOptions = [
             key: Key('ShipmentsOut'),
             sales: true,
             docType: FinDocType.shipment),
-        label: '\nOutgoing shipments',
+        label: 'Outgoing shipments',
         icon: const Icon(Icons.send),
       ),
       TabItem(
@@ -198,14 +198,14 @@ List<MenuOption> menuOptions = [
             key: Key('ShipmentsIn'),
             sales: false,
             docType: FinDocType.shipment),
-        label: '\nIncoming shipments',
+        label: 'Incoming shipments',
         icon: const Icon(Icons.call_received),
       ),
       TabItem(
         form: const LocationList(
           key: Key('Locations'),
         ),
-        label: '\nWH Locations',
+        label: 'WH Locations',
         icon: const Icon(Icons.location_pin),
       ),
     ],

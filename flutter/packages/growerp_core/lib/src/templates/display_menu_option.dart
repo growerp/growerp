@@ -268,7 +268,9 @@ class MenuOptionState extends State<DisplayMenuOption>
                       tabs: tabText,
                     ),
               title: appBarTitle(
-                  context, '$title ${tabItems[tabIndex].label}', isPhone),
+                  context,
+                  '$title ${isPhone ? '\n' : ', '}${tabItems[tabIndex].label}',
+                  isPhone),
               actions: actions),
           drawer: myDrawer(context, isPhone, widget.menuList),
           floatingActionButton: floatingActionButtonList[tabIndex],

@@ -43,7 +43,7 @@ List<MenuOption> acctMenuOptions = [
               key: Key("SalesInvoice"),
               sales: true,
               docType: FinDocType.invoice),
-          label: "\nOutgoing Invoices",
+          label: "Outgoing Invoices",
           icon: const Icon(Icons.home),
         ),
         TabItem(
@@ -51,7 +51,7 @@ List<MenuOption> acctMenuOptions = [
               key: Key("SalesPayment"),
               sales: true,
               docType: FinDocType.payment),
-          label: "\nIncoming Payments",
+          label: "Incoming Payments",
           icon: const Icon(Icons.home),
         ),
       ]),
@@ -72,7 +72,7 @@ List<MenuOption> acctMenuOptions = [
               key: Key("PurchaseInvoice"),
               sales: false,
               docType: FinDocType.invoice),
-          label: "\nIncoming Invoices",
+          label: "Incoming Invoices",
           icon: const Icon(Icons.home),
         ),
         TabItem(
@@ -80,7 +80,7 @@ List<MenuOption> acctMenuOptions = [
               key: Key("PurchasePayment"),
               sales: false,
               docType: FinDocType.payment),
-          label: "\nOutgoing Payments",
+          label: "Outgoing Payments",
           icon: const Icon(Icons.home),
         ),
       ]),
@@ -128,12 +128,12 @@ List<MenuOption> acctMenuOptions = [
       tabItems: [
         TabItem(
           form: const BalanceSheetForm(),
-          label: "\nBalance Sheet",
+          label: "Balance Sheet",
           icon: const Icon(Icons.list),
         ),
         TabItem(
           form: const BalanceSummaryList(),
-          label: "\nBalance Summary",
+          label: "Balance Summary",
           icon: const Icon(Icons.list),
         ),
       ],

@@ -44,7 +44,7 @@ List<MenuOption> acctMenuOptions = [
               key: Key("SalesInvoice"),
               sales: true,
               docType: FinDocType.invoice),
-          label: "\nOutgoing Invoices",
+          label: "Outgoing Invoices",
           icon: const Icon(Icons.home),
         ),
         TabItem(
@@ -52,7 +52,7 @@ List<MenuOption> acctMenuOptions = [
               key: Key("SalesPayment"),
               sales: true,
               docType: FinDocType.payment),
-          label: "\nIncoming Payments",
+          label: "Incoming Payments",
           icon: const Icon(Icons.home),
         ),
         TabItem(
@@ -60,7 +60,7 @@ List<MenuOption> acctMenuOptions = [
             key: Key('Customer'),
             role: Role.customer,
           ),
-          label: '\nCustomers',
+          label: 'Customers',
           icon: const Icon(Icons.school),
         ),
       ]),
@@ -81,7 +81,7 @@ List<MenuOption> acctMenuOptions = [
               key: Key("PurchaseInvoice"),
               sales: false,
               docType: FinDocType.invoice),
-          label: "\nIncoming Invoices",
+          label: "Incoming Invoices",
           icon: const Icon(Icons.home),
         ),
         TabItem(
@@ -89,7 +89,7 @@ List<MenuOption> acctMenuOptions = [
               key: Key("PurchasePayment"),
               sales: false,
               docType: FinDocType.payment),
-          label: "\nOutgoing Payments",
+          label: "Outgoing Payments",
           icon: const Icon(Icons.home),
         ),
         TabItem(
@@ -97,7 +97,7 @@ List<MenuOption> acctMenuOptions = [
             key: Key('Supplier'),
             role: Role.supplier,
           ),
-          label: '\nSuppliers',
+          label: 'Suppliers',
           icon: const Icon(Icons.business),
         ),
       ]),
@@ -145,12 +145,12 @@ List<MenuOption> acctMenuOptions = [
       tabItems: [
         TabItem(
           form: const BalanceSheetForm(),
-          label: "\nBalance Sheet",
+          label: "Balance Sheet",
           icon: const Icon(Icons.list),
         ),
         TabItem(
           form: const BalanceSummaryList(),
-          label: "\nBalance Summary",
+          label: "Balance Summary",
           icon: const Icon(Icons.list),
         ),
       ],

@@ -115,7 +115,7 @@ TableSpan? buildRowSpan(
   return TableSpan(
     padding: padding,
     backgroundDecoration: getBackGround(context, index),
-    extent: FixedTableSpanExtent(isPhone ? 75 : 25),
+    extent: FixedTableSpanExtent(isPhone ? 65 : 25),
     recognizerFactories: <Type, GestureRecognizerFactory>{
       TapGestureRecognizer:
           GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(

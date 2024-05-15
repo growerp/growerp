@@ -46,7 +46,7 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: "packages/growerp_core/images/crmGrey.png",
     selectedImage: "packages/growerp_core/images/crm.png",
-    title: "CRM\n",
+    title: "CRM",
     route: '/crm',
     readGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
@@ -110,7 +110,7 @@ List<MenuOption> menuOptions = [
       TabItem(
         form: const FinDocList(
             key: Key('SalesOrder'), sales: true, docType: FinDocType.order),
-        label: '\nSales orders',
+        label: 'Sales orders',
         icon: const Icon(Icons.home),
       ),
       TabItem(
@@ -124,7 +124,7 @@ List<MenuOption> menuOptions = [
       TabItem(
         form: const FinDocList(
             key: Key('PurchaseOrder'), sales: false, docType: FinDocType.order),
-        label: '\nPurchase orders',
+        label: 'Purchase orders',
         icon: const Icon(Icons.home),
       ),
       TabItem(
