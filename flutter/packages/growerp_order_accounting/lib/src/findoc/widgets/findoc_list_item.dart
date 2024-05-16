@@ -204,7 +204,7 @@ List<TableViewCell> getDataTiles(
           children: [
             Text("${type.toString()} Id: "),
             TextButton(
-              onPressed: () async => await showDialog(
+              onPressed: () => showDialog(
                   barrierDismissible: true,
                   context: context,
                   builder: (BuildContext context) => type == FinDocType.payment

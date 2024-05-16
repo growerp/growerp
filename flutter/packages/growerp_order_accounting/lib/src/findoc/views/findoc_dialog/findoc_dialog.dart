@@ -21,6 +21,7 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import 'add_another_item_dialog.dart';
 import 'add_product_item_dialog.dart';
@@ -89,11 +90,18 @@ class MyFinDocState extends State<FinDocPage> {
   bool? _isPosted = false;
   Company? _selectedCompany;
   late bool isPhone;
+  late bool readOnly;
 
   @override
   void initState() {
     super.initState();
     finDoc = widget.finDoc;
+    if (finDoc.id() != null &&
+        (finDoc.status == FinDocStatusVal.completed ||
+            finDoc.status == FinDocStatusVal.cancelled))
+      readOnly = true;
+    else
+      readOnly = false;
     finDocUpdated = finDoc;
     _isPosted = finDocUpdated.isPosted ?? false;
     _selectedCompany = finDocUpdated.otherCompany ?? finDocUpdated.otherCompany;
@@ -149,22 +157,26 @@ class MyFinDocState extends State<FinDocPage> {
       switch (state.status) {
         case CartStatus.inProcess:
           finDocUpdated = state.finDoc;
-          return Column(children: [
-            widget.finDoc.docType == FinDocType.transaction
-                ? headerEntryTransaction()
-                : headerEntry(),
-            SizedBox(height: isPhone ? 110 : 50, child: updateButtons(state)),
-            widget.finDoc.docType == FinDocType.transaction
-                ? finDocItemListTransaction(state)
-                : finDocItemList(state),
-            const SizedBox(height: 10),
-            Center(
-                child: Text(
-                    "Items# ${finDocUpdated.items.length}   Grand total : ${finDocUpdated.grandTotal == null ? "0.00" : finDocUpdated.grandTotal.toString()}",
-                    key: const Key('grandTotal'))),
-            const SizedBox(height: 10),
-            SizedBox(height: 40, child: generalButtons()),
-          ]);
+          return Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                widget.finDoc.docType == FinDocType.transaction
+                    ? headerEntryTransaction()
+                    : headerEntry(),
+                if (!readOnly)
+                  SizedBox(
+                      height: isPhone ? 110 : 50, child: updateButtons(state)),
+                widget.finDoc.docType == FinDocType.transaction
+                    ? finDocItemListTransaction(state)
+                    : finDocItemList(state),
+                const SizedBox(height: 10),
+                Center(
+                    child: Text(
+                        "Items# ${finDocUpdated.items.length}   Grand total : ${finDocUpdated.grandTotal == null ? "0.00" : finDocUpdated.grandTotal.toString()}",
+                        key: const Key('grandTotal'))),
+                const SizedBox(height: 10),
+                if (!readOnly) SizedBox(height: 40, child: generalButtons()),
+              ]);
         default:
           return const LoadingIndicator();
       }
@@ -216,6 +228,7 @@ class MyFinDocState extends State<FinDocPage> {
                 return CircularProgressIndicator();
               case DataFetchStatus.success:
                 return DropdownSearch<Company>(
+                  enabled: !readOnly,
                   selectedItem: _selectedCompany,
                   popupProps: PopupProps.menu(
                     showSearchBox: true,
@@ -276,6 +289,7 @@ class MyFinDocState extends State<FinDocPage> {
               padding: const EdgeInsets.all(10),
               child: TextFormField(
                 key: const Key('description'),
+                readOnly: readOnly,
                 decoration:
                     InputDecoration(labelText: '${finDoc.docType} Description'),
                 controller: _descriptionController,
@@ -301,12 +315,14 @@ class MyFinDocState extends State<FinDocPage> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('description'),
+                    readOnly: readOnly,
                     decoration: InputDecoration(
                         labelText: '${finDoc.docType} Description'),
                     controller: _descriptionController,
                   ),
                 ),
-                if (finDoc.docType == FinDocType.transaction)
+                if (finDoc.docType == FinDocType.transaction &&
+                    _isPosted == false)
                   Column(children: [
                     const Text("Post?"),
                     Radio(
@@ -467,144 +483,193 @@ class MyFinDocState extends State<FinDocPage> {
 
   Widget finDocItemList(CartState state) {
     List<FinDocItem> items = finDocUpdated.items;
+    late final ScrollController _verticalController = ScrollController();
+    late final ScrollController _horizontalController = ScrollController();
+    // field headers
+    List<String> getNames(
+        {String? classificationId, FinDocType? docType, bool? sales}) {
+      return [
+        if (!isPhone) "Item Type",
+        "Description",
+        "Qty",
+        "Price",
+        if (!isPhone) "SubTotal",
+        " "
+      ];
+    }
 
-    return Expanded(
-        child: ListView.builder(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            key: const Key('listView'),
-            itemCount: items.length + 1,
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return ListTile(
-                  leading: !isPhone
-                      ? const CircleAvatar(
-                          backgroundColor: Colors.transparent,
-                        )
-                      : null,
-                  title: Column(children: [
-                    Row(children: <Widget>[
-                      if (!isPhone)
-                        const Expanded(
-                            child:
-                                Text("Item Type", textAlign: TextAlign.center)),
-                      const Expanded(
-                          child:
-                              Text("Description", textAlign: TextAlign.center)),
-                      if (!isPhone)
-                        const Expanded(
-                            child:
-                                Text("    Qty", textAlign: TextAlign.center)),
-                      const Text("Price", textAlign: TextAlign.center),
-                      if (!isPhone)
-                        const Expanded(
-                            child:
-                                Text("SubTotal", textAlign: TextAlign.center)),
-                      const Expanded(
-                          child: Text(" ", textAlign: TextAlign.center)),
-                    ]),
-                    const Divider(),
-                  ]),
-                );
-              }
-              if (index == 1 && items.isEmpty) {
-                return const Center(
-                    heightFactor: 20,
-                    child: Text("no items found!",
-                        key: Key('empty'), textAlign: TextAlign.center));
-              }
-              final item = items[index - 1];
-              var itemType = item.itemType != null
-                  ? state.itemTypes.firstWhere(
-                      (e) => e.itemTypeId == item.itemType!.itemTypeId)
-                  : ItemType();
-              return ListTile(
-                  key: const Key('productItem'),
-                  leading: !isPhone
-                      ? CircleAvatar(
-                          backgroundColor: Colors.green,
-                          child: Text(item.itemSeqId.toString()),
-                        )
-                      : null,
-                  title: Row(children: <Widget>[
-                    if (!isPhone)
-                      Expanded(
-                          child: Text(itemType.itemTypeName,
-                              textAlign: TextAlign.left,
-                              key: Key('itemType${index - 1}'))),
-                    Expanded(
-                        child: Text("${item.description}",
-                            key: Key('itemDescription${index - 1}'),
-                            textAlign: TextAlign.left)),
-                    if (!isPhone)
-                      Expanded(
-                          child: Text("${item.quantity}",
-                              textAlign: TextAlign.center,
-                              key: Key('itemQuantity${index - 1}'))),
-                    Text("${item.price}", key: Key('itemPrice${index - 1}')),
-                    if (!isPhone)
-                      Expanded(
-                        key: Key('subTotal${index - 1}'),
-                        child: Text(
-                            (item.price! *
-                                    (item.quantity ?? Decimal.parse('1')))
-                                .toString(),
-                            textAlign: TextAlign.center),
+    // field lengths
+    List<double> lengths = [if (!isPhone) 60, 90, 30, 70, if (!isPhone) 70, 30];
+    // fields content
+    List<dynamic> getFieldContent(FinDocItem item,
+        {int? index,
+        String? classificationId,
+        FinDocType? docType,
+        bool? sales}) {
+      var itemType = item.itemType != null
+          ? state.itemTypes
+              .firstWhere((e) => e.itemTypeId == item.itemType!.itemTypeId)
+          : ItemType();
+      return [
+        if (!isPhone)
+          CircleAvatar(
+            backgroundColor: Colors.green,
+            child: Text(item.itemSeqId.toString()),
+          ),
+        if (!isPhone)
+          Text(itemType.itemTypeName,
+              textAlign: TextAlign.left, key: Key('itemType${index}')),
+        Text("${item.description}",
+            key: Key('itemDescription${index}'), textAlign: TextAlign.left),
+        Text("${item.quantity}",
+            textAlign: TextAlign.center, key: Key('itemQuantity${index}')),
+        Text("${item.price}", key: Key('itemPrice${index}')),
+        if (!isPhone)
+          Text((item.price! * (item.quantity ?? Decimal.parse('1'))).toString(),
+              textAlign: TextAlign.center),
+      ];
+    }
+
+    // buttons
+    List<Widget> getButtons(int itemIndex) => [
+          IconButton(
+            icon: const Icon(Icons.delete_forever),
+            padding: EdgeInsets.all(0),
+            key: Key("delete${itemIndex - 1}"),
+            onPressed: () {
+              _cartBloc.add(CartDeleteItem(itemIndex - 1));
+            },
+          )
+        ];
+
+    var padding = SpanPadding(trailing: 5, leading: 5);
+    SpanDecoration? getBackGround(BuildContext context, int index) {
+      return index == 0
+          ? SpanDecoration(
+              color: Theme.of(context).colorScheme.tertiaryContainer)
+          : null;
+    } // field content
+
+    List<List<TableViewCell>> tableViewCells =
+        get2dTableData(getNames, lengths, items, getFieldContent, getButtons);
+    return Flexible(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: items.isEmpty
+            ? const Text("no items yet")
+            : TableView.builder(
+                diagonalDragBehavior: DiagonalDragBehavior.free,
+                verticalDetails:
+                    ScrollableDetails.vertical(controller: _verticalController),
+                horizontalDetails: ScrollableDetails.horizontal(
+                    controller: _horizontalController),
+                cellBuilder: (context, vicinity) =>
+                    tableViewCells[vicinity.row][vicinity.column],
+                // height of table cell
+                columnBuilder: (index) => index >= tableViewCells[0].length
+                    ? null
+                    : TableSpan(
+                        padding: padding,
+                        backgroundDecoration: getBackGround(context, index),
+                        extent: FixedTableSpanExtent(lengths[index])),
+                pinnedColumnCount: 1,
+                // width of table cell
+                rowBuilder: (index) => index >= tableViewCells.length
+                    ? null
+                    : TableSpan(
+                        padding: padding,
+                        backgroundDecoration: getBackGround(context, index),
+                        extent: FixedTableSpanExtent(20),
                       ),
-                  ]),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete_forever),
-                    key: Key("delete${index - 1}"),
-                    onPressed: () {
-                      _cartBloc.add(CartDeleteItem(index - 1));
-                    },
-                  ));
-            }));
+                pinnedRowCount: 1,
+              ),
+      ),
+    );
   }
 
   Widget finDocItemListTransaction(CartState state) {
     List<FinDocItem> items = finDocUpdated.items;
+    late final ScrollController _verticalController = ScrollController();
+    late final ScrollController _horizontalController = ScrollController();
+    // field headers
+    List<String> getNames(
+        {String? classificationId, FinDocType? docType, bool? sales}) {
+      return ['Account', 'Debit', 'Credit', if (!readOnly) 'del.'];
+    }
 
-    return Expanded(
+    // field lengths
+    List<double> lengths = [60, 70, 70, 30];
+    // fields content, using strings index not required
+    // widgets also allowed, then index is used for the key on the widgets
+    List<dynamic> getFieldContent(FinDocItem item,
+        {int? index,
+        String? classificationId,
+        FinDocType? docType,
+        bool? sales}) {
+      return [
+        item.glAccount!.accountCode!,
+        item.isDebit! ? item.price.toString() : '',
+        !item.isDebit! ? item.price.toString() : '',
+      ];
+    }
+
+    // buttons
+    List<Widget> getButtons(int itemIndex) => [
+          IconButton(
+            padding: EdgeInsets.all(0),
+            icon: const Icon(
+              Icons.delete_forever,
+              size: 20,
+            ),
+            key: Key("delete$itemIndex"),
+            onPressed: () {
+              _cartBloc.add(CartDeleteItem(itemIndex));
+            },
+          )
+        ];
+
+    var padding = SpanPadding(trailing: 5, leading: 5);
+    SpanDecoration? getBackGround(BuildContext context, int index) {
+      return index == 0
+          ? SpanDecoration(
+              color: Theme.of(context).colorScheme.tertiaryContainer)
+          : null;
+    } // field content
+
+    List<List<TableViewCell>> tableViewCells =
+        get2dTableData(getNames, lengths, items, getFieldContent, getButtons);
+    return Flexible(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
         child: items.isEmpty
             ? const Text("no items yet")
-            : SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: DataTable(
-                    dividerThickness: 0.0,
-                    dataRowMaxHeight: 25,
-                    dataRowMinHeight: 15,
-                    columns: const [
-                      DataColumn(label: Expanded(child: Text('Account'))),
-                      DataColumn(label: Expanded(child: Text('Debit'))),
-                      DataColumn(label: Expanded(child: Text('Credit'))),
-                      DataColumn(label: Expanded(child: Text(''))),
-                    ],
-                    rows: List.generate(items.length, (index) {
-                      return DataRow(cells: [
-                        DataCell(Text(items[index].glAccount!.accountCode!,
-                            key: Key('accountCode$index'))),
-                        DataCell(Text(
-                            items[index].isDebit!
-                                ? items[index].price.toString()
-                                : '',
-                            key: Key('debit$index'))),
-                        DataCell(Text(
-                            !items[index].isDebit!
-                                ? items[index].price.toString()
-                                : '',
-                            key: Key('credit$index'))),
-                        DataCell(IconButton(
-                          icon: const Icon(
-                            Icons.delete_forever,
-                            size: 15,
-                          ),
-                          key: Key("delete$index"),
-                          onPressed: () {
-                            _cartBloc.add(CartDeleteItem(index));
-                          },
-                        )),
-                      ]);
-                    })),
-              ));
+            : TableView.builder(
+                diagonalDragBehavior: DiagonalDragBehavior.free,
+                verticalDetails:
+                    ScrollableDetails.vertical(controller: _verticalController),
+                horizontalDetails: ScrollableDetails.horizontal(
+                    controller: _horizontalController),
+                cellBuilder: (context, vicinity) =>
+                    tableViewCells[vicinity.row][vicinity.column],
+                // height of table cell
+                columnBuilder: (index) => index >= tableViewCells[0].length
+                    ? null
+                    : TableSpan(
+                        padding: padding,
+                        backgroundDecoration: getBackGround(context, index),
+                        extent: FixedTableSpanExtent(lengths[index])),
+                pinnedColumnCount: 1,
+                // width of table cell
+                rowBuilder: (index) => index >= tableViewCells.length
+                    ? null
+                    : TableSpan(
+                        padding: padding,
+                        backgroundDecoration: getBackGround(context, index),
+                        extent: FixedTableSpanExtent(20),
+                      ),
+                pinnedRowCount: 1,
+              ),
+      ),
+    );
   }
 }

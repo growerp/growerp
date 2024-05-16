@@ -118,7 +118,9 @@ class FinDocListState extends State<FinDocList> {
   }
 
   TableSpan? _buildRowSpan(int index) {
-    return buildRowSpan(index, isPhone, finDocs.length, context);
+    if (index >= finDocs.length) return null;
+    FinDoc finDoc = index == 0 ? FinDoc() : finDocs[index - 1];
+    return buildRowSpan(index, isPhone, context, finDoc, widget.onlyRental);
   }
 
   @override
@@ -142,24 +144,20 @@ class FinDocListState extends State<FinDocList> {
                 docType: widget.docType,
                 finDocBloc: _finDocBloc)
             : Container(),
-        Expanded(
-            child: RefreshIndicator(
-          onRefresh: (() async =>
-              _finDocBloc.add(const FinDocFetch(refresh: true))),
-          child: TableView.builder(
-            diagonalDragBehavior: DiagonalDragBehavior.free,
-            verticalDetails:
-                ScrollableDetails.vertical(controller: _verticalController),
-            horizontalDetails:
-                ScrollableDetails.horizontal(controller: _horizontalController),
-            cellBuilder: _buildCell,
-            //    columnCount: getHeaderTiles(context, finDocs[0]).length,
-            columnBuilder: _buildColumnSpan,
-            pinnedColumnCount: 1,
-            //    rowCount: finDocs.length + 1,
-            rowBuilder: _buildRowSpan,
-            pinnedRowCount: 1,
-          ),
+        Flexible(
+            child: TableView.builder(
+          diagonalDragBehavior: DiagonalDragBehavior.free,
+          verticalDetails:
+              ScrollableDetails.vertical(controller: _verticalController),
+          horizontalDetails:
+              ScrollableDetails.horizontal(controller: _horizontalController),
+          cellBuilder: _buildCell,
+          //    columnCount: getHeaderTiles(context, finDocs[0]).length,
+          columnBuilder: _buildColumnSpan,
+          pinnedColumnCount: 1,
+          //    rowCount: finDocs.length + 1,
+          rowBuilder: _buildRowSpan,
+          pinnedRowCount: 1,
         ))
       ]);
     }

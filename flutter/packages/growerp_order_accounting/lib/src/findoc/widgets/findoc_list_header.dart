@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 List<TableViewCell> getHeaderTiles(BuildContext context, FinDoc finDoc) {
@@ -109,9 +110,12 @@ double getColumnWidth(int index, bool isPhone) {
 
 // row definition
 TableSpan? buildRowSpan(
-    int index, bool isPhone, int length, BuildContext context) {
-  if (index >= length) return null;
-
+  int index,
+  bool isPhone,
+  BuildContext context,
+  FinDoc finDoc,
+  bool onlyRental,
+) {
   return TableSpan(
     padding: padding,
     backgroundDecoration: getBackGround(context, index),
@@ -119,9 +123,18 @@ TableSpan? buildRowSpan(
     recognizerFactories: <Type, GestureRecognizerFactory>{
       TapGestureRecognizer:
           GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-        () => TapGestureRecognizer(),
-        (TapGestureRecognizer t) => t.onTap = () => print('Tap row $index'),
-      ),
+              () => TapGestureRecognizer(),
+              (TapGestureRecognizer t) => t.onTap = () => showDialog(
+                  barrierDismissible: true,
+                  context: context,
+                  builder: (BuildContext context) {
+                    return BlocProvider.value(
+                        value: context.read<FinDocBloc>(),
+                        child: onlyRental == true
+                            ? ReservationDialog(
+                                finDoc: finDoc, original: finDoc)
+                            : FinDocDialog(finDoc));
+                  }))
     },
   );
 }
