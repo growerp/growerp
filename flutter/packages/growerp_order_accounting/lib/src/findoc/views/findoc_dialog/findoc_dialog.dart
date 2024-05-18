@@ -96,9 +96,7 @@ class MyFinDocState extends State<FinDocPage> {
   void initState() {
     super.initState();
     finDoc = widget.finDoc;
-    if (finDoc.id() != null &&
-        (finDoc.status == FinDocStatusVal.completed ||
-            finDoc.status == FinDocStatusVal.cancelled))
+    if (finDoc.id() != null && finDoc.status == FinDocStatusVal.statusFixed)
       readOnly = true;
     else
       readOnly = false;
@@ -158,6 +156,7 @@ class MyFinDocState extends State<FinDocPage> {
         case CartStatus.inProcess:
           finDocUpdated = state.finDoc;
           return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 widget.finDoc.docType == FinDocType.transaction
@@ -165,15 +164,15 @@ class MyFinDocState extends State<FinDocPage> {
                     : headerEntry(),
                 if (!readOnly)
                   SizedBox(
-                      height: isPhone ? 110 : 50, child: updateButtons(state)),
+                      height: isPhone ? 110 : 40, child: updateButtons(state)),
+                const SizedBox(height: 20),
                 widget.finDoc.docType == FinDocType.transaction
                     ? finDocItemListTransaction(state)
                     : finDocItemList(state),
                 const SizedBox(height: 10),
-                Center(
-                    child: Text(
-                        "Items# ${finDocUpdated.items.length}   Grand total : ${finDocUpdated.grandTotal == null ? "0.00" : finDocUpdated.grandTotal.toString()}",
-                        key: const Key('grandTotal'))),
+                Text(
+                    "Items# ${finDocUpdated.items.length}   Grand total : ${finDocUpdated.grandTotal == null ? "0.00" : finDocUpdated.grandTotal.toString()}",
+                    key: const Key('grandTotal')),
                 const SizedBox(height: 10),
                 if (!readOnly) SizedBox(height: 40, child: generalButtons()),
               ]);
@@ -287,12 +286,21 @@ class MyFinDocState extends State<FinDocPage> {
       Expanded(
           child: Padding(
               padding: const EdgeInsets.all(10),
-              child: TextFormField(
-                key: const Key('description'),
-                readOnly: readOnly,
-                decoration:
-                    InputDecoration(labelText: '${finDoc.docType} Description'),
-                controller: _descriptionController,
+              child: Row(
+                children: [
+                  Flexible(
+                    child: TextFormField(
+                      key: const Key('description'),
+                      readOnly: readOnly,
+                      decoration: InputDecoration(
+                          labelText: '${finDoc.docType} Description'),
+                      controller: _descriptionController,
+                    ),
+                  ),
+                  Flexible(
+                      child: Text(
+                          "Status: ${finDoc.displayStatus(classificationId)}")),
+                ],
               ))),
     ];
 
@@ -486,9 +494,13 @@ class MyFinDocState extends State<FinDocPage> {
     late final ScrollController _verticalController = ScrollController();
     late final ScrollController _horizontalController = ScrollController();
     // field headers
-    List<String> getNames(
-        {String? classificationId, FinDocType? docType, bool? sales}) {
+    List<dynamic> getItemFieldNames(
+        {int? itemIndex,
+        String? classificationId,
+        FinDocItem? item,
+        BuildContext? context}) {
       return [
+        "#",
         if (!isPhone) "Item Type",
         "Description",
         "Qty",
@@ -499,50 +511,56 @@ class MyFinDocState extends State<FinDocPage> {
     }
 
     // field lengths
-    List<double> lengths = [if (!isPhone) 60, 90, 30, 70, if (!isPhone) 70, 30];
+    List<double> getItemFieldWidth(
+        {int? itemIndex, FinDocItem? item, BuildContext? context}) {
+      if (isPhone)
+        return [6, 30, 10, 10, 15];
+      else
+        return [4, 8, 30, 10, 10, 10, 10];
+    }
+
     // fields content
-    List<dynamic> getFieldContent(FinDocItem item,
-        {int? index,
-        String? classificationId,
-        FinDocType? docType,
-        bool? sales}) {
+    List<dynamic> getItemFieldContent(FinDocItem item,
+        {int? itemIndex, String? classificationId, context}) {
       var itemType = item.itemType != null
           ? state.itemTypes
               .firstWhere((e) => e.itemTypeId == item.itemType!.itemTypeId)
           : ItemType();
       return [
-        if (!isPhone)
-          CircleAvatar(
-            backgroundColor: Colors.green,
-            child: Text(item.itemSeqId.toString()),
-          ),
+        CircleAvatar(
+          backgroundColor: Colors.green,
+          child: Text(item.itemSeqId.toString()),
+        ),
         if (!isPhone)
           Text(itemType.itemTypeName,
-              textAlign: TextAlign.left, key: Key('itemType${index}')),
+              textAlign: TextAlign.left, key: Key('itemType${itemIndex}')),
         Text("${item.description}",
-            key: Key('itemDescription${index}'), textAlign: TextAlign.left),
+            key: Key('itemDescription${itemIndex}'), textAlign: TextAlign.left),
         Text("${item.quantity}",
-            textAlign: TextAlign.center, key: Key('itemQuantity${index}')),
-        Text("${item.price}", key: Key('itemPrice${index}')),
-        if (!isPhone)
+            textAlign: TextAlign.center, key: Key('itemQuantity${itemIndex}')),
+        Text("${item.price}", key: Key('itemPrice${itemIndex}')),
+        if (!isPhone) // subtotal
           Text((item.price! * (item.quantity ?? Decimal.parse('1'))).toString(),
               textAlign: TextAlign.center),
       ];
     }
 
     // buttons
-    List<Widget> getButtons(int itemIndex) => [
+    List<Widget> getRowActionButtons(
+            {int? itemIndex, FinDocItem? item, BuildContext? context}) =>
+        [
           IconButton(
+            visualDensity: VisualDensity.compact,
             icon: const Icon(Icons.delete_forever),
             padding: EdgeInsets.all(0),
-            key: Key("delete${itemIndex - 1}"),
+            key: Key("delete${itemIndex}"),
             onPressed: () {
-              _cartBloc.add(CartDeleteItem(itemIndex - 1));
+              _cartBloc.add(CartDeleteItem(itemIndex!));
             },
           )
         ];
 
-    var padding = SpanPadding(trailing: 5, leading: 5);
+    var padding = SpanPadding(trailing: 8, leading: 8);
     SpanDecoration? getBackGround(BuildContext context, int index) {
       return index == 0
           ? SpanDecoration(
@@ -550,40 +568,42 @@ class MyFinDocState extends State<FinDocPage> {
           : null;
     } // field content
 
-    List<List<TableViewCell>> tableViewCells =
-        get2dTableData(getNames, lengths, items, getFieldContent, getButtons);
+    var (
+      List<List<TableViewCell>> tableViewCells,
+      List<double> fieldWidths,
+      double? rowHeight
+    ) = get2dTableData(
+        getItemFieldNames, getItemFieldWidth, items, getItemFieldContent,
+        getRowActionButtons: getRowActionButtons, context: context);
     return Flexible(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: items.isEmpty
-            ? const Text("no items yet")
-            : TableView.builder(
-                diagonalDragBehavior: DiagonalDragBehavior.free,
-                verticalDetails:
-                    ScrollableDetails.vertical(controller: _verticalController),
-                horizontalDetails: ScrollableDetails.horizontal(
-                    controller: _horizontalController),
-                cellBuilder: (context, vicinity) =>
-                    tableViewCells[vicinity.row][vicinity.column],
-                // height of table cell
-                columnBuilder: (index) => index >= tableViewCells[0].length
-                    ? null
-                    : TableSpan(
-                        padding: padding,
-                        backgroundDecoration: getBackGround(context, index),
-                        extent: FixedTableSpanExtent(lengths[index])),
-                pinnedColumnCount: 1,
-                // width of table cell
-                rowBuilder: (index) => index >= tableViewCells.length
-                    ? null
-                    : TableSpan(
-                        padding: padding,
-                        backgroundDecoration: getBackGround(context, index),
-                        extent: FixedTableSpanExtent(20),
-                      ),
-                pinnedRowCount: 1,
-              ),
-      ),
+      child: items.isEmpty
+          ? const Text("no items yet")
+          : TableView.builder(
+              diagonalDragBehavior: DiagonalDragBehavior.free,
+              verticalDetails:
+                  ScrollableDetails.vertical(controller: _verticalController),
+              horizontalDetails: ScrollableDetails.horizontal(
+                  controller: _horizontalController),
+              cellBuilder: (context, vicinity) =>
+                  tableViewCells[vicinity.row][vicinity.column],
+              // height of table cell
+              columnBuilder: (index) => index >= tableViewCells[0].length
+                  ? null
+                  : TableSpan(
+                      padding: padding,
+                      backgroundDecoration: getBackGround(context, index),
+                      extent: FixedTableSpanExtent(fieldWidths[index])),
+              pinnedColumnCount: 1,
+              // width of table cell
+              rowBuilder: (index) => index >= tableViewCells.length
+                  ? null
+                  : TableSpan(
+                      padding: padding,
+                      backgroundDecoration: getBackGround(context, index),
+                      extent: FixedTableSpanExtent(rowHeight!),
+                    ),
+              pinnedRowCount: 1,
+            ),
     );
   }
 
@@ -592,20 +612,28 @@ class MyFinDocState extends State<FinDocPage> {
     late final ScrollController _verticalController = ScrollController();
     late final ScrollController _horizontalController = ScrollController();
     // field headers
-    List<String> getNames(
-        {String? classificationId, FinDocType? docType, bool? sales}) {
+    List<dynamic> getItemFieldNames(
+        {int? itemIndex,
+        String? classificationId,
+        FinDocItem? item,
+        BuildContext? context}) {
       return ['Account', 'Debit', 'Credit', if (!readOnly) 'del.'];
     }
 
     // field lengths
-    List<double> lengths = [60, 70, 70, 30];
+    List<double> getItemFieldWidth(
+        {int? itemIndex, FinDocItem? item, BuildContext? context}) {
+      return [10, 20, 20, 30];
+    }
+
     // fields content, using strings index not required
     // widgets also allowed, then index is used for the key on the widgets
-    List<dynamic> getFieldContent(FinDocItem item,
-        {int? index,
+    List<dynamic> getItemFieldContent(FinDocItem item,
+        {int? itemIndex,
         String? classificationId,
         FinDocType? docType,
-        bool? sales}) {
+        bool? sales,
+        context}) {
       return [
         item.glAccount!.accountCode!,
         item.isDebit! ? item.price.toString() : '',
@@ -613,8 +641,14 @@ class MyFinDocState extends State<FinDocPage> {
       ];
     }
 
+    double getRowHeight({BuildContext? context}) {
+      return 15;
+    }
+
     // buttons
-    List<Widget> getButtons(int itemIndex) => [
+    List<Widget> getRowActionButtons(
+            {int? itemIndex, FinDocItem? item, BuildContext? context}) =>
+        [
           IconButton(
             padding: EdgeInsets.all(0),
             icon: const Icon(
@@ -623,12 +657,12 @@ class MyFinDocState extends State<FinDocPage> {
             ),
             key: Key("delete$itemIndex"),
             onPressed: () {
-              _cartBloc.add(CartDeleteItem(itemIndex));
+              _cartBloc.add(CartDeleteItem(itemIndex!));
             },
           )
         ];
 
-    var padding = SpanPadding(trailing: 5, leading: 5);
+    var padding = SpanPadding(trailing: 15, leading: 15);
     SpanDecoration? getBackGround(BuildContext context, int index) {
       return index == 0
           ? SpanDecoration(
@@ -636,14 +670,21 @@ class MyFinDocState extends State<FinDocPage> {
           : null;
     } // field content
 
-    List<List<TableViewCell>> tableViewCells =
-        get2dTableData(getNames, lengths, items, getFieldContent, getButtons);
-    return Flexible(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: items.isEmpty
-            ? const Text("no items yet")
-            : TableView.builder(
+    var (
+      List<List<TableViewCell>> tableViewCells,
+      List<double> fieldWidths,
+      double? rowHeight
+    ) = get2dTableData(
+        getItemFieldNames, getItemFieldWidth, items, getItemFieldContent,
+        getRowActionButtons: getRowActionButtons,
+        getRowHeight: getRowHeight,
+        context: context);
+    return items.isEmpty
+        ? const Text("no items yet")
+        : Flexible(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 20.0),
+              child: TableView.builder(
                 diagonalDragBehavior: DiagonalDragBehavior.free,
                 verticalDetails:
                     ScrollableDetails.vertical(controller: _verticalController),
@@ -657,7 +698,7 @@ class MyFinDocState extends State<FinDocPage> {
                     : TableSpan(
                         padding: padding,
                         backgroundDecoration: getBackGround(context, index),
-                        extent: FixedTableSpanExtent(lengths[index])),
+                        extent: FixedTableSpanExtent(fieldWidths[index])),
                 pinnedColumnCount: 1,
                 // width of table cell
                 rowBuilder: (index) => index >= tableViewCells.length
@@ -665,11 +706,11 @@ class MyFinDocState extends State<FinDocPage> {
                     : TableSpan(
                         padding: padding,
                         backgroundDecoration: getBackGround(context, index),
-                        extent: FixedTableSpanExtent(20),
+                        extent: FixedTableSpanExtent(rowHeight!),
                       ),
                 pinnedRowCount: 1,
               ),
-      ),
-    );
+            ),
+          );
   }
 }

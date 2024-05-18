@@ -12,9 +12,9 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
@@ -57,7 +57,6 @@ class FinDocListState extends State<FinDocList> {
   List<FinDoc> finDocs = <FinDoc>[];
   int? tab;
   late int limit;
-  String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
   late bool isPhone;
   bool hasReachedMax = false;
@@ -65,10 +64,12 @@ class FinDocListState extends State<FinDocList> {
   late final ScrollController _verticalController = ScrollController();
   late final ScrollController _horizontalController = ScrollController();
   List<List<TableViewCell>> tableViewRows = [];
+  late String classificationId;
 
   @override
   void initState() {
     super.initState();
+    classificationId = context.read<String>();
     entityName =
         classificationId == 'AppHotel' && widget.docType == FinDocType.order
             ? 'Reservation'
@@ -103,26 +104,6 @@ class FinDocListState extends State<FinDocList> {
     _finDocBloc.add(const FinDocFetch(limit: 15));
   }
 
-  TableViewCell _buildCell(BuildContext context, TableVicinity vicinity) {
-    if (vicinity.row == 0) {
-      return getHeaderTiles(context, finDocs[0])[vicinity.column];
-    }
-    if (vicinity.column == 0) {
-      return tableViewRows[vicinity.row - 1][0];
-    }
-    return tableViewRows[vicinity.row - 1][vicinity.column];
-  }
-
-  TableSpan? _buildColumnSpan(int index) {
-    return buildColumnSpan(index, isPhone, context);
-  }
-
-  TableSpan? _buildRowSpan(int index) {
-    if (index >= finDocs.length) return null;
-    FinDoc finDoc = index == 0 ? FinDoc() : finDocs[index - 1];
-    return buildRowSpan(index, isPhone, context, finDoc, widget.onlyRental);
-  }
-
   @override
   Widget build(BuildContext context) {
     limit = (MediaQuery.of(context).size.height / 100).round();
@@ -134,9 +115,11 @@ class FinDocListState extends State<FinDocList> {
             child: Text(
                 widget.journalId != null
                     ? "no journal entries found"
-                    : "no (${widget.docType == FinDocType.transaction ? 'unposted' : 'open'})${widget.docType == FinDocType.shipment ? "${widget.sales ? 'outgoing' : 'incoming'} " : "${widget.docType == FinDocType.transaction ? '' : widget.sales ? 'sales' : 'purchase'} "}${entityName}s found!",
+                    : "no (${widget.docType == FinDocType.transaction ? 'unposted' : 'open'})"
+                        "${widget.docType == FinDocType.shipment ? "${widget.sales ? 'outgoing' : 'incoming'} " : "${widget.docType == FinDocType.transaction ? '' : widget.sales ? 'sales' : 'purchase'} "}"
+                        "${entityName}s found!",
                 textAlign: TextAlign.center));
-      return Column(children: [
+/*      return Column(children: [
         widget.docType == FinDocType.transaction
             ? FinDocListHeaderTrans(
                 isPhone: isPhone,
@@ -144,22 +127,61 @@ class FinDocListState extends State<FinDocList> {
                 docType: widget.docType,
                 finDocBloc: _finDocBloc)
             : Container(),
-        Flexible(
-            child: TableView.builder(
-          diagonalDragBehavior: DiagonalDragBehavior.free,
-          verticalDetails:
-              ScrollableDetails.vertical(controller: _verticalController),
-          horizontalDetails:
-              ScrollableDetails.horizontal(controller: _horizontalController),
-          cellBuilder: _buildCell,
-          //    columnCount: getHeaderTiles(context, finDocs[0]).length,
-          columnBuilder: _buildColumnSpan,
-          pinnedColumnCount: 1,
-          //    rowCount: finDocs.length + 1,
-          rowBuilder: _buildRowSpan,
-          pinnedRowCount: 1,
-        ))
-      ]);
+*/
+      var (
+        List<List<TableViewCell>> tableViewCells,
+        List<double> fieldWidths,
+        double? rowHeight
+      ) = get2dTableData<FinDoc>(
+        getItemFieldNames,
+        getItemFieldWidth,
+        finDocs,
+        getItemFieldContent,
+        getRowActionButtons: getRowActionButtons,
+        getRowHeight: getRowHeight,
+        context: context,
+      );
+      return TableView.builder(
+        diagonalDragBehavior: DiagonalDragBehavior.free,
+        verticalDetails:
+            ScrollableDetails.vertical(controller: _verticalController),
+        horizontalDetails:
+            ScrollableDetails.horizontal(controller: _horizontalController),
+        cellBuilder: (context, vicinity) =>
+            tableViewCells[vicinity.row][vicinity.column],
+        columnBuilder: (index) => index >= tableViewCells[0].length
+            ? null
+            : TableSpan(
+                padding: padding,
+                backgroundDecoration: getBackGround(context, index),
+                extent: FixedTableSpanExtent(fieldWidths[index]),
+              ),
+        pinnedColumnCount: 1,
+        rowBuilder: (index) => index >= tableViewCells.length
+            ? null
+            : TableSpan(
+                padding: padding,
+                backgroundDecoration: getBackGround(context, index),
+                extent: FixedTableSpanExtent(rowHeight!),
+                recognizerFactories: <Type, GestureRecognizerFactory>{
+                    TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<
+                            TapGestureRecognizer>(
+                        () => TapGestureRecognizer(),
+                        (TapGestureRecognizer t) => t.onTap = () => showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return BlocProvider.value(
+                                  value: context.read<FinDocBloc>(),
+                                  child: widget.onlyRental == true
+                                      ? ReservationDialog(
+                                          finDoc: finDocs[index],
+                                          original: finDocs[index])
+                                      : FinDocDialog(finDocs[index]));
+                            }))
+                  }),
+        pinnedRowCount: 1,
+      );
     }
 
     return Builder(builder: (BuildContext context) {
@@ -186,11 +208,6 @@ class FinDocListState extends State<FinDocList> {
           case FinDocStatus.success:
             finDocs = state.finDocs;
             hasReachedMax = state.hasReachedMax;
-            // generate table cells
-            for (int row = 0; row < finDocs.length; row++) {
-              tableViewRows
-                  .add(getDataTiles(context, finDocs[row], row, _finDocBloc));
-            }
 
             // if rental (hotelroom) need to show checkin/out orders
             if (widget.onlyRental && widget.status != null) {

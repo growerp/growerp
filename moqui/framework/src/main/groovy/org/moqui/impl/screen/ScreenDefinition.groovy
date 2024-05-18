@@ -44,9 +44,9 @@ import javax.servlet.http.HttpServletResponse
 @CompileStatic
 class ScreenDefinition {
     private final static Logger logger = LoggerFactory.getLogger(ScreenDefinition.class)
-    private final static Set<String> scanWidgetNames = new HashSet<String>(
+    private final static Set<String> scanWidgetItemFieldNames = new HashSet<String>(
             ['section', 'section-iterate', 'section-include', 'form-single', 'form-list', 'tree', 'subscreens-panel', 'subscreens-menu'])
-    private final static Set<String> screenStaticWidgetNames = new HashSet<String>(
+    private final static Set<String> screenStaticWidgetItemFieldNames = new HashSet<String>(
             ['subscreens-panel', 'subscreens-menu', 'subscreens-active'])
 
     @SuppressWarnings("GrFinalVariableAccess") protected final ScreenFacadeImpl sfi
@@ -120,7 +120,7 @@ class ScreenDefinition {
         for (int seIdx = 0; seIdx < screenExtendNodeList.size(); seIdx++) {
             MNode screenExtendNode = (MNode) screenExtendNodeList.get(seIdx)
             // NOTE: form-single, form-list merged below; various others overridden below (section, section-iterate)
-            screenExtendNode.descendants(scanWidgetNames, extendDescendantsMap)
+            screenExtendNode.descendants(scanWidgetItemFieldNames, extendDescendantsMap)
 
             // start with attributes and simple override by name/id elements
             screenNode.attributes.putAll(screenExtendNode.attributes)
@@ -266,7 +266,7 @@ class ScreenDefinition {
         rootSection = new ScreenSection(ecfi, screenNode, location + ".screen")
 
         if (rootSection != null && rootSection.widgets != null) {
-            Map<String, ArrayList<MNode>> descMap = rootSection.widgets.widgetsNode.descendants(scanWidgetNames)
+            Map<String, ArrayList<MNode>> descMap = rootSection.widgets.widgetsNode.descendants(scanWidgetItemFieldNames)
             // get all of the other sections by name
             for (MNode sectionNode in descMap.get('section')) {
                 String sectionName = sectionNode.attribute("name")
@@ -331,7 +331,7 @@ class ScreenDefinition {
                 MNode widgetsNode = rootSection.widgets.widgetsNode
                 if (!"widgets".equals(widgetsNode.getName())) widgetsNode = widgetsNode.first("widgets")
                 for (MNode child in widgetsNode.getChildren()) {
-                    if (!screenStaticWidgetNames.contains(child.getName())) {otherElements = true; break } }
+                    if (!screenStaticWidgetItemFieldNames.contains(child.getName())) {otherElements = true; break } }
                 if (!otherElements) serverStatic = new HashSet<>(['all'])
             }
         }

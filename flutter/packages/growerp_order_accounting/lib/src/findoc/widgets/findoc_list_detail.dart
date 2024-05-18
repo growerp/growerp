@@ -12,35 +12,94 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
-import '../../../growerp_order_accounting.dart';
-
-List<TableViewCell> getDataTiles(
-  BuildContext context,
-  FinDoc finDoc,
-  int index,
-  FinDocBloc finDocBloc,
-) {
+// field headers
+List<dynamic> getItemFieldNames(
+    {int? itemIndex,
+    String? classificationId,
+    FinDoc? item,
+    BuildContext? context}) {
   bool isPhone = isAPhone(context);
+  if (isPhone)
+    return [
+      CircleAvatar(
+        //    radius: 20,
+        backgroundColor: Theme.of(context!).colorScheme.secondary,
+        child: Icon(Icons.search_sharp,
+            size: 25, color: Theme.of(context).colorScheme.onSecondary),
+      ),
+      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Text('${item!.docType} Id'),
+          SizedBox(width: 10),
+          Text(classificationId == 'AppHotel'
+              ? 'Reserv. Date'
+              : 'Creation Date'),
+        ]),
+        Text(item.sales ? 'Customer' : 'Supplier'),
+        Row(
+          children: [
+            Text('Status'),
+            SizedBox(width: 10),
+            if (item.docType != FinDocType.shipment) Text('Total'),
+            SizedBox(width: 10),
+            Text('#Items'),
+          ],
+        ),
+      ]),
+      const Text(""),
+    ];
+  else
+    return [
+      Text('${item!.docType} Id'),
+      Text(classificationId == 'AppHotel' ? 'Reserv. Date' : 'Creation Date'),
+      Text(item.sales ? 'Customer' : 'Supplier'),
+      if (item.docType != FinDocType.shipment)
+        const Text(
+          "Total",
+          textAlign: TextAlign.right,
+        ),
+      const Text("Status"),
+      const Text("Email Address"),
+      const Text(""),
+    ];
+}
 
-  /*context
-          .read<AuthBloc>()
-          .state
-          .authenticate
-          ?.company!
-          .currency!
-          .currencyId,
-    */
-  String classificationId = context.read<String>();
-  List<Widget> tableCells = [];
-  if (isPhone) {
-    tableCells = <Widget>[
+// field lengths perc of screenwidth can be larger than 100 %: horizontal scroll
+List<double> getItemFieldWidth(
+    {int? itemIndex, FinDoc? item, BuildContext? context}) {
+  if (isPhone(context))
+    return [10, 59, 35];
+  else
+    return [5, 9, 29, 10, 19, 04, 20];
+}
+
+// row height
+double getRowHeight({BuildContext? context}) {
+  return isPhone(context) ? 65 : 20;
+}
+
+// general settings
+var padding = SpanPadding(trailing: 5, leading: 5);
+SpanDecoration? getBackGround(BuildContext context, int index) {
+  return index == 0
+      ? SpanDecoration(color: Theme.of(context).colorScheme.tertiaryContainer)
+      : null;
+}
+
+// fields content, using strings index not required
+// widgets also allowed, then index is used for the key on the widgets
+List<dynamic> getItemFieldContent(FinDoc finDoc,
+    {int? itemIndex, BuildContext? context}) {
+  String classificationId = context!.read<String>();
+  if (isPhone(context))
+    return [
       CircleAvatar(
         backgroundColor: Theme.of(context).colorScheme.secondary,
         child: Text(
@@ -51,7 +110,7 @@ List<TableViewCell> getDataTiles(
       Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(
           children: [
-            Text(finDoc.pseudoId ?? '', key: Key('id$index')),
+            Text(finDoc.pseudoId ?? '', key: Key('id$itemIndex')),
             SizedBox(width: 10),
             Text(classificationId == 'AppHotel'
                 ? finDoc.items[0].rentalFromDate != null
@@ -61,87 +120,103 @@ List<TableViewCell> getDataTiles(
           ],
         ),
         Text(finDoc.otherCompany?.name.truncate(25) ?? '',
-            key: Key("otherUser$index")),
+            key: Key("otherUser$itemIndex")),
         Row(
           children: [
             Text(
                 finDoc.status != null
                     ? finDoc.displayStatus(classificationId)!
                     : '??',
-                key: Key("status$index")),
+                key: Key("status$itemIndex")),
             const SizedBox(width: 10),
             if (finDoc.docType != FinDocType.shipment)
               Text(
                   finDoc.grandTotal != null
                       ? "${finDoc.grandTotal!.currency()}"
                       : '',
-                  key: Key("grandTotal$index")),
+                  key: Key("grandTotal$itemIndex")),
             if (finDoc.docType != FinDocType.shipment)
               const SizedBox(width: 10),
-            Text(finDoc.items.length.toString(), key: Key("itemsLength$index")),
+            Text(finDoc.items.length.toString(),
+                key: Key("itemsLength$itemIndex")),
           ],
         )
-      ]),
+      ])
     ];
-  } else {
-    tableCells = <Widget>[
-      Text(finDoc.pseudoId ?? '', key: Key('id$index')),
+  else
+    return [
+      Text(finDoc.pseudoId ?? '', key: Key('id$itemIndex')),
       Text(classificationId == 'AppHotel' &&
               finDoc.items[0].rentalFromDate != null
           ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
           : "${finDoc.creationDate?.toString().substring(0, 11)}"),
-      Text(finDoc.otherCompany?.name ?? '', key: Key("otherUser$index")),
+      Text(finDoc.otherCompany?.name ?? '', key: Key("otherUser$itemIndex")),
       if (finDoc.docType != FinDocType.shipment)
         Text("${finDoc.grandTotal!.currency()}",
-            textAlign: TextAlign.right, key: Key("grandTotal$index")),
-      Text(finDoc.displayStatus(classificationId)!, key: Key("status$index")),
+            textAlign: TextAlign.right, key: Key("grandTotal$itemIndex")),
+      Text(finDoc.displayStatus(classificationId)!,
+          key: Key("status$itemIndex")),
       Text(finDoc.otherCompany!.email ?? '             '),
     ];
-  }
+}
 
-  Widget? itemButtons(BuildContext context, FinDocBloc finDocBloc) {
-    if (finDoc.salesChannel != 'Web' ||
-        (finDoc.salesChannel == 'Web' &&
-            finDoc.status != FinDocStatusVal.inPreparation)) {
-      return Row(children: [
-        if (!isPhone)
-          IconButton(
-            key: Key('delete$index'),
-            icon: const Icon(Icons.delete_forever),
-            tooltip: 'Cancel ${finDoc.docType}',
+// buttons
+List<Widget> getRowActionButtons(
+    {int? itemIndex, FinDoc? item, BuildContext? context}) {
+  FinDocBloc finDocBloc = context!.read<FinDocBloc>();
+  if (item!.salesChannel != 'Web' ||
+      (item.salesChannel == 'Web' &&
+          item.status != FinDocStatusVal.inPreparation)) {
+    return [
+      if (item.status != FinDocStatusVal.completed)
+        IconButton(
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.all(0),
+            key: Key('nextStatus$itemIndex'),
+            icon: const Icon(Icons.arrow_upward),
+            tooltip: item.status != null
+                ? FinDocStatusVal.nextStatus(item.status!).toString()
+                : '',
             onPressed: () {
-              finDocBloc.add(FinDocUpdate(
-                  finDoc.copyWith(status: FinDocStatusVal.cancelled)));
-            },
-          ),
-        if (!isPhone &&
-            (finDoc.docType == FinDocType.order ||
-                finDoc.docType == FinDocType.invoice))
-          IconButton(
-            key: Key('print$index'),
-            icon: const Icon(Icons.print),
-            tooltip: 'PDF/Print ${finDoc.docType}',
-            onPressed: () async {
-              await Navigator.pushNamed(context, '/printer', arguments: finDoc);
-            },
-          ),
-        SizedBox(
-          width: 30,
-          child: IconButton(
-              key: Key('nextStatus$index'),
-              icon: const Icon(Icons.arrow_upward),
-              tooltip: finDoc.status != null
-                  ? FinDocStatusVal.nextStatus(finDoc.status!).toString()
-                  : '',
-              onPressed: () {
-                finDocBloc.add(FinDocUpdate(finDoc.copyWith(
-                    status: FinDocStatusVal.nextStatus(finDoc.status!))));
-              }),
+              finDocBloc.add(FinDocUpdate(item.copyWith(
+                  status: FinDocStatusVal.nextStatus(item.status!))));
+            }),
+      if ((item.docType == FinDocType.order ||
+          item.docType == FinDocType.invoice))
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          padding: EdgeInsets.all(0),
+          key: Key('print$itemIndex'),
+          icon: const Icon(Icons.print),
+          tooltip: 'PDF/Print ${item.docType}',
+          onPressed: () async {
+            await Navigator.pushNamed(context, '/printer', arguments: item);
+          },
         ),
-      ]);
-    }
-    return null;
+      if (item.status != FinDocStatusVal.completed)
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          padding: EdgeInsets.all(0),
+          key: Key('delete$itemIndex'),
+          icon: const Icon(Icons.delete_forever),
+          tooltip: 'Cancel ${item.docType}',
+          onPressed: () {
+            finDocBloc.add(
+                FinDocUpdate(item.copyWith(status: FinDocStatusVal.cancelled)));
+          },
+        ),
+    ];
   }
+  return [];
+}
+/* need to copy item and related docs information?
+List<TableViewCell> getDataTiles(
+  BuildContext context,
+  FinDoc finDoc,
+  int index,
+  FinDocBloc finDocBloc,
+) {
+  bool isPhone = isAPhone(context);
 
   List<Widget> items(BuildContext context, FinDoc findoc) {
     String r = isPhone ? '\n' : ' '; // return when used on mobile
@@ -261,11 +336,7 @@ List<TableViewCell> getDataTiles(
     return finDocItems;
   }
 
-  List<TableViewCell> tableViewCells = [];
-  for (int fieldIndex = 0; fieldIndex < tableCells.length; fieldIndex++) {
-    tableViewCells.add(TableViewCell(child: tableCells[fieldIndex]));
-  }
-  tableViewCells
-      .add(TableViewCell(child: itemButtons(context, finDocBloc) ?? Text('')));
-  return tableViewCells;
+  return [];
+
 }
+*/
