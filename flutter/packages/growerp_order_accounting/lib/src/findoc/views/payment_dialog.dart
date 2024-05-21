@@ -200,7 +200,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                     return const FatalErrorForm(
                         message: 'server connection problem');
                   case DataFetchStatus.loading:
-                    return CircularProgressIndicator();
+                    return LoadingIndicator();
                   case DataFetchStatus.success:
                     return DropdownSearch<Company>(
                       selectedItem: _selectedCompany,
@@ -255,7 +255,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                           : null,
                     );
                   default:
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: LoadingIndicator());
                 }
               }),
               TextFormField(
@@ -434,7 +434,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                       },
                     );
                   default:
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: LoadingIndicator());
                 }
               }),
               const SizedBox(height: 20),

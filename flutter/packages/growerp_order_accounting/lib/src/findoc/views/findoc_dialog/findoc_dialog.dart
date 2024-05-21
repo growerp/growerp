@@ -96,10 +96,7 @@ class MyFinDocState extends State<FinDocPage> {
   void initState() {
     super.initState();
     finDoc = widget.finDoc;
-    if (finDoc.id() != null && finDoc.status == FinDocStatusVal.statusFixed)
-      readOnly = true;
-    else
-      readOnly = false;
+    readOnly = FinDocStatusVal.statusFixed(finDoc.status!);
     finDocUpdated = finDoc;
     _isPosted = finDocUpdated.isPosted ?? false;
     _selectedCompany = finDocUpdated.otherCompany ?? finDocUpdated.otherCompany;
@@ -135,19 +132,13 @@ class MyFinDocState extends State<FinDocPage> {
         [bool mounted = true]) async {
       switch (state.status) {
         case CartStatus.complete:
-          HelperFunctions.showMessage(
-              context,
-              '${finDoc.idIsNull() ? "Add" : "Update"} successfull',
-              Colors.green);
-          await Future.delayed(const Duration(milliseconds: 500));
-          if (!mounted) return const Text('not mounted!');
           Navigator.of(context).pop();
           break;
         case CartStatus.failure:
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
           break;
         default:
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: LoadingIndicator());
       }
     }
 
@@ -155,60 +146,60 @@ class MyFinDocState extends State<FinDocPage> {
       switch (state.status) {
         case CartStatus.inProcess:
           finDocUpdated = state.finDoc;
-          return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                widget.finDoc.docType == FinDocType.transaction
-                    ? headerEntryTransaction()
-                    : headerEntry(),
-                if (!readOnly)
-                  SizedBox(
-                      height: isPhone ? 110 : 40, child: updateButtons(state)),
-                const SizedBox(height: 20),
-                widget.finDoc.docType == FinDocType.transaction
-                    ? finDocItemListTransaction(state)
-                    : finDocItemList(state),
-                const SizedBox(height: 10),
-                Text(
-                    "Items# ${finDocUpdated.items.length}   Grand total : ${finDocUpdated.grandTotal == null ? "0.00" : finDocUpdated.grandTotal.toString()}",
-                    key: const Key('grandTotal')),
-                const SizedBox(height: 10),
-                if (!readOnly) SizedBox(height: 40, child: generalButtons()),
-              ]);
+          return Column(children: [
+            widget.finDoc.docType == FinDocType.transaction
+                ? headerEntryTransaction()
+                : headerEntry(),
+            if (!readOnly) updateButtons(state),
+            const SizedBox(height: 20),
+            widget.finDoc.docType == FinDocType.transaction
+                ? finDocItemListTransaction(state)
+                : finDocItemList(state),
+            const SizedBox(height: 10),
+            Text(
+                "Items# ${finDocUpdated.items.length}   Grand total : ${finDocUpdated.grandTotal == null ? "0.00" : finDocUpdated.grandTotal.toString()}",
+                key: const Key('grandTotal')),
+            const SizedBox(height: 10),
+            if (!readOnly) generalButtons(),
+          ]);
         default:
           return const LoadingIndicator();
       }
     }
 
-    return Dialog(
-        key: Key("FinDocDialog${finDoc.sales == true ? 'Sales' : 'Purchase'}"
-            "${finDoc.docType}"),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        insetPadding: const EdgeInsets.all(10),
-        child: SingleChildScrollView(
-            key: const Key('listView1'),
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            child: popUp(
-              title: "${finDoc.sales ? 'Sales' : 'Purchase'} ${finDoc.docType} "
-                  "#${finDoc.pseudoId ?? ' new'}",
-              height: 650,
-              width: isPhone ? 400 : 800,
-              context: context,
-              child: Builder(builder: (BuildContext context) {
-                if (finDoc.sales) {
-                  return BlocConsumer<SalesCartBloc, CartState>(
-                      listener: blocConsumerListener,
-                      builder: blocConsumerBuilder);
-                }
-                // purchase from here
-                return BlocConsumer<PurchaseCartBloc, CartState>(
-                    listener: blocConsumerListener,
-                    builder: blocConsumerBuilder);
-              }),
-            )));
+    return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Dialog(
+            key:
+                Key("FinDocDialog${finDoc.sales == true ? 'Sales' : 'Purchase'}"
+                    "${finDoc.docType}"),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            insetPadding: const EdgeInsets.all(10),
+            child: SingleChildScrollView(
+                key: const Key('listView1'),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                child: popUp(
+                  title:
+                      "${finDoc.sales ? 'Sales' : 'Purchase'} ${finDoc.docType} "
+                      "#${finDoc.pseudoId ?? ' new'}",
+                  height: 650,
+                  width: isPhone ? 400 : 800,
+                  context: context,
+                  child: Builder(builder: (BuildContext context) {
+                    if (finDoc.sales) {
+                      return BlocConsumer<SalesCartBloc, CartState>(
+                          listener: blocConsumerListener,
+                          builder: blocConsumerBuilder);
+                    }
+                    // purchase from here
+                    return BlocConsumer<PurchaseCartBloc, CartState>(
+                        listener: blocConsumerListener,
+                        builder: blocConsumerBuilder);
+                  }),
+                ))));
   }
 
   Widget headerEntry() {
@@ -224,7 +215,7 @@ class MyFinDocState extends State<FinDocPage> {
                 return const FatalErrorForm(
                     message: 'server connection problem');
               case DataFetchStatus.loading:
-                return CircularProgressIndicator();
+                return LoadingIndicator();
               case DataFetchStatus.success:
                 return DropdownSearch<Company>(
                   enabled: !readOnly,
@@ -279,7 +270,7 @@ class MyFinDocState extends State<FinDocPage> {
                       : null,
                 );
               default:
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: LoadingIndicator());
             }
           }),
         )),
@@ -548,17 +539,19 @@ class MyFinDocState extends State<FinDocPage> {
     // buttons
     List<Widget> getRowActionButtons(
             {int? itemIndex, FinDocItem? item, BuildContext? context}) =>
-        [
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            icon: const Icon(Icons.delete_forever),
-            padding: EdgeInsets.all(0),
-            key: Key("delete${itemIndex}"),
-            onPressed: () {
-              _cartBloc.add(CartDeleteItem(itemIndex!));
-            },
-          )
-        ];
+        readOnly
+            ? []
+            : [
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.delete_forever),
+                  padding: EdgeInsets.all(0),
+                  key: Key("delete${itemIndex}"),
+                  onPressed: () {
+                    _cartBloc.add(CartDeleteItem(itemIndex!));
+                  },
+                )
+              ];
 
     var padding = SpanPadding(trailing: 8, leading: 8);
     SpanDecoration? getBackGround(BuildContext context, int index) {

@@ -215,7 +215,7 @@ class _GanttFormState extends State<GanttForm> {
               ),
             );
           }
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: LoadingIndicator());
         });
       });
     });

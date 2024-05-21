@@ -474,7 +474,7 @@ class WebsiteFormState extends State<WebsiteForm> {
             case DataFetchStatus.failure:
               return const FatalErrorForm(message: 'server connection problem');
             case DataFetchStatus.loading:
-              return const CircularProgressIndicator();
+              return const LoadingIndicator();
             case DataFetchStatus.success:
               return DropdownSearch<Product>.multiSelection(
                 key: Key("addProduct${category.categoryName}"),
@@ -540,7 +540,7 @@ class WebsiteFormState extends State<WebsiteForm> {
                 },
               );
             default:
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingIndicator());
           }
         }),
       BlocBuilder<DataFetchBloc<Categories>, DataFetchState>(
@@ -549,7 +549,7 @@ class WebsiteFormState extends State<WebsiteForm> {
           case DataFetchStatus.failure:
             return const FatalErrorForm(message: 'server connection problem');
           case DataFetchStatus.loading:
-            return const CircularProgressIndicator();
+            return const LoadingIndicator();
           case DataFetchStatus.success:
             return DropdownSearch<Category>.multiSelection(
               key: const Key("addShopCategory}"),
@@ -606,7 +606,7 @@ class WebsiteFormState extends State<WebsiteForm> {
               },
             );
           default:
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: LoadingIndicator());
         }
       }),
       InputDecorator(

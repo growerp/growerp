@@ -142,7 +142,7 @@ class WorkflowDashboardState extends State<WorkflowDashboard> {
           return HelperFunctions.showMessage(
               context, 'Error: ${taskState.message}', Colors.red);
         default:
-          return const CircularProgressIndicator();
+          return const LoadingIndicator();
       }
     });
   }

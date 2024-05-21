@@ -142,7 +142,7 @@ class WebsiteContentState extends State<WebsiteContent> {
                 );
               }
             default:
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingIndicator());
           }
         });
   }

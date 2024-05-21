@@ -179,7 +179,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
             case DataFetchStatus.failure:
               return const FatalErrorForm(message: 'server connection problem');
             case DataFetchStatus.loading:
-              return CircularProgressIndicator();
+              return LoadingIndicator();
             case DataFetchStatus.success:
               return DropdownSearch<User>(
                 selectedItem: _selectedLead,
@@ -221,7 +221,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                 },
               );
             default:
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingIndicator());
           }
         },
       ),
@@ -231,7 +231,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
             case DataFetchStatus.failure:
               return const FatalErrorForm(message: 'server connection problem');
             case DataFetchStatus.loading:
-              return CircularProgressIndicator();
+              return LoadingIndicator();
             case DataFetchStatus.success:
               return DropdownSearch<User>(
                   selectedItem: _selectedAccount,
@@ -273,7 +273,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                     _selectedAccount = newValue;
                   });
             default:
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingIndicator());
           }
         },
       ),

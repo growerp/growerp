@@ -365,8 +365,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                                 : null,
                           );
                         default:
-                          return const Center(
-                              child: CircularProgressIndicator());
+                          return const Center(child: LoadingIndicator());
                       }
                     }),
                   ),

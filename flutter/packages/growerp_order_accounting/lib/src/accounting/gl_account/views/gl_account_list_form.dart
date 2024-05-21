@@ -171,7 +171,7 @@ class GlAccountsState extends State<GlAccountList> {
                             })))
               ]));
         default:
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: LoadingIndicator());
       }
     });
   }

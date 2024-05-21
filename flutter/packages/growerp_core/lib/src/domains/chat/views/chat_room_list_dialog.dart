@@ -99,7 +99,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                               top: 5, right: 5, child: DialogCloseButton())
                         ])))));
       }
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: LoadingIndicator());
     });
   }
 

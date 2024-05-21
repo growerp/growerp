@@ -128,7 +128,7 @@ class ItemTypeListState extends State<ItemTypeList> {
                                 })))
                   ]));
             default:
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingIndicator());
           }
         });
   }

@@ -145,7 +145,7 @@ class ProductListState extends State<ProductList> {
                                 })))
                   ]));
             default:
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingIndicator());
           }
         });
   }

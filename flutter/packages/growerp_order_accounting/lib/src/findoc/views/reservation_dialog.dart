@@ -22,23 +22,6 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../findoc.dart';
 
-/*
-class ReservationDialog extends StatelessWidget {
-  final FinDoc finDoc;
-  final FinDoc? original;
-  const ReservationDialog({super.key, required this.finDoc, this.original});
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiBlocProvider(providers: [
-      BlocProvider<DataFetchBloc<Users>>(
-          create: (context) => DataFetchBloc<Users>()),
-      BlocProvider<DataFetchBloc<Products>>(
-          create: (context) => DataFetchBloc<Products>())
-    ], child: ReservationForm(finDoc: finDoc, original: original));
-  }
-}
-*/
 class ReservationDialog extends StatefulWidget {
   /// original order
   final FinDoc? original;
@@ -193,7 +176,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                         return const FatalErrorForm(
                             message: 'server connection problem');
                       case DataFetchStatus.loading:
-                        return CircularProgressIndicator();
+                        return LoadingIndicator();
                       case DataFetchStatus.success:
                         return DropdownSearch<User>(
                           selectedItem: _selectedUser,
@@ -242,7 +225,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                               value == null ? 'field required' : null,
                         );
                       default:
-                        return const Center(child: CircularProgressIndicator());
+                        return const Center(child: LoadingIndicator());
                     }
                   }),
                   const SizedBox(height: 20),
@@ -253,7 +236,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                         return const FatalErrorForm(
                             message: 'server connection problem');
                       case DataFetchStatus.loading:
-                        return CircularProgressIndicator();
+                        return LoadingIndicator();
                       case DataFetchStatus.success:
                         return DropdownSearch<Product>(
                           selectedItem: _selectedProduct,
@@ -320,7 +303,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                               value == null ? "Select a product?" : null,
                         );
                       default:
-                        return const Center(child: CircularProgressIndicator());
+                        return const Center(child: LoadingIndicator());
                     }
                   }),
                   const SizedBox(height: 20),

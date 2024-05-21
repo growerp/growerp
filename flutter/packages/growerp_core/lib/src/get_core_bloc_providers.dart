@@ -25,6 +25,8 @@ List<BlocProvider> getCoreBlocProviders(
     BlocProvider<TaskWorkflowTemplateBloc>(
         create: (context) =>
             TaskBloc(restClient, TaskType.workflowTemplate, screens)),
+    BlocProvider<DataFetchBloc<FinDocs>>(
+        create: (context) => DataFetchBloc<FinDocs>()),
     BlocProvider<DataFetchBloc<Products>>(
         create: (context) => DataFetchBloc<Products>()),
     BlocProvider<DataFetchBloc<Categories>>(

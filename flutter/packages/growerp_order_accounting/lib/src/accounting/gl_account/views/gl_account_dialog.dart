@@ -100,8 +100,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
                         case GlAccountStatus.success:
                           return _glAccountForm(state);
                         default:
-                          return const Center(
-                              child: CircularProgressIndicator());
+                          return const Center(child: LoadingIndicator());
                       }
                     })))));
   }

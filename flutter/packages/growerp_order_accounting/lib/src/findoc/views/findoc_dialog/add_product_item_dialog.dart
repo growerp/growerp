@@ -69,7 +69,7 @@ Future addProductItemDialog(BuildContext context) async {
                                                 message:
                                                     'server connection problem');
                                           case DataFetchStatus.loading:
-                                            return CircularProgressIndicator();
+                                            return LoadingIndicator();
                                           case DataFetchStatus.success:
                                             return DropdownSearch<Product>(
                                               selectedItem: selectedProduct,
@@ -150,8 +150,7 @@ Future addProductItemDialog(BuildContext context) async {
                                             );
                                           default:
                                             return const Center(
-                                                child:
-                                                    CircularProgressIndicator());
+                                                child: LoadingIndicator());
                                         }
                                       }),
                                       const SizedBox(height: 20),
@@ -258,8 +257,7 @@ Future addProductItemDialog(BuildContext context) async {
                                             );
                                           default:
                                             return const Center(
-                                                child:
-                                                    CircularProgressIndicator());
+                                                child: LoadingIndicator());
                                         }
                                       }),
                                       const SizedBox(height: 20),

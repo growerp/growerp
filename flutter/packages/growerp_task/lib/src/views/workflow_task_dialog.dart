@@ -234,7 +234,7 @@ class WorkflowTaskDialogState extends State<WorkflowTaskDialog> {
                             value == null ? 'field required' : null,
                       );
                     default:
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child: LoadingIndicator());
                   }
                 }),
                 Expanded(

@@ -118,7 +118,7 @@ class OpportunitiesState extends State<OpportunityList> {
                                         index: index));
                           })));
             default:
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingIndicator());
           }
         },
       );

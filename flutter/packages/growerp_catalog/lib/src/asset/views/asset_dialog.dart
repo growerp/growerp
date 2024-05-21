@@ -98,7 +98,7 @@ class AssetDialogState extends State<AssetDialog> {
         case AssetStatus.failure:
           return const FatalErrorForm(message: 'Asset load problem');
         default:
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: LoadingIndicator());
       }
     });
   }
@@ -194,7 +194,7 @@ class AssetDialogState extends State<AssetDialog> {
                           value == null ? 'field required' : null,
                     );
                   default:
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: LoadingIndicator());
                 }
               }),
               DropdownButtonFormField<String>(

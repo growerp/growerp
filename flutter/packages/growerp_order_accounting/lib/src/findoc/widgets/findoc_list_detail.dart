@@ -28,11 +28,9 @@ List<dynamic> getItemFieldNames(
   bool isPhone = isAPhone(context);
   if (isPhone)
     return [
-      CircleAvatar(
-        //    radius: 20,
-        backgroundColor: Theme.of(context!).colorScheme.secondary,
-        child: Icon(Icons.search_sharp,
-            size: 25, color: Theme.of(context).colorScheme.onSecondary),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(3, 3, 0, 0),
+        child: Text("Short\nID"),
       ),
       Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
@@ -71,7 +69,7 @@ List<dynamic> getItemFieldNames(
     ];
 }
 
-// field lengths perc of screenwidth can be larger than 100 %: horizontal scroll
+// field lengths perc of screenwidth can be larger than 100 %: horizontal
 List<double> getItemFieldWidth(
     {int? itemIndex, FinDoc? item, BuildContext? context}) {
   if (isPhone(context))

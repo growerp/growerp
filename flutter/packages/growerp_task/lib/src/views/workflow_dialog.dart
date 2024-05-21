@@ -132,7 +132,7 @@ class WorkflowDialogState extends State<WorkflowDialog> {
                                       );
                                     default:
                                       return const Center(
-                                          child: CircularProgressIndicator());
+                                          child: LoadingIndicator());
                                   }
                                 })
                               : Text(

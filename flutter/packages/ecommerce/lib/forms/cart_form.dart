@@ -71,7 +71,7 @@ class _CartList extends StatelessWidget {
                 .toList(),
           );
         default:
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: LoadingIndicator());
       }
     });
   }

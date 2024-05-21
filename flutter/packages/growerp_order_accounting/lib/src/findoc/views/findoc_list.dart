@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/src/findoc/widgets/search_findoc.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import '../findoc.dart';
@@ -61,15 +62,20 @@ class FinDocListState extends State<FinDocList> {
   late bool isPhone;
   bool hasReachedMax = false;
   late FinDocBloc _finDocBloc;
-  late final ScrollController _verticalController = ScrollController();
   late final ScrollController _horizontalController = ScrollController();
   List<List<TableViewCell>> tableViewRows = [];
   late String classificationId;
+  late bool search;
+  String searchString = '';
+  late FocusNode myFocusNode;
+  List<FinDoc> searchFinDocs = [];
 
   @override
   void initState() {
     super.initState();
     classificationId = context.read<String>();
+    search = false;
+    myFocusNode = FocusNode();
     entityName =
         classificationId == 'AppHotel' && widget.docType == FinDocType.order
             ? 'Reservation'
@@ -144,7 +150,7 @@ class FinDocListState extends State<FinDocList> {
       return TableView.builder(
         diagonalDragBehavior: DiagonalDragBehavior.free,
         verticalDetails:
-            ScrollableDetails.vertical(controller: _verticalController),
+            ScrollableDetails.vertical(controller: _scrollController),
         horizontalDetails:
             ScrollableDetails.horizontal(controller: _horizontalController),
         cellBuilder: (context, vicinity) =>
@@ -238,31 +244,64 @@ class FinDocListState extends State<FinDocList> {
             return Scaffold(
                 floatingActionButton: ![FinDocType.shipment]
                         .contains(widget.docType)
-                    ? FloatingActionButton(
-                        key: const Key("addNew"),
-                        onPressed: () async {
-                          await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                    value: _finDocBloc,
-                                    child: widget.docType == FinDocType.payment
-                                        ? PaymentDialog(
-                                            finDoc: FinDoc(
-                                                sales: widget.sales,
-                                                docType: widget.docType))
-                                        : FinDocDialog(FinDoc(
-                                            sales: widget.sales,
-                                            docType: widget.docType)));
-                              });
-                        },
-                        tooltip: 'Add New',
-                        child: const Icon(Icons.add))
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          FloatingActionButton(
+                              key: const Key("search"),
+                              onPressed: () async {
+                                // find findoc id to show
+                                FinDoc finDoc = await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return BlocProvider.value(
+                                          value: context
+                                              .read<DataFetchBloc<FinDocs>>(),
+                                          child: SearchFinDocList(
+                                              docType: widget.docType,
+                                              sales: widget.sales));
+                                    });
+                                // show detail page
+                                await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return BlocProvider.value(
+                                          value: context.read<FinDocBloc>(),
+                                          child: FinDocDialog(finDoc));
+                                    });
+                              },
+                              child: const Icon(Icons.search)),
+                          SizedBox(height: 10),
+                          FloatingActionButton(
+                              key: const Key("addNew"),
+                              onPressed: () async {
+                                await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return BlocProvider.value(
+                                          value: _finDocBloc,
+                                          child: widget.docType ==
+                                                  FinDocType.payment
+                                              ? PaymentDialog(
+                                                  finDoc: FinDoc(
+                                                      sales: widget.sales,
+                                                      docType: widget.docType))
+                                              : FinDocDialog(FinDoc(
+                                                  sales: widget.sales,
+                                                  docType: widget.docType)));
+                                    });
+                              },
+                              tooltip: 'Add New',
+                              child: const Icon(Icons.add)),
+                        ],
+                      )
                     : null,
                 body: finDocsPage());
           default:
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: LoadingIndicator());
         }
       }
 
@@ -305,55 +344,6 @@ class FinDocListState extends State<FinDocList> {
     });
   }
 
-/*
-  FinDocListItem getFinDocListItem(
-      int index, bool isPhone, BuildContext context) {
-    return FinDocListItem(
-      finDoc: finDocs[index],
-      docType: widget.docType,
-      index: index,
-      isPhone: isPhone,
-      sales: widget.sales,
-      onlyRental: widget.onlyRental,
-      additionalItemButton: widget.additionalItemButtonName != null &&
-              widget.additionalItemButtonRoute != null
-          ? TextButton(
-              key: Key('addButton$index'),
-              child: Text(widget.additionalItemButtonName!),
-              onPressed: () async {
-                await Navigator.pushNamed(
-                    context, widget.additionalItemButtonRoute!,
-                    arguments: finDocs[index]);
-              },
-            )
-          : null,
-    );
-  }
-
-  FinDocListItemTrans getFinDocListItemTrans(
-      int index, bool isPhone, BuildContext context) {
-    return FinDocListItemTrans(
-      finDoc: finDocs[index],
-      docType: widget.docType,
-      index: index,
-      isPhone: isPhone,
-      sales: widget.sales,
-      onlyRental: widget.onlyRental,
-      additionalItemButton: widget.additionalItemButtonName != null &&
-              widget.additionalItemButtonRoute != null
-          ? TextButton(
-              key: Key('addButton$index'),
-              child: Text(widget.additionalItemButtonName!),
-              onPressed: () async {
-                await Navigator.pushNamed(
-                    context, widget.additionalItemButtonRoute!,
-                    arguments: finDocs[index]);
-              },
-            )
-          : null,
-    );
-  }
-*/
   @override
   void dispose() {
     _scrollController

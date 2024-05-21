@@ -118,7 +118,7 @@ class TimePeriodListState extends State<TimePeriodList> {
                                 })))
                   ]));
             default:
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingIndicator());
           }
         });
   }

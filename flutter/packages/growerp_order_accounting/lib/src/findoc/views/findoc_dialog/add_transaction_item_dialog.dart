@@ -98,8 +98,7 @@ Future addTransactionItemDialog(BuildContext context, bool sales,
                                   },
                                 );
                               default:
-                                return const Center(
-                                    child: CircularProgressIndicator());
+                                return const Center(child: LoadingIndicator());
                             }
                           }),
                           const SizedBox(height: 20),

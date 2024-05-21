@@ -170,7 +170,7 @@ class WorkflowEditorContextMenuState extends State<WorkflowEditorContextMenu> {
                           value == null ? 'field required' : null,
                     );
                   default:
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: LoadingIndicator());
                 }
               }),
               const SizedBox(height: 20),

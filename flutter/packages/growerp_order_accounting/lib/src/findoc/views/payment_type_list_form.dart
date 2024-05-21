@@ -124,7 +124,7 @@ class PaymentTypeListState extends State<PaymentTypeList> {
                                 })))
                   ]));
             default:
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingIndicator());
           }
         });
   }

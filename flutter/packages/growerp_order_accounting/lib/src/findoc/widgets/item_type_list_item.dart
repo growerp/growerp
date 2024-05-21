@@ -82,7 +82,7 @@ class ItemTypeListItem extends StatelessWidget {
             },
           );
         default:
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: LoadingIndicator());
       }
     });
     var direction = itemType.direction == 'I' ? 'InComing' : 'OutGoing';

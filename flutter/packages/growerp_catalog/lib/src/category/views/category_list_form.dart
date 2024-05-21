@@ -137,7 +137,7 @@ class CategoriesListState extends State<CategoryList> {
                                 })))
                   ]));
             default:
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingIndicator());
           }
         });
   }

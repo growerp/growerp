@@ -111,7 +111,7 @@ Future addRentalItemDialog(BuildContext context,
                                                 message:
                                                     'server connection problem');
                                           case DataFetchStatus.loading:
-                                            return CircularProgressIndicator();
+                                            return LoadingIndicator();
                                           case DataFetchStatus.success:
                                             return DropdownSearch<Product>(
                                               selectedItem: selectedProduct,
@@ -199,8 +199,7 @@ Future addRentalItemDialog(BuildContext context,
                                             );
                                           default:
                                             return const Center(
-                                                child:
-                                                    CircularProgressIndicator());
+                                                child: LoadingIndicator());
                                         }
                                       }),
                                       const SizedBox(height: 10),

@@ -86,7 +86,7 @@ class ChatState extends State<ChatDialog> {
                         ]),
                       ))));
         } else {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: LoadingIndicator());
         }
       });
     });

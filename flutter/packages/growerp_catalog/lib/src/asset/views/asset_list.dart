@@ -114,7 +114,7 @@ class AssetListState extends State<AssetList> {
                                 })))
                   ]));
             default:
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingIndicator());
           }
         });
   }
