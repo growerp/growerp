@@ -29,8 +29,6 @@ class SearchFinDocList extends StatefulWidget {
 }
 
 class SearchFinDocState extends State<SearchFinDocList> {
-  final _scrollController = ScrollController();
-  final TextEditingController _searchController = TextEditingController();
   late DataFetchBloc _finDocBloc;
   List<FinDoc> finDocs = [];
 
@@ -49,21 +47,19 @@ class SearchFinDocState extends State<SearchFinDocList> {
         HelperFunctions.showMessage(context, '${state.message}', Colors.red);
       }
     }, builder: (context, state) {
-      switch (state.status) {
-        case DataFetchStatus.failure:
-          return Center(
-              child: Text('failed to fetch search items: ${state.message}'));
-        case DataFetchStatus.success:
-          finDocs = (state.data as FinDocs).finDocs;
-          return MyScaffold(
-              searchController: _searchController,
-              finDocBloc: _finDocBloc,
-              widget: widget,
-              finDocs: finDocs,
-              scrollController: _scrollController);
-        default:
-          return LoadingIndicator();
+      if (state.status == DataFetchStatus.failure) {
+        return Center(
+            child: Text('failed to fetch search items: ${state.message}'));
       }
+      if (state.status == DataFetchStatus.success) {
+        finDocs = (state.data as FinDocs).finDocs;
+      }
+      return Stack(
+        children: [
+          MyScaffold(finDocBloc: _finDocBloc, widget: widget, finDocs: finDocs),
+          if (state.status == DataFetchStatus.loading) LoadingIndicator(),
+        ],
+      );
     });
   }
 }
@@ -71,23 +67,18 @@ class SearchFinDocState extends State<SearchFinDocList> {
 class MyScaffold extends StatelessWidget {
   const MyScaffold({
     super.key,
-    required TextEditingController searchController,
     required DataFetchBloc finDocBloc,
     required this.widget,
     required this.finDocs,
-    required ScrollController scrollController,
-  })  : _searchController = searchController,
-        _finDocBloc = finDocBloc,
-        _scrollController = scrollController;
+  }) : _finDocBloc = finDocBloc;
 
-  final TextEditingController _searchController;
   final DataFetchBloc _finDocBloc;
   final SearchFinDocList widget;
   final List<FinDoc> finDocs;
-  final ScrollController _scrollController;
 
   @override
   Widget build(BuildContext context) {
+    final ScrollController _scrollController = ScrollController();
     return Scaffold(
         backgroundColor: Colors.transparent,
         body: Dialog(
@@ -106,7 +97,6 @@ class MyScaffold extends StatelessWidget {
                       autofocus: true,
                       key: const Key('name'),
                       decoration: InputDecoration(labelText: "Search input"),
-                      controller: _searchController,
                       validator: (value) {
                         if (value!.isEmpty)
                           return 'Please enter a search value?';
