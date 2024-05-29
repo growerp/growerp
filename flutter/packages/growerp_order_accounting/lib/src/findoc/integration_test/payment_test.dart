@@ -209,15 +209,15 @@ class PaymentTest {
             ? test.invoices
             : test.payments;
     for (FinDoc payment in payments) {
-      await CommonTest.doSearch(tester, searchString: payment.id()!);
-      if (CommonTest.getTextField('status0') == 'in Preparation') {
-        await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 3);
-      }
-      if (CommonTest.getTextField('status0') == 'Created') {
-        await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 3);
-      }
-      if (CommonTest.getTextField('status0') == 'Approved') {
-        await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 3);
+      await CommonTest.doNewSearch(tester, searchString: payment.orderId!);
+      await CommonTest.tapByKey(tester, 'searchResult0'); // open detail
+      if (CommonTest.getDropdown('statusDropDown') ==
+              FinDocStatusVal.inPreparation.toString() ||
+          CommonTest.getDropdown('statusDropDown') ==
+              FinDocStatusVal.created.toString()) {
+        await CommonTest.tapByKey(tester, 'statusDropDown');
+        await CommonTest.tapByText(tester, 'approved');
+        await CommonTest.tapByKey(tester, 'update', seconds: 2);
       }
     }
     await CommonTest.closeSearch(tester);

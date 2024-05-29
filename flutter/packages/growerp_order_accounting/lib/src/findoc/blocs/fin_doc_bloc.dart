@@ -106,10 +106,11 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         itemTypes = await restClient.getItemTypes(sales: sales);
       }
       FinDocs result = await restClient.getFinDoc(
+        finDocId: event.finDocId,
         start: start,
         limit: event.limit,
-        sales: sales,
-        docType: docType,
+        sales: event.sales ?? sales,
+        docType: event.docType ?? docType,
         searchString: event.searchString,
         journalId: event.journalId,
       );

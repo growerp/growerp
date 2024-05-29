@@ -3,8 +3,8 @@ import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-part 'data_fetch.state.dart';
-part 'data_fetch.event.dart';
+part 'data_fetch_state.dart';
+part 'data_fetch_event.dart';
 
 mixin DataFetchBlocOther<T> on Bloc<DataFetchBlocEvent, DataFetchState> {}
 

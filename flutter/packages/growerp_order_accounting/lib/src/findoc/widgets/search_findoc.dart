@@ -94,8 +94,8 @@ class MyScaffold extends StatelessWidget {
                 width: 350,
                 child: Column(children: [
                   TextFormField(
+                      key: Key('searchField'),
                       autofocus: true,
-                      key: const Key('name'),
                       decoration: InputDecoration(labelText: "Search input"),
                       validator: (value) {
                         if (value!.isEmpty)
@@ -135,7 +135,9 @@ class MyScaffold extends StatelessWidget {
                                     direction: DismissDirection.startToEnd,
                                     child: ListTile(
                                       title: Text(
-                                          " ID: ${finDocs[index].pseudoId}  Date: ${finDocs[index].creationDate?.dateOnly()}"),
+                                          "ID: ${finDocs[index].pseudoId}  "
+                                          "Date: ${finDocs[index].creationDate?.dateOnly()}",
+                                          key: Key("searchResult$index")),
                                       subtitle: Text(
                                           "Company: ${finDocs[index].otherCompany?.name} "),
                                       onTap: () => Navigator.of(context)

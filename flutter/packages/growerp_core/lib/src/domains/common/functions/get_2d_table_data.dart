@@ -1,11 +1,18 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 /// a program to generate the structure for the TableView,builder 2d scrollable
 /// data tables
+// return parameters
 (List<List<TableViewCell>>, List<double>, double? height) get2dTableData<T>(
   // a list is strings or widgets used as column headers
-  List<dynamic> Function({int? itemIndex, T? item, BuildContext? context})
+  List<dynamic> Function(
+          {int? itemIndex,
+          String? classificationId,
+          T? item,
+          BuildContext? context})
       getItemFieldNames,
   // the width of the columns in percetage of the screen width.
   List<double> Function({int? itemIndex, T? item, BuildContext? context})
@@ -21,11 +28,34 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
   // get the item row height
   double Function({BuildContext? context})? getRowHeight,
   // get a list of iconbuttons  for processing a single row.
-  List<Widget> Function({int? itemIndex, T? item, BuildContext? context})?
-      getRowActionButtons,
+  List<Widget> Function({
+    Bloc<dynamic, dynamic>? bloc,
+    BuildContext? context,
+    T? item,
+    int? itemIndex,
+  })? getRowActionButtons,
+  // extra parameters
   BuildContext? context,
-  // the heigth of the row
+  Bloc? bloc,
 }) {
+  // check if input parameters consistent
+  if (kDebugMode) {
+    int itemsName =
+        getItemFieldNames(context: context, itemIndex: 0, item: items[0])
+            .length;
+    int itemsWidth =
+        getItemFieldWidth(itemIndex: 0, item: items[0], context: context)
+            .length;
+    int itemsContent =
+        getItemFieldContent(items[0], itemIndex: 0, context: context).length;
+    if (itemsName != itemsWidth &&
+        itemsName != itemsContent &&
+        itemsWidth != itemsContent) {
+      throw FormatException("Number of names($itemsName) "
+          "not the same as number of fields width($itemsWidth) "
+          " or number of field contens($itemsContent)");
+    }
+  }
   List<List<TableViewCell>> tableViewCells = []; // table content
   List<TableViewCell> contentRow = []; // row content
   // create table content
@@ -61,7 +91,10 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
           child: Row(
               mainAxisSize: MainAxisSize.min,
               children: getRowActionButtons(
-                  itemIndex: itemIndex, item: item, context: context))));
+                  itemIndex: itemIndex,
+                  item: item,
+                  context: context!,
+                  bloc: bloc!))));
 
       // add to table
       tableViewCells.add(contentRow);

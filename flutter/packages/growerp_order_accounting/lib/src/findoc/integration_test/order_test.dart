@@ -21,7 +21,7 @@ import 'package:growerp_models/growerp_models.dart';
 class OrderTest {
   static Future<void> selectPurchaseOrders(WidgetTester tester) async {
     await CommonTest.selectOption(
-        tester, 'dbOrders', 'FinDocListPurchaseOrder', '3');
+        tester, 'dbOrders', 'FinDocListPurchaseOrder', '2');
   }
 
   static Future<void> selectSalesOrders(WidgetTester tester) async {
@@ -285,6 +285,158 @@ class OrderTest {
     for (FinDoc order in orders) {
       await CommonTest.doSearch(tester, searchString: order.orderId!);
       expect(CommonTest.getTextField('status0'), 'Completed');
+    }
+  }
+
+  static Future<void> addOrders(WidgetTester tester, List<FinDoc> orders,
+      {bool check = true}) async {
+    SaveTest test = await PersistFunctions.getTest();
+    // test = test.copyWith(orders: []); //======= remove
+    // await PersistFunctions.persistTest(test); //=====remove
+    if (test.orders.isEmpty) {
+      await PersistFunctions.persistTest(
+          test.copyWith(orders: await enterOrderData(tester, orders)));
+    }
+    if (check) {
+      test = await PersistFunctions.getTest();
+      await checkOrders(tester, test.orders);
+    }
+  }
+
+  static Future<void> updateOrders(
+      WidgetTester tester, List<FinDoc> orders) async {
+    SaveTest test = await PersistFunctions.getTest();
+    if (test.orders[0].description != orders[0].description) {
+      // copy orderId
+      for (int x = 0; x < orders.length; x++) {
+        orders[x] = orders[x].copyWith(orderId: test.orders[x].orderId);
+      }
+      test = test.copyWith(orders: await enterOrderData(tester, orders));
+      await PersistFunctions.persistTest(test);
+    }
+    await checkOrders(tester, test.orders);
+  }
+
+  static Future<void> deleteLastOrder(WidgetTester tester) async {
+    SaveTest test = await PersistFunctions.getTest();
+    var count = CommonTest.getWidgetCountByKey(tester, 'finDocItem');
+    if (count == test.orders.length) {
+      await CommonTest.tapByKey(tester, 'edit${count - 1}');
+      await CommonTest.tapByKey(tester, 'cancelFinDoc', seconds: 5);
+      // refresh not work in test
+      //await CommonTest.refresh(tester);
+      //expect(find.byKey(Key('finDocItem')), findsNWidgets(count - 1));
+      await PersistFunctions.persistTest(test.copyWith(
+          payments: test.orders.sublist(0, test.orders.length - 1)));
+    }
+  }
+
+  static Future<List<FinDoc>> enterOrderData(
+      WidgetTester tester, List<FinDoc> orders) async {
+    List<FinDoc> newOrders = []; // with orderId added
+    for (final order in orders) {
+      if (order.orderId == null) {
+        await CommonTest.tapByKey(tester, 'addNew');
+      } else {
+        await CommonTest.doSearch(tester, searchString: order.orderId!);
+        await CommonTest.tapByKey(tester, 'edit0');
+        expect(
+            CommonTest.getTextField('topHeader').split('#')[1], order.orderId);
+      }
+      await CommonTest.checkWidgetKey(
+          tester, "FinDocDialog${order.sales ? 'Sales' : 'Purchase'}Order");
+      // enter supplier/customer
+      await CommonTest.enterDropDownSearch(
+          tester,
+          order.sales ? 'customer' : 'supplier',
+          order.otherUser!.company!.name!);
+      await CommonTest.enterText(tester, 'description', order.description!);
+      // delete existing order items
+      while (tester.any(find.byKey(const Key("itemDelete0")))) {
+        await CommonTest.tapByKey(tester, "itemDelete0", seconds: 2);
+      }
+      // items
+      for (final item in order.items) {
+        await CommonTest.tapByKey(tester, 'addProduct', seconds: 1);
+        await CommonTest.checkWidgetKey(tester, 'addProductItemDialog');
+        await CommonTest.enterDropDownSearch(
+            tester, 'product', item.description!);
+        await CommonTest.enterText(tester, 'itemPrice', item.price.toString());
+        await CommonTest.enterText(
+            tester, 'itemQuantity', item.quantity.toString());
+        await CommonTest.drag(tester, listViewName: 'listView3');
+        await CommonTest.tapByKey(tester, 'ok');
+      }
+      await CommonTest.drag(tester, seconds: 2);
+      await CommonTest.tapByKey(tester, 'update');
+      await CommonTest.waitForSnackbarToGo(tester);
+      // create new findoc with orderId
+      FinDoc newFinDoc =
+          order.copyWith(pseudoId: CommonTest.getTextField('id0'));
+      // get productId's
+      List<FinDocItem> newItems = [];
+      await CommonTest.tapByKey(tester, 'id0'); //open detail
+      for (final (index, item) in order.items.indexed) {
+        FinDocItem newItem = item.copyWith(
+            productId: CommonTest.getTextField('itemProductId$index'));
+        newItems.add(newItem);
+      }
+      await CommonTest.tapByKey(tester, 'cancel'); // close detail
+      newOrders.add(newFinDoc.copyWith(items: newItems));
+      await tester.pumpAndSettle(); // for the message to disappear
+    }
+    await CommonTest.closeSearch(tester);
+    return newOrders;
+  }
+
+  static Future<void> checkOrders(
+      WidgetTester tester, List<FinDoc> orders) async {
+    for (FinDoc order in orders) {
+      await CommonTest.doNewSearch(tester, searchString: order.pseudoId!);
+      await CommonTest.tapByKey(tester, 'searchResult0'); // open detail
+      expect(
+          CommonTest.getDropdownSearch(
+              order.sales == true ? "customer" : "supplier"),
+          contains(order.otherUser?.company!.name));
+      expect(CommonTest.getTextField('grandTotal'),
+          contains(order.grandTotal.toString()));
+      // items
+      for (final (index, item) in order.items.indexed) {
+        expect(CommonTest.getTextField('itemProductId$index'), item.productId);
+      }
+      for (final (index, item) in order.items.indexed) {
+        expect(CommonTest.getTextField('itemDescription$index'),
+            equals(item.description));
+        expect(CommonTest.getTextField('itemPrice$index'),
+            equals(item.price.toString()));
+        if (!CommonTest.isPhone())
+          expect(CommonTest.getTextField('itemQuantity$index'),
+              equals(item.quantity.toString()));
+      }
+      await CommonTest.tapByKey(tester, 'cancel');
+    }
+  }
+
+  static Future<void> sendOrApproveOrders(WidgetTester tester) async {
+    SaveTest test = await PersistFunctions.getTest();
+    List<FinDoc> orders = test.orders.isNotEmpty
+        ? test.orders
+        : test.orders.isNotEmpty
+            ? test.orders
+            : test.payments;
+    expect(orders.isNotEmpty, true,
+        reason: 'This test needs orders created in previous steps');
+    for (FinDoc order in test.orders) {
+      await CommonTest.doNewSearch(tester, searchString: order.pseudoId!);
+      await CommonTest.tapByKey(tester, 'searchResult0'); // open detail
+      if (CommonTest.getDropdown('statusDropDown') ==
+              FinDocStatusVal.inPreparation.toString() ||
+          CommonTest.getDropdown('statusDropDown') ==
+              FinDocStatusVal.created.toString()) {
+        await CommonTest.tapByKey(tester, 'statusDropDown');
+        await CommonTest.tapByText(tester, 'approved');
+        await CommonTest.tapByKey(tester, 'update', seconds: 2);
+      }
     }
   }
 }

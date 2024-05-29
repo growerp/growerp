@@ -1,4 +1,4 @@
-part of 'data_fetch.bloc.dart';
+part of 'data_fetch_bloc.dart';
 
 enum DataFetchStatus { initial, loading, success, failure }
 

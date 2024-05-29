@@ -68,4 +68,22 @@ enum FinDocStatusVal {
         return true;
     }
   }
+
+  static List<FinDocStatusVal> validStatusList(FinDocStatusVal? currentStatus) {
+    if (currentStatus == null) currentStatus = created;
+    switch (currentStatus) {
+      case inPreparation:
+        return [inPreparation, created, approved, cancelled];
+      case created:
+        return [created, approved, cancelled];
+      case approved:
+        return [approved, cancelled];
+      case completed:
+        return [completed];
+      case cancelled:
+        return [cancelled];
+      default:
+        return [];
+    }
+  }
 }

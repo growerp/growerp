@@ -146,6 +146,7 @@ class FinDocListState extends State<FinDocList> {
         getRowActionButtons: getRowActionButtons,
         getRowHeight: getRowHeight,
         context: context,
+        bloc: _finDocBloc,
       );
       return TableView.builder(
         diagonalDragBehavior: DiagonalDragBehavior.free,
@@ -178,12 +179,15 @@ class FinDocListState extends State<FinDocList> {
                             context: context,
                             builder: (BuildContext context) {
                               return BlocProvider.value(
-                                  value: context.read<FinDocBloc>(),
+                                  value: _finDocBloc,
                                   child: widget.onlyRental == true
                                       ? ReservationDialog(
-                                          finDoc: finDocs[index],
-                                          original: finDocs[index])
-                                      : FinDocDialog(finDocs[index]));
+                                          finDoc: finDocs[index - 1],
+                                          original: finDocs[index - 1])
+                                      : widget.docType == FinDocType.payment
+                                          ? PaymentDialog(
+                                              finDoc: finDocs[index - 1])
+                                          : FinDocDialog(finDocs[index - 1]));
                             }))
                   }),
         pinnedRowCount: 1,
@@ -249,12 +253,14 @@ class FinDocListState extends State<FinDocList> {
                         children: [
                           FloatingActionButton(
                               key: const Key("search"),
+                              heroTag: "btn1",
                               onPressed: () async {
                                 // find findoc id to show
                                 FinDoc finDoc = await showDialog(
                                     barrierDismissible: true,
                                     context: context,
                                     builder: (BuildContext context) {
+                                      // search separate from finDocBloc
                                       return BlocProvider.value(
                                           value: context
                                               .read<DataFetchBloc<FinDocs>>(),
@@ -268,7 +274,7 @@ class FinDocListState extends State<FinDocList> {
                                     context: context,
                                     builder: (BuildContext context) {
                                       return BlocProvider.value(
-                                          value: context.read<FinDocBloc>(),
+                                          value: _finDocBloc,
                                           child: FinDocDialog(finDoc));
                                     });
                               },
@@ -276,6 +282,7 @@ class FinDocListState extends State<FinDocList> {
                           SizedBox(height: 10),
                           FloatingActionButton(
                               key: const Key("addNew"),
+                              heroTag: "btn2",
                               onPressed: () async {
                                 await showDialog(
                                     barrierDismissible: true,

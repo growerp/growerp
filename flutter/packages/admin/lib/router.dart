@@ -72,6 +72,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 4, tabIndex: 0));
+    case '/findoc':
+      return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => ShowFinDocDialog(settings.arguments as FinDoc));
     case '/inventory':
       return MaterialPageRoute(
           settings: settings,

@@ -22,8 +22,10 @@ abstract class FinDocEvent extends Equatable {
 
 class FinDocFetch extends FinDocEvent {
   const FinDocFetch({
-    this.finDocId = '',
-    this.docType = FinDocType.unknown,
+    this.finDocId,
+    this.pseudoId,
+    this.docType,
+    this.sales,
     this.customerCompanyPartyId = '',
     this.searchString = '',
     this.refresh = false,
@@ -32,15 +34,16 @@ class FinDocFetch extends FinDocEvent {
   });
   final String searchString;
   final bool refresh;
-  final String finDocId;
+  final String? finDocId;
+  final String? pseudoId;
+  final bool? sales;
   final String? journalId;
-  final FinDocType docType; // to get a single document id, docType
+  final FinDocType? docType; // to get a single document id, docType
   final String customerCompanyPartyId;
   final int limit;
 
   @override
-  List<Object> get props =>
-      [finDocId, docType, customerCompanyPartyId, searchString, refresh];
+  List<Object> get props => [customerCompanyPartyId, searchString, refresh];
 }
 
 class FinDocUpdate extends FinDocEvent {
@@ -58,13 +61,6 @@ class FinDocShipmentReceive extends FinDocEvent {
 class FinDocConfirmPayment extends FinDocEvent {
   const FinDocConfirmPayment(this.payment);
   final FinDoc payment;
-}
-
-@Deprecated("You should use the UserBloc not FinDoc")
-class FinDocGetUsers extends FinDocEvent {
-  const FinDocGetUsers({this.role, this.filter});
-  final Role? role;
-  final String? filter;
 }
 
 class FinDocGetItemTypes extends FinDocEvent {

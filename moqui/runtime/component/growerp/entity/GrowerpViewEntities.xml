@@ -75,9 +75,6 @@ along with this software (see the LICENSE.md file). If not, see
             entity-alias="OINV" entity-name="mantle.order.OrderItemBilling"
             join-from-alias="ORHD" join-optional="true">
             <key-map field-name="orderId" />
-            <entity-condition>
-                <econdition field-name="invoiceItemSeqId" value="1" or-null="true" />
-            </entity-condition>
         </member-entity>
         <member-entity
             entity-alias="OPAY" entity-name="mantle.account.payment.Payment"

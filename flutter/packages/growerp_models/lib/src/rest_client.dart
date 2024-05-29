@@ -281,6 +281,8 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/FinDoc")
   @Extra({'requireApiKey': true})
   Future<FinDocs> getFinDoc({
+    @Query('finDocId') String? finDocId,
+    @Query('pseudoId') String? pseudoId,
     @Query('sales') bool? sales,
     @Query('docType') FinDocType? docType,
     @Query('companyPartyId') String? companyPartyId,

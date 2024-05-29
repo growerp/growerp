@@ -521,6 +521,7 @@ List<FinDoc> purchaseOrders = [
       docType: FinDocType.order,
       description: 'The first order',
       otherUser: suppliers[0],
+      grandTotal: Decimal.parse('144.2'),
       items: [
         FinDocItem(
             description: products[0].productName,
@@ -532,11 +533,36 @@ List<FinDoc> purchaseOrders = [
       docType: FinDocType.order,
       description: 'The second order',
       otherUser: suppliers[1],
+      grandTotal: Decimal.parse('688.4'),
       items: [
         FinDocItem(
             description: products[1].productName,
             quantity: Decimal.parse('40'),
             price: Decimal.parse('17.21')),
+      ]),
+  FinDoc(
+      sales: false,
+      docType: FinDocType.order,
+      description: 'The third order',
+      otherUser: suppliers[0],
+      grandTotal: Decimal.parse('2232.6'),
+      items: [
+        FinDocItem(
+            description: products[2].productName,
+            quantity: Decimal.parse('60'),
+            price: Decimal.parse('37.21'))
+      ]),
+  FinDoc(
+      sales: false,
+      docType: FinDocType.order,
+      description: 'The fourth order',
+      otherUser: suppliers[1],
+      grandTotal: Decimal.parse('3776.8'),
+      items: [
+        FinDocItem(
+            description: products[3].productName,
+            quantity: Decimal.parse('80'),
+            price: Decimal.parse('47.21')),
       ]),
 ];
 List<FinDoc> purchaseInvoices = [

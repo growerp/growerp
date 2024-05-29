@@ -1,4 +1,4 @@
-part of 'data_fetch.bloc.dart';
+part of 'data_fetch_bloc.dart';
 
 abstract class DataFetchBlocEvent extends Equatable {
   const DataFetchBlocEvent();

@@ -61,9 +61,10 @@ extension DateOnly on DateTime {
   }
 }
 
-extension UsCurrency on Decimal {
+extension UsCurrency on Decimal? {
   String currency() {
-    return NumberFormat("#,###.00", "en_US").format(double.parse(toString()));
+    if (this == null) return ('');
+    return NumberFormat("#,#00.000", "en_US").format(double.parse(toString()));
   }
 }
 

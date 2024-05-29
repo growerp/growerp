@@ -73,7 +73,7 @@ List<dynamic> getItemFieldNames(
 List<double> getItemFieldWidth(
     {int? itemIndex, FinDoc? item, BuildContext? context}) {
   if (isPhone(context))
-    return [10, 59, 35];
+    return [10, 62, 35];
   else
     return [5, 9, 29, 10, 19, 04, 20];
 }
@@ -101,7 +101,7 @@ List<dynamic> getItemFieldContent(FinDoc finDoc,
       CircleAvatar(
         backgroundColor: Theme.of(context).colorScheme.secondary,
         child: Text(
-          finDoc.pseudoId!.lastChar(3),
+          finDoc.pseudoId == null ? '' : finDoc.pseudoId!.lastChar(3),
           style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
         ),
       ),
@@ -128,10 +128,7 @@ List<dynamic> getItemFieldContent(FinDoc finDoc,
                 key: Key("status$itemIndex")),
             const SizedBox(width: 10),
             if (finDoc.docType != FinDocType.shipment)
-              Text(
-                  finDoc.grandTotal != null
-                      ? "${finDoc.grandTotal!.currency()}"
-                      : '',
+              Text(finDoc.grandTotal!.currency(),
                   key: Key("grandTotal$itemIndex")),
             if (finDoc.docType != FinDocType.shipment)
               const SizedBox(width: 10),
@@ -159,53 +156,47 @@ List<dynamic> getItemFieldContent(FinDoc finDoc,
 }
 
 // buttons
-List<Widget> getRowActionButtons(
-    {int? itemIndex, FinDoc? item, BuildContext? context}) {
-  FinDocBloc finDocBloc = context!.read<FinDocBloc>();
-  if (item!.salesChannel != 'Web' ||
-      (item.salesChannel == 'Web' &&
-          item.status != FinDocStatusVal.inPreparation)) {
-    return [
-      if (item.status != FinDocStatusVal.completed)
-        IconButton(
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.all(0),
-            key: Key('nextStatus$itemIndex'),
-            icon: const Icon(Icons.arrow_upward),
-            tooltip: item.status != null
-                ? FinDocStatusVal.nextStatus(item.status!).toString()
-                : '',
-            onPressed: () {
-              finDocBloc.add(FinDocUpdate(item.copyWith(
-                  status: FinDocStatusVal.nextStatus(item.status!))));
-            }),
-      if ((item.docType == FinDocType.order ||
-          item.docType == FinDocType.invoice))
-        IconButton(
-          visualDensity: VisualDensity.compact,
-          padding: EdgeInsets.all(0),
-          key: Key('print$itemIndex'),
-          icon: const Icon(Icons.print),
-          tooltip: 'PDF/Print ${item.docType}',
-          onPressed: () async {
-            await Navigator.pushNamed(context, '/printer', arguments: item);
-          },
-        ),
-      if (item.status != FinDocStatusVal.completed)
-        IconButton(
+List<Widget> getRowActionButtons({
+  Bloc<dynamic, dynamic>? bloc,
+  BuildContext? context,
+  FinDoc? item,
+  int? itemIndex,
+}) {
+  // order from the web better not touch when in prep
+  if (item!.docType == FinDocType.order &&
+      item.salesChannel == 'Web' &&
+      item.status == FinDocStatusVal.inPreparation) return [];
+  return [
+    // pdf currently just available for invoice and order
+    if ((item.docType == FinDocType.order ||
+        item.docType == FinDocType.invoice))
+      IconButton(
+        visualDensity: VisualDensity.compact,
+        padding: EdgeInsets.all(0),
+        key: Key('print$itemIndex'),
+        icon: const Icon(Icons.print),
+        tooltip: 'PDF/Print ${item.docType}',
+        onPressed: () async {
+          await Navigator.pushNamed(context!, '/printer', arguments: item);
+        },
+      ),
+    if ((item.status != FinDocStatusVal.cancelled &&
+        item.status != FinDocStatusVal.completed))
+      IconButton(
           visualDensity: VisualDensity.compact,
           padding: EdgeInsets.all(0),
           key: Key('delete$itemIndex'),
           icon: const Icon(Icons.delete_forever),
-          tooltip: 'Cancel ${item.docType}',
-          onPressed: () {
-            finDocBloc.add(
-                FinDocUpdate(item.copyWith(status: FinDocStatusVal.cancelled)));
-          },
-        ),
-    ];
-  }
-  return [];
+          tooltip: 'remove item',
+          onPressed: () async {
+            bool? result = await confirmDialog(
+                context!, "delete ${item.pseudoId}?", "cannot be undone!");
+            if (result == true) {
+              bloc!.add(FinDocUpdate(
+                  item.copyWith(status: FinDocStatusVal.cancelled)));
+            }
+          }),
+  ];
 }
 /* need to copy item and related docs information?
 List<TableViewCell> getDataTiles(

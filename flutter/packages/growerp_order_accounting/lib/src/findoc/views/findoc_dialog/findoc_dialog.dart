@@ -16,9 +16,7 @@ import 'package:decimal/decimal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
@@ -28,6 +26,30 @@ import 'add_product_item_dialog.dart';
 import 'add_rental_item_dialog.dart';
 import 'add_transaction_item_dialog.dart';
 
+class ShowFinDocDialog extends StatelessWidget {
+  final FinDoc finDoc;
+  const ShowFinDocDialog(this.finDoc, {super.key});
+  @override
+  Widget build(BuildContext context) {
+    RestClient restClient = context.read<RestClient>();
+    return BlocProvider<FinDocBloc>(
+        create: (context) => FinDocBloc(
+            restClient, finDoc.sales, finDoc.docType!, context.read<String>())
+          ..add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!)),
+        child: BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
+          if (state.status == FinDocStatus.success) {
+            return RepositoryProvider.value(
+                value: restClient,
+                child: finDoc.docType == FinDocType.payment
+                    ? PaymentDialog(finDoc: state.finDocs[0])
+                    : FinDocDialog(state.finDocs[0]));
+          } else {
+            return const LoadingIndicator();
+          }
+        }));
+  }
+}
+
 class FinDocDialog extends StatelessWidget {
   final FinDoc finDoc;
   const FinDocDialog(this.finDoc, {super.key});
@@ -35,6 +57,8 @@ class FinDocDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     RestClient restClient = context.read<RestClient>();
+
+    //  if (finDoc.status != null && !FinDocStatusVal.statusFixed(finDoc.status!)) {
     if (finDoc.sales) {
       return BlocProvider<SalesCartBloc>(
           create: (context) => CartBloc(
@@ -65,6 +89,8 @@ class FinDocDialog extends StatelessWidget {
             restClient: restClient)
           ..add(CartFetch(finDoc)),
         child: FinDocPage(finDoc));
+    //  } else
+    //    return FinDocPage(finDoc);
   }
 }
 
@@ -79,6 +105,7 @@ class MyFinDocState extends State<FinDocPage> {
   final _formKeyHeader = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   final _companySearchBoxController = TextEditingController();
+  final _pseudoIdController = TextEditingController();
   late CartBloc _cartBloc;
   late DataFetchBloc<Companies> _companyBloc;
   late DataFetchBloc<Products> _productBloc;
@@ -91,19 +118,22 @@ class MyFinDocState extends State<FinDocPage> {
   Company? _selectedCompany;
   late bool isPhone;
   late bool readOnly;
+  late FinDocStatusVal _updatedStatus;
 
   @override
   void initState() {
     super.initState();
     finDoc = widget.finDoc;
-    readOnly = FinDocStatusVal.statusFixed(finDoc.status!);
     finDocUpdated = finDoc;
+    classificationId = context.read<String>();
+    readOnly = finDoc.status == null
+        ? false
+        : FinDocStatusVal.statusFixed(finDoc.status!);
     _isPosted = finDocUpdated.isPosted ?? false;
+    _updatedStatus = finDocUpdated.status ?? FinDocStatusVal.created;
     _selectedCompany = finDocUpdated.otherCompany ?? finDocUpdated.otherCompany;
+    _pseudoIdController.text = finDocUpdated.pseudoId ?? '';
     _finDocBloc = context.read<FinDocBloc>();
-    if (finDoc.id() != null)
-      _finDocBloc
-          .add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!));
     _companyBloc = context.read<DataFetchBloc<Companies>>()
       ..add(GetDataEvent(() => context.read<RestClient>().getCompany(
           limit: 3,
@@ -115,18 +145,17 @@ class MyFinDocState extends State<FinDocPage> {
           limit: 3,
           isForDropDown: true,
           assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : '')));
-    _descriptionController.text = finDocUpdated.description ?? "";
+    _descriptionController.text = finDocUpdated.description ?? " ";
     if (finDoc.sales) {
       _cartBloc = context.read<SalesCartBloc>() as CartBloc;
     } else {
       _cartBloc = context.read<PurchaseCartBloc>() as CartBloc;
     }
-    classificationId = GlobalConfiguration().get("classificationId");
   }
 
   @override
   Widget build(BuildContext context) {
-    isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    isPhone = isAPhone(context);
 
     blocConsumerListener(BuildContext context, CartState state,
         [bool mounted = true]) async {
@@ -147,11 +176,19 @@ class MyFinDocState extends State<FinDocPage> {
         case CartStatus.inProcess:
           finDocUpdated = state.finDoc;
           return Column(children: [
+            // header
             widget.finDoc.docType == FinDocType.transaction
                 ? headerEntryTransaction()
                 : headerEntry(),
+            // related documents
+            if (widget.finDoc.id() != null &&
+                (widget.finDoc.status != FinDocStatusVal.inPreparation ||
+                    widget.finDoc.status != FinDocStatusVal.created))
+              relatedFinDocs(finDoc: widget.finDoc, context: context),
+            // update buttons
+            const SizedBox(height: 10),
             if (!readOnly) updateButtons(state),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
             widget.finDoc.docType == FinDocType.transaction
                 ? finDocItemListTransaction(state)
                 : finDocItemList(state),
@@ -202,106 +239,149 @@ class MyFinDocState extends State<FinDocPage> {
                 ))));
   }
 
+  /// list the widgets list either in a single column for phone
+  /// or 2 columns for the web.
   Widget headerEntry() {
+    // list of widgets to display
     List<Widget> widgets = [
-      if (widget.finDoc.docType != FinDocType.transaction)
-        Expanded(
-            child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-          child: BlocBuilder<DataFetchBloc<Companies>, DataFetchState>(
-              builder: (context, state) {
-            switch (state.status) {
-              case DataFetchStatus.failure:
-                return const FatalErrorForm(
-                    message: 'server connection problem');
-              case DataFetchStatus.loading:
-                return LoadingIndicator();
-              case DataFetchStatus.success:
-                return DropdownSearch<Company>(
-                  enabled: !readOnly,
-                  selectedItem: _selectedCompany,
-                  popupProps: PopupProps.menu(
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      autofocus: true,
-                      decoration: InputDecoration(
-                          labelText:
-                              "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name"),
-                      controller: _companySearchBoxController,
-                    ),
-                    title: popUp(
-                      context: context,
-                      title:
-                          "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
-                      height: 50,
-                    ),
-                  ),
-                  dropdownDecoratorProps: DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: finDocUpdated.sales ? 'Customer' : 'Supplier',
-                    ),
-                  ),
-                  key: Key(
-                      finDocUpdated.sales == true ? 'customer' : 'supplier'),
-                  itemAsString: (Company? u) => "${u!.name}",
-                  asyncItems: (String filter) {
-                    _companyBloc.add(GetDataEvent(() => context
-                        .read<RestClient>()
-                        .getCompany(
-                            searchString: filter,
-                            limit: 3,
-                            isForDropDown: true,
-                            role: widget.finDoc.sales
-                                ? Role.customer
-                                : Role.supplier)));
-                    return Future.delayed(const Duration(milliseconds: 150),
-                        () {
-                      return Future.value(
-                          (_companyBloc.state.data as Companies).companies);
-                    });
-                  },
-                  onChanged: (Company? newValue) {
-                    setState(() {
-                      _selectedCompany = newValue;
-                    });
-                  },
-                  validator: (value) => value == null
-                      ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
-                      : null,
-                );
-              default:
-                return const Center(child: LoadingIndicator());
-            }
-          }),
-        )),
-      Expanded(
-          child: Padding(
-              padding: const EdgeInsets.all(10),
+      BlocBuilder<DataFetchBloc<Companies>, DataFetchState>(
+          builder: (context, state) {
+        switch (state.status) {
+          case DataFetchStatus.failure:
+            return const FatalErrorForm(message: 'server connection problem');
+          case DataFetchStatus.loading:
+            return LoadingIndicator();
+          case DataFetchStatus.success:
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Flexible(
+                  SizedBox(
+                    width: 115,
                     child: TextFormField(
-                      key: const Key('description'),
-                      readOnly: readOnly,
-                      decoration: InputDecoration(
-                          labelText: '${finDoc.docType} Description'),
-                      controller: _descriptionController,
+                      key: const Key('pseudoId'),
+                      decoration: const InputDecoration(labelText: 'Id'),
+                      controller: _pseudoIdController,
+                      keyboardType: TextInputType.number,
                     ),
                   ),
-                  Flexible(
-                      child: Text(
-                          "Status: ${finDoc.displayStatus(classificationId)}")),
+                  Expanded(
+                    child: DropdownSearch<Company>(
+                      enabled: !readOnly,
+                      selectedItem: _selectedCompany,
+                      popupProps: PopupProps.menu(
+                        showSearchBox: true,
+                        searchFieldProps: TextFieldProps(
+                          autofocus: true,
+                          decoration: InputDecoration(
+                              labelText:
+                                  "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name"),
+                          controller: _companySearchBoxController,
+                        ),
+                        title: popUp(
+                          context: context,
+                          title:
+                              "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
+                          height: 50,
+                        ),
+                      ),
+                      dropdownDecoratorProps: DropDownDecoratorProps(
+                        dropdownSearchDecoration: InputDecoration(
+                          labelText:
+                              finDocUpdated.sales ? 'Customer' : 'Supplier',
+                        ),
+                      ),
+                      key: Key(finDocUpdated.sales == true
+                          ? 'customer'
+                          : 'supplier'),
+                      itemAsString: (Company? u) => "${u!.name}",
+                      asyncItems: (String filter) {
+                        _companyBloc.add(GetDataEvent(() => context
+                            .read<RestClient>()
+                            .getCompany(
+                                searchString: filter,
+                                limit: 3,
+                                isForDropDown: true,
+                                role: widget.finDoc.sales
+                                    ? Role.customer
+                                    : Role.supplier)));
+                        return Future.delayed(const Duration(milliseconds: 150),
+                            () {
+                          return Future.value(
+                              (_companyBloc.state.data as Companies).companies);
+                        });
+                      },
+                      onChanged: (Company? newValue) {
+                        setState(() {
+                          _selectedCompany = newValue;
+                        });
+                      },
+                      validator: (value) => value == null
+                          ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
+                          : null,
+                    ),
+                  ),
                 ],
-              ))),
+              ),
+            );
+          default:
+            return const Center(child: LoadingIndicator());
+        }
+      }),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            SizedBox(
+              width: 115,
+              child: DropdownButtonFormField<FinDocStatusVal>(
+                key: const Key('statusDropDown'),
+                decoration: const InputDecoration(labelText: 'Status'),
+                value: _updatedStatus,
+                validator: (value) => value == null ? 'field required' : null,
+                items: FinDocStatusVal.validStatusList(
+                        finDoc.status ?? FinDocStatusVal.created)
+                    .map((label) => DropdownMenuItem<FinDocStatusVal>(
+                          value: label,
+                          child: Text(label.name),
+                        ))
+                    .toList(),
+                onChanged: readOnly
+                    ? null
+                    : (FinDocStatusVal? newValue) {
+                        setState(() {
+                          _updatedStatus = newValue!;
+                        });
+                      },
+                isExpanded: true,
+              ),
+            ),
+            Expanded(
+              child: TextFormField(
+                key: const Key('description'),
+                readOnly: readOnly,
+                decoration:
+                    InputDecoration(labelText: '${finDoc.docType} Description'),
+                controller: _descriptionController,
+              ),
+            ),
+          ],
+        ),
+      ),
     ];
 
-    return Center(
-        child: SizedBox(
-            height: isPhone ? 150 : 100,
-            child: Form(
-                key: _formKeyHeader,
-                child: Column(
-                    children: isPhone ? widgets : [Row(children: widgets)]))));
+    return SizedBox(
+        //  height: isPhone ? 210 : 100,
+        child: Form(
+            key: _formKeyHeader,
+            child: isPhone
+                ? Column(children: widgets)
+                : Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                    Expanded(child: widgets[0]),
+                    Expanded(child: widgets[1]),
+                  ])));
   }
 
   Widget headerEntryTransaction() {
@@ -456,9 +536,7 @@ class MyFinDocState extends State<FinDocPage> {
                 onPressed: () {
                   finDocUpdated = finDocUpdated.copyWith(
                       // set order to created, others not. inprep only used by website.
-                      status: finDocUpdated.docType == FinDocType.order
-                          ? FinDocStatusVal.created
-                          : FinDocStatusVal.inPreparation,
+                      status: _updatedStatus,
                       otherCompany: _selectedCompany,
                       description: _descriptionController.text);
                   if ((finDocUpdated.docType == FinDocType.transaction &&
@@ -492,9 +570,10 @@ class MyFinDocState extends State<FinDocPage> {
         BuildContext? context}) {
       return [
         "#",
+        "ProdId",
         if (!isPhone) "Item Type",
         "Description",
-        "Qty",
+        if (!isPhone) "Qty",
         "Price",
         if (!isPhone) "SubTotal",
         " "
@@ -505,14 +584,14 @@ class MyFinDocState extends State<FinDocPage> {
     List<double> getItemFieldWidth(
         {int? itemIndex, FinDocItem? item, BuildContext? context}) {
       if (isPhone)
-        return [6, 30, 10, 10, 15];
+        return [6, 14, 25, 10, 14];
       else
-        return [4, 8, 30, 10, 10, 10, 10];
+        return [4, 8, 8, 28, 6, 10, 10, 10];
     }
 
     // fields content
     List<dynamic> getItemFieldContent(FinDocItem item,
-        {int? itemIndex, String? classificationId, context}) {
+        {int? itemIndex, BuildContext? context}) {
       var itemType = item.itemType != null
           ? state.itemTypes
               .firstWhere((e) => e.itemTypeId == item.itemType!.itemTypeId)
@@ -522,14 +601,19 @@ class MyFinDocState extends State<FinDocPage> {
           backgroundColor: Colors.green,
           child: Text(item.itemSeqId.toString()),
         ),
+        Text("${item.productId}",
+            textAlign: TextAlign.center, key: Key('itemProductId${itemIndex}')),
         if (!isPhone)
           Text(itemType.itemTypeName,
               textAlign: TextAlign.left, key: Key('itemType${itemIndex}')),
         Text("${item.description}",
             key: Key('itemDescription${itemIndex}'), textAlign: TextAlign.left),
-        Text("${item.quantity}",
-            textAlign: TextAlign.center, key: Key('itemQuantity${itemIndex}')),
-        Text("${item.price}", key: Key('itemPrice${itemIndex}')),
+        if (!isPhone)
+          Text("${item.quantity}",
+              textAlign: TextAlign.center,
+              key: Key('itemQuantity${itemIndex}')),
+        Text(item.price!.currency(),
+            textAlign: TextAlign.right, key: Key('itemPrice${itemIndex}')),
         if (!isPhone) // subtotal
           Text((item.price! * (item.quantity ?? Decimal.parse('1'))).toString(),
               textAlign: TextAlign.center),
@@ -537,8 +621,12 @@ class MyFinDocState extends State<FinDocPage> {
     }
 
     // buttons
-    List<Widget> getRowActionButtons(
-            {int? itemIndex, FinDocItem? item, BuildContext? context}) =>
+    List<Widget> getRowActionButtons({
+      Bloc<dynamic, dynamic>? bloc,
+      BuildContext? context,
+      FinDocItem? item,
+      int? itemIndex,
+    }) =>
         readOnly
             ? []
             : [
@@ -546,7 +634,7 @@ class MyFinDocState extends State<FinDocPage> {
                   visualDensity: VisualDensity.compact,
                   icon: const Icon(Icons.delete_forever),
                   padding: EdgeInsets.all(0),
-                  key: Key("delete${itemIndex}"),
+                  key: Key("itemDelete$itemIndex"),
                   onPressed: () {
                     _cartBloc.add(CartDeleteItem(itemIndex!));
                   },
@@ -565,9 +653,11 @@ class MyFinDocState extends State<FinDocPage> {
       List<List<TableViewCell>> tableViewCells,
       List<double> fieldWidths,
       double? rowHeight
-    ) = get2dTableData(
+    ) = get2dTableData<FinDocItem>(
         getItemFieldNames, getItemFieldWidth, items, getItemFieldContent,
-        getRowActionButtons: getRowActionButtons, context: context);
+        getRowActionButtons: getRowActionButtons,
+        context: context,
+        bloc: _finDocBloc);
     return Flexible(
       child: items.isEmpty
           ? const Text("no items yet")
@@ -622,11 +712,7 @@ class MyFinDocState extends State<FinDocPage> {
     // fields content, using strings index not required
     // widgets also allowed, then index is used for the key on the widgets
     List<dynamic> getItemFieldContent(FinDocItem item,
-        {int? itemIndex,
-        String? classificationId,
-        FinDocType? docType,
-        bool? sales,
-        context}) {
+        {int? itemIndex, BuildContext? context}) {
       return [
         item.glAccount!.accountCode!,
         item.isDebit! ? item.price.toString() : '',
@@ -639,8 +725,12 @@ class MyFinDocState extends State<FinDocPage> {
     }
 
     // buttons
-    List<Widget> getRowActionButtons(
-            {int? itemIndex, FinDocItem? item, BuildContext? context}) =>
+    List<Widget> getRowActionButtons({
+      Bloc<dynamic, dynamic>? bloc,
+      BuildContext? context,
+      FinDocItem? item,
+      int? itemIndex,
+    }) =>
         [
           IconButton(
             padding: EdgeInsets.all(0),
@@ -648,7 +738,7 @@ class MyFinDocState extends State<FinDocPage> {
               Icons.delete_forever,
               size: 20,
             ),
-            key: Key("delete$itemIndex"),
+            key: Key("itemDelete$itemIndex"),
             onPressed: () {
               _cartBloc.add(CartDeleteItem(itemIndex!));
             },
@@ -667,11 +757,12 @@ class MyFinDocState extends State<FinDocPage> {
       List<List<TableViewCell>> tableViewCells,
       List<double> fieldWidths,
       double? rowHeight
-    ) = get2dTableData(
+    ) = get2dTableData<FinDocItem>(
         getItemFieldNames, getItemFieldWidth, items, getItemFieldContent,
         getRowActionButtons: getRowActionButtons,
         getRowHeight: getRowHeight,
-        context: context);
+        context: context,
+        bloc: _finDocBloc);
     return items.isEmpty
         ? const Text("no items yet")
         : Flexible(

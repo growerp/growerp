@@ -248,6 +248,17 @@ class CommonTest {
     await CommonTest.checkWidgetKey(tester, 'CompanyDialogOrgInternal');
   }
 
+  static Future<void> doNewSearch(WidgetTester tester,
+      {required String searchString, int? seconds}) async {
+    seconds ??= waitTime;
+    if (tester.any(find.byKey(const Key('searchButton'))) == false) {
+      await tapByKey(tester, 'search');
+    }
+    await enterText(tester, 'searchField', searchString);
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle(const Duration(seconds: waitTime));
+  }
+
   static Future<void> doSearch(WidgetTester tester,
       {required String searchString, int? seconds}) async {
     seconds ??= waitTime;
@@ -408,6 +419,7 @@ class CommonTest {
     if (tff.initialValue is Currency) return tff.initialValue.description;
     if (tff.initialValue is UserGroup) return tff.initialValue.toString();
     if (tff.initialValue is Role) return tff.initialValue.value;
+    if (tff.initialValue is FinDocStatusVal) return tff.initialValue.toString();
     return tff.initialValue;
   }
 

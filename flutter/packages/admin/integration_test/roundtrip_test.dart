@@ -38,6 +38,16 @@ void main() {
     await Hive.initFlutter();
   });
 
+  Future<void> selectPurchaseOrders(WidgetTester tester) async {
+    await CommonTest.selectOption(
+        tester, 'dbOrders', 'FinDocListPurchaseOrder', '3');
+  }
+
+  Future<void> selectSalesOrders(WidgetTester tester) async {
+    await CommonTest.selectOption(
+        tester, 'dbOrders', 'FinDocListSalesOrder', '1');
+  }
+
   testWidgets('''GrowERP roundtrip Purchase test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
@@ -54,7 +64,7 @@ void main() {
       "products": products.sublist(0, 2), // will add categories too
       "users": suppliers.sublist(0, 2) + [customers[0]],
     });
-    await OrderTest.selectPurchaseOrders(tester);
+    await selectPurchaseOrders(tester);
     await OrderTest.createPurchaseOrder(tester, purchaseOrders);
     await OrderTest.checkPurchaseOrder(tester);
     await OrderTest.sendPurchaseOrder(tester, purchaseOrders);
@@ -97,7 +107,7 @@ void main() {
         blocProviders: getAdminBlocProviders(restClient, 'AppAdmin'),
         clear: false); // have to use data from previous testWidget
     await CommonTest.gotoMainMenu(tester);
-    await OrderTest.selectSalesOrders(tester);
+    await selectSalesOrders(tester);
     await OrderTest.createSalesOrder(tester, salesOrders);
     await OrderTest.checkSalesOrder(tester);
     await OrderTest.approveSalesOrder(tester);

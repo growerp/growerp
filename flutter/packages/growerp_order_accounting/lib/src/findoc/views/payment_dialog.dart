@@ -25,8 +25,7 @@ import '../findoc.dart';
 
 class ShowPaymentDialog extends StatelessWidget {
   final FinDoc finDoc;
-  final bool dialog;
-  const ShowPaymentDialog(this.finDoc, {super.key, this.dialog = true});
+  const ShowPaymentDialog(this.finDoc, {super.key});
   @override
   Widget build(BuildContext context) {
     context.read<FinDocBloc>()
@@ -41,34 +40,6 @@ class ShowPaymentDialog extends StatelessWidget {
   }
 }
 
-/*
-class PaymentDialog extends StatelessWidget {
-  final FinDoc finDoc;
-  final PaymentMethod? paymentMethod;
-  const PaymentDialog({required this.finDoc, this.paymentMethod, super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    if (finDoc.sales) {
-      return MultiBlocProvider(
-          providers: [
-            BlocProvider<DataFetchBloc<Companies>>(
-                create: (context) => DataFetchBloc<Companies>()),
-            BlocProvider<GlAccountBloc>(
-                create: (context) => GlAccountBloc(context.read<RestClient>())),
-          ],
-          child:
-              PaymentDialog(finDoc: finDoc, paymentMethod: paymentMethod));
-    }
-    return MultiBlocProvider(providers: [
-      BlocProvider<DataFetchBloc<Companies>>(
-          create: (context) => DataFetchBloc<Companies>()),
-      BlocProvider<GlAccountBloc>(
-          create: (context) => GlAccountBloc(context.read<RestClient>())),
-    ], child: PaymentDialog(finDoc: finDoc, paymentMethod: paymentMethod));
-  }
-}
-*/
 class PaymentDialog extends StatefulWidget {
   final FinDoc finDoc;
   final PaymentMethod? paymentMethod;
@@ -87,8 +58,10 @@ class PaymentDialogState extends State<PaymentDialog> {
   PaymentType? _selectedPaymentType;
   late DataFetchBloc<Companies> _companyBloc;
   late GlAccountBloc _accountBloc;
+  late FinDocStatusVal _updatedStatus;
 
   late bool isPhone;
+  late bool readOnly;
   late PaymentInstrument _paymentInstrument;
   final _userSearchBoxController = TextEditingController();
   final _amountController = TextEditingController();
@@ -99,10 +72,14 @@ class PaymentDialogState extends State<PaymentDialog> {
     super.initState();
     finDoc = widget.finDoc;
     finDocUpdated = finDoc;
+    readOnly = finDoc.status == null
+        ? false
+        : FinDocStatusVal.statusFixed(finDoc.status!);
     _selectedCompany = finDocUpdated.otherCompany;
     _selectedGlAccount = finDocUpdated.items.isNotEmpty
         ? finDocUpdated.items[0].glAccount
         : null;
+    _updatedStatus = finDocUpdated.status ?? FinDocStatusVal.created;
     _selectedCompany = finDocUpdated.otherCompany;
     _amountController.text =
         finDoc.grandTotal == null ? '' : finDoc.grandTotal.toString();
@@ -131,7 +108,6 @@ class PaymentDialogState extends State<PaymentDialog> {
         value: context.read<FinDocBloc>(),
         child: Dialog(
             key: Key("PaymentDialog${finDoc.sales ? 'Sales' : 'Purchase'}"),
-            insetPadding: const EdgeInsets.all(10),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
@@ -150,7 +126,7 @@ class PaymentDialogState extends State<PaymentDialog> {
               builder: (context, state) {
                 return popUp(
                     context: context,
-                    height: 750,
+                    height: 650,
                     width: 400,
                     title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
                         "Payment #${finDoc.pseudoId ?? 'New'}",
@@ -183,15 +159,30 @@ class PaymentDialogState extends State<PaymentDialog> {
     }
 
     return Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
         child: Form(
             key: paymentDialogFormKey,
             child: Column(children: <Widget>[
-              TextFormField(
-                key: const Key('pseudoId'),
-                decoration: const InputDecoration(labelText: 'Id (opt)'),
-                controller: _pseudoIdController,
-                keyboardType: TextInputType.number,
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      key: const Key('pseudoId'),
+                      decoration: const InputDecoration(labelText: 'Id'),
+                      controller: _pseudoIdController,
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  Expanded(
+                    child: TextFormField(
+                        key: const Key('amount'),
+                        decoration: const InputDecoration(labelText: 'Amount'),
+                        controller: _amountController,
+                        keyboardType: TextInputType.number,
+                        validator: (value) =>
+                            value!.isEmpty ? "Enter Price or Amount?" : null),
+                  ),
+                ],
               ),
               BlocBuilder<DataFetchBloc<Companies>, DataFetchState>(
                   builder: (context, state) {
@@ -202,70 +193,99 @@ class PaymentDialogState extends State<PaymentDialog> {
                   case DataFetchStatus.loading:
                     return LoadingIndicator();
                   case DataFetchStatus.success:
-                    return DropdownSearch<Company>(
-                      selectedItem: _selectedCompany,
-                      popupProps: PopupProps.menu(
-                        showSearchBox: true,
-                        searchFieldProps: TextFieldProps(
-                          autofocus: true,
-                          decoration: InputDecoration(
-                              labelText:
-                                  "${finDocUpdated.sales ? 'customer' : 'supplier'} name"),
-                          controller: _userSearchBoxController,
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: DropdownButtonFormField<FinDocStatusVal>(
+                            key: const Key('statusDropDown'),
+                            decoration:
+                                const InputDecoration(labelText: 'Status'),
+                            value: _updatedStatus,
+                            validator: (value) =>
+                                value == null ? 'field required' : null,
+                            items: FinDocStatusVal.validStatusList(
+                                    finDoc.status ?? FinDocStatusVal.created)
+                                .map((label) =>
+                                    DropdownMenuItem<FinDocStatusVal>(
+                                      value: label,
+                                      child: Text(label.name),
+                                    ))
+                                .toList(),
+                            onChanged: readOnly
+                                ? null
+                                : (FinDocStatusVal? newValue) {
+                                    setState(() {
+                                      _updatedStatus = newValue!;
+                                    });
+                                  },
+                            isExpanded: true,
+                          ),
                         ),
-                        menuProps: MenuProps(
-                            borderRadius: BorderRadius.circular(20.0)),
-                        title: popUp(
-                          context: context,
-                          title:
-                              "Select ${finDocUpdated.sales ? 'customer' : 'supplier'}",
-                          height: 50,
+                        Expanded(
+                          flex: 2,
+                          child: DropdownSearch<Company>(
+                            selectedItem: _selectedCompany,
+                            popupProps: PopupProps.menu(
+                              showSearchBox: true,
+                              searchFieldProps: TextFieldProps(
+                                autofocus: true,
+                                decoration: InputDecoration(
+                                    labelText:
+                                        "${finDocUpdated.sales ? 'customer' : 'supplier'} name"),
+                                controller: _userSearchBoxController,
+                              ),
+                              menuProps: MenuProps(
+                                  borderRadius: BorderRadius.circular(20.0)),
+                              title: popUp(
+                                context: context,
+                                title:
+                                    "Select ${finDocUpdated.sales ? 'customer' : 'supplier'}",
+                              ),
+                            ),
+                            dropdownDecoratorProps: DropDownDecoratorProps(
+                                dropdownSearchDecoration: InputDecoration(
+                                    labelText: finDocUpdated.sales
+                                        ? 'Customer'
+                                        : 'Supplier')),
+                            key: Key(
+                                finDocUpdated.sales ? 'customer' : 'supplier'),
+                            itemAsString: (Company? u) => " ${u!.name}",
+                            asyncItems: (String filter) {
+                              _companyBloc.add(GetDataEvent(() => context
+                                  .read<RestClient>()
+                                  .getCompany(
+                                      searchString: filter,
+                                      limit: 3,
+                                      isForDropDown: true,
+                                      role: widget.finDoc.sales
+                                          ? Role.customer
+                                          : Role.supplier)));
+                              return Future.delayed(
+                                  const Duration(milliseconds: 150), () {
+                                return Future.value(
+                                    (_companyBloc.state.data as Companies)
+                                        .companies);
+                              });
+                            },
+                            onChanged: (Company? newValue) {
+                              setState(() {
+                                _selectedCompany = newValue;
+                              });
+                            },
+                            validator: (value) => value == null
+                                ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
+                                : null,
+                          ),
                         ),
-                      ),
-                      dropdownDecoratorProps: DropDownDecoratorProps(
-                          dropdownSearchDecoration: InputDecoration(
-                              labelText: finDocUpdated.sales
-                                  ? 'Customer'
-                                  : 'Supplier')),
-                      key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
-                      itemAsString: (Company? u) => " ${u!.name}",
-                      asyncItems: (String filter) {
-                        _companyBloc.add(GetDataEvent(() => context
-                            .read<RestClient>()
-                            .getCompany(
-                                searchString: filter,
-                                limit: 3,
-                                isForDropDown: true,
-                                role: widget.finDoc.sales
-                                    ? Role.customer
-                                    : Role.supplier)));
-                        return Future.delayed(const Duration(milliseconds: 150),
-                            () {
-                          return Future.value(
-                              (_companyBloc.state.data as Companies).companies);
-                        });
-                      },
-                      onChanged: (Company? newValue) {
-                        setState(() {
-                          _selectedCompany = newValue;
-                        });
-                      },
-                      validator: (value) => value == null
-                          ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
-                          : null,
+                      ],
                     );
                   default:
                     return const Center(child: LoadingIndicator());
                 }
               }),
-              TextFormField(
-                  key: const Key('amount'),
-                  decoration: const InputDecoration(labelText: 'Amount'),
-                  controller: _amountController,
-                  keyboardType: TextInputType.number,
-                  validator: (value) =>
-                      value!.isEmpty ? "Enter Price or Amount?" : null),
-              const SizedBox(height: 20),
+              if (widget.finDoc.id() != null)
+                relatedFinDocs(finDoc: widget.finDoc, context: context),
               InputDecorator(
                 decoration: InputDecoration(
                   labelText: 'PaymentMethods',
@@ -364,7 +384,6 @@ class PaymentDialogState extends State<PaymentDialog> {
                   ],
                 ),
               ),
-              const SizedBox(height: 10),
               DropdownButtonFormField<PaymentType>(
                 key: const Key('paymentType'),
                 decoration: const InputDecoration(labelText: 'Payment Type'),
@@ -387,7 +406,6 @@ class PaymentDialogState extends State<PaymentDialog> {
                 },
                 isExpanded: true,
               ),
-              const SizedBox(height: 20),
               BlocBuilder<GlAccountBloc, GlAccountState>(
                   builder: (context, state) {
                 switch (state.status) {
@@ -437,7 +455,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                     return const Center(child: LoadingIndicator());
                 }
               }),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   ElevatedButton(
@@ -460,6 +478,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                               otherCompany: _selectedCompany,
                               grandTotal: Decimal.parse(_amountController.text),
                               pseudoId: _pseudoIdController.text,
+                              status: _updatedStatus,
                               paymentInstrument: _paymentInstrument,
                               items: [
                                 FinDocItem(
