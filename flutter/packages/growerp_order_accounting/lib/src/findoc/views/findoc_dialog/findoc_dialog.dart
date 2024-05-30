@@ -343,7 +343,7 @@ class MyFinDocState extends State<FinDocPage> {
                 decoration: const InputDecoration(labelText: 'Status'),
                 value: _updatedStatus,
                 validator: (value) => value == null ? 'field required' : null,
-                items: FinDocStatusVal.validStatusList(null)
+                items: FinDocStatusVal.validStatusList(_updatedStatus)
                     .map((label) => DropdownMenuItem<FinDocStatusVal>(
                           value: label,
                           child: Text(label.name),

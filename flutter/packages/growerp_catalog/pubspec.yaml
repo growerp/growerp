@@ -26,7 +26,7 @@ dependencies:
   archive: ^3.3.0
   path_provider: ^2.0.11
   url_launcher: ^6.1.4
-  flutter_colorpicker: ^1.0.3
+  flutter_colorpicker: ^1.1.0
   from_css_color: ^2.0.0
   bloc_concurrency: ^0.2.0
   image_picker: ^1.0.4

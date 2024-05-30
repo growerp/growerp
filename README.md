@@ -25,7 +25,7 @@ When the application is started, create a new company, select demo data or an em
 Documentation available at https://www.growerp.com
 
 ## Install GrowERP locally using global growerp command
-## <span style="color:red">required flutter version 3.16.9</span> 
+## <span style="color:red">required flutter version channel stable</span> 
 
 ```sh
 dart pub global activate growerp

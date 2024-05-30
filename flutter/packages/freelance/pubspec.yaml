@@ -16,7 +16,7 @@ dependencies:
   responsive_framework: ^1.4.0
   flutter_simple_treeview: ^3.0.2
   printing: ^5.11.1
-  pdf: ^3.10.3
+  pdf: ^3.10.8
   bloc_concurrency: ^0.2.0
   growerp_task: ^1.0.0
   growerp_core: ^1.2.4

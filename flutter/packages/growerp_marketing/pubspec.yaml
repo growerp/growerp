@@ -31,7 +31,7 @@ dependencies:
   responsive_framework: ^1.4.0
   dropdown_search: ^5.0.6
   printing: ^5.11.1
-  pdf: ^3.10.3
+  pdf: ^3.10.8
   about: ^2.1.1
   web_socket_channel: ^2.1.0
   shared_preferences: ^2.0.15
@@ -43,7 +43,7 @@ dependencies:
   freezed_annotation: ^2.0.3
   credit_card_validator: ^2.0.1
   url_launcher: ^6.1.4
-  flutter_colorpicker: ^1.0.3
+  flutter_colorpicker: ^1.1.0
   from_css_color: ^2.0.0
   path_provider: ^2.0.11
   file_picker: ^5.2.0+1
