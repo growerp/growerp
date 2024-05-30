@@ -128,7 +128,7 @@ List<dynamic> getItemFieldContent(FinDoc finDoc,
                 key: Key("status$itemIndex")),
             const SizedBox(width: 10),
             if (finDoc.docType != FinDocType.shipment)
-              Text(finDoc.grandTotal!.currency(),
+              Text(finDoc.grandTotal.currency(),
                   key: Key("grandTotal$itemIndex")),
             if (finDoc.docType != FinDocType.shipment)
               const SizedBox(width: 10),

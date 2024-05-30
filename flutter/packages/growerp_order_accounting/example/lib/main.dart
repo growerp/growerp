@@ -91,6 +91,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         'with: ${settings.arguments.toString()} }');
   }
   switch (settings.name) {
+    case '/findoc':
+      return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => ShowFinDocDialog(settings.arguments as FinDoc));
     case '/':
       return MaterialPageRoute(
           builder: (context) => HomeForm(menuOptions: menuOptions));

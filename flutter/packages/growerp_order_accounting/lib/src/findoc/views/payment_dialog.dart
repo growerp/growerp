@@ -57,7 +57,7 @@ class PaymentDialogState extends State<PaymentDialog> {
   Company? _selectedCompany;
   PaymentType? _selectedPaymentType;
   late DataFetchBloc<Companies> _companyBloc;
-  late GlAccountBloc _accountBloc;
+//  late GlAccountBloc _accountBloc;
   late FinDocStatusVal _updatedStatus;
 
   late bool isPhone;
@@ -97,8 +97,8 @@ class PaymentDialogState extends State<PaymentDialog> {
       ..add(GetDataEvent(() => context.read<RestClient>().getCompany(
           limit: 3,
           role: widget.finDoc.sales ? Role.customer : Role.supplier)));
-    _accountBloc = context.read<GlAccountBloc>();
-    _accountBloc.add(const GlAccountFetch(limit: 3));
+    //  _accountBloc = context.read<GlAccountBloc>()
+    //    ..add(const GlAccountFetch(limit: 3));
   }
 
   @override

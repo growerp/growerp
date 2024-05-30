@@ -39,7 +39,7 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
   Bloc? bloc,
 }) {
   // check if input parameters consistent
-  if (kDebugMode) {
+  if (kDebugMode && items.isNotEmpty) {
     int itemsName =
         getItemFieldNames(context: context, itemIndex: 0, item: items[0])
             .length;

@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "4 Applications/4 workflow/Workflow data organization.md",
+                "file": "2 End User documentation/1 Introduction/3 General business flow.md",
                 "mode": "source",
                 "source": false
               }
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "4 Applications/4 workflow/Workflow data organization.md",
+                "file": "2 End User documentation/1 Introduction/3 General business flow.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "4 Applications/4 workflow/Workflow data organization.md",
+                "file": "2 End User documentation/1 Introduction/3 General business flow.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "4 Applications/4 workflow/Workflow data organization.md"
+                "file": "2 End User documentation/1 Introduction/3 General business flow.md"
               }
             }
           },
@@ -168,8 +168,8 @@
   },
   "active": "cd2ba6fa8750f0f9",
   "lastOpenFiles": [
-    "4 Applications/3 Freelance/1 Introduction.md",
     "4 Applications/4 workflow/Workflow data organization.md",
+    "4 Applications/3 Freelance/1 Introduction.md",
     "3 Technical documentation/2 Flutter frontend & development.md",
     "4 Applications/4 workflow",
     "4 Applications/4 Workflow.md",

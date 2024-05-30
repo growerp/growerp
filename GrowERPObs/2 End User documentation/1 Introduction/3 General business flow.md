@@ -5,32 +5,27 @@ Please find below the general business flow of the purchase and sales process. T
 
 ## Purchasing
 
-```mermaid
-
-graph LR
-
-A[create purchase order] --> M[approve sales order] --> |if needs shipping| B[create shipment] --> W[receive shipment & post ledger] --> V[order complete]
-
-M --> C[create invoice] --> E[approve invoice & post ledger] --> G[invoice complete]
-
-M --> D(create payment) --> J[send payment & post ledger] --> L[payment complete]
-
-```
-
+	1. enter & approve/send purchase order --> creates:
+		1. 'approved/posted' invoice 
+		2. 'created' payment
+		3. 'approved' incoming shipment(when physical product)
+	2. approve/send payment --> creates:
+		1. 'completed/posted' payment
+		2. non physical product: order 'completed'.
+	3. approve/receive shipment when physical product --> creates:
+		1. 'completed/posted' shipment
+		2. purchase order 'completed' (when payment approved/send)
 ## Sales
 
-```mermaid
-
-graph LR
-
-A[create sales order] --> M[approve sales order] -->|if needs shipping| N[create shipment] --> B[approve shipment & post ledger & order complete]
-
-M --> C[create invoice] --> E[approve invoice & post ledger] --> G[invoice complete]
-
-M --> D(create payment) --> J[send payment & post ledger] --> L[payment complete=paid]
-
-```
-
+	1. enter & approve/receive sales order --> creates:
+		1. 'approved/send/posted' invoice
+		2. 'created' payment
+		3. 'created' outgoing shipment(when physical product)
+	3. approve/pack shipment when physical product shipped --> creates:
+		1. posted shipment
+	4. complete/send shipment
+	5. approve/receive payment -> order completed
+	
   
 ## End user actions
 

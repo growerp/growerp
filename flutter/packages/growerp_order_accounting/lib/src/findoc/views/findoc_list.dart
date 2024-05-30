@@ -180,14 +180,9 @@ class FinDocListState extends State<FinDocList> {
                             builder: (BuildContext context) {
                               return BlocProvider.value(
                                   value: _finDocBloc,
-                                  child: widget.onlyRental == true
-                                      ? ReservationDialog(
-                                          finDoc: finDocs[index - 1],
-                                          original: finDocs[index - 1])
-                                      : widget.docType == FinDocType.payment
-                                          ? PaymentDialog(
-                                              finDoc: finDocs[index - 1])
-                                          : FinDocDialog(finDocs[index - 1]));
+                                  child: SelectFinDocDialog(
+                                      onlyRental: widget.onlyRental,
+                                      finDoc: finDocs[index - 1]));
                             }))
                   }),
         pinnedRowCount: 1,
@@ -368,5 +363,30 @@ class FinDocListState extends State<FinDocList> {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.offset;
     return currentScroll >= (maxScroll * 0.9);
+  }
+}
+
+class SelectFinDocDialog extends StatelessWidget {
+  const SelectFinDocDialog({
+    super.key,
+    required this.finDoc,
+    bool onlyRental = false,
+  });
+
+  final FinDoc finDoc;
+  final bool onlyRental = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return onlyRental == true
+        ? ReservationDialog(finDoc: finDoc, original: finDoc)
+        // shipment with status approved shows receive screen
+        : finDoc.docType == FinDocType.shipment &&
+                finDoc.status == FinDocStatusVal.approved &&
+                finDoc.sales == false
+            ? ShipmentReceiveDialog(finDoc)
+            : finDoc.docType == FinDocType.payment
+                ? PaymentDialog(finDoc: finDoc)
+                : FinDocDialog(finDoc);
   }
 }

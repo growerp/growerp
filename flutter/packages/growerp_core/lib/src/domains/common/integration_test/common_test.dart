@@ -257,6 +257,8 @@ class CommonTest {
     await enterText(tester, 'searchField', searchString);
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle(const Duration(seconds: waitTime));
+    await tapByKey(tester, 'searchResult0');
+    await tester.pumpAndSettle(const Duration(seconds: waitTime));
   }
 
   static Future<void> doSearch(WidgetTester tester,
@@ -629,5 +631,13 @@ class CommonTest {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, handler);
+  }
+
+  static Future<String> getRelatedFindoc(
+      WidgetTester tester, String pseudoId, FinDocType type) async {
+    await tapByKey(tester, "rel$type");
+    String id = getTextField('topHeader').split('#')[1];
+    await tapByKey(tester, 'cancel');
+    return id;
   }
 }

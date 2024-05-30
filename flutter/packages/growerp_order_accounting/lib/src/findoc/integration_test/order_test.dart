@@ -393,7 +393,6 @@ class OrderTest {
       WidgetTester tester, List<FinDoc> orders) async {
     for (FinDoc order in orders) {
       await CommonTest.doNewSearch(tester, searchString: order.pseudoId!);
-      await CommonTest.tapByKey(tester, 'searchResult0'); // open detail
       expect(
           CommonTest.getDropdownSearch(
               order.sales == true ? "customer" : "supplier"),
@@ -408,7 +407,7 @@ class OrderTest {
         expect(CommonTest.getTextField('itemDescription$index'),
             equals(item.description));
         expect(CommonTest.getTextField('itemPrice$index'),
-            equals(item.price.toString()));
+            equals(item.price.currency()));
         if (!CommonTest.isPhone())
           expect(CommonTest.getTextField('itemQuantity$index'),
               equals(item.quantity.toString()));
@@ -419,16 +418,10 @@ class OrderTest {
 
   static Future<void> sendOrApproveOrders(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> orders = test.orders.isNotEmpty
-        ? test.orders
-        : test.orders.isNotEmpty
-            ? test.orders
-            : test.payments;
-    expect(orders.isNotEmpty, true,
-        reason: 'This test needs orders created in previous steps');
+    List<FinDoc> newOrders = List.of(test.orders);
     for (FinDoc order in test.orders) {
       await CommonTest.doNewSearch(tester, searchString: order.pseudoId!);
-      await CommonTest.tapByKey(tester, 'searchResult0'); // open detail
+      // open detail
       if (CommonTest.getDropdown('statusDropDown') ==
               FinDocStatusVal.inPreparation.toString() ||
           CommonTest.getDropdown('statusDropDown') ==
@@ -437,6 +430,42 @@ class OrderTest {
         await CommonTest.tapByText(tester, 'approved');
         await CommonTest.tapByKey(tester, 'update', seconds: 2);
       }
+      // get related document numbers
+      await CommonTest.doNewSearch(tester, searchString: order.pseudoId!);
+      String paymentId = await CommonTest.getRelatedFindoc(
+          tester, order.pseudoId!, FinDocType.payment);
+      String invoiceId = await CommonTest.getRelatedFindoc(
+          tester, order.pseudoId!, FinDocType.invoice);
+      await CommonTest.tapByKey(tester, 'cancel');
+      FinDoc neworder =
+          order.copyWith(paymentId: paymentId, invoiceId: invoiceId);
+      newOrders.add(neworder);
     }
+    await PersistFunctions.persistTest(test.copyWith(orders: newOrders));
+  }
+
+  static Future<void> sendOrApprovePayments(WidgetTester tester) async {
+    SaveTest test = await PersistFunctions.getTest();
+    List<FinDoc> newOrders = List.of(test.orders);
+    for (FinDoc order in test.orders) {
+      await CommonTest.doNewSearch(tester, searchString: order.paymentId!);
+      // open detail
+      if (CommonTest.getDropdown('statusDropDown') ==
+              FinDocStatusVal.inPreparation.toString() ||
+          CommonTest.getDropdown('statusDropDown') ==
+              FinDocStatusVal.created.toString()) {
+        await CommonTest.tapByKey(tester, 'statusDropDown');
+        await CommonTest.tapByText(tester, 'approved');
+        await CommonTest.tapByKey(tester, 'update', seconds: 2);
+      }
+      // get related transactions
+      await CommonTest.doNewSearch(tester, searchString: order.paymentId!);
+      String transactionId = await CommonTest.getRelatedFindoc(
+          tester, order.paymentId!, FinDocType.transaction);
+      await CommonTest.tapByKey(tester, 'cancel');
+      FinDoc neworder = order.copyWith(transactionId: transactionId);
+      newOrders.add(neworder);
+    }
+    await PersistFunctions.persistTest(test.copyWith(orders: newOrders));
   }
 }

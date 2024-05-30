@@ -444,6 +444,7 @@ along with this software (see the LICENSE.md file). If not, see
                             orderId: item.orderId,
                             paymentId: item.paymentId,
                             invoiceId: item.invoiceId,
+                            shipmentId: item.shipmentId,
                             description: item.orderName,
                             salesChannel: item.salesChannel,
                             statusId: convertedStatusId,
@@ -634,6 +635,7 @@ along with this software (see the LICENSE.md file). If not, see
                             orderId: item.orderId,
                             invoiceId: item.invoiceId,
                             paymentId: item.paymentId,
+                            transactionId: item.transactionId,
                             Id: item.invoiceId,
                             description: item.invoiceName,
                             statusId: convertedStatusId,
@@ -814,6 +816,7 @@ along with this software (see the LICENSE.md file). If not, see
                         paymentInstrument: item.paymentInstrumentId.substring(2),
                         paymentId: item.paymentId,
                         pseudoId: item.pseudoId ?: '',
+                        transactionId: item.transactionId,
                         id: item.paymentId,
                         invoiceId: item.invoiceId ? item.invoiceId : item.forInvoiceId,
                         statusId: convertedStatusId,
@@ -934,6 +937,7 @@ along with this software (see the LICENSE.md file). If not, see
                             pseudoId: item.pseudoId,
                             Id: item.shipmentId,
                             shipmentId: item.shipmentId,
+                            transactionId: item.transactionId,
                             pseudoId: item.pseudoId ?:'',
                             statusId: convertedStatusId,
                             shipmentMethod: item.shipmentMethod,
@@ -959,6 +963,7 @@ along with this software (see the LICENSE.md file). If not, see
                         ]" />
                     <set field="finDocItem"
                         from="[
+                        itemSeqId: item.orderItemSeqId,
                         productId: item.productId,
                         quantity: item.quantity ? item.quantity.toString() : null,
                         description: item.itemDescription,
@@ -2323,9 +2328,12 @@ along with this software (see the LICENSE.md file). If not, see
                         <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                             in-map="[companyPartyId: companyPartyId, seqName: 'shipment']"
                             out-map="context" />
+                        <!-- shipment created with status created -> ShipScheduled better then
+                        approved -> ShipPacked because when approved, you have to show the 
+                        receive or send screen shipment -->
                         <service-call name="update#mantle.shipment.Shipment" out-map="context"
                             in-map="[shipmentId: shipmentId,
-                                    statusId: order.sales == true ? 'ShipScheduled' : 'ShipPacked',
+                                statusId: ShipScheduled,
                                     pseudoId: seqNum]" />
                         <else><!-- no shipable items so complete order already here not with rental
                             though-->

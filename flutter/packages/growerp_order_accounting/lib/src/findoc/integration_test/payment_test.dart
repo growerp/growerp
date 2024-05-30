@@ -210,7 +210,6 @@ class PaymentTest {
             : test.payments;
     for (FinDoc payment in payments) {
       await CommonTest.doNewSearch(tester, searchString: payment.orderId!);
-      await CommonTest.tapByKey(tester, 'searchResult0'); // open detail
       if (CommonTest.getDropdown('statusDropDown') ==
               FinDocStatusVal.inPreparation.toString() ||
           CommonTest.getDropdown('statusDropDown') ==

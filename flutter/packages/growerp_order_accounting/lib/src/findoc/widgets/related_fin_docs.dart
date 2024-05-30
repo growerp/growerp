@@ -52,7 +52,7 @@ class relatedFinDocs extends StatelessWidget {
                     arguments: FinDoc(
                         sales: finDoc.sales,
                         docType: FinDocType.shipment,
-                        paymentId: finDoc.shipmentId))),
+                        shipmentId: finDoc.shipmentId))),
           if (finDoc.docType != FinDocType.transaction &&
               finDoc.transactionId != null)
             TextButton(
@@ -62,7 +62,7 @@ class relatedFinDocs extends StatelessWidget {
                     arguments: FinDoc(
                         sales: finDoc.sales,
                         docType: FinDocType.transaction,
-                        paymentId: finDoc.transactionId))),
+                        transactionId: finDoc.transactionId))),
         ]));
   }
 }

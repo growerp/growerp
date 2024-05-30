@@ -38,11 +38,7 @@ class ShowFinDocDialog extends StatelessWidget {
           ..add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!)),
         child: BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
           if (state.status == FinDocStatus.success) {
-            return RepositoryProvider.value(
-                value: restClient,
-                child: finDoc.docType == FinDocType.payment
-                    ? PaymentDialog(finDoc: state.finDocs[0])
-                    : FinDocDialog(state.finDocs[0]));
+            return SelectFinDocDialog(finDoc: state.finDocs[0]);
           } else {
             return const LoadingIndicator();
           }
@@ -191,11 +187,17 @@ class MyFinDocState extends State<FinDocPage> {
             const SizedBox(height: 10),
             widget.finDoc.docType == FinDocType.transaction
                 ? finDocItemListTransaction(state)
-                : finDocItemList(state),
+                : widget.finDoc.docType == FinDocType.shipment
+                    ? finDocItemListShipment(state)
+                    : finDocItemList(state),
             const SizedBox(height: 10),
-            Text(
-                "Items# ${finDocUpdated.items.length}   Grand total : ${finDocUpdated.grandTotal == null ? "0.00" : finDocUpdated.grandTotal.toString()}",
-                key: const Key('grandTotal')),
+            if (finDoc.docType == FinDocType.shipment)
+              Text("Items# ${finDocUpdated.items.length}"),
+            if (finDoc.docType != FinDocType.shipment)
+              Text(
+                  "Items# ${finDocUpdated.items.length}   "
+                  "Grand total : ${finDocUpdated.grandTotal.currency()}",
+                  key: const Key('grandTotal')),
             const SizedBox(height: 10),
             if (!readOnly) generalButtons(),
           ]);
@@ -341,8 +343,7 @@ class MyFinDocState extends State<FinDocPage> {
                 decoration: const InputDecoration(labelText: 'Status'),
                 value: _updatedStatus,
                 validator: (value) => value == null ? 'field required' : null,
-                items: FinDocStatusVal.validStatusList(
-                        finDoc.status ?? FinDocStatusVal.created)
+                items: FinDocStatusVal.validStatusList(null)
                     .map((label) => DropdownMenuItem<FinDocStatusVal>(
                           value: label,
                           child: Text(label.name),
@@ -648,6 +649,115 @@ class MyFinDocState extends State<FinDocPage> {
               color: Theme.of(context).colorScheme.tertiaryContainer)
           : null;
     } // field content
+
+    var (
+      List<List<TableViewCell>> tableViewCells,
+      List<double> fieldWidths,
+      double? rowHeight
+    ) = get2dTableData<FinDocItem>(
+        getItemFieldNames, getItemFieldWidth, items, getItemFieldContent,
+        getRowActionButtons: getRowActionButtons,
+        context: context,
+        bloc: _finDocBloc);
+    return Flexible(
+      child: items.isEmpty
+          ? const Text("no items yet")
+          : TableView.builder(
+              diagonalDragBehavior: DiagonalDragBehavior.free,
+              verticalDetails:
+                  ScrollableDetails.vertical(controller: _verticalController),
+              horizontalDetails: ScrollableDetails.horizontal(
+                  controller: _horizontalController),
+              cellBuilder: (context, vicinity) =>
+                  tableViewCells[vicinity.row][vicinity.column],
+              // height of table cell
+              columnBuilder: (index) => index >= tableViewCells[0].length
+                  ? null
+                  : TableSpan(
+                      padding: padding,
+                      backgroundDecoration: getBackGround(context, index),
+                      extent: FixedTableSpanExtent(fieldWidths[index])),
+              pinnedColumnCount: 1,
+              // width of table cell
+              rowBuilder: (index) => index >= tableViewCells.length
+                  ? null
+                  : TableSpan(
+                      padding: padding,
+                      backgroundDecoration: getBackGround(context, index),
+                      extent: FixedTableSpanExtent(rowHeight!),
+                    ),
+              pinnedRowCount: 1,
+            ),
+    );
+  }
+
+  Widget finDocItemListShipment(CartState state) {
+    List<FinDocItem> items = finDocUpdated.items;
+    late final ScrollController _verticalController = ScrollController();
+    late final ScrollController _horizontalController = ScrollController();
+    // field headers
+    List<dynamic> getItemFieldNames(
+        {int? itemIndex,
+        String? classificationId,
+        FinDocItem? item,
+        BuildContext? context}) {
+      return ["#", "ProdId", "Description", "Qty", ' '];
+    }
+
+    // field lengths
+    List<double> getItemFieldWidth(
+        {int? itemIndex, FinDocItem? item, BuildContext? context}) {
+      if (isPhone)
+        return [6, 14, 25, 10, 20];
+      else
+        return [4, 8, 28, 10, 20];
+    }
+
+    // fields content
+    List<dynamic> getItemFieldContent(FinDocItem item,
+        {int? itemIndex, BuildContext? context}) {
+      return [
+        CircleAvatar(
+          backgroundColor: Colors.green,
+          child: Text(item.itemSeqId.toString()),
+        ),
+        Text("${item.productId}",
+            textAlign: TextAlign.center, key: Key('itemProductId${itemIndex}')),
+        Text("${item.description}",
+            key: Key('itemDescription${itemIndex}'), textAlign: TextAlign.left),
+        Text("${item.quantity}",
+            textAlign: TextAlign.center, key: Key('itemQuantity${itemIndex}')),
+      ];
+    }
+
+    // buttons
+    List<Widget> getRowActionButtons({
+      Bloc<dynamic, dynamic>? bloc,
+      BuildContext? context,
+      FinDocItem? item,
+      int? itemIndex,
+    }) =>
+        readOnly
+            ? []
+            : [
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.delete_forever),
+                  padding: EdgeInsets.all(0),
+                  key: Key("itemDelete$itemIndex"),
+                  onPressed: () {
+                    _cartBloc.add(CartDeleteItem(itemIndex!));
+                  },
+                )
+              ];
+
+    var padding = SpanPadding(trailing: 8, leading: 8);
+    SpanDecoration? getBackGround(BuildContext context, int index) {
+      return index == 0
+          ? SpanDecoration(
+              color: Theme.of(context).colorScheme.tertiaryContainer)
+          : null;
+    }
 
     var (
       List<List<TableViewCell>> tableViewCells,
