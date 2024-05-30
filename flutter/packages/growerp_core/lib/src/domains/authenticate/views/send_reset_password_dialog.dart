@@ -15,7 +15,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domains.dart';
-import '../../common/functions/helper_functions.dart';
 
 class SendResetPasswordDialog extends StatefulWidget {
   const SendResetPasswordDialog(this.username, {super.key});

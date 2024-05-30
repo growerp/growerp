@@ -19,7 +19,6 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../../../domains/domains.dart';
 import '../../../l10n/generated/core_localizations.dart';
-import '../../common/functions/helper_functions.dart';
 
 class LoginDialog extends StatefulWidget {
   const LoginDialog({super.key});
