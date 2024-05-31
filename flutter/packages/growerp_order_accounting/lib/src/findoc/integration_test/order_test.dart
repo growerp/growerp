@@ -416,11 +416,126 @@ class OrderTest {
     }
   }
 
-  static Future<void> sendOrApproveOrders(WidgetTester tester) async {
+  static Future<List<FinDoc>> getFinDocs(FinDocType type) async {
+    final test = await PersistFunctions.getTest();
+    switch (type) {
+      case FinDocType.order:
+        return test.orders;
+      case FinDocType.invoice:
+        return test.invoices;
+      case FinDocType.payment:
+        return test.payments;
+      case FinDocType.shipment:
+        return test.shipments;
+      case FinDocType.transaction:
+        return test.transactions;
+      default:
+        return [];
+    }
+  }
+
+  static Future<void> saveFinDocs(List<FinDoc> finDocs) async {
+    final test = await PersistFunctions.getTest();
+    switch (finDocs[0].docType) {
+      case FinDocType.order:
+        await PersistFunctions.persistTest(test.copyWith(orders: finDocs));
+        break;
+      case FinDocType.invoice:
+        await PersistFunctions.persistTest(test.copyWith(invoices: finDocs));
+        break;
+
+      case FinDocType.payment:
+        await PersistFunctions.persistTest(test.copyWith(payments: finDocs));
+        break;
+
+      case FinDocType.shipment:
+        await PersistFunctions.persistTest(test.copyWith(shipments: finDocs));
+        break;
+
+      case FinDocType.transaction: // add to existing transactions
+        final totalTransactions = List.of(test.transactions);
+        totalTransactions.addAll(finDocs);
+        await PersistFunctions.persistTest(
+            test.copyWith(transactions: totalTransactions));
+        break;
+
+      default:
+    }
+  }
+
+  static Future<void> approveOrders(WidgetTester tester) async {
+    await approveFinDocs(tester, FinDocType.order);
+  }
+
+  static Future<void> approvePayments(WidgetTester tester) async {
+    await approveFinDocs(tester, FinDocType.order, subType: FinDocType.payment);
+  }
+
+  static Future<void> approveShipments(WidgetTester tester) async {
+    await approveFinDocs(tester, FinDocType.order,
+        subType: FinDocType.shipment);
+  }
+
+  static Future<void> checkPaymentsComplete(WidgetTester tester) async {
+    await checkFinDocsComplete(tester, FinDocType.order,
+        subType: FinDocType.payment);
+  }
+
+  static Future<void> checkInvoicesComplete(WidgetTester tester) async {
+    await checkFinDocsComplete(tester, FinDocType.order,
+        subType: FinDocType.invoice);
+  }
+
+  static Future<void> checkShipmentsComplete(WidgetTester tester) async {
+    await checkFinDocsComplete(tester, FinDocType.order,
+        subType: FinDocType.shipment);
+  }
+
+  static Future<void> checkTransactionsComplete(WidgetTester tester) async {
+    await checkFinDocsComplete(tester, FinDocType.order,
+        subType: FinDocType.transaction);
+  }
+
+  static Future<void> receiveShipments(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> newOrders = List.of(test.orders);
-    for (FinDoc order in test.orders) {
-      await CommonTest.doNewSearch(tester, searchString: order.pseudoId!);
+    List<FinDoc> orders = test.orders;
+    for (FinDoc order in orders) {
+      await CommonTest.doSearch(tester, searchString: order.shipmentId!);
+      await CommonTest.checkWidgetKey(tester, 'ShipmentReceiveDialogPurchase');
+      await CommonTest.tapByKey(tester, 'update', seconds: 3);
+      await CommonTest.tapByKey(tester, 'update', seconds: 5);
+    }
+  }
+
+  /// Approve all findocs for a specific type, however when a sub type
+  /// is provided the related findoc is approved.
+  /// When approving finDocs related documents are created of which the id's
+  /// are stored with the main findoc. Transactions however from alldocuments
+  /// are stored together in the transaction list under test.
+  static Future<void> approveFinDocs(WidgetTester tester, FinDocType type,
+      {FinDocType? subType}) async {
+    List<FinDoc> oldFinDocs = await getFinDocs(type);
+    List<FinDoc> newFinDocs = List.of(oldFinDocs);
+
+    for (FinDoc finDoc in oldFinDocs) {
+      // if provided approve related findoc
+      String? id;
+      switch (subType) {
+        case FinDocType.order:
+          id = finDoc.orderId;
+        case FinDocType.invoice:
+          id = finDoc.invoiceId;
+        case FinDocType.payment:
+          id = finDoc.paymentId;
+        case FinDocType.shipment:
+          id = finDoc.shipmentId;
+        case FinDocType.transaction:
+          id = finDoc.transactionId;
+        default:
+      }
+
+      await CommonTest.doNewSearch(tester,
+          searchString: id != null ? id : finDoc.pseudoId!);
       // open detail
       if (CommonTest.getDropdown('statusDropDown') ==
               FinDocStatusVal.inPreparation.toString() ||
@@ -431,41 +546,85 @@ class OrderTest {
         await CommonTest.tapByKey(tester, 'update', seconds: 2);
       }
       // get related document numbers
-      await CommonTest.doNewSearch(tester, searchString: order.pseudoId!);
-      String paymentId = await CommonTest.getRelatedFindoc(
-          tester, order.pseudoId!, FinDocType.payment);
-      String invoiceId = await CommonTest.getRelatedFindoc(
-          tester, order.pseudoId!, FinDocType.invoice);
-      await CommonTest.tapByKey(tester, 'cancel');
-      FinDoc neworder =
-          order.copyWith(paymentId: paymentId, invoiceId: invoiceId);
-      newOrders.add(neworder);
+      await CommonTest.doNewSearch(tester,
+          searchString: id != null ? id : finDoc.pseudoId!);
+      switch (type) {
+        case FinDocType.order:
+          String? paymentId =
+              await CommonTest.getRelatedFindoc(tester, FinDocType.payment);
+          String? invoiceId =
+              await CommonTest.getRelatedFindoc(tester, FinDocType.invoice);
+          String? shipmentId =
+              await CommonTest.getRelatedFindoc(tester, FinDocType.shipment);
+          newFinDocs.add(finDoc.copyWith(
+              paymentId: paymentId,
+              invoiceId: invoiceId,
+              shipmentId: shipmentId));
+          break;
+        case FinDocType.payment:
+          String? transactionId =
+              await CommonTest.getRelatedFindoc(tester, FinDocType.transaction);
+          newFinDocs.add(FinDoc(
+              docType: FinDocType.transaction,
+              transactionId: transactionId,
+              paymentId: finDoc.paymentId,
+              sales: true));
+        case FinDocType.invoice:
+          String? transactionId =
+              await CommonTest.getRelatedFindoc(tester, FinDocType.transaction);
+          newFinDocs.add(FinDoc(
+              docType: FinDocType.transaction,
+              transactionId: transactionId,
+              invoiceId: finDoc.invoiceId,
+              sales: true));
+        case FinDocType.shipment:
+          String? transactionId =
+              await CommonTest.getRelatedFindoc(tester, FinDocType.transaction);
+          newFinDocs.add(FinDoc(
+              docType: FinDocType.transaction,
+              shipmentId: finDoc.shipmentId,
+              transactionId: transactionId,
+              sales: true));
+        default:
+      }
     }
-    await PersistFunctions.persistTest(test.copyWith(orders: newOrders));
+    await CommonTest.tapByKey(tester, 'cancel');
+    await saveFinDocs(newFinDocs);
   }
 
-  static Future<void> sendOrApprovePayments(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> newOrders = List.of(test.orders);
-    for (FinDoc order in test.orders) {
-      await CommonTest.doNewSearch(tester, searchString: order.paymentId!);
-      // open detail
-      if (CommonTest.getDropdown('statusDropDown') ==
-              FinDocStatusVal.inPreparation.toString() ||
-          CommonTest.getDropdown('statusDropDown') ==
-              FinDocStatusVal.created.toString()) {
-        await CommonTest.tapByKey(tester, 'statusDropDown');
-        await CommonTest.tapByText(tester, 'approved');
-        await CommonTest.tapByKey(tester, 'update', seconds: 2);
+  /// Approve all findocs for a specific type, however when a sub type
+  /// is provided the related findoc is approved.
+  /// When approving finDocs related documents are created of which the id's
+  /// are stored with the main findoc. Transactions however from alldocuments
+  /// are stored together in the transaction list under test.
+  static Future<void> checkFinDocsComplete(WidgetTester tester, FinDocType type,
+      {FinDocType? subType}) async {
+    List<FinDoc> oldFinDocs = await getFinDocs(type);
+
+    for (FinDoc finDoc in oldFinDocs) {
+      // if provided approve related findoc
+      String? id;
+      switch (subType) {
+        case FinDocType.order:
+          id = finDoc.orderId;
+        case FinDocType.invoice:
+          id = finDoc.invoiceId;
+        case FinDocType.payment:
+          id = finDoc.paymentId;
+        case FinDocType.shipment:
+          id = finDoc.shipmentId;
+        case FinDocType.transaction:
+          id = finDoc.transactionId;
+        default:
       }
-      // get related transactions
-      await CommonTest.doNewSearch(tester, searchString: order.paymentId!);
-      String transactionId = await CommonTest.getRelatedFindoc(
-          tester, order.paymentId!, FinDocType.transaction);
+
+      await CommonTest.doNewSearch(tester,
+          searchString: id != null ? id : finDoc.pseudoId!);
+      // open detail
+      expect(CommonTest.getDropdown('statusDropDown'),
+          FinDocStatusVal.completed.toString());
       await CommonTest.tapByKey(tester, 'cancel');
-      FinDoc neworder = order.copyWith(transactionId: transactionId);
-      newOrders.add(neworder);
     }
-    await PersistFunctions.persistTest(test.copyWith(orders: newOrders));
+    // get related document numbers
   }
 }

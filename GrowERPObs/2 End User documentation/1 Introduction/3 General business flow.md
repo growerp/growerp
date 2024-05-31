@@ -3,12 +3,19 @@
 
 Please find below the general business flow of the purchase and sales process. The processes assume that incoming and outgoing products, employees, suppliers and customer have been defined. Accounting has been setup by the system when the company was created.
 
+Every document has similar status in the order of:
+	1. in preparation (only used for web orders)
+	2. Created
+	3. Approved
+	4. Completed/posted
+	5. Cancelled
+
 ## Purchasing
 
 	1. enter & approve/send purchase order --> creates:
 		1. 'approved/posted' invoice 
 		2. 'created' payment
-		3. 'approved' incoming shipment(when physical product)
+		3. 'created' incoming shipment(when physical product)
 	2. approve/send payment --> creates:
 		1. 'completed/posted' payment
 		2. non physical product: order 'completed'.
@@ -21,7 +28,7 @@ Please find below the general business flow of the purchase and sales process. T
 		1. 'approved/send/posted' invoice
 		2. 'created' payment
 		3. 'created' outgoing shipment(when physical product)
-	3. approve/pack shipment when physical product shipped --> creates:
+	2. approve/pack shipment when physical product shipped --> creates:
 		1. posted shipment
 	4. complete/send shipment
 	5. approve/receive payment -> order completed

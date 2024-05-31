@@ -82,6 +82,31 @@ List<MenuOption> menuOptions = [
       title: 'Accounting',
       route: '/accounting',
       readGroups: [UserGroup.admin]),
+  MenuOption(
+    image: 'packages/growerp_core/images/supplierGrey.png',
+    selectedImage: 'packages/growerp_core/images/supplier.png',
+    title: 'Shipments',
+    route: '/shipments',
+    readGroups: [UserGroup.admin, UserGroup.employee],
+    tabItems: [
+      TabItem(
+        form: const FinDocList(
+            key: Key('ShipmentsOut'),
+            sales: true,
+            docType: FinDocType.shipment),
+        label: 'Outgoing shipments',
+        icon: const Icon(Icons.send),
+      ),
+      TabItem(
+        form: const FinDocList(
+            key: Key('ShipmentsIn'),
+            sales: false,
+            docType: FinDocType.shipment),
+        label: 'Incoming shipments',
+        icon: const Icon(Icons.call_received),
+      ),
+    ],
+  ),
 ];
 
 // routing
@@ -108,6 +133,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+    case '/shipments':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: menuOptions, menuIndex: 3, tabIndex: 0));
     case '/printer':
       return MaterialPageRoute(
           builder: (context) =>
@@ -177,6 +206,10 @@ class MainMenuForm extends StatelessWidget {
                 "${authenticate.company!.currency?.currencyId} "
                 "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
                 "(${authenticate.stats?.purchInvoicesNotPaidCount ?? 0})",
+          ]),
+          makeDashboardItem('dbShipments', context, menuOptions[3], [
+            "Incoming Shipments: ${authenticate.stats?.incomingShipments ?? 0}",
+            "Outgoing Shipments: ${authenticate.stats?.outgoingShipments ?? 0}",
           ]),
         ]);
       }

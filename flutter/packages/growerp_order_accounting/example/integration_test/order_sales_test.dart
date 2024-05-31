@@ -49,7 +49,7 @@ void main() {
     await OrderTest.selectSalesOrders(tester);
     await OrderTest.addOrders(tester, salesOrders.sublist(0, 1));
     await OrderTest.updateOrders(tester, salesOrders.sublist(1, 2));
-    await OrderTest.sendOrApproveOrders(tester);
+    await OrderTest.approveOrders(tester);
     await PaymentTest.selectSalesPayments(tester);
     await PaymentTest.sendReceivePayment(tester);
     await PaymentTest.checkPayments(tester);

@@ -51,11 +51,17 @@ void main() {
     await OrderTest.addOrders(tester, purchaseOrders.sublist(0, 1));
     await OrderTest.updateOrders(tester, purchaseOrders.sublist(1, 2));
     await OrderTest.deleteLastOrder(tester);
-    await OrderTest.sendOrApproveOrders(tester);
+    await OrderTest.approveOrders(tester);
     await PaymentTest.selectPurchasePayments(tester);
-    await PaymentTest.sendReceivePayment(tester);
-    await PaymentTest.checkPayments(tester);
+    await OrderTest.approvePayments(tester);
+    await OrderTest.checkPaymentsComplete(tester);
+    await InvoiceTest.selectPurchaseInvoices(tester);
+    await OrderTest.checkInvoicesComplete(tester);
+    await ShipmentTest.selectIncomingShipments(tester);
+    await OrderTest.approveShipments(tester);
+    await OrderTest.receiveShipments(tester);
+    await OrderTest.checkShipmentsComplete(tester);
     await TransactionTest.selectTransactions(tester);
-    await TransactionTest.checkTransactionComplete(tester);
+    await TransactionTest.checkTransactionsComplete(tester);
   });
 }

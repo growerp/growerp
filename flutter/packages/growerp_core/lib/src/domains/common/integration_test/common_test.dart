@@ -251,9 +251,7 @@ class CommonTest {
   static Future<void> doNewSearch(WidgetTester tester,
       {required String searchString, int? seconds}) async {
     seconds ??= waitTime;
-    if (tester.any(find.byKey(const Key('searchButton'))) == false) {
-      await tapByKey(tester, 'search');
-    }
+    await tapByKey(tester, 'search');
     await enterText(tester, 'searchField', searchString);
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle(const Duration(seconds: waitTime));
@@ -633,8 +631,9 @@ class CommonTest {
         .setMockMethodCallHandler(channel, handler);
   }
 
-  static Future<String> getRelatedFindoc(
-      WidgetTester tester, String pseudoId, FinDocType type) async {
+  static Future<String?> getRelatedFindoc(
+      WidgetTester tester, FinDocType type) async {
+    if (tester.any(find.byKey(Key("rel$type"))) == false) return null;
     await tapByKey(tester, "rel$type");
     String id = getTextField('topHeader').split('#')[1];
     await tapByKey(tester, 'cancel');
