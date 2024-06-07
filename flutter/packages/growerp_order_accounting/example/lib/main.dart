@@ -13,11 +13,11 @@
  */
 
 // ignore_for_file: depend_on_referenced_packages
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'acct_menu_option_data.dart';
@@ -38,9 +38,21 @@ Future main() async {
     title: 'GrowERP Order and Accounting.',
     router: generateRoute,
     menuOptions: menuOptions,
-    extraDelegates: const [OrderAccountingLocalizations.delegate],
-    extraBlocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
+    extraDelegates: const [
+      OrderAccountingLocalizations.delegate,
+      InventoryLocalizations.delegate
+    ],
+    extraBlocProviders:
+        getOrderAccountingBlocProvidersExample(restClient, 'AppAdmin'),
   ));
+}
+
+List<BlocProvider> getOrderAccountingBlocProvidersExample(
+    restClient, classificationId) {
+  return [
+    ...getInventoryBlocProviders(restClient),
+    ...getOrderAccountingBlocProviders(restClient, classificationId),
+  ];
 }
 
 // Menu definition
@@ -107,14 +119,22 @@ List<MenuOption> menuOptions = [
       ),
     ],
   ),
+  MenuOption(
+      image: 'packages/growerp_core/images/supplierGrey.png',
+      selectedImage: 'packages/growerp_core/images/supplier.png',
+      title: 'Inventory',
+      route: '/inventory',
+      readGroups: [
+        UserGroup.admin,
+        UserGroup.employee,
+      ],
+      child: const LocationList()),
 ];
 
 // routing
 Route<dynamic> generateRoute(RouteSettings settings) {
-  if (kDebugMode) {
-    debugPrint('>>>NavigateTo { ${settings.name} '
-        'with: ${settings.arguments.toString()} }');
-  }
+  debugPrint('>>>NavigateTo { ${settings.name} '
+      'with: ${settings.arguments.toString()} }');
   switch (settings.name) {
     case '/findoc':
       return MaterialPageRoute(
@@ -141,6 +161,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) =>
               PrintingForm(finDocIn: settings.arguments as FinDoc));
+    case '/inventory':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: menuOptions, menuIndex: 4, tabIndex: 0));
     case '/accounting':
       return MaterialPageRoute(
           builder: (context) => HomeForm(menuOptions: acctMenuOptions));
@@ -210,6 +234,9 @@ class MainMenuForm extends StatelessWidget {
           makeDashboardItem('dbShipments', context, menuOptions[3], [
             "Incoming Shipments: ${authenticate.stats?.incomingShipments ?? 0}",
             "Outgoing Shipments: ${authenticate.stats?.outgoingShipments ?? 0}",
+          ]),
+          makeDashboardItem('dbInventory', context, menuOptions[4], [
+            "Wh Locations: ${authenticate.stats?.whLocations ?? 0}",
           ]),
         ]);
       }

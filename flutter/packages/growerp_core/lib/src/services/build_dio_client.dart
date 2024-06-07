@@ -111,24 +111,20 @@ class KeyInterceptor extends Interceptor {
   @override
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
-    if (options.extra['requireApiKey'] == true) {
-      options.headers['api_key'] = await _box?.get('apiKey');
+    options.headers['api_key'] = await _box?.get('apiKey');
+    if (options.method != 'GET') {
+      options.headers['moquiSessionToken'] =
+          await _box?.get('moquiSessionToken');
     }
-
-    //if (options.method != 'GET') {
-    //  options.headers['moquisessiontoken'] =
-    //      await _box?.get('moquiSessionToken');
-    //}
-
     return super.onRequest(options, handler);
   }
 
-  //@override
-  //void onResponse(Response response, ResponseInterceptorHandler handler) async {
-  //  await _box?.put('moquiSessionToken', response.headers['moquisessiontoken']);
+  @override
+  void onResponse(Response response, ResponseInterceptorHandler handler) async {
+    await _box?.put('moquiSessionToken', response.headers['moquiSessionToken']);
 
-  //  response.headers.removeAll('set-cookie');
+    //  response.headers.removeAll('set-cookie');
 
-  //  return super.onResponse(response, handler);
-  //}
+    return super.onResponse(response, handler);
+  }
 }

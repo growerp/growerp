@@ -76,6 +76,7 @@ class MenuOptionState extends State<DisplayMenuOption>
     if (tabItems.isEmpty) {
       displayMOFormKey =
           child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
+      // debugPrint("==1== current form key: $displayMOFormKey");
     }
     for (var i = 0; i < tabItems.length; i++) {
       // form key for testing

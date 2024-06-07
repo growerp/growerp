@@ -1,6 +1,6 @@
 # example
 
-An example package for the GrowERP marketing package.
+An example package for the GrowERP order accounting package.
 
 It uses the local backend system
     from https://github.com/growerp/growerp-moqui

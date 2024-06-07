@@ -42,9 +42,8 @@ class TransactionTest {
       WidgetTester tester, List<FinDoc> transactions,
       {bool check = true}) async {
     SaveTest test = await PersistFunctions.getTest();
-    // test = test.copyWith(transactions: []); //======= remove for full test
-    // await PersistFunctions.persistTest(test); //=====remove for full test
     if (test.transactions.isEmpty) {
+      // not tested yet
       await PersistFunctions.persistTest(test.copyWith(
           transactions: await enterTransactionData(tester, transactions)));
     }
@@ -130,7 +129,8 @@ class TransactionTest {
       // create new findoc with transactionId
       newTransactions.add(
           transaction.copyWith(transactionId: CommonTest.getTextField('id0')));
-      await CommonTest.tapByKey(tester, 'edit0'); //open detail
+      await CommonTest.doNewSearch(tester,
+          searchString: CommonTest.getTextField('id0'));
       expect(
           transaction.description, CommonTest.getTextFormField('description'));
       expect(transaction.isPosted, CommonTest.getRadio('isPosted'));
@@ -178,9 +178,8 @@ class TransactionTest {
   static Future<void> postTransactions(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     for (FinDoc transaction in test.transactions) {
-      await CommonTest.doSearch(tester,
+      await CommonTest.doNewSearch(tester,
           searchString: transaction.transactionId!);
-      await CommonTest.tapByKey(tester, 'edit0');
       await CommonTest.tapByKey(tester, 'isPosted', seconds: 3);
       await CommonTest.tapByKey(tester, 'header');
       await CommonTest.tapByKey(tester, 'update');

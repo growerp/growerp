@@ -20,8 +20,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import '../../accounting/accounting.dart';
-import '../findoc.dart';
+import '../../../accounting/accounting.dart';
+import '../../findoc.dart';
 
 class ShowPaymentDialog extends StatelessWidget {
   final FinDoc finDoc;
@@ -57,7 +57,8 @@ class PaymentDialogState extends State<PaymentDialog> {
   Company? _selectedCompany;
   PaymentType? _selectedPaymentType;
   late DataFetchBloc<Companies> _companyBloc;
-//  late GlAccountBloc _accountBloc;
+  // ignore: unused_field
+  late GlAccountBloc _accountBloc; // needed for accountlist
   late FinDocStatusVal _updatedStatus;
 
   late bool isPhone;
@@ -97,8 +98,8 @@ class PaymentDialogState extends State<PaymentDialog> {
       ..add(GetDataEvent(() => context.read<RestClient>().getCompany(
           limit: 3,
           role: widget.finDoc.sales ? Role.customer : Role.supplier)));
-    //  _accountBloc = context.read<GlAccountBloc>()
-    //    ..add(const GlAccountFetch(limit: 3));
+    _accountBloc = context.read<GlAccountBloc>()
+      ..add(const GlAccountFetch(limit: 3));
   }
 
   @override
@@ -146,11 +147,11 @@ class PaymentDialogState extends State<PaymentDialog> {
     }
     AuthBloc authBloc = context.read<AuthBloc>();
     GlAccountBloc glAccountBloc = context.read<GlAccountBloc>();
-    Color getColor(Set<MaterialState> states) {
-      const Set<MaterialState> interactiveStates = <MaterialState>{
-        MaterialState.pressed,
-        MaterialState.hovered,
-        MaterialState.focused,
+    Color getColor(Set<WidgetState> states) {
+      const Set<WidgetState> interactiveStates = <WidgetState>{
+        WidgetState.pressed,
+        WidgetState.hovered,
+        WidgetState.focused,
       };
       if (states.any(interactiveStates.contains)) {
         return Colors.blue;
@@ -309,7 +310,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                               key: const Key('creditCard'),
                               checkColor: Colors.white,
                               fillColor:
-                                  MaterialStateProperty.resolveWith(getColor),
+                                  WidgetStateProperty.resolveWith(getColor),
                               value: _paymentInstrument ==
                                   PaymentInstrument.creditcard,
                               onChanged: (bool? value) {
@@ -328,8 +329,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                       Checkbox(
                           key: const Key('cash'),
                           checkColor: Colors.white,
-                          fillColor:
-                              MaterialStateProperty.resolveWith(getColor),
+                          fillColor: WidgetStateProperty.resolveWith(getColor),
                           value: _paymentInstrument == PaymentInstrument.cash,
                           onChanged: (bool? value) {
                             setState(() {
@@ -347,8 +347,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                       Checkbox(
                           key: const Key('check'),
                           checkColor: Colors.white,
-                          fillColor:
-                              MaterialStateProperty.resolveWith(getColor),
+                          fillColor: WidgetStateProperty.resolveWith(getColor),
                           value: _paymentInstrument == PaymentInstrument.check,
                           onChanged: (bool? value) {
                             setState(() {
@@ -366,8 +365,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                       Checkbox(
                           key: const Key('bank'),
                           checkColor: Colors.white,
-                          fillColor:
-                              MaterialStateProperty.resolveWith(getColor),
+                          fillColor: WidgetStateProperty.resolveWith(getColor),
                           value: _paymentInstrument == PaymentInstrument.bank,
                           onChanged: (bool? value) {
                             setState(() {

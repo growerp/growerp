@@ -80,7 +80,9 @@ class LocationListItem extends StatelessWidget {
                         });
                   }),
             ])),
-        children: items(location, index));
+        children: location.assets.isEmpty
+            ? [Text("No assets found")]
+            : items(location, index));
   }
 
   List<Widget> items(Location location, int index) {

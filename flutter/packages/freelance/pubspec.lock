@@ -29,10 +29,10 @@ packages:
     dependency: transitive
     description:
       name: archive
-      sha256: "6bd38d335f0954f5fad9c79e614604fbf03a0e5b975923dd001b6ea965ef5b4b"
+      sha256: cb6a278ef2dbb298455e1a713bda08524a175630ec643a242c399c932a0a1f7d
       url: "https://pub.dev"
     source: hosted
-    version: "3.6.0"
+    version: "3.6.1"
   args:
     dependency: transitive
     description:
@@ -706,18 +706,18 @@ packages:
     dependency: transitive
     description:
       name: image_picker
-      sha256: "33974eca2e87e8b4e3727f1b94fa3abcb25afe80b6bc2c4d449a0e150aedf720"
+      sha256: "021834d9c0c3de46bf0fe40341fa07168407f694d9b2bb18d532dc1261867f7a"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.1"
+    version: "1.1.2"
   image_picker_android:
     dependency: transitive
     description:
       name: image_picker_android
-      sha256: c01a23e2dc3a71330e96705e08115f9e1d63780fc54f09b8a31d5e8a6881ca33
+      sha256: "4161e1f843d8480d2e9025ee22411778c3c9eb7e40076dcf2da23d8242b7b51c"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.12+2"
+    version: "0.8.12+3"
   image_picker_for_web:
     dependency: transitive
     description:
@@ -730,10 +730,10 @@ packages:
     dependency: transitive
     description:
       name: image_picker_ios
-      sha256: "4824d8c7f6f89121ef0122ff79bb00b009607faecc8545b86bca9ab5ce1e95bf"
+      sha256: "6703696ad49f5c3c8356d576d7ace84d1faf459afb07accbb0fae780753ff447"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.11+2"
+    version: "0.8.12"
   image_picker_linux:
     dependency: transitive
     description:
@@ -1175,10 +1175,10 @@ packages:
     dependency: transitive
     description:
       name: rational
-      sha256: ba58e9e18df9abde280e8b10051e4bce85091e41e8e7e411b6cde2e738d357cf
+      sha256: cb808fb6f1a839e6fc5f7d8cb3b0a10e1db48b3be102de73938c627f0b636336
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.2"
+    version: "2.2.3"
   reorderables:
     dependency: transitive
     description:

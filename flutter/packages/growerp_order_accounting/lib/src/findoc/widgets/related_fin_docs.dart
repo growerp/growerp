@@ -13,6 +13,10 @@ class relatedFinDocs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (finDoc.id() == null) return Container();
+    if (finDoc.docType == FinDocType.order &&
+        (finDoc.status == FinDocStatusVal.inPreparation ||
+            finDoc.status == FinDocStatusVal.created)) return Container();
     return Padding(
         padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [

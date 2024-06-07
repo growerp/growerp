@@ -20,7 +20,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import '../findoc.dart';
+import '../../findoc.dart';
 
 class ReservationDialog extends StatefulWidget {
   /// original order

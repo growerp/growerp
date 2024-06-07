@@ -207,8 +207,8 @@ class _GanttFormState extends State<GanttForm> {
                       rightSideItemBuilder: buildAssetReservation,
                       itemCount: itemCount + 1,
                       itemExtent: 20,
-                      leftHandSideColBackgroundColor: scheme.background,
-                      rightHandSideColBackgroundColor: scheme.background,
+                      leftHandSideColBackgroundColor: scheme.surface,
+                      rightHandSideColBackgroundColor: scheme.surface,
                     ),
                   )
                 ],

@@ -37,6 +37,8 @@ List<BlocProvider> getCoreBlocProviders(
         create: (context) => DataFetchBloc<Users>()),
     BlocProvider<DataFetchBloc<Companies>>(
         create: (context) => DataFetchBloc<Companies>()),
+    BlocProvider<DataFetchBloc<Locations>>(
+        create: (context) => DataFetchBloc<Locations>()),
   ];
   return blocProviders;
 }

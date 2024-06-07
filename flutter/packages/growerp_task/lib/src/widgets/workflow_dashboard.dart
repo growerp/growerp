@@ -68,7 +68,7 @@ class WorkflowDashboardState extends State<WorkflowDashboard> {
                       ),
                       CircleAvatar(
                         backgroundColor:
-                            Theme.of(context).colorScheme.onBackground,
+                            Theme.of(context).colorScheme.onSurface,
                         radius: 10,
                         child: IconButton(
                           padding: EdgeInsets.zero,

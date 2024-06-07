@@ -504,7 +504,7 @@ class UserDialogState extends State<UserDialogStateFull> {
       if (widget.user.partyId != null)
         ElevatedButton(
             style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.red)),
+                backgroundColor: WidgetStateProperty.all(Colors.red)),
             key: const Key('deleteUser'),
             child: const Text('Delete User'),
             onPressed: () async {

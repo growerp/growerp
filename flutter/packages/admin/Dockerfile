@@ -16,7 +16,7 @@
 # with: docker build --build-arg DOCKER_TAG=1.3.0 -f packages/admin/Dockerfile -t growerp/admin . --progress=plain
 #
 #Stage 1 - Install dependencies and build the app
-FROM growerp/flutter-sdk-image:3.16.9 AS build-env
+FROM growerp/flutter-sdk-image:latest AS build-env
 
 ARG BRANCH=development # currently either master or development we need to add existing
 ARG DOCKER_TAG=1.0.0+1

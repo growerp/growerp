@@ -19,23 +19,6 @@ import 'package:growerp_order_accounting/src/findoc/findoc.dart';
 
 import '../../accounting/accounting.dart';
 
-/*
-class ItemTypeListForm extends StatelessWidget {
-  const ItemTypeList({super.key});
-  @override
-  Widget build(BuildContext context) => MultiBlocProvider(
-        providers: [
-          BlocProvider<FinDocBloc>(
-              create: (context) => FinDocBloc(context.read<RestClient>(), true,
-                  FinDocType.order, context.read<String>()),
-              child: const ItemTypeList()),
-          BlocProvider<GlAccountBloc>(
-              create: (context) => GlAccountBloc(context.read<RestClient>())),
-        ],
-        child: const ItemTypeList(),
-      );
-}
-*/
 class ItemTypeList extends StatefulWidget {
   const ItemTypeList({super.key});
   @override

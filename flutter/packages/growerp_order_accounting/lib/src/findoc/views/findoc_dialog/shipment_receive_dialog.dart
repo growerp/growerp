@@ -20,7 +20,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import '../blocs/blocs.dart';
+import '../../findoc.dart';
 
 class ShipmentReceiveDialog extends StatefulWidget {
   final FinDoc finDoc;
@@ -30,7 +30,8 @@ class ShipmentReceiveDialog extends StatefulWidget {
 }
 
 class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
-  late RestClient repos;
+  late RestClient restClient;
+  late DataFetchBloc<Locations> _locationBloc;
   late bool isPhone;
   final List<TextEditingController> _locationSearchBoxControllers = [];
   final List<TextEditingController> _newLocationControllers = [];
@@ -41,7 +42,6 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
   @override
   void initState() {
     super.initState();
-    repos = context.read<RestClient>();
     for (var _ in widget.finDoc.items) {
       _locationSearchBoxControllers.add(TextEditingController());
       _newLocationControllers.add(TextEditingController());
@@ -49,6 +49,9 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
     }
     newItems = List.of(widget.finDoc.items);
     confirm = false;
+    _locationBloc = context.read<DataFetchBloc<Locations>>()
+      ..add(
+          GetDataEvent(() => context.read<RestClient>().getLocation(limit: 3)));
   }
 
   @override
@@ -77,6 +80,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
     FinDocBloc finDocBloc = context.read<FinDocBloc>();
     String nowDate = DateTime.now().toString().substring(0, 10);
     return Column(children: [
+      relatedFinDocs(finDoc: widget.finDoc, context: context),
       Expanded(
           child: ListView.builder(
               key: const Key('listView'),
@@ -91,7 +95,6 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                             )
                           : null,
                       title: const Column(children: [
-                        SizedBox(height: 20),
                         Center(
                             child: Text(
                           'For every Item either:\n'
@@ -148,63 +151,56 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                                 child: SizedBox(
                                     height: 60,
                                     child: DropdownSearch<Location>(
-                                      key: const Key('locationDropDown'),
-                                      selectedItem: _selectedLocations[index],
-                                      popupProps: PopupProps.menu(
-                                        showSearchBox: true,
-                                        searchFieldProps: TextFieldProps(
-                                          autofocus: true,
-                                          decoration: const InputDecoration(
-                                              labelText: "location name"),
-                                          controller:
-                                              _locationSearchBoxControllers[
-                                                  index],
+                                        key: Key('locationDropDown$index'),
+                                        selectedItem: _selectedLocations[index],
+                                        popupProps: PopupProps.menu(
+                                          showSearchBox: true,
+                                          searchFieldProps: TextFieldProps(
+                                            autofocus: true,
+                                            decoration: const InputDecoration(
+                                                labelText: "location name"),
+                                            controller:
+                                                _locationSearchBoxControllers[
+                                                    index],
+                                          ),
+                                          menuProps: MenuProps(
+                                              borderRadius:
+                                                  BorderRadius.circular(20.0)),
+                                          title: popUp(
+                                            context: context,
+                                            title: 'Select location',
+                                            height: 50,
+                                          ),
                                         ),
-                                        menuProps: MenuProps(
-                                            borderRadius:
-                                                BorderRadius.circular(20.0)),
-                                        title: popUp(
-                                          context: context,
-                                          title: 'Select location',
-                                          height: 50,
-                                        ),
-                                      ),
-                                      dropdownDecoratorProps:
-                                          const DropDownDecoratorProps(
-                                              dropdownSearchDecoration:
-                                                  InputDecoration(
-                                                      labelText: 'Location')),
-                                      itemAsString: (Location? u) =>
-                                          " ${u?.locationName}",
-/*                                      asyncItems: (String? filter) async {
-                                       ApiResult<List<Location>> result =
-                                            await repos.getLocation(
-                                                filter:
-                                                    _locationSearchBoxControllers[
-                                                            index]
-                                                        .text);
-                                        return result.when(
-                                            success: (data) => data,
-                                            failure: (_) => [
-                                                  Location(
-                                                      locationName:
-                                                          'get data error')
-                                                ]);
-                                      },
-*/
-                                      validator: (value) {
-                                        return value == null
-                                            ? "Select a location?"
-                                            : null;
-                                      },
-                                      onChanged: (Location? newValue) {
-                                        setState(() {
+                                        dropdownDecoratorProps:
+                                            const DropDownDecoratorProps(
+                                                dropdownSearchDecoration:
+                                                    InputDecoration(
+                                                        labelText: 'Location')),
+                                        itemAsString: (Location? u) =>
+                                            " ${u?.locationName}",
+                                        asyncItems: (String filter) {
+                                          _locationBloc.add(GetDataEvent(() =>
+                                              context
+                                                  .read<RestClient>()
+                                                  .getLocation(
+                                                      searchString: filter,
+                                                      limit: 3)));
+                                          return Future.delayed(
+                                              const Duration(milliseconds: 250),
+                                              () {
+                                            return Future.value((_locationBloc
+                                                    .state.data as Locations)
+                                                .locations);
+                                          });
+                                        },
+                                        compareFn: (item, sItem) =>
+                                            item.locationId == sItem.locationId,
+                                        onChanged: (Location? newValue) {
                                           _selectedLocations[index] = newValue!;
                                           _newLocationControllers[index].text =
                                               '';
-                                        });
-                                      },
-                                    ))),
+                                        }))),
                             const SizedBox(width: 10),
                             Expanded(
                                 child: TextFormField(

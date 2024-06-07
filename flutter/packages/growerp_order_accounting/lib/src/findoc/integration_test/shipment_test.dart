@@ -17,11 +17,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 class ShipmentTest {
   static Future<void> selectIncomingShipments(WidgetTester tester) async {
+    await CommonTest.gotoMainMenu(tester);
     await CommonTest.selectOption(
         tester, 'dbShipments', 'FinDocListShipmentsIn', '2');
   }
 
   static Future<void> selectOutgoingShipments(WidgetTester tester) async {
+    await CommonTest.gotoMainMenu(tester);
     await CommonTest.selectOption(
         tester, 'dbShipments', 'FinDocListShipmentsOut', '1');
   }

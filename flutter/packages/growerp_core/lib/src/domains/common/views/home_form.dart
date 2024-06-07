@@ -38,8 +38,6 @@ class HomeForm extends StatefulWidget {
 }
 
 class HomeFormState extends State<HomeForm> {
-  String singleCompany = GlobalConfiguration().get("singleCompany");
-
   late AuthBloc _authBloc;
 
   @override

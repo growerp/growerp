@@ -438,6 +438,18 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                         in-map="[sales: sales, docType: docType, statusId: item.statusId]"
                         out-map="context" />
+                    <!-- it looks like the view is not updated quickly enough and not provide
+                    shipmentId so now check if present, when not, get from shipment item source-->
+                    <if
+                        condition="item.statusId == 'OrderApproved' &amp;&amp; item.shipmentId == null">
+                        <entity-find entity-name="mantle.shipment.ShipmentItemSource"
+                            list="shipments">
+                            <econdition field-name="orderId" from="item.orderId" />
+                        </entity-find>
+                        <if condition="shipments">
+                            <set field="item.shipmentId" from="shipments[0].shipmentId" />
+                        </if>
+                    </if>
                     <set field="finDocOut"
                         from="[
                             pseudoId: item.pseudoId,
@@ -446,7 +458,7 @@ along with this software (see the LICENSE.md file). If not, see
                             invoiceId: item.invoiceId,
                             shipmentId: item.shipmentId,
                             description: item.orderName,
-                            salesChannel: item.salesChannel,
+                            salesChannel: item.salesChannelDescr,
                             statusId: convertedStatusId,
                             creationDate: item.entryDate
                                 ? ec.l10n.format(item.entryDate,'yyyy-MM-dd') : null,
@@ -833,6 +845,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </iterate>
             </if>
             <if condition="docType == 'shipment'">
+                <!-- shipSheduled (FinDocCreated) -> shipPacked(FinDocApproved)
+                    -> ShipShipped (FinDocCompleted)   -->
                 <set field="openStatusList"
                     from="['ShipInput','ShipScheduled','ShipPicked',
                             'ShipPacked','ShipShipped']" />
@@ -1962,6 +1976,8 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="growerp.100.FinDocServices100.get#FinDoc"
                 in-map="inMap" out-map="context" />
             <set field="finDoc" from="finDocs[0]" />
+            <log
+                message="====result findoc update reldocs orderId: ${finDoc.orderId} shipmentId: ${finDoc.shipmentId}" />
         </actions>
     </service>
 
@@ -2182,33 +2198,31 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="orderHeader.orderName" from="order.description" />
                 <entity-update value-field="orderHeader" />
             </if>
+            <!-- order part-->
             <if condition="order.otherUser || order.otherCompany">
-                <if condition="order.sales == true"><!-- quotes on true NOT required -->
-                    <set field="customerPartyId" from="order.otherCompany.partyId" />
-                    <set field="contactRole" value="CustomerContactPerson" />
-                    <else>
-                        <set field="vendorPartyId" from="order.otherCompany.partyId" />
-                        <set field="contactRole" value="VendorContactPerson" />
-                    </else>
-                </if>
-                <!-- update either vendor or customer -->
+                <!-- get existing record -->
                 <entity-find entity-name="mantle.order.OrderPart" list="parts" for-update="true"
                     limit="1">
-                    <econdition field-name="vendorPartyId" from="vendorPartyId"
-                        ignore-if-empty="true" />
-                    <econdition field-name="customerPartyId" from="customerPartyId"
-                        ignore-if-empty="true" />
                     <econdition field-name="orderId" />
                 </entity-find>
-                <if condition="order.sales == true"><!-- quotes on true NOT required -->
-                    <set field="parts[0].customerPartyId" from="customerPartyId" />
-                    <else>
-                        <set field="parts[0].vendorPartyId" from="vendorPartyId" />
-                    </else>
+                <if
+                    condition="order.sales == true &amp;&amp; parts[0].customerPartyId != order.otherCompany.partyId">
+                    <set field="parts[0].customerPartyId" from="order.otherCompany.partyId" />
+                    <entity-update value-field="parts[0]" />
                 </if>
-                <entity-update value-field="parts[0]" />
+                <if
+                    condition="order.sales == false &amp;&amp; parts[0].vendorPartyId != order.otherCompany.partyId">
+                    <set field="parts[0].vendorPartyId" from="order.otherCompany.partyId" />
+                    <entity-update value-field="parts[0]" />
+                </if>
                 <!-- contact person (add if missing)-->
                 <if condition="order.otherUser?.partyId">
+                    <if condition="order.sales == true">
+                        <set field="contactRole" value="CustomerContactPerson" />
+                        <else>
+                            <set field="contactRole" value="VendorContactPerson" />
+                        </else>
+                    </if>
                     <entity-find entity-name="mantle.order.OrderPartParty" list="parties"
                         for-update="true">
                         <econdition field-name="orderId" />
@@ -2333,7 +2347,7 @@ along with this software (see the LICENSE.md file). If not, see
                         receive or send screen shipment -->
                         <service-call name="update#mantle.shipment.Shipment" out-map="context"
                             in-map="[shipmentId: shipmentId,
-                                statusId: ShipScheduled,
+                                    statusId: 'ShipScheduled',
                                     pseudoId: seqNum]" />
                         <else><!-- no shipable items so complete order already here not with rental
                             though-->
@@ -2723,7 +2737,7 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[shipmentId:finDoc.shipmentId, productId:sid.productId, statusId:'AstAvailable',
                             quantityAccepted:quantityRemaining, facilityId: facilityId,
                             ownerPartyId: companyPartyId,
-                            locationSeqId: finDocItem.location.locationSeqId]" />
+                            locationSeqId: finDocItem.location.locationId]" />
             </iterate>
             <service-call out-map="context" in-map="[shipmentId:finDoc.shipmentId]"
                 name="mantle.shipment.ShipmentServices.deliver#Shipment" />

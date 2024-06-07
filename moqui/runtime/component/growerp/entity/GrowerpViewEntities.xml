@@ -93,7 +93,8 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="entryDate" entity-alias="ORHD" />
         <alias name="grandTotal" entity-alias="ORHD" />
         <alias name="placedDate" entity-alias="ORHD" />
-        <alias name="salesChannel" field="description" entity-alias="SC" />
+        <alias name="salesChannelId" field="enumId" entity-alias="SC" />
+        <alias name="salesChannelDescr" field="description" entity-alias="SC" />
         <alias name="statusId" entity-alias="ORHD" />
 
         <alias name="vendorPartyId" entity-alias="OPRT" />
@@ -297,6 +298,7 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="SHIP">
             <key-map field-name="shipmentId" />
         </member-entity>
+        <!-- ledger transaction-->
         <member-entity entity-alias="TRANS" entity-name="mantle.ledger.transaction.AcctgTrans"
             join-from-alias="SHIP" join-optional="true">
             <key-map field-name="shipmentId" />
@@ -320,6 +322,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="geoTypeEnumId" value="GEOT_COUNTRY" />
             </entity-condition>
         </member-entity>
+        <!-- shipment Item-->
         <member-entity entity-alias="SITEM" entity-name="mantle.shipment.ShipmentItem"
             join-from-alias="SHIP">
             <key-map field-name="shipmentId" />
@@ -396,6 +399,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="shipmentId" entity-alias="SHIP" />
         <alias name="pseudoId" entity-alias="SHIP" />
         <alias name="transactionId" field="acctgTransId" entity-alias="TRANS" />
+        <alias name="shipmentMethodId" field="enumId" entity-alias="METHOD" />
         <alias name="shipmentMethod" field="description" entity-alias="METHOD" />
 
         <alias name="contactMechId" entity-alias="PA" />

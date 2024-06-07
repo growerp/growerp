@@ -1,9 +1,9 @@
 export 'findoc_list.dart';
 export 'findoc_dialog/findoc_dialog.dart';
-export 'reservation_dialog.dart';
-export 'shipment_receive_dialog.dart';
-export 'payment_dialog.dart';
+export 'findoc_dialog/reservation_dialog.dart';
+export 'findoc_dialog/shipment_receive_dialog.dart';
+export 'findoc_dialog/payment_dialog.dart';
 export 'pdf_formats.dart';
 export 'printing_form.dart';
 export 'item_type_list.dart';
-export 'payment_type_list_form.dart';
+export 'payment_type_list.dart';

@@ -97,14 +97,16 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="product"
                     from="[productId: loc.productId,
                             pseudoId: loc.pseudoId, productName: loc.productName]" />
-                <set field="asset"
-                    from="[assetId: loc.assetId, statusId: loc.statusId,
+                <if condition="loc.assetId">
+                    <set field="asset"
+                        from="[assetId: loc.assetId, statusId: loc.statusId,
                             assetName: loc.assetName, product: product,
                             acquireCost: acquireCost,
                             quantityOnHand: loc.quantityOnHand?.toString(),
                             availableToPromise: loc.availableToPromise?.toString(),
                             acquireShipmentId: loc.acquireShipmentId]" />
-                <script>assets.add(asset)</script>
+                    <script>assets.add(asset)</script>
+                </if>
                 <set field="lastItem" from="loc" />
             </iterate>
             <if condition="lastItem">

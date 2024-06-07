@@ -9,7 +9,7 @@ class NavBarItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      mouseCursor: MaterialStateMouseCursor.clickable,
+      mouseCursor: WidgetStateMouseCursor.clickable,
       onTap: () {
         if (drawer) Navigator.pop(context);
         Navigator.pushNamed(context, navigationPath);

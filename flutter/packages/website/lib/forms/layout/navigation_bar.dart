@@ -76,7 +76,7 @@ class NavBarLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-        mouseCursor: MaterialStateMouseCursor.clickable,
+        mouseCursor: WidgetStateMouseCursor.clickable,
         onTap: () {
           Navigator.pushNamed(context, HomeRoute);
         },

@@ -133,7 +133,9 @@ class MyFinDocState extends State<FinDocPage> {
     _companyBloc = context.read<DataFetchBloc<Companies>>()
       ..add(GetDataEvent(() => context.read<RestClient>().getCompany(
           limit: 3,
-          role: widget.finDoc.sales ? Role.customer : Role.supplier)));
+          role: finDoc.sales && finDoc.docType != FinDocType.transaction
+              ? Role.customer
+              : Role.supplier)));
     _glAccountBloc = context.read<GlAccountBloc>();
     _glAccountBloc.add(const GlAccountFetch(limit: 3));
     _productBloc = context.read<DataFetchBloc<Products>>()
@@ -177,10 +179,7 @@ class MyFinDocState extends State<FinDocPage> {
                 ? headerEntryTransaction()
                 : headerEntry(),
             // related documents
-            if (widget.finDoc.id() != null &&
-                (widget.finDoc.status != FinDocStatusVal.inPreparation ||
-                    widget.finDoc.status != FinDocStatusVal.created))
-              relatedFinDocs(finDoc: widget.finDoc, context: context),
+            relatedFinDocs(finDoc: finDocUpdated, context: context),
             // update buttons
             const SizedBox(height: 10),
             if (!readOnly) updateButtons(state),
@@ -217,7 +216,7 @@ class MyFinDocState extends State<FinDocPage> {
             ),
             insetPadding: const EdgeInsets.all(10),
             child: SingleChildScrollView(
-                key: const Key('listView1'),
+                key: const Key('listView'),
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 child: popUp(
@@ -390,32 +389,80 @@ class MyFinDocState extends State<FinDocPage> {
         padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
         child: Padding(
             padding: const EdgeInsets.all(10),
-            child: Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: TextFormField(
-                    key: const Key('description'),
-                    readOnly: readOnly,
-                    decoration: InputDecoration(
-                        labelText: '${finDoc.docType} Description'),
-                    controller: _descriptionController,
-                  ),
-                ),
-                if (finDoc.docType == FinDocType.transaction &&
-                    _isPosted == false)
-                  Column(children: [
-                    const Text("Post?"),
-                    Radio(
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        key: const Key('description'),
+                        readOnly: readOnly,
+                        decoration: InputDecoration(
+                            labelText: '${finDoc.docType} Description'),
+                        controller: _descriptionController,
+                      ),
+                    ),
+                    Column(children: [
+                      const Text("Posted"),
+                      Radio(
                         key: const Key('isPosted'),
                         value: true,
                         groupValue: _isPosted,
                         toggleable: true,
-                        onChanged: (newValue) {
-                          setState(() {
-                            _isPosted = newValue;
-                          });
-                        }),
-                  ])
+                        onChanged: (newValue) => readOnly
+                            ? null
+                            : setState(() {
+                                _isPosted = newValue;
+                              }),
+                      ),
+                    ])
+                  ],
+                ),
+                DropdownSearch<Company>(
+                  enabled: !readOnly,
+                  selectedItem: _selectedCompany,
+                  popupProps: PopupProps.menu(
+                    showSearchBox: true,
+                    searchFieldProps: TextFieldProps(
+                      autofocus: true,
+                      decoration: InputDecoration(
+                          labelText:
+                              "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name"),
+                      controller: _companySearchBoxController,
+                    ),
+                    title: popUp(
+                      context: context,
+                      title:
+                          "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
+                      height: 50,
+                    ),
+                  ),
+                  dropdownDecoratorProps: DropDownDecoratorProps(
+                    dropdownSearchDecoration: InputDecoration(
+                      labelText: 'Company',
+                    ),
+                  ),
+                  key: Key('company'),
+                  itemAsString: (Company? u) => "${u!.name ?? ''}",
+                  asyncItems: (String filter) {
+                    _companyBloc.add(GetDataEvent(
+                        () => context.read<RestClient>().getCompany(
+                              searchString: filter,
+                              limit: 3,
+                              isForDropDown: true,
+                            )));
+                    return Future.delayed(const Duration(milliseconds: 150),
+                        () {
+                      return Future.value(
+                          (_companyBloc.state.data as Companies).companies);
+                    });
+                  },
+                  onChanged: (Company? newValue) {
+                    setState(() {
+                      _selectedCompany = newValue;
+                    });
+                  },
+                )
               ],
             )));
   }
@@ -434,7 +481,7 @@ class MyFinDocState extends State<FinDocPage> {
       ElevatedButton(
           key: const Key('addItem'),
           child: Text(widget.finDoc.docType == FinDocType.transaction
-              ? 'Add transaction'
+              ? 'Add\n transaction item'
               : 'Add other item'),
           onPressed: () async {
             final dynamic finDocItem;
@@ -824,9 +871,11 @@ class MyFinDocState extends State<FinDocPage> {
     List<dynamic> getItemFieldContent(FinDocItem item,
         {int? itemIndex, BuildContext? context}) {
       return [
-        item.glAccount!.accountCode!,
-        item.isDebit! ? item.price.toString() : '',
-        !item.isDebit! ? item.price.toString() : '',
+        Text(item.glAccount!.accountCode!, key: Key('accountCode$itemIndex')),
+        Text((item.isDebit! ? item.price.currency() : ''),
+            key: Key('debit$itemIndex')),
+        Text(!item.isDebit! ? item.price.currency() : '',
+            key: Key('credit$itemIndex')),
       ];
     }
 
