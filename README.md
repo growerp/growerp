@@ -9,7 +9,7 @@ Admin application
 - IOS:     https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755
 
 Hotel application: 
-- Web:     https://hotel.growerp.org
+- Web:     https://hotel.growerp.com
 - Android: https://play.google.com/store/apps/details?id=org.growerp.hotel
 - IOS:     https://apps.apple.com/app/growerp-hotel-open-source/id1531267095 
 
@@ -20,7 +20,7 @@ Admin application
 Hotel application: 
 - Web:     https://hotel.growerp.org
 
-When the application is started, create a new company, select demo data or an empty system and look around!
+When the application is started, create a new company, select demo data or an empty system, login and use the password sent by email and look around! Provide comments to support@growerp.com
 
 Documentation available at https://www.growerp.com
 
