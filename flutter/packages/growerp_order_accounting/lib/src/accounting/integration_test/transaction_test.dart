@@ -31,7 +31,7 @@ class TransactionTest {
             ? test.transactions
             : test.payments;
     for (FinDoc finDoc in finDocs) {
-      await CommonTest.doSearch(tester, searchString: finDoc.chainId()!);
+      await CommonTest.doNewSearch(tester, searchString: finDoc.chainId()!);
       await tester.pumpAndSettle();
       expect(CommonTest.getTextField('status0'), 'Y',
           reason: 'transaction status field check posted');
@@ -87,30 +87,25 @@ class TransactionTest {
 */
   static Future<List<FinDoc>> enterTransactionData(
       WidgetTester tester, List<FinDoc> transactions) async {
-    int index = 0;
     List<FinDoc> newTransactions = []; // with transactionId added
-    for (FinDoc transaction in transactions) {
+    for (final (index, transaction) in transactions.indexed) {
       if (transaction.transactionId == null) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.doSearch(tester,
+        await CommonTest.doNewSearch(tester,
             searchString: transaction.transactionId!);
-        await CommonTest.tapByKey(tester, 'edit0');
         expect(CommonTest.getTextField('topHeader').split('#')[1],
             transaction.transactionId);
       }
       await CommonTest.checkWidgetKey(tester, "FinDocDialogSalesTransaction");
       await CommonTest.enterText(
           tester, 'description', transaction.description!);
-      if (transaction.isPosted!) {
-        await CommonTest.tapByKey(tester, 'isPosted');
-      }
       // delete existing transaction items
       SaveTest test = await PersistFunctions.getTest();
       if (test.transactions.isNotEmpty &&
           test.transactions[index].items.isNotEmpty) {
         for (int x = 0; x < test.transactions[index].items.length; x++) {
-          await CommonTest.tapByKey(tester, 'delete0');
+          await CommonTest.tapByKey(tester, 'itemDelete0');
         }
       }
       // items
@@ -120,59 +115,41 @@ class TransactionTest {
         await CommonTest.enterDropDownSearch(
             tester, 'glAccount', item.glAccount!.accountCode!);
         await CommonTest.tapByKey(tester, item.isDebit! ? 'debit' : 'credit');
-        await CommonTest.enterText(tester, 'price', item.price.toString());
+        await CommonTest.enterText(tester, 'price', item.price.currency());
         await CommonTest.tapByKey(tester, 'ok');
       }
       await CommonTest.drag(tester, seconds: 2);
       await CommonTest.tapByKey(tester, 'update');
       await CommonTest.waitForSnackbarToGo(tester);
-      // create new findoc with transactionId
-      newTransactions.add(
-          transaction.copyWith(transactionId: CommonTest.getTextField('id0')));
-      await CommonTest.doNewSearch(tester,
-          searchString: CommonTest.getTextField('id0'));
-      expect(
-          transaction.description, CommonTest.getTextFormField('description'));
-      expect(transaction.isPosted, CommonTest.getRadio('isPosted'));
-      for (int x = 0; x < transaction.items.length; x++) {
-        expect(transaction.items[x].glAccount!.accountCode!,
-            CommonTest.getTextField('accountCode$x'));
-        expect(
-            transaction.items[x].price!.toString(),
-            CommonTest.getTextField(
-                "${transaction.items[x].isDebit! ? 'debit' : 'credit'}$x"));
-      }
-      await CommonTest.tapByKey(tester, 'cancel'); // close detail
-      await tester.pumpAndSettle(); // for the message to disappear
-      index++;
+      // save transactionid if required
+      newTransactions.add(transaction.copyWith(
+          transactionId:
+              transaction.transactionId ?? CommonTest.getTextField('id0')));
     }
-    await CommonTest.closeSearch(tester);
     return newTransactions;
   }
 
   static Future<void> checkTransaction(
       WidgetTester tester, List<FinDoc> transactions) async {
     for (FinDoc transaction in transactions) {
-      await CommonTest.doSearch(tester,
+      await CommonTest.doNewSearch(tester,
           searchString: transaction.transactionId!);
-      expect(CommonTest.getTextField('grandTotal0'),
-          equals(transaction.grandTotal.toString()));
-      await CommonTest.tapByKey(tester, 'edit0'); //open detail
+      expect(CommonTest.getTextField('grandTotal'),
+          contains(transaction.grandTotal.currency()));
       expect(
           transaction.description, CommonTest.getTextFormField('description'));
       expect(transaction.isPosted, CommonTest.getRadio('isPosted'));
-      for (int x = 0; x < transaction.items.length; x++) {
-        expect(transaction.items[x].glAccount!.accountCode!,
-            CommonTest.getTextField('accountCode$x'));
+      for (final (index, item) in transaction.items.indexed) {
+        expect(item.glAccount!.accountCode!,
+            CommonTest.getTextField('accountCode$index'));
         expect(
-            transaction.items[x].price!.toString(),
+            item.price.currency(),
             CommonTest.getTextField(
-                "${transaction.items[x].isDebit! ? 'debit' : 'credit'}$x"));
+                "${item.isDebit! ? 'debit' : 'credit'}$index"));
       }
       await CommonTest.tapByKey(tester, 'cancel'); // close detail
       await tester.pumpAndSettle(); // for the message to disappear
     }
-    await CommonTest.closeSearch(tester);
   }
 
   static Future<void> postTransactions(WidgetTester tester) async {
@@ -180,7 +157,7 @@ class TransactionTest {
     for (FinDoc transaction in test.transactions) {
       await CommonTest.doNewSearch(tester,
           searchString: transaction.transactionId!);
-      await CommonTest.tapByKey(tester, 'isPosted', seconds: 3);
+      await CommonTest.tapByKey(tester, 'isPosted');
       await CommonTest.tapByKey(tester, 'header');
       await CommonTest.tapByKey(tester, 'update');
     }
@@ -188,16 +165,12 @@ class TransactionTest {
 
   static Future<void> checkTransactionsComplete(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> transactions = test.orders.isNotEmpty
-        ? test.orders
-        : test.transactions.isNotEmpty
-            ? test.transactions
-            : test.payments;
-    for (FinDoc transaction in transactions) {
-      await CommonTest.doSearch(tester,
+    for (FinDoc transaction in test.transactions) {
+      await CommonTest.doNewSearch(tester,
           searchString: transaction.transactionId!);
-      expect(CommonTest.getTextField('status0'), 'Y',
-          reason: "posted field should be Y now");
+      expect(CommonTest.getRadio('isPosted'), true,
+          reason: "posted field should be true now");
+      await CommonTest.tapByKey(tester, 'cancel');
     }
   }
 }

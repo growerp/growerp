@@ -55,7 +55,7 @@ void main() {
       "users": suppliers.sublist(0, 2),
       "locations": locations,
     });
-    // purchase
+
     await OrderTest.selectPurchaseOrders(tester);
     await OrderTest.addOrders(tester, purchaseOrders.sublist(0, 1));
     await OrderTest.updateOrders(tester, purchaseOrders.sublist(1, 2));
@@ -72,7 +72,9 @@ void main() {
     await OrderTest.checkShipmentsComplete(tester);
     await OrderTest.selectInventory(tester);
     await OrderTest.checkInventory(tester);
+    await OrderTest.selectPurchaseOrders(tester);
+    await OrderTest.checkOrdersComplete(tester);
     await TransactionTest.selectTransactions(tester);
-    await OrderTest.checkTransactionsComplete(tester);
+    await TransactionTest.checkTransactionsComplete(tester);
   });
 }

@@ -25,7 +25,7 @@ List<MenuOption> acctMenuOptions = [
   MenuOption(
     image: "packages/growerp_core/images/accountingGrey.png",
     selectedImage: "packages/growerp_core/images/accounting.png",
-    title: "Accounting DashBoard",
+    title: "Accounting\nDashBoard",
     route: '/accounting',
     readGroups: [UserGroup.admin, UserGroup.employee],
     child: const AccountingForm(),

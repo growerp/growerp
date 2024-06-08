@@ -255,7 +255,8 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="entryDate" entity-alias="ORHD" />
         <alias name="grandTotal" entity-alias="ORHD" />
         <alias name="placedDate" entity-alias="ORHD" />
-        <alias name="salesChannel" field="description" entity-alias="SC" />
+        <alias name="salesChannelId" field="enumId" entity-alias="SC" />
+        <alias name="salesChannelDescr" field="description" entity-alias="SC" />
         <alias name="statusId" entity-alias="ORHD" />
 
         <alias name="vendorPartyId" entity-alias="OPRT" />
