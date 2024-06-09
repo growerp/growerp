@@ -17,7 +17,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:hive/hive.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 T getJsonObject<T>(
     String result, T Function(Map<String, dynamic> json) fromJson) {
@@ -61,21 +60,21 @@ class PersistFunctions {
   }
 
   static Future<void> removeAuthenticate() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('authenticate');
+    var box = await Hive.openBox('growerp');
+    await box.delete('authenticate');
   }
 
   static Future<void> persistFinDoc(FinDoc finDoc) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('${finDoc.sales.toString}${finDoc.docType}',
+    var box = await Hive.openBox('growerp');
+    await box.put('${finDoc.sales.toString}${finDoc.docType}',
         finDoc.toJson().toString());
   }
 
   static Future<FinDoc?> getFinDoc(bool sales, FinDocType finDocType) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var box = await Hive.openBox('growerp');
     // ignore informaton with a bad format
     try {
-      String? result = prefs.getString('${sales.toString}$finDocType');
+      String? result = box.get('${sales.toString}$finDocType');
       if (result != null) {
         return getJsonObject<FinDoc>(result, (json) => FinDoc.fromJson(json));
       }
@@ -86,21 +85,21 @@ class PersistFunctions {
   }
 
   static Future<void> removeFinDoc(FinDoc finDoc) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('${finDoc.sales.toString}${finDoc.docType}');
+    var box = await Hive.openBox('growerp');
+    await box.delete('${finDoc.sales.toString}${finDoc.docType}');
   }
 
   static const String _testName = "savetest";
   static Future<void> persistTest(SaveTest test, {bool backup = false}) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_testName, jsonEncode(test.toJson()));
+    var box = await Hive.openBox('growerp');
+    await box.put(_testName, jsonEncode(test.toJson()));
   }
 
   static Future<SaveTest> getTest({bool backup = false}) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var box = await Hive.openBox('growerp');
     // ignore informaton with a bad format
     try {
-      String? result = prefs.getString(_testName);
+      String? result = box.get(_testName);
       if (result != null) {
         return getJsonObject<SaveTest>(
             result, (json) => SaveTest.fromJson(json));
@@ -112,7 +111,7 @@ class PersistFunctions {
   }
 
   static Future<void> removeTest() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_testName);
+    var box = await Hive.openBox('growerp');
+    await box.delete(_testName);
   }
 }

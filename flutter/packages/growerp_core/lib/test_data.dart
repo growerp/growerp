@@ -747,6 +747,18 @@ List<FinDoc> salesOrders = [
           quantity: Decimal.parse('40'),
         ),
       ]),
+  FinDoc(
+      sales: true,
+      docType: FinDocType.order,
+      description: 'The second sales order',
+      otherUser: customers[1],
+      items: [
+        FinDocItem(
+          description: products[1].productName,
+          price: products[1].price,
+          quantity: Decimal.parse('40'),
+        ),
+      ]),
 ];
 
 List<FinDoc> salesInvoices = [
@@ -821,16 +833,17 @@ List<Asset> assets = [
     statusId: assetStatusValues[0],
     acquireCost: Decimal.parse('11'),
     receivedDate: DateTime.now().subtract(const Duration(days: 4)),
+    location: locations[0],
   ),
   Asset(
-    assetName: 'asset name 2',
-    availableToPromise: Decimal.parse('200'),
-    quantityOnHand: Decimal.parse('200'),
-    product: products[1],
-    statusId: assetStatusValues[0],
-    acquireCost: Decimal.parse('22'),
-    receivedDate: DateTime.now().subtract(const Duration(days: 4)),
-  ),
+      assetName: 'asset name 2',
+      availableToPromise: Decimal.parse('200'),
+      quantityOnHand: Decimal.parse('200'),
+      product: products[1],
+      statusId: assetStatusValues[0],
+      acquireCost: Decimal.parse('22'),
+      receivedDate: DateTime.now().subtract(const Duration(days: 4)),
+      location: locations[1]),
   Asset(
     assetName: 'asset name 3 for rental',
     availableToPromise: Decimal.parse('1'),
@@ -853,10 +866,10 @@ List<Asset> assets = [
 
 // Inventory
 List<Location> locations = [
-  Location(locationName: "loc1", assets: [assets[0]]),
-  Location(locationName: "loc2", assets: [assets[1]]),
-  Location(locationName: "loc3", assets: [assets[2]]),
-  Location(locationName: "loc4", assets: [assets[3]]),
+  Location(locationName: "loc1"),
+  Location(locationName: "loc2"),
+  Location(locationName: "loc3"),
+  Location(locationName: "loc4"),
 ];
 
 List<Product> productsHotel = [

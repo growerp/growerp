@@ -138,12 +138,20 @@ class FinDocTest {
     // get related document numbers
   }
 
+  /// same as approve findocs with the difference to set the status to 'complete'
+  static Future<void> completeFinDocs(WidgetTester tester, FinDocType type,
+      {FinDocType? subType}) async {
+    approveFinDocs(tester, type,
+        subType: subType, status: FinDocStatusVal.completed);
+  }
+
   /// Approve all findocs for a specific type, however when a sub type
   /// is provided the related findoc is approved.
   /// When approving finDocs 'order' related documents are created of which the id's
   /// are stored with the order findoc.
   static Future<void> approveFinDocs(WidgetTester tester, FinDocType type,
-      {FinDocType? subType}) async {
+      {FinDocType? subType,
+      FinDocStatusVal status = FinDocStatusVal.approved}) async {
     List<FinDoc> oldFinDocs = await getFinDocs(type);
     List<FinDoc> newFinDocs = [];
 
@@ -171,11 +179,14 @@ class FinDocTest {
       if (CommonTest.getDropdown('statusDropDown') ==
               FinDocStatusVal.inPreparation.toString() ||
           CommonTest.getDropdown('statusDropDown') ==
-              FinDocStatusVal.created.toString()) {
+              FinDocStatusVal.created.toString() ||
+          status != FinDocStatusVal.approved) {
         await CommonTest.tapByKey(tester, 'statusDropDown');
-        await CommonTest.tapByText(tester, 'approved');
+        await CommonTest.tapByText(tester, status.name);
         await CommonTest.tapByKey(tester, 'update', seconds: 2);
         await CommonTest.waitForSnackbarToGo(tester);
+      } else {
+        expect(true, false, reason: 'Begin status not valid');
       }
       // get related document numbers just for order,
       // transactions are saved by check completed

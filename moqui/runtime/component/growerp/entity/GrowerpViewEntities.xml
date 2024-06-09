@@ -1254,6 +1254,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="payFromDate" field="fromDate" entity-alias="PAYMENT" />
         <alias name="payThruDate" field="thruDate" entity-alias="PAYMENT" />
         <alias name="paymentMethodId" entity-alias="CC" />
+        <alias name="cardId" field="enumId" entity-alias="CCTYPE" />
         <alias name="cardType" field="description" entity-alias="CCTYPE" />
         <alias name="cardNumber" entity-alias="CC" />
         <alias name="expireDate" entity-alias="CC" />

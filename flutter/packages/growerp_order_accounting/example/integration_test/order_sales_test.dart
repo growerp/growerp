@@ -15,6 +15,7 @@
 // ignore_for_file: depend_on_referenced_packages
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
@@ -34,26 +35,42 @@ void main() {
 
   testWidgets('''GrowERP Order sales test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
-        OrderAccountingLocalizations.localizationsDelegates,
-        blocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
+    await CommonTest.startTestApp(
+        tester,
+        router.generateRoute,
+        menuOptions,
+        const [
+          OrderAccountingLocalizations.delegate,
+          InventoryLocalizations.delegate
+        ],
+        blocProviders: router.getOrderAccountingBlocProvidersExample(
+            restClient, 'AppAdmin'),
         title: "Order Sales test",
         restClient: restClient,
         clear: true); // use data from previous run, ifnone same as true
     // prepare
     await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "categories": categories.sublist(0, 2),
-      "products": products.sublist(0, 3),
-      "users": customers.sublist(0, 2)
+      "users": customers.sublist(0, 2),
+      "assets": assets, // create locations and products too
     });
     await OrderTest.selectSalesOrders(tester);
     await OrderTest.addOrders(tester, salesOrders.sublist(0, 1));
     await OrderTest.updateOrders(tester, salesOrders.sublist(1, 2));
+    await OrderTest.deleteLastOrder(tester);
     await OrderTest.approveOrders(tester);
+    await ShipmentTest.selectOutgoingShipments(tester);
+    await OrderTest.approveShipments(tester);
+    await OrderTest.completeShipments(tester);
+    await OrderTest.checkShipmentsComplete(tester);
     await PaymentTest.selectSalesPayments(tester);
-    await PaymentTest.sendReceivePayment(tester);
-    await PaymentTest.checkPayments(tester);
+    await OrderTest.approvePayments(tester);
+    await OrderTest.checkPaymentsComplete(tester);
+    await CommonTest.gotoMainMenu(tester);
+    await OrderTest.selectSalesOrders(tester);
+    await OrderTest.checkOrdersComplete(tester);
+    await OrderTest.selectInventory(tester);
+    await OrderTest.checkInventory(tester);
     await TransactionTest.selectTransactions(tester);
-    await TransactionTest.checkTransactionComplete(tester);
+    await TransactionTest.checkTransactionsComplete(tester);
   });
 }

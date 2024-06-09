@@ -848,7 +848,7 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <!-- depreciated, just used by the screens-->
+    <!-- depreciated, just used by the screens and the tests-->
     <service verb="import" noun="Entities">
         <description> Import general entities</description>
         <in-parameters>

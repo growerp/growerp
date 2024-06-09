@@ -3,7 +3,7 @@
 
 For this system we created integration tests only. We consider unit test too high maintenance. These integration tests are 'kind of' end user readable. The top level integration tests in the admin and hotel etc packages and can be started with the general 'flutter test integration_test/testname_test' command.
 
-if one of the tests fail, you can copy the test file inside the lib directory and test from there using the debugging facility in your favorite IDE. you can also use the hot-restart function there to speed up the testing which is not available in the integration_test directory.
+if one of the tests fail, you can set the clear parameter to false, and comment out the steps which were already successful executed. Th test will then restart using the data it saved during execution and skip the commented steps.
 
 Initial data is stored in packages/growerp_core/lib/test_data.dart.
 When data is created by the tests the resulting ID with the initial data is stored using the 'shared_preferences' package  under the name 'test'. This data can be used in later tests when you need a customer name or created document ID for an order. 
