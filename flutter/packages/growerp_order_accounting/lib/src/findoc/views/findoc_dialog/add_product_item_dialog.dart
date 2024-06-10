@@ -136,7 +136,7 @@ Future addProductItemDialog(BuildContext context) async {
                                                   priceController.text =
                                                       newValue.listPrice == null
                                                           ? ''
-                                                          : newValue.listPrice
+                                                          : newValue.price
                                                               .toString();
                                                   itemDescriptionController
                                                           .text =

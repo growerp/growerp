@@ -176,9 +176,8 @@ Future addRentalItemDialog(BuildContext context,
                                               onChanged:
                                                   (Product? newValue) async {
                                                 selectedProduct = newValue;
-                                                priceController.text = newValue!
-                                                    .listPrice
-                                                    .toString();
+                                                priceController.text =
+                                                    newValue!.price.toString();
                                                 itemDescriptionController.text =
                                                     "${newValue.productName}";
                                                 productBloc.add(GetDataEvent(

@@ -46,16 +46,15 @@ void main() {
     });
     await OrderTest.selectSalesOrders(tester);
     await OrderTest.createRentalSalesOrder(tester, rentalSalesOrders);
-    await OrderTest.checkRentalSalesOrder(tester);
+    await OrderTest.checkOrderDetail(tester);
     await OrderTest.checkRentalSalesOrderBlocDates(tester);
-    await OrderTest.approveSalesOrder(tester);
-    await InvoiceTest.selectSalesInvoices(tester);
-    await InvoiceTest.checkInvoices(tester);
-    await InvoiceTest.sendOrApproveInvoices(tester);
+    await OrderTest.approveOrders(tester);
+    await PaymentTest.selectSalesPayments(tester);
+    await OrderTest.approvePayments(tester);
+    await OrderTest.checkPaymentsComplete(tester);
     await CommonTest.gotoMainMenu(tester);
     await OrderTest.selectSalesOrders(tester);
-    await CommonTest.tapByKey(tester, 'nextStatus0',
-        seconds: 5); // to completed
-    await OrderTest.checkOrderCompleted(tester);
+    await OrderTest.completeOrders(tester);
+    await OrderTest.checkOrdersComplete(tester);
   });
 }

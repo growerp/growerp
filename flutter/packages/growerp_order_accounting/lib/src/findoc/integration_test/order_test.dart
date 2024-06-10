@@ -105,11 +105,11 @@ class OrderTest {
       await CommonTest.tapByKey(tester, 'update', seconds: 5);
       // get productId
       await CommonTest.tapByKey(tester, 'id0');
-      List<FinDocItem> newItems = List.of(order.items);
-      for (int index = 0; index < order.items.length; index++) {
-        var productId = CommonTest.getTextField('itemLine$index').split(' ')[1];
-        FinDocItem newItem = order.items[index].copyWith(productId: productId);
-        newItems[index] = newItem;
+      List<FinDocItem> newItems = [];
+      for (final (index, item) in order.items.indexed) {
+        FinDocItem newItem = item.copyWith(
+            productId: CommonTest.getTextField('itemProductId$index'));
+        newItems.add(newItem);
       }
       await CommonTest.tapByKey(tester, 'id0');
       // save order with orderId and productId
@@ -147,20 +147,47 @@ class OrderTest {
       await CommonTest.drag(tester, listViewName: 'listView4');
       await CommonTest.tapByKey(tester, 'okRental');
       await CommonTest.drag(tester);
-      await CommonTest.tapByKey(tester, 'update', seconds: 5);
-      // get productId added at the top
+      await CommonTest.tapByKey(tester, 'update', seconds: 3);
+      // tap orderId added at the top to get detail
       await CommonTest.tapByKey(tester, 'id0');
-      List<FinDocItem> newItems = List.of(finDoc.items);
-      for (int index = 0; index < finDoc.items.length; index++) {
-        var productId = CommonTest.getTextField('itemLine$index').split(' ')[1];
-        FinDocItem newItem = finDoc.items[index].copyWith(productId: productId);
-        newItems[index] = newItem;
+      // get all productId's
+      List<FinDocItem> newItems = [];
+      for (final (index, item) in finDoc.items.indexed) {
+        FinDocItem newItem = item.copyWith(
+            productId: CommonTest.getTextField('itemProductId$index'));
+        newItems.add(newItem);
       }
-      await CommonTest.tapByKey(tester, 'id0'); // close again
+      await CommonTest.tapByKey(tester, 'cancel'); // close again
       newOrders.add(finDoc.copyWith(
-          orderId: CommonTest.getTextField('id0'), items: newItems));
+          orderId: CommonTest.getTextField('id0'),
+          pseudoId: CommonTest.getTextField('id0'),
+          items: newItems));
     }
     await PersistFunctions.persistTest(test.copyWith(orders: newOrders));
+  }
+
+  static Future<void> checkOrderDetail(tester) async {
+    await checkFinDocDetail(tester, FinDocType.order);
+  }
+
+  static Future<void> checkFinDocDetail(
+      WidgetTester tester, FinDocType docType) async {
+    List<FinDoc> finDocs = await FinDocTest.getFinDocs(docType);
+    for (final finDoc in finDocs) {
+      await CommonTest.doNewSearch(tester, searchString: finDoc.pseudoId!);
+      for (final (index, item) in finDoc.items.indexed) {
+        expect(CommonTest.getTextField('itemProductId$index'), item.productId!);
+        expect(CommonTest.getTextField('itemDescription$index'),
+            item.description!);
+        expect(
+            CommonTest.getTextField('itemPrice$index'), item.price.currency());
+        if (!CommonTest.isPhone())
+          expect(CommonTest.getTextField('itemQuantity$index'),
+              item.quantity.toString());
+        await CommonTest.tapByKey(tester, 'cancel'); // cancel dialog
+        await CommonTest.closeSearch(tester);
+      }
+    }
   }
 
   static Future<void> checkPurchaseOrder(WidgetTester tester) async {
@@ -445,6 +472,12 @@ class OrderTest {
   static Future<void> completeShipments(WidgetTester tester) async {
     await FinDocTest.approveFinDocs(tester, FinDocType.order,
         subType: FinDocType.shipment, status: FinDocStatusVal.completed);
+  }
+
+  /// approve shipments related to an order
+  static Future<void> completeOrders(WidgetTester tester) async {
+    await FinDocTest.approveFinDocs(tester, FinDocType.order,
+        status: FinDocStatusVal.completed);
   }
 
   /// check if a payment related to an order  has the status complete

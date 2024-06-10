@@ -650,18 +650,17 @@ class MyFinDocState extends State<FinDocPage> {
           child: Text(item.itemSeqId.toString()),
         ),
         Text("${item.productId}",
-            textAlign: TextAlign.center, key: Key('itemProductId${itemIndex}')),
+            textAlign: TextAlign.center, key: Key('itemProductId$itemIndex')),
         if (!isPhone)
           Text(itemType.itemTypeName,
-              textAlign: TextAlign.left, key: Key('itemType${itemIndex}')),
+              textAlign: TextAlign.left, key: Key('itemType$itemIndex')),
         Text("${item.description}",
             key: Key('itemDescription${itemIndex}'), textAlign: TextAlign.left),
         if (!isPhone)
           Text("${item.quantity}",
-              textAlign: TextAlign.center,
-              key: Key('itemQuantity${itemIndex}')),
+              textAlign: TextAlign.center, key: Key('itemQuantity$itemIndex')),
         Text(item.price!.currency(),
-            textAlign: TextAlign.right, key: Key('itemPrice${itemIndex}')),
+            textAlign: TextAlign.right, key: Key('itemPrice$itemIndex')),
         if (!isPhone) // subtotal
           Text((item.price! * (item.quantity ?? Decimal.parse('1'))).toString(),
               textAlign: TextAlign.center),

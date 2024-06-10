@@ -110,11 +110,16 @@ List<dynamic> getItemFieldContent(FinDoc finDoc,
           children: [
             Text(finDoc.pseudoId ?? '', key: Key('id$itemIndex')),
             SizedBox(width: 10),
-            Text(classificationId == 'AppHotel'
-                ? finDoc.items[0].rentalFromDate != null
-                    ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
-                    : '???'
-                : "${finDoc.creationDate?.toString().substring(0, 11)}"),
+            Text(
+              classificationId == 'AppHotel'
+                  ? finDoc.items[0].rentalFromDate != null
+                      ? finDoc.items[0].rentalFromDate
+                          .toString()
+                          .substring(0, 10)
+                      : '???'
+                  : "${finDoc.creationDate?.toString().substring(0, 11)}",
+              key: Key('date'),
+            ),
           ],
         ),
         Text(finDoc.otherCompany?.name.truncate(25) ?? '',
