@@ -216,6 +216,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                     return Future.value((_leadBloc.state.data as Users).users);
                   });
                 },
+                compareFn: (item, sItem) => item.partyId == sItem.partyId,
                 onChanged: (User? newValue) {
                   _selectedLead = newValue;
                 },
@@ -269,6 +270,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                           (_employeeBloc.state.data as Users).users);
                     });
                   },
+                  compareFn: (item, sItem) => item.partyId == sItem.partyId,
                   onChanged: (User? newValue) {
                     _selectedAccount = newValue;
                   });

@@ -79,16 +79,16 @@ void main() {
     await PaymentTest.selectPurchasePayments(tester);
     await PaymentTest.checkPayments(tester);
     await TransactionTest.selectTransactions(tester);
-    await TransactionTest.checkTransactionComplete(tester);
+    await TransactionTest.checkTransactionsComplete(tester);
     await CommonTest.gotoMainMenu(tester);
     await OrderTest.selectPurchaseOrders(tester);
     await OrderTest.checkOrderCompleted(tester);
     await PaymentTest.selectPurchasePayments(tester);
     // confirm purchase payment paid
-    await PaymentTest.sendReceivePayment(tester);
+    await PaymentTest.approvePayments(tester);
     // check purchase payment complete
     await PaymentTest.selectPurchasePayments(tester);
-    await PaymentTest.checkPaymentComplete(tester);
+    await PaymentTest.checkPaymentsComplete(tester);
     // check purchase invoice complete
     await InvoiceTest.selectPurchaseInvoices(tester);
     await InvoiceTest.checkInvoicesComplete(tester);
@@ -122,12 +122,12 @@ void main() {
     await PaymentTest.selectSalesPayments(tester);
     await PaymentTest.checkPayments(tester);
     await TransactionTest.selectTransactions(tester);
-    await TransactionTest.checkTransactionComplete(tester);
+    await TransactionTest.checkTransactionsComplete(tester);
     await PaymentTest.selectSalesPayments(tester);
     // confirm sales payment received
-    await PaymentTest.sendReceivePayment(tester);
+    await PaymentTest.approvePayments(tester);
     // check sales payment complete
-    await PaymentTest.checkPaymentComplete(tester);
+    await PaymentTest.checkPaymentsComplete(tester);
     // check sales invoice complete
     await InvoiceTest.selectSalesInvoices(tester);
     await InvoiceTest.checkInvoicesComplete(tester);

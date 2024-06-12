@@ -64,12 +64,12 @@ void main() {
     await OrderTest.checkShipmentsComplete(tester);
     await PaymentTest.selectSalesPayments(tester);
     await OrderTest.approvePayments(tester);
-    await OrderTest.checkPaymentsComplete(tester);
+    await OrderTest.checkOrderPaymentsComplete(tester);
     await CommonTest.gotoMainMenu(tester);
     await OrderTest.selectSalesOrders(tester);
     await OrderTest.checkOrdersComplete(tester);
     await OrderTest.selectInventory(tester);
-    await OrderTest.checkInventory(tester);
+    await InventoryTest.checkInventory(tester);
     await TransactionTest.selectTransactions(tester);
     await TransactionTest.checkTransactionsComplete(tester);
   });

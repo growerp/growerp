@@ -12,8 +12,10 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 class InventoryTest {
@@ -88,6 +90,30 @@ class InventoryTest {
       await CommonTest.doSearch(tester, searchString: order.shipmentId!);
       expect(
           order.items[0].quantity.toString(), CommonTest.getTextField('qoh0'));
+    }
+  }
+
+  static Future<void> checkInventory(WidgetTester tester) async {
+    SaveTest test = await PersistFunctions.getTest();
+    List<FinDoc> orders = test.orders;
+    for (final order in orders) {
+      // find asset for order product
+      final asset = assets.firstWhere(// from test data
+          (el) => el.product?.productName == order.items[0].description);
+      // find location
+      await CommonTest.doSearch(tester,
+          searchString: asset.location!.locationName!);
+      late Decimal newQoh;
+      if (order.sales == false) {
+        newQoh = asset.quantityOnHand! + order.items[0].quantity!;
+      } else {
+        newQoh = asset.quantityOnHand! - order.items[0].quantity!;
+      }
+      expect(newQoh, Decimal.parse(CommonTest.getTextField('qoh0')),
+          reason: 'new inventory quantity wrong: old: '
+              '${asset.quantityOnHand.toString()} '
+              'order: ${order.items[0].quantity.toString()}'
+              'actual: ${CommonTest.getTextField('qoh0')}');
     }
   }
 }

@@ -68,11 +68,8 @@ class FinDocTest {
     }
   }
 
-  /// Approve all findocs for a specific type, however when a sub type
-  /// is provided the related findoc is approved.
-  /// When approving finDocs related documents are created of which the id's
-  /// are stored with the main findoc. Transactions however from alldocuments
-  /// are stored together in the transaction list under test.
+  /// check if a finDoc is complete and copy the transaction numbers
+  /// when it is a payment, invoice or shipment.
   static Future<void> checkFinDocsComplete(WidgetTester tester, FinDocType type,
       {FinDocType? subType}) async {
     List<FinDoc> oldFinDocs = await getFinDocs(type);
@@ -105,6 +102,7 @@ class FinDocTest {
       if (type == FinDocType.invoice || subType == FinDocType.invoice) {
         String? transactionId =
             await CommonTest.getRelatedFindoc(tester, FinDocType.transaction);
+        expect(transactionId, isNot(equals(isNull)));
         newFinDocs.add(FinDoc(
             docType: FinDocType.transaction,
             transactionId: transactionId,
@@ -115,6 +113,7 @@ class FinDocTest {
       if (type == FinDocType.payment || subType == FinDocType.payment) {
         String? transactionId =
             await CommonTest.getRelatedFindoc(tester, FinDocType.transaction);
+        expect(transactionId, isNot(equals(isNull)));
         newFinDocs.add(FinDoc(
             docType: FinDocType.transaction,
             transactionId: transactionId,
@@ -125,6 +124,7 @@ class FinDocTest {
       if (type == FinDocType.shipment || subType == FinDocType.shipment) {
         String? transactionId =
             await CommonTest.getRelatedFindoc(tester, FinDocType.transaction);
+        expect(transactionId, isNot(equals(isNull)));
         newFinDocs.add(FinDoc(
             docType: FinDocType.transaction,
             transactionId: transactionId,
@@ -133,23 +133,31 @@ class FinDocTest {
       }
 
       await CommonTest.tapByKey(tester, 'cancel');
-      await saveFinDocs(newFinDocs);
     }
-    // get related document numbers
+    await saveFinDocs(newFinDocs);
   }
 
   /// same as approve findocs with the difference to set the status to 'complete'
   static Future<void> completeFinDocs(WidgetTester tester, FinDocType type,
       {FinDocType? subType}) async {
-    approveFinDocs(tester, type,
+    await changeStatusFinDocs(tester, type,
         subType: subType, status: FinDocStatusVal.completed);
   }
 
-  /// Approve all findocs for a specific type, however when a sub type
-  /// is provided the related findoc is approved.
-  /// When approving finDocs 'order' related documents are created of which the id's
+  /// cancel the last findoc in a list when more then a single record...
+  static Future<void> cancelLastFinDoc(WidgetTester tester, FinDocType type,
+      {FinDocType? subType}) async {
+    await changeStatusFinDocs(tester, type,
+        subType: subType, status: FinDocStatusVal.cancelled);
+  }
+
+  /// Change status of all findocs for a specific type, however when a sub type
+  /// is provided the related findoc staus is changed.
+  /// When changing status of finDocs 'order' related documents are created of which the id's
   /// are stored with the order findoc.
-  static Future<void> approveFinDocs(WidgetTester tester, FinDocType type,
+  /// The default is approve.
+  /// when cancelled just the last record is cancelled when there are at 2 records
+  static Future<void> changeStatusFinDocs(WidgetTester tester, FinDocType type,
       {FinDocType? subType,
       FinDocStatusVal status = FinDocStatusVal.approved}) async {
     List<FinDoc> oldFinDocs = await getFinDocs(type);
@@ -170,6 +178,15 @@ class FinDocTest {
         case FinDocType.transaction:
           id = finDoc.transactionId;
         default:
+      }
+
+      // cancel the last record in te list
+      if (status == FinDocStatusVal.cancelled && oldFinDocs.length > 1) {
+        // copy when not last record
+        if (finDoc != oldFinDocs.lastOrNull) {
+          newFinDocs.add(finDoc);
+          continue;
+        }
       }
 
       await CommonTest.doNewSearch(tester,
@@ -224,8 +241,27 @@ class FinDocTest {
         expect(await CommonTest.getRelatedFindoc(tester, FinDocType.order),
             finDoc.orderId);
       }
+      await CommonTest.tapByKey(tester, 'cancel');
     }
-    await CommonTest.tapByKey(tester, 'cancel');
     await saveFinDocs(newFinDocs);
+  }
+
+  static Future<void> checkFinDocDetail(
+      WidgetTester tester, FinDocType docType) async {
+    List<FinDoc> finDocs = await FinDocTest.getFinDocs(docType);
+    for (final finDoc in finDocs) {
+      await CommonTest.doNewSearch(tester, searchString: finDoc.pseudoId!);
+      for (final (index, item) in finDoc.items.indexed) {
+        expect(CommonTest.getTextField('itemProductId$index'), item.productId!);
+        expect(CommonTest.getTextField('itemDescription$index'),
+            item.description!);
+        expect(
+            CommonTest.getTextField('itemPrice$index'), item.price.currency());
+        if (!CommonTest.isPhone())
+          expect(CommonTest.getTextField('itemQuantity$index'),
+              item.quantity.toString());
+        await CommonTest.tapByKey(tester, 'cancel'); // cancel dialog
+      }
+    }
   }
 }

@@ -51,9 +51,9 @@ void main() {
     await InvoiceTest.updateInvoices(tester, salesInvoices.sublist(1, 2));
     await InvoiceTest.sendOrApproveInvoices(tester);
     await PaymentTest.selectSalesPayments(tester);
-    await PaymentTest.sendReceivePayment(tester);
+    await PaymentTest.approvePayments(tester);
     await PaymentTest.checkPayments(tester);
     await TransactionTest.selectTransactions(tester);
-    await TransactionTest.checkTransactionComplete(tester);
+    await TransactionTest.checkTransactionsComplete(tester);
   });
 }

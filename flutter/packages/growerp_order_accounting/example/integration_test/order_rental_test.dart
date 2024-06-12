@@ -51,7 +51,7 @@ void main() {
     await OrderTest.approveOrders(tester);
     await PaymentTest.selectSalesPayments(tester);
     await OrderTest.approvePayments(tester);
-    await OrderTest.checkPaymentsComplete(tester);
+    await OrderTest.checkOrderPaymentsComplete(tester);
     await CommonTest.gotoMainMenu(tester);
     await OrderTest.selectSalesOrders(tester);
     await OrderTest.completeOrders(tester);

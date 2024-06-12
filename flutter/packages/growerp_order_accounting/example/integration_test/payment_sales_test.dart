@@ -46,9 +46,9 @@ void main() {
     await PaymentTest.addPayments(tester, salesPayments.sublist(0, 2));
     await PaymentTest.updatePayments(tester, salesPayments.sublist(2, 4));
     await PaymentTest.deleteLastPayment(tester);
-    await PaymentTest.sendReceivePayment(tester);
-    await PaymentTest.checkPaymentComplete(tester);
+    await PaymentTest.approvePayments(tester);
+    await PaymentTest.checkPaymentsComplete(tester);
     await TransactionTest.selectTransactions(tester);
-    await TransactionTest.checkTransactionComplete(tester);
+    await TransactionTest.checkTransactionsComplete(tester);
   });
 }

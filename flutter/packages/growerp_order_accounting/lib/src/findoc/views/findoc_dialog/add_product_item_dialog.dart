@@ -126,8 +126,8 @@ Future addProductItemDialog(BuildContext context) async {
                                                 });
                                               },
                                               compareFn: (item, sItem) =>
-                                                  item.pseudoId ==
-                                                  sItem.pseudoId,
+                                                  item.productId ==
+                                                  sItem.productId,
                                               onChanged: (Product? newValue) {
                                                 setState(() {
                                                   selectedProduct = newValue;

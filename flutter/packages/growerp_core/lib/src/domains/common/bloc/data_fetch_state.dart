@@ -26,7 +26,7 @@ class DataFetchState<T> extends Equatable {
   }
 
   @override
-  List<Object?> get props => [status];
+  List<Object?> get props => [status, data, message];
 
   @override
   String toString() => '$status { $data }';

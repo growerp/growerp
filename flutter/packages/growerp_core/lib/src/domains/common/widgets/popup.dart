@@ -23,7 +23,7 @@ Widget popUp(
     double padding = 10,
     required BuildContext context}) {
   if (width == null) {
-    isPhone(context) ? width = 350 : width = 700;
+    isPhone(context) ? width = 450 : width = 700;
   }
   return Stack(clipBehavior: Clip.none, children: [
     SizedBox(

@@ -293,9 +293,7 @@ class MyFinDocState extends State<FinDocPage> {
                               finDocUpdated.sales ? 'Customer' : 'Supplier',
                         ),
                       ),
-                      key: Key(finDocUpdated.sales == true
-                          ? 'customer'
-                          : 'supplier'),
+                      key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
                       itemAsString: (Company? u) => "${u!.name}",
                       asyncItems: (String filter) {
                         _companyBloc.add(GetDataEvent(() => context
@@ -309,7 +307,7 @@ class MyFinDocState extends State<FinDocPage> {
                                     : Role.supplier)));
                         return Future.delayed(const Duration(milliseconds: 150),
                             () {
-                          return Future.value(
+                          return Future<List<Company>>.value(
                               (_companyBloc.state.data as Companies).companies);
                         });
                       },

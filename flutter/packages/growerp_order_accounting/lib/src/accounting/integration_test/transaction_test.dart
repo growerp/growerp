@@ -23,21 +23,6 @@ class TransactionTest {
         tester, 'acctLedger', 'FinDocListTransaction', '3');
   }
 
-  static Future<void> checkTransactionComplete(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> finDocs = test.orders.isNotEmpty
-        ? test.orders
-        : test.transactions.isNotEmpty
-            ? test.transactions
-            : test.payments;
-    for (FinDoc finDoc in finDocs) {
-      await CommonTest.doNewSearch(tester, searchString: finDoc.chainId()!);
-      await tester.pumpAndSettle();
-      expect(CommonTest.getTextField('status0'), 'Y',
-          reason: 'transaction status field check posted');
-    }
-  }
-
   static Future<void> addTransactions(
       WidgetTester tester, List<FinDoc> transactions,
       {bool check = true}) async {

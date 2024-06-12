@@ -66,6 +66,7 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
       current = List.of(state.companies);
     }
     try {
+      emit(state.copyWith(status: CompanyStatus.loading));
       Companies compResult = await restClient.getCompany(
           role: role,
           companyPartyId: event.companyPartyId,

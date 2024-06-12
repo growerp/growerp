@@ -7,13 +7,13 @@ List<BlocProvider> getUserCompanyBlocProviders(
     RestClient restClient, String classificationId) {
   List<BlocProvider> blocProviders = [
     BlocProvider<CompanyBloc>(
-        create: (context) => CompanyBloc(restClient, Role.lead)),
+        create: (context) => CompanyBloc(restClient, Role.company)),
     BlocProvider<CompanyCustomerBloc>(
         create: (context) => CompanyBloc(restClient, Role.customer)),
     BlocProvider<CompanySupplierBloc>(
         create: (context) => CompanyBloc(restClient, Role.supplier)),
-    BlocProvider<CompanyBloc>(
-        create: (context) => CompanyBloc(restClient, Role.company)),
+    BlocProvider<CompanyLeadBloc>(
+        create: (context) => CompanyBloc(restClient, Role.lead)),
     BlocProvider<EmployeeBloc>(
         create: (context) => UserBloc(restClient, Role.company)),
     BlocProvider<LeadBloc>(

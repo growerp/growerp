@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "3 Technical documentation/7 Integration tests.md",
+                "file": "2 End User documentation/1 Introduction/3 General business flow.md",
                 "mode": "source",
                 "source": false
               }
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "3 Technical documentation/7 Integration tests.md",
+                "file": "2 End User documentation/1 Introduction/3 General business flow.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "3 Technical documentation/7 Integration tests.md",
+                "file": "2 End User documentation/1 Introduction/3 General business flow.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "3 Technical documentation/7 Integration tests.md"
+                "file": "2 End User documentation/1 Introduction/3 General business flow.md"
               }
             }
           },
@@ -168,6 +168,7 @@
   },
   "active": "cd2ba6fa8750f0f9",
   "lastOpenFiles": [
+    "3 Technical documentation/7 Integration tests.md",
     "2 End User documentation/1 Introduction/3 General business flow.md",
     "4 Applications/4 workflow/Workflow data organization.md",
     "4 Applications/3 Freelance/1 Introduction.md",
@@ -197,7 +198,6 @@
     "2 End User documentation/5 Order management/1 Introduction.md",
     "2 End User documentation/5 Order management",
     "2 End User documentation/2 Website/3 Publish products.md",
-    "2 End User documentation/6 inventory management/1 Introduction.md",
     "2 End User documentation/6 inventory management",
     "2 End User documentation/2 Website",
     "2 End User documentation/1 Introduction",

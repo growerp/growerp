@@ -632,7 +632,7 @@ List<FinDoc> purchasePayments = [
   FinDoc(
     sales: false,
     docType: FinDocType.payment,
-    otherUser: suppliers[0],
+    otherCompany: supplierCompanies[0],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("22.22"),
     items: [FinDocItem(paymentType: PaymentType(accountCode: '21200'))],
@@ -640,7 +640,7 @@ List<FinDoc> purchasePayments = [
   FinDoc(
     sales: false,
     docType: FinDocType.payment,
-    otherUser: suppliers[1],
+    otherCompany: supplierCompanies[1],
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("33.33"),
     items: [FinDocItem(paymentType: PaymentType(accountCode: '21200'))],
@@ -648,7 +648,7 @@ List<FinDoc> purchasePayments = [
   FinDoc(
     sales: false,
     docType: FinDocType.payment,
-    otherUser: suppliers[0],
+    otherCompany: supplierCompanies[2],
     paymentInstrument: PaymentInstrument.check,
     grandTotal: Decimal.parse("44.44"),
     items: [FinDocItem(paymentType: PaymentType(accountCode: '21200'))],
@@ -656,7 +656,7 @@ List<FinDoc> purchasePayments = [
   FinDoc(
     sales: false,
     docType: FinDocType.payment,
-    otherUser: suppliers[1],
+    otherCompany: supplierCompanies[3],
     paymentInstrument: PaymentInstrument.bank,
     grandTotal: Decimal.parse("55.55"),
     items: [FinDocItem(paymentType: PaymentType(accountCode: '21200'))],
@@ -664,7 +664,7 @@ List<FinDoc> purchasePayments = [
   FinDoc(
     sales: false,
     docType: FinDocType.payment,
-    otherUser: suppliers[1],
+    otherCompany: supplierCompanies[3],
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("66.66"),
     items: [FinDocItem(paymentType: PaymentType(accountCode: '21600'))],
@@ -672,7 +672,7 @@ List<FinDoc> purchasePayments = [
   FinDoc(
     sales: false,
     docType: FinDocType.payment,
-    otherUser: suppliers[0],
+    otherCompany: supplierCompanies[2],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("77.77"),
     items: [FinDocItem(paymentType: PaymentType(accountCode: '2160'))],
@@ -680,7 +680,7 @@ List<FinDoc> purchasePayments = [
   FinDoc(
     sales: false,
     docType: FinDocType.payment,
-    otherUser: suppliers[1],
+    otherCompany: supplierCompanies[1],
     paymentInstrument: PaymentInstrument.bank,
     grandTotal: Decimal.parse("88.88"),
     items: [FinDocItem(paymentType: PaymentType(accountCode: '21600'))],
@@ -688,7 +688,7 @@ List<FinDoc> purchasePayments = [
   FinDoc(
     sales: false,
     docType: FinDocType.payment,
-    otherUser: suppliers[0],
+    otherCompany: supplierCompanies[0],
     paymentInstrument: PaymentInstrument.check,
     grandTotal: Decimal.parse("9.99"),
     items: [FinDocItem(paymentType: PaymentType(accountCode: '21600'))],
@@ -698,7 +698,7 @@ List<FinDoc> salesPayments = [
   FinDoc(
     sales: true,
     docType: FinDocType.payment,
-    otherUser: customers[0],
+    otherCompany: customerCompanies[0],
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("33.22"),
     items: [FinDocItem(paymentType: PaymentType(accountCode: '12600'))],
@@ -706,7 +706,7 @@ List<FinDoc> salesPayments = [
   FinDoc(
     sales: true,
     docType: FinDocType.payment,
-    otherUser: customers[1],
+    otherCompany: customerCompanies[1],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("44.11"),
     items: [FinDocItem(paymentType: PaymentType(accountCode: '12100'))],
@@ -714,7 +714,7 @@ List<FinDoc> salesPayments = [
   FinDoc(
     sales: true,
     docType: FinDocType.payment,
-    otherUser: customers[0],
+    otherCompany: customerCompanies[2],
     paymentInstrument: PaymentInstrument.check,
     grandTotal: Decimal.parse("55.11"),
     items: [FinDocItem(paymentType: PaymentType(accountCode: '12100'))],
@@ -722,7 +722,7 @@ List<FinDoc> salesPayments = [
   FinDoc(
     sales: true,
     docType: FinDocType.payment,
-    otherUser: customers[1],
+    otherCompany: customerCompanies[3],
     paymentInstrument: PaymentInstrument.bank,
     grandTotal: Decimal.parse("66.11"),
     items: [FinDocItem(paymentType: PaymentType(accountCode: '12600'))],

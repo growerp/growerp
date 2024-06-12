@@ -12,11 +12,9 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:decimal/decimal.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:growerp_core/test_data.dart';
 import 'package:intl/intl.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'integration_test.dart';
@@ -167,27 +165,7 @@ class OrderTest {
   }
 
   static Future<void> checkOrderDetail(tester) async {
-    await checkFinDocDetail(tester, FinDocType.order);
-  }
-
-  static Future<void> checkFinDocDetail(
-      WidgetTester tester, FinDocType docType) async {
-    List<FinDoc> finDocs = await FinDocTest.getFinDocs(docType);
-    for (final finDoc in finDocs) {
-      await CommonTest.doNewSearch(tester, searchString: finDoc.pseudoId!);
-      for (final (index, item) in finDoc.items.indexed) {
-        expect(CommonTest.getTextField('itemProductId$index'), item.productId!);
-        expect(CommonTest.getTextField('itemDescription$index'),
-            item.description!);
-        expect(
-            CommonTest.getTextField('itemPrice$index'), item.price.currency());
-        if (!CommonTest.isPhone())
-          expect(CommonTest.getTextField('itemQuantity$index'),
-              item.quantity.toString());
-        await CommonTest.tapByKey(tester, 'cancel'); // cancel dialog
-        await CommonTest.closeSearch(tester);
-      }
-    }
+    await FinDocTest.checkFinDocDetail(tester, FinDocType.order);
   }
 
   static Future<void> checkPurchaseOrder(WidgetTester tester) async {
@@ -453,43 +431,25 @@ class OrderTest {
 
   /// approve orders
   static Future<void> approveOrders(WidgetTester tester) async {
-    await FinDocTest.approveFinDocs(tester, FinDocType.order);
+    await FinDocTest.changeStatusFinDocs(tester, FinDocType.order);
   }
 
-  /// approve payments re;ated to an order
-  static Future<void> approvePayments(WidgetTester tester) async {
-    await FinDocTest.approveFinDocs(tester, FinDocType.order,
-        subType: FinDocType.payment);
+  /// complete orders
+  static Future<void> completeOrders(WidgetTester tester) async {
+    await FinDocTest.changeStatusFinDocs(tester, FinDocType.order,
+        status: FinDocStatusVal.completed);
   }
 
   /// approve shipments related to an order
   static Future<void> approveShipments(WidgetTester tester) async {
-    await FinDocTest.approveFinDocs(tester, FinDocType.order,
+    await FinDocTest.changeStatusFinDocs(tester, FinDocType.order,
         subType: FinDocType.shipment);
   }
 
-  /// approve shipments related to an order
+  /// complete shipments related to an order
   static Future<void> completeShipments(WidgetTester tester) async {
-    await FinDocTest.approveFinDocs(tester, FinDocType.order,
+    await FinDocTest.changeStatusFinDocs(tester, FinDocType.order,
         subType: FinDocType.shipment, status: FinDocStatusVal.completed);
-  }
-
-  /// approve shipments related to an order
-  static Future<void> completeOrders(WidgetTester tester) async {
-    await FinDocTest.approveFinDocs(tester, FinDocType.order,
-        status: FinDocStatusVal.completed);
-  }
-
-  /// check if a payment related to an order  has the status complete
-  static Future<void> checkPaymentsComplete(WidgetTester tester) async {
-    await FinDocTest.checkFinDocsComplete(tester, FinDocType.order,
-        subType: FinDocType.payment);
-  }
-
-  /// check if an invoice related an is complete
-  static Future<void> checkInvoicesComplete(WidgetTester tester) async {
-    await FinDocTest.checkFinDocsComplete(tester, FinDocType.order,
-        subType: FinDocType.invoice);
   }
 
   /// check shipments related to an order if complete
@@ -498,46 +458,26 @@ class OrderTest {
         subType: FinDocType.shipment);
   }
 
+  /// approve payments related to an order
+  static Future<void> approvePayments(WidgetTester tester) async {
+    await FinDocTest.changeStatusFinDocs(tester, FinDocType.order,
+        subType: FinDocType.payment);
+  }
+
+  /// check if a payment related to an order  has the status complete
+  static Future<void> checkOrderPaymentsComplete(WidgetTester tester) async {
+    await FinDocTest.checkFinDocsComplete(tester, FinDocType.order,
+        subType: FinDocType.payment);
+  }
+
+  /// check if an invoice related an order is complete
+  static Future<void> checkInvoicesComplete(WidgetTester tester) async {
+    await FinDocTest.checkFinDocsComplete(tester, FinDocType.order,
+        subType: FinDocType.invoice);
+  }
+
   /// check if an order has the status complete
   static Future<void> checkOrdersComplete(WidgetTester tester) async {
     await FinDocTest.checkFinDocsComplete(tester, FinDocType.order);
-  }
-
-  static Future<void> receiveShipments(
-      WidgetTester tester, List<Location> locations) async {
-    SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> orders = test.orders;
-    for (final (index, order) in orders.indexed) {
-      await CommonTest.doNewSearch(tester, searchString: order.shipmentId!);
-      await CommonTest.checkWidgetKey(tester, 'ShipmentReceiveDialogPurchase');
-      await CommonTest.enterDropDownSearch(
-          tester, 'locationDropDown$index', locations[index].locationName!);
-    }
-    await CommonTest.tapByKey(tester, 'update');
-    await CommonTest.tapByKey(tester, 'update', seconds: 5);
-  }
-
-  static Future<void> checkInventory(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> orders = test.orders;
-    for (final order in orders) {
-      // find asset for order product
-      final asset = assets.firstWhere(// from test data
-          (el) => el.product?.productName == order.items[0].description);
-      // find location
-      await CommonTest.doSearch(tester,
-          searchString: asset.location!.locationName!);
-      late Decimal newQoh;
-      if (order.sales == false) {
-        newQoh = asset.quantityOnHand! + order.items[0].quantity!;
-      } else {
-        newQoh = asset.quantityOnHand! - order.items[0].quantity!;
-      }
-      expect(newQoh, Decimal.parse(CommonTest.getTextField('qoh0')),
-          reason: 'new inventory quantity wrong: old: '
-              '${asset.quantityOnHand.toString()} '
-              'order: ${order.items[0].quantity.toString()}'
-              'actual: ${CommonTest.getTextField('qoh0')}');
-    }
   }
 }

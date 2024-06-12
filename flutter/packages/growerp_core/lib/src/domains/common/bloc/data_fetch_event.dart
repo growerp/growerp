@@ -9,4 +9,6 @@ abstract class DataFetchBlocEvent extends Equatable {
 class GetDataEvent<T> extends DataFetchBlocEvent {
   const GetDataEvent(this.futureFunction);
   final Future<T> Function() futureFunction;
+  @override
+  List<Object> get props => [futureFunction];
 }

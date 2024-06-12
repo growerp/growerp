@@ -171,8 +171,8 @@ Future addRentalItemDialog(BuildContext context,
                                                 });
                                               },
                                               compareFn: (item, sItem) =>
-                                                  item.pseudoId ==
-                                                  sItem.pseudoId,
+                                                  item.productId ==
+                                                  sItem.productId,
                                               onChanged:
                                                   (Product? newValue) async {
                                                 selectedProduct = newValue;

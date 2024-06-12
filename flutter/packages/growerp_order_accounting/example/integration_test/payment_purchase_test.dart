@@ -40,21 +40,22 @@ void main() {
         restClient: restClient,
         blocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
         clear: true); // use data from previous run, ifnone same as true
-    await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "companies": [
-        company.copyWith(partyId: '_MOD_', name: initialCompany.name)
-      ],
-      "users": suppliers.sublist(0, 2),
-    });
+    List<Company> companies = [
+      company.copyWith(partyId: '_MOD_', name: initialCompany.name)
+    ];
+    companies.addAll(supplierCompanies.sublist(0, 4));
+    await CommonTest.createCompanyAndAdmin(tester,
+        testData: {"companies": companies});
     await CommonTest.logout(tester);
     await CommonTest.login(tester);
     await PaymentTest.selectPurchasePayments(tester);
     await PaymentTest.addPayments(tester, purchasePayments.sublist(0, 4));
     await PaymentTest.updatePayments(tester, purchasePayments.sublist(4, 8));
     await PaymentTest.deleteLastPayment(tester);
-    await PaymentTest.sendReceivePayment(tester);
-    await PaymentTest.checkPaymentComplete(tester);
+    await PaymentTest.approvePayments(tester);
+    await PaymentTest.completePayments(tester);
+    await PaymentTest.checkPaymentsComplete(tester);
     await TransactionTest.selectTransactions(tester);
-    await TransactionTest.checkTransactionComplete(tester);
+    await TransactionTest.checkTransactionsComplete(tester);
   });
 }

@@ -63,15 +63,15 @@ void main() {
     await OrderTest.approveOrders(tester);
     await PaymentTest.selectPurchasePayments(tester);
     await OrderTest.approvePayments(tester);
-    await OrderTest.checkPaymentsComplete(tester);
+    await OrderTest.checkOrderPaymentsComplete(tester);
     await InvoiceTest.selectPurchaseInvoices(tester);
     await OrderTest.checkInvoicesComplete(tester);
     await ShipmentTest.selectIncomingShipments(tester);
     await OrderTest.approveShipments(tester);
-    await OrderTest.receiveShipments(tester, locations);
+    await ShipmentTest.receiveShipments(tester, locations);
     await OrderTest.checkShipmentsComplete(tester);
     await OrderTest.selectInventory(tester);
-    await OrderTest.checkInventory(tester);
+    await InventoryTest.checkInventory(tester);
     await OrderTest.selectPurchaseOrders(tester);
     await OrderTest.checkOrdersComplete(tester);
     await TransactionTest.selectTransactions(tester);

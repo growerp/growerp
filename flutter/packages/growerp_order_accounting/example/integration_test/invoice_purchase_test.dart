@@ -53,9 +53,9 @@ void main() {
     await InvoiceTest.deleteLastInvoice(tester);
     await InvoiceTest.sendOrApproveInvoices(tester);
     await PaymentTest.selectPurchasePayments(tester);
-    await PaymentTest.sendReceivePayment(tester);
+    await PaymentTest.approvePayments(tester);
     await PaymentTest.checkPayments(tester);
     await TransactionTest.selectTransactions(tester);
-    await TransactionTest.checkTransactionComplete(tester);
+    await TransactionTest.checkTransactionsComplete(tester);
   });
 }

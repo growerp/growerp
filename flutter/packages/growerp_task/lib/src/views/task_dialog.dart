@@ -254,6 +254,8 @@ class TaskDialogState extends State<TaskDialog> {
                                 searchString: filter, isForDropDown: true));
                             return Future.value(state.tasks);
                           },
+                          compareFn: (item, sItem) =>
+                              item.taskId == sItem.taskId,
                           validator: (value) =>
                               value == null ? 'field required' : null,
                         );

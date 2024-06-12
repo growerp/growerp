@@ -65,7 +65,7 @@ void main() {
     await CommonTest.gotoMainMenu(tester);
     await OrderTest.selectPurchaseOrders(tester);
     await PaymentTest.selectPurchasePayments(tester);
-    await PaymentTest.sendReceivePayment(tester);
+    await PaymentTest.approvePayments(tester);
     await PaymentTest.selectPurchasePayments(tester);
     await InvoiceTest.selectPurchaseInvoices(tester);
     await CommonTest.gotoMainMenu(tester);
@@ -97,12 +97,12 @@ void main() {
     await PaymentTest.selectSalesPayments(tester);
     await PaymentTest.checkPayments(tester);
     await TransactionTest.selectTransactions(tester);
-    await TransactionTest.checkTransactionComplete(tester);
+    await TransactionTest.checkTransactionsComplete(tester);
     await PaymentTest.selectSalesPayments(tester);
     // confirm sales payment received
-    await PaymentTest.sendReceivePayment(tester);
+    await PaymentTest.approvePayments(tester);
     // check sales payment complete
-    await PaymentTest.checkPaymentComplete(tester);
+    await PaymentTest.checkPaymentsComplete(tester);
     // check sales invoice complete
     await InvoiceTest.selectSalesInvoices(tester);
     await InvoiceTest.checkInvoicesComplete(tester);

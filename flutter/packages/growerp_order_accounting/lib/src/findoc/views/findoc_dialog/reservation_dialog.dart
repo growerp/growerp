@@ -216,6 +216,8 @@ class ReservationDialogState extends State<ReservationDialog> {
                                   (_userBloc.state.data as Users).users);
                             });
                           },
+                          compareFn: (item, sItem) =>
+                              item.partyId == sItem.partyId,
                           onChanged: (User? newValue) {
                             setState(() {
                               _selectedUser = newValue;
@@ -283,7 +285,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                             });
                           },
                           compareFn: (item, sItem) =>
-                              item.pseudoId == sItem.pseudoId,
+                              item.productId == sItem.productId,
                           onChanged: (Product? newValue) async {
                             _selectedProduct = newValue;
                             _priceController.text =

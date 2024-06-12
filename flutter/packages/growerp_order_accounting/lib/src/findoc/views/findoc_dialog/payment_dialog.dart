@@ -17,7 +17,6 @@ import 'package:decimal/decimal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../../accounting/accounting.dart';
@@ -60,11 +59,11 @@ class PaymentDialogState extends State<PaymentDialog> {
   // ignore: unused_field
   late GlAccountBloc _accountBloc; // needed for accountlist
   late FinDocStatusVal _updatedStatus;
+  late AuthBloc _authBloc;
 
   late bool isPhone;
   late bool readOnly;
   late PaymentInstrument _paymentInstrument;
-  final _userSearchBoxController = TextEditingController();
   final _amountController = TextEditingController();
   final _pseudoIdController = TextEditingController();
 
@@ -92,51 +91,52 @@ class PaymentDialogState extends State<PaymentDialog> {
     _paymentInstrument = finDocUpdated.paymentInstrument == null
         ? PaymentInstrument.cash
         : finDocUpdated.paymentInstrument!;
-    _finDocBloc = context.read<FinDocBloc>();
-    _finDocBloc.add(FinDocGetPaymentTypes(sales: finDoc.sales));
+    _finDocBloc = context.read<FinDocBloc>()
+      ..add(FinDocGetPaymentTypes(sales: finDoc.sales));
     _companyBloc = context.read<DataFetchBloc<Companies>>()
-      ..add(GetDataEvent(() => context.read<RestClient>().getCompany(
-          limit: 3,
-          role: widget.finDoc.sales ? Role.customer : Role.supplier)));
+      ..add(
+          GetDataEvent<Companies>(() => Future<Companies>.value(Companies())));
     _accountBloc = context.read<GlAccountBloc>()
-      ..add(const GlAccountFetch(limit: 3));
+      ..add(const GlAccountFetch(limit: 0));
+    _authBloc = context.read<AuthBloc>();
   }
 
   @override
   Widget build(BuildContext context) {
-    isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    return BlocProvider.value(
-        value: context.read<FinDocBloc>(),
-        child: Dialog(
+    isPhone = isAPhone(context);
+    return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Dialog(
             key: Key("PaymentDialog${finDoc.sales ? 'Sales' : 'Purchase'}"),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
-            child: BlocConsumer<FinDocBloc, FinDocState>(
-              listenWhen: (previous, current) =>
-                  previous.status == FinDocStatus.loading,
-              listener: (context, state) {
-                if (state.status == FinDocStatus.success) {
-                  Navigator.of(context).pop();
-                }
-                if (state.status == FinDocStatus.failure) {
-                  HelperFunctions.showMessage(
-                      context, '${state.message}', Colors.red);
-                }
-              },
-              builder: (context, state) {
-                return popUp(
+            child: SingleChildScrollView(
+                key: const Key('listView2'),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                child: popUp(
                     context: context,
                     height: 650,
-                    width: 400,
+                    width: 600,
                     title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
                         "Payment #${finDoc.pseudoId ?? 'New'}",
-                    child: SingleChildScrollView(
-                        key: const Key('listView2'),
-                        physics: const ClampingScrollPhysics(),
-                        child: paymentForm(state, paymentDialogFormKey)));
-              },
-            )));
+                    child: BlocConsumer<FinDocBloc, FinDocState>(
+                      listenWhen: (previous, current) =>
+                          previous.status == FinDocStatus.loading,
+                      listener: (context, state) {
+                        if (state.status == FinDocStatus.success) {
+                          Navigator.of(context).pop();
+                        }
+                        if (state.status == FinDocStatus.failure) {
+                          HelperFunctions.showMessage(
+                              context, '${state.message}', Colors.red);
+                        }
+                      },
+                      builder: (context, state) {
+                        return paymentForm(state, paymentDialogFormKey);
+                      },
+                    )))));
   }
 
   Widget paymentForm(
@@ -145,8 +145,6 @@ class PaymentDialogState extends State<PaymentDialog> {
       _selectedPaymentType = state.paymentTypes.firstWhere(
           (el) => _selectedPaymentType!.paymentTypeId == el.paymentTypeId);
     }
-    AuthBloc authBloc = context.read<AuthBloc>();
-    GlAccountBloc glAccountBloc = context.read<GlAccountBloc>();
     Color getColor(Set<WidgetState> states) {
       const Set<WidgetState> interactiveStates = <WidgetState>{
         WidgetState.pressed,
@@ -159,12 +157,15 @@ class PaymentDialogState extends State<PaymentDialog> {
       return Colors.red;
     }
 
+    final companyLabel =
+        "Select ${finDocUpdated.sales ? 'customer' : 'supplier'}";
     return Padding(
         padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
         child: Form(
             key: paymentDialogFormKey,
             child: Column(children: <Widget>[
               Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(
                     child: TextFormField(
@@ -172,6 +173,98 @@ class PaymentDialogState extends State<PaymentDialog> {
                       decoration: const InputDecoration(labelText: 'Id'),
                       controller: _pseudoIdController,
                       keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  Expanded(
+                      flex: 2,
+                      child:
+                          BlocBuilder<DataFetchBloc<Companies>, DataFetchState>(
+                              builder: (context, state) {
+                        switch (state.status) {
+                          case DataFetchStatus.success:
+                            return DropdownSearch<Company>(
+                              selectedItem: _selectedCompany,
+                              popupProps: PopupProps.menu(
+                                isFilterOnline: true,
+                                showSelectedItems: true,
+                                showSearchBox: true,
+                                searchFieldProps: TextFieldProps(
+                                    autofocus: true,
+                                    decoration: InputDecoration(
+                                        labelText: companyLabel)),
+                                menuProps: MenuProps(
+                                    borderRadius: BorderRadius.circular(20.0)),
+                                title: popUp(
+                                  context: context,
+                                  title: companyLabel,
+                                  height: 50,
+                                ),
+                              ),
+                              dropdownDecoratorProps: DropDownDecoratorProps(
+                                  dropdownSearchDecoration:
+                                      InputDecoration(labelText: companyLabel)),
+                              key: const Key('otherCompany'),
+                              itemAsString: (Company? u) => " ${u!.name}",
+                              asyncItems: (String filter) async {
+                                _companyBloc.add(GetDataEvent(() => context
+                                    .read<RestClient>()
+                                    .getCompany(
+                                        searchString: filter,
+                                        limit: 3,
+                                        isForDropDown: true,
+                                        role: widget.finDoc.sales
+                                            ? Role.customer
+                                            : Role.supplier)));
+                                return Future.delayed(
+                                    const Duration(milliseconds: 150), () {
+                                  return Future.value(
+                                      (_companyBloc.state.data as Companies)
+                                          .companies);
+                                });
+                              },
+                              compareFn: (item, sItem) =>
+                                  item.partyId == sItem.partyId,
+                              onChanged: (Company? newValue) {
+                                setState(() {
+                                  _selectedCompany = newValue;
+                                });
+                              },
+                              validator: (value) => value == null
+                                  ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
+                                  : null,
+                            );
+                          case DataFetchStatus.failure:
+                            return const FatalErrorForm(
+                                message: 'server connection problem');
+                          default:
+                            return const Center(child: LoadingIndicator());
+                        }
+                      })),
+                ],
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<FinDocStatusVal>(
+                      key: const Key('statusDropDown'),
+                      decoration: const InputDecoration(labelText: 'Status'),
+                      value: _updatedStatus,
+                      validator: (value) =>
+                          value == null ? 'field required' : null,
+                      items: FinDocStatusVal.validStatusList(
+                              finDoc.status ?? FinDocStatusVal.created)
+                          .map((label) => DropdownMenuItem<FinDocStatusVal>(
+                                value: label,
+                                child: Text(label.name),
+                              ))
+                          .toList(),
+                      onChanged: readOnly
+                          ? null
+                          : (FinDocStatusVal? newValue) {
+                              _updatedStatus = newValue!;
+                            },
+                      isExpanded: true,
                     ),
                   ),
                   Expanded(
@@ -185,108 +278,9 @@ class PaymentDialogState extends State<PaymentDialog> {
                   ),
                 ],
               ),
-              BlocBuilder<DataFetchBloc<Companies>, DataFetchState>(
-                  builder: (context, state) {
-                switch (state.status) {
-                  case DataFetchStatus.failure:
-                    return const FatalErrorForm(
-                        message: 'server connection problem');
-                  case DataFetchStatus.loading:
-                    return LoadingIndicator();
-                  case DataFetchStatus.success:
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: DropdownButtonFormField<FinDocStatusVal>(
-                            key: const Key('statusDropDown'),
-                            decoration:
-                                const InputDecoration(labelText: 'Status'),
-                            value: _updatedStatus,
-                            validator: (value) =>
-                                value == null ? 'field required' : null,
-                            items: FinDocStatusVal.validStatusList(
-                                    finDoc.status ?? FinDocStatusVal.created)
-                                .map((label) =>
-                                    DropdownMenuItem<FinDocStatusVal>(
-                                      value: label,
-                                      child: Text(label.name),
-                                    ))
-                                .toList(),
-                            onChanged: readOnly
-                                ? null
-                                : (FinDocStatusVal? newValue) {
-                                    setState(() {
-                                      _updatedStatus = newValue!;
-                                    });
-                                  },
-                            isExpanded: true,
-                          ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: DropdownSearch<Company>(
-                            selectedItem: _selectedCompany,
-                            popupProps: PopupProps.menu(
-                              showSearchBox: true,
-                              searchFieldProps: TextFieldProps(
-                                autofocus: true,
-                                decoration: InputDecoration(
-                                    labelText:
-                                        "${finDocUpdated.sales ? 'customer' : 'supplier'} name"),
-                                controller: _userSearchBoxController,
-                              ),
-                              menuProps: MenuProps(
-                                  borderRadius: BorderRadius.circular(20.0)),
-                              title: popUp(
-                                context: context,
-                                title:
-                                    "Select ${finDocUpdated.sales ? 'customer' : 'supplier'}",
-                              ),
-                            ),
-                            dropdownDecoratorProps: DropDownDecoratorProps(
-                                dropdownSearchDecoration: InputDecoration(
-                                    labelText: finDocUpdated.sales
-                                        ? 'Customer'
-                                        : 'Supplier')),
-                            key: Key(
-                                finDocUpdated.sales ? 'customer' : 'supplier'),
-                            itemAsString: (Company? u) => " ${u!.name}",
-                            asyncItems: (String filter) {
-                              _companyBloc.add(GetDataEvent(() => context
-                                  .read<RestClient>()
-                                  .getCompany(
-                                      searchString: filter,
-                                      limit: 3,
-                                      isForDropDown: true,
-                                      role: widget.finDoc.sales
-                                          ? Role.customer
-                                          : Role.supplier)));
-                              return Future.delayed(
-                                  const Duration(milliseconds: 150), () {
-                                return Future.value(
-                                    (_companyBloc.state.data as Companies)
-                                        .companies);
-                              });
-                            },
-                            onChanged: (Company? newValue) {
-                              setState(() {
-                                _selectedCompany = newValue;
-                              });
-                            },
-                            validator: (value) => value == null
-                                ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
-                                : null,
-                          ),
-                        ),
-                      ],
-                    );
-                  default:
-                    return const Center(child: LoadingIndicator());
-                }
-              }),
-              if (widget.finDoc.id() != null)
-                relatedFinDocs(finDoc: widget.finDoc, context: context),
+              widget.finDoc.id() == null
+                  ? SizedBox(height: 20)
+                  : relatedFinDocs(finDoc: widget.finDoc, context: context),
               InputDecorator(
                 decoration: InputDecoration(
                   labelText: 'PaymentMethods',
@@ -302,7 +296,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                                         ?.paymentMethod?.ccDescription !=
                                     null) ||
                             (finDoc.sales == false &&
-                                authBloc.state.authenticate?.company
+                                _authBloc.state.authenticate?.company
                                         ?.paymentMethod?.ccDescription !=
                                     null),
                         child: Row(children: [
@@ -323,7 +317,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                               }),
                           Expanded(
                               child: Text(
-                                  "Credit Card ${finDoc.sales == false ? authBloc.state.authenticate?.company?.paymentMethod?.ccDescription : _selectedCompany?.paymentMethod?.ccDescription}")),
+                                  "Credit Card ${finDoc.sales == false ? _authBloc.state.authenticate?.company?.paymentMethod?.ccDescription : _selectedCompany?.paymentMethod?.ccDescription}")),
                         ])),
                     Row(children: [
                       Checkbox(
@@ -436,11 +430,11 @@ class PaymentDialogState extends State<PaymentDialog> {
                       itemAsString: (GlAccount? u) =>
                           " ${u?.accountCode ?? ''} ${u?.accountName ?? ''} ",
                       asyncItems: (String filter) async {
-                        glAccountBloc.add(
+                        _accountBloc.add(
                             GlAccountFetch(searchString: filter, limit: 3));
                         return Future.delayed(const Duration(milliseconds: 100),
                             () {
-                          return Future.value(glAccountBloc.state.glAccounts);
+                          return Future.value(_accountBloc.state.glAccounts);
                         });
                       },
                       compareFn: (item, sItem) =>

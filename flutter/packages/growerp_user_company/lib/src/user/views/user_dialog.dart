@@ -353,7 +353,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                               });
                             },
                             compareFn: (item, sItem) =>
-                                item.pseudoId == sItem.pseudoId,
+                                item.partyId == sItem.partyId,
                             onChanged: (Company? newValue) {
                               setState(() {
                                 _selectedCompany = newValue ?? Company();

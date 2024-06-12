@@ -17,6 +17,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import 'integration_test.dart';
+
 class PaymentTest {
   static Future<void> selectPurchasePayments(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
@@ -52,31 +54,15 @@ class PaymentTest {
     if (newPayments[0].grandTotal != payments[0].grandTotal) {
       // copy new payment data with paymentId
       for (int x = 0; x < test.payments.length; x++) {
-        newPayments[x] =
-            payments[x].copyWith(paymentId: test.payments[x].paymentId);
+        newPayments[x] = payments[x].copyWith(
+            paymentId: test.payments[x].paymentId,
+            pseudoId: test.payments[x].paymentId);
       }
       // update existing records, no need to use return data
       await enterPaymentData(tester, newPayments);
       await PersistFunctions.persistTest(test.copyWith(payments: newPayments));
     }
     await checkPayment(tester, newPayments);
-  }
-
-  static Future<void> deleteLastPayment(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    var count = CommonTest.getWidgetCountByKey(tester, 'finDocItem');
-    if (count == test.payments.length) {
-      await CommonTest.refresh(tester); // does not work
-      await CommonTest.tapByKey(tester, 'edit${count - 1}');
-      await CommonTest.tapByKey(tester, 'cancelFinDoc', seconds: 5);
-      expect(CommonTest.getTextField('status${count - 1}'),
-          equals(finDocStatusValues[FinDocStatusVal.cancelled.toString()]));
-      //  only within testing deleted item will not be removed after refresh
-      //    await CommonTest.refresh(tester);
-      expect(find.byKey(const Key('finDocItem')), findsNWidgets(count - 1));
-      await PersistFunctions.persistTest(test.copyWith(
-          payments: test.payments.sublist(0, test.payments.length - 1)));
-    }
   }
 
   static Future<List<FinDoc>> enterPaymentData(
@@ -86,8 +72,7 @@ class PaymentTest {
       if (payment.paymentId == null) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.doSearch(tester, searchString: payment.paymentId!);
-        await CommonTest.tapByKey(tester, 'edit0');
+        await CommonTest.doNewSearch(tester, searchString: payment.paymentId!);
         expect(CommonTest.getTextField('topHeader').split('#')[1],
             payment.paymentId,
             reason: 'found different detail than was searched for');
@@ -95,9 +80,7 @@ class PaymentTest {
       await CommonTest.checkWidgetKey(
           tester, "PaymentDialog${payment.sales ? 'Sales' : 'Purchase'}");
       await CommonTest.enterDropDownSearch(
-          tester,
-          payment.sales ? 'customer' : 'supplier',
-          payment.otherUser!.company!.name!);
+          tester, 'otherCompany', payment.otherCompany!.name!);
       await CommonTest.enterText(tester, 'amount',
           payment.grandTotal!.toString()); // required because keyboard come up
       await CommonTest.drag(tester, listViewName: 'listView2');
@@ -131,20 +114,18 @@ class PaymentTest {
   static Future<void> checkPayment(
       WidgetTester tester, List<FinDoc> payments) async {
     for (FinDoc payment in payments) {
-      await CommonTest.doSearch(tester,
+      await CommonTest.doNewSearch(tester,
           searchString: payment.paymentId!, seconds: 5);
-      expect(CommonTest.getTextField('otherUser0'),
-          contains(payment.otherUser?.company!.name));
-      expect(CommonTest.getTextField('status0'), equals('Created'));
-      expect(CommonTest.getTextField('grandTotal0'),
-          equals(payment.grandTotal.toString()));
-      await CommonTest.tapByKey(tester, 'edit0');
+      expect(CommonTest.getDropdownSearch('otherCompany'),
+          equals(payment.otherCompany!.name));
+      expect(CommonTest.getDropdown('statusDropDown'),
+          equals(FinDocStatusVal.created.toString()));
       expect(
           find.byKey(Key(
               'PaymentDialog${payment.sales == true ? "Sales" : "Purchase"}')),
           findsOneWidget);
       expect(CommonTest.getTextFormField('amount'),
-          equals(payment.grandTotal!.toString()));
+          equals(payment.grandTotal.currency()));
       switch (payment.paymentInstrument) {
         case PaymentInstrument.creditcard:
           expect(CommonTest.getCheckbox('creditCard'), equals(true));
@@ -162,7 +143,6 @@ class PaymentTest {
       }
       await CommonTest.tapByKey(tester, 'cancel');
     }
-    await CommonTest.closeSearch(tester);
   }
 
   // not used locally...need replacement
@@ -175,7 +155,7 @@ class PaymentTest {
             : test.payments;
     List<FinDoc> finDocs = [];
     for (FinDoc payment in payments) {
-      await CommonTest.doSearch(tester, searchString: payment.id()!);
+      await CommonTest.doNewSearch(tester, searchString: payment.id()!);
       // payment Id with order
       String paymentId = CommonTest.getTextField('id0');
       // if same as order number , wrong record, get next one
@@ -199,36 +179,31 @@ class PaymentTest {
     }
   }
 
-  /// assume we are in the purchase payment list
-  /// confirm that a payment has been send
-  static Future<void> sendReceivePayment(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> payments = test.orders.isNotEmpty
-        ? test.orders
-        : test.invoices.isNotEmpty
-            ? test.invoices
-            : test.payments;
-    for (FinDoc payment in payments) {
-      await CommonTest.doNewSearch(tester, searchString: payment.orderId!);
-      if (CommonTest.getDropdown('statusDropDown') ==
-              FinDocStatusVal.inPreparation.toString() ||
-          CommonTest.getDropdown('statusDropDown') ==
-              FinDocStatusVal.created.toString()) {
-        await CommonTest.tapByKey(tester, 'statusDropDown');
-        await CommonTest.tapByText(tester, 'approved');
-        await CommonTest.tapByKey(tester, 'update', seconds: 2);
-      }
-    }
-    await CommonTest.closeSearch(tester);
+  /// approve payments
+  static Future<void> approvePayments(WidgetTester tester) async {
+    await FinDocTest.changeStatusFinDocs(tester, FinDocType.payment);
   }
 
-  /// check if the purchase process has been completed successfuly
-  static Future<void> checkPaymentComplete(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> payments = test.orders.isEmpty ? test.payments : test.orders;
-    for (FinDoc payment in payments) {
-      await CommonTest.doSearch(tester, searchString: payment.paymentId!);
-      expect(CommonTest.getTextField('status0'), 'Completed');
-    }
+  /// complete/post a payment related to an order
+  static Future<void> completePayments(WidgetTester tester) async {
+    await FinDocTest.changeStatusFinDocs(tester, FinDocType.payment,
+        status: FinDocStatusVal.completed);
+  }
+
+  /// check if a payment related to an order  has the status complete
+  static Future<void> checkPaymentsComplete(WidgetTester tester) async {
+    await FinDocTest.checkFinDocsComplete(tester, FinDocType.payment);
+    // check if have transactions generated
+    List<FinDoc> transactions =
+        await FinDocTest.getFinDocs(FinDocType.transaction);
+    List<FinDoc> payments = await FinDocTest.getFinDocs(FinDocType.payment);
+    expect(payments.length, transactions.length,
+        reason: "#transactions(${transactions.length}) should be the same "
+            "as #payments(${payments.length}");
+  }
+
+  /// cancel a payment
+  static Future<void> deleteLastPayment(WidgetTester tester) async {
+    await FinDocTest.cancelLastFinDoc(tester, FinDocType.payment);
   }
 }

@@ -190,6 +190,8 @@ class AssetDialogState extends State<AssetDialog> {
                             searchString: filter, isForDropDown: true));
                         return Future.value(state.products);
                       },
+                      compareFn: (item, sItem) =>
+                          item.productId == sItem.productId,
                       validator: (value) =>
                           value == null ? 'field required' : null,
                     );

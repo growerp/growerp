@@ -40,7 +40,7 @@ dependencies:
 #  html_editor_enhanced: ^2.5.1
   markdown_widget: ^2.3.1
   dropdown_search: ^5.0.6
-  dio: ^5.4.1
+  dio: ^5.4.3
   growerp_core: ^1.2.4
   growerp_models: ^1.2.1
 dev_dependencies: 

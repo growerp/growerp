@@ -14,6 +14,7 @@
 
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 class ShipmentTest {
   static Future<void> selectIncomingShipments(WidgetTester tester) async {
@@ -26,5 +27,19 @@ class ShipmentTest {
     await CommonTest.gotoMainMenu(tester);
     await CommonTest.selectOption(
         tester, 'dbShipments', 'FinDocListShipmentsOut', '1');
+  }
+
+  static Future<void> receiveShipments(
+      WidgetTester tester, List<Location> locations) async {
+    SaveTest test = await PersistFunctions.getTest();
+    List<FinDoc> orders = test.orders;
+    for (final (index, order) in orders.indexed) {
+      await CommonTest.doNewSearch(tester, searchString: order.shipmentId!);
+      await CommonTest.checkWidgetKey(tester, 'ShipmentReceiveDialogPurchase');
+      await CommonTest.enterDropDownSearch(
+          tester, 'locationDropDown$index', locations[index].locationName!);
+    }
+    await CommonTest.tapByKey(tester, 'update');
+    await CommonTest.tapByKey(tester, 'update', seconds: 5);
   }
 }

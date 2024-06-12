@@ -527,7 +527,7 @@ class WebsiteFormState extends State<WebsiteForm> {
                         (_productBloc.state.data as Products).products);
                   });
                 },
-                compareFn: (item, sItem) => item.pseudoId == sItem.pseudoId,
+                compareFn: (item, sItem) => item.productId == sItem.productId,
                 onChanged: (List<Product>? newValue) {
                   List<Category> newCats =
                       List.of(state.website!.websiteCategories);
