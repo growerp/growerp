@@ -360,6 +360,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 partyId: item.companyPartyId,
                                 pseudoId: item.companyPseudoId,
                                 name: item.companyName,
+                                paymentMethod: paymentMethod,
                                 ]" />
                         <else>
                             <set field="company"

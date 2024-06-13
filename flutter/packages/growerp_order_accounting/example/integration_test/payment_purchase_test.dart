@@ -46,8 +46,6 @@ void main() {
     companies.addAll(supplierCompanies.sublist(0, 4));
     await CommonTest.createCompanyAndAdmin(tester,
         testData: {"companies": companies});
-    await CommonTest.logout(tester);
-    await CommonTest.login(tester);
     await PaymentTest.selectPurchasePayments(tester);
     await PaymentTest.addPayments(tester, purchasePayments.sublist(0, 4));
     await PaymentTest.updatePayments(tester, purchasePayments.sublist(4, 8));

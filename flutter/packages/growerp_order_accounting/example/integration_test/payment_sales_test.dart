@@ -41,12 +41,13 @@ void main() {
         blocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester,
-        testData: {"users": customers.sublist(0, 2)});
+        testData: {"companies": customerCompanies});
     await PaymentTest.selectSalesPayments(tester);
     await PaymentTest.addPayments(tester, salesPayments.sublist(0, 2));
     await PaymentTest.updatePayments(tester, salesPayments.sublist(2, 4));
     await PaymentTest.deleteLastPayment(tester);
     await PaymentTest.approvePayments(tester);
+    await PaymentTest.completePayments(tester);
     await PaymentTest.checkPaymentsComplete(tester);
     await TransactionTest.selectTransactions(tester);
     await TransactionTest.checkTransactionsComplete(tester);

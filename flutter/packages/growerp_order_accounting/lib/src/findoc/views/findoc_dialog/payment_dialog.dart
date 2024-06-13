@@ -290,35 +290,33 @@ class PaymentDialogState extends State<PaymentDialog> {
                 ),
                 child: Column(
                   children: [
-                    Visibility(
-                        visible: (finDoc.sales == true &&
-                                _selectedCompany
-                                        ?.paymentMethod?.ccDescription !=
-                                    null) ||
-                            (finDoc.sales == false &&
-                                _authBloc.state.authenticate?.company
-                                        ?.paymentMethod?.ccDescription !=
-                                    null),
-                        child: Row(children: [
-                          Checkbox(
-                              key: const Key('creditCard'),
-                              checkColor: Colors.white,
-                              fillColor:
-                                  WidgetStateProperty.resolveWith(getColor),
-                              value: _paymentInstrument ==
-                                  PaymentInstrument.creditcard,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  if (value == true) {
-                                    _paymentInstrument =
-                                        PaymentInstrument.creditcard;
-                                  }
-                                });
-                              }),
-                          Expanded(
-                              child: Text(
-                                  "Credit Card ${finDoc.sales == false ? _authBloc.state.authenticate?.company?.paymentMethod?.ccDescription : _selectedCompany?.paymentMethod?.ccDescription}")),
-                        ])),
+                    if ((finDoc.sales == true &&
+                            _selectedCompany?.paymentMethod?.ccDescription !=
+                                null) ||
+                        (finDoc.sales == false &&
+                            _authBloc.state.authenticate?.company?.paymentMethod
+                                    ?.ccDescription !=
+                                null))
+                      Row(children: [
+                        Checkbox(
+                            key: const Key('creditCard'),
+                            checkColor: Colors.white,
+                            fillColor:
+                                WidgetStateProperty.resolveWith(getColor),
+                            value: _paymentInstrument ==
+                                PaymentInstrument.creditcard,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                if (value == true) {
+                                  _paymentInstrument =
+                                      PaymentInstrument.creditcard;
+                                }
+                              });
+                            }),
+                        Expanded(
+                            child: Text(
+                                "Credit Card ${finDoc.sales == false ? _authBloc.state.authenticate?.company?.paymentMethod?.ccDescription : _selectedCompany?.paymentMethod?.ccDescription}")),
+                      ]),
                     Row(children: [
                       Checkbox(
                           key: const Key('cash'),
@@ -332,10 +330,9 @@ class PaymentDialogState extends State<PaymentDialog> {
                               }
                             });
                           }),
-                      const Expanded(
-                          child: Text(
+                      Text(
                         "Cash",
-                      )),
+                      ),
                     ]),
                     Row(children: [
                       Checkbox(
@@ -350,10 +347,9 @@ class PaymentDialogState extends State<PaymentDialog> {
                               }
                             });
                           }),
-                      const Expanded(
-                          child: Text(
+                      Text(
                         "Check",
-                      )),
+                      ),
                     ]),
                     Row(children: [
                       Checkbox(
@@ -368,10 +364,9 @@ class PaymentDialogState extends State<PaymentDialog> {
                               }
                             });
                           }),
-                      Expanded(
-                          child: Text(
+                      Text(
                         "Bank ${finDoc.otherCompany?.paymentMethod?.creditCardNumber ?? ''}",
-                      )),
+                      ),
                     ]),
                   ],
                 ),
