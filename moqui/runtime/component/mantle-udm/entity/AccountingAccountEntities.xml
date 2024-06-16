@@ -1554,6 +1554,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="PmntProposed" toStatusId="PmntPromised" transitionName="Promise"/>
             <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="PmntProposed" toStatusId="PmntCancelled" transitionName="Cancel"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="PmntProposed" toStatusId="PmntAuthorized" transitionName="Authorize"/><!-- growerp change -->
             <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="PmntPromised" toStatusId="PmntAuthorized" transitionName="Authorize"/>
             <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="PmntPromised" toStatusId="PmntDelivered" transitionName="Deliver"/>
             <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="PmntPromised" toStatusId="PmntCancelled" transitionName="Cancel"/>
