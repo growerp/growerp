@@ -441,25 +441,25 @@ class OrderTest {
   }
 
   /// approve shipments related to an order
-  static Future<void> approveShipments(WidgetTester tester) async {
+  static Future<void> approveOrderShipments(WidgetTester tester) async {
     await FinDocTest.changeStatusFinDocs(tester, FinDocType.order,
         subType: FinDocType.shipment);
   }
 
   /// complete shipments related to an order
-  static Future<void> completeShipments(WidgetTester tester) async {
+  static Future<void> completeOrderShipments(WidgetTester tester) async {
     await FinDocTest.changeStatusFinDocs(tester, FinDocType.order,
         subType: FinDocType.shipment, status: FinDocStatusVal.completed);
   }
 
   /// check shipments related to an order if complete
-  static Future<void> checkShipmentsComplete(WidgetTester tester) async {
+  static Future<void> checkOrderShipmentsComplete(WidgetTester tester) async {
     await FinDocTest.checkFinDocsComplete(tester, FinDocType.order,
         subType: FinDocType.shipment);
   }
 
   /// approve payments related to an order
-  static Future<void> approvePayments(WidgetTester tester) async {
+  static Future<void> approveOrderPayments(WidgetTester tester) async {
     await FinDocTest.changeStatusFinDocs(tester, FinDocType.order,
         subType: FinDocType.payment);
   }
@@ -471,7 +471,7 @@ class OrderTest {
   }
 
   /// check if an invoice related an order is complete
-  static Future<void> checkInvoicesComplete(WidgetTester tester) async {
+  static Future<void> checkOrderInvoicesComplete(WidgetTester tester) async {
     await FinDocTest.checkFinDocsComplete(tester, FinDocType.order,
         subType: FinDocType.invoice);
   }

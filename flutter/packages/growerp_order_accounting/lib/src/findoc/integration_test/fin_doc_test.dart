@@ -101,6 +101,7 @@ class FinDocTest {
         await CommonTest.tapByKey(tester, "itemDelete0", seconds: 2);
       }
       // add new items
+      List<FinDocItem> newItems = [];
       for (FinDocItem item in finDoc.items) {
         await CommonTest.tapByKey(tester, 'addProduct', seconds: 1);
         await CommonTest.checkWidgetKey(tester, 'addProductItemDialog');
@@ -111,14 +112,11 @@ class FinDocTest {
             tester, 'itemQuantity', item.quantity.toString());
         await CommonTest.drag(tester, listViewName: 'listView3');
         await CommonTest.tapByKey(tester, 'ok');
-      }
-      // get productId's
-      await CommonTest.drag(tester, seconds: 2);
-      List<FinDocItem> newItems = [];
-      for (final (index, item) in finDoc.items.indexed) {
+        // item added at the top, get productid
         newItems.add(item.copyWith(
-            productId: CommonTest.getTextField('itemProductId$index')));
+            productId: CommonTest.getTextField('itemProductId0')));
       }
+      await CommonTest.drag(tester, seconds: 2);
       // update/create finDoc
       await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
       await CommonTest.waitForSnackbarToGo(tester);
@@ -158,8 +156,8 @@ class FinDocTest {
         if (!CommonTest.isPhone())
           expect(CommonTest.getTextField('itemQuantity$index'),
               item.quantity.toString());
-        await CommonTest.tapByKey(tester, 'cancel'); // cancel dialog
       }
+      await CommonTest.tapByKey(tester, 'cancel'); // cancel dialog
     }
   }
 
@@ -258,6 +256,11 @@ class FinDocTest {
     List<FinDoc> oldFinDocs = await getFinDocs(type);
     List<FinDoc> newFinDocs = [];
 
+    if (status == FinDocStatusVal.cancelled && oldFinDocs.length < 2) {
+      print("Need at least 2 records, to delete one");
+      return;
+    }
+
     for (FinDoc finDoc in oldFinDocs) {
       // if subType provided approve related findoc
       String? id;
@@ -275,20 +278,17 @@ class FinDocTest {
         default:
       }
 
-      // cancel the last record in te list when we have at least 2 records
-      if (status == FinDocStatusVal.cancelled && oldFinDocs.length > 1) {
-        // copy when not last record
-        if (finDoc != oldFinDocs.lastOrNull) {
-          newFinDocs.add(finDoc);
-          continue;
-        }
+      if (status == FinDocStatusVal.cancelled &&
+          finDoc != oldFinDocs.lastOrNull) {
+        newFinDocs.add(finDoc);
+        continue;
       }
 
       // change status
       await CommonTest.doNewSearch(tester,
           searchString: id != null ? id : finDoc.pseudoId!,
           seconds: CommonTest.waitTime);
-      // approve on detail screen
+      // statuschange on detail screen
       if (CommonTest.getDropdown('statusDropDown') ==
               FinDocStatusVal.inPreparation.toString() ||
           CommonTest.getDropdown('statusDropDown') ==
@@ -304,25 +304,25 @@ class FinDocTest {
                 'Begin status: ${CommonTest.getDropdown('statusDropDown')} not valid');
       }
 
-      // get related document numbers just for order,
-      // transactions are saved by check completed
-      await CommonTest.doNewSearch(tester,
-          searchString: id != null ? id : finDoc.pseudoId!);
-      // get order related documents
-      if (type == FinDocType.order && subType == null) {
-        String? paymentId =
-            await CommonTest.getRelatedFindoc(tester, FinDocType.payment);
-        String? invoiceId =
-            await CommonTest.getRelatedFindoc(tester, FinDocType.invoice);
-        String? shipmentId =
-            await CommonTest.getRelatedFindoc(tester, FinDocType.shipment);
-        newFinDocs.add(finDoc.copyWith(
-            paymentId: paymentId,
-            invoiceId: invoiceId,
-            shipmentId: shipmentId));
-      }
-
       if (status != FinDocStatusVal.cancelled) {
+        // get related document numbers just for order,
+        // transactions are saved by check completed
+        await CommonTest.doNewSearch(tester,
+            searchString: id != null ? id : finDoc.pseudoId!);
+        // get order related documents
+        if (type == FinDocType.order && subType == null) {
+          String? paymentId =
+              await CommonTest.getRelatedFindoc(tester, FinDocType.payment);
+          String? invoiceId =
+              await CommonTest.getRelatedFindoc(tester, FinDocType.invoice);
+          String? shipmentId =
+              await CommonTest.getRelatedFindoc(tester, FinDocType.shipment);
+          newFinDocs.add(finDoc.copyWith(
+              paymentId: paymentId,
+              invoiceId: invoiceId,
+              shipmentId: shipmentId));
+        }
+
         // not add cancelled record
         if ((type == FinDocType.order && subType == FinDocType.payment)) {
           expect(await CommonTest.getRelatedFindoc(tester, FinDocType.order),
@@ -345,9 +345,9 @@ class FinDocTest {
               await CommonTest.getRelatedFindoc(tester, FinDocType.payment);
           newFinDocs.add(finDoc.copyWith(paymentId: paymentId));
         }
-      }
 
-      await CommonTest.tapByKey(tester, 'cancel');
+        await CommonTest.tapByKey(tester, 'cancel');
+      }
     }
     await saveFinDocs(newFinDocs);
   }

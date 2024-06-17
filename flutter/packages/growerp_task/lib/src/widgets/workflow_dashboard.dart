@@ -98,6 +98,7 @@ class WorkflowDashboardState extends State<WorkflowDashboard> {
               child: DropdownSearch<Task>(
                 key: const Key('taskDropDown'),
                 popupProps: PopupProps.menu(
+                  isFilterOnline: true,
                   showSearchBox: true,
                   searchFieldProps: TextFieldProps(
                     autofocus: true,
@@ -115,6 +116,7 @@ class WorkflowDashboardState extends State<WorkflowDashboard> {
                 onChanged: (Task? newValue) {
                   taskBloc.add(TaskCreateUserWorkflow(newValue!.taskId));
                 },
+                compareFn: (item, sItem) => item.taskId == sItem.taskId,
                 asyncItems: (String filter) {
                   taskBloc.add(
                       TaskFetch(searchString: filter, isForDropDown: true));

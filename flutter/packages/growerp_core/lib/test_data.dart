@@ -747,7 +747,7 @@ List<FinDoc> salesOrders = [
       sales: true,
       docType: FinDocType.order,
       description: 'The first sales order',
-      otherUser: customers[0],
+      otherCompany: customerCompanies[0],
       items: [
         FinDocItem(
           description: products[0].productName,
@@ -764,7 +764,7 @@ List<FinDoc> salesOrders = [
       sales: true,
       docType: FinDocType.order,
       description: 'The second sales order',
-      otherUser: customers[1],
+      otherCompany: customerCompanies[1],
       items: [
         FinDocItem(
           description: products[1].productName,
@@ -809,6 +809,42 @@ List<FinDoc> salesInvoices = [
           description: products[0].productName,
           price: products[0].price,
           quantity: Decimal.parse('50'),
+        ),
+      ]),
+  FinDoc(
+      sales: true,
+      docType: FinDocType.invoice,
+      description: 'The third sales invoice',
+      otherCompany: customerCompanies[3],
+      grandTotal: Decimal.parse('1003.89'),
+      items: [
+        FinDocItem(
+          description: products[1].productName,
+          price: products[1].price,
+          quantity: Decimal.parse('1'),
+        ),
+        FinDocItem(
+          description: products[2].productName,
+          price: products[2].price,
+          quantity: Decimal.parse('10'),
+        ),
+      ]),
+  FinDoc(
+      sales: true,
+      docType: FinDocType.invoice,
+      description: 'The forthg sales invoice',
+      otherCompany: customerCompanies[0],
+      grandTotal: Decimal.parse('3439.4'),
+      items: [
+        FinDocItem(
+          description: products[0].productName,
+          price: products[0].price,
+          quantity: Decimal.parse('20'),
+        ),
+        FinDocItem(
+          description: products[1].productName,
+          price: products[1].price,
+          quantity: Decimal.parse('40'),
         ),
       ]),
 ];

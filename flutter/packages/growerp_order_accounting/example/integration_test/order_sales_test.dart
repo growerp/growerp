@@ -50,7 +50,7 @@ void main() {
         clear: true); // use data from previous run, ifnone same as true
     // prepare
     await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "users": customers.sublist(0, 2),
+      "companies": customerCompanies,
       "assets": assets, // create locations and products too
     });
     await OrderTest.selectSalesOrders(tester);
@@ -59,11 +59,11 @@ void main() {
     await OrderTest.deleteLastOrder(tester);
     await OrderTest.approveOrders(tester);
     await ShipmentTest.selectOutgoingShipments(tester);
-    await OrderTest.approveShipments(tester);
-    await OrderTest.completeShipments(tester);
-    await OrderTest.checkShipmentsComplete(tester);
+    await OrderTest.approveOrderShipments(tester);
+    await OrderTest.completeOrderShipments(tester);
+    await OrderTest.checkOrderShipmentsComplete(tester);
     await PaymentTest.selectSalesPayments(tester);
-    await OrderTest.approvePayments(tester);
+    await OrderTest.approveOrderPayments(tester);
     await OrderTest.checkOrderPaymentsComplete(tester);
     await CommonTest.gotoMainMenu(tester);
     await OrderTest.selectSalesOrders(tester);

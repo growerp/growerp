@@ -184,6 +184,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
               return DropdownSearch<User>(
                 selectedItem: _selectedLead,
                 popupProps: PopupProps.menu(
+                  isFilterOnline: true,
                   showSearchBox: true,
                   searchFieldProps: TextFieldProps(
                     autofocus: true,
@@ -237,6 +238,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
               return DropdownSearch<User>(
                   selectedItem: _selectedAccount,
                   popupProps: PopupProps.menu(
+                    isFilterOnline: true,
                     showSearchBox: true,
                     searchFieldProps: TextFieldProps(
                       autofocus: true,

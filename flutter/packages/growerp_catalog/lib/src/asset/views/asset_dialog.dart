@@ -158,6 +158,7 @@ class AssetDialogState extends State<AssetDialog> {
                       key: const Key('productDropDown'),
                       selectedItem: _selectedProduct,
                       popupProps: PopupProps.menu(
+                        isFilterOnline: true,
                         showSearchBox: true,
                         searchFieldProps: TextFieldProps(
                           autofocus: true,

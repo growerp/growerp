@@ -142,6 +142,7 @@ class AddressDialogState extends State<AddressDialog> {
                   key: const Key('country'),
                   selectedItem: _selectedCountry,
                   popupProps: PopupProps.menu(
+                    isFilterOnline: true,
                     showSearchBox: true,
                     searchFieldProps: TextFieldProps(
                       autofocus: true,

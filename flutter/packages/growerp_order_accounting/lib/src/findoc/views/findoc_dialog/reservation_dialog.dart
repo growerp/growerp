@@ -181,6 +181,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                         return DropdownSearch<User>(
                           selectedItem: _selectedUser,
                           popupProps: PopupProps.menu(
+                            isFilterOnline: true,
                             showSearchBox: true,
                             searchFieldProps: TextFieldProps(
                               autofocus: true,

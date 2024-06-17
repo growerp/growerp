@@ -154,6 +154,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                                         key: Key('locationDropDown$index'),
                                         selectedItem: _selectedLocations[index],
                                         popupProps: PopupProps.menu(
+                                          isFilterOnline: true,
                                           showSearchBox: true,
                                           searchFieldProps: TextFieldProps(
                                             autofocus: true,

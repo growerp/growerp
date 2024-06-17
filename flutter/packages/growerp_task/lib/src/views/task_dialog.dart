@@ -226,6 +226,7 @@ class TaskDialogState extends State<TaskDialog> {
                           key: const Key('taskDropDown'),
                           selectedItem: _selectedWorkflow,
                           popupProps: PopupProps.menu(
+                            isFilterOnline: true,
                             showSearchBox: true,
                             searchFieldProps: TextFieldProps(
                               autofocus: true,

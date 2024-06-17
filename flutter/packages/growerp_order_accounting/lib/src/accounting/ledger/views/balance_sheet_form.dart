@@ -169,6 +169,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                           key: const Key('periodDropDown'),
                           selectedItem: _selectedPeriod,
                           popupProps: PopupProps.menu(
+                            isFilterOnline: true,
                             showSearchBox: true,
                             searchFieldProps: TextFieldProps(
                               autofocus: true,

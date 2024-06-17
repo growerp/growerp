@@ -42,17 +42,20 @@ void main() {
         clear: true); // use data from previous run, ifnone same as true
     // prepare
     await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "categories": categories.sublist(0, 2),
       "products": products.sublist(0, 3),
-      "users": customers.sublist(0, 2)
+      "companies": customerCompanies,
     });
     await InvoiceTest.selectSalesInvoices(tester);
-    await InvoiceTest.addInvoices(tester, salesInvoices.sublist(0, 1));
-    await InvoiceTest.updateInvoices(tester, salesInvoices.sublist(1, 2));
+    await InvoiceTest.addInvoices(tester, salesInvoices.sublist(0, 2));
+    await InvoiceTest.updateInvoices(tester, salesInvoices.sublist(2, 4));
+    await InvoiceTest.deleteLastInvoice(tester);
     await InvoiceTest.sendOrApproveInvoices(tester);
     await PaymentTest.selectSalesPayments(tester);
-    await PaymentTest.approvePayments(tester);
-    await PaymentTest.checkPayments(tester);
+    await InvoiceTest.approveInvoicePayments(tester);
+    await InvoiceTest.completeInvoicePayments(tester);
+    await InvoiceTest.checkInvoicePaymentsComplete(tester);
+    await InvoiceTest.selectSalesInvoices(tester);
+    await InvoiceTest.checkInvoicesComplete(tester);
     await TransactionTest.selectTransactions(tester);
     await TransactionTest.checkTransactionsComplete(tester);
   });

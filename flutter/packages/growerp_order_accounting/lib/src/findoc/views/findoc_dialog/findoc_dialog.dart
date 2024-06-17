@@ -272,6 +272,7 @@ class MyFinDocState extends State<FinDocPage> {
                       enabled: !readOnly,
                       selectedItem: _selectedCompany,
                       popupProps: PopupProps.menu(
+                        isFilterOnline: true,
                         showSearchBox: true,
                         searchFieldProps: TextFieldProps(
                           autofocus: true,
@@ -311,6 +312,7 @@ class MyFinDocState extends State<FinDocPage> {
                               (_companyBloc.state.data as Companies).companies);
                         });
                       },
+                      compareFn: (item, sItem) => item.partyId == sItem.partyId,
                       onChanged: (Company? newValue) {
                         setState(() {
                           _selectedCompany = newValue;
@@ -420,6 +422,8 @@ class MyFinDocState extends State<FinDocPage> {
                   enabled: !readOnly,
                   selectedItem: _selectedCompany,
                   popupProps: PopupProps.menu(
+                    isFilterOnline: true,
+                    showSelectedItems: true,
                     showSearchBox: true,
                     searchFieldProps: TextFieldProps(
                       autofocus: true,
@@ -455,10 +459,9 @@ class MyFinDocState extends State<FinDocPage> {
                           (_companyBloc.state.data as Companies).companies);
                     });
                   },
+                  compareFn: (item, sItem) => item.partyId == sItem.partyId,
                   onChanged: (Company? newValue) {
-                    setState(() {
-                      _selectedCompany = newValue;
-                    });
+                    _selectedCompany = newValue;
                   },
                 )
               ],

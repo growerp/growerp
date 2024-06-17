@@ -98,6 +98,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
               DropdownSearch<User>(
                 key: const Key('userDropDown'),
                 popupProps: PopupProps.menu(
+                  isFilterOnline: true,
                   showSearchBox: true,
                   searchFieldProps: TextFieldProps(
                     autofocus: true,

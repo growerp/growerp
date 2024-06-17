@@ -50,7 +50,7 @@ void main() {
     await OrderTest.checkRentalSalesOrderBlocDates(tester);
     await OrderTest.approveOrders(tester);
     await PaymentTest.selectSalesPayments(tester);
-    await OrderTest.approvePayments(tester);
+    await OrderTest.approveOrderPayments(tester);
     await OrderTest.checkOrderPaymentsComplete(tester);
     await CommonTest.gotoMainMenu(tester);
     await OrderTest.selectSalesOrders(tester);

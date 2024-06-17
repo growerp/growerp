@@ -85,6 +85,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                         key: const Key('periodDropDown'),
                         selectedItem: _selectedPeriod,
                         popupProps: PopupProps.menu(
+                          isFilterOnline: true,
                           showSearchBox: true,
                           searchFieldProps: TextFieldProps(
                             autofocus: true,
