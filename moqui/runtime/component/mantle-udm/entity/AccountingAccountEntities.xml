@@ -444,6 +444,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <!-- The basic process is: In Process, Finalized/Approved, Sent (optional), Payment Received or Write Off -->
             <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="InvoiceInProcess" toStatusId="InvoiceFinalized" transitionName="Finalize"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="InvoiceInProcess" toStatusId="InvoiceSent" transitionName="Send"/><!-- added for growerp -->
             <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="InvoiceFinalized" toStatusId="InvoiceSent" transitionName="Send"/>
 
             <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="InvoiceFinalized" toStatusId="InvoicePmtRecvd" transitionName="Receive Payment"/>
