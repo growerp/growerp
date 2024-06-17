@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -65,6 +66,100 @@ class FinDocTest {
         break;
 
       default:
+    }
+  }
+
+  /// create or update a finDoc type document (not shipment)
+  /// with header and product items
+  /// After add/update get the generated finDocId and productId's
+  /// after finish save the input list.
+  static Future<void> enterFinDocData(
+      WidgetTester tester, List<FinDoc> finDocs) async {
+    List<FinDoc> newFinDocs =
+        []; // with invoiceId added (when new) and productId's
+    for (final finDoc in finDocs) {
+      // add or modify?
+      if (finDoc.pseudoId == null) {
+        await CommonTest.tapByKey(tester, 'addNew');
+      } else {
+        await CommonTest.doNewSearch(tester, searchString: finDoc.pseudoId!);
+        expect(CommonTest.getTextField('topHeader').split('#')[1],
+            finDoc.pseudoId);
+      }
+      await CommonTest.checkWidgetKey(tester,
+          "FinDocDialog${finDoc.sales ? 'Sales' : 'Purchase'}${finDoc.docType!.toString()}");
+      // enter supplier/customer
+      await CommonTest.enterDropDownSearch(tester,
+          finDoc.sales ? 'customer' : 'supplier', finDoc.otherCompany!.name!);
+      if (finDoc.docType == FinDocType.order ||
+          finDoc.docType == FinDocType.invoice)
+        await CommonTest.enterText(tester, 'description', finDoc.description!);
+      // delete existing findoc items
+      await CommonTest.drag(tester, listViewName: 'listView');
+      // delete any existing items
+      while (tester.any(find.byKey(const Key("itemDelete0")))) {
+        await CommonTest.tapByKey(tester, "itemDelete0", seconds: 2);
+      }
+      // add new items
+      for (FinDocItem item in finDoc.items) {
+        await CommonTest.tapByKey(tester, 'addProduct', seconds: 1);
+        await CommonTest.checkWidgetKey(tester, 'addProductItemDialog');
+        await CommonTest.enterDropDownSearch(
+            tester, 'product', item.description!);
+        await CommonTest.enterText(tester, 'itemPrice', item.price.toString());
+        await CommonTest.enterText(
+            tester, 'itemQuantity', item.quantity.toString());
+        await CommonTest.drag(tester, listViewName: 'listView3');
+        await CommonTest.tapByKey(tester, 'ok');
+      }
+      // get productId's
+      await CommonTest.drag(tester, seconds: 2);
+      List<FinDocItem> newItems = [];
+      for (final (index, item) in finDoc.items.indexed) {
+        newItems.add(item.copyWith(
+            productId: CommonTest.getTextField('itemProductId$index')));
+      }
+      // update/create finDoc
+      await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
+      await CommonTest.waitForSnackbarToGo(tester);
+      // create new findoc with pseudoId when adding
+      newFinDocs.add(finDoc.copyWith(
+          pseudoId: finDoc.pseudoId != null
+              ? finDoc.pseudoId
+              : CommonTest.getTextField('id0'), // Id always added at the top
+          items: newItems));
+    }
+    await FinDocTest.saveFinDocs(newFinDocs);
+  }
+
+  /// check the entered data of a finDoc, company and products
+  static Future<void> checkFinDocDetail(
+      WidgetTester tester, FinDocType docType) async {
+    List<FinDoc> finDocs = await FinDocTest.getFinDocs(docType);
+    for (final finDoc in finDocs) {
+      await CommonTest.doNewSearch(tester, searchString: finDoc.pseudoId!);
+      expect(
+          CommonTest.getTextField('topHeader').split('#')[1], finDoc.pseudoId);
+      await CommonTest.checkWidgetKey(tester,
+          "FinDocDialog${finDoc.sales ? 'Sales' : 'Purchase'}${finDoc.docType!.toString()}");
+      // check supplier/customer
+      expect(
+          CommonTest.getDropdownSearch(finDoc.sales ? 'customer' : 'supplier'),
+          finDoc.otherCompany!.name!);
+      if (finDoc.docType == FinDocType.order ||
+          finDoc.docType == FinDocType.invoice)
+        expect(CommonTest.getTextFormField('description'), finDoc.description!);
+      for (final (index, item) in finDoc.items.indexed) {
+        expect(CommonTest.getTextField('itemProductId$index'), item.productId!);
+        expect(CommonTest.getTextField('itemDescription$index'),
+            item.description!);
+        expect(
+            CommonTest.getTextField('itemPrice$index'), item.price.currency());
+        if (!CommonTest.isPhone())
+          expect(CommonTest.getTextField('itemQuantity$index'),
+              item.quantity.toString());
+        await CommonTest.tapByKey(tester, 'cancel'); // cancel dialog
+      }
     }
   }
 
@@ -180,7 +275,7 @@ class FinDocTest {
         default:
       }
 
-      // cancel the last record in te list
+      // cancel the last record in te list when we have at least 2 records
       if (status == FinDocStatusVal.cancelled && oldFinDocs.length > 1) {
         // copy when not last record
         if (finDoc != oldFinDocs.lastOrNull) {
@@ -189,6 +284,7 @@ class FinDocTest {
         }
       }
 
+      // change status
       await CommonTest.doNewSearch(tester,
           searchString: id != null ? id : finDoc.pseudoId!,
           seconds: CommonTest.waitTime);
@@ -203,8 +299,11 @@ class FinDocTest {
         await CommonTest.tapByKey(tester, 'update', seconds: 2);
         await CommonTest.waitForSnackbarToGo(tester);
       } else {
-        expect(true, false, reason: 'Begin status not valid');
+        expect(true, false,
+            reason:
+                'Begin status: ${CommonTest.getDropdown('statusDropDown')} not valid');
       }
+
       // get related document numbers just for order,
       // transactions are saved by check completed
       await CommonTest.doNewSearch(tester,
@@ -222,46 +321,34 @@ class FinDocTest {
             invoiceId: invoiceId,
             shipmentId: shipmentId));
       }
-      if ((type == FinDocType.order && subType == FinDocType.payment)) {
-        expect(await CommonTest.getRelatedFindoc(tester, FinDocType.order),
-            finDoc.orderId);
-        expect(await CommonTest.getRelatedFindoc(tester, FinDocType.invoice),
-            finDoc.invoiceId);
-      }
-      if ((type == FinDocType.order && subType == FinDocType.invoice) ||
-          type == FinDocType.invoice && subType == null) {
-        if (type == FinDocType.order) {
+
+      if (status != FinDocStatusVal.cancelled) {
+        // not add cancelled record
+        if ((type == FinDocType.order && subType == FinDocType.payment)) {
+          expect(await CommonTest.getRelatedFindoc(tester, FinDocType.order),
+              finDoc.orderId);
+          expect(await CommonTest.getRelatedFindoc(tester, FinDocType.invoice),
+              finDoc.invoiceId);
+        }
+        if ((type == FinDocType.order && subType == FinDocType.invoice)) {
+          expect(await CommonTest.getRelatedFindoc(tester, FinDocType.order),
+              finDoc.orderId);
+          expect(await CommonTest.getRelatedFindoc(tester, FinDocType.payment),
+              finDoc.paymentId);
+        }
+        if ((type == FinDocType.order && subType == FinDocType.shipment)) {
           expect(await CommonTest.getRelatedFindoc(tester, FinDocType.order),
               finDoc.orderId);
         }
-        expect(await CommonTest.getRelatedFindoc(tester, FinDocType.payment),
-            finDoc.paymentId);
+        if (type == FinDocType.invoice && subType == null) {
+          String? paymentId =
+              await CommonTest.getRelatedFindoc(tester, FinDocType.payment);
+          newFinDocs.add(finDoc.copyWith(paymentId: paymentId));
+        }
       }
-      if ((type == FinDocType.order && subType == FinDocType.shipment)) {
-        expect(await CommonTest.getRelatedFindoc(tester, FinDocType.order),
-            finDoc.orderId);
-      }
+
       await CommonTest.tapByKey(tester, 'cancel');
     }
     await saveFinDocs(newFinDocs);
-  }
-
-  static Future<void> checkFinDocDetail(
-      WidgetTester tester, FinDocType docType) async {
-    List<FinDoc> finDocs = await FinDocTest.getFinDocs(docType);
-    for (final finDoc in finDocs) {
-      await CommonTest.doNewSearch(tester, searchString: finDoc.pseudoId!);
-      for (final (index, item) in finDoc.items.indexed) {
-        expect(CommonTest.getTextField('itemProductId$index'), item.productId!);
-        expect(CommonTest.getTextField('itemDescription$index'),
-            item.description!);
-        expect(
-            CommonTest.getTextField('itemPrice$index'), item.price.currency());
-        if (!CommonTest.isPhone())
-          expect(CommonTest.getTextField('itemQuantity$index'),
-              item.quantity.toString());
-        await CommonTest.tapByKey(tester, 'cancel'); // cancel dialog
-      }
-    }
   }
 }

@@ -181,6 +181,7 @@ class PaymentTest {
 
   /// approve payments
   static Future<void> approvePayments(WidgetTester tester) async {
+    // default approve
     await FinDocTest.changeStatusFinDocs(tester, FinDocType.payment);
   }
 

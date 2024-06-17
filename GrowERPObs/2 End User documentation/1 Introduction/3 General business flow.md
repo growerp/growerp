@@ -10,7 +10,7 @@ Every document has similar status in the order of:
 	4. Completed/posted
 	5. Cancelled
 
-## Purchasing
+## Purchasing Order
 
 	1. enter & approve/send purchase order --> creates:
 		1. 'approved/posted' invoice 
@@ -22,7 +22,7 @@ Every document has similar status in the order of:
 	3. approve/receive shipment when physical product --> creates:
 		1. 'completed/posted' shipment
 		2. purchase order 'completed' (when payment approved/send)
-## Sales
+## Sales order
 
 	1. enter & approve/receive sales order --> creates:
 		1. 'approved/send/posted' invoice
@@ -32,8 +32,20 @@ Every document has similar status in the order of:
 		1. posted shipment
 	4. complete/send shipment
 	5. approve/receive payment -> order completed
-	
-  
+
+## Sales Invoice
+
+## Purchase Invoice
+
+## Sales(Incoming) Payment
+
+	1. enter & approve sales Payment
+	2. complete payment -> posted transaction
+## Purchase(outgoing) Payment
+
+	1. enter & approve Purchase Payment
+	2. complete payment -> posted transaction
+
 ## End user actions
 
 Below an explanation of the user actions which are possible. All other actions referenced will be performed by the system.

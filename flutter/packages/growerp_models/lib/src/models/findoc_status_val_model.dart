@@ -41,7 +41,6 @@ enum FinDocStatusVal {
   static FinDocStatusVal? nextStatus(FinDocStatusVal currentStatus) {
     switch (currentStatus) {
       case inPreparation:
-        return created;
       case created:
         return approved;
       case approved:
@@ -73,7 +72,7 @@ enum FinDocStatusVal {
     if (currentStatus == null) currentStatus = created;
     switch (currentStatus) {
       case inPreparation:
-        return [inPreparation, created, cancelled];
+        return [inPreparation, approved, cancelled];
       case created:
         return [created, approved, cancelled];
       case approved:

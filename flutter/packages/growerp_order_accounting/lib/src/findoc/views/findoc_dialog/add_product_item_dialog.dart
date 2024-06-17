@@ -134,10 +134,10 @@ Future addProductItemDialog(BuildContext context) async {
                                                 });
                                                 if (newValue != null) {
                                                   priceController.text =
-                                                      newValue.listPrice == null
+                                                      newValue.price == null
                                                           ? ''
                                                           : newValue.price
-                                                              .toString();
+                                                              .currency();
                                                   itemDescriptionController
                                                           .text =
                                                       "${newValue.productName}";

@@ -464,33 +464,33 @@ List<Product> products = [
     //  image: Uint8List.fromList('R0lGODlhAQABAAAAACwAAAAAAQABAAA='.codeUnits),
     price: Decimal.parse('23.99'),
     listPrice: Decimal.parse('27.99'),
-    assetClassId: 'Hotel Room',
     categories: [categories[0]],
     productTypeId: productTypes[0], // must be zero: shippable good
     description: 'This is a dummy description of first product',
     useWarehouse: true,
+    assetClassId: "AsClsInventoryFin",
   ),
   Product(
     productName: 'This is product 2 : shippable',
     //  image: Uint8List.fromList('R0lGODlhAQABAAAAACwAAAAAAQABAAA='.codeUnits),
     price: Decimal.parse('73.99'),
     listPrice: Decimal.parse('73.99'),
-    assetClassId: 'Hotel Room',
     categories: [categories[0], categories[1]],
     productTypeId: productTypes[0], // must be zero: shippable good
     description: 'This is a dummy description of second product',
     useWarehouse: true,
+    assetClassId: "AsClsInventoryFin",
   ),
   Product(
     productName: 'This is product 3 : rental',
     //  image: Uint8List.fromList('R0lGODlhAQABAAAAACwAAAAAAQABAAA='.codeUnits),
     price: Decimal.parse('93.99'),
     listPrice: Decimal.parse('99.99'),
-    assetClassId: 'Hotel Room',
     categories: [categories[0]], // only category 0 or rental test fails
     productTypeId: productTypes[2],
     description: 'This is a dummy description of third product',
     useWarehouse: false,
+    assetClassId: "AsClsInventoryFin",
   ),
   Product(
     productName: 'This is product 4 : service',
@@ -501,6 +501,7 @@ List<Product> products = [
     productTypeId: productTypes[1],
     description: 'This is the fourth product to be deleted',
     useWarehouse: false,
+    assetClassId: "AsClsInventoryFin",
   ),
 ];
 
@@ -570,7 +571,7 @@ List<FinDoc> purchaseInvoices = [
       sales: false,
       docType: FinDocType.invoice,
       description: 'Invoice 1',
-      otherUser: suppliers[0],
+      otherCompany: supplierCompanies[0],
       grandTotal: Decimal.parse('144.2'),
       items: [
         FinDocItem(
@@ -582,7 +583,7 @@ List<FinDoc> purchaseInvoices = [
       sales: false,
       docType: FinDocType.invoice,
       description: 'Invoice 2',
-      otherUser: suppliers[1],
+      otherCompany: supplierCompanies[1],
       grandTotal: Decimal.parse('688.4'),
       items: [
         FinDocItem(
@@ -594,7 +595,7 @@ List<FinDoc> purchaseInvoices = [
       sales: false,
       docType: FinDocType.invoice,
       description: 'Invoice 3',
-      otherUser: suppliers[1],
+      otherCompany: supplierCompanies[1],
       grandTotal: Decimal.parse('448.4'),
       items: [
         FinDocItem(
@@ -606,7 +607,7 @@ List<FinDoc> purchaseInvoices = [
       sales: false,
       docType: FinDocType.invoice,
       description: 'Invoice 4',
-      otherUser: suppliers[1],
+      otherCompany: supplierCompanies[1],
       grandTotal: Decimal.parse('112.10'),
       items: [
         FinDocItem(
@@ -618,13 +619,25 @@ List<FinDoc> purchaseInvoices = [
       sales: false,
       docType: FinDocType.invoice,
       description: 'Invoice 5',
-      otherUser: suppliers[0],
+      otherCompany: supplierCompanies[0],
       grandTotal: Decimal.parse('1660.5'),
       items: [
         FinDocItem(
             description: products[1].productName,
             quantity: Decimal.parse('50'),
             price: Decimal.parse('33.21')),
+      ]),
+  FinDoc(
+      sales: false,
+      docType: FinDocType.invoice,
+      description: 'Invoice 6',
+      otherCompany: supplierCompanies[1],
+      grandTotal: Decimal.parse('1660.55'),
+      items: [
+        FinDocItem(
+            description: products[1].productName,
+            quantity: Decimal.parse('50'),
+            price: Decimal.parse('33.22')),
       ]),
 ];
 
@@ -766,7 +779,7 @@ List<FinDoc> salesInvoices = [
       sales: true,
       docType: FinDocType.invoice,
       description: 'The first sales invoice',
-      otherUser: customers[0],
+      otherCompany: customerCompanies[0],
       grandTotal: Decimal.parse('3439.4'),
       items: [
         FinDocItem(
@@ -784,7 +797,7 @@ List<FinDoc> salesInvoices = [
       sales: true,
       docType: FinDocType.invoice,
       description: 'The second sales invoice',
-      otherUser: customers[1],
+      otherCompany: customerCompanies[1],
       grandTotal: Decimal.parse('1939.4'),
       items: [
         FinDocItem(
@@ -805,7 +818,7 @@ List<FinDoc> rentalSalesOrders = [
       sales: false,
       docType: FinDocType.order,
       description: 'The first rental sales order',
-      otherUser: customers[0],
+      otherCompany: customerCompanies[0],
       items: [
         FinDocItem(
           description: products[2].productName,

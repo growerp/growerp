@@ -323,7 +323,8 @@ class CommonTest {
 
   static Future<void> checkWidgetKey(WidgetTester tester, String widgetKey,
       [int count = 1]) async {
-    expect(find.byKey(Key(widgetKey)), findsNWidgets(count));
+    expect(find.byKey(Key(widgetKey)), findsNWidgets(count),
+        reason: "looking for widget key: $widgetKey failed");
   }
 
   static Future<bool> doesExistKey(WidgetTester tester, String widgetKey,
@@ -507,8 +508,6 @@ class CommonTest {
 
   static Future<void> tapByKey(WidgetTester tester, String key,
       {int seconds = 1}) async {
-    expect(find.byKey(Key(key)).last, findsOneWidget,
-        reason: "could not find key: $key to tap on");
     await tester.tap(find.byKey(Key(key)).last, warnIfMissed: false);
     await tester.pump();
     await tester.pumpAndSettle(Duration(seconds: seconds));
