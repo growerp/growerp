@@ -1235,7 +1235,7 @@ List<FinDoc> transactions = [
   ),
   FinDoc(
     sales: false,
-    description: "first transaction, some expenses",
+    description: "second transaction, some expenses",
     isPosted: false,
     grandTotal: Decimal.parse('100'),
     items: [
@@ -1251,7 +1251,7 @@ List<FinDoc> transactions = [
   ),
   FinDoc(
     sales: false,
-    description: "second transaction, some revenue",
+    description: "third transaction, some revenue",
     isPosted: false,
     grandTotal: Decimal.parse('300'),
     items: [
@@ -1267,7 +1267,7 @@ List<FinDoc> transactions = [
   ),
   FinDoc(
     sales: false,
-    description: "second transaction, some expenses",
+    description: "fourth transaction, some expenses",
     isPosted: false,
     grandTotal: Decimal.parse('400'),
     items: [

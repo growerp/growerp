@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -42,10 +43,10 @@ class TransactionTest {
       WidgetTester tester, List<FinDoc> transactions) async {
     SaveTest test = await PersistFunctions.getTest();
     if (test.transactions[0].description != transactions[0].description) {
-      // copy transactionId
+      // copy pseudoId
       for (int x = 0; x < transactions.length; x++) {
-        transactions[x] = transactions[x]
-            .copyWith(transactionId: test.transactions[x].transactionId);
+        transactions[x] =
+            transactions[x].copyWith(pseudoId: test.transactions[x].pseudoId);
       }
       test = test.copyWith(
           transactions: await enterTransactionData(tester, transactions));
@@ -72,26 +73,22 @@ class TransactionTest {
 */
   static Future<List<FinDoc>> enterTransactionData(
       WidgetTester tester, List<FinDoc> transactions) async {
-    List<FinDoc> newTransactions = []; // with transactionId added
-    for (final (index, transaction) in transactions.indexed) {
-      if (transaction.transactionId == null) {
+    List<FinDoc> newTransactions = []; // with pseudoId added
+    for (final transaction in transactions) {
+      if (transaction.pseudoId == null) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
         await CommonTest.doNewSearch(tester,
-            searchString: transaction.transactionId!);
+            searchString: transaction.pseudoId!);
         expect(CommonTest.getTextField('topHeader').split('#')[1],
-            transaction.transactionId);
+            transaction.pseudoId);
       }
       await CommonTest.checkWidgetKey(tester, "FinDocDialogSalesTransaction");
       await CommonTest.enterText(
           tester, 'description', transaction.description!);
       // delete existing transaction items
-      SaveTest test = await PersistFunctions.getTest();
-      if (test.transactions.isNotEmpty &&
-          test.transactions[index].items.isNotEmpty) {
-        for (int x = 0; x < test.transactions[index].items.length; x++) {
-          await CommonTest.tapByKey(tester, 'itemDelete0');
-        }
+      while (tester.any(find.byKey(const Key("itemDelete0")))) {
+        await CommonTest.tapByKey(tester, "itemDelete0", seconds: 2);
       }
       // items
       for (FinDocItem item in transaction.items) {
@@ -99,8 +96,9 @@ class TransactionTest {
         await CommonTest.checkWidgetKey(tester, 'addTransactionItemDialog');
         await CommonTest.enterDropDownSearch(
             tester, 'glAccount', item.glAccount!.accountCode!);
-        await CommonTest.tapByKey(tester, item.isDebit! ? 'debit' : 'credit');
-        await CommonTest.enterText(tester, 'price', item.price.currency());
+        await CommonTest.tapByKey(tester, item.isDebit! ? 'debit' : 'credit',
+            seconds: 2);
+        await CommonTest.enterText(tester, 'price', item.price.toString());
         await CommonTest.tapByKey(tester, 'ok');
       }
       await CommonTest.drag(tester, seconds: 2);
@@ -108,8 +106,9 @@ class TransactionTest {
       await CommonTest.waitForSnackbarToGo(tester);
       // save transactionid if required
       newTransactions.add(transaction.copyWith(
-          transactionId:
-              transaction.transactionId ?? CommonTest.getTextField('id0')));
+          pseudoId: transaction.pseudoId != null
+              ? transaction.pseudoId
+              : CommonTest.getTextField('id0')));
     }
     return newTransactions;
   }
@@ -117,13 +116,14 @@ class TransactionTest {
   static Future<void> checkTransaction(
       WidgetTester tester, List<FinDoc> transactions) async {
     for (FinDoc transaction in transactions) {
-      await CommonTest.doNewSearch(tester,
-          searchString: transaction.transactionId!);
+      await CommonTest.doNewSearch(tester, searchString: transaction.pseudoId!);
       expect(CommonTest.getTextField('grandTotal'),
           contains(transaction.grandTotal.currency()));
       expect(
           transaction.description, CommonTest.getTextFormField('description'));
-      expect(transaction.isPosted, CommonTest.getRadio('isPosted'));
+      expect(transaction.isPosted, CommonTest.getRadio('isPosted'),
+          reason:
+              "should be ${transaction.isPosted! ? 'posted' : 'not posted'} but is not?");
       for (final (index, item) in transaction.items.indexed) {
         expect(item.glAccount!.accountCode!,
             CommonTest.getTextField('accountCode$index'));
@@ -140,8 +140,7 @@ class TransactionTest {
   static Future<void> postTransactions(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     for (FinDoc transaction in test.transactions) {
-      await CommonTest.doNewSearch(tester,
-          searchString: transaction.transactionId!);
+      await CommonTest.doNewSearch(tester, searchString: transaction.pseudoId!);
       await CommonTest.tapByKey(tester, 'isPosted');
       await CommonTest.tapByKey(tester, 'header');
       await CommonTest.tapByKey(tester, 'update');
@@ -151,8 +150,7 @@ class TransactionTest {
   static Future<void> checkTransactionsComplete(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     for (FinDoc transaction in test.transactions) {
-      await CommonTest.doNewSearch(tester,
-          searchString: transaction.transactionId!);
+      await CommonTest.doNewSearch(tester, searchString: transaction.pseudoId!);
       expect(CommonTest.getRadio('isPosted'), true,
           reason: "posted field should be true now");
       await CommonTest.tapByKey(tester, 'cancel');

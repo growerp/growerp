@@ -393,6 +393,16 @@ class MyFinDocState extends State<FinDocPage> {
               children: [
                 Row(
                   children: [
+                    SizedBox(
+                      width: 80,
+                      child: TextFormField(
+                        key: const Key('pseudoId'),
+                        decoration: const InputDecoration(labelText: 'Id'),
+                        controller: _pseudoIdController,
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    SizedBox(width: 10),
                     Expanded(
                       child: TextFormField(
                         key: const Key('description'),
@@ -400,6 +410,60 @@ class MyFinDocState extends State<FinDocPage> {
                         decoration: InputDecoration(
                             labelText: '${finDoc.docType} Description'),
                         controller: _descriptionController,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownSearch<Company>(
+                        enabled: !readOnly,
+                        selectedItem: _selectedCompany,
+                        popupProps: PopupProps.menu(
+                          isFilterOnline: true,
+                          showSelectedItems: true,
+                          showSearchBox: true,
+                          searchFieldProps: TextFieldProps(
+                            autofocus: true,
+                            decoration: InputDecoration(
+                                labelText:
+                                    "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name"),
+                            controller: _companySearchBoxController,
+                          ),
+                          title: popUp(
+                            context: context,
+                            title:
+                                "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
+                            height: 50,
+                          ),
+                        ),
+                        dropdownDecoratorProps: DropDownDecoratorProps(
+                          dropdownSearchDecoration: InputDecoration(
+                            labelText: 'Company',
+                          ),
+                        ),
+                        key: Key('company'),
+                        itemAsString: (Company? u) => "${u!.name ?? ''}",
+                        asyncItems: (String filter) {
+                          _companyBloc.add(GetDataEvent(
+                              () => context.read<RestClient>().getCompany(
+                                    searchString: filter,
+                                    limit: 3,
+                                    isForDropDown: true,
+                                  )));
+                          return Future.delayed(
+                              const Duration(milliseconds: 150), () {
+                            return Future.value(
+                                (_companyBloc.state.data as Companies)
+                                    .companies);
+                          });
+                        },
+                        compareFn: (item, sItem) =>
+                            item.partyId == sItem.partyId,
+                        onChanged: (Company? newValue) {
+                          _selectedCompany = newValue;
+                        },
                       ),
                     ),
                     Column(children: [
@@ -417,52 +481,6 @@ class MyFinDocState extends State<FinDocPage> {
                       ),
                     ])
                   ],
-                ),
-                DropdownSearch<Company>(
-                  enabled: !readOnly,
-                  selectedItem: _selectedCompany,
-                  popupProps: PopupProps.menu(
-                    isFilterOnline: true,
-                    showSelectedItems: true,
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      autofocus: true,
-                      decoration: InputDecoration(
-                          labelText:
-                              "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name"),
-                      controller: _companySearchBoxController,
-                    ),
-                    title: popUp(
-                      context: context,
-                      title:
-                          "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
-                      height: 50,
-                    ),
-                  ),
-                  dropdownDecoratorProps: DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: 'Company',
-                    ),
-                  ),
-                  key: Key('company'),
-                  itemAsString: (Company? u) => "${u!.name ?? ''}",
-                  asyncItems: (String filter) {
-                    _companyBloc.add(GetDataEvent(
-                        () => context.read<RestClient>().getCompany(
-                              searchString: filter,
-                              limit: 3,
-                              isForDropDown: true,
-                            )));
-                    return Future.delayed(const Duration(milliseconds: 150),
-                        () {
-                      return Future.value(
-                          (_companyBloc.state.data as Companies).companies);
-                    });
-                  },
-                  compareFn: (item, sItem) => item.partyId == sItem.partyId,
-                  onChanged: (Company? newValue) {
-                    _selectedCompany = newValue;
-                  },
                 )
               ],
             )));
@@ -857,13 +875,13 @@ class MyFinDocState extends State<FinDocPage> {
         String? classificationId,
         FinDocItem? item,
         BuildContext? context}) {
-      return ['Account', 'Debit', 'Credit', if (!readOnly) 'del.'];
+      return ['Account', 'Debit', 'Credit', 'ProdId', if (!readOnly) 'del.'];
     }
 
     // field lengths
     List<double> getItemFieldWidth(
         {int? itemIndex, FinDocItem? item, BuildContext? context}) {
-      return [10, 20, 20, 30];
+      return [12, 12, 12, 15, 15];
     }
 
     // fields content, using strings index not required
@@ -876,6 +894,7 @@ class MyFinDocState extends State<FinDocPage> {
             key: Key('debit$itemIndex')),
         Text(!item.isDebit! ? item.price.currency() : '',
             key: Key('credit$itemIndex')),
+        Text(item.productId ?? '', key: Key('itemProductId$itemIndex')),
       ];
     }
 
@@ -904,7 +923,7 @@ class MyFinDocState extends State<FinDocPage> {
           )
         ];
 
-    var padding = SpanPadding(trailing: 15, leading: 15);
+    var padding = SpanPadding(trailing: 10, leading: 10);
     SpanDecoration? getBackGround(BuildContext context, int index) {
       return index == 0
           ? SpanDecoration(
@@ -926,7 +945,7 @@ class MyFinDocState extends State<FinDocPage> {
         ? const Text("no items yet")
         : Flexible(
             child: Padding(
-              padding: const EdgeInsets.only(left: 20.0),
+              padding: const EdgeInsets.only(left: 10.0),
               child: TableView.builder(
                 diagonalDragBehavior: DiagonalDragBehavior.free,
                 verticalDetails:
