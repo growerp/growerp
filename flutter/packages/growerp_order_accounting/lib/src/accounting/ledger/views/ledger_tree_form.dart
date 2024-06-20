@@ -13,7 +13,6 @@
  */
 
 import 'package:decimal/decimal.dart';
-import 'package:decimal/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_simple_treeview/flutter_simple_treeview.dart';
@@ -46,6 +45,7 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
   Iterable<TreeNode> _nodes = [];
   late LedgerBloc _ledgerBloc;
   late bool expanded;
+  late String currencyId;
 
   @override
   void initState() {
@@ -54,6 +54,13 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
     _ledgerBloc = context.read<LedgerBloc>();
     _ledgerBloc.add(const LedgerFetch(ReportType.ledger));
     expanded = false;
+    currencyId = context
+        .read<AuthBloc>()
+        .state
+        .authenticate!
+        .company!
+        .currency!
+        .currencyId!;
   }
 
   @override
@@ -74,16 +81,14 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
             SizedBox(
                 width: 100,
                 child: Text(
-                    Constant.numberFormat.format(DecimalIntl(
-                        Decimal.parse(glAccount.postedBalance.toString()) +
-                            Decimal.parse(glAccount.rollUp.toString()))),
+                    (Decimal.parse(glAccount.postedBalance.toString()) +
+                            Decimal.parse(glAccount.rollUp.toString()))
+                        .currency(currencyId: currencyId),
                     textAlign: TextAlign.right)),
             if (isLargerThanPhone(context))
               SizedBox(
                   width: 100,
-                  child: Text(
-                      Constant.numberFormat.format(DecimalIntl(
-                          Decimal.parse(glAccount.rollUp.toString()))),
+                  child: Text(glAccount.rollUp.currency(currencyId: currencyId),
                       textAlign: TextAlign.right))
           ]),
           children: glAccount.children.map(getTreeNode).toList(),

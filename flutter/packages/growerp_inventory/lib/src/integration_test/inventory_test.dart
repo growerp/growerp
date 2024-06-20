@@ -97,23 +97,28 @@ class InventoryTest {
     SaveTest test = await PersistFunctions.getTest();
     List<FinDoc> orders = test.orders;
     for (final order in orders) {
-      // find asset for order product
-      final asset = assets.firstWhere(// from test data
-          (el) => el.product?.productName == order.items[0].description);
-      // find location
-      await CommonTest.doSearch(tester,
-          searchString: asset.location!.locationName!);
-      late Decimal newQoh;
-      if (order.sales == false) {
-        newQoh = asset.quantityOnHand! + order.items[0].quantity!;
-      } else {
-        newQoh = asset.quantityOnHand! - order.items[0].quantity!;
+      for (final item in order.items) {
+        // find asset for order product
+        final asset = assets.firstWhere(// from test data
+            (el) => el.product?.productName == item.description);
+        // find location (was saved in receive shipments)
+        await CommonTest.doSearch(tester,
+            searchString: item.asset!.location!.locationName!);
+        late Decimal newQoh;
+        if (order.sales == false) {
+          newQoh = asset.quantityOnHand! + item.quantity!;
+        } else {
+          newQoh = asset.quantityOnHand! - item.quantity!;
+        }
+        expect(newQoh, Decimal.parse(CommonTest.getTextField('qoh0')),
+            reason: 'new inventory quantity wrong: '
+                ' orderid: ${order.pseudoId} '
+                ' product name: ${item.description} '
+                'asset quantity: ${asset.quantityOnHand.toString()} '
+                'order quantity: ${item.quantity.toString()}'
+                'actual total quantity: ${CommonTest.getTextField('qoh0')} '
+                'location: ${item.asset?.location?.locationName}');
       }
-      expect(newQoh, Decimal.parse(CommonTest.getTextField('qoh0')),
-          reason: 'new inventory quantity wrong: old: '
-              '${asset.quantityOnHand.toString()} '
-              'order: ${order.items[0].quantity.toString()}'
-              'actual: ${CommonTest.getTextField('qoh0')}');
     }
   }
 }

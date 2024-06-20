@@ -115,6 +115,7 @@ class MyFinDocState extends State<FinDocPage> {
   late bool isPhone;
   late bool readOnly;
   late FinDocStatusVal _updatedStatus;
+  late String currencyId;
 
   @override
   void initState() {
@@ -122,6 +123,13 @@ class MyFinDocState extends State<FinDocPage> {
     finDoc = widget.finDoc;
     finDocUpdated = finDoc;
     classificationId = context.read<String>();
+    currencyId = context
+        .read<AuthBloc>()
+        .state
+        .authenticate!
+        .company!
+        .currency!
+        .currencyId!;
     readOnly = finDoc.status == null
         ? false
         : FinDocStatusVal.statusFixed(finDoc.status!);
@@ -195,7 +203,7 @@ class MyFinDocState extends State<FinDocPage> {
             if (finDoc.docType != FinDocType.shipment)
               Text(
                   "Items# ${finDocUpdated.items.length}   "
-                  "Grand total : ${finDocUpdated.grandTotal.currency()}",
+                  "Grand total : ${finDocUpdated.grandTotal.currency(currencyId: currencyId)}",
                   key: const Key('grandTotal')),
             const SizedBox(height: 10),
             if (!readOnly) generalButtons(),
@@ -678,7 +686,7 @@ class MyFinDocState extends State<FinDocPage> {
         if (!isPhone)
           Text("${item.quantity}",
               textAlign: TextAlign.center, key: Key('itemQuantity$itemIndex')),
-        Text(item.price!.currency(),
+        Text(item.price!.currency(currencyId: currencyId),
             textAlign: TextAlign.right, key: Key('itemPrice$itemIndex')),
         if (!isPhone) // subtotal
           Text((item.price! * (item.quantity ?? Decimal.parse('1'))).toString(),
@@ -766,7 +774,13 @@ class MyFinDocState extends State<FinDocPage> {
         String? classificationId,
         FinDocItem? item,
         BuildContext? context}) {
-      return ["#", "ProdId", "Description", "Qty", ' '];
+      return [
+        "#",
+        "ProdId",
+        "Description",
+        "Qty",
+        finDoc.status == FinDocStatusVal.completed ? "Loc" : ' '
+      ];
     }
 
     // field lengths
@@ -792,6 +806,10 @@ class MyFinDocState extends State<FinDocPage> {
             key: Key('itemDescription${itemIndex}'), textAlign: TextAlign.left),
         Text("${item.quantity}",
             textAlign: TextAlign.center, key: Key('itemQuantity${itemIndex}')),
+        if (finDoc.status == FinDocStatusVal.completed)
+          Text("${item.asset?.location?.locationName}",
+              textAlign: TextAlign.center,
+              key: Key('itemLocation${itemIndex}')),
       ];
     }
 
@@ -890,9 +908,9 @@ class MyFinDocState extends State<FinDocPage> {
         {int? itemIndex, BuildContext? context}) {
       return [
         Text(item.glAccount!.accountCode!, key: Key('accountCode$itemIndex')),
-        Text((item.isDebit! ? item.price.currency() : ''),
+        Text((item.isDebit! ? item.price.currency(currencyId: currencyId) : ''),
             key: Key('debit$itemIndex')),
-        Text(!item.isDebit! ? item.price.currency() : '',
+        Text(!item.isDebit! ? item.price.currency(currencyId: currencyId) : '',
             key: Key('credit$itemIndex')),
         Text(item.productId ?? '', key: Key('itemProductId$itemIndex')),
       ];

@@ -41,9 +41,7 @@ class FinDocItem with _$FinDocItem {
     Decimal? price,
     GlAccount? glAccount,
     bool? isDebit,
-    String? assetId,
-    String? assetName,
-    Location? location,
+    Asset? asset,
     @DateTimeConverter() DateTime? rentalFromDate,
     @DateTimeConverter() DateTime? rentalThruDate,
   }) = _FinDocItem;

@@ -51,7 +51,8 @@ class AssetTest {
       } else {
         await CommonTest.doSearch(tester, searchString: asset.assetId);
         await CommonTest.tapByKey(tester, 'name0');
-        expect(CommonTest.getTextField('header').split('#')[1], asset.assetId);
+        expect(
+            CommonTest.getTextField('topHeader').split('#')[1], asset.assetId);
       }
       await CommonTest.checkWidgetKey(tester, 'AssetDialog');
       await CommonTest.tapByKey(
@@ -94,7 +95,7 @@ class AssetTest {
       expect(CommonTest.getDropdownSearch('productDropDown'),
           asset.product!.productName!);
       expect(CommonTest.getDropdown('statusDropDown'), asset.statusId);
-      var id = CommonTest.getTextField('header').split('#')[1];
+      var id = CommonTest.getTextField('topHeader').split('#')[1];
       newAssets.add(asset.copyWith(assetId: id));
       await CommonTest.tapByKey(tester, 'cancel');
     }

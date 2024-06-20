@@ -202,6 +202,11 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.call_received),
       ),
       TabItem(
+        form: const AssetList(),
+        label: 'Assets',
+        icon: const Icon(Icons.money),
+      ),
+      TabItem(
         form: const LocationList(
           key: Key('Locations'),
         ),

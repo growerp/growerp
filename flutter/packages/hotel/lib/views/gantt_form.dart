@@ -92,15 +92,18 @@ class _GanttFormState extends State<GanttForm> {
               reservations
                   .add(FinDoc(shipmentId: (itemCount++).toString(), items: [
                 FinDocItem(
-                    assetId: fullDate.productId,
-                    assetName: fullDate.productName,
+                    asset: Asset(
+                        assetId: fullDate.productId,
+                        assetName: fullDate.productName),
                     description: '!!${fullDate.fullDates.join(',')}')
               ])); // space
             }
 
             reservations.add(FinDoc(
                 shipmentId: (itemCount++).toString(),
-                items: [FinDocItem(assetId: '', assetName: '')])); // space
+                items: [
+                  FinDocItem(asset: Asset(assetId: '', assetName: ''))
+                ])); // space
 
             // group all open reservations by Room number as a single item
             assets = List.of(assets);
@@ -114,7 +117,7 @@ class _GanttFormState extends State<GanttForm> {
                     finDoc.status == FinDocStatusVal.approved) {
                   // create a findoc for every item
                   for (var item in finDoc.items) {
-                    if (item.assetId == asset.assetId &&
+                    if (item.asset!.assetId == asset.assetId &&
                         item.rentalFromDate != null &&
                         item.rentalThruDate != null) {
                       reservations.add(finDoc.copyWith(
@@ -125,10 +128,14 @@ class _GanttFormState extends State<GanttForm> {
                 }
               }
               if (!hasReservation) {
-                reservations.add(
-                    FinDoc(shipmentId: itemCount.toString(), items: [
-                  FinDocItem(assetId: asset.assetId, assetName: asset.assetName)
-                ]));
+                reservations.add(FinDoc(
+                    shipmentId: itemCount.toString(),
+                    items: [
+                      FinDocItem(
+                          asset: Asset(
+                              assetId: asset.assetId,
+                              assetName: asset.assetName))
+                    ]));
               }
             }
             DateTime now = CustomizableDateTime.current;
@@ -348,7 +355,7 @@ class _GanttFormState extends State<GanttForm> {
       alignment: Alignment.centerLeft,
       child: Text(roomReservations.isEmpty
           ? ''
-          : roomReservations[0].items[0].assetName ?? '??'),
+          : roomReservations[0].items[0].asset!.assetName ?? '??'),
     );
   }
 

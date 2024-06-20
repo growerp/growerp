@@ -106,8 +106,8 @@ class FinDoc with _$FinDoc {
       //    "rental: ${items[0].rentalFromDate?.toString().substring(0, 10)}/${items[0].rentalThruDate?.toString().substring(0, 10)} st:$status!"
       "$docType# $pseudoId/$orderId!/$shipmentId/$invoiceId!/$paymentId! s/p: ${salesString()} "
       "Date: $creationDate! $description! items: ${items.length} "
-      "asset: ${items.isNotEmpty ? items[0].assetName : ''} "
-      "${items.isNotEmpty ? items[0].assetId : ''}"
+      "asset: ${items.isNotEmpty ? items[0].asset?.assetName : ''} "
+      "${items.isNotEmpty ? items[0].asset?.assetId : ''}"
       "descr: ${items.isNotEmpty ? items[0].description : ''} ";
 //      "status: $status! otherUser: $otherUser! Items: ${items!.length}";
 

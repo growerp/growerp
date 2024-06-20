@@ -34,7 +34,13 @@ Future addProductItemDialog(BuildContext context) async {
   GlAccountBloc glAccountBloc = context.read<GlAccountBloc>();
   DataFetchBloc<Products> productBloc = context.read<DataFetchBloc<Products>>();
   String classificationId = context.read<String>();
-
+  String currencyId = context
+      .read<AuthBloc>()
+      .state
+      .authenticate!
+      .company!
+      .currency!
+      .currencyId!;
   return showDialog<FinDocItem>(
       context: context,
       barrierDismissible: true,
@@ -133,11 +139,13 @@ Future addProductItemDialog(BuildContext context) async {
                                                   selectedProduct = newValue;
                                                 });
                                                 if (newValue != null) {
-                                                  priceController.text =
-                                                      newValue.price == null
-                                                          ? ''
-                                                          : newValue.price
-                                                              .currency();
+                                                  priceController
+                                                      .text = newValue.price ==
+                                                          null
+                                                      ? ''
+                                                      : newValue.price.currency(
+                                                          currencyId:
+                                                              currencyId);
                                                   itemDescriptionController
                                                           .text =
                                                       "${newValue.productName}";

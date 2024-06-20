@@ -264,11 +264,13 @@ along with this software (see the LICENSE.md file). If not, see
                                 <parameter name="accountCode" />
                                 <parameter name="accountName" />
                             </parameter>
-                            <parameter name="assetId" />
-                            <parameter name="assetName" />
-                            <parameter name="location" type="Map">
-                                <parameter name="locationId" />
-                                <parameter name="locationName" />
+                            <parameter name="asset" type="Map">
+                                <parameter name="assetId" />
+                                <parameter name="assetName" />
+                                <parameter name="location" type="Map">
+                                    <parameter name="locationId" />
+                                    <parameter name="locationName" />
+                                </parameter>
                             </parameter>
                             <parameter name="rentalFromDate" />
                             <parameter name="rentalThruDate" />
@@ -1185,9 +1187,13 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="glAccount">
                         <parameter name="glAccountId" />
                     </parameter>
-                    <parameter name="assetId" />
-                    <parameter name="location" type="Map">
-                        <parameter name="locationId" />
+                    <parameter name="asset" type="Map">
+                        <parameter name="assetId" />
+                        <parameter name="assetName" />
+                        <parameter name="location" type="Map">
+                            <parameter name="locationId" />
+                            <parameter name="locationName" />
+                        </parameter>
                     </parameter>
                     <parameter name="rentalFromDate" />
                     <parameter name="rentalThruDate" />
@@ -1271,11 +1277,13 @@ along with this software (see the LICENSE.md file). If not, see
                             <parameter name="accountCode" />
                             <parameter name="accountName" />
                         </parameter>
-                        <parameter name="assetId" />
-                        <parameter name="assetName" />
-                        <parameter name="location" type="Map">
-                            <parameter name="locationId" />
-                            <parameter name="locationName" />
+                        <parameter name="asset" type="Map">
+                            <parameter name="assetId" />
+                            <parameter name="assetName" />
+                            <parameter name="location" type="Map">
+                                <parameter name="locationId" />
+                                <parameter name="locationName" />
+                            </parameter>
                         </parameter>
                         <parameter name="rentalFromDate" />
                         <parameter name="rentalThruDate" />
@@ -1787,11 +1795,13 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="quantity" />
                         <parameter name="price" />
                         <parameter name="glAccountId" />
-                        <parameter name="assetId" />
-                        <parameter name="assetName" />
-                        <parameter name="location" type="Map">
-                            <parameter name="locationId" />
-                            <parameter name="locationName" />
+                        <parameter name="asset" type="Map">
+                            <parameter name="assetId" />
+                            <parameter name="assetName" />
+                            <parameter name="location" type="Map">
+                                <parameter name="locationId" />
+                                <parameter name="locationName" />
+                            </parameter>
                         </parameter>
                         <parameter name="rentalFromDate" />
                         <parameter name="rentalThruDate" />
@@ -2675,11 +2685,14 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="shipmentId" />
                 <parameter name="items" type="List">
                     <parameter name="item" type="Map">
-                        <parameter name="location" type="Map">
-                            <parameter name="locationId" />
-                        </parameter>
                         <parameter name="productId" />
                         <parameter name="quantity" />
+                        <parameter name="asset" type="Map">
+                            <parameter name="location" type="Map">
+                                <parameter name="locationId" />
+                                <parameter name="locationName" />
+                            </parameter>
+                        </parameter>
                     </parameter>
                 </parameter>
             </parameter>
@@ -2697,9 +2710,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="item" type="Map">
                         <parameter name="productId" />
                         <parameter name="quantity" />
-                        <parameter name="location" type="Map">
-                            <parameter name="locationId" />
-                            <parameter name="locationName" />
+                        <parameter name="asset" type="Map">
+                            <parameter name="location" type="Map">
+                                <parameter name="locationId" />
+                                <parameter name="locationName" />
+                            </parameter>
                         </parameter>
                     </parameter>
                 </parameter>
@@ -2724,18 +2739,19 @@ along with this software (see the LICENSE.md file). If not, see
                     from="sid.quantity - (sid.quantityAcceptedTotal ?: 0) - (sid.quantityRejectedTotal ?: 0)" />
                 <set field="finDocItem"
                     from="finDoc.items.find {element -> element.productId == sid.productId}" />
-                <if condition="!finDocItem.location.locationId"><!-- if empty create new location -->
+                <if condition="!finDocItem.asset.location.locationId"><!-- if empty create new
+                    location -->
                     <service-call name="create#mantle.facility.FacilityLocation"
-                        in-map="[description: finDocItem.location.locationName ?: '${sid.pseudoId}(${nowDate})',
+                        in-map="[description: finDocItem.asset.location.locationName ?: '${sid.pseudoId}(${nowDate})',
                                 facilityId: facilityId]"
                         out-map="context" />
-                    <set field="finDocItem.location.locationSeqId" from="locationSeqId" />
+                    <set field="finDocItem.asset.location.locationId" from="locationSeqId" />
                 </if>
                 <service-call name="mantle.shipment.ShipmentServices.receive#ShipmentProduct"
                     in-map="[shipmentId:finDoc.shipmentId, productId:sid.productId, statusId:'AstAvailable',
                             quantityAccepted:quantityRemaining, facilityId: facilityId,
                             ownerPartyId: companyPartyId,
-                            locationSeqId: finDocItem.location.locationId]" />
+                            locationSeqId: finDocItem.asset.location.locationId]" />
             </iterate>
             <service-call out-map="context" in-map="[shipmentId:finDoc.shipmentId]"
                 name="mantle.shipment.ShipmentServices.deliver#Shipment" />

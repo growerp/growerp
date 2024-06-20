@@ -145,7 +145,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                     const SizedBox(height: 10),
                     confirm
                         ? Text(
-                            'To location: ${newItems[index].location?.locationName}')
+                            'To location: ${newItems[index].asset?.location?.locationName}')
                         : Row(children: <Widget>[
                             Expanded(
                                 child: SizedBox(
@@ -233,13 +233,15 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                         confirm = false;
                       });
                       newItems.forEachIndexed((index, value) {
-                        newItems[index] = value.copyWith(
+                        final asset = value.asset!.copyWith(
                             location: _selectedLocations[index].locationId !=
                                     null
                                 ? _selectedLocations[index]
                                 : Location(
                                     locationName:
                                         _newLocationControllers[index].text));
+
+                        newItems[index] = value.copyWith(asset: asset);
                       });
                       finDocBloc.add(FinDocShipmentReceive(
                           widget.finDoc.copyWith(items: newItems)));
@@ -255,7 +257,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                       setState(() {
                         if (confirm == false) {
                           newItems.forEachIndexed((index, value) {
-                            newItems[index] = value.copyWith(
+                            final asset = value.asset!.copyWith(
                                 location: _selectedLocations[index]
                                             .locationId !=
                                         null
@@ -271,6 +273,8 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                                             locationName:
                                                 '${newItems[index].description}'
                                                 '($nowDate)'));
+
+                            newItems[index] = value.copyWith(asset: asset);
                             confirm = true;
                           });
                         } else {

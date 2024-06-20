@@ -109,8 +109,10 @@ class AssetListState extends State<AssetList> {
                                           direction:
                                               DismissDirection.startToEnd,
                                           child: AssetListItem(
-                                              asset: state.assets[index],
-                                              index: index));
+                                            asset: state.assets[index],
+                                            index: index,
+                                            isPhone: isPhone(context),
+                                          ));
                                 })))
                   ]));
             default:

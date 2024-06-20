@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 import '../asset.dart';
 
@@ -62,19 +63,42 @@ class _AssetListHeaderState extends State<AssetListHeader> {
                       assetBloc.add(AssetFetch(searchString: searchString));
                     })
               ])
-            : Column(children: [
-                Row(children: <Widget>[
-                  const Expanded(
-                      child: Text("Name", textAlign: TextAlign.center)),
-                  Expanded(
-                      child: Text(
-                          classificationId == 'AppHotel' ? 'Type' : 'Product',
-                          textAlign: TextAlign.center)),
-                  const Expanded(
-                      child: Text("Act.", textAlign: TextAlign.center)),
-                ]),
-                const Divider(),
-              ]),
+            : isPhone(context)
+                ? Row(
+                    children: [
+                      Column(children: [
+                        if (isPhone(context))
+                          const Text("Asset Name", textAlign: TextAlign.center),
+                        if (isPhone(context))
+                          Text(
+                              classificationId == 'AppHotel'
+                                  ? 'Type'
+                                  : 'Product',
+                              textAlign: TextAlign.center)
+                      ]),
+                      const Expanded(
+                          child:
+                              Text("Active(Y/N).", textAlign: TextAlign.right)),
+                    ],
+                  )
+                : Column(
+                    children: [
+                      Row(children: <Widget>[
+                        const Expanded(
+                            child: Text("Asset Name",
+                                textAlign: TextAlign.center)),
+                        Expanded(
+                            child: Text(
+                                classificationId == 'AppHotel'
+                                    ? 'Type'
+                                    : 'Product',
+                                textAlign: TextAlign.center)),
+                        const Expanded(
+                            child: Text("Act.", textAlign: TextAlign.center)),
+                      ]),
+                      const Divider(),
+                    ],
+                  ),
         trailing: const Text(' '));
   }
 }

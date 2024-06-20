@@ -2082,4 +2082,25 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="curDescription" field="description" entity-alias="CURTYPE" />
         <alias name="customerStatusId" entity-alias="ORGCOMPANYPARTY" />
     </view-entity>
+
+    <view-entity entity-name="AssetProductAndLocation" package="growerp.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" />
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product"
+            join-from-alias="AST">
+            <key-map field-name="productId" />
+        </member-entity>
+        <member-entity entity-alias="LOC" entity-name="mantle.facility.FacilityLocation"
+            join-from-alias="AST" join-optional="true">
+            <key-map field-name="locationSeqId" />
+            <key-map field-name="facilityId" />
+        </member-entity>
+        <alias-all entity-alias="AST" />
+        <alias entity-alias="PROD" name="pseudoId" />
+        <alias entity-alias="PROD" name="productName" />
+        <alias entity-alias="PROD" name="productTypeEnumId" />
+        <alias entity-alias="PROD" name="productClassEnumId" />
+        <alias entity-alias="LOC" name="locationId" field="locationSeqId" />
+        <alias entity-alias="LOC" name="locationName" field="description" />
+    </view-entity>
+
 </entities>

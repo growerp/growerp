@@ -18,10 +18,15 @@ import 'package:growerp_models/growerp_models.dart';
 import '../asset.dart';
 
 class AssetListItem extends StatelessWidget {
-  const AssetListItem({super.key, required this.asset, required this.index});
+  const AssetListItem(
+      {super.key,
+      required this.asset,
+      required this.index,
+      required this.isPhone});
 
   final Asset asset;
   final int index;
+  final bool isPhone;
 
   @override
   Widget build(BuildContext context) {
@@ -31,17 +36,35 @@ class AssetListItem extends StatelessWidget {
           backgroundColor: Colors.green,
           child: Text(asset.assetName != null ? asset.assetName![0] : "?"),
         ),
-        title: Row(
-          children: <Widget>[
-            Expanded(child: Text("${asset.assetName}", key: Key('name$index'))),
-            Expanded(
-                child: Text("${asset.product!.productName}",
-                    key: Key('product$index'), textAlign: TextAlign.center)),
-            Expanded(
-                child: Text(asset.statusId == 'Deactivated' ? 'N' : 'Y',
-                    key: Key('status$index'), textAlign: TextAlign.center)),
-          ],
-        ),
+        title: isPhone
+            ? Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("${asset.assetName}", key: Key('name$index')),
+                    Text("${asset.product!.productName}",
+                        key: Key('product$index')),
+                  ],
+                ),
+                const SizedBox(width: 5),
+                Text(asset.statusId == 'Deactivated' ? 'N' : 'Y',
+                    key: Key('status$index'), textAlign: TextAlign.center),
+              ])
+            : Row(
+                children: <Widget>[
+                  Expanded(
+                      child:
+                          Text("${asset.assetName}", key: Key('name$index'))),
+                  Expanded(
+                      child: Text("${asset.product!.productName}",
+                          key: Key('product$index'),
+                          textAlign: TextAlign.center)),
+                  Expanded(
+                      child: Text(asset.statusId == 'Deactivated' ? 'N' : 'Y',
+                          key: Key('status$index'),
+                          textAlign: TextAlign.center)),
+                ],
+              ),
         onTap: () async {
           await showDialog(
               barrierDismissible: true,

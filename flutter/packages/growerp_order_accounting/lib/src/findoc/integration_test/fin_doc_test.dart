@@ -69,6 +69,17 @@ class FinDocTest {
     }
   }
 
+  static Future<void> updateFinDocData(
+      WidgetTester tester, List<FinDoc> newFinDocs) async {
+    final oldFinDocs = await FinDocTest.getFinDocs(newFinDocs[0].docType!);
+    // copy pseudoId
+    for (int x = 0; x < oldFinDocs.length; x++) {
+      newFinDocs[x] = newFinDocs[x].copyWith(pseudoId: oldFinDocs[x].pseudoId);
+    }
+    await enterFinDocData(tester, newFinDocs);
+    await checkFinDocDetail(tester, FinDocType.invoice);
+  }
+
   /// create or update a finDoc type document (not shipment)
   /// with header and product items
   /// After add/update get the generated finDocId and productId's
@@ -76,15 +87,15 @@ class FinDocTest {
   static Future<void> enterFinDocData(
       WidgetTester tester, List<FinDoc> finDocs) async {
     List<FinDoc> newFinDocs =
-        []; // with invoiceId added (when new) and productId's
+        []; // with pseudoId added (when new) and productId's
     for (final finDoc in finDocs) {
       // add or modify?
       if (finDoc.pseudoId == null) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
         await CommonTest.doNewSearch(tester, searchString: finDoc.pseudoId!);
-        expect(CommonTest.getTextField('topHeader').split('#')[1],
-            finDoc.pseudoId);
+        expect(finDoc.pseudoId,
+            CommonTest.getTextField('topHeader').split('#')[1]);
       }
       await CommonTest.checkWidgetKey(tester,
           "FinDocDialog${finDoc.sales ? 'Sales' : 'Purchase'}${finDoc.docType!.toString()}");
@@ -137,25 +148,24 @@ class FinDocTest {
     for (final finDoc in finDocs) {
       await CommonTest.doNewSearch(tester, searchString: finDoc.pseudoId!);
       expect(
-          CommonTest.getTextField('topHeader').split('#')[1], finDoc.pseudoId);
+          finDoc.pseudoId, CommonTest.getTextField('topHeader').split('#')[1]);
       await CommonTest.checkWidgetKey(tester,
           "FinDocDialog${finDoc.sales ? 'Sales' : 'Purchase'}${finDoc.docType!.toString()}");
       // check supplier/customer
-      expect(
-          CommonTest.getDropdownSearch(finDoc.sales ? 'customer' : 'supplier'),
-          finDoc.otherCompany!.name!);
+      expect(finDoc.otherCompany!.name!,
+          CommonTest.getDropdownSearch(finDoc.sales ? 'customer' : 'supplier'));
       if (finDoc.docType == FinDocType.order ||
           finDoc.docType == FinDocType.invoice)
-        expect(CommonTest.getTextFormField('description'), finDoc.description!);
+        expect(finDoc.description!, CommonTest.getTextFormField('description'));
       for (final (index, item) in finDoc.items.indexed) {
-        expect(CommonTest.getTextField('itemProductId$index'), item.productId!);
-        expect(CommonTest.getTextField('itemDescription$index'),
-            item.description!);
+        expect(item.productId!, CommonTest.getTextField('itemProductId$index'));
+        expect(item.description!,
+            CommonTest.getTextField('itemDescription$index'));
         expect(
-            CommonTest.getTextField('itemPrice$index'), item.price.currency());
+            item.price.currency(), CommonTest.getTextField('itemPrice$index'));
         if (!CommonTest.isPhone())
-          expect(CommonTest.getTextField('itemQuantity$index'),
-              item.quantity.toString());
+          expect(item.quantity.toString(),
+              CommonTest.getTextField('itemQuantity$index'));
       }
       await CommonTest.tapByKey(tester, 'cancel'); // cancel dialog
     }
@@ -188,39 +198,42 @@ class FinDocTest {
       await CommonTest.doNewSearch(tester,
           searchString: id != null ? id : finDoc.pseudoId!);
       // open detail
-      expect(CommonTest.getDropdown('statusDropDown'),
-          FinDocStatusVal.completed.toString());
+      expect(FinDocStatusVal.completed.toString(),
+          CommonTest.getDropdown('statusDropDown'));
 
       // get transaction id's
       if (type == FinDocType.invoice || subType == FinDocType.invoice) {
-        String? transactionId =
+        String? pseudoId =
             await CommonTest.getRelatedFindoc(tester, FinDocType.transaction);
-        expect(transactionId, isNot(equals(isNull)));
+        expect(pseudoId, isNot(equals(isNull)),
+            reason: "pseudoId should not be null!");
         newFinDocs.add(FinDoc(
             docType: FinDocType.transaction,
-            transactionId: transactionId,
+            pseudoId: pseudoId,
             invoiceId: finDoc.invoiceId,
             sales: true));
       }
 
       if (type == FinDocType.payment || subType == FinDocType.payment) {
-        String? transactionId =
+        String? pseudoId =
             await CommonTest.getRelatedFindoc(tester, FinDocType.transaction);
-        expect(transactionId, isNot(equals(isNull)));
+        expect(pseudoId, isNot(equals(isNull)),
+            reason: "pseudoId should not be null!");
         newFinDocs.add(FinDoc(
             docType: FinDocType.transaction,
-            transactionId: transactionId,
+            pseudoId: pseudoId,
             paymentId: finDoc.paymentId,
             sales: true));
       }
 
       if (type == FinDocType.shipment || subType == FinDocType.shipment) {
-        String? transactionId =
+        String? pseudoId =
             await CommonTest.getRelatedFindoc(tester, FinDocType.transaction);
-        expect(transactionId, isNot(equals(isNull)));
+        expect(pseudoId, isNot(equals(isNull)),
+            reason: "pseudoId should not be null!");
         newFinDocs.add(FinDoc(
             docType: FinDocType.transaction,
-            transactionId: transactionId,
+            pseudoId: pseudoId,
             shipmentId: finDoc.shipmentId,
             sales: true));
       }
@@ -296,7 +309,8 @@ class FinDocTest {
           status != FinDocStatusVal.approved) {
         await CommonTest.tapByKey(tester, 'statusDropDown');
         await CommonTest.tapByText(tester, status.name);
-        await CommonTest.tapByKey(tester, 'update', seconds: 2);
+        await CommonTest.tapByKey(tester, 'update',
+            seconds: CommonTest.waitTime);
         await CommonTest.waitForSnackbarToGo(tester);
       } else {
         expect(true, false,
@@ -304,6 +318,7 @@ class FinDocTest {
                 'Begin status: ${CommonTest.getDropdown('statusDropDown')} not valid');
       }
 
+      // not add cancelled record
       if (status != FinDocStatusVal.cancelled) {
         // get related document numbers just for order,
         // transactions are saved by check completed
@@ -322,23 +337,21 @@ class FinDocTest {
               invoiceId: invoiceId,
               shipmentId: shipmentId));
         }
-
-        // not add cancelled record
         if ((type == FinDocType.order && subType == FinDocType.payment)) {
-          expect(await CommonTest.getRelatedFindoc(tester, FinDocType.order),
-              finDoc.orderId);
-          expect(await CommonTest.getRelatedFindoc(tester, FinDocType.invoice),
-              finDoc.invoiceId);
+          expect(finDoc.pseudoId,
+              await CommonTest.getRelatedFindoc(tester, FinDocType.order));
+          expect(finDoc.invoiceId,
+              await CommonTest.getRelatedFindoc(tester, FinDocType.invoice));
         }
         if ((type == FinDocType.order && subType == FinDocType.invoice)) {
-          expect(await CommonTest.getRelatedFindoc(tester, FinDocType.order),
-              finDoc.orderId);
-          expect(await CommonTest.getRelatedFindoc(tester, FinDocType.payment),
-              finDoc.paymentId);
+          expect(finDoc.pseudoId,
+              await CommonTest.getRelatedFindoc(tester, FinDocType.order));
+          expect(finDoc.paymentId,
+              await CommonTest.getRelatedFindoc(tester, FinDocType.payment));
         }
         if ((type == FinDocType.order && subType == FinDocType.shipment)) {
-          expect(await CommonTest.getRelatedFindoc(tester, FinDocType.order),
-              finDoc.orderId);
+          expect(finDoc.pseudoId,
+              await CommonTest.getRelatedFindoc(tester, FinDocType.order));
         }
         if (type == FinDocType.invoice && subType == null) {
           String? paymentId =

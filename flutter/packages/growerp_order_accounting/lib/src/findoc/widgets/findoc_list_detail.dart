@@ -75,7 +75,7 @@ List<double> getItemFieldWidth(
   if (isPhone(context))
     return [10, 62, 35];
   else
-    return [5, 9, 29, 10, 19, 04, 20];
+    return [5, 9, 29, if (item?.docType != FinDocType.shipment) 10, 19, 04, 20];
 }
 
 // row height
@@ -96,6 +96,13 @@ SpanDecoration? getBackGround(BuildContext context, int index) {
 List<dynamic> getItemFieldContent(FinDoc finDoc,
     {int? itemIndex, BuildContext? context}) {
   String classificationId = context!.read<String>();
+  String currencyId = context
+      .read<AuthBloc>()
+      .state
+      .authenticate!
+      .company!
+      .currency!
+      .currencyId!;
   if (isPhone(context))
     return [
       CircleAvatar(
@@ -133,7 +140,7 @@ List<dynamic> getItemFieldContent(FinDoc finDoc,
                 key: Key("status$itemIndex")),
             const SizedBox(width: 10),
             if (finDoc.docType != FinDocType.shipment)
-              Text(finDoc.grandTotal.currency(),
+              Text(finDoc.grandTotal.currency(currencyId: currencyId),
                   key: Key("grandTotal$itemIndex")),
             if (finDoc.docType != FinDocType.shipment)
               const SizedBox(width: 10),
@@ -152,7 +159,7 @@ List<dynamic> getItemFieldContent(FinDoc finDoc,
           : "${finDoc.creationDate?.toString().substring(0, 11)}"),
       Text(finDoc.otherCompany?.name ?? '', key: Key("otherUser$itemIndex")),
       if (finDoc.docType != FinDocType.shipment)
-        Text("${finDoc.grandTotal!.currency()}",
+        Text("${finDoc.grandTotal!.currency(currencyId: currencyId)}",
             textAlign: TextAlign.right, key: Key("grandTotal$itemIndex")),
       Text(finDoc.displayStatus(classificationId)!,
           key: Key("status$itemIndex")),

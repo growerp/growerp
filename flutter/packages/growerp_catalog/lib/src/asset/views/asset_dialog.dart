@@ -14,11 +14,14 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:io';
+
 import 'package:decimal/decimal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -38,17 +41,34 @@ class AssetDialogState extends State<AssetDialog> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _quantityOnHandController =
       TextEditingController();
+  final TextEditingController _acquireCostController = TextEditingController();
   final TextEditingController _productSearchBoxController =
+      TextEditingController();
+  final TextEditingController _locationSearchBoxController =
       TextEditingController();
   late String classificationId;
   late AssetBloc _assetBloc;
   late ProductBloc _productBloc;
+  late DataFetchBloc<Locations> _locationBloc;
+  Location? _selectedLocation;
   Product? _selectedProduct;
   late String _statusId;
+  late String currencyId;
+  late String currencySymbol;
 
   @override
   void initState() {
     super.initState();
+    currencyId = context
+        .read<AuthBloc>()
+        .state
+        .authenticate!
+        .company!
+        .currency!
+        .currencyId!;
+    currencySymbol = NumberFormat.simpleCurrency(
+            locale: Platform.localeName, name: currencyId)
+        .currencySymbol;
     _assetBloc = context.read<AssetBloc>();
     _productBloc = context.read<ProductBloc>();
     _productBloc.add(const ProductFetch());
@@ -57,8 +77,15 @@ class AssetDialogState extends State<AssetDialog> {
     _quantityOnHandController.text = widget.asset.quantityOnHand == null
         ? ''
         : widget.asset.quantityOnHand.toString();
+    _acquireCostController.text = widget.asset.acquireCost == null
+        ? ''
+        : widget.asset.acquireCost.toString();
     _selectedProduct = widget.asset.product;
+    _selectedLocation = widget.asset.location;
     classificationId = context.read<String>();
+    _locationBloc = context.read<DataFetchBloc<Locations>>()
+      ..add(
+          GetDataEvent(() => context.read<RestClient>().getLocation(limit: 3)));
   }
 
   @override
@@ -89,10 +116,13 @@ class AssetDialogState extends State<AssetDialog> {
                   ),
                   child: popUp(
                       context: context,
-                      title: classificationId == 'AppHotel'
-                          ? 'Room information'
-                          : 'Asset Information',
-                      height: 500,
+                      title: (classificationId == 'AppHotel'
+                              ? "Room #"
+                              : "Asset #") +
+                          (widget.asset.assetId.isEmpty
+                              ? "New"
+                              : widget.asset.assetId),
+                      height: 450,
                       width: 350,
                       child: _showForm(isPhone))));
         case AssetStatus.failure:
@@ -108,13 +138,6 @@ class AssetDialogState extends State<AssetDialog> {
         child: Form(
             key: _assetDialogformKey,
             child: ListView(key: const Key('listView'), children: <Widget>[
-              Center(
-                  child: Text(
-                      (classificationId == 'AppHotel' ? "Room #" : "Asset #") +
-                          (widget.asset.assetId.isEmpty
-                              ? "New"
-                              : widget.asset.assetId),
-                      key: const Key('header'))),
               TextFormField(
                 key: const Key('name'),
                 decoration: InputDecoration(
@@ -132,21 +155,47 @@ class AssetDialogState extends State<AssetDialog> {
                   child: const SizedBox(height: 20)),
               Visibility(
                   visible: classificationId != 'AppHotel',
-                  child: TextFormField(
-                    key: const Key('quantityOnHand'),
-                    decoration:
-                        const InputDecoration(labelText: 'Quantity on Hand'),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          key: const Key('quantityOnHand'),
+                          decoration: const InputDecoration(
+                              labelText: 'Quantity on Hand'),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.allow(
+                                RegExp('[0-9.,]+'))
+                          ],
+                          controller: _quantityOnHandController,
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please enter a quantityOnHand?';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: TextFormField(
+                          key: const Key('acquireCost'),
+                          decoration: InputDecoration(
+                              labelText: 'Aquired Costs($currencySymbol)'),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.allow(
+                                RegExp('[0-9.,]+'))
+                          ],
+                          controller: _acquireCostController,
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please enter a aquired cost value?';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
                     ],
-                    controller: _quantityOnHandController,
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please enter a quantityOnHand?';
-                      }
-                      return null;
-                    },
                   )),
               BlocBuilder<ProductBloc, ProductState>(builder: (context, state) {
                 switch (state.status) {
@@ -177,12 +226,12 @@ class AssetDialogState extends State<AssetDialog> {
                       dropdownDecoratorProps: DropDownDecoratorProps(
                         dropdownSearchDecoration: InputDecoration(
                           labelText: classificationId == 'AppHotel'
-                              ? 'Room Type'
-                              : 'Product',
+                              ? 'Room Type[id]'
+                              : 'Product[id]',
                         ),
                       ),
                       itemAsString: (Product? u) =>
-                          " ${u!.productName}", // invisible char for test
+                          " ${u!.productName}[${u.pseudoId}]", // invisible char for test
                       onChanged: (Product? newValue) {
                         _selectedProduct = newValue;
                       },
@@ -200,23 +249,74 @@ class AssetDialogState extends State<AssetDialog> {
                     return const Center(child: LoadingIndicator());
                 }
               }),
-              DropdownButtonFormField<String>(
-                key: const Key('statusDropDown'),
-                decoration: const InputDecoration(labelText: 'Status'),
-                value: _statusId,
-                validator: (value) => value == null ? 'field required' : null,
-                items: assetStatusValues
-                    .map((label) => DropdownMenuItem<String>(
-                          value: label,
-                          child: Text(label),
-                        ))
-                    .toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _statusId = newValue!;
-                  });
-                },
-                isExpanded: true,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      key: const Key('statusDropDown'),
+                      decoration: const InputDecoration(labelText: 'Status'),
+                      value: _statusId,
+                      validator: (value) =>
+                          value == null ? 'field required' : null,
+                      items: assetStatusValues
+                          .map((label) => DropdownMenuItem<String>(
+                                value: label,
+                                child: Text(label),
+                              ))
+                          .toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _statusId = newValue!;
+                        });
+                      },
+                      isExpanded: true,
+                    ),
+                  ),
+                  Expanded(
+                    child: DropdownSearch<Location>(
+                        key: const Key('locationDropDown'),
+                        selectedItem: _selectedLocation,
+                        popupProps: PopupProps.menu(
+                          isFilterOnline: true,
+                          showSearchBox: true,
+                          searchFieldProps: TextFieldProps(
+                            autofocus: true,
+                            decoration: const InputDecoration(
+                                labelText: "location name"),
+                            controller: _locationSearchBoxController,
+                          ),
+                          menuProps: MenuProps(
+                              borderRadius: BorderRadius.circular(20.0)),
+                          title: popUp(
+                            context: context,
+                            title: 'Select location',
+                            height: 50,
+                          ),
+                        ),
+                        dropdownDecoratorProps: const DropDownDecoratorProps(
+                            dropdownSearchDecoration:
+                                InputDecoration(labelText: 'Location')),
+                        itemAsString: (Location? u) =>
+                            " ${u?.locationName ?? ''}",
+                        asyncItems: (String filter) {
+                          _locationBloc.add(GetDataEvent(() => context
+                              .read<RestClient>()
+                              .getLocation(searchString: filter, limit: 3)));
+                          return Future.delayed(
+                              const Duration(milliseconds: 250), () {
+                            return Future.value(
+                                (_locationBloc.state.data as Locations)
+                                    .locations);
+                          });
+                        },
+                        compareFn: (item, sItem) =>
+                            item.locationId == sItem.locationId,
+                        onChanged: (Location? newValue) {
+                          _selectedLocation = newValue!;
+                        }),
+                  )
+                ],
               ),
               const SizedBox(height: 20),
               ElevatedButton(

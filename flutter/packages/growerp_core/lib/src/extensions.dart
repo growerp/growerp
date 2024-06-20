@@ -19,6 +19,8 @@
 //  CustomizableDateTime.customTime =
 //      DateTime.now().add(const Duration(days: 1));
 
+import 'dart:io';
+
 import 'package:decimal/decimal.dart';
 import 'package:intl/intl.dart';
 
@@ -62,9 +64,11 @@ extension DateOnly on DateTime {
 }
 
 extension UsCurrency on Decimal? {
-  String currency() {
+  String currency({String currencyId = "USD"}) {
     if (this == null) return ('');
-    return NumberFormat("#,##0.00#", "en_US").format(double.parse(toString()));
+    var format = NumberFormat.simpleCurrency(
+        locale: Platform.localeName, name: currencyId);
+    return '${format.currencySymbol}${NumberFormat("#,##0.00#", "en_US").format(double.parse(toString()))}';
   }
 }
 

@@ -639,6 +639,10 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="pseudoId" />
                         <parameter name="productName" />
                     </parameter>
+                    <parameter name="location" type="Map">
+                        <parameter name="locationId" />
+                        <parameter name="locationName" />
+                    </parameter>
                 </parameter>
             </parameter>
         </out-parameters>
@@ -658,7 +662,7 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                 in-map="[docType: 'asset', statusId: assetClassId]" out-map="assetClass" />
             <entity-find offset="start" limit="limit" list="assetList"
-                entity-name="mantle.product.asset.AssetAndProduct">
+                entity-name="growerp.product.asset.AssetProductAndLocation">
                 <econdition field-name="assetId" ignore-if-empty="true" />
                 <!--econdition
                 field-name="statusId"
@@ -706,11 +710,12 @@ along with this software (see the LICENSE.md file). If not, see
                     assetName: item.assetName,
                     quantityOnHand: item.quantityOnHandTotal ? item.quantityOnHandTotal.toString() : '0',
                     availableToPromise: item.availableToPromiseTotal ? item.availableToPromiseTotal.toString() : '0',
-                    acquireCost: item.acquireCost,
+                    acquireCost: item.acquireCost?.toString(),
                     receivedDate: item.receivedDate ? ec.l10n.format(item.receivedDate,'yyyy-MM-dd')  : null,
                     expectedEndOfLifeDate: item.expectedEndOfLife ? ec.l10n.format(item.expectedEndOfLife,'yyyy-MM-dd')  : null,
                     product: [productId: item.productId, pseudoId: item.pseudoId,
-                    productName: item.productName],
+                                productName: item.productName],
+                    location: [locationId: item.locationId, locationName: item.locationName],
                     ]" />
                 <script>assets.add(assetOut)</script>
             </iterate>
@@ -832,7 +837,7 @@ along with this software (see the LICENSE.md file). If not, see
                     statusId: status.convertedStatusId,
                     quantityOnHandTotal: new BigDecimal(asset.quantityOnHand),
                     availableToPromiseTotal: new BigDecimal(asset.quantityOnHand),
-                    acquireCost: asset.acquireCost,
+                    acquireCost: new BigDecimal(asset.acquireCost),
                     facilityId: stores[0].inventoryFacilityId,
                     locationSeqId: asset.location?.locationId,
                     assetTypeEnumId: classificationId == 'AppHotel' ? 'AstTpFixed' : 'AstTpInventory']"
@@ -859,6 +864,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="assetName" />
                 <parameter name="quantityOnHand" />
                 <parameter name="availableToPromise" />
+                <parameter name="acquireCost" />
                 <parameter name="receivedDate" />
                 <parameter name="expectedEndOfLifeDate" />
                 <parameter name="product" type="Map">
@@ -876,6 +882,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="assetName" />
                 <parameter name="quantityOnHand" />
                 <parameter name="availableToPromise" />
+                <parameter name="acquireCost" />
                 <parameter name="receivedDate" />
                 <parameter name="expectedEndOfLifeDate" />
                 <parameter name="product" type="Map">

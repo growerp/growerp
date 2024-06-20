@@ -42,18 +42,7 @@ class InvoiceTest {
 
   static Future<void> updateInvoices(
       WidgetTester tester, List<FinDoc> newFinDocs) async {
-    await updateFinDocData(tester, newFinDocs);
-  }
-
-  static Future<void> updateFinDocData(
-      WidgetTester tester, List<FinDoc> newFinDocs) async {
-    final oldFinDocs = await FinDocTest.getFinDocs(newFinDocs[0].docType!);
-    // copy pseudoId
-    for (int x = 0; x < oldFinDocs.length; x++) {
-      newFinDocs[x] = newFinDocs[x].copyWith(pseudoId: oldFinDocs[x].pseudoId);
-    }
-    await FinDocTest.enterFinDocData(tester, newFinDocs);
-    await FinDocTest.checkFinDocDetail(tester, FinDocType.invoice);
+    await FinDocTest.updateFinDocData(tester, newFinDocs);
   }
 
   static Future<void> deleteLastInvoice(WidgetTester tester) async {

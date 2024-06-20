@@ -50,10 +50,8 @@ void main() {
         clear: true); // use data from previous run, ifnone same as true
 
     await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "categories": categories.sublist(0, 2),
-      "products": products.sublist(0, 2),
-      "users": suppliers.sublist(0, 2),
-      "locations": locations,
+      "assets": assets, // will also load products and WH locations
+      "companies": supplierCompanies,
     });
 
     await OrderTest.selectPurchaseOrders(tester);

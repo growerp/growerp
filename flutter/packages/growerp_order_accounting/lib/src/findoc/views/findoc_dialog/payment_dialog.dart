@@ -66,12 +66,20 @@ class PaymentDialogState extends State<PaymentDialog> {
   late PaymentInstrument _paymentInstrument;
   final _amountController = TextEditingController();
   final _pseudoIdController = TextEditingController();
+  late String currencyId;
 
   @override
   void initState() {
     super.initState();
     finDoc = widget.finDoc;
     finDocUpdated = finDoc;
+    currencyId = context
+        .read<AuthBloc>()
+        .state
+        .authenticate!
+        .company!
+        .currency!
+        .currencyId!;
     readOnly = finDoc.status == null
         ? false
         : FinDocStatusVal.statusFixed(finDoc.status!);
@@ -81,8 +89,9 @@ class PaymentDialogState extends State<PaymentDialog> {
         : null;
     _updatedStatus = finDocUpdated.status ?? FinDocStatusVal.created;
     _selectedCompany = finDocUpdated.otherCompany;
-    _amountController.text =
-        finDoc.grandTotal == null ? '' : finDoc.grandTotal.toString();
+    _amountController.text = finDoc.grandTotal == null
+        ? ''
+        : finDoc.grandTotal.currency(currencyId: ''); // not show currency
     _pseudoIdController.text =
         finDoc.pseudoId == null ? '' : finDoc.pseudoId.toString();
     _selectedPaymentType = finDocUpdated.items.isNotEmpty

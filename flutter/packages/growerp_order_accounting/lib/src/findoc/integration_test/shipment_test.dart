@@ -14,6 +14,7 @@
 
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 class ShipmentTest {
@@ -32,13 +33,26 @@ class ShipmentTest {
   static Future<void> receiveShipments(
       WidgetTester tester, List<Location> locations) async {
     SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> orders = test.orders;
-    for (final (index, order) in orders.indexed) {
+    List<FinDoc> newOrders = [];
+    for (final (index, order) in test.orders.indexed) {
       await CommonTest.doNewSearch(tester, searchString: order.shipmentId!);
       await CommonTest.checkWidgetKey(tester, 'ShipmentReceiveDialogPurchase');
-      await CommonTest.enterDropDownSearch(
-          tester, 'locationDropDown$index', locations[index].locationName!);
+      List<FinDocItem> newItems = [];
+      for (final item in order.items) {
+        // find location where other products already located
+        final asset = assets.firstWhere(// from test data
+            (el) => el.product?.productName == item.description);
+        await CommonTest.enterDropDownSearch(
+            tester, 'locationDropDown$index', asset.location!.locationName!);
+        // save location to check later
+        newItems.add(item.copyWith(
+            asset: Asset(
+                location:
+                    Location(locationName: asset.location!.locationName!))));
+      }
+      newOrders.add(order.copyWith(items: newItems));
     }
+    await PersistFunctions.persistTest(test.copyWith(orders: newOrders));
     await CommonTest.tapByKey(tester, 'update');
     await CommonTest.tapByKey(tester, 'update', seconds: 5);
   }

@@ -51,7 +51,8 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
     if (itemsName != itemsWidth &&
         itemsName != itemsContent &&
         itemsWidth != itemsContent) {
-      throw FormatException("Number of names($itemsName) "
+      throw FormatException(
+          "Generate table parameters,Number of names($itemsName) "
           "not the same as number of fields width($itemsWidth) "
           " or number of field contens($itemsContent)");
     }
