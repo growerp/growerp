@@ -38,6 +38,7 @@ dependencies:
   dropdown_search: ^5.0.6
   growerp_core: ^1.2.4
   growerp_models: ^1.2.1
+  universal_io: ^2.2.2
 
 dev_dependencies: 
   flutter_test: 

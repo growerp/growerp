@@ -16,7 +16,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image;
-import 'dart:io';
+import 'package:universal_io/io.dart';
 import 'package:http/http.dart' show get;
 import '../../domains.dart';
 

@@ -232,7 +232,7 @@ class MyFinDocState extends State<FinDocPage> {
                       "${finDoc.sales ? 'Sales' : 'Purchase'} ${finDoc.docType} "
                       "#${finDoc.pseudoId ?? ' new'}",
                   height: 650,
-                  width: isPhone ? 400 : 800,
+                  width: isPhone ? 400 : 900,
                   context: context,
                   child: Builder(builder: (BuildContext context) {
                     if (finDoc.sales) {
@@ -646,8 +646,8 @@ class MyFinDocState extends State<FinDocPage> {
       return [
         "#",
         "ProdId",
-        if (!isPhone) "Item Type",
         "Description",
+        if (!isPhone) "Item Type",
         if (!isPhone) "Qty",
         "Price",
         if (!isPhone) "SubTotal",
@@ -661,7 +661,7 @@ class MyFinDocState extends State<FinDocPage> {
       if (isPhone)
         return [6, 14, 25, 10, 14];
       else
-        return [4, 8, 8, 28, 6, 10, 10, 10];
+        return [3, 8, 13, 8, 4, 5, 5, 5];
     }
 
     // fields content
@@ -678,14 +678,14 @@ class MyFinDocState extends State<FinDocPage> {
         ),
         Text("${item.productId}",
             textAlign: TextAlign.center, key: Key('itemProductId$itemIndex')),
-        if (!isPhone)
-          Text(itemType.itemTypeName,
-              textAlign: TextAlign.left, key: Key('itemType$itemIndex')),
         Text("${item.description}",
             key: Key('itemDescription${itemIndex}'), textAlign: TextAlign.left),
         if (!isPhone)
+          Text(itemType.itemTypeName,
+              textAlign: TextAlign.left, key: Key('itemType$itemIndex')),
+        if (!isPhone)
           Text("${item.quantity}",
-              textAlign: TextAlign.center, key: Key('itemQuantity$itemIndex')),
+              textAlign: TextAlign.right, key: Key('itemQuantity$itemIndex')),
         Text(item.price!.currency(currencyId: currencyId),
             textAlign: TextAlign.right, key: Key('itemPrice$itemIndex')),
         if (!isPhone) // subtotal

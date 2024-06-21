@@ -12,7 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'dart:io';
+import 'package:universal_io/io.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_driver/flutter_driver.dart';

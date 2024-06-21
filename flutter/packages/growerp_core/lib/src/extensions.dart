@@ -19,7 +19,7 @@
 //  CustomizableDateTime.customTime =
 //      DateTime.now().add(const Duration(days: 1));
 
-import 'dart:io';
+import 'package:universal_io/io.dart';
 
 import 'package:decimal/decimal.dart';
 import 'package:intl/intl.dart';

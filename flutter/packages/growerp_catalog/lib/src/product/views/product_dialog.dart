@@ -13,7 +13,7 @@
  */
 
 import 'dart:async';
-import 'dart:io';
+import 'package:universal_io/io.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart' as foundation;

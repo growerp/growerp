@@ -3006,9 +3006,13 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="orderId" from="orders.orderId" />
                         <else>
                             <!-- not exist so create -->
+                            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                                in-map="[companyPartyId: companyPartyId, seqName: 'order']"
+                                out-map="context" />
                             <service-call name="mantle.order.OrderServices.create#Order"
                                 in-map="[
                                     statusId: 'OrderOpen',
+                                    pseudoId: seqNum,
                                     currencyUomId: aPref.baseCurrencyUomId,
                                     productStoreId: stores[0].productStoreId,
                                     placedDate: ec.user.nowTimestamp,

@@ -13,7 +13,7 @@
  */
 
 import 'dart:convert';
-import 'dart:io';
+import 'package:universal_io/io.dart';
 
 import 'package:equatable/equatable.dart';
 import 'dart:typed_data';

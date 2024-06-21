@@ -13,7 +13,7 @@
  */
 
 import 'dart:convert';
-import 'dart:io';
+import 'package:universal_io/io.dart';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:decimal/decimal.dart';

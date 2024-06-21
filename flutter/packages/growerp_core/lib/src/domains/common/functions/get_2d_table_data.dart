@@ -70,8 +70,10 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
         item: item,
       );
       for (final name in names) {
-        contentRow.add(
-            TableViewCell(child: name is String ? Text(name) : name as Widget));
+        contentRow.add(TableViewCell(
+            child: name is String
+                ? Text(name, textAlign: TextAlign.center)
+                : name as Widget));
       }
       tableViewCells.add(contentRow);
       contentRow = [];

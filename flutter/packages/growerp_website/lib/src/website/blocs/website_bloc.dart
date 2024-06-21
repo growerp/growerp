@@ -13,7 +13,7 @@
  */
 
 import 'dart:async';
-import 'dart:io';
+import 'package:universal_io/io.dart';
 import 'package:dio/dio.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:growerp_models/growerp_models.dart';

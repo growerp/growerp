@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:dcli/dcli.dart';
 
 import '../src.dart';
