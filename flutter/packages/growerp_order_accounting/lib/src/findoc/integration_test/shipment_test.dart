@@ -40,8 +40,12 @@ class ShipmentTest {
       List<FinDocItem> newItems = [];
       for (final item in order.items) {
         // find location where other products already located
-        final asset = assets.firstWhere(// from test data
-            (el) => el.product?.productName == item.description);
+        // if not found, use latest location in the list in test data
+        final asset = assets.firstWhere(
+            // from test data
+            (el) => el.product?.productName == item.description,
+            orElse: () => Asset(
+                location: Location(locationName: locations.last.locationName)));
         await CommonTest.enterDropDownSearch(
             tester, 'locationDropDown$index', asset.location!.locationName!);
         // save location to check later

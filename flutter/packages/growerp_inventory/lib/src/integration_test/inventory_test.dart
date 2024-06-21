@@ -99,11 +99,19 @@ class InventoryTest {
     for (final order in orders) {
       for (final item in order.items) {
         // find asset for order product
-        final asset = assets.firstWhere(// from test data
-            (el) => el.product?.productName == item.description);
-        // find location (was saved in receive shipments)
+        final asset = assets.firstWhere(
+            // from test data
+            (el) => el.product?.productName == item.description,
+            orElse: () => Asset());
+        expect(asset.location, isNotNull,
+            reason:
+                'Could not find product: ${item.description} in test data asset list');
+        // find location (purchase order saved in receive shipments,
+        // sales in asset list)
         await CommonTest.doSearch(tester,
-            searchString: item.asset!.location!.locationName!);
+            searchString: order.sales == false
+                ? item.asset!.location!.locationName!
+                : asset.location!.locationName!);
         late Decimal newQoh;
         if (order.sales == false) {
           newQoh = asset.quantityOnHand! + item.quantity!;
