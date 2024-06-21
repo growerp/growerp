@@ -506,8 +506,7 @@ along with this software (see the LICENSE.md file). If not, see
                             description: item.description,
                             quantity: item.quantity.toString(),
                             price: item.unitAmount.toString(),
-                            assetId: item.assetId,
-                            assetName: item.assetName,
+                            asset: [assetId: item.assetId, assetName: item.assetName],
                             rentalFromDate: item.rentalFromDate
                                 ?  ec.l10n.format(item.rentalFromDate,'yyyy-MM-dd')  : null,
                             rentalThruDate: item.rentalThruDate

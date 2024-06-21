@@ -63,12 +63,18 @@ extension DateOnly on DateTime {
   }
 }
 
+/// currency extension to display currencies with a symbol and amount
+/// separated US style with ',' and '.'
+/// when currency is missing no ',' is displayed to avoid input format problems
 extension UsCurrency on Decimal? {
   String currency({String currencyId = "USD"}) {
     if (this == null) return ('');
     var format = NumberFormat.simpleCurrency(
         locale: Platform.localeName, name: currencyId);
-    return '${format.currencySymbol}${NumberFormat("#,##0.00#", "en_US").format(double.parse(toString()))}';
+    String usFormat = currencyId == '' ? "###0.00#" : "#,##0.00#";
+
+    return '${format.currencySymbol}'
+        '${NumberFormat(usFormat, "en_US").format(double.parse(toString()))}';
   }
 }
 

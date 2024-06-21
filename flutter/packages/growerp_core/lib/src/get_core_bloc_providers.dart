@@ -20,6 +20,8 @@ List<BlocProvider> getCoreBlocProviders(
           ..add(ChatRoomFetch())),
     BlocProvider<ChatMessageBloc>(
         create: (context) => ChatMessageBloc(restClient, chatServer, authBloc)),
+    BlocProvider<TaskToDoBloc>(
+        create: (context) => TaskBloc(restClient, TaskType.todo, null)),
     BlocProvider<TaskWorkflowBloc>(
         create: (context) => TaskBloc(restClient, TaskType.workflow, null)),
     BlocProvider<TaskWorkflowTemplateBloc>(
