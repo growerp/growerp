@@ -1909,6 +1909,230 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="get" noun="Party"><!-- replacement for user and company -->
+        <description>
+            Get all parties with related company(if any) and role
+        </description>
+        <in-parameters>
+            <parameter name="partyId" /><!-- if present select a single user -->
+            <parameter name="firstName" />
+            <parameter name="lastName" />
+            <parameter name="companyName" />
+            <parameter name="role" /><!-- if present select user from specific role-->
+            <parameter name="userGroupId" /><!-- if present select user from specific security
+            group-->
+            <parameter name="ownerPartyId" /><!-- required when registering company customers-->
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+            <parameter name="search" default="null" />
+            <parameter name="isForDropDown" type="Boolean" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="parties" type="List">
+                <parameter name="party" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="email" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
+                    <parameter name="companyName" /><!-- if null is a person, else a company-->
+                    <parameter name="loginDisabled" type="Boolean" />
+                    <parameter name="loginName" />
+                    <parameter name="userGroupId" />
+                    <parameter name="groupDescription" />
+                    <parameter name="language" />
+                    <parameter name="company" type="Map">
+                        <parameter name="partyId" />
+                        <parameter name="name" />
+                        <parameter name="email" />
+                        <parameter name="role" />
+                        <parameter name="paymentMethod">
+                            <parameter name="ccPaymentMethodId" />
+                            <parameter name="ccDescription" />
+                        </parameter>
+                    </parameter>
+                    <parameter name="image" />
+                    <parameter name="userId" />
+                    <parameter name="locale" />
+                    <parameter name="telephoneNr" />
+                </parameter>
+            </parameter>
+            <parameter name="personToCompanyId" /><!-- used in update user for reassign of company -->
+        </out-parameters>
+        <actions>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Party">
+        <description>
+            add a new user/company with user related company to an existing owner company
+        </description>
+        <in-parameters>
+            <parameter name="party" type="Map" required="true">
+                <parameter name="partyId" />
+                <parameter name="pseudoId" />
+                <parameter name="email" />
+                <parameter name="firstName" />
+                <parameter name="lastName" />
+                <parameter name="companyName" />
+                <parameter name="loginDisabled" type="Boolean" />
+                <parameter name="loginName" />
+                <parameter name="userGroupId" />
+                <parameter name="groupDescription" />
+                <parameter name="language" />
+                <parameter name="image" />
+                <parameter name="userId" />
+                <parameter name="locale" />
+                <parameter name="telephoneNr" />
+                <parameter name="role" />
+                <parameter name="email" />
+                <parameter name="currency" type="Map">
+                    <parameter name="currencyId" />
+                </parameter>
+                <parameter name="currencyName" />
+                <parameter name="vatPerc">
+                    <description>Percentage used for VAT if applicable</description>
+                </parameter>
+                <parameter name="salesPerc">
+                    <description>Percentage used for sales tax</description>
+                </parameter>
+                <parameter name="address" type="Map">
+                    <parameter name="addressId" />
+                    <parameter name="address1" />
+                    <parameter name="address2" />
+                    <parameter name="city" />
+                    <parameter name="postalCode" />
+                    <parameter name="province" />
+                    <parameter name="provinceId" />
+                    <parameter name="country" />
+                    <parameter name="countryId" />
+                </parameter>
+                <parameter name="image" />
+                <parameter name="paymentMethod" type="Map">
+                    <parameter name="creditCardType" />
+                    <parameter name="creditCardNumber" />
+                    <parameter name="expireMonth" />
+                    <parameter name="expireYear" />
+                </parameter>
+            </parameter>
+            <parameter name="password"
+                default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
+            <parameter name="ownerPartyId" /><!-- only required when no user logged in after
+            creating owner company -->
+        </in-parameters>
+        <out-parameters>
+            <parameter name="party" type="Map">
+                <parameter name="partyId" />
+                <parameter name="pseudoId" />
+                <parameter name="email" />
+                <parameter name="firstName" />
+                <parameter name="lastName" />
+                <parameter name="companyName" />
+                <parameter name="loginDisabled" type="Boolean" />
+                <parameter name="loginName" />
+                <parameter name="userGroupId" />
+                <parameter name="groupDescription" />
+                <parameter name="language" />
+                <parameter name="role" />
+                <parameter name="paymentMethod">
+                    <parameter name="ccPaymentMethodId" />
+                    <parameter name="ccDescription" />
+                </parameter>
+                <parameter name="image" />
+                <parameter name="userId" />
+                <parameter name="locale" />
+                <parameter name="telephoneNr" />
+            </parameter>
+            <parameter name="password" />
+        </out-parameters>
+        <actions></actions>
+    </service>
+
+    <service verb="update" noun="Party">
+        <description>
+            update user information
+        </description>
+        <in-parameters>
+            <parameter name="party" type="Map" required="true">
+                <parameter name="partyId" required="true" />
+                <parameter name="email" />
+                <parameter name="firstName" />
+                <parameter name="lastName" />
+                <parameter name="loginDisabled" type="Boolean" />
+                <parameter name="loginName" />
+                <parameter name="userGroupId" />
+                <parameter name="groupDescription" />
+                <parameter name="language" />
+                <parameter name="image" />
+                <parameter name="userId" />
+                <parameter name="locale" />
+                <parameter name="telephoneNr" />
+                <parameter name="company" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="name" />
+                    <parameter name="email" />
+                    <parameter name="role" />
+                </parameter>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="party" type="Map">
+                <parameter name="partyId" />
+                <parameter name="email" />
+                <parameter name="firstName" />
+                <parameter name="lastName" />
+                <parameter name="loginDisabled" type="Boolean" />
+                <parameter name="loginName" />
+                <parameter name="userGroupId" />
+                <parameter name="groupDescription" />
+                <parameter name="language" />
+                <parameter name="image" />
+                <parameter name="userId" />
+                <parameter name="locale" />
+                <parameter name="telephoneNr" />
+                <parameter name="company" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="name" />
+                    <parameter name="email" />
+                    <parameter name="role" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions></actions>
+    </service>
+
+    <service verb="delete" noun="Party"><!-- replacement for user and company -->
+        <description>Deactivate a owner companies logged in user and optionally delete owner company too.</description>
+        <in-parameters>
+            <parameter name="partyId" required="true" />
+            <parameter name="deleteCompanyToo" type="Boolean" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="party" type="Map">
+                <parameter name="partyId" />
+                <parameter name="email" />
+                <parameter name="firstName" />
+                <parameter name="lastName" />
+                <parameter name="loginDisabled" type="Boolean" />
+                <parameter name="loginName" />
+                <parameter name="userGroupId" />
+                <parameter name="groupDescription" />
+                <parameter name="language" />
+                <parameter name="image" />
+                <parameter name="userId" />
+                <parameter name="locale" />
+                <parameter name="telephoneNr" />
+                <parameter name="company" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="name" />
+                    <parameter name="email" />
+                    <parameter name="role" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions></actions>
+    </service>
+
     <service verb="register" noun="UserAndCompany" authenticate="anonymous-all">
         <description>Register a new accounting/ownercompany with an admin user</description>
         <in-parameters>

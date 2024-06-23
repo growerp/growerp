@@ -239,3 +239,14 @@ class Opportunities with _$Opportunities {
   factory Opportunities.fromJson(Map<String, dynamic> json) =>
       _$OpportunitiesFromJson(json);
 }
+
+@freezed
+class Parties with _$Parties {
+  factory Parties({
+    @Default(const []) List<Party> parties,
+  }) = _Parties;
+  Parties._();
+
+  factory Parties.fromJson(Map<String, dynamic> json) =>
+      _$PartiesFromJson(json);
+}

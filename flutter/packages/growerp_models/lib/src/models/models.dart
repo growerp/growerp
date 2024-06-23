@@ -41,3 +41,4 @@ export 'opportunity_model.dart';
 export 'task_model.dart';
 export 'task_status_model.dart';
 export 'task_type_model.dart';
+export 'party_model.dart';
