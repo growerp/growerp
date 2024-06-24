@@ -106,6 +106,7 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
         } else {
           companies.add(compResult);
         }
+        // this update can be achieved by logging out and in again.
 //        if (authBloc.state.authenticate!.company!.partyId ==
 //            compResult.partyId) {
 //        authBloc.add(AuthLoad());

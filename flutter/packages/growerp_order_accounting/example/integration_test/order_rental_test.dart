@@ -42,7 +42,7 @@ void main() {
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester, testData: {
       "assets": [assets[2]], // will create product and category too
-      "users": [customers[0]],
+      "companies": [customerCompanies[0]],
     });
     await OrderTest.selectSalesOrders(tester);
     await OrderTest.createRentalSalesOrder(tester, rentalSalesOrders);

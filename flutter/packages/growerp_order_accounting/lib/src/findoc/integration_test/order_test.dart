@@ -88,6 +88,7 @@ class OrderTest {
       await CommonTest.tapByKey(tester, 'addNew');
       await CommonTest.tapByKey(tester, 'customer');
       await CommonTest.tapByText(tester, finDoc.otherCompany!.name!);
+      await CommonTest.enterText(tester, 'description', finDoc.description!);
       await CommonTest.tapByKey(tester, 'itemRental');
       await CommonTest.tapByKey(tester, 'product', seconds: 5);
       await CommonTest.tapByText(tester, finDoc.items[0].description!);
@@ -128,50 +129,6 @@ class OrderTest {
     await FinDocTest.checkFinDocDetail(tester, FinDocType.order);
   }
 
-  static Future<void> checkPurchaseOrder(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> orders = test.orders;
-    for (FinDoc order in orders) {
-      await CommonTest.doNewSearch(tester, searchString: order.orderId!);
-      // check list
-      expect(CommonTest.getTextField('id0'), equals(order.orderId!));
-      await CommonTest.tapByKey(tester, 'id0'); // open detail
-      expect(order.items[0].productId,
-          CommonTest.getTextField('itemLine0').split(' ')[1]);
-      await CommonTest.checkText(tester, order.items[0].description!);
-      await CommonTest.tapByKey(tester, 'id0'); // close detail
-      // check detail
-      await CommonTest.tapByKey(tester, 'edit0');
-      await CommonTest.checkText(tester, order.orderId!);
-      await CommonTest.checkText(tester, order.items[0].description!);
-      await CommonTest.tapByKey(tester, 'cancel'); // cancel dialog
-      await CommonTest.closeSearch(tester);
-    }
-  }
-
-  static Future<void> checkSalesOrder(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> orders = test.orders;
-    for (FinDoc order in orders) {
-      await CommonTest.doNewSearch(tester, searchString: order.orderId!);
-      // check list
-      expect(CommonTest.getTextField('id0'), equals(order.orderId!));
-      await CommonTest.tapByKey(tester, 'id0'); // open detail
-      for (int index = 0; index < order.items.length; index++) {
-        expect(order.items[index].productId,
-            CommonTest.getTextField('itemLine$index').split(' ')[1]);
-        await CommonTest.checkText(tester, order.items[index].description!);
-      }
-      await CommonTest.tapByKey(tester, 'id0'); // close detail
-      // check detail
-      await CommonTest.tapByKey(tester, 'edit0');
-      await CommonTest.checkText(tester, order.orderId!);
-      await CommonTest.checkText(tester, order.items[0].description!);
-      await CommonTest.tapByKey(tester, 'cancel'); // cancel dialog
-      await CommonTest.closeSearch(tester);
-    }
-  }
-
   static Future<void> checkRentalSalesOrder(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     var intlFormat = DateFormat('yyyy-MM-dd');
@@ -205,21 +162,6 @@ class OrderTest {
     await CommonTest.tapByKey(tester, 'cancel');
   }
 
-  static Future<void> sendPurchaseOrder(
-      WidgetTester tester, List<FinDoc> orders) async {
-    SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> orders = test.orders;
-    for (FinDoc order in orders) {
-      await CommonTest.doNewSearch(tester, searchString: order.orderId!);
-      // in the app the order starts as created
-      //    await CommonTest.tapByKey(tester, 'nextStatus0',
-      //        seconds: 5); // to created
-      await CommonTest.tapByKey(tester, 'nextStatus0',
-          seconds: 5); // to approved
-    }
-    await CommonTest.gotoMainMenu(tester);
-  }
-
   static Future<void> approveSalesOrder(WidgetTester tester,
       {String classificationId = 'AppAdmin'}) async {
     SaveTest test = await PersistFunctions.getTest();
@@ -245,18 +187,6 @@ class OrderTest {
       await CommonTest.doNewSearch(tester, searchString: order.orderId!);
       expect(CommonTest.getTextField('status0'),
           equals(classificationId == 'AppHotel' ? 'Checked Out' : 'Completed'));
-    }
-  }
-
-  /// check if the purchase order has been completed successfuly
-  static Future<void> checkPurchaseOrdersComplete(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> orders = test.orders;
-    expect(orders.isNotEmpty, true,
-        reason: 'This test needs orders created in previous steps');
-    for (FinDoc order in orders) {
-      await CommonTest.doNewSearch(tester, searchString: order.orderId!);
-      expect(CommonTest.getTextField('status0'), 'Completed');
     }
   }
 

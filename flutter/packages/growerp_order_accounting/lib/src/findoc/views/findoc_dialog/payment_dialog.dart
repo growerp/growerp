@@ -12,12 +12,14 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:universal_io/io.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:decimal/decimal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:intl/intl.dart';
 
 import '../../../accounting/accounting.dart';
 import '../../findoc.dart';
@@ -67,6 +69,7 @@ class PaymentDialogState extends State<PaymentDialog> {
   final _amountController = TextEditingController();
   final _pseudoIdController = TextEditingController();
   late String currencyId;
+  late String currencySymbol;
 
   @override
   void initState() {
@@ -80,6 +83,9 @@ class PaymentDialogState extends State<PaymentDialog> {
         .company!
         .currency!
         .currencyId!;
+    currencySymbol = NumberFormat.simpleCurrency(
+            locale: Platform.localeName, name: currencyId)
+        .currencySymbol;
     readOnly = finDoc.status == null
         ? false
         : FinDocStatusVal.statusFixed(finDoc.status!);
@@ -279,7 +285,8 @@ class PaymentDialogState extends State<PaymentDialog> {
                   Expanded(
                     child: TextFormField(
                         key: const Key('amount'),
-                        decoration: const InputDecoration(labelText: 'Amount'),
+                        decoration: InputDecoration(
+                            labelText: 'Amount($currencySymbol)'),
                         controller: _amountController,
                         keyboardType: TextInputType.number,
                         validator: (value) =>

@@ -851,7 +851,7 @@ List<FinDoc> salesInvoices = [
 
 List<FinDoc> rentalSalesOrders = [
   FinDoc(
-      sales: false,
+      sales: true,
       docType: FinDocType.order,
       description: 'The first rental sales order',
       otherCompany: customerCompanies[0],

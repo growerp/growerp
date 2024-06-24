@@ -125,7 +125,7 @@ class PaymentTest {
               'PaymentDialog${payment.sales == true ? "Sales" : "Purchase"}')),
           findsOneWidget);
       expect(CommonTest.getTextFormField('amount'),
-          equals(payment.grandTotal.currency()));
+          equals(payment.grandTotal.currency(currencyId: '')));
       switch (payment.paymentInstrument) {
         case PaymentInstrument.creditcard:
           expect(CommonTest.getCheckbox('creditCard'), equals(true));
