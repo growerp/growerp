@@ -88,14 +88,14 @@ class CategoryTest {
   static Future<void> deleteLastCategory(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     int count = test.categories.length;
-    await CommonTest.gotoMainMenu(tester);
-    await CategoryTest.selectCategories(tester);
+    // openclose search to refresh
+    await CommonTest.tapByKey(tester, 'search');
+    await CommonTest.tapByKey(tester, 'search');
     expect(find.byKey(const Key('categoryItem')),
         findsNWidgets(count)); // initial admin
-    await CommonTest.tapByKey(tester, 'delete${count - 1}', seconds: 5);
+    await CommonTest.tapByKey(tester, 'delete${count - 1}',
+        seconds: CommonTest.waitTime);
     // replacement for refresh...
-    await CommonTest.gotoMainMenu(tester);
-    await CategoryTest.selectCategories(tester);
     expect(find.byKey(const Key('categoryItem')), findsNWidgets(count - 1));
     await PersistFunctions.persistTest(test.copyWith(
         categories: test.categories.sublist(0, test.categories.length - 1)));

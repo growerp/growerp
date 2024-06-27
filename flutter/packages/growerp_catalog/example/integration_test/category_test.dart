@@ -47,7 +47,7 @@ void main() {
     } catch (error) {
       await CommonTest.takeScreenShot(
           binding: binding, tester: tester, screenShotName: "Category_Error");
-      print("==========test failed: $error");
+      rethrow;
     }
   });
 }

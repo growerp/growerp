@@ -30,10 +30,14 @@ class _CategoryListHeaderState extends State<CategoryListHeader> {
   bool search = false;
   @override
   Widget build(BuildContext context) {
+    final categoryBloc = context.read<CategoryBloc>();
     return ListTile(
         leading: GestureDetector(
           key: const Key('search'),
-          onTap: (() => setState(() => search = !search)),
+          onTap: (() {
+            if (search) categoryBloc.add(const CategoryFetch(refresh: true));
+            setState(() => search = !search);
+          }),
           child: const Icon(Icons.search_sharp, size: 40),
         ),
         title: search
