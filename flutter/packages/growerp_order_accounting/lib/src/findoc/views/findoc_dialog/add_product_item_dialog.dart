@@ -126,8 +126,7 @@ Future addProductItemDialog(BuildContext context) async {
                                                     const Duration(
                                                         milliseconds: 150), () {
                                                   return Future.value(
-                                                      (productBloc.state.data
-                                                              as Products)
+                                                      (state.data as Products)
                                                           .products);
                                                 });
                                               },

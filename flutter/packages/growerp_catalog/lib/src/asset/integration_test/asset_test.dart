@@ -61,11 +61,12 @@ class AssetTest {
       if (classificationId == 'AppAdmin') {
         await CommonTest.enterText(
             tester, 'quantityOnHand', asset.quantityOnHand.toString());
+        await CommonTest.enterText(
+            tester, 'acquireCost', asset.acquireCost.toString());
       }
       await CommonTest.enterDropDownSearch(
           tester, 'productDropDown', asset.product!.productName!);
       await CommonTest.enterDropDown(tester, 'statusDropDown', asset.statusId!);
-      await CommonTest.drag(tester);
       await CommonTest.tapByKey(tester, 'update');
       await CommonTest.waitForSnackbarToGo(tester);
     }
@@ -91,6 +92,8 @@ class AssetTest {
       if (classificationId == 'AppAdmin') {
         expect(CommonTest.getTextFormField('quantityOnHand'),
             equals(asset.quantityOnHand.toString()));
+        expect(CommonTest.getTextFormField('acquireCost'),
+            equals(asset.acquireCost.currency(currencyId: '')));
       }
       expect(CommonTest.getDropdownSearch('productDropDown'),
           asset.product!.productName!);
@@ -104,17 +107,20 @@ class AssetTest {
   }
 
   static Future<void> deleteAssets(WidgetTester tester) async {
+    // openclose search to refresh
+    await CommonTest.tapByKey(tester, 'search');
+    await CommonTest.tapByKey(tester, 'search');
     SaveTest test = await PersistFunctions.getTest();
-    int count = test.assets.length;
-    await CommonTest.gotoMainMenu(tester);
-    await AssetTest.selectAsset(tester);
-    expect(find.byKey(const Key('assetItem')), findsNWidgets(count));
-    await CommonTest.tapByKey(tester, 'delete${count - 1}', seconds: 5);
-    await CommonTest.gotoMainMenu(tester);
-    await AssetTest.selectAsset(tester);
-    expect(CommonTest.getTextField('status${count - 1}'), 'N');
-    PersistFunctions.persistTest(
-        test.copyWith(assets: test.assets.sublist(0, test.assets.length - 1)));
+    // delete assets
+    for (int x = 0; x < test.assets.length; x++) {
+      await CommonTest.tapByKey(tester, "delete$x",
+          seconds: CommonTest.waitTime);
+    }
+
+    // check assets
+    for (int x = 0; x < test.assets.length; x++) {
+      expect('N', CommonTest.getTextField("status$x"));
+    }
   }
 
   static Future<void> updateAssets(WidgetTester tester) async {

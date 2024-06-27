@@ -24,11 +24,24 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/foundation.dart' as found;
 
 import '../../../../growerp_core.dart';
 import '../../../../test_data.dart';
 
 class CommonTest {
+  static Future<void> takeScreenShot(
+      {binding, tester, String? screenShotName}) async {
+    if (found.kIsWeb) {
+      await binding.takeScreenshot(screenShotName);
+      return;
+    } else if (Platform.isAndroid) {
+      await binding.convertFlutterSurfaceToImage();
+      await tester.pumpAndSettle();
+    }
+    await binding.takeScreenshot(screenShotName);
+  }
+
   static String classificationId =
       GlobalConfiguration().get("classificationId");
   static const int waitTime = 3;

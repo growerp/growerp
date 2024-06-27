@@ -837,7 +837,7 @@ along with this software (see the LICENSE.md file). If not, see
                     statusId: status.convertedStatusId,
                     quantityOnHandTotal: new BigDecimal(asset.quantityOnHand),
                     availableToPromiseTotal: new BigDecimal(asset.quantityOnHand),
-                    acquireCost: new BigDecimal(asset.acquireCost),
+                    acquireCost: asset.acquireCost ? new BigDecimal(asset.acquireCost): BigDecimal.ZERO,
                     facilityId: stores[0].inventoryFacilityId,
                     locationSeqId: asset.location?.locationId,
                     assetTypeEnumId: classificationId == 'AppHotel' ? 'AstTpFixed' : 'AstTpInventory']"
@@ -912,12 +912,15 @@ along with this software (see the LICENSE.md file). If not, see
             <if
                 condition=" assetOld.assetName != asset.assetName || 
                             assetOld.quantityOnHandTotal != asset.quantityOnHand ||
+                            assetOld.acquireCost != asset.acquireCost ||
                             assetOld.statusId != status.convertedStatusId ||
                             assetOld.classEnumId != assetClass.convertedStatusId ||
                             assetOld.productId != asset.product.productId">
                 <set field="assetOld.assetName" from="asset.assetName" />
                 <set field="assetOld.quantityOnHandTotal"
                     from="new BigDecimal(asset.quantityOnHand)" />
+                <set field="assetOld.acquireCost"
+                    from="new BigDecimal(asset.acquireCost)" />
                 <set field="assetOld.statusId" from="status.convertedStatusId" />
                 <set field="assetOld.classEnumId" from="assetClass.convertedStatusId" />
                 <set field="assetOld.productId" from="asset.product.productId" />

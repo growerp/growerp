@@ -9,6 +9,7 @@ generated
 
 #melos
 pubspec_overrides.yaml
+screenshots
 
 # Miscellaneous
 *.class

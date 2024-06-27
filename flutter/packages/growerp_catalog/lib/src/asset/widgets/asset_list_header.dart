@@ -36,8 +36,10 @@ class _AssetListHeaderState extends State<AssetListHeader> {
     return ListTile(
         leading: GestureDetector(
             key: const Key('search'),
-            onTap: (() =>
-                setState(() => search ? search = false : search = true)),
+            onTap: (() {
+              if (search) assetBloc.add(const AssetFetch(refresh: true));
+              setState(() => search = !search);
+            }),
             child: const Icon(Icons.search_sharp, size: 40)),
         title: search
             ? Row(children: <Widget>[
