@@ -30,7 +30,7 @@ For the background processes also a Moqui, database and chat server are started.
 To start the background test:
 ```bash
 cd growerp/flutter
-docker compose -f docker-compose.test.yml up
+./buildRun.sh
 ```
 
 See futher the README.md file in the root of this project.

@@ -12,12 +12,23 @@ adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do slee
 # hack just for  automated testing
 sed -i -e 's\overrideUrl: null\overrideUrl: "http://moqui"\g' packages/growerp_core/lib/src/domains/common/integration_test/common_test.dart
 
-#cd packages/admin
-#sed -i -e 's\"databaseUrlDebug": "",\"databaseUrlDebug": "http://moqui",\g' assets/cfg/app_settings.json
-#sed -i -e 's\"chatUrlDebug": "",\"chatUrlDebug": "ws://chat:8080",\g' assets/cfg/app_settings.json
-#flutter test integration_test -d emulator:5557
-
+# run all tests
 melos test-headless --no-select
+
+# just run order/accounting tests
+#cd packages/growerp_order_accounting/example
+#../../../test/set_app_settings.sh
+#flutter test integration_test
+
+# just run catalog tests
+#cd packages/growerp_catalog/example
+#../../../test/set_app_settings.sh
+#flutter test integration_test
+
+# just run user/company tests
+#cd packages/growerp_user_company/example
+#../../../test/set_app_settings.sh
+#flutter test integration_test
 
 # Take a screenshot of the Flutter app.
 # mkdir -p 'screenshots' || exit 1
