@@ -1120,6 +1120,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="isForDropDown">
                     <set field="userOut"
                         from="[
+                            partyId: userInfo?.userPartyId,
                             pseudoId: userInfo?.userPseudoId,
                             firstName: userInfo?.firstName,
                             lastName: userInfo?.lastName,

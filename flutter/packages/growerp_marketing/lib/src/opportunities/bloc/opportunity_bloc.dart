@@ -85,6 +85,7 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
     Emitter<OpportunityState> emit,
   ) async {
     try {
+      emit(state.copyWith(status: OpportunityStatus.loading));
       List<Opportunity> opportunities = List.from(state.opportunities);
       if (event.opportunity.opportunityId.isNotEmpty) {
         Opportunity compResult =
@@ -120,8 +121,8 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
     Emitter<OpportunityState> emit,
   ) async {
     try {
+      emit(state.copyWith(status: OpportunityStatus.loading));
       List<Opportunity> opportunities = List.from(state.opportunities);
-
       await restClient.deleteOpportunity(opportunity: event.opportunity);
       int index = opportunities.indexWhere((element) =>
           element.opportunityId == event.opportunity.opportunityId);

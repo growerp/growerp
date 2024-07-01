@@ -12,7 +12,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_marketing/src/opportunities/integration_test/data.dart';
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
@@ -20,20 +20,27 @@ void main() {
   });
 
   testWidgets('''GrowERP opportunity test''', (tester) async {
-    RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, generateRoute, menuOptions,
-        MarketingLocalizations.localizationsDelegates,
-        restClient: restClient,
-        blocProviders: getMarketingBlocProviders(restClient),
-        clear: true,
-        title: "Opportunity test");
-    await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "users": administrators.sublist(0, 2) + leads.sublist(0, 2)
-    });
-    await OpportunityTest.selectOpportunities(tester);
-    await OpportunityTest.addOpportunities(tester, opportunities.sublist(0, 4));
-    await OpportunityTest.updateOpportunities(
-        tester, opportunities.sublist(4, 8));
-    await OpportunityTest.deleteLastOpportunity(tester);
+    try {
+      RestClient restClient = RestClient(await buildDioClient());
+      await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+          MarketingLocalizations.localizationsDelegates,
+          restClient: restClient,
+          blocProviders: getMarketingBlocProviders(restClient),
+          clear: true,
+          title: "Opportunity test");
+      await CommonTest.createCompanyAndAdmin(tester, testData: {
+        "users": administrators.sublist(0, 2) + leads.sublist(0, 2)
+      });
+      await OpportunityTest.selectOpportunities(tester);
+      await OpportunityTest.addOpportunities(
+          tester, opportunities.sublist(0, 4));
+      await OpportunityTest.updateOpportunities(
+          tester, opportunities.sublist(4, 8));
+      await OpportunityTest.deleteLastOpportunity(tester);
+    } catch (error) {
+      await CommonTest.takeScreenShot(
+          binding: binding, tester: tester, screenShotName: "Category_Error");
+      rethrow;
+    }
   });
 }
