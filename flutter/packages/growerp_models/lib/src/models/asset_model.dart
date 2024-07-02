@@ -12,11 +12,14 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:io';
+
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:fast_csv/fast_csv.dart' as fast_csv;
+import 'package:logger/logger.dart';
 
-import '../json_converters.dart';
-import 'models.dart';
+import '../../growerp_models.dart';
 
 part 'asset_model.freezed.dart';
 part 'asset_model.g.dart';
@@ -56,3 +59,61 @@ List<String> assetClassIds = [
 ];
 
 List<String> assetStatusValues = ['Available', 'Deactivated', 'In Use'];
+
+String assetCsvFormat =
+    'AssetClassId, Asset Name, AquiredCost, QOH, ATP, ReceivedDate, '
+    'EndOfLifeDate, ProductId, LocationId';
+List<String> assetCsvTitles = assetCsvFormat.split(',');
+int assetCsvLength = assetCsvTitles.length;
+
+List<Asset> CsvToAssets(String csvFile, Logger logger) {
+  int errors = 0;
+  List<Asset> assets = [];
+  final result = fast_csv.parse(csvFile);
+  for (final row in result) {
+    if (row == result.first) continue;
+    try {
+      assets.add(Asset(
+        assetClassId: '',
+        assetName: row[1],
+        acquireCost: row[7].isNotEmpty && row[7] != 'null'
+            ? Decimal.parse(row[7])
+            : null,
+        quantityOnHand: Decimal.parse('100000'), // quantities missing
+        availableToPromise: Decimal.parse('100000'),
+//          receivedDate: DateTime.tryParse(row[4]),
+//          expectedEndOfLifeDate: DateTime.tryParse(row[4]),
+        product: Product(pseudoId: row[0]),
+//        location: Location(locationId: row[0]),
+      ));
+    } catch (e) {
+      String fieldList = '';
+      assetCsvTitles
+          .asMap()
+          .forEach((index, value) => fieldList += "$value: ${row[index]}\n");
+      logger.e("Error processing asset csv line: $fieldList \n"
+          "error message: $e");
+      if (errors++ == 5) exit(1);
+    }
+  }
+  return assets;
+}
+
+String CsvFromAssets(List<Asset> assets) {
+  var csv = [assetCsvFormat];
+  for (Asset asset in assets) {
+    csv.add(createCsvRow([
+      asset.assetId,
+      asset.assetClassId ?? '',
+      asset.assetName ?? '',
+      asset.acquireCost.toString(),
+      asset.quantityOnHand.toString(),
+      asset.availableToPromise.toString(),
+      asset.receivedDate.toString(),
+      asset.expectedEndOfLifeDate.toString(),
+      asset.product!.pseudoId,
+      asset.location!.locationId ?? '',
+    ], assetCsvLength));
+  }
+  return csv.join();
+}

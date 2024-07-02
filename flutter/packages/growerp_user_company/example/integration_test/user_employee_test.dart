@@ -23,7 +23,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 Future<void> main() async {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
 
   setUp(() async {
@@ -35,21 +35,27 @@ Future<void> main() async {
   }
 
   testWidgets('''GrowERP user employee test''', (tester) async {
-    RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, generateRoute, menuOptions,
-        UserCompanyLocalizations.localizationsDelegates,
-        restClient: restClient,
-        clear: true,
-        title: 'GrowERP user-employee test',
-        blocProviders: getUserCompanyBlocProviders(restClient, 'AppAdmin'));
-    await CommonTest.createCompanyAndAdmin(tester);
-    await selectEmployees(tester);
-    await UserTest.addAdministrators(tester, administrators.sublist(0, 3));
-    await UserTest.updateAdministrators(tester, administrators.sublist(3, 6));
-    await UserTest.deleteAdministrators(tester);
-    await selectEmployees(tester);
-    await UserTest.addEmployees(tester, employees.sublist(0, 3));
-    await UserTest.updateEmployees(tester, employees.sublist(3, 6));
-    await UserTest.deleteEmployees(tester);
+    try {
+      RestClient restClient = RestClient(await buildDioClient());
+      await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+          UserCompanyLocalizations.localizationsDelegates,
+          restClient: restClient,
+          clear: true,
+          title: 'GrowERP user-employee test',
+          blocProviders: getUserCompanyBlocProviders(restClient, 'AppAdmin'));
+      await CommonTest.createCompanyAndAdmin(tester);
+      await selectEmployees(tester);
+      await UserTest.addAdministrators(tester, administrators.sublist(0, 3));
+      await UserTest.updateAdministrators(tester, administrators.sublist(3, 6));
+      await UserTest.deleteAdministrators(tester);
+      await selectEmployees(tester);
+      await UserTest.addEmployees(tester, employees.sublist(0, 3));
+      await UserTest.updateEmployees(tester, employees.sublist(3, 6));
+      await UserTest.deleteEmployees(tester);
+    } catch (error) {
+      await CommonTest.takeScreenShot(
+          binding: binding, tester: tester, screenShotName: "Asset_Error");
+      rethrow;
+    }
   }, skip: false);
 }

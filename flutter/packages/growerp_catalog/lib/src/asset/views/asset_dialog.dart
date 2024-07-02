@@ -239,7 +239,8 @@ class AssetDialogState extends State<AssetDialog> {
                               isForDropDown: true)));
                       return Future.delayed(const Duration(milliseconds: 150),
                           () {
-                        return Future.value((state.data as Products).products);
+                        return Future.value(
+                            (_productBloc.state.data as Products).products);
                       });
                     },
                     compareFn: (item, sItem) =>
@@ -323,7 +324,8 @@ class AssetDialogState extends State<AssetDialog> {
                               return Future.delayed(
                                   const Duration(milliseconds: 250), () {
                                 return Future.value(
-                                    (state.data as Locations).locations);
+                                    (_locationBloc.state.data as Locations)
+                                        .locations);
                               });
                             },
                             compareFn: (item, sItem) =>

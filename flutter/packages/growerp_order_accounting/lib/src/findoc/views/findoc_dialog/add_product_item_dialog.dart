@@ -126,7 +126,8 @@ Future addProductItemDialog(BuildContext context) async {
                                                     const Duration(
                                                         milliseconds: 150), () {
                                                   return Future.value(
-                                                      (state.data as Products)
+                                                      (productBloc.state.data
+                                                              as Products)
                                                           .products);
                                                 });
                                               },
@@ -245,7 +246,7 @@ Future addProductItemDialog(BuildContext context) async {
                                                         limit: 3));
                                                 return Future.delayed(
                                                     const Duration(
-                                                        milliseconds: 100), () {
+                                                        milliseconds: 150), () {
                                                   return Future.value(
                                                       glAccountBloc
                                                           .state.glAccounts);

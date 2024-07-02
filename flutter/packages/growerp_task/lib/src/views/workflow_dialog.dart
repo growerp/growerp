@@ -125,7 +125,12 @@ class WorkflowDialogState extends State<WorkflowDialog> {
                                           taskBloc.add(TaskFetch(
                                               searchString: filter,
                                               isForDropDown: true));
-                                          return Future.value(state.tasks);
+                                          return Future.delayed(
+                                              const Duration(milliseconds: 150),
+                                              () {
+                                            return Future.value(
+                                                taskBloc.state.tasks);
+                                          });
                                         },
                                         compareFn: (item, sItem) =>
                                             item.taskId == sItem.taskId,

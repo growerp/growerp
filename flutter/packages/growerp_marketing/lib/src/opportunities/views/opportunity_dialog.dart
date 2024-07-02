@@ -214,7 +214,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                           isForDropDown: true,
                           role: Role.lead)));
                   return Future.delayed(const Duration(milliseconds: 150), () {
-                    return Future.value((state.data as Users).users);
+                    return Future.value((_leadBloc.state.data as Users).users);
                   });
                 },
                 compareFn: (item, sItem) => item.partyId == sItem.partyId,
@@ -270,7 +270,8 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                             role: Role.company)));
                     return Future.delayed(const Duration(milliseconds: 150),
                         () {
-                      return Future.value((state.data as Users).users);
+                      return Future.value(
+                          (_employeeBloc.state.data as Users).users);
                     });
                   },
                   compareFn: (item, sItem) => item.partyId == sItem.partyId,

@@ -17,7 +17,8 @@ class DataFetchBloc<T> extends Bloc<DataFetchBlocEvent, DataFetchState>
         emit(state.copyWith(status: DataFetchStatus.loading));
         final data = await event.futureFunction();
         // await Future.delayed(Duration(milliseconds: 1000));
-        emit(state.copyWith(status: DataFetchStatus.success, data: data));
+        return emit(
+            state.copyWith(status: DataFetchStatus.success, data: data));
       } on DioException catch (e) {
         emit(state.copyWith(
             status: DataFetchStatus.failure,

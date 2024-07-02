@@ -24,7 +24,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
@@ -37,24 +37,30 @@ void main() {
 
   var testName = '''GrowERP website test''';
   testWidgets(testName, (tester) async {
-    RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, generateRoute, menuOptions,
-        WebsiteLocalizations.localizationsDelegates,
-        title: testName,
-        restClient: restClient,
-        blocProviders: getWebsiteBlocProviders(restClient),
-        clear: true); // use data from previous run, ifnone same as true
-    await CommonTest.createCompanyAndAdmin(tester, testData: {
-      // related categories also created
-      "products": products.sublist(0, 2),
-    });
-    await selectWebsite(tester);
-    await WebsiteTest.updateTitle(tester);
-    await WebsiteTest.updateTextSection(tester);
-    await WebsiteTest.updateImages(tester);
-    await WebsiteTest.updateHomePageCategories(tester, "Deals", products);
-    await WebsiteTest.updateHomePageCategories(tester, "Featured", products);
-    await WebsiteTest.updateShopCategories(tester);
-    await CommonTest.gotoMainMenu(tester);
+    try {
+      RestClient restClient = RestClient(await buildDioClient());
+      await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+          WebsiteLocalizations.localizationsDelegates,
+          title: testName,
+          restClient: restClient,
+          blocProviders: getWebsiteBlocProviders(restClient),
+          clear: true); // use data from previous run, ifnone same as true
+      await CommonTest.createCompanyAndAdmin(tester, testData: {
+        // related categories also created
+        "products": products.sublist(0, 2),
+      });
+      await selectWebsite(tester);
+      await WebsiteTest.updateTitle(tester);
+      await WebsiteTest.updateTextSection(tester);
+      await WebsiteTest.updateImages(tester);
+      await WebsiteTest.updateHomePageCategories(tester, "Deals", products);
+      await WebsiteTest.updateHomePageCategories(tester, "Featured", products);
+      await WebsiteTest.updateShopCategories(tester);
+      await CommonTest.gotoMainMenu(tester);
+    } catch (error) {
+      await CommonTest.takeScreenShot(
+          binding: binding, tester: tester, screenShotName: "Asset_Error");
+      rethrow;
+    }
   });
 }
