@@ -22,8 +22,8 @@ Sub commands:
   
 ### import:
   will upload data like ledger(glaccount), customers products etc from the terminal
-  Also has a helper program csvToCsv to convert your csv files to the
-    GrowERP format.
+  Also has a helper program convertToCsv to convert your files to the
+    GrowERP CSV format.
   #### Parameters
   * -i input file or directory, if directory will process filenames according the [FileType]
   * -u -p user/password optional, will remember from last time
@@ -52,11 +52,8 @@ Sub commands:
   * -t receive timeout: default 60 seconds
   * -f optional filetype [FileType] like glAccount, product, category etc...
 
-## the csv to csv command
-this command converts from your exported csv files to the GrowERP csv files to import. This command provides an example which was used for an existing customer previously using a SAGE50 system
-
-Its reordering columns and incoming CSV doing optional
-required conversion in the process
+### the convertToCsv command
+this command converts from your exported csv/ods/xlsx files to the GrowERP csv files to import. This command provides an example which was used for an existing customer previously using a SAGE50 system
 
 #### input parameters:
 * mandatatory the input directory name
@@ -73,7 +70,7 @@ or after the activate growerp at the top:
 will create a new directory: growerpOutput with the converted file(s).
 
 ### The conversion workflow
-1. Extract csv files from the old system and put them in a single directory.
+1. Extract csv/ods/xlsx files from the old system and put them in a single directory.
 2. When importing images create an 'images' directory and a images.csv file in the format: filetype,id,filename
 3. Specify the conversion rules.
     * specify the names of these files in the getFileNames function
@@ -91,7 +88,7 @@ will create a new directory: growerpOutput with the converted file(s).
     ```
     * run conversion for all files
     ```bash
-    dart pub global run growerp:csvToCsv inputDir
+    dart pub global run growerp:convertToCsv inputDir
     ```
 5. Import the generated GrowERP csv files into the growerp system
    * execute activate 

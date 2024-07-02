@@ -59,7 +59,7 @@ void main() {
       await CommonTest.gotoMainMenu(tester);
     } catch (error) {
       await CommonTest.takeScreenShot(
-          binding: binding, tester: tester, screenShotName: "Asset_Error");
+          binding: binding, tester: tester, screenShotName: "Website_Error");
       rethrow;
     }
   });

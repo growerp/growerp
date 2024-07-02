@@ -1030,6 +1030,8 @@ along with this software (see the LICENSE.md file). If not, see
                                     operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="invoiceId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="theirAcctgTransId" ignore-case="true"
+                                    operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="paymentId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="transactionId" ignore-case="true"
