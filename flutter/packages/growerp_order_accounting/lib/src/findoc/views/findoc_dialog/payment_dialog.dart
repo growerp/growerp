@@ -185,6 +185,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                   Expanded(
                     child: TextFormField(
                       key: const Key('pseudoId'),
+                      enabled: !readOnly,
                       decoration: const InputDecoration(labelText: 'Id'),
                       controller: _pseudoIdController,
                       keyboardType: TextInputType.number,

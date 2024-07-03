@@ -270,6 +270,7 @@ class MyFinDocState extends State<FinDocPage> {
                     width: 115,
                     child: TextFormField(
                       key: const Key('pseudoId'),
+                      enabled: !readOnly,
                       decoration: const InputDecoration(labelText: 'Id'),
                       controller: _pseudoIdController,
                       keyboardType: TextInputType.number,
@@ -405,6 +406,7 @@ class MyFinDocState extends State<FinDocPage> {
                       width: 80,
                       child: TextFormField(
                         key: const Key('pseudoId'),
+                        enabled: !readOnly,
                         decoration: const InputDecoration(labelText: 'Id'),
                         controller: _pseudoIdController,
                         keyboardType: TextInputType.number,
@@ -899,7 +901,7 @@ class MyFinDocState extends State<FinDocPage> {
     // field lengths
     List<double> getItemFieldWidth(
         {int? itemIndex, FinDocItem? item, BuildContext? context}) {
-      return [12, 12, 12, 15, 15];
+      return [12, 15, 15, 15, 15];
     }
 
     // fields content, using strings index not required
