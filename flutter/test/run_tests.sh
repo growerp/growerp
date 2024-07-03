@@ -30,10 +30,11 @@ melos test-headless --no-select
 #../../../test/set_app_settings.sh
 #flutter test integration_test
 
-# Take a screenshot of the Flutter app.
-# mkdir -p 'screenshots' || exit 1
-# adb shell screencap /sdcard/screenshot.png
+# just run website tests
+#cd packages/growerp_website/example
+#../../../test/set_app_settings.sh
+#flutter drive --driver=test_driver/integration_test.dart --target=integration_test/website_test.dart
+#flutter test integration_test
 
-# adb pull /sdcard/screenshot.png screenshots/flutter-screen.png
 
-# sleep infinity
+sleep infinity # to keep the container alive

@@ -34,12 +34,14 @@ class CommonTest {
       {binding, tester, String? screenShotName}) async {
     if (found.kIsWeb) {
       await binding.takeScreenshot(screenShotName);
+      await tester.pumpAndSettle();
       return;
     } else if (Platform.isAndroid) {
       await binding.convertFlutterSurfaceToImage();
       await tester.pumpAndSettle();
     }
     await binding.takeScreenshot(screenShotName);
+    await tester.pumpAndSettle();
   }
 
   static String classificationId =
