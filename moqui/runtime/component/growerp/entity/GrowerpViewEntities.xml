@@ -16,6 +16,7 @@ along with this software (see the LICENSE.md file). If not, see
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-2.1.xsd">
 
 
+    <!-- order headers -->
     <view-entity entity-name="OrderHeaderPartAndParties" package="growerp.order">
         <member-entity entity-alias="ORHD" entity-name="mantle.order.OrderHeader" />
         <member-entity entity-alias="SC" entity-name="moqui.basic.Enumeration"
@@ -119,6 +120,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="shipmentId" entity-alias="SIS" />
     </view-entity>
 
+    <!-- order items -->
     <view-entity entity-name="OrderItemsAndReservation" package="growerp.order">
         <member-entity entity-alias="OITEM" entity-name="mantle.order.OrderItem" />
         <member-entity
@@ -510,49 +512,6 @@ along with this software (see the LICENSE.md file). If not, see
         <alias entity-alias="ASSET" name="statusId" />
         <alias entity-alias="ASSET" name="ownerPartyId" />
         <alias entity-alias="ASSET" name="totalAssets" field="quantityOnHandTotal" function="sum" />
-    </view-entity>
-
-    <view-entity entity-name="InvoiceAndParties" package="growerp.account">
-        <member-entity entity-alias="INV" entity-name="mantle.account.invoice.Invoice" />
-        <member-entity
-            entity-alias="PAY" entity-name="mantle.account.payment.Payment"
-            join-from-alias="INV" join-optional="true">
-            <key-map field-name="invoiceId" related="forInvoiceId" />
-        </member-entity>
-        <!-- vendor data -->
-        <member-entity entity-alias="VPARTY" entity-name="mantle.party.Party"
-            join-from-alias="INV" join-optional="true">
-            <key-map field-name="fromPartyId" related="partyId" />
-        </member-entity>
-        <member-entity entity-alias="VORG" entity-name="mantle.party.Organization"
-            join-from-alias="VPARTY" join-optional="true">
-            <key-map field-name="partyId" />
-        </member-entity>
-        <!-- customer data -->
-        <member-entity entity-alias="CPARTY" entity-name="mantle.party.Party"
-            join-from-alias="INV" join-optional="true">
-            <key-map field-name="toPartyId" related="partyId" />
-        </member-entity>
-        <member-entity entity-alias="CORG" entity-name="mantle.party.Organization"
-            join-from-alias="CPARTY" join-optional="true">
-            <key-map field-name="partyId" />
-        </member-entity>
-        <alias name="invoiceId" entity-alias="INV" />
-        <alias name="pseudoId" entity-alias="INV" />
-        <alias name="fromPartyId" entity-alias="INV" />
-        <alias name="toPartyId" entity-alias="INV" />
-        <alias name="invoiceName" field="description" entity-alias="INV" />
-        <alias name="statusId" entity-alias="INV" />
-        <alias name="invoiceDate" entity-alias="INV" />
-        <alias name="invoiceTotal" entity-alias="INV" />
-
-        <alias name="vendorPartyId" field="partyId" entity-alias="VORG" />
-        <alias name="vendorPseudoId" field="pseudoId" entity-alias="VPARTY" />
-        <alias name="vendorCompanyName" field="organizationName" entity-alias="VORG" />
-
-        <alias name="customerPartyId" field="partyId" entity-alias="CORG" />
-        <alias name="customerPseudoId" field="pseudoId" entity-alias="CPARTY" />
-        <alias name="customerCompanyName" field="organizationName" entity-alias="CORG" />
     </view-entity>
 
     <view-entity entity-name="InvoiceItemsAndParties" package="growerp.account">
