@@ -591,6 +591,11 @@ along with this software (see the LICENSE.md file). If not, see
                                 <!-- just a list to scroll get Id's-->
                                 <entity-find offset="start" limit="limit"
                                     entity-name="mantle.account.invoice.Invoice" list="invoiceIds">
+                                    <econdition
+                                        field-name="toPartyId"
+                                        from="customerPartyId" ignore-if-empty="true" />
+                                    <econdition field-name="fromPartyId"
+                                        from="vendorPartyId" ignore-if-empty="true" />
                                     <econditions combine="or">
                                         <econdition field-name="statusId" operator="in"
                                             from="statusList" ignore-if-empty="true" />
