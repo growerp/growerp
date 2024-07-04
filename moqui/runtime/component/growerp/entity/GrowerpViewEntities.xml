@@ -2045,7 +2045,7 @@ along with this software (see the LICENSE.md file). If not, see
     <view-entity entity-name="AssetProductAndLocation" package="growerp.product.asset">
         <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" />
         <member-entity entity-alias="PROD" entity-name="mantle.product.Product"
-            join-from-alias="AST">
+            join-from-alias="AST" join-optional="true">
             <key-map field-name="productId" />
         </member-entity>
         <member-entity entity-alias="LOC" entity-name="mantle.facility.FacilityLocation"

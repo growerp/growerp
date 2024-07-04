@@ -180,6 +180,10 @@ Future<void> main(List<String> args) async {
         csvFormat = categoryCsvFormat;
         csvLength = categoryCsvLength;
         break;
+      case FileType.asset:
+        csvFormat = assetCsvFormat;
+        csvLength = assetCsvLength;
+        break;
       case FileType.product:
         csvFormat = productCsvFormat;
         csvLength = productCsvLength;

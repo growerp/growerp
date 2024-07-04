@@ -62,7 +62,7 @@ List<String> assetStatusValues = ['Available', 'Deactivated', 'In Use'];
 
 String assetCsvFormat =
     'AssetClassId, Asset Name, AquiredCost, QOH, ATP, ReceivedDate, '
-    'EndOfLifeDate, ProductId, LocationId';
+    'EndOfLifeDate, ProductId, LocationId,\r\n';
 List<String> assetCsvTitles = assetCsvFormat.split(',');
 int assetCsvLength = assetCsvTitles.length;
 
@@ -74,17 +74,19 @@ List<Asset> CsvToAssets(String csvFile, Logger logger) {
     if (row == result.first) continue;
     try {
       assets.add(Asset(
-        assetClassId: '',
+        assetClassId: row[0],
         assetName: row[1],
-        acquireCost: row[7].isNotEmpty && row[7] != 'null'
-            ? Decimal.parse(row[7])
+        acquireCost: row[2].isNotEmpty && row[2] != 'null'
+            ? Decimal.parse(row[2])
             : null,
-        quantityOnHand: Decimal.parse('100000'), // quantities missing
-        availableToPromise: Decimal.parse('100000'),
-//          receivedDate: DateTime.tryParse(row[4]),
-//          expectedEndOfLifeDate: DateTime.tryParse(row[4]),
-        product: Product(pseudoId: row[0]),
-//        location: Location(locationId: row[0]),
+        quantityOnHand:
+            row[3] == '' ? Decimal.parse('0') : Decimal.parse(row[3]),
+        availableToPromise:
+            row[4] == '' ? Decimal.parse('0') : Decimal.parse(row[4]),
+        receivedDate: DateTime.tryParse(row[5]),
+        expectedEndOfLifeDate: DateTime.tryParse(row[6]),
+        product: Product(pseudoId: row[7]),
+        location: Location(locationId: row[8]),
       ));
     } catch (e) {
       String fieldList = '';

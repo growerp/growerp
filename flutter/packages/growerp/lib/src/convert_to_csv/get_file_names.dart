@@ -26,6 +26,10 @@ List<String> getFileNames(FileType fileType) {
       searchFiles.add('4-1-chart_of_accounts_list.csv'); // basic layout
       break;
 
+    case FileType.asset:
+      searchFiles.add('5-3-inventory_item_list.csv');
+      break;
+
     case FileType.product:
     case FileType.user:
     case FileType.finDocTransaction:
@@ -57,7 +61,6 @@ List<String> getFileNames(FileType fileType) {
     case FileType.finDocPaymentSaleItem:
     case FileType.finDocPaymentPurchaseItem:
     case FileType.category:
-    case FileType.asset:
     case FileType.website:
       break;
     default:

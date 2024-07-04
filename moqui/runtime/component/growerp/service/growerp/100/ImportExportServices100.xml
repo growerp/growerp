@@ -369,6 +369,23 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="import" noun="Assets">
+        <in-parameters>
+            <parameter name="assets" required="true" type="List" />
+            <parameter name="classificationId" />
+        </in-parameters>
+        <actions>
+            <iterate list="assets" entry="asset">
+                <service-call name="growerp.100.CatgProdServices100.create#Asset"
+                    out-map="result"
+                    in-map="[asset: asset, classificationId: classificationId]" />
+            </iterate>
+            <if condition="!ec.message.hasError()">
+                <message type="success">${assets?.size()} assets imported</message>
+            </if>
+        </actions>
+    </service>
+
     <service verb="import" noun="FinDocs">
         <in-parameters>
             <parameter name="finDocs" required="true" type="List" />

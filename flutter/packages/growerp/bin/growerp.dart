@@ -25,7 +25,8 @@ import '../lib/src/src.dart';
 
 Future<void> main(List<String> args) async {
   String growerpPath = '$HOME/growerp';
-  String validCommands = "valid commands are:'install | import | export'";
+  String validCommands =
+      "valid commands are:'install | import | export | finalize'";
   String? backendUrl;
   String branch = 'master';
   String inputFile = '';
@@ -170,6 +171,10 @@ Future<void> main(List<String> args) async {
                   break;
                 case FileType.category:
                   await client.importCategories(CsvToCategories(csvFile));
+                  break;
+                case FileType.asset:
+                  await client.importAssets(
+                      CsvToAssets(csvFile, logger), 'AppAdmin');
                   break;
                 case FileType.company:
                   await client.importCompanies(CsvToCompanies(csvFile));

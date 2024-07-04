@@ -61,7 +61,7 @@ this command converts from your exported csv/ods/xlsx files to the GrowERP csv f
 
 examples:
 ```bash
-  dart run ~/growerp/flutter/packages/growerp/bin/csvToCsv.dart inputDir transaction
+  dart run ~/growerp/flutter/packages/growerp/bin/convertToCsv.dart inputDir transaction
 ```
 or after the activate growerp at the top:
 ```bash

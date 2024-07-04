@@ -10,9 +10,11 @@ abstract class RestClient {
   factory RestClient(Dio dio, {String baseUrl}) = _RestClient;
 
   @GET("rest/s1/growerp/100/CheckEmail")
+  @Extra({'noApiKey': true})
   Future<Map<String, bool>> checkEmail({@Query('email') required String email});
 
   @POST("rest/s1/growerp/100/UserAndCompany")
+  @Extra({'noApiKey': true})
   @FormUrlEncoded()
   Future<Authenticate> registerCompanyAdmin({
     @Field() required String emailAddress,
@@ -27,6 +29,7 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/Login")
+  @Extra({'noApiKey': true})
   @FormUrlEncoded()
   Future<Authenticate> login({
     @Field() required String username,
@@ -35,9 +38,11 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/Logout")
+  @Extra({'noApiKey': true})
   Future<String> logout();
 
   @POST("rest/s1/growerp/100/ResetPassword")
+  @Extra({'noApiKey': true})
   Future<String> resetPassword({@Field() required String username});
 
   @POST("rest/s1/growerp/100/Password")
@@ -548,6 +553,10 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/ImportExport/categories")
   Future<void> importCategories(@Field() List<Category> categories);
+
+  @POST("rest/s1/growerp/100/ImportExport/assets")
+  Future<void> importAssets(
+      @Field() List<Asset> assets, @Field() String classificationId);
 
   @GET("rest/s1/growerp/100/Categories")
   Future<Categories> getCategories({@Query('limit') int? limit});

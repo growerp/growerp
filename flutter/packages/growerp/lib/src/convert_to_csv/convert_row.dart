@@ -123,6 +123,21 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       }
       return columnsTo;
 
+    /// convert to [assetCsvFormat]
+    /// 'AssetClassId, Asset Name, AquiredCost, QOH, ATP, ReceivedDate, '
+    /// 'EndOfLifeDate, ProductId, LocationId,';
+    case FileType.asset:
+      columnsTo.add(''); // type
+      columnsTo.add(columnsFrom[4]); // name
+      columnsTo.add(columnsFrom[7]); // cost
+      columnsTo.add('');
+      columnsTo.add('');
+      columnsTo.add('');
+      columnsTo.add('');
+      columnsTo.add(columnsFrom[0]); // product id
+      columnsTo.add('');
+      return columnsTo;
+
     /// convert to [companyCsvFormat]
     case FileType.company:
       if (fileName.contains('customer') || fileName.contains('main-company')) {

@@ -54,10 +54,12 @@ class KeyInterceptor extends Interceptor {
   @override
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
-    options.headers['api_key'] = await _box?.get('apiKey');
-    if (options.method != 'GET') {
-      options.headers['moquiSessionToken'] =
-          await _box?.get('moquiSessionToken');
+    if (options.extra['noApiKey'] == null) {
+      options.headers['api_key'] = await _box?.get('apiKey');
+      if (options.method != 'GET') {
+        options.headers['moquiSessionToken'] =
+            await _box?.get('moquiSessionToken');
+      }
     }
     return super.onRequest(options, handler);
   }
