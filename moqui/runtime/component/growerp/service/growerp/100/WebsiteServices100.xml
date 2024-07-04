@@ -360,7 +360,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </iterate>
                     <!-- website categories -->
                     <iterate list="website.websiteCategories" entry="catg">
-                        <service-call name="growerp.100.CatgProdServices100.update#ProductCategory"
+                        <service-call name="growerp.100.CatalogServices100.update#ProductCategory"
                             in-map="[category: catg]" />
                     </iterate>
                     <!-- product categories -->

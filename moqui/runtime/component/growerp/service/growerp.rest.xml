@@ -133,47 +133,47 @@ along with this software (see the LICENSE.md file). If not, see
         <resource name="Categories" require-authentication="anonymous-all">
             <!-- separate from Categoryfor security reasons -->
             <method type="get">
-                <service name="growerp.100.CatgProdServices100.get#ProductCategories" />
+                <service name="growerp.100.CatalogServices100.get#ProductCategories" />
             </method>
         </resource>
         <resource name="Category">
             <method type="post">
-                <service name="growerp.100.CatgProdServices100.create#ProductCategory" />
+                <service name="growerp.100.CatalogServices100.create#ProductCategory" />
             </method>
             <method type="patch">
-                <service name="growerp.100.CatgProdServices100.update#ProductCategory" />
+                <service name="growerp.100.CatalogServices100.update#ProductCategory" />
             </method>
             <method type="delete">
-                <service name="growerp.100.CatgProdServices100.delete#ProductCategory" />
+                <service name="growerp.100.CatalogServices100.delete#ProductCategory" />
             </method>
         </resource>
         <!-- products -->
         <resource name="Products" require-authentication="anonymous-all">
             <!-- separate from Product for security reasons -->
             <method type="get">
-                <service name="growerp.100.CatgProdServices100.get#Products" />
+                <service name="growerp.100.CatalogServices100.get#Products" />
             </method>
         </resource>
         <resource name="Product">
             <method type="post">
-                <service name="growerp.100.CatgProdServices100.create#Product" />
+                <service name="growerp.100.CatalogServices100.create#Product" />
             </method>
             <method type="patch">
-                <service name="growerp.100.CatgProdServices100.update#Product" />
+                <service name="growerp.100.CatalogServices100.update#Product" />
             </method>
             <method type="delete">
-                <service name="growerp.100.CatgProdServices100.delete#Product" />
+                <service name="growerp.100.CatalogServices100.delete#Product" />
             </method>
         </resource>
         <resource name="Asset">
             <method type="get">
-                <service name="growerp.100.CatgProdServices100.get#Assets" />
+                <service name="growerp.100.CatalogServices100.get#Assets" />
             </method>
             <method type="post">
-                <service name="growerp.100.CatgProdServices100.create#Asset" />
+                <service name="growerp.100.CatalogServices100.create#Asset" />
             </method>
             <method type="patch"><!-- also for delete: change status -->
-                <service name="growerp.100.CatgProdServices100.update#Asset" />
+                <service name="growerp.100.CatalogServices100.update#Asset" />
             </method>
         </resource>
         <!-- financial docs: order, invoice payments -->
@@ -196,16 +196,16 @@ along with this software (see the LICENSE.md file). If not, see
         <!-- Warehouse location -->
         <resource name="Location"><!-- get financial docs : order/invoice/payment -->
             <method type="get">
-                <service name="growerp.100.WarehouseServices100.get#Location" />
+                <service name="growerp.100.InventoryServices100.get#Location" />
             </method>
             <method type="post">
-                <service name="growerp.100.WarehouseServices100.create#Location" />
+                <service name="growerp.100.InventoryServices100.create#Location" />
             </method>
             <method type="patch">
-                <service name="growerp.100.WarehouseServices100.update#Location" />
+                <service name="growerp.100.InventoryServices100.update#Location" />
             </method>
             <method type="delete">
-                <service name="growerp.100.WarehouseServices100.delete#Location" />
+                <service name="growerp.100.InventoryServices100.delete#Location" />
             </method>
         </resource>
         <!-- project/tasks -->

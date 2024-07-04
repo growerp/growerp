@@ -341,7 +341,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="ownerPartyId" from="relComp.ownerPartyId" />
                 </entity-find>
                 <if condition="!products">
-                    <service-call name="growerp.100.CatgProdServices100.create#Product"
+                    <service-call name="growerp.100.CatalogServices100.create#Product"
                         out-map="result"
                         in-map="[product: product, classificationId: classificationId]" />
                 </if>
@@ -360,7 +360,7 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <script>ec.user.setEffectiveTime(Timestamp.valueOf("1999-01-01 00:00:00"))</script>
             <iterate list="categories" entry="category">
-                <service-call name="growerp.100.CatgProdServices100.create#ProductCategory"
+                <service-call name="growerp.100.CatalogServices100.create#ProductCategory"
                     in-map="[category: category, classificationId: classificationId]" />
             </iterate>
             <if condition="!ec.message.hasError()">
@@ -376,7 +376,7 @@ along with this software (see the LICENSE.md file). If not, see
         </in-parameters>
         <actions>
             <iterate list="assets" entry="asset">
-                <service-call name="growerp.100.CatgProdServices100.create#Asset"
+                <service-call name="growerp.100.CatalogServices100.create#Asset"
                     out-map="result"
                     in-map="[asset: asset, classificationId: classificationId]" />
             </iterate>
@@ -717,7 +717,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <if condition="item.pseudoProductId">
                     <!-- find productId from pseudoProductId -->
-                    <service-call name="growerp.100.CatgProdServices100.get#Products"
+                    <service-call name="growerp.100.CatalogServices100.get#Products"
                         out-map="context"
                         in-map="[pseudoId: item.pseudoProductId, classificationId: classificationId, ownerPartyId: ownerPartyId]" />
                     <if condition="!products.isEmpty()"><!-- get services always provide list -->
@@ -726,7 +726,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <if condition="item.docType == 'invoice'">
                             <set field="products[0].price" from="item.price" />
                             <set field="products[0].listPrice" from="item.price" />
-                            <service-call name="growerp.100.CatgProdServices100.update#Product"
+                            <service-call name="growerp.100.CatalogServices100.update#Product"
                                 out-map="context"
                                 in-map="[product: products[0], classificationId: classificationId]" />
                         </if>
@@ -743,7 +743,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     price: item.price,
                                     listPrice: item.price,
                                     ]" />
-                            <service-call name="growerp.100.CatgProdServices100.create#Product"
+                            <service-call name="growerp.100.CatalogServices100.create#Product"
                                 out-map="context"
                                 in-map="[product: product, classificationId: classificationId]" />
                             <set field="item.productId" from="product.productId" />
@@ -904,7 +904,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <if condition="entities.categories">
                 <iterate list="entities.categories" entry="category">
-                    <service-call name="growerp.100.CatgProdServices100.create#ProductCategory"
+                    <service-call name="growerp.100.CatalogServices100.create#ProductCategory"
                         in-map="[category: category, classificationId: classificationId]" />
                 </iterate>
             </if>
@@ -922,7 +922,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 from="foundCategories[0].productCategoryId" />
                         </if>
                     </iterate>
-                    <service-call name="growerp.100.CatgProdServices100.create#Product"
+                    <service-call name="growerp.100.CatalogServices100.create#Product"
                         out-map="result"
                         in-map="[product: product, classificationId: classificationId]" />
                 </iterate>
@@ -930,14 +930,14 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <if condition="entities.assets">
                 <iterate list="entities.assets" entry="asset">
-                    <service-call name="growerp.100.CatgProdServices100.create#Asset"
+                    <service-call name="growerp.100.CatalogServices100.create#Asset"
                         in-map="[asset: asset, classificationId: classificationId]" />
                 </iterate>
                 <message public="true" type="success">Assets Upload completed</message>
             </if>
             <if condition="entities.locations">
                 <iterate list="entities.locations" entry="location">
-                    <service-call name="growerp.100.WarehouseServices100.create#Location"
+                    <service-call name="growerp.100.InventoryServices100.create#Location"
                         in-map="[location: location]" />
                 </iterate>
                 <message public="true" type="success">Locations Upload completed</message>
@@ -1013,7 +1013,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="fileText" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.CatgProdServices100.get#ProductCategories"
+            <service-call name="growerp.100.CatalogServices100.get#ProductCategories"
                 in-map="[classificationId: classificationId]" out-map="context" />
             <set field="fileText" value="" />
             <script><![CDATA[
@@ -1044,7 +1044,7 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <script>logger.warn("getting products")</script>
-            <service-call name="growerp.100.CatgProdServices100.get#Products"
+            <service-call name="growerp.100.CatalogServices100.get#Products"
                 out-map="context" />
             <set field="fileText" value="" />
             <script><![CDATA[

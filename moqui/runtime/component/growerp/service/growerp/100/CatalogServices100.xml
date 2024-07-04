@@ -328,7 +328,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- add if no id's -->
                 <if condition="!category.categoryId">
                     <!-- check if exist not required, already done in entity import -->
-                    <service-call name="growerp.100.CatgProdServices100.create#ProductCategory"
+                    <service-call name="growerp.100.CatalogServices100.create#ProductCategory"
                         in-map="[category: category]" out-map="categoryResult" />
                     <set field="categoryId" from="categoryResult.category.categoryId" />
                     <else>
@@ -360,7 +360,7 @@ along with this software (see the LICENSE.md file). If not, see
                         quantityOnHand: product.assetCount,
                         product: newProduct,
                         statusId: 'Available']" />
-                <service-call name="growerp.100.CatgProdServices100.create#Asset"
+                <service-call name="growerp.100.CatalogServices100.create#Asset"
                     in-map="[asset: inMap, classificationId: classificationId]" />
             </if>
             <!-- product Image -->
@@ -370,7 +370,7 @@ along with this software (see the LICENSE.md file). If not, see
                         base64: product.image]" />
             </if>
             <!-- return created product -->
-            <service-call name="growerp.100.CatgProdServices100.get#Products"
+            <service-call name="growerp.100.CatalogServices100.get#Products"
                 in-map="[productId: productId]" out-map="context" />
             <set field="product" from="products[0]" />
         </actions>
@@ -550,7 +550,7 @@ along with this software (see the LICENSE.md file). If not, see
                             quantityOnHand: Integer.parseInt(product.assetCount),
                             product: newProduct,
                             statusId: 'Available']" />
-                        <service-call name="growerp.100.CatgProdServices100.create#Asset"
+                        <service-call name="growerp.100.CatalogServices100.create#Asset"
                             in-map="[asset: asset]" />
                     </else>
                 </if>
@@ -561,7 +561,7 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[type: 'product', id: product.productId,
                         base64: product.image]" />
             </if>
-            <service-call name="growerp.100.CatgProdServices100.get#Products"
+            <service-call name="growerp.100.CatalogServices100.get#Products"
                 in-map="[productId: product.productId]" out-map="context" />
             <set field="product" from="products[0]" />
         </actions>
@@ -603,7 +603,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <set field="prods[0].salesDiscontinuationDate" from="ec.user.nowTimestamp" />
             <entity-update value-field="prods[0]" />
-            <service-call name="growerp.100.CatgProdServices100.get#Products"
+            <service-call name="growerp.100.CatalogServices100.get#Products"
                 in-map="[productId: product.productId]" out-map="context" />
             <set field="product" from="products[0]" />
         </actions>
@@ -803,7 +803,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="checkProducts">
                     <set field="asset.product.productId" from="checkProducts[0].productId" />
                     <else>
-                        <service-call name="growerp.100.CatgProdServices100.create#Product"
+                        <service-call name="growerp.100.CatalogServices100.create#Product"
                             in-map="[product: asset.product,classificationId: classificationId]"
                             out-map="productResult" />
                         <set field="asset.product.productId" from="productResult.product.productId" />
@@ -820,7 +820,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="locations">
                     <set field="asset.location.locationId" from="locations[0].locationSeqId" />
                     <else>
-                        <service-call name="growerp.100.WarehouseServices100.create#Location"
+                        <service-call name="growerp.100.InventoryServices100.create#Location"
                             in-map="[location: asset.location]"
                             out-map="locationResult" />
                         <set field="asset.location.locationId"
@@ -847,7 +847,7 @@ along with this software (see the LICENSE.md file). If not, see
                             availableToPromiseDiff: asset.quantityOnHand,
                                 effdateDate: ec.user.nowTimestamp,
                                 productId: asset.product.productId]" />
-            <service-call name="growerp.100.CatgProdServices100.get#Assets"
+            <service-call name="growerp.100.CatalogServices100.get#Assets"
                 in-map="[assetId: assetId]" out-map="context" />
             <set field="asset" from="assets[0]" />
         </actions>
@@ -926,7 +926,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="assetOld.productId" from="asset.product.productId" />
                 <entity-update value-field="assetOld" />
             </if>
-            <service-call name="growerp.100.CatgProdServices100.get#Assets"
+            <service-call name="growerp.100.CatalogServices100.get#Assets"
                 in-map="[assetId: asset.assetId]" out-map="context" />
             <set field="asset" from="assets[0]" />
         </actions>
@@ -1131,7 +1131,7 @@ along with this software (see the LICENSE.md file). If not, see
                             fromDate: ec.user.nowTimestamp]" />
             </iterate>
             <!-- get added category -->
-            <service-call name="growerp.100.CatgProdServices100.get#ProductCategories"
+            <service-call name="growerp.100.CatalogServices100.get#ProductCategories"
                 in-map="[categoryId: productCategoryId]" out-map="context" />
             <set field="category" from="categories[0]" />
         </actions>
@@ -1207,7 +1207,7 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[type: 'category', id: category.categoryId, base64: category.image]" />
             </if>
             <!-- return category information -->
-            <service-call name="growerp.100.CatgProdServices100.get#ProductCategories"
+            <service-call name="growerp.100.CatalogServices100.get#ProductCategories"
                 in-map="[categoryId: category.categoryId]" out-map="context" />
             <set field="category" from="categories[0]" />
         </actions>
@@ -1263,7 +1263,7 @@ along with this software (see the LICENSE.md file). If not, see
                         message="could not find rollup for category: ${category.categoryId}" />
                 </else>
             </if>
-            <service-call name="growerp.100.CatgProdServices100.get#ProductCategories"
+            <service-call name="growerp.100.CatalogServices100.get#ProductCategories"
                 in-map="[categoryId: category.categoryId]" out-map="context" />
             <set field="category" from="categories[0]" />
         </actions>

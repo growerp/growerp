@@ -142,7 +142,7 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[facilityId: facilities[0].facilityId,
                     description: location.locationName]"
                 out-map="context" />
-            <service-call name="growerp.100.WarehouseServices100.get#Location"
+            <service-call name="growerp.100.InventoryServices100.get#Location"
                 in-map="[facilityId: facilities[0].facilityId,
                              locationId: locationSeqId]"
                 out-map="context" />
@@ -194,7 +194,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="locations[0].description" from="location.locationName" />
                 <entity-update value-field="locations[0]" />
             </if>
-            <service-call name="growerp.100.WarehouseServices100.get#Location"
+            <service-call name="growerp.100.InventoryServices100.get#Location"
                 in-map="[facilityId: facilities[0].facilityId,
                              locationId: location.locationId]"
                 out-map="context" />
@@ -241,7 +241,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="facilityId" from="facilities[0].facilityId" />
                 <econdition field-name="locationSeqId" from="location.locationId" />
             </entity-find>
-            <service-call name="growerp.100.WarehouseServices100.get#Location"
+            <service-call name="growerp.100.InventoryServices100.get#Location"
                 in-map="[facilityId: facilities[0].facilityId,
                              locationId: location.locationId]"
                 out-map="context" />
