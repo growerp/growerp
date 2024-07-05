@@ -16,13 +16,13 @@ fi
 # insert some sensitive data from docker-compose
 if [ "$SMTP_USER" != "" ] ; then
     echo "updating email"
-    sed -i -e "s/\SMTP_USER/${SMTP_USER}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
-    sed -i -e "s/\SMTP_PASSWORD/${SMTP_PASSWORD}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
+    sed -i -e "s/SMTP_USER/${SMTP_USER}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
+    sed -i -e "s/SMTP_PASSWORD/${SMTP_PASSWORD}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
 fi
 if [ "$BIRDSEND_API_KEY" != "" ] ; then
     echo "updating birdsend"
-    sed -i -e "s/\BIRDSEND_API_KEY/${BIRDSEND_API_KEY}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
-    sed -i -e "s/\BIRDSEND_AUTM_SEQUENCE/${BIRDSEND_AUTM_SEQUENCE}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
+    sed -i -e "s/BIRDSEND_API_KEY/${BIRDSEND_API_KEY}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
+    sed -i -e "s/BIRDSEND_AUTM_SEQUENCE/${BIRDSEND_AUTM_SEQUENCE}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
 fi
 if [ "$STRIPE_SECRET_KEY" != "" ] ; then
     echo "updating stripe key"
