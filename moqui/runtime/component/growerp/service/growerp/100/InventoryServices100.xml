@@ -20,6 +20,7 @@ along with this software (see the LICENSE.md file). If not, see
         <description> get a single, or all warehouse locations</description>
         <in-parameters>
             <parameter name="locationId" />
+            <parameter name="pseudoId" />
             <parameter name="facilityId" />
             <parameter name="start" default-value="0" type="Integer" />
             <parameter name="limit" default-value="20" type="Integer" />
@@ -29,6 +30,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="locations" type="List">
                 <parameter name="location" type="Map">
                     <parameter name="locationId" />
+                    <parameter name="pseudoId" />
                     <parameter name="locationName" />
                     <parameter name="assets" type="List">
                         <parameter name="asset" type="Map">
@@ -69,6 +71,8 @@ along with this software (see the LICENSE.md file). If not, see
                         operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="locationId" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="pseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="acquireShipmentId" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="pseudoShipmentId" ignore-case="true"
@@ -91,12 +95,13 @@ along with this software (see the LICENSE.md file). If not, see
                         from="[
                         locationId: loc.locationId,
                         locationName: loc.locationName,
+                        pseudoId: loc.locationPseudoId,
                         assets: assets]" />
                     <set field="assets" from="[]" />
                 </if>
                 <set field="product"
                     from="[productId: loc.productId,
-                            pseudoId: loc.pseudoId, productName: loc.productName]" />
+                            pseudoId: loc.productPseudoId, productName: loc.productName]" />
                 <if condition="loc.assetId">
                     <set field="asset"
                         from="[assetId: loc.assetId, statusId: loc.statusId,
@@ -120,12 +125,15 @@ along with this software (see the LICENSE.md file). If not, see
         <description> get a single, or all warehouse locations</description>
         <in-parameters>
             <parameter name="location" type="Map" required="true">
+                <parameter name="locationId" />
+                <parameter name="pseudoId" />
                 <parameter name="locationName" />
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="location" type="Map">
                 <parameter name="locationId" />
+                <parameter name="pseudoId" />
                 <parameter name="locationName" />
             </parameter>
         </out-parameters>
@@ -135,11 +143,17 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find entity-name="mantle.facility.Facility" list="facilities">
                 <econdition field-name="ownerPartyId" from="companyPartyId" />
             </entity-find>
-            <entity-find entity-name="mantle.facility.Facility" list="facilities">
-                <econdition field-name="ownerPartyId" from="companyPartyId" />
-            </entity-find>
+            <if condition="!location.pseudoId || location.pseudoId == ''">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[companyPartyId: companyPartyId, seqName: 'facilityLocation${facilities[0].facilityId}']"
+                    out-map="context" />
+                <set field="location.pseudoId" from="seqNum" />
+            </if>
+            <log message="====create location: $location" />
             <service-call name="create#mantle.facility.FacilityLocation"
                 in-map="[facilityId: facilities[0].facilityId,
+                    locationSeqId: location.locationId,
+                    positionId: location.pseudoId,
                     description: location.locationName]"
                 out-map="context" />
             <service-call name="growerp.100.InventoryServices100.get#Location"
@@ -155,12 +169,14 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="location" type="Map">
                 <parameter name="locationId" />
+                <parameter name="pseudoId" />
                 <parameter name="locationName" />
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="location" type="Map">
                 <parameter name="locationId" />
+                <parameter name="pseudoId" />
                 <parameter name="locationName" />
                 <parameter name="assets" type="List">
                     <parameter name="asset" type="Map">
@@ -185,13 +201,22 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find entity-name="mantle.facility.Facility" list="facilities">
                 <econdition field-name="ownerPartyId" from="companyPartyId" />
             </entity-find>
+            <if condition="!location.pseudoId || location.pseudoId == ''">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[companyPartyId: companyPartyId, seqName: 'facilityLocation${facilities[0].facilityId}']"
+                    out-map="context" />
+                <set field="location.pseudoId" from="seqNum" />
+            </if>
             <entity-find entity-name="mantle.facility.FacilityLocation" list="locations"
                 for-update="true" limit="1">
                 <econdition field-name="facilityId" from="facilities[0].facilityId" />
                 <econdition field-name="locationSeqId" from="location.locationId" />
             </entity-find>
-            <if condition="locations[0].description != location.locationName">
+            <if
+                condition="locations[0].description != location.locationName ||
+                            locations[0].positionId != location.pseudoId">
                 <set field="locations[0].description" from="location.locationName" />
+                <set field="locations[0].positionId" from="location.pseudoId" />
                 <entity-update value-field="locations[0]" />
             </if>
             <service-call name="growerp.100.InventoryServices100.get#Location"

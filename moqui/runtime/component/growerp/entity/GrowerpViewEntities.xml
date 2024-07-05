@@ -480,6 +480,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="ownerPartyId" entity-alias="FAC" />
         <alias name="locationId" field="locationSeqId" entity-alias="FCL" />
         <alias name="locationName" field="description" entity-alias="FCL" />
+        <alias name="locationPseudoId" field="positionId" entity-alias="FCL" />
 
         <alias name="assetId" entity-alias="AST" />
         <alias name="assetName" entity-alias="AST" />
@@ -494,7 +495,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="pseudoShipmentId" field="pseudoId" entity-alias="SHIP" />
 
         <alias name="productId" entity-alias="PROD" />
-        <alias name="pseudoId" entity-alias="PROD" />
+        <alias name="productPseudoId" field="pseudoId" entity-alias="PROD" />
         <alias name="productName" entity-alias="PROD" />
         <alias name="productTypeEnumId" entity-alias="PROD" />
         <alias name="productClassEnumId" entity-alias="PROD" />
