@@ -31,12 +31,14 @@ class LocationDialogState extends State<LocationDialog> {
   late Location location;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _pseudoIdController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     location = widget.location;
     _nameController.text = location.locationName ?? '';
+    _pseudoIdController.text = location.pseudoId ?? '';
   }
 
   @override
@@ -75,7 +77,7 @@ class LocationDialogState extends State<LocationDialog> {
                     child: _showForm(isPhone),
                     title:
                         'Location Information #${location.locationId ?? "New"}',
-                    height: 200,
+                    height: 300,
                     width: 400))));
   }
 
@@ -84,6 +86,12 @@ class LocationDialogState extends State<LocationDialog> {
         child: Form(
             key: _formKey,
             child: ListView(key: const Key('listView'), children: <Widget>[
+              TextFormField(
+                key: const Key('id'),
+                decoration: const InputDecoration(labelText: 'Location Id'),
+                controller: _pseudoIdController,
+              ),
+              const SizedBox(height: 20),
               TextFormField(
                 key: const Key('name'),
                 decoration: const InputDecoration(labelText: 'Location Name'),
@@ -105,6 +113,7 @@ class LocationDialogState extends State<LocationDialog> {
                       context.read<LocationBloc>().add(LocationUpdate(
                             Location(
                               locationId: location.locationId,
+                              pseudoId: _pseudoIdController.text,
                               locationName: _nameController.text,
                             ),
                           ));

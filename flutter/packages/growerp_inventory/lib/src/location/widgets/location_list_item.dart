@@ -47,7 +47,7 @@ class LocationListItem extends StatelessWidget {
         ),
         title: Row(children: <Widget>[
           Expanded(
-              child: Text("${location.locationName}[${location.locationId}]",
+              child: Text("${location.locationName}[${location.pseudoId}]",
                   key: Key('locName$index'))),
           SizedBox(
               width: 70,

@@ -23,6 +23,7 @@ class Location with _$Location {
   Location._();
   factory Location({
     final String? locationId,
+    final String? pseudoId,
     final String? locationName,
     @Default([]) final List<Asset> assets,
   }) = _Location;
