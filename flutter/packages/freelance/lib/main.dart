@@ -88,7 +88,6 @@ Future main() async {
       InventoryLocalizations.delegate,
     ],
     extraBlocProviders: [
-      ...getInventoryBlocProviders(restClient),
       ...getUserCompanyBlocProviders(restClient, classificationId),
       ...getCatalogBlocProviders(restClient, classificationId),
       ...getOrderAccountingBlocProviders(restClient, classificationId),

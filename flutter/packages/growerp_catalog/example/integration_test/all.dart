@@ -1,4 +1,5 @@
-import 'asset_test.dart' as asset;
+import '../../../growerp_inventory/example/integration_test/asset_test.dart'
+    as asset;
 import 'category_test.dart' as category;
 import 'product_test.dart' as product;
 

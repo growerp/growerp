@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
+import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';

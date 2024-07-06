@@ -10,8 +10,6 @@ List<BlocProvider> getCatalogBlocProviders(
         create: (context) => ProductBloc(restClient, classificationId)),
     BlocProvider<CategoryBloc>(
         create: (context) => CategoryBloc(restClient, classificationId)),
-    BlocProvider<AssetBloc>(
-        create: (context) => AssetBloc(restClient, classificationId)),
   ];
   return blocProviders;
 }

@@ -27,7 +27,8 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   Future<void> selectLocation(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbInventory', 'LocationList');
+    await CommonTest.selectOption(
+        tester, 'dbInventory', 'LocationListLocations', '2');
   }
 
   setUp(() async {
@@ -40,7 +41,7 @@ void main() {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         InventoryLocalizations.localizationsDelegates,
         restClient: restClient,
-        blocProviders: getInventoryBlocProviders(restClient),
+        blocProviders: getInventoryBlocProviders(restClient, "AppAdmin"),
         title: "Inventory location test",
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester, testData: {

@@ -74,11 +74,6 @@ List<MenuOption> menuOptions = [
           icon: const Icon(Icons.home),
         ),
         TabItem(
-          form: const AssetList(),
-          label: 'Assets',
-          icon: const Icon(Icons.money),
-        ),
-        TabItem(
           form: const CategoryList(),
           label: 'Catgs',
           icon: const Icon(Icons.business),
@@ -126,7 +121,6 @@ class MainMenuForm extends StatelessWidget {
           makeDashboardItem('dbCatalog', context, menuOptions[1], [
             "Categories: ${authenticate.stats?.categories ?? 0}",
             "Products: ${authenticate.stats?.products ?? 0}",
-            "Assets: ${authenticate.stats?.assets ?? 0}",
           ]),
         ]);
       }

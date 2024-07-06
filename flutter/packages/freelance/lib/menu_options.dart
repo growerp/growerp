@@ -89,11 +89,6 @@ List<MenuOption> menuOptions = [
           icon: const Icon(Icons.home),
         ),
         TabItem(
-          form: const AssetList(),
-          label: "Assets",
-          icon: const Icon(Icons.money),
-        ),
-        TabItem(
           form: const CategoryList(),
           label: "Categories",
           icon: const Icon(Icons.business),

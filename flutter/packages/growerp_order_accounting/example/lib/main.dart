@@ -50,7 +50,7 @@ Future main() async {
 List<BlocProvider> getOrderAccountingBlocProvidersExample(
     restClient, classificationId) {
   return [
-    ...getInventoryBlocProviders(restClient),
+    ...getInventoryBlocProviders(restClient, classificationId),
     ...getOrderAccountingBlocProviders(restClient, classificationId),
   ];
 }

@@ -96,7 +96,7 @@ List<LocalizationsDelegate> delegates = [
 
 List<BlocProvider> getAdminBlocProviders(restClient, classificationId) {
   return [
-    ...getInventoryBlocProviders(restClient),
+    ...getInventoryBlocProviders(restClient, classificationId),
     ...getUserCompanyBlocProviders(restClient, classificationId),
     ...getCatalogBlocProviders(restClient, classificationId),
     ...getOrderAccountingBlocProviders(restClient, classificationId),

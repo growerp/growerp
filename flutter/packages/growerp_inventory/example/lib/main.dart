@@ -38,7 +38,7 @@ Future main() async {
     router: generateRoute,
     menuOptions: menuOptions,
     extraDelegates: const [InventoryLocalizations.delegate],
-    extraBlocProviders: getInventoryBlocProviders(restClient),
+    extraBlocProviders: getInventoryBlocProviders(restClient, "AppAdmin"),
   ));
 }
 
@@ -63,15 +63,26 @@ List<MenuOption> menuOptions = [
     child: const MainMenu(),
   ),
   MenuOption(
-      image: 'packages/growerp_core/images/supplierGrey.png',
-      selectedImage: 'packages/growerp_core/images/supplier.png',
-      title: 'Inventory',
-      route: '/inventory',
-      readGroups: [
-        UserGroup.admin,
-        UserGroup.employee,
-      ],
-      child: const LocationList()),
+    image: 'packages/growerp_core/images/supplierGrey.png',
+    selectedImage: 'packages/growerp_core/images/supplier.png',
+    title: 'Inventory',
+    route: '/inventory',
+    readGroups: [UserGroup.admin, UserGroup.employee],
+    tabItems: [
+      TabItem(
+        form: const AssetList(),
+        label: 'Assets',
+        icon: const Icon(Icons.money),
+      ),
+      TabItem(
+        form: const LocationList(
+          key: Key('Locations'),
+        ),
+        label: 'WH Locations',
+        icon: const Icon(Icons.location_pin),
+      ),
+    ],
+  ),
 ];
 
 // routing
@@ -94,6 +105,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 2, tabIndex: 0));
+    case '/assets':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: menuOptions, menuIndex: 3, tabIndex: 0));
     default:
       return MaterialPageRoute(
           builder: (context) => FatalErrorForm(
@@ -119,8 +134,7 @@ class MainMenu extends StatelessWidget {
             "Employees: ${authenticate.company!.employees.length}",
           ]),
           makeDashboardItem('dbInventory', context, menuOptions[2], [
-            "Incoming Shipments: ${authenticate.stats?.incomingShipments ?? 0}",
-            "Outgoing Shipments: ${authenticate.stats?.outgoingShipments ?? 0}",
+            "Number of assets: ${authenticate.stats?.assets ?? 0}",
             "Wh Locations: ${authenticate.stats?.whLocations ?? 0}",
           ]),
         ]);

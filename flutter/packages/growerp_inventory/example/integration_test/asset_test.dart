@@ -16,12 +16,12 @@
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:growerp_catalog/growerp_catalog.dart';
-import 'package:catalog_example/main.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:inventory_example/main.dart';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -35,9 +35,9 @@ void main() {
     try {
       RestClient restClient = RestClient(await buildDioClient());
       await CommonTest.startTestApp(tester, generateRoute, menuOptions,
-          CatalogLocalizations.localizationsDelegates,
+          InventoryLocalizations.localizationsDelegates,
           restClient: restClient,
-          blocProviders: getCatalogBlocProviders(restClient, 'AppAdmin'),
+          blocProviders: getInventoryBlocProviders(restClient, "AppAdmin"),
           title: "Asset test",
           clear: true); // use data from previous run, ifnone same as true
       await CommonTest.createCompanyAndAdmin(tester, testData: {
