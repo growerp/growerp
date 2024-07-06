@@ -137,7 +137,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                       : null,
                   title: Column(children: [
                     Row(children: <Widget>[
-                      Text('${newItems[index].productId}'),
+                      Text('${newItems[index].product?.productId ?? ''}'),
                       const SizedBox(width: 10),
                       Expanded(child: Text('${newItems[index].description}')),
                       Text('${newItems[index].quantity}'),

@@ -279,8 +279,7 @@ Future addProductItemDialog(BuildContext context) async {
                                                   itemType: ItemType(
                                                       itemTypeId:
                                                           'ItemProduct'),
-                                                  productId: selectedProduct!
-                                                      .productId,
+                                                  product: selectedProduct!,
                                                   price: Decimal.parse(
                                                       priceController.text),
                                                   description:

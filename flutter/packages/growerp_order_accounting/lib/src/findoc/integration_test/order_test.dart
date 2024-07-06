@@ -113,7 +113,8 @@ class OrderTest {
       List<FinDocItem> newItems = [];
       for (final (index, item) in finDoc.items.indexed) {
         FinDocItem newItem = item.copyWith(
-            productId: CommonTest.getTextField('itemProductId$index'));
+            product: Product(
+                productId: CommonTest.getTextField('itemProductId$index')));
         newItems.add(newItem);
       }
       await CommonTest.tapByKey(tester, 'cancel'); // close again
@@ -131,13 +132,13 @@ class OrderTest {
 
   static Future<void> checkRentalSalesOrder(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
-    var intlFormat = DateFormat('yyyy-MM-dd');
+    //  var intlFormat = DateFormat('yyyy-MM-dd');
     int x = 0;
     for (FinDoc order in test.orders) {
       expect(CommonTest.getTextField('status$x'), equals('Created'));
       await CommonTest.tapByKey(tester, 'id$x', seconds: 5);
-      expect(CommonTest.getTextField('itemLine$x'),
-          contains(intlFormat.format(order.items[0].rentalFromDate!)));
+      expect(CommonTest.getTextField('itemProductId$x'),
+          equals(order.items[0].product?.productId));
       x++;
     }
   }

@@ -66,7 +66,7 @@ class ReservationDialogState extends State<ReservationDialog> {
           classificationId: classificationId)));
     if (widget.finDoc.items.isNotEmpty) {
       _selectedProduct = Product(
-          productId: widget.finDoc.items[0].productId!,
+          productId: widget.finDoc.items[0].product?.productId ?? '',
           productName: widget.finDoc.items[0].description);
       _priceController.text = widget.finDoc.items[0].price.toString();
       _quantityController.text = widget.finDoc.items[0].quantity.toString();
@@ -288,9 +288,10 @@ class ReservationDialogState extends State<ReservationDialog> {
                           compareFn: (item, sItem) =>
                               item.productId == sItem.productId,
                           onChanged: (Product? newValue) async {
-                            _selectedProduct = newValue;
-                            _priceController.text =
-                                newValue!.listPrice.toString();
+                            setState(() {
+                              _selectedProduct = newValue;
+                            });
+                            _priceController.text = newValue!.price.toString();
                             _productBloc.add(GetDataEvent(() => context
                                 .read<RestClient>()
                                 .getDailyRentalOccupancy(
@@ -379,7 +380,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                                         ? FinDocStatusVal.created
                                         : FinDocStatusVal.inPreparation);
                                 FinDocItem newItem = FinDocItem(
-                                    productId: _selectedProduct!.productId,
+                                    product: _selectedProduct,
                                     itemType:
                                         ItemType(itemTypeId: 'ItemRental'),
                                     price: Decimal.parse(_priceController.text),

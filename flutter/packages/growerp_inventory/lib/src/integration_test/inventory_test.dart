@@ -45,7 +45,7 @@ class InventoryTest {
       // check list
       await CommonTest.tapByKey(tester, 'id0'); // open items
       expect(CommonTest.getTextField('itemLine0'),
-          contains(order.items[0].productId),
+          contains(order.items[0].product?.productId),
           reason: "checking productId");
       await CommonTest.tapByKey(tester, 'id0'); // close items
     }

@@ -678,7 +678,7 @@ class MyFinDocState extends State<FinDocPage> {
           backgroundColor: Colors.green,
           child: Text(item.itemSeqId.toString()),
         ),
-        Text("${item.productId}",
+        Text("${item.product?.productId}",
             textAlign: TextAlign.center, key: Key('itemProductId$itemIndex')),
         Text("${item.description}",
             key: Key('itemDescription${itemIndex}'), textAlign: TextAlign.left),
@@ -688,8 +688,12 @@ class MyFinDocState extends State<FinDocPage> {
         if (!isPhone)
           Text("${item.quantity}",
               textAlign: TextAlign.right, key: Key('itemQuantity$itemIndex')),
-        Text(item.price!.currency(currencyId: currencyId),
-            textAlign: TextAlign.right, key: Key('itemPrice$itemIndex')),
+        if (item.product?.productTypeId != 'Rental')
+          Text(item.price!.currency(currencyId: currencyId),
+              textAlign: TextAlign.right, key: Key('itemPrice$itemIndex')),
+        if (item.product?.productTypeId == 'Rental')
+          Text(item.rentalFromDate.toString(),
+              textAlign: TextAlign.right, key: Key('fromDate$itemIndex')),
         if (!isPhone) // subtotal
           Text((item.price! * (item.quantity ?? Decimal.parse('1'))).toString(),
               textAlign: TextAlign.center),
@@ -802,7 +806,7 @@ class MyFinDocState extends State<FinDocPage> {
           backgroundColor: Colors.green,
           child: Text(item.itemSeqId.toString()),
         ),
-        Text("${item.productId}",
+        Text("${item.product?.productId}",
             textAlign: TextAlign.center, key: Key('itemProductId${itemIndex}')),
         Text("${item.description}",
             key: Key('itemDescription${itemIndex}'), textAlign: TextAlign.left),
@@ -914,7 +918,8 @@ class MyFinDocState extends State<FinDocPage> {
             key: Key('debit$itemIndex')),
         Text(!item.isDebit! ? item.price.currency(currencyId: currencyId) : '',
             key: Key('credit$itemIndex')),
-        Text(item.productId ?? '', key: Key('itemProductId$itemIndex')),
+        Text(item.product?.productId ?? '',
+            key: Key('itemProductId$itemIndex')),
       ];
     }
 

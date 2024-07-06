@@ -34,8 +34,7 @@ class FinDocItem with _$FinDocItem {
     String? itemSeqId,
     ItemType? itemType,
     PaymentType? paymentType,
-    String? productId,
-    String? pseudoProductId,
+    Product? product,
     String? description,
     Decimal? quantity,
     Decimal? price,
@@ -67,7 +66,7 @@ List<FinDocItem> CsvToFinDocItems(String csvFile, Logger logger) {
         pseudoId: row[0],
         docType: FinDocType.tryParse(row[1]),
         itemSeqId: row[2],
-        pseudoProductId: row[3],
+        product: Product(pseudoId: row[3]),
         description: row[4],
         quantity: row[5] != 'null' && row[5].isNotEmpty
             ? Decimal.parse(row[5])
@@ -100,7 +99,7 @@ String CsvFromFinDocItems(List<FinDocItem> finDocItems) {
       finDocItem.pseudoId ?? '',
       finDocItem.docType.toString(),
       finDocItem.itemSeqId.toString(),
-      finDocItem.pseudoProductId ?? '',
+      finDocItem.product?.pseudoId ?? '',
       finDocItem.description ?? '',
       finDocItem.quantity?.toString() ?? '',
       finDocItem.price?.toString() ?? '',

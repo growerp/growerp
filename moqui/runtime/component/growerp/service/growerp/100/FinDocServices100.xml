@@ -254,7 +254,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <parameter name="paymentTypeId" />
                                 <parameter name="paymentTypeName" />
                             </parameter>
-                            <parameter name="productId" />
+                            <parameter name="product" />
                             <parameter name="description" />
                             <parameter name="quantity" />
                             <parameter name="price" />
@@ -495,12 +495,19 @@ along with this software (see the LICENSE.md file). If not, see
                         </iterate>
                         <set field="finDocItems" from="[]" />
                     </if>
+                    <!-- convert ProductTypeId -->
+                    <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                        in-map="[docType: 'product', statusId: item.productTypeId]"
+                        out-map="productType" />
+
                     <set field="finDocItem"
                         from="[
                             finDocId: item.orderId,
                             docType: 'order',
                             itemSeqId: item.orderItemSeqId,
-                            productId: item.productId,
+                            product: [productId: item.productId,
+                                        pseudoId: item.productPseudoId,
+                                        productTypeId: productType.convertedStatusId],
                             itemType: [itemTypeId: item.itemTypeId,
                                         itemTypeName: item.itemTypeName],
                             description: item.description,
@@ -693,7 +700,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="finDocItem"
                             from="[
                         itemSeqId: item.invoiceItemSeqId,
-                        productId: item.productId,
+                        product: [productId: item.productId],
                         itemType: [itemTypeId: item.itemTypeId,
                                     itemTypeName: item.itemTypeName],
                         description: item.description,
@@ -1007,7 +1014,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="finDocItem"
                         from="[
                         itemSeqId: item.orderItemSeqId,
-                        productId: item.productId,
+                        product: [productId: item.productId],
                         quantity: item.quantity ? item.quantity.toString() : null,
                         description: item.itemDescription,
                         asset: asset
@@ -1149,8 +1156,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     accountCode: item.accountCode,
                                     accountName: item.accountName,
                                     ],
-                                productId: item.productId,
-                                pseudoProductId: item.pseudoProductId,
+                                product: [productId: item.productId, pseudoId: item.pseudoProductId],
                                 description: item.description,
                                 assetId: item.assetId,
                         ]" />
@@ -1296,7 +1302,9 @@ along with this software (see the LICENSE.md file). If not, see
                             <parameter name="paymentTypeId" />
                             <parameter name="paymentTypeName" />
                         </parameter>
-                        <parameter name="productId" />
+                        <parameter name="product" type="Map">
+                            <parameter name="productId" />
+                        </parameter>
                         <parameter name="description" />
                         <parameter name="quantity" />
                         <parameter name="price" />
@@ -1374,8 +1382,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <iterate list="finDoc.items" entry="item">
                         <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
                             in-map="[   acctgTransId: acctgTransId,
-                                        productId: item.productId,
-                                        pseudoProductId: item.pseudoProductId,
+                                        productId: item.product.productId,
+                                        pseudoProductId: item.product.pseudoId,
                                         glAccountId: item.glAccount.glAccountId,
                                         debitCreditFlag: item.isDebit == true ? 'D' : 'C',
                                         amount: item.price,
@@ -1656,7 +1664,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call
                         name="mantle.order.OrderServices.add#OrderProductQuantity"
                         in-map="context + [ itemTypeId: item.itemType.itemTypeId,
-                                            productId: item.productId,
+                                            productId: item.product.productId,
                                             quantity: item.quantity,
                                             unitAmount: item.price]"
                         out-map="context" />
@@ -1664,12 +1672,12 @@ along with this software (see the LICENSE.md file). If not, see
                         <service-call
                             name="mantle.order.OrderServices.add#OrderProductQuantity"
                             in-map="context + [ itemTypeId: item.itemType.itemTypeId,
-                                            productId: item.productId,
+                                            productId: item.product.productId,
                                             quantity: item.quantity,
                                             unitAmount: item.price]"
                             out-map="context" />
                         <service-call name="create#growerp.product.AssetRental"
-                            in-map="[   productId: item.productId,
+                            in-map="[   productId: item.product.productId,
                                     assetId: item.assetId,
                                     orderId: orderId,
                                     orderItemSeqId: orderItemSeqId,
@@ -1680,7 +1688,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <else>
                         <service-call name="mantle.order.OrderServices.create#OrderItem"
                             in-map="context + [itemTypeEnumId: item.itemType.itemTypeId,
-                                            productId: item.productId,
+                                            productId: item.product.productId,
                                             itemDescription: item.description,
                                             quantity: item.quantity,
                                             unitAmount: item.price,
@@ -1707,7 +1715,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <service-call
                     name="mantle.account.InvoiceServices.create#InvoiceItem"
                     in-map="context + [ itemTypeEnumId: item.itemType.itemTypeId,
-                                        productId: item.productId,
+                                        productId: item.product.productId,
                                         quantity: item.quantity,
                                         description: item.description,
                                         overrideGlAccountId: item.glAccount?.glAccountId,
@@ -1756,7 +1764,9 @@ along with this software (see the LICENSE.md file). If not, see
                             <parameter name="paymentTypeId" />
                             <parameter name="paymentTypeName" />
                         </parameter>
-                        <parameter name="productId" />
+                        <parameter name="product" type="Map">
+                            <parameter name="productId" />
+                        </parameter>
                         <parameter name="description" />
                         <parameter name="quantity" />
                         <parameter name="price" />
@@ -1819,7 +1829,9 @@ along with this software (see the LICENSE.md file). If not, see
                             <parameter name="paymentTypeId" />
                             <parameter name="paymentTypeName" />
                         </parameter>
-                        <parameter name="productId" />
+                        <parameter name="product" type="Map">
+                            <parameter name="productId" />
+                        </parameter>
                         <parameter name="description" />
                         <parameter name="quantity" />
                         <parameter name="price" />
@@ -1992,8 +2004,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
                             in-map="[   acctgTransId: finDoc.transactionId,
                                         glAccountId: item.glAccount.glAccountId,
-                                        productId: item.productId,
-                                        pseudoProductId: item.pseudoProductId,
+                                        productId: item.product.productId,
+                                        pseudoProductId: item.product.pseudoId,
                                         quantity: item.quantity,
                                         debitCreditFlag: item.isDebit == true ? 'D' : 'C',
                                         amount: item.price,
@@ -2292,7 +2304,7 @@ along with this software (see the LICENSE.md file). If not, see
                                         items[0].rentalThruDate">
                         <service-call
                             name="growerp.100.FinDocServices100.get#AssetsAvailableForProduct"
-                            in-map="productId: items[0].productId,
+                            in-map="productId: items[0].product.productId,
                                     fromDate: items[0].rentalFromDate,
                                     thruDate: items[0].rentalThruDate"
                             out-map="context" />
@@ -2714,7 +2726,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="shipmentId" />
                 <parameter name="items" type="List">
                     <parameter name="item" type="Map">
-                        <parameter name="productId" />
+                        <parameter name="product">
+                            <parameter name="productId" />
+                        </parameter>
                         <parameter name="quantity" />
                         <parameter name="asset" type="Map">
                             <parameter name="location" type="Map">
@@ -2737,7 +2751,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="transactionId" />
                 <parameter name="items" type="List">
                     <parameter name="item" type="Map">
-                        <parameter name="productId" />
+                        <parameter name="product">
+                            <parameter name="productId" />
+                        </parameter>
                         <parameter name="quantity" />
                         <parameter name="asset" type="Map">
                             <parameter name="location" type="Map">
@@ -2767,7 +2783,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="quantityRemaining"
                     from="sid.quantity - (sid.quantityAcceptedTotal ?: 0) - (sid.quantityRejectedTotal ?: 0)" />
                 <set field="finDocItem"
-                    from="finDoc.items.find {element -> element.productId == sid.productId}" />
+                    from="finDoc.items.find {element -> element.product.productId == sid.productId}" />
                 <if condition="!finDocItem.asset.location.locationId"><!-- if empty create new
                     location -->
                     <service-call name="create#mantle.facility.FacilityLocation"

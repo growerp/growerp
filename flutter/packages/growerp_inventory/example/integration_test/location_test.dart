@@ -35,7 +35,7 @@ void main() {
     await Hive.initFlutter();
   });
 
-  testWidgets('''GrowERP inventory test''', (tester) async {
+  testWidgets('''GrowERP location test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         InventoryLocalizations.localizationsDelegates,
@@ -50,6 +50,5 @@ void main() {
     await LocationTest.addLocations(tester, locations.sublist(0, 2));
     await LocationTest.updateLocations(tester, locations.sublist(2, 4));
     await LocationTest.deleteLocations(tester, 2);
-    await CommonTest.logout(tester);
   });
 }

@@ -276,8 +276,7 @@ Future addRentalItemDialog(BuildContext context,
                                                     itemType: ItemType(
                                                         itemTypeId:
                                                             'ItemRental'),
-                                                    productId: selectedProduct!
-                                                        .productId,
+                                                    product: selectedProduct!,
                                                     price: Decimal.parse(
                                                         priceController.text),
                                                     description:

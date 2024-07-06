@@ -133,6 +133,10 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="orderId" />
             <key-map field-name="orderItemSeqId" related="invoiceItemSeqId" />
         </member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product"
+            join-from-alias="OITEM" join-optional="true">
+            <key-map field-name="productId" />
+        </member-entity>
         <member-entity
             entity-alias="RESERV" entity-name="growerp.product.AssetRental"
             join-from-alias="OITEM" join-optional="true">
@@ -150,7 +154,9 @@ along with this software (see the LICENSE.md file). If not, see
         <alias
             name="itemTypeId" field="itemTypeEnumId" entity-alias="OITEM" />
         <alias name="itemTypeName" field="description" entity-alias="ITEMTYPE" />
-        <alias name="productId" entity-alias="OITEM" />
+        <alias name="productId" entity-alias="PROD" />
+        <alias name="productPseudoId" field="pseudoId" entity-alias="PROD" />
+        <alias name="productTypeId" field="productTypeEnumId" entity-alias="PROD" />
         <alias name="description" field="itemDescription" entity-alias="OITEM" />
         <alias name="quantity" entity-alias="OITEM" />
         <alias name="unitAmount" entity-alias="OITEM" />

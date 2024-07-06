@@ -239,13 +239,16 @@ Future<void> createRoomReservation(
     await CommonTest.tapByKey(tester, 'id0'); // added at the top
     List<FinDocItem> newItems = List.of(finDoc.items);
     for (int index = 0; index < finDoc.items.length; index++) {
-      var productId = CommonTest.getTextField('itemLine$index').split(' ')[1];
-      FinDocItem newItem = finDoc.items[index].copyWith(productId: productId);
+      var productId = CommonTest.getTextField('itemProductId$index');
+      FinDocItem newItem =
+          finDoc.items[index].copyWith(product: Product(productId: productId));
       newItems[index] = newItem;
     }
-    await CommonTest.tapByKey(tester, 'id0'); // close again
+    await CommonTest.tapByKey(tester, 'cancel'); // close again
     newOrders.add(finDoc.copyWith(
-        orderId: CommonTest.getTextField('id0'), items: newItems));
+        orderId: CommonTest.getTextField('id0'),
+        pseudoId: CommonTest.getTextField('id0'),
+        items: newItems));
   }
   await PersistFunctions.persistTest(test.copyWith(orders: newOrders));
 }

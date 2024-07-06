@@ -177,7 +177,7 @@ class FinDocListItemTrans extends StatelessWidget {
                 title: Text(
                     "GlAccount: ${e.glAccount?.accountCode} ${e.glAccount?.accountName}  "
                     "${isPhone ? '\n' : ''}"
-                    "ProductId: ${e.pseudoProductId ?? ''} ${e.description ?? ''}  "
+                    "ProductId: ${e.product?.pseudoId ?? ''} ${e.description ?? ''}  "
                     "${isPhone ? '\n' : ''}"
                     "Amount: $debitCredit ${e.price}",
                     key: Key('itemLine$index'))))
