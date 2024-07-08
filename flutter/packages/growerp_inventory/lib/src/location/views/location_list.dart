@@ -109,10 +109,20 @@ class LocationListState extends State<LocationList> {
                                             barrierDismissible: true,
                                             context: context,
                                             builder: (BuildContext context) {
-                                              return BlocProvider.value(
-                                                  value: _locationBloc,
-                                                  child: LocationDialog(
-                                                      locations[index - 1]));
+                                              return index >=
+                                                      state.locations.length
+                                                  ? const BottomLoader()
+                                                  : Dismissible(
+                                                      key: const Key(
+                                                          'locationItem'),
+                                                      direction:
+                                                          DismissDirection
+                                                              .startToEnd,
+                                                      child: BlocProvider.value(
+                                                          value: _locationBloc,
+                                                          child: LocationDialog(
+                                                              locations[
+                                                                  index - 1])));
                                             }))
                           }),
                 pinnedRowCount: 1,
@@ -167,45 +177,6 @@ class LocationListState extends State<LocationList> {
                 ],
               ),
               body: tableView(),
-
-              /*
-                
-                RefreshIndicator(
-                    onRefresh: (() async =>
-                        _locationBloc.add(const LocationFetch(refresh: true))),
-                    child: ListView.builder(
-                      key: const Key('listView'),
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: state.hasReachedMax
-                          ? state.locations.length + 1
-                          : state.locations.length + 2,
-                      controller: _scrollController,
-                      itemBuilder: (BuildContext context, int index) {
-                        if (index == 0) {
-                          return Column(children: [
-                            LocationListHeader(locationBloc: _locationBloc),
-                            const Divider(),
-                            Visibility(
-                                visible: state.locations.isEmpty,
-                                child: const Center(
-                                    heightFactor: 20,
-                                    child: Text("No locations found",
-                                        textAlign: TextAlign.center)))
-                          ]);
-                        }
-                        index--;
-                        return index >= state.locations.length
-                            ? const BottomLoader()
-                            : Dismissible(
-                                key: const Key('locationItem'),
-                                direction: DismissDirection.startToEnd,
-                                child: LocationListItem(
-                                    location: state.locations[index],
-                                    index: index,
-                                    isPhone: isPhone));
-                      },
-                    ))
-  */
             );
           default:
             return const Center(child: LoadingIndicator());

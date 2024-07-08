@@ -86,6 +86,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     if (state.hasReachedMax && !event.refresh && event.searchString == '') {
       return;
     }
+    emit(state.copyWith(status: FinDocStatus.loading));
     List<FinDoc> current = [];
     if (state.status == FinDocStatus.initial ||
         event.refresh ||

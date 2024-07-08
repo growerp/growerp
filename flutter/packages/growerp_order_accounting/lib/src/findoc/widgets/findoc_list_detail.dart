@@ -135,7 +135,7 @@ List<dynamic> getItemFieldContent(FinDoc finDoc,
             ),
           ],
         ),
-        Text(finDoc.otherCompany?.name.truncate(25) ?? '',
+        Text(finDoc.otherCompany?.name.truncate(20) ?? '',
             key: Key("otherUser$itemIndex")),
         Row(
           children: [

@@ -112,7 +112,7 @@ class FinDocListState extends State<FinDocList> {
   Widget build(BuildContext context) {
     limit = (MediaQuery.of(context).size.height / 100).round();
     isPhone = isAPhone(context);
-    Widget finDocsPage() {
+    Widget finDocsPage(int length) {
       if (finDocs.isEmpty)
         return Center(
             heightFactor: 20,
@@ -176,11 +176,16 @@ class FinDocListState extends State<FinDocList> {
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _finDocBloc,
-                                  child: SelectFinDocDialog(
-                                      onlyRental: widget.onlyRental,
-                                      finDoc: finDocs[index - 1]));
+                              return index >= length
+                                  ? const BottomLoader()
+                                  : Dismissible(
+                                      key: const Key('locationItem'),
+                                      direction: DismissDirection.startToEnd,
+                                      child: BlocProvider.value(
+                                          value: _finDocBloc,
+                                          child: SelectFinDocDialog(
+                                              onlyRental: widget.onlyRental,
+                                              finDoc: finDocs[index - 1])));
                             }))
                   }),
         pinnedRowCount: 1,
@@ -297,7 +302,7 @@ class FinDocListState extends State<FinDocList> {
                           child: const Icon(Icons.add)),
                   ],
                 ),
-                body: finDocsPage());
+                body: finDocsPage(state.finDocs.length));
           default:
             return const Center(child: LoadingIndicator());
         }
