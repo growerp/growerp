@@ -52,7 +52,7 @@ class PdfFormats {
                 width: 50,
                 child: BarcodeWidget(
                   barcode: Barcode.qrCode(),
-                  data: finDoc.id()!,
+                  data: finDoc.pseudoId!,
                 ),
               ),
             ],
@@ -86,7 +86,7 @@ class PdfFormats {
       '${info.docType} Date:',
     ];
     final data = <String>[
-      info.id()!,
+      info.pseudoId ?? '',
       info.creationDate!.toString().substring(0, 10),
     ];
 

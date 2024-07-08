@@ -80,7 +80,7 @@ extension UsCurrency on Decimal? {
 
 extension LastChar on String {
   String lastChar(int length) {
-    if (this.length <= length) return '';
+    if (this.length <= length) return this;
     return substring(this.length - length);
   }
 }

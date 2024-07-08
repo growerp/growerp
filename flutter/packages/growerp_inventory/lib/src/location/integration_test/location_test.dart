@@ -43,8 +43,8 @@ class LocationTest {
       if (location.locationId == null) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.doSearch(tester, searchString: location.locationId!);
-        await CommonTest.tapByKey(tester, 'edit0');
+        await CommonTest.doNewSearch(tester,
+            searchString: location.locationId!);
         expect(CommonTest.getTextField('topHeader').split('#')[1],
             location.locationId);
       }
@@ -61,11 +61,9 @@ class LocationTest {
       WidgetTester tester, List<Location> locations) async {
     List<Location> newLocations = [];
     for (Location location in locations) {
-      await CommonTest.doSearch(tester, searchString: location.locationName!);
+      await CommonTest.doNewSearch(tester,
+          searchString: location.locationName!);
       // list
-      expect(CommonTest.getTextField('locName0'),
-          startsWith(location.locationName!));
-      await CommonTest.tapByKey(tester, 'edit0');
       expect(find.byKey(const Key('LocationDialog')), findsOneWidget);
       expect(
           CommonTest.getTextFormField('name'), equals(location.locationName!));
@@ -73,20 +71,21 @@ class LocationTest {
       newLocations.add(location.copyWith(locationId: id));
       await CommonTest.tapByKey(tester, 'cancel');
     }
-    await CommonTest.closeSearch(tester);
     return newLocations;
   }
 
   static Future<void> deleteLocations(
       WidgetTester tester, int numberOfDeletes) async {
     SaveTest test = await PersistFunctions.getTest();
-    int count = test.locations.length;
-    await CommonTest.refresh(tester);
-    expect(find.byKey(const Key('locationItem')), findsNWidgets(count));
-    await CommonTest.tapByKey(tester, 'delete${count - 1}', seconds: 5);
-    expect(find.byKey(const Key('locationItem')), findsNWidgets(count - 1));
-    PersistFunctions.persistTest(test.copyWith(
-        locations: test.locations.sublist(0, test.locations.length - 1)));
+    // delete locations
+    for (int x = 0; x < test.locations.length; x++) {
+      await CommonTest.tapByKey(tester, "delete0");
+      await CommonTest.tapByKey(tester, "continue",
+          seconds: CommonTest.waitTime);
+    }
+
+    // check locations deleted
+    expect(find.text('no locations found'), findsOneWidget);
   }
 
   static Future<void> updateLocations(

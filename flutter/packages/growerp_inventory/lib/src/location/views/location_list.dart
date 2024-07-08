@@ -11,11 +11,12 @@
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import '../location.dart';
 import '../widgets/widgets.dart';
@@ -29,7 +30,9 @@ class LocationList extends StatefulWidget {
 
 class LocationListState extends State<LocationList> {
   final _scrollController = ScrollController();
+  final _horizontalController = ScrollController();
   late LocationBloc _locationBloc;
+  List<Location> locations = <Location>[];
   late Authenticate authenticate;
   late int limit;
   String? searchString;
@@ -43,7 +46,6 @@ class LocationListState extends State<LocationList> {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     limit = (MediaQuery.of(context).size.height / 100).round();
     return BlocBuilder<LocationBloc, LocationState>(
       builder: (context, state) {
@@ -52,22 +54,123 @@ class LocationListState extends State<LocationList> {
             return Center(
                 child: Text('failed to fetch locations: ${state.message}'));
           case LocationStatus.success:
+            locations = state.locations;
+
+            Widget tableView() {
+              if (locations.isEmpty)
+                return Center(
+                    heightFactor: 20,
+                    child: Text("no locations found",
+                        textAlign: TextAlign.center));
+              // get table data formatted for tableView
+              var (
+                List<List<TableViewCell>> tableViewCells,
+                List<double> fieldWidths,
+                double? rowHeight
+              ) = get2dTableData<Location>(
+                getItemFieldNames,
+                getItemFieldWidth,
+                state.locations,
+                getItemFieldContent,
+                getRowActionButtons: getRowActionButtons,
+                getRowHeight: getRowHeight,
+                context: context,
+                bloc: _locationBloc,
+              );
+              return TableView.builder(
+                diagonalDragBehavior: DiagonalDragBehavior.free,
+                verticalDetails:
+                    ScrollableDetails.vertical(controller: _scrollController),
+                horizontalDetails: ScrollableDetails.horizontal(
+                    controller: _horizontalController),
+                cellBuilder: (context, vicinity) =>
+                    tableViewCells[vicinity.row][vicinity.column],
+                columnBuilder: (index) => index >= tableViewCells[0].length
+                    ? null
+                    : TableSpan(
+                        padding: padding,
+                        backgroundDecoration: getBackGround(context, index),
+                        extent: FixedTableSpanExtent(fieldWidths[index]),
+                      ),
+                pinnedColumnCount: 1,
+                rowBuilder: (index) => index >= tableViewCells.length
+                    ? null
+                    : TableSpan(
+                        padding: padding,
+                        backgroundDecoration: getBackGround(context, index),
+                        extent: FixedTableSpanExtent(rowHeight!),
+                        recognizerFactories: <Type, GestureRecognizerFactory>{
+                            TapGestureRecognizer:
+                                GestureRecognizerFactoryWithHandlers<
+                                        TapGestureRecognizer>(
+                                    () => TapGestureRecognizer(),
+                                    (TapGestureRecognizer t) =>
+                                        t.onTap = () => showDialog(
+                                            barrierDismissible: true,
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return BlocProvider.value(
+                                                  value: _locationBloc,
+                                                  child: LocationDialog(
+                                                      locations[index - 1]));
+                                            }))
+                          }),
+                pinnedRowCount: 1,
+              );
+            }
+
             return Scaffold(
-                floatingActionButton: FloatingActionButton(
-                    key: const Key("addNew"),
-                    onPressed: () async {
-                      await showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return BlocProvider.value(
-                                value: _locationBloc,
-                                child: LocationDialog(Location()));
-                          });
-                    },
-                    tooltip: 'Add New',
-                    child: const Icon(Icons.add)),
-                body: RefreshIndicator(
+              floatingActionButton: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FloatingActionButton(
+                      key: const Key("search"),
+                      heroTag: "btn1",
+                      onPressed: () async {
+                        // find findoc id to show
+                        Location location = await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              // search separate from finDocBloc
+                              return BlocProvider.value(
+                                  value:
+                                      context.read<DataFetchBloc<Locations>>(),
+                                  child: SearchLocationList());
+                            });
+                        // show detail page
+                        await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return BlocProvider.value(
+                                  value: _locationBloc,
+                                  child: LocationDialog(location));
+                            });
+                      },
+                      child: const Icon(Icons.search)),
+                  SizedBox(height: 10),
+                  FloatingActionButton(
+                      key: const Key("addNew"),
+                      onPressed: () async {
+                        await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return BlocProvider.value(
+                                  value: _locationBloc,
+                                  child: LocationDialog(Location()));
+                            });
+                      },
+                      tooltip: 'Add New',
+                      child: const Icon(Icons.add)),
+                ],
+              ),
+              body: tableView(),
+
+              /*
+                
+                RefreshIndicator(
                     onRefresh: (() async =>
                         _locationBloc.add(const LocationFetch(refresh: true))),
                     child: ListView.builder(
@@ -101,7 +204,9 @@ class LocationListState extends State<LocationList> {
                                     index: index,
                                     isPhone: isPhone));
                       },
-                    )));
+                    ))
+  */
+            );
           default:
             return const Center(child: LoadingIndicator());
         }

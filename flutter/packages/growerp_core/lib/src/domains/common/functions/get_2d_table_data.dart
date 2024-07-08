@@ -40,6 +40,7 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 }) {
   // check if input parameters consistent
   if (kDebugMode && items.isNotEmpty) {
+    int buttons = getRowActionButtons != null ? 1 : 0;
     int itemsName =
         getItemFieldNames(context: context, itemIndex: 0, item: items[0])
             .length;
@@ -48,13 +49,13 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
             .length;
     int itemsContent =
         getItemFieldContent(items[0], itemIndex: 0, context: context).length;
-    if (itemsName != itemsWidth &&
-        itemsName != itemsContent &&
-        itemsWidth != itemsContent) {
-      throw FormatException(
-          "Generate table parameters,Number of names($itemsName) "
+    if (itemsName != itemsWidth ||
+        itemsName != itemsContent + buttons ||
+        itemsWidth != itemsContent + buttons) {
+      throw FormatException("Generate table parameters:\n"
+          "The number of field names($itemsName) is "
           "not the same as number of fields width($itemsWidth) "
-          " or number of field contens($itemsContent)");
+          " or number of field contents($itemsContent) + buttons($buttons)");
     }
   }
   List<List<TableViewCell>> tableViewCells = []; // table content

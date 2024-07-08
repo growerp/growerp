@@ -1,2 +1,1 @@
-export 'location_list_header.dart';
-export 'location_list_item.dart';
+export 'location_list_detail.dart';

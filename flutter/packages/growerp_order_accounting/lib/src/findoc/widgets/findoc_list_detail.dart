@@ -36,9 +36,7 @@ List<dynamic> getItemFieldNames(
         Row(children: [
           Text('${item!.docType} Id'),
           SizedBox(width: 10),
-          Text(classificationId == 'AppHotel'
-              ? 'Reserv. Date'
-              : 'Creation Date'),
+          Text(classificationId == 'AppHotel' ? 'RsvDate' : 'CrDate'),
         ]),
         Text(item.sales ? 'Customer' : 'Supplier'),
         Row(
@@ -73,9 +71,17 @@ List<dynamic> getItemFieldNames(
 List<double> getItemFieldWidth(
     {int? itemIndex, FinDoc? item, BuildContext? context}) {
   if (isPhone(context))
-    return [10, 62, 35];
+    return [10, 55, 25];
   else
-    return [5, 9, 29, if (item?.docType != FinDocType.shipment) 10, 19, 04, 20];
+    return [
+      5,
+      12,
+      20,
+      if (item?.docType != FinDocType.shipment) 10,
+      10,
+      10,
+      15,
+    ];
 }
 
 // row height
@@ -147,8 +153,8 @@ List<dynamic> getItemFieldContent(FinDoc finDoc,
             Text(finDoc.items.length.toString(),
                 key: Key("itemsLength$itemIndex")),
           ],
-        )
-      ])
+        ),
+      ]),
     ];
   else
     return [
@@ -163,7 +169,8 @@ List<dynamic> getItemFieldContent(FinDoc finDoc,
             textAlign: TextAlign.right, key: Key("grandTotal$itemIndex")),
       Text(finDoc.displayStatus(classificationId)!,
           key: Key("status$itemIndex")),
-      Text(finDoc.otherCompany!.email ?? '             '),
+      Text(finDoc.otherCompany?.email ?? finDoc.otherUser?.email ?? '',
+          key: Key("emailstatus$itemIndex")),
     ];
 }
 
@@ -210,134 +217,3 @@ List<Widget> getRowActionButtons({
           }),
   ];
 }
-/* need to copy item and related docs information?
-List<TableViewCell> getDataTiles(
-  BuildContext context,
-  FinDoc finDoc,
-  int index,
-  FinDocBloc finDocBloc,
-) {
-  bool isPhone = isAPhone(context);
-
-  List<Widget> items(BuildContext context, FinDoc findoc) {
-    String r = isPhone ? '\n' : ' '; // return when used on mobile
-    List<Widget> finDocItems = [];
-    if (finDoc.docType == FinDocType.payment) {
-      finDocItems = [
-        ListTile(
-            leading: const SizedBox(width: 50),
-            title: Text(
-                "Type: ${finDoc.items[0].itemType?.itemTypeName ?? '??'}$r"
-                "Overr.GlAccount: ${finDoc.items[0].glAccount?.accountCode ?? ''}"))
-      ];
-    } else {
-      finDocItems = List.from(finDoc.items.mapIndexed((index, e) =>
-          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            const SizedBox(width: 50),
-            ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: Colors.green,
-                  maxRadius: 10,
-                  child: Text(e.itemSeqId.toString()),
-                ),
-                title: Text(
-                    // blank required before and after productId for automated test
-                    finDoc.docType == FinDocType.shipment
-                        ? "Product: ${e.description}[${e.productId}] "
-                            "Quantity: ${e.quantity.toString()} "
-                        : finDoc.docType == FinDocType.order ||
-                                finDoc.docType == FinDocType.invoice &&
-                                    e.quantity != null
-                            ? "ProductId: ${e.productId} $r${e.description}$r"
-                                "Quantity: ${e.quantity.toString()} "
-                                "Price: ${e.price.toString()} "
-                                "SubTotal: ${(e.quantity! * e.price!).toString()}$r"
-                                "${e.rentalFromDate == null ? '' : " "
-                                    "Rental: ${e.rentalFromDate.toString().substring(0, 10)}/"
-                                    "${e.rentalThruDate.toString().substring(0, 10)}"}\n"
-                                "${finDoc.docType == FinDocType.invoice ? 'Overr.GLAccount: ${e.glAccount?.accountCode ?? ''}' : ''}$r"
-                                "${finDoc.docType == FinDocType.invoice || finDoc.docType == FinDocType.order ? 'ItemType: ${e.itemType!.itemTypeName}' : ''}\n"
-                            : '', // payment: no items
-                    key: Key('itemLine$index')))
-          ])));
-    }
-    if (finDoc.address != null) {
-      finDocItems.add(ListTile(
-          leading: const SizedBox(width: 50),
-          title: Text("Shipping method: ${finDoc.shipmentMethod} "
-              "telephone: ${finDoc.telephoneNr}\n"
-              "${findoc.address!.address1} ${findoc.address!.address2} "
-              "${findoc.address!.province}\n"
-              "${findoc.address!.postalCode} ${finDoc.address!.city}\n"
-              "${finDoc.address!.country}")));
-    }
-
-    Widget refDocDialog(String id, FinDocType type, bool sales) {
-      return Wrap(
-          alignment: WrapAlignment.center,
-          runAlignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Text("${type.toString()} Id: "),
-            TextButton(
-              onPressed: () => showDialog(
-                  barrierDismissible: true,
-                  context: context,
-                  builder: (BuildContext context) => type == FinDocType.payment
-                      ? ShowPaymentDialog(
-                          FinDoc(paymentId: id, sales: sales, docType: type))
-                      : FinDocDialog(type == FinDocType.invoice
-                          ? FinDoc(invoiceId: id, sales: sales, docType: type)
-                          : type == FinDocType.shipment
-                              ? FinDoc(
-                                  shipmentId: id, sales: sales, docType: type)
-                              : type == FinDocType.order
-                                  ? FinDoc(
-                                      orderId: finDoc.pseudoId,
-                                      sales: sales,
-                                      docType: type)
-                                  : FinDoc(
-                                      transactionId: id,
-                                      sales: sales,
-                                      docType: type))),
-              child: Text(id),
-            )
-          ]);
-    }
-
-    List<Widget> refDoc = [];
-    if (finDoc.docType != FinDocType.invoice && finDoc.invoiceId != null) {
-      refDoc.add(
-          refDocDialog(finDoc.invoiceId!, FinDocType.invoice, finDoc.sales));
-    }
-    if (finDoc.docType != FinDocType.order && finDoc.orderId != null) {
-      refDoc.add(refDocDialog(finDoc.orderId!, FinDocType.order, finDoc.sales));
-    }
-    if (finDoc.docType != FinDocType.payment && finDoc.paymentId != null) {
-      refDoc.add(
-          refDocDialog(finDoc.paymentId!, FinDocType.payment, finDoc.sales));
-    }
-    if (finDoc.docType != FinDocType.shipment && finDoc.shipmentId != null) {
-      refDoc.add(
-          refDocDialog(finDoc.shipmentId!, FinDocType.shipment, finDoc.sales));
-    }
-    if (finDoc.docType != FinDocType.transaction &&
-        finDoc.transactionId != null) {
-      refDoc.add(refDocDialog(
-          finDoc.transactionId!, FinDocType.transaction, finDoc.sales));
-    }
-
-    if (refDoc.isNotEmpty) {
-      finDocItems.add(ListTile(
-          leading: const SizedBox(width: 50),
-          title: const Text("Referenced Documents:"),
-          subtitle: Wrap(children: refDoc)));
-    }
-
-    return finDocItems;
-  }
-
-  return [];
-
-}
-*/

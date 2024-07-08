@@ -657,13 +657,13 @@ class MyFinDocState extends State<FinDocPage> {
       ];
     }
 
-    // field lengths
+    // field lengths % of screen width
     List<double> getItemFieldWidth(
         {int? itemIndex, FinDocItem? item, BuildContext? context}) {
       if (isPhone)
-        return [6, 14, 25, 10, 14];
+        return [6, 14, 25, 14, 14];
       else
-        return [3, 8, 13, 8, 4, 5, 5, 5];
+        return [3, 8, 13, 8, 4, 10, 10, 8];
     }
 
     // fields content

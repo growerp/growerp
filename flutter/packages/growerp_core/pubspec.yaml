@@ -61,7 +61,7 @@ dependencies:
   dio_cache_interceptor: ^3.5.0
   flutter_flow_chart: ^2.2.0
   star_menu: ^4.0.1
-  two_dimensional_scrollables: ^0.2.1
+  two_dimensional_scrollables: ^0.3.1
   universal_io: ^2.2.2
 
 dev_dependencies: 

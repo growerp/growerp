@@ -54,7 +54,7 @@ dependencies:
   growerp_core: ^1.2.4
   growerp_models: ^1.2.1
   scrollable_positioned_list: ^0.3.8
-  two_dimensional_scrollables: ^0.2.1
+  two_dimensional_scrollables: ^0.3.1
 
 dev_dependencies: 
   flutter_test: 

@@ -76,7 +76,7 @@ class LocationDialogState extends State<LocationDialog> {
                     context: context,
                     child: _showForm(isPhone),
                     title:
-                        'Location Information #${location.locationId ?? "New"}',
+                        'Location Information #${location.pseudoId ?? "New"}',
                     height: 300,
                     width: 400))));
   }
