@@ -2304,7 +2304,7 @@ along with this software (see the LICENSE.md file). If not, see
                                         items[0].rentalThruDate">
                         <service-call
                             name="growerp.100.FinDocServices100.get#AssetsAvailableForProduct"
-                            in-map="productId: items[0].product.productId,
+                            in-map="productId: items[0].productId,
                                     fromDate: items[0].rentalFromDate,
                                     thruDate: items[0].rentalThruDate"
                             out-map="context" />
