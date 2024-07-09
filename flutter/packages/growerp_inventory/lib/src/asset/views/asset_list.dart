@@ -11,11 +11,12 @@
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import '../asset.dart';
 
 class AssetList extends StatefulWidget {
@@ -26,13 +27,15 @@ class AssetList extends StatefulWidget {
 
 class AssetListState extends State<AssetList> {
   final _scrollController = ScrollController();
+  final _horizontalController = ScrollController();
   late AssetBloc _assetBloc;
-  String classificationId = GlobalConfiguration().getValue("classificationId");
+  late String classificationId;
   late String entityName;
 
   @override
   void initState() {
     super.initState();
+    classificationId = context.read<String>();
     entityName = classificationId == 'AppHotel' ? 'Room' : 'Asset';
     _scrollController.addListener(_onScroll);
     _assetBloc = context.read<AssetBloc>();
@@ -60,61 +63,129 @@ class AssetListState extends State<AssetList> {
               return Center(
                   child: Text('failed to fetch assets: ${state.message}'));
             case AssetStatus.success:
+              Widget tableView() {
+                if (state.assets.isEmpty)
+                  return Center(
+                      heightFactor: 20,
+                      child: Text("no locations found",
+                          textAlign: TextAlign.center));
+                // get table data formatted for tableView
+                var (
+                  List<List<TableViewCell>> tableViewCells,
+                  List<double> fieldWidths,
+                  double? rowHeight
+                ) = get2dTableData<Asset>(
+                  getItemFieldNames,
+                  getItemFieldWidth,
+                  state.assets,
+                  getItemFieldContent,
+                  getRowActionButtons: getRowActionButtons,
+                  getRowHeight: getRowHeight,
+                  context: context,
+                  bloc: _assetBloc,
+                );
+                return TableView.builder(
+                  diagonalDragBehavior: DiagonalDragBehavior.free,
+                  verticalDetails:
+                      ScrollableDetails.vertical(controller: _scrollController),
+                  horizontalDetails: ScrollableDetails.horizontal(
+                      controller: _horizontalController),
+                  cellBuilder: (context, vicinity) =>
+                      tableViewCells[vicinity.row][vicinity.column],
+                  columnBuilder: (index) => index >= tableViewCells[0].length
+                      ? null
+                      : TableSpan(
+                          padding: padding,
+                          backgroundDecoration: getBackGround(context, index),
+                          extent: FixedTableSpanExtent(fieldWidths[index]),
+                        ),
+                  pinnedColumnCount: 1,
+                  rowBuilder: (index) => index >= tableViewCells.length
+                      ? null
+                      : TableSpan(
+                          padding: padding,
+                          backgroundDecoration: getBackGround(context, index),
+                          extent: FixedTableSpanExtent(rowHeight!),
+                          recognizerFactories: <Type, GestureRecognizerFactory>{
+                              TapGestureRecognizer:
+                                  GestureRecognizerFactoryWithHandlers<
+                                          TapGestureRecognizer>(
+                                      () => TapGestureRecognizer(),
+                                      (TapGestureRecognizer t) =>
+                                          t.onTap = () => showDialog(
+                                              barrierDismissible: true,
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return index >=
+                                                        state.assets.length
+                                                    ? const BottomLoader()
+                                                    : Dismissible(
+                                                        key: const Key(
+                                                            'locationItem'),
+                                                        direction:
+                                                            DismissDirection
+                                                                .startToEnd,
+                                                        child: BlocProvider.value(
+                                                            value: _assetBloc,
+                                                            child: AssetDialog(
+                                                                state.assets[
+                                                                    index -
+                                                                        1])));
+                                              }))
+                            }),
+                  pinnedRowCount: 1,
+                );
+              }
+
               return Scaffold(
-                  floatingActionButton: FloatingActionButton(
-                      heroTag: "assetNew",
-                      key: const Key("addNew"),
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _assetBloc,
-                                  child: AssetDialog(Asset()));
-                            });
-                      },
-                      tooltip: CoreLocalizations.of(context)!.addNew,
-                      child: const Icon(Icons.add)),
-                  body: Column(children: [
-                    const AssetListHeader(),
-                    Expanded(
-                        child: RefreshIndicator(
-                            onRefresh: (() async => _assetBloc
-                                .add(const AssetFetch(refresh: true))),
-                            child: ListView.builder(
-                                key: const Key('listView'),
-                                shrinkWrap: true,
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                itemCount: state.hasReachedMax
-                                    ? state.assets.length + 1
-                                    : state.assets.length + 2,
-                                controller: _scrollController,
-                                itemBuilder: (BuildContext context, int index) {
-                                  if (index == 0) {
-                                    return Visibility(
-                                        visible: state.assets.isEmpty,
-                                        child: Center(
-                                            heightFactor: 20,
-                                            child: Text(
-                                                "no ${entityName}s found!",
-                                                key: const Key('empty'),
-                                                textAlign: TextAlign.center)));
-                                  }
-                                  index--;
-                                  return index >= state.assets.length
-                                      ? const BottomLoader()
-                                      : Dismissible(
-                                          key: const Key('assetItem'),
-                                          direction:
-                                              DismissDirection.startToEnd,
-                                          child: AssetListItem(
-                                            asset: state.assets[index],
-                                            index: index,
-                                            isPhone: isPhone(context),
-                                          ));
-                                })))
-                  ]));
+                  floatingActionButton: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FloatingActionButton(
+                          key: const Key("search"),
+                          heroTag: "btn1",
+                          onPressed: () async {
+                            // find findoc id to show
+                            Asset asset = await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  // search separate from finDocBloc
+                                  return BlocProvider.value(
+                                      value: context
+                                          .read<DataFetchBloc<Locations>>(),
+                                      child: SearchAssetList());
+                                });
+                            // show detail page
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                      value: _assetBloc,
+                                      child: AssetDialog(asset));
+                                });
+                          },
+                          child: const Icon(Icons.search)),
+                      SizedBox(height: 10),
+                      FloatingActionButton(
+                          heroTag: "assetNew",
+                          key: const Key("addNew"),
+                          onPressed: () async {
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                      value: _assetBloc,
+                                      child: AssetDialog(Asset()));
+                                });
+                          },
+                          tooltip: CoreLocalizations.of(context)!.addNew,
+                          child: const Icon(Icons.add)),
+                    ],
+                  ),
+                  body: tableView());
             default:
               return const Center(child: LoadingIndicator());
           }

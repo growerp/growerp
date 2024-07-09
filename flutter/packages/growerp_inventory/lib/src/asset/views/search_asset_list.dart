@@ -18,30 +18,27 @@ import 'package:growerp_core/growerp_core.dart';
 
 import 'package:growerp_models/growerp_models.dart';
 
-class SearchFinDocList extends StatefulWidget {
-  const SearchFinDocList(
-      {super.key, required this.sales, required this.docType});
-  final bool sales;
-  final FinDocType docType;
+class SearchAssetList extends StatefulWidget {
+  const SearchAssetList({super.key});
 
   @override
-  SearchFinDocState createState() => SearchFinDocState();
+  SearchAssetState createState() => SearchAssetState();
 }
 
-class SearchFinDocState extends State<SearchFinDocList> {
-  late DataFetchBloc _finDocBloc;
-  List<FinDoc> finDocs = [];
+class SearchAssetState extends State<SearchAssetList> {
+  late DataFetchBloc _AssetBloc;
+  List<Asset> locations = [];
 
   @override
   void initState() {
     super.initState();
-    _finDocBloc = context.read<DataFetchBloc<FinDocs>>()
-      ..add(GetDataEvent(() => context.read<RestClient>().getFinDoc(limit: 0)));
+    _AssetBloc = context.read<DataFetchBloc<Assets>>()
+      ..add(GetDataEvent(() => context.read<RestClient>().getAsset(limit: 0)));
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<DataFetchBloc<FinDocs>, DataFetchState>(
+    return BlocConsumer<DataFetchBloc<Assets>, DataFetchState>(
         listener: (context, state) {
       if (state.status == DataFetchStatus.failure) {
         HelperFunctions.showMessage(context, '${state.message}', Colors.red);
@@ -52,12 +49,12 @@ class SearchFinDocState extends State<SearchFinDocList> {
             child: Text('failed to fetch search items: ${state.message}'));
       }
       if (state.status == DataFetchStatus.success) {
-        finDocs = (state.data as FinDocs).finDocs;
+        locations = (state.data as Assets).assets;
       }
       return Stack(
         children: [
-          FinDocScaffold(
-              finDocBloc: _finDocBloc, widget: widget, finDocs: finDocs),
+          AssetScaffold(
+              finDocBloc: _AssetBloc, widget: widget, locations: locations),
           if (state.status == DataFetchStatus.loading) LoadingIndicator(),
         ],
       );
@@ -65,17 +62,17 @@ class SearchFinDocState extends State<SearchFinDocList> {
   }
 }
 
-class FinDocScaffold extends StatelessWidget {
-  const FinDocScaffold({
+class AssetScaffold extends StatelessWidget {
+  const AssetScaffold({
     super.key,
     required DataFetchBloc finDocBloc,
     required this.widget,
-    required this.finDocs,
-  }) : _finDocBloc = finDocBloc;
+    required this.locations,
+  }) : _AssetBloc = finDocBloc;
 
-  final DataFetchBloc _finDocBloc;
-  final SearchFinDocList widget;
-  final List<FinDoc> finDocs;
+  final DataFetchBloc _AssetBloc;
+  final SearchAssetList widget;
+  final List<Asset> locations;
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +87,7 @@ class FinDocScaffold extends StatelessWidget {
             ),
             child: popUp(
                 context: context,
-                title: '${widget.docType} Search ',
+                title: 'Asset Search ',
                 height: 500,
                 width: 350,
                 child: Column(children: [
@@ -103,12 +100,10 @@ class FinDocScaffold extends StatelessWidget {
                           return 'Please enter a search value?';
                         return null;
                       },
-                      onFieldSubmitted: (value) => _finDocBloc.add(GetDataEvent(
-                          () => context.read<RestClient>().getFinDoc(
-                              docType: widget.docType,
-                              sales: widget.sales,
-                              limit: 5,
-                              searchString: value)))),
+                      onFieldSubmitted: (value) => _AssetBloc.add(GetDataEvent(
+                          () => context
+                              .read<RestClient>()
+                              .getAsset(limit: 5, searchString: value)))),
                   const SizedBox(height: 20),
                   const Text('Search results'),
                   Expanded(
@@ -116,12 +111,12 @@ class FinDocScaffold extends StatelessWidget {
                           key: const Key('listView'),
                           shrinkWrap: true,
                           physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: finDocs.length + 2,
+                          itemCount: locations.length + 2,
                           controller: _scrollController,
                           itemBuilder: (BuildContext context, int index) {
                             if (index == 0) {
                               return Visibility(
-                                  visible: finDocs.isEmpty,
+                                  visible: locations.isEmpty,
                                   child: Center(
                                       heightFactor: 20,
                                       child: Text('No search items found (yet)',
@@ -129,20 +124,18 @@ class FinDocScaffold extends StatelessWidget {
                                           textAlign: TextAlign.center)));
                             }
                             index--;
-                            return index >= finDocs.length
+                            return index >= locations.length
                                 ? Text('')
                                 : Dismissible(
                                     key: const Key('searchItem'),
                                     direction: DismissDirection.startToEnd,
                                     child: ListTile(
                                       title: Text(
-                                          "ID: ${finDocs[index].pseudoId}  "
-                                          "Date: ${finDocs[index].creationDate?.dateOnly()}",
+                                          "ID: ${locations[index].pseudoId}\n"
+                                          "Name: ${locations[index].assetName}",
                                           key: Key("searchResult$index")),
-                                      subtitle: Text(
-                                          "Company: ${finDocs[index].otherCompany?.name} "),
                                       onTap: () => Navigator.of(context)
-                                          .pop(finDocs[index]),
+                                          .pop(locations[index]),
                                     ));
                           }))
                 ]))));

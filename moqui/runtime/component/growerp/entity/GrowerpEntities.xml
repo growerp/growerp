@@ -85,6 +85,14 @@ along with this software (see the LICENSE.md file). If not, see
         </index>
     </extend-entity>
 
+    <extend-entity entity-name="Asset" package="mantle.product.asset"
+        sequence-primary-prefix="ast">
+        <field name="assetPseudoId" type="id"></field><!-- pseudoId give conflict in many views -->
+        <index name="ASSET_PSEUDOID" unique="false">
+            <index-field name="assetPseudoId" />
+        </index>
+    </extend-entity>
+
     <extend-entity entity-name="Shipment" package="mantle.shipment"
         sequence-primary-prefix="shp">
         <field name="pseudoId" type="id"></field>

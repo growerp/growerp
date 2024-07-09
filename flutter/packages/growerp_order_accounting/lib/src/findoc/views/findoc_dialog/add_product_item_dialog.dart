@@ -13,6 +13,7 @@
  */
 
 import 'dart:async';
+import 'package:universal_io/io.dart';
 
 import 'package:decimal/decimal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -21,6 +22,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:intl/intl.dart';
 
 import '../../../accounting/accounting.dart';
 
@@ -41,6 +43,9 @@ Future addProductItemDialog(BuildContext context) async {
       .company!
       .currency!
       .currencyId!;
+  String currencySymbol =
+      NumberFormat.simpleCurrency(locale: Platform.localeName, name: currencyId)
+          .currencySymbol;
   return showDialog<FinDocItem>(
       context: context,
       barrierDismissible: true,
@@ -139,13 +144,13 @@ Future addProductItemDialog(BuildContext context) async {
                                                   selectedProduct = newValue;
                                                 });
                                                 if (newValue != null) {
-                                                  priceController
-                                                      .text = newValue.price ==
-                                                          null
-                                                      ? ''
-                                                      : newValue.price.currency(
-                                                          currencyId:
-                                                              currencyId);
+                                                  priceController.text =
+                                                      newValue.price == null
+                                                          ? ''
+                                                          : newValue.price
+                                                              .currency(
+                                                                  currencyId:
+                                                                      '');
                                                   itemDescriptionController
                                                           .text =
                                                       "${newValue.productName}";
@@ -176,8 +181,9 @@ Future addProductItemDialog(BuildContext context) async {
                                       const SizedBox(height: 20),
                                       TextFormField(
                                         key: const Key('itemPrice'),
-                                        decoration: const InputDecoration(
-                                            labelText: 'Price/Amount'),
+                                        decoration: InputDecoration(
+                                            labelText:
+                                                'Price/Amount(${currencySymbol})'),
                                         controller: priceController,
                                         validator: (value) {
                                           if (value!.isEmpty) {

@@ -2061,11 +2061,13 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="facilityId" />
         </member-entity>
         <alias-all entity-alias="AST" />
-        <alias entity-alias="PROD" name="pseudoId" />
+        <alias entity-alias="AST" name="pseudoId" field="assetPseudoId" />
+        <alias entity-alias="PROD" name="productPseudoId" field="productId" />
         <alias entity-alias="PROD" name="productName" />
         <alias entity-alias="PROD" name="productTypeEnumId" />
         <alias entity-alias="PROD" name="productClassEnumId" />
         <alias entity-alias="LOC" name="locationId" field="locationSeqId" />
+        <alias entity-alias="LOC" name="locationPseudoId" field="positionId" />
         <alias entity-alias="LOC" name="locationName" field="description" />
     </view-entity>
 

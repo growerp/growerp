@@ -49,7 +49,7 @@ class AssetTest {
       if (asset.assetId.isEmpty) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.doSearch(tester, searchString: asset.assetId);
+        await CommonTest.doNewSearch(tester, searchString: asset.assetId);
         await CommonTest.tapByKey(tester, 'name0');
         expect(
             CommonTest.getTextField('topHeader').split('#')[1], asset.assetId);
@@ -77,16 +77,8 @@ class AssetTest {
       {String classificationId = 'AppAdmin'}) async {
     List<Asset> newAssets = [];
     for (Asset asset in assets) {
-      await CommonTest.doSearch(tester, searchString: asset.assetName!);
-      // list
-      expect(CommonTest.getTextField('name0'), equals(asset.assetName));
-      if (!CommonTest.isPhone()) {
-        expect(CommonTest.getTextField('statusId0'), equals(asset.statusId));
-      }
-      expect(CommonTest.getTextField('product0'),
-          equals(asset.product!.productName!));
+      await CommonTest.doNewSearch(tester, searchString: asset.assetName!);
       // detail
-      await CommonTest.tapByKey(tester, 'name0');
       expect(find.byKey(const Key('AssetDialog')), findsOneWidget);
       expect(CommonTest.getTextFormField('name'), equals(asset.assetName!));
       if (classificationId == 'AppAdmin') {
@@ -102,14 +94,10 @@ class AssetTest {
       newAssets.add(asset.copyWith(assetId: id));
       await CommonTest.tapByKey(tester, 'cancel');
     }
-    await CommonTest.closeSearch(tester);
     return newAssets;
   }
 
   static Future<void> deleteAssets(WidgetTester tester) async {
-    // openclose search to refresh
-    await CommonTest.tapByKey(tester, 'search');
-    await CommonTest.tapByKey(tester, 'search');
     SaveTest test = await PersistFunctions.getTest();
     // delete assets
     for (int x = 0; x < test.assets.length; x++) {

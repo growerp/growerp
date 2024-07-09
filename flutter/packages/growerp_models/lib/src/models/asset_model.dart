@@ -28,6 +28,7 @@ part 'asset_model.g.dart';
 class Asset with _$Asset {
   factory Asset({
     @Default("") String assetId,
+    @Default("") String pseudoId,
     String? assetClassId, // room, table etc
     String? assetName, // include room number/name
     String? statusId,

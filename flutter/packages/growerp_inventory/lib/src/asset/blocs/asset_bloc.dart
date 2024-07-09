@@ -54,7 +54,7 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
     try {
       emit(state.copyWith(status: AssetStatus.loading));
       Assets compResult = await restClient.getAsset(
-          search: event.searchString, assetClassId: event.assetClassId);
+          searchString: event.searchString, assetClassId: event.assetClassId);
       emit(state.copyWith(
         status: AssetStatus.success,
         assets: compResult.assets,

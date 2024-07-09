@@ -54,7 +54,7 @@ class SearchLocationState extends State<SearchLocationList> {
       }
       return Stack(
         children: [
-          MyScaffold(
+          LocationScaffold(
               finDocBloc: _LocationBloc, widget: widget, locations: locations),
           if (state.status == DataFetchStatus.loading) LoadingIndicator(),
         ],
@@ -63,8 +63,8 @@ class SearchLocationState extends State<SearchLocationList> {
   }
 }
 
-class MyScaffold extends StatelessWidget {
-  const MyScaffold({
+class LocationScaffold extends StatelessWidget {
+  const LocationScaffold({
     super.key,
     required DataFetchBloc finDocBloc,
     required this.widget,

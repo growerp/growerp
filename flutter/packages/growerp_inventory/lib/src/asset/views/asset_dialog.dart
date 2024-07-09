@@ -37,8 +37,10 @@ class AssetDialog extends StatefulWidget {
 class AssetDialogState extends State<AssetDialog> {
   final _assetDialogformKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _pseudoIdController = TextEditingController();
   final TextEditingController _quantityOnHandController =
       TextEditingController();
+  final TextEditingController _atpController = TextEditingController();
   final TextEditingController _acquireCostController = TextEditingController();
   final TextEditingController _productSearchBoxController =
       TextEditingController();
@@ -74,9 +76,13 @@ class AssetDialogState extends State<AssetDialog> {
           .getProduct(limit: 3, isForDropDown: true)));
     _statusId = widget.asset.statusId ?? 'Available';
     _nameController.text = widget.asset.assetName ?? '';
+    _pseudoIdController.text = widget.asset.pseudoId;
     _quantityOnHandController.text = widget.asset.quantityOnHand == null
         ? ''
         : widget.asset.quantityOnHand.toString();
+    _atpController.text = widget.asset.availableToPromise == null
+        ? ''
+        : widget.asset.availableToPromise.toString();
     _acquireCostController.text = widget.asset.acquireCost == null
         ? ''
         : widget.asset.acquireCost.currency(currencyId: ''); // no symbol
@@ -119,9 +125,9 @@ class AssetDialogState extends State<AssetDialog> {
                       title: (classificationId == 'AppHotel'
                               ? "Room #"
                               : "Asset #") +
-                          (widget.asset.assetId.isEmpty
+                          (widget.asset.pseudoId.isEmpty
                               ? "New"
-                              : widget.asset.assetId),
+                              : widget.asset.pseudoId),
                       height: 450,
                       width: 350,
                       child: _showForm(isPhone))));
@@ -139,6 +145,11 @@ class AssetDialogState extends State<AssetDialog> {
       child: Form(
           key: _assetDialogformKey,
           child: Column(children: <Widget>[
+            TextFormField(
+              key: const Key('pseudoId'),
+              decoration: InputDecoration(labelText: 'Id'),
+              controller: _pseudoIdController,
+            ),
             TextFormField(
               key: const Key('name'),
               decoration: InputDecoration(
@@ -168,6 +179,24 @@ class AssetDialogState extends State<AssetDialog> {
                       validator: (value) {
                         if (value!.isEmpty) {
                           return 'Please enter a quantityOnHand?';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: TextFormField(
+                      key: const Key('atp'),
+                      decoration:
+                          const InputDecoration(labelText: 'Avail. to promise'),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
+                      ],
+                      controller: _atpController,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Please enter a avilable to promise?';
                         }
                         return null;
                       },
@@ -351,17 +380,22 @@ class AssetDialogState extends State<AssetDialog> {
                     _assetBloc.add(AssetUpdate(
                       Asset(
                         assetId: widget.asset.assetId,
+                        pseudoId: _pseudoIdController.text,
                         assetClassId: classificationId == 'AppHotel'
                             ? 'Hotel Room'
                             : null,
                         assetName: _nameController.text,
                         quantityOnHand: _quantityOnHandController.text != ""
                             ? Decimal.parse(_quantityOnHandController.text)
-                            : Decimal.parse('1'),
+                            : Decimal.parse('0'),
+                        availableToPromise: _atpController.text != ""
+                            ? Decimal.parse(_atpController.text)
+                            : Decimal.parse('0'),
                         acquireCost: _acquireCostController.text != ""
                             ? Decimal.parse(_acquireCostController.text)
                             : Decimal.parse('0'),
                         product: _selectedProduct,
+                        location: _selectedLocation,
                         statusId: _statusId,
                       ),
                     ));

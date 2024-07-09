@@ -183,7 +183,7 @@ abstract class RestClient {
       @Query('assetId') String? assetId,
       @Query('productId') String? productId,
       @Query('isForDropDown') bool? isForDropDown,
-      @Query('search') String? search});
+      @Query('search') String? searchString});
 
   @POST("rest/s1/growerp/100/Asset")
   Future<Asset> createAsset(

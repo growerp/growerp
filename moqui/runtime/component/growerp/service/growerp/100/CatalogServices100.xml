@@ -614,6 +614,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="companyPartyId" />
             <parameter name="productId" />
+            <parameter name="pseudoId" />
             <parameter name="assetId" />
             <parameter name="assetClassId" />
             <parameter name="start" default-value="0" type="Integer" />
@@ -624,6 +625,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="assets" type="List">
                 <parameter name="asset" type="Map">
+                    <parameter name="pseudoId" />
                     <parameter name="assetId" />
                     <parameter name="statusId" />
                     <parameter name="assetTypeId" />
@@ -676,6 +678,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <econditions combine="or">
                     <econdition field-name="assetId" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="pseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="assetName" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="productName" ignore-case="true"
@@ -689,10 +693,10 @@ along with this software (see the LICENSE.md file). If not, see
                     <script>
                         assets.add([
                         assetId: item.assetId,
+                        pseudoId: item.pseudoId,
                         assetName: item.assetName,
                         receivedDate: item.receivedDate,
-                        productName: item.productName,
-                        productId: item.productId
+                        product: [productId: item.productName, productId: item.productId],
                         ])
                     </script>
                     <continue />
@@ -704,6 +708,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="assetOut"
                     from="[
                     assetId: item.assetId,
+                    pseudoId: item.pseudoId,
                     statusId: status.convertedStatusId,
                     assetTypeId: item.assetTypeEnumId,
                     assetClassId: assetClass.convertedStatusId,
@@ -713,9 +718,9 @@ along with this software (see the LICENSE.md file). If not, see
                     acquireCost: item.acquireCost?.toString(),
                     receivedDate: item.receivedDate ? ec.l10n.format(item.receivedDate,'yyyy-MM-dd')  : null,
                     expectedEndOfLifeDate: item.expectedEndOfLife ? ec.l10n.format(item.expectedEndOfLife,'yyyy-MM-dd')  : null,
-                    product: [productId: item.productId, pseudoId: item.pseudoId,
+                    product: [productId: item.productId, pseudoId: item.productPseudoId,
                                 productName: item.productName],
-                    location: [locationId: item.locationId, locationName: item.locationName],
+                    location: [locationId: item.locationId, pseudoId: item.locationPseudoId, locationName: item.locationName],
                     ]" />
                 <script>assets.add(assetOut)</script>
             </iterate>
@@ -727,6 +732,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="classificationId" required="true" />
             <parameter name="asset" type="Map" required="true">
+                <parameter name="pseudoId" />
                 <parameter name="statusId" />
                 <parameter name="assetTypeId" />
                 <parameter name="assetClassId" />
@@ -764,6 +770,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="asset" type="Map">
                 <parameter name="assetId" />
+                <parameter name="pseudoId" />
                 <parameter name="statusId" />
                 <parameter name="assetTypeId" />
                 <parameter name="assetClassId" />
@@ -787,6 +794,12 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="!asset.pseudoId || asset.pseudoId == ''">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[companyPartyId: companyPartyId, seqName: 'asset']"
+                    out-map="context" />
+                <set field="asset.pseudoId" from="seqNum" />
+            </if>
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                 in-map="[docType: 'asset', statusId: asset.statusId]" out-map="status" />
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
@@ -830,6 +843,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <service-call name="create#mantle.product.asset.Asset"
                 in-map="[
+                    assetPseudoId: asset.pseudoId,
                     classEnumId: assetClass.convertedStatusId,
                     assetName: asset.assetName,
                     productId: asset.product.productId,
@@ -858,6 +872,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="asset" type="Map" required="true">
                 <parameter name="assetId" />
+                <parameter name="pseudoId" />
                 <parameter name="statusId" />
                 <parameter name="assetTypeId" />
                 <parameter name="assetClassId" />
@@ -871,11 +886,16 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="productId" />
                     <parameter name="pseudoId" />
                 </parameter>
+                <parameter name="location" type="Map">
+                    <parameter name="locationId" />
+                    <parameter name="pseudoId" />
+                </parameter>
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="asset" type="Map">
                 <parameter name="assetId" />
+                <parameter name="pseudoId" />
                 <parameter name="statusId" />
                 <parameter name="assetTypeId" />
                 <parameter name="assetClassId" />
@@ -890,9 +910,14 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="pseudoId" />
                     <parameter name="productName" />
                 </parameter>
+                <parameter name="location" type="Map">
+                    <parameter name="locationId" />
+                    <parameter name="pseudoId" />
+                </parameter>
             </parameter>
         </out-parameters>
         <actions>
+            <log message="====updating asset: $asset" />
             <!-- for update no owner needed in single company use -->
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
@@ -901,21 +926,25 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="assetId" from="asset.assetId" />
                 <econdition field-name="ownerPartyId" from="companyPartyId" />
             </entity-find>
-            <set field="assetOld" from="assets[0]" />
-            <if condition="!assetOld">
+            <if condition="!assets">
                 <return error="true" message="asset ${asset.assetId} not found!}" />
             </if>
+            <set field="assetOld" from="assets[0]" />
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                 in-map="[docType: 'asset', statusId: asset.statusId]" out-map="status" />
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                 in-map="[docType: 'asset', statusId: asset.assetClassId]" out-map="assetClass" />
             <if
                 condition=" assetOld.assetName != asset.assetName || 
+                            assetOld.assetPseudoId != asset.pseudoId ||
                             assetOld.quantityOnHandTotal != asset.quantityOnHand ||
                             assetOld.acquireCost != asset.acquireCost ||
+                            assetOld.availableToPromiseTotal != asset.availableToPromise ||
                             assetOld.statusId != status.convertedStatusId ||
                             assetOld.classEnumId != assetClass.convertedStatusId ||
-                            assetOld.productId != asset.product.productId">
+                            assetOld.productId != asset.product.productId ||
+                            assetOld.locationSeqId != asset.location.locationId">
+                <set field="assetOld.assetPseudoId" from="asset.pseudoId" />
                 <set field="assetOld.assetName" from="asset.assetName" />
                 <set field="assetOld.quantityOnHandTotal"
                     from="new BigDecimal(asset.quantityOnHand)" />
@@ -923,8 +952,10 @@ along with this software (see the LICENSE.md file). If not, see
                     from="new BigDecimal(asset.acquireCost)" />
                 <set field="assetOld.statusId" from="status.convertedStatusId" />
                 <set field="assetOld.classEnumId" from="assetClass.convertedStatusId" />
-                <set field="assetOld.productId" from="asset.product.productId" />
-                <entity-update value-field="assetOld" />
+                <set field="assetOld.productId" from="asset.product?.productId" />
+                <set field="assetOld.locationSeqId" from="asset.location?.locationId" />
+                <log message="====updating asset1: $assetOld" />
+                <service-call name="update#mantle.product.asset.Asset" in-map="assetOld" />
             </if>
             <service-call name="growerp.100.CatalogServices100.get#Assets"
                 in-map="[assetId: asset.assetId]" out-map="context" />
