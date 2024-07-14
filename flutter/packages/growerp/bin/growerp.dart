@@ -111,7 +111,7 @@ Future<void> main(List<String> args) async {
         export(backendUrl, outputDirectory, username, password);
         break;
       case 'report':
-        // TODO(hansbak): create a data (conversion) report
+        // (hansbak): create a data (conversion) report
         // how many open documents order,invoices, payments  value
         // how many orders with no invoices
         // how many invoices with no ledger tranactions

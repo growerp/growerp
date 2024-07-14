@@ -55,22 +55,6 @@ class TransactionTest {
     await checkTransaction(tester, test.transactions);
   }
 
-/*
-  static Future<void> deleteLastTransaction(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    var count = CommonTest.getWidgetCountByKey(tester, 'finDocItem');
-    if (count == test.transactions.length) {
-      await CommonTest.tapByKey(tester, 'edit${count - 1}');
-      await CommonTest.tapByKey(tester, 'cancelFinDoc', seconds: 5);
-      // refresh not work in test
-      //await CommonTest.refresh(tester);
-      //expect(find.byKey(Key('finDocItem')), findsNWidgets(count - 1));
-      await PersistFunctions.persistTest(test.copyWith(
-          payments:
-              test.transactions.sublist(0, test.transactions.length - 1)));
-    }
-  }
-*/
   static Future<List<FinDoc>> enterTransactionData(
       WidgetTester tester, List<FinDoc> transactions) async {
     List<FinDoc> newTransactions = []; // with pseudoId added

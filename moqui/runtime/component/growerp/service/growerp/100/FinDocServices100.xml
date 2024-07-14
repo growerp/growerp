@@ -1382,8 +1382,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <iterate list="finDoc.items" entry="item">
                         <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
                             in-map="[   acctgTransId: acctgTransId,
-                                        productId: item.product.productId,
-                                        pseudoProductId: item.product.pseudoId,
+                                        productId: item.product ? item.product.productId : '',
+                                        pseudoProductId: item.product ? item.product.pseudoId : '',
                                         glAccountId: item.glAccount.glAccountId,
                                         debitCreditFlag: item.isDebit == true ? 'D' : 'C',
                                         amount: item.price,
@@ -1999,13 +1999,11 @@ along with this software (see the LICENSE.md file). If not, see
                         <if condition="!item.price">
                             <continue />
                         </if>
-                        <!--log
-                        message="===adding item: ${finDoc.transactionId}" /-->
                         <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
                             in-map="[   acctgTransId: finDoc.transactionId,
                                         glAccountId: item.glAccount.glAccountId,
-                                        productId: item.product.productId,
-                                        pseudoProductId: item.product.pseudoId,
+                                        productId: item.product ? item.product.productId : '',
+                                        pseudoProductId: item.product ? item.product.pseudoId : '',
                                         quantity: item.quantity,
                                         debitCreditFlag: item.isDebit == true ? 'D' : 'C',
                                         amount: item.price,

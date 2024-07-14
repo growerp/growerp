@@ -63,9 +63,6 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
                                   context,
                                   '${widget.timeEntry.timeEntryId == null ? "Add" : "Update"} successfull',
                                   Colors.green);
-                              await Future.delayed(
-                                  const Duration(milliseconds: 500));
-                              if (!mounted) return;
                               Navigator.of(context).pop();
                               break;
                             case TaskBlocStatus.failure:

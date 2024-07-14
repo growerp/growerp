@@ -49,6 +49,6 @@ docker image rm image-name
 dart pub global activate melos # only one time
 melos clean
 melos bootstrap # remove references to pub.dev and use local packages
-melos build_all # generate data models
+melos build     # generate data models
 melos l10n      # generate language localization files
 ```

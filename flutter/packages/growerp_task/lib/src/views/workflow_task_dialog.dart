@@ -67,8 +67,6 @@ class WorkflowTaskDialogState extends State<WorkflowTaskDialog> {
                           context,
                           '${widget.task.taskId.isEmpty ? "Add" : "Update"} successfull',
                           Colors.green);
-                      await Future.delayed(const Duration(milliseconds: 500));
-                      if (!mounted) return;
                       Navigator.of(context).pop();
                       break;
                     case TaskBlocStatus.failure:

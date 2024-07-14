@@ -904,8 +904,7 @@ class MyFinDocState extends State<FinDocPage> {
         'Debit',
         'Credit',
         'ProdId',
-        if (!readOnly) 'del.',
-        ''
+        ' ',
       ];
     }
 
@@ -942,17 +941,18 @@ class MyFinDocState extends State<FinDocPage> {
       int? itemIndex,
     }) =>
         [
-          IconButton(
-            padding: EdgeInsets.all(0),
-            icon: const Icon(
-              Icons.delete_forever,
-              size: 20,
-            ),
-            key: Key("itemDelete$itemIndex"),
-            onPressed: () {
-              _cartBloc.add(CartDeleteItem(itemIndex!));
-            },
-          )
+          if (!readOnly)
+            IconButton(
+              padding: EdgeInsets.all(0),
+              icon: const Icon(
+                Icons.delete_forever,
+                size: 20,
+              ),
+              key: Key("itemDelete$itemIndex"),
+              onPressed: () {
+                _cartBloc.add(CartDeleteItem(itemIndex!));
+              },
+            )
         ];
 
     var padding = SpanPadding(trailing: 10, leading: 10);

@@ -35,18 +35,19 @@ class AppNavObserver extends NavigatorObserver {
     }
     super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
   }
-
+/*
   @override
   void didStartUserGesture(Route route, Route? previousRoute) {
-    // TODO: implement didStartUserGesture
+    //  implement didStartUserGesture
     super.didStartUserGesture(route, previousRoute);
   }
 
   @override
   void didStopUserGesture() {
-    // TODO: implement didStopUserGesture
+    //  implement didStopUserGesture
     super.didStopUserGesture();
   }
+  */
 }
 
 class RouteStackItem {

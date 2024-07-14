@@ -1125,6 +1125,7 @@ along with this software (see the LICENSE.md file). If not, see
                             firstName: userInfo?.firstName,
                             lastName: userInfo?.lastName,
                             company: company,
+                            userId: userInfo?.userId,
                             ]" />
                     <else>
                         <set field="userOut"
