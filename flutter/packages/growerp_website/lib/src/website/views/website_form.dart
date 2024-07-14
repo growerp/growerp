@@ -50,10 +50,12 @@ class WebsiteFormState extends State<WebsiteForm> {
   final _websiteFormKey2 = GlobalKey<FormState>();
   final _websiteFormKey3 = GlobalKey<FormState>();
   ScrollController myScrollController = ScrollController();
+  late String classificationId;
 
   @override
   void initState() {
     super.initState();
+    classificationId = context.read<String>();
     _websiteBloc = context.read<WebsiteBloc>()..add(WebsiteFetch());
     _categoryBloc = context.read<DataFetchBloc<Categories>>()
       ..add(GetDataEvent(() => context
@@ -519,7 +521,7 @@ class WebsiteFormState extends State<WebsiteForm> {
                           searchString: filter,
                           limit: 3,
                           isForDropDown: true,
-                          assetClassId: context.read<String>() == 'AppHotel'
+                          assetClassId: classificationId == 'AppHotel'
                               ? 'Hotel Room'
                               : '')));
                   return Future.delayed(const Duration(milliseconds: 250), () {

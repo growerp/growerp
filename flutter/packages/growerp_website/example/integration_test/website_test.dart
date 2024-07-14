@@ -56,7 +56,6 @@ void main() {
       await WebsiteTest.updateHomePageCategories(tester, "Deals", products);
       await WebsiteTest.updateHomePageCategories(tester, "Featured", products);
       await WebsiteTest.updateShopCategories(tester);
-      await CommonTest.gotoMainMenu(tester);
     } catch (error) {
       await CommonTest.takeScreenShot(
           binding: binding, tester: tester, screenShotName: "Website_Error");
