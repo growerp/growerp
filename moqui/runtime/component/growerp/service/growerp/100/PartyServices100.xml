@@ -2899,26 +2899,6 @@ along with this software (see the LICENSE.md file). If not, see
                                 in-map="member + [productId: newProductId,
                                             productCategoryId: newCategoryId]" />
                         </iterate>
-                        <!-- related assets -->
-                        <entity-find entity-name="mantle.product.asset.Asset" list="assets">
-                            <econdition field-name="productId" from="product.productId" />
-                        </entity-find>
-                        <iterate list="assets" entry="asset">
-                            <service-call name="create#mantle.product.asset.Asset"
-                                in-map="asset + [   assetId: null, 
-                                                    productId: productId,
-                                                    assetName: 'unusedItem',
-                                                    facilityId: facilityId,
-                                                    ownerPartyId: companyPartyId,
-                                                    acquireCostUomId: currencyId]"
-                                out-map="context" />
-                            <entity-find entity-name="mantle.product.asset.AssetDetail"
-                                list="detailList">
-                                <econdition field-name="assetId" from="asset.assetId" />
-                            </entity-find>
-                            <service-call name="create#mantle.product.asset.AssetDetail"
-                                in-map="detailList[0] + [assetDetailId: null, assetId: assetId]" />
-                        </iterate>
                     </iterate>
                 </if>
 
@@ -3039,42 +3019,24 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="facilityId" from="facilities[0].facilityId" />
 
                     <set field="xLoc" value="0" type="Integer" />
+                    <!-- create data for assets -->
+                    <set field="assets" from="[]" />
                     <iterate list="assetsIn" entry="asset">
-                        <entity-find entity-name="mantle.product.Product" list="products">
-                            <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                            <econdition field-name="productName"
-                                from="asset.productName + (classificationId != 'AppHotel'? counter : '')" />
-                        </entity-find>
-                        <if condition="products">
-                            <set field="product" from="products[0]" />
-                            <else>
-                                <continue />
-                            </else>
-                        </if>
-                        <!-- create location -->
-                        <service-call name="create#mantle.facility.FacilityLocation"
-                            in-map="[facilityId: facilityId,
-                                        description: 'loc' + xLoc++]"
-                            out-map="context" />
-
-                        <!-- do not put fixed asset in inventory we do not want the normal reserve
-                        process to work -->
-                        <service-call name="create#mantle.product.asset.Asset" out-map="context"
-                            in-map="
-                            productId: product.productId,
-                            classEnumId: product.assetClassEnumId,
-                            hasQuantity: 'N',
-                            quantityOnHandTotal: 1,
-                            assetTypeEnumId: product.assetTypeEnumId,
+                        <set field="asset"
+                            from="[
+                            product: [productName: asset.productName + (classificationId != 'AppHotel'? counter : '')],
+                            quantityOnHand: 10,
+                            availableToPromise: 10,
                             assetName: asset.assetName,
                             ownerPartyId: companyPartyId,
                             statusId: 'AstAvailable',
-                            facilityId: product.assetTypeEnumId != 'AstTpFixed'? facilityId : null,
-                            locationSeqId: product.assetTypeEnumId != 'AstTpFixed'?  locationSeqId : null
-                            " />
-                        <service-call name="create#mantle.product.asset.AssetDetail"
-                            in-map="[assetId: assetId]" />
+                            location: [locationName: asset.productName],
+                        ]" />
+                        <script>assets.add(asset)</script>
                     </iterate>
+                    <set field="entities['assets']" from="assets" />
+                    <service-call name="growerp.100.ImportExportServices.import#entities"
+                        in-map="entities" />
                 </if>
 
                 <!-- users only load with the first app -->

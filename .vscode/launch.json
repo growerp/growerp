@@ -47,6 +47,17 @@
             ]
         },
         {
+            "name": "Admin linux (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/admin",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "linux",
+            ]
+        },
+        {
             "name": "Admin mobile (lib/main.dart)",
             "type": "dart",
             "request": "launch",

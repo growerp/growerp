@@ -67,8 +67,8 @@ class AssetListState extends State<AssetList> {
                 if (state.assets.isEmpty)
                   return Center(
                       heightFactor: 20,
-                      child: Text("no locations found",
-                          textAlign: TextAlign.center));
+                      child:
+                          Text("no assets found", textAlign: TextAlign.center));
                 // get table data formatted for tableView
                 var (
                   List<List<TableViewCell>> tableViewCells,

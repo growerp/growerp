@@ -170,7 +170,7 @@ class AssetDialogState extends State<AssetDialog> {
                     child: TextFormField(
                       key: const Key('quantityOnHand'),
                       decoration:
-                          const InputDecoration(labelText: 'Quantity on Hand'),
+                          const InputDecoration(labelText: 'Qty on Hand'),
                       keyboardType: TextInputType.number,
                       inputFormatters: <TextInputFormatter>[
                         FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
@@ -186,9 +186,9 @@ class AssetDialogState extends State<AssetDialog> {
                   ),
                   Expanded(
                     child: TextFormField(
-                      key: const Key('atp'),
+                      key: const Key('availableToPromise'),
                       decoration:
-                          const InputDecoration(labelText: 'Avail. to promise'),
+                          const InputDecoration(labelText: 'Qty Promise'),
                       keyboardType: TextInputType.number,
                       inputFormatters: <TextInputFormatter>[
                         FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
@@ -206,7 +206,7 @@ class AssetDialogState extends State<AssetDialog> {
                     child: TextFormField(
                       key: const Key('acquireCost'),
                       decoration: InputDecoration(
-                          labelText: 'Aquired Costs($currencySymbol)'),
+                          labelText: 'Aqrd. Costs($currencySymbol)'),
                       keyboardType: TextInputType.number,
                       inputFormatters: <TextInputFormatter>[
                         FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))

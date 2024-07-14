@@ -36,11 +36,12 @@ String getDioError(e) {
       break;
   }
   String returnMessage = '';
-  Map<String, dynamic> response = json.decode(e.response.toString());
-
   if (exception.type != DioExceptionType.unknown)
     returnMessage += "$expression: ${exception.message}";
-  if (e.response != null)
+  if (e.response != null) {
+    Map<String, dynamic> response = json.decode(e.response.toString());
     returnMessage += "${response['errors']}[${response['errorCode']}]";
+  }
+  if (returnMessage.isEmpty) returnMessage = "Server Connection error";
   return returnMessage;
 }

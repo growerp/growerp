@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 
 class FatalErrorForm extends StatelessWidget {
   final String message;
@@ -23,14 +24,16 @@ class FatalErrorForm extends StatelessWidget {
       {super.key, required this.message, this.route, this.buttonText});
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 400,
-      child: Center(
+    return Scaffold(
+      body: Center(
           child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-            Text(message),
+            Text(
+              message,
+              style: const TextStyle(color: Colors.red, fontSize: 20),
+            ),
             Visibility(
                 visible: route != null && buttonText != null,
                 child: ElevatedButton(
@@ -38,13 +41,12 @@ class FatalErrorForm extends StatelessWidget {
                     onPressed: () {
                       Navigator.pushNamed(context, route!);
                     })),
-/*            const SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               key: const Key('restart'),
               child: const Text('Restart'),
               onPressed: () => Phoenix.rebirth(context),
             )
-*/
           ])),
     );
   }

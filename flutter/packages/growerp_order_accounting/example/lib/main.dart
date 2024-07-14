@@ -22,6 +22,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'acct_menu_option_data.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,19 +32,21 @@ Future main() async {
   ChatServer chatServer = ChatServer();
   Bloc.observer = AppBlocObserver();
 
-  runApp(TopApp(
-    restClient: restClient,
-    classificationId: 'AppAdmin',
-    chatServer: chatServer,
-    title: 'GrowERP Order and Accounting.',
-    router: generateRoute,
-    menuOptions: menuOptions,
-    extraDelegates: const [
-      OrderAccountingLocalizations.delegate,
-      InventoryLocalizations.delegate
-    ],
-    extraBlocProviders:
-        getOrderAccountingBlocProvidersExample(restClient, 'AppAdmin'),
+  runApp(Phoenix(
+    child: TopApp(
+      restClient: restClient,
+      classificationId: 'AppAdmin',
+      chatServer: chatServer,
+      title: 'GrowERP Order and Accounting.',
+      router: generateRoute,
+      menuOptions: menuOptions,
+      extraDelegates: const [
+        OrderAccountingLocalizations.delegate,
+        InventoryLocalizations.delegate
+      ],
+      extraBlocProviders:
+          getOrderAccountingBlocProvidersExample(restClient, 'AppAdmin'),
+    ),
   ));
 }
 

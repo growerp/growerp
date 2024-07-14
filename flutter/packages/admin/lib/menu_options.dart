@@ -82,7 +82,7 @@ List<MenuOption> menuOptions = [
           key: Key('Lead'),
           role: Role.lead,
         ),
-        label: '   Lead Contacs',
+        label: '   Lead Contacts',
         icon: const Icon(Icons.business),
       ),
       TabItem(

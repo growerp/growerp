@@ -15,7 +15,6 @@ along with this software (see the LICENSE.md file). If not, see
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
-
     <service verb="get" noun="Location" authenticate="false">
         <description> get a single, or all warehouse locations</description>
         <in-parameters>
@@ -272,6 +271,359 @@ along with this software (see the LICENSE.md file). If not, see
                 out-map="context" />
             <entity-delete value-field="locationList[0]" />
             <set field="location" from="locations[0]" />
+        </actions>
+    </service>
+    <service verb="get" noun="Assets">
+        <description> get a single, or all assets</description>
+        <in-parameters>
+            <parameter name="companyPartyId" />
+            <parameter name="productId" />
+            <parameter name="pseudoId" />
+            <parameter name="assetId" />
+            <parameter name="assetClassId" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="20" type="Integer" />
+            <parameter name="filter" default="null" />
+            <parameter name="search" default="null" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="assets" type="List">
+                <parameter name="asset" type="Map">
+                    <parameter name="pseudoId" />
+                    <parameter name="assetId" />
+                    <parameter name="statusId" />
+                    <parameter name="assetTypeId" />
+                    <parameter name="assetClassId" />
+                    <parameter name="assetName" />
+                    <parameter name="quantityOnHand" />
+                    <parameter name="acquireCost" />
+                    <parameter name="availableToPromise" />
+                    <parameter name="receivedDate" />
+                    <parameter name="expectedEndOfLifeDate" />
+                    <parameter name="product" type="Map">
+                        <parameter name="productId" />
+                        <parameter name="pseudoId" />
+                        <parameter name="productName" />
+                    </parameter>
+                    <parameter name="location" type="Map">
+                        <parameter name="locationId" />
+                        <parameter name="locationName" />
+                    </parameter>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="filter != null">
+                <set field="filter" value="%${filter}%" />
+            </if>
+            <if condition="search != null">
+                <set field="search" value="%${search}%" />
+            </if>
+            <if condition="!assetId &amp;&amp; !search"><!--single
+                asset and search always show, list only active assets-->
+                <set field="activated" value="AstDeactivated" />
+            </if>
+            <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                in-map="[docType: 'asset', statusId: assetClassId]" out-map="assetClass" />
+            <entity-find offset="start" limit="limit" list="assetList"
+                entity-name="growerp.product.asset.AssetProductAndLocation">
+                <econdition field-name="assetId" ignore-if-empty="true" />
+                <!--econdition
+                field-name="statusId"
+                    operator="not-equals" from="activated" ignore-if-empty="true"/-->
+                <econdition field-name="classEnumId"
+                    from="assetClass.convertedStatusId" ignore-if-empty="true" />
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="productId" ignore-if-empty="true" />
+                <econdition field-name="assetName" operator="like" ignore-case="true"
+                    from="filter" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="assetId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="pseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="assetName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="productName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="assetName" />
+            </entity-find>
+            <set field="assets" from="[]" />
+            <iterate entry="item" list="assetList">
+                <if condition="filter != null">
+                    <script>
+                        assets.add([
+                        assetId: item.assetId,
+                        pseudoId: item.pseudoId,
+                        assetName: item.assetName,
+                        receivedDate: item.receivedDate,
+                        product: [productId: item.productName, productId: item.productId],
+                        ])
+                    </script>
+                    <continue />
+                </if>
+                <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                    in-map="[docType: 'asset', statusId: item.statusId]" out-map="status" />
+                <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                    in-map="[docType: 'asset', statusId: item.classEnumId]" out-map="assetClass" />
+                <set field="assetOut"
+                    from="[
+                    assetId: item.assetId,
+                    pseudoId: item.pseudoId,
+                    statusId: status.convertedStatusId,
+                    assetTypeId: item.assetTypeEnumId,
+                    assetClassId: assetClass.convertedStatusId,
+                    assetName: item.assetName,
+                    quantityOnHand: item.quantityOnHandTotal ? item.quantityOnHandTotal.toString() : '0',
+                    availableToPromise: item.availableToPromiseTotal ? item.availableToPromiseTotal.toString() : '0',
+                    acquireCost: item.acquireCost?.toString(),
+                    receivedDate: item.receivedDate ? ec.l10n.format(item.receivedDate,'yyyy-MM-dd')  : null,
+                    expectedEndOfLifeDate: item.expectedEndOfLife ? ec.l10n.format(item.expectedEndOfLife,'yyyy-MM-dd')  : null,
+                    product: [productId: item.productId, pseudoId: item.productPseudoId,
+                                productName: item.productName],
+                    location: [locationId: item.locationId, pseudoId: item.locationPseudoId, locationName: item.locationName],
+                    ]" />
+                <script>assets.add(assetOut)</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Asset">
+        <description> Create a Asset </description>
+        <in-parameters>
+            <parameter name="classificationId" required="true" />
+            <parameter name="asset" type="Map" required="true">
+                <parameter name="pseudoId" />
+                <parameter name="statusId" />
+                <parameter name="assetTypeId" />
+                <parameter name="assetClassId" />
+                <parameter name="assetName" />
+                <parameter name="quantityOnHand" />
+                <parameter name="availableToPromise" />
+                <parameter name="acquireCost" />
+                <parameter name="receivedDate" />
+                <parameter name="expectedEndOfLifeDate" />
+                <parameter name="product" type="Map">
+                    <parameter name="productId" />
+                    <parameter name="productTypeId" />
+                    <parameter name="assetClassId" />
+                    <parameter name="productName" />
+                    <parameter name="description" />
+                    <parameter name="price" />
+                    <parameter name="listPrice" />
+                    <parameter name="categories" type="List">
+                        <parameter name="category" type="Map">
+                            <parameter name="categoryId" />
+                            <parameter name="categoryName" />
+                            <parameter name="description" />
+                            <parameter name="image" />
+                        </parameter>
+                    </parameter>
+                    <parameter name="useWarehouse" type="Boolean" />
+                    <parameter name="image" />
+                </parameter>
+                <parameter name="location" type="Map">
+                    <parameter name="locationId" />
+                    <parameter name="locationName" />
+                </parameter>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="asset" type="Map">
+                <parameter name="assetId" />
+                <parameter name="pseudoId" />
+                <parameter name="statusId" />
+                <parameter name="assetTypeId" />
+                <parameter name="assetClassId" />
+                <parameter name="assetName" />
+                <parameter name="quantityOnHand" />
+                <parameter name="availableToPromise" />
+                <parameter name="acquireCost" />
+                <parameter name="receivedDate" />
+                <parameter name="expectedEndOfLifeDate" />
+                <parameter name="product" type="Map">
+                    <parameter name="productId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="productName" />
+                </parameter>
+                <parameter name="location" type="Map">
+                    <parameter name="locationId" />
+                    <parameter name="locationName" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="!asset.pseudoId || asset.pseudoId == ''">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[companyPartyId: companyPartyId, seqName: 'asset']"
+                    out-map="context" />
+                <set field="asset.pseudoId" from="seqNum" />
+            </if>
+            <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                in-map="[docType: 'asset', statusId: asset.statusId]" out-map="status" />
+            <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                in-map="[docType: 'asset', statusId: asset.assetClassId]" out-map="assetClass" />
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!asset.product?.productId &amp;&amp; asset.product?.productName">
+                <!-- check first if exist by name -->
+                <entity-find entity-name="mantle.product.Product" list="checkProducts" limit="1">
+                    <econdition field-name="productName" from="asset.product?.productName" />
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                </entity-find>
+                <if condition="checkProducts">
+                    <set field="asset.product.productId" from="checkProducts[0].productId" />
+                    <else>
+                        <service-call name="growerp.100.CatalogServices100.create#Product"
+                            in-map="[product: asset.product,classificationId: classificationId]"
+                            out-map="productResult" />
+                        <set field="asset.product.productId" from="productResult.product.productId" />
+                    </else>
+                </if>
+            </if>
+            <!-- if just location names are provided generate id's if not found create-->
+            <if
+                condition="!asset.location?.locationId &amp;&amp; asset.location?.locationName">
+                <entity-find entity-name="mantle.facility.FacilityLocation" list="locations">
+                    <econdition field-name="facilityId" from="stores[0].inventoryFacilityId" />
+                    <econdition field-name="description" from="asset.location.locationName" />
+                </entity-find>
+                <if condition="locations">
+                    <set field="asset.location.locationId" from="locations[0].locationSeqId" />
+                    <else>
+                        <service-call name="growerp.100.InventoryServices100.create#Location"
+                            in-map="[location: asset.location]"
+                            out-map="locationResult" />
+                        <set field="asset.location.locationId"
+                            from="locationResult.location.locationId" />
+                    </else>
+                </if>
+            </if>
+            <service-call name="create#mantle.product.asset.Asset"
+                in-map="[
+                    assetPseudoId: asset.pseudoId,
+                    classEnumId: assetClass.convertedStatusId,
+                    assetName: asset.assetName,
+                    productId: asset.product.productId,
+                    ownerPartyId: companyPartyId,
+                    statusId: status.convertedStatusId,
+                    quantityOnHandTotal: new BigDecimal(asset.quantityOnHand),
+                    availableToPromiseTotal: new BigDecimal(asset.quantityOnHand),
+                    acquireCost: asset.acquireCost ? new BigDecimal(asset.acquireCost): BigDecimal.ZERO,
+                    facilityId: stores[0].inventoryFacilityId,
+                    locationSeqId: asset.location?.locationId,
+                    assetTypeEnumId: classificationId == 'AppHotel' ? 'AstTpFixed' : 'AstTpInventory']"
+                out-map="context" />
+            <service-call name="create#mantle.product.asset.AssetDetail"
+                in-map="[assetId: assetId, quantityOnHandDiff: asset.quantityOnHand,
+                            availableToPromiseDiff: asset.quantityOnHand,
+                                effdateDate: ec.user.nowTimestamp,
+                                productId: asset.product.productId]" />
+            <service-call name="growerp.100.InventoryServices100.get#Assets"
+                in-map="[assetId: assetId]" out-map="context" />
+            <set field="asset" from="assets[0]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="Asset">
+        <description> Update an existing Asset</description>
+        <in-parameters>
+            <parameter name="asset" type="Map" required="true">
+                <parameter name="assetId" />
+                <parameter name="pseudoId" />
+                <parameter name="statusId" />
+                <parameter name="assetTypeId" />
+                <parameter name="assetClassId" />
+                <parameter name="assetName" />
+                <parameter name="quantityOnHand" />
+                <parameter name="availableToPromise" />
+                <parameter name="acquireCost" />
+                <parameter name="receivedDate" />
+                <parameter name="expectedEndOfLifeDate" />
+                <parameter name="product" type="Map">
+                    <parameter name="productId" />
+                    <parameter name="pseudoId" />
+                </parameter>
+                <parameter name="location" type="Map">
+                    <parameter name="locationId" />
+                    <parameter name="pseudoId" />
+                </parameter>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="asset" type="Map">
+                <parameter name="assetId" />
+                <parameter name="pseudoId" />
+                <parameter name="statusId" />
+                <parameter name="assetTypeId" />
+                <parameter name="assetClassId" />
+                <parameter name="assetName" />
+                <parameter name="quantityOnHand" />
+                <parameter name="availableToPromise" />
+                <parameter name="acquireCost" />
+                <parameter name="receivedDate" />
+                <parameter name="expectedEndOfLifeDate" />
+                <parameter name="product" type="Map">
+                    <parameter name="productId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="productName" />
+                </parameter>
+                <parameter name="location" type="Map">
+                    <parameter name="locationId" />
+                    <parameter name="pseudoId" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <log message="====updating asset: $asset" />
+            <!-- for update no owner needed in single company use -->
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find list="assets" limit="1"
+                entity-name="mantle.product.asset.Asset" for-update="true">
+                <econdition field-name="assetId" from="asset.assetId" />
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!assets">
+                <return error="true" message="asset ${asset.assetId} not found!}" />
+            </if>
+            <set field="assetOld" from="assets[0]" />
+            <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                in-map="[docType: 'asset', statusId: asset.statusId]" out-map="status" />
+            <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                in-map="[docType: 'asset', statusId: asset.assetClassId]" out-map="assetClass" />
+            <if
+                condition=" assetOld.assetName != asset.assetName || 
+                            assetOld.assetPseudoId != asset.pseudoId ||
+                            assetOld.quantityOnHandTotal != asset.quantityOnHand ||
+                            assetOld.acquireCost != asset.acquireCost ||
+                            assetOld.availableToPromiseTotal != asset.availableToPromise ||
+                            assetOld.statusId != status.convertedStatusId ||
+                            assetOld.classEnumId != assetClass.convertedStatusId ||
+                            assetOld.productId != asset.product.productId ||
+                            assetOld.locationSeqId != asset.location.locationId">
+                <set field="assetOld.assetPseudoId" from="asset.pseudoId" />
+                <set field="assetOld.assetName" from="asset.assetName" />
+                <set field="assetOld.quantityOnHandTotal"
+                    from="new BigDecimal(asset.quantityOnHand)" />
+                <set field="assetOld.acquireCost"
+                    from="new BigDecimal(asset.acquireCost)" />
+                <set field="assetOld.statusId" from="status.convertedStatusId" />
+                <set field="assetOld.classEnumId" from="assetClass.convertedStatusId" />
+                <set field="assetOld.productId" from="asset.product?.productId" />
+                <set field="assetOld.locationSeqId" from="asset.location?.locationId" />
+                <log message="====updating asset1: $assetOld" />
+                <entity-update value-field="assetOld" />
+            </if>
+            <service-call name="growerp.100.InventoryServices100.get#Assets"
+                in-map="[assetId: asset.assetId]" out-map="context" />
+            <set field="asset" from="assets[0]" />
         </actions>
     </service>
 

@@ -899,13 +899,20 @@ class MyFinDocState extends State<FinDocPage> {
         String? classificationId,
         FinDocItem? item,
         BuildContext? context}) {
-      return ['Account', 'Debit', 'Credit', 'ProdId', if (!readOnly) 'del.'];
+      return [
+        'Account',
+        'Debit',
+        'Credit',
+        'ProdId',
+        if (!readOnly) 'del.',
+        ''
+      ];
     }
 
     // field lengths
     List<double> getItemFieldWidth(
         {int? itemIndex, FinDocItem? item, BuildContext? context}) {
-      return [12, 15, 15, 15, 15];
+      return [12, 15, 15, 10, 15];
     }
 
     // fields content, using strings index not required

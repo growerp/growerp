@@ -62,6 +62,8 @@ class AssetTest {
         await CommonTest.enterText(
             tester, 'quantityOnHand', asset.quantityOnHand.toString());
         await CommonTest.enterText(
+            tester, 'availableToPromise', asset.availableToPromise.toString());
+        await CommonTest.enterText(
             tester, 'acquireCost', asset.acquireCost.toString());
       }
       await CommonTest.enterDropDownSearch(
@@ -84,6 +86,8 @@ class AssetTest {
       if (classificationId == 'AppAdmin') {
         expect(CommonTest.getTextFormField('quantityOnHand'),
             equals(asset.quantityOnHand.toString()));
+        expect(CommonTest.getTextFormField('availableToPromise'),
+            equals(asset.availableToPromise.toString()));
         expect(CommonTest.getTextFormField('acquireCost'),
             equals(asset.acquireCost.currency(currencyId: '')));
       }

@@ -123,15 +123,7 @@ class FinDocListState extends State<FinDocList> {
                         "${widget.docType == FinDocType.shipment ? "${widget.sales ? 'outgoing' : 'incoming'} " : "${widget.docType == FinDocType.transaction ? '' : widget.sales ? 'sales' : 'purchase'} "}"
                         "${entityName}s found!",
                 textAlign: TextAlign.center));
-/*      return Column(children: [
-        widget.docType == FinDocType.transaction
-            ? FinDocListHeaderTrans(
-                isPhone: isPhone,
-                sales: widget.sales,
-                docType: widget.docType,
-                finDocBloc: _finDocBloc)
-            : Container(),
-*/
+
       var (
         List<List<TableViewCell>> tableViewCells,
         List<double> fieldWidths,
