@@ -63,20 +63,16 @@ class LocationListState extends State<LocationList> {
                     child: Text("no locations found",
                         textAlign: TextAlign.center));
               // get table data formatted for tableView
+              // get table data formatted for tableView
               var (
                 List<List<TableViewCell>> tableViewCells,
                 List<double> fieldWidths,
                 double? rowHeight
-              ) = get2dTableData<Location>(
-                getItemFieldNames,
-                getItemFieldWidth,
-                state.locations,
-                getItemFieldContent,
-                getRowActionButtons: getRowActionButtons,
-                getRowHeight: getRowHeight,
-                context: context,
-                bloc: _locationBloc,
-              );
+              ) = get2dTableData1<Location>(getTableData,
+                  bloc: _locationBloc,
+                  classificationId: 'AppAdmin',
+                  context: context,
+                  items: locations);
               return TableView.builder(
                 diagonalDragBehavior: DiagonalDragBehavior.free,
                 verticalDetails:

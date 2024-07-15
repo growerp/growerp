@@ -6,6 +6,73 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 /// a program to generate the structure for the TableView,builder 2d scrollable
 /// data tables
 // return parameters
+
+/// Table row definition
+class TableRowContent {
+  final dynamic fieldName; // can be string or widget
+  final double fieldWidth;
+  final dynamic fieldContent;
+
+  TableRowContent({
+    required this.fieldWidth,
+    required this.fieldName,
+    required this.fieldContent,
+  });
+}
+
+/// TableView.builder definition
+class TableData {
+  final double rowHeight;
+  final List<TableRowContent> rowContent; // name,width,content,action buttons
+  TableData({
+    required this.rowHeight,
+    required this.rowContent,
+  });
+}
+
+(List<List<TableViewCell>>, List<double>, double? height) get2dTableData1<T>(
+    TableData Function(Bloc bloc, String classificationId, BuildContext context,
+            List<T> items)
+        getTableData,
+    {Bloc? bloc,
+    required String classificationId,
+    required BuildContext context,
+    required List<T> items}) {
+  TableData tableData = getTableData(bloc!, '', context, items);
+
+  List<List<TableViewCell>> tableViewCells = []; // table content
+  List<TableViewCell> contentRow = []; // row content
+  // create table content headers
+  for (final rowContent in tableData.rowContent) {
+    contentRow.add(TableViewCell(
+        child: rowContent.fieldName is String
+            ? Text(rowContent.fieldName, textAlign: TextAlign.center)
+            : rowContent.fieldName as Widget));
+  }
+  tableViewCells.add(contentRow);
+  contentRow = [];
+  // add data to table
+  for (final (fieldIndex, field) in tableData.rowContent.indexed) {
+    // add boilerplate code and key (for testing) to fields
+    contentRow.add(TableViewCell(
+        child: field is String
+            ? Text(field.fieldContent,
+                key: Key(
+                    '${tableData.rowContent[fieldIndex].fieldName}$fieldIndex'))
+            : field.fieldContent as Widget));
+  }
+  tableViewCells.add(contentRow);
+
+  // calculate the single field width in percetage of the screen width
+  double width = MediaQuery.of(context).size.width;
+  List<double> result = [];
+  for (final p in tableData.rowContent) {
+    result.add(width / 100 * p.fieldWidth);
+  }
+  // provide row height if requested
+  return (tableViewCells, result, tableData.rowHeight);
+}
+
 (List<List<TableViewCell>>, List<double>, double? height) get2dTableData<T>(
   // a list is strings or widgets used as column headers
   List<dynamic> Function(
