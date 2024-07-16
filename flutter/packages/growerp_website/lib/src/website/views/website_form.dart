@@ -51,11 +51,13 @@ class WebsiteFormState extends State<WebsiteForm> {
   final _websiteFormKey3 = GlobalKey<FormState>();
   ScrollController myScrollController = ScrollController();
   late String classificationId;
+  late RestClient restClient;
 
   @override
   void initState() {
     super.initState();
     classificationId = context.read<String>();
+    restClient = context.read<RestClient>();
     _websiteBloc = context.read<WebsiteBloc>()..add(WebsiteFetch());
     _categoryBloc = context.read<DataFetchBloc<Categories>>()
       ..add(GetDataEvent(() => context
@@ -590,12 +592,11 @@ class WebsiteFormState extends State<WebsiteForm> {
               itemAsString: (Category item) => item.categoryName.truncate(15),
               selectedItems: _selectedCategories,
               asyncItems: (String filter) {
-                _categoryBloc.add(
-                    GetDataEvent(() => context.read<RestClient>().getCategory(
-                          searchString: filter,
-                          limit: 3,
-                          isForDropDown: true,
-                        )));
+                _categoryBloc.add(GetDataEvent(() => restClient.getCategory(
+                      searchString: filter,
+                      limit: 3,
+                      isForDropDown: true,
+                    )));
                 return Future.delayed(const Duration(milliseconds: 100), () {
                   return Future.value(
                       (_categoryBloc.state.data as Categories).categories);

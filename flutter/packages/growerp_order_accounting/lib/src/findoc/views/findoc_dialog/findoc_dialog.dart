@@ -639,87 +639,86 @@ class MyFinDocState extends State<FinDocPage> {
     List<FinDocItem> items = finDocUpdated.items;
     late final ScrollController _verticalController = ScrollController();
     late final ScrollController _horizontalController = ScrollController();
-    // field headers
-    List<dynamic> getItemFieldNames(
-        {int? itemIndex,
-        String? classificationId,
-        FinDocItem? item,
-        BuildContext? context}) {
-      return [
-        "#",
-        "ProdId",
-        "Description",
-        if (!isPhone) "Item Type",
-        if (!isPhone) "Qty",
-        "Price",
-        if (!isPhone) "SubTotal",
-        " "
-      ];
-    }
 
-    // field lengths % of screen width
-    List<double> getItemFieldWidth(
-        {int? itemIndex, FinDocItem? item, BuildContext? context}) {
-      if (isPhone)
-        return [6, 14, 25, 14, 14];
-      else
-        return [3, 8, 13, 8, 4, 10, 10, 8];
-    }
-
-    // fields content
-    List<dynamic> getItemFieldContent(FinDocItem item,
-        {int? itemIndex, BuildContext? context}) {
+    TableData getTableData(Bloc bloc, String classificationId,
+        BuildContext context, FinDocItem item, int index) {
+      String currencyId = context
+          .read<AuthBloc>()
+          .state
+          .authenticate!
+          .company!
+          .currency!
+          .currencyId!;
       var itemType = item.itemType != null
           ? state.itemTypes
               .firstWhere((e) => e.itemTypeId == item.itemType!.itemTypeId)
           : ItemType();
-      return [
-        CircleAvatar(
-          backgroundColor: Colors.green,
-          child: Text(item.itemSeqId.toString()),
-        ),
-        Text("${item.product?.productId}",
-            textAlign: TextAlign.center, key: Key('itemProductId$itemIndex')),
-        Text("${item.description}",
-            key: Key('itemDescription${itemIndex}'), textAlign: TextAlign.left),
-        if (!isPhone)
-          Text(itemType.itemTypeName,
-              textAlign: TextAlign.left, key: Key('itemType$itemIndex')),
-        if (!isPhone)
-          Text("${item.quantity}",
-              textAlign: TextAlign.right, key: Key('itemQuantity$itemIndex')),
-        if (item.product?.productTypeId != 'Rental')
-          Text(item.price!.currency(currencyId: currencyId),
-              textAlign: TextAlign.right, key: Key('itemPrice$itemIndex')),
-        if (item.product?.productTypeId == 'Rental')
-          Text(item.rentalFromDate.toString(),
-              textAlign: TextAlign.right, key: Key('fromDate$itemIndex')),
-        if (!isPhone) // subtotal
-          Text((item.price! * (item.quantity ?? Decimal.parse('1'))).toString(),
-              textAlign: TextAlign.center),
-      ];
-    }
+      List<TableRowContent> rowContent = [];
+      rowContent.add(TableRowContent(
+          width: isPhone ? 6 : 3,
+          name: '#',
+          value: CircleAvatar(
+              backgroundColor: Colors.green,
+              child: Text(item.itemSeqId.toString()))));
+      rowContent.add(TableRowContent(
+          width: isPhone ? 14 : 8,
+          name: 'ProdId',
+          value: Text("${item.product?.productId}",
+              textAlign: TextAlign.center, key: Key('itemProductId$index'))));
+      rowContent.add(TableRowContent(
+          width: isPhone ? 25 : 25,
+          name: 'Description',
+          value: Text("${item.description}",
+              key: Key('itemDescription${index}'), textAlign: TextAlign.left)));
+      if (!isPhone)
+        rowContent.add(TableRowContent(
+            width: 8,
+            name: 'Item Type',
+            value: Text(itemType.itemTypeName,
+                textAlign: TextAlign.left, key: Key('itemType$index'))));
+      if (!isPhone)
+        rowContent.add(TableRowContent(
+            width: 4,
+            name: 'Qty',
+            value: Text("${item.quantity}",
+                textAlign: TextAlign.right, key: Key('itemQuantity$index'))));
+      if (item.product?.productTypeId != 'Rental')
+        rowContent.add(TableRowContent(
+            width: 15,
+            name: 'Price',
+            value: Text(item.price!.currency(currencyId: currencyId),
+                textAlign: TextAlign.right, key: Key('itemPrice$index'))));
+      if (item.product?.productTypeId == 'Rental')
+        rowContent.add(TableRowContent(
+            width: 10,
+            name: 'Date',
+            value: Text(item.rentalFromDate.toString(),
+                textAlign: TextAlign.right, key: Key('fromDate$index'))));
+      if (!isPhone)
+        rowContent.add(TableRowContent(
+            width: 10,
+            name: 'SubTot.',
+            value: Text(
+                (item.price! * (item.quantity ?? Decimal.parse('1')))
+                    .currency(currencyId: currencyId)
+                    .toString(),
+                textAlign: TextAlign.center)));
+      if (!readOnly)
+        rowContent.add(TableRowContent(
+            width: isPhone ? 14 : 8,
+            name: '',
+            value: IconButton(
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(Icons.delete_forever),
+              padding: EdgeInsets.all(0),
+              key: Key("itemDelete$index"),
+              onPressed: () {
+                _cartBloc.add(CartDeleteItem(index));
+              },
+            )));
 
-    // buttons
-    List<Widget> getRowActionButtons({
-      Bloc<dynamic, dynamic>? bloc,
-      BuildContext? context,
-      FinDocItem? item,
-      int? itemIndex,
-    }) =>
-        readOnly
-            ? []
-            : [
-                IconButton(
-                  visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.delete_forever),
-                  padding: EdgeInsets.all(0),
-                  key: Key("itemDelete$itemIndex"),
-                  onPressed: () {
-                    _cartBloc.add(CartDeleteItem(itemIndex!));
-                  },
-                )
-              ];
+      return TableData(rowHeight: 40, rowContent: rowContent);
+    }
 
     var padding = SpanPadding(trailing: 8, leading: 8);
     SpanDecoration? getBackGround(BuildContext context, int index) {
@@ -729,15 +728,16 @@ class MyFinDocState extends State<FinDocPage> {
           : null;
     } // field content
 
+    // get table data formatted for tableView
     var (
       List<List<TableViewCell>> tableViewCells,
       List<double> fieldWidths,
       double? rowHeight
-    ) = get2dTableData<FinDocItem>(
-        getItemFieldNames, getItemFieldWidth, items, getItemFieldContent,
-        getRowActionButtons: getRowActionButtons,
+    ) = get2dTableData<FinDocItem>(getTableData,
+        bloc: _finDocBloc,
+        classificationId: 'AppAdmin',
         context: context,
-        bloc: _finDocBloc);
+        items: items);
     return Flexible(
       child: items.isEmpty
           ? const Text("no items yet")
@@ -774,71 +774,54 @@ class MyFinDocState extends State<FinDocPage> {
     List<FinDocItem> items = finDocUpdated.items;
     late final ScrollController _verticalController = ScrollController();
     late final ScrollController _horizontalController = ScrollController();
-    // field headers
-    List<dynamic> getItemFieldNames(
-        {int? itemIndex,
-        String? classificationId,
-        FinDocItem? item,
-        BuildContext? context}) {
-      return [
-        "#",
-        "ProdId",
-        "Description",
-        "Qty",
-        finDoc.status == FinDocStatusVal.completed ? "Loc" : ' '
-      ];
-    }
 
-    // field lengths
-    List<double> getItemFieldWidth(
-        {int? itemIndex, FinDocItem? item, BuildContext? context}) {
-      if (isPhone)
-        return [6, 14, 25, 10, 20];
-      else
-        return [4, 8, 28, 10, 20];
-    }
+    TableData getTableData(Bloc bloc, String classificationId,
+        BuildContext context, FinDocItem item, int index) {
+      List<TableRowContent> rowContent = [];
 
-    // fields content
-    List<dynamic> getItemFieldContent(FinDocItem item,
-        {int? itemIndex, BuildContext? context}) {
-      return [
-        CircleAvatar(
-          backgroundColor: Colors.green,
-          child: Text(item.itemSeqId.toString()),
-        ),
-        Text("${item.product?.productId}",
-            textAlign: TextAlign.center, key: Key('itemProductId${itemIndex}')),
-        Text("${item.description}",
-            key: Key('itemDescription${itemIndex}'), textAlign: TextAlign.left),
-        Text("${item.quantity}",
-            textAlign: TextAlign.center, key: Key('itemQuantity${itemIndex}')),
-        if (finDoc.status == FinDocStatusVal.completed)
-          Text("${item.asset?.location?.locationName}",
-              textAlign: TextAlign.center,
-              key: Key('itemLocation${itemIndex}')),
-      ];
+      rowContent.add(TableRowContent(
+          name: '#',
+          width: isPhone ? 6 : 4,
+          value: CircleAvatar(
+              backgroundColor: Colors.green,
+              child: Text(item.itemSeqId.toString()))));
+      rowContent.add(TableRowContent(
+          name: 'ProdId',
+          width: isPhone ? 14 : 8,
+          value: Text("${item.product?.productId}",
+              textAlign: TextAlign.center, key: Key('itemProductId${index}'))));
+      rowContent.add(TableRowContent(
+          name: 'Description',
+          width: isPhone ? 25 : 28,
+          value: Text("${item.description}",
+              key: Key('itemDescription${index}'), textAlign: TextAlign.left)));
+      rowContent.add(TableRowContent(
+          name: 'Qty',
+          width: isPhone ? 10 : 10,
+          value: Text("${item.quantity}",
+              textAlign: TextAlign.center, key: Key('itemQuantity${index}'))));
+      if (finDoc.status == FinDocStatusVal.completed)
+        rowContent.add(TableRowContent(
+            name: 'Location',
+            width: isPhone ? 20 : 20,
+            value: Text("${item.asset?.location?.locationName}",
+                textAlign: TextAlign.center,
+                key: Key('itemLocation${index}'))));
+      if (!readOnly)
+        rowContent.add(TableRowContent(
+            name: ' ',
+            width: isPhone ? 20 : 20,
+            value: IconButton(
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(Icons.delete_forever),
+              padding: EdgeInsets.all(0),
+              key: Key("itemDelete$index"),
+              onPressed: () {
+                _cartBloc.add(CartDeleteItem(index));
+              },
+            )));
+      return TableData(rowHeight: isPhone ? 30 : 20, rowContent: rowContent);
     }
-
-    // buttons
-    List<Widget> getRowActionButtons({
-      Bloc<dynamic, dynamic>? bloc,
-      BuildContext? context,
-      FinDocItem? item,
-      int? itemIndex,
-    }) =>
-        readOnly
-            ? []
-            : [
-                IconButton(
-                  visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.delete_forever),
-                  padding: EdgeInsets.all(0),
-                  key: Key("itemDelete$itemIndex"),
-                  onPressed: () {
-                    _cartBloc.add(CartDeleteItem(itemIndex!));
-                  },
-                )
-              ];
 
     var padding = SpanPadding(trailing: 8, leading: 8);
     SpanDecoration? getBackGround(BuildContext context, int index) {
@@ -848,15 +831,16 @@ class MyFinDocState extends State<FinDocPage> {
           : null;
     }
 
+    // get table data formatted for tableView
     var (
       List<List<TableViewCell>> tableViewCells,
       List<double> fieldWidths,
       double? rowHeight
-    ) = get2dTableData<FinDocItem>(
-        getItemFieldNames, getItemFieldWidth, items, getItemFieldContent,
-        getRowActionButtons: getRowActionButtons,
+    ) = get2dTableData<FinDocItem>(getTableData,
+        bloc: _finDocBloc,
+        classificationId: 'AppAdmin',
         context: context,
-        bloc: _finDocBloc);
+        items: items);
     return Flexible(
       child: items.isEmpty
           ? const Text("no items yet")
@@ -893,67 +877,51 @@ class MyFinDocState extends State<FinDocPage> {
     List<FinDocItem> items = finDocUpdated.items;
     late final ScrollController _verticalController = ScrollController();
     late final ScrollController _horizontalController = ScrollController();
-    // field headers
-    List<dynamic> getItemFieldNames(
-        {int? itemIndex,
-        String? classificationId,
-        FinDocItem? item,
-        BuildContext? context}) {
-      return [
-        'Account',
-        'Debit',
-        'Credit',
-        'ProdId',
-        ' ',
-      ];
-    }
 
-    // field lengths
-    List<double> getItemFieldWidth(
-        {int? itemIndex, FinDocItem? item, BuildContext? context}) {
-      return [12, 15, 15, 10, 15];
-    }
-
-    // fields content, using strings index not required
-    // widgets also allowed, then index is used for the key on the widgets
-    List<dynamic> getItemFieldContent(FinDocItem item,
-        {int? itemIndex, BuildContext? context}) {
-      return [
-        Text(item.glAccount!.accountCode!, key: Key('accountCode$itemIndex')),
-        Text((item.isDebit! ? item.price.currency(currencyId: currencyId) : ''),
-            key: Key('debit$itemIndex')),
-        Text(!item.isDebit! ? item.price.currency(currencyId: currencyId) : '',
-            key: Key('credit$itemIndex')),
-        Text(item.product?.productId ?? '',
-            key: Key('itemProductId$itemIndex')),
-      ];
-    }
-
-    double getRowHeight({BuildContext? context}) {
-      return 15;
-    }
-
-    // buttons
-    List<Widget> getRowActionButtons({
-      Bloc<dynamic, dynamic>? bloc,
-      BuildContext? context,
-      FinDocItem? item,
-      int? itemIndex,
-    }) =>
-        [
-          if (!readOnly)
-            IconButton(
+    TableData getTableData(Bloc bloc, String classificationId,
+        BuildContext context, FinDocItem item, int index) {
+      List<TableRowContent> rowContent = [];
+      rowContent.add(TableRowContent(
+          name: 'Account',
+          width: 12,
+          value: Text(item.glAccount!.accountCode!,
+              key: Key('accountCode$index'))));
+      rowContent.add(TableRowContent(
+          name: 'Debit',
+          width: 15,
+          value: Text(
+              (item.isDebit!
+                  ? item.price.currency(currencyId: currencyId)
+                  : ''),
+              key: Key('debit$index'))));
+      rowContent.add(TableRowContent(
+          name: 'Credit',
+          width: 15,
+          value: Text(
+              !item.isDebit! ? item.price.currency(currencyId: currencyId) : '',
+              key: Key('credit$index'))));
+      rowContent.add(TableRowContent(
+          name: 'ProdId',
+          width: 10,
+          value: Text(item.product?.productId ?? '',
+              key: Key('itemProductId$index'))));
+      if (!readOnly)
+        rowContent.add(TableRowContent(
+            name: ' ',
+            width: 15,
+            value: IconButton(
               padding: EdgeInsets.all(0),
               icon: const Icon(
                 Icons.delete_forever,
                 size: 20,
               ),
-              key: Key("itemDelete$itemIndex"),
+              key: Key("itemDelete$index"),
               onPressed: () {
-                _cartBloc.add(CartDeleteItem(itemIndex!));
+                _cartBloc.add(CartDeleteItem(index));
               },
-            )
-        ];
+            )));
+      return TableData(rowHeight: 15, rowContent: rowContent);
+    }
 
     var padding = SpanPadding(trailing: 10, leading: 10);
     SpanDecoration? getBackGround(BuildContext context, int index) {
@@ -963,16 +931,16 @@ class MyFinDocState extends State<FinDocPage> {
           : null;
     } // field content
 
+// get table data formatted for tableView
     var (
       List<List<TableViewCell>> tableViewCells,
       List<double> fieldWidths,
       double? rowHeight
-    ) = get2dTableData<FinDocItem>(
-        getItemFieldNames, getItemFieldWidth, items, getItemFieldContent,
-        getRowActionButtons: getRowActionButtons,
-        getRowHeight: getRowHeight,
+    ) = get2dTableData<FinDocItem>(getTableData,
+        bloc: _finDocBloc,
+        classificationId: 'AppAdmin',
         context: context,
-        bloc: _finDocBloc);
+        items: items);
     return items.isEmpty
         ? const Text("no items yet")
         : Flexible(

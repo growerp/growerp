@@ -63,12 +63,11 @@ class LocationListState extends State<LocationList> {
                     child: Text("no locations found",
                         textAlign: TextAlign.center));
               // get table data formatted for tableView
-              // get table data formatted for tableView
               var (
                 List<List<TableViewCell>> tableViewCells,
                 List<double> fieldWidths,
                 double? rowHeight
-              ) = get2dTableData1<Location>(getTableData,
+              ) = get2dTableData<Location>(getTableData,
                   bloc: _locationBloc,
                   classificationId: 'AppAdmin',
                   context: context,
@@ -105,7 +104,7 @@ class LocationListState extends State<LocationList> {
                                             barrierDismissible: true,
                                             context: context,
                                             builder: (BuildContext context) {
-                                              return index >=
+                                              return index >
                                                       state.locations.length
                                                   ? const BottomLoader()
                                                   : Dismissible(

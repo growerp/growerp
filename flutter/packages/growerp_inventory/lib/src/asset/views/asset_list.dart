@@ -74,16 +74,11 @@ class AssetListState extends State<AssetList> {
                   List<List<TableViewCell>> tableViewCells,
                   List<double> fieldWidths,
                   double? rowHeight
-                ) = get2dTableData<Asset>(
-                  getItemFieldNames,
-                  getItemFieldWidth,
-                  state.assets,
-                  getItemFieldContent,
-                  getRowActionButtons: getRowActionButtons,
-                  getRowHeight: getRowHeight,
-                  context: context,
-                  bloc: _assetBloc,
-                );
+                ) = get2dTableData<Asset>(getTableData,
+                    bloc: _assetBloc,
+                    classificationId: 'AppAdmin',
+                    context: context,
+                    items: state.assets);
                 return TableView.builder(
                   diagonalDragBehavior: DiagonalDragBehavior.free,
                   verticalDetails:
@@ -116,12 +111,12 @@ class AssetListState extends State<AssetList> {
                                               barrierDismissible: true,
                                               context: context,
                                               builder: (BuildContext context) {
-                                                return index >=
+                                                return index >
                                                         state.assets.length
                                                     ? const BottomLoader()
                                                     : Dismissible(
                                                         key: const Key(
-                                                            'locationItem'),
+                                                            'assetItem'),
                                                         direction:
                                                             DismissDirection
                                                                 .startToEnd,

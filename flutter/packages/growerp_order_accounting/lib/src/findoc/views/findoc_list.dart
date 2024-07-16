@@ -123,21 +123,17 @@ class FinDocListState extends State<FinDocList> {
                         "${widget.docType == FinDocType.shipment ? "${widget.sales ? 'outgoing' : 'incoming'} " : "${widget.docType == FinDocType.transaction ? '' : widget.sales ? 'sales' : 'purchase'} "}"
                         "${entityName}s found!",
                 textAlign: TextAlign.center));
-
+      // get table data formatted for tableView
       var (
         List<List<TableViewCell>> tableViewCells,
         List<double> fieldWidths,
         double? rowHeight
-      ) = get2dTableData<FinDoc>(
-        getItemFieldNames,
-        getItemFieldWidth,
-        finDocs,
-        getItemFieldContent,
-        getRowActionButtons: getRowActionButtons,
-        getRowHeight: getRowHeight,
-        context: context,
-        bloc: _finDocBloc,
-      );
+      ) = get2dTableData<FinDoc>(getTableData,
+          bloc: _finDocBloc,
+          classificationId: 'AppAdmin',
+          context: context,
+          items: finDocs);
+      // build the table
       return TableView.builder(
         diagonalDragBehavior: DiagonalDragBehavior.free,
         verticalDetails:
