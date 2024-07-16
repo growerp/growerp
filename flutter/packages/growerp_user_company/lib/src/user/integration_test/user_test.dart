@@ -139,8 +139,7 @@ class UserTest {
       if (user.partyId == null) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.doSearch(tester, searchString: user.partyId!);
-        await CommonTest.tapByKey(tester, 'name0');
+        await CommonTest.doNewSearch(tester, searchString: user.partyId!);
         expect(CommonTest.getTextField('header').split('#')[1], user.partyId);
       }
       expect(find.byKey(Key('UserDialog${user.company!.role!.name}')),
@@ -205,12 +204,8 @@ class UserTest {
     Role currentRole = users[0].company?.role ?? Role.unknown;
     List<User> newUsers = [];
     for (User user in users) {
-      await CommonTest.doSearch(tester, searchString: user.firstName!);
-      // check list
-      expect(CommonTest.getTextField('name0'),
-          equals('${user.firstName} ${user.lastName}'));
+      await CommonTest.doNewSearch(tester, searchString: user.firstName!);
       // check detail
-      await CommonTest.tapByKey(tester, 'name0');
       var id = CommonTest.getTextField('header').split('#')[1];
       expect(find.byKey(Key('UserDialog${user.company!.role!.name}')),
           findsOneWidget);

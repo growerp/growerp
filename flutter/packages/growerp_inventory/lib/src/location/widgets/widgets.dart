@@ -1,1 +1,1 @@
-export 'location_list_detail.dart';
+export 'location_list_table_def.dart';

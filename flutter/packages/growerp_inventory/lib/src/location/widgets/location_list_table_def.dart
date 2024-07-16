@@ -21,11 +21,10 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
-    Location? location, int index) {
-  if (location == null) location = Location(assets: []);
+    Location item, int index) {
   List<TableRowContent> rowContent = [];
   Decimal qohTotal = Decimal.zero;
-  for (Asset asset in location.assets) {
+  for (Asset asset in item.assets) {
     qohTotal += asset.quantityOnHand ?? Decimal.zero;
   }
   if (isPhone(context))
@@ -36,18 +35,18 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
           minRadius: 20,
           backgroundColor: Theme.of(context).colorScheme.secondary,
           child: Text(
-            location.pseudoId == null ? '' : location.pseudoId!.lastChar(3),
+            item.pseudoId == null ? '' : item.pseudoId!.lastChar(3),
             style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
           ),
         )));
   rowContent.add(TableRowContent(
       name: 'Loc Id',
       width: isPhone(context) ? 15 : 10,
-      value: Text(location.pseudoId ?? '', key: Key('id$index'))));
+      value: Text(item.pseudoId ?? '', key: Key('id$index'))));
   rowContent.add(TableRowContent(
       name: 'Name',
       width: isPhone(context) ? 30 : 30,
-      value: Text(location.locationName ?? '', key: Key('name$index'))));
+      value: Text(item.locationName ?? '', key: Key('name$index'))));
   rowContent.add(TableRowContent(
     name: Text(
       'Qty.',
@@ -64,7 +63,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
     rowContent.add(TableRowContent(
         name: Text('#Assets'),
         width: 10,
-        value: Text(location.assets.length.toString(),
+        value: Text(item.assets.length.toString(),
             key: Key('assetsCount$index'))));
   rowContent.add(TableRowContent(
       width: isPhone(context) ? 25 : 15,
@@ -76,12 +75,10 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
           icon: const Icon(Icons.delete_forever),
           tooltip: 'remove item',
           onPressed: () async {
-            if (location != null) {
-              bool? result = await confirmDialog(context,
-                  "delete ${location.pseudoId ?? ''}?", "cannot be undone!");
-              if (result == true) {
-                bloc.add(LocationDelete(location));
-              }
+            bool? result = await confirmDialog(
+                context, "delete ${item.pseudoId ?? ''}?", "cannot be undone!");
+            if (result == true) {
+              bloc.add(LocationDelete(item));
             }
           })));
 

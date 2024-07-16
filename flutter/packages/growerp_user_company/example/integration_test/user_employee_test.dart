@@ -54,7 +54,9 @@ Future<void> main() async {
       await UserTest.deleteEmployees(tester);
     } catch (error) {
       await CommonTest.takeScreenShot(
-          binding: binding, tester: tester, screenShotName: "Asset_Error");
+          binding: binding,
+          tester: tester,
+          screenShotName: "User employee_Error");
       rethrow;
     }
   }, skip: false);

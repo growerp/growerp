@@ -12,10 +12,11 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:responsive_framework/responsive_framework.dart';
+import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../../../growerp_user_company.dart';
 
@@ -30,6 +31,7 @@ class UserList extends StatefulWidget {
 
 class UserListState extends State<UserList> {
   final ScrollController _scrollController = ScrollController();
+  final _horizontalController = ScrollController();
   final double _scrollThreshold = 200.0;
   late UserBloc _userBloc;
   late AuthBloc _authBloc;
@@ -69,52 +71,69 @@ class UserListState extends State<UserList> {
 
   @override
   Widget build(BuildContext context) {
-    isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    isPhone = isAPhone(context);
     return Builder(builder: (BuildContext context) {
-      Widget showForm(state) {
-        return RefreshIndicator(
-            onRefresh: (() async =>
-                _userBloc.add(const UserFetch(refresh: true))),
-            child: ListView.builder(
-              key: const Key('listView'),
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: hasReachedMax && users.isNotEmpty
-                  ? users.length + 1
-                  : users.length + 2,
-              controller: _scrollController,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == 0) {
-                  return Column(children: [
-                    UserListHeader(
-                        isPhone: isPhone,
-                        role: widget.role,
-                        userBloc: _userBloc),
-                    const Divider(),
-                  ]);
-                }
-                if (index == 1 && users.isEmpty) {
-                  return const Center(
-                      heightFactor: 20,
-                      child: Text("no records found!",
-                          key: Key('empty'), textAlign: TextAlign.center));
-                }
-                index -= 1;
-                return index >= users.length
-                    ? const BottomLoader()
-                    : Dismissible(
-                        key: const Key('userItem'),
-                        direction: DismissDirection.startToEnd,
-                        child: BlocProvider.value(
-                          value: _userBloc,
-                          child: UserListItem(
-                            user: users[index],
-                            index: index,
-                            role: widget.role,
-                            isDeskTop: !isPhone,
-                          ),
-                        ));
-              },
-            ));
+      Widget tableView() {
+        if (users.isEmpty)
+          return Center(
+              heightFactor: 20,
+              child: Text("no users found", textAlign: TextAlign.center));
+        // get table data formatted for tableView
+        var (
+          List<List<TableViewCell>> tableViewCells,
+          List<double> fieldWidths,
+          double? rowHeight
+        ) = get2dTableData<User>(getTableData,
+            bloc: _userBloc,
+            classificationId: 'AppAdmin',
+            context: context,
+            items: users);
+        return TableView.builder(
+          diagonalDragBehavior: DiagonalDragBehavior.free,
+          verticalDetails:
+              ScrollableDetails.vertical(controller: _scrollController),
+          horizontalDetails:
+              ScrollableDetails.horizontal(controller: _horizontalController),
+          cellBuilder: (context, vicinity) =>
+              tableViewCells[vicinity.row][vicinity.column],
+          columnBuilder: (index) => index >= tableViewCells[0].length
+              ? null
+              : TableSpan(
+                  padding: padding,
+                  backgroundDecoration: getBackGround(context, index),
+                  extent: FixedTableSpanExtent(fieldWidths[index]),
+                ),
+          pinnedColumnCount: 1,
+          rowBuilder: (index) => index >= tableViewCells.length
+              ? null
+              : TableSpan(
+                  padding: padding,
+                  backgroundDecoration: getBackGround(context, index),
+                  extent: FixedTableSpanExtent(rowHeight!),
+                  recognizerFactories: <Type, GestureRecognizerFactory>{
+                      TapGestureRecognizer:
+                          GestureRecognizerFactoryWithHandlers<
+                                  TapGestureRecognizer>(
+                              () => TapGestureRecognizer(),
+                              (TapGestureRecognizer t) =>
+                                  t.onTap = () => showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return index > users.length
+                                            ? const BottomLoader()
+                                            : Dismissible(
+                                                key: const Key('locationItem'),
+                                                direction:
+                                                    DismissDirection.startToEnd,
+                                                child: BlocProvider.value(
+                                                    value: _userBloc,
+                                                    child: UserDialog(
+                                                        users[index - 1])));
+                                      }))
+                    }),
+          pinnedRowCount: 1,
+        );
       }
 
       blocListener(context, state) {
@@ -137,26 +156,58 @@ class UserListState extends State<UserList> {
           users = state.users;
           hasReachedMax = state.hasReachedMax;
           return Scaffold(
-              floatingActionButton: FloatingActionButton(
-                  key: const Key("addNew"),
-                  onPressed: () async {
-                    await showDialog(
-                        barrierDismissible: true,
-                        context: context,
-                        builder: (BuildContext context) {
-                          return BlocProvider.value(
-                              value: _userBloc,
-                              child: UserDialog(User(
-                                  company: widget.role == Role.company
-                                      ? _authBloc.state.authenticate!.company
-                                      : Company(
-                                          role: widget.role,
-                                        ))));
-                        });
-                  },
-                  tooltip: 'Add New',
-                  child: const Icon(Icons.add)),
-              body: showForm(state));
+              floatingActionButton: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FloatingActionButton(
+                      key: const Key("search"),
+                      heroTag: "btn1",
+                      onPressed: () async {
+                        // find findoc id to show
+                        User user = await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              // search separate from finDocBloc
+                              return BlocProvider.value(
+                                  value:
+                                      context.read<DataFetchBloc<Locations>>(),
+                                  child: SearchUserList());
+                            });
+                        // show detail page
+                        await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return BlocProvider.value(
+                                  value: _userBloc, child: UserDialog(user));
+                            });
+                      },
+                      child: const Icon(Icons.search)),
+                  SizedBox(height: 10),
+                  FloatingActionButton(
+                      key: const Key("addNew"),
+                      onPressed: () async {
+                        await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return BlocProvider.value(
+                                  value: _userBloc,
+                                  child: UserDialog(User(
+                                      company: widget.role == Role.company
+                                          ? _authBloc
+                                              .state.authenticate!.company
+                                          : Company(
+                                              role: widget.role,
+                                            ))));
+                            });
+                      },
+                      tooltip: 'Add New',
+                      child: const Icon(Icons.add)),
+                ],
+              ),
+              body: tableView());
         }
         isLoading = true;
         return const LoadingIndicator();
