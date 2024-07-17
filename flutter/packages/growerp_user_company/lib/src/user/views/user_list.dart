@@ -18,6 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:growerp_models/growerp_models.dart';
+
 import '../../../growerp_user_company.dart';
 
 class UserList extends StatefulWidget {
@@ -30,7 +31,7 @@ class UserList extends StatefulWidget {
 }
 
 class UserListState extends State<UserList> {
-  final ScrollController _scrollController = ScrollController();
+  final _scrollController = ScrollController();
   final _horizontalController = ScrollController();
   final double _scrollThreshold = 200.0;
   late UserBloc _userBloc;
@@ -170,8 +171,7 @@ class UserListState extends State<UserList> {
                             builder: (BuildContext context) {
                               // search separate from finDocBloc
                               return BlocProvider.value(
-                                  value:
-                                      context.read<DataFetchBloc<Locations>>(),
+                                  value: context.read<DataFetchBloc<Users>>(),
                                   child: SearchUserList());
                             });
                         // show detail page

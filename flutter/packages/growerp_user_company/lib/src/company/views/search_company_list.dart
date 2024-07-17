@@ -17,28 +17,28 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-class SearchLocationList extends StatefulWidget {
-  const SearchLocationList({super.key});
+class SearchCompanyList extends StatefulWidget {
+  const SearchCompanyList({super.key});
 
   @override
-  SearchLocationState createState() => SearchLocationState();
+  SearchCompanyState createState() => SearchCompanyState();
 }
 
-class SearchLocationState extends State<SearchLocationList> {
-  late DataFetchBloc _LocationBloc;
-  List<Location> locations = [];
+class SearchCompanyState extends State<SearchCompanyList> {
+  late DataFetchBloc _CompanyBloc;
+  List<Company> companies = [];
 
   @override
   void initState() {
     super.initState();
-    _LocationBloc = context.read<DataFetchBloc<Locations>>()
+    _CompanyBloc = context.read<DataFetchBloc<Companies>>()
       ..add(
-          GetDataEvent(() => context.read<RestClient>().getLocation(limit: 0)));
+          GetDataEvent(() => context.read<RestClient>().getCompany(limit: 0)));
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<DataFetchBloc<Locations>, DataFetchState>(
+    return BlocConsumer<DataFetchBloc<Companies>, DataFetchState>(
         listener: (context, state) {
       if (state.status == DataFetchStatus.failure) {
         HelperFunctions.showMessage(context, '${state.message}', Colors.red);
@@ -49,12 +49,12 @@ class SearchLocationState extends State<SearchLocationList> {
             child: Text('failed to fetch search items: ${state.message}'));
       }
       if (state.status == DataFetchStatus.success) {
-        locations = (state.data as Locations).locations;
+        companies = (state.data as Companies).companies;
       }
       return Stack(
         children: [
-          LocationScaffold(
-              finDocBloc: _LocationBloc, widget: widget, locations: locations),
+          CompanyScaffold(
+              finDocBloc: _CompanyBloc, widget: widget, companies: companies),
           if (state.status == DataFetchStatus.loading) LoadingIndicator(),
         ],
       );
@@ -62,17 +62,17 @@ class SearchLocationState extends State<SearchLocationList> {
   }
 }
 
-class LocationScaffold extends StatelessWidget {
-  const LocationScaffold({
+class CompanyScaffold extends StatelessWidget {
+  const CompanyScaffold({
     super.key,
     required DataFetchBloc finDocBloc,
     required this.widget,
-    required this.locations,
-  }) : _LocationBloc = finDocBloc;
+    required this.companies,
+  }) : _CompanyBloc = finDocBloc;
 
-  final DataFetchBloc _LocationBloc;
-  final SearchLocationList widget;
-  final List<Location> locations;
+  final DataFetchBloc _CompanyBloc;
+  final SearchCompanyList widget;
+  final List<Company> companies;
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +87,7 @@ class LocationScaffold extends StatelessWidget {
             ),
             child: popUp(
                 context: context,
-                title: 'Location Search ',
+                title: 'Company Search ',
                 height: 500,
                 width: 350,
                 child: Column(children: [
@@ -100,10 +100,10 @@ class LocationScaffold extends StatelessWidget {
                           return 'Please enter a search value?';
                         return null;
                       },
-                      onFieldSubmitted: (value) => _LocationBloc.add(
+                      onFieldSubmitted: (value) => _CompanyBloc.add(
                           GetDataEvent(() => context
                               .read<RestClient>()
-                              .getLocation(limit: 5, searchString: value)))),
+                              .getCompany(limit: 5, searchString: value)))),
                   const SizedBox(height: 20),
                   const Text('Search results'),
                   Expanded(
@@ -111,12 +111,12 @@ class LocationScaffold extends StatelessWidget {
                           key: const Key('listView'),
                           shrinkWrap: true,
                           physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: locations.length + 2,
+                          itemCount: companies.length + 2,
                           controller: _scrollController,
                           itemBuilder: (BuildContext context, int index) {
                             if (index == 0) {
                               return Visibility(
-                                  visible: locations.isEmpty,
+                                  visible: companies.isEmpty,
                                   child: Center(
                                       heightFactor: 20,
                                       child: Text('No search items found (yet)',
@@ -124,18 +124,18 @@ class LocationScaffold extends StatelessWidget {
                                           textAlign: TextAlign.center)));
                             }
                             index--;
-                            return index >= locations.length
+                            return index >= companies.length
                                 ? Text('')
                                 : Dismissible(
                                     key: const Key('searchItem'),
                                     direction: DismissDirection.startToEnd,
                                     child: ListTile(
                                       title: Text(
-                                          "ID: ${locations[index].pseudoId}\n"
-                                          "Name: ${locations[index].locationName}",
+                                          "ID: ${companies[index].pseudoId}\n"
+                                          "Name: ${companies[index].name}",
                                           key: Key("searchResult$index")),
                                       onTap: () => Navigator.of(context)
-                                          .pop(locations[index]),
+                                          .pop(companies[index]),
                                     ));
                           }))
                 ]))));

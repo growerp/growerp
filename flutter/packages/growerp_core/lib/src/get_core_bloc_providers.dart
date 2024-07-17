@@ -35,6 +35,7 @@ List<BlocProvider> getCoreBlocProviders(
         create: (context) => DataFetchBloc<Categories>()),
     BlocProvider<DataFetchBloc<Users>>(
         create: (context) => DataFetchBloc<Users>()),
+    // in marketing need to search for 2 different type of users
     BlocProvider<DataFetchBlocOther<Users>>(
         create: (context) => DataFetchBloc<Users>()),
     BlocProvider<DataFetchBloc<Companies>>(

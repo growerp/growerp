@@ -60,8 +60,7 @@ class CompanyTest {
         if (c.partyId == null) {
           await CommonTest.tapByKey(tester, 'addNew');
         } else {
-          await CommonTest.doSearch(tester, searchString: c.partyId!);
-          await CommonTest.tapByKey(tester, 'name0');
+          await CommonTest.doNewSearch(tester, searchString: c.partyId!);
           expect(CommonTest.getTextField('header').split('#')[1], c.partyId);
         }
       }
@@ -102,8 +101,7 @@ class CompanyTest {
       await CommonTest.tapByKey(tester, 'update', seconds: 3);
       // get partyId if not yet have (not for main company)
       if (clist.length > 1 && c.partyId == null) {
-        await CommonTest.doSearch(tester, searchString: c.name!);
-        await CommonTest.tapByKey(tester, 'name0');
+        await CommonTest.doNewSearch(tester, searchString: c.name!);
         var id = CommonTest.getTextField('header').split('#')[1];
         c = c.copyWith(partyId: id);
         await CommonTest.tapByKey(tester, 'cancel');
@@ -121,8 +119,7 @@ class CompanyTest {
 
     for (Company c in test.companies) {
       if (test.companies.length > 1) {
-        await CommonTest.doSearch(tester, searchString: c.partyId!);
-        await CommonTest.tapByKey(tester, 'name0');
+        await CommonTest.doNewSearch(tester, searchString: c.partyId!);
         expect(CommonTest.getTextField('header').split('#')[1], c.partyId);
       }
       expect(CommonTest.getTextFormField('companyName'), equals(c.name!));
