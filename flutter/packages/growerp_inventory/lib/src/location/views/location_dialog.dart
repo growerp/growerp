@@ -60,8 +60,6 @@ class LocationDialogState extends State<LocationDialog> {
                           context,
                           '${location.locationId == null ? "Add" : "Update"} successfull',
                           Colors.green);
-                      await Future.delayed(const Duration(milliseconds: 500));
-                      if (!mounted) return;
                       Navigator.of(context).pop();
                       break;
                     case LocationStatus.failure:

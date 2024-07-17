@@ -57,11 +57,12 @@ class LocationListState extends State<LocationList> {
             locations = state.locations;
 
             Widget tableView() {
-              if (locations.isEmpty)
-                return Center(
+              if (locations.isEmpty) {
+                return const Center(
                     heightFactor: 20,
                     child: Text("no locations found",
                         textAlign: TextAlign.center));
+              }
               // get table data formatted for tableView
               var (
                 List<List<TableViewCell>> tableViewCells,
@@ -133,7 +134,7 @@ class LocationListState extends State<LocationList> {
                       heroTag: "btn1",
                       onPressed: () async {
                         // find findoc id to show
-                        Location location = await showDialog(
+                        await showDialog(
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
@@ -141,20 +142,20 @@ class LocationListState extends State<LocationList> {
                               return BlocProvider.value(
                                   value:
                                       context.read<DataFetchBloc<Locations>>(),
-                                  child: SearchLocationList());
-                            });
-                        // show detail page
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _locationBloc,
-                                  child: LocationDialog(location));
-                            });
+                                  child: const SearchLocationList());
+                            }).then((value) async =>
+                            // show detail page
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                      value: _locationBloc,
+                                      child: LocationDialog(value));
+                                }));
                       },
                       child: const Icon(Icons.search)),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   FloatingActionButton(
                       key: const Key("addNew"),
                       onPressed: () async {

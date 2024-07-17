@@ -147,7 +147,7 @@ class AssetDialogState extends State<AssetDialog> {
           child: Column(children: <Widget>[
             TextFormField(
               key: const Key('pseudoId'),
-              decoration: InputDecoration(labelText: 'Id'),
+              decoration: const InputDecoration(labelText: 'Id'),
               controller: _pseudoIdController,
             ),
             TextFormField(

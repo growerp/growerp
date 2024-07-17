@@ -5,7 +5,7 @@ String createCsvRow(List<String> rows, int length) {
     if (row.isEmpty) {
       result += ',';
     } else {
-      result += '\"${row.replaceAll('"', '""')}\",';
+      result += '"${row.replaceAll('"', '""')}",';
     }
   }
   for (int index = rows.length; index < length; index++) {

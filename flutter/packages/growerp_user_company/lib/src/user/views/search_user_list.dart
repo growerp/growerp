@@ -26,13 +26,13 @@ class SearchUserList extends StatefulWidget {
 }
 
 class SearchUserState extends State<SearchUserList> {
-  late DataFetchBloc _UserBloc;
+  late DataFetchBloc _userBloc;
   List<User> users = [];
 
   @override
   void initState() {
     super.initState();
-    _UserBloc = context.read<DataFetchBloc<Users>>()
+    _userBloc = context.read<DataFetchBloc<Users>>()
       ..add(GetDataEvent(() => context.read<RestClient>().getUser(limit: 0)));
   }
 
@@ -53,8 +53,8 @@ class SearchUserState extends State<SearchUserList> {
       }
       return Stack(
         children: [
-          UserScaffold(finDocBloc: _UserBloc, widget: widget, users: users),
-          if (state.status == DataFetchStatus.loading) LoadingIndicator(),
+          UserScaffold(finDocBloc: _userBloc, widget: widget, users: users),
+          if (state.status == DataFetchStatus.loading) const LoadingIndicator(),
         ],
       );
     });
@@ -67,15 +67,15 @@ class UserScaffold extends StatelessWidget {
     required DataFetchBloc finDocBloc,
     required this.widget,
     required this.users,
-  }) : _UserBloc = finDocBloc;
+  }) : _userBloc = finDocBloc;
 
-  final DataFetchBloc _UserBloc;
+  final DataFetchBloc _userBloc;
   final SearchUserList widget;
   final List<User> users;
 
   @override
   Widget build(BuildContext context) {
-    final ScrollController _scrollController = ScrollController();
+    final ScrollController scrollController = ScrollController();
     return Scaffold(
         backgroundColor: Colors.transparent,
         body: Dialog(
@@ -91,15 +91,17 @@ class UserScaffold extends StatelessWidget {
                 width: 350,
                 child: Column(children: [
                   TextFormField(
-                      key: Key('searchField'),
+                      key: const Key('searchField'),
                       autofocus: true,
-                      decoration: InputDecoration(labelText: "Search input"),
+                      decoration:
+                          const InputDecoration(labelText: "Search input"),
                       validator: (value) {
-                        if (value!.isEmpty)
+                        if (value!.isEmpty) {
                           return 'Please enter a search value?';
+                        }
                         return null;
                       },
-                      onFieldSubmitted: (value) => _UserBloc.add(GetDataEvent(
+                      onFieldSubmitted: (value) => _userBloc.add(GetDataEvent(
                           () => context
                               .read<RestClient>()
                               .getUser(limit: 5, searchString: value)))),
@@ -111,20 +113,20 @@ class UserScaffold extends StatelessWidget {
                           shrinkWrap: true,
                           physics: const AlwaysScrollableScrollPhysics(),
                           itemCount: users.length + 2,
-                          controller: _scrollController,
+                          controller: scrollController,
                           itemBuilder: (BuildContext context, int index) {
                             if (index == 0) {
                               return Visibility(
                                   visible: users.isEmpty,
-                                  child: Center(
+                                  child: const Center(
                                       heightFactor: 20,
                                       child: Text('No search items found (yet)',
-                                          key: const Key('empty'),
+                                          key: Key('empty'),
                                           textAlign: TextAlign.center)));
                             }
                             index--;
                             return index >= users.length
-                                ? Text('')
+                                ? const Text('')
                                 : Dismissible(
                                     key: const Key('searchItem'),
                                     direction: DismissDirection.startToEnd,

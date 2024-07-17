@@ -179,7 +179,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
             case DataFetchStatus.failure:
               return const FatalErrorForm(message: 'server connection problem');
             case DataFetchStatus.loading:
-              return LoadingIndicator();
+              return const LoadingIndicator();
             case DataFetchStatus.success:
               return DropdownSearch<User>(
                 selectedItem: _selectedLead,
@@ -235,7 +235,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
             case DataFetchStatus.failure:
               return const FatalErrorForm(message: 'server connection problem');
             case DataFetchStatus.loading:
-              return LoadingIndicator();
+              return const LoadingIndicator();
             case DataFetchStatus.success:
               return DropdownSearch<User>(
                   selectedItem: _selectedAccount,

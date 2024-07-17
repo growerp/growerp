@@ -49,7 +49,7 @@ String glAccountCsvFormat =
 int glAccountCsvLength = glAccountCsvFormat.split(',').length;
 
 // import
-List<GlAccount> CsvToGlAccounts(String csvFile) {
+List<GlAccount> csvToGlAccounts(String csvFile) {
   List<GlAccount> glAccounts = [];
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
@@ -67,7 +67,7 @@ List<GlAccount> CsvToGlAccounts(String csvFile) {
 }
 
 // export
-String CsvFromGlAccounts(List<GlAccount> glAccounts) {
+String csvFromGlAccounts(List<GlAccount> glAccounts) {
   var csv = [glAccountCsvFormat];
   for (GlAccount glAccount in glAccounts) {
     csv.add(createCsvRow([

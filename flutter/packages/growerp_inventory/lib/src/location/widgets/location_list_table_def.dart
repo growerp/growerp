@@ -27,7 +27,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
   for (Asset asset in item.assets) {
     qohTotal += asset.quantityOnHand ?? Decimal.zero;
   }
-  if (isPhone(context))
+  if (isPhone(context)) {
     rowContent.add(TableRowContent(
         name: 'ShortId',
         width: 15,
@@ -39,6 +39,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
           ),
         )));
+  }
   rowContent.add(TableRowContent(
       name: 'Loc Id',
       width: isPhone(context) ? 15 : 10,
@@ -48,7 +49,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
       width: isPhone(context) ? 30 : 30,
       value: Text(item.locationName ?? '', key: Key('name$index'))));
   rowContent.add(TableRowContent(
-    name: Text(
+    name: const Text(
       'Qty.',
       textAlign: TextAlign.right,
     ),
@@ -59,18 +60,19 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
       textAlign: TextAlign.right,
     ),
   ));
-  if (!isPhone(context))
+  if (!isPhone(context)) {
     rowContent.add(TableRowContent(
-        name: Text('#Assets'),
+        name: const Text('#Assets'),
         width: 10,
         value: Text(item.assets.length.toString(),
             key: Key('assetsCount$index'))));
+  }
   rowContent.add(TableRowContent(
       width: isPhone(context) ? 25 : 15,
       name: ' ',
       value: IconButton(
           visualDensity: VisualDensity.compact,
-          padding: EdgeInsets.all(0),
+          padding: const EdgeInsets.all(0),
           key: Key('delete$index'),
           icon: const Icon(Icons.delete_forever),
           tooltip: 'remove item',
@@ -87,7 +89,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
 }
 
 // general settings
-var padding = SpanPadding(trailing: 5, leading: 5);
+var padding = const SpanPadding(trailing: 5, leading: 5);
 SpanDecoration? getBackGround(BuildContext context, int index) {
   return index == 0
       ? SpanDecoration(color: Theme.of(context).colorScheme.tertiaryContainer)

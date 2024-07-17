@@ -62,8 +62,9 @@ class Party with _$Party {
 
   @override
   String toString() {
-    if (this.companyName == null)
+    if (companyName == null) {
       return 'User $firstName $lastName [$partyId] sec: $userGroup  email: $email';
+    }
     return 'Company $companyName email: $email';
   }
 }

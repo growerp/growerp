@@ -58,7 +58,7 @@ class SearchFinDocState extends State<SearchFinDocList> {
         children: [
           FinDocScaffold(
               finDocBloc: _finDocBloc, widget: widget, finDocs: finDocs),
-          if (state.status == DataFetchStatus.loading) LoadingIndicator(),
+          if (state.status == DataFetchStatus.loading) const LoadingIndicator(),
         ],
       );
     });
@@ -79,7 +79,7 @@ class FinDocScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScrollController _scrollController = ScrollController();
+    final ScrollController scrollController = ScrollController();
     return Scaffold(
         backgroundColor: Colors.transparent,
         body: Dialog(
@@ -95,12 +95,13 @@ class FinDocScaffold extends StatelessWidget {
                 width: 350,
                 child: Column(children: [
                   TextFormField(
-                      key: Key('searchField'),
+                      key: const Key('searchField'),
                       autofocus: true,
-                      decoration: InputDecoration(labelText: "Search input"),
+                      decoration: const InputDecoration(labelText: "Search input"),
                       validator: (value) {
-                        if (value!.isEmpty)
+                        if (value!.isEmpty) {
                           return 'Please enter a search value?';
+                        }
                         return null;
                       },
                       onFieldSubmitted: (value) => _finDocBloc.add(GetDataEvent(
@@ -117,20 +118,20 @@ class FinDocScaffold extends StatelessWidget {
                           shrinkWrap: true,
                           physics: const AlwaysScrollableScrollPhysics(),
                           itemCount: finDocs.length + 2,
-                          controller: _scrollController,
+                          controller: scrollController,
                           itemBuilder: (BuildContext context, int index) {
                             if (index == 0) {
                               return Visibility(
                                   visible: finDocs.isEmpty,
-                                  child: Center(
+                                  child: const Center(
                                       heightFactor: 20,
                                       child: Text('No search items found (yet)',
-                                          key: const Key('empty'),
+                                          key: Key('empty'),
                                           textAlign: TextAlign.center)));
                             }
                             index--;
                             return index >= finDocs.length
-                                ? Text('')
+                                ? const Text('')
                                 : Dismissible(
                                     key: const Key('searchItem'),
                                     direction: DismissDirection.startToEnd,

@@ -149,7 +149,7 @@ List<String> finDocCsvTitles = finDocCsvFormat.split(',');
 int finDocCsvLength = finDocItemCsvTitles.length;
 
 // import
-List<FinDoc> CsvToFinDocs(String csvFile, Logger logger) {
+List<FinDoc> csvToFinDocs(String csvFile, Logger logger) {
   int errors = 0;
   List<FinDoc> finDocs = [];
   final result = fast_csv.parse(csvFile);
@@ -190,7 +190,7 @@ List<FinDoc> CsvToFinDocs(String csvFile, Logger logger) {
 }
 
 // export
-String CsvFromFinDocs(List<FinDoc> finDocs) {
+String csvFromFinDocs(List<FinDoc> finDocs) {
   var csv = [finDocCsvFormat];
   for (FinDoc finDoc in finDocs) {
     csv.add(createCsvRow([

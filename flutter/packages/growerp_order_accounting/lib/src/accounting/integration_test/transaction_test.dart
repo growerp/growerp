@@ -90,9 +90,7 @@ class TransactionTest {
       await CommonTest.waitForSnackbarToGo(tester);
       // save transactionid if required
       newTransactions.add(transaction.copyWith(
-          pseudoId: transaction.pseudoId != null
-              ? transaction.pseudoId
-              : CommonTest.getTextField('id0')));
+          pseudoId: transaction.pseudoId ?? CommonTest.getTextField('id0')));
     }
     return newTransactions;
   }

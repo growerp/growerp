@@ -31,35 +31,35 @@ export(String? backendUrl, String outputDirectory, String username,
     // export glAccount
     if (fileType == FileType.unknown || fileType == FileType.glAccount) {
       GlAccounts result = await client.getGlAccount(limit: 999);
-      csvContent = CsvFromGlAccounts(result.glAccounts);
+      csvContent = csvFromGlAccounts(result.glAccounts);
       final file1 = File("$outputDirectory/${FileType.glAccount.name}.csv");
       file1.writeAsStringSync(csvContent);
     }
     // export company
     if (fileType == FileType.unknown || fileType == FileType.company) {
       Companies result = await client.getCompany(limit: 999);
-      csvContent = CsvFromCompanies(result.companies);
+      csvContent = csvFromCompanies(result.companies);
       final file2 = File("$outputDirectory/${FileType.company.name}.csv");
       file2.writeAsStringSync(csvContent);
     }
     // export users
     if (fileType == FileType.unknown || fileType == FileType.user) {
       Users result = await client.getUsers('999');
-      csvContent = CsvFromUsers(result.users);
+      csvContent = csvFromUsers(result.users);
       final file3 = File("$outputDirectory/${FileType.user.name}.csv");
       file3.writeAsStringSync(csvContent);
     }
     // export products
     if (fileType == FileType.unknown || fileType == FileType.product) {
       Products result = await client.getProducts(limit: 999);
-      csvContent = CsvFromProducts(result.products);
+      csvContent = csvFromProducts(result.products);
       final file4 = File("$outputDirectory/${FileType.product.name}.csv");
       file4.writeAsStringSync(csvContent);
     } // export categories
     if (fileType == FileType.unknown || fileType == FileType.category) {
       fileType = FileType.category;
       Categories result = await client.getCategories(limit: 999);
-      csvContent = CsvFromCategories(result.categories);
+      csvContent = csvFromCategories(result.categories);
       final file5 = File("$outputDirectory/${FileType.category.name}.csv");
       file5.writeAsStringSync(csvContent);
     }
@@ -67,7 +67,7 @@ export(String? backendUrl, String outputDirectory, String username,
     if (fileType == FileType.unknown || fileType == FileType.website) {
       fileType = FileType.website;
       Website result = await client.exportWebsite();
-      csvContent = CsvFromWebsite(result);
+      csvContent = csvFromWebsite(result);
       final file6 = File("$outputDirectory/${FileType.website.name}.csv");
       file6.writeAsStringSync(csvContent);
     }

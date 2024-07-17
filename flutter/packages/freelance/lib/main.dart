@@ -78,7 +78,7 @@ Future main() async {
     title: 'GrowERP Freelance.',
     router: router.generateRoute,
     menuOptions: menuOptions,
-    extraDelegates: [
+    extraDelegates: const [
       UserCompanyLocalizations.delegate,
       CatalogLocalizations.delegate,
       InventoryLocalizations.delegate,

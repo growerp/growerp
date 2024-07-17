@@ -113,7 +113,7 @@ class FinDocListState extends State<FinDocList> {
     limit = (MediaQuery.of(context).size.height / 100).round();
     isPhone = isAPhone(context);
     Widget finDocsPage(int length) {
-      if (finDocs.isEmpty)
+      if (finDocs.isEmpty) {
         return Center(
             heightFactor: 20,
             child: Text(
@@ -123,6 +123,7 @@ class FinDocListState extends State<FinDocList> {
                         "${widget.docType == FinDocType.shipment ? "${widget.sales ? 'outgoing' : 'incoming'} " : "${widget.docType == FinDocType.transaction ? '' : widget.sales ? 'sales' : 'purchase'} "}"
                         "${entityName}s found!",
                 textAlign: TextAlign.center));
+      }
       // get table data formatted for tableView
       var (
         List<List<TableViewCell>> tableViewCells,
@@ -240,7 +241,7 @@ class FinDocListState extends State<FinDocList> {
                         heroTag: "btn1",
                         onPressed: () async {
                           // find findoc id to show
-                          FinDoc finDoc = await showDialog(
+                          await showDialog(
                               barrierDismissible: true,
                               context: context,
                               builder: (BuildContext context) {
@@ -251,19 +252,20 @@ class FinDocListState extends State<FinDocList> {
                                     child: SearchFinDocList(
                                         docType: widget.docType,
                                         sales: widget.sales));
-                              });
-                          // show detail page
-                          await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                    value: _finDocBloc,
-                                    child: SelectFinDocDialog(finDoc: finDoc));
-                              });
+                              }).then((value) async =>
+                              // show detail page
+                              await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                        value: _finDocBloc,
+                                        child:
+                                            SelectFinDocDialog(finDoc: value));
+                                  }));
                         },
                         child: const Icon(Icons.search)),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     if (widget.docType != FinDocType.shipment)
                       FloatingActionButton(
                           key: const Key("addNew"),

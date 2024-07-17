@@ -25,13 +25,13 @@ class SearchLocationList extends StatefulWidget {
 }
 
 class SearchLocationState extends State<SearchLocationList> {
-  late DataFetchBloc _LocationBloc;
+  late DataFetchBloc _locationBloc;
   List<Location> locations = [];
 
   @override
   void initState() {
     super.initState();
-    _LocationBloc = context.read<DataFetchBloc<Locations>>()
+    _locationBloc = context.read<DataFetchBloc<Locations>>()
       ..add(
           GetDataEvent(() => context.read<RestClient>().getLocation(limit: 0)));
   }
@@ -54,8 +54,8 @@ class SearchLocationState extends State<SearchLocationList> {
       return Stack(
         children: [
           LocationScaffold(
-              finDocBloc: _LocationBloc, widget: widget, locations: locations),
-          if (state.status == DataFetchStatus.loading) LoadingIndicator(),
+              finDocBloc: _locationBloc, widget: widget, locations: locations),
+          if (state.status == DataFetchStatus.loading) const LoadingIndicator(),
         ],
       );
     });
@@ -68,15 +68,15 @@ class LocationScaffold extends StatelessWidget {
     required DataFetchBloc finDocBloc,
     required this.widget,
     required this.locations,
-  }) : _LocationBloc = finDocBloc;
+  }) : _locationBloc = finDocBloc;
 
-  final DataFetchBloc _LocationBloc;
+  final DataFetchBloc _locationBloc;
   final SearchLocationList widget;
   final List<Location> locations;
 
   @override
   Widget build(BuildContext context) {
-    final ScrollController _scrollController = ScrollController();
+    final ScrollController scrollController = ScrollController();
     return Scaffold(
         backgroundColor: Colors.transparent,
         body: Dialog(
@@ -92,15 +92,17 @@ class LocationScaffold extends StatelessWidget {
                 width: 350,
                 child: Column(children: [
                   TextFormField(
-                      key: Key('searchField'),
+                      key: const Key('searchField'),
                       autofocus: true,
-                      decoration: InputDecoration(labelText: "Search input"),
+                      decoration:
+                          const InputDecoration(labelText: "Search input"),
                       validator: (value) {
-                        if (value!.isEmpty)
+                        if (value!.isEmpty) {
                           return 'Please enter a search value?';
+                        }
                         return null;
                       },
-                      onFieldSubmitted: (value) => _LocationBloc.add(
+                      onFieldSubmitted: (value) => _locationBloc.add(
                           GetDataEvent(() => context
                               .read<RestClient>()
                               .getLocation(limit: 5, searchString: value)))),
@@ -112,20 +114,20 @@ class LocationScaffold extends StatelessWidget {
                           shrinkWrap: true,
                           physics: const AlwaysScrollableScrollPhysics(),
                           itemCount: locations.length + 2,
-                          controller: _scrollController,
+                          controller: scrollController,
                           itemBuilder: (BuildContext context, int index) {
                             if (index == 0) {
                               return Visibility(
                                   visible: locations.isEmpty,
-                                  child: Center(
+                                  child: const Center(
                                       heightFactor: 20,
                                       child: Text('No search items found (yet)',
-                                          key: const Key('empty'),
+                                          key: Key('empty'),
                                           textAlign: TextAlign.center)));
                             }
                             index--;
                             return index >= locations.length
-                                ? Text('')
+                                ? const Text('')
                                 : Dismissible(
                                     key: const Key('searchItem'),
                                     direction: DismissDirection.startToEnd,

@@ -29,8 +29,9 @@ class ShowPaymentDialog extends StatelessWidget {
   const ShowPaymentDialog(this.finDoc, {super.key});
   @override
   Widget build(BuildContext context) {
-    context.read<FinDocBloc>()
-      ..add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!));
+    context
+        .read<FinDocBloc>()
+        .add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!));
     return BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
       if (state.status == FinDocStatus.success) {
         return PaymentDialog(finDoc: state.finDocs[0]);
@@ -296,8 +297,8 @@ class PaymentDialogState extends State<PaymentDialog> {
                 ],
               ),
               widget.finDoc.id() == null
-                  ? SizedBox(height: 20)
-                  : relatedFinDocs(finDoc: widget.finDoc, context: context),
+                  ? const SizedBox(height: 20)
+                  : RelatedFinDocs(finDoc: widget.finDoc, context: context),
               InputDecorator(
                 decoration: InputDecoration(
                   labelText: 'PaymentMethods',
@@ -347,7 +348,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                               }
                             });
                           }),
-                      Text(
+                      const Text(
                         "Cash",
                       ),
                     ]),
@@ -364,7 +365,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                               }
                             });
                           }),
-                      Text(
+                      const Text(
                         "Check",
                       ),
                     ]),

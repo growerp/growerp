@@ -103,8 +103,9 @@ class FinDocTest {
       await CommonTest.enterDropDownSearch(tester,
           finDoc.sales ? 'customer' : 'supplier', finDoc.otherCompany!.name!);
       if (finDoc.docType == FinDocType.order ||
-          finDoc.docType == FinDocType.invoice)
+          finDoc.docType == FinDocType.invoice) {
         await CommonTest.enterText(tester, 'description', finDoc.description!);
+      }
       // delete existing findoc items
       await CommonTest.drag(tester, listViewName: 'listView');
       // delete any existing items
@@ -134,9 +135,8 @@ class FinDocTest {
       await CommonTest.waitForSnackbarToGo(tester);
       // create new findoc with pseudoId when adding
       newFinDocs.add(finDoc.copyWith(
-          pseudoId: finDoc.pseudoId != null
-              ? finDoc.pseudoId
-              : CommonTest.getTextField('id0'), // Id always added at the top
+          pseudoId: finDoc.pseudoId ??
+              CommonTest.getTextField('id0'), // Id always added at the top
           items: newItems));
     }
     await FinDocTest.saveFinDocs(newFinDocs);
@@ -156,8 +156,9 @@ class FinDocTest {
       expect(finDoc.otherCompany!.name!,
           CommonTest.getDropdownSearch(finDoc.sales ? 'customer' : 'supplier'));
       if (finDoc.docType == FinDocType.order ||
-          finDoc.docType == FinDocType.invoice)
+          finDoc.docType == FinDocType.invoice) {
         expect(finDoc.description!, CommonTest.getTextFormField('description'));
+      }
       for (final (index, item) in finDoc.items.indexed) {
         expect(item.product?.productId ?? '',
             CommonTest.getTextField('itemProductId$index'));
@@ -165,9 +166,10 @@ class FinDocTest {
             CommonTest.getTextField('itemDescription$index'));
         expect(
             item.price.currency(), CommonTest.getTextField('itemPrice$index'));
-        if (!CommonTest.isPhone())
+        if (!CommonTest.isPhone()) {
           expect(item.quantity.toString(),
               CommonTest.getTextField('itemQuantity$index'));
+        }
       }
       await CommonTest.tapByKey(tester, 'cancel'); // cancel dialog
     }
@@ -198,7 +200,7 @@ class FinDocTest {
       }
 
       await CommonTest.doNewSearch(tester,
-          searchString: id != null ? id : finDoc.pseudoId!);
+          searchString: id ?? finDoc.pseudoId!);
       // open detail
       expect(FinDocStatusVal.completed.toString(),
           CommonTest.getDropdown('statusDropDown'));
@@ -272,7 +274,7 @@ class FinDocTest {
     List<FinDoc> newFinDocs = [];
 
     if (status == FinDocStatusVal.cancelled && oldFinDocs.length < 2) {
-      print("Need at least 2 records, to delete one");
+      debugPrint("Need at least 2 records, to delete one");
       return;
     }
 
@@ -301,8 +303,7 @@ class FinDocTest {
 
       // change status
       await CommonTest.doNewSearch(tester,
-          searchString: id != null ? id : finDoc.pseudoId!,
-          seconds: CommonTest.waitTime);
+          searchString: id ?? finDoc.pseudoId!, seconds: CommonTest.waitTime);
       // statuschange on detail screen
       if (CommonTest.getDropdown('statusDropDown') ==
               FinDocStatusVal.inPreparation.toString() ||
@@ -325,7 +326,7 @@ class FinDocTest {
         // get related document numbers just for order,
         // transactions are saved by check completed
         await CommonTest.doNewSearch(tester,
-            searchString: id != null ? id : finDoc.pseudoId!);
+            searchString: id ?? finDoc.pseudoId!);
         // get order related documents
         if (type == FinDocType.order && subType == null) {
           String? paymentId =

@@ -26,7 +26,7 @@ part 'lists_model.freezed.dart';
 @freezed
 class GlAccounts with _$GlAccounts {
   factory GlAccounts({
-    @Default(const []) List<GlAccount> glAccounts,
+    @Default([]) List<GlAccount> glAccounts,
   }) = _GlAccounts;
   GlAccounts._();
 
@@ -37,7 +37,7 @@ class GlAccounts with _$GlAccounts {
 @freezed
 class Categories with _$Categories {
   factory Categories({
-    @Default(const []) List<Category> categories,
+    @Default([]) List<Category> categories,
   }) = _Categories;
   Categories._();
 
@@ -48,7 +48,7 @@ class Categories with _$Categories {
 @freezed
 class Products with _$Products {
   factory Products({
-    @Default(const []) List<Product> products,
+    @Default([]) List<Product> products,
   }) = _Products;
   Products._();
 
@@ -59,7 +59,7 @@ class Products with _$Products {
 @freezed
 class Assets with _$Assets {
   factory Assets({
-    @Default(const []) List<Asset> assets,
+    @Default([]) List<Asset> assets,
   }) = _Assets;
   Assets._();
 
@@ -69,7 +69,7 @@ class Assets with _$Assets {
 @freezed
 class Users with _$Users {
   factory Users({
-    @Default(const []) List<User> users,
+    @Default([]) List<User> users,
   }) = _Users;
   Users._();
 
@@ -79,7 +79,7 @@ class Users with _$Users {
 @freezed
 class Companies with _$Companies {
   factory Companies({
-    @Default(const []) List<Company> companies,
+    @Default([]) List<Company> companies,
   }) = _Companies;
   Companies._();
 
@@ -90,7 +90,7 @@ class Companies with _$Companies {
 @freezed
 class RentalFullDates with _$RentalFullDates {
   factory RentalFullDates({
-    @Default(const []) List<String> rentalFullDates,
+    @Default([]) List<String> rentalFullDates,
   }) = _RentalFullDates;
   RentalFullDates._();
 
@@ -101,7 +101,7 @@ class RentalFullDates with _$RentalFullDates {
 @freezed
 class FinDocs with _$FinDocs {
   factory FinDocs({
-    @Default(const []) List<FinDoc> finDocs,
+    @Default([]) List<FinDoc> finDocs,
   }) = _FinDocs;
   FinDocs._();
 
@@ -112,7 +112,7 @@ class FinDocs with _$FinDocs {
 @freezed
 class FinDocItems with _$FinDocItems {
   factory FinDocItems({
-    @Default(const []) List<FinDocItem> finDocItems,
+    @Default([]) List<FinDocItem> finDocItems,
   }) = _FinDocItems;
   FinDocItems._();
 
@@ -123,7 +123,7 @@ class FinDocItems with _$FinDocItems {
 @freezed
 class ItemTypes with _$ItemTypes {
   factory ItemTypes({
-    @Default(const []) List<ItemType> itemTypes,
+    @Default([]) List<ItemType> itemTypes,
   }) = _ItemTypes;
   ItemTypes._();
 
@@ -134,7 +134,7 @@ class ItemTypes with _$ItemTypes {
 @freezed
 class PaymentTypes with _$PaymentTypes {
   factory PaymentTypes({
-    @Default(const []) List<PaymentType> paymentTypes,
+    @Default([]) List<PaymentType> paymentTypes,
   }) = _PaymentTypes;
   PaymentTypes._();
 
@@ -145,7 +145,7 @@ class PaymentTypes with _$PaymentTypes {
 @freezed
 class Locations with _$Locations {
   factory Locations({
-    @Default(const []) List<Location> locations,
+    @Default([]) List<Location> locations,
   }) = _Locations;
   Locations._();
 
@@ -156,7 +156,7 @@ class Locations with _$Locations {
 @freezed
 class TimePeriods with _$TimePeriods {
   factory TimePeriods({
-    @Default(const []) List<TimePeriod> timePeriods,
+    @Default([]) List<TimePeriod> timePeriods,
   }) = _TimePeriods;
   TimePeriods._();
 
@@ -167,7 +167,7 @@ class TimePeriods with _$TimePeriods {
 @freezed
 class LedgerJournals with _$LedgerJournals {
   factory LedgerJournals({
-    @Default(const []) List<LedgerJournal> ledgerJournals,
+    @Default([]) List<LedgerJournal> ledgerJournals,
   }) = _LedgerJournals;
   LedgerJournals._();
 
@@ -178,7 +178,7 @@ class LedgerJournals with _$LedgerJournals {
 @freezed
 class AccountClasses with _$AccountClasses {
   factory AccountClasses({
-    @Default(const []) List<AccountClass> accountClasses,
+    @Default([]) List<AccountClass> accountClasses,
   }) = _AccountClasses;
   AccountClasses._();
 
@@ -189,7 +189,7 @@ class AccountClasses with _$AccountClasses {
 @freezed
 class AccountTypes with _$AccountTypes {
   factory AccountTypes({
-    @Default(const []) List<AccountType> accountTypes,
+    @Default([]) List<AccountType> accountTypes,
   }) = _AccountTypes;
   AccountTypes._();
 
@@ -200,7 +200,7 @@ class AccountTypes with _$AccountTypes {
 @freezed
 class ChatRooms with _$ChatRooms {
   factory ChatRooms({
-    @Default(const []) List<ChatRoom> chatRooms,
+    @Default([]) List<ChatRoom> chatRooms,
   }) = _ChatRooms;
   ChatRooms._();
 
@@ -211,7 +211,7 @@ class ChatRooms with _$ChatRooms {
 @freezed
 class ChatMessages with _$ChatMessages {
   factory ChatMessages({
-    @Default(const []) List<ChatMessage> chatMessages,
+    @Default([]) List<ChatMessage> chatMessages,
   }) = _ChatMessages;
   ChatMessages._();
 
@@ -222,7 +222,7 @@ class ChatMessages with _$ChatMessages {
 @freezed
 class Tasks with _$Tasks {
   factory Tasks({
-    @Default(const []) List<Task> tasks,
+    @Default([]) List<Task> tasks,
   }) = _Tasks;
   Tasks._();
 
@@ -232,7 +232,7 @@ class Tasks with _$Tasks {
 @freezed
 class Opportunities with _$Opportunities {
   factory Opportunities({
-    @Default(const []) List<Opportunity> opportunities,
+    @Default([]) List<Opportunity> opportunities,
   }) = _Opportunities;
   Opportunities._();
 
@@ -243,7 +243,7 @@ class Opportunities with _$Opportunities {
 @freezed
 class Parties with _$Parties {
   factory Parties({
-    @Default(const []) List<Party> parties,
+    @Default([]) List<Party> parties,
   }) = _Parties;
   Parties._();
 

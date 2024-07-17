@@ -22,8 +22,7 @@ import 'package:growerp_models/growerp_models.dart';
 import '../../../growerp_user_company.dart';
 
 class UserList extends StatefulWidget {
-  const UserList({this.role, this.key});
-  final Key? key;
+  const UserList({super.key, this.role});
   final Role? role;
 
   @override
@@ -63,7 +62,7 @@ class UserListState extends State<UserList> {
         break;
       case Role.lead:
         (_userBloc = context.read<LeadBloc>() as UserBloc)
-          ..add(const UserFetch());
+            .add(const UserFetch());
         break;
       default:
         _userBloc = (context.read<UserBloc>())..add(const UserFetch());
@@ -75,10 +74,11 @@ class UserListState extends State<UserList> {
     isPhone = isAPhone(context);
     return Builder(builder: (BuildContext context) {
       Widget tableView() {
-        if (users.isEmpty)
-          return Center(
+        if (users.isEmpty) {
+          return const Center(
               heightFactor: 20,
               child: Text("no users found", textAlign: TextAlign.center));
+        }
         // get table data formatted for tableView
         var (
           List<List<TableViewCell>> tableViewCells,
@@ -165,26 +165,27 @@ class UserListState extends State<UserList> {
                       heroTag: "btn1",
                       onPressed: () async {
                         // find findoc id to show
-                        User user = await showDialog(
+                        await showDialog(
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
                               // search separate from finDocBloc
                               return BlocProvider.value(
                                   value: context.read<DataFetchBloc<Users>>(),
-                                  child: SearchUserList());
-                            });
-                        // show detail page
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _userBloc, child: UserDialog(user));
-                            });
+                                  child: const SearchUserList());
+                            }).then((value) async =>
+                            // show detail page
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                      value: _userBloc,
+                                      child: UserDialog(value));
+                                }));
                       },
                       child: const Icon(Icons.search)),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   FloatingActionButton(
                       key: const Key("addNew"),
                       onPressed: () async {

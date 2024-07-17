@@ -59,7 +59,7 @@ dev_dependencies:
     sdk: flutter
   integration_test: 
     sdk: flutter
-  lint_hard: ^4.0.0
+  flutter_lints: ^4.0.0
   build_runner: ^2.1.11
   json_serializable: ^6.7.1
   freezed: ^2.0.3

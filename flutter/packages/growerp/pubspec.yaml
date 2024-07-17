@@ -25,7 +25,7 @@ dependencies:
   spreadsheet_decoder: ^2.2.0
 
 dev_dependencies:
-  lint_hard: ^4.0.0
+  flutter_lints: ^4.0.0
 
 
 

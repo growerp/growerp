@@ -48,7 +48,7 @@ class BalanceSheetListForm extends StatefulWidget {
 class BalanceSheetFormState extends State<BalanceSheetListForm> {
   final TextEditingController _periodSearchBoxController =
       TextEditingController();
-  NumberFormat formatter = new NumberFormat("00");
+  NumberFormat formatter = NumberFormat("00");
   TreeController? _controller;
   Iterable<TreeNode> _nodes = [];
   late int level;
@@ -174,7 +174,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                             searchFieldProps: TextFieldProps(
                               autofocus: true,
                               decoration:
-                                  InputDecoration(labelText: 'Time period'),
+                                  const InputDecoration(labelText: 'Time period'),
                               controller: _periodSearchBoxController,
                             ),
                             title: popUp(
@@ -183,7 +183,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                               height: 50,
                             ),
                           ),
-                          dropdownDecoratorProps: DropDownDecoratorProps(
+                          dropdownDecoratorProps: const DropDownDecoratorProps(
                             dropdownSearchDecoration: InputDecoration(
                               labelText: 'Time period',
                             ),
@@ -212,7 +212,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                             child: const Text('Q'),
                             onPressed: () {
                               String currentQuarter =
-                                  "${formatter.format(DateTime.now().month / 4 + 1)}";
+                                  formatter.format(DateTime.now().month / 4 + 1);
                               _ledgerBloc.add(LedgerFetch(ReportType.sheet,
                                   periodName:
                                       '${_selectedPeriod.periodName.substring(0, 5)}'

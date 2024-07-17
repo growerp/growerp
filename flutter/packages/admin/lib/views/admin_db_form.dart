@@ -28,7 +28,7 @@ class AdminDbForm extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        WorkflowDashboard(),
+        const WorkflowDashboard(),
         Expanded(
           child: DashBoardForm(dashboardItems: [
             makeDashboardItem('dbCompany', context, menuOptions[1], [

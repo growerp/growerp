@@ -67,7 +67,7 @@ String assetCsvFormat =
 List<String> assetCsvTitles = assetCsvFormat.split(',');
 int assetCsvLength = assetCsvTitles.length;
 
-List<Asset> CsvToAssets(String csvFile, Logger logger) {
+List<Asset> csvToAssets(String csvFile, Logger logger) {
   int errors = 0;
   List<Asset> assets = [];
   final result = fast_csv.parse(csvFile);
@@ -102,7 +102,7 @@ List<Asset> CsvToAssets(String csvFile, Logger logger) {
   return assets;
 }
 
-String CsvFromAssets(List<Asset> assets) {
+String csvFromAssets(List<Asset> assets) {
   var csv = [assetCsvFormat];
   for (Asset asset in assets) {
     csv.add(createCsvRow([

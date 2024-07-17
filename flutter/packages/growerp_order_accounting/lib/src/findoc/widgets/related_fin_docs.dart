@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-class relatedFinDocs extends StatelessWidget {
-  const relatedFinDocs({
+class RelatedFinDocs extends StatelessWidget {
+  const RelatedFinDocs({
     super.key,
     required this.finDoc,
     required this.context,
@@ -22,8 +22,8 @@ class relatedFinDocs extends StatelessWidget {
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           if (finDoc.docType != FinDocType.order && finDoc.orderId != null)
             TextButton(
-                key: Key('relOrder'),
-                child: Text('Order'),
+                key: const Key('relOrder'),
+                child: const Text('Order'),
                 onPressed: () => Navigator.pushNamed(context, '/findoc',
                     arguments: FinDoc(
                         sales: finDoc.sales,
@@ -31,8 +31,8 @@ class relatedFinDocs extends StatelessWidget {
                         orderId: finDoc.orderId))),
           if (finDoc.docType != FinDocType.invoice && finDoc.invoiceId != null)
             TextButton(
-                key: Key('relInvoice'),
-                child: Text('Invoice'),
+                key: const Key('relInvoice'),
+                child: const Text('Invoice'),
                 onPressed: () => Navigator.pushNamed(context, '/findoc',
                     arguments: FinDoc(
                         sales: finDoc.sales,
@@ -40,8 +40,8 @@ class relatedFinDocs extends StatelessWidget {
                         invoiceId: finDoc.invoiceId))),
           if (finDoc.docType != FinDocType.payment && finDoc.paymentId != null)
             TextButton(
-                key: Key('relPayment'),
-                child: Text('Payment'),
+                key: const Key('relPayment'),
+                child: const Text('Payment'),
                 onPressed: () => Navigator.pushNamed(context, '/findoc',
                     arguments: FinDoc(
                         sales: finDoc.sales,
@@ -50,8 +50,8 @@ class relatedFinDocs extends StatelessWidget {
           if (finDoc.docType != FinDocType.shipment &&
               finDoc.shipmentId != null)
             TextButton(
-                key: Key('relShipment'),
-                child: Text('Shipment'),
+                key: const Key('relShipment'),
+                child: const Text('Shipment'),
                 onPressed: () => Navigator.pushNamed(context, '/findoc',
                     arguments: FinDoc(
                         sales: finDoc.sales,
@@ -60,8 +60,8 @@ class relatedFinDocs extends StatelessWidget {
           if (finDoc.docType != FinDocType.transaction &&
               finDoc.transactionId != null)
             TextButton(
-                key: Key('relTransaction'),
-                child: Text('Transaction'),
+                key: const Key('relTransaction'),
+                child: const Text('Transaction'),
                 onPressed: () => Navigator.pushNamed(context, '/findoc',
                     arguments: FinDoc(
                         sales: finDoc.sales,

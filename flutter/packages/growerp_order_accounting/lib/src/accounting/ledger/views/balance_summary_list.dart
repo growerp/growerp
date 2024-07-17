@@ -35,7 +35,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
   final _itemPositionsListener = ItemPositionsListener.create();
   final TextEditingController _periodSearchBoxController =
       TextEditingController();
-  NumberFormat formatter = new NumberFormat("00");
+  NumberFormat formatter = NumberFormat("00");
   late bool search;
   late LedgerBloc _ledgerBloc;
   late bool started;
@@ -90,7 +90,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                           searchFieldProps: TextFieldProps(
                             autofocus: true,
                             decoration:
-                                InputDecoration(labelText: 'Time period'),
+                                const InputDecoration(labelText: 'Time period'),
                             controller: _periodSearchBoxController,
                           ),
                           title: popUp(
@@ -99,7 +99,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                             height: 50,
                           ),
                         ),
-                        dropdownDecoratorProps: DropDownDecoratorProps(
+                        dropdownDecoratorProps: const DropDownDecoratorProps(
                           dropdownSearchDecoration: InputDecoration(
                             labelText: 'Time period',
                           ),
@@ -128,7 +128,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                           child: const Text('Q'),
                           onPressed: () {
                             String currentQuarter =
-                                "${formatter.format(DateTime.now().month / 4 + 1)}";
+                                formatter.format(DateTime.now().month / 4 + 1);
                             _ledgerBloc.add(LedgerFetch(ReportType.summary,
                                 periodName:
                                     '${_selectedPeriod.periodName.substring(0, 5)}'

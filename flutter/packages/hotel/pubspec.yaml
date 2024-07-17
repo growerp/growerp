@@ -26,6 +26,7 @@ dev_dependencies:
     sdk: flutter
   mockito: ^5.0.3
   bloc_test: ^9.0.1
+  flutter_lints: ^4.0.0
 flutter_icons: 
   android: launcher_icon
   ios: true

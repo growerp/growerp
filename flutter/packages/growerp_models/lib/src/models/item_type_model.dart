@@ -39,16 +39,16 @@ String itemTypeCsvFormat = "itemTypeId, accountCode, direction(I/O/E), \r\n";
 int itemTypeCsvLength = itemTypeCsvFormat.split(',').length;
 
 // import
-List<ItemType> CsvToItemTypes(String csvFile) {
-  List<ItemType> ItemTypes = [];
+List<ItemType> csvToItemTypes(String csvFile) {
+  List<ItemType> itemTypes = [];
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
     if (row == result.first) continue;
-    ItemTypes.add(ItemType(
+    itemTypes.add(ItemType(
       itemTypeId: row[0],
       accountCode: row[1],
       direction: row[2],
     ));
   }
-  return ItemTypes;
+  return itemTypes;
 }

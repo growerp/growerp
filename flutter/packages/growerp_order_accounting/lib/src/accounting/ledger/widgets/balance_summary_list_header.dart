@@ -75,23 +75,23 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
               ])
             : Column(children: [
                 if (widget.isPhone)
-                  Text("Account Name", textAlign: TextAlign.center),
+                  const Text("Account Name", textAlign: TextAlign.center),
                 Row(children: <Widget>[
-                  Expanded(child: Text("Code", textAlign: TextAlign.center)),
+                  const Expanded(child: Text("Code", textAlign: TextAlign.center)),
                   if (!widget.isPhone)
-                    Expanded(child: Text("Name", textAlign: TextAlign.center)),
-                  Expanded(child: Text("Begin", textAlign: TextAlign.right)),
+                    const Expanded(child: Text("Name", textAlign: TextAlign.center)),
+                  const Expanded(child: Text("Begin", textAlign: TextAlign.right)),
                   if (!widget.isPhone)
-                    Expanded(
+                    const Expanded(
                         child:
                             Text("Post.\nDebit", textAlign: TextAlign.right)),
                   if (!widget.isPhone)
-                    Expanded(
+                    const Expanded(
                         child:
                             Text("Post.\nCredt", textAlign: TextAlign.right)),
-                  Expanded(child: Text("End Bal.", textAlign: TextAlign.right)),
+                  const Expanded(child: Text("End Bal.", textAlign: TextAlign.right)),
                 ]),
-                Divider(),
+                const Divider(),
               ]),
         trailing: const Text(' '));
   }

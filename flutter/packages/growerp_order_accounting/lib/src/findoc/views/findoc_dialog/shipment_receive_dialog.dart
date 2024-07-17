@@ -80,7 +80,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
     FinDocBloc finDocBloc = context.read<FinDocBloc>();
     String nowDate = DateTime.now().toString().substring(0, 10);
     return Column(children: [
-      relatedFinDocs(finDoc: widget.finDoc, context: context),
+      RelatedFinDocs(finDoc: widget.finDoc, context: context),
       Expanded(
           child: ListView.builder(
               key: const Key('listView'),
@@ -137,7 +137,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                       : null,
                   title: Column(children: [
                     Row(children: <Widget>[
-                      Text('${newItems[index].product?.productId ?? ''}'),
+                      Text(newItems[index].product?.productId ?? ''),
                       const SizedBox(width: 10),
                       Expanded(child: Text('${newItems[index].description}')),
                       Text('${newItems[index].quantity}'),

@@ -42,7 +42,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         "${item.lastName ?? ''} ${isPhone ? item.email ?? ' ' : ''}",
         key: Key('name$index'),
       )));
-  if (!isPhone)
+  if (!isPhone) {
     rowContent.add(TableRowContent(
         name: 'Email',
         width: 15,
@@ -51,12 +51,14 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
           textAlign: TextAlign.left,
           key: Key('email$index'),
         )));
-  if (!isPhone)
+  }
+  if (!isPhone) {
     rowContent.add(TableRowContent(
         name: 'Login Name',
         width: 15,
         value: Text((!item.loginDisabled! ? item.loginName ?? ' ' : ' '),
             key: Key('username$index'))));
+  }
   rowContent.add(TableRowContent(
       name: 'Company',
       width: 15,
@@ -82,7 +84,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
 }
 
 // general settings
-var padding = SpanPadding(trailing: 5, leading: 5);
+var padding = const SpanPadding(trailing: 5, leading: 5);
 SpanDecoration? getBackGround(BuildContext context, int index) {
   return index == 0
       ? SpanDecoration(color: Theme.of(context).colorScheme.tertiaryContainer)

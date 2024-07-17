@@ -13,8 +13,9 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
     for (List row in images) {
       if (row[0] == fileType.name && row[1] == id) {
         // if not file path, add it using the filename
-        if (row[2][0] != '/')
+        if (row[2][0] != '/') {
           return '${fileName.substring(0, fileName.lastIndexOf('/') + 1)}${row[2]}';
+        }
         return row[2];
       }
     }
@@ -26,12 +27,13 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
     if (date.contains('/')) {
       // csv file
       var dateList = date.split('/');
-      var prefix;
-      if (dateList[2] == '99')
+      String prefix;
+      if (dateList[2] == '99') {
         prefix = '19';
-      else
+      } else {
         prefix = '20';
-      return "${prefix}${dateList[2]}-${dateList[0].padLeft(2, '0')}-${dateList[1].padLeft(2, '0')}";
+      }
+      return "$prefix${dateList[2]}-${dateList[0].padLeft(2, '0')}-${dateList[1].padLeft(2, '0')}";
     }
     // spreadsheet file
     return date.substring(0, 10);
@@ -52,8 +54,9 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
 
   // reject balances
   if (columnsFrom.length > 8) {
-    if (columnsFrom[5] == 'Beginning Balance' && columnsFrom[8] == '')
+    if (columnsFrom[5] == 'Beginning Balance' && columnsFrom[8] == '') {
       return [];
+    }
     if (columnsFrom.length > 8 && columnsFrom[5] == 'Ending Balance') return [];
   }
   if (columnsFrom.length > 5 && columnsFrom[5] == 'Change') return [];
@@ -147,10 +150,11 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
         // 12:Telephone 1,Telephone 2,Fax Number,Customer E-mail,
         // 16:Resale Number,Discount Days,Discount Percent,Customer Web Site
         columnsTo.add(columnsFrom[2]); // id
-        if (fileName.contains('main-company'))
+        if (fileName.contains('main-company')) {
           columnsTo.add(Role.company.value);
-        else
+        } else {
           columnsTo.add(Role.customer.value); //role
+        }
         columnsTo.add(columnsFrom[3]); //name
         columnsTo.add(columnsFrom[15]); //email
         columnsTo.add(columnsFrom[12]); // teleph
@@ -331,8 +335,9 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add(columnsFrom[10]); // checknumber
       String amount = columnsFrom[14].replaceAll('-', ''); // check number
       columnsTo.add(amount); // total amount
-      if (amount == '0' || amount == '' || double.tryParse(amount) == null)
+      if (amount == '0' || amount == '' || double.tryParse(amount) == null) {
         return []; // ignore records with zero/invalid amounts
+      }
       columnsTo.add(columnsFrom[20]); // for invoice in classification
       return columnsTo;
 
@@ -595,8 +600,9 @@ String accountCodeToItemType(String accountCode, String pseudoProductId) {
     '75500': 'ItemProduct',
   };
 
-  if (accountCodes[accountCode] == 'ItemProduct' && pseudoProductId == '')
+  if (accountCodes[accountCode] == 'ItemProduct' && pseudoProductId == '') {
     return ('ItemSales');
+  }
   return (accountCodes[accountCode] ?? 'ItemExpense');
 }
 

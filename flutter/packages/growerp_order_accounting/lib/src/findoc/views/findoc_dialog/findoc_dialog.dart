@@ -187,7 +187,7 @@ class MyFinDocState extends State<FinDocPage> {
                 ? headerEntryTransaction()
                 : headerEntry(),
             // related documents
-            relatedFinDocs(finDoc: finDocUpdated, context: context),
+            RelatedFinDocs(finDoc: finDocUpdated, context: context),
             // update buttons
             const SizedBox(height: 10),
             if (!readOnly) updateButtons(state),
@@ -259,7 +259,7 @@ class MyFinDocState extends State<FinDocPage> {
           case DataFetchStatus.failure:
             return const FatalErrorForm(message: 'server connection problem');
           case DataFetchStatus.loading:
-            return LoadingIndicator();
+            return const LoadingIndicator();
           case DataFetchStatus.success:
             return Padding(
               padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
@@ -412,7 +412,7 @@ class MyFinDocState extends State<FinDocPage> {
                         keyboardType: TextInputType.number,
                       ),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: TextFormField(
                         key: const Key('description'),
@@ -448,13 +448,13 @@ class MyFinDocState extends State<FinDocPage> {
                             height: 50,
                           ),
                         ),
-                        dropdownDecoratorProps: DropDownDecoratorProps(
+                        dropdownDecoratorProps: const DropDownDecoratorProps(
                           dropdownSearchDecoration: InputDecoration(
                             labelText: 'Company',
                           ),
                         ),
-                        key: Key('company'),
-                        itemAsString: (Company? u) => "${u!.name ?? ''}",
+                        key: const Key('company'),
+                        itemAsString: (Company? u) => u!.name ?? '',
                         asyncItems: (String filter) {
                           _companyBloc.add(GetDataEvent(
                               () => context.read<RestClient>().getCompany(
@@ -637,8 +637,8 @@ class MyFinDocState extends State<FinDocPage> {
 
   Widget finDocItemList(CartState state) {
     List<FinDocItem> items = finDocUpdated.items;
-    late final ScrollController _verticalController = ScrollController();
-    late final ScrollController _horizontalController = ScrollController();
+    late final ScrollController verticalController = ScrollController();
+    late final ScrollController horizontalController = ScrollController();
 
     TableData getTableData(Bloc bloc, String classificationId,
         BuildContext context, FinDocItem item, int index) {
@@ -669,32 +669,36 @@ class MyFinDocState extends State<FinDocPage> {
           width: isPhone ? 25 : 25,
           name: 'Description',
           value: Text("${item.description}",
-              key: Key('itemDescription${index}'), textAlign: TextAlign.left)));
-      if (!isPhone)
+              key: Key('itemDescription$index'), textAlign: TextAlign.left)));
+      if (!isPhone) {
         rowContent.add(TableRowContent(
             width: 8,
             name: 'Item Type',
             value: Text(itemType.itemTypeName,
                 textAlign: TextAlign.left, key: Key('itemType$index'))));
-      if (!isPhone)
+      }
+      if (!isPhone) {
         rowContent.add(TableRowContent(
             width: 4,
             name: 'Qty',
             value: Text("${item.quantity}",
                 textAlign: TextAlign.right, key: Key('itemQuantity$index'))));
-      if (item.product?.productTypeId != 'Rental')
+      }
+      if (item.product?.productTypeId != 'Rental') {
         rowContent.add(TableRowContent(
             width: 15,
             name: 'Price',
             value: Text(item.price!.currency(currencyId: currencyId),
                 textAlign: TextAlign.right, key: Key('itemPrice$index'))));
-      if (item.product?.productTypeId == 'Rental')
+      }
+      if (item.product?.productTypeId == 'Rental') {
         rowContent.add(TableRowContent(
             width: 10,
             name: 'Date',
             value: Text(item.rentalFromDate.toString(),
                 textAlign: TextAlign.right, key: Key('fromDate$index'))));
-      if (!isPhone)
+      }
+      if (!isPhone) {
         rowContent.add(TableRowContent(
             width: 10,
             name: 'SubTot.',
@@ -703,24 +707,26 @@ class MyFinDocState extends State<FinDocPage> {
                     .currency(currencyId: currencyId)
                     .toString(),
                 textAlign: TextAlign.center)));
-      if (!readOnly)
+      }
+      if (!readOnly) {
         rowContent.add(TableRowContent(
             width: isPhone ? 14 : 8,
             name: '',
             value: IconButton(
               visualDensity: VisualDensity.compact,
               icon: const Icon(Icons.delete_forever),
-              padding: EdgeInsets.all(0),
+              padding: const EdgeInsets.all(0),
               key: Key("itemDelete$index"),
               onPressed: () {
                 _cartBloc.add(CartDeleteItem(index));
               },
             )));
+      }
 
       return TableData(rowHeight: 40, rowContent: rowContent);
     }
 
-    var padding = SpanPadding(trailing: 8, leading: 8);
+    var padding = const SpanPadding(trailing: 8, leading: 8);
     SpanDecoration? getBackGround(BuildContext context, int index) {
       return index == 0
           ? SpanDecoration(
@@ -744,9 +750,9 @@ class MyFinDocState extends State<FinDocPage> {
           : TableView.builder(
               diagonalDragBehavior: DiagonalDragBehavior.free,
               verticalDetails:
-                  ScrollableDetails.vertical(controller: _verticalController),
+                  ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(
-                  controller: _horizontalController),
+                  controller: horizontalController),
               cellBuilder: (context, vicinity) =>
                   tableViewCells[vicinity.row][vicinity.column],
               // height of table cell
@@ -772,8 +778,8 @@ class MyFinDocState extends State<FinDocPage> {
 
   Widget finDocItemListShipment(CartState state) {
     List<FinDocItem> items = finDocUpdated.items;
-    late final ScrollController _verticalController = ScrollController();
-    late final ScrollController _horizontalController = ScrollController();
+    late final ScrollController verticalController = ScrollController();
+    late final ScrollController horizontalController = ScrollController();
 
     TableData getTableData(Bloc bloc, String classificationId,
         BuildContext context, FinDocItem item, int index) {
@@ -789,41 +795,42 @@ class MyFinDocState extends State<FinDocPage> {
           name: 'ProdId',
           width: isPhone ? 14 : 8,
           value: Text("${item.product?.productId}",
-              textAlign: TextAlign.center, key: Key('itemProductId${index}'))));
+              textAlign: TextAlign.center, key: Key('itemProductId$index'))));
       rowContent.add(TableRowContent(
           name: 'Description',
           width: isPhone ? 25 : 28,
           value: Text("${item.description}",
-              key: Key('itemDescription${index}'), textAlign: TextAlign.left)));
+              key: Key('itemDescription$index'), textAlign: TextAlign.left)));
       rowContent.add(TableRowContent(
           name: 'Qty',
           width: isPhone ? 10 : 10,
           value: Text("${item.quantity}",
-              textAlign: TextAlign.center, key: Key('itemQuantity${index}'))));
-      if (finDoc.status == FinDocStatusVal.completed)
+              textAlign: TextAlign.center, key: Key('itemQuantity$index'))));
+      if (finDoc.status == FinDocStatusVal.completed) {
         rowContent.add(TableRowContent(
             name: 'Location',
             width: isPhone ? 20 : 20,
             value: Text("${item.asset?.location?.locationName}",
-                textAlign: TextAlign.center,
-                key: Key('itemLocation${index}'))));
-      if (!readOnly)
+                textAlign: TextAlign.center, key: Key('itemLocation$index'))));
+      }
+      if (!readOnly) {
         rowContent.add(TableRowContent(
             name: ' ',
             width: isPhone ? 20 : 20,
             value: IconButton(
               visualDensity: VisualDensity.compact,
               icon: const Icon(Icons.delete_forever),
-              padding: EdgeInsets.all(0),
+              padding: const EdgeInsets.all(0),
               key: Key("itemDelete$index"),
               onPressed: () {
                 _cartBloc.add(CartDeleteItem(index));
               },
             )));
+      }
       return TableData(rowHeight: isPhone ? 30 : 20, rowContent: rowContent);
     }
 
-    var padding = SpanPadding(trailing: 8, leading: 8);
+    var padding = const SpanPadding(trailing: 8, leading: 8);
     SpanDecoration? getBackGround(BuildContext context, int index) {
       return index == 0
           ? SpanDecoration(
@@ -847,9 +854,9 @@ class MyFinDocState extends State<FinDocPage> {
           : TableView.builder(
               diagonalDragBehavior: DiagonalDragBehavior.free,
               verticalDetails:
-                  ScrollableDetails.vertical(controller: _verticalController),
+                  ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(
-                  controller: _horizontalController),
+                  controller: horizontalController),
               cellBuilder: (context, vicinity) =>
                   tableViewCells[vicinity.row][vicinity.column],
               // height of table cell
@@ -875,8 +882,8 @@ class MyFinDocState extends State<FinDocPage> {
 
   Widget finDocItemListTransaction(CartState state) {
     List<FinDocItem> items = finDocUpdated.items;
-    late final ScrollController _verticalController = ScrollController();
-    late final ScrollController _horizontalController = ScrollController();
+    late final ScrollController verticalController = ScrollController();
+    late final ScrollController horizontalController = ScrollController();
 
     TableData getTableData(Bloc bloc, String classificationId,
         BuildContext context, FinDocItem item, int index) {
@@ -905,12 +912,12 @@ class MyFinDocState extends State<FinDocPage> {
           width: 10,
           value: Text(item.product?.productId ?? '',
               key: Key('itemProductId$index'))));
-      if (!readOnly)
+      if (!readOnly) {
         rowContent.add(TableRowContent(
             name: ' ',
             width: 15,
             value: IconButton(
-              padding: EdgeInsets.all(0),
+              padding: const EdgeInsets.all(0),
               icon: const Icon(
                 Icons.delete_forever,
                 size: 20,
@@ -920,10 +927,11 @@ class MyFinDocState extends State<FinDocPage> {
                 _cartBloc.add(CartDeleteItem(index));
               },
             )));
+      }
       return TableData(rowHeight: 15, rowContent: rowContent);
     }
 
-    var padding = SpanPadding(trailing: 10, leading: 10);
+    var padding = const SpanPadding(trailing: 10, leading: 10);
     SpanDecoration? getBackGround(BuildContext context, int index) {
       return index == 0
           ? SpanDecoration(
@@ -949,9 +957,9 @@ class MyFinDocState extends State<FinDocPage> {
               child: TableView.builder(
                 diagonalDragBehavior: DiagonalDragBehavior.free,
                 verticalDetails:
-                    ScrollableDetails.vertical(controller: _verticalController),
+                    ScrollableDetails.vertical(controller: verticalController),
                 horizontalDetails: ScrollableDetails.horizontal(
-                    controller: _horizontalController),
+                    controller: horizontalController),
                 cellBuilder: (context, vicinity) =>
                     tableViewCells[vicinity.row][vicinity.column],
                 // height of table cell

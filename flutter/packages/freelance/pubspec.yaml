@@ -40,7 +40,7 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   mockito: ^5.0.2
-  very_good_analysis: ^5.1.0
+  flutter_lints: ^4.0.0
 
   bloc_test: ^9.0.1
  # flutter_launcher_icons: ^0.9.2

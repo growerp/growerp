@@ -97,8 +97,6 @@ class ReservationDialogState extends State<ReservationDialog> {
                       context,
                       '${widget.finDoc.idIsNull() ? "Add" : "Update"} successfull',
                       Colors.green);
-                  await Future.delayed(const Duration(milliseconds: 500));
-                  if (!mounted) return;
                   Navigator.of(context).pop();
                   break;
                 case FinDocStatus.failure:
@@ -176,7 +174,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                         return const FatalErrorForm(
                             message: 'server connection problem');
                       case DataFetchStatus.loading:
-                        return LoadingIndicator();
+                        return const LoadingIndicator();
                       case DataFetchStatus.success:
                         return DropdownSearch<User>(
                           selectedItem: _selectedUser,
@@ -239,7 +237,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                         return const FatalErrorForm(
                             message: 'server connection problem');
                       case DataFetchStatus.loading:
-                        return LoadingIndicator();
+                        return const LoadingIndicator();
                       case DataFetchStatus.success:
                         return DropdownSearch<Product>(
                           selectedItem: _selectedProduct,

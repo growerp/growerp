@@ -41,17 +41,17 @@ String paymentTypeCsvFormat = "paymentTypeId, accountCode, "
 int paymentTypeCsvLength = paymentTypeCsvFormat.split(',').length;
 
 // import
-List<PaymentType> CsvToPaymentTypes(String csvFile) {
-  List<PaymentType> PaymentTypes = [];
+List<PaymentType> csvToPaymentTypes(String csvFile) {
+  List<PaymentType> paymentTypes = [];
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
     if (row == result.first) continue;
-    PaymentTypes.add(PaymentType(
+    paymentTypes.add(PaymentType(
       paymentTypeId: row[0],
       accountCode: row[1],
       isPayable: row[2] == "true" ? true : false,
       isApplied: row[3] == "true" ? true : false,
     ));
   }
-  return PaymentTypes;
+  return paymentTypes;
 }

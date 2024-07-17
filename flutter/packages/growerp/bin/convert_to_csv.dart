@@ -20,7 +20,7 @@ import 'package:fast_csv/fast_csv.dart' as fast_csv;
 import 'package:growerp_models/growerp_models.dart';
 import 'package:logger/logger.dart';
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
-import '../lib/src/src.dart';
+import 'package:growerp/src/src.dart';
 
 var logger = Logger(filter: MyFilter());
 String outputDirectory = 'growerpOutput';
@@ -73,7 +73,7 @@ Future<void> main(List<String> args) async {
       exit(1);
     }
     var outputDirectory = modifiedArgs[0];
-    logger.i("convertToCsv command: directory ${outputDirectory} "
+    logger.i("convertToCsv command: directory $outputDirectory "
         "startDate: ${startDate.toString()}  "
         "endDate: ${endDate.toString()} -f ${requestedFileType?.name}");
   }
@@ -90,8 +90,9 @@ Future<void> main(List<String> args) async {
   // copy images if present
   List<List<String>> images = [[]];
   if (isDirectory('${args[0]}/images')) {
-    if (!isDirectory('$outputDirectory/images'))
+    if (!isDirectory('$outputDirectory/images')) {
       createDir('$outputDirectory/images');
+    }
     copyTree('${args[0]}/images', '$outputDirectory/images', overwrite: true);
     copy('${args[0]}/images.csv', '$outputDirectory/images.csv',
         overwrite: true);
@@ -122,7 +123,7 @@ Future<void> main(List<String> args) async {
     List<List<String>> convertedRows = [];
     for (String fileInput in files) {
       String fileContent = '';
-      logger.i("Processing filetype: ${fileType.name} file: ${fileInput}");
+      logger.i("Processing filetype: ${fileType.name} file: $fileInput");
       if (fileInput.endsWith('.csv')) {
         // parse raw csv file string
         fileContent = File(fileInput).readAsStringSync();
@@ -133,13 +134,13 @@ Future<void> main(List<String> args) async {
         var decoder = SpreadsheetDecoder.decodeBytes(bytes);
         final buffer = StringBuffer();
         decoder.tables.forEach((key, value) {
-          value.rows.forEach((row) {
+          for (var row in value.rows) {
             List<String> rows = [];
-            row.forEach((element) {
+            for (var element in row) {
               rows.add(element == null ? '' : '$element');
-            });
+            }
             buffer.write(createCsvRow(rows, row.length));
-          });
+          }
         });
         fileContent = buffer.toString();
       }
@@ -149,15 +150,17 @@ Future<void> main(List<String> args) async {
       int index = 0;
       inputCsvFile = fast_csv.parse(fileContent);
       for (final row in inputCsvFile) {
+        // ignore: avoid_print
         if (++index % 10000 == 0) print("processing row: $index");
-        if (fileInput.endsWith('.csv') && row == inputCsvFile.first)
+        if (fileInput.endsWith('.csv') && row == inputCsvFile.first) {
           continue; // header line
+        }
         List<String> convertedRow =
             convertRow(fileType, row, fileInput, images, startDate);
         if (convertedRow.isNotEmpty) convertedRows.add(convertedRow);
       }
       logger.i(
-          "filetype: ${fileType.name} file: ${fileInput} $index records processed");
+          "filetype: ${fileType.name} file: $fileInput $index records processed");
     }
 
     // prepare output files and run post processing like mandatory sort
@@ -226,8 +229,9 @@ Future<void> main(List<String> args) async {
         for (final row in convertedRows) {
           if (startDate != null &&
               convertDateString(row[0]).isBefore(startDate)) continue;
-          if (endDate != null && convertDateString(row[0]).isAfter(endDate))
+          if (endDate != null && convertDateString(row[0]).isAfter(endDate)) {
             continue;
+          }
           if (row[0].isEmpty) continue;
           if (lastRow.isEmpty || row[0] != lastRow[0]) {
             List<String> newRow = List.from(row);
@@ -264,8 +268,9 @@ Future<void> main(List<String> args) async {
         for (final row in convertedRows) {
           if (startDate != null &&
               convertDateString(row[0]).isBefore(startDate)) continue;
-          if (endDate != null && convertDateString(row[0]).isAfter(endDate))
+          if (endDate != null && convertDateString(row[0]).isAfter(endDate)) {
             continue;
+          }
           if (lastRow.isNotEmpty && row[0] != lastRow[0]) {
             seqNumber++;
           }

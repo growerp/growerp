@@ -33,8 +33,8 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
   if (isPhone(context)) {
     rowContent.add(TableRowContent(
         width: 10,
-        name: Padding(
-          padding: const EdgeInsets.fromLTRB(3, 3, 0, 0),
+        name: const Padding(
+          padding: EdgeInsets.fromLTRB(3, 3, 0, 0),
           child: Text("Short\nID"),
         ),
         value: CircleAvatar(
@@ -50,17 +50,17 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         name: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
             Text('${item.docType} Id'),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Text(classificationId == 'AppHotel' ? 'RsvDate' : 'CrDate'),
           ]),
           Text(item.sales ? 'Customer' : 'Supplier'),
           Row(
             children: [
-              Text('Status'),
-              SizedBox(width: 10),
-              if (item.docType != FinDocType.shipment) Text('Total'),
-              SizedBox(width: 10),
-              Text('#Items'),
+              const Text('Status'),
+              const SizedBox(width: 10),
+              if (item.docType != FinDocType.shipment) const Text('Total'),
+              const SizedBox(width: 10),
+              const Text('#Items'),
             ],
           ),
         ]),
@@ -68,7 +68,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
           Row(
             children: [
               Text(item.pseudoId ?? '', key: Key('id$index')),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Text(
                 classificationId == 'AppHotel'
                     ? item.items[0].rentalFromDate != null
@@ -77,7 +77,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
                             .substring(0, 10)
                         : '???'
                     : "${item.creationDate?.toString().substring(0, 11)}",
-                key: Key('date'),
+                key: const Key('date'),
               ),
             ],
           ),
@@ -118,15 +118,16 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         name: Text(item.sales ? 'Customer' : 'Supplier'),
         value:
             Text(item.otherCompany?.name ?? '', key: Key("otherUser$index"))));
-    if (item.docType != FinDocType.shipment)
+    if (item.docType != FinDocType.shipment) {
       rowContent.add(TableRowContent(
           width: 10,
           name: const Text(
             "Total",
             textAlign: TextAlign.right,
           ),
-          value: Text("${item.grandTotal.currency(currencyId: currencyId)}",
+          value: Text(item.grandTotal.currency(currencyId: currencyId),
               textAlign: TextAlign.right, key: Key("grandTotal$index"))));
+    }
     rowContent.add(TableRowContent(
         width: 10,
         name: const Text("Status"),
@@ -147,7 +148,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             item.docType == FinDocType.invoice)
           IconButton(
             visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.all(0),
+            padding: const EdgeInsets.all(0),
             key: Key('print$index'),
             icon: const Icon(Icons.print),
             tooltip: 'PDF/Print ${item.docType}',
@@ -159,7 +160,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             item.status != FinDocStatusVal.completed)
           IconButton(
               visualDensity: VisualDensity.compact,
-              padding: EdgeInsets.all(0),
+              padding: const EdgeInsets.all(0),
               key: Key('delete$index'),
               icon: const Icon(Icons.delete_forever),
               tooltip: 'remove item',
@@ -177,7 +178,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
 }
 
 // general settings
-var padding = SpanPadding(trailing: 5, leading: 5);
+var padding = const SpanPadding(trailing: 5, leading: 5);
 SpanDecoration? getBackGround(BuildContext context, int index) {
   return index == 0
       ? SpanDecoration(color: Theme.of(context).colorScheme.tertiaryContainer)

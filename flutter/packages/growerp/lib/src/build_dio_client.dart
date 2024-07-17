@@ -1,6 +1,6 @@
 import 'dart:io' show Platform;
 import 'package:dio/dio.dart';
-import 'package:growerp_models/src/logger.dart';
+import 'package:growerp/src/src.dart';
 import 'package:hive/hive.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
@@ -13,15 +13,15 @@ Future<Dio> buildDioClient(String? base,
     if (Platform.isAndroid) {
       android = true;
     }
+    // ignore: empty_catches
   } catch (e) {}
 
   final dio = Dio()
     ..options = BaseOptions(
-        baseUrl: base == null
-            ? (android == true)
+        baseUrl: base ??
+            ((android == true)
                 ? 'http://10.0.2.2:8080/'
-                : 'http://localhost:8080/'
-            : base)
+                : 'http://localhost:8080/'))
     ..options.connectTimeout = const Duration(seconds: 5)
     ..options.receiveTimeout = timeout
     ..httpClientAdapter;
@@ -49,7 +49,7 @@ Future<Dio> buildDioClient(String? base,
 class KeyInterceptor extends Interceptor {
   KeyInterceptor(this._box);
 
-  Box? _box;
+  final Box? _box;
 
   @override
   void onRequest(

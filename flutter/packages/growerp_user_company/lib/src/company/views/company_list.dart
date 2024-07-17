@@ -71,10 +71,11 @@ class CompanyListState extends State<CompanyList> {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return Builder(builder: (BuildContext context) {
       Widget tableView() {
-        if (companies.isEmpty)
-          return Center(
+        if (companies.isEmpty) {
+          return const Center(
               heightFactor: 20,
               child: Text("no users found", textAlign: TextAlign.center));
+        }
         // get table data formatted for tableView
         var (
           List<List<TableViewCell>> tableViewCells,
@@ -161,7 +162,7 @@ class CompanyListState extends State<CompanyList> {
                       heroTag: "btn1",
                       onPressed: () async {
                         // find findoc id to show
-                        Company company = await showDialog(
+                        await showDialog(
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
@@ -169,20 +170,20 @@ class CompanyListState extends State<CompanyList> {
                               return BlocProvider.value(
                                   value:
                                       context.read<DataFetchBloc<Companies>>(),
-                                  child: SearchCompanyList());
-                            });
-                        // show detail page
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _companyBloc,
-                                  child: CompanyDialog(company));
-                            });
+                                  child: const SearchCompanyList());
+                            }).then((value) async =>
+                            // show detail page
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                      value: _companyBloc,
+                                      child: CompanyDialog(value));
+                                }));
                       },
                       child: const Icon(Icons.search)),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   FloatingActionButton(
                       key: const Key("addNew"),
                       onPressed: () async {

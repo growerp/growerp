@@ -2793,8 +2793,8 @@ along with this software (see the LICENSE.md file). If not, see
                     [ taskType: 'workflowTemplate', taskName: 'Enter a sales/purchase order', jsonImage: jsonData1,
                         workflowTasks: [
                         [flowElementId: '7983a5a9-3613-47ea-80ae-7949d2de4db1', routing: 'selectScreen,Sales,Purchase'],
-                        [flowElementId: 'dd764264-142c-4863-b523-104c12c718d0', routing: 'salesOrderEntry'],
-                        [flowElementId: 'c8e99403-c6c2-464e-8752-3b93355a4a49', routing: 'purchaseOrderEntry'],
+                        [flowElementId: 'dd764264-142c-4863-b523-104c12c718d0', routing: 'salesorderEntry'],
+                        [flowElementId: 'c8e99403-c6c2-464e-8752-3b93355a4a49', routing: 'purchaseorderEntry'],
                         [flowElementId: 'b98c034f-892b-4fb2-85aa-fca829bf3e39', routing: 'textScreen,Start screen'],
                         [flowElementId: 'b9e96209-d9cf-4719-9173-7e5c1c10ca5f', routing: 'textScreen,End screen'],
                         ]

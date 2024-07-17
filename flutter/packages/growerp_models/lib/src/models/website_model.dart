@@ -54,7 +54,7 @@ String websiteCsvFormat =
 int websiteCsvLength = glAccountCsvFormat.split(',').length;
 
 // import
-Website CsvToWebsite(String csvFile) {
+Website csvToWebsite(String csvFile) {
   Website website = Website();
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
@@ -117,14 +117,14 @@ Website CsvToWebsite(String csvFile) {
 }
 
 // export
-String CsvFromWebsite(Website website) {
+String csvFromWebsite(Website website) {
   var csv = [websiteCsvFormat];
   csv.add(createCsvRow([
     website.hostName,
     website.title,
     website.colorJson,
     website.measurementId,
-    website.websiteCategories.length > 0
+    website.websiteCategories.isNotEmpty
         ? website.websiteCategories[0].categoryName
         : '',
     website.websiteCategories.length > 1
@@ -139,28 +139,28 @@ String CsvFromWebsite(Website website) {
     website.websiteCategories.length > 4
         ? website.websiteCategories[4].categoryName
         : '',
-    website.productCategories.length > 0
+    website.productCategories.isNotEmpty
         ? website.productCategories[0].categoryName
         : '',
-    website.productCategories.length > 0
+    website.productCategories.isNotEmpty
         ? website.productCategories[1].categoryName
         : '',
-    website.productCategories.length > 0
+    website.productCategories.isNotEmpty
         ? website.productCategories[2].categoryName
         : '',
-    website.productCategories.length > 0
+    website.productCategories.isNotEmpty
         ? website.productCategories[3].categoryName
         : '',
-    website.productCategories.length > 0
+    website.productCategories.isNotEmpty
         ? website.productCategories[4].categoryName
         : '',
-    website.websiteContent.length > 0 ? website.websiteContent[0].path : '',
-    website.websiteContent.length > 0 ? website.websiteContent[0].title : '',
-    website.websiteContent.length > 0 ? website.websiteContent[0].text : '',
-    website.websiteContent.length > 0 && website.websiteContent[0].image != null
+    website.websiteContent.isNotEmpty ? website.websiteContent[0].path : '',
+    website.websiteContent.isNotEmpty ? website.websiteContent[0].title : '',
+    website.websiteContent.isNotEmpty ? website.websiteContent[0].text : '',
+    website.websiteContent.isNotEmpty && website.websiteContent[0].image != null
         ? base64.encode(website.websiteContent[0].image!)
         : '',
-    website.websiteContent.length > 0
+    website.websiteContent.isNotEmpty
         ? website.websiteContent[0].seqId.toString()
         : '',
     website.websiteContent.length > 1 ? website.websiteContent[1].path : '',

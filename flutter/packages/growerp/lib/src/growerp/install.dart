@@ -15,16 +15,18 @@ install(String growerpPath, String branch) {
     // only stash and pop if changes present
     var lines = '';
     'git status'.start(
-        workingDirectory: '$growerpPath',
+        workingDirectory: growerpPath,
         progress: Progress((line) => lines += line));
-    if (!lines.contains('working tree clean'))
-      run('git stash', workingDirectory: '$growerpPath');
-    run('git pull', workingDirectory: '$growerpPath');
-    if (!lines.contains('working tree clean'))
-      run('git stash pop', workingDirectory: '$growerpPath');
+    if (!lines.contains('working tree clean')) {
+      run('git stash', workingDirectory: growerpPath);
+    }
+    run('git pull', workingDirectory: growerpPath);
+    if (!lines.contains('working tree clean')) {
+      run('git stash pop', workingDirectory: growerpPath);
+    }
   } else {
     run('git clone -b $branch https://github.com/growerp/growerp.git $growerpPath',
-        workingDirectory: '$HOME');
+        workingDirectory: HOME);
   }
   logger.i('Starting chat server in separate window...');
   run('gnome-terminal -- bash -c "cd $growerpPath/chat && ./gradlew apprun"');

@@ -77,11 +77,13 @@ class TimePeriodListState extends State<TimePeriodList> {
                       key: const Key("changePeriod"),
                       onPressed: () async {
                         setState(() {
-                          if (periodType == 'Y')
+                          if (periodType == 'Y') {
                             periodType = 'Q';
-                          else if (periodType == 'Q')
+                          } else if (periodType == 'Q') {
                             periodType = 'M';
-                          else if (periodType == 'M') periodType = 'Y';
+                          } else if (periodType == 'M') {
+                            periodType = 'Y';
+                          }
                         });
                         _ledgerBloc
                             .add(LedgerTimePeriods(periodType: periodType));
@@ -93,7 +95,7 @@ class TimePeriodListState extends State<TimePeriodList> {
                     Expanded(
                         child: RefreshIndicator(
                             onRefresh: (() async =>
-                                _ledgerBloc.add(LedgerTimePeriods())),
+                                _ledgerBloc.add(const LedgerTimePeriods())),
                             child: ListView.builder(
                                 key: const Key('listView'),
                                 shrinkWrap: true,

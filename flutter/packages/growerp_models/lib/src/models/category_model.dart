@@ -29,6 +29,7 @@ class Category extends Equatable with _$Category {
   Category._();
   factory Category({
     @Default("") String categoryId,
+    @Default("") String pseudoId,
     @Default("") String categoryName,
     @Default("") String description,
     @Uint8ListConverter() Uint8List? image,
@@ -51,7 +52,7 @@ String categoryCsvFormat =
     "category Id, Category Name*, Description*, image\r\n";
 int categoryCsvLength = categoryCsvFormat.split(',').length;
 
-List<Category> CsvToCategories(String csvFile) {
+List<Category> csvToCategories(String csvFile) {
   List<Category> categories = [];
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
@@ -69,7 +70,7 @@ List<Category> CsvToCategories(String csvFile) {
   return categories;
 }
 
-String CsvFromCategories(List<Category> categories) {
+String csvFromCategories(List<Category> categories) {
   var csv = [categoryCsvFormat];
   for (Category category in categories) {
     csv.add(createCsvRow([

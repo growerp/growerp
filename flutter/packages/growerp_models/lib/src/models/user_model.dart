@@ -69,7 +69,7 @@ String userCsvFormat =
     'User Group, language, image, Company Name, Company Role\r\n';
 int userCsvLength = userCsvFormat.split(',').length;
 
-List<User> CsvToUsers(String csvFile) {
+List<User> csvToUsers(String csvFile) {
   List<User> users = [];
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
@@ -97,7 +97,7 @@ List<User> CsvToUsers(String csvFile) {
   return users;
 }
 
-String CsvFromUsers(List<User> users) {
+String csvFromUsers(List<User> users) {
   var csv = [userCsvFormat];
   for (User user in users) {
     csv.add(createCsvRow([

@@ -30,7 +30,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
       .currencyId!;
 
   List<TableRowContent> rowContent = [];
-  if (isPhone(context))
+  if (isPhone(context)) {
     rowContent.add(TableRowContent(
         name: 'ShortId',
         width: isPhone(context) ? 15 : 10,
@@ -42,17 +42,19 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
           ),
         )));
-  if (!isPhone(context))
+  }
+  if (!isPhone(context)) {
     rowContent.add(TableRowContent(
         name: 'AssetId',
         width: 10,
         value: Text(item.pseudoId, key: Key('id$index'))));
+  }
   rowContent.add(TableRowContent(
       name: 'Name',
       width: isPhone(context) ? 40 : 25,
       value: Text(item.assetName ?? '', key: Key('name$index'))));
   rowContent.add(TableRowContent(
-    name: Text(
+    name: const Text(
       'Qty.',
       textAlign: TextAlign.right,
     ),
@@ -63,18 +65,20 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
       textAlign: TextAlign.right,
     ),
   ));
-  if (!isPhone(context))
+  if (!isPhone(context)) {
     rowContent.add(TableRowContent(
-        name: Text('Cost'),
+        name: const Text('Cost'),
         width: 10,
         value: Text(item.acquireCost.currency(currencyId: currencyId))));
-  if (!isPhone(context))
+  }
+  if (!isPhone(context)) {
     rowContent.add(TableRowContent(
-        name: Text('Loc Id'),
+        name: const Text('Loc Id'),
         width: 10,
         value: Text(item.acquireCost.currency(currencyId: currencyId))));
+  }
   rowContent.add(TableRowContent(
-      name: Text('Act'),
+      name: const Text('Act'),
       width: 8,
       value: Text(item.statusId == 'Deactivated' ? 'N' : 'Y',
           key: Key('status$index'), textAlign: TextAlign.center)));
@@ -100,7 +104,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
 }
 
 // general settings
-var padding = SpanPadding(trailing: 5, leading: 5);
+var padding = const SpanPadding(trailing: 5, leading: 5);
 SpanDecoration? getBackGround(BuildContext context, int index) {
   return index == 0
       ? SpanDecoration(color: Theme.of(context).colorScheme.tertiaryContainer)

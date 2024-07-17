@@ -64,7 +64,7 @@ String productCsvFormat =
 List<String> productCsvTitles = productCsvFormat.split(',');
 int productCsvLength = productCsvTitles.length;
 
-List<Product> CsvToProducts(String csvFile, Logger logger) {
+List<Product> csvToProducts(String csvFile, Logger logger) {
   int errors = 0;
   List<Product> products = [];
   final result = fast_csv.parse(csvFile);
@@ -103,7 +103,7 @@ List<Product> CsvToProducts(String csvFile, Logger logger) {
   return products;
 }
 
-String CsvFromProducts(List<Product> products) {
+String csvFromProducts(List<Product> products) {
   var csv = [productCsvFormat];
   for (Product product in products) {
     csv.add(createCsvRow([

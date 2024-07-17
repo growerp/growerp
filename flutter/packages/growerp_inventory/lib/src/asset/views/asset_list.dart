@@ -64,11 +64,12 @@ class AssetListState extends State<AssetList> {
                   child: Text('failed to fetch assets: ${state.message}'));
             case AssetStatus.success:
               Widget tableView() {
-                if (state.assets.isEmpty)
-                  return Center(
+                if (state.assets.isEmpty) {
+                  return const Center(
                       heightFactor: 20,
                       child:
                           Text("no assets found", textAlign: TextAlign.center));
+                }
                 // get table data formatted for tableView
                 var (
                   List<List<TableViewCell>> tableViewCells,
@@ -141,7 +142,7 @@ class AssetListState extends State<AssetList> {
                           heroTag: "btn1",
                           onPressed: () async {
                             // find findoc id to show
-                            Asset asset = await showDialog(
+                            await showDialog(
                                 barrierDismissible: true,
                                 context: context,
                                 builder: (BuildContext context) {
@@ -149,20 +150,20 @@ class AssetListState extends State<AssetList> {
                                   return BlocProvider.value(
                                       value: context
                                           .read<DataFetchBloc<Locations>>(),
-                                      child: SearchAssetList());
-                                });
-                            // show detail page
-                            await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return BlocProvider.value(
-                                      value: _assetBloc,
-                                      child: AssetDialog(asset));
-                                });
+                                      child: const SearchAssetList());
+                                }).then((value) async =>
+                                // show detail page
+                                await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return BlocProvider.value(
+                                          value: _assetBloc,
+                                          child: AssetDialog(value));
+                                    }));
                           },
                           child: const Icon(Icons.search)),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       FloatingActionButton(
                           heroTag: "assetNew",
                           key: const Key("addNew"),

@@ -50,8 +50,6 @@ class _FilesHeaderState extends State<GlAccountFilesDialog> {
       if (state.status == GlAccountStatus.success) {
         glAccountFilesDialogKey.currentState!
             .showSnackBar(snackBar(context, Colors.green, state.message ?? ''));
-        await Future.delayed(const Duration(milliseconds: 1000));
-        if (!mounted) return;
         Navigator.of(context).pop();
       }
     }, builder: (context, state) {

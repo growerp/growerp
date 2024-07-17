@@ -80,7 +80,7 @@ Future addProductItemDialog(BuildContext context) async {
                                                 message:
                                                     'server connection problem');
                                           case DataFetchStatus.loading:
-                                            return LoadingIndicator();
+                                            return const LoadingIndicator();
                                           case DataFetchStatus.success:
                                             return DropdownSearch<Product>(
                                               selectedItem: selectedProduct,
@@ -183,7 +183,7 @@ Future addProductItemDialog(BuildContext context) async {
                                         key: const Key('itemPrice'),
                                         decoration: InputDecoration(
                                             labelText:
-                                                'Price/Amount(${currencySymbol})'),
+                                                'Price/Amount($currencySymbol)'),
                                         controller: priceController,
                                         validator: (value) {
                                           if (value!.isEmpty) {

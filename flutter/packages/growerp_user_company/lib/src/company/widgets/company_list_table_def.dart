@@ -26,7 +26,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
   bool isPhone = isAPhone(context);
   List<TableRowContent> rowContent = [];
 
-  if (isPhone)
+  if (isPhone) {
     rowContent.add(TableRowContent(
       name: 'ShortId',
       width: 10,
@@ -37,6 +37,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             : Text(item.name != null ? item.name![0] : '?'),
       ),
     ));
+  }
 
   rowContent.add(TableRowContent(
     name: 'Id',
@@ -44,9 +45,9 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
     value: Text(item.pseudoId ?? '', key: Key('id$index')),
   ));
 
-  if (isPhone)
+  if (isPhone) {
     rowContent.add(TableRowContent(
-      name: Text('Company Name\nEmail'),
+      name: const Text('Company Name\nEmail'),
       width: 55,
       value: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,36 +58,41 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         ],
       ),
     ));
+  }
 
-  if (!isPhone)
+  if (!isPhone) {
     rowContent.add(TableRowContent(
       name: 'Company Name',
       width: 20,
       value: Text(item.name ?? '', key: Key('id$index')),
     ));
+  }
 
-  if (!isPhone)
+  if (!isPhone) {
     rowContent.add(TableRowContent(
       name: 'Role',
       width: 10,
       value: Text(item.role!.value, key: Key('role$index')),
     ));
+  }
 
-  if (!isPhone)
+  if (!isPhone) {
     rowContent.add(TableRowContent(
       name: 'Email',
       width: 10,
       value: Text(item.email ?? '', key: Key('email$index')),
     ));
+  }
 
-  if (!isPhone)
+  if (!isPhone) {
     rowContent.add(TableRowContent(
       name: 'TelephoneNr',
       width: 10,
       value: Text(item.telephoneNr ?? '', key: Key('telephone$index')),
     ));
+  }
 
-  if (!isPhone)
+  if (!isPhone) {
     rowContent.add(TableRowContent(
       name: 'VAT/SLS',
       width: 10,
@@ -96,6 +102,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
               : item.salesPerc.toString(),
           key: Key('perc$index')),
     ));
+  }
 
   rowContent.add(TableRowContent(
     name: '',
@@ -113,7 +120,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
 }
 
 // general settings
-var padding = SpanPadding(trailing: 5, leading: 5);
+var padding = const SpanPadding(trailing: 5, leading: 5);
 SpanDecoration? getBackGround(BuildContext context, int index) {
   return index == 0
       ? SpanDecoration(color: Theme.of(context).colorScheme.tertiaryContainer)

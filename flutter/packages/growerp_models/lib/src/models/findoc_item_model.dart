@@ -55,7 +55,7 @@ String finDocItemCsvFormat = "finDoc Id, finDocType, item Seq, "
 List<String> finDocItemCsvTitles = finDocItemCsvFormat.split(',');
 int finDocItemCsvLength = finDocItemCsvTitles.length;
 
-List<FinDocItem> CsvToFinDocItems(String csvFile, Logger logger) {
+List<FinDocItem> csvToFinDocItems(String csvFile, Logger logger) {
   int errors = 0;
   List<FinDocItem> finDocItems = [];
   final result = fast_csv.parse(csvFile);
@@ -92,7 +92,7 @@ List<FinDocItem> CsvToFinDocItems(String csvFile, Logger logger) {
   return finDocItems;
 }
 
-String CsvFromFinDocItems(List<FinDocItem> finDocItems) {
+String csvFromFinDocItems(List<FinDocItem> finDocItems) {
   var csv = [finDocItemCsvFormat];
   for (FinDocItem finDocItem in finDocItems) {
     csv.add(createCsvRow([

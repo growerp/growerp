@@ -111,7 +111,7 @@ Future addRentalItemDialog(BuildContext context,
                                                 message:
                                                     'server connection problem');
                                           case DataFetchStatus.loading:
-                                            return LoadingIndicator();
+                                            return const LoadingIndicator();
                                           case DataFetchStatus.success:
                                             return DropdownSearch<Product>(
                                               selectedItem: selectedProduct,
@@ -245,9 +245,10 @@ Future addRentalItemDialog(BuildContext context,
                                                         .state
                                                         .data as Products)
                                                     .products;
-                                                if (prods.isNotEmpty)
+                                                if (prods.isNotEmpty) {
                                                   rentalDays =
                                                       prods[0].fullDates;
+                                                }
                                                 return await selectDate(
                                                     context);
                                               }),

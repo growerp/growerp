@@ -41,16 +41,18 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
       String periodType = 'Y', year = DateTime.now().year.toString();
       // get periodType from periodname
       if (event.periodName.isNotEmpty) {
-        if (event.periodName.contains('q'))
+        if (event.periodName.contains('q')) {
           periodType = 'Q';
-        else if (event.periodName.contains('m'))
+        } else if (event.periodName.contains('m')) {
           periodType = 'M';
-        else
+        } else {
           periodType = 'Y';
-        if (periodType != 'Y')
+        }
+        if (periodType != 'Y') {
           year = event.periodName.substring(1, 5);
-        else
+        } else {
           year = ''; // get all years
+        }
       }
       final TimePeriods timePeriods =
           await restClient.getTimePeriod(year: year, periodType: periodType);

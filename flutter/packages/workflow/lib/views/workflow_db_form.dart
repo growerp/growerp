@@ -30,8 +30,8 @@ class WorkflowDbForm extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            SizedBox(height: 10),
-            WorkflowDashboard(),
+            const SizedBox(height: 10),
+            const WorkflowDashboard(),
             Expanded(
               child: DashBoardForm(dashboardItems: [
                 makeDashboardItem('dbWorkflows', context, menuOptions[1],

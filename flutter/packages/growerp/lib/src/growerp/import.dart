@@ -68,42 +68,44 @@ import(String inputFile, String? backendUrl, String username,
     await login(client, username, password);
     // import
     for (fileType in FileType.values) {
-      if (overrideFileType != FileType.unknown && overrideFileType != fileType)
+      if (overrideFileType != FileType.unknown &&
+          overrideFileType != fileType) {
         continue;
+      }
       var fileNames =
           find('${fileType.name}-*.csv', workingDirectory: inputFile).toList();
-      fileNames..sort();
+      fileNames.sort();
       for (final fileName in fileNames) {
-        logger.i("Importing $fileType: ${fileName}");
+        logger.i("Importing $fileType: $fileName");
         String csvFile = File(fileName).readAsStringSync();
         switch (fileType) {
           case FileType.itemType:
-            await client.importItemTypes(CsvToItemTypes(csvFile));
+            await client.importItemTypes(csvToItemTypes(csvFile));
             break;
           case FileType.paymentType:
-            await client.importPaymentTypes(CsvToPaymentTypes(csvFile));
+            await client.importPaymentTypes(csvToPaymentTypes(csvFile));
             break;
           case FileType.glAccount:
-            await client.importGlAccounts(CsvToGlAccounts(csvFile));
+            await client.importGlAccounts(csvToGlAccounts(csvFile));
             break;
           case FileType.product:
             await client.importProducts(
-                CsvToProducts(csvFile, logger), 'AppAdmin');
+                csvToProducts(csvFile, logger), 'AppAdmin');
             break;
           case FileType.category:
-            await client.importCategories(CsvToCategories(csvFile));
+            await client.importCategories(csvToCategories(csvFile));
             break;
           case FileType.asset:
-            await client.importAssets(CsvToAssets(csvFile, logger), 'AppAdmin');
+            await client.importAssets(csvToAssets(csvFile, logger), 'AppAdmin');
             break;
           case FileType.company:
-            await client.importCompanies(CsvToCompanies(csvFile));
+            await client.importCompanies(csvToCompanies(csvFile));
             break;
           case FileType.user:
-            await client.importUsers(CsvToUsers(csvFile));
+            await client.importUsers(csvToUsers(csvFile));
             break;
           case FileType.website:
-            await client.importWebsite(CsvToWebsite(csvFile));
+            await client.importWebsite(csvToWebsite(csvFile));
             break;
           case FileType.finDocTransaction:
           case FileType.finDocOrderPurchase:
@@ -112,7 +114,7 @@ import(String inputFile, String? backendUrl, String username,
           case FileType.finDocOrderSale:
           case FileType.finDocInvoiceSale:
           case FileType.finDocPaymentSale:
-            await client.importFinDoc(CsvToFinDocs(csvFile, logger));
+            await client.importFinDoc(csvToFinDocs(csvFile, logger));
             break;
           case FileType.finDocTransactionItem:
           case FileType.finDocOrderPurchaseItem:
@@ -122,7 +124,7 @@ import(String inputFile, String? backendUrl, String username,
           case FileType.finDocInvoiceSaleItem:
           case FileType.finDocPaymentSaleItem:
             await client.importFinDocItem(
-                CsvToFinDocItems(csvFile, logger), 'AppAdmin');
+                csvToFinDocItems(csvFile, logger), 'AppAdmin');
             break;
           default:
             logger.e("FileType ${fileType.name} not implemented yet");

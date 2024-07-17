@@ -62,7 +62,7 @@ String companyCsvFormat =
     'Vat perc, Sales Perc\r\n';
 int companyCsvLength = companyCsvFormat.split(',').length;
 
-List<Company> CsvToCompanies(String csvFile) {
+List<Company> csvToCompanies(String csvFile) {
   List<Company> companies = [];
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
@@ -105,7 +105,7 @@ List<Company> CsvToCompanies(String csvFile) {
   return companies;
 }
 
-String CsvFromCompanies(List<Company> companies) {
+String csvFromCompanies(List<Company> companies) {
   var csv = [companyCsvFormat];
   for (Company company in companies) {
     csv.add(createCsvRow([

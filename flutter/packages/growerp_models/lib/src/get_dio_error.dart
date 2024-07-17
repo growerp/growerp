@@ -36,8 +36,9 @@ String getDioError(e) {
       break;
   }
   String returnMessage = '';
-  if (exception.type != DioExceptionType.unknown)
+  if (exception.type != DioExceptionType.unknown) {
     returnMessage += "$expression: ${exception.message}";
+  }
   if (e.response != null) {
     Map<String, dynamic> response = json.decode(e.response.toString());
     returnMessage += "${response['errors']}[${response['errorCode']}]";

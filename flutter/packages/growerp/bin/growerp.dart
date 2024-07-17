@@ -19,7 +19,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:logger/logger.dart';
 import 'package:hive/hive.dart';
 
-import '../lib/src/src.dart';
+import 'package:growerp/src/src.dart';
 
 Future<void> main(List<String> args) async {
   String growerpPath = '$HOME/growerp';

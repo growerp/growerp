@@ -69,7 +69,7 @@ enum FinDocStatusVal {
   }
 
   static List<FinDocStatusVal> validStatusList(FinDocStatusVal? currentStatus) {
-    if (currentStatus == null) currentStatus = created;
+    currentStatus ??= created;
     switch (currentStatus) {
       case inPreparation:
         return [inPreparation, approved, cancelled];
