@@ -143,7 +143,8 @@ class LocationListState extends State<LocationList> {
                                   value:
                                       context.read<DataFetchBloc<Locations>>(),
                                   child: const SearchLocationList());
-                            }).then((value) async =>
+                            }).then((value) async => value != null
+                            ?
                             // show detail page
                             await showDialog(
                                 barrierDismissible: true,
@@ -152,7 +153,8 @@ class LocationListState extends State<LocationList> {
                                   return BlocProvider.value(
                                       value: _locationBloc,
                                       child: LocationDialog(value));
-                                }));
+                                })
+                            : const SizedBox.shrink());
                       },
                       child: const Icon(Icons.search)),
                   const SizedBox(height: 10),

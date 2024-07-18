@@ -151,7 +151,8 @@ class ProductListState extends State<ProductList> {
                                         value: context
                                             .read<DataFetchBloc<Locations>>(),
                                         child: const SearchProductList());
-                                  }).then((value) async =>
+                                  }).then((value) async => value != null
+                                  ?
                                   // show detail page
                                   await showDialog(
                                       barrierDismissible: true,
@@ -160,7 +161,8 @@ class ProductListState extends State<ProductList> {
                                         return BlocProvider.value(
                                             value: _productBloc,
                                             child: ProductDialog(value));
-                                      }));
+                                      })
+                                  : const SizedBox.shrink());
                             },
                             child: const Icon(Icons.search)),
                         const SizedBox(height: 10),

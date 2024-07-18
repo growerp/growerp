@@ -151,7 +151,8 @@ class AssetListState extends State<AssetList> {
                                       value: context
                                           .read<DataFetchBloc<Locations>>(),
                                       child: const SearchAssetList());
-                                }).then((value) async =>
+                                }).then((value) async => value != null
+                                ?
                                 // show detail page
                                 await showDialog(
                                     barrierDismissible: true,
@@ -160,7 +161,8 @@ class AssetListState extends State<AssetList> {
                                       return BlocProvider.value(
                                           value: _assetBloc,
                                           child: AssetDialog(value));
-                                    }));
+                                    })
+                                : const SizedBox.shrink());
                           },
                           child: const Icon(Icons.search)),
                       const SizedBox(height: 10),

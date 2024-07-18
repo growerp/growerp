@@ -20,7 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 class CategoryTest {
   static Future<void> selectCategories(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbCatalog', 'CategoryList', '3');
+    await CommonTest.selectOption(tester, 'dbCatalog', 'CategoryList', '2');
   }
 
   static Future<void> addCategories(
@@ -44,8 +44,7 @@ class CategoryTest {
       if (category.categoryId.isEmpty) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.doSearch(tester, searchString: category.categoryId);
-        await CommonTest.tapByKey(tester, 'name0');
+        await CommonTest.doNewSearch(tester, searchString: category.categoryId);
         expect(CommonTest.getTextField('header').split('#')[1],
             category.categoryId);
       }
@@ -65,11 +64,16 @@ class CategoryTest {
       WidgetTester tester, List<Category> categories) async {
     List<Category> newCategories = [];
     for (Category category in categories) {
-      await CommonTest.doSearch(tester,
-          searchString: category.categoryName, seconds: 5);
       // list
-      expect(CommonTest.getTextField('name0'), equals(category.categoryName));
-      expect(CommonTest.getTextField('products0'), equals('0'));
+      for (final (index, _) in categories.indexed) {
+        if (CommonTest.getTextField('id$index') == category.pseudoId) {
+          expect(CommonTest.getTextField('name$index'),
+              equals(category.categoryName));
+          expect(CommonTest.getTextField('products$index'), equals('0'));
+        }
+      }
+      await CommonTest.doNewSearch(tester,
+          searchString: category.categoryName, seconds: 5);
       // detail
       await CommonTest.tapByKey(tester, 'name0');
       expect(find.byKey(const Key('CategoryDialog')), findsOneWidget);
@@ -81,16 +85,12 @@ class CategoryTest {
       newCategories.add(category.copyWith(categoryId: id));
       await CommonTest.tapByKey(tester, 'cancel');
     }
-    await CommonTest.closeSearch(tester);
     return newCategories;
   }
 
   static Future<void> deleteLastCategory(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     int count = test.categories.length;
-    // openclose search to refresh
-    await CommonTest.tapByKey(tester, 'search');
-    await CommonTest.tapByKey(tester, 'search');
     expect(find.byKey(const Key('categoryItem')),
         findsNWidgets(count)); // initial admin
     await CommonTest.tapByKey(tester, 'delete${count - 1}',

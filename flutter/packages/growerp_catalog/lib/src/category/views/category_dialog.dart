@@ -33,8 +33,9 @@ class CategoryDialog extends StatefulWidget {
 
 class CategoryDialogState extends State<CategoryDialog> {
   final _categoryDialogFormKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _descrController = TextEditingController();
+  final _idController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _descrController = TextEditingController();
   bool loading = false;
   late Category updatedCategory;
   XFile? _imageFile;
@@ -50,6 +51,7 @@ class CategoryDialogState extends State<CategoryDialog> {
   void initState() {
     super.initState();
     classificationId = GlobalConfiguration().get("classificationId");
+    _idController.text = widget.category.pseudoId;
     _nameController.text = widget.category.categoryName;
     _descrController.text = widget.category.description;
     _selectedProducts = List.of(widget.category.products);
@@ -257,6 +259,12 @@ class CategoryDialogState extends State<CategoryDialog> {
                                       style: const TextStyle(
                                           fontSize: 30, color: Colors.black))),
                       const SizedBox(height: 10),
+                      TextFormField(
+                        key: const Key('Id'),
+                        decoration:
+                            const InputDecoration(labelText: 'Category Id'),
+                        controller: _idController,
+                      ),
                       TextFormField(
                         key: const Key('name'),
                         decoration:

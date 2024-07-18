@@ -1509,12 +1509,12 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="productCategoryId" />
         </member-entity>
         <alias name="parentProductCategoryId" entity-alias="ROLLUP" />
-        <alias name="pseudoId" entity-alias="PARENT" />
         <alias name="ownerPartyId" entity-alias="PARENT" />
         <alias name="fromDate" entity-alias="ROLLUP" />
         <alias name="thruDate" entity-alias="ROLLUP" />
         <alias name="sequenceNum" entity-alias="ROLLUP" />
         <alias name="productCategoryId" entity-alias="ROLLUP" />
+        <alias name="pseudoId" entity-alias="CHILD" />
         <alias name="categoryName" entity-alias="CHILD" />
         <alias name="description" entity-alias="CHILD" />
     </view-entity>

@@ -252,7 +252,8 @@ class FinDocListState extends State<FinDocList> {
                                     child: SearchFinDocList(
                                         docType: widget.docType,
                                         sales: widget.sales));
-                              }).then((value) async =>
+                              }).then((value) async => value != null
+                              ?
                               // show detail page
                               await showDialog(
                                   barrierDismissible: true,
@@ -262,7 +263,8 @@ class FinDocListState extends State<FinDocList> {
                                         value: _finDocBloc,
                                         child:
                                             SelectFinDocDialog(finDoc: value));
-                                  }));
+                                  })
+                              : const SizedBox.shrink());
                         },
                         child: const Icon(Icons.search)),
                     const SizedBox(height: 10),

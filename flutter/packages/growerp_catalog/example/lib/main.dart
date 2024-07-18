@@ -75,7 +75,7 @@ List<MenuOption> menuOptions = [
         ),
         TabItem(
           form: const CategoryList(),
-          label: 'Catgs',
+          label: 'Categories',
           icon: const Icon(Icons.business),
         ),
       ]),

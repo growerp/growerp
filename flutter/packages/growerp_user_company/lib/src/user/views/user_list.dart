@@ -173,7 +173,8 @@ class UserListState extends State<UserList> {
                               return BlocProvider.value(
                                   value: context.read<DataFetchBloc<Users>>(),
                                   child: const SearchUserList());
-                            }).then((value) async =>
+                            }).then((value) async => value != null
+                            ?
                             // show detail page
                             await showDialog(
                                 barrierDismissible: true,
@@ -182,7 +183,8 @@ class UserListState extends State<UserList> {
                                   return BlocProvider.value(
                                       value: _userBloc,
                                       child: UserDialog(value));
-                                }));
+                                })
+                            : const SizedBox.shrink());
                       },
                       child: const Icon(Icons.search)),
                   const SizedBox(height: 10),

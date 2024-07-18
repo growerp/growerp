@@ -25,7 +25,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import '../../../growerp_catalog.dart';
+import '../../category/blocs/category_bloc.dart';
+import '../product.dart';
 
 final GlobalKey<ScaffoldMessengerState> productDialogKey =
     GlobalKey<ScaffoldMessengerState>();

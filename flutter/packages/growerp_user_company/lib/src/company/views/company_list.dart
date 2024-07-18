@@ -171,7 +171,8 @@ class CompanyListState extends State<CompanyList> {
                                   value:
                                       context.read<DataFetchBloc<Companies>>(),
                                   child: const SearchCompanyList());
-                            }).then((value) async =>
+                            }).then((value) async => value != null
+                            ?
                             // show detail page
                             await showDialog(
                                 barrierDismissible: true,
@@ -180,7 +181,8 @@ class CompanyListState extends State<CompanyList> {
                                   return BlocProvider.value(
                                       value: _companyBloc,
                                       child: CompanyDialog(value));
-                                }));
+                                })
+                            : const SizedBox.shrink());
                       },
                       child: const Icon(Icons.search)),
                   const SizedBox(height: 10),
