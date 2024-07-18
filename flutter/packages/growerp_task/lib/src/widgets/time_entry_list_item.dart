@@ -63,6 +63,7 @@ class TimeEntryListItem extends StatelessWidget {
       trailing: IconButton(
         key: Key('delete$index'),
         icon: const Icon(Icons.delete_forever),
+        padding: EdgeInsets.zero,
         onPressed: () {
           context.read<TaskBloc>().add(TaskTimeEntryDelete(timeEntry));
         },

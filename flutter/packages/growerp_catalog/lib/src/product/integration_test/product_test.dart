@@ -50,8 +50,7 @@ class ProductTest {
       if (product.productId.isEmpty) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.doSearch(tester, searchString: product.productId);
-        await CommonTest.tapByKey(tester, 'name0');
+        await CommonTest.doNewSearch(tester, searchString: product.productId);
         expect(
             CommonTest.getTextField('header').split('#')[1], product.productId);
       }
@@ -94,33 +93,25 @@ class ProductTest {
       {String classificationId = 'AppAdmin'}) async {
     List<Product> newProducts = [];
     for (Product product in products) {
-      await CommonTest.doSearch(tester, searchString: product.productName!);
-      // list
-      expect(CommonTest.getTextField('name0'), equals(product.productName));
-      expect(
-          CommonTest.getTextField('price0'), equals(product.price.toString()));
-      if (classificationId == 'AppAdmin') {
-        if (product.categories.length == 1) {
-          expect(CommonTest.getTextField('categoryName0'),
-              equals(product.categories[0].categoryName));
-        } else {
-          expect(CommonTest.getTextField('categoryName0'),
-              equals(product.categories.length.toString()));
+      //find id in list and check
+      for (final (index, _) in products.indexed) {
+        if (CommonTest.getTextField('id$index') == product.pseudoId) {
+          expect(CommonTest.getTextField('price$index'),
+              equals(product.price.currency(currencyId: 'USD')));
+          expect(CommonTest.getTextField('name$index'),
+              equals(product.description));
         }
       }
-      if (!CommonTest.isPhone()) {
-        expect(CommonTest.getTextField('description0'),
-            equals(product.description));
-      }
       // detail screen
-      await CommonTest.tapByKey(tester, 'name0');
+      await CommonTest.doNewSearch(tester, searchString: product.productName!);
       var id = CommonTest.getTextField('header').split('#')[1];
       expect(find.byKey(const Key('ProductDialog')), findsOneWidget);
       expect(CommonTest.getTextFormField('name'), product.productName);
       expect(CommonTest.getTextFormField('description'), product.description);
-      expect(CommonTest.getTextFormField('price'), product.price.toString());
+      expect(CommonTest.getTextFormField('price'),
+          product.price.currency(currencyId: ''));
       expect(CommonTest.getTextFormField('listPrice'),
-          product.listPrice.toString());
+          product.listPrice.currency(currencyId: ''));
       if (classificationId == 'AppAdmin') {
         for (Category category in product.categories) {
           expect(find.byKey(Key(category.categoryName)), findsOneWidget);

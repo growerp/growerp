@@ -148,7 +148,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             item.docType == FinDocType.invoice)
           IconButton(
             visualDensity: VisualDensity.compact,
-            padding: const EdgeInsets.all(0),
+            padding: EdgeInsets.zero,
             key: Key('print$index'),
             icon: const Icon(Icons.print),
             tooltip: 'PDF/Print ${item.docType}',
@@ -160,7 +160,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             item.status != FinDocStatusVal.completed)
           IconButton(
               visualDensity: VisualDensity.compact,
-              padding: const EdgeInsets.all(0),
+              padding: EdgeInsets.zero,
               key: Key('delete$index'),
               icon: const Icon(Icons.delete_forever),
               tooltip: 'remove item',

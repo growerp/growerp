@@ -12,10 +12,12 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import '../product.dart';
 
@@ -27,7 +29,9 @@ class ProductList extends StatefulWidget {
 
 class ProductListState extends State<ProductList> {
   final _scrollController = ScrollController();
+  final _horizontalController = ScrollController();
   late ProductBloc _productBloc;
+  late List<Product> products;
   late String classificationId;
   late String entityName;
   late bool started;
@@ -46,6 +50,68 @@ class ProductListState extends State<ProductList> {
   @override
   Widget build(BuildContext context) {
     limit = (MediaQuery.of(context).size.height / 100).round();
+
+    Widget tableView() {
+      if (products.isEmpty) {
+        return const Center(
+            heightFactor: 20,
+            child: Text("no products found", textAlign: TextAlign.center));
+      }
+      // get table data formatted for tableView
+      var (
+        List<List<TableViewCell>> tableViewCells,
+        List<double> fieldWidths,
+        double? rowHeight
+      ) = get2dTableData<Product>(getTableData,
+          bloc: _productBloc,
+          classificationId: 'AppAdmin',
+          context: context,
+          items: products);
+      return TableView.builder(
+        diagonalDragBehavior: DiagonalDragBehavior.free,
+        verticalDetails:
+            ScrollableDetails.vertical(controller: _scrollController),
+        horizontalDetails:
+            ScrollableDetails.horizontal(controller: _horizontalController),
+        cellBuilder: (context, vicinity) =>
+            tableViewCells[vicinity.row][vicinity.column],
+        columnBuilder: (index) => index >= tableViewCells[0].length
+            ? null
+            : TableSpan(
+                padding: padding,
+                backgroundDecoration: getBackGround(context, index),
+                extent: FixedTableSpanExtent(fieldWidths[index]),
+              ),
+        pinnedColumnCount: 1,
+        rowBuilder: (index) => index >= tableViewCells.length
+            ? null
+            : TableSpan(
+                padding: padding,
+                backgroundDecoration: getBackGround(context, index),
+                extent: FixedTableSpanExtent(rowHeight!),
+                recognizerFactories: <Type, GestureRecognizerFactory>{
+                    TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<
+                            TapGestureRecognizer>(
+                        () => TapGestureRecognizer(),
+                        (TapGestureRecognizer t) => t.onTap = () => showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return index > products.length
+                                  ? const BottomLoader()
+                                  : Dismissible(
+                                      key: const Key('locationItem'),
+                                      direction: DismissDirection.startToEnd,
+                                      child: BlocProvider.value(
+                                          value: _productBloc,
+                                          child: ProductDialog(
+                                              products[index - 1])));
+                            }))
+                  }),
+        pinnedRowCount: 1,
+      );
+    }
+
     return BlocConsumer<ProductBloc, ProductState>(
         listenWhen: (previous, current) =>
             previous.status == ProductStatus.loading,
@@ -66,10 +132,38 @@ class ProductListState extends State<ProductList> {
               return Center(
                   child: Text('failed to fetch product: ${state.message}'));
             case ProductStatus.success:
+              products = state.products;
               return Scaffold(
                   floatingActionButton: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
+                        FloatingActionButton(
+                            key: const Key("search"),
+                            heroTag: "btn1",
+                            onPressed: () async {
+                              // find findoc id to show
+                              await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    // search separate from finDocBloc
+                                    return BlocProvider.value(
+                                        value: context
+                                            .read<DataFetchBloc<Locations>>(),
+                                        child: const SearchProductList());
+                                  }).then((value) async =>
+                                  // show detail page
+                                  await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return BlocProvider.value(
+                                            value: _productBloc,
+                                            child: ProductDialog(value));
+                                      }));
+                            },
+                            child: const Icon(Icons.search)),
+                        const SizedBox(height: 10),
                         FloatingActionButton(
                             heroTag: 'productFiles',
                             key: const Key("upDownload"),
@@ -102,48 +196,7 @@ class ProductListState extends State<ProductList> {
                             tooltip: CoreLocalizations.of(context)!.addNew,
                             child: const Icon(Icons.add))
                       ]),
-                  body: Column(children: [
-                    const ProductListHeader(),
-                    Expanded(
-                        child: RefreshIndicator(
-                            onRefresh: () async => _productBloc
-                                .add(const ProductFetch(refresh: true)),
-                            child: ListView.builder(
-                                key: const Key('listView'),
-                                shrinkWrap: true,
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                itemCount: state.hasReachedMax
-                                    ? state.products.length + 1
-                                    : state.products.length + 2,
-                                controller: _scrollController,
-                                itemBuilder: (BuildContext context, int index) {
-                                  if (index == 0) {
-                                    return Visibility(
-                                        visible: state.products.isEmpty,
-                                        child: Center(
-                                            heightFactor: 20,
-                                            child: Text(
-                                                started
-                                                    ? classificationId ==
-                                                            'AppHotel'
-                                                        ? 'No Room Types found'
-                                                        : 'No Products found'
-                                                    : '',
-                                                key: const Key('empty'),
-                                                textAlign: TextAlign.center)));
-                                  }
-                                  index--;
-                                  return index >= state.products.length
-                                      ? const BottomLoader()
-                                      : Dismissible(
-                                          key: const Key('productItem'),
-                                          direction:
-                                              DismissDirection.startToEnd,
-                                          child: ProductListItem(
-                                              product: state.products[index],
-                                              index: index));
-                                })))
-                  ]));
+                  body: tableView());
             default:
               return const Center(child: LoadingIndicator());
           }

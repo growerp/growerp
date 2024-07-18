@@ -715,7 +715,7 @@ class MyFinDocState extends State<FinDocPage> {
             value: IconButton(
               visualDensity: VisualDensity.compact,
               icon: const Icon(Icons.delete_forever),
-              padding: const EdgeInsets.all(0),
+              padding: EdgeInsets.zero,
               key: Key("itemDelete$index"),
               onPressed: () {
                 _cartBloc.add(CartDeleteItem(index));
@@ -820,7 +820,7 @@ class MyFinDocState extends State<FinDocPage> {
             value: IconButton(
               visualDensity: VisualDensity.compact,
               icon: const Icon(Icons.delete_forever),
-              padding: const EdgeInsets.all(0),
+              padding: EdgeInsets.zero,
               key: Key("itemDelete$index"),
               onPressed: () {
                 _cartBloc.add(CartDeleteItem(index));
@@ -917,7 +917,7 @@ class MyFinDocState extends State<FinDocPage> {
             name: ' ',
             width: 15,
             value: IconButton(
-              padding: const EdgeInsets.all(0),
+              padding: EdgeInsets.zero,
               icon: const Icon(
                 Icons.delete_forever,
                 size: 20,

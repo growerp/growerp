@@ -1509,6 +1509,7 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="productCategoryId" />
         </member-entity>
         <alias name="parentProductCategoryId" entity-alias="ROLLUP" />
+        <alias name="pseudoId" entity-alias="PARENT" />
         <alias name="ownerPartyId" entity-alias="PARENT" />
         <alias name="fromDate" entity-alias="ROLLUP" />
         <alias name="thruDate" entity-alias="ROLLUP" />
@@ -1528,6 +1529,7 @@ along with this software (see the LICENSE.md file). If not, see
         </member-entity>
         <alias name="productCategoryId" entity-alias="CATGMEMBER" />
         <alias name="productId" entity-alias="PRODUCT" />
+        <alias name="pseudoId" entity-alias="PRODUCT" />
         <alias name="productName" entity-alias="PRODUCT" />
     </view-entity>
 

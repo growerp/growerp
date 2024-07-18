@@ -74,6 +74,7 @@ class HomeFormState extends State<HomeForm> {
                       widget.menuOptions[0].route == '/')
                     IconButton(
                         key: const Key('logoutButton'),
+                        padding: EdgeInsets.zero,
                         icon: const Icon(Icons.do_not_disturb,
                             key: Key('HomeFormAuth')),
                         tooltip: 'Logout',

@@ -38,6 +38,7 @@ class TimePeriodListItem extends StatelessWidget {
       buttons.add(IconButton(
           key: Key('delete$index'),
           icon: const Icon(Icons.delete_forever),
+          padding: EdgeInsets.zero,
           tooltip: 'delete period',
           onPressed: () {
             ledgerBloc.add(LedgerTimePeriodsUpdate(
@@ -57,6 +58,7 @@ class TimePeriodListItem extends StatelessWidget {
 */
     if (!timePeriod.hasNextPeriod && timePeriod.periodType == 'Y') {
       buttons.add(IconButton(
+          padding: EdgeInsets.zero,
           key: Key('next$index'),
           icon: const Icon(Icons.arrow_forward),
           tooltip: 'create next period',

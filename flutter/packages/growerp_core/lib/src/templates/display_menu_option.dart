@@ -150,6 +150,7 @@ class MenuOptionState extends State<DisplayMenuOption>
         IconButton(
             key: const Key('chatButton'), // causes a duplicate key?
             icon: const Icon(Icons.chat),
+            padding: EdgeInsets.zero,
             tooltip: 'Chat',
             onPressed: () async => {
                   await showDialog(
@@ -208,7 +209,7 @@ class MenuOptionState extends State<DisplayMenuOption>
     Widget simplePage(bool isPhone) {
       displayMOFormKey =
           child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-      debugPrint("==2-simple= current form key: $displayMOFormKey");
+      // debugPrint("==2-simple= current form key: $displayMOFormKey");
 
       List<Widget> simpleChildren = [Expanded(child: child!)];
       if (widget.workflow != null) {
@@ -233,7 +234,7 @@ class MenuOptionState extends State<DisplayMenuOption>
       displayMOFormKey =
           tabList[tabIndex].toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
       Color tabSelectedBackground = Theme.of(context).colorScheme.onSecondary;
-      debugPrint("==3-tab= current form key: $displayMOFormKey");
+      //debugPrint("==3-tab= current form key: $displayMOFormKey");
       List<Widget> tabChildren = [
         Expanded(
             child: isPhone

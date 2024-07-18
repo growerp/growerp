@@ -90,6 +90,7 @@ class OpportunityListItem extends StatelessWidget {
         trailing: IconButton(
           key: Key('delete$index'),
           icon: const Icon(Icons.delete_forever),
+          padding: EdgeInsets.zero,
           onPressed: () {
             opportunityBloc.add(OpportunityDelete(opportunity));
           },

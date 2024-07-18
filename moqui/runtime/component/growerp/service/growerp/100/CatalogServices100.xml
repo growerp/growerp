@@ -290,7 +290,14 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[docType: 'asset', statusId: product.assetClassId]" out-map="context" />
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                 in-map="[docType: 'product', statusId: product.productTypeId]" out-map="prodConvert" />
-            <!-- product -->
+            <!-- create pseudoId when not provided -->
+            <if condition="!product.pseudoId || product.pseudoId == ''">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[companyPartyId: companyPartyId, seqName: 'product']"
+                    out-map="context" />
+                <set field="product.pseudoId" from="seqNum" />
+            </if>
+            <!-- create product -->
             <service-call name="create#mantle.product.Product"
                 in-map="[
                 pseudoId: product.pseudoId,
@@ -714,13 +721,14 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="products" from="[]" />
                     <iterate list="productList" entry="product">
                         <script>products.add([productName: product.productName,
-                            productId: product.productId])
+                            productId: product.productId, pseudoId: product.pseudoId])
                     </script>
                     </iterate>
                     <!-- output -->
                     <set field="groupOut"
                         from="[
                             categoryId: group.productCategoryId,
+                            pseudoId: group.pseudoId,
                             categoryName: group.categoryName,
                             description: group.description,
                             nbrOfProducts: nbrOfProducts,
@@ -731,6 +739,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="groupOut"
                             from="[
                                 categoryId: group.productCategoryId,
+                                pseudoId: group.pseudoId,
                                 categoryName: group.categoryName,
                                 ]" />
                     </else>
@@ -745,6 +754,7 @@ along with this software (see the LICENSE.md file). If not, see
                                             salads, deserts etc</description>
         <in-parameters>
             <parameter name="category" type="Map" required="true">
+                <parameter name="pseudoId" />
                 <parameter name="categoryName" />
                 <parameter name="description" />
                 <parameter name="image" />
@@ -758,6 +768,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="category" type="Map">
                 <parameter name="categoryId" />
+                <parameter name="pseudoId" />
                 <parameter name="categoryName" />
                 <parameter name="description" />
                 <parameter name="image" />
@@ -781,10 +792,18 @@ along with this software (see the LICENSE.md file). If not, see
                 <return error="true"
                     message="Root category not found for companyId: $companyPartyId" />
             </if>
+            <!-- create pseudoId when not provided -->
+            <if condition="!category.pseudoId || category.pseudoId == ''">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[companyPartyId: companyPartyId, seqName: 'category']"
+                    out-map="context" />
+                <set field="category.pseudoId" from="seqNum" />
+            </if>
             <set field="rootProductCategoryId" from="rootList[0].productCategoryId" />
             <!-- create -->
             <service-call name="create#mantle.product.category.ProductCategory"
                 in-map="[categoryName: category.categoryName,
+                    pseudoId: category.pseudoId,
                     description: category.description,
                     productCategoryTypeEnumId: 'PctCatalog',
                     ownerPartyId: ownerPartyId]"

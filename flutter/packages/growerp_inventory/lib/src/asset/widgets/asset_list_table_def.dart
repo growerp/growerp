@@ -89,12 +89,14 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         ? IconButton(
             key: Key('delete$index'),
             icon: const Icon(Icons.delete_forever),
+            padding: EdgeInsets.zero,
             onPressed: () {
               bloc.add(AssetUpdate(item.copyWith(statusId: 'Deactivated')));
             })
         : IconButton(
             key: Key('delete$index'),
             icon: const Icon(Icons.event_available),
+            padding: EdgeInsets.zero,
             onPressed: () {
               bloc.add(AssetUpdate(item.copyWith(statusId: 'Available')));
             }),

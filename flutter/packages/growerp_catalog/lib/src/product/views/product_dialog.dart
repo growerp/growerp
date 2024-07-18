@@ -13,6 +13,7 @@
  */
 
 import 'dart:async';
+import 'package:intl/intl.dart';
 import 'package:universal_io/io.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:decimal/decimal.dart';
@@ -56,10 +57,22 @@ class ProductDialogState extends State<ProductDialog> {
   final ImagePicker _picker = ImagePicker();
   late List<Category> _selectedCategories;
   final ScrollController _scrollController = ScrollController();
+  late String currencyId;
+  late String currencySymbol;
 
   @override
   void initState() {
     super.initState();
+    currencyId = context
+        .read<AuthBloc>()
+        .state
+        .authenticate!
+        .company!
+        .currency!
+        .currencyId!;
+    currencySymbol = NumberFormat.simpleCurrency(
+            locale: Platform.localeName, name: currencyId)
+        .currencySymbol;
     _productBloc = context.read<ProductBloc>();
     context
         .read<CategoryBloc>()
@@ -68,11 +81,12 @@ class ProductDialogState extends State<ProductDialog> {
     _nameController.text = widget.product.productName ?? '';
     _idController.text = widget.product.pseudoId;
     _descriptionController.text = widget.product.description ?? '';
-    _priceController.text =
-        widget.product.price == null ? '' : widget.product.price.toString();
+    _priceController.text = widget.product.price == null
+        ? ''
+        : widget.product.price.currency(currencyId: '');
     _listPriceController.text = widget.product.listPrice == null
         ? ''
-        : widget.product.listPrice.toString();
+        : widget.product.listPrice.currency(currencyId: '');
     _assetsController.text = widget.product.assetCount == null
         ? ''
         : widget.product.assetCount.toString();
@@ -285,7 +299,8 @@ class ProductDialogState extends State<ProductDialog> {
           Expanded(
             child: TextFormField(
               key: const Key('listPrice'),
-              decoration: const InputDecoration(labelText: 'List Price'),
+              decoration:
+                  InputDecoration(labelText: 'List Price($currencySymbol)'),
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
               ],
@@ -299,7 +314,8 @@ class ProductDialogState extends State<ProductDialog> {
           Expanded(
             child: TextFormField(
               key: const Key('price'),
-              decoration: const InputDecoration(labelText: 'Current Price'),
+              decoration:
+                  InputDecoration(labelText: 'Current Price($currencySymbol)'),
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
               ],

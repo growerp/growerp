@@ -232,7 +232,7 @@ class CategoryDialogState extends State<CategoryDialog> {
                     child: Column(children: [
                       Center(
                           child: Text(
-                        'Category #${widget.category.categoryId.isEmpty ? " New" : widget.category.categoryId}',
+                        'Category #${widget.category.pseudoId.isEmpty ? " New" : widget.category.pseudoId}',
                         style: const TextStyle(
                             fontSize: 10, fontWeight: FontWeight.bold),
                         key: const Key('header'),
