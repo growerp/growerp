@@ -48,7 +48,6 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
                         arguments: auth?.user),
                     child: Column(children: [
                       CircleAvatar(
-                          backgroundColor: Colors.green,
                           radius: 40,
                           child: auth?.user?.image != null
                               ? Image.memory(auth!.user!.image!)

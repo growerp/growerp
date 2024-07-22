@@ -657,13 +657,11 @@ class MyFinDocState extends State<FinDocPage> {
       rowContent.add(TableRowContent(
           width: isPhone ? 6 : 3,
           name: '#',
-          value: CircleAvatar(
-              backgroundColor: Colors.green,
-              child: Text(item.itemSeqId.toString()))));
+          value: CircleAvatar(child: Text(item.itemSeqId.toString()))));
       rowContent.add(TableRowContent(
           width: isPhone ? 14 : 8,
           name: 'ProdId',
-          value: Text("${item.product?.productId}",
+          value: Text("${item.product?.pseudoId}",
               textAlign: TextAlign.center, key: Key('itemProductId$index'))));
       rowContent.add(TableRowContent(
           width: isPhone ? 25 : 25,
@@ -788,13 +786,11 @@ class MyFinDocState extends State<FinDocPage> {
       rowContent.add(TableRowContent(
           name: '#',
           width: isPhone ? 6 : 4,
-          value: CircleAvatar(
-              backgroundColor: Colors.green,
-              child: Text(item.itemSeqId.toString()))));
+          value: CircleAvatar(child: Text(item.itemSeqId.toString()))));
       rowContent.add(TableRowContent(
           name: 'ProdId',
           width: isPhone ? 14 : 8,
-          value: Text("${item.product?.productId}",
+          value: Text("${item.product?.pseudoId}",
               textAlign: TextAlign.center, key: Key('itemProductId$index'))));
       rowContent.add(TableRowContent(
           name: 'Description',
@@ -910,7 +906,7 @@ class MyFinDocState extends State<FinDocPage> {
       rowContent.add(TableRowContent(
           name: 'ProdId',
           width: 10,
-          value: Text(item.product?.productId ?? '',
+          value: Text(item.product?.pseudoId ?? '',
               key: Key('itemProductId$index'))));
       if (!readOnly) {
         rowContent.add(TableRowContent(

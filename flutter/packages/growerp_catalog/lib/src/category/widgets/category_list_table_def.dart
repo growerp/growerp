@@ -30,7 +30,6 @@ TableData getCategoryTableData(Bloc bloc, String classificationId,
       width: 10,
       value: CircleAvatar(
         key: const Key('categoryItem'),
-        backgroundColor: Colors.green,
         child: item.image != null
             ? Image.memory(
                 item.image!,

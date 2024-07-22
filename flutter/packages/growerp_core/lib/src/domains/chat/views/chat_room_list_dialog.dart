@@ -225,7 +225,6 @@ class ListDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
         leading: CircleAvatar(
-          backgroundColor: Colors.green,
           child: Text(chatRooms[index].chatRoomName != null
               ? chatRooms[index].chatRoomName![0]
               : "?"),

@@ -241,7 +241,6 @@ class CategoryDialogState extends State<CategoryDialog> {
                       )),
                       const SizedBox(height: 30),
                       CircleAvatar(
-                          backgroundColor: Colors.green,
                           radius: 70,
                           child: _imageFile != null
                               ? foundation.kIsWeb
@@ -256,8 +255,7 @@ class CategoryDialogState extends State<CategoryDialog> {
                                           ? '?'
                                           : widget.category.categoryName
                                               .substring(0, 1),
-                                      style: const TextStyle(
-                                          fontSize: 30, color: Colors.black))),
+                                      style: const TextStyle(fontSize: 30))),
                       const SizedBox(height: 10),
                       TextFormField(
                         key: const Key('Id'),

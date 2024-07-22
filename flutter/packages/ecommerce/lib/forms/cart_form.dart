@@ -39,7 +39,7 @@ class CartForm extends StatelessWidget {
               child: _CartList(),
             ),
           ),
-          const Divider(height: 4, color: Colors.black),
+          const Divider(height: 4),
           _CartTotal()
         ],
       ),

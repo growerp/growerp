@@ -31,7 +31,6 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
       name: 'ShortId',
       width: 10,
       value: CircleAvatar(
-        backgroundColor: Colors.green,
         child: item.image != null
             ? Image.memory(item.image!)
             : Text(item.name != null ? item.name![0] : '?'),

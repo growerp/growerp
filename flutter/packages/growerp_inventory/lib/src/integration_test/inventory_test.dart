@@ -108,7 +108,7 @@ class InventoryTest {
                 'Could not find product: ${item.description} in test data asset list');
         // find location (purchase order saved in receive shipments,
         // sales in asset list)
-        await CommonTest.doSearch(tester,
+        await CommonTest.doNewSearch(tester,
             searchString: order.sales == false
                 ? item.asset!.location!.locationName!
                 : asset.location!.locationName!);

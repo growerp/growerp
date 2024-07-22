@@ -88,7 +88,6 @@ class ItemTypeListItem extends StatelessWidget {
     var direction = itemType.direction == 'I' ? 'InComing' : 'OutGoing';
     return ListTile(
         leading: CircleAvatar(
-          backgroundColor: Colors.green,
           child: Text(itemType.itemTypeName.isNotEmpty
               ? itemType.itemTypeName.substring(0, 3)
               : ''),

@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,7 +22,6 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../get_core_bloc_providers.dart';
 import '../../../services/chat_server.dart';
-import '../../../styles/color_schemes.dart';
 import '../../domains.dart';
 import '../../../l10n/generated/core_localizations.dart';
 
@@ -107,10 +107,8 @@ class TopApp extends StatelessWidget {
                                 start: 1921, end: double.infinity, name: '4K'),
                           ]),
                       themeMode: state.themeMode,
-                      theme: ThemeData(
-                          useMaterial3: true, colorScheme: lightColorScheme),
-                      darkTheme: ThemeData(
-                          useMaterial3: true, colorScheme: darkColorScheme),
+                      theme: FlexThemeData.light(scheme: FlexScheme.money),
+                      darkTheme: FlexThemeData.dark(scheme: FlexScheme.money),
                       onGenerateRoute: router,
                       navigatorObservers: [AppNavObserver()],
                       home: BlocBuilder<AuthBloc, AuthState>(

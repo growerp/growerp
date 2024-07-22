@@ -469,7 +469,6 @@ class ProductDialogState extends State<ProductDialog> {
                     )),
                     const SizedBox(height: 10),
                     CircleAvatar(
-                        backgroundColor: Colors.green,
                         radius: 60,
                         child: _imageFile != null
                             ? foundation.kIsWeb
@@ -482,8 +481,7 @@ class ProductDialogState extends State<ProductDialog> {
                                     widget.product.productName
                                             ?.substring(0, 1) ??
                                         '',
-                                    style: const TextStyle(
-                                        fontSize: 30, color: Colors.black))),
+                                    style: const TextStyle(fontSize: 30))),
                     const SizedBox(height: 10),
                     Column(children: (rows.isEmpty ? column : rows)),
                   ])))),

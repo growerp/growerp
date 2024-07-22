@@ -1465,6 +1465,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <return error="true"
                     message="Owner company missing in create#user service for ${user.firstName} ${user.lastName} ${user.userGroupId}" />
             </if>
+            <!-- create pseudoId when not provided -->
+            <if condition="!user.pseudoId || user.pseudoId == ''">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[companyPartyId: companyPartyId, seqName: 'party']"
+                    out-map="context" />
+                <set field="user.pseudoId" from="seqNum" />
+            </if>
             <!-- create account-->
             <if condition="user.loginName">
                 <then>
@@ -2909,19 +2916,19 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="productsHotel"
                     from="[
                     [ productName: 'Single Room', description:'The Single bed room',
-                        productTypeId: 'PtFixedAssetUse', assetClassId: 'AsClsRoom', assetTypeId: 'AstTpFixed',
+                        productTypeId: 'Rental', assetClassId: 'room', assetTypeId: 'AstTpFixed',
                         price: 50, image: 'demoRooms/room1', categoryName: 'rooms'],
                     [ productName: 'Standard Room', description:'The Standard room',
-                        productTypeId: 'PtFixedAssetUse', assetClassId: 'AsClsRoom', assetTypeId: 'AstTpFixed',
+                        productTypeId: 'rental', assetClassId: 'room', assetTypeId: 'AstTpFixed',
                         price: 80, image: 'demoRooms/room2', categoryName: 'rooms'],
                     [ productName: 'Deluxe Room', description:'The Deluxe room offering',
-                        productTypeId: 'PtFixedAssetUse', assetClassId: 'AsClsRoom', assetTypeId: 'AstTpFixed',
+                        productTypeId: 'rental', assetClassId: 'room', assetTypeId: 'AstTpFixed',
                         price: 170, image: 'demoRooms/room3', categoryName: 'rooms'],
                     [ productName: 'Suite', description:'The Suite',
-                        productTypeId: 'PtFixedAssetUse', assetClassId: 'AsClsRoom', assetTypeId: 'AstTpFixed',
+                        productTypeId: 'rental', assetClassId: 'room', assetTypeId: 'AstTpFixed',
                         price: 360, image: 'demoRooms/room4', categoryName: 'rooms'],
                     [ productName: 'Appartment', description:'The living,  two bedroom appartment',
-                        productTypeId: 'PtFixedAssetUse', assetClassId: 'AsClsRoom', assetTypeId: 'AstTpFixed',
+                        productTypeId: 'rental', assetClassId: 'room', assetTypeId: 'AstTpFixed',
                         price: 460, image: 'demoRooms/room5', categoryName: 'rooms'],
                 ]" />
 
@@ -2948,14 +2955,12 @@ along with this software (see the LICENSE.md file). If not, see
                                     message="No category ${el.categoryName} found for product: ${el.productName}" />
                             </else>
                         </if>
-                        <service-call name="create#mantle.product.Product"
+                        <service-call name="growerp.100.CatalogServices100.create#Product"
                             in-map="[
-                            productTypeEnumId: el.productTypeId,
-                            assetClassEnumId: el.assetClassId,
-                            assetTypeEnumId: el.assetTypeId,
+                            productTypeId: el.productTypeId,
+                            assetClassId: el.assetClassId,
                             productName: el.productName + (classificationId != 'AppHotel'? counter : ''),
                             description: el.description,
-                            ownerPartyId: ownerPartyId,
                             ]"
                             out-map="context" />
                         <service-call

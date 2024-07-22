@@ -36,10 +36,12 @@ void main() {
           tester, opportunities.sublist(0, 4));
       await OpportunityTest.updateOpportunities(
           tester, opportunities.sublist(4, 8));
-      await OpportunityTest.deleteLastOpportunity(tester);
+      await OpportunityTest.deleteOpportunities(tester);
     } catch (error) {
       await CommonTest.takeScreenShot(
-          binding: binding, tester: tester, screenShotName: "Category_Error");
+          binding: binding,
+          tester: tester,
+          screenShotName: "Opportunity_Error");
       rethrow;
     }
   });

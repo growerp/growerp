@@ -106,7 +106,7 @@ List<MenuOption> menuOptions = [
           key: Key('CompanyCustomer'),
           role: Role.customer,
         ),
-        label: 'Customer Companies',
+        label: 'Cust.Companies',
         icon: const Icon(Icons.school),
       ),
     ],

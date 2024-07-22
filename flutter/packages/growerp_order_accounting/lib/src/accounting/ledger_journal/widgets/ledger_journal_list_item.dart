@@ -30,7 +30,6 @@ class LedgerJournalListItem extends StatelessWidget {
     final ledgerJournalBloc = context.read<LedgerJournalBloc>();
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: Colors.green,
         child: Text(ledgerJournal.journalName.isEmpty ? '?' : ''),
       ),
       title: Column(children: [

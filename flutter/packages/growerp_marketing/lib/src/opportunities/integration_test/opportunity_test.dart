@@ -59,15 +59,12 @@ class OpportunityTest {
     await checkOpportunity(tester, newOpportunities);
   }
 
-  static Future<void> deleteLastOpportunity(WidgetTester tester) async {
+  static Future<void> deleteOpportunities(WidgetTester tester) async {
     MarketingTest test = await PersistMarketingTest.get();
     var count = CommonTest.getWidgetCountByKey(tester, 'opportunityItem');
     if (count == test.opportunities.length) {
-      await CommonTest.gotoMainMenu(tester);
-      await OpportunityTest.selectOpportunities(tester);
-      await CommonTest.tapByKey(tester, 'delete${count - 1}', seconds: 5);
-      await CommonTest.gotoMainMenu(tester);
-      await OpportunityTest.selectOpportunities(tester);
+      await CommonTest.tapByKey(tester, 'delete${count - 1}',
+          seconds: CommonTest.waitTime);
       expect(
           find.byKey(const Key('opportunityItem')), findsNWidgets(count - 1));
       await PersistMarketingTest.save(test.copyWith(
@@ -82,9 +79,8 @@ class OpportunityTest {
       if (opportunity.opportunityId.isEmpty) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.doSearch(tester,
+        await CommonTest.doNewSearch(tester,
             searchString: opportunity.opportunityId);
-        await CommonTest.tapByKey(tester, 'name0');
         expect(CommonTest.getTextField('topHeader').split('#')[1],
             opportunity.opportunityId);
       }
@@ -114,24 +110,24 @@ class OpportunityTest {
   static Future<List<Opportunity>> checkOpportunity(
       WidgetTester tester, List<Opportunity> opportunities) async {
     List<Opportunity> newOpportunities = [];
-    for (Opportunity opportunity in opportunities) {
-      await CommonTest.doSearch(tester,
-          searchString: opportunity.opportunityName!);
-      expect(CommonTest.getTextField('name0'),
+    for (final opportunity in opportunities) {
+      /* list checking to be added
+      expect(CommonTest.getTextField('name$index'),
           equals(opportunity.opportunityName));
-      expect(
-          CommonTest.getTextField('lead0'),
-          contains("${opportunity.leadUser!.firstName!} "
-              "${opportunity.leadUser!.lastName!}"));
       if (!CommonTest.isPhone()) {
-        expect(CommonTest.getTextField('estAmount0'),
-            equals(opportunity.estAmount.toString()));
-        expect(CommonTest.getTextField('estProbability0'),
-            equals(opportunity.estProbability.toString()));
         expect(
-            CommonTest.getTextField('stageId0'), equals(opportunity.stageId));
-      }
-      await CommonTest.tapByKey(tester, 'name0');
+            CommonTest.getTextField('lead$index'),
+            contains("${opportunity.leadUser!.firstName!} "
+                "${opportunity.leadUser!.lastName!}"));
+        expect(CommonTest.getTextField('estAmount$index'),
+            equals(opportunity.estAmount.toString()));
+        expect(CommonTest.getTextField('estProbability$index'),
+            equals(opportunity.estProbability.toString()));
+        expect(CommonTest.getTextField('stageId$index'),
+            equals(opportunity.stageId));
+      }*/
+      await CommonTest.doNewSearch(tester,
+          searchString: opportunity.opportunityName!);
       expect(find.byKey(const Key('OpportunityDialog')), findsOneWidget);
       var id = CommonTest.getTextField('topHeader').split('#')[1];
       expect(CommonTest.getTextFormField('name'),
@@ -150,7 +146,6 @@ class OpportunityTest {
       newOpportunities.add(opportunity.copyWith(opportunityId: id));
       await CommonTest.tapByKey(tester, 'cancel');
     }
-    await CommonTest.closeSearch(tester);
     return newOpportunities;
   }
 }

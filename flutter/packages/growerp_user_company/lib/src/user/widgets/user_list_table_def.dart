@@ -28,7 +28,6 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
     name: ' ',
     width: isPhone ? 10 : 5,
     value: CircleAvatar(
-      backgroundColor: Colors.green,
       child: item.image != null
           ? Image.memory(item.image!)
           : Text(item.firstName != null ? item.firstName![0] : '?'),

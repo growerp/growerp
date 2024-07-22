@@ -27,6 +27,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="opportunities" type="List">
                 <parameter name="opportunity" type="Map">
                     <parameter name="opportunityId" />
+                    <parameter name="pseudoId" />
                     <parameter name="lastUpdated" />
                     <parameter name="opportunityName" />
                     <parameter name="stageId" />
@@ -87,6 +88,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <econditions combine="or">
                     <econdition field-name="opportunityId" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="pseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="opportunityName" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="description" ignore-case="true"
@@ -119,6 +122,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="opOut"
                     from="[
                         opportunityId: opp.opportunityId,
+                        pseudoId: opp.pseudoId,
                         lastUpdated: opp.lastUpdatedStamp
                             ? opp.lastUpdatedStamp.toString() + 'z'
                             : null,
@@ -139,6 +143,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="opportunity" type="Map" required="true">
                 <parameter name="opportunityId" />
+                <parameter name="pseudoId" />
                 <parameter name="opportunityName" />
                 <parameter name="stageId" />
                 <parameter name="description" />
@@ -162,6 +167,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="opportunity" type="Map">
                 <parameter name="opportunityId" />
+                <parameter name="pseudoId" />
                 <parameter name="lastUpdated" />
                 <parameter name="opportunityName" />
                 <parameter name="stageId" />
@@ -201,8 +207,16 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- create pseudoId when not provided -->
+            <if condition="!opportunity.pseudoId || opportunity.pseudoId == ''">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[companyPartyId: companyPartyId, seqName: 'opportunity']"
+                    out-map="context" />
+                <set field="opportunity.pseudoId" from="seqNum" />
+            </if>
             <service-call name="create#mantle.sales.opportunity.SalesOpportunity"
-                in-map="[estimatedAmount: opportunity.estAmount,
+                in-map="[pseudoId: opportunity.pseudoId,
+                        estimatedAmount: opportunity.estAmount,
                         opportunityName: opportunity.opportunityName,
                         description: opportunity.description,
                         estimatedProbability: opportunity.estProbability,
@@ -234,6 +248,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="opportunity" type="Map" required="true">
                 <parameter name="opportunityId" />
+                <parameter name="pseudoId" />
                 <parameter name="opportunityName" />
                 <parameter name="stageId" />
                 <parameter name="description" />
@@ -259,6 +274,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="opportunity" type="Map">
                 <parameter name="opportunityId" />
+                <parameter name="pseudoId" />
                 <parameter name="lastUpdated" />
                 <parameter name="opportunityName" />
                 <parameter name="stageId" />
@@ -302,6 +318,10 @@ along with this software (see the LICENSE.md file). If not, see
                     message="opportunity ${opportunity?.opportunityId} not found!" />
             </if>
             <set field="update" value="false" />
+            <if condition="oldValue.pseudoId != opportunity.pseudoId">
+                <set field="oldValue.pseudoId" from="opportunity.pseudoId" />
+                <set field="update" value="true" />
+            </if>
             <if condition="oldValue.opportunityName != opportunity.opportunityName">
                 <set field="oldValue.opportunityName" from="opportunity.opportunityName" />
                 <set field="update" value="true" />
@@ -386,6 +406,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="opportunity" type="Map">
                 <parameter name="opportunityId" />
+                <parameter name="pseudoId" />
                 <parameter name="lastUpdated" />
                 <parameter name="opportunityName" />
                 <parameter name="stageId" />

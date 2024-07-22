@@ -645,7 +645,6 @@ class CompanyFormState extends State<CompanyDialog> {
                               )),
                               const SizedBox(height: 10),
                               CircleAvatar(
-                                  backgroundColor: Colors.green,
                                   radius: 60,
                                   child: _imageFile != null
                                       ? kIsWeb

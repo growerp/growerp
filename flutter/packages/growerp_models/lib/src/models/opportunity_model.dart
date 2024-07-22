@@ -25,6 +25,7 @@ class Opportunity with _$Opportunity {
   factory Opportunity({
     @DateTimeConverter() DateTime? lastUpdated,
     @Default("") String opportunityId,
+    @Default("") String pseudoId,
     String? opportunityName,
     String? description,
     Decimal? estAmount,

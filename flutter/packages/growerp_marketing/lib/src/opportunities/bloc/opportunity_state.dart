@@ -20,6 +20,7 @@ class OpportunityState extends Equatable {
   const OpportunityState({
     this.status = OpportunityStatus.initial,
     this.opportunities = const <Opportunity>[],
+    this.searchResults = const <Opportunity>[],
     this.message,
     this.hasReachedMax = false,
     this.searchString = '',
@@ -28,6 +29,7 @@ class OpportunityState extends Equatable {
   final OpportunityStatus status;
   final String? message;
   final List<Opportunity> opportunities;
+  final List<Opportunity> searchResults;
   final bool hasReachedMax;
   final String searchString;
 
@@ -35,6 +37,7 @@ class OpportunityState extends Equatable {
     OpportunityStatus? status,
     String? message,
     List<Opportunity>? opportunities,
+    List<Opportunity>? searchResults,
     bool error = false,
     bool? hasReachedMax,
     String? searchString,
@@ -42,6 +45,7 @@ class OpportunityState extends Equatable {
     return OpportunityState(
       status: status ?? this.status,
       opportunities: opportunities ?? this.opportunities,
+      searchResults: searchResults ?? this.searchResults,
       message: message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,
@@ -49,7 +53,8 @@ class OpportunityState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [status, message, opportunities, hasReachedMax];
+  List<Object?> get props =>
+      [status, message, opportunities, searchResults, hasReachedMax];
 
   @override
   String toString() => '$status { #opportunities: ${opportunities.length}, '

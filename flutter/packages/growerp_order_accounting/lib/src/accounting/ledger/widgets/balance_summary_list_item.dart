@@ -29,7 +29,6 @@ class BalanceSummaryListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: Colors.green,
         child: Text(
             glAccount.accountName!.isEmpty ? '?' : glAccount.accountName![0]),
       ),

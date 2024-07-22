@@ -37,7 +37,6 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         width: 15,
         value: CircleAvatar(
           key: const Key('productItem'),
-          backgroundColor: Colors.green,
           child: item.image != null
               ? Image.memory(
                   item.image!,

@@ -87,7 +87,6 @@ class PaymentTypeListItem extends StatelessWidget {
 
     return ListTile(
         leading: CircleAvatar(
-          backgroundColor: Colors.green,
           child: Text(paymentType.paymentTypeName.substring(3, 5)),
         ),
         title: Row(

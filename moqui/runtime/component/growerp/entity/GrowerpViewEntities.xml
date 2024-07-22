@@ -1575,6 +1575,7 @@ along with this software (see the LICENSE.md file). If not, see
         </member-entity>
 
         <alias name="opportunityId" field="salesOpportunityId" entity-alias="OPPOR" />
+        <alias name="pseudoId" entity-alias="OPPOR" />
         <alias name="ownerPartyId" entity-alias="OPPOR" />
         <alias name="opportunityName" entity-alias="OPPOR" />
         <alias name="description" entity-alias="OPPOR" />

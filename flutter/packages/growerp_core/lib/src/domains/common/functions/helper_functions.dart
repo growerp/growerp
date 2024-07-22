@@ -39,7 +39,6 @@ class HelperFunctions {
                 Text(message),
               ],
             ),
-            backgroundColor: Colors.green,
           )));
     }
   }

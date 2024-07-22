@@ -611,7 +611,6 @@ class UserDialogState extends State<UserDialogStateFull> {
               )),
               const SizedBox(height: 10),
               CircleAvatar(
-                  backgroundColor: Colors.green,
                   radius: 80,
                   child: _imageFile != null
                       ? kIsWeb

@@ -35,7 +35,6 @@ class GlAccountListItem extends StatelessWidget {
         : Constant.numberFormat.format(DecimalIntl(glAccount.postedBalance!));
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: Colors.green,
         child: Text(glAccount.accountCode == null
             ? '?'
             : glAccount.accountCode!.substring(0, 3)),

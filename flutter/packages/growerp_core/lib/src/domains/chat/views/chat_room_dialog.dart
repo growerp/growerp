@@ -30,18 +30,19 @@ class ChatRoomDialog extends StatefulWidget {
 class ChatRoomDialogState extends State<ChatRoomDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _chatRoomSearchBoxController =
-      TextEditingController();
   final TextEditingController _userSearchBoxController =
       TextEditingController();
 
   bool loading = false;
   User? _selectedUser;
+  late DataFetchBloc<Users> _userBloc;
 
   @override
   void initState() {
     super.initState();
     _nameController.text = widget.chatRoom.chatRoomName ?? '';
+    _userBloc = context.read<DataFetchBloc<Users>>()
+      ..add(GetDataEvent(() => context.read<RestClient>().getUser(limit: 3)));
   }
 
   @override
@@ -117,11 +118,18 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
                     dropdownSearchDecoration:
                         InputDecoration(labelText: 'Chat partner')),
                 itemAsString: (User? u) => " ${u!.firstName} ${u.lastName}",
-                asyncItems: (String? filter) async {
-                  Users result = await repos.getUser(
-                      filter: _chatRoomSearchBoxController.text);
-                  return result.users;
+                asyncItems: (String filter) {
+                  _userBloc.add(
+                      GetDataEvent(() => context.read<RestClient>().getUser(
+                            searchString: filter,
+                            limit: 3,
+                            isForDropDown: true,
+                          )));
+                  return Future.delayed(const Duration(milliseconds: 150), () {
+                    return Future.value((_userBloc.state.data as Users).users);
+                  });
                 },
+                compareFn: (item, sItem) => item.partyId == sItem.partyId,
                 validator: (value) =>
                     _nameController.text.isEmpty && value == null
                         ? 'field required'

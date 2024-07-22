@@ -38,7 +38,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <extend-entity entity-name="Payment" package="mantle.account.payment"
         sequence-primary-prefix="pay">
-        <field name="pseudoId" type="id"></field>
+        <field name="pseudoId" type="id" />
         <field name="itemTypeGlAccountId" type="id">
             <description>Is used for posting this payment without invoice</description>
         </field>
@@ -52,12 +52,16 @@ along with this software (see the LICENSE.md file). If not, see
     </extend-entity>
 
     <extend-entity entity-name="SalesOpportunity" package="mantle.sales.opportunity">
+        <field name="pseudoId" type="id" />
         <field name="ownerPartyId" type="id">
             <description>The company owner, to separate companies.</description>
         </field>
         <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
             <key-map field-name="ownerPartyId" />
         </relationship>
+        <index name="OPPORTUNITY_PSEUDOID" unique="false">
+            <index-field name="pseudoId" />
+        </index>
     </extend-entity>
 
     <extend-entity entity-name="Party" package="mantle.party">

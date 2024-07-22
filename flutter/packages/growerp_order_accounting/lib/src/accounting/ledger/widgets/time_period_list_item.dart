@@ -70,7 +70,6 @@ class TimePeriodListItem extends StatelessWidget {
 
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: Colors.green,
         child: Text(timePeriod.periodName.substring(3, 5)),
       ),
       title: Row(

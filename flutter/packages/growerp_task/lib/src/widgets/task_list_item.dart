@@ -32,7 +32,6 @@ class TaskListItem extends StatelessWidget {
     final taskBloc = context.read<TaskBloc>();
     return ListTile(
         leading: CircleAvatar(
-            backgroundColor: Colors.green,
             child: Text(task.taskName.isNotEmpty ? task.taskName[0] : '')),
         title: Row(
           children: <Widget>[
