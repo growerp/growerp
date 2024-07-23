@@ -97,7 +97,7 @@ class WebsiteContentState extends State<WebsiteContent> {
           switch (state.status) {
             case ContentStatus.failure:
               return Center(
-                child: ElevatedButton(
+                child: OutlinedButton(
                   onPressed: () => Navigator.of(context).pop(newContent),
                   child: const Text("press to continue"),
                 ),
@@ -245,7 +245,7 @@ class WebsiteContentState extends State<WebsiteContent> {
               const SizedBox(height: 10),
               Row(children: [
                 Expanded(
-                    child: ElevatedButton(
+                    child: OutlinedButton(
                         key: const Key('update'),
                         child: Text(
                             widget.content.path.isEmpty ? 'Create' : 'Update'),
@@ -318,7 +318,7 @@ class WebsiteContentState extends State<WebsiteContent> {
                           : MarkdownConfig.defaultConfig)),
             ])),
       const SizedBox(height: 10),
-      ElevatedButton(
+      OutlinedButton(
           key: const Key('update'),
           child: Text(widget.content.path.isEmpty ? 'Create' : 'Update'),
           onPressed: () async {

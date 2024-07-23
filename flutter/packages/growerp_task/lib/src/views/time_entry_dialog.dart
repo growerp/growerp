@@ -118,7 +118,7 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
                 ))),
                 SizedBox(
                     width: 100,
-                    child: ElevatedButton(
+                    child: OutlinedButton(
                       key: const Key('setDate'),
                       onPressed: () => selectDate(context),
                       child: const Text('Update\n date'),
@@ -144,7 +144,7 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
                 controller: _commentsController,
               ),
               const SizedBox(height: 30),
-              ElevatedButton(
+              OutlinedButton(
                   key: const Key('update'),
                   child: Text(widget.timeEntry.timeEntryId == null
                       ? 'Create'

@@ -128,7 +128,7 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
           const SizedBox(height: 10),
           Row(mainAxisAlignment: MainAxisAlignment.end, children: [
             if (!expanded)
-              ElevatedButton(
+              OutlinedButton(
                 child: const Text('Expand All'),
                 onPressed: () => setState(() {
                   _controller!.expandAll();
@@ -137,14 +137,14 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
               ),
             const SizedBox(width: 10),
             if (expanded)
-              ElevatedButton(
+              OutlinedButton(
                 child: const Text('Collapse All'),
                 onPressed: () => setState(() {
                   _controller!.collapseAll();
                   expanded = !expanded;
                 }),
               ),
-            ElevatedButton(
+            OutlinedButton(
                 child: const Text('Recalculate'),
                 onPressed: () => _ledgerBloc.add(LedgerCalculate())),
           ]),

@@ -55,7 +55,7 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
                   ),
                   onChanged: ((value) => setState(() => searchString = value)),
                 )),
-                ElevatedButton(
+                OutlinedButton(
                     key: const Key('searchButton'),
                     child: const Text('Search'),
                     onPressed: () async {
@@ -77,10 +77,13 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
                 if (widget.isPhone)
                   const Text("Account Name", textAlign: TextAlign.center),
                 Row(children: <Widget>[
-                  const Expanded(child: Text("Code", textAlign: TextAlign.center)),
+                  const Expanded(
+                      child: Text("Code", textAlign: TextAlign.center)),
                   if (!widget.isPhone)
-                    const Expanded(child: Text("Name", textAlign: TextAlign.center)),
-                  const Expanded(child: Text("Begin", textAlign: TextAlign.right)),
+                    const Expanded(
+                        child: Text("Name", textAlign: TextAlign.center)),
+                  const Expanded(
+                      child: Text("Begin", textAlign: TextAlign.right)),
                   if (!widget.isPhone)
                     const Expanded(
                         child:
@@ -89,7 +92,8 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
                     const Expanded(
                         child:
                             Text("Post.\nCredt", textAlign: TextAlign.right)),
-                  const Expanded(child: Text("End Bal.", textAlign: TextAlign.right)),
+                  const Expanded(
+                      child: Text("End Bal.", textAlign: TextAlign.right)),
                 ]),
                 const Divider(),
               ]),

@@ -316,13 +316,13 @@ class WebsiteFormState extends State<WebsiteForm> {
                     ),
                   ),
                   actions: <Widget>[
-                    ElevatedButton(
+                    OutlinedButton(
                       child: const Text('Cancel'),
                       onPressed: () {
                         Navigator.of(context).pop(); //dismiss the color picker
                       },
                     ),
-                    ElevatedButton(
+                    OutlinedButton(
                       child: const Text('Save'),
                       onPressed: () {
                         Navigator.of(context)
@@ -391,7 +391,7 @@ class WebsiteFormState extends State<WebsiteForm> {
                       style: const TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(width: 10),
-                  ElevatedButton(
+                  OutlinedButton(
                       key: const Key('updateHost'),
                       child: const Text('update'),
                       onPressed: () async {
@@ -420,7 +420,7 @@ class WebsiteFormState extends State<WebsiteForm> {
                           const InputDecoration(labelText: 'Title text')),
                 ),
                 const SizedBox(width: 10),
-                ElevatedButton(
+                OutlinedButton(
                     key: const Key('updateTitle'),
                     child: const Text('update'),
                     onPressed: () async {
@@ -634,7 +634,7 @@ class WebsiteFormState extends State<WebsiteForm> {
                     decoration: const InputDecoration(
                         labelText: 'Title of the vault'))),
             const SizedBox(width: 10),
-            ElevatedButton(
+            OutlinedButton(
                 key: const Key('upload'),
                 child: const Text('Upload '),
                 onPressed: () async {
@@ -658,7 +658,7 @@ class WebsiteFormState extends State<WebsiteForm> {
             const SizedBox(width: 10),
             Visibility(
                 visible: _obsidianController.text.isNotEmpty,
-                child: ElevatedButton(
+                child: OutlinedButton(
                     key: const Key('obsidianDelete'),
                     style: ButtonStyle(
                         backgroundColor: WidgetStateProperty.all(Colors.red)),
@@ -685,7 +685,7 @@ class WebsiteFormState extends State<WebsiteForm> {
                           labelText: 'Statistics Id of the website')),
                 ),
                 const SizedBox(width: 10),
-                ElevatedButton(
+                OutlinedButton(
                     key: const Key('measurementId'),
                     child: const Text('update'),
                     onPressed: () async {

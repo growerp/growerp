@@ -51,7 +51,7 @@ class _BalanceSheetHeaderState extends State<BalanceSheetHeader> {
                   ),
                   onChanged: ((value) => setState(() => searchString = value)),
                 )),
-                ElevatedButton(
+                OutlinedButton(
                     key: const Key('searchButton'),
                     child: const Text('Search'),
                     onPressed: () async {

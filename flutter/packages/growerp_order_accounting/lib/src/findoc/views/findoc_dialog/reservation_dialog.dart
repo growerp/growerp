@@ -327,7 +327,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                       "${_selectedDate.toLocal()}".split(' ')[0],
                       key: const Key('date'),
                     ))),
-                    ElevatedButton(
+                    OutlinedButton(
                       key: const Key('setDate'),
                       onPressed: () => selectDate(context),
                       child: const Text(' Update Startdate'),
@@ -354,7 +354,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                   const SizedBox(height: 20),
                   Row(children: [
                     Expanded(
-                        child: ElevatedButton(
+                        child: OutlinedButton(
                       key: const Key('cancel'),
                       child: const Text('Cancel'),
                       onPressed: () {
@@ -363,7 +363,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                     )),
                     const SizedBox(width: 20),
                     Expanded(
-                        child: ElevatedButton(
+                        child: OutlinedButton(
                             key: const Key('update'),
                             child: Text(widget.finDoc.orderId == null
                                 ? 'Create'

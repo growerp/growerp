@@ -177,20 +177,20 @@ class MenuOptionState extends State<DisplayMenuOption>
 
     Widget workflowBar = SizedBox(
         child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-/*          ElevatedButton(
+/*          OutlinedButton(
             child: const Text('Previous'),
             onPressed: () {
               taskBloc.add(TaskWorkflowPrevious(widget.workflow!.taskId));
             },
           ),
 */
-      ElevatedButton(
+      OutlinedButton(
         child: const Text('Cancel'),
         onPressed: () {
           taskBloc.add(TaskWorkflowCancel(widget.workflow!.taskId));
         },
       ),
-/*          ElevatedButton(
+/*          OutlinedButton(
             child: const Text('Suspend'),
             onPressed: () {
               taskBloc.add(TaskWorkflowSuspend(widget.workflow!.taskId));
@@ -198,7 +198,7 @@ class MenuOptionState extends State<DisplayMenuOption>
           ),
 */
       const SizedBox(width: 10),
-      ElevatedButton(
+      OutlinedButton(
         child: const Text('Next'),
         onPressed: () {
           taskBloc.add(TaskWorkflowNext(widget.workflow!.taskId));

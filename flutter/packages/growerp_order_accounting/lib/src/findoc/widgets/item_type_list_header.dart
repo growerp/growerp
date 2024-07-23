@@ -61,7 +61,7 @@ class _ItemTypeListHeaderState extends State<ItemTypeListHeader> {
                             searchString = value;
                           })),
                     )),
-                    ElevatedButton(
+                    OutlinedButton(
                         key: const Key('searchButton'),
                         child: const Text('Search'),
                         onPressed: () {

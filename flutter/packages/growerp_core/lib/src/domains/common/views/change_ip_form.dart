@@ -78,7 +78,7 @@ class _ChangeIpFormState extends State<ChangeIpForm> {
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      ElevatedButton(
+                      OutlinedButton(
                         child: const Text('Cancel'),
                         onPressed: () {
                           context.read<AuthBloc>().add(AuthLoad());
@@ -86,7 +86,7 @@ class _ChangeIpFormState extends State<ChangeIpForm> {
                       ),
                       const SizedBox(width: 20),
                       Expanded(
-                        child: ElevatedButton(
+                        child: OutlinedButton(
                             child: const Text('Ok'),
                             onPressed: () async {
                               if (_formKey.currentState!.validate()) {

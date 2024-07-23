@@ -139,7 +139,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
                 },
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
+              OutlinedButton(
                   key: const Key('update'),
                   child: Text(
                       widget.chatRoom.chatRoomId.isEmpty ? 'Create' : 'Update'),

@@ -171,7 +171,7 @@ class LoginDialogState extends State<LoginDialog> {
               },
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
+            OutlinedButton(
                 child: const Text('Submit new Password'),
                 onPressed: () {
                   if (_loginFormKey1.currentState!.validate()) {
@@ -272,7 +272,7 @@ class LoginDialogState extends State<LoginDialog> {
                 const SizedBox(height: 10),
                 Row(children: [
                   Expanded(
-                      child: ElevatedButton(
+                      child: OutlinedButton(
                           key: const Key('login'),
                           child: const Text('Login'),
                           onPressed: () {

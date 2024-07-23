@@ -96,7 +96,7 @@ Future addAnotherItemDialog(
                             keyboardType: TextInputType.number,
                           ),
                           const SizedBox(height: 20),
-                          ElevatedButton(
+                          OutlinedButton(
                             key: const Key('ok'),
                             child: const Text('Ok'),
                             onPressed: () {

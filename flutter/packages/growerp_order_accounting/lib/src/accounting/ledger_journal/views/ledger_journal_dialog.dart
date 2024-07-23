@@ -92,7 +92,7 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
       Row(
         children: [
           if (widget.ledgerJournal.journalId.isNotEmpty)
-            ElevatedButton(
+            OutlinedButton(
                 key: const Key('post'),
                 child: const Text('Upd.Header'),
                 onPressed: () {
@@ -106,7 +106,7 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
                 }),
           const SizedBox(width: 10),
           Expanded(
-            child: ElevatedButton(
+            child: OutlinedButton(
                 key: const Key('update'),
                 child: Text(widget.ledgerJournal.journalId.isEmpty
                     ? 'Create'

@@ -57,7 +57,7 @@ class _LedgerJournalListHeaderState extends State<LedgerJournalListHeader> {
                             searchString = value;
                           })),
                     )),
-                ElevatedButton(
+                OutlinedButton(
                     key: const Key('searchButton'),
                     child: const Text('Search'),
                     onPressed: () {

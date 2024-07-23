@@ -106,7 +106,7 @@ class _CartTotal extends StatelessWidget {
                 return Row(children: <Widget>[
                   Text(("Total: ${cartState.finDoc.grandTotal ?? 0.00}  "),
                       style: hugeStyle),
-                  ElevatedButton(
+                  OutlinedButton(
                       child: Text('Buy?', style: hugeStyle),
                       onPressed: order.items.length == 0
                           ? null

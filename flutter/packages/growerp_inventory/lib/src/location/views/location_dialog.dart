@@ -102,7 +102,7 @@ class LocationDialogState extends State<LocationDialog> {
                 },
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
+              OutlinedButton(
                   key: const Key('update'),
                   child:
                       Text(location.locationId == null ? 'Create' : 'Update'),

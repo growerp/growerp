@@ -273,7 +273,7 @@ Future addProductItemDialog(BuildContext context) async {
                                       const SizedBox(height: 20),
                                       Row(children: [
                                         Expanded(
-                                          child: ElevatedButton(
+                                          child: OutlinedButton(
                                             key: const Key('ok'),
                                             child: const Text('Add product'),
                                             onPressed: () {

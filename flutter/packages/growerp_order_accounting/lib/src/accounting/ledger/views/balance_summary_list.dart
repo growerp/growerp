@@ -117,14 +117,14 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                       ),
                     ),
                     if (_selectedPeriod.periodType != 'Y')
-                      ElevatedButton(
+                      OutlinedButton(
                           child: const Text('Y'),
                           onPressed: () => _ledgerBloc.add(LedgerFetch(
                               ReportType.summary,
                               periodName:
                                   _selectedPeriod.periodName.substring(0, 5)))),
                     if (_selectedPeriod.periodType != 'Q')
-                      ElevatedButton(
+                      OutlinedButton(
                           child: const Text('Q'),
                           onPressed: () {
                             String currentQuarter =
@@ -135,7 +135,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                                     'q$currentQuarter'));
                           }),
                     if (_selectedPeriod.periodType != 'M')
-                      ElevatedButton(
+                      OutlinedButton(
                           child: const Text('M'),
                           onPressed: () => _ledgerBloc.add(LedgerFetch(
                               ReportType.summary,

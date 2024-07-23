@@ -36,13 +36,13 @@ class FatalErrorForm extends StatelessWidget {
             ),
             Visibility(
                 visible: route != null && buttonText != null,
-                child: ElevatedButton(
+                child: OutlinedButton(
                     child: Text("$buttonText"),
                     onPressed: () {
                       Navigator.pushNamed(context, route!);
                     })),
             const SizedBox(height: 20),
-            ElevatedButton(
+            OutlinedButton(
               key: const Key('restart'),
               child: const Text('Restart'),
               onPressed: () => Phoenix.rebirth(context),

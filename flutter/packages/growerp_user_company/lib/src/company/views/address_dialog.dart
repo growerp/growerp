@@ -173,7 +173,7 @@ class AddressDialogState extends State<AddressDialog> {
                 const SizedBox(height: 20),
                 Row(children: [
                   Expanded(
-                      child: ElevatedButton(
+                      child: OutlinedButton(
                           key: const Key('updateAddress'),
                           child: Text(
                               widget.address == null ? 'Create' : 'Update'),

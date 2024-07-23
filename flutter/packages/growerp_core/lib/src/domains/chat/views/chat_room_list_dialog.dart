@@ -169,7 +169,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                         });
                       }),
                     )),
-                ElevatedButton(
+                OutlinedButton(
                     child: const Text('Search'),
                     onPressed: () {
                       _chatRoomBloc.add(ChatRoomFetch(

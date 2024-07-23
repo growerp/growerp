@@ -380,7 +380,7 @@ _settingsDialog(BuildContext context, Authenticate authenticate) async {
           content: Container(
             height: 200,
             child: Column(children: <Widget>[
-              ElevatedButton(
+              OutlinedButton(
                 child: Text('Select an another company'),
                 onPressed: () async {
                   BlocProvider.of<CompanyBloc>(context)
@@ -391,14 +391,14 @@ _settingsDialog(BuildContext context, Authenticate authenticate) async {
               SizedBox(height: 20),
               Visibility(
                   visible: authenticate.apiKey == null,
-                  child: ElevatedButton(
+                  child: OutlinedButton(
                     child: Text('Register as a customer'),
                     onPressed: () {
                       Navigator.popAndPushNamed(context, '/register');
                     },
                   )),
               SizedBox(height: 20),
-              ElevatedButton(
+              OutlinedButton(
                 child: Text('About'),
                 onPressed: () {
                   Navigator.popAndPushNamed(context, '/about');

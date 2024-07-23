@@ -150,7 +150,7 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
                 const SizedBox(height: 20),
                 Row(children: [
                   Expanded(
-                      child: ElevatedButton(
+                      child: OutlinedButton(
                           key: const Key('updatePaymentMethod'),
                           child: Text(
                               widget.paymentMethod?.creditCardNumber != null

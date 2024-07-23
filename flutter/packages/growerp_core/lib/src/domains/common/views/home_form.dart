@@ -148,7 +148,7 @@ class HomeFormState extends State<HomeForm> {
                             if (widget.title.isNotEmpty)
                               const SizedBox(height: 30),
                             authenticate.company?.partyId != null
-                                ? ElevatedButton(
+                                ? OutlinedButton(
                                     key: const Key('loginButton'),
                                     child: Text(CoreLocalizations.of(context)!
                                         .loginWithExistingUserName),
@@ -164,7 +164,7 @@ class HomeFormState extends State<HomeForm> {
                                     })
                                 : const Text('No companies yet, create one!'),
                             const Expanded(child: SizedBox(height: 130)),
-                            ElevatedButton(
+                            OutlinedButton(
                                 key: const Key('newCompButton'),
                                 child: const Text(
                                     'Create a new company and admin'),

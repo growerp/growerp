@@ -375,7 +375,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                   children: [
                     if (_selectedCompany.name != null)
                       Expanded(
-                          child: ElevatedButton(
+                          child: OutlinedButton(
                         key: const Key('editCompany'),
                         onPressed: () async {
                           var result = await showDialog(
@@ -396,7 +396,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                       )),
                     const SizedBox(width: 10),
                     Expanded(
-                        child: ElevatedButton(
+                        child: OutlinedButton(
                       key: const Key('newCompany'),
                       onPressed: () async {
                         var result = await showDialog(
@@ -502,7 +502,7 @@ class UserDialogState extends State<UserDialogStateFull> {
     ];
     Widget updateButton = Row(children: [
       if (widget.user.partyId != null)
-        ElevatedButton(
+        OutlinedButton(
             style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all(Colors.red)),
             key: const Key('deleteUser'),
@@ -524,7 +524,7 @@ class UserDialogState extends State<UserDialogStateFull> {
             }),
       const SizedBox(width: 10),
       Expanded(
-          child: ElevatedButton(
+          child: OutlinedButton(
               key: const Key('updateUser'),
               child: Text(updatedUser.partyId == null ? 'Create' : 'Update'),
               onPressed: () async {

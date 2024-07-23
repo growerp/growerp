@@ -56,7 +56,7 @@ class _GlAccountListHeaderState extends State<GlAccountListHeader> {
                             searchString = value;
                           })),
                     )),
-                ElevatedButton(
+                OutlinedButton(
                     key: const Key('searchButton'),
                     child: const Text('Search'),
                     onPressed: () {

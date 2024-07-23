@@ -119,7 +119,7 @@ class WorkflowEditorMainMenuState extends State<WorkflowEditorMainMenu> {
       const SizedBox(height: 20),
       Row(children: [
         const SizedBox(width: 10),
-        ElevatedButton(
+        OutlinedButton(
           child: const Text('Re-load'),
           onPressed: () async {
             widget.dashboard.removeAllElements();
@@ -133,7 +133,7 @@ class WorkflowEditorMainMenuState extends State<WorkflowEditorMainMenu> {
         ),
         const SizedBox(height: 20),
         Expanded(
-          child: ElevatedButton(
+          child: OutlinedButton(
               child: const Text('Save'),
               onPressed: () {
                 _workflowTemplateBloc.add(TaskUpdate(widget.workflow));

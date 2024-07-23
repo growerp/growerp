@@ -173,8 +173,8 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                             showSearchBox: true,
                             searchFieldProps: TextFieldProps(
                               autofocus: true,
-                              decoration:
-                                  const InputDecoration(labelText: 'Time period'),
+                              decoration: const InputDecoration(
+                                  labelText: 'Time period'),
                               controller: _periodSearchBoxController,
                             ),
                             title: popUp(
@@ -201,25 +201,25 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                         ),
                       ),
                       if (_selectedPeriod.periodType != 'Y')
-                        ElevatedButton(
+                        OutlinedButton(
                             child: const Text('Y'),
                             onPressed: () => _ledgerBloc.add(LedgerFetch(
                                 ReportType.sheet,
                                 periodName: _selectedPeriod.periodName
                                     .substring(0, 5)))),
                       if (_selectedPeriod.periodType != 'Q')
-                        ElevatedButton(
+                        OutlinedButton(
                             child: const Text('Q'),
                             onPressed: () {
-                              String currentQuarter =
-                                  formatter.format(DateTime.now().month / 4 + 1);
+                              String currentQuarter = formatter
+                                  .format(DateTime.now().month / 4 + 1);
                               _ledgerBloc.add(LedgerFetch(ReportType.sheet,
                                   periodName:
                                       '${_selectedPeriod.periodName.substring(0, 5)}'
                                       'q$currentQuarter'));
                             }),
                       if (_selectedPeriod.periodType != 'M')
-                        ElevatedButton(
+                        OutlinedButton(
                             child: const Text('M'),
                             onPressed: () => _ledgerBloc.add(LedgerFetch(
                                 ReportType.sheet,
@@ -227,7 +227,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                                     '${_selectedPeriod.periodName.substring(0, 5)}'
                                     'm${formatter.format(DateTime.now().month)}'))),
                       if (!expanded)
-                        ElevatedButton(
+                        OutlinedButton(
                           child: const Text('Exp.'),
                           onPressed: () => setState(() {
                             expanded = !expanded;
@@ -235,7 +235,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                           }),
                         ),
                       if (expanded)
-                        ElevatedButton(
+                        OutlinedButton(
                           child: const Text('Col.'),
                           onPressed: () => setState(() {
                             expanded = !expanded;

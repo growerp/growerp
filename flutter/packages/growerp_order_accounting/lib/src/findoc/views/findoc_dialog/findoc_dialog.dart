@@ -498,7 +498,7 @@ class MyFinDocState extends State<FinDocPage> {
 
   Widget updateButtons(state) {
     List<Widget> buttons = [
-      ElevatedButton(
+      OutlinedButton(
           key: const Key('header'),
           child: const Text("Update Header"),
           onPressed: () {
@@ -507,7 +507,7 @@ class MyFinDocState extends State<FinDocPage> {
                 description: _descriptionController.text,
                 isPosted: _isPosted)));
           }),
-      ElevatedButton(
+      OutlinedButton(
           key: const Key('addItem'),
           child: Text(widget.finDoc.docType == FinDocType.transaction
               ? 'Add\n transaction item'
@@ -531,7 +531,7 @@ class MyFinDocState extends State<FinDocPage> {
             }
           }),
       if (widget.finDoc.docType == FinDocType.order)
-        ElevatedButton(
+        OutlinedButton(
             key: const Key('itemRental'),
             child: const Text('Asset Rental'),
             onPressed: () async {
@@ -546,7 +546,7 @@ class MyFinDocState extends State<FinDocPage> {
               }
             }),
       if (widget.finDoc.docType != FinDocType.transaction)
-        ElevatedButton(
+        OutlinedButton(
             key: const Key('addProduct'),
             child: const Text('Add Product'),
             onPressed: () async {
@@ -588,14 +588,14 @@ class MyFinDocState extends State<FinDocPage> {
         children: <Widget>[
           Visibility(
               visible: !finDoc.idIsNull(),
-              child: ElevatedButton(
+              child: OutlinedButton(
                   key: const Key('cancelFinDoc'),
                   child: const Text('Cancel'),
                   onPressed: () {
                     _cartBloc.add(CartCancelFinDoc(finDocUpdated));
                   })),
           const SizedBox(width: 5),
-          ElevatedButton(
+          OutlinedButton(
               key: const Key('clear'),
               child: const Text('Clear Cart'),
               onPressed: () {
@@ -605,7 +605,7 @@ class MyFinDocState extends State<FinDocPage> {
               }),
           const SizedBox(width: 5),
           Expanded(
-            child: ElevatedButton(
+            child: OutlinedButton(
                 key: const Key('update'),
                 child: Text(
                     "${finDoc.idIsNull() ? CoreLocalizations.of(context)!.create : CoreLocalizations.of(context)!.update} "

@@ -463,7 +463,7 @@ class PaymentDialogState extends State<PaymentDialog> {
               const SizedBox(height: 10),
               Row(
                 children: [
-                  ElevatedButton(
+                  OutlinedButton(
                       key: const Key('cancelFinDoc'),
                       child: const Text('Cancel Payment'),
                       onPressed: () {
@@ -473,7 +473,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                       }),
                   const SizedBox(width: 20),
                   Expanded(
-                    child: ElevatedButton(
+                    child: OutlinedButton(
                         key: const Key('update'),
                         child: Text(
                             '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),

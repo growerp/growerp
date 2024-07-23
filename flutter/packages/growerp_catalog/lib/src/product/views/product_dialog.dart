@@ -385,7 +385,7 @@ class ProductDialogState extends State<ProductDialog> {
         ),
       Row(children: [
         Expanded(
-            child: ElevatedButton(
+            child: OutlinedButton(
                 key: const Key('update'),
                 child: Text(
                     widget.product.productId.isEmpty ? 'Create' : 'Update'),

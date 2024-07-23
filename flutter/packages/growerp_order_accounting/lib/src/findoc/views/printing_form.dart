@@ -44,7 +44,7 @@ class PrintingForm extends StatelessWidget {
             ),
             SizedBox(
                 height: 100,
-                child: ElevatedButton(
+                child: OutlinedButton(
                     key: const Key('back'),
                     child: const Icon(Icons.arrow_back),
                     onPressed: () {

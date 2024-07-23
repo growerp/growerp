@@ -76,7 +76,7 @@ class MultiSelectState<T> extends State<MultiSelect> {
               ),
         Row(children: [
           Expanded(
-              child: ElevatedButton(
+              child: OutlinedButton(
             key: const Key('ok'),
             onPressed: (() {
               return Navigator.pop(context, selectedItems);

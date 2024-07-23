@@ -288,7 +288,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
       Row(
         children: [
           Expanded(
-              child: ElevatedButton(
+              child: OutlinedButton(
                   key: const Key('update'),
                   child: Text(widget.opportunity.opportunityId.isEmpty
                       ? 'Create'

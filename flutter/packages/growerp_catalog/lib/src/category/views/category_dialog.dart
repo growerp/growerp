@@ -299,7 +299,7 @@ class CategoryDialogState extends State<CategoryDialog> {
                               )),
                           child: Wrap(spacing: 10.0, children: relProducts)),
                       const SizedBox(height: 10),
-                      ElevatedButton(
+                      OutlinedButton(
                           key: const Key('update'),
                           child: Text(widget.category.categoryId.isEmpty
                               ? 'Create'

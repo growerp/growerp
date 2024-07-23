@@ -82,7 +82,7 @@ class WorkflowEditorContextMenuState extends State<WorkflowEditorContextMenu> {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     spacing: 10,
                     children: [
-                      ElevatedButton(
+                      OutlinedButton(
                         child: const Text('Resize'),
                         onPressed: () async {
                           widget.dashboard
@@ -90,14 +90,14 @@ class WorkflowEditorContextMenuState extends State<WorkflowEditorContextMenu> {
                           Navigator.of(context).pop();
                         },
                       ),
-                      ElevatedButton(
+                      OutlinedButton(
                         child: const Text('Delete'),
                         onPressed: () async {
                           widget.dashboard.removeElement(widget.element);
                           Navigator.of(context).pop();
                         },
                       ),
-                      ElevatedButton(
+                      OutlinedButton(
                         child: const Text('remove outgoing connections'),
                         onPressed: () async {
                           widget.dashboard
@@ -180,7 +180,7 @@ class WorkflowEditorContextMenuState extends State<WorkflowEditorContextMenu> {
               }),
               const SizedBox(height: 20),
 */
-              ElevatedButton(
+              OutlinedButton(
                   key: const Key('update'),
                   child: Text(
                       widget.workflow.taskId.isEmpty ? 'Create' : 'Update'),

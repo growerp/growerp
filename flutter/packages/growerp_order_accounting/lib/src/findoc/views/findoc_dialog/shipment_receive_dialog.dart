@@ -225,7 +225,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
           child: Row(children: [
             Visibility(
                 visible: confirm,
-                child: ElevatedButton(
+                child: OutlinedButton(
                     key: const Key('back'),
                     child: const Text('Go back'),
                     onPressed: () async {
@@ -250,7 +250,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
               width: 10,
             ),
             Expanded(
-                child: ElevatedButton(
+                child: OutlinedButton(
                     key: const Key('update'),
                     child: Text(confirm ? 'Confirm ' : 'Receive shipment'),
                     onPressed: () async {

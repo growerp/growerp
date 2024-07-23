@@ -235,22 +235,22 @@ class _GanttFormState extends State<GanttForm> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          ElevatedButton(
+          OutlinedButton(
             onPressed: () => setState(() => columnPeriod = Period.day),
             child: const Text('Day'),
           ),
           const SizedBox(width: 10),
-          ElevatedButton(
+          OutlinedButton(
             onPressed: () => setState(() => columnPeriod = Period.week),
             child: const Text('Week'),
           ),
           const SizedBox(width: 10),
-          ElevatedButton(
+          OutlinedButton(
             onPressed: () => setState(() => columnPeriod = Period.month),
             child: const Text('Month'),
           ),
           const SizedBox(width: 10),
-          ElevatedButton(
+          OutlinedButton(
             key: const Key('refresh'),
             onPressed: () {
               _finDocBloc.add(const FinDocFetch(refresh: true));

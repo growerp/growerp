@@ -25,7 +25,7 @@ confirmDeleteUserComp(BuildContext context, UserGroup userGroup) {
     const Text("Please note you will be blocked using the system."
         "\nThis cannot be undone!"),
     const SizedBox(height: 20),
-    ElevatedButton(
+    OutlinedButton(
         child: const Text("Only User delete"),
         onPressed: () {
           Navigator.of(context).pop(false);
@@ -33,7 +33,7 @@ confirmDeleteUserComp(BuildContext context, UserGroup userGroup) {
   ];
   if (userGroup == UserGroup.admin) {
     actions.add(const SizedBox(height: 10));
-    actions.add(ElevatedButton(
+    actions.add(OutlinedButton(
       child: const Text("User AND Company delete"),
       onPressed: () {
         Navigator.of(context).pop(true);

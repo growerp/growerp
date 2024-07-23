@@ -62,7 +62,7 @@ class _FilesHeaderState extends State<ProductFilesDialog> {
               const SizedBox(height: 40),
               const Text("Download first to obtain the format"),
               const SizedBox(height: 10),
-              ElevatedButton(
+              OutlinedButton(
                   key: const Key('upload'),
                   child: const Text('Upload CSV file'),
                   onPressed: () async {
@@ -82,7 +82,7 @@ class _FilesHeaderState extends State<ProductFilesDialog> {
                     }
                   }),
               const SizedBox(height: 20),
-              ElevatedButton(
+              OutlinedButton(
                   key: const Key('download'),
                   child: const Text('Download via email'),
                   onPressed: () {

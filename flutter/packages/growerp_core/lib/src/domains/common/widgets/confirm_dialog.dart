@@ -19,13 +19,13 @@ import 'popup.dart';
 /// dialog returns true when continue, false when cancelled
 confirmDialog(BuildContext context, String title, String content) {
   // set up the buttons
-  Widget cancelButton = ElevatedButton(
+  Widget cancelButton = OutlinedButton(
     child: const Text("Cancel", key: Key('cancel')),
     onPressed: () {
       Navigator.of(context).pop(false);
     },
   );
-  Widget continueButton = ElevatedButton(
+  Widget continueButton = OutlinedButton(
     child: const Text("Continue", key: Key('continue')),
     onPressed: () {
       Navigator.of(context).pop(true);

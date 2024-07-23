@@ -208,7 +208,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
         decoration: const InputDecoration(labelText: 'Posted Balance'),
         controller: _postedBalanceController,
       ),
-      ElevatedButton(
+      OutlinedButton(
           key: const Key('update'),
           child:
               Text(widget.glAccount.glAccountId == null ? 'Create' : 'Update'),

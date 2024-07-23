@@ -146,7 +146,7 @@ class WorkflowDialogState extends State<WorkflowDialog> {
                               : Text(
                                   "Current task ${widget.workflow!.taskName}"),
                           const SizedBox(height: 20),
-                          ElevatedButton(
+                          OutlinedButton(
                               key: const Key('startWorkflow'),
                               child: Text(
                                   "${widget.workflow == null ? 'Start' : 'continue'} Workflow?"),

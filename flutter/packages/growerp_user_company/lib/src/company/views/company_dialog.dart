@@ -518,7 +518,7 @@ class CompanyFormState extends State<CompanyDialog> {
       Expanded(
           child: Visibility(
               visible: isAdmin,
-              child: ElevatedButton(
+              child: OutlinedButton(
                   key: const Key('update'),
                   onPressed: isAdmin
                       ? () async {

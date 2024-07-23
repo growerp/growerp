@@ -107,8 +107,14 @@ class TopApp extends StatelessWidget {
                                 start: 1921, end: double.infinity, name: '4K'),
                           ]),
                       themeMode: state.themeMode,
-                      theme: FlexThemeData.light(scheme: FlexScheme.money),
-                      darkTheme: FlexThemeData.dark(scheme: FlexScheme.money),
+                      theme: FlexThemeData.light(
+                        scheme: FlexScheme.jungle,
+                        useMaterial3: true,
+                      ),
+                      darkTheme: FlexThemeData.dark(
+                        scheme: FlexScheme.jungle,
+                        useMaterial3: true,
+                      ),
                       onGenerateRoute: router,
                       navigatorObservers: [AppNavObserver()],
                       home: BlocBuilder<AuthBloc, AuthState>(

@@ -143,7 +143,7 @@ class ChatState extends State<ChatDialog> {
         const SizedBox(
           width: 16,
         ),
-        ElevatedButton(
+        OutlinedButton(
             key: const Key('send'),
             child: const Text('Send'),
             onPressed: () {

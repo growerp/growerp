@@ -198,7 +198,7 @@ class FinDocListState extends State<FinDocList> {
         switch (state.status) {
           case FinDocStatus.failure:
             return Center(
-                child: ElevatedButton(
+                child: OutlinedButton(
                     onPressed: () =>
                         _finDocBloc.add(const FinDocFetch(refresh: true)),
                     child: const Text('Press here to continue')));

@@ -372,7 +372,7 @@ class AssetDialogState extends State<AssetDialog> {
               ],
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
+            OutlinedButton(
                 key: const Key('update'),
                 child: Text(widget.asset.assetId.isEmpty ? 'Create' : 'Update'),
                 onPressed: () async {

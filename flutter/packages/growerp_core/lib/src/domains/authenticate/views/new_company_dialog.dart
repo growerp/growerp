@@ -152,7 +152,7 @@ class _NewCompanyDialogState extends State<NewCompanyDialog> {
                     const SizedBox(height: 20),
                     Row(children: [
                       Expanded(
-                          child: ElevatedButton(
+                          child: OutlinedButton(
                               key: const Key('newCustomer'),
                               child: const Text('Register as a customer'),
                               onPressed: () {
@@ -216,7 +216,7 @@ class _NewCompanyDialogState extends State<NewCompanyDialog> {
                     const SizedBox(height: 10),
                     Row(children: [
                       Expanded(
-                          child: ElevatedButton(
+                          child: OutlinedButton(
                               key: const Key('newCompany'),
                               child: const Text(
                                   'Register AND create a new Company'),

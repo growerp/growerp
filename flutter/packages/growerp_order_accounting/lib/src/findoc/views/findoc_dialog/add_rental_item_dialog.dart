@@ -232,7 +232,7 @@ Future addRentalItemDialog(BuildContext context,
                                             ),
                                           ),
                                           const SizedBox(width: 10),
-                                          ElevatedButton(
+                                          OutlinedButton(
                                               key: const Key('setDate'),
                                               child: const Text(
                                                 'Select date',
@@ -264,7 +264,7 @@ Future addRentalItemDialog(BuildContext context,
                                       Row(
                                         children: [
                                           Expanded(
-                                            child: ElevatedButton(
+                                            child: OutlinedButton(
                                               key: const Key('okRental'),
                                               child:
                                                   const Text('Add reservation'),

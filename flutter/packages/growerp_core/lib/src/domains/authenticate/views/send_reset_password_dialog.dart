@@ -80,7 +80,7 @@ class _SendResetPasswordDialogState extends State<SendResetPasswordDialog> {
                                   username = value;
                                 }),
                             const SizedBox(height: 20),
-                            ElevatedButton(
+                            OutlinedButton(
                               child: const Text('Ok'),
                               onPressed: () {
                                 _authBloc

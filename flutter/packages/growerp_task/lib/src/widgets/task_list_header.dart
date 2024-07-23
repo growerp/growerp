@@ -51,7 +51,7 @@ class _TaskListHeaderState extends State<TaskListHeader> {
                       onChanged: ((value) =>
                           setState(() => searchString = value)),
                     )),
-                ElevatedButton(
+                OutlinedButton(
                     child: const Text('Search'),
                     onPressed: () {
                       context

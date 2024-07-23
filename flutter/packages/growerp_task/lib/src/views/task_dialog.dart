@@ -160,7 +160,7 @@ class TaskDialogState extends State<TaskDialog> {
               Row(children: [
                 if (widget.task.taskId.isNotEmpty &&
                     widget.task.taskType == TaskType.todo)
-                  ElevatedButton(
+                  OutlinedButton(
                       key: const Key('TimeEntries'),
                       child: const Text('TimeEntries'),
                       onPressed: () async {
@@ -178,7 +178,7 @@ class TaskDialogState extends State<TaskDialog> {
                     widget.task.taskId.isNotEmpty &&
                     widget.task.taskType != TaskType.workflow)
                   Expanded(
-                      child: ElevatedButton(
+                      child: OutlinedButton(
                           key: const Key('editWorkflow'),
                           child: const Text('Edit Diagram'),
                           onPressed: () => Navigator.of(context).pushNamed(
@@ -186,7 +186,7 @@ class TaskDialogState extends State<TaskDialog> {
                               arguments: widget.task))),
                 if (widget.task.taskType == TaskType.workflow)
                   Expanded(
-                      child: ElevatedButton(
+                      child: OutlinedButton(
                           key: const Key('startWorkflow'),
                           child: const Text('Start Workflow'),
                           onPressed: () => Navigator.of(context).pushNamed(
@@ -195,7 +195,7 @@ class TaskDialogState extends State<TaskDialog> {
                 const SizedBox(width: 10),
                 if (widget.task.taskType != TaskType.workflow)
                   Expanded(
-                      child: ElevatedButton(
+                      child: OutlinedButton(
                           key: const Key('update'),
                           child: Text(
                               widget.task.taskId.isEmpty ? 'Create' : 'Update'),

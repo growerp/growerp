@@ -121,7 +121,7 @@ Future addTransactionItemDialog(BuildContext context, bool sales,
                             },
                           ),
                           const SizedBox(height: 20),
-                          ElevatedButton(
+                          OutlinedButton(
                             key: const Key('ok'),
                             child: const Text('Ok'),
                             onPressed: () {
