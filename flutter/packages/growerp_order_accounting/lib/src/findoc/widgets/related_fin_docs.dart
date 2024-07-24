@@ -30,7 +30,7 @@ class RelatedFinDocs extends StatelessWidget {
                         docType: FinDocType.order,
                         orderId: finDoc.orderId))),
           if (finDoc.docType != FinDocType.invoice && finDoc.invoiceId != null)
-            TextButton(
+            OutlinedButton(
                 key: const Key('relInvoice'),
                 child: const Text('Invoice'),
                 onPressed: () => Navigator.pushNamed(context, '/findoc',
@@ -39,7 +39,7 @@ class RelatedFinDocs extends StatelessWidget {
                         docType: FinDocType.invoice,
                         invoiceId: finDoc.invoiceId))),
           if (finDoc.docType != FinDocType.payment && finDoc.paymentId != null)
-            TextButton(
+            OutlinedButton(
                 key: const Key('relPayment'),
                 child: const Text('Payment'),
                 onPressed: () => Navigator.pushNamed(context, '/findoc',
@@ -49,7 +49,7 @@ class RelatedFinDocs extends StatelessWidget {
                         paymentId: finDoc.paymentId))),
           if (finDoc.docType != FinDocType.shipment &&
               finDoc.shipmentId != null)
-            TextButton(
+            OutlinedButton(
                 key: const Key('relShipment'),
                 child: const Text('Shipment'),
                 onPressed: () => Navigator.pushNamed(context, '/findoc',
@@ -59,7 +59,7 @@ class RelatedFinDocs extends StatelessWidget {
                         shipmentId: finDoc.shipmentId))),
           if (finDoc.docType != FinDocType.transaction &&
               finDoc.transactionId != null)
-            TextButton(
+            OutlinedButton(
                 key: const Key('relTransaction'),
                 child: const Text('Transaction'),
                 onPressed: () => Navigator.pushNamed(context, '/findoc',

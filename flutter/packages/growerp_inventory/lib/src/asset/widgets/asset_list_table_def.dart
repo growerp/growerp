@@ -102,7 +102,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             }),
   ));
   return TableData(
-      rowHeight: isPhone(context) ? 30 : 20, rowContent: rowContent);
+      rowHeight: isPhone(context) ? 40 : 20, rowContent: rowContent);
 }
 
 // general settings

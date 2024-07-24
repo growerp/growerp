@@ -527,6 +527,10 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="INV" join-optional="true">
             <key-map field-name="invoiceId" />
         </member-entity>
+        <member-entity entity-alias="ITEMPROD" entity-name="mantle.product.Product"
+            join-from-alias="ITEM" join-optional="true">
+            <key-map field-name="productId" />
+        </member-entity>
         <member-entity entity-alias="TRANS" entity-name="mantle.ledger.transaction.AcctgTrans"
             join-from-alias="INV" join-optional="true">
             <key-map field-name="invoiceId" />
@@ -624,6 +628,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="invoiceTotal" entity-alias="INV" />
         <alias name="invoiceItemSeqId" entity-alias="ITEM" />
         <alias name="productId" entity-alias="ITEM" />
+        <alias name="productPseudoId" field="pseudoId" entity-alias="ITEMPROD" />
         <alias name="rentalFromDate" entity-alias="RESERV" />
         <alias name="rentalThruDate" entity-alias="RESERV" />
         <alias name="assetRentalId" entity-alias="RESERV" />

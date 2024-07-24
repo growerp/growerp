@@ -48,8 +48,9 @@ class TableRowContent {
     {required Bloc bloc,
     required String classificationId,
     required BuildContext context,
-    required List<T> items}) {
-  double width = MediaQuery.of(context).size.width;
+    required List<T> items,
+    double? screenWidth}) {
+  double width = screenWidth ?? MediaQuery.of(context).size.width;
   List<double> fieldWidth = [];
   late TableData tableData;
   List<List<TableViewCell>> tableViewCells = []; // table content

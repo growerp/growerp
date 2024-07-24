@@ -116,6 +116,7 @@ class MyFinDocState extends State<FinDocPage> {
   late bool readOnly;
   late FinDocStatusVal _updatedStatus;
   late String currencyId;
+  late double screenWidth;
 
   @override
   void initState() {
@@ -162,6 +163,7 @@ class MyFinDocState extends State<FinDocPage> {
   @override
   Widget build(BuildContext context) {
     isPhone = isAPhone(context);
+    screenWidth = isPhone ? 400 : 900;
 
     blocConsumerListener(BuildContext context, CartState state,
         [bool mounted = true]) async {
@@ -232,7 +234,7 @@ class MyFinDocState extends State<FinDocPage> {
                       "${finDoc.sales ? 'Sales' : 'Purchase'} ${finDoc.docType} "
                       "#${finDoc.pseudoId ?? ' new'}",
                   height: 650,
-                  width: isPhone ? 400 : 900,
+                  width: screenWidth,
                   context: context,
                   child: Builder(builder: (BuildContext context) {
                     if (finDoc.sales) {
@@ -664,7 +666,7 @@ class MyFinDocState extends State<FinDocPage> {
           value: Text("${item.product?.pseudoId}",
               textAlign: TextAlign.center, key: Key('itemProductId$index'))));
       rowContent.add(TableRowContent(
-          width: isPhone ? 25 : 25,
+          width: isPhone ? 25 : 30,
           name: 'Description',
           value: Text("${item.description}",
               key: Key('itemDescription$index'), textAlign: TextAlign.left)));
@@ -677,15 +679,15 @@ class MyFinDocState extends State<FinDocPage> {
       }
       if (!isPhone) {
         rowContent.add(TableRowContent(
-            width: 4,
+            width: 10,
             name: 'Qty',
             value: Text("${item.quantity}",
                 textAlign: TextAlign.right, key: Key('itemQuantity$index'))));
       }
       if (item.product?.productTypeId != 'Rental') {
         rowContent.add(TableRowContent(
-            width: 15,
-            name: 'Price',
+            width: 12,
+            name: Text('Price', textAlign: TextAlign.right),
             value: Text(item.price!.currency(currencyId: currencyId),
                 textAlign: TextAlign.right, key: Key('itemPrice$index'))));
       }
@@ -699,12 +701,12 @@ class MyFinDocState extends State<FinDocPage> {
       if (!isPhone) {
         rowContent.add(TableRowContent(
             width: 10,
-            name: 'SubTot.',
+            name: Text('SubTot.', textAlign: TextAlign.right),
             value: Text(
                 (item.price! * (item.quantity ?? Decimal.parse('1')))
                     .currency(currencyId: currencyId)
                     .toString(),
-                textAlign: TextAlign.center)));
+                textAlign: TextAlign.right)));
       }
       if (!readOnly) {
         rowContent.add(TableRowContent(
@@ -741,7 +743,8 @@ class MyFinDocState extends State<FinDocPage> {
         bloc: _finDocBloc,
         classificationId: 'AppAdmin',
         context: context,
-        items: items);
+        items: items,
+        screenWidth: screenWidth);
     return Flexible(
       child: items.isEmpty
           ? const Text("no items yet")
@@ -843,7 +846,8 @@ class MyFinDocState extends State<FinDocPage> {
         bloc: _finDocBloc,
         classificationId: 'AppAdmin',
         context: context,
-        items: items);
+        items: items,
+        screenWidth: screenWidth);
     return Flexible(
       child: items.isEmpty
           ? const Text("no items yet")
@@ -935,7 +939,7 @@ class MyFinDocState extends State<FinDocPage> {
           : null;
     } // field content
 
-// get table data formatted for tableView
+    // get table data formatted for tableView
     var (
       List<List<TableViewCell>> tableViewCells,
       List<double> fieldWidths,
@@ -944,7 +948,8 @@ class MyFinDocState extends State<FinDocPage> {
         bloc: _finDocBloc,
         classificationId: 'AppAdmin',
         context: context,
-        items: items);
+        items: items,
+        screenWidth: screenWidth);
     return items.isEmpty
         ? const Text("no items yet")
         : Flexible(

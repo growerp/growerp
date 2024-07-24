@@ -700,7 +700,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="finDocItem"
                             from="[
                         itemSeqId: item.invoiceItemSeqId,
-                        product: [productId: item.productId],
+                        product: [productId: item.productId,pseudoId: item.productPseudoId],
                         itemType: [itemTypeId: item.itemTypeId,
                                     itemTypeName: item.itemTypeName],
                         description: item.description,
@@ -1395,6 +1395,12 @@ along with this software (see the LICENSE.md file). If not, see
                         <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
                             in-map="[acctgTransId: acctgTransId]" />
                     </if>
+                </else-if>
+                <else-if condition="finDoc.docType == 'shipment'">
+                    <service-call name="mantle.shipment.ShipmentServices.create#Shipment"
+                        in-map="[ ]" />
+                    <service-call name="update#mantle.shipment.Shipment"
+                        in-map="[shipmentId: shipmentId, pseudoId: finDoc.pseudoId]" />
                 </else-if>
                 <else>
                     <return error="true"

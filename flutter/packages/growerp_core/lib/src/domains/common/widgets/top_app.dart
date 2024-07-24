@@ -109,10 +109,22 @@ class TopApp extends StatelessWidget {
                       themeMode: state.themeMode,
                       theme: FlexThemeData.light(
                         scheme: FlexScheme.jungle,
+                        subThemesData: const FlexSubThemesData(
+                          dialogBackgroundSchemeColor:
+                              SchemeColor.outlineVariant,
+                          inputDecoratorBorderType:
+                              FlexInputBorderType.underline,
+                        ),
                         useMaterial3: true,
                       ),
                       darkTheme: FlexThemeData.dark(
                         scheme: FlexScheme.jungle,
+                        subThemesData: const FlexSubThemesData(
+                          dialogBackgroundSchemeColor:
+                              SchemeColor.outlineVariant,
+                          inputDecoratorBorderType:
+                              FlexInputBorderType.underline,
+                        ),
                         useMaterial3: true,
                       ),
                       onGenerateRoute: router,

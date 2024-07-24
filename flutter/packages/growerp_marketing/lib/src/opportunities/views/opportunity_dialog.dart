@@ -32,6 +32,7 @@ class OpportunityDialog extends StatefulWidget {
 class OpportunityDialogState extends State<OpportunityDialog> {
   final _formKeyOpportunity = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _pseudoIdController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _estAmountController = TextEditingController();
   final _estProbabilityController = TextEditingController();
@@ -57,6 +58,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
           () => context.read<RestClient>().getUser(limit: 3, role: Role.lead)));
     _opportunityBloc = context.read<OpportunityBloc>();
     _nameController.text = widget.opportunity.opportunityName ?? '';
+    _pseudoIdController.text = widget.opportunity.pseudoId;
     _descriptionController.text = widget.opportunity.description ?? '';
     _estAmountController.text = widget.opportunity.estAmount != null
         ? widget.opportunity.estAmount.toString()
@@ -112,6 +114,11 @@ class OpportunityDialogState extends State<OpportunityDialog> {
 
   Widget _opportunityForm() {
     List<Widget> widgets = [
+      TextFormField(
+        key: const Key('pseudoId'),
+        decoration: const InputDecoration(labelText: 'Id'),
+        controller: _pseudoIdController,
+      ),
       TextFormField(
         key: const Key('name'),
         decoration: const InputDecoration(labelText: 'Opportunity Name'),
@@ -298,6 +305,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                       _opportunityBloc.add(OpportunityUpdate(Opportunity(
                         opportunityId: widget.opportunity.opportunityId,
                         opportunityName: _nameController.text,
+                        pseudoId: _pseudoIdController.text,
                         description: _descriptionController.text,
                         estAmount: Decimal.parse(_estAmountController.text),
                         estProbability:

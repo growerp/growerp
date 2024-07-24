@@ -127,7 +127,7 @@ class FinDocTest {
         // item added at the top, get productid
         newItems.add(item.copyWith(
             product:
-                Product(productId: CommonTest.getTextField('itemProductId0'))));
+                Product(pseudoId: CommonTest.getTextField('itemProductId0'))));
       }
       await CommonTest.drag(tester, seconds: 2);
       // update/create finDoc
@@ -160,7 +160,7 @@ class FinDocTest {
         expect(finDoc.description!, CommonTest.getTextFormField('description'));
       }
       for (final (index, item) in finDoc.items.indexed) {
-        expect(item.product?.productId ?? '',
+        expect(item.product?.pseudoId ?? '',
             CommonTest.getTextField('itemProductId$index'));
         expect(item.description!,
             CommonTest.getTextField('itemDescription$index'));

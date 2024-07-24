@@ -100,7 +100,7 @@ class ProductListState extends State<ProductList> {
                               return index > products.length
                                   ? const BottomLoader()
                                   : Dismissible(
-                                      key: const Key('locationItem'),
+                                      key: const Key('productItem'),
                                       direction: DismissDirection.startToEnd,
                                       child: BlocProvider.value(
                                           value: _productBloc,

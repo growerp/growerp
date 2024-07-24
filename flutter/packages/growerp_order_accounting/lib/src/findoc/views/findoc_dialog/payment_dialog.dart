@@ -124,16 +124,13 @@ class PaymentDialogState extends State<PaymentDialog> {
         backgroundColor: Colors.transparent,
         body: Dialog(
             key: Key("PaymentDialog${finDoc.sales ? 'Sales' : 'Purchase'}"),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
             child: SingleChildScrollView(
                 key: const Key('listView2'),
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 child: popUp(
                     context: context,
-                    height: 650,
+                    height: 700,
                     width: 600,
                     title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
                         "Payment #${finDoc.pseudoId ?? 'New'}",
@@ -200,6 +197,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                         switch (state.status) {
                           case DataFetchStatus.success:
                             return DropdownSearch<Company>(
+                              enabled: !readOnly,
                               selectedItem: _selectedCompany,
                               popupProps: PopupProps.menu(
                                 isFilterOnline: true,
@@ -286,6 +284,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                   ),
                   Expanded(
                     child: TextFormField(
+                        enabled: !readOnly,
                         key: const Key('amount'),
                         decoration: InputDecoration(
                             labelText: 'Amount($currencySymbol)'),
@@ -324,12 +323,14 @@ class PaymentDialogState extends State<PaymentDialog> {
                             value: _paymentInstrument ==
                                 PaymentInstrument.creditcard,
                             onChanged: (bool? value) {
-                              setState(() {
-                                if (value == true) {
-                                  _paymentInstrument =
-                                      PaymentInstrument.creditcard;
-                                }
-                              });
+                              !readOnly
+                                  ? setState(() {
+                                      if (value == true) {
+                                        _paymentInstrument =
+                                            PaymentInstrument.creditcard;
+                                      }
+                                    })
+                                  : null;
                             }),
                         Expanded(
                             child: Text(
@@ -342,11 +343,14 @@ class PaymentDialogState extends State<PaymentDialog> {
                           fillColor: WidgetStateProperty.resolveWith(getColor),
                           value: _paymentInstrument == PaymentInstrument.cash,
                           onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _paymentInstrument = PaymentInstrument.cash;
-                              }
-                            });
+                            !readOnly
+                                ? setState(() {
+                                    if (value == true) {
+                                      _paymentInstrument =
+                                          PaymentInstrument.cash;
+                                    }
+                                  })
+                                : null;
                           }),
                       const Text(
                         "Cash",
@@ -359,11 +363,14 @@ class PaymentDialogState extends State<PaymentDialog> {
                           fillColor: WidgetStateProperty.resolveWith(getColor),
                           value: _paymentInstrument == PaymentInstrument.check,
                           onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _paymentInstrument = PaymentInstrument.check;
-                              }
-                            });
+                            !readOnly
+                                ? setState(() {
+                                    if (value == true) {
+                                      _paymentInstrument =
+                                          PaymentInstrument.check;
+                                    }
+                                  })
+                                : null;
                           }),
                       const Text(
                         "Check",
@@ -376,11 +383,14 @@ class PaymentDialogState extends State<PaymentDialog> {
                           fillColor: WidgetStateProperty.resolveWith(getColor),
                           value: _paymentInstrument == PaymentInstrument.bank,
                           onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _paymentInstrument = PaymentInstrument.bank;
-                              }
-                            });
+                            !readOnly
+                                ? setState(() {
+                                    if (value == true) {
+                                      _paymentInstrument =
+                                          PaymentInstrument.bank;
+                                    }
+                                  })
+                                : null;
                           }),
                       Text(
                         "Bank ${finDoc.otherCompany?.paymentMethod?.creditCardNumber ?? ''}",
@@ -389,27 +399,26 @@ class PaymentDialogState extends State<PaymentDialog> {
                   ],
                 ),
               ),
-              DropdownButtonFormField<PaymentType>(
-                key: const Key('paymentType'),
-                decoration: const InputDecoration(labelText: 'Payment Type'),
-                hint: const Text('Payment Type'),
-                value: _selectedPaymentType,
-                validator: (value) =>
-                    value == null && _selectedGlAccount == null
-                        ? 'Enter a item type for posting?'
-                        : null,
-                items: state.paymentTypes.map((item) {
-                  return DropdownMenuItem<PaymentType>(
-                      value: item,
-                      child: Text(
-                          '${item.paymentTypeName}\n ${item.accountCode} ${item.accountName}',
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2));
-                }).toList(),
-                onChanged: (PaymentType? newValue) {
-                  _selectedPaymentType = newValue;
-                },
-                isExpanded: true,
+              IgnorePointer(
+                ignoring: readOnly,
+                child: DropdownButtonFormField<PaymentType>(
+                  key: const Key('paymentType'),
+                  value: _selectedPaymentType,
+                  validator: (value) =>
+                      value == null && _selectedGlAccount == null
+                          ? 'Enter a item type for posting?'
+                          : null,
+                  items: state.paymentTypes.map((item) {
+                    return DropdownMenuItem<PaymentType>(
+                        value: item,
+                        child: Text(
+                            '${item.paymentTypeName}\n ${item.accountCode} ${item.accountName}',
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2));
+                  }).toList(),
+                  onChanged: (newValue) => _selectedPaymentType = newValue,
+                  isExpanded: true,
+                ),
               ),
               BlocBuilder<GlAccountBloc, GlAccountState>(
                   builder: (context, state) {
@@ -419,6 +428,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                         message: 'server connection problem');
                   case GlAccountStatus.success:
                     return DropdownSearch<GlAccount>(
+                      enabled: !readOnly,
                       selectedItem: _selectedGlAccount,
                       popupProps: PopupProps.menu(
                         isFilterOnline: true,

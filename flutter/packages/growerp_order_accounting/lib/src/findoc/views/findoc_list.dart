@@ -165,10 +165,10 @@ class FinDocListState extends State<FinDocList> {
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
-                              return index >= length
+                              return index > finDocs.length
                                   ? const BottomLoader()
                                   : Dismissible(
-                                      key: const Key('locationItem'),
+                                      key: const Key('finDocItem'),
                                       direction: DismissDirection.startToEnd,
                                       child: BlocProvider.value(
                                           value: _finDocBloc,
