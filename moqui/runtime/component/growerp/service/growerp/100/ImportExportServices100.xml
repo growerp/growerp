@@ -679,6 +679,35 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.FinDocServices100.update#FinDoc"
                         in-map="[finDoc: finDoc, classificationId: classificationId]" />
                     <set field="itemsOut" from="[]" />
+                    <!-- create a shipment for account 12000-->
+                    <if condition="finDoc?.items?.glAccount?.accountCode?.contains('12000')">
+                        <set field="saveFinDoc" from="finDoc" />
+                        <set field="finDoc.docType" value="schipment" />
+                        <set field="newItems" from="[]" />
+                        <iterate list="finDoc.items" entry="item">
+                            <if condition="item.glAccount.accountCode == '12000'">
+                                <script>newItems.add(item)</script>
+                            </if>
+                        </iterate>
+                        <set field="finDoc.items" from="newItems" />
+                        <if condition="finDoc.items[0].isDebit">
+                            <set field="finDoc.sales" value="false" type="Boolean" />
+                            <else>
+                                <set field="finDoc.sales" value="true" type="Boolean" />
+                            </else>
+                        </if>
+                        <service-call name="growerp.100.FinDocServices100.create#FinDoc"
+                            in-map="[finDoc: finDoc, classificationId: classificationId]"
+                            out-map="context" />
+                        <set field="saveFinDoc.shipmentId" from="finDoc.shipmentId" />
+                    </if>
+                    <!--log
+                    message="===import findocItems: ${finDoc.pseudoId} items price:
+                    ${finDoc.items?.price}" /-->
+                    <!-- create transaction-->
+                    <service-call name="growerp.100.FinDocServices100.update#FinDoc"
+                        in-map="[finDoc: saveFinDoc, classificationId: classificationId]" />
+
                 </if>
                 <if condition="!lastItem || lastItem.pseudoId != item.pseudoId">
                     <!-- find related finDoc header -->

@@ -86,7 +86,8 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
           Row(
             children: [
               Text(
-                  classificationId == 'AppHotel'
+                  classificationId == 'AppHotel' &&
+                          item.docType == FinDocType.order
                       ? item.status!.hotel
                       : item.status!.name,
                   key: Key("status$index")),
@@ -134,7 +135,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         width: 10,
         name: const Text("Status"),
         value: Text(
-            classificationId == 'AppHotel'
+            classificationId == 'AppHotel' && item.docType == FinDocType.order
                 ? item.status!.hotel
                 : item.status!.name,
             key: Key("status$index"))));

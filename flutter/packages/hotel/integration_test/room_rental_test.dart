@@ -54,6 +54,7 @@ Future<void> selectReservations(WidgetTester tester) async {
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  String classificationId = 'AppHotel';
 /*
   DateTime today = CustomizableDateTime.current;
   DateTime plus2 = today.add(const Duration(days: 2));
@@ -79,7 +80,7 @@ void main() {
         menuOptions,
         delegates,
         restClient: restClient,
-        blocProviders: getHotelBlocProviders(restClient, 'AppAdmin'),
+        blocProviders: getHotelBlocProviders(restClient, classificationId),
       );
       await CommonTest.createCompanyAndAdmin(tester);
       await selectRoomTypes(tester);
@@ -177,7 +178,8 @@ void main() {
         menuOptions,
         delegates,
         restClient: restClient,
-        blocProviders: getHotelBlocProviders(restClient, 'AppAdmin'),
+        blocProviders: getHotelBlocProviders(restClient, classificationId),
+        classificationId: classificationId,
       );
       await CommonTest.createCompanyAndAdmin(tester, testData: {
         "assets": roomsHotel, // will also add products
