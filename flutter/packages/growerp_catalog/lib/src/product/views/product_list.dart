@@ -53,9 +53,10 @@ class ProductListState extends State<ProductList> {
 
     Widget tableView() {
       if (products.isEmpty) {
-        return const Center(
+        return Center(
             heightFactor: 20,
-            child: Text("no products found", textAlign: TextAlign.center));
+            child:
+                Text("no ${entityName}s found", textAlign: TextAlign.center));
       }
       // get table data formatted for tableView
       var (

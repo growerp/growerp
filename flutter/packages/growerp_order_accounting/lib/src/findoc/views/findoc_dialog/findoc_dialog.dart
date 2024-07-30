@@ -269,7 +269,7 @@ class MyFinDocState extends State<FinDocPage> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   SizedBox(
-                    width: 115,
+                    width: 80,
                     child: TextFormField(
                       key: const Key('pseudoId'),
                       enabled: !readOnly,
@@ -347,7 +347,7 @@ class MyFinDocState extends State<FinDocPage> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             SizedBox(
-              width: 115,
+              width: 145,
               child: DropdownButtonFormField<FinDocStatusVal>(
                 key: const Key('statusDropDown'),
                 decoration: const InputDecoration(labelText: 'Status'),
@@ -356,7 +356,9 @@ class MyFinDocState extends State<FinDocPage> {
                 items: FinDocStatusVal.validStatusList(_updatedStatus)
                     .map((label) => DropdownMenuItem<FinDocStatusVal>(
                           value: label,
-                          child: Text(label.name),
+                          child: Text(classificationId == 'AppHotel'
+                              ? label.hotel
+                              : label.name),
                         ))
                     .toList(),
                 onChanged: readOnly

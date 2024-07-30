@@ -56,8 +56,8 @@ class ProductTest {
       }
       await CommonTest.checkWidgetKey(tester, 'ProductDialog');
       await CommonTest.enterText(tester, 'name', product.productName!);
+      await CommonTest.drag(tester);
       await CommonTest.enterText(tester, 'description', product.description!);
-      await CommonTest.dragNew(tester, key: 'description');
       await CommonTest.enterText(tester, 'price', product.price.toString());
       await CommonTest.enterText(
           tester, 'listPrice', product.listPrice.toString());

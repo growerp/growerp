@@ -111,6 +111,7 @@ class FinDoc with _$FinDoc {
       "descr: ${items.isNotEmpty ? items[0].description : ''} ";
 //      "status: $status! otherUser: $otherUser! Items: ${items!.length}";
 
+  // @depreciated: use finDocStatusVal
   String? displayStatus(String classificationId) {
     if (status == null) return '??';
     if (docType != FinDocType.order) {
@@ -125,6 +126,7 @@ class FinDoc with _$FinDoc {
   }
 }
 
+// depreciated: use finDocStatusVal
 Map<String, String> finDocStatusValues = {
   // explanation of status values
   'FinDocPrep': 'in Preparation',
@@ -134,6 +136,7 @@ Map<String, String> finDocStatusValues = {
   'FinDocCancelled': 'Cancelled'
 };
 
+// depreciated: use finDocStatusVal
 Map<String, String> finDocStatusValuesHotel = {
   'FinDocPrep': 'in Preparation',
   'FinDocCreated': 'Created',

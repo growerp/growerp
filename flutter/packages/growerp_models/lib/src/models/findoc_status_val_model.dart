@@ -13,15 +13,18 @@
  */
 
 enum FinDocStatusVal {
-  inPreparation('FinDocPrep'),
-  created('FinDocCreated'),
-  approved('FinDocApproved'),
-  completed('FinDocCompleted'),
-  cancelled('FinDocCancelled'),
-  unknown('Unknown');
+  inPreparation('FinDocPrep', 'In Preparation', 'In Preparation'),
+  created('FinDocCreated', 'Created', 'Created'),
+  approved('FinDocApproved', 'Checked In', 'Approved'),
+  completed('FinDocCompleted', 'Checked Out', 'Completed'),
+  cancelled('FinDocCancelled', 'Cancelled', 'Cancelled'),
+  unknown('Unknown', 'Unknown', 'Unknown');
 
-  final String value;
-  const FinDocStatusVal(this.value);
+  const FinDocStatusVal(this.value, this.hotel, this.other);
+
+  final String value; // value used in backend
+  final String hotel; // used in hotel app
+  final String other; // value used in other apps
 
   static final Map<String, FinDocStatusVal> byValue = {};
   static FinDocStatusVal? getByValue(String value) {

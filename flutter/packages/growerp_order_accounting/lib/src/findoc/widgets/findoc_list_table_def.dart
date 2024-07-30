@@ -86,9 +86,9 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
           Row(
             children: [
               Text(
-                  item.status != null
-                      ? item.displayStatus(classificationId)!
-                      : '??',
+                  classificationId == 'AppHotel'
+                      ? item.status!.hotel
+                      : item.status!.name,
                   key: Key("status$index")),
               const SizedBox(width: 10),
               if (item.docType != FinDocType.shipment)
@@ -109,10 +109,12 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         width: 12,
         name: Text(
             classificationId == 'AppHotel' ? 'Reserv. Date' : 'Creation Date'),
-        value: Text(classificationId == 'AppHotel' &&
-                item.items[0].rentalFromDate != null
-            ? item.items[0].rentalFromDate.toString().substring(0, 10)
-            : "${item.creationDate?.toString().substring(0, 11)}")));
+        value: Text(
+            classificationId == 'AppHotel' &&
+                    item.items[0].rentalFromDate != null
+                ? item.items[0].rentalFromDate.toString().substring(0, 10)
+                : "${item.creationDate?.toString().substring(0, 11)}",
+            key: Key("date$index"))));
     rowContent.add(TableRowContent(
         width: 20,
         name: Text(item.sales ? 'Customer' : 'Supplier'),
@@ -131,7 +133,10 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
     rowContent.add(TableRowContent(
         width: 10,
         name: const Text("Status"),
-        value: Text(item.displayStatus(classificationId)!,
+        value: Text(
+            classificationId == 'AppHotel'
+                ? item.status!.hotel
+                : item.status!.name,
             key: Key("status$index"))));
     rowContent.add(TableRowContent(
         width: 10,

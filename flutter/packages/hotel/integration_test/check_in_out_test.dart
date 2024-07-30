@@ -41,6 +41,7 @@ void main() {
   DateTime today = CustomizableDateTime.current;
   var intlFormat = DateFormat('yyyy-MM-dd');
   String todayStringIntl = intlFormat.format(today);
+  String classificationId = 'AppHotel';
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
@@ -57,7 +58,8 @@ void main() {
       router.generateRoute,
       menuOptions,
       delegates,
-      blocProviders: getHotelBlocProviders(restClient, 'AppHotel'),
+      blocProviders: getHotelBlocProviders(restClient, classificationId),
+      classificationId: classificationId,
     );
     await CommonTest.createCompanyAndAdmin(tester, testData: {
       "products": productsHotel,
@@ -69,10 +71,14 @@ void main() {
     await createRoomReservation(tester, roomReservations.sublist(0));
     await selectCheckInOut(tester);
     expect(find.byKey(const Key('id0')), findsNWidgets(1));
-    expect(CommonTest.getTextField('status0'), equals('Created'));
+
+    expect(CommonTest.getTextField('status0'), FinDocStatusVal.created.hotel);
     await CommonTest.tapByKey(tester, 'id0');
-    expect(CommonTest.getTextField('itemLine0'), contains(todayStringIntl));
-    await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
+    expect(CommonTest.getTextField('fromDate0'), contains(todayStringIntl));
+    await CommonTest.tapByKey(tester, 'statusDropDown');
+    await CommonTest.tapByText(tester, FinDocStatusVal.approved.hotel);
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
+    await CommonTest.waitForSnackbarToGo(tester);
   }, skip: false);
 
   testWidgets("Test checkout >>>>>", (WidgetTester tester) async {
@@ -81,21 +87,28 @@ void main() {
     CustomizableDateTime.customTime =
         DateTime.now().add(const Duration(days: 1));
     await CommonTest.startTestApp(
-      clear: true,
-      restClient: restClient,
-      title: 'Hotel Checkout Test',
-      tester,
-      router.generateRoute,
-      menuOptions,
-      delegates,
-      blocProviders: getHotelBlocProviders(restClient, 'AppAdmin'),
-    );
+        clear: true,
+        restClient: restClient,
+        title: 'Hotel Checkout Test',
+        tester,
+        router.generateRoute,
+        menuOptions,
+        delegates,
+        blocProviders: getHotelBlocProviders(restClient, 'AppHotel'),
+        classificationId: classificationId);
     await selectCheckOut(tester);
     expect(find.byKey(const Key('id0')), findsNWidgets(1));
-    expect(CommonTest.getTextField('status0'), equals('Checked In'));
+
+    expect(CommonTest.getTextField('status0'), FinDocStatusVal.approved.hotel);
     await CommonTest.tapByKey(tester, 'id0');
-    expect(CommonTest.getTextField('itemLine0'), contains(todayStringIntl));
-    await CommonTest.tapByKey(tester, 'nextStatus0');
+    expect(
+        CommonTest.getDropdown('statusDropDown',
+            classificationId: classificationId),
+        equals(FinDocStatusVal.approved.hotel));
+    await CommonTest.tapByKey(tester, 'statusDropDown');
+    await CommonTest.tapByText(tester, FinDocStatusVal.completed.hotel);
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
+    await CommonTest.waitForSnackbarToGo(tester);
   }, skip: false);
 
   testWidgets("Test empty checkin and checkout >>>>>",
@@ -104,15 +117,15 @@ void main() {
     CustomizableDateTime.customTime =
         DateTime.now().add(const Duration(days: 1));
     await CommonTest.startTestApp(
-      clear: true,
-      restClient: restClient,
-      title: 'Hotel reservation empty checkin/out Test',
-      tester,
-      router.generateRoute,
-      menuOptions,
-      delegates,
-      blocProviders: getHotelBlocProviders(restClient, 'AppHotel'),
-    );
+        clear: true,
+        restClient: restClient,
+        title: 'Hotel reservation empty checkin/out Test',
+        tester,
+        router.generateRoute,
+        menuOptions,
+        delegates,
+        blocProviders: getHotelBlocProviders(restClient, classificationId),
+        classificationId: classificationId);
     await selectCheckInOut(tester);
     expect(find.byKey(const Key('id0')), findsNothing);
     await selectCheckOut(tester);

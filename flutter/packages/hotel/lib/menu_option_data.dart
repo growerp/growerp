@@ -68,7 +68,7 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: "packages/growerp_core/images/single-bedGrey.png",
     selectedImage: "packages/growerp_core/images/single-bed.png",
-    title: "Room",
+    title: "Rooms",
     route: '/rooms',
     readGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
@@ -87,7 +87,7 @@ List<MenuOption> menuOptions = [
   MenuOption(
       image: "packages/growerp_core/images/reservationGrey.png",
       selectedImage: "packages/growerp_core/images/reservation.png",
-      title: "Reservations\n",
+      title: "Reservations",
       route: '/reservations',
       readGroups: [
         UserGroup.admin,

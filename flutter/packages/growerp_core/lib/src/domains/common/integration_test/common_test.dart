@@ -44,8 +44,6 @@ class CommonTest {
     await tester.pumpAndSettle();
   }
 
-  static String classificationId =
-      GlobalConfiguration().get("classificationId");
   static const int waitTime = 3;
 
   static Future<void> startTestApp(
@@ -56,7 +54,8 @@ class CommonTest {
       {List<BlocProvider>? blocProviders,
       required RestClient restClient,
       bool clear = false,
-      String title = "Growerp testing..."}) async {
+      String title = "Growerp testing...",
+      String classificationId = 'AppAdmin'}) async {
     int seq = Random.secure().nextInt(1024);
     SaveTest test = await PersistFunctions.getTest();
     if (clear == true) {
@@ -429,13 +428,17 @@ class CommonTest {
     await tester.pumpAndSettle(const Duration(seconds: 1));
   }
 
-  static String getDropdown(String key) {
+  static String getDropdown(String key,
+      {String classificationId = 'AppAdmin'}) {
     DropdownButtonFormField tff = find.byKey(Key(key)).evaluate().single.widget
         as DropdownButtonFormField;
     if (tff.initialValue is Currency) return tff.initialValue.description;
     if (tff.initialValue is UserGroup) return tff.initialValue.toString();
     if (tff.initialValue is Role) return tff.initialValue.value;
-    if (tff.initialValue is FinDocStatusVal) return tff.initialValue.toString();
+    if (tff.initialValue is FinDocStatusVal)
+      return classificationId == 'AppHotel'
+          ? tff.initialValue.hotel as String
+          : tff.initialValue.name as String;
     return tff.initialValue;
   }
 

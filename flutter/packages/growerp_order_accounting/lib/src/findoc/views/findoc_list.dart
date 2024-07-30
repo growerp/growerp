@@ -131,7 +131,7 @@ class FinDocListState extends State<FinDocList> {
         double? rowHeight
       ) = get2dTableData<FinDoc>(getTableData,
           bloc: _finDocBloc,
-          classificationId: 'AppAdmin',
+          classificationId: classificationId,
           context: context,
           items: finDocs);
       // build the table
