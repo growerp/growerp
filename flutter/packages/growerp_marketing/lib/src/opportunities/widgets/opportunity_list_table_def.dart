@@ -24,7 +24,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
     Opportunity item, int index) {
   List<TableRowContent> rowContent = [];
   bool isPhone = isAPhone(context);
-  if (isPhone)
+  if (isPhone) {
     rowContent.add(TableRowContent(
         name: 'ShortId',
         width: 15,
@@ -36,27 +36,30 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
           ),
         )));
+  }
   rowContent.add(TableRowContent(
       name: 'Id',
       width: isPhone ? 15 : 10,
-      value: Text("${item.pseudoId}", key: Key('id$index'))));
+      value: Text(item.pseudoId, key: Key('id$index'))));
   rowContent.add(TableRowContent(
       name: 'name',
       width: isPhone ? 29 : 25,
       value: Text("${item.opportunityName}", key: Key('name$index'))));
-  if (!isPhone)
+  if (!isPhone) {
     rowContent.add(TableRowContent(
         name: 'Est. Amount',
         width: 15,
         value: Text(item.estAmount.toString(),
             key: Key('estAmount$index'), textAlign: TextAlign.center)));
-  if (!isPhone)
+  }
+  if (!isPhone) {
     rowContent.add(TableRowContent(
         name: 'Est.Probability',
         width: 15,
         value: Text(item.estProbability.toString(),
             key: Key('estProbability$index'), textAlign: TextAlign.center)));
-  if (!isPhone)
+  }
+  if (!isPhone) {
     rowContent.add(TableRowContent(
         name: 'Lead name/company',
         width: 15,
@@ -68,20 +71,23 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
               : ""),
           key: Key('lead$index'),
         )));
-  if (!isPhone)
+  }
+  if (!isPhone) {
     rowContent.add(TableRowContent(
         name: 'Lead Email',
         width: 15,
         value: Text(
-          item.leadUser != null ? "${item.leadUser!.email ?? ''}" : "",
+          item.leadUser != null ? item.leadUser!.email ?? '' : "",
           key: Key('leadEmail$index'),
         )));
-  if (!isPhone)
+  }
+  if (!isPhone) {
     rowContent.add(TableRowContent(
         name: 'Stage',
         width: 15,
         value: Text("${item.stageId}",
             key: Key('stageId$index'), textAlign: TextAlign.center)));
+  }
   rowContent.add(TableRowContent(
       name: 'next Step',
       width: 15,

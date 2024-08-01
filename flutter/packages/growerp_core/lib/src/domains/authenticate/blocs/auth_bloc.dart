@@ -109,7 +109,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
-      Authenticate authenticate = await restClient.registerCompanyAdmin(
+      String ok = await restClient.registerCompanyAdmin(
         emailAddress: event.user.email!,
         companyName: event.user.company!.name!,
         currencyId: event.currencyId,
@@ -121,11 +121,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // when debug mode password is always qqqqqq9!
         newPassword: kReleaseMode ? null : 'qqqqqq9!',
       );
-      emit(state.copyWith(
-          status: AuthStatus.unAuthenticated,
-          authenticate: authenticate,
-          message: 'Register Company and Admin successful.\n'
-              'You can now login with the password sent by email'));
+      if (ok.contains('"ok" : "ok"')) {
+        emit(state.copyWith(
+            status: AuthStatus.unAuthenticated,
+            message: 'Register Company and Admin successful.\n'
+                'You can now login with the password sent by email'));
+      } else {
+        emit(state.copyWith(
+            status: AuthStatus.failure,
+            message: 'Register Company and Admin failed.\n'
+                'Contact support@growerp.com for assistence'));
+      }
       await PersistFunctions.persistAuthenticate(state.authenticate!);
     } on DioException catch (e) {
       emit(state.copyWith(

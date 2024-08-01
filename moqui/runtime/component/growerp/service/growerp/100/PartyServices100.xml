@@ -497,11 +497,6 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="relComp"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if condition="!company.pseudoId">
-                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[companyPartyId: relComp.ownerPartyId, seqName: 'company']" />
-                <set field="company.pseudoId" from="seqNum" />
-            </if>
             <if condition="!ownerPartyId">
                 <set field="ownerPartyId" from="relComp.ownerPartyId" />
             </if>
@@ -512,6 +507,13 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
                 </else-if>
             </if>
+            <if condition="!company.pseudoId || company.pseudoId == ''">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'party']"
+                    out-map="context" />
+                <set field="company.pseudoId" from="seqNum" />
+            </if>
+
             <service-call
                 name="mantle.party.PartyServices.create#Organization"
                 out-map="context"
@@ -1259,11 +1261,14 @@ along with this software (see the LICENSE.md file). If not, see
                     from="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
             </if>
             <set field="newPasswordVerify" from="newPassword" />
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'party']"
+                out-map="context" />
             <!-- owner for customers is done in partyRelationship -->
             <service-call name="mantle.party.PartyServices.create#Account"
                 in-map="context + [roleTypeId: roleTypeId, loginAfterCreate: false,
                         firstName: user.firstName, lastName: user.lastName,
-                        username: loginName,
+                        username: loginName, pseudoId: seqNum,
                         ownerPartyId: user.userGroupId == 'GROWERP_M_CUSTOMER' ?
                             null : ownerPartyId,
                         emailAddress: user.email, disabled: disabled]"
@@ -1305,9 +1310,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="companyPartyId" from="user.companyPartyId" />
                 <else>
                     <!-- new company -->
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'party']"
+                        out-map="context" />
                     <service-call out-map="comp"
                         name="mantle.party.PartyServices.create#Organization"
-                        in-map="[organizationName: user.companyName,
+                        in-map="[organizationName: user.companyName, pseudoId: seqNum,
                                 ownerPartyId: user.userGroupId == 'GROWERP_M_CUSTOMER'
                                     ? null : ownerPartyId, roleTypeId: roleTypeId,
                                 disabled: 'N']" />
@@ -1380,6 +1388,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="telephoneNr" />
                 <parameter name="company" type="Map" required="true">
                     <parameter name="partyId" />
+                    <parameter name="pseudoId" />
                     <parameter name="name" />
                     <parameter name="role" />
                     <parameter name="email" />
@@ -1447,17 +1456,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="telephoneNr" />
             </parameter>
             <parameter name="password" />
+            <parameter name="login" type="bool" default-value="false"></parameter>
         </out-parameters>
         <actions>
             <service-call
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="relComp" />
-            <if condition="relComp.companyPartyId &amp;&amp; !user.pseudoId">
-                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[companyPartyId: relComp.companyPartyId, seqName: 'user']" />
-                <set field="user.pseudoId" from="seqNum" />
-            </if>
-
             <if condition="!ownerPartyId">
                 <set field="ownerPartyId" from="relComp.ownerPartyId" />
             </if>
@@ -1468,73 +1472,51 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- create pseudoId when not provided -->
             <if condition="!user.pseudoId || user.pseudoId == ''">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[companyPartyId: companyPartyId, seqName: 'party']"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'party']"
                     out-map="context" />
                 <set field="user.pseudoId" from="seqNum" />
             </if>
-            <!-- create account-->
-            <if condition="user.loginName">
-                <then>
-                    <service-call name="mantle.party.PartyServices.create#Account"
-                        in-map="[roleTypeId: user.company.role == 
+            <!-- create account with or without login-->
+            <entity-find entity-name="PersonAndUserAccount" list="parties" />
+            <service-call name="mantle.party.PartyServices.create#Account"
+                in-map="[roleTypeId: user.company.role == 
                                     'Lead'? 'Customer' : user.company.role, 
                                 pseudoId: user.pseudoId,
-                                loginAfterCreate: false,
+                                loginAfterCreate: login,
                                 firstName: user.firstName, lastName: user.lastName,
                                 emailAddress: user.email,
                                 username: user.loginName, newPassword: password,
                                 newPasswordVerify: password,
                                 ownerPartyId: ownerPartyId]"
-                        out-map="userAccount" />
-                    <if condition="user.loginDisabled">
-                        <service-call name="update#moqui.security.UserAccount"
-                            in-map="[userId: userAccount.userId,
+                out-map="userAccount" />
+            <if condition="user.loginDisabled">
+                <service-call name="update#moqui.security.UserAccount"
+                    in-map="[userId: userAccount.userId,
                                 disabled: user.loginDisabled == true ? 'Y' : 'N']" />
-                    </if>
-                    <!-- user security access -->
-                    <service-call name="create#moqui.security.UserGroupMember"
-                        in-map="[userGroupId: user.userGroupId, userId: userAccount.userId]" />
-                    <service-call name="create#moqui.security.UserGroupMember"
-                        in-map="[userGroupId: 'ALL_USERS', userId: userAccount.userId]" />
-                    <set field="userPartyId" from="userAccount.partyId" />
-                </then>
-                <else>
-                    <!-- create without account -->
-                    <service-call name="create#mantle.party.Party"
-                        in-map="[partyTypeEnumId:'PtyPerson',
-                                pseudoId: user.pseudoId,
-                                ownerPartyId: ownerPartyId]"
-                        out-map="newPartyOut" />
-                    <set field="userPartyId" from="newPartyOut.partyId" />
-                    <service-call name="create#mantle.party.Person"
-                        in-map="[partyId: userPartyId,firstName: user.firstName,
-                                lastName: user.lastName,]" />
-                    <!-- user email -->
-                    <if condition="user.email">
-                        <service-call name="mantle.party.ContactServices.create#EmailAddress"
-                            in-map="[emailAddress:user.email,
-                                    partyId: userPartyId,
-                                    contactMechPurposeId:'EmailPrimary']" />
-                    </if>
-                </else>
+            </if>
+            <if condition="user.loginName">
+                <!-- user security access -->
+                <service-call name="create#moqui.security.UserGroupMember"
+                    in-map="[userGroupId: user.userGroupId, userId: userAccount.userId]" />
+                <service-call name="create#moqui.security.UserGroupMember"
+                    in-map="[userGroupId: 'ALL_USERS', userId: userAccount.userId]" />
+                <set field="userPartyId" from="userAccount.partyId" />
             </if>
             <!-- create company if required -->
-            <if condition="!user.company.partyId &amp;&amp; user.company.name">
-                <service-call name="growerp.100.PartyServices100.create#Company"
-                    in-map="[company: user.company, ownerPartyId: ownerPartyId]"
-                    out-map="context" />
-                <set field="companyPartyId" from="company.partyId" />
+            <if condition="!user.company.partyId">
+                <then>
+                    <if condition="user.company.name">
+                        <service-call name="growerp.100.PartyServices100.create#Company"
+                            in-map="[company: user.company, ownerPartyId: ownerPartyId]"
+                            out-map="context" />
+                        <set field="companyPartyId" from="company.partyId" />
+                    </if>
+                </then>
                 <else><!-- existing company or orgInternal-->
                     <if condition="user.company.role == 'OrgInternal'">
                         <set field="companyPartyId" from="relComp.companyPartyId" />
                         <else>
-                            <if condition="user.company.partyId">
-                                <set field="companyPartyId" from="user.company.partyId" />
-                                <else>
-                                    <return error="true"
-                                        message="No related company for user: ${user.firstName} ${user.lastName}!" />
-                                </else>
-                            </if>
+                            <set field="companyPartyId" from="user.company.partyId" />
                         </else>
                     </if>
                 </else>
@@ -1652,10 +1634,13 @@ along with this software (see the LICENSE.md file). If not, see
                             ]" />
                 <else-if
                     condition="user.loginName &amp;&amp; user.email &amp;&amp; user.userGroupId">
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: relComp.ownerPartyId, seqName: 'party']"
+                        out-map="context" />
                     <service-call name="mantle.party.PartyServices.create#Account"
                         in-map="[roleTypeId: user.company.role == 
                                     'Lead'? 'Customer' : user.company.role, 
-                                loginAfterCreate: false,
+                                loginAfterCreate: false, pseudoId: seqNum,
                                 firstName: user.firstName, lastName: user.lastName,
                                 emailAddress: user.email,
                                 username: user.loginName, newPassword: password,
@@ -1704,9 +1689,12 @@ along with this software (see the LICENSE.md file). If not, see
                         <return error="true"
                             message="Login account needs an email address!" />
                     </if>
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: relComp.ownerPartyId, seqName: 'party']"
+                        out-map="context" />
                     <service-call name="create#moqui.security.UserAccount"
                         in-map="[
-                            partyId: user.partyId,
+                            partyId: user.partyId, pseudoId: seqNum,
                             userFullName: user.firstName + ' ' + user.lastName,
                             emailAddress: user.email, disabled: 'N',
                             username: user.loginName]"
@@ -2145,6 +2133,47 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
 
     <service verb="register" noun="UserAndCompany" authenticate="anonymous-all">
+        <in-parameters>
+            <!-- user information -->
+            <parameter name="firstName" required="true" />
+            <parameter name="middleName" />
+            <parameter name="lastName" required="true" />
+            <parameter name="emailAddress" required="true">
+                <text-email />
+            </parameter>
+            <parameter name="username" default="emailAddress" />
+            <parameter name="newPassword" />
+            <parameter name="newPasswordVerify" default="newPassword" />
+            <parameter name="locale" />
+            <!-- company information -->
+            <parameter name="companyEmailAddress" required="true" />
+            <parameter name="companyName" required="true" />
+            <parameter name="currencyId" required="true" />
+            <parameter name="classificationId" required="true" />
+            <!-- default setup -->
+            <parameter name="productionEnvironment" default-value="false" /><!-- string bolean -->
+            <parameter name="demoData" default-value="true" /><!-- string bolean -->
+        </in-parameters>
+        <out-parameters>
+            <parameter name="ok" />
+        </out-parameters>
+        <actions>
+            <set field="hostName" from="ec.web.getHostName(false)" />
+            <service-call name="growerp.100.PartyServices100.registerAsync#UserAndCompany"
+                async="true"
+                in-map="[firstName: firstName,middleName: middleName,
+                lastName: lastName, emailAddress: emailAddress,
+                username:username, newPassword: newPassword,
+                newPasswordVerify: newPasswordVerify,
+                locale: locale, companyEmailAddress: companyEmailAddress,
+                companyName: companyName, currencyId: currencyId,
+                classificationId: classificationId,
+                productionEnvironment: productionEnvironment,
+                demoData: demoData, hostName: hostName]" />
+            <set field="ok" value="ok" />
+        </actions>
+    </service>
+    <service verb="registerAsync" noun="UserAndCompany" authenticate="anonymous-all">
         <description>Register a new accounting/ownercompany with an admin user</description>
         <in-parameters>
             <!-- user information -->
@@ -2162,11 +2191,11 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="companyEmailAddress" required="true" />
             <parameter name="companyName" required="true" />
             <parameter name="currencyId" required="true" />
-            <parameter name="classificationId" required="true" /> <!-- allocate company to
-            application name -->
+            <parameter name="classificationId" required="true" />
             <!-- default setup -->
             <parameter name="productionEnvironment" default-value="false" /><!-- string bolean -->
             <parameter name="demoData" default-value="true" /><!-- string bolean -->
+            <parameter name="hostName" />
         </in-parameters>
         <out-parameters>
             <parameter name="authenticate" type="Map">
@@ -2231,43 +2260,43 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <!-- create root party -->
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: 'system', seqName: 'party']"
+                out-map="context" />
             <service-call name="create#mantle.party.Party"
-                in-map="[partyTypeEnumId: 'PtyOwner',
+                in-map="[partyTypeEnumId: 'PtyOwner', pseudoId: seqNum,
                         disabled: 'N']"
                 out-map="owner" />
             <!-- create admin user -->
             <set field="company"
                 from="[name: companyName,
-                                        role: 'OrgInternal',
-                                        email: companyEmailAddress]" />
+                    role: 'OrgInternal',
+                    email: companyEmailAddress]" />
             <set field="user"
                 from="[
                     userGroupId: 'GROWERP_M_ADMIN',
                     email: emailAddress,
                     firstName: firstName,
                     lastName: lastName,
-                    loginName: emailAddress,
+                    loginName: username,
                     company: company,
                     ]" />
-
             <!-- will create admin and company and link to owner; 
                 return results in the map user and return password-->
             <!-- client can set password by providing newPassword -->
             <service-call name="growerp.100.PartyServices100.create#User"
                 in-map="[user: user, password: newPassword,
-                    ownerPartyId: owner.partyId]"
+                    ownerPartyId: owner.partyId, login: true]"
                 out-map="context" />
             <!-- initialize accounting with defaults -->
             <service-call name="growerp.100.AccountingServices100.init#PartyAccountingConfiguration"
                 in-map="[sourcePartyId: 'DefaultSettings',
                         organizationPartyId: user.company.partyId, baseCurrencyUomId: currencyId]" />
-            <!-- login -->
-            <script>ec.user.internalLoginUser(username)</script>
             <!-- create productStore and other setup data.-->
             <service-call name="growerp.100.PartyServices100.verifyAndGet#ProductStore"
                 in-map="[ownerPartyId: owner.partyId, userPartyId: user.partyId,
-                        demoData: demoData == 'true'? true : false,
-                        companyPartyId: user.company.partyId, classificationId: classificationId]" />
+                        companyPartyId: user.company.partyId, classificationId: classificationId,
+                        hostName: hostName]" />
             <!--sendemail -->
             <if condition="user.loginName">
                 <entity-find-one entity-name="moqui.basic.email.EmailServer"
@@ -2293,6 +2322,15 @@ along with this software (see the LICENSE.md file). If not, see
                 <service-call name="growerp.100.BirdSendServices100.registerAdd#UserToGroup"
                     in-map="email: emailAddress, firstName: firstName,
                         lastName: lastName" />
+            </if>
+            <if condition="demoData">
+                <service-call name="growerp.100.PartyServices100.load#DemoData"
+                    include-user-login="true"
+                    in-map="[ownerPartyId: owner.partyId,
+                        companyPartyId: user.company.partyId,
+                        currencyId: currencyId,
+                        classificationId: classificationId,
+                        userPartyId: user.partyId]" />
             </if>
             <set field="authenticate" from="[:]" />
             <!-- return company Data -->
@@ -2320,7 +2358,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="userPartyId" required="true" />
             <parameter name="companyPartyId" required="true" />
             <parameter name="classificationId" required="true" />
-            <parameter name="demoData" type="Boolean" />
+            <parameter name="hostName" />
         </in-parameters>
         <out-parameters>
             <parameter name="productStore" />
@@ -2335,54 +2373,14 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!classification">
                 <return error="true" message="classificationId: $classificationId invalid" />
             </if>
-            <!-- verify party classification application-->
-            <entity-find-one entity-name="mantle.party.PartyClassificationAndAppl"
-                value-field="partyClassification">
-                <field-map field-name="partyId" from="ownerPartyId" />
-                <field-map field-name="partyClassificationId" from="classificationId" />
-                <field-map field-name="classificationTypeEnumId" value="PcltMobileApp" />
-            </entity-find-one>
-            <set field="demoData" from="demoData ?: false" />
-            <set field="newOwner" value="true" type="Boolean" />
-            <if condition="partyClassification">
-                <!-- already exist -->
-                <!-- we just have a single productstore and a single website -->
-                <entity-find-one entity-name="mantle.product.store.ProductStore"
-                    value-field="productStore">
-                    <field-map field-name="organizationPartyId" from="companyPartyId" />
-                </entity-find-one>
-                <return />
-                <else>
-                    <!-- check if existing classification has demo data when yes then also create
-                    for new app -->
-                    <entity-find entity-name="mantle.party.PartyClassificationAndAppl" limit="1"
-                        list="partyClassifications">
-                        <econdition field-name="partyId" from="ownerPartyId" />
-                        <econdition field-name="classificationTypeEnumId" value="PcltMobileApp" />
-                    </entity-find>
-                    <if condition="partyClassifications">
-                        <set field="newOwner" value="false" type="Boolean" />
-                        <!-- check if first product of demo data exist -->
-                        <if condition="partyClassifications[0].partyClassificationId == 'AppAdmin'">
-                            <set field="productName" value="Hoodie" />
-                        </if>
-                        <if condition="partyClassifications[0].partyClassificationId == 'AppHotel'">
-                            <set field="productName" value="Single Room" />
-                        </if>
-                        <entity-find entity-name="mantle.product.Product" list="products" limit="1">
-                            <econdition field-name="productName" from="productName" />
-                            <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                        </entity-find>
-                        <if condition="products">
-                            <set field="demoData" value="true" />
-                        </if>
-                    </if>
-                    <service-call name="create#mantle.party.PartyClassificationAppl"
-                        in-map="[partyId: ownerPartyId, partyClassificationId: classificationId,
-                            classificationTypeEnumId: 'PcltMobileApp']" />
-                </else>
-            </if>
-            <if condition="newOwner">
+            <!-- check if ANY applications exist-->
+            <entity-find entity-name="mantle.party.PartyClassificationAndAppl" limit="1"
+                list="partyClassifications">
+                <econdition field-name="partyId" from="ownerPartyId" />
+                <econdition field-name="classificationTypeEnumId" value="PcltMobileApp" />
+            </entity-find>
+            <if condition="!partyClassifications">
+                <!-- not found so new user -->
                 <entity-find-one entity-name="mantle.party.Organization" value-field="company">
                     <field-map field-name="partyId" from="companyPartyId" />
                 </entity-find-one>
@@ -2473,8 +2471,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </iterate>
 
                 <!-- update website settings-->
-                <set field="hostName" from="ec.web.getHostName(false)" />
-                <if condition="hostName == '10.0.2.2' || hostname == '127.0.0.1'">
+                <if condition="hostName == '10.0.2.2' || hostName == '127.0.0.1'">
                     <set field="hostName" value="localhost" />
                 </if>
                 <if condition="hostName == 'localhost'">
@@ -2522,7 +2519,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </else>
                     </if>
                     <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[companyPartyId: companyPartyId, seqName: 'category']"
+                        in-map="[ownerPartyId: 'system', seqName: 'category']"
                         out-map="context" />
                     <service-call name="create#mantle.product.category.ProductCategory"
                         out-map="context"
@@ -2665,39 +2662,48 @@ along with this software (see the LICENSE.md file). If not, see
             <!--message>Indexed
             ${documentsIndexed} documents for feed ${dataFeedId} in ${System.currentTimeMillis() -
             startTime}ms</message-->
+
+            <!-- check for specific classification application-->
+            <entity-find-one entity-name="mantle.party.PartyClassificationAndAppl"
+                value-field="partyClassification">
+                <field-map field-name="partyId" from="ownerPartyId" />
+                <field-map field-name="partyClassificationId" from="classificationId" />
+                <field-map field-name="classificationTypeEnumId" value="PcltMobileApp" />
+            </entity-find-one>
+
             <!-- hotel app not using categories but need one for products -->
-            <if condition="classificationId == 'AppHotel'">
-                <entity-find entity-name="mantle.product.category.ProductCategory" list="rootList">
-                    <econdition field-name="productCategoryTypeEnumId" value="PctRoot" />
-                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                </entity-find>
-                <if condition="!rootList">
-                    <return error="true"
-                        message="Root category not found for ownerPartyId: $ownerPartyId" />
-                </if>
-                <set field="rootProductCategoryId" from="rootList[0].productCategoryId" />
-                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[companyPartyId: companyPartyId, seqName: 'category']"
-                    out-map="context" />
-                <service-call name="create#mantle.product.category.ProductCategory"
-                    in-map="[categoryName: 'rooms', pseudoId: seqNum,
+            <if condition="!partyClassification">
+                <if condition="classificationId == 'AppHotel'">
+                    <entity-find entity-name="mantle.product.category.ProductCategory"
+                        list="rootList">
+                        <econdition field-name="productCategoryTypeEnumId" value="PctRoot" />
+                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                    </entity-find>
+                    <if condition="!rootList">
+                        <return error="true"
+                            message="Root category not found for ownerPartyId: $ownerPartyId" />
+                    </if>
+                    <set field="rootProductCategoryId" from="rootList[0].productCategoryId" />
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: 'system', seqName: 'category']"
+                        out-map="context" />
+                    <service-call name="create#mantle.product.category.ProductCategory"
+                        in-map="[categoryName: 'rooms', pseudoId: seqNum,
                         description: 'Dummy category to connect the room types',
                         productCategoryTypeEnumId: 'PctCatalog',
                         ownerPartyId: ownerPartyId]"
-                    out-map="context" />
-                <service-call
-                    name="create#mantle.product.category.ProductCategoryRollup"
-                    in-map="[parentProductCategoryId: rootProductCategoryId,
+                        out-map="context" />
+                    <service-call
+                        name="create#mantle.product.category.ProductCategoryRollup"
+                        in-map="[parentProductCategoryId: rootProductCategoryId,
                             productCategoryId: productCategoryId]" />
+                </if>
+                <!-- finally create classification-->
+                <service-call name="create#mantle.party.PartyClassificationAppl"
+                    in-map="[partyId: ownerPartyId, partyClassificationId: classificationId,
+                            classificationTypeEnumId: 'PcltMobileApp']" />
             </if>
-            <if condition="demoData">
-                <service-call name="growerp.100.PartyServices100.load#DemoData"
-                    in-map="[ownerPartyId: ownerPartyId,
-                        companyPartyId: companyPartyId,
-                        currencyId: currencyId,
-                        classificationId: classificationId,
-                        userPartyId: userPartyId]" />
-            </if>
+
             <!-- return the created product store -->
             <entity-find-one entity-name="mantle.product.store.ProductStore"
                 value-field="productStore">
@@ -2706,8 +2712,7 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <!--internal
-    service used in register to run async-->
+    <!-- internal service used in register to run async-->
     <service verb="load" noun="DemoData" transaction-timeout="3600">
         <!-- not reachable outside -->
         <in-parameters>
@@ -2722,11 +2727,16 @@ along with this software (see the LICENSE.md file). If not, see
             <log
                 message="creating demo data for app: $classificationId for owner: $ownerPartyId and company: $companyPartyId" />
             <!-- get single productStore/website for main company -->
-            <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
-                <econdition field-name="organizationPartyId" from="companyPartyId" />
-            </entity-find>
-            <set field="productStoreId" from="stores[0].productStoreId" />
-            <set field="facilityId" from="stores[0].inventoryFacilityId" />
+            <entity-find-one entity-name="mantle.product.store.ProductStore"
+                value-field="productStore">
+                <field-map field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find-one>
+            <if condition="!productStore">
+                <return error="true"
+                    message="Could not find a product store for company: ${companyPartyId}" />
+            </if>
+            <set field="productStoreId" from="productStore.productStoreId" />
+            <set field="facilityId" from="productStore.inventoryFacilityId" />
 
             <!-- get root (browse) category -->
             <entity-find entity-name="mantle.product.store.ProductStoreCategory"
@@ -2736,7 +2746,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <if condition="!browseRootList">
                 <return error="true"
-                    message="Root browse category not found for companyId: $companyPartyId" />
+                    message="Root browse category not found for productStoreId: $productStoreId of companyId: $companyPartyId" />
             </if>
             <set field="browseRootProductCategoryId" from="browseRootList[0].productCategoryId" />
             <!-- root category -->
@@ -2842,7 +2852,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                         <!-- create category -->
                         <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                            in-map="[companyPartyId: companyPartyId, seqName: 'category']"
+                            in-map="[ownerPartyId: ownerPartyId, seqName: 'category']"
                             out-map="context" />
                         <service-call name="create#mantle.product.category.ProductCategory"
                             in-map="category + [pseudoId: seqNum, productCategoryId: null,
@@ -3056,12 +3066,13 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="entities" />
                 </if>
 
-                <!-- users only load with the first app -->
+                <!-- users only load with the first app of an owner-->
                 <entity-find-count entity-name="mantle.party.PartyClassificationAndAppl"
                     count-field="partyClassifications">
                     <econdition field-name="partyId" from="ownerPartyId" />
                     <econdition field-name="classificationTypeEnumId" value="PcltMobileApp" />
                 </entity-find-count>
+
                 <if condition="partyClassifications == 1">
                     <set field="dbLeads" from="[]" />
                     <set field="dbEmployees" from="[]" />
@@ -3074,6 +3085,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                         <set field="userIn"
                             from="[
+                            pseudoId: lastname,
                             firstName: us.firstName,
                             lastName: us.lastName + counter,
                             email: us.emailAddress? us.emailAddress.substring(0,us.emailAddress.indexOf('@')) + counter + companyCount + us.emailAddress.substring(us.emailAddress.indexOf('@')) : null,
@@ -3082,9 +3094,8 @@ along with this software (see the LICENSE.md file). If not, see
                             userGroupId: us.userGroupId ? us.userGroupId : null,
                             company: company ,
                         ]" />
-
                         <service-call name="growerp.100.PartyServices100.create#User"
-                            in-map="[user: userIn]" out-map="outMap" />
+                            in-map="[user: userIn, ownerPartyId: ownerPartyId]" out-map="outMap" />
                         <script>
                             if(us.role == 'OrgInternal') dbEmployees.add(outMap)
                             if(us.role == 'Lead') dbLeads.add(outMap)
@@ -3199,70 +3210,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="companyRole" value="Supplier" />
                 </entity-find>
                 <set field="index" type="Integer" value="0" />
-                <iterate list="ordersIn" entry="order">
-                    <!-- check if exists -->
-                    <entity-find entity-name="mantle.order.OrderHeader" list="orders">
-                        <econdition field-name="orderName" from="order.orderName" />
-                    </entity-find>
-                    <if condition="orders">
-                        <!--exist
-                        it so use orderId -->
-                        <set field="orderId" from="orders.orderId" />
-                        <else>
-                            <!-- not exist so create -->
-                            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                                in-map="[companyPartyId: companyPartyId, seqName: 'order']"
-                                out-map="context" />
-                            <service-call name="mantle.order.OrderServices.create#Order"
-                                in-map="[
-                                    statusId: 'OrderOpen',
-                                    pseudoId: seqNum,
-                                    currencyUomId: aPref.baseCurrencyUomId,
-                                    productStoreId: stores[0].productStoreId,
-                                    placedDate: ec.user.nowTimestamp,
-                                    customerPartyId: customers[index%2].companyPartyId,
-                                    vendorPartyId: companyPartyId,
-                                ]"
-                                out-map="context" />
-                            <if condition="customers[index%2].personPartyId">
-                                <service-call name="create#mantle.order.OrderPartParty"
-                                    in-map="[orderId: orderId, orderPartSeqId: orderPartSeqId,
-                                    partyId: customers[index%2].personPartyId,
-                                    roleTypeId: 'CustomerContactPerson']" />
-                            </if>
-                        </else>
-                    </if>
-                    <entity-find entity-name="growerp.mobile.product.ProductAndCategoryAndPrices"
-                        list="products" limit="1">
-                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                        <econdition field-name="productName" operator="like"
-                            value="%${order.productName}%" />
-                    </entity-find>
-                    <service-call
-                        name="mantle.order.OrderServices.add#OrderProductQuantity"
-                        in-map="context + [productId: products[0].productId,
-                                            itemTypeEnumId: classificationId == 'AppAdmin'
-                                                ? 'ItemProduct': 'ItemRental',
-                                            description: order.productName,
-                                            unitAmount: order.price ?: products[0].price,
-                                            requiredByDate: order.reservationDate,
-                                            quantity: order.quantity]"
-                        out-map="context" />
-                    <if condition="classificationId == 'AppHotel'">
-                        <while condition="order.quantity--">
-                            <service-call name="create#growerp.product.AssetRental"
-                                in-map="[ productId: products[0].productId,
-                                orderId: orderId, orderItemSeqId: orderItemSeqId,
-                                rentalFromDate: order.rentalFromDate, rentalThruDate: order.rentalThruDate
-                                ]"
-                            />
-                        </while>
-                    </if>
-                    <set field="order.orderId" from="orderId" />
-                    <service-call in-map="[order: [orderId: orderId, statusId:'OrderPlaced']]"
-                        name="growerp.100.FinDocServices100.update#Order" />
-                    <set field="index" from="index + 1" />
-                </iterate>
 
                 <!-- tasks -->
                 <entity-find entity-name="growerp.party.OwnerCompanyDetailAndEmployee"

@@ -689,7 +689,7 @@ class MyFinDocState extends State<FinDocPage> {
       if (item.product?.productTypeId != 'Rental') {
         rowContent.add(TableRowContent(
             width: 12,
-            name: Text('Price', textAlign: TextAlign.right),
+            name: const Text('Price', textAlign: TextAlign.right),
             value: Text(item.price!.currency(currencyId: currencyId),
                 textAlign: TextAlign.right, key: Key('itemPrice$index'))));
       }
@@ -703,7 +703,7 @@ class MyFinDocState extends State<FinDocPage> {
       if (!isPhone) {
         rowContent.add(TableRowContent(
             width: 10,
-            name: Text('SubTot.', textAlign: TextAlign.right),
+            name: const Text('SubTot.', textAlign: TextAlign.right),
             value: Text(
                 (item.price! * (item.quantity ?? Decimal.parse('1')))
                     .currency(currencyId: currencyId)

@@ -103,7 +103,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         ])));
   } else {
     rowContent.add(TableRowContent(
-        width: 5,
+        width: 8,
         name: Text('${item.docType} Id'),
         value: Text(item.pseudoId ?? '', key: Key('id$index'))));
     rowContent.add(TableRowContent(

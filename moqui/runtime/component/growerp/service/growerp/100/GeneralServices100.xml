@@ -17,14 +17,19 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="getNext" noun="PseudoId">
         <in-parameters>
-            <parameter name="companyPartyId" />
-            <parameter name="seqName" />
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="seqName" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="seqNum" />
+            <parameter name="seqNum" default-value="" />
         </out-parameters>
         <actions>
-            <set field="seqName" value="$companyPartyId-$seqName" />
+            <set field="prefixMap"
+                from="['party':'PY', 'category': 'C', 'product': 'PR',
+                       'order': 'OR', invoice: 'IV', 'shipment': 'SP',
+                       'payment': 'PT', 'transaction': 'T']" />
+            <set field="prefix" from="prefixMap[seqName]" />
+            <set field="seqName" value="$ownerPartyId-$seqName" />
             <entity-find-one entity-name="moqui.entity.SequenceValueItem" value-field="seqItem"
                 for-update="true">
                 <field-map field-name="seqName" from="seqName" />
@@ -37,6 +42,12 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="seqNum" from="seqItem.seqNum + 1" />
                     <set field="seqItem.seqNum" from="seqNum" />
                     <entity-update value-field="seqItem" />
+                </else>
+            </if>
+            <if condition="ownerPartyId == 'system'">
+                <set field="seqNum" value="S$seqNum" />
+                <else>
+                    <set field="seqNum" value="$prefix$seqNum" />
                 </else>
             </if>
         </actions>

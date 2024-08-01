@@ -293,7 +293,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- create pseudoId when not provided -->
             <if condition="!product.pseudoId || product.pseudoId == ''">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[companyPartyId: companyPartyId, seqName: 'product']"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'product']"
                     out-map="context" />
                 <set field="product.pseudoId" from="seqNum" />
             </if>
@@ -797,7 +797,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- create pseudoId when not provided -->
             <if condition="!category.pseudoId || category.pseudoId == ''">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[companyPartyId: companyPartyId, seqName: 'category']"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'category']"
                     out-map="context" />
                 <set field="category.pseudoId" from="seqNum" />
             </if>

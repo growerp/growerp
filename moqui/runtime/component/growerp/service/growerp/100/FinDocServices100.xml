@@ -1343,7 +1343,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- create pseudoId when not provided -->
             <if condition="!finDoc.pseudoId || finDoc.pseudoId == ''">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[companyPartyId: companyPartyId, seqName: finDoc.docType]"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: finDoc.docType]"
                     out-map="context" />
                 <set field="finDoc.pseudoId" from="seqNum" />
             </if>
@@ -1965,7 +1965,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </entity-find>
                     <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
                         <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                            in-map="[companyPartyId: companyPartyId, seqName: 'transaction']"
+                            in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
                             out-map="context" />
                         <set field="transactions[0].pseudoId" from="seqNum" />
                         <entity-update value-field="transactions[0]" />
@@ -2368,7 +2368,7 @@ along with this software (see the LICENSE.md file). If not, see
                         value-field="updInvoice" for-update="true" />
                     <if condition="updInvoice">
                         <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                            in-map="[companyPartyId: companyPartyId, seqName: 'invoice']"
+                            in-map="[ownerPartyId: ownerPartyId, seqName: 'invoice']"
                             out-map="context" />
                         <set field="updInvoice.pseudoId" from="seqNum" />
                         <entity-update value-field="updInvoice" />
@@ -2376,7 +2376,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <!-- create payment -->
                     <set field="effectiveDate" from="ec.user.nowTimestamp" />
                     <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[companyPartyId: companyPartyId, seqName: 'payment']"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']"
                         out-map="context" />
                     <service-call
                         name="mantle.account.PaymentServices.create#InvoicePayment"
@@ -2394,7 +2394,7 @@ along with this software (see the LICENSE.md file). If not, see
                         out-map="context" />
                     <if condition="shipmentId != null">
                         <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                            in-map="[companyPartyId: companyPartyId, seqName: 'shipment']"
+                            in-map="[ownerPartyId: ownerPartyId, seqName: 'shipment']"
                             out-map="context" />
                         <!-- shipment created with status created -> ShipScheduled better then
                         approved -> ShipPacked because when approved, you have to show the 
@@ -2421,7 +2421,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </entity-find>
                     <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
                         <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                            in-map="[companyPartyId: companyPartyId, seqName: 'transaction']"
+                            in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
                             out-map="context" />
                         <set field="transactions[0].pseudoId" from="seqNum" />
                         <entity-update value-field="transactions[0]" />
@@ -2516,7 +2516,7 @@ along with this software (see the LICENSE.md file). If not, see
                             invoice.statusId == 'InvoiceSent'">
                     <!-- create payment for approved/sent invoices -->
                     <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[companyPartyId: companyPartyId, seqName: 'payment']"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']"
                         out-map="context" />
                     <service-call
                         name="mantle.account.PaymentServices.create#InvoicePayment"
@@ -2545,7 +2545,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[companyPartyId: companyPartyId, seqName: 'transaction']"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
                     out-map="context" />
                 <set field="transactions[0].pseudoId" from="seqNum" />
                 <entity-update value-field="transactions[0]" />
@@ -2712,7 +2712,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[companyPartyId: companyPartyId, seqName: 'transaction']"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
                     out-map="context" />
                 <set field="transactions[0].pseudoId" from="seqNum" />
                 <entity-update value-field="transactions[0]" />
@@ -2812,7 +2812,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[companyPartyId: companyPartyId, seqName: 'transaction']"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
                     out-map="context" />
                 <set field="transactions[0].pseudoId" from="seqNum" />
                 <entity-update value-field="transactions[0]" />

@@ -34,7 +34,7 @@ class SearchOpportunityState extends State<SearchOpportunityList> {
   void initState() {
     super.initState();
     _opportunityBloc = context.read<OpportunityBloc>()
-      ..add(OpportunityFetch(limit: 0));
+      ..add(const OpportunityFetch(limit: 0));
   }
 
   @override

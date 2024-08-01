@@ -210,11 +210,10 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- create pseudoId when not provided -->
             <if condition="!opportunity.pseudoId || opportunity.pseudoId == ''">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[companyPartyId: companyPartyId, seqName: 'opportunity']"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'opportunity']"
                     out-map="context" />
                 <set field="opportunity.pseudoId" from="seqNum" />
             </if>
-            <log message="===create opp ${opportunity.pseudoId}" />
             <service-call name="create#mantle.sales.opportunity.SalesOpportunity"
                 in-map="[pseudoId: opportunity.pseudoId,
                         estimatedAmount: opportunity.estAmount,

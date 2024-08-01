@@ -435,10 +435,11 @@ class CommonTest {
     if (tff.initialValue is Currency) return tff.initialValue.description;
     if (tff.initialValue is UserGroup) return tff.initialValue.toString();
     if (tff.initialValue is Role) return tff.initialValue.value;
-    if (tff.initialValue is FinDocStatusVal)
+    if (tff.initialValue is FinDocStatusVal) {
       return classificationId == 'AppHotel'
           ? tff.initialValue.hotel as String
           : tff.initialValue.name as String;
+    }
     return tff.initialValue;
   }
 
