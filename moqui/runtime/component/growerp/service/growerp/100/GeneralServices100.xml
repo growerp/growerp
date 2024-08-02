@@ -133,9 +133,9 @@ along with this software (see the LICENSE.md file). If not, see
                 purchInvoicesNotPaidAmount: st.purchInvoicesNotPaidAmount?.toString(),
                 allTasks: st.allTasks,
                 notInvoicedHours: st.notInvoicedHours,
-                outgoingShipments: outgoingShipments,
-                incomngShipments: incomingShipments,
-                whLocations: whLocations
+                outgoingShipments: st.outgoingShipments,
+                incomngShipments: st.incomingShipments,
+                whLocations: st.whLocations
                 ]" />
             </if>
         </actions>
@@ -143,11 +143,15 @@ along with this software (see the LICENSE.md file). If not, see
 
 
     <service verb="get" noun="Statistics" authenticate="false">
-        <description>Job run by the job sheduler do not make pubic.</description>
+        <description>Job run by the job sheduler or at owner creation, do not make pubic.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" />
+        </in-parameters>
         <actions>
             <entity-find entity-name="growerp.party.OwnerAndCompany" list="parties">
+                <econdition field-name="partyTypeEnumId" value="PtyOwner" />
                 <econdition field-name="companyRole" value="OrgInternal" />
-                <econdition field-name="companyDisabled" value="N" or-null="true" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true" />
             </entity-find>
             <iterate list="parties" entry="party">
                 <set field="companyPartyId" from="party.companyPartyId" />
@@ -158,6 +162,14 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="userDisabled" value="N" or-null="true" />
                     <econdition field-name="ownerDisabled" value="N" or-null="true" />
                     <econdition field-name="companyRole" value="OrgInternal" />
+                </entity-find-count>
+                <entity-find-count count-field="admins"
+                    entity-name="growerp.party.OwnerPersonDetailAndCompany">
+                    <econdition field-name="ownerPartyId" />
+                    <econdition field-name="userDisabled" value="N" or-null="true" />
+                    <econdition field-name="ownerDisabled" value="N" or-null="true" />
+                    <econdition field-name="companyRole" value="OrgInternal" />
+                    <econdition field-name="userGroupId" value="GROWERP_M_ADMIN" />
                 </entity-find-count>
                 <entity-find-count count-field="leads"
                     entity-name="mantle.party.PartyDetailAndRole">
@@ -212,22 +224,22 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find-count>
                 <entity-find-count entity-name="mantle.order.OrderPart"
                     count-field="openSlsOrders">
-                    <econdition field-name="vendorPartyId" from="ownerPartyId" />
+                    <econdition field-name="vendorPartyId" from="companyPartyId" />
                 </entity-find-count>
                 <entity-find-count entity-name="mantle.order.OrderPart"
                     count-field="openPurOrders">
-                    <econdition field-name="customerPartyId" from="ownerPartyId" />
+                    <econdition field-name="customerPartyId" from="companyPartyId" />
                 </entity-find-count>
                 <entity-find entity-name="mantle.account.invoice.InvoiceSummary"
                     list="allRecInvList" use-clone="true">
-                    <econdition field-name="fromPartyId" from="ownerPartyId" />
+                    <econdition field-name="fromPartyId" from="companyPartyId" />
                     <econdition field-name="statusId" operator="in"
                         value="InvoiceFinalized,InvoiceSent,InvoiceAcked" />
                     <select-field field-name="fromPartyId,invoiceCount,unpaidTotal,currencyUomId" />
                 </entity-find>
                 <entity-find entity-name="mantle.account.invoice.InvoiceSummary"
                     list="allPblInvList" use-clone="true">
-                    <econdition field-name="toPartyId" from="ownerPartyId" />
+                    <econdition field-name="toPartyId" from="companyPartyId" />
                     <econdition field-name="statusId" operator="in"
                         value="InvoiceReceived,InvoiceApproved" />
                     <select-field field-name="toPartyId,invoiceCount,unpaidTotal,currencyUomId" />
@@ -256,15 +268,19 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find-count>
                 <entity-find-count entity-name="mantle.shipment.ShipmentAndItemSource"
                     count-field="incomingShipments">
-                    <econdition field-name="toPartyId" from="ownerPartyId" />
+                    <econdition field-name="toPartyId" from="companyPartyId" />
                     <econdition field-name="statusId" operator="in"
                         from="['ShipInput','ShipScheduled','ShipPicked',
                             'ShipPacked','Ship','Shipped']" />
                 </entity-find-count>
-                <entity-find-count entity-name="mantle.product.asset.AssetLocationDetail"
+                <entity-find-one entity-name="mantle.facility.Facility" value-field="facility">
+                    <field-map field-name="ownerPartyId" from="companyPartyId" />
+                </entity-find-one>
+                <entity-find-count entity-name="mantle.facility.FacilityLocation"
                     count-field="whLocations">
-                    <econdition field-name="ownerPartyId" />
+                    <econdition field-name="facilityId" from="facility.facilityId" />
                 </entity-find-count>
+                <log message="location found: ${whLocations}" />
                 <service-call name="delete#growerp.general.Statistics">
                     <field-map field-name="ownerPartyId" />
                 </service-call>

@@ -19,7 +19,7 @@ Future<void> login(RestClient client, String username, String password) async {
     Map result = await client.checkEmail(email: username);
     if (result['ok'] == false) {
       // no so register new
-      await client.registerCompanyAdmin(
+      Map registerResult = await client.registerCompanyAdmin(
           emailAddress: username,
           companyEmailAddress: 'q$username',
           newPassword: password,
@@ -29,7 +29,16 @@ Future<void> login(RestClient client, String username, String password) async {
           currencyId: 'USD',
           demoData: false,
           classificationId: 'AppAdmin');
+      if (registerResult['ok'] == false) {
+        logger.e(
+            "registration of a new company failed!\nPlease contact support@growerp.com");
+        exit(1);
+      } else {
+        // wait for background server job to finish
+        await Future.delayed(const Duration(seconds: 1));
+      }
     }
+
     // login for key
     authenticate = await client.login(
         username: username, password: password, classificationId: 'AppAdmin');

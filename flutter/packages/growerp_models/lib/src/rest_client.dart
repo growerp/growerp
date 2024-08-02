@@ -16,7 +16,7 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/UserAndCompany")
   @Extra({'noApiKey': true})
   @FormUrlEncoded()
-  Future<String> registerCompanyAdmin({
+  Future<Map<String, bool>> registerCompanyAdmin({
     @Field() required String emailAddress,
     @Field() required String companyEmailAddress,
     @Field() required String firstName,

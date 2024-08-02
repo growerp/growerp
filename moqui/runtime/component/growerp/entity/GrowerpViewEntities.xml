@@ -1996,7 +1996,7 @@ along with this software (see the LICENSE.md file). If not, see
     </view-entity>
 
     <view-entity entity-name="OwnerAndCompany" package="growerp.party">
-        <description>get all people related to a certain companyId = PR =&gt; toPartyId</description>
+        <description>get all comanies related to a certain owner</description>
         <!-- owner to company -->
         <member-entity entity-alias="PTYOWNER" entity-name="mantle.party.Party">
             <entity-condition>

@@ -125,7 +125,6 @@ class CommonTest {
       admin: admin.copyWith(email: email, loginName: email),
       company: initialCompany.copyWith(email: email, name: companyName),
     ));
-    await Future.delayed(const Duration(seconds: waitTime));
     await CommonTest.login(tester, testData: testData);
   }
 

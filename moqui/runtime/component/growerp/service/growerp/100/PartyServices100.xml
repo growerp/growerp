@@ -2151,11 +2151,11 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="currencyId" required="true" />
             <parameter name="classificationId" required="true" />
             <!-- default setup -->
-            <parameter name="productionEnvironment" default-value="false" /><!-- string bolean -->
-            <parameter name="demoData" default-value="true" /><!-- string bolean -->
+            <parameter name="productionEnvironment" default-value="false" type="Boolean" />
+            <parameter name="demoData" default-value="true" type="Boolean" />
         </in-parameters>
         <out-parameters>
-            <parameter name="ok" />
+            <parameter name="ok" type="Boolean" default-value="false" />
         </out-parameters>
         <actions>
             <set field="hostName" from="ec.web.getHostName(false)" />
@@ -2170,7 +2170,7 @@ along with this software (see the LICENSE.md file). If not, see
                 classificationId: classificationId,
                 productionEnvironment: productionEnvironment,
                 demoData: demoData, hostName: hostName]" />
-            <set field="ok" value="ok" />
+            <set field="ok" value="true" type="Boolean" />
         </actions>
     </service>
     <service verb="registerAsync" noun="UserAndCompany" authenticate="anonymous-all">
@@ -2193,70 +2193,12 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="currencyId" required="true" />
             <parameter name="classificationId" required="true" />
             <!-- default setup -->
-            <parameter name="productionEnvironment" default-value="false" /><!-- string bolean -->
-            <parameter name="demoData" default-value="true" /><!-- string bolean -->
+            <parameter name="productionEnvironment" default-value="false" type="Boolean" />
+            <parameter name="demoData" default-value="true" type="Boolean" />
             <parameter name="hostName" />
         </in-parameters>
         <out-parameters>
-            <parameter name="authenticate" type="Map">
-                <parameter name="ownerPartyId" />
-                <parameter name="classificationId" />
-                <parameter name="company" type="Map">
-                    <parameter name="partyId" />
-                    <parameter name="name" />
-                    <parameter name="email" />
-                    <parameter name="currency" type="Map">
-                        <parameter name="currencyId" />
-                        <parameter name="description" />
-                    </parameter>
-                    <parameter name="vatPerc">
-                        <description>Percentage used for VAT if applicable</description>
-                    </parameter>
-                    <parameter name="salesPerc">
-                        <description>Percentage used for sales tax</description>
-                    </parameter>
-                    <parameter name="address" type="Map">
-                        <parameter name="addressId" />
-                        <parameter name="address1" />
-                        <parameter name="address2" />
-                        <parameter name="city" />
-                        <parameter name="postalCode" />
-                        <parameter name="province" />
-                        <parameter name="provinceId" />
-                        <parameter name="country" />
-                        <parameter name="countryId" />
-                    </parameter>
-                    <parameter name="image" />
-                    <parameter name="paymentMethod">
-                        <parameter name="ccPaymentMethodId" />
-                        <parameter name="ccDescription" />
-                    </parameter>
-                    <parameter name="telephoneNr" />
-                    <parameter name="employees" type="List">
-                        <parameter name="employee" type="Map">
-                            <parameter name="partyId" />
-                            <parameter name="email" />
-                            <parameter name="firstName" />
-                            <parameter name="lastName" />
-                        </parameter>
-                    </parameter>
-                </parameter>
-                <parameter name="user" type="Map">
-                    <parameter name="partyId" />
-                    <parameter name="email" />
-                    <parameter name="firstName" />
-                    <parameter name="lastName" />
-                    <parameter name="loginDisabled" type="Boolean" />
-                    <parameter name="loginName" />
-                    <parameter name="userGroupId" />
-                    <parameter name="groupDescription" />
-                    <parameter name="language" />
-                    <parameter name="image" />
-                    <parameter name="userId" />
-                    <parameter name="locale" />
-                    <parameter name="telephoneNr" />
-                </parameter>
-            </parameter>
+            <parameter name="ok" type="Boolean" default-value="false" />
         </out-parameters>
         <actions>
             <!-- create root party -->
@@ -2332,24 +2274,9 @@ along with this software (see the LICENSE.md file). If not, see
                         classificationId: classificationId,
                         userPartyId: user.partyId]" />
             </if>
-            <set field="authenticate" from="[:]" />
-            <!-- return company Data -->
-            <service-call name="growerp.100.PartyServices100.get#Company"
-                in-map="[companyPartyId: user.company.partyId]"
-                out-map="getCompany" />
-            <if condition="getCompany.companies">
-                <set field="authenticate.company" from="getCompany.companies[0]" />
-            </if>
-            <!-- return user data -->
-            <service-call name="growerp.100.PartyServices100.get#User"
-                in-map="userPartyId: user.partyId"
-                out-map="userInfo" />
-            <if condition="userInfo.users">
-                <set field="authenticate.user" from="userInfo.users[0]" />
-            </if>
-            <!-- owner -->
-            <set field="authenticate.ownerPartyId" from="owner.partyId" />
-            <set field="authenticate.classificationId" from="classificationId" />
+            <service-call name="growerp.100.GeneralServices100.get#Statistics"
+                in-map="[ownerPartyId: owner.partyId]" />
+            <set field="ok" value="true" type="Boolean" />
         </actions>
     </service>
     <service verb="verifyAndGet" noun="ProductStore">

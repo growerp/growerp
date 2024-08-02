@@ -109,7 +109,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
-      String ok = await restClient.registerCompanyAdmin(
+      Map result = await restClient.registerCompanyAdmin(
         emailAddress: event.user.email!,
         companyName: event.user.company!.name!,
         currencyId: event.currencyId,
@@ -121,7 +121,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // when debug mode password is always qqqqqq9!
         newPassword: kReleaseMode ? null : 'qqqqqq9!',
       );
-      if (ok.contains('"ok" : "ok"')) {
+      if (result['ok'] == true) {
         emit(state.copyWith(
             status: AuthStatus.unAuthenticated,
             message: 'Register Company and Admin successful.\n'
