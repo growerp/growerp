@@ -44,7 +44,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
   }
 
   final RestClient restClient;
-  final Role? role;
+  final Role role;
   int start = 0;
 
   Future<void> _onUserFetch(

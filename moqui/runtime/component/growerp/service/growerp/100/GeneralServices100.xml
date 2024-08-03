@@ -280,7 +280,6 @@ along with this software (see the LICENSE.md file). If not, see
                     count-field="whLocations">
                     <econdition field-name="facilityId" from="facility.facilityId" />
                 </entity-find-count>
-                <log message="location found: ${whLocations}" />
                 <service-call name="delete#growerp.general.Statistics">
                     <field-map field-name="ownerPartyId" />
                 </service-call>

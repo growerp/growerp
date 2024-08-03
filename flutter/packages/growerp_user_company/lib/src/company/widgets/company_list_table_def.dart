@@ -22,7 +22,8 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import '../company.dart';
 
 TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
-    Company item, int index) {
+    Company item, int index,
+    {dynamic extra}) {
   bool isPhone = isAPhone(context);
   List<TableRowContent> rowContent = [];
 

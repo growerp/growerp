@@ -977,6 +977,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="partyId" />
                     <parameter name="pseudoId" />
                     <parameter name="email" />
+                    <parameter name="role" />
                     <parameter name="firstName" />
                     <parameter name="lastName" />
                     <parameter name="loginDisabled" type="Boolean" />
@@ -1018,25 +1019,22 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="disabled" value="N" />
             </if>
             <!-- adjust role -->
-            <set field="companyRole" from="role" />
             <if condition="role == 'Customer'">
                 <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
             </if>
             <if condition="role == 'Lead'">
                 <set field="customerStatusId" value="CUSTOMER_ASSIGNED" />
-                <set field="companyRole" value="Customer" />
+                <set field="role" value="Customer" />
             </if>
             <if condition="role == 'Unknown'">
-                <set field="companyRole" from="null" />
+                <set field="role" from="null" />
             </if>
             <if condition="role == 'Company'">
-                <set field="companyRole" value="OrgInternal" />
+                <set field="role" value="OrgInternal" />
             </if>
             <!-- get records -->
             <entity-find offset="start" limit="limit" list="userInfos"
                 entity-name="growerp.party.OwnerPersonDetailAndCompany">
-                <econdition field-name="companyPartyId" operator="is-null"
-                    ignore="role != 'Unknown'" />
                 <econdition field-name="ownerPartyId" ignore-if-empty="true" />
                 <econdition field-name="userPartyId" ignore-if-empty="true" />
                 <econditions combine="or">
@@ -1051,7 +1049,10 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="emailAddress" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
                 </econditions>
-                <econdition field-name="companyRole" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="role" ignore-if-empty="true" />
+                    <econdition field-name="companyRole" from="role" ignore-if-empty="true" />
+                </econditions>
                 <econdition field-name="customerStatusId" ignore-if-empty="true" or-null="true" />
                 <econdition field-name="userGroupId" ignore-if-empty="true" />
                 <econditions combine="or">
@@ -1065,7 +1066,11 @@ along with this software (see the LICENSE.md file). If not, see
             <iterate entry="userInfo" list="userInfos">
                 <!-- adjust role -->
                 <if
-                    condition="userInfo.companyRole == 'Customer' &amp;&amp; userInfo.customerStatusId == 'CUSTOMER_ASSIGNED'">
+                    condition="userInfo.role == 'Customer' &amp;&amp; userInfo.customerStatusId == 'CUSTOMER_ASSIGNED'">
+                    <set field="userInfo.role" value="Lead" />
+                </if>
+                <if
+                    condition="userInfo.companyRole == 'Customer' &amp;&amp; userInfo.companyCustomerStatusId == 'CUSTOMER_ASSIGNED'">
                     <set field="userInfo.companyRole" value="Lead" />
                 </if>
                 <!-- image -->
@@ -1134,6 +1139,7 @@ along with this software (see the LICENSE.md file). If not, see
                             from="[
                                 partyId: userInfo?.userPartyId,
                                 pseudoId: userInfo?.userPseudoId,
+                                role: userInfo.role,
                                 email: userInfo?.emailAddress ?: userInfo.emailAddressCm,
                                 emailContactMechId: userInfo.emailContactMechId,
                                 firstName: userInfo?.firstName,
@@ -1375,6 +1381,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="partyId" />
                 <parameter name="pseudoId" />
                 <parameter name="email" />
+                <parameter name="role" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
                 <parameter name="loginDisabled" type="Boolean" />
@@ -1433,6 +1440,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="partyId" />
                 <parameter name="pseudoId" />
                 <parameter name="email" />
+                <parameter name="role" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
                 <parameter name="loginDisabled" type="Boolean" />
@@ -1476,11 +1484,18 @@ along with this software (see the LICENSE.md file). If not, see
                     out-map="context" />
                 <set field="user.pseudoId" from="seqNum" />
             </if>
+            <!-- role -->
+            <if condition="user.role == 'Lead'">
+                <set field="user.role" value="Customer" />
+                <set field="customerStatusId" value="CUSTOMER_ASSIGNED" />
+                <else-if condition="user.role == 'Customer'">
+                    <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
+                </else-if>
+            </if>
             <!-- create account with or without login-->
             <entity-find entity-name="PersonAndUserAccount" list="parties" />
             <service-call name="mantle.party.PartyServices.create#Account"
-                in-map="[roleTypeId: user.company.role == 
-                                    'Lead'? 'Customer' : user.company.role, 
+                in-map="[       roleTypeId: user.role, 
                                 pseudoId: user.pseudoId,
                                 loginAfterCreate: login,
                                 firstName: user.firstName, lastName: user.lastName,
@@ -1489,9 +1504,14 @@ along with this software (see the LICENSE.md file). If not, see
                                 newPasswordVerify: password,
                                 ownerPartyId: ownerPartyId]"
                 out-map="userAccount" />
+            <set field="userPartyId" from="userAccount.partyId" />
+            <if condition="customerStatusId">
+                <service-call name="update#mantle.party.Party"
+                    in-map="[partyId: userPartyId, customerStatusId: customerStatusId]" />
+            </if>
             <if condition="user.loginDisabled">
                 <service-call name="update#moqui.security.UserAccount"
-                    in-map="[userId: userAccount.userId,
+                    in-map="[userId: userPartyId,
                                 disabled: user.loginDisabled == true ? 'Y' : 'N']" />
             </if>
             <if condition="user.loginName">
@@ -1500,7 +1520,6 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[userGroupId: user.userGroupId, userId: userAccount.userId]" />
                 <service-call name="create#moqui.security.UserGroupMember"
                     in-map="[userGroupId: 'ALL_USERS', userId: userAccount.userId]" />
-                <set field="userPartyId" from="userAccount.partyId" />
             </if>
             <!-- create company if required -->
             <if condition="!user.company.partyId">
@@ -1522,8 +1541,9 @@ along with this software (see the LICENSE.md file). If not, see
                 </else>
             </if>
             <!-- add new user to company  -->
-            <service-call name="create#mantle.party.PartyRelationship"
-                in-map="[   
+            <if condition="companyPartyId">
+                <service-call name="create#mantle.party.PartyRelationship"
+                    in-map="[   
                         fromPartyId: userPartyId,
                         fromRoleTypeId: 'Employee',
                         toPartyId: companyPartyId,
@@ -1531,6 +1551,7 @@ along with this software (see the LICENSE.md file). If not, see
                         relationshipTypeEnumId: 'PrtEmployee',
                         fromDate: ec.user.nowTimestamp
                         ]" />
+            </if>
             <!-- add image -->
             <if condition="user.image">
                 <service-call name="growerp.100.ImageServices100.upload#Image"
@@ -1566,6 +1587,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="email" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
+                <parameter name="role" />
                 <parameter name="loginDisabled" type="Boolean" />
                 <parameter name="loginName" />
                 <parameter name="userGroupId" />
@@ -1589,6 +1611,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="email" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
+                <parameter name="role" />
                 <parameter name="loginDisabled" type="Boolean" />
                 <parameter name="loginName" />
                 <parameter name="userGroupId" />
@@ -1638,8 +1661,7 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="[ownerPartyId: relComp.ownerPartyId, seqName: 'party']"
                         out-map="context" />
                     <service-call name="mantle.party.PartyServices.create#Account"
-                        in-map="[roleTypeId: user.company.role == 
-                                    'Lead'? 'Customer' : user.company.role, 
+                        in-map="[roleTypeId: user.role, 
                                 loginAfterCreate: false, pseudoId: seqNum,
                                 firstName: user.firstName, lastName: user.lastName,
                                 emailAddress: user.email,
@@ -1659,6 +1681,25 @@ along with this software (see the LICENSE.md file). If not, see
 
                 </else-if>
             </if>
+            <!-- update role , orgInternal cannot change-->
+            <if
+                condition="oldValue.user.role != 'OrgInternal' &amp;&amp; user.role != oldValue.user.role">
+                <set field="newRole" from="user.role" />
+                <if condition="user.role == 'Lead'">
+                    <set field="newRole" value="Customer" />
+                    <service-call name="update#mantle.party.Party"
+                        in-map="[partyId: user.partyId, customerStatusId: 'CUSTOMER_ASSIGNED']" />
+                </if>
+                <if condition="user.role == 'Customer'">
+                    <service-call name="update#mantle.party.Party"
+                        in-map="[partyId: user.partyId, customerStatusId: CUSTOMER_QUALIFIED]" />
+                </if>
+                <!-- delete all roles -->
+                <service-call name="delete#mantle.party.PartyRole"
+                    in-map="[partyId: user.partyId]" />
+                <service-call name="create#mantle.party.PartyRole"
+                    in-map="[partyId: user.partyId, roleTypeId: newRole]" />
+            </if>
             <!-- update alternative email address -->
             <if condition="user.email == ''">
                 <set field="user.email" from="null" />
@@ -1677,8 +1718,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </else>
                 </if>
             </if>
-            <!--check
-            for new login account-->
+            <!-- check for new login account-->
             <if condition="user.loginName &amp;&amp; !oldValue.user.loginName">
                 <then>
                     <if condition="!user.userGroupId">
@@ -2651,8 +2691,6 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="counterMax" default="1" type="Integer" />
         </in-parameters>
         <actions>
-            <log
-                message="creating demo data for app: $classificationId for owner: $ownerPartyId and company: $companyPartyId" />
             <!-- get single productStore/website for main company -->
             <entity-find-one entity-name="mantle.product.store.ProductStore"
                 value-field="productStore">
@@ -3019,6 +3057,7 @@ along with this software (see the LICENSE.md file). If not, see
                             locale: 'EN',
                             loginName: us.userGroupId? us.username + counter + companyCount : null,
                             userGroupId: us.userGroupId ? us.userGroupId : null,
+                            role: us.role,
                             company: company ,
                         ]" />
                         <service-call name="growerp.100.PartyServices100.create#User"

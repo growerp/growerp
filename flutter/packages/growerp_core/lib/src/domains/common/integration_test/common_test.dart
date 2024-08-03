@@ -429,8 +429,12 @@ class CommonTest {
 
   static String getDropdown(String key,
       {String classificationId = 'AppAdmin'}) {
-    DropdownButtonFormField tff = find.byKey(Key(key)).evaluate().single.widget
-        as DropdownButtonFormField;
+    DropdownButtonFormField tff = find
+        .byKey(Key(key))
+        .last
+        .evaluate()
+        .single
+        .widget as DropdownButtonFormField;
     if (tff.initialValue is Currency) return tff.initialValue.description;
     if (tff.initialValue is UserGroup) return tff.initialValue.toString();
     if (tff.initialValue is Role) return tff.initialValue.value;

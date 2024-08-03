@@ -29,6 +29,7 @@ class User with _$User {
   factory User({
     String? partyId, // allocated by system cannot be changed.
     String? pseudoId,
+    @RoleConverter() Role? role,
     String? userId, // allocated by system cannot be changed.
     String? firstName,
     String? lastName,

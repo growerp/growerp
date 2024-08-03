@@ -43,13 +43,15 @@ class TableRowContent {
 
 (List<List<TableViewCell>>, List<double>, double? height) get2dTableData<T>(
     TableData Function(Bloc bloc, String classificationId, BuildContext context,
-            T item, int index)
+            T item, int index,
+            {dynamic extra})
         getTableData,
     {required Bloc bloc,
     required String classificationId,
     required BuildContext context,
     required List<T> items,
-    double? screenWidth}) {
+    double? screenWidth,
+    dynamic extra}) {
   double width = screenWidth ?? MediaQuery.of(context).size.width;
   List<double> fieldWidth = [];
   late TableData tableData;
@@ -57,7 +59,8 @@ class TableRowContent {
   List<TableViewCell> contentRow = []; // row content
   // create table content headers
   for (final (rowIndex, item) in items.indexed) {
-    tableData = getTableData(bloc, classificationId, context, item, rowIndex);
+    tableData = getTableData(bloc, classificationId, context, item, rowIndex,
+        extra: extra);
     if (rowIndex == 0) {
       for (final fieldContent in tableData.rowContent) {
         // add header

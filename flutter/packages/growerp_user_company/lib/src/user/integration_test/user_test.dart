@@ -140,7 +140,8 @@ class UserTest {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
         await CommonTest.doNewSearch(tester, searchString: user.partyId!);
-        expect(CommonTest.getTextField('header').split('#')[1], user.partyId);
+        expect(
+            CommonTest.getTextField('topHeader').split('#')[1], user.partyId);
       }
       expect(find.byKey(Key('UserDialog${user.company!.role!.name}')),
           findsOneWidget);
@@ -206,7 +207,7 @@ class UserTest {
     for (User user in users) {
       await CommonTest.doNewSearch(tester, searchString: user.firstName!);
       // check detail
-      var id = CommonTest.getTextField('header').split('#')[1];
+      var id = CommonTest.getTextField('topHeader').split('#')[1];
       expect(find.byKey(Key('UserDialog${user.company!.role!.name}')),
           findsOneWidget);
       expect(CommonTest.getTextFormField('firstName'), equals(user.firstName!));

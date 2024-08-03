@@ -21,7 +21,8 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import '../blocs/product_bloc.dart';
 
 TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
-    Product item, int index) {
+    Product item, int index,
+    {dynamic extra}) {
   String currencyId = context
       .read<AuthBloc>()
       .state

@@ -146,16 +146,8 @@ List<MenuOption> menuOptions = [
       ),
       TabItem(
         form: const UserList(
-          key: Key('Unknown'),
-          role: Role.unknown,
-        ),
-        label: 'Others',
-        icon: const Icon(Icons.business),
-      ),
-      TabItem(
-        form: const UserList(
           key: Key('All'),
-          role: null,
+          role: Role.unknown,
         ),
         label: 'All',
         icon: const Icon(Icons.business),

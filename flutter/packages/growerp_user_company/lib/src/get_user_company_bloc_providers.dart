@@ -23,7 +23,7 @@ List<BlocProvider> getUserCompanyBlocProviders(
     BlocProvider<SupplierBloc>(
         create: (context) => UserBloc(restClient, Role.supplier)),
     BlocProvider<UserBloc>(
-        create: (context) => UserBloc(restClient, Role.company)),
+        create: (context) => UserBloc(restClient, Role.unknown)),
   ];
   return blocProviders;
 }

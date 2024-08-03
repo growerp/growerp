@@ -88,7 +88,8 @@ class UserListState extends State<UserList> {
             bloc: _userBloc,
             classificationId: 'AppAdmin',
             context: context,
-            items: users);
+            items: users,
+            extra: widget.role);
         return TableView.builder(
           diagonalDragBehavior: DiagonalDragBehavior.free,
           verticalDetails:

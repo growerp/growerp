@@ -48,6 +48,7 @@ class UserDialogState extends State<UserDialogStateFull> {
   late final GlobalKey<FormState> _userDialogFormKey;
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
+  final _idController = TextEditingController();
   final _loginNameController = TextEditingController();
   final _telephoneController = TextEditingController();
   final _emailController = TextEditingController();
@@ -79,6 +80,7 @@ class UserDialogState extends State<UserDialogStateFull> {
     _userDialogFormKey = GlobalKey<FormState>();
 
     if (widget.user.partyId != null) {
+      _idController.text = widget.user.pseudoId ?? '';
       _firstNameController.text = widget.user.firstName ?? '';
       _lastNameController.text = widget.user.lastName ?? '';
       _loginNameController.text = widget.user.loginName ?? '';
@@ -88,7 +90,8 @@ class UserDialogState extends State<UserDialogStateFull> {
       _hasLogin = widget.user.userId != null;
     }
     _selectedCompany = widget.user.company ?? Company(role: Role.unknown);
-    _selectedRole = widget.user.company!.role ?? Role.unknown;
+    _selectedRole =
+        widget.user.role ?? widget.user.company!.role ?? Role.unknown;
     _selectedUserGroup = widget.user.userGroup ?? UserGroup.employee;
     localUserGroups = UserGroup.values;
     updatedUser = widget.user;
@@ -149,8 +152,9 @@ class UserDialogState extends State<UserDialogStateFull> {
       ),
       child: popUp(
           context: context,
-          title:
-              "${_selectedRole == Role.company ? widget.user.userGroup != null && widget.user.userGroup == UserGroup.admin ? 'Admininistrator' : 'Employee' : _selectedRole.name} contact person information",
+          title: _selectedRole == Role.company
+              ? "${widget.user.userGroup != null && widget.user.userGroup == UserGroup.admin ? 'Admininistrator' : 'Employee'}"
+              : "${_selectedRole.name} person #${widget.user.partyId ?? ' new'}",
           width: isPhone ? 400 : 1000,
           height: isPhone ? 700 : 700,
           child: Scaffold(
@@ -229,6 +233,37 @@ class UserDialogState extends State<UserDialogStateFull> {
         ),
         child: Column(
           children: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    key: const Key('id'),
+                    decoration: InputDecoration(labelText: 'Id'),
+                    controller: _idController,
+                  ),
+                ),
+                Expanded(
+                  child: DropdownButtonFormField<Role>(
+                    key: const Key('role'),
+                    decoration: const InputDecoration(labelText: 'Role'),
+                    hint: const Text('Role'),
+                    value: _selectedRole,
+                    validator: (value) =>
+                        value == Role.unknown ? 'Select a valid role!' : null,
+                    items: Role.values.map((item) {
+                      return DropdownMenuItem<Role>(
+                          value: item, child: Text(item.value));
+                    }).toList(),
+                    onChanged: (Role? newValue) {
+                      setState(() {
+                        _selectedRole = newValue!;
+                      });
+                    },
+                    isExpanded: true,
+                  ),
+                ),
+              ],
+            ),
             Row(children: [
               Expanded(
                   child: TextFormField(
@@ -530,6 +565,7 @@ class UserDialogState extends State<UserDialogStateFull> {
               onPressed: () async {
                 if (_userDialogFormKey.currentState!.validate()) {
                   updatedUser = updatedUser.copyWith(
+                      pseudoId: _idController.text,
                       firstName: _firstNameController.text,
                       lastName: _lastNameController.text,
                       email: _emailController.text,
@@ -537,17 +573,11 @@ class UserDialogState extends State<UserDialogStateFull> {
                       telephoneNr: _telephoneController.text,
                       loginDisabled: _isLoginDisabled,
                       userGroup: _selectedUserGroup,
+                      role: _selectedRole,
 //                      language: Localizations.localeOf(context)
 //                          .languageCode
 //                          .toString(),
-                      company: widget.user.company!.role == Role.company
-                          ? widget.user.company
-                          : _selectedCompany.name != null
-                              ? _selectedCompany.copyWith(role: _selectedRole)
-                              : Company(
-                                  name:
-                                      "${_lastNameController.text}, ${_firstNameController.text}",
-                                  role: _selectedRole),
+                      company: _selectedCompany.copyWith(role: _selectedRole),
                       image: await HelperFunctions.getResizedImage(
                           _imageFile?.path));
                   if (!mounted) return;
@@ -594,21 +624,6 @@ class UserDialogState extends State<UserDialogStateFull> {
             controller: _scrollController,
             key: const Key('listView'),
             child: Column(children: <Widget>[
-              Center(
-                  child: Text(
-                'User $_selectedRole'
-                ' #${updatedUser.partyId ?? " New"}',
-                style:
-                    const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                key: const Key('header'),
-              )),
-              Center(
-                  child: Text(
-                'Company #${updatedUser.company!.partyId ?? ""}',
-                style:
-                    const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                key: const Key('compHeader'),
-              )),
               const SizedBox(height: 10),
               CircleAvatar(
                   radius: 80,

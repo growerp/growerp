@@ -21,7 +21,8 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
-    Location item, int index) {
+    Location item, int index,
+    {dynamic extra}) {
   List<TableRowContent> rowContent = [];
   Decimal qohTotal = Decimal.zero;
   for (Asset asset in item.assets) {

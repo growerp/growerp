@@ -645,7 +645,8 @@ class MyFinDocState extends State<FinDocPage> {
     late final ScrollController horizontalController = ScrollController();
 
     TableData getTableData(Bloc bloc, String classificationId,
-        BuildContext context, FinDocItem item, int index) {
+        BuildContext context, FinDocItem item, int index,
+        {dynamic extra}) {
       String currencyId = context
           .read<AuthBloc>()
           .state
@@ -785,7 +786,8 @@ class MyFinDocState extends State<FinDocPage> {
     late final ScrollController horizontalController = ScrollController();
 
     TableData getTableData(Bloc bloc, String classificationId,
-        BuildContext context, FinDocItem item, int index) {
+        BuildContext context, FinDocItem item, int index,
+        {dynamic extra}) {
       List<TableRowContent> rowContent = [];
 
       rowContent.add(TableRowContent(
@@ -888,7 +890,8 @@ class MyFinDocState extends State<FinDocPage> {
     late final ScrollController horizontalController = ScrollController();
 
     TableData getTableData(Bloc bloc, String classificationId,
-        BuildContext context, FinDocItem item, int index) {
+        BuildContext context, FinDocItem item, int index,
+        {dynamic extra}) {
       List<TableRowContent> rowContent = [];
       rowContent.add(TableRowContent(
           name: 'Account',

@@ -20,7 +20,8 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
-    FinDoc item, int index) {
+    FinDoc item, int index,
+    {dynamic extra}) {
   String currencyId = context
       .read<AuthBloc>()
       .state

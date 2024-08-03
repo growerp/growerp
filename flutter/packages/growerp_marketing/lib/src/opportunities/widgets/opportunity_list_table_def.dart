@@ -21,7 +21,8 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import '../bloc/opportunity_bloc.dart';
 
 TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
-    Opportunity item, int index) {
+    Opportunity item, int index,
+    {dynamic extra}) {
   List<TableRowContent> rowContent = [];
   bool isPhone = isAPhone(context);
   if (isPhone) {

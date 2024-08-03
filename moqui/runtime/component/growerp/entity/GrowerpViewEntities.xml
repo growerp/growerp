@@ -905,6 +905,10 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="PTYOWNER">
             <key-map field-name="partyId" related="ownerPartyId" />
         </member-entity>
+        <member-entity entity-alias="PERSONROLE" entity-name="mantle.party.PartyRole"
+            join-from-alias="PTYPERSON" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
         <member-entity entity-alias="PERSON" entity-name="mantle.party.Person"
             join-from-alias="PTYPERSON">
             <key-map field-name="partyId" />
@@ -969,6 +973,7 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="ORGCOMPANYPARTY" join-optional="true">
             <key-map field-name="partyId" />
         </member-entity>
+        <!-- company role-->
         <member-entity entity-alias="ORGCOMPANYROLE" entity-name="mantle.party.PartyRole"
             join-from-alias="ORGCOMPANY" join-optional="true">
             <key-map field-name="partyId" />
@@ -998,6 +1003,8 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="userPseudoId" field="partyId" entity-alias="PTYPERSON" />
         <alias name="firstName" entity-alias="PERSON" />
         <alias name="lastName" entity-alias="PERSON" />
+        <alias name="role" field="roleTypeId" entity-alias="PERSONROLE" />
+        <alias name="customerStatusId" entity-alias="PTYPERSON" />
         <!-- userlogin -->
         <alias name="userId" entity-alias="ACCT" />
         <alias name="loginName" field="username" entity-alias="ACCT" />
@@ -1032,7 +1039,8 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="companyDisabled" field="disabled" entity-alias="ORGCOMPANYPARTY" />
         <alias name="companyName" field="organizationName" entity-alias="ORGCOMPANY" />
         <alias name="companyRole" field="roleTypeId" entity-alias="ORGCOMPANYROLE" />
-        <alias name="customerStatusId" entity-alias="ORGCOMPANYPARTY" />
+        <alias name="companyCustomerStatusId" field="customerStatusId"
+            entity-alias="ORGCOMPANYPARTY" />
         <!-- company creditcard -->
         <alias name="payFromDate" field="fromDate" entity-alias="PAYMENT" />
         <alias name="payThruDate" field="thruDate" entity-alias="PAYMENT" />

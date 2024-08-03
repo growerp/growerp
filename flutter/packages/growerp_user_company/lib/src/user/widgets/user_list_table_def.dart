@@ -21,27 +21,50 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import '../user.dart';
 
 TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
-    User item, int index) {
+    User item, int index,
+    {dynamic extra}) {
   bool isPhone = isAPhone(context);
   List<TableRowContent> rowContent = [];
-  rowContent.add(TableRowContent(
-    name: ' ',
-    width: isPhone ? 10 : 5,
-    value: CircleAvatar(
-      child: item.image != null
-          ? Image.memory(item.image!)
-          : Text(item.firstName != null ? item.firstName![0] : '?'),
-    ),
-  ));
-  rowContent.add(TableRowContent(
-      name: Text(isPhone ? 'Name\nEmail' : 'Name', textAlign: TextAlign.start),
-      width: isPhone ? 50 : 20,
-      value: Text(
-        "${item.firstName ?? ''} "
-        "${item.lastName ?? ''} ${isPhone ? item.email ?? ' ' : ''}",
-        key: Key('name$index'),
-      )));
-  if (!isPhone) {
+  if (isPhone) {
+    rowContent.add(TableRowContent(
+      name: ' ',
+      width: isPhone ? 10 : 5,
+      value: CircleAvatar(
+        child: item.image != null
+            ? Image.memory(item.image!)
+            : Text(item.firstName != null ? item.firstName![0] : '?'),
+      ),
+    ));
+    rowContent.add(TableRowContent(
+        name: Text('ID\nName\nEmail', textAlign: TextAlign.start),
+        width: 40,
+        value: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(item.pseudoId ?? ''),
+            Text("${item.firstName ?? ''} ${item.lastName ?? ''}",
+                key: Key('name$index')),
+            Text(
+              item.email != null ? item.email.truncate(18) : ' ',
+              key: Key('email$index'),
+            ),
+          ],
+        )));
+  } else {
+    rowContent.add(TableRowContent(
+        name: Text('ID', textAlign: TextAlign.start),
+        width: 8,
+        value: Text(
+          "${item.pseudoId ?? ''}",
+          key: Key('id$index'),
+        )));
+    rowContent.add(TableRowContent(
+        name: Text('Name', textAlign: TextAlign.start),
+        width: 15,
+        value: Text(
+          "${item.firstName ?? ''} ${item.lastName ?? ''} ",
+          key: Key('name$index'),
+        )));
     rowContent.add(TableRowContent(
         name: 'Email',
         width: 15,
@@ -50,27 +73,29 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
           textAlign: TextAlign.left,
           key: Key('email$index'),
         )));
-  }
-  if (!isPhone) {
     rowContent.add(TableRowContent(
         name: 'Login Name',
         width: 15,
         value: Text((!item.loginDisabled! ? item.loginName ?? ' ' : ' '),
             key: Key('username$index'))));
   }
-  rowContent.add(TableRowContent(
-      name: 'Company',
-      width: 15,
-      value: Text(item.company?.name ?? ' ',
-          key: Key('companyName$index'), textAlign: TextAlign.center)));
-  rowContent.add(TableRowContent(
-      name: 'Admin?',
-      width: 15,
-      value: Text(item.userGroup == UserGroup.admin ? 'Y' : 'N',
-          textAlign: TextAlign.center, key: Key('isAdmin$index'))));
+  // specific roles
+  if (extra as Role != Role.unknown) // only specific roles: show company
+    rowContent.add(TableRowContent(
+        name: 'Company',
+        width: isPhone ? 30 : 20,
+        value: Text(item.company?.name ?? ' ',
+            key: Key('companyName$index'), textAlign: TextAlign.left)));
+  if (extra == Role.unknown) // all items so show role
+    rowContent.add(TableRowContent(
+        name: 'Role',
+        width: 30,
+        value: Text(item.role != null ? item.role!.name : Role.unknown.name,
+            key: Key('role$index'), textAlign: TextAlign.left)));
+  // all devices
   rowContent.add(TableRowContent(
       name: ' ',
-      width: 15,
+      width: 10,
       value: IconButton(
         key: Key("delete$index"),
         icon: const Icon(Icons.delete_forever),
@@ -79,7 +104,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         },
       )));
 
-  return TableData(rowHeight: isPhone ? 40 : 20, rowContent: rowContent);
+  return TableData(rowHeight: isPhone ? 65 : 20, rowContent: rowContent);
 }
 
 // general settings
