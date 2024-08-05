@@ -77,7 +77,6 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="mainCompanies" type="Boolean" default="true" />
             <parameter name="start" type="Integer" default-value="0" />
             <parameter name="limit" type="Integer" default-value="20" />
-            <parameter name="filter" default="null" />
             <parameter name="searchString" default="null" />
         </in-parameters>
         <out-parameters>
@@ -111,15 +110,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="notRoleTypeId" value="OrgInternal" />
                 </else>
             </if>
-            <if condition="filter != null"><!-- only used when logged in -->
-                <set field="filter" value="%${filter}%" />
-                <set field="ownerPartyId" from="null" />
-            </if>
             <entity-find list="parties" offset="start" limit="limit"
                 entity-name="growerp.party.CompanyPreferenceAndRole">
                 <econdition field-name="ownerPartyId" ignore-if-empty="true" />
-                <econdition field-name="organizationName" operator="like"
-                    from="filter" ignore-if-empty="true" ignore-case="true" />
                 <econdition field-name="roleTypeId" from="roleTypeId"
                     ignore-if-empty="true" />
                 <econdition field-name="roleTypeId" from="notRoleTypeId"
@@ -155,7 +148,8 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="Company">
         <in-parameters>
-            <parameter name="companyPartyId" />
+            <parameter name="partyId" />
+            <parameter name="pseudoId" />
             <parameter name="firstName" />
             <parameter name="lastName" />
             <parameter name="companyName" />
@@ -164,7 +158,6 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="ownerPartyId" /><!-- required when registering company customers-->
             <parameter name="start" type="Integer" default-value="0" />
             <parameter name="limit" type="Integer" default-value="20" />
-            <parameter name="filter" default="null" />
             <parameter name="searchString" default="null" />
             <parameter name="isForDropDown" type="Boolean" />
         </in-parameters>
@@ -221,9 +214,6 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <set field="role" from="role?.capitalize()" />
-            <if condition="filter != null">
-                <set field="filter" value="%${filter}%" />
-            </if>
             <if condition="searchString != null">
                 <set field="search" value="%${searchString}%" />
             </if>
@@ -257,17 +247,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="ownerPartyId" ignore-if-empty="true" />
                 <econdition field-name="companyPartyId" ignore-if-empty="true" />
                 <econditions combine="or">
-                    <econdition field-name="companyPartyId" operator="like"
-                        from="filter" ignore-if-empty="true" ignore-case="true" />
-                    <econdition field-name="lastName" operator="like"
-                        from="filter" ignore-if-empty="true" ignore-case="true" />
-                    <econdition field-name="firstName" operator="like"
-                        from="filter" ignore-if-empty="true" ignore-case="true" />
-                    <econdition field-name="companyName" operator="like"
-                        from="filter" ignore-if-empty="true" ignore-case="true" />
-                </econditions>
-                <econditions combine="or">
                     <econdition field-name="companyPartyId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="companyPseudoId" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="companyName" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />

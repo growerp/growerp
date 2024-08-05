@@ -81,6 +81,7 @@ class CompanyFormState extends State<CompanyDialog> {
   List<User> employees = [];
   late Company company;
   Role _selectedRole = Role.unknown;
+  final _idController = TextEditingController();
   final _nameController = TextEditingController();
   final _telephoneController = TextEditingController();
   final _emailController = TextEditingController();
@@ -125,6 +126,7 @@ class CompanyFormState extends State<CompanyDialog> {
       _selectedCurrency = currencies.firstWhere(
           (element) => element.currencyId == company.currency?.currencyId);
     }
+    _idController.text = company.pseudoId ?? '';
     _nameController.text = company.name ?? '';
     _selectedRole = company.role ?? widget.company.role!;
     _emailController.text = company.email ?? '';
@@ -188,7 +190,8 @@ class CompanyFormState extends State<CompanyDialog> {
             ),
             child: popUp(
                 context: context,
-                title: "$_selectedRole Company information",
+                title:
+                    "$_selectedRole Company #${company.partyId == null ? 'New' : company.pseudoId}",
                 width: isPhone ? 400 : 1000,
                 height: isPhone ? 600 : 750,
                 child: listChild()))
@@ -296,21 +299,19 @@ class CompanyFormState extends State<CompanyDialog> {
         }));
 
     List<Widget> widgets = [
-      TextFormField(
-        readOnly: !isAdmin,
-        key: const Key('companyName'),
-        decoration: const InputDecoration(labelText: 'Company Name'),
-        controller: _nameController,
-        validator: (value) {
-          if (value!.isEmpty) return 'Please enter the company Name?';
-          return null;
-        },
-      ),
       Row(
         children: [
-          Visibility(
-            visible: authenticate.company!.partyId != company.partyId,
-            child: Expanded(
+          Expanded(
+            child: TextFormField(
+              key: const Key('id'),
+              decoration: InputDecoration(labelText: 'ID'),
+              controller: _idController,
+            ),
+          ),
+          if (authenticate.company!.partyId != company.partyId)
+            SizedBox(width: 10),
+          if (authenticate.company!.partyId != company.partyId)
+            Expanded(
               child: DropdownButtonFormField<Role>(
                 key: const Key('role'),
                 decoration: const InputDecoration(labelText: 'Role'),
@@ -330,10 +331,28 @@ class CompanyFormState extends State<CompanyDialog> {
                 isExpanded: true,
               ),
             ),
+        ],
+      ),
+      TextFormField(
+        readOnly: !isAdmin,
+        key: const Key('companyName'),
+        decoration: const InputDecoration(labelText: 'Company Name'),
+        controller: _nameController,
+        validator: (value) {
+          if (value!.isEmpty) return 'Please enter the company Name?';
+          return null;
+        },
+      ),
+      Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              key: const Key('telephoneNr'),
+              decoration: const InputDecoration(labelText: 'Telephone number'),
+              controller: _telephoneController,
+            ),
           ),
-          Visibility(
-              visible: authenticate.company!.partyId != company.partyId,
-              child: const SizedBox(width: 10)),
+          SizedBox(width: 10),
           Expanded(
             child: DropdownButtonFormField<Currency>(
               key: const Key('currency'),
@@ -355,11 +374,6 @@ class CompanyFormState extends State<CompanyDialog> {
             ),
           ),
         ],
-      ),
-      TextFormField(
-        key: const Key('telephoneNr'),
-        decoration: const InputDecoration(labelText: 'Telephone number'),
-        controller: _telephoneController,
       ),
       TextFormField(
         readOnly: !isAdmin,
@@ -585,102 +599,107 @@ class CompanyFormState extends State<CompanyDialog> {
         backgroundColor: Colors.transparent,
         floatingActionButton:
             ImageButtons(_scrollController, _onImageButtonPressed),
-        body: MultiBlocListener(
-            listeners: [
-              BlocListener<CompanyBloc, CompanyState>(
-                listenWhen: (previous, current) =>
-                    previous.status == CompanyStatus.loading,
-                listener: (context, state) {
-                  if (state.status == CompanyStatus.failure) {
-                    HelperFunctions.showMessage(
-                        context, state.message, Colors.green);
-                  }
-                  if (state.status == CompanyStatus.success) {
-                    if (widget.dialog == true && _nameController.text != '') {
-                      Navigator.of(context).pop(state.companies[0]);
-                    } else {
-                      HelperFunctions.showMessage(
-                          context, state.message, Colors.green);
-                    }
-                  }
-                },
-              ),
-              BlocListener<AuthBloc, AuthState>(
-                listenWhen: (previous, current) =>
-                    previous.status == AuthStatus.loading,
-                listener: (context, state) {
-                  if (state.status == AuthStatus.failure) {
-                    HelperFunctions.showMessage(
-                        context, state.message, Colors.green);
-                  }
-                  if (state.status == AuthStatus.authenticated) {
-                    // message on parent page
-                    HelperFunctions.showMessage(
-                        context, state.message, Colors.green);
-                    if (widget.dialog == true && _nameController.text != '') {
-                      Navigator.of(context).pop(company);
-                    }
-                  }
-                },
-              )
-            ],
-            child: BlocBuilder<CompanyBloc, CompanyState>(
-                builder: (context, state) {
+        body: BlocConsumer<CompanyBloc, CompanyState>(
+            listenWhen: (previous, current) =>
+                previous.status == CompanyStatus.loading,
+            listener: (context, state) {
+              if (state.status == CompanyStatus.failure) {
+                HelperFunctions.showMessage(
+                    context, state.message, Colors.green);
+              }
+              if (state.status == CompanyStatus.success) {
+                if (widget.dialog == true && _nameController.text != '') {
+                  Navigator.of(context).pop(state.companies[0]);
+                } else {
+                  HelperFunctions.showMessage(
+                      context, state.message, Colors.green);
+                }
+              }
+            },
+            builder: (context, state) {
               if (state.status == CompanyStatus.failure) {
                 return FatalErrorForm(message: state.message!);
               }
               if (state.status == CompanyStatus.success) {
-                return Form(
-                    key: _companyDialogFormKey,
-                    child: SingleChildScrollView(
-                        controller: _scrollController,
-                        key: const Key('listView'),
-                        child: Padding(
-                            padding: const EdgeInsets.fromLTRB(5, 0, 5, 5),
-                            child: Column(children: [
-                              Center(
-                                  child: Text(
-                                'id:#${company.partyId ?? 'New'}',
-                                key: const Key('header'),
-                              )),
-                              const SizedBox(height: 10),
-                              CircleAvatar(
-                                  radius: 60,
-                                  child: _imageFile != null
-                                      ? kIsWeb
-                                          ? Image.network(_imageFile!.path,
-                                              scale: 0.3)
-                                          : Image.file(File(_imageFile!.path),
-                                              scale: 0.3)
-                                      : company.image != null
-                                          ? Image.memory(company.image!,
-                                              scale: 0.3)
-                                          : Text(
-                                              company.name != null
-                                                  ? company.name!
-                                                      .substring(0, 1)
-                                                  : '?',
-                                              style: const TextStyle(
-                                                  fontSize: 30,
-                                                  color: Colors.black))),
-                              const SizedBox(height: 10),
-                              Column(children: (rows.isEmpty ? column : rows)),
-                              updateButton,
-                              if (widget.dialog) const SizedBox(height: 10),
-                              if (widget.dialog)
-                                InputDecorator(
-                                    decoration: InputDecoration(
-                                      labelText: 'Employees',
-                                      border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(25.0),
-                                      ),
-                                    ),
-                                    child: Wrap(
-                                        spacing: 10, children: employeeChips)),
-                            ]))));
+                return form(
+                    companyDialogFormKey: _companyDialogFormKey,
+                    scrollController: _scrollController,
+                    company: company,
+                    imageFile: _imageFile,
+                    rows: rows,
+                    column: column,
+                    updateButton: updateButton,
+                    widget: widget,
+                    employeeChips: employeeChips);
               }
               return const LoadingIndicator();
-            })));
+            }));
+  }
+}
+
+class form extends StatelessWidget {
+  const form({
+    super.key,
+    required GlobalKey<FormState> companyDialogFormKey,
+    required ScrollController scrollController,
+    required this.company,
+    required XFile? imageFile,
+    required this.rows,
+    required this.column,
+    required this.updateButton,
+    required this.widget,
+    required this.employeeChips,
+  })  : _companyDialogFormKey = companyDialogFormKey,
+        _scrollController = scrollController,
+        _imageFile = imageFile;
+
+  final GlobalKey<FormState> _companyDialogFormKey;
+  final ScrollController _scrollController;
+  final Company company;
+  final XFile? _imageFile;
+  final List<Widget> rows;
+  final List<Widget> column;
+  final Widget updateButton;
+  final CompanyDialog widget;
+  final List<Widget> employeeChips;
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+        key: _companyDialogFormKey,
+        child: SingleChildScrollView(
+            controller: _scrollController,
+            key: const Key('listView'),
+            child: Padding(
+                padding: const EdgeInsets.fromLTRB(5, 10, 5, 5),
+                child: Column(children: [
+                  CircleAvatar(
+                      radius: 60,
+                      child: _imageFile != null
+                          ? kIsWeb
+                              ? Image.network(_imageFile!.path, scale: 0.3)
+                              : Image.file(File(_imageFile!.path), scale: 0.3)
+                          : company.image != null
+                              ? Image.memory(company.image!, scale: 0.3)
+                              : Text(
+                                  company.name != null
+                                      ? company.name!.substring(0, 1)
+                                      : '?',
+                                  style: const TextStyle(
+                                      fontSize: 30, color: Colors.black))),
+                  const SizedBox(height: 10),
+                  Column(children: (rows.isEmpty ? column : rows)),
+                  updateButton,
+                  if (widget.dialog) const SizedBox(height: 10),
+                  if (widget.dialog)
+                    InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: 'Employees',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25.0),
+                          ),
+                        ),
+                        child: Wrap(spacing: 10, children: employeeChips)),
+                ]))));
   }
 }

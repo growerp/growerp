@@ -74,7 +74,7 @@ class CompanyListState extends State<CompanyList> {
         if (companies.isEmpty) {
           return const Center(
               heightFactor: 20,
-              child: Text("no users found", textAlign: TextAlign.center));
+              child: Text("no companies found", textAlign: TextAlign.center));
         }
         // get table data formatted for tableView
         var (

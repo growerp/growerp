@@ -68,17 +68,14 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
             key: const Key('listView'),
             child: Column(
               children: <Widget>[
-                const SizedBox(height: 20),
                 Visibility(
                   visible: widget.paymentMethod?.ccDescription != null,
                   child: Text("${widget.paymentMethod?.ccDescription}",
                       key: const Key('regCard')),
                 ),
                 const Text("New Card:",
-                    style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold)),
+                    style:
+                        TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<CreditCardType>(
                   key: const Key('cardTypeDropDown'),
@@ -99,7 +96,7 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
                   },
                   isExpanded: true,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 TextFormField(
                   key: const Key('creditCardNumber'),
                   decoration: const InputDecoration(labelText: 'Card Number'),
@@ -115,7 +112,7 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 Row(children: [
                   Expanded(
                     child: TextFormField(
@@ -131,7 +128,7 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
                       },
                     ),
                   ),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: TextFormField(
                       key: const Key('expireYear'),
@@ -147,7 +144,7 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
                     ),
                   )
                 ]),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 Row(children: [
                   Expanded(
                       child: OutlinedButton(

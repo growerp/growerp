@@ -44,13 +44,13 @@ void main() {
         blocProviders: getUserCompanyBlocProviders(restClient, 'AppAdmin'),
         clear: true);
     await CommonTest.createCompanyAndAdmin(tester);
+    await CompanyTest.selectCompany(tester);
+    await CompanyTest.checkCompany(tester);
     await selectCustomers(tester); // create
     await CompanyTest.enterCompanyData(tester, customerCompanies.sublist(0, 2));
     await selectCustomers(tester);
     await CompanyTest.checkCompany(tester);
     await selectCustomers(tester); // update
     await CompanyTest.enterCompanyData(tester, customerCompanies.sublist(2, 4));
-    await selectCustomers(tester);
-    await CompanyTest.checkCompany(tester);
   }, skip: false);
 }

@@ -25,9 +25,9 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <set field="prefixMap"
-                from="['party':'PY', 'category': 'C', 'product': 'PR',
-                       'order': 'OR', invoice: 'IV', 'shipment': 'SP',
-                       'payment': 'PT', 'transaction': 'T']" />
+                from="['party':'P', 'category': 'C', 'product': 'PR',
+                       'order': 'OR', invoice: 'IV', 'shipment': 'SM',
+                       'payment': 'PM', 'transaction': 'T']" />
             <set field="prefix" from="prefixMap[seqName]" />
             <set field="seqName" value="$ownerPartyId-$seqName" />
             <entity-find-one entity-name="moqui.entity.SequenceValueItem" value-field="seqItem"
@@ -46,9 +46,9 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <if condition="ownerPartyId == 'system'">
                 <set field="seqNum" value="S$seqNum" />
-                <else>
+                <!--else>
                     <set field="seqNum" value="$prefix$seqNum" />
-                </else>
+                </else-->
             </if>
         </actions>
     </service>

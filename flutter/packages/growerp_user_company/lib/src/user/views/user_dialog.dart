@@ -238,7 +238,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('id'),
-                    decoration: InputDecoration(labelText: 'Id'),
+                    decoration: InputDecoration(labelText: 'ID'),
                     controller: _idController,
                   ),
                 ),

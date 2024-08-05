@@ -57,7 +57,6 @@ abstract class RestClient {
   Future<Companies> getCompanies({
     @Query('mainCompanies') bool? mainCompanies,
     @Query('searchString') String? searchString,
-    @Query('filter') String? filter,
     @Query('start') int? start,
     @Query('limit') int? limit,
   });
@@ -76,7 +75,6 @@ abstract class RestClient {
     @Query('role') Role? role,
     @Query('start') int? start,
     @Query('limit') int? limit,
-    @Query('filter') String? filter,
     @Query('firstName') String? firstName,
     @Query('lastName') String? lastName,
     @Query('searchString') String? searchString,

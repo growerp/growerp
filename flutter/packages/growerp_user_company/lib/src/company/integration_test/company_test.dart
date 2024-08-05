@@ -24,7 +24,7 @@ class CompanyTest {
   }
 
   static Future<void> selectCompany(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'tapCompany', 'CompanyForm', '1');
+    await CommonTest.selectOption(tester, 'dbCompanies', 'CompanyForm', '1');
   }
 
   /// enter company data in company dialog screen.
@@ -44,11 +44,11 @@ class CompanyTest {
       return;
     }
 
-    // create new list with partyId from last list from test if not empty
+    // create new list with pseudoId from last list from test if not empty
     List<Company> clist = List.of(inputList);
     if (test.companies.isNotEmpty) {
       for (int x = 0; x < test.companies.length; x++) {
-        clist[x] = clist[x].copyWith(partyId: test.companies[x].partyId);
+        clist[x] = clist[x].copyWith(pseudoId: test.companies[x].pseudoId);
       }
     }
 
@@ -57,11 +57,12 @@ class CompanyTest {
     for (Company c in clist) {
       if (clist.length > 1) {
         // single (main) company no selection
-        if (c.partyId == null) {
+        if (c.pseudoId == null) {
           await CommonTest.tapByKey(tester, 'addNew');
         } else {
-          await CommonTest.doNewSearch(tester, searchString: c.partyId!);
-          expect(CommonTest.getTextField('header').split('#')[1], c.partyId);
+          await CommonTest.doNewSearch(tester, searchString: c.pseudoId!);
+          expect(
+              CommonTest.getTextField('topHeader').split('#')[1], c.pseudoId);
         }
       }
 
@@ -99,11 +100,11 @@ class CompanyTest {
       await CommonTest.dragNew(tester, key: 'paymentMethodLabel');
       // add/update company record
       await CommonTest.tapByKey(tester, 'update', seconds: 3);
-      // get partyId if not yet have (not for main company)
-      if (clist.length > 1 && c.partyId == null) {
+      // get pseudoId if not yet have (not for main company)
+      if (clist.length > 1 && c.pseudoId == null) {
         await CommonTest.doNewSearch(tester, searchString: c.name!);
-        var id = CommonTest.getTextField('header').split('#')[1];
-        c = c.copyWith(partyId: id);
+        var id = CommonTest.getTextField('topHeader').split('#')[1];
+        c = c.copyWith(pseudoId: id);
         await CommonTest.tapByKey(tester, 'cancel');
       }
       newCompanies.add(c);
@@ -119,8 +120,8 @@ class CompanyTest {
 
     for (Company c in test.companies) {
       if (test.companies.length > 1) {
-        await CommonTest.doNewSearch(tester, searchString: c.partyId!);
-        expect(CommonTest.getTextField('header').split('#')[1], c.partyId);
+        await CommonTest.doNewSearch(tester, searchString: c.pseudoId!);
+        expect(CommonTest.getTextField('topHeader').split('#')[1], c.pseudoId);
       }
       expect(CommonTest.getTextFormField('companyName'), equals(c.name!));
       expect(CommonTest.getTextFormField('email'), equals(c.email ?? ''));
