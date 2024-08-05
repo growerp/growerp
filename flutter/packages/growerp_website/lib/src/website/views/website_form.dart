@@ -60,13 +60,11 @@ class WebsiteFormState extends State<WebsiteForm> {
     restClient = context.read<RestClient>();
     _websiteBloc = context.read<WebsiteBloc>()..add(WebsiteFetch());
     _categoryBloc = context.read<DataFetchBloc<Categories>>()
-      ..add(GetDataEvent(() => context
-          .read<RestClient>()
-          .getCategory(limit: 3, isForDropDown: true)));
+      ..add(GetDataEvent(
+          () => restClient.getCategory(limit: 3, isForDropDown: true)));
     _productBloc = context.read<DataFetchBloc<Products>>()
-      ..add(GetDataEvent(() => context
-          .read<RestClient>()
-          .getProduct(limit: 3, isForDropDown: true)));
+      ..add(GetDataEvent(
+          () => restClient.getProduct(limit: 3, isForDropDown: true)));
   }
 
   @override
@@ -517,15 +515,12 @@ class WebsiteFormState extends State<WebsiteForm> {
                 itemAsString: (Product? u) =>
                     " ${u!.productName}[${u.pseudoId}]",
                 asyncItems: (String filter) {
-                  _productBloc.add(GetDataEvent(() => context
-                      .read<RestClient>()
-                      .getProduct(
-                          searchString: filter,
-                          limit: 3,
-                          isForDropDown: true,
-                          assetClassId: classificationId == 'AppHotel'
-                              ? 'Hotel Room'
-                              : '')));
+                  _productBloc.add(GetDataEvent(() => restClient.getProduct(
+                      searchString: filter,
+                      limit: 3,
+                      isForDropDown: true,
+                      assetClassId:
+                          classificationId == 'AppHotel' ? 'Hotel Room' : '')));
                   return Future.delayed(const Duration(milliseconds: 250), () {
                     return Future.value(
                         (_productBloc.state.data as Products).products);
