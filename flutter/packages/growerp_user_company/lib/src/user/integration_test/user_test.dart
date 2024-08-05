@@ -131,17 +131,17 @@ class UserTest {
     Role currentRole = npUsers[0].company?.role ?? Role.unknown;
     if (oldUsers.isNotEmpty) {
       for (int x = 0; x < oldUsers.length; x++) {
-        npUsers[x] = npUsers[x].copyWith(partyId: oldUsers[x].partyId);
+        npUsers[x] = npUsers[x].copyWith(pseudoId: oldUsers[x].pseudoId);
       }
     }
     List<User> newUsers = [];
     for (User user in npUsers) {
-      if (user.partyId == null) {
+      if (user.pseudoId == null) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.doNewSearch(tester, searchString: user.partyId!);
+        await CommonTest.doNewSearch(tester, searchString: user.pseudoId!);
         expect(
-            CommonTest.getTextField('topHeader').split('#')[1], user.partyId);
+            CommonTest.getTextField('topHeader').split('#')[1], user.pseudoId);
       }
       expect(find.byKey(Key('UserDialog${user.company!.role!.name}')),
           findsOneWidget);
@@ -230,7 +230,7 @@ class UserTest {
         await CommonTest.drag(tester);
         await CommonTest.tapByKey(tester, 'cancel');
       }
-      newUsers.add(user.copyWith(partyId: id));
+      newUsers.add(user.copyWith(pseudoId: id));
       await CommonTest.drag(tester);
       if (currentRole == Role.company) {
         // login

@@ -148,8 +148,8 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="Company">
         <in-parameters>
-            <parameter name="partyId" />
-            <parameter name="pseudoId" />
+            <parameter name="companyPartyId" />
+            <parameter name="companyPseudoId" />
             <parameter name="firstName" />
             <parameter name="lastName" />
             <parameter name="companyName" />
@@ -247,8 +247,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="ownerPartyId" ignore-if-empty="true" />
                 <econdition field-name="companyPartyId" ignore-if-empty="true" />
                 <econditions combine="or">
-                    <econdition field-name="companyPartyId" ignore-case="true"
-                        operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="companyPseudoId" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="companyName" ignore-case="true"
@@ -1020,7 +1018,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="ownerPartyId" ignore-if-empty="true" />
                 <econdition field-name="userPartyId" ignore-if-empty="true" />
                 <econditions combine="or">
-                    <econdition field-name="userPartyId" ignore-case="true"
+                    <econdition field-name="userPseudoId" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="firstName" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />

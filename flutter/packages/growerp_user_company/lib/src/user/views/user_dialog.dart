@@ -154,7 +154,7 @@ class UserDialogState extends State<UserDialogStateFull> {
           context: context,
           title: _selectedRole == Role.company
               ? "${widget.user.userGroup != null && widget.user.userGroup == UserGroup.admin ? 'Admininistrator' : 'Employee'}"
-              : "${_selectedRole.name} person #${widget.user.partyId ?? ' new'}",
+              : "${_selectedRole.name} person #${widget.user.pseudoId ?? ' new'}",
           width: isPhone ? 400 : 1000,
           height: isPhone ? 700 : 700,
           child: Scaffold(
@@ -372,7 +372,8 @@ class UserDialogState extends State<UserDialogStateFull> {
                                 const DropDownDecoratorProps(
                                     dropdownSearchDecoration:
                                         InputDecoration(labelText: 'Company')),
-                            itemAsString: (Company? u) => " ${u!.name}",
+                            itemAsString: (Company? u) =>
+                                " ${u!.name}[${u.pseudoId}]",
                             asyncItems: (String filter) {
                               _companyBloc.add(CompanyFetch(
                                 ownerPartyId:

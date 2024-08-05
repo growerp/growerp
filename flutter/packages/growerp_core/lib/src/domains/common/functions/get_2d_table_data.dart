@@ -66,7 +66,7 @@ class TableRowContent {
         // add header
         contentRow.add(TableViewCell(
             child: fieldContent.name is String
-                ? Text(fieldContent.name, textAlign: TextAlign.center)
+                ? Text(fieldContent.name, textAlign: TextAlign.left)
                 : fieldContent.name as Widget));
       }
       tableViewCells.add(contentRow);
@@ -83,6 +83,7 @@ class TableRowContent {
       contentRow.add(TableViewCell(
           child: fieldContent.value is String
               ? Text(fieldContent.value,
+                  textAlign: TextAlign.left,
                   key: Key('${tableData.rowContent.first.name}$rowIndex'))
               : fieldContent.value as Widget));
     }
