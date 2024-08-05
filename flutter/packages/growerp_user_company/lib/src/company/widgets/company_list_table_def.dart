@@ -34,7 +34,9 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
       value: CircleAvatar(
         child: item.image != null
             ? Image.memory(item.image!)
-            : Text(item.name != null ? item.name![0] : '?'),
+            : Text(
+                item.pseudoId == null ? '' : item.pseudoId!.lastChar(3),
+              ),
       ),
     ));
   }

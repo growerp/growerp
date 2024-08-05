@@ -1257,6 +1257,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="personFromDate" field="fromDate" entity-alias="PERSONTOCOMPANY" />
         <alias name="personThruDate" field="thruDate" entity-alias="PERSONTOCOMPANY" />
         <alias name="personDisabled" field="disabled" entity-alias="PTYPERSON" />
+        <alias name="personPseudoId" field="pseudoId" entity-alias="PTYPERSON" />
         <alias name="personPartyId" field="partyId" entity-alias="PERSON" />
         <alias name="firstName" entity-alias="PERSON" />
         <alias name="lastName" entity-alias="PERSON" />

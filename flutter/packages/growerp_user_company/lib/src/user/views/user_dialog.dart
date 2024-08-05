@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_string_interpolations
+
 /*
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
@@ -238,7 +240,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('id'),
-                    decoration: InputDecoration(labelText: 'ID'),
+                    decoration: const InputDecoration(labelText: 'ID'),
                     controller: _idController,
                   ),
                 ),

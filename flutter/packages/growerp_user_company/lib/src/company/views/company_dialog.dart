@@ -304,12 +304,12 @@ class CompanyFormState extends State<CompanyDialog> {
           Expanded(
             child: TextFormField(
               key: const Key('id'),
-              decoration: InputDecoration(labelText: 'ID'),
+              decoration: const InputDecoration(labelText: 'ID'),
               controller: _idController,
             ),
           ),
           if (authenticate.company!.partyId != company.partyId)
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
           if (authenticate.company!.partyId != company.partyId)
             Expanded(
               child: DropdownButtonFormField<Role>(
@@ -352,7 +352,7 @@ class CompanyFormState extends State<CompanyDialog> {
               controller: _telephoneController,
             ),
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Expanded(
             child: DropdownButtonFormField<Currency>(
               key: const Key('currency'),
@@ -539,6 +539,7 @@ class CompanyFormState extends State<CompanyDialog> {
                           if (_companyDialogFormKey.currentState!.validate()) {
                             Company updatedCompany = Company(
                                 partyId: company.partyId,
+                                pseudoId: _idController.text,
                                 email: _emailController.text,
                                 name: _nameController.text,
                                 role: _selectedRole,
@@ -621,7 +622,7 @@ class CompanyFormState extends State<CompanyDialog> {
                 return FatalErrorForm(message: state.message!);
               }
               if (state.status == CompanyStatus.success) {
-                return form(
+                return CompanyForm(
                     companyDialogFormKey: _companyDialogFormKey,
                     scrollController: _scrollController,
                     company: company,
@@ -637,8 +638,8 @@ class CompanyFormState extends State<CompanyDialog> {
   }
 }
 
-class form extends StatelessWidget {
-  const form({
+class CompanyForm extends StatelessWidget {
+  const CompanyForm({
     super.key,
     required GlobalKey<FormState> companyDialogFormKey,
     required ScrollController scrollController,

@@ -27,16 +27,18 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
   List<TableRowContent> rowContent = [];
   if (isPhone) {
     rowContent.add(TableRowContent(
-      name: ' ',
+      name: 'ShortId',
       width: isPhone ? 10 : 5,
       value: CircleAvatar(
         child: item.image != null
             ? Image.memory(item.image!)
-            : Text(item.firstName != null ? item.firstName![0] : '?'),
+            : Text(
+                item.pseudoId == null ? '' : item.pseudoId!.lastChar(3),
+              ),
       ),
     ));
     rowContent.add(TableRowContent(
-        name: Text('ID\nName\nEmail', textAlign: TextAlign.start),
+        name: const Text('ID\nName\nEmail', textAlign: TextAlign.start),
         width: 40,
         value: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,14 +54,14 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         )));
   } else {
     rowContent.add(TableRowContent(
-        name: Text('ID', textAlign: TextAlign.start),
+        name: const Text('ID', textAlign: TextAlign.start),
         width: 8,
         value: Text(
-          "${item.pseudoId ?? ''}",
+          item.pseudoId ?? '',
           key: Key('id$index'),
         )));
     rowContent.add(TableRowContent(
-        name: Text('Name', textAlign: TextAlign.start),
+        name: const Text('Name', textAlign: TextAlign.start),
         width: 15,
         value: Text(
           "${item.firstName ?? ''} ${item.lastName ?? ''} ",
@@ -80,18 +82,21 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             key: Key('username$index'))));
   }
   // specific roles
-  if (extra as Role != Role.unknown) // only specific roles: show company
+  if (extra as Role != Role.unknown) {
+    // only specific roles: show company
     rowContent.add(TableRowContent(
         name: 'Company',
         width: isPhone ? 30 : 20,
         value: Text(item.company?.name ?? ' ',
             key: Key('companyName$index'), textAlign: TextAlign.left)));
-  if (extra == Role.unknown) // all items so show role
+  } else {
+    // all items so show role
     rowContent.add(TableRowContent(
         name: 'Role',
         width: 30,
         value: Text(item.role != null ? item.role!.name : Role.unknown.name,
             key: Key('role$index'), textAlign: TextAlign.left)));
+  }
   // all devices
   rowContent.add(TableRowContent(
       name: ' ',
