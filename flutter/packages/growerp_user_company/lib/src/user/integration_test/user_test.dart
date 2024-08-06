@@ -202,14 +202,13 @@ class UserTest {
 
   static Future<List<User>> checkUser(
       WidgetTester tester, List<User> users) async {
-    Role currentRole = users[0].company?.role ?? Role.unknown;
+    Role currentRole = users[0].role ?? Role.unknown;
     List<User> newUsers = [];
     for (User user in users) {
       await CommonTest.doNewSearch(tester, searchString: user.firstName!);
       // check detail
       var id = CommonTest.getTextField('topHeader').split('#')[1];
-      expect(find.byKey(Key('UserDialog${user.company!.role!.name}')),
-          findsOneWidget);
+      expect(find.byKey(Key('UserDialog${user.role!.name}')), findsOneWidget);
       expect(CommonTest.getTextFormField('firstName'), equals(user.firstName!));
       expect(CommonTest.getTextFormField('lastName'), equals(user.lastName!));
       expect(
@@ -217,7 +216,7 @@ class UserTest {
       expect(CommonTest.getTextFormField('userTelephoneNr'),
           equals(user.telephoneNr ?? ''));
 
-      if (currentRole != Role.company && user.company != null) {
+      if (currentRole != Role.company) {
         await CommonTest.tapByKey(tester, 'editCompany');
         expect(CommonTest.getTextFormField('companyName'),
             equals(user.company!.name!)); // required!

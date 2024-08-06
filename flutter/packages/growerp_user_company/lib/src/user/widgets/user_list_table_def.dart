@@ -44,7 +44,8 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(item.pseudoId ?? ''),
-            Text("${item.firstName ?? ''} ${item.lastName ?? ''}",
+            Text(
+                ("${item.firstName ?? ''} ${item.lastName ?? ''}").truncate(18),
                 key: Key('name$index')),
             Text(
               item.email != null ? item.email.truncate(18) : ' ',

@@ -146,6 +146,15 @@ class UserDialogState extends State<UserDialogStateFull> {
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    String title = '';
+    if (_selectedRole == Role.company) {
+      title = widget.user.userGroup != null &&
+              widget.user.userGroup == UserGroup.admin
+          ? 'Admininistrator'
+          : 'Employee';
+    } else {
+      title = _selectedRole.name;
+    }
     return Dialog(
       key: Key('UserDialog${_selectedRole.name}'),
       insetPadding: const EdgeInsets.all(10),
@@ -154,9 +163,7 @@ class UserDialogState extends State<UserDialogStateFull> {
       ),
       child: popUp(
           context: context,
-          title: _selectedRole == Role.company
-              ? "${widget.user.userGroup != null && widget.user.userGroup == UserGroup.admin ? 'Admininistrator' : 'Employee'}"
-              : "${_selectedRole.name} person #${widget.user.pseudoId ?? ' new'}",
+          title: "$title #${widget.user.pseudoId ?? ' new'}",
           width: isPhone ? 400 : 1000,
           height: isPhone ? 700 : 700,
           child: Scaffold(
@@ -326,123 +333,99 @@ class UserDialogState extends State<UserDialogStateFull> {
           ],
         ),
       ),
-      Visibility(
-          visible: _selectedRole != Role.company,
-          child: InputDecorator(
-              decoration: InputDecoration(
-                labelText: "${_selectedCompany.role?.value ?? Role.unknown}"
-                    " Company information",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
+      if (_selectedRole != Role.company)
+        InputDecorator(
+            decoration: InputDecoration(
+              labelText: "${_selectedCompany.role?.value ?? Role.unknown}"
+                  " Company information",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
               ),
-              child: Column(children: [
-                Row(children: [
-                  Expanded(
-                    child: BlocBuilder<CompanyBloc, CompanyState>(
-                        builder: (context, state) {
-                      switch (state.status) {
-                        case CompanyStatus.failure:
-                          return const FatalErrorForm(
-                              message: 'server connection problem');
-                        case CompanyStatus.success:
-                          return DropdownSearch<Company>(
-                            key: const Key('userCompanyName'),
-                            selectedItem: _selectedCompany.name == null
-                                ? Company(name: '')
-                                : _selectedCompany,
-                            popupProps: PopupProps.menu(
-                              showSelectedItems: true,
-                              isFilterOnline: true,
-                              showSearchBox: true,
-                              searchFieldProps: TextFieldProps(
-                                autofocus: true,
-                                decoration: const InputDecoration(
-                                    labelText: "company,name"),
-                                controller: _companySearchBoxController,
-                              ),
-                              menuProps: MenuProps(
-                                  borderRadius: BorderRadius.circular(20.0)),
-                              title: popUp(
-                                context: context,
-                                title: 'Select company',
-                                height: 50,
-                                width: 450,
-                              ),
+            ),
+            child: Column(children: [
+              Row(children: [
+                Expanded(
+                  child: BlocBuilder<CompanyBloc, CompanyState>(
+                      builder: (context, state) {
+                    switch (state.status) {
+                      case CompanyStatus.failure:
+                        return const FatalErrorForm(
+                            message: 'server connection problem');
+                      case CompanyStatus.success:
+                        return DropdownSearch<Company>(
+                          key: const Key('userCompanyName'),
+                          selectedItem: _selectedCompany.name == null
+                              ? Company(name: '')
+                              : _selectedCompany,
+                          popupProps: PopupProps.menu(
+                            showSelectedItems: true,
+                            isFilterOnline: true,
+                            showSearchBox: true,
+                            searchFieldProps: TextFieldProps(
+                              autofocus: true,
+                              decoration: const InputDecoration(
+                                  labelText: "company,name"),
+                              controller: _companySearchBoxController,
                             ),
-                            dropdownDecoratorProps:
-                                const DropDownDecoratorProps(
-                                    dropdownSearchDecoration:
-                                        InputDecoration(labelText: 'Company')),
-                            itemAsString: (Company? u) =>
-                                " ${u!.name}[${u.pseudoId ?? ''}]",
-                            asyncItems: (String filter) {
-                              _companyBloc.add(CompanyFetch(
-                                ownerPartyId:
-                                    _authBloc.state.authenticate!.ownerPartyId!,
-                                searchString: filter,
-                                limit: 3,
-                                isForDropDown: true,
-                              ));
-                              return Future.delayed(
-                                  const Duration(milliseconds: 100), () {
-                                return Future.value(
-                                    _companyBloc.state.companies);
-                              });
-                            },
-                            compareFn: (item, sItem) =>
-                                item.partyId == sItem.partyId,
-                            onChanged: (Company? newValue) {
-                              setState(() {
-                                _selectedCompany = newValue ?? Company();
-                              });
-                            },
-                            validator: (value) => value == null &&
-                                    _companyController.text == ''
-                                ? "Select an existing or Create a new company"
-                                : null,
-                          );
-                        default:
-                          return const Center(child: LoadingIndicator());
-                      }
-                    }),
-                  ),
-                ]),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    if (_selectedCompany.name != null)
-                      Expanded(
-                          child: OutlinedButton(
-                        key: const Key('editCompany'),
-                        onPressed: () async {
-                          var result = await showDialog(
-                              barrierDismissible: true,
+                            menuProps: MenuProps(
+                                borderRadius: BorderRadius.circular(20.0)),
+                            title: popUp(
                               context: context,
-                              builder: (BuildContext context) {
-                                return ShowCompanyDialog(_selectedCompany,
-                                    dialog: true);
-                              });
-                          if (result is Company) {
-                            setState(() {
-                              _selectedCompany = result;
-                              _selectedRole = result.role!;
+                              title: 'Select company',
+                              height: 50,
+                              width: 450,
+                            ),
+                          ),
+                          dropdownDecoratorProps: const DropDownDecoratorProps(
+                              dropdownSearchDecoration:
+                                  InputDecoration(labelText: 'Company')),
+                          itemAsString: (Company? u) =>
+                              " ${u!.name}[${u.pseudoId ?? ''}]",
+                          asyncItems: (String filter) {
+                            _companyBloc.add(CompanyFetch(
+                              ownerPartyId:
+                                  _authBloc.state.authenticate!.ownerPartyId!,
+                              searchString: filter,
+                              limit: 3,
+                              isForDropDown: true,
+                            ));
+                            return Future.delayed(
+                                const Duration(milliseconds: 100), () {
+                              return Future.value(_companyBloc.state.companies);
                             });
-                          }
-                        },
-                        child: const Text('Update Company'),
-                      )),
-                    const SizedBox(width: 10),
+                          },
+                          compareFn: (item, sItem) =>
+                              item.partyId == sItem.partyId,
+                          onChanged: (Company? newValue) {
+                            setState(() {
+                              _selectedCompany = newValue ?? Company();
+                            });
+                          },
+                          validator: (value) =>
+                              value == null && _companyController.text == ''
+                                  ? "Select an existing or Create a new company"
+                                  : null,
+                        );
+                      default:
+                        return const Center(child: LoadingIndicator());
+                    }
+                  }),
+                ),
+              ]),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  if (_selectedCompany.name != null)
                     Expanded(
                         child: OutlinedButton(
-                      key: const Key('newCompany'),
+                      key: const Key('editCompany'),
                       onPressed: () async {
                         var result = await showDialog(
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
-                              return ShowCompanyDialog(Company(
-                                  partyId: '_NEW_', role: _selectedRole));
+                              return ShowCompanyDialog(_selectedCompany,
+                                  dialog: true);
                             });
                         if (result is Company) {
                           setState(() {
@@ -451,12 +434,33 @@ class UserDialogState extends State<UserDialogStateFull> {
                           });
                         }
                       },
-                      child: const Text('New Company'),
+                      child: const Text('Update Company'),
                     )),
-                  ],
-                ),
-              ]))),
-      if (widget.user.loginName != null)
+                  const SizedBox(width: 10),
+                  Expanded(
+                      child: OutlinedButton(
+                    key: const Key('newCompany'),
+                    onPressed: () async {
+                      var result = await showDialog(
+                          barrierDismissible: true,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return ShowCompanyDialog(
+                                Company(partyId: '_NEW_', role: _selectedRole));
+                          });
+                      if (result is Company) {
+                        setState(() {
+                          _selectedCompany = result;
+                          _selectedRole = result.role!;
+                        });
+                      }
+                    },
+                    child: const Text('New Company'),
+                  )),
+                ],
+              ),
+            ])),
+      if (widget.user.loginName != null || widget.user.role == Role.company)
         InputDecorator(
             decoration: InputDecoration(
               labelText: 'User Login',
