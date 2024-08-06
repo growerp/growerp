@@ -44,10 +44,10 @@ Future<void> main() async {
           title: 'GrowERP user-employee test',
           blocProviders: getUserCompanyBlocProviders(restClient, 'AppAdmin'));
       await CommonTest.createCompanyAndAdmin(tester);
-//      await selectEmployees(tester);
-//      await UserTest.addAdministrators(tester, administrators.sublist(0, 3));
-//      await UserTest.updateAdministrators(tester, administrators.sublist(3, 6));
-//      await UserTest.deleteAdministrators(tester);
+      await selectEmployees(tester);
+      await UserTest.addAdministrators(tester, administrators.sublist(0, 3));
+      await UserTest.updateAdministrators(tester, administrators.sublist(3, 6));
+      await UserTest.deleteAdministrators(tester);
       await selectEmployees(tester);
       await UserTest.addEmployees(tester, employees.sublist(0, 3));
       await UserTest.updateEmployees(tester, employees.sublist(3, 6));
