@@ -375,7 +375,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                                     dropdownSearchDecoration:
                                         InputDecoration(labelText: 'Company')),
                             itemAsString: (Company? u) =>
-                                " ${u!.name}[${u.pseudoId}]",
+                                " ${u!.name}[${u.pseudoId ?? ''}]",
                             asyncItems: (String filter) {
                               _companyBloc.add(CompanyFetch(
                                 ownerPartyId:
@@ -456,9 +456,8 @@ class UserDialogState extends State<UserDialogStateFull> {
                   ],
                 ),
               ]))),
-      Visibility(
-        visible: widget.user.company!.role == Role.company,
-        child: InputDecorator(
+      if (widget.user.loginName != null)
+        InputDecorator(
             decoration: InputDecoration(
               labelText: 'User Login',
               border: OutlineInputBorder(
@@ -535,8 +534,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                     )
                   ])
                 ])
-            ])),
-      )
+            ]))
     ];
     Widget updateButton = Row(children: [
       if (widget.user.partyId != null)

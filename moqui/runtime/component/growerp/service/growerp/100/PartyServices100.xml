@@ -1484,18 +1484,33 @@ along with this software (see the LICENSE.md file). If not, see
                 </else-if>
             </if>
             <!-- create account with or without login-->
-            <entity-find entity-name="PersonAndUserAccount" list="parties" />
-            <service-call name="mantle.party.PartyServices.create#Account"
-                in-map="[       roleTypeId: user.role, 
-                                pseudoId: user.pseudoId,
-                                loginAfterCreate: login,
-                                firstName: user.firstName, lastName: user.lastName,
-                                emailAddress: user.email,
-                                username: user.loginName, newPassword: password,
-                                newPasswordVerify: password,
-                                ownerPartyId: ownerPartyId]"
-                out-map="userAccount" />
-            <set field="userPartyId" from="userAccount.partyId" />
+            <!-- create#Account will always create a login even if username == null-->
+            <set field="inMap"
+                from="[ roleTypeId: user.role,
+                    pseudoId: user.pseudoId,  loginAfterCreate: login,
+                    firstName: user.firstName, lastName: user.lastName,
+                    emailAddress: user.email,
+                    username: user.loginName, newPassword: password,
+                    newPasswordVerify: password, ownerPartyId: ownerPartyId]" />
+            <if condition="user.loginName">
+                <service-call name="mantle.party.PartyServices.create#Account"
+                    in-map="inMap" out-map="userAccount" />
+                <set field="userPartyId" from="userAccount.partyId" />
+                <else>
+                    <service-call name="create#mantle.party.Party"
+                        in-map="inMap + [partyTypeEnumId:'PtyPerson']" out-map="newPartyOut" />
+                    <set field="userPartyId" from="newPartyOut.partyId" />
+                    <service-call name="create#mantle.party.Person"
+                        in-map="inMap + [partyId: userPartyId]" />
+                    <service-call name="create#mantle.party.PartyRole"
+                        in-map="[partyId:userPartyId, roleTypeId:user.role]" />
+                    <if condition="user.email">
+                        <service-call name="mantle.party.ContactServices.create#EmailAddress"
+                            in-map="[emailAddress:user.email, partyId:userPartyId,
+                                     contactMechPurposeId:'EmailPrimary']" />
+                    </if>
+                </else>
+            </if>
             <if condition="customerStatusId">
                 <service-call name="update#mantle.party.Party"
                     in-map="[partyId: userPartyId, customerStatusId: customerStatusId]" />

@@ -199,6 +199,7 @@ class UserListState extends State<UserList> {
                               return BlocProvider.value(
                                   value: _userBloc,
                                   child: UserDialog(User(
+                                      role: widget.role,
                                       company: widget.role == Role.company
                                           ? _authBloc
                                               .state.authenticate!.company
