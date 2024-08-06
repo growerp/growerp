@@ -202,7 +202,7 @@ class FinDocTest {
       await CommonTest.doNewSearch(tester,
           searchString: id ?? finDoc.pseudoId!);
       // open detail
-      expect(FinDocStatusVal.completed.toString(),
+      expect(FinDocStatusVal.completed.name,
           CommonTest.getDropdown('statusDropDown'));
 
       // get transaction id's
@@ -306,9 +306,9 @@ class FinDocTest {
           searchString: id ?? finDoc.pseudoId!, seconds: CommonTest.waitTime);
       // statuschange on detail screen
       if (CommonTest.getDropdown('statusDropDown') ==
-              FinDocStatusVal.inPreparation.toString() ||
+              FinDocStatusVal.inPreparation.name ||
           CommonTest.getDropdown('statusDropDown') ==
-              FinDocStatusVal.created.toString() ||
+              FinDocStatusVal.created.name ||
           status != FinDocStatusVal.approved) {
         await CommonTest.tapByKey(tester, 'statusDropDown');
         await CommonTest.tapByText(tester, status.name);

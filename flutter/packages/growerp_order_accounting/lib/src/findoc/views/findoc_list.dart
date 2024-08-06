@@ -208,7 +208,7 @@ class FinDocListState extends State<FinDocList> {
 
             // if rental (hotelroom) need to show checkin/out orders
             if (widget.onlyRental && widget.status != null) {
-              if (widget.status == FinDocStatusVal.created.toString()) {
+              if (widget.status == FinDocStatusVal.created) {
                 finDocs = state.finDocs
                     .where((FinDoc el) =>
                         el.items[0].rentalFromDate != null &&
@@ -217,7 +217,7 @@ class FinDocListState extends State<FinDocList> {
                             .isSameDate(CustomizableDateTime.current))
                     .toList();
               }
-              if (widget.status == FinDocStatusVal.approved.toString()) {
+              if (widget.status == FinDocStatusVal.approved) {
                 finDocs = state.finDocs
                     .where((FinDoc el) =>
                         el.items[0].rentalThruDate != null &&

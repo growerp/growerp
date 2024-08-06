@@ -20,11 +20,11 @@ enum FinDocStatusVal {
   cancelled('FinDocCancelled', 'Cancelled', 'Cancelled'),
   unknown('Unknown', 'Unknown', 'Unknown');
 
-  const FinDocStatusVal(this.value, this.hotel, this.other);
+  const FinDocStatusVal(this.value, this.hotel, this.name);
 
   final String value; // value used in backend
   final String hotel; // used in hotel app
-  final String other; // value used in other apps
+  final String name; // value used in other apps
 
   static final Map<String, FinDocStatusVal> byValue = {};
   static FinDocStatusVal? getByValue(String value) {

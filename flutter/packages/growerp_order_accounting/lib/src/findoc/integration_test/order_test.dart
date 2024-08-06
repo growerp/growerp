@@ -135,8 +135,8 @@ class OrderTest {
     //  var intlFormat = DateFormat('yyyy-MM-dd');
     int x = 0;
     for (FinDoc order in test.orders) {
-      expect(
-          CommonTest.getTextField('status$x'), equals(FinDocStatusVal.created));
+      expect(CommonTest.getTextField('status$x'),
+          equals(FinDocStatusVal.created.name));
       await CommonTest.tapByKey(tester, 'id$x', seconds: 5);
       expect(CommonTest.getTextField('itemProductId$x'),
           equals(order.items[0].product?.productId));
@@ -175,8 +175,8 @@ class OrderTest {
 //          seconds: 5); // to created
       await CommonTest.tapByKey(tester, 'nextStatus0',
           seconds: 5); // to approved
-      expect(
-          CommonTest.getTextField('status0'), equals(FinDocStatusVal.approved));
+      expect(CommonTest.getTextField('status0'),
+          equals(FinDocStatusVal.approved.name));
     }
     await CommonTest.gotoMainMenu(tester);
   }
@@ -188,7 +188,7 @@ class OrderTest {
     for (FinDoc order in orders) {
       await CommonTest.doNewSearch(tester, searchString: order.orderId!);
       expect(CommonTest.getTextField('status0'),
-          equals(FinDocStatusVal.completed));
+          equals(FinDocStatusVal.completed.name));
     }
   }
 

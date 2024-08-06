@@ -119,7 +119,7 @@ class PaymentTest {
       expect(CommonTest.getDropdownSearch('otherCompany'),
           equals(payment.otherCompany!.name));
       expect(CommonTest.getDropdown('statusDropDown'),
-          equals(FinDocStatusVal.created.toString()));
+          equals(FinDocStatusVal.created.name));
       expect(
           find.byKey(Key(
               'PaymentDialog${payment.sales == true ? "Sales" : "Purchase"}')),
