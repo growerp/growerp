@@ -210,14 +210,15 @@ Future<void> main(List<String> args) async {
           lastUser = convertedRow;
         }
         convertedRows = users;
-        break;
       case FileType.finDocTransaction:
       case FileType.finDocOrderPurchase:
-      case FileType.finDocInvoicePurchase:
-      case FileType.finDocPaymentPurchase:
       case FileType.finDocOrderSale:
+      case FileType.finDocInvoicePurchase:
       case FileType.finDocInvoiceSale:
+      case FileType.finDocPaymentPurchase:
       case FileType.finDocPaymentSale:
+      case FileType.finDocShipmentOutgoing:
+      case FileType.finDocShipmentIncoming:
         csvFormat = finDocCsvFormat;
         csvLength = finDocCsvLength;
         convertedRows
@@ -235,11 +236,13 @@ Future<void> main(List<String> args) async {
           if (row[0].isEmpty) continue;
           if (lastRow.isEmpty || row[0] != lastRow[0]) {
             List<String> newRow = List.from(row);
-            // replace by sequential number when not invoice
+            // replace by sequential number
             if (fileType != FileType.finDocInvoiceSale &&
                 fileType != FileType.finDocInvoicePurchase &&
                 fileType != FileType.finDocOrderSale &&
-                fileType != FileType.finDocOrderPurchase) {
+                fileType != FileType.finDocOrderPurchase &&
+                fileType != FileType.finDocShipmentOutgoing &&
+                fileType != FileType.finDocShipmentIncoming) {
               newRow[0] = (seqNumber++).toString();
             }
 //            print(
@@ -252,11 +255,13 @@ Future<void> main(List<String> args) async {
         break;
       case FileType.finDocTransactionItem:
       case FileType.finDocOrderPurchaseItem:
-      case FileType.finDocInvoicePurchaseItem:
-      case FileType.finDocPaymentPurchaseItem:
       case FileType.finDocOrderSaleItem:
+      case FileType.finDocInvoicePurchaseItem:
       case FileType.finDocInvoiceSaleItem:
+      case FileType.finDocPaymentPurchaseItem:
       case FileType.finDocPaymentSaleItem:
+      case FileType.finDocShipmentIncomingItem:
+      case FileType.finDocShipmentOutgoingItem:
         csvFormat = finDocItemCsvFormat;
         csvLength = finDocItemCsvLength;
         convertedRows
@@ -275,11 +280,14 @@ Future<void> main(List<String> args) async {
             seqNumber++;
           }
           List<String> newRow = List.from(row);
-          // replace by sequential number when not invoice
+          // replace by sequential number when not these types
+          // because like to show the original id in the new system
           if (fileType != FileType.finDocInvoiceSaleItem &&
               fileType != FileType.finDocInvoicePurchaseItem &&
               fileType != FileType.finDocOrderSaleItem &&
-              fileType != FileType.finDocOrderPurchaseItem) {
+              fileType != FileType.finDocOrderPurchaseItem &&
+              fileType != FileType.finDocShipmentIncomingItem &&
+              fileType != FileType.finDocShipmentOutgoingItem) {
             newRow[0] = seqNumber.toString();
           }
           // print(

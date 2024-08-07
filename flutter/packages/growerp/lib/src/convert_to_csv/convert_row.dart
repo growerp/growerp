@@ -572,6 +572,116 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add(columnsFrom[0]); // account code
       columnsTo.add(isDebit.toString());
       return columnsTo;
+
+    case FileType.finDocShipmentIncoming:
+
+      /// from:(start from 1)
+      /// 1: accountId 3: date, 4: reference, 7: debit amount 8: credit amount
+      /// 12: customerId, 13 customer name 14: vendorId, 15: vendor name
+      ///  18: productId 19: description
+
+      /// to: [finDocCsvFormat]
+      if (columnsFrom.length < 18) return [];
+      if (columnsFrom[0] != '12000') return [];
+      // debit filled
+      if (columnsFrom[6] != '') {
+        // ignore if product Id or company missing
+        if (columnsFrom[17] == '' || columnsFrom[13] == '') return [];
+        columnsTo.add(columnsFrom[3]); // will be replaced by sequential id
+        columnsTo.add('false');
+        columnsTo.add('Shipment');
+        columnsTo.add('converted');
+        columnsTo.add(dateConvert(columnsFrom[2]));
+        columnsTo.add('');
+        columnsTo.add(columnsFrom[13]);
+        columnsTo.add(columnsFrom[14]);
+        columnsTo.add(columnsFrom[3]); // put refnum here
+        columnsTo.add('');
+        columnsTo.add(''); // total amount
+      }
+      return columnsTo;
+
+    case FileType.finDocShipmentIncomingItem:
+
+      /// from:(start from 1)
+      /// 1: accountId 3: date, 4: reference, 7: debit amount 8: credit amount
+      /// 12: customerId, 14: vendorId, 18: productId 19: description
+      //
+      /// to: [finDocItemCsvFormat]
+      if (columnsFrom.length < 18) return [];
+      if (columnsFrom[0] != '12000') return [];
+      //  debit filled
+      if (columnsFrom[6] != '') {
+        // ignore if product Id or company missing
+        if (columnsFrom[17] == '' || columnsFrom[13] == '') return [];
+        columnsTo.add(columnsFrom[3]); // will be replaced by sequential id
+        columnsTo.add('Shipment');
+        columnsTo.add(''); //seqId by system
+        columnsTo.add(columnsFrom[17]); // product id
+        columnsTo.add(columnsFrom[18]); // descr
+        columnsTo.add('1'); // quantity later on import get from invoice
+        columnsTo.add(''); // price
+        columnsTo.add(''); // itemType accountCode
+        columnsTo.add('');
+        columnsTo.add('');
+      }
+      return columnsTo;
+
+    case FileType.finDocShipmentOutgoing:
+
+      /// from:(start from 1)
+      /// 1: accountId 3: date, 4: reference, 7: debit amount 8: credit amount
+      /// 12: customerId, 13 customer name 14: vendorId, 15: vendor name
+      ///  18: productId 10: description
+
+      /// to: [finDocCsvFormat]
+      if (columnsFrom.length < 18) return [];
+      if (columnsFrom[0] != '12000') return [];
+      // credit filled
+      if (columnsFrom[7] != '') {
+        // ignore if product Id or company missing
+        if (columnsFrom[17] == '' || columnsFrom[11] == '') return [];
+        // just use to combine items, need to replace by seq num
+        columnsTo.add(columnsFrom[3]); // will be replaced by sequential id
+        columnsTo.add('true');
+        columnsTo.add('Shipment');
+        columnsTo.add('converted');
+        columnsTo.add(dateConvert(columnsFrom[2]));
+        columnsTo.add('');
+        columnsTo.add(columnsFrom[11]);
+        columnsTo.add(columnsFrom[12]);
+        columnsTo.add(columnsFrom[3]); // put refnum here
+        columnsTo.add('');
+        columnsTo.add(''); // total amount
+      }
+      return columnsTo;
+
+    case FileType.finDocShipmentOutgoingItem:
+
+      /// from:(start from 1)
+      /// 1: accountId 3: date, 4: reference, 7: debit amount 8: credit amount
+      /// 12: customerId, 14: vendorId, 18: productId 19: description
+      //
+      /// to: [finDocItemCsvFormat]
+      if (columnsFrom.length < 18) return [];
+      if (columnsFrom[0] != '12000') return [];
+      // credit filled
+      if (columnsFrom[7] != '') {
+        // ignore if product Id or company missing
+        if (columnsFrom[17] == '' || columnsFrom[11] == '') return [];
+        columnsTo.add(columnsFrom[3]); // will be replaced by sequential id
+        columnsTo.add('Shipment');
+        columnsTo.add(''); //seqId by system
+        columnsTo.add(columnsFrom[17]); // product id
+        columnsTo.add(columnsFrom[18]); // descr
+        columnsTo.add('1'); // quantity later on import get from invoice
+        columnsTo.add(''); // price
+        columnsTo.add(''); // itemType accountCode
+        columnsTo.add('');
+        columnsTo.add('');
+      }
+      return columnsTo;
+
     // do some more conversion here, depending on filetype.
     //
     default: // no output

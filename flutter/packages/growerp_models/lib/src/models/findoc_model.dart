@@ -147,7 +147,7 @@ Map<String, String> finDocStatusValuesHotel = {
 
 String finDocCsvFormat = "Id, Sales, finDocType, descr, date, "
     "other user Id, other company Id, other company Name, reference number, "
-    "check number(blank is cash), totalAmount, Invoice/Payment, \r\n";
+    "check number(blank is cash), totalAmount, Invoice/Payment ID, \r\n";
 List<String> finDocCsvTitles = finDocCsvFormat.split(',');
 int finDocCsvLength = finDocItemCsvTitles.length;
 

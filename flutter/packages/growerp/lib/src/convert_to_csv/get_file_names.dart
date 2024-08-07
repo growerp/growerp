@@ -43,6 +43,11 @@ List<String> getFileNames(FileType fileType) {
     case FileType.finDocOrderSale:
     case FileType.finDocOrderSaleItem:
       searchFiles.add('3a1-sales_order_journal.csv');
+    case FileType.finDocShipmentIncoming:
+    case FileType.finDocShipmentIncomingItem:
+    case FileType.finDocShipmentOutgoing:
+    case FileType.finDocShipmentOutgoingItem:
+      searchFiles.add('general_ledger_2022Q3.ods'); // get account 12000
     case FileType.finDocPaymentSaleItem:
     case FileType.finDocPaymentPurchaseItem:
     case FileType.category:

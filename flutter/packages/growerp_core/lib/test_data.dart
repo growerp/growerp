@@ -325,6 +325,7 @@ List<User> leads = [
   User(
     firstName: 'lead1',
     lastName: 'last Name 1',
+    role: Role.lead,
     company: leadCompanies[0],
     email: 'emailXXX@example.org',
     telephoneNr: '6666666666666',
@@ -332,6 +333,7 @@ List<User> leads = [
   User(
     firstName: 'lead2',
     lastName: 'last Name 2',
+    role: Role.lead,
     company: leadCompanies[1],
     email: 'emailXXX@example.org',
     telephoneNr: '77777777777777',
@@ -339,6 +341,7 @@ List<User> leads = [
   User(
     firstName: 'lead3',
     lastName: 'last Name 3',
+    role: Role.lead,
     company: leadCompanies[2],
     email: 'emailXXX@example.org',
     telephoneNr: '888888888888888',
@@ -346,18 +349,21 @@ List<User> leads = [
   User(
     firstName: 'lead4',
     lastName: 'last Name 4',
+    role: Role.lead,
     company: leadCompanies[3],
     telephoneNr: '9999999999',
   ),
   User(
     firstName: 'lead5',
     lastName: 'last Name 5',
+    role: Role.lead,
     company: leadCompanies[4],
     telephoneNr: '000000000000',
   ),
   User(
     firstName: 'lead6',
     lastName: 'last Name 6',
+    role: Role.lead,
     company: leadCompanies[5],
     email: 'emailXXX@example.org',
     telephoneNr: '11111111111111',
@@ -368,6 +374,7 @@ List<User> suppliers = [
   User(
     firstName: 'supplier1',
     lastName: 'last Name1',
+    role: Role.supplier,
     company: supplierCompanies[0],
     email: 'emailXXX@example.org',
     telephoneNr: '99999999999999',
@@ -375,6 +382,7 @@ List<User> suppliers = [
   User(
     firstName: 'supplier2',
     lastName: 'last Name2',
+    role: Role.supplier,
     company: supplierCompanies[1],
     telephoneNr: '10101010101010',
   ),
@@ -382,6 +390,7 @@ List<User> suppliers = [
     firstName: 'supplier3',
     lastName: 'last Name3',
     loginDisabled: true,
+    role: Role.supplier,
     company: supplierCompanies[2],
     email: 'emailXXX@example.org',
     telephoneNr: '99999999999999',
@@ -389,6 +398,7 @@ List<User> suppliers = [
   User(
     firstName: 'supplier4',
     lastName: 'last Name4',
+    role: Role.supplier,
     company: supplierCompanies[3],
     email: 'emailXXX@example.org',
     telephoneNr: '202020202020',
@@ -398,6 +408,7 @@ List<User> customers = [
   User(
     firstName: 'customer1',
     lastName: 'lastName1',
+    role: Role.customer,
     company: customerCompanies[1],
     email: 'emailXXX@example.org',
     telephoneNr: '111111111111',
@@ -405,6 +416,7 @@ List<User> customers = [
   User(
     firstName: 'customer2',
     lastName: 'lastName2',
+    role: Role.customer,
     company: customerCompanies[2],
     email: 'emailXXX@example.org',
     telephoneNr: '12121212121212',

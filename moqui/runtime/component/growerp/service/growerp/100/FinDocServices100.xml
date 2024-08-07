@@ -886,27 +886,27 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="openStatusList"
                     from="['ShipInput','ShipScheduled','ShipPicked',
                             'ShipPacked','ShipShipped']" />
-                <if condition="finDocId">
-                    <entity-find
-                        entity-name="growerp.warehouse.ShipmentAndPartiesAndWarehouse" list="items">
-                        <econdition field-name="shipmentId" from="finDocId" />
-                        <econdition field-name="fromPartyId" from="vendorPartyId"
-                            ignore-if-empty="true" />
-                        <econdition field-name="toPartyId" from="customerPartyId"
-                            ignore-if-empty="true" />
+                <if condition="finDocId || pseudoId">
+                    <entity-find list="items"
+                        entity-name="growerp.warehouse.ShipmentAndPartiesAndWarehouse">
+                        <econdition field-name="shipmentId" from="finDocId" ignore-if-empty="true" />
+                        <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
+                        <econditions combine="or">
+                            <econdition field-name="fromPartyId" from="companyPartyId" />
+                            <econdition field-name="toPartyId" from="companyPartyId" />
+                        </econditions>
                     </entity-find>
                     <else>
                         <if condition="open == true &amp;&amp; !finDocId &amp;&amp; !search">
                             <set field="status" from="openStatusList" />
                             <set field="fromDate" from="weekOldDate" />
                         </if>
-                        <entity-find offset="start" limit="limit"
-                            entity-name="growerp.warehouse.ShipmentAndPartiesAndWarehouse"
-                            list="items">
-                            <econdition field-name="fromPartyId" from="vendorPartyId"
-                                ignore-if-empty="true" />
-                            <econdition field-name="toPartyId" from="customerPartyId"
-                                ignore-if-empty="true" />
+                        <entity-find offset="start" limit="limit" list="items"
+                            entity-name="growerp.warehouse.ShipmentAndPartiesAndWarehouse">
+                            <econditions combine="or">
+                                <econdition field-name="fromPartyId" from="companyPartyId" />
+                                <econdition field-name="toPartyId" from="companyPartyId" />
+                            </econditions>
                             <econditions combine="or">
                                 <econdition field-name="statusId" operator="in"
                                     from="status" ignore-if-empty="true" />
@@ -923,7 +923,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <econdition field-name="orderId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                             </econditions>
-                            <order-by field-name="shipmentId" />
+                            <order-by field-name="pseudoId" />
                         </entity-find>
                     </else>
                 </if>
@@ -1396,11 +1396,11 @@ along with this software (see the LICENSE.md file). If not, see
                             in-map="[acctgTransId: acctgTransId]" />
                     </if>
                 </else-if>
+                <!-- create shipment -->
                 <else-if condition="finDoc.docType == 'shipment'">
-                    <service-call name="mantle.shipment.ShipmentServices.create#Shipment"
-                        in-map="[ ]" />
-                    <service-call name="update#mantle.shipment.Shipment"
-                        in-map="[shipmentId: shipmentId, pseudoId: finDoc.pseudoId]" />
+                    <service-call name="growerp.100.FinDocServices100.create#Shipment"
+                        in-map="[shipment: finDoc]" out-map="context" />
+                    <set field="finDocId" from="shipmentId" />
                 </else-if>
                 <else>
                     <return error="true"
@@ -1542,6 +1542,42 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[invoiceId: invoiceId,
                             invoiceItems: invoice.items]" />
             </if>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Shipment">
+        <description> Create an shipment for the users company</description>
+        <in-parameters>
+            <parameter name="shipment" required="true" type="Map" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="shipmentId" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="shipment.sales == false">
+                <set field="toPartyId" from="companyPartyId" />
+                <set field="fromPartyId" from="shipment.otherCompany.partyId" />
+                <else>
+                    <set field="fromPartyId" from="companyPartyId" />
+                    <set field="toPartyId" from="shipment.otherCompany.partyId" />
+                </else>
+            </if>
+            <!-- create shipment -->
+            <service-call name="mantle.shipment.ShipmentServices.create#Shipment"
+                in-map="[   pseudoId: shipment.pseudoId,
+                            fromPartyId: fromPartyId,
+                            toPartyId: toPartyId,
+                            description: shipment.description,
+                            externalId: shipment.reference]"
+                out-map="context" />
+            <!-- create items -->
+            <iterate list="shipment.items" entry="item">
+                <service-call name="mantle.shipment.ShipmentServices.create#ShipmentItem"
+                    in-map="[shipmentId: shipmentId, productId: item.product.productId,
+                            quantity: item.quantity]" />
+            </iterate>
         </actions>
     </service>
 
@@ -1927,7 +1963,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </econditions>
                     </entity-find>
                     <if condition="!check">
-                        <return message="Shipment not found!" />
+                        <return message="Shipment ${finDoc.shipmentId} not found!" />
                     </if>
                     <if condition="finDoc.sales == true &amp;&amp; finDoc.statusId == 'ShipPacked'">
                         <entity-find entity-name="mantle.shipment.ShipmentItemSource"

@@ -497,6 +497,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="finDoc.docType == 'transaction'">
                     <set field="finDoc.isPosted" value="false" type="Boolean" />
                 </if>
+                <if condition="finDoc.docType == 'shipment' &amp;&amp; finDoc.reference">
+                    <log
+                        message="====looking for invoice with reference: ${finDoc.reference} sales: ${finDoc.sales}" />
+                    <!-- get quantity from invoice -->
+                </if>
                 <!-- create findoc-->
                 <service-call name="growerp.100.FinDocServices100.create#FinDoc"
                     in-map="[finDoc: finDoc, classificationId: classificationId]" out-map="result" />
@@ -642,6 +647,11 @@ along with this software (see the LICENSE.md file). If not, see
                         </else>
                     </if>
                 </if>
+                <if condition="finDoc.docType == 'shipment' &amp;&amp; finDoc.reference">
+                    <log
+                        message="====looking for transaction with reference: ${finDoc.reference} for shipment: ${result.finDoc?.shipmentId}" />
+                    <!-- connect shipment to transaction -->
+                </if>
             </iterate>
             <if condition="!ec.message.hasError()">
                 <message type="success">${finDocs?.size()} finDocs  ${finDocs[0].docType} imported</message>
@@ -673,41 +683,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="finDoc.docType == 'transaction'">
                         <set field="finDoc.isPosted" value="true" type="Boolean" />
                     </if>
-                    <!--log
-                    message="===import findocItems: ${finDoc.pseudoId} items price:
-                    ${finDoc.items?.price}" /-->
                     <service-call name="growerp.100.FinDocServices100.update#FinDoc"
                         in-map="[finDoc: finDoc, classificationId: classificationId]" />
                     <set field="itemsOut" from="[]" />
-                    <!-- create a shipment for account 12000-->
-                    <if condition="finDoc?.items?.glAccount?.accountCode?.contains('12000')">
-                        <set field="saveFinDoc" from="finDoc" />
-                        <set field="finDoc.docType" value="schipment" />
-                        <set field="newItems" from="[]" />
-                        <iterate list="finDoc.items" entry="item">
-                            <if condition="item.glAccount.accountCode == '12000'">
-                                <script>newItems.add(item)</script>
-                            </if>
-                        </iterate>
-                        <set field="finDoc.items" from="newItems" />
-                        <if condition="finDoc.items[0].isDebit">
-                            <set field="finDoc.sales" value="false" type="Boolean" />
-                            <else>
-                                <set field="finDoc.sales" value="true" type="Boolean" />
-                            </else>
-                        </if>
-                        <service-call name="growerp.100.FinDocServices100.create#FinDoc"
-                            in-map="[finDoc: finDoc, classificationId: classificationId]"
-                            out-map="context" />
-                        <set field="saveFinDoc.shipmentId" from="finDoc.shipmentId" />
-                    </if>
-                    <!--log
-                    message="===import findocItems: ${finDoc.pseudoId} items price:
-                    ${finDoc.items?.price}" /-->
-                    <!-- create transaction-->
-                    <service-call name="growerp.100.FinDocServices100.update#FinDoc"
-                        in-map="[finDoc: saveFinDoc, classificationId: classificationId]" />
-
                 </if>
                 <if condition="!lastItem || lastItem.pseudoId != item.pseudoId">
                     <!-- find related finDoc header -->
@@ -745,13 +723,13 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                     </if>
                 </if>
-                <if condition="item.pseudoProductId">
+                <if condition="item.product.pseudoId">
                     <!-- find productId from pseudoProductId -->
                     <service-call name="growerp.100.CatalogServices100.get#Products"
                         out-map="context"
-                        in-map="[pseudoId: item.pseudoProductId, classificationId: classificationId, ownerPartyId: ownerPartyId]" />
+                        in-map="[pseudoId: item.product.pseudoId, classificationId: classificationId, ownerPartyId: ownerPartyId]" />
                     <if condition="!products.isEmpty()"><!-- get services always provide list -->
-                        <set field="item.productId" from="products[0].productId" />
+                        <set field="item.product.productId" from="products[0].productId" />
                         <!-- update prices when on an invoice -->
                         <if condition="item.docType == 'invoice'">
                             <set field="products[0].price" from="item.price" />

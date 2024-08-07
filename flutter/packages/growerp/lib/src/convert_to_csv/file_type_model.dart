@@ -23,6 +23,10 @@ enum FileType {
   finDocOrderPurchaseItem,
   finDocOrderSale,
   finDocOrderSaleItem,
+  finDocShipmentIncoming,
+  finDocShipmentIncomingItem,
+  finDocShipmentOutgoing,
+  finDocShipmentOutgoingItem,
   website,
   unknown
 }

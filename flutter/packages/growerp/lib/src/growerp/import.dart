@@ -35,7 +35,7 @@ Future<void> login(RestClient client, String username, String password) async {
         exit(1);
       } else {
         // wait for background server job to finish
-        await Future.delayed(const Duration(seconds: 1));
+        await Future.delayed(const Duration(seconds: 2));
       }
     }
 
@@ -90,51 +90,44 @@ import(String inputFile, String? backendUrl, String username,
         switch (fileType) {
           case FileType.itemType:
             await client.importItemTypes(csvToItemTypes(csvFile));
-            break;
           case FileType.paymentType:
             await client.importPaymentTypes(csvToPaymentTypes(csvFile));
-            break;
           case FileType.glAccount:
             await client.importGlAccounts(csvToGlAccounts(csvFile));
-            break;
           case FileType.product:
             await client.importProducts(
                 csvToProducts(csvFile, logger), 'AppAdmin');
-            break;
           case FileType.category:
             await client.importCategories(csvToCategories(csvFile));
-            break;
           case FileType.asset:
             await client.importAssets(csvToAssets(csvFile, logger), 'AppAdmin');
-            break;
           case FileType.company:
             await client.importCompanies(csvToCompanies(csvFile));
-            break;
           case FileType.user:
             await client.importUsers(csvToUsers(csvFile));
-            break;
           case FileType.website:
             await client.importWebsite(csvToWebsite(csvFile));
-            break;
           case FileType.finDocTransaction:
-          case FileType.finDocOrderPurchase:
-          case FileType.finDocInvoicePurchase:
-          case FileType.finDocPaymentPurchase:
           case FileType.finDocOrderSale:
+          case FileType.finDocOrderPurchase:
           case FileType.finDocInvoiceSale:
+          case FileType.finDocInvoicePurchase:
           case FileType.finDocPaymentSale:
+          case FileType.finDocPaymentPurchase:
+          case FileType.finDocShipmentIncoming:
+          case FileType.finDocShipmentOutgoing:
             await client.importFinDoc(csvToFinDocs(csvFile, logger));
-            break;
           case FileType.finDocTransactionItem:
-          case FileType.finDocOrderPurchaseItem:
-          case FileType.finDocInvoicePurchaseItem:
-          case FileType.finDocPaymentPurchaseItem:
           case FileType.finDocOrderSaleItem:
+          case FileType.finDocOrderPurchaseItem:
           case FileType.finDocInvoiceSaleItem:
+          case FileType.finDocInvoicePurchaseItem:
           case FileType.finDocPaymentSaleItem:
+          case FileType.finDocPaymentPurchaseItem:
+          case FileType.finDocShipmentOutgoingItem:
+          case FileType.finDocShipmentIncomingItem:
             await client.importFinDocItem(
                 csvToFinDocItems(csvFile, logger), 'AppAdmin');
-            break;
           default:
             logger.e("FileType ${fileType.name} not implemented yet");
             exit(1);
