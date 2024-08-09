@@ -39,11 +39,7 @@ class FinDoc with _$FinDoc {
     String? invoiceId,
     String? paymentId,
     String? transactionId,
-    String? pseudoOrderId,
-    String? pseudoShipmentId,
-    String? pseudoInvoiceId,
-    String? pseudoPaymentId,
-    String? pseudoTransactionId,
+    String? requestId,
     String?
         reference, //transaction id field saved in AcctgTrans/theirAcctgTransId in backend
     @PaymentInstrumentConverter() PaymentInstrument? paymentInstrument,
@@ -65,6 +61,7 @@ class FinDoc with _$FinDoc {
     bool? isPosted,
     LedgerJournal? journal,
     PaymentMethod? paymentMethod, // check , credit card, electronic
+    RequestType? requestType,
     @Default([]) List<FinDocItem> items,
   }) = _FinDoc;
 
@@ -76,7 +73,8 @@ class FinDoc with _$FinDoc {
           shipmentId == null &&
           invoiceId == null &&
           paymentId == null &&
-          transactionId == null)
+          transactionId == null &&
+          requestId == null)
       ? true
       : false;
 
@@ -92,7 +90,9 @@ class FinDoc with _$FinDoc {
                   ? shipmentId
                   : docType == FinDocType.order
                       ? orderId
-                      : null;
+                      : docType == FinDocType.request
+                          ? requestId
+                          : null;
 
   String? chainId() =>
       shipmentId ?? (invoiceId ?? (paymentId ?? (orderId ?? (transactionId))));
@@ -104,46 +104,14 @@ class FinDoc with _$FinDoc {
   @override
   String toString() =>
       //    "rental: ${items[0].rentalFromDate?.toString().substring(0, 10)}/${items[0].rentalThruDate?.toString().substring(0, 10)} st:$status!"
-      "$docType# $pseudoId/$orderId!/$shipmentId/$invoiceId!/$paymentId! s/p: ${salesString()} "
+      "$docType# $pseudoId/$orderId!/$shipmentId/$invoiceId!/$paymentId!/$requestId! s/p: ${salesString()} "
+      "PseudoId: $pseudoId"
       "Date: $creationDate! $description! items: ${items.length} "
       "asset: ${items.isNotEmpty ? items[0].asset?.assetName : ''} "
       "${items.isNotEmpty ? items[0].asset?.assetId : ''}"
       "descr: ${items.isNotEmpty ? items[0].description : ''} ";
 //      "status: $status! otherUser: $otherUser! Items: ${items!.length}";
-
-  // @depreciated: use finDocStatusVal
-  String? displayStatus(String classificationId) {
-    if (status == null) return '??';
-    if (docType != FinDocType.order) {
-      return finDocStatusValues[status.toString()];
-    }
-    switch (classificationId) {
-      case 'AppHotel':
-        return finDocStatusValuesHotel[status.toString()];
-      default:
-        return finDocStatusValues[status.toString()];
-    }
-  }
 }
-
-// depreciated: use finDocStatusVal
-Map<String, String> finDocStatusValues = {
-  // explanation of status values
-  'FinDocPrep': 'in Preparation',
-  'FinDocCreated': 'Created',
-  'FinDocApproved': 'Approved',
-  'FinDocCompleted': 'Completed',
-  'FinDocCancelled': 'Cancelled'
-};
-
-// depreciated: use finDocStatusVal
-Map<String, String> finDocStatusValuesHotel = {
-  'FinDocPrep': 'in Preparation',
-  'FinDocCreated': 'Created',
-  'FinDocApproved': 'Checked In',
-  'FinDocCompleted': 'Checked Out',
-  'FinDocCancelled': 'Cancelled'
-};
 
 String finDocCsvFormat = "Id, Sales, finDocType, descr, date, "
     "other user Id, other company Id, other company Name, reference number, "

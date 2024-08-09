@@ -39,6 +39,9 @@ List<BlocProvider> getOrderAccountingBlocProviders(
     BlocProvider<TransactionBloc>(
         create: (context) => FinDocBloc(
             restClient, true, FinDocType.transaction, classificationId)),
+    BlocProvider<RequestBloc>(
+        create: (context) =>
+            FinDocBloc(restClient, true, FinDocType.request, classificationId)),
   ];
   return blocProviders;
 }

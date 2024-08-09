@@ -21,6 +21,7 @@ import 'package:growerp_order_accounting/src/findoc/widgets/search_findoc_list.d
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import '../findoc.dart';
+import 'findoc_dialog/request_dialog.dart';
 
 class FinDocList extends StatefulWidget {
   const FinDocList({
@@ -37,7 +38,7 @@ class FinDocList extends StatefulWidget {
   final bool sales;
   final FinDocType docType;
   final bool onlyRental;
-  final String? status;
+  final FinDocStatusVal? status;
   final String? additionalItemButtonName;
   final String? additionalItemButtonRoute;
   final String? journalId;
@@ -84,25 +85,22 @@ class FinDocListState extends State<FinDocList> {
         widget.sales
             ? _finDocBloc = context.read<SalesOrderBloc>() as FinDocBloc
             : _finDocBloc = context.read<PurchaseOrderBloc>() as FinDocBloc;
-        break;
       case FinDocType.invoice:
         widget.sales
             ? _finDocBloc = context.read<SalesInvoiceBloc>() as FinDocBloc
             : _finDocBloc = context.read<PurchaseInvoiceBloc>() as FinDocBloc;
-        break;
       case FinDocType.payment:
         widget.sales
             ? _finDocBloc = context.read<SalesPaymentBloc>() as FinDocBloc
             : _finDocBloc = context.read<PurchasePaymentBloc>() as FinDocBloc;
-        break;
       case FinDocType.shipment:
         widget.sales
             ? _finDocBloc = context.read<OutgoingShipmentBloc>() as FinDocBloc
             : _finDocBloc = context.read<IncomingShipmentBloc>() as FinDocBloc;
-        break;
       case FinDocType.transaction:
         _finDocBloc = context.read<TransactionBloc>() as FinDocBloc;
-        break;
+      case FinDocType.request:
+        _finDocBloc = context.read<RequestBloc>() as FinDocBloc;
       default:
     }
     _finDocBloc.add(const FinDocFetch(limit: 15));
@@ -120,7 +118,7 @@ class FinDocListState extends State<FinDocList> {
                 widget.journalId != null
                     ? "no journal entries found"
                     : "no (${widget.docType == FinDocType.transaction ? 'unposted' : 'open'})"
-                        "${widget.docType == FinDocType.shipment ? "${widget.sales ? 'outgoing' : 'incoming'} " : "${widget.docType == FinDocType.transaction ? '' : widget.sales ? 'sales' : 'purchase'} "}"
+                        "${widget.docType == FinDocType.shipment ? "${widget.sales ? 'outgoing' : 'incoming'} " : "${widget.docType == FinDocType.transaction || widget.docType == FinDocType.request ? '' : widget.sales ? 'sales' : 'purchase'} "}"
                         "${entityName}s found!",
                 textAlign: TextAlign.center));
       }
@@ -212,7 +210,7 @@ class FinDocListState extends State<FinDocList> {
                 finDocs = state.finDocs
                     .where((FinDoc el) =>
                         el.items[0].rentalFromDate != null &&
-                        el.status.toString() == widget.status &&
+                        el.status == widget.status &&
                         el.items[0].rentalFromDate!
                             .isSameDate(CustomizableDateTime.current))
                     .toList();
@@ -221,7 +219,7 @@ class FinDocListState extends State<FinDocList> {
                 finDocs = state.finDocs
                     .where((FinDoc el) =>
                         el.items[0].rentalThruDate != null &&
-                        el.status.toString() == widget.status &&
+                        el.status == widget.status &&
                         el.items[0].rentalThruDate!
                             .isSameDate(CustomizableDateTime.current))
                     .toList();
@@ -279,9 +277,14 @@ class FinDocListState extends State<FinDocList> {
                                 builder: (BuildContext context) {
                                   return BlocProvider.value(
                                       value: _finDocBloc,
-                                      child:
-                                          widget.docType == FinDocType.payment
-                                              ? PaymentDialog(
+                                      child: widget.docType ==
+                                              FinDocType.payment
+                                          ? PaymentDialog(
+                                              finDoc: FinDoc(
+                                                  sales: widget.sales,
+                                                  docType: widget.docType))
+                                          : widget.docType == FinDocType.request
+                                              ? RequestDialog(
                                                   finDoc: FinDoc(
                                                       sales: widget.sales,
                                                       docType: widget.docType))
@@ -301,41 +304,47 @@ class FinDocListState extends State<FinDocList> {
       }
 
       // finally create the BlocConsumer
-      if (widget.docType == FinDocType.order) {
-        if (widget.sales) {
-          return BlocConsumer<SalesOrderBloc, FinDocState>(
+      switch (widget.docType) {
+        case FinDocType.order:
+          if (widget.sales) {
+            return BlocConsumer<SalesOrderBloc, FinDocState>(
+                listener: listener, builder: builder);
+          }
+          return BlocConsumer<PurchaseOrderBloc, FinDocState>(
               listener: listener, builder: builder);
-        }
-        return BlocConsumer<PurchaseOrderBloc, FinDocState>(
-            listener: listener, builder: builder);
-      }
-      if (widget.docType == FinDocType.invoice) {
-        if (widget.sales) {
-          return BlocConsumer<SalesInvoiceBloc, FinDocState>(
+
+        case FinDocType.invoice:
+          if (widget.sales) {
+            return BlocConsumer<SalesInvoiceBloc, FinDocState>(
+                listener: listener, builder: builder);
+          }
+          return BlocConsumer<PurchaseInvoiceBloc, FinDocState>(
               listener: listener, builder: builder);
-        }
-        return BlocConsumer<PurchaseInvoiceBloc, FinDocState>(
-            listener: listener, builder: builder);
-      }
-      if (widget.docType == FinDocType.payment) {
-        if (widget.sales) {
-          return BlocConsumer<SalesPaymentBloc, FinDocState>(
+
+        case FinDocType.payment:
+          if (widget.sales) {
+            return BlocConsumer<SalesPaymentBloc, FinDocState>(
+                listener: listener, builder: builder);
+          }
+          return BlocConsumer<PurchasePaymentBloc, FinDocState>(
               listener: listener, builder: builder);
-        }
-        return BlocConsumer<PurchasePaymentBloc, FinDocState>(
-            listener: listener, builder: builder);
-      }
-      if (widget.docType == FinDocType.shipment) {
-        if (widget.sales) {
-          return BlocConsumer<OutgoingShipmentBloc, FinDocState>(
+
+        case FinDocType.shipment:
+          if (widget.sales) {
+            return BlocConsumer<OutgoingShipmentBloc, FinDocState>(
+                listener: listener, builder: builder);
+          }
+          return BlocConsumer<IncomingShipmentBloc, FinDocState>(
               listener: listener, builder: builder);
-        }
-        return BlocConsumer<IncomingShipmentBloc, FinDocState>(
-            listener: listener, builder: builder);
+        case FinDocType.transaction:
+          return BlocConsumer<TransactionBloc, FinDocState>(
+              listener: listener, builder: builder);
+        case FinDocType.request:
+          return BlocConsumer<RequestBloc, FinDocState>(
+              listener: listener, builder: builder);
+        case FinDocType.unknown:
+          return Container();
       }
-      // Transaction
-      return BlocConsumer<TransactionBloc, FinDocState>(
-          listener: listener, builder: builder);
     });
   }
 

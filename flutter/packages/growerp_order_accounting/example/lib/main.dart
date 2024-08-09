@@ -132,6 +132,15 @@ List<MenuOption> menuOptions = [
         UserGroup.employee,
       ],
       child: const LocationList()),
+  MenuOption(
+    image: 'packages/growerp_core/images/accountingGrey.png',
+    selectedImage: 'packages/growerp_core/images/accounting.png',
+    title: 'Requests',
+    route: '/requests',
+    readGroups: [UserGroup.admin],
+    child: const FinDocList(
+        key: Key('Reuquest'), sales: false, docType: FinDocType.request),
+  ),
 ];
 
 // routing
@@ -156,6 +165,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+    case '/requests':
+      return MaterialPageRoute(
+          builder: (context) =>
+              DisplayMenuOption(menuList: menuOptions, menuIndex: 5));
     case '/shipments':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
@@ -240,6 +253,9 @@ class MainMenuForm extends StatelessWidget {
           ]),
           makeDashboardItem('dbInventory', context, menuOptions[4], [
             "Wh Locations: ${authenticate.stats?.whLocations ?? 0}",
+          ]),
+          makeDashboardItem('dbRequests', context, menuOptions[5], [
+            "Requests: ${authenticate.stats?.requests ?? 0}",
           ]),
         ]);
       }

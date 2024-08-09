@@ -670,6 +670,76 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="customerEmail" field="emailAddress" entity-alias="CACCOUNT" />
     </view-entity>
 
+    <view-entity entity-name="RequestAndParty" package="growerp.order">
+        <member-entity entity-alias="REQ" entity-name="mantle.request.Request" />
+        <member-entity entity-alias="REQITEM" entity-name="mantle.request.RequestItem"
+            join-from-alias="REQ" join-optional="true">
+            <key-map field-name="requestId" />
+        </member-entity>
+        <!-- requester person -->
+        <member-entity entity-alias="PTYPERSON" entity-name="mantle.party.Party"
+            join-from-alias="REQ" join-optional="true">
+            <key-map field-name="filedByPartyId" related="partyId" />
+            <entity-condition>
+                <econdition field-name="disabled" operator="not-equals" value="Y"
+                    or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="PERSON" entity-name="mantle.party.Person"
+            join-from-alias="PTYPERSON" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="PR" entity-name="mantle.party.PartyRelationship"
+            join-from-alias="PERSON" join-optional="true">
+            <key-map field-name="partyId" related="fromPartyId" />
+            <entity-condition>
+                <date-filter />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="PERSONPTYORG" entity-name="mantle.party.Party"
+            join-from-alias="PR" join-optional="true">
+            <key-map field-name="toPartyId" related="partyId" />
+            <entity-condition>
+                <econdition field-name="disabled" operator="not-equals" value="Y"
+                    or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="PERSONORG" entity-name="mantle.party.Organization"
+            join-from-alias="PERSONPTYORG" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <!-- requester org -->
+        <member-entity entity-alias="PTYORG" entity-name="mantle.party.Party"
+            join-from-alias="REQ" join-optional="true">
+            <key-map field-name="filedByPartyId" related="partyId" />
+            <entity-condition>
+                <econdition field-name="disabled" operator="not-equals" value="Y"
+                    or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization"
+            join-from-alias="PTYORG" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <alias name="requestId" entity-alias="REQ" />
+        <alias name="pseudoId" field="requestPseudoId" entity-alias="REQ" />
+        <alias name="requestType" field="requestTypeEnumId" entity-alias="REQ" />
+        <alias name="ownerPartyId" entity-alias="REQ" />
+        <alias name="statusId" entity-alias="REQ" />
+        <alias name="requestDate" entity-alias="REQ" />
+        <alias name="description" entity-alias="REQ" />
+        <alias name="filedByPartyId" entity-alias="REQ" />
+        <alias name="personPseudoId" field="pseudoId" entity-alias="PTYPERSON" />
+        <alias name="personFirstName" field="firstName" entity-alias="PERSON" />
+        <alias name="personLastName" field="lastName" entity-alias="PERSON" />
+        <alias name="personCompanyName" field="organizationName" entity-alias="ORG" />
+        <alias name="personCompanyPartyId" field="partyId" entity-alias="PERSONPTYORG" />
+        <alias name="personCompanyPseudoId" field="pseudoId" entity-alias="PERSONPTYORG" />
+        <alias name="companyName" field="organizationName" entity-alias="ORG" />
+        <alias name="companyPseudoId" field="pseudoId" entity-alias="PTYORG"></alias>
+        <alias name="lastUpdatedStamp" entity-alias="REQ" />
+    </view-entity>
+
     <view-entity entity-name="PaymentAndInfo" package="growerp.order">
         <member-entity entity-alias="PAY" entity-name="mantle.account.payment.Payment" />
         <member-entity entity-alias="ENUM" entity-name="moqui.basic.Enumeration"
@@ -686,7 +756,7 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="PAY" join-optional="true">
             <key-map field-name="overrideGlAccountId" related="glAccountId" />
         </member-entity>
-        <!-- supplier/vendor info (required?)-->
+        <!-- supplier/vendor info -->
         <member-entity entity-alias="VORG" entity-name="mantle.party.Organization"
             join-from-alias="PAY" join-optional="true">
             <key-map field-name="toPartyId" related="partyId" />

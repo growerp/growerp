@@ -111,6 +111,22 @@ along with this software (see the LICENSE.md file). If not, see
                 ]" />
                 <set field="convertedStatusId" from="orderStatusValues[statusId]" />
             </if>
+            <if condition="docType == 'request'">
+                <set field="requestStatusValues"
+                    from="[
+                    ReqDraft: 'FinDocPrep',
+                    FinDocPrep: 'ReqDraft',
+                    ReqSubmitted: 'FinDocCreated',
+                    FinDocCreated:'ReqSubmitted',
+                    ReqInProgress: 'FinDocApproved',
+                    FinDocApproved: 'ReqInProgress',
+                    ReqCompleted: 'FinDocCompleted',
+                    FinDocCompleted: 'ReqCompleted',
+                    ReqCancelled: 'FinDocCancelled',
+                    FinDocCancelled:'ReqCancelled'
+                ]" />
+                <set field="convertedStatusId" from="requestStatusValues[statusId]" />
+            </if>
             <if condition="docType == 'invoice'">
                 <if condition="sales == true">
                     <set field="invoiceStatusValues"
@@ -305,6 +321,79 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="customerPartyId" from="companyPartyId" />
             </if>
             <set field="current" value="0" type="Integer" />
+            <!-- request -->
+            <log
+                message="====doctype: $docType ==requestId: $finDocId p: $pseudoId o: $ownerPartyId" />
+            <if condition="docType == 'request'">
+                <!-- 'ReqDraft','ReqSubmitted','ReqInProgress','ReqCompleted','ReqCancelled' -->
+                <set field="openStatusList"
+                    from="['ReqDraft','ReqSubmitted','ReqInProgress']" />
+                <if condition="finDocId || pseudoId">
+                    <entity-find
+                        entity-name="growerp.order.RequestAndParty" list="items">
+                        <econdition field-name="requestId" from="finDocId" ignore-if-empty="true" />
+                        <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
+                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                    </entity-find>
+                    <else>
+                        <if
+                            condition="open == true &amp;&amp; !finDocId
+                            &amp;&amp; !pseudoId &amp;&amp; !search">
+                            <set field="statusList" from="openStatusList" />
+                            <set field="fromDate" from="weekOldDate" />
+                        </if>
+                        <entity-find offset="start" limit="limit"
+                            entity-name="growerp.order.RequestAndParty" list="items">
+                            <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                            <!--econditions
+                                combine="or">
+                                <econdition field-name="statusId" operator="in" from="statusList"
+                                    ignore-if-empty="true" />
+                                <econdition field-name="effectiveDate" operator="greater"
+                                    from="lastUpdatedStamp" ignore-if-empty="true" />
+                            </econditions-->
+                            <econdition field-name="requestDate" operator="less-equals"
+                                from="tsDate" ignore-if-empty="true" />
+                            <econditions combine="or">
+                                <econdition field-name="pseudoId" ignore-case="true"
+                                    operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="requestId" ignore-case="true"
+                                    operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="requestName" ignore-case="true"
+                                    operator="like" from="search" ignore-if-empty="true" />
+                            </econditions>
+                            <order-by field-name="pseudoId" />
+                        </entity-find>
+                    </else>
+                </if>
+                <log message="====requests found: ${items?.size()}" />
+                <iterate list="items" entry="item">
+                    <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                        in-map="[sales: sales, docType: docType, statusId: item.statusId]"
+                        out-map="context" />
+                    <set field="requestPersonCompany"
+                        from="[partyId: item.personCompanyPartyId,
+                                pseudoId: item.personCompanyPseudoId,
+                                name: item.personCompanyName]" />
+                    <set field="finDocOut"
+                        from="[
+                        docType: docType,
+                        requestId: item.requestId,
+                        pseudoId: item.pseudoId,
+                        statusId: convertedStatusId,
+                        creationDate: item.requestDate,
+                        placedDate: lastUpdatedStamp,
+                        user: [partyId: item.filedByPartyId,
+                                firstName: item.personFirstName, 
+                                lastName: item.personLastName,
+                                pseudoId: item.personPseudoId,
+                                company: requestPersonCompany],
+                        company: [partyId: item.filedByPartyId,
+                                pseudoId: item.companyPseudoId,
+                                name: item.companyName]]" />
+                    <script>finDocs.add(finDocOut)</script>
+                </iterate>
+            </if>
             <!-- order -->
             <if condition="docType == 'order'">
                 <if condition="search">
@@ -1366,6 +1455,20 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="[payment: finDoc]" out-map="context" />
                     <set field="finDocId" from="paymentId" />
                 </else-if>
+                <!-- request -->
+                <else-if condition="finDoc.docType == 'request'">
+                    <service-call name="create#mantle.request.Request"
+                        in-map="[   pseudoId: finDoc.pseudoId,
+                                    requestTypeEnumId: finDoc.trequestType,
+                                    description: finDoc.description,
+                                    ownerPartyId: ownerPartyId,
+                                    statusId: convertedStatusId,
+                                    filedByPartyId: finDoc.otherCompany.partyId ?: finDoc.otherUser.partyId,
+                                    requestDate: nowDate,                                   
+                                ]"
+                        out-map="context" />
+                    <set field="finDocId" from="requestId" />
+                </else-if>
                 <!-- transaction -->
                 <else-if condition="finDoc.docType == 'transaction'">
                     <service-call name="mantle.ledger.LedgerServices.create#AcctgTrans"
@@ -2060,6 +2163,22 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="inMap"
                         from="[finDocId: finDoc.transactionId,
                                     docType: 'transaction', sales: true]" />
+                </else-if>
+                <else-if condition="finDoc.docType == 'request'">
+                    <service-call name="update#mantle.request.Request"
+                        in-map="[   requestId: finDoc.finDocId.
+                                    pseudoId: finDoc.pseudoId,
+                                    requestTypeEnumId: finDoc.requestType,
+                                    description: finDoc.description,
+                                    ownerpartyId: ownerPartyId,
+                                    statusId: convertedStatusId,
+                                    filedByPartyId; finDoc.company.partyId ?: finDoc.user.partyId,
+                                    requestDate: nowDate,                                   
+                                ]"
+                        out-map="context" />
+                    <set field="inMap"
+                        from="[finDocId: finDoc.requestId,
+                                    docType: 'request', sales: false]" />
                 </else-if>
                 <else>
                     <return error="true" message="doctype ${finDoc.docType} not supported!" />

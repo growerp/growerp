@@ -16,6 +16,7 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
+  patrol: ^3.9.0
 
 flutter:
   uses-material-design: true
@@ -23,3 +24,8 @@ flutter:
     - assets/cfg/
 flutter_intl:
   enabled: true
+
+patrol:
+  app_name: Catalog Example
+  android:
+    package_name: com.example.example

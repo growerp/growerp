@@ -83,14 +83,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           return emit(state.copyWith(status: AuthStatus.unAuthenticated));
         }
         //Authenticated
-        emit(state.copyWith(
+        await PersistFunctions.persistAuthenticate(authResult);
+        chat.connect(authResult.apiKey!, authResult.user!.userId!);
+        return emit(state.copyWith(
             status: AuthStatus.authenticated, authenticate: authResult));
-        await PersistFunctions.persistAuthenticate(state.authenticate!);
-        chat.connect(
-            state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
       } else {
         // UnAuthenticated
-        emit(state.copyWith(
+        return emit(state.copyWith(
             status: AuthStatus.unAuthenticated,
             authenticate: defaultAuthenticate));
       }

@@ -32,6 +32,7 @@ mixin SalesOrderBloc on Bloc<FinDocEvent, FinDocState> {}
 mixin OutgoingShipmentBloc on Bloc<FinDocEvent, FinDocState> {}
 mixin IncomingShipmentBloc on Bloc<FinDocEvent, FinDocState> {}
 mixin TransactionBloc on Bloc<FinDocEvent, FinDocState> {}
+mixin RequestBloc on Bloc<FinDocEvent, FinDocState> {}
 
 EventTransformer<E> finDocDroppable<E>(Duration duration) {
   return (events, mapper) {
@@ -58,7 +59,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         SalesOrderBloc,
         IncomingShipmentBloc,
         OutgoingShipmentBloc,
-        TransactionBloc {
+        TransactionBloc,
+        RequestBloc {
   FinDocBloc(this.restClient, this.sales, this.docType, this.classificationId,
       {this.journalId = ''})
       : super(const FinDocState()) {
@@ -164,23 +166,21 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
           case FinDocType.order:
             index = finDocs.indexWhere(
                 (element) => element.orderId == event.finDoc.orderId);
-            break;
           case FinDocType.payment:
             index = finDocs.indexWhere(
                 (element) => element.paymentId == event.finDoc.paymentId);
-            break;
           case FinDocType.invoice:
             index = finDocs.indexWhere(
                 (element) => element.invoiceId == event.finDoc.invoiceId);
-            break;
           case FinDocType.shipment:
             index = finDocs.indexWhere(
                 (element) => element.shipmentId == event.finDoc.shipmentId);
-            break;
           case FinDocType.transaction:
             index = finDocs.indexWhere((element) =>
                 element.transactionId == event.finDoc.transactionId);
-            break;
+          case FinDocType.request:
+            index = finDocs.indexWhere(
+                (element) => element.requestId == event.finDoc.requestId);
           default:
         }
         finDocs[index] = compResult;

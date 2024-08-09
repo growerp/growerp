@@ -12,35 +12,23 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-/// financial document (FinDoc) types
-enum FinDocType {
-  request('Request'),
-  order('Order'),
-  invoice('Invoice'),
-  payment('Payment'),
-  shipment('Shipment'),
-  transaction('Transaction'),
-  unknown('UnKnown');
+/// financial document (Request) types
+enum RequestType {
+  information('Information'),
+  consultation('Consultation'),
+  other('Other');
 
-  const FinDocType(this._name);
+  const RequestType(this._name);
   final String _name;
 
-  static FinDocType tryParse(String val) {
+  static RequestType tryParse(String val) {
     switch (val) {
-      case 'request':
-        return request;
-      case 'Order':
-        return order;
-      case 'Invoice':
-        return invoice;
-      case 'Payment':
-        return payment;
-      case 'Shipment':
-        return shipment;
-      case 'Transaction':
-        return transaction;
+      case 'Information':
+        return information;
+      case 'Consultation':
+        return consultation;
     }
-    return unknown;
+    return other;
   }
 
   @override
