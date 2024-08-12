@@ -151,6 +151,22 @@ class RoleConverter implements JsonConverter<Role?, String?> {
   }
 }
 
+class PartyTypeConverter implements JsonConverter<PartyType?, String?> {
+  const PartyTypeConverter();
+
+  @override
+  PartyType? fromJson(String? json) {
+    if (json == null) return null;
+    return PartyType.getByValue(json);
+  }
+
+  @override
+  String? toJson(PartyType? object) {
+    if (object == null) return null;
+    return object.value;
+  }
+}
+
 class CreditCardTypeConverter
     implements JsonConverter<CreditCardType?, String?> {
   const CreditCardTypeConverter();

@@ -35,7 +35,6 @@ dependencies:
   global_configuration: ^2.0.0
   file_picker: ^5.2.0+1
   stream_transform: ^2.1.0
-  json_annotation: ^4.7.0
   decimal: ^2.1.0
 #  html_editor_enhanced: ^2.5.1
   markdown_widget: ^2.3.1

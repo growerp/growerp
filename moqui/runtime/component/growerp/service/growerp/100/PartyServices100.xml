@@ -505,7 +505,7 @@ along with this software (see the LICENSE.md file). If not, see
                         roleTypeId: company.role,
                         customerStatusId: customerStatusId,
                         disabled: 'N']" />
-            <!-- company to owner relationship -->
+            <!-- company to owner relationship obsolete: should use ownerPartyId in entity Party-->
             <service-call name="create#mantle.party.PartyRelationship"
                 in-map="[fromPartyId: partyId, 
                     fromRoleTypeId: company.role,
@@ -1814,23 +1814,21 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[type: 'user', id: user.partyId,
                         base64: user.image]" />
             </if>
-            <!-- check company -->
-            <if condition="!user.company.partyId &amp;&amp; !user.company.name">
-                <return error="true" message="New or existing company required!" />
-            </if>
-            <!-- related company changes -->
+            <!-- related company changes if any -->
             <if condition="user.company.partyId != oldValue.user.company.partyId">
                 <!-- delete  old relationship -->
                 <entity-delete-by-condition entity-name="mantle.party.PartyRelationship">
                     <econdition field-name="fromPartyId" from="oldValue.user.partyId" />
                 </entity-delete-by-condition>
                 <!-- create new relationship -->
-                <service-call name="create#mantle.party.PartyRelationship"
-                    in-map="[fromPartyId: user.partyId, fromRoleTypeId: 'Employee',
+                <if condition="user.company.partyId">
+                    <service-call name="create#mantle.party.PartyRelationship"
+                        in-map="[fromPartyId: user.partyId, fromRoleTypeId: 'Employee',
                     relationshipTypeEnumId: 'PrtEmployee', fromDate: ec.user.nowTimestamp,
                     toPartyId: user.company.partyId,
                     toRoleTypeId: user.company.role == 'Lead'? 'Customer' : user.company.role
                     ]" />
+                </if>
             </if>
             <!-- telephone -->
             <if condition="user.telephoneNr || user.telephoneNr != oldValue.user.telephoneNr">
@@ -1956,228 +1954,95 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <service verb="get" noun="Party"><!-- replacement for user and company -->
+    <service verb="get" noun="CompanyUser">
         <description>
-            Get all parties with related company(if any) and role
+            Get all users with no company and companies
         </description>
         <in-parameters>
             <parameter name="partyId" /><!-- if present select a single user -->
-            <parameter name="firstName" />
-            <parameter name="lastName" />
-            <parameter name="companyName" />
+            <parameter name="pseudoId" />
             <parameter name="role" /><!-- if present select user from specific role-->
-            <parameter name="userGroupId" /><!-- if present select user from specific security
-            group-->
-            <parameter name="ownerPartyId" /><!-- required when registering company customers-->
             <parameter name="start" type="Integer" default-value="0" />
             <parameter name="limit" type="Integer" default-value="20" />
             <parameter name="search" default="null" />
             <parameter name="isForDropDown" type="Boolean" />
         </in-parameters>
         <out-parameters>
-            <parameter name="parties" type="List">
-                <parameter name="party" type="Map">
-                    <parameter name="partyId" />
-                    <parameter name="pseudoId" />
-                    <parameter name="email" />
-                    <parameter name="firstName" />
-                    <parameter name="lastName" />
-                    <parameter name="companyName" /><!-- if null is a person, else a company-->
-                    <parameter name="loginDisabled" type="Boolean" />
-                    <parameter name="loginName" />
-                    <parameter name="userGroupId" />
-                    <parameter name="groupDescription" />
-                    <parameter name="language" />
-                    <parameter name="company" type="Map">
-                        <parameter name="partyId" />
-                        <parameter name="name" />
-                        <parameter name="email" />
-                        <parameter name="role" />
-                        <parameter name="paymentMethod">
-                            <parameter name="ccPaymentMethodId" />
-                            <parameter name="ccDescription" />
-                        </parameter>
-                    </parameter>
-                    <parameter name="image" />
-                    <parameter name="userId" />
-                    <parameter name="locale" />
-                    <parameter name="telephoneNr" />
-                </parameter>
+            <parameter name="companiesUsers" type="List">
+                <parameter name="partyId" />
+                <parameter name="pseudoId" />
+                <parameter name="email" />
+                <parameter name="name" />
+                <parameter name="email" />
+                <parameter name="telephoneNr" />
             </parameter>
-            <parameter name="personToCompanyId" /><!-- used in update user for reassign of company -->
         </out-parameters>
         <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="role" from="role?.capitalize()" />
+            <if condition="role == 'Unknown'">
+                <set field="role" from="null" />
+            </if>
+            <if condition="search">
+                <set field="searchString" value="%$search%" />
+            </if>
+            <log message="=====get companyuser===role: $role owner: $ownerPartyId $searchString" />
+            <entity-find offset="start" limit="limit" list="companies"
+                entity-name="growerp.party.OwnerCompany">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="role" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="name" from="searchString" ignore-case="true"
+                        operator="like" ignore-if-empty="true" />
+                    <econdition field-name="pseudoId" from="searchString" ignore-case="true"
+                        operator="like" ignore-if-empty="true" />
+                    <econdition field-name="email" from="searchString" ignore-case="true"
+                        operator="like" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="name" />
+            </entity-find>
+            <log message="===comps found: ${companies?.size()}" />
+
+            <entity-find offset="start" limit="limit" list="users"
+                entity-name="growerp.party.OwnerUser">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="role" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="firstName" from="searchString" ignore-case="true"
+                        operator="like" ignore-if-empty="true" />
+                    <econdition field-name="lastName" from="searchString" ignore-case="true"
+                        operator="like" ignore-if-empty="true" />
+                    <econdition field-name="pseudoId" from="searchString" ignore-case="true"
+                        operator="like" ignore-if-empty="true" />
+                    <econdition field-name="email" from="searchString" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="lastName,firstName" />
+            </entity-find>
+            <log message="===users found: ${users?.size()}" />
+
+            <log message="companies ${companies?.size()}  users: ${users?.size()}" />
+            <set field="companiesUsers" from="[]" />
+            <iterate list="users" entry="user">
+                <set field="name" value="${user.lastName}, ${user.firstName}" />
+                <script>companiesUsers.add([
+                        type: 'user',
+                        partyId: user.partyId,
+                        pseudoId: user.pseudoId,
+                        role: user.role,
+                        name: name])</script>
+            </iterate>
+            <script>companies.sort{it.name}</script>
+            <iterate list="companies" entry="company">
+                <script>companiesUsers.add([
+                    type: 'company',
+                    partyId: company.partyId,
+                    pseudoId: company.pseudoId,
+                    role: company.role,
+                    name: company.name])</script>
+            </iterate>
+            <log message="===usercomps found: ${companiesUsers?.size()}" />
         </actions>
-    </service>
-
-    <service verb="create" noun="Party">
-        <description>
-            add a new user/company with user related company to an existing owner company
-        </description>
-        <in-parameters>
-            <parameter name="party" type="Map" required="true">
-                <parameter name="partyId" />
-                <parameter name="pseudoId" />
-                <parameter name="email" />
-                <parameter name="firstName" />
-                <parameter name="lastName" />
-                <parameter name="companyName" />
-                <parameter name="loginDisabled" type="Boolean" />
-                <parameter name="loginName" />
-                <parameter name="userGroupId" />
-                <parameter name="groupDescription" />
-                <parameter name="language" />
-                <parameter name="image" />
-                <parameter name="userId" />
-                <parameter name="locale" />
-                <parameter name="telephoneNr" />
-                <parameter name="role" />
-                <parameter name="email" />
-                <parameter name="currency" type="Map">
-                    <parameter name="currencyId" />
-                </parameter>
-                <parameter name="currencyName" />
-                <parameter name="vatPerc">
-                    <description>Percentage used for VAT if applicable</description>
-                </parameter>
-                <parameter name="salesPerc">
-                    <description>Percentage used for sales tax</description>
-                </parameter>
-                <parameter name="address" type="Map">
-                    <parameter name="addressId" />
-                    <parameter name="address1" />
-                    <parameter name="address2" />
-                    <parameter name="city" />
-                    <parameter name="postalCode" />
-                    <parameter name="province" />
-                    <parameter name="provinceId" />
-                    <parameter name="country" />
-                    <parameter name="countryId" />
-                </parameter>
-                <parameter name="image" />
-                <parameter name="paymentMethod" type="Map">
-                    <parameter name="creditCardType" />
-                    <parameter name="creditCardNumber" />
-                    <parameter name="expireMonth" />
-                    <parameter name="expireYear" />
-                </parameter>
-            </parameter>
-            <parameter name="password"
-                default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
-            <parameter name="ownerPartyId" /><!-- only required when no user logged in after
-            creating owner company -->
-        </in-parameters>
-        <out-parameters>
-            <parameter name="party" type="Map">
-                <parameter name="partyId" />
-                <parameter name="pseudoId" />
-                <parameter name="email" />
-                <parameter name="firstName" />
-                <parameter name="lastName" />
-                <parameter name="companyName" />
-                <parameter name="loginDisabled" type="Boolean" />
-                <parameter name="loginName" />
-                <parameter name="userGroupId" />
-                <parameter name="groupDescription" />
-                <parameter name="language" />
-                <parameter name="role" />
-                <parameter name="paymentMethod">
-                    <parameter name="ccPaymentMethodId" />
-                    <parameter name="ccDescription" />
-                </parameter>
-                <parameter name="image" />
-                <parameter name="userId" />
-                <parameter name="locale" />
-                <parameter name="telephoneNr" />
-            </parameter>
-            <parameter name="password" />
-        </out-parameters>
-        <actions></actions>
-    </service>
-
-    <service verb="update" noun="Party">
-        <description>
-            update user information
-        </description>
-        <in-parameters>
-            <parameter name="party" type="Map" required="true">
-                <parameter name="partyId" required="true" />
-                <parameter name="email" />
-                <parameter name="firstName" />
-                <parameter name="lastName" />
-                <parameter name="loginDisabled" type="Boolean" />
-                <parameter name="loginName" />
-                <parameter name="userGroupId" />
-                <parameter name="groupDescription" />
-                <parameter name="language" />
-                <parameter name="image" />
-                <parameter name="userId" />
-                <parameter name="locale" />
-                <parameter name="telephoneNr" />
-                <parameter name="company" type="Map">
-                    <parameter name="partyId" />
-                    <parameter name="name" />
-                    <parameter name="email" />
-                    <parameter name="role" />
-                </parameter>
-            </parameter>
-        </in-parameters>
-        <out-parameters>
-            <parameter name="party" type="Map">
-                <parameter name="partyId" />
-                <parameter name="email" />
-                <parameter name="firstName" />
-                <parameter name="lastName" />
-                <parameter name="loginDisabled" type="Boolean" />
-                <parameter name="loginName" />
-                <parameter name="userGroupId" />
-                <parameter name="groupDescription" />
-                <parameter name="language" />
-                <parameter name="image" />
-                <parameter name="userId" />
-                <parameter name="locale" />
-                <parameter name="telephoneNr" />
-                <parameter name="company" type="Map">
-                    <parameter name="partyId" />
-                    <parameter name="name" />
-                    <parameter name="email" />
-                    <parameter name="role" />
-                </parameter>
-            </parameter>
-        </out-parameters>
-        <actions></actions>
-    </service>
-
-    <service verb="delete" noun="Party"><!-- replacement for user and company -->
-        <description>Deactivate a owner companies logged in user and optionally delete owner company too.</description>
-        <in-parameters>
-            <parameter name="partyId" required="true" />
-            <parameter name="deleteCompanyToo" type="Boolean" />
-        </in-parameters>
-        <out-parameters>
-            <parameter name="party" type="Map">
-                <parameter name="partyId" />
-                <parameter name="email" />
-                <parameter name="firstName" />
-                <parameter name="lastName" />
-                <parameter name="loginDisabled" type="Boolean" />
-                <parameter name="loginName" />
-                <parameter name="userGroupId" />
-                <parameter name="groupDescription" />
-                <parameter name="language" />
-                <parameter name="image" />
-                <parameter name="userId" />
-                <parameter name="locale" />
-                <parameter name="telephoneNr" />
-                <parameter name="company" type="Map">
-                    <parameter name="partyId" />
-                    <parameter name="name" />
-                    <parameter name="email" />
-                    <parameter name="role" />
-                </parameter>
-            </parameter>
-        </out-parameters>
-        <actions></actions>
     </service>
 
     <service verb="register" noun="UserAndCompany" authenticate="anonymous-all">

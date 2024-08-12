@@ -63,6 +63,8 @@ class User with _$User {
   String toString() => 'User $firstName $lastName [$partyId] sec: $userGroup '
       ' email: $email'
       'company: ${company!.name}[${company!.partyId}] size: ${image?.length}';
+
+  String getName() => '$lastName, $firstName';
 }
 
 String userCsvFormat =

@@ -275,15 +275,20 @@ along with this software (see the LICENSE.md file). If not, see
                             'ShipPacked','Ship','Shipped']" />
                 </entity-find-count>
                 <entity-find-one entity-name="mantle.facility.Facility" value-field="facility">
-                    <field-map field-name="ownerPartyId" from="ownerPartyId" />
+                    <field-map field-name="facilityTypeEnumId" value="FcTpWarehouse" />
+                    <field-map field-name="ownerPartyId" from="companyPartyId" />
                 </entity-find-one>
+                <if condition="!facility">
+                    <log level="error"
+                        message="could not find warehouse for company: $companyPartyId" />
+                </if>
                 <entity-find-count entity-name="mantle.facility.FacilityLocation"
                     count-field="whLocations">
                     <econdition field-name="facilityId" from="facility.facilityId" />
                 </entity-find-count>
                 <entity-find-count entity-name="mantle.request.Request"
                     count-field="requests">
-                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                    <econdition field-name="requestOwnerPartyId" from="ownerPartyId" />
                 </entity-find-count>
                 <service-call name="delete#growerp.general.Statistics">
                     <field-map field-name="ownerPartyId" />

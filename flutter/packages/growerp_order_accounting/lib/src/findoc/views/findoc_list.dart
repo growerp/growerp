@@ -383,12 +383,14 @@ class SelectFinDocDialog extends StatelessWidget {
     return onlyRental == true
         ? ReservationDialog(finDoc: finDoc, original: finDoc)
         // shipment with status approved shows receive screen
-        : finDoc.docType == FinDocType.shipment &&
-                finDoc.status == FinDocStatusVal.approved &&
-                finDoc.sales == false
-            ? ShipmentReceiveDialog(finDoc)
-            : finDoc.docType == FinDocType.payment
-                ? PaymentDialog(finDoc: finDoc)
-                : FinDocDialog(finDoc);
+        : finDoc.docType == FinDocType.request
+            ? ShowRequestDialog(finDoc)
+            : finDoc.docType == FinDocType.shipment &&
+                    finDoc.status == FinDocStatusVal.approved &&
+                    finDoc.sales == false
+                ? ShipmentReceiveDialog(finDoc)
+                : finDoc.docType == FinDocType.payment
+                    ? PaymentDialog(finDoc: finDoc)
+                    : FinDocDialog(finDoc);
   }
 }

@@ -41,7 +41,6 @@ dependencies:
   shared_preferences: ^2.0.15
   stream_transform: ^2.1.0
   collection: ^1.16.0
-  json_annotation: ^4.7.0
   dio: ^5.4.3
   credit_card_validator: ^2.0.1
   url_launcher: ^6.1.4

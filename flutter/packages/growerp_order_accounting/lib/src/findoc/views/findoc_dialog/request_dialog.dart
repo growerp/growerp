@@ -51,10 +51,9 @@ class RequestDialogState extends State<RequestDialog> {
   late FinDoc finDoc; // incoming finDoc
   late FinDoc finDocUpdated;
   late FinDocBloc _finDocBloc;
-  GlAccount? _selectedGlAccount;
-  Company? _selectedCompany;
+  CompanyUser? _selectedCompanyUser;
   RequestType? _selectedRequestType;
-  late DataFetchBloc<Companies> _companyBloc;
+  late DataFetchBloc<CompaniesUsers> _companyUserBloc;
   // ignore: unused_field
   late GlAccountBloc _accountBloc; // needed for accountlist
   late FinDocStatusVal _updatedStatus;
@@ -72,18 +71,16 @@ class RequestDialogState extends State<RequestDialog> {
     readOnly = finDoc.status == null
         ? false
         : FinDocStatusVal.statusFixed(finDoc.status!);
-    _selectedCompany = finDocUpdated.otherCompany;
-    _selectedGlAccount = finDocUpdated.items.isNotEmpty
-        ? finDocUpdated.items[0].glAccount
-        : null;
+    _selectedCompanyUser = (CompanyUser.tryParse(finDocUpdated.otherCompany) ??
+        CompanyUser.tryParse(finDocUpdated.otherUser));
     _updatedStatus = finDocUpdated.status ?? FinDocStatusVal.created;
-    _selectedCompany = finDocUpdated.otherCompany;
+    _descriptionController.text = finDocUpdated.description ?? '';
     _pseudoIdController.text =
         finDoc.pseudoId == null ? '' : finDoc.pseudoId.toString();
     _selectedRequestType = finDocUpdated.requestType;
-    _companyBloc = context.read<DataFetchBloc<Companies>>()
-      ..add(
-          GetDataEvent<Companies>(() => Future<Companies>.value(Companies())));
+    _companyUserBloc = context.read<DataFetchBloc<CompaniesUsers>>()
+      ..add(GetDataEvent<CompaniesUsers>(
+          () => Future<CompaniesUsers>.value(CompaniesUsers())));
     _finDocBloc = context.read<FinDocBloc>();
   }
 
@@ -93,15 +90,14 @@ class RequestDialogState extends State<RequestDialog> {
     return Scaffold(
         backgroundColor: Colors.transparent,
         body: Dialog(
-            key: Key("RequestDialog${finDoc.sales ? 'Sales' : 'Purchase'}"),
+            key: const Key("RequestDialog"),
             child: SingleChildScrollView(
                 key: const Key('listView2'),
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 child: popUp(
                     context: context,
-                    height: 700,
-                    width: 600,
+                    height: 600,
                     title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
                         "Request #${finDoc.pseudoId ?? 'New'}",
                     child: BlocConsumer<FinDocBloc, FinDocState>(
@@ -124,8 +120,7 @@ class RequestDialogState extends State<RequestDialog> {
 
   Widget requestForm(
       FinDocState state, GlobalKey<FormState> requestDialogFormKey) {
-    final companyLabel =
-        "Select ${finDocUpdated.sales ? 'customer' : 'supplier'}";
+    const companyLabel = "Select Requester";
     return Padding(
         padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
         child: Form(
@@ -145,172 +140,151 @@ class RequestDialogState extends State<RequestDialog> {
                   ),
                   Expanded(
                       flex: 2,
-                      child:
-                          BlocBuilder<DataFetchBloc<Companies>, DataFetchState>(
-                              builder: (context, state) {
-                        switch (state.status) {
-                          case DataFetchStatus.success:
-                            return DropdownSearch<Company>(
-                              enabled: !readOnly,
-                              selectedItem: _selectedCompany,
-                              popupProps: PopupProps.menu(
-                                isFilterOnline: true,
-                                showSelectedItems: true,
-                                showSearchBox: true,
-                                searchFieldProps: TextFieldProps(
-                                    autofocus: true,
-                                    decoration: InputDecoration(
-                                        labelText: companyLabel)),
-                                menuProps: MenuProps(
-                                    borderRadius: BorderRadius.circular(20.0)),
-                                title: popUp(
-                                  context: context,
-                                  title: companyLabel,
-                                  height: 50,
-                                ),
-                              ),
-                              dropdownDecoratorProps: DropDownDecoratorProps(
-                                  dropdownSearchDecoration:
-                                      InputDecoration(labelText: companyLabel)),
-                              key: const Key('otherCompany'),
-                              itemAsString: (Company? u) => " ${u!.name}",
-                              asyncItems: (String filter) async {
-                                _companyBloc.add(GetDataEvent(() => context
-                                    .read<RestClient>()
-                                    .getCompany(
-                                        searchString: filter,
-                                        limit: 3,
-                                        isForDropDown: true,
-                                        role: widget.finDoc.sales
-                                            ? Role.customer
-                                            : Role.supplier)));
-                                return Future.delayed(
-                                    const Duration(milliseconds: 150), () {
-                                  return Future.value(
-                                      (_companyBloc.state.data as Companies)
-                                          .companies);
-                                });
+                      child: DropdownButtonFormField<FinDocStatusVal>(
+                        key: const Key('statusDropDown'),
+                        decoration:
+                            const InputDecoration(labelText: 'Status11'),
+                        value: _updatedStatus,
+                        validator: (value) =>
+                            value == null ? 'field required' : null,
+                        items: FinDocStatusVal.validStatusList(
+                                finDoc.status ?? FinDocStatusVal.created)
+                            .map((label) => DropdownMenuItem<FinDocStatusVal>(
+                                  value: label,
+                                  child: Text(label.name),
+                                ))
+                            .toList(),
+                        onChanged: readOnly
+                            ? null
+                            : (FinDocStatusVal? newValue) {
+                                _updatedStatus = newValue!;
                               },
-                              compareFn: (item, sItem) =>
-                                  item.partyId == sItem.partyId,
-                              onChanged: (Company? newValue) {
-                                setState(() {
-                                  _selectedCompany = newValue;
-                                });
-                              },
-                              validator: (value) => value == null
-                                  ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
-                                  : null,
-                            );
-                          case DataFetchStatus.failure:
-                            return const FatalErrorForm(
-                                message: 'server connection problem');
-                          default:
-                            return const Center(child: LoadingIndicator());
-                        }
-                      })),
-                ],
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<FinDocStatusVal>(
-                      key: const Key('statusDropDown'),
-                      decoration: const InputDecoration(labelText: 'Status'),
-                      value: _updatedStatus,
-                      validator: (value) =>
-                          value == null ? 'field required' : null,
-                      items: FinDocStatusVal.validStatusList(
-                              finDoc.status ?? FinDocStatusVal.created)
-                          .map((label) => DropdownMenuItem<FinDocStatusVal>(
-                                value: label,
-                                child: Text(label.name),
-                              ))
-                          .toList(),
-                      onChanged: readOnly
-                          ? null
-                          : (FinDocStatusVal? newValue) {
-                              _updatedStatus = newValue!;
-                            },
-                      isExpanded: true,
-                    ),
-                  ),
+                        isExpanded: true,
+                      )),
                 ],
               ),
               widget.finDoc.id() == null
                   ? const SizedBox(height: 20)
                   : RelatedFinDocs(finDoc: widget.finDoc, context: context),
-              InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: 'Request Type',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                  ),
-                  child: Column(children: [
-                    IgnorePointer(
-                      ignoring: readOnly,
-                      child: DropdownButtonFormField<RequestType>(
-                        key: const Key('requestType'),
-                        value: _selectedRequestType,
-                        validator: (value) =>
-                            value == null && _selectedGlAccount == null
-                                ? 'Enter a item type for posting?'
-                                : null,
-                        items: RequestType.values.map((item) {
-                          return DropdownMenuItem<RequestType>(
-                              value: item,
-                              child: Text(item.name,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2));
-                        }).toList(),
-                        onChanged: (newValue) =>
-                            _selectedRequestType = newValue,
-                        isExpanded: true,
-                      ),
-                    ),
-                    TextFormField(
-                      key: const Key('description'),
-                      decoration:
-                          const InputDecoration(labelText: 'Description'),
-                      controller: _descriptionController,
-                    ),
-                    Row(
-                      children: [
-                        OutlinedButton(
-                            key: const Key('cancelFinDoc'),
-                            child: const Text('Cancel Request'),
-                            onPressed: () {
-                              _finDocBloc
-                                  .add(FinDocUpdate(finDocUpdated.copyWith(
-                                status: FinDocStatusVal.cancelled,
-                              )));
-                            }),
-                        const SizedBox(width: 20),
-                        Expanded(
-                          child: OutlinedButton(
-                              key: const Key('update'),
-                              child: Text(
-                                  '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
-                              onPressed: () {
-                                if (requestDialogFormKey.currentState!
-                                    .validate()) {
-                                  _finDocBloc
-                                      .add(FinDocUpdate(finDocUpdated.copyWith(
-                                    otherCompany: _selectedCompany,
-                                    pseudoId: _pseudoIdController.text,
-                                    description: _descriptionController.text,
-                                    status: _updatedStatus,
-                                    requestType: _selectedRequestType,
-                                    items: [],
-                                  )));
-                                }
-                              }),
+              BlocBuilder<DataFetchBloc<CompaniesUsers>, DataFetchState>(
+                  builder: (context, state) {
+                switch (state.status) {
+                  case DataFetchStatus.success:
+                    return DropdownSearch<CompanyUser>(
+                      enabled: !readOnly,
+                      selectedItem: _selectedCompanyUser,
+                      popupProps: PopupProps.menu(
+                        isFilterOnline: true,
+                        showSelectedItems: true,
+                        showSearchBox: true,
+                        searchFieldProps: const TextFieldProps(
+                            autofocus: true,
+                            decoration:
+                                InputDecoration(labelText: companyLabel)),
+                        menuProps: MenuProps(
+                            borderRadius: BorderRadius.circular(20.0)),
+                        title: popUp(
+                          context: context,
+                          title: companyLabel,
+                          height: 50,
                         ),
-                      ],
-                    ),
-                  ]))
+                      ),
+                      dropdownDecoratorProps: const DropDownDecoratorProps(
+                          dropdownSearchDecoration:
+                              InputDecoration(labelText: companyLabel)),
+                      key: const Key('otherCompanyUser'),
+                      itemAsString: (CompanyUser? u) =>
+                          " ${u!.name}[${u.pseudoId}]",
+                      asyncItems: (String filter) async {
+                        _companyUserBloc.add(GetDataEvent(() => context
+                            .read<RestClient>()
+                            .getCompanyUser(
+                                searchString: filter,
+                                limit: 4,
+                                isForDropDown: true,
+                                role: Role.unknown)));
+                        return Future.delayed(const Duration(milliseconds: 150),
+                            () {
+                          return Future.value(
+                              (_companyUserBloc.state.data as CompaniesUsers)
+                                  .companiesUsers);
+                        });
+                      },
+                      compareFn: (item, sItem) => item.partyId == sItem.partyId,
+                      onChanged: (CompanyUser? newValue) {
+                        setState(() {
+                          _selectedCompanyUser = newValue;
+                        });
+                      },
+                      validator: (value) =>
+                          value == null ? "Select requester" : null,
+                    );
+                  case DataFetchStatus.failure:
+                    return const FatalErrorForm(
+                        message: 'server connection problem');
+                  default:
+                    return const Center(child: LoadingIndicator());
+                }
+              }),
+              SizedBox(height: 10),
+              IgnorePointer(
+                ignoring: readOnly,
+                child: DropdownButtonFormField<RequestType>(
+                  decoration: const InputDecoration(labelText: 'Request Type'),
+                  key: const Key('requestType'),
+                  value: _selectedRequestType,
+                  items: RequestType.values.map((item) {
+                    return DropdownMenuItem<RequestType>(
+                        value: item,
+                        child: Text(item.name,
+                            overflow: TextOverflow.ellipsis, maxLines: 2));
+                  }).toList(),
+                  onChanged: (newValue) => _selectedRequestType = newValue,
+                  isExpanded: true,
+                ),
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                key: const Key('description'),
+                minLines: 5,
+                maxLines: 8,
+                decoration: const InputDecoration(labelText: 'Description'),
+                controller: _descriptionController,
+              ),
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  OutlinedButton(
+                      key: const Key('cancelFinDoc'),
+                      child: const Text('Cancel Request'),
+                      onPressed: () {
+                        _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
+                          status: FinDocStatusVal.cancelled,
+                        )));
+                      }),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: OutlinedButton(
+                        key: const Key('update'),
+                        child: Text(
+                            '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
+                        onPressed: () {
+                          if (requestDialogFormKey.currentState!.validate()) {
+                            _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
+                              requestId: widget.finDoc.requestId,
+                              requestType: _selectedRequestType,
+                              otherCompany: _selectedCompanyUser!.getCompany(),
+                              otherUser: _selectedCompanyUser!.getUser(),
+                              pseudoId: _pseudoIdController.text,
+                              description: _descriptionController.text,
+                              status: _updatedStatus,
+                              items: [],
+                            )));
+                          }
+                        }),
+                  ),
+                ],
+              )
             ])));
   }
 }

@@ -127,6 +127,16 @@ along with this software (see the LICENSE.md file). If not, see
                 ]" />
                 <set field="convertedStatusId" from="requestStatusValues[statusId]" />
             </if>
+            <if condition="docType == 'requestType'">
+                <set field="requestTypeValues"
+                    from="[
+                    RqtConsulation: 'consultation',
+                    consultation: 'RqtConsulation',
+                    RqtInformation: 'information',
+                    information: 'RqtInformation',
+                ]" />
+                <set field="convertedStatusId" from="requestTypeValues[statusId]" />
+            </if>
             <if condition="docType == 'invoice'">
                 <if condition="sales == true">
                     <set field="invoiceStatusValues"
@@ -226,6 +236,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="invoiceId" />
                     <parameter name="paymentId" />
                     <parameter name="transactionId" />
+                    <parameter name="requestId" />
                     <parameter name="isPosted" type="Boolean" />
                     <parameter name="paymentInstrument" />
                     <parameter name="statusId" />
@@ -293,6 +304,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </parameter>
                     </parameter>
                 </parameter>
+                <parameter name="requestType" />
             </parameter>
         </out-parameters>
         <actions>
@@ -371,26 +383,37 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                         in-map="[sales: sales, docType: docType, statusId: item.statusId]"
                         out-map="context" />
+                    <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                        in-map="[sales: sales, docType: 'requestType', statusId: item.requestType]"
+                        out-map="requestType" />
                     <set field="requestPersonCompany"
-                        from="[partyId: item.personCompanyPartyId,
+                        from="item.personCompanyPartyId ? [partyId: item.personCompanyPartyId,
                                 pseudoId: item.personCompanyPseudoId,
-                                name: item.personCompanyName]" />
+                                name: item.personCompanyName] : null" />
                     <set field="finDocOut"
                         from="[
                         docType: docType,
                         requestId: item.requestId,
                         pseudoId: item.pseudoId,
                         statusId: convertedStatusId,
-                        creationDate: item.requestDate,
-                        placedDate: lastUpdatedStamp,
-                        user: [partyId: item.filedByPartyId,
+                        creationDate: item.requestDate ? ec.l10n.format(item.requestDate,'yyyy-MM-dd')  : null,
+                        requestType: requestType.convertedStatusId,
+                        placedDate: item.lastUpdatedStamp ? ec.l10n.format(item.lastUpdatedStamp,'yyyy-MM-dd')  : null,
+                        otherUser: item.personLastName ? [
+                                type: 'user',
+                                partyId: item.filedByPartyId,
                                 firstName: item.personFirstName, 
                                 lastName: item.personLastName,
                                 pseudoId: item.personPseudoId,
-                                company: requestPersonCompany],
-                        company: [partyId: item.filedByPartyId,
+                                email: item.personEmail,
+                                company: requestPersonCompany] : null,
+                        otherCompany: item.companyName ? [
+                                type: 'company',
+                                partyId: item.filedByPartyId,
                                 pseudoId: item.companyPseudoId,
-                                name: item.companyName]]" />
+                                email: item.companyEmail,
+                                name: item.companyName] : null,
+                        description: item.description]" />
                     <script>finDocs.add(finDocOut)</script>
                 </iterate>
             </if>
@@ -1322,6 +1345,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="rentalFromDate" />
                     <parameter name="rentalThruDate" />
                 </parameter>
+                <parameter name="requestType" />
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -1415,16 +1439,25 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="rentalThruDate" />
                     </parameter>
                 </parameter>
+                <parameter name="requestType" />
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <log message="===other user: ${finDoc.otherUser} comp: ${otherCompany}" />
+            <set field="nowDate" from="ec.user.nowTimestamp.toString().substring(0,10)" />
             <if
-                condition="finDoc.docType != 'transaction' &amp;&amp; (!finDoc.otherCompany || !finDoc.otherCompany.partyId)">
+                condition="finDoc.docType != 'transaction' &amp;&amp; 
+                    (!finDoc.otherCompany &amp;&amp; !finDoc.otherUser)">
                 <return error="true"
-                    message="Other company required with valid companyPartyId 
-                    findoc company: ${finDoc.company} docType: ${finDoc.docType} ${finDoc.pseudoId}" />
+                    message="Other Company or User required! company: ${finDoc.otherCompany} user: ${finDoc.otherUser} " />
+            </if>
+            <if condition="finDoc.otherCompany">
+                <set field="otherPartyId" from="finDoc.otherCompany.partyId" />
+                <else-if condition="finDoc.otherUser">
+                    <set field="otherPartyId" from="finDoc.otherUser.partyId" />
+                </else-if>
             </if>
             <service-call name="growerp.100.FinDocServices100.convert#StatusId" out-map="context"
                 in-map="[sales: finDoc?.sales, docType: finDoc.docType, statusId: finDoc.statusId]" />
@@ -1457,13 +1490,18 @@ along with this software (see the LICENSE.md file). If not, see
                 </else-if>
                 <!-- request -->
                 <else-if condition="finDoc.docType == 'request'">
+                    <!-- convert requestType -->
+                    <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                        in-map="[sales: sales, docType: 'requestType', statusId: finDoc.requestType]"
+                        out-map="requestType" />
+                    <log message="===create findoc requestType: ${requestType.convertedStatusId}" />
                     <service-call name="create#mantle.request.Request"
-                        in-map="[   pseudoId: finDoc.pseudoId,
-                                    requestTypeEnumId: finDoc.trequestType,
+                        in-map="[   requestPseudoId: finDoc.pseudoId,
+                                    requestTypeEnumId: requestType.convertedStatusId,
                                     description: finDoc.description,
-                                    ownerPartyId: ownerPartyId,
+                                    requestOwnerPartyId: ownerPartyId,
                                     statusId: convertedStatusId,
-                                    filedByPartyId: finDoc.otherCompany.partyId ?: finDoc.otherUser.partyId,
+                                    filedByPartyId: otherPartyId,
                                     requestDate: nowDate,                                   
                                 ]"
                         out-map="context" />
@@ -1474,7 +1512,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="mantle.ledger.LedgerServices.create#AcctgTrans"
                         in-map="[   acctgTransTypeEnumId: 'AttInternal',
                                     organizationPartyId: companyPartyId,
-                                    otherPartyId: finDoc.otherCompany?.partyId,
+                                    otherPartyId: otherPartyId,
                                     description: finDoc.description,
                                     glJournalId: finDoc.journal?.journalId,
                                     isPosted: 'N',
@@ -1883,6 +1921,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="invoiceId" />
                 <parameter name="paymentId" />
                 <parameter name="transactionId" />
+                <parameter name="requestId" />
                 <parameter name="isPosted" type="Boolean" />
                 <parameter name="paymentInstrument" />
                 <parameter name="statusId" />
@@ -1935,6 +1974,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="invoiceId" />
                 <parameter name="paymentId" />
                 <parameter name="transactionId" />
+                <parameter name="requestId" />
                 <parameter name="isPosted" type="Boolean" />
                 <parameter name="paymentInstrument" />
                 <parameter name="statusId" />
@@ -2164,16 +2204,25 @@ along with this software (see the LICENSE.md file). If not, see
                         from="[finDocId: finDoc.transactionId,
                                     docType: 'transaction', sales: true]" />
                 </else-if>
+                <!-- request -->
                 <else-if condition="finDoc.docType == 'request'">
+                    <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                        in-map="[sales: sales, docType: 'requestType', statusId: finDoc.requestType]"
+                        out-map="requestType" />
+                    <if condition="finDoc.otherCompany">
+                        <set field="otherPartyId" from="finDoc.otherCompany.partyId" />
+                        <else-if condition="finDoc.otherUser">
+                            <set field="otherPartyId" from="finDoc.otherUser.partyId" />
+                        </else-if>
+                    </if>
                     <service-call name="update#mantle.request.Request"
-                        in-map="[   requestId: finDoc.finDocId.
+                        in-map="[   requestId: finDoc.requestId,
                                     pseudoId: finDoc.pseudoId,
-                                    requestTypeEnumId: finDoc.requestType,
+                                    requestTypeEnumId: requestType.convertedStatusId,
                                     description: finDoc.description,
                                     ownerpartyId: ownerPartyId,
                                     statusId: convertedStatusId,
-                                    filedByPartyId; finDoc.company.partyId ?: finDoc.user.partyId,
-                                    requestDate: nowDate,                                   
+                                    filedByPartyId: otherPartyId,
                                 ]"
                         out-map="context" />
                     <set field="inMap"

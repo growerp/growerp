@@ -1,5 +1,5 @@
 /*
- * This software is in the public domain under CC0 1.0 Universal plus a
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
  * 
  * To the extent possible under law, the author(s) have dedicated all
@@ -12,21 +12,18 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-enum Role {
-  company('OrgInternal'),
-  customer('Customer'),
-  lead('Lead'),
-  supplier('Supplier'),
-  unknown('');
+enum PartyType {
+  company('Company'),
+  user('User');
 
   final String value;
-  const Role(this.value);
+  const PartyType(this.value);
 
-  static final Map<String, Role> byValue = {};
-  static Role? getByValue(String value) {
+  static final Map<String, PartyType> byValue = {};
+  static PartyType? getByValue(String value) {
     if (byValue.isEmpty) {
-      for (Role role in Role.values) {
-        byValue[role.toString()] = role;
+      for (PartyType role in PartyType.values) {
+        byValue[role.name] = role;
       }
     }
     return byValue[value];

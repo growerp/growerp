@@ -39,6 +39,7 @@ class SaveTest with _$SaveTest {
     @Default([]) List<FinDoc> invoices,
     @Default([]) List<FinDoc> shipments,
     @Default([]) List<FinDoc> transactions,
+    @Default([]) List<FinDoc> requests,
     @Default([]) List<ChatRoom> chatRooms,
     @Default([]) List<Asset> assets,
     @Default([]) List<Product> products,

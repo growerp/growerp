@@ -241,12 +241,12 @@ class Opportunities with _$Opportunities {
 }
 
 @freezed
-class Parties with _$Parties {
-  factory Parties({
-    @Default([]) List<Party> parties,
-  }) = _Parties;
-  Parties._();
+class CompaniesUsers with _$CompaniesUsers {
+  factory CompaniesUsers({
+    @Default([]) List<CompanyUser> companiesUsers,
+  }) = _CompaniesUsers;
+  CompaniesUsers._();
 
-  factory Parties.fromJson(Map<String, dynamic> json) =>
-      _$PartiesFromJson(json);
+  factory CompaniesUsers.fromJson(Map<String, dynamic> json) =>
+      _$CompaniesUsersFromJson(json);
 }

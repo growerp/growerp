@@ -18,8 +18,8 @@ enum RequestType {
   consultation('Consultation'),
   other('Other');
 
-  const RequestType(this._name);
-  final String _name;
+  const RequestType(this.name);
+  final String name;
 
   static RequestType tryParse(String val) {
     switch (val) {
@@ -33,6 +33,6 @@ enum RequestType {
 
   @override
   String toString() {
-    return _name;
+    return name;
   }
 }

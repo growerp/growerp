@@ -59,7 +59,9 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             children: [
               const Text('Status'),
               const SizedBox(width: 10),
-              if (item.docType != FinDocType.shipment) const Text('Total'),
+              if (item.docType != FinDocType.shipment &&
+                  item.docType != FinDocType.request)
+                const Text('Total'),
               const SizedBox(width: 10),
               const Text('#Items'),
             ],
@@ -82,7 +84,10 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
               ),
             ],
           ),
-          Text(item.otherCompany?.name.truncate(20) ?? '',
+          Text(
+              item.otherCompany?.name.truncate(20) ??
+                  item.otherUser?.getName().truncate(20) ??
+                  '',
               key: Key("otherUser$index")),
           Row(
             children: [
@@ -93,7 +98,8 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
                       : item.status!.name,
                   key: Key("status$index")),
               const SizedBox(width: 10),
-              if (item.docType != FinDocType.shipment)
+              if (item.docType != FinDocType.shipment &&
+                  item.docType != FinDocType.request)
                 Text(item.grandTotal.currency(currencyId: currencyId),
                     key: Key("grandTotal$index")),
               if (item.docType != FinDocType.shipment)

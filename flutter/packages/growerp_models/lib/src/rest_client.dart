@@ -88,30 +88,15 @@ abstract class RestClient {
   Future<Company> updateCompany({@Field() required Company company});
 
   // party to replace company and user
-  @GET("rest/s1/growerp/100/Party")
-  Future<Parties> getParty({
-    @Query('partyId') String? partyId,
-    @Query('pseudoId') String? pseudoId,
+  @GET("rest/s1/growerp/100/CompanyUser")
+  Future<CompaniesUsers> getCompanyUser({
     @Query('role') Role? role,
     @Query('start') int? start,
     @Query('limit') int? limit,
-    @Query('firstName') String? firstName,
-    @Query('lastName') String? lastName,
-    @Query('company') Party? company,
+    @Query('name') String? firstName,
     @Query('search') String? searchString,
     @Query('isForDropDown') bool? isForDropDown,
   });
-
-  @POST("rest/s1/growerp/100/Party")
-  Future<Party> createParty({@Field() required Party party});
-
-  @PATCH("rest/s1/growerp/100/Party")
-  Future<Party> updateParty({@Field() required Party party});
-
-  @DELETE("rest/s1/growerp/100/Party")
-  Future<Party> deleteParty(
-      {@Field() required String partyId,
-      @Field() required bool deleteCompanyToo});
 
   // user
   @GET("rest/s1/growerp/100/User")

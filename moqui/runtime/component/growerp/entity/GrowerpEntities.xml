@@ -39,14 +39,14 @@ along with this software (see the LICENSE.md file). If not, see
     <extend-entity entity-name="Request" package="mantle.request"
         sequence-primary-prefix="req">
         <field name="requestPseudoId" type="id" /><!-- if pseudoId get conflicts with existing views -->
-        <field name="ownerPartyId" type="id">
+        <field name="requestOwnerPartyId" type="id">
             <description>The company owner, to separate companies.</description>
         </field>
         <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
-            <key-map field-name="ownerPartyId" />
+            <key-map field-name="requestOwnerPartyId" />
         </relationship>
         <index name="REQUEST_PSEUDOID" unique="false">
-            <index-field name="pseudoId" />
+            <index-field name="requestPseudoId" />
         </index>
     </extend-entity>
 

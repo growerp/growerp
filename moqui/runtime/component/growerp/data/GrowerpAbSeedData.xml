@@ -41,4 +41,7 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.basic.Enumeration description="Workflow Task template" enumId="WeatWorkflowTaskTemplate"
         enumTypeId="WorkEffortAssocType" />
 
+    <!-- request type -->
+    <moqui.basic.Enumeration enumId="RqtConsulation" description="Consultation"
+        enumTypeId="RequestType" />
 </entity-facade-xml>

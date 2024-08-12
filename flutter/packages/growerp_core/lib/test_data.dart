@@ -420,7 +420,19 @@ List<User> customers = [
     company: customerCompanies[2],
     email: 'emailXXX@example.org',
     telephoneNr: '12121212121212',
-  )
+  ),
+  User(
+    firstName: 'customer3',
+    lastName: 'PersonNoComp',
+    role: Role.customer,
+    email: 'emailXXX@example.org',
+  ),
+  User(
+    firstName: 'customer4',
+    lastName: 'PersonNoComp',
+    role: Role.customer,
+    email: 'emailXXX@example.org',
+  ),
 ];
 
 List<Task> tasks = [
@@ -1359,4 +1371,31 @@ List<PaymentType> paymentTypes = [
       isPayable: false,
       accountCode: "11000",
       accountName: "Accounts Receivable"),
+];
+
+List<FinDoc> requests = [
+  FinDoc(
+      otherCompany: supplierCompanies[0],
+      description: "this is the first request",
+      items: []),
+  FinDoc(
+      otherCompany: supplierCompanies[1],
+      description: "this is the first request",
+      items: []),
+  FinDoc(
+      otherUser: customers[0],
+      description: "this is the first request",
+      items: []),
+  FinDoc(
+      otherUser: customers[1],
+      description: "this is the first request",
+      items: []),
+  FinDoc(
+      otherUser: customers[2],
+      description: "this is the first request",
+      items: []),
+  FinDoc(
+      otherUser: customers[3],
+      description: "this is the first request",
+      items: []),
 ];
