@@ -437,6 +437,7 @@ class CommonTest {
         .widget as DropdownButtonFormField;
     if (tff.initialValue is Currency) return tff.initialValue.description;
     if (tff.initialValue is UserGroup) return tff.initialValue.toString();
+    if (tff.initialValue is RequestType) return tff.initialValue.value;
     if (tff.initialValue is Role) return tff.initialValue.value;
     if (tff.initialValue is FinDocStatusVal) {
       return classificationId == 'AppHotel'

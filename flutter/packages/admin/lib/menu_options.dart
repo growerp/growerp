@@ -78,6 +78,12 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.home),
       ),
       TabItem(
+        form: FinDocList(
+            key: Key('Request'), sales: false, docType: FinDocType.request),
+        label: 'Requests',
+        icon: const Icon(Icons.question_answer),
+      ),
+      TabItem(
         form: const UserList(
           key: Key('Lead'),
           role: Role.lead,

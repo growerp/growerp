@@ -45,7 +45,6 @@ class User with _$User {
     String? telephoneNr,
 
     /// admin, employee, customer, supplier etc...
-    // ignore: invalid_annotation_target
     @JsonKey(name: 'userGroupId') @UserGroupConverter() UserGroup? userGroup,
     // the localization variables
     @Default('EN') String language,

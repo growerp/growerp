@@ -97,19 +97,24 @@ class FinDocScaffold extends StatelessWidget {
                   TextFormField(
                       key: const Key('searchField'),
                       autofocus: true,
-                      decoration: const InputDecoration(labelText: "Search input"),
+                      decoration:
+                          const InputDecoration(labelText: "Search input"),
                       validator: (value) {
                         if (value!.isEmpty) {
                           return 'Please enter a search value?';
                         }
                         return null;
                       },
-                      onFieldSubmitted: (value) => _finDocBloc.add(GetDataEvent(
-                          () => context.read<RestClient>().getFinDoc(
-                              docType: widget.docType,
-                              sales: widget.sales,
-                              limit: 5,
-                              searchString: value)))),
+                      onFieldSubmitted: (value) {
+                        _finDocBloc.add(GetDataEvent(() => context
+                            .read<RestClient>()
+                            .getFinDoc(
+                                docType: widget.docType,
+                                sales: widget.sales,
+                                limit: 5,
+                                searchString: value)));
+                        Future.delayed(const Duration(milliseconds: 150));
+                      }),
                   const SizedBox(height: 20),
                   const Text('Search results'),
                   Expanded(
@@ -130,21 +135,26 @@ class FinDocScaffold extends StatelessWidget {
                                           textAlign: TextAlign.center)));
                             }
                             index--;
-                            return index >= finDocs.length
-                                ? const Text('')
-                                : Dismissible(
-                                    key: const Key('searchItem'),
-                                    direction: DismissDirection.startToEnd,
-                                    child: ListTile(
-                                      title: Text(
-                                          "ID: ${finDocs[index].pseudoId}  "
-                                          "Date: ${finDocs[index].creationDate?.dateOnly()}",
-                                          key: Key("searchResult$index")),
-                                      subtitle: Text(
-                                          "Company: ${finDocs[index].otherCompany?.name} "),
-                                      onTap: () => Navigator.of(context)
-                                          .pop(finDocs[index]),
-                                    ));
+                            if (index >= finDocs.length)
+                              return Text(' ');
+                            else {
+                              var party = toCompanyUser(
+                                  finDocs[index].otherCompany ??
+                                      finDocs[index].otherUser);
+                              return Dismissible(
+                                  key: const Key('searchItem'),
+                                  direction: DismissDirection.startToEnd,
+                                  child: ListTile(
+                                    title: Text(
+                                        "ID: ${finDocs[index].pseudoId}  "
+                                        "Date: ${finDocs[index].creationDate?.dateOnly()}",
+                                        key: Key("searchResult$index")),
+                                    subtitle:
+                                        Text("${party!.type}: ${party.name} "),
+                                    onTap: () => Navigator.of(context)
+                                        .pop(finDocs[index]),
+                                  ));
+                            }
                           }))
                 ]))));
   }

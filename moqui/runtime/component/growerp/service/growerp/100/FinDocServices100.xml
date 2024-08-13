@@ -369,9 +369,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <econditions combine="or">
                                 <econdition field-name="pseudoId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
-                                <econdition field-name="requestId" ignore-case="true"
-                                    operator="like" from="search" ignore-if-empty="true" />
-                                <econdition field-name="requestName" ignore-case="true"
+                                <econdition field-name="description" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                             </econditions>
                             <order-by field-name="pseudoId" />

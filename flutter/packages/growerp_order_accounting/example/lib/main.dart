@@ -139,7 +139,7 @@ List<MenuOption> menuOptions = [
     route: '/requests',
     readGroups: [UserGroup.admin],
     child: const FinDocList(
-        key: Key('Reuquest'), sales: false, docType: FinDocType.request),
+        key: Key('Request'), sales: false, docType: FinDocType.request),
   ),
 ];
 

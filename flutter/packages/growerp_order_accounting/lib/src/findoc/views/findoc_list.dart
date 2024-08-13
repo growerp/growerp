@@ -384,7 +384,7 @@ class SelectFinDocDialog extends StatelessWidget {
         ? ReservationDialog(finDoc: finDoc, original: finDoc)
         // shipment with status approved shows receive screen
         : finDoc.docType == FinDocType.request
-            ? ShowRequestDialog(finDoc)
+            ? RequestDialog(finDoc: finDoc)
             : finDoc.docType == FinDocType.shipment &&
                     finDoc.status == FinDocStatusVal.approved &&
                     finDoc.sales == false

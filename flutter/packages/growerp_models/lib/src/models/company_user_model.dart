@@ -73,3 +73,38 @@ class CompanyUser with _$CompanyUser {
     }
   }
 }
+
+CompanyUser? toCompanyUser(dynamic object) {
+  switch (object) {
+    case Company():
+      return CompanyUser(
+          type: PartyType.company,
+          partyId: object.partyId,
+          pseudoId: object.pseudoId,
+          name: object.name,
+          role: object.role,
+          email: object.email,
+          telephoneNr: object.telephoneNr);
+    case User():
+      if (object.company == null) // return only user when no company
+        return CompanyUser(
+            type: PartyType.user,
+            partyId: object.partyId,
+            pseudoId: object.pseudoId,
+            name: "${object.lastName}, ${object.firstName}",
+            role: object.role,
+            email: object.email,
+            telephoneNr: object.telephoneNr);
+      // if related company return that
+      return CompanyUser(
+          type: PartyType.company,
+          partyId: object.company?.partyId,
+          pseudoId: object.company?.pseudoId,
+          name: object.company?.name,
+          role: object.company?.role,
+          email: object.company?.email,
+          telephoneNr: object.company?.telephoneNr);
+    default:
+      return null;
+  }
+}

@@ -423,15 +423,17 @@ List<User> customers = [
   ),
   User(
     firstName: 'customer3',
-    lastName: 'PersonNoComp',
+    lastName: 'customer3NoComp',
     role: Role.customer,
     email: 'emailXXX@example.org',
+    company: Company(),
   ),
   User(
     firstName: 'customer4',
-    lastName: 'PersonNoComp',
+    lastName: 'customer4NoComp',
     role: Role.customer,
     email: 'emailXXX@example.org',
+    company: Company(),
   ),
 ];
 
@@ -1375,27 +1377,38 @@ List<PaymentType> paymentTypes = [
 
 List<FinDoc> requests = [
   FinDoc(
+      docType: FinDocType.request,
+      requestType: RequestType.information,
       otherCompany: supplierCompanies[0],
       description: "this is the first request",
       items: []),
   FinDoc(
+      docType: FinDocType.request,
+      requestType: RequestType.consultation,
       otherCompany: supplierCompanies[1],
-      description: "this is the first request",
+      description: "this is the second request",
       items: []),
   FinDoc(
+      docType: FinDocType.request,
+      requestType: RequestType.other,
       otherUser: customers[0],
-      description: "this is the first request",
+      description: "this is the third request",
       items: []),
   FinDoc(
+      docType: FinDocType.request,
+      requestType: RequestType.other,
       otherUser: customers[1],
-      description: "this is the first request",
+      description: "this is the fourth request",
       items: []),
   FinDoc(
+      docType: FinDocType.request,
+      requestType: RequestType.information,
       otherUser: customers[2],
-      description: "this is the first request",
+      description: "this is the fifth request",
       items: []),
   FinDoc(
       otherUser: customers[3],
-      description: "this is the first request",
+      requestType: RequestType.consultation,
+      description: "this is the sixth request",
       items: []),
 ];

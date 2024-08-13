@@ -120,7 +120,7 @@ class RequestDialogState extends State<RequestDialog> {
 
   Widget requestForm(
       FinDocState state, GlobalKey<FormState> requestDialogFormKey) {
-    const companyLabel = "Select Requester";
+    const companyLabel = "Requester";
     return Padding(
         padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
         child: Form(
@@ -142,8 +142,7 @@ class RequestDialogState extends State<RequestDialog> {
                       flex: 2,
                       child: DropdownButtonFormField<FinDocStatusVal>(
                         key: const Key('statusDropDown'),
-                        decoration:
-                            const InputDecoration(labelText: 'Status11'),
+                        decoration: const InputDecoration(labelText: 'Status'),
                         value: _updatedStatus,
                         validator: (value) =>
                             value == null ? 'field required' : null,
@@ -172,6 +171,7 @@ class RequestDialogState extends State<RequestDialog> {
                   case DataFetchStatus.success:
                     return DropdownSearch<CompanyUser>(
                       enabled: !readOnly,
+                      key: const Key('otherCompanyUser'),
                       selectedItem: _selectedCompanyUser,
                       popupProps: PopupProps.menu(
                         isFilterOnline: true,
@@ -192,7 +192,6 @@ class RequestDialogState extends State<RequestDialog> {
                       dropdownDecoratorProps: const DropDownDecoratorProps(
                           dropdownSearchDecoration:
                               InputDecoration(labelText: companyLabel)),
-                      key: const Key('otherCompanyUser'),
                       itemAsString: (CompanyUser? u) =>
                           " ${u!.name}[${u.pseudoId}]",
                       asyncItems: (String filter) async {
@@ -226,7 +225,7 @@ class RequestDialogState extends State<RequestDialog> {
                     return const Center(child: LoadingIndicator());
                 }
               }),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               IgnorePointer(
                 ignoring: readOnly,
                 child: DropdownButtonFormField<RequestType>(
@@ -243,7 +242,7 @@ class RequestDialogState extends State<RequestDialog> {
                   isExpanded: true,
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 key: const Key('description'),
                 minLines: 5,
@@ -251,38 +250,38 @@ class RequestDialogState extends State<RequestDialog> {
                 decoration: const InputDecoration(labelText: 'Description'),
                 controller: _descriptionController,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(
                 children: [
-                  OutlinedButton(
-                      key: const Key('cancelFinDoc'),
-                      child: const Text('Cancel Request'),
-                      onPressed: () {
-                        _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
-                          status: FinDocStatusVal.cancelled,
-                        )));
-                      }),
-                  const SizedBox(width: 20),
                   Expanded(
                     child: OutlinedButton(
-                        key: const Key('update'),
-                        child: Text(
-                            '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
+                        key: const Key('cancelFinDoc'),
+                        child: const Text('Cancel Request'),
                         onPressed: () {
-                          if (requestDialogFormKey.currentState!.validate()) {
-                            _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
-                              requestId: widget.finDoc.requestId,
-                              requestType: _selectedRequestType,
-                              otherCompany: _selectedCompanyUser!.getCompany(),
-                              otherUser: _selectedCompanyUser!.getUser(),
-                              pseudoId: _pseudoIdController.text,
-                              description: _descriptionController.text,
-                              status: _updatedStatus,
-                              items: [],
-                            )));
-                          }
+                          _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
+                            status: FinDocStatusVal.cancelled,
+                          )));
                         }),
                   ),
+                  const SizedBox(width: 20),
+                  OutlinedButton(
+                      key: const Key('update'),
+                      child: Text(
+                          '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
+                      onPressed: () {
+                        if (requestDialogFormKey.currentState!.validate()) {
+                          _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
+                            requestId: widget.finDoc.requestId,
+                            requestType: _selectedRequestType,
+                            otherCompany: _selectedCompanyUser!.getCompany(),
+                            otherUser: _selectedCompanyUser!.getUser(),
+                            pseudoId: _pseudoIdController.text,
+                            description: _descriptionController.text,
+                            status: _updatedStatus,
+                            items: [],
+                          )));
+                        }
+                      }),
                 ],
               )
             ])));
