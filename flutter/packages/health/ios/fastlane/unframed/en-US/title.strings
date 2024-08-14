@@ -1,0 +1,9 @@
+# title.strings
+"dashboard" = "Application Dashboard.";
+"company" = "Company Information";
+"catalog" = "Products & Assets & Categories";
+"orders" = "Orders & Customers/Suppliers";
+"website" = "Website maintenance";
+"account" = "Accounting Dashboard";
+"ledgers" = "Ledger tree & transactions";
+"chat" = "Internal Chat window";

@@ -32,7 +32,7 @@
             "args": [
                 "import",
                 "-i",
-                "growerpCsv"
+                "growerpOutput"
             ]
         },
         {
@@ -62,6 +62,13 @@
             "type": "dart",
             "request": "launch",
             "cwd": "flutter/packages/admin",
+            "program": "lib/main.dart",
+        },
+        {
+            "name": "Health mobile (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/health",
             "program": "lib/main.dart",
         },
         {

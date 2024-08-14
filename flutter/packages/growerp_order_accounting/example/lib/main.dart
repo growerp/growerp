@@ -168,7 +168,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case '/requests':
       return MaterialPageRoute(
           builder: (context) =>
-              DisplayMenuOption(menuList: menuOptions, menuIndex: 5));
+              DisplayMenuOption(menuList: menuOptions, menuIndex: 1));
     case '/shipments':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(

@@ -617,7 +617,7 @@ packages:
     source: path
     version: "1.2.1"
   growerp_models:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description:
       path: "../growerp_models"
       relative: true

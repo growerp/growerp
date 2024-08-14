@@ -1,0 +1,16 @@
+{
+  "portrait": {
+    "iPad Pro (12.9": {
+      "offset": "+96+102",
+      "width": 2048
+    },
+    "iPhone 8": {
+      "offset": "+98+335",
+      "width": 1242
+    },
+    "iPhone 12 Pro Max": {
+      "offset": "+74+62",
+      "width": 1284
+    }
+  }
+}
