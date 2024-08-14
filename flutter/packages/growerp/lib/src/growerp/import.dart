@@ -35,7 +35,8 @@ Future<void> login(RestClient client, String username, String password) async {
         exit(1);
       } else {
         // wait for background server job to finish
-        await Future.delayed(const Duration(seconds: 2));
+        print(" wait for background job to finish");
+        await Future.delayed(const Duration(seconds: 5));
       }
     }
 

@@ -334,8 +334,6 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <set field="current" value="0" type="Integer" />
             <!-- request -->
-            <log
-                message="====doctype: $docType ==requestId: $finDocId p: $pseudoId o: $ownerPartyId" />
             <if condition="docType == 'request'">
                 <!-- 'ReqDraft','ReqSubmitted','ReqInProgress','ReqCompleted','ReqCancelled' -->
                 <set field="openStatusList"
@@ -376,7 +374,6 @@ along with this software (see the LICENSE.md file). If not, see
                         </entity-find>
                     </else>
                 </if>
-                <log message="====requests found: ${items?.size()}" />
                 <iterate list="items" entry="item">
                     <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                         in-map="[sales: sales, docType: docType, statusId: item.statusId]"
@@ -1443,7 +1440,6 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <log message="===other user: ${finDoc.otherUser} comp: ${otherCompany}" />
             <set field="nowDate" from="ec.user.nowTimestamp.toString().substring(0,10)" />
             <if
                 condition="finDoc.docType != 'transaction' &amp;&amp; 
@@ -1492,7 +1488,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                         in-map="[sales: sales, docType: 'requestType', statusId: finDoc.requestType]"
                         out-map="requestType" />
-                    <log message="===create findoc requestType: ${requestType.convertedStatusId}" />
                     <service-call name="create#mantle.request.Request"
                         in-map="[   requestPseudoId: finDoc.pseudoId,
                                     requestTypeEnumId: requestType.convertedStatusId,
@@ -1842,7 +1837,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="orderId" />
             </entity-delete-by-condition>
             <iterate list="orderItems" entry="item">
-                <if condition="item.itemType.itemTypeId == 'ItemProduct'">
+                <if
+                    condition="item.itemType.itemTypeId == 'ItemProduct'
+                        &amp;&amp; !item.product.productId.isEmpty()">
                     <service-call
                         name="mantle.order.OrderServices.add#OrderProductQuantity"
                         in-map="context + [ itemTypeId: item.itemType.itemTypeId,

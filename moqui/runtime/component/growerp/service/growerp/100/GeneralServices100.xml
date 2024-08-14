@@ -280,12 +280,15 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find-one>
                 <if condition="!facility">
                     <log level="error"
-                        message="could not find warehouse for company: $companyPartyId" />
+                        message="could not find warehouse for company: $companyPartyId owner: $ownerPartyId" />
+                    <set field="whLocations" value="0" />
+                    <else>
+                        <entity-find-count entity-name="mantle.facility.FacilityLocation"
+                            count-field="whLocations">
+                            <econdition field-name="facilityId" from="facility.facilityId" />
+                        </entity-find-count>
+                    </else>
                 </if>
-                <entity-find-count entity-name="mantle.facility.FacilityLocation"
-                    count-field="whLocations">
-                    <econdition field-name="facilityId" from="facility.facilityId" />
-                </entity-find-count>
                 <entity-find-count entity-name="mantle.request.Request"
                     count-field="requests">
                     <econdition field-name="requestOwnerPartyId" from="ownerPartyId" />
