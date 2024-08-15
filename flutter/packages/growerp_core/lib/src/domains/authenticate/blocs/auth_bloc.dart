@@ -36,7 +36,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       : super(const AuthState()) {
     on<AuthLoad>(_onAuthLoad);
     on<AuthRegisterCompanyAndAdmin>(_onAuthRegisterCompanyAndAdmin);
-//    on<AuthRegisterUserEcommerce>(_onAuthRegisterUserEcommerce);
+    on<AuthRegisterUserEcommerce>(_onAuthRegisterUserEcommerce);
     on<AuthLoggedOut>(_onAuthLoggedOut);
     on<AuthLogin>(_onAuthLogin);
     on<AuthResetPassword>(_onAuthResetPassword);
@@ -140,29 +140,36 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-/*  Future<void> _onAuthRegisterUserEcommerce(
+  Future<void> _onAuthRegisterUserEcommerce(
     AuthRegisterUserEcommerce event,
     Emitter<AuthState> emit,
   ) async {
-    ApiResult<List<User>> apiResult = await restClient.registerUser(
-        event.user.copyWith(userGroup: UserGroup.customer),
-        state.authenticate!.company!.partyId!);
-    emit(apiResult.when(
-        success: (User data) {
-          emit(state.copyWith(status: AuthStatus.registered));
-          return state.copyWith(
-              status: AuthStatus.unAuthenticated,
-              message: '          Register successful,\n'
-                  'you can now login with the password sent by email.',
-              authenticate: state.authenticate!.copyWith(user: data[0]));
-        },
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: AuthStatus.failure, message: NetworkExceptions.getErrorMessage(error))));
-    if (state.status == AuthStatus.registered) {
-      await PersistFunctions.persistAuthenticate(state.authenticate!);
+    try {
+      emit(state.copyWith(status: AuthStatus.loading));
+      final result = await restClient.registerUser(
+        emailAddress: event.user.email!,
+        firstName: event.user.firstName!,
+        lastName: event.user.lastName!,
+        companyPartyId: event.companyPartyId,
+        classificationId: classificationId,
+        newPassword: kReleaseMode ? null : 'qqqqqq9!',
+      );
+      if (result['ok'] == true) {
+        emit(state.copyWith(
+            status: AuthStatus.unAuthenticated,
+            message: '          Register successful,\n'
+                'you can now login with the password sent by email.'));
+      } else {
+        emit(state.copyWith(
+            status: AuthStatus.failure,
+            message: 'Register Company and Admin failed.\n'
+                'Contact support@growerp.com for assistence'));
+      }
+    } on DioException catch (e) {
+      emit(state.copyWith(status: AuthStatus.failure, message: getDioError(e)));
     }
   }
-*/
+
   Future<void> _onAuthLoggedOut(
     AuthLoggedOut event,
     Emitter<AuthState> emit,

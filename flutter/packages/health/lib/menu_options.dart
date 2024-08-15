@@ -25,7 +25,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
-    readGroups: [UserGroup.admin, UserGroup.employee],
+    readGroups: [UserGroup.admin, UserGroup.employee, UserGroup.other],
     writeGroups: [UserGroup.admin],
     child: const local.AdminDbForm(),
   ),
@@ -34,16 +34,18 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/accounting.png',
     title: 'Requests',
     route: '/requests',
-    readGroups: [UserGroup.admin],
+    writeGroups: [UserGroup.admin],
+    myGroups: [UserGroup.other, UserGroup.employee],
     child: const FinDocList(
         key: Key('Request'), sales: false, docType: FinDocType.request),
   ),
   MenuOption(
     image: 'packages/growerp_core/images/accountingGrey.png',
     selectedImage: 'packages/growerp_core/images/accounting.png',
-    title: 'Customers',
+    title: 'Patients',
     route: '/customers',
-    readGroups: [UserGroup.admin],
+    readGroups: [UserGroup.employee],
+    writeGroups: [UserGroup.admin],
     child: const UserList(
       key: Key('Customer'),
       role: Role.customer,
@@ -52,9 +54,10 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: 'packages/growerp_core/images/accountingGrey.png',
     selectedImage: 'packages/growerp_core/images/accounting.png',
-    title: 'Employees',
+    title: 'Staff',
     route: '/employees',
-    readGroups: [UserGroup.admin],
+    readGroups: [UserGroup.employee],
+    writeGroups: [UserGroup.admin],
     child: const UserList(
       key: Key('Employee'),
       role: Role.company,
@@ -63,10 +66,10 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: 'packages/growerp_core/images/accountingGrey.png',
     selectedImage: 'packages/growerp_core/images/accounting.png',
-    title: 'Company',
+    title: 'Hospital',
     route: '/company',
     writeGroups: [UserGroup.admin],
-    readGroups: [UserGroup.employee],
+    readGroups: [UserGroup.employee, UserGroup.other],
     child: ShowCompanyDialog(
       Company(),
       dialog: false,

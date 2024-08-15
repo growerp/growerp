@@ -18,7 +18,7 @@
 enum UserGroup {
   employee('GROWERP_M_EMPLOYEE'),
   admin('GROWERP_M_ADMIN'),
-  other('OTHER');
+  other('GROWERP_M_OTHER');
 
   final String value;
   const UserGroup(this.value);

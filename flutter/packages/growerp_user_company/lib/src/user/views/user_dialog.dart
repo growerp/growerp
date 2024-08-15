@@ -460,85 +460,83 @@ class UserDialogState extends State<UserDialogStateFull> {
                 ],
               ),
             ])),
-      if (widget.user.loginName != null || widget.user.role == Role.company)
-        InputDecorator(
-            decoration: InputDecoration(
-              labelText: 'User Login',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(25.0),
-              ),
+      InputDecorator(
+          decoration: InputDecoration(
+            labelText: 'User Login',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(25.0),
             ),
-            child: Column(children: [
-              TextFormField(
-                readOnly: !(currentUser.userGroup == UserGroup.admin),
-                key: const Key('loginName'),
-                decoration:
-                    const InputDecoration(labelText: 'User Login Name '),
-                controller: _loginNameController,
-                onChanged: (value) {
-                  if (value.isNotEmpty != _hasLogin) {
-                    return setState(() {
-                      _hasLogin = !_hasLogin;
-                    });
-                  }
-                },
-                validator: (value) {
-                  if (widget.user.userGroup == UserGroup.admin &&
-                      value!.isEmpty) {
-                    return 'An administrator needs a username!';
-                  }
-                  return null;
-                },
-              ),
-              if (currentUser.userGroup == UserGroup.admin &&
-                  _loginNameController.text.isNotEmpty)
-                Column(children: [
-                  const SizedBox(height: 10),
-                  Row(children: [
-                    Expanded(
-                        child: DropdownButtonFormField<UserGroup>(
-                      decoration: const InputDecoration(
-                          labelText: 'Security User Group'),
-                      key: const Key('userGroup'),
-                      hint: const Text('Security User Group'),
-                      value: _selectedUserGroup,
-                      validator: (value) =>
-                          value == null ? 'field required' : null,
-                      items: localUserGroups.map((item) {
-                        return DropdownMenuItem<UserGroup>(
-                            value: item, child: Text(item.name));
-                      }).toList(),
-                      onChanged: (UserGroup? newValue) {
-                        setState(() {
-                          _selectedUserGroup = newValue!;
-                        });
-                      },
-                      isExpanded: true,
-                    )),
-                    const SizedBox(width: 10),
-                    SizedBox(
-                      width: 100,
-                      height: 60,
-                      child: InputDecorator(
-                          decoration: InputDecoration(
-                            labelText: 'Disabled',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(25.0),
-                            ),
+          ),
+          child: Column(children: [
+            TextFormField(
+              readOnly: !(currentUser.userGroup == UserGroup.admin),
+              key: const Key('loginName'),
+              decoration: const InputDecoration(labelText: 'User Login Name '),
+              controller: _loginNameController,
+              onChanged: (value) {
+                if (value.isNotEmpty != _hasLogin) {
+                  return setState(() {
+                    _hasLogin = !_hasLogin;
+                  });
+                }
+              },
+              validator: (value) {
+                if (widget.user.userGroup == UserGroup.admin &&
+                    value!.isEmpty) {
+                  return 'An administrator needs a username!';
+                }
+                return null;
+              },
+            ),
+            if (currentUser.userGroup == UserGroup.admin &&
+                _loginNameController.text.isNotEmpty)
+              Column(children: [
+                const SizedBox(height: 10),
+                Row(children: [
+                  Expanded(
+                      child: DropdownButtonFormField<UserGroup>(
+                    decoration:
+                        const InputDecoration(labelText: 'Security User Group'),
+                    key: const Key('userGroup'),
+                    hint: const Text('Security User Group'),
+                    value: _selectedUserGroup,
+                    validator: (value) =>
+                        value == null ? 'field required' : null,
+                    items: localUserGroups.map((item) {
+                      return DropdownMenuItem<UserGroup>(
+                          value: item, child: Text(item.name));
+                    }).toList(),
+                    onChanged: (UserGroup? newValue) {
+                      setState(() {
+                        _selectedUserGroup = newValue!;
+                      });
+                    },
+                    isExpanded: true,
+                  )),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    width: 100,
+                    height: 60,
+                    child: InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: 'Disabled',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25.0),
                           ),
-                          child: Checkbox(
-                            key: const Key('loginDisabled'),
-                            value: _isLoginDisabled,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                _isLoginDisabled = value!;
-                              });
-                            },
-                          )),
-                    )
-                  ])
+                        ),
+                        child: Checkbox(
+                          key: const Key('loginDisabled'),
+                          value: _isLoginDisabled,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _isLoginDisabled = value!;
+                            });
+                          },
+                        )),
+                  )
                 ])
-            ]))
+              ])
+          ]))
     ];
     Widget updateButton = Row(children: [
       if (widget.user.partyId != null)

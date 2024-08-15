@@ -21,7 +21,6 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,8 +30,8 @@ Future main() async {
   RestClient restClient = RestClient(await buildDioClient());
   ChatServer chatServer = ChatServer();
 
-  runApp(Phoenix(
-    child: TopApp(
+  runApp(
+    TopApp(
       restClient: restClient,
       classificationId: 'AppAdmin',
       chatServer: chatServer,
@@ -42,7 +41,7 @@ Future main() async {
       extraDelegates: const [InventoryLocalizations.delegate],
       extraBlocProviders: getInventoryBlocProviders(restClient, "AppAdmin"),
     ),
-  ));
+  );
 }
 
 // Menu definition

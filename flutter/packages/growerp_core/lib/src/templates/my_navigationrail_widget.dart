@@ -26,7 +26,7 @@ Widget myNavigationRail(
   Authenticate auth = authBloc.state.authenticate!;
   for (var option in menu) {
     {
-      if (option.readGroups.contains(auth.user?.userGroup)) {
+      if (access(auth.user!.userGroup!, option)) {
         //print("====tap available: tap${option.route}");
 
         items.add(NavigationRailDestination(

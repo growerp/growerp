@@ -21,28 +21,49 @@ import '../menu_options.dart';
 class AdminDbForm extends StatelessWidget {
   const AdminDbForm({super.key});
 
+  bool access(UserGroup userGroup, MenuOption menuOption) {
+    print("===1=check for $userGroup in write: ${menuOption.writeGroups}");
+    if (menuOption.writeGroups != null &&
+        menuOption.writeGroups!.contains(userGroup)) return true;
+    print("==2==check for $userGroup in my: ${menuOption.myGroups}");
+    if (menuOption.myGroups != null &&
+        menuOption.myGroups!.contains(userGroup)) {
+      return true;
+    }
+    print("=3===check for $userGroup in read: ${menuOption.readGroups}");
+    if (menuOption.readGroups != null &&
+        menuOption.readGroups!.contains(userGroup)) return true;
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
+    var userGroup =
+        context.read<AuthBloc>().state.authenticate!.user!.userGroup;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Expanded(
           child: DashBoardForm(dashboardItems: [
-            makeDashboardItem('dbRequests', context, menuOptions[1], [
-              "Requests: ${authenticate.stats?.requests ?? 0}",
-            ]),
-            makeDashboardItem('dbCustomers', context, menuOptions[2], [
-              "Customers: ${authenticate.stats?.customers ?? 0}",
-            ]),
-            makeDashboardItem('dbEmployees', context, menuOptions[3], [
-              "Employees: ${authenticate.stats?.opportunities ?? 0}",
-            ]),
-            makeDashboardItem('dbCompany', context, menuOptions[4], [
-              authenticate.company!.name!.length > 20
-                  ? "${authenticate.company!.name!.substring(0, 20)}..."
-                  : "${authenticate.company!.name}",
-            ]),
+            if (access(userGroup!, menuOptions[1]))
+              makeDashboardItem('dbRequests', context, menuOptions[1], [
+                "#: ${authenticate.stats?.requests ?? 0}",
+              ]),
+            if (access(userGroup, menuOptions[2]))
+              makeDashboardItem('dbCustomers', context, menuOptions[2], [
+                "#: ${authenticate.stats?.customers ?? 0}",
+              ]),
+            if (access(userGroup, menuOptions[3]))
+              makeDashboardItem('dbEmployees', context, menuOptions[3], [
+                "#: ${authenticate.stats?.opportunities ?? 0}",
+              ]),
+            if (access(userGroup, menuOptions[4]))
+              makeDashboardItem('dbCompany', context, menuOptions[4], [
+                authenticate.company!.name!.length > 20
+                    ? "${authenticate.company!.name!.substring(0, 20)}..."
+                    : "${authenticate.company!.name}",
+              ]),
           ]),
         ),
       ],

@@ -124,13 +124,16 @@ abstract class RestClient {
 
   // ecommerce
   @POST("rest/s1/growerp/100/RegisterUser")
-  @FormUrlEncoded()
-  Future<Authenticate> registerUser({
-    @Field() required User user,
-    @Field() required String ownerPartyId,
+  @Extra({'noApiKey': true})
+  Future<Map<String, bool>> registerUser({
+    @Field() required String emailAddress,
+    @Field() required String firstName,
+    @Field() required String lastName,
+    @Field() required String companyPartyId,
     @Field() required String classificationId,
-    @Field() required String newPassword,
+    @Field() String? newPassword, // just for test
   });
+
   // Website ======
   @GET("rest/s1/growerp/100/Website")
   Future<Website> getWebsite();

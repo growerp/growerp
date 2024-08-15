@@ -15,61 +15,93 @@ along with this software (see the LICENSE.md file). If not, see
 <entity-facade-xml type="seed-initial">
 
     <!--  GrowERP REST API security all separated by internalorg company-->
-    <moqui.basic.Enumeration description="GrowERP Mobile User groups" enumId="GROWERPMOBILE" enumTypeId="UserGroupType"/> 
-    <moqui.security.UserGroup userGroupId="GROWERP_M_SYSTEM" description="System Admin" groupTypeEnumId="GROWERPMOBILE"/>
-        <moqui.security.UserGroupMember userGroupId="GROWERP_M_SYSTEM" userId="EX_JOHN_DOE" fromDate="1265184000000"/>
-    <moqui.security.UserGroup userGroupId="GROWERP_M_ADMIN" description="Admin" groupTypeEnumId="GROWERPMOBILE">
-        <permissions userPermissionId="ORDER_APPROVE" fromDate="0"/>
-        <permissions userPermissionId="INVOICE_APPROVE" fromDate="0"/>
+    <moqui.basic.Enumeration description="GrowERP Mobile User groups" enumId="GROWERPMOBILE"
+        enumTypeId="UserGroupType" />
+    <moqui.security.UserGroup userGroupId="GROWERP_M_SYSTEM" description="System Admin"
+        groupTypeEnumId="GROWERPMOBILE" />
+    <moqui.security.UserGroupMember userGroupId="GROWERP_M_SYSTEM" userId="EX_JOHN_DOE"
+        fromDate="1265184000000" />
+    <moqui.security.UserGroup userGroupId="GROWERP_M_ADMIN" description="Admin"
+        groupTypeEnumId="GROWERPMOBILE">
+        <permissions userPermissionId="ORDER_APPROVE" fromDate="0" />
+        <permissions userPermissionId="INVOICE_APPROVE" fromDate="0" />
     </moqui.security.UserGroup>
-    <moqui.security.UserGroup userGroupId="GROWERP_M_EMPLOYEE" description="Employee" groupTypeEnumId="GROWERPMOBILE">
-        <permissions userPermissionId="ORDER_APPROVE" fromDate="0"/>
+    <moqui.security.UserGroup userGroupId="GROWERP_M_EMPLOYEE" description="Employee"
+        groupTypeEnumId="GROWERPMOBILE">
+        <permissions userPermissionId="ORDER_APPROVE" fromDate="0" />
     </moqui.security.UserGroup>
-    <moqui.security.UserGroup userGroupId="GROWERP_M_CUSTOMER" description="Customer" groupTypeEnumId="GROWERPMOBILE"/>
-    <moqui.security.UserGroup userGroupId="GROWERP_M_LEAD" description="Lead" groupTypeEnumId="GROWERPMOBILE"/>
-    <moqui.security.UserGroup userGroupId="GROWERP_M_SUPPLIER" description="Supplier" groupTypeEnumId="GROWERPMOBILE"/>
+    <moqui.security.UserGroup userGroupId="GROWERP_M_OTHER" description="Customer"
+        groupTypeEnumId="GROWERPMOBILE" />
+    <moqui.security.UserGroup userGroupId="GROWERP_M_CUSTOMER" description="Customer"
+        groupTypeEnumId="GROWERPMOBILE" />
+    <moqui.security.UserGroup userGroupId="GROWERP_M_LEAD" description="Lead"
+        groupTypeEnumId="GROWERPMOBILE" />
+    <moqui.security.UserGroup userGroupId="GROWERP_M_SUPPLIER" description="Supplier"
+        groupTypeEnumId="GROWERPMOBILE" />
 
     <!-- Artifact group for all of the GROWERP REST API via the GROWERP resource (the root resource) -->
-    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_API" description="GROWERP REST API (via root resource)"/>
-    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_API" artifactTypeEnumId="AT_REST_PATH"
-        inheritAuthz="Y" artifactName="/growerp"/>
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_API"
+        description="GROWERP REST API (via root resource)" />
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_API"
+        artifactTypeEnumId="AT_REST_PATH"
+        inheritAuthz="Y" artifactName="/growerp" />
     <!-- pop rest store -->
-    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_API" artifactTypeEnumId="AT_REST_PATH"
-        inheritAuthz="Y" artifactName="/pop"/>
-    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_API" artifactTypeEnumId="AT_XML_SCREEN"
-        inheritAuthz="Y" artifactName="component://growerp/screen/rest.xml"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_API"
+        artifactTypeEnumId="AT_REST_PATH"
+        inheritAuthz="Y" artifactName="/pop" />
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_API"
+        artifactTypeEnumId="AT_XML_SCREEN"
+        inheritAuthz="Y" artifactName="component://growerp/screen/rest.xml" />
 
     <!-- Full company permissions for the ADMIN and system user group -->
-    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_ADMIN_SYS" userGroupId="ADMIN" 
-        artifactGroupId="GROWERP_API" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_ADMIN_SYS" userGroupId="ADMIN"
+        artifactGroupId="GROWERP_API" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL" />
 
-    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_ADMIN_SYS" userGroupId="GROWERP_M_SYSTEM" 
-        artifactGroupId="GROWERP_API" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
-    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_ADMIN" userGroupId="GROWERP_M_ADMIN" 
-        artifactGroupId="GROWERP_API" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_ADMIN_SYS"
+        userGroupId="GROWERP_M_SYSTEM"
+        artifactGroupId="GROWERP_API" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL" />
+    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_ADMIN"
+        userGroupId="GROWERP_M_ADMIN"
+        artifactGroupId="GROWERP_API" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL" />
     <!-- Read permissions for all employees user group temporary set to all too..better in app..-->
-    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_EMPL" userGroupId="GROWERP_M_EMPLOYEE"
-        artifactGroupId="GROWERP_API" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_EMPL"
+        userGroupId="GROWERP_M_EMPLOYEE"
+        artifactGroupId="GROWERP_API" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL" />
 
     <!-- Special Permissions -->
-    <!-- in general users can read with the company, write access can be limited to other users and company info-->
-    <userPermissions userPermissionId="GROWERP_M_ALL" description="Any action on any employee, any company"/>
-    <userPermissions userPermissionId="GROWERP_M_COMPANY" description="Any action on own company info"/>
-    <userPermissions userPermissionId="GROWERP_M_USERS" description="Any action on any employee in the same company"/>
-    <userPermissions userPermissionId="GROWERP_M_CUSTOMERS" description="Outside user group"/>
+    <!-- in general users can read with the company, write access can be limited to other users and
+    company info-->
+    <userPermissions userPermissionId="GROWERP_M_ALL"
+        description="Any action on any employee, any company" />
+    <userPermissions userPermissionId="GROWERP_M_COMPANY"
+        description="Any action on own company info" />
+    <userPermissions userPermissionId="GROWERP_M_USERS"
+        description="Any action on any employee in the same company" />
+    <userPermissions userPermissionId="GROWERP_M_CUSTOMERS" description="Outside user group" />
     <!-- system group -->
-    <userGroupPermissions userGroupId="GROWERP_M_SYSTEM" userPermissionId="GROWERP_M_ALL" fromDate="0"/>
+    <userGroupPermissions userGroupId="GROWERP_M_SYSTEM" userPermissionId="GROWERP_M_ALL"
+        fromDate="0" />
     <!-- company admin group -->
-    <userGroupPermissions userGroupId="GROWERP_M_ADMIN" userPermissionId="GROWERP_M_COMPANY" fromDate="0"/>
-    <userGroupPermissions userGroupId="GROWERP_M_ADMIN" userPermissionId="GROWERP_M_USERS" fromDate="0"/>
-    <!-- company eployee group -->
-    <userGroupPermissions userGroupId="GROWERP_M_EMPLOYEE" userPermissionId="GROWERP_M_USERS" fromDate="0"/>
-    <!-- customer group -->
-    <userGroupPermissions userGroupId="GROWERP_M_CUSTOMER" userPermissionId="GROWERP_M_CUSTOMERS" fromDate="0"/>
-    <userGroupPermissions userGroupId="GROWERP_M_LEAD" userPermissionId="GROWERP_M_CUSTOMERS" fromDate="0"/>
-    <userGroupPermissions userGroupId="GROWERP_M_SUPPLIER" userPermissionId="GROWERP_M_CUSTOMERS" fromDate="0"/>
+    <userGroupPermissions userGroupId="GROWERP_M_ADMIN" userPermissionId="GROWERP_M_COMPANY"
+        fromDate="0" />
+    <userGroupPermissions userGroupId="GROWERP_M_ADMIN" userPermissionId="GROWERP_M_USERS"
+        fromDate="0" />
+    <!-- company employee group -->
+    <userGroupPermissions userGroupId="GROWERP_M_EMPLOYEE" userPermissionId="GROWERP_M_USERS"
+        fromDate="0" />
+    <!-- other groups -->
+    <userGroupPermissions userGroupId="GROWERP_M_OTHER" userPermissionId="GROWERP_M_CUSTOMERS"
+        fromDate="0" />
+    <userGroupPermissions userGroupId="GROWERP_M_CUSTOMER" userPermissionId="GROWERP_M_CUSTOMERS"
+        fromDate="0" />
+    <userGroupPermissions userGroupId="GROWERP_M_LEAD" userPermissionId="GROWERP_M_CUSTOMERS"
+        fromDate="0" />
+    <userGroupPermissions userGroupId="GROWERP_M_SUPPLIER" userPermissionId="GROWERP_M_CUSTOMERS"
+        fromDate="0" />
 
-    <moqui.security.UserGroupPermission userGroupId="GROWERP_M_SYSTEM" userPermissionId="ADMIN_PASSWORD" fromDate="0"/>
-    <moqui.security.UserGroupPermission userGroupId="GROWERP_M_ADMIN" userPermissionId="ADMIN_PASSWORD" fromDate="0"/>
+    <moqui.security.UserGroupPermission userGroupId="GROWERP_M_SYSTEM"
+        userPermissionId="ADMIN_PASSWORD" fromDate="0" />
+    <moqui.security.UserGroupPermission userGroupId="GROWERP_M_ADMIN"
+        userPermissionId="ADMIN_PASSWORD" fromDate="0" />
 
 </entity-facade-xml>

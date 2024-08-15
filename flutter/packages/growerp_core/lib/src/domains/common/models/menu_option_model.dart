@@ -28,8 +28,10 @@ class MenuOption {
   final Object? arguments; // optional arguments to used with route
   final List<TabItem>? tabItems; // top/bottom tabs
   final Widget? child; // when no tabs this is single page
-  final List<UserGroup> readGroups; // user groups who can read
+  final List<UserGroup>? readGroups; // user groups who can read
   final List<UserGroup>? writeGroups; // user groups who can add/update/delete
+  final List<UserGroup>?
+      myGroups; // user groups who add/update/delete own records
 
   MenuOption({
     this.image,
@@ -39,8 +41,9 @@ class MenuOption {
     this.arguments,
     this.tabItems,
     this.child,
-    required this.readGroups,
+    this.readGroups,
     this.writeGroups,
+    this.myGroups,
   });
 
   MenuOption copyWith({

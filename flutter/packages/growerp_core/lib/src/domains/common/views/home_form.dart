@@ -123,19 +123,10 @@ class HomeFormState extends State<HomeForm> {
                             height: 80,
                             width: 80),
                         if (widget.title.isNotEmpty) const SizedBox(height: 30),
-                        InkWell(
-                            onLongPress: () async {
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return const ChangeIpForm();
-                                  });
-                            },
-                            child: Text(widget.title,
-                                style: TextStyle(
-                                    fontSize: isPhone ? 15 : 25,
-                                    fontWeight: FontWeight.bold))),
+                        Text(widget.title,
+                            style: TextStyle(
+                                fontSize: isPhone ? 15 : 25,
+                                fontWeight: FontWeight.bold)),
                         if (widget.title.isNotEmpty) const SizedBox(height: 30),
                         state.authenticate!.company?.partyId != null
                             ? OutlinedButton(
@@ -153,9 +144,23 @@ class HomeFormState extends State<HomeForm> {
                                       });
                                 })
                             : const Text('No companies yet, create one!'),
-                        const Expanded(child: SizedBox(height: 130)),
+                        Expanded(child: const SizedBox(height: 10)),
                         OutlinedButton(
                             key: const Key('newCompButton'),
+                            child: const Text('Register Customer at company'),
+                            onPressed: () async {
+                              await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                        value: _authBloc,
+                                        child: const NewCompanyDialog(false));
+                                  });
+                            }),
+                        SizedBox(height: 10),
+                        OutlinedButton(
+                            key: const Key('newUserButton'),
                             child: const Text('Create a new company and admin'),
                             onPressed: () async {
                               await showDialog(

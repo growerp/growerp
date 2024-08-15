@@ -110,6 +110,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="notRoleTypeId" value="OrgInternal" />
                 </else>
             </if>
+            <if condition="searchString">
+                <set field="searchString" value="%$searchString%" />
+            </if>
             <entity-find list="parties" offset="start" limit="limit"
                 entity-name="growerp.party.CompanyPreferenceAndRole">
                 <econdition field-name="ownerPartyId" ignore-if-empty="true" />
@@ -121,9 +124,11 @@ along with this software (see the LICENSE.md file). If not, see
                     or-null="true" />
                 <econditions combine="or">
                     <econdition field-name="organizationName" from="searchString"
-                        ignore-if-empty="true" ignore-case="true" />
+                        operator="like" ignore-if-empty="true" ignore-case="true" />
                     <econdition field-name="partyId" from="searchString"
-                        ignore-if-empty="true" />
+                        operator="like" ignore-if-empty="true" ignore-case="true" />
+                    <econdition field-name="pseudoId" from="searchString"
+                        operator="like" ignore-if-empty="true" ignore-case="true" />
                 </econditions>
                 <order-by field-name="organizationName" />
             </entity-find>
@@ -1162,78 +1167,31 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="register" noun="User" authenticate="anonymous-all">
         <description>registration on the e-commerce webapp for a specific company just for non-employees</description>
         <in-parameters>
-            <parameter name="ownerPartyId" required="true">
-                <description>Party Id of the organization</description>
-            </parameter>
-            <parameter name="classificationId">
-                <description>The App id the user want to register for, valid entries: AppAdmin, AppHotel etc </description>
-            </parameter>
-            <parameter name="user" type="Map" required="true">
-                <parameter name="partyId" />
-                <parameter name="pseudoId" />
-                <parameter name="email" />
-                <parameter name="firstName" />
-                <parameter name="lastName" />
-                <parameter name="loginDisabled" type="Boolean" default-value="false" />
-                <parameter name="loginName" default="email" />
-                <parameter name="userGroupId" />
-                <parameter name="groupDescription" />
-                <parameter name="language" />
-                <parameter name="companyPartyId" />
-                <parameter name="companyName" />
-                <parameter name="image" />
-                <parameter name="userId" />
-                <parameter name="locale" />
-                <parameter name="telephoneNr" />
-                <parameter name="companyAddress" type="Map">
-                    <parameter name="addressId" />
-                    <parameter name="address1" />
-                    <parameter name="address2" />
-                    <parameter name="city" />
-                    <parameter name="postalCode" />
-                    <parameter name="province" />
-                    <parameter name="country" />
-                </parameter>
-                <parameter name="companyPaymentMethod" type="Map">
-                    <parameter name="ccPaymentMethodId" />
-                    <parameter name="ccDescription" />
-                </parameter>
-            </parameter>
+            <parameter name="emailAddress" />
+            <parameter name="firstName" />
+            <parameter name="lastName" />
+            <parameter name="userCompanyName" />
+            <parameter name="userCompanyPartyId" />
+            <parameter name="companyPartyId" required="true" />
+            <parameter name="classificationId" required="true" />
             <parameter name="newPassword" />
         </in-parameters>
         <out-parameters>
-            <parameter name="user" type="Map">
-                <parameter name="partyId" />
-                <parameter name="pseudoId" />
-                <parameter name="email" />
-                <parameter name="firstName" />
-                <parameter name="lastName" />
-                <parameter name="loginDisabled" type="Boolean" default-value="'N'" />
-                <parameter name="loginName" />
-                <parameter name="userGroupId" />
-                <parameter name="groupDescription" />
-                <parameter name="language" />
-                <parameter name="image" />
-                <parameter name="userId" />
-                <parameter name="locale" />
-                <parameter name="telephoneNr" />
-                <parameter name="company" type="Map">
-                    <parameter name="partyId" />
-                    <parameter name="name" />
-                    <parameter name="email" />
-                    <parameter name="role" />
-                </parameter>
-            </parameter>
+            <parameter name="ok" type="Boolean" default-value="false" />
         </out-parameters>
         <actions>
             <!-- check input parameters because anonymous access -->
+            <entity-find entity-name="mantle.party.Party" list="parties">
+                <econdition field-name="partyId" from="companyPartyId" />
+            </entity-find>
+            <set field="ownerPartyId" from="parties[0].ownerPartyId" />
             <entity-find-one entity-name="growerp.party.CompanyPreferenceAndRole"
                 value-field="party">
-                <field-map field-name="partyId" from="ownerPartyId" />
+                <field-map field-name="partyId" from="companyPartyId" />
                 <field-map field-name="roleTypeId" value="OrgInternal" />
             </entity-find-one>
             <if condition="!party">
-                <return message="Not a valid ownerId" />
+                <return message="Not a valid companyPartyId: $companyPartyId" />
             </if>
             <entity-find-one entity-name="mantle.party.PartyClassification"
                 value-field="classification">
@@ -1242,95 +1200,15 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!classification">
                 <return message="Not a valid classificationId: ${classificationId}" />
             </if>
-            <if condition="!user.companyName &amp;&amp; !user.companyPartyId">
-                <return error="true"
-                    message="Company name required for new lead, customer or supplier" />
-            </if>
-            <!-- create account, not active when no login provided -->
-            <set field="disabled" value="N" />
-            <if condition="!user.loginName">
-                <set field="disabled" value="Y" />
-                <set field="loginName" from="user.email" />
-                <else>
-                    <set field="loginName" from="user.loginName" />
-                </else>
-            </if>
-            <if condition="!newPassword">
-                <set field="newPassword"
-                    from="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
-            </if>
-            <set field="newPasswordVerify" from="newPassword" />
-            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                in-map="[ownerPartyId: ownerPartyId, seqName: 'party']"
-                out-map="context" />
-            <!-- owner for customers is done in partyRelationship -->
-            <service-call name="mantle.party.PartyServices.create#Account"
-                in-map="context + [roleTypeId: roleTypeId, loginAfterCreate: false,
-                        firstName: user.firstName, lastName: user.lastName,
-                        username: loginName, pseudoId: seqNum,
-                        ownerPartyId: user.userGroupId == 'GROWERP_M_CUSTOMER' ?
-                            null : ownerPartyId,
-                        emailAddress: user.email, disabled: disabled]"
-                out-map="userAccount" />
-            <set field="userPartyId" from="userAccount.partyId" />
-
-            <if condition="user.userGroupId == 'GROWERP_M_CUSTOMER'">
-                <service-call name="create#mantle.party.PartyRelationship"
-                    in-map="[   fromPartyId: userAccount.partyId,
-                            fromRoleTypeId: 'Customer',
-                            toPartyId: ownerPartyId,
-                            toRoleTypeId: 'Owner',
-                            relationshipTypeEnumId: 'PrtCustomer',
-                            fromDate: ec.user.nowTimestamp
-                            ]" />
-            </if>
-
-            <!-- roles -->
-            <if
-                condition="user.userGroupId == 'GROWERP_M_LEAD' ||
-                    user.userGroupId == 'GROWERP_M_CUSTOMER'">
-                <set field="roleTypeId" value="Customer" />
-                <else-if condition="user.userGroupId == 'GROWERP_M_SUPPLIER'">
-                    <set field="roleTypeId" value="Supplier" />
-                </else-if>
-                <else>
-                    <return message="Not a valid userGroupId: ${user.userGroupId}" />
-                </else>
-            </if>
-            <!-- company -->
-            <if condition="user.companyPartyId">
-                <!-- existing company -->
-                <entity-find-one entity-name="mantle.party.Party" value-field="checkParty">
-                    <field-map field-name="partyId" from="user.companyPartyId" />
-                </entity-find-one>
-                <if condition="!checkParty">
-                    <return error="true" message="could not find company ${user.companyPartyId}" />
-                </if>
-                <set field="companyPartyId" from="user.companyPartyId" />
-                <else>
-                    <!-- new company -->
-                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[ownerPartyId: ownerPartyId, seqName: 'party']"
-                        out-map="context" />
-                    <service-call out-map="comp"
-                        name="mantle.party.PartyServices.create#Organization"
-                        in-map="[organizationName: user.companyName, pseudoId: seqNum,
-                                ownerPartyId: user.userGroupId == 'GROWERP_M_CUSTOMER'
-                                    ? null : ownerPartyId, roleTypeId: roleTypeId,
-                                disabled: 'N']" />
-                    <set field="companyPartyId" from="comp.partyId" />
-                </else>
-            </if>
-            <!-- company party relationship -->
-            <service-call name="create#mantle.party.PartyRelationship"
-                in-map="[fromPartyId: userPartyId, fromRoleTypeId: 'Employee',
-                    relationshipTypeEnumId: 'PrtEmployee', fromDate: ec.user.nowTimestamp,
-                    toPartyId: companyPartyId, toRoleTypeId: roleTypeId]" />
-            <!-- provide security -->
-            <service-call name="create#moqui.security.UserGroupMember"
-                in-map="[userGroupId: user.userGroupId, userId: userAccount.userId]" />
+            <!-- createUser -->
+            <set field="company" from="[name: userCompanyName, partyId: userCompanyPartyId]" />
+            <service-call name="growerp.100.PartyServices100.create#User"
+                in-map="[user: [firstName: firstName, lastName: lastName, 
+                        email: emailAddress, role: 'Customer', userGroupId: 'GROWERP_M_OTHER',
+                        loginName: emailAddress, company: company], 
+                        password: newPassword, ownerPartyId: ownerPartyId]" />
             <!-- only send email when login name provided -->
-            <if condition="user.email">
+            <if condition="emailAddress">
                 <entity-find-one entity-name="moqui.basic.email.EmailServer"
                     value-field="emailExist">
                     <field-map field-name="emailServerId" value="SYSTEM" />
@@ -1339,29 +1217,24 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
                         async="true">
                         <field-map field-name="emailTemplateId" value="WELCOME" />
-                        <field-map field-name="toAddresses" from="user.email" />
+                        <field-map field-name="toAddresses" from="emailAddress" />
                         <field-map field-name="bodyParameters"
                             from="[classification: classificationId.substring(3),
-                                newPassword:newPassword, firstName: user.firstName,
-                                lastName: user.lastName]" />
+                                newPassword:newPassword, firstName: firstName,
+                                lastName: lastName]" />
                     </service-call>
                     <else>
                         <log level="warn"
-                            message="====== Email not configured, ${user.LoginName} password: $newPassword" />
+                            message="====== Email not configured, $emailAddress password: $newPassword" />
                     </else>
                 </if>
                 <!-- add to mailing list -->
                 <service-call name="growerp.100.BirdSendServices100.registerAdd#UserToGroup"
-                    in-map="email: user.email, firstName: user.firstName,
-                            lastName: user.lastName" />
+                    in-map="email: emailAddress, firstName: firstName,
+                            lastName: lastName" />
             </if>
             <!-- return all user info -->
-            <service-call name="growerp.100.PartyServices100.get#User"
-                in-map="[ownerPartyId: ownerPartyId,userPartyId: userPartyId]"
-                out-map="userInfo" />
-            <if condition="userInfo.users">
-                <set field="user" from="userInfo.users[0]" />
-            </if>
+            <set field="ok" value="true" type="Boolean" />
         </actions>
     </service>
 
@@ -1533,28 +1406,29 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!user.company.partyId">
                 <then>
                     <if condition="user.company.name">
+                        <!-- create company -->
                         <service-call name="growerp.100.PartyServices100.create#Company"
                             in-map="[company: user.company, ownerPartyId: ownerPartyId]"
                             out-map="context" />
-                        <set field="companyPartyId" from="company.partyId" />
+                        <set field="userCompanyPartyId" from="company.partyId" />
                     </if>
                 </then>
                 <else><!-- existing company or orgInternal-->
                     <if condition="user.company.role == 'OrgInternal'">
                         <set field="companyPartyId" from="relComp.companyPartyId" />
                         <else>
-                            <set field="companyPartyId" from="user.company.partyId" />
+                            <set field="userCompanyPartyId" from="user.company.partyId" />
                         </else>
                     </if>
                 </else>
             </if>
             <!-- add new user to company  -->
-            <if condition="companyPartyId">
+            <if condition="userCompanyPartyId">
                 <service-call name="create#mantle.party.PartyRelationship"
                     in-map="[   
                         fromPartyId: userPartyId,
                         fromRoleTypeId: 'Employee',
-                        toPartyId: companyPartyId,
+                        toPartyId: userCompanyPartyId,
                         toRoleTypeId: user.company.role == 'Lead'? 'Customer' : user.company.role,
                         relationshipTypeEnumId: 'PrtEmployee',
                         fromDate: ec.user.nowTimestamp
@@ -1702,9 +1576,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="update#mantle.party.Party"
                         in-map="[partyId: user.partyId, customerStatusId: CUSTOMER_QUALIFIED]" />
                 </if>
-                <!-- delete all roles -->
+                <!-- update role -->
                 <service-call name="delete#mantle.party.PartyRole"
-                    in-map="[partyId: user.partyId]" />
+                    in-map="[partyId: user.partyId, roleTypeId: oldValue.user.role]" />
                 <service-call name="create#mantle.party.PartyRole"
                     in-map="[partyId: user.partyId, roleTypeId: newRole]" />
             </if>
@@ -1725,6 +1599,20 @@ along with this software (see the LICENSE.md file). If not, see
                                 contactPurposeId: 'EmailPrimary']" />
                     </else>
                 </if>
+            </if>
+            <!-- check security group -->
+            <if condition="user.userGroup != oldValue.user.userGroup">
+                <entity-find-one entity-name="moqui.security.UserGroupMember"
+                    value-field="userGroupMember">
+                    <field-map field-name="userGroupId" from="oldValue.user.userGroup" />
+                    <field-map field-name="userId" from="user.userId" />
+                </entity-find-one>
+                <!-- finish existing -->
+                <service-call name="update#moqui.security.UserGroupMember"
+                    in-map="userGroupMember + [thruDate: ec.user.nowTimestamp]" />
+                <!-- create new -->
+                <service-call name="create#moqui.security.UserGroupMember"
+                    in-map="userGroupMember + [fromDate: ec.user.nowTimestamp]" />
             </if>
             <!-- check for new login account-->
             <if condition="user.loginName &amp;&amp; !oldValue.user.loginName">
@@ -2196,7 +2084,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="ownerPartyId" required="true" />
             <parameter name="userPartyId" required="true" />
-            <parameter name="companyPartyId" required="true" />
+            <parameter name="companyPartyId" />
             <parameter name="classificationId" required="true" />
             <parameter name="hostName" />
         </in-parameters>

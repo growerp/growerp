@@ -34,7 +34,8 @@ class AuthRegisterCompanyAndAdmin extends AuthEvent {
 
 class AuthRegisterUserEcommerce extends AuthEvent {
   final User user;
-  const AuthRegisterUserEcommerce(this.user);
+  final String companyPartyId;
+  const AuthRegisterUserEcommerce(this.user, this.companyPartyId);
 }
 
 class AuthLogin extends AuthEvent {

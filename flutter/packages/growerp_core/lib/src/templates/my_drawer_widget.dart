@@ -25,7 +25,7 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
   List<MenuOption> options = [];
   for (var option in menu) {
     {
-      if (option.readGroups.contains(groupId)) {
+      if (option.readGroups != null && option.readGroups!.contains(groupId)) {
         options.add(option);
       }
     }

@@ -13,6 +13,7 @@
  */
 
 // ignore_for_file: depend_on_referenced_packages
+import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
@@ -30,6 +31,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'router.dart' as router;
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+// import 'package:web/web.dart' as web;
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,6 +72,8 @@ Future main() async {
   RestClient restClient = RestClient(await buildDioClient());
   ChatServer chatServer = ChatServer();
   String classificationId = GlobalConfiguration().get("classificationId");
+
+  //if (kIsWeb) print("============hostName: ${web.window.location.href}");
 
   runApp(TopApp(
     restClient: restClient,
