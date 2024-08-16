@@ -18,7 +18,7 @@
 #Stage 1 - Install dependencies and build the app
 FROM growerp/flutter-sdk-image:latest AS build-env
 
-ARG BRANCH=development # currently either master or development we need to add existing
+ARG BRANCH=master # currently either master or development we need to add existing
 ARG DOCKER_TAG=1.0.0+1
 USER root
 # Install linux dependencies
@@ -32,13 +32,14 @@ RUN git config --system --add safe.directory '*'
 RUN git config --global --add safe.directory /home/mobiledevops/.flutter-sdk
 
 # activate melos
-RUN dart pub global activate melos
+RUN dart pub global activate melos 3.4.0
 ENV PATH="$PATH":"$HOME/.pub-cache/bin"
 
 # get growerp repos
 USER mobiledevops
 WORKDIR /home/mobiledevops
 # RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
+RUN ls
 COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/
 WORKDIR /home/mobiledevops/
 RUN echo "pwd: $PWD"

@@ -8,6 +8,7 @@ packages:
   - packages/freelance
   - packages/workflow
   - packages/growerp*
+  - packages/health
   - packages/growerp*/*example
 
 command:
@@ -46,6 +47,7 @@ scripts:
     description: Generates l10n for all app packages.
     run: "flutter gen-l10n"
     exec:
+      concurrency: 1
       failFast: true
     packageFilters:
       fileExists: "l10n.yaml"
