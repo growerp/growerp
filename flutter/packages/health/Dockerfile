@@ -42,6 +42,7 @@ WORKDIR /home/mobiledevops
 COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/
 WORKDIR /home/mobiledevops/
 RUN echo "pwd: $PWD"
+RUN sed -i 's\//webactivate \\' /home/mobiledevops/packages/health/lib/main.dart
 RUN flutter --version
 RUN melos clean
 RUN melos bootstrap

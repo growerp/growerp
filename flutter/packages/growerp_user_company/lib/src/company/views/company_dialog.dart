@@ -87,6 +87,8 @@ class CompanyFormState extends State<CompanyDialog> {
   final _emailController = TextEditingController();
   final _vatPercController = TextEditingController();
   final _salesPercController = TextEditingController();
+  final _hostNameController = TextEditingController();
+  final _backendController = TextEditingController();
   Currency _selectedCurrency = currencies[0];
   late bool isAdmin;
   late final GlobalKey<FormState> _companyDialogFormKey;
@@ -130,6 +132,8 @@ class CompanyFormState extends State<CompanyDialog> {
     _nameController.text = company.name ?? '';
     _selectedRole = company.role ?? widget.company.role!;
     _emailController.text = company.email ?? '';
+    _backendController.text = company.secondaryBackend ?? '';
+    _hostNameController.text = company.hostName ?? '';
     _vatPercController.text =
         company.vatPerc == null ? '' : company.vatPerc.toString();
     _salesPercController.text =
@@ -525,7 +529,27 @@ class CompanyFormState extends State<CompanyDialog> {
                         ],
                       )
                     ]))),
-          ]))
+          ])),
+      if (company.role == Role.company)
+        Row(children: [
+          Expanded(
+            child: TextFormField(
+              readOnly: !isAdmin,
+              key: const Key('hostName'),
+              decoration: const InputDecoration(labelText: 'HostName'),
+              controller: _hostNameController,
+            ),
+          ),
+          SizedBox(width: 10),
+          Expanded(
+            child: TextFormField(
+              readOnly: !isAdmin,
+              key: const Key('secondaryBackend'),
+              decoration: const InputDecoration(labelText: 'Secondary Backend'),
+              controller: _backendController,
+            ),
+          )
+        ])
     ];
 
     Widget updateButton = Row(children: [
@@ -555,6 +579,8 @@ class CompanyFormState extends State<CompanyDialog> {
                                     _salesPercController.text.isEmpty
                                         ? '0'
                                         : _salesPercController.text),
+                                hostName: _hostNameController.text,
+                                secondaryBackend: _backendController.text,
                                 image: await HelperFunctions.getResizedImage(
                                     _imageFile?.path));
                             if (!mounted) return;

@@ -67,6 +67,9 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_EMPL"
         userGroupId="GROWERP_M_EMPLOYEE"
         artifactGroupId="GROWERP_API" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL" />
+    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_EMPL"
+        userGroupId="GROWERP_M_OTHER"
+        artifactGroupId="GROWERP_API" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL" />
 
     <!-- Special Permissions -->
     <!-- in general users can read with the company, write access can be limited to other users and

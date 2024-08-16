@@ -16,6 +16,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 import '../../../l10n/generated/core_localizations.dart';
 import '../../../templates/templates.dart';
@@ -37,11 +38,15 @@ class HomeForm extends StatefulWidget {
 
 class HomeFormState extends State<HomeForm> {
   late AuthBloc _authBloc;
+  Company? company;
+  late String classificationId;
 
   @override
   void initState() {
     super.initState();
     _authBloc = context.read<AuthBloc>();
+    company = context.read<Company?>();
+    classificationId = context.read<String>();
   }
 
   @override
@@ -147,7 +152,8 @@ class HomeFormState extends State<HomeForm> {
                         Expanded(child: const SizedBox(height: 10)),
                         OutlinedButton(
                             key: const Key('newCompButton'),
-                            child: const Text('Register Customer at company'),
+                            child: Text(
+                                'Register ${classificationId == 'AppHealth' ? 'Patient' : 'Customer'} at ${company == null ? 'Company' : company!.name}'),
                             onPressed: () async {
                               await showDialog(
                                   barrierDismissible: true,
@@ -159,19 +165,21 @@ class HomeFormState extends State<HomeForm> {
                                   });
                             }),
                         SizedBox(height: 10),
-                        OutlinedButton(
-                            key: const Key('newUserButton'),
-                            child: const Text('Create a new company and admin'),
-                            onPressed: () async {
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return BlocProvider.value(
-                                        value: _authBloc,
-                                        child: const NewCompanyDialog(true));
-                                  });
-                            }),
+                        if (company == null)
+                          OutlinedButton(
+                              key: const Key('newUserButton'),
+                              child:
+                                  const Text('Create a new company and admin'),
+                              onPressed: () async {
+                                await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return BlocProvider.value(
+                                          value: _authBloc,
+                                          child: const NewCompanyDialog(true));
+                                    });
+                              }),
                         const SizedBox(height: 50)
                       ]),
                     ))),

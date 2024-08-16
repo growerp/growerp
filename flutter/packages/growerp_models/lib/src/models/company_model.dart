@@ -43,6 +43,8 @@ class Company with _$Company {
     Decimal? vatPerc,
     Decimal? salesPerc,
     @Default([]) List<User> employees,
+    String? hostName,
+    String? secondaryBackend,
   }) = _Company;
 
   factory Company.fromJson(Map<String, dynamic> json) =>

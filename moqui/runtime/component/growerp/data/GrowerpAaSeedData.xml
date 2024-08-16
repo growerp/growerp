@@ -17,7 +17,13 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.basic.Enumeration description="Owner" enumId="PtyOwner" enumTypeId="PartyType" />
 
     <moqui.basic.Enumeration enumCode="product_store_id_from_hostname"
-        description="Product Store ID From Hostname" enumId="PsstHostname"
+        description="Hostname of the html website" enumId="PsstHostname"
+        enumTypeId="ProductStoreSettingType" />
+    <moqui.basic.Enumeration enumCode="product_store_id_from_hostname"
+        description="Hostname of flutter app" enumId="PsstAppHostname"
+        enumTypeId="ProductStoreSettingType" />
+    <moqui.basic.Enumeration enumCode="product_store_id_from_hostname"
+        description="Hostname of the secondary backend" enumId="PsstSecBackend"
         enumTypeId="ProductStoreSettingType" />
     <moqui.basic.Enumeration enumCode="product_store_id_measurement_id" description="MeasurementId"
         enumId="PsstMeasurementId" enumTypeId="ProductStoreSettingType" />

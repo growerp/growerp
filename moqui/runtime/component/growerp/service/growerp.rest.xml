@@ -66,6 +66,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.ImageServices100.upload#Image"/>
             </method></resource-->
         <!-- parties -->
+        <resource name="CompanyFromHost" require-authentication="anonymous-all">
+            <method type="get">
+                <service name="growerp.100.PartyServices100.get#CompanyFromHost" />
+            </method>
+        </resource>
         <resource name="CheckEmail" require-authentication="anonymous-all">
             <method type="get">
                 <service name="growerp.100.PartyServices100.check#Email" />

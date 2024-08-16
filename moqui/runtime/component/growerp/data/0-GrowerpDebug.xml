@@ -18,7 +18,6 @@ along with this software (see the LICENSE.md file). If not, see
         <!-- ========== Test Admin User ========== -->
         <!-- password=moqui -->
         <moqui.security.UserAccount userId="EX_JOHN_DOE" username="john.doe" userFullName="John Doe"
-                pseudoId="debugUser"
                 currentPassword="16ac58bbfa332c1c55bd98b53e60720bfa90d394" passwordHashType="SHA"
                 passwordHint="framework name, lowercase" currencyUomId="USD" locale="en_US"
                 timeZone="US/Central"

@@ -55,6 +55,7 @@ class _NewCompanyDialogState extends State<NewCompanyDialog> {
       ..add(GetDataEvent(() => context.read<RestClient>().getCompanies(
             limit: 1,
           )));
+    _selectedCompany = context.read<Company?>();
   }
 
   @override
@@ -81,10 +82,11 @@ class _NewCompanyDialogState extends State<NewCompanyDialog> {
                 ),
                 child: popUp(
                   context: context,
-                  title: !widget.admin
-                      ? "Enter a new customer for company\n "
-                          "${_authBloc.state.authenticate!.company!.name}"
-                      : "Enter a new company with admin",
+                  title: widget.admin
+                      ? "Enter a new company with admin"
+                      : _selectedCompany != null
+                          ? "New customer for ${_selectedCompany!.name}"
+                          : "Enter a new customer",
                   height: 700,
                   width: 400,
                   child: _registerForm(_authBloc.state.authenticate!),
@@ -101,7 +103,7 @@ class _NewCompanyDialogState extends State<NewCompanyDialog> {
             key: const Key('listView'),
             child: Column(children: <Widget>[
               const SizedBox(height: 10),
-              if (!widget.admin)
+              if (!widget.admin && _selectedCompany == null)
                 DropdownSearch<Company>(
                   selectedItem: _selectedCompany,
                   popupProps: PopupProps.menu(

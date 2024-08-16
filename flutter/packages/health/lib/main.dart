@@ -31,7 +31,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'router.dart' as router;
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
-// import 'package:web/web.dart' as web;
+//webactivate import 'package:web/web.dart' as web;
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,7 +73,13 @@ Future main() async {
   ChatServer chatServer = ChatServer();
   String classificationId = GlobalConfiguration().get("classificationId");
 
-  //if (kIsWeb) print("============hostName: ${web.window.location.href}");
+  Company? company;
+  if (kIsWeb) {
+    String? hostName;
+    //webactivate hostname = web.window.location.href;
+    company = await restClient.getCompanyFromHost(hostName);
+  }
+  //company = Company(partyId: '100002', name: 'hallo hallo');
 
   runApp(TopApp(
     restClient: restClient,
@@ -85,6 +91,7 @@ Future main() async {
     extraDelegates: delegates,
     extraBlocProviders: getAdminBlocProviders(restClient, classificationId),
     screens: screens,
+    company: company,
   ));
 }
 

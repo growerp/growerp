@@ -15,6 +15,38 @@ along with this software (see the LICENSE.md file). If not, see
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
+    <service verb="get" noun="CompanyFromHost">
+        <description>Get the main company from the hostname</description>
+        <in-parameters>
+            <parameter name="hostName" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="company" type="Map">
+                <parameter name="partyId" />
+                <parameter name="pseudoId" />
+                <parameter name="name" />
+                <parameter name="email" />
+                <parameter name="role" />
+                <parameter name="email" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="hostNames">
+                <econdition field-name="settingTypeEnumId" value="PsstAppHostname" />
+            </entity-find>
+            <if condition="!hostNames">
+                <return />
+            </if>
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
+                <econdition field-name="productStoreId" from="hostNames[0].productStoreId" />
+            </entity-find>
+            <service-call name="growerp.100.PartyServices100.get#Companies"
+                in-map="[companyPartyId: stores[0].organizationPartyId]"
+                out-map="context" />
+            <set field="company" from="companies[0]" />
+        </actions>
+    </service>
+
     <service verb="check" noun="Email">
         <description>Check if a particular email address exists of a party</description>
         <in-parameters>
@@ -214,6 +246,9 @@ along with this software (see the LICENSE.md file). If not, see
                     </parameter>
                 </parameter>
             </parameter>
+            <parameter name="telephoneNr" />
+            <parameter name="hostName" />
+            <parameter name="secondaryBackend" />
             <parameter name="companyTelContactMechId" />
             <parameter name="companyEmailContactMechId" />
         </out-parameters>
@@ -339,6 +374,28 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="imageFile" from="null" />
                         </else>
                     </if>
+                    <!-- hostnames -->
+                    <entity-find-one entity-name="mantle.product.store.ProductStore"
+                        value-field="productStore">
+                        <field-map field-name="organizationPartyId" from="companyPartyId" />
+                    </entity-find-one>
+                    <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                        list="hosts">
+                        <econdition field-name="productStoreId" from="productStore.productStoreId" />
+                        <econdition field-name="settingTypeEnumId" value="PsstAppHostname" />
+                        <date-filter />
+                    </entity-find>
+                    <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                        list="backends">
+                        <econdition field-name="productStoreId" from="productStore.productStoreId" />
+                        <econdition field-name="settingTypeEnumId" value="PsstSecBackend" />
+                        <date-filter />
+                    </entity-find>
+                    <if condition="items?.size() > 0">
+                        <set field="companyEmailContactMechId"
+                            from="items[0].companyEmailContactMechId" />
+                        <set field="companyTelContactMechId" from="items[0].companyTelContactMechId" />
+                    </if>
                     <if condition="isForDropDown">
                         <set field="company"
                             from="[
@@ -361,7 +418,9 @@ along with this software (see the LICENSE.md file). If not, see
                                     vatPerc: item.vatPerc?item.vatPerc.toString():'0',
                                     salesPerc: item.salesPerc?item.salesPerc.toString():'0',
                                     paymentMethod: paymentMethod,
-                                    telephoneNr: telephoneNr ?: ''
+                                    telephoneNr: telephoneNr ?: '',
+                                    hostName: hosts[0].settingValue,
+                                    secondaryBackend: backends[0].settingValue,
                                     ]" />
                         </else>
                     </if>
@@ -432,6 +491,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="expireYear" />
                 </parameter>
                 <parameter name="telephoneNr" />
+                <parameter name="hostName" />
+                <parameter name="secondaryBackend" />
             </parameter>
             <parameter name="ownerPartyId" /><!-- needed in initial registration -->
         </in-parameters>
@@ -479,6 +540,9 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="lastName" />
                     </parameter>
                 </parameter>
+                <parameter name="telephoneNr" />
+                <parameter name="hostName" />
+                <parameter name="secondaryBackend" />
             </parameter>
         </out-parameters>
         <actions>
@@ -594,7 +658,23 @@ along with this software (see the LICENSE.md file). If not, see
                         contactNumber: company.telephoneNr,
                         partyId: partyId]" />
             </if>
-
+            <!-- hostnames -->
+            <entity-find-one entity-name="mantle.product.store.ProductStore"
+                value-field="productStore">
+                <field-map field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find-one>
+            <if condition="company.hostName">
+                <service-call name="create#mantle.product.store.ProductStoreSetting"
+                    in-map="[productStoreId: productStore.productStoreId,
+                            settingTypeEnumId: PsstAppHostname,
+                            settingValue: company.hostName]" />
+            </if>
+            <if condition="company.secondaryBackend">
+                <service-call name="create#mantle.product.store.ProductStoreSetting"
+                    in-map="[productStoreId: productStore.productStoreId,
+                            settingTypeEnumId: PsstSecBackend,
+                            settingValue: company.secondaryBackend]" />
+            </if>
             <!-- return created company -->
             <service-call name="growerp.100.PartyServices100.get#Company"
                 in-map="[ownerPartyId: ownerPartyId, companyPartyId: partyId]"
@@ -646,6 +726,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="expireYear" />
                 </parameter>
                 <parameter name="telephoneNr" />
+                <parameter name="hostName" />
+                <parameter name="secondaryBackend" />
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -692,6 +774,9 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="lastName" />
                     </parameter>
                 </parameter>
+                <parameter name="telephoneNr" />
+                <parameter name="hostName" />
+                <parameter name="secondaryBackend" />
             </parameter>
         </out-parameters>
         <actions>
@@ -940,6 +1025,44 @@ along with this software (see the LICENSE.md file). If not, see
                     </else>
                 </if>
                 <entity-update value-field="party" />
+            </if>
+            <!-- hostnames -->
+            <entity-find-one entity-name="mantle.product.store.ProductStore"
+                value-field="productStore">
+                <field-map field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find-one>
+            <set field="nowDate" from="ec.user.nowTimestamp" />
+            <if condition="company.hostName != oldValue.companies[0].hostName">
+                <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="settings">
+                    <econdition field-name="productStoreId" from="productStore.productStoreId" />
+                    <econdition field-name="settingTypeEnumId" value="PsstAppHostname" />
+                    <date-filter />
+                </entity-find>
+                <if condition="settings"><!-- update/delete existing -->
+                    <service-call name="update#mantle.product.store.ProductStoreSetting"
+                        in-map="settings[0] + [thruDate: nowDate]" />
+                </if>
+                <service-call name="create#mantle.product.store.ProductStoreSetting"
+                    in-map="[productStoreId: productStore.productStoreId,
+                            settingTypeEnumId: 'PsstAppHostname',
+                            settingValue: company.hostName,
+                            fromDate: nowDate]" />
+            </if>
+            <if condition="company.secondaryBackend != oldValue.companies[0].secondaryBackend">
+                <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="settings">
+                    <econdition field-name="productStoreId" from="productStore.productStoreId" />
+                    <econdition field-name="settingTypeEnumId" value="PsstSecBackend" />
+                    <date-filter />
+                </entity-find>
+                <if condition="settings"><!-- update/delete existing -->
+                    <service-call name="update#mantle.product.store.ProductStoreSetting"
+                        in-map="settings[0] + [thruDate: nowDate]" />
+                </if>
+                <service-call name="create#mantle.product.store.ProductStoreSetting"
+                    in-map="[productStoreId: productStore.productStoreId,
+                            settingTypeEnumId: 'PsstSecBackend',
+                            settingValue: company.secondaryBackend,
+                            fromDate: nowDate]" />
             </if>
             <!-- return updated company -->
             <service-call

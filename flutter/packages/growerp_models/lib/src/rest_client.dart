@@ -66,6 +66,12 @@ abstract class RestClient {
       {@Query('classificationId') required String classificationId});
 
   // company
+  @GET("rest/s1/growerp/100/CompanyFromHost")
+  Future<Company> getCompanyFromHost(
+    @Query('hostName') String? hostName,
+  );
+
+  // company
   @GET("rest/s1/growerp/100/Company")
   Future<Companies> getCompany({
     @Query('companyPartyId') String? companyPartyId,
