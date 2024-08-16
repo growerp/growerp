@@ -15,12 +15,9 @@
 // ignore_for_file: depend_on_referenced_packages
 import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_catalog/growerp_catalog.dart';
-import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
-import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'menu_options.dart';
@@ -76,7 +73,7 @@ Future main() async {
   Company? company;
   if (kIsWeb) {
     String? hostName;
-    //webactivate hostname = web.window.location.href;
+    //webactivate hostName = web.window.location.href;
     company = await restClient.getCompanyFromHost(hostName);
   }
   //company = Company(partyId: '100002', name: 'hallo hallo');
@@ -102,11 +99,8 @@ List<LocalizationsDelegate> delegates = [
 
 List<BlocProvider> getAdminBlocProviders(restClient, classificationId) {
   return [
-    ...getInventoryBlocProviders(restClient, classificationId),
     ...getUserCompanyBlocProviders(restClient, classificationId),
-    ...getCatalogBlocProviders(restClient, classificationId),
     ...getOrderAccountingBlocProviders(restClient, classificationId),
     ...getMarketingBlocProviders(restClient),
-    ...getWebsiteBlocProviders(restClient),
   ];
 }

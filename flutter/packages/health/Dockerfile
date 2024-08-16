@@ -32,7 +32,7 @@ RUN git config --system --add safe.directory '*'
 RUN git config --global --add safe.directory /home/mobiledevops/.flutter-sdk
 
 # activate melos
-RUN dart pub global activate melos
+RUN dart pub global activate melos 3.4.0
 ENV PATH="$PATH":"$HOME/.pub-cache/bin"
 
 # get growerp repos
@@ -43,6 +43,7 @@ COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/
 WORKDIR /home/mobiledevops/
 RUN echo "pwd: $PWD"
 RUN sed -i 's\//webactivate \\' /home/mobiledevops/packages/health/lib/main.dart
+# RUN more /home/mobiledevops/packages/health/lib/main.dart
 RUN flutter --version
 RUN melos clean
 RUN melos bootstrap
