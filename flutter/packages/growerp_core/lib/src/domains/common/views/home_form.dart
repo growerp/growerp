@@ -115,20 +115,22 @@ class HomeFormState extends State<HomeForm> {
                         key: const Key('HomeFormUnAuth'),
                         title: appBarTitle(
                           context,
-                          'Login / New company',
+                          company == null ? 'Login / New company' : 'Login',
                           isPhone,
                         )),
                     body: Center(
                       child: Column(children: <Widget>[
                         const SizedBox(height: 20),
-                        Image(
-                            image: AssetImage(themeMode == ThemeMode.light
-                                ? 'packages/growerp_core/images/growerp100.png'
-                                : 'packages/growerp_core/images/growerpDark100.png'),
-                            height: 80,
-                            width: 80),
+                        company != null && company!.image != null
+                            ? Image.memory(company!.image!, scale: 0.3)
+                            : Image(
+                                image: AssetImage(themeMode == ThemeMode.light
+                                    ? 'packages/growerp_core/images/growerp100.png'
+                                    : 'packages/growerp_core/images/growerpDark100.png'),
+                                height: 80,
+                                width: 80),
                         if (widget.title.isNotEmpty) const SizedBox(height: 30),
-                        Text(widget.title,
+                        Text(company == null ? widget.title : company!.name!,
                             style: TextStyle(
                                 fontSize: isPhone ? 15 : 25,
                                 fontWeight: FontWeight.bold)),

@@ -74,7 +74,13 @@ Future main() async {
   if (kIsWeb) {
     String? hostName;
     //webactivate hostName = web.window.location.href;
-    company = await restClient.getCompanyFromHost(hostName);
+    // ignore: unnecessary_null_comparison
+    if (hostName != null) {
+      hostName = hostName.substring(7); // remove protocoll
+      hostName = hostName.substring(0, hostName.indexOf(':')); //remove port
+      company = await restClient.getCompanyFromHost(hostName);
+      if (company.partyId == null) company = null;
+    }
   }
   //company = Company(partyId: '100002', name: 'hallo hallo');
 

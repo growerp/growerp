@@ -36,7 +36,7 @@
             ]
         },
         {
-            "name": "Admin chrome (lib/main.dart)",
+            "name": "Admin Web (lib/main.dart)",
             "type": "dart",
             "request": "launch",
             "cwd": "flutter/packages/admin",
@@ -70,6 +70,19 @@
             "request": "launch",
             "cwd": "flutter/packages/health",
             "program": "lib/main.dart",
+        },
+        {
+            "name": "Health Web (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/health",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "chrome",
+                "--web-renderer",
+                "auto"
+            ]
         },
         {
             "name": "Freelance mobile (lib/main.dart)",
