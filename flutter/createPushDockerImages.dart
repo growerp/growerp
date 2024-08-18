@@ -20,6 +20,10 @@ void main() async {
     print("$name is not a valid app, valid apps are $apps");
     exit(1);
   }
+
+  final String upgradeVersion = ask('Upgrade the version and save in Git? N/y',
+      required: false, defaultValue: 'N');
+
   var home = "${env['HOME']}/growerp";
 
   String getVersion(String appName) {
@@ -63,7 +67,7 @@ void main() async {
               currentVersion.substring(currentVersion.indexOf('+'));
       print(
           "update versionfile: ${app == 'growerp-moqui' ? '$home/moqui/runtime/component/growerp/component.xml' : '$home/flutter/packages/$app/pubspec.yaml'} old version $currentVersion new version: $newVersion");
-      if (!test) {
+      if (upgradeVersion.toUpperCase() == 'Y') {
         // write back new version
         if (app == 'growerp-moqui') {
           replace(
@@ -101,7 +105,7 @@ void main() async {
   var commitMessage = "Image created for App ${name.isEmpty ? apps : name} "
       "with tag $gitTag";
   print("update git with message: $commitMessage");
-  if (!test) {
+  if (upgradeVersion.toUpperCase() == 'Y') {
     run('git add .', workingDirectory: home);
     run('git commit -m \"$commitMessage\"', workingDirectory: home);
     run('git tag $gitTag', workingDirectory: home);
