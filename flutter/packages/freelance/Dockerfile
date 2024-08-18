@@ -51,7 +51,7 @@ RUN melos l10n --no-select
 RUN melos build --no-select
 # build flutter app
 WORKDIR /home/mobiledevops/flutter/packages/freelance
-RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
+#RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
 RUN flutter build web --release
 
 # Stage 2 - Create the run-time image
