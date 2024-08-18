@@ -38,11 +38,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) =>
               DisplayMenuOption(menuList: menuOptions, menuIndex: 1));
-    case '/company':
-      return MaterialPageRoute(
-          settings: settings,
-          builder: (context) =>
-              DisplayMenuOption(menuList: menuOptions, menuIndex: 4));
     case '/user':
       return MaterialPageRoute(
           settings: settings,
@@ -57,6 +52,16 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           settings: settings,
           builder: (context) =>
               DisplayMenuOption(menuList: menuOptions, menuIndex: 3));
+    case '/company':
+      return MaterialPageRoute(
+          settings: settings,
+          builder: (context) =>
+              DisplayMenuOption(menuList: menuOptions, menuIndex: 4));
+    case '/website':
+      return MaterialPageRoute(
+          settings: settings,
+          builder: (context) =>
+              DisplayMenuOption(menuList: menuOptions, menuIndex: 5));
     case '/findoc':
       return MaterialPageRoute(
           settings: settings,

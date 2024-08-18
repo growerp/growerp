@@ -266,34 +266,34 @@ packages:
     dependency: transitive
     description:
       name: dcli
-      sha256: fb9897c9c2171bc53a26b62e582a98b4e1df70a65bede073c1a11108950d0440
+      sha256: "34db376a896219c6ae8f8888d86a8c155b3d28be611337ffd810777c44e1dfc6"
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.5"
+    version: "6.0.5"
   dcli_common:
     dependency: transitive
     description:
       name: dcli_common
-      sha256: fa90efc6f5105de865db51fed4204b41e13f5113425d5704e46e56889f1cc46a
+      sha256: "88973e3e9f065aa27dc0b1dd054d8e2a79d31de2d420641bc661c462768e621f"
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.3"
+    version: "6.0.3"
   dcli_core:
     dependency: transitive
     description:
       name: dcli_core
-      sha256: "4adec804e93b718d2b9efd7e4305c818219f65b8140833c7c12b10b198aff8c9"
+      sha256: af001fd27bf24b7cea15cb0579848e8312c62cd6ff63092375e19218f0e501e7
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.7"
+    version: "6.0.3"
   dcli_terminal:
     dependency: transitive
     description:
       name: dcli_terminal
-      sha256: fc289acb2e03f20c0d9b97ad5f19bcfa0d9dd8323028fee182fa7249b7687891
+      sha256: cb82b6927c413f46a00395421b094186776fa203ca29bf3f3a966fca2de76846
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.3"
+    version: "6.0.3"
   decimal:
     dependency: transitive
     description:
@@ -984,14 +984,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
-  native_synchronization:
+  native_synchronization_temp:
     dependency: transitive
     description:
-      name: native_synchronization
-      sha256: ff200fe0a64d733ff7d4dde2005271c297db81007604c8cd21037959858133ab
+      name: native_synchronization_temp
+      sha256: "5f5f15add4eeb6c7dcf9172314232657c6b1d002a45cca0ba46d955497645d5a"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.0"
+    version: "0.6.0"
   nested:
     dependency: transitive
     description:
@@ -1256,30 +1256,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.0"
-  runtime_named_locks:
-    dependency: transitive
-    description:
-      name: runtime_named_locks
-      sha256: "5fe859c1ddeeb595f6528596157191b628d85ba3137f0da327d92153604f2f6b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0-beta.6"
-  runtime_native_semaphores:
-    dependency: transitive
-    description:
-      name: runtime_native_semaphores
-      sha256: bd5895d87f97543be6c9a5199b8a10483b9d6871327fe508ec89dbc2437c9220
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0-beta.6"
   scope:
     dependency: transitive
     description:
       name: scope
-      sha256: "9930a3822bd33d1884a642d1cd79e6baf56d17288b3e0c54ae7c00cb559ef614"
+      sha256: "0b056e5b64ca16a2db9e1eb35cf7fd05a9e99a6b15140f82bfa651d081e4819b"
       url: "https://pub.dev"
     source: hosted
-    version: "4.1.1"
+    version: "5.1.0"
   scroll_to_index:
     dependency: transitive
     description:

@@ -9,9 +9,9 @@ CONF_FILE="conf/MoquiProductionConf.xml"
 # =================== start ===============================
 
 #insert version
-if [ -n "$TAG" ] ; then
-    sed -i -e "s/\XXXXX/$TAG/g" runtime/component/growerp/component.xml
-fi
+#if [ -n "$TAG" ] ; then
+#    sed -i -e "s/\XXXXX/$TAG/g" runtime/component/growerp/component.xml
+#fi
 
 # insert some sensitive data from docker-compose
 if [ "$SMTP_USER" != "" ] ; then

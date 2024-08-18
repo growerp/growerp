@@ -19,6 +19,7 @@ import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_website/growerp_website.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'menu_options.dart';
 import 'package:flutter/material.dart';
@@ -101,6 +102,7 @@ Future main() async {
 List<LocalizationsDelegate> delegates = [
   UserCompanyLocalizations.delegate,
   OrderAccountingLocalizations.delegate,
+  WebsiteLocalizations.delegate,
 ];
 
 List<BlocProvider> getAdminBlocProviders(restClient, classificationId) {
@@ -108,5 +110,6 @@ List<BlocProvider> getAdminBlocProviders(restClient, classificationId) {
     ...getUserCompanyBlocProviders(restClient, classificationId),
     ...getOrderAccountingBlocProviders(restClient, classificationId),
     ...getMarketingBlocProviders(restClient),
+    ...getWebsiteBlocProviders(restClient),
   ];
 }

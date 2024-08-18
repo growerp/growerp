@@ -1,5 +1,5 @@
 name: health
-version: 0.0.1+1
+version: 1.4.0+1
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none
@@ -25,6 +25,7 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   web: ^1.0.0
+  growerp_website: ^1.2.1
 
 dev_dependencies: 
   flutter_test:

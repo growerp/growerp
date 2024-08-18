@@ -13,7 +13,7 @@ executables:
 environment: 
   sdk: '>=3.2.6 <4.0.0'
 dependencies: 
-  dcli: ^4.0.0
+  dcli: ^6.0.4
   dio: ^5.4.3
   fast_csv: ^0.2.6
   get_it: ^7.6.4

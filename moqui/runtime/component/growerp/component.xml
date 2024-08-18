@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/moqui-conf-2.1.xsd"
-        name="growerp" version="XXXXX">
+        name="growerp" version="1.2.1+0">
         <depends-on name="moqui-fop" />
         <depends-on name="mantle-udm" />
         <depends-on name="mantle-usl" />
