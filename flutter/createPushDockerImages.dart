@@ -55,7 +55,7 @@ void main() async {
   apps.forEach((app) {
     if ((name.isNotEmpty && app == name) || name.isEmpty) {
       print(
-          "create new version from largest version numer: $largestVersionNumber");
+          "create new version from largest version number + 1: $largestVersionNumber");
       newVersion = appVersion.substring(0, appVersion.lastIndexOf('.') + 1) +
           largestVersionNumber.toString() +
           appVersion.substring(appVersion.indexOf('+'));
