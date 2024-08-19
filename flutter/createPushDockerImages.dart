@@ -16,9 +16,21 @@ void main() async {
   ];
 
   bool test = false;
-  final String name = ask('app image name, return for all:', required: false);
-  if (name.isNotEmpty && !apps.contains(name)) {
-    print("$name is not a valid app, valid apps are $apps");
+  final String nameList = ask(
+      'app image name list separated by comma, return for all:',
+      required: false);
+
+  // check names
+  var names = nameList.split(',');
+  bool error = false;
+  for (var name in names) {
+    if (!apps.contains(name)) {
+      print("$name is not a valid appName");
+      error = true;
+    }
+  }
+  if (error == true) {
+    print("valid apps are $apps");
     exit(1);
   }
 
@@ -62,15 +74,17 @@ void main() async {
     }
   }
 
-  print("=== current app: $name largest version number: $largestVersionNumber");
+  print(
+      "=== current app(s): $names largest version number: $largestVersionNumber");
+  largestVersionNumber++;
 
   for (var app in apps) {
-    if ((name.isNotEmpty && app == name) || name.isEmpty) {
+    if ((names.isNotEmpty && names.contains(app)) || names.isEmpty) {
       // create new version
       currentVersion = getVersion(app);
       newVersion =
           currentVersion.substring(0, currentVersion.lastIndexOf('.') + 1) +
-              (++largestVersionNumber).toString() +
+              (largestVersionNumber).toString() +
               currentVersion.substring(currentVersion.indexOf('+'));
       print(
           "=== update versionfile: ${app == 'growerp-moqui' ? '$home/moqui/runtime/component/growerp/component.xml' : '$home/flutter/packages/$app/pubspec.yaml'} old version $currentVersion new version: $newVersion");
@@ -88,7 +102,7 @@ void main() async {
         }
       }
       // create image and push to  docker hub
-      String dockerImage = 'growerp/$name';
+      String dockerImage = 'growerp/$app';
       var dockerTag = newVersion.substring(0, newVersion.indexOf('+'));
       print("=== create docker image: $dockerImage with tag: latest");
       if (!test) {
@@ -97,7 +111,7 @@ void main() async {
               workingDirectory: '$home/moqui');
         } else {
           run(
-              'docker build --file $home/flutter/packages/$name/Dockerfile '
+              'docker build --file $home/flutter/packages/$app/Dockerfile '
               ' --progress=plain -t $dockerImage:latest . ',
               workingDirectory: '$home/flutter');
         }
@@ -117,7 +131,7 @@ void main() async {
   }
   // update git
   var gitTag = newVersion.substring(0, newVersion.indexOf('+'));
-  var commitMessage = "Image created for App ${name.isEmpty ? apps : name} "
+  var commitMessage = "Image created for App ${names.isEmpty ? apps : names} "
       "with tag $gitTag";
   if (upgradeVersion.toUpperCase() == 'Y') {
     print("=== update git with message: $commitMessage");
