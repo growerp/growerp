@@ -96,6 +96,7 @@ List<LocalizationsDelegate> delegates = [
   WebsiteLocalizations.delegate,
   MarketingLocalizations.delegate,
   InventoryLocalizations.delegate,
+  CatalogLocalizations.delegate,
 ];
 
 List<BlocProvider> getHotelBlocProviders(restClient, classificationId) {

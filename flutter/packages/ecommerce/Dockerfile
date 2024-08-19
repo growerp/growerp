@@ -36,7 +36,7 @@ RUN cd /usr/local/growerp/packages/core && \
     flutter pub get && \
     flutter pub run build_runner build
 WORKDIR /usr/local/growerp/packages/ecommerce
-RUN /usr/local/flutter/bin/flutter build web --release
+RUN /usr/local/flutter/bin/flutter build web --release --web-renderer=auto
 
 # Stage 2 - Create the run-time image
 FROM nginx

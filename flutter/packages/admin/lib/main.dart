@@ -31,7 +31,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'router.dart' as router;
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
-//webactivate import 'package:web/web.dart' as web;
+//webactivate import 'dart:html' as html;
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -76,11 +76,12 @@ Future main() async {
   Company? company;
   if (kIsWeb) {
     String? hostName;
-    //webactivate hostName = web.window.location.href;
+    //webactivate hostName = html.window.location.hostname;
     // ignore: unnecessary_null_comparison
     if (hostName != null) {
       hostName = hostName.substring(7); // remove protocoll
       hostName = hostName.substring(0, hostName.indexOf(':')); //remove port
+      print("=====hostname: $hostName");
       company = await restClient.getCompanyFromHost(hostName);
       if (company.partyId == null) company = null;
     }

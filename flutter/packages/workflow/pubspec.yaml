@@ -19,8 +19,8 @@ dependencies:
     sdk: flutter
   global_configuration: ^2.0.0
   intl: ^0.19.0
-  shared_preferences: ^2.0.6
-  package_info_plus: ^5.0.1
+  shared_preferences: ^2.3.2
+  package_info_plus: ^8.0.2
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   flutter_flow_chart: ^2.2.0

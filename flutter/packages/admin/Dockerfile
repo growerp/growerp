@@ -44,7 +44,7 @@ COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/
 WORKDIR /home/mobiledevops/
 RUN echo "pwd: $PWD"
 RUN sed -i 's\//webactivate \\' /home/mobiledevops/packages/admin/lib/main.dart
-RUN more /home/mobiledevops/packages/admin/lib/main.dart
+# RUN more /home/mobiledevops/packages/admin/lib/main.dart
 RUN flutter --version
 RUN melos clean
 RUN melos bootstrap
@@ -55,7 +55,7 @@ RUN melos build --no-select
 # build flutter app
 WORKDIR /home/mobiledevops/packages/admin
 #RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
-RUN flutter build web --release
+RUN flutter build web --release --web-renderer=auto
 
 # Stage 2 - Create the run-time image
 FROM nginx
