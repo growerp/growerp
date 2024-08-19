@@ -14,7 +14,7 @@ add to /etc/hosts file:
 ### run compose 
 This will start admin/moqui/chat images:
 ```sh
-docker compose up # start the images
+docker compose up -f docker-compose-dev.yaml # start the images
 ```
 Because images already prepared at dockerhub.com the system will start in a couple of minutes.
 

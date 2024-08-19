@@ -112,7 +112,8 @@ class _NewCompanyDialogState extends State<NewCompanyDialog> {
                     showSearchBox: true,
                     searchFieldProps: TextFieldProps(
                       autofocus: true,
-                      decoration: InputDecoration(labelText: " Company Name"),
+                      decoration:
+                          const InputDecoration(labelText: " Company Name"),
                       controller: _companySearchBoxController,
                     ),
                     title: popUp(
@@ -121,12 +122,12 @@ class _NewCompanyDialogState extends State<NewCompanyDialog> {
                       height: 50,
                     ),
                   ),
-                  dropdownDecoratorProps: DropDownDecoratorProps(
+                  dropdownDecoratorProps: const DropDownDecoratorProps(
                     dropdownSearchDecoration: InputDecoration(
                       labelText: 'Company',
                     ),
                   ),
-                  key: Key('selectCompany'),
+                  key: const Key('selectCompany'),
                   itemAsString: (Company? u) => "${u!.name}",
                   asyncItems: (String filter) {
                     _companyBloc.add(GetDataEvent(

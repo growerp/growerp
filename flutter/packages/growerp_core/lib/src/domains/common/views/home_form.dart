@@ -151,7 +151,7 @@ class HomeFormState extends State<HomeForm> {
                                       });
                                 })
                             : const Text('No companies yet, create one!'),
-                        Expanded(child: const SizedBox(height: 10)),
+                        const Expanded(child: SizedBox(height: 10)),
                         OutlinedButton(
                             key: const Key('newCompButton'),
                             child: Text(
@@ -166,7 +166,7 @@ class HomeFormState extends State<HomeForm> {
                                         child: const NewCompanyDialog(false));
                                   });
                             }),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         if (company == null)
                           OutlinedButton(
                               key: const Key('newUserButton'),

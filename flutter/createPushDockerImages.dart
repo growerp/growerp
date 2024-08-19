@@ -1,5 +1,6 @@
 #! /usr/bin/env dcli
-// ignore_for_file: dead_code
+// ignore: file_names
+// ignore_for_file: dead_code, avoid_print
 
 import 'dart:io';
 import 'package:dcli/dcli.dart';
@@ -45,19 +46,20 @@ void main() async {
 
   // always use the higest current version of all apps (all in a monorep)
   int largestVersionNumber = 0;
-  apps.forEach((app) {
+  for (var app in apps) {
     currentVersion = getVersion(app);
     print("current app $app version: $currentVersion");
     var appVersionNumber = int.parse(currentVersion.substring(
         currentVersion.lastIndexOf('.') + 1, currentVersion.indexOf('+')));
     // use the largest
-    if (appVersionNumber > largestVersionNumber)
+    if (appVersionNumber > largestVersionNumber) {
       largestVersionNumber = appVersionNumber;
-  });
+    }
+  }
 
   print("current app: $name largest version number: $largestVersionNumber");
 
-  apps.forEach((app) {
+  for (var app in apps) {
     if ((name.isNotEmpty && app == name) || name.isEmpty) {
       // create new version
       currentVersion = getVersion(app);
@@ -83,31 +85,34 @@ void main() async {
       // create image and push to  docker hub
       String dockerImage = 'growerp/$name';
       var dockerTag = newVersion.substring(0, newVersion.indexOf('+'));
-      print("=== create docker image: $dockerImage with tag: $dockerTag");
+      print("=== create docker image: $dockerImage with tag: latest");
       if (!test) {
         if (app == 'growerp-moqui') {
-          run('docker build -t $dockerImage:latest .',
+          run('docker build --progress=plain -t $dockerImage:latest . ',
               workingDirectory: '$home/moqui');
         } else {
           run(
               'docker build --file $home/flutter/packages/$name/Dockerfile '
-              '-t $dockerImage:latest .',
+              ' --progress=plain -t $dockerImage:latest . ',
               workingDirectory: '$home/flutter');
         }
         run('docker push $dockerImage:latest');
-        run('docker tag $dockerImage:latest $dockerImage:$dockerTag');
-        run('docker push $dockerImage:$dockerTag');
+        if (upgradeVersion.toUpperCase() == 'Y') {
+          print("=== create docker image: $dockerImage with tag: $dockerTag");
+          run('docker tag $dockerImage:latest $dockerImage:$dockerTag');
+          run('docker push $dockerImage:$dockerTag');
+        }
       }
     }
-  });
+  }
   // update git
   var gitTag = newVersion.substring(0, newVersion.indexOf('+'));
   var commitMessage = "Image created for App ${name.isEmpty ? apps : name} "
       "with tag $gitTag";
-  print("update git with message: $commitMessage");
   if (upgradeVersion.toUpperCase() == 'Y') {
+    print("update git with message: $commitMessage");
     run('git add .', workingDirectory: home);
-    run('git commit -m \"$commitMessage\"', workingDirectory: home);
+    run('git commit -m "$commitMessage"', workingDirectory: home);
     run('git tag $gitTag', workingDirectory: home);
     run('git push', workingDirectory: home);
     run('git push origin $gitTag', workingDirectory: home);

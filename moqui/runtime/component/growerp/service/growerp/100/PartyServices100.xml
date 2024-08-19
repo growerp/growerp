@@ -34,6 +34,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="hostNames">
                 <econdition field-name="settingTypeEnumId" value="PsstAppHostname" />
                 <econdition field-name="settingValue" from="hostName" />
+                <date-filter />
             </entity-find>
             <if condition="!hostNames">
                 <return />
@@ -382,18 +383,28 @@ along with this software (see the LICENSE.md file). If not, see
                         value-field="productStore">
                         <field-map field-name="organizationPartyId" from="companyPartyId" />
                     </entity-find-one>
-                    <entity-find entity-name="mantle.product.store.ProductStoreSetting"
-                        list="hosts">
-                        <econdition field-name="productStoreId" from="productStore.productStoreId" />
-                        <econdition field-name="settingTypeEnumId" value="PsstAppHostname" />
-                        <date-filter />
-                    </entity-find>
-                    <entity-find entity-name="mantle.product.store.ProductStoreSetting"
-                        list="backends">
-                        <econdition field-name="productStoreId" from="productStore.productStoreId" />
-                        <econdition field-name="settingTypeEnumId" value="PsstSecBackend" />
-                        <date-filter />
-                    </entity-find>
+                    <if condition="productStore">
+                        <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                            list="hosts">
+                            <econdition field-name="productStoreId"
+                                from="productStore.productStoreId" />
+                            <econdition field-name="settingTypeEnumId" value="PsstAppHostname" />
+                            <date-filter />
+                        </entity-find>
+                        <if condition="hosts">
+                            <set field="appHostName" from="hosts[0].settingValue" />
+                        </if>
+                        <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                            list="backends">
+                            <econdition field-name="productStoreId"
+                                from="productStore.productStoreId" />
+                            <econdition field-name="settingTypeEnumId" value="PsstSecBackend" />
+                            <date-filter />
+                        </entity-find>
+                        <if condition="backends">
+                            <set field="backendName" from="backends[0].settingValue" />
+                        </if>
+                    </if>
                     <if condition="items?.size() > 0">
                         <set field="companyEmailContactMechId"
                             from="items[0].companyEmailContactMechId" />
@@ -422,8 +433,8 @@ along with this software (see the LICENSE.md file). If not, see
                                     salesPerc: item.salesPerc?item.salesPerc.toString():'0',
                                     paymentMethod: paymentMethod,
                                     telephoneNr: telephoneNr ?: '',
-                                    hostName: hosts[0]?.settingValue,
-                                    secondaryBackend: backends[0]?.settingValue,
+                                    hostName: appHostName,
+                                    secondaryBackend: backendName,
                                     ]" />
                         </else>
                     </if>

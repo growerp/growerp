@@ -78,7 +78,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: FinDocList(
+        form: const FinDocList(
             key: Key('Request'), sales: false, docType: FinDocType.request),
         label: 'Requests',
         icon: const Icon(Icons.question_answer),

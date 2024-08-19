@@ -1,6 +1,6 @@
 #stage 1 -get files and build
 ARG DOCKER_TAG=NOTSET1
-FROM openjdk:11-jdk as build-env
+FROM openjdk:11-jdk AS build-env
 
 ARG BRANCH=development # currently either master or development we need to add existing
 ARG DOCKER_TAG=NOTSET1

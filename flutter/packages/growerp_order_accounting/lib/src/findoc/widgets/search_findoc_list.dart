@@ -135,9 +135,9 @@ class FinDocScaffold extends StatelessWidget {
                                           textAlign: TextAlign.center)));
                             }
                             index--;
-                            if (index >= finDocs.length)
-                              return Text(' ');
-                            else {
+                            if (index >= finDocs.length) {
+                              return const Text(' ');
+                            } else {
                               var party = toCompanyUser(
                                   finDocs[index].otherCompany ??
                                       finDocs[index].otherUser);

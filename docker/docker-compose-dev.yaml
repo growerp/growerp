@@ -140,18 +140,18 @@ services:
     networks:
       - my-network
 
-  hotel:
-    container_name: hotel
-    image: growerp/hotel
+  health:
+    container_name: health
+    image: growerp/health
     build:
       context: ../flutter
-      dockerfile: ../flutter/packages/hotel/Dockerfile
+      dockerfile: ../flutter/packages/admin/Dockerfile
     restart: unless-stopped
     expose:
       - 80
     volumes:
       - ./app_settings.json:/usr/share/nginx/html/assets/assets/cfg/app_settings.json
     environment:
-      - VIRTUAL_HOST=hotel.growerp.local
+      - VIRTUAL_HOST=health.growerp.local
     networks:
       - my-network

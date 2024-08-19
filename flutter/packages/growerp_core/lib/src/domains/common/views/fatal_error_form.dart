@@ -37,7 +37,7 @@ class FatalErrorForm extends StatelessWidget {
               style: const TextStyle(color: Colors.red, fontSize: 20),
             ),
             OutlinedButton(
-                child: Text("$buttonText"),
+                child: Text(buttonText),
                 onPressed: () {
                   Navigator.pushNamedAndRemoveUntil(context, '/', (r) => false);
                 }),

@@ -13,6 +13,7 @@
  */
 
 // ignore_for_file: depend_on_referenced_packages
+import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
@@ -30,6 +31,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'router.dart' as router;
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+//webactivate
+import 'package:web/web.dart' as web;
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,6 +74,23 @@ Future main() async {
   ChatServer chatServer = ChatServer();
   String classificationId = GlobalConfiguration().get("classificationId");
 
+  Company? company;
+  if (kIsWeb) {
+    String? hostName;
+    //webactivate
+    hostName = web.window.location.href;
+    // ignore: unnecessary_null_comparison
+    if (hostName != null) {
+      hostName = hostName.substring(7); // remove protocoll
+      hostName = hostName.substring(0, hostName.indexOf(':')); //remove port
+      print("=====hostName: $hostName");
+      company = await restClient.getCompanyFromHost(hostName);
+      print("=== company: $company");
+      if (company.partyId == null) company = null;
+    }
+  }
+
+  //company = Company(partyId: '100002', name: 'hallo hallo');
   runApp(TopApp(
     restClient: restClient,
     classificationId: classificationId,
@@ -81,6 +101,7 @@ Future main() async {
     extraDelegates: delegates,
     extraBlocProviders: getAdminBlocProviders(restClient, classificationId),
     screens: screens,
+    company: company,
   ));
 }
 

@@ -540,7 +540,7 @@ class CompanyFormState extends State<CompanyDialog> {
               controller: _hostNameController,
             ),
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Expanded(
             child: TextFormField(
               readOnly: !isAdmin,

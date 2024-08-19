@@ -1,4 +1,4 @@
-package org.growerp.admin
+package org.growerp.health
 
 import io.flutter.embedding.android.FlutterActivity
 

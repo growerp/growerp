@@ -86,7 +86,8 @@ CompanyUser? toCompanyUser(dynamic object) {
           email: object.email,
           telephoneNr: object.telephoneNr);
     case User():
-      if (object.company == null) // return only user when no company
+      if (object.company == null) {
+        // return only user when no company
         return CompanyUser(
             type: PartyType.user,
             partyId: object.partyId,
@@ -95,6 +96,7 @@ CompanyUser? toCompanyUser(dynamic object) {
             role: object.role,
             email: object.email,
             telephoneNr: object.telephoneNr);
+      }
       // if related company return that
       return CompanyUser(
           type: PartyType.company,
