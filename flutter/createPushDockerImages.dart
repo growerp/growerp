@@ -22,8 +22,13 @@ void main() async {
     exit(1);
   }
 
-  final String upgradeVersion = ask('Upgrade the version and save in Git? N/y',
+  final String push = ask('Push to growerp.org test system? y/N',
       required: false, defaultValue: 'N');
+  String upgradeVersion = 'N';
+  if (push.toUpperCase() == 'Y') {
+    upgradeVersion = ask('Upgrade the version and save in Git? y/N',
+        required: false, defaultValue: 'N');
+  }
 
   var home = "${env['HOME']}/growerp";
 
@@ -48,7 +53,7 @@ void main() async {
   int largestVersionNumber = 0;
   for (var app in apps) {
     currentVersion = getVersion(app);
-    print("current app $app version: $currentVersion");
+    print("=== current app $app version: $currentVersion");
     var appVersionNumber = int.parse(currentVersion.substring(
         currentVersion.lastIndexOf('.') + 1, currentVersion.indexOf('+')));
     // use the largest
@@ -57,7 +62,7 @@ void main() async {
     }
   }
 
-  print("current app: $name largest version number: $largestVersionNumber");
+  print("=== current app: $name largest version number: $largestVersionNumber");
 
   for (var app in apps) {
     if ((name.isNotEmpty && app == name) || name.isEmpty) {
@@ -68,7 +73,7 @@ void main() async {
               (++largestVersionNumber).toString() +
               currentVersion.substring(currentVersion.indexOf('+'));
       print(
-          "update versionfile: ${app == 'growerp-moqui' ? '$home/moqui/runtime/component/growerp/component.xml' : '$home/flutter/packages/$app/pubspec.yaml'} old version $currentVersion new version: $newVersion");
+          "=== update versionfile: ${app == 'growerp-moqui' ? '$home/moqui/runtime/component/growerp/component.xml' : '$home/flutter/packages/$app/pubspec.yaml'} old version $currentVersion new version: $newVersion");
       if (upgradeVersion.toUpperCase() == 'Y') {
         // write back new version
         if (app == 'growerp-moqui') {
@@ -96,11 +101,16 @@ void main() async {
               ' --progress=plain -t $dockerImage:latest . ',
               workingDirectory: '$home/flutter');
         }
-        run('docker push $dockerImage:latest');
-        if (upgradeVersion.toUpperCase() == 'Y') {
-          print("=== create docker image: $dockerImage with tag: $dockerTag");
-          run('docker tag $dockerImage:latest $dockerImage:$dockerTag');
-          run('docker push $dockerImage:$dockerTag');
+        print("=== Image $dockerImage:latest created.");
+        if (push.toUpperCase() == 'Y') {
+          print(
+              "=== pushing docker image: $dockerImage with tag: latest to growerp.org");
+          run('docker push $dockerImage:latest');
+          if (upgradeVersion.toUpperCase() == 'Y') {
+            print("=== create docker image: $dockerImage with tag: $dockerTag");
+            run('docker tag $dockerImage:latest $dockerImage:$dockerTag');
+            run('docker push $dockerImage:$dockerTag');
+          }
         }
       }
     }
@@ -110,7 +120,7 @@ void main() async {
   var commitMessage = "Image created for App ${name.isEmpty ? apps : name} "
       "with tag $gitTag";
   if (upgradeVersion.toUpperCase() == 'Y') {
-    print("update git with message: $commitMessage");
+    print("=== update git with message: $commitMessage");
     run('git add .', workingDirectory: home);
     run('git commit -m "$commitMessage"', workingDirectory: home);
     run('git tag $gitTag', workingDirectory: home);
