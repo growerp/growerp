@@ -71,11 +71,11 @@ Future main() async {
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
   ChatServer chatServer = ChatServer();
-  String classificationId = GlobalConfiguration().get("classificationId");
+  String classificationId = 'AppHealth';
 
   Company? company;
   if (kIsWeb) {
-    String? hostName;
+    String? hostName = Uri.base.toString();
     //webactivate hostName = web.window.location.hostname;
     // ignore: unnecessary_null_comparison
     if (hostName != null) {
@@ -86,7 +86,6 @@ Future main() async {
       if (company.partyId == null) company = null;
     }
   }
-  //company = Company(partyId: '100002', name: 'hallo hallo');
 
   runApp(TopApp(
     restClient: restClient,
