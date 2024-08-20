@@ -59,7 +59,7 @@ along with this software (see the LICENSE.md file). If not, see
                     if (sequence.name == groupName) sequenceId = sequence.sequence_id
                 }
 
-                logger.info("===seqId: $sequenceId")
+                //logger.info("===seqId: $sequenceId")
                 if (sequenceId) {
                     // add user and sequence
                     result = sendPOST("v1/contacts",

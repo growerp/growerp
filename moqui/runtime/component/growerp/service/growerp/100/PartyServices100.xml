@@ -1311,7 +1311,8 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="userCompanyPartyId" />
             <parameter name="companyPartyId" required="true" />
             <parameter name="classificationId" required="true" />
-            <parameter name="newPassword" />
+            <parameter name="newPassword"
+                default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
         </in-parameters>
         <out-parameters>
             <parameter name="ok" type="Boolean" default-value="false" />
