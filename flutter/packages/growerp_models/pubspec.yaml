@@ -29,7 +29,7 @@ dev_dependencies:
   flutter_lints: ^4.0.0
   build_runner: ^2.1.11
   json_serializable: ^6.8.0
-  freezed: ^2.5.7
+  freezed: ^2.5.2
   retrofit_generator: ^8.1.2
   hive_generator: ^2.0.1
 

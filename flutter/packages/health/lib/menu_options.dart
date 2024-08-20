@@ -15,7 +15,7 @@
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'package:growerp_website/growerp_website.dart';
+//import 'package:growerp_website/growerp_website.dart';
 import 'views/main_menu_form.dart' as local;
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -26,7 +26,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
-    readGroups: [UserGroup.admin, UserGroup.employee, UserGroup.other],
+    readGroups: [UserGroup.employee, UserGroup.other],
     writeGroups: [UserGroup.admin],
     child: const local.AdminDbForm(),
   ),
@@ -76,7 +76,7 @@ List<MenuOption> menuOptions = [
       dialog: false,
     ),
   ),
-  MenuOption(
+/*  MenuOption(
     image: 'packages/growerp_core/images/crmGrey.png',
     selectedImage: 'packages/growerp_core/images/crm.png',
     title: 'Website',
@@ -85,4 +85,5 @@ List<MenuOption> menuOptions = [
     writeGroups: [UserGroup.admin],
     child: const WebsiteForm(),
   ),
+*/
 ];

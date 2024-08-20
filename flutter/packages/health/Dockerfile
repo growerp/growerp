@@ -43,7 +43,7 @@ RUN ls
 COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/
 WORKDIR /home/mobiledevops/
 RUN echo "pwd: $PWD"
-RUN sed -i 's\//webactivate \\' /home/mobiledevops/packages/health/lib/main.dart
+# RUN sed -i 's\//webactivate \\' /home/mobiledevops/packages/health/lib/main.dart
 RUN flutter --version
 RUN melos clean
 RUN melos bootstrap
@@ -54,8 +54,7 @@ RUN melos build --no-select
 # build flutter app
 WORKDIR /home/mobiledevops/packages/health
 #RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
-RUN flutter build web --release --web-renderer=auto
-
+RUN flutter build web --release
 # Stage 2 - Create the run-time image
 FROM nginx
 COPY --from=build-env /home/mobiledevops/packages/health/build/web /usr/share/nginx/html

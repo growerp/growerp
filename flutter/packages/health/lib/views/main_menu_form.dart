@@ -64,8 +64,9 @@ class AdminDbForm extends StatelessWidget {
                     ? "${authenticate.company!.name!.substring(0, 20)}..."
                     : "${authenticate.company!.name}",
               ]),
-            if (access(userGroup, menuOptions[5]))
+            /*       if (access(userGroup, menuOptions[5]))
               makeDashboardItem('dbCompany', context, menuOptions[5], []),
+     */
           ]),
         ),
       ],
