@@ -21,11 +21,10 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
   ThemeBloc themeBloc = context.read<ThemeBloc>();
   AuthBloc authBloc = context.read<AuthBloc>();
   Authenticate? auth = authBloc.state.authenticate;
-  UserGroup? groupId = auth?.user?.userGroup;
   List<MenuOption> options = [];
   for (var option in menu) {
     {
-      if (option.readGroups != null && option.readGroups!.contains(groupId)) {
+      if (access(auth?.user?.userGroup!, option)) {
         options.add(option);
       }
     }
