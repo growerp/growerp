@@ -21,19 +21,23 @@ void main() async {
       required: false);
 
   // check names
-  var names = nameList.split(',');
-  bool error = false;
-  for (var name in names) {
-    if (!apps.contains(name)) {
-      print("$name is not a valid appName");
-      error = true;
+  List<String> names = [];
+  if (nameList.isEmpty) {
+    names = apps;
+  } else {
+    names = nameList.split(',');
+    bool error = false;
+    for (var name in names) {
+      if (!apps.contains(name)) {
+        print("$name is not a valid appName");
+        error = true;
+      }
+    }
+    if (error == true) {
+      print("valid apps are $apps");
+      exit(1);
     }
   }
-  if (error == true) {
-    print("valid apps are $apps");
-    exit(1);
-  }
-
   final String push = ask('Push to growerp.org test system? y/N',
       required: false, defaultValue: 'N');
   String upgradeVersion = 'N';
@@ -131,11 +135,21 @@ void main() async {
   }
   // update git
   var gitTag = newVersion.substring(0, newVersion.indexOf('+'));
-  var commitMessage = "Image created for App ${names.isEmpty ? apps : names} "
+  var commitMessage =
+      "Image(s) created for App(s) ${names.isEmpty ? apps : names} "
       "with tag $gitTag";
   if (upgradeVersion.toUpperCase() == 'Y') {
-    print("=== update git with message: $commitMessage");
-    run('git add .', workingDirectory: home);
+    print("=== save version files in git with message: $commitMessage");
+    for (var name in names) {
+      switch (name) {
+        case 'growerp-moqui':
+          run('git add $home/moqui/runtime/component/growerp/component.xml',
+              workingDirectory: home);
+        default:
+          run('git add $home/flutter/packages/$name/pubspec.yaml',
+              workingDirectory: home);
+      }
+    }
     run('git commit -m "$commitMessage"', workingDirectory: home);
     run('git tag $gitTag', workingDirectory: home);
     run('git push', workingDirectory: home);
