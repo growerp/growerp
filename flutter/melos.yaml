@@ -10,6 +10,7 @@ packages:
   - packages/growerp*
   - packages/health
   - packages/growerp*/*example
+  - packages/test
 
 command:
   bootstrap:

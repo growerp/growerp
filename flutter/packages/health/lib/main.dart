@@ -75,12 +75,10 @@ Future main() async {
 
   Company? company;
   if (kIsWeb) {
-    String? hostName = Uri.base.toString();
+    String? hostName;
     //webactivate hostName = web.window.location.hostname;
     // ignore: unnecessary_null_comparison
     if (hostName != null) {
-      hostName = hostName.substring(7); // remove protocoll
-      hostName = hostName.substring(0, hostName.indexOf(':')); //remove port
       debugPrint("====hostname: $hostName");
       company = await restClient.getCompanyFromHost(hostName);
       if (company.partyId == null) company = null;

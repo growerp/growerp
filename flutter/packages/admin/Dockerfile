@@ -33,7 +33,7 @@ ENV PATH="$PATH":"$HOME/.pub-cache/bin"
 COPY --chown=myuser:myuser . $HOME
 # stup new folder as the working directory
 WORKDIR $HOME
-# RUN sed -i 's\//webactivate \\' $HOME/packages/admin/lib/main.dart
+RUN sed -i 's\//webactivate \\' $HOME/packages/admin/lib/main.dart
 RUN melos clean
 RUN melos bootstrap
 # localization
