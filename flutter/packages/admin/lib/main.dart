@@ -79,8 +79,6 @@ Future main() async {
     //webactivate hostName = web.window.location.hostname;
     // ignore: unnecessary_null_comparison
     if (hostName != null) {
-      hostName = hostName.substring(7); // remove protocoll
-      hostName = hostName.substring(0, hostName.indexOf(':')); //remove port
       // ignore: avoid_print
       print("=====hostname: $hostName");
       company = await restClient.getCompanyFromHost(hostName);
