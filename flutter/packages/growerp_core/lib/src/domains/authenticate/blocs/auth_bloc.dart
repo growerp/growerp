@@ -35,8 +35,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(this.chat, this.restClient, this.classificationId)
       : super(const AuthState()) {
     on<AuthLoad>(_onAuthLoad);
-    on<AuthRegisterCompanyAndAdmin>(_onAuthRegisterCompanyAndAdmin);
-    on<AuthRegisterUserEcommerce>(_onAuthRegisterUserEcommerce);
+    on<AuthRegister>(_onAuthRegister);
     on<AuthLoggedOut>(_onAuthLoggedOut);
     on<AuthLogin>(_onAuthLogin);
     on<AuthResetPassword>(_onAuthResetPassword);
@@ -102,71 +101,32 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onAuthRegisterCompanyAndAdmin(
-    AuthRegisterCompanyAndAdmin event,
+  Future<void> _onAuthRegister(
+    AuthRegister event,
     Emitter<AuthState> emit,
   ) async {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
-      Map result = await restClient.registerCompanyAdmin(
-        emailAddress: event.user.email!,
-        companyName: event.user.company!.name!,
-        currencyId: event.currencyId,
+      final result = await restClient.register(
+        classificationId: classificationId,
+        email: event.user.email!,
+        companyPartyId: event.user.company?.partyId,
         firstName: event.user.firstName!,
         lastName: event.user.lastName!,
-        companyEmailAddress: event.user.email!,
-        demoData: event.demoData,
-        classificationId: classificationId,
         // when debug mode password is always qqqqqq9!
         newPassword: kReleaseMode ? null : 'qqqqqq9!',
       );
-      if (result['ok'] == true) {
-        emit(state.copyWith(
-            status: AuthStatus.unAuthenticated,
-            message: 'Register Company and Admin successful.\n'
-                'You can now login with the password sent by email'));
-      } else {
-        emit(state.copyWith(
-            status: AuthStatus.failure,
-            message: 'Register Company and Admin failed.\n'
-                'Contact support@growerp.com for assistence'));
-      }
-      await PersistFunctions.persistAuthenticate(state.authenticate!);
+      await PersistFunctions.persistAuthenticate(result);
+      emit(state.copyWith(
+          status: AuthStatus.unAuthenticated,
+          authenticate: result,
+          message: 'Registration successful.\n'
+              'You can now login with the password sent by email'));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: AuthStatus.failure,
           authenticate: Authenticate(classificationId: classificationId),
           message: getDioError(e)));
-    }
-  }
-
-  Future<void> _onAuthRegisterUserEcommerce(
-    AuthRegisterUserEcommerce event,
-    Emitter<AuthState> emit,
-  ) async {
-    try {
-      emit(state.copyWith(status: AuthStatus.loading));
-      final result = await restClient.registerUser(
-        emailAddress: event.user.email!,
-        firstName: event.user.firstName!,
-        lastName: event.user.lastName!,
-        companyPartyId: event.companyPartyId,
-        classificationId: classificationId,
-        newPassword: kReleaseMode ? null : 'qqqqqq9!',
-      );
-      if (result['ok'] == true) {
-        emit(state.copyWith(
-            status: AuthStatus.unAuthenticated,
-            message: '          Register successful,\n'
-                'you can now login with the password sent by email.'));
-      } else {
-        emit(state.copyWith(
-            status: AuthStatus.failure,
-            message: 'Register Company and Admin failed.\n'
-                'Contact support@growerp.com for assistence'));
-      }
-    } on DioException catch (e) {
-      emit(state.copyWith(status: AuthStatus.failure, message: getDioError(e)));
     }
   }
 
@@ -193,25 +153,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
+      PersistFunctions.removeAuthenticate();
       Authenticate authenticate = await restClient.login(
         username: event.username,
         password: event.password,
+        extraInfo: event.extraInfo,
+        companyName: event.companyName,
+        currencyId: event.currency?.currencyId,
+        demoData: event.demoData,
         classificationId: classificationId,
       );
       if (authenticate.apiKey != null) {
-        if (authenticate.apiKey == 'passwordChange') {
-          return emit(state.copyWith(
-              status: AuthStatus.passwordChange,
-              authenticate: authenticate,
-              message: 'need to change password'));
-        }
         emit(state.copyWith(
             status: AuthStatus.authenticated,
             authenticate: authenticate,
             message: 'You are logged in now...'));
         PersistFunctions.persistAuthenticate(state.authenticate!);
-        chat.connect(
-            state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
+        if (state.authenticate!.user!.userId != null)
+          chat.connect(
+              state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
         var box = await Hive.openBox('growerp');
         box.put('apiKey', authenticate.apiKey);
       } else {

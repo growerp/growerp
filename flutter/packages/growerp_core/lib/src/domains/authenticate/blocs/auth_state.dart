@@ -22,7 +22,6 @@ enum AuthStatus {
   unAuthenticated,
   failure,
   changeIp,
-  passwordChange,
 }
 
 class AuthState extends Equatable {
@@ -54,7 +53,7 @@ class AuthState extends Equatable {
   @override
   String toString() =>
       "$status { owner: ${authenticate?.ownerPartyId} company: ${authenticate?.company?.name} "
-      "user: ${authenticate?.user?.lastName!} "
+      "user: ${authenticate?.user?.lastName ?? '?'} "
       //    "ApiKey: ${authenticate?.apiKey?.substring(0, 10)}...."
       " message: $message";
 }

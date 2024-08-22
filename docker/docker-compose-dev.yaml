@@ -1,4 +1,3 @@
-version: "2"
 
 networks:
   my-network:
@@ -145,7 +144,7 @@ services:
     image: growerp/health
     build:
       context: ../flutter
-      dockerfile: ../flutter/packages/admin/Dockerfile
+      dockerfile: ../flutter/packages/health/Dockerfile
     restart: unless-stopped
     expose:
       - 80
@@ -155,3 +154,4 @@ services:
       - VIRTUAL_HOST=health.growerp.local
     networks:
       - my-network
+      

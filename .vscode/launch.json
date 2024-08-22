@@ -58,7 +58,7 @@
             "program": "lib/main.dart",
             "args": [
                 "-d",
-                "linux",
+                "linux"
             ]
         },
         {
@@ -66,14 +66,14 @@
             "type": "dart",
             "request": "launch",
             "cwd": "flutter/packages/admin",
-            "program": "lib/main.dart",
+            "program": "lib/main.dart"
         },
         {
             "name": "Health mobile (lib/main.dart)",
             "type": "dart",
             "request": "launch",
             "cwd": "flutter/packages/health",
-            "program": "lib/main.dart",
+            "program": "lib/main.dart"
         },
         {
             "name": "Health Web (lib/main.dart)",
@@ -84,8 +84,28 @@
             "args": [
                 "-d",
                 "chrome",
-                "--web-renderer",
-                "auto"
+                "--web-port",
+                "55555"
+            ]
+        },
+        {
+            "name": "Test mobile",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/test",
+            "program": "lib/main.dart"
+        },
+        {
+            "name": "Test Web",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/test",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "chrome",
+                "--web-port",
+                "55555"
             ]
         },
         {
@@ -93,14 +113,14 @@
             "type": "dart",
             "request": "launch",
             "cwd": "flutter/packages/freelance",
-            "program": "lib/main.dart",
+            "program": "lib/main.dart"
         },
         {
             "name": "Hotel mobile (lib/main.dart)",
             "type": "dart",
             "request": "launch",
             "cwd": "flutter/packages/hotel",
-            "program": "lib/main.dart",
+            "program": "lib/main.dart"
         },
         {
             "name": "Hotel chrome (lib/main.dart)",
@@ -110,7 +130,7 @@
             "program": "lib/main.dart",
             "args": [
                 "-d",
-                "chrome",
+                "chrome"
             ]
         },
         {
@@ -121,7 +141,7 @@
             "program": "lib/main.dart",
             "args": [
                 "-d",
-                "chrome",
+                "chrome"
             ]
         },
         {
@@ -131,12 +151,22 @@
             "cwd": "flutter/packages/growerp/bin",
             "program": "csvToCsv.dart",
             "args": [
-                "/home/hans/accugeo/accugeoConvert",
-                //"-start",
-                //"2000-01-01",
-                //"-end",
-                //"2000-06-07"
+                "/home/hans/accugeo/accugeoConvert"
             ]
         },
+        {
+            "name": "Core (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/growerp_core/example",
+            "program": "lib/main.dart"
+        },
+        {
+            "name": "UserCompany (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/growerp_user_company/example",
+            "program": "lib/main.dart"
+        }
     ]
 }

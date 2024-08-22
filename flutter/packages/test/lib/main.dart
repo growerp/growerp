@@ -1,17 +1,16 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:web/web.dart' as web;
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 import 'package:global_configuration/global_configuration.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await GlobalConfiguration().loadFromAsset('app_settings');
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+  // SharedPreferences prefs = await SharedPreferences.getInstance();
   await Hive.initFlutter();
 
   RestClient restClient = RestClient(await buildDioClient());

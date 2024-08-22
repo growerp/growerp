@@ -29,28 +29,32 @@ class LoginDialog extends StatefulWidget {
 
 class LoginDialogState extends State<LoginDialog> {
   final _loginFormKey = GlobalKey<FormState>();
+  final _moreInfoFormKey = GlobalKey<FormState>();
   late Authenticate authenticate;
   bool _obscureText = true;
-  String? companyPartyId;
-  String? companyName;
   List<Company>? companies;
-  Company? _companySelected;
   String? oldPassword;
-  String? username;
-  LoginDialogState();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _companyController = TextEditingController();
   final _loginFormKey1 = GlobalKey<FormState>();
   final _password3Controller = TextEditingController();
   final _password4Controller = TextEditingController();
   bool _obscureText3 = true;
   bool _obscureText4 = true;
   late AuthBloc _authBloc;
+  late Currency _currencySelected;
+  late bool _demoData;
 
   @override
   void initState() {
     super.initState();
     _authBloc = context.read<AuthBloc>();
+    _currencySelected = currencies[1];
+    _demoData = kReleaseMode ? false : true;
+    if (!kReleaseMode) {
+      _passwordController.text = 'qqqqqq9!';
+    }
   }
 
   @override
@@ -61,18 +65,34 @@ class LoginDialogState extends State<LoginDialog> {
           HelperFunctions.showMessage(
               context, '${state.message}', Colors.green);
           Navigator.of(context).pop();
-          break;
         case AuthStatus.failure:
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-          break;
         default:
           HelperFunctions.showMessage(
               context, '${state.message}', Colors.green);
-          break;
       }
     }, builder: (context, state) {
       if (state.status == AuthStatus.loading) return const LoadingIndicator();
-      if (state.status == AuthStatus.passwordChange) {
+      var furtherAction = state.authenticate!.apiKey;
+      authenticate = state.authenticate!;
+      _usernameController.text = authenticate.user?.loginName ??
+          (kReleaseMode ? '' : 'test@example.com');
+      return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Dialog(
+              insetPadding: const EdgeInsets.all(10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: furtherAction == 'moreInfo'
+                  ? moreInfoForm(
+                      _usernameController.text, authenticate.moquiSessionToken!)
+                  : furtherAction == 'changePassword'
+                      ? changePasswordForm(
+                          _usernameController.text, oldPassword)
+                      : loginForm()));
+
+/*      if (state.status == AuthStatus.passwordChange) {
         username = _usernameController.text;
         oldPassword = _passwordController.text;
       }
@@ -89,139 +109,194 @@ class LoginDialogState extends State<LoginDialog> {
       if (_passwordController.text.isEmpty && !kReleaseMode) {
         _passwordController.text = 'qqqqqq9!';
       }
-      return Scaffold(
-          backgroundColor: Colors.transparent,
-          body: Dialog(
-              insetPadding: const EdgeInsets.all(10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: oldPassword != null && username != null
-                  ? _changePassword(username, oldPassword)
-                  : companyPartyId == null
-                      ? _changeEcommerceCompany()
-                      : _loginToCurrentCompany()));
+*/
     });
   }
 
-  Widget _changePassword(String? username, String? oldPassword) {
+  Widget changePasswordForm(String? username, String? oldPassword) {
+    return Dialog(
+        insetPadding: const EdgeInsets.all(10),
+        child: popUp(
+            height: 500,
+            context: context,
+            title: "Create New Password",
+            child: Form(
+              key: _loginFormKey1,
+              child: Column(children: <Widget>[
+                const SizedBox(height: 40),
+                Text("username: $username"),
+                const SizedBox(height: 20),
+                TextFormField(
+                  key: const Key("password1"),
+                  autofocus: true,
+                  controller: _password3Controller,
+                  obscureText: _obscureText3,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    helperText:
+                        'At least 8 characters, including alpha, number '
+                        '&\nspecial character, no previous password.',
+                    suffixIcon: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _obscureText3 = !_obscureText3;
+                        });
+                      },
+                      child: Icon(_obscureText3
+                          ? Icons.visibility
+                          : Icons.visibility_off),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value!.isEmpty) return 'Please enter first password?';
+                    final regExpRequire = RegExp(
+                        r'^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).{8,}');
+                    if (!regExpRequire.hasMatch(value)) {
+                      return 'At least 8 characters, including alpha, number & special character.';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  key: const Key("password2"),
+                  obscureText: _obscureText4,
+                  decoration: InputDecoration(
+                    labelText: 'Verify Password',
+                    helperText: 'Enter the new password again.',
+                    suffixIcon: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _obscureText4 = !_obscureText4;
+                        });
+                      },
+                      child: Icon(_obscureText4
+                          ? Icons.visibility
+                          : Icons.visibility_off),
+                    ),
+                  ),
+                  controller: _password4Controller,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Enter password again to verify?';
+                    }
+                    if (value != _password4Controller.text) {
+                      return 'Password is not matching';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                OutlinedButton(
+                    child: const Text('Submit new Password'),
+                    onPressed: () {
+                      if (_loginFormKey1.currentState!.validate()) {
+                        _authBloc.add(
+                          AuthChangePassword(
+                            username!,
+                            oldPassword!,
+                            _password4Controller.text,
+                          ),
+                        );
+                      }
+                    }),
+              ]),
+            )));
+  }
+
+  Widget moreInfoForm(String username, String password) {
+    var user = authenticate.user;
     return popUp(
-        height: 500,
+        height: user?.userGroup == UserGroup.admin ? 450 : 350,
         context: context,
-        title: "Create New Password",
+        title: 'Complete your registration',
         child: Form(
-          key: _loginFormKey1,
-          child: Column(children: <Widget>[
-            const SizedBox(height: 40),
-            Text("username: $username"),
-            const SizedBox(height: 20),
-            TextFormField(
-              key: const Key("password1"),
-              autofocus: true,
-              controller: _password3Controller,
-              obscureText: _obscureText3,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                helperText: 'At least 8 characters, including alpha, number '
-                    '&\nspecial character, no previous password.',
-                suffixIcon: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _obscureText3 = !_obscureText3;
-                    });
-                  },
-                  child: Icon(
-                      _obscureText3 ? Icons.visibility : Icons.visibility_off),
-                ),
-              ),
-              validator: (value) {
-                if (value!.isEmpty) return 'Please enter first password?';
-                final regExpRequire =
-                    RegExp(r'^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).{8,}');
-                if (!regExpRequire.hasMatch(value)) {
-                  return 'At least 8 characters, including alpha, number & special character.';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-            TextFormField(
-              key: const Key("password2"),
-              obscureText: _obscureText4,
-              decoration: InputDecoration(
-                labelText: 'Verify Password',
-                helperText: 'Enter the new password again.',
-                suffixIcon: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _obscureText4 = !_obscureText4;
-                    });
-                  },
-                  child: Icon(
-                      _obscureText4 ? Icons.visibility : Icons.visibility_off),
-                ),
-              ),
-              controller: _password4Controller,
-              validator: (value) {
-                if (value!.isEmpty) return 'Enter password again to verify?';
-                if (value != _password4Controller.text) {
-                  return 'Password is not matching';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-            OutlinedButton(
-                child: const Text('Submit new Password'),
-                onPressed: () {
-                  if (_loginFormKey1.currentState!.validate()) {
-                    _authBloc.add(
-                      AuthChangePassword(
-                        username!,
-                        oldPassword!,
-                        _password4Controller.text,
+            key: _moreInfoFormKey,
+            child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                key: const Key('listView'),
+                child: Column(children: <Widget>[
+                  Column(children: [
+                    const SizedBox(height: 10),
+                    const Text(
+                      "Welcome!",
+                      textAlign: TextAlign.center,
+                    ),
+                    Text("${user?.lastName}, ${user?.firstName}"),
+                    if (user?.userGroup == UserGroup.admin)
+                      const Text(
+                          "please enter both the company name\nand currency for the new company"),
+                    if (user?.userGroup != UserGroup.admin)
+                      const Text(
+                          "please enter optionally a company name you work for."),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      key: const Key('companyName'),
+                      decoration: const InputDecoration(
+                          labelText: 'Business Company name'),
+                      controller: _companyController,
+                      validator: (value) {
+                        if (user?.userGroup == UserGroup.admin &&
+                            value!.isEmpty) {
+                          return 'Please enter business name("Private" for Private person)';
+                        }
+                        return null;
+                      },
+                    ),
+                    if (user?.userGroup == UserGroup.admin)
+                      DropdownButtonFormField<Currency>(
+                        key: const Key('currency'),
+                        decoration:
+                            const InputDecoration(labelText: 'Currency'),
+                        hint: const Text('Currency'),
+                        value: _currencySelected,
+                        validator: (value) =>
+                            value == null ? 'Currency field required!' : null,
+                        items: currencies.map((item) {
+                          return DropdownMenuItem<Currency>(
+                              value: item, child: Text(item.description!));
+                        }).toList(),
+                        onChanged: (Currency? newValue) {
+                          setState(() {
+                            _currencySelected = newValue!;
+                          });
+                        },
+                        isExpanded: true,
                       ),
-                    );
-                  }
-                }),
-          ]),
-        ));
+                    const SizedBox(height: 10),
+                    if (user?.userGroup == UserGroup.admin)
+                      InputDecorator(
+                          decoration:
+                              const InputDecoration(labelText: 'DemoData'),
+                          child: CheckboxListTile(
+                              key: const Key('demoData'),
+                              title: const Text("Generate demo data"),
+                              value: _demoData,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  _demoData = value!;
+                                });
+                              })),
+                    const SizedBox(height: 10),
+                    OutlinedButton(
+                        key: const Key('newCompany'),
+                        child: const Text('Submit'),
+                        onPressed: () {
+                          if (_moreInfoFormKey.currentState!.validate()) {
+                            context.read<AuthBloc>().add(AuthLogin(
+                                username, password,
+                                extraInfo: true,
+                                companyName: _companyController.text,
+                                currency: _currencySelected,
+                                demoData: _demoData));
+                          }
+                        })
+                  ])
+                ]))));
   }
 
-  Widget _changeEcommerceCompany() {
-    final loginFormKey2 = GlobalKey<FormState>();
-    return SizedBox(
-        width: 400,
-        height: 400,
-        child: Form(
-          key: loginFormKey2,
-          child: SingleChildScrollView(
-            child: DropdownButton(
-              key: const ValueKey('drop_down'),
-              underline: const SizedBox(), // remove underline
-              hint: const Text('Company'),
-              value: _companySelected,
-              items: companies?.map((item) {
-                return DropdownMenuItem<Company>(
-                  value: item,
-                  child: Text(item.name ?? 'Company??'),
-                );
-              }).toList(),
-              onChanged: (Company? newValue) {},
-/*                _authBloc.add(AuthUpdateCompany(newValue!));
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/', ModalRoute.withName('/'),
-                    arguments:
-                        FormArguments(message: "Ecommerce company changed!"));
-              },
-*/
-              isExpanded: true,
-            ),
-          ),
-        ));
-  }
-
-  Widget _loginToCurrentCompany() {
+  Widget loginForm() {
     return popUp(
         height: 350,
         context: context,

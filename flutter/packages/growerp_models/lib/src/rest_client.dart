@@ -13,18 +13,15 @@ abstract class RestClient {
   @Extra({'noApiKey': true})
   Future<Map<String, bool>> checkEmail({@Query('email') required String email});
 
-  @POST("rest/s1/growerp/100/UserAndCompany")
+  @POST("rest/s1/growerp/100/Register")
   @Extra({'noApiKey': true})
   @FormUrlEncoded()
-  Future<Map<String, bool>> registerCompanyAdmin({
-    @Field() required String emailAddress,
-    @Field() required String companyEmailAddress,
+  Future<Authenticate> register({
+    @Field() required String classificationId,
     @Field() required String firstName,
     @Field() required String lastName,
-    @Field() required String companyName,
-    @Field() required String currencyId,
-    @Field() required bool demoData,
-    @Field() required String classificationId,
+    @Field() required String email,
+    @Field() String? companyPartyId,
     @Field() String? newPassword,
   });
 
@@ -34,11 +31,14 @@ abstract class RestClient {
   Future<Authenticate> login({
     @Field() required String username,
     @Field() required String password,
+    @Field() bool? extraInfo,
+    @Field() String? companyName,
+    @Field() String? currencyId,
+    @Field() bool? demoData,
     @Field() required String classificationId,
   });
 
   @POST("rest/s1/growerp/100/Logout")
-  @Extra({'noApiKey': true})
   Future<String> logout();
 
   @POST("rest/s1/growerp/100/ResetPassword")
@@ -127,18 +127,6 @@ abstract class RestClient {
   Future<User> deleteUser(
       {@Field() required String partyId,
       @Field() required bool deleteCompanyToo});
-
-  // ecommerce
-  @POST("rest/s1/growerp/100/RegisterUser")
-  @Extra({'noApiKey': true})
-  Future<Map<String, bool>> registerUser({
-    @Field() required String emailAddress,
-    @Field() required String firstName,
-    @Field() required String lastName,
-    @Field() required String companyPartyId,
-    @Field() required String classificationId,
-    @Field() String? newPassword, // just for test
-  });
 
   // Website ======
   @GET("rest/s1/growerp/100/Website")

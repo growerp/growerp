@@ -22,12 +22,13 @@ part 'authenticate_model.g.dart';
 class Authenticate with _$Authenticate {
   Authenticate._();
   factory Authenticate({
-    final String? apiKey,
+    final String? apiKey, // api or actions as changePassword, moreinfo
     required String classificationId, // appname
     String? moquiSessionToken,
     String? ownerPartyId,
-    Company? company, //postall address not used here, use user comp address
-    User? user, // user has a company companyAddress
+    CompanyUser? companyUser,
+    Company? company,
+    User? user,
     Stats? stats,
   }) = _Authenticate;
 

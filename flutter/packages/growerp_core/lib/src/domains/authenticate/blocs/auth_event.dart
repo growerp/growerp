@@ -22,26 +22,23 @@ abstract class AuthEvent extends Equatable {
 
 class AuthLoad extends AuthEvent {}
 
-class AuthRegisterCompanyAndAdmin extends AuthEvent {
+class AuthRegister extends AuthEvent {
   final User user;
-  final String currencyId;
-  final bool demoData;
-  const AuthRegisterCompanyAndAdmin(this.user, this.currencyId,
-      [this.demoData = true]);
+  const AuthRegister(this.user);
   @override
-  List<Object> get props => [user, currencyId, demoData];
-}
-
-class AuthRegisterUserEcommerce extends AuthEvent {
-  final User user;
-  final String companyPartyId;
-  const AuthRegisterUserEcommerce(this.user, this.companyPartyId);
+  List<Object> get props => [user];
 }
 
 class AuthLogin extends AuthEvent {
   final String username;
   final String password;
-  const AuthLogin(this.username, this.password);
+  // for registration continuation
+  final bool extraInfo;
+  final String? companyName;
+  final Currency? currency;
+  final bool? demoData;
+  const AuthLogin(this.username, this.password,
+      {this.extraInfo = false, this.companyName, this.currency, this.demoData});
 }
 
 class AuthResetPassword extends AuthEvent {

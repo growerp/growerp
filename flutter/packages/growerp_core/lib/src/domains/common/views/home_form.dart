@@ -18,7 +18,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import '../../../l10n/generated/core_localizations.dart';
 import '../../../templates/templates.dart';
 import '../../domains.dart';
 
@@ -75,6 +74,8 @@ class HomeFormState extends State<HomeForm> {
     }, builder: (context, state) {
       switch (state.status) {
         case AuthStatus.authenticated:
+          if (['moreInfo', 'changePassword']
+              .contains(state.authenticate!.apiKey)) return LoginDialog();
           return Column(children: [
             Expanded(
                 child: DisplayMenuOption(
@@ -115,7 +116,7 @@ class HomeFormState extends State<HomeForm> {
                         key: const Key('HomeFormUnAuth'),
                         title: appBarTitle(
                           context,
-                          company == null ? 'Login / New company' : 'Login',
+                          'Login / Register',
                           isPhone,
                         )),
                     body: Center(
@@ -129,33 +130,15 @@ class HomeFormState extends State<HomeForm> {
                                     : 'packages/growerp_core/images/growerpDark100.png'),
                                 height: 80,
                                 width: 80),
-                        if (widget.title.isNotEmpty) const SizedBox(height: 30),
+                        const SizedBox(height: 30),
                         Text(company == null ? widget.title : company!.name!,
                             style: TextStyle(
                                 fontSize: isPhone ? 15 : 25,
                                 fontWeight: FontWeight.bold)),
-                        if (widget.title.isNotEmpty) const SizedBox(height: 30),
-                        state.authenticate!.company?.partyId != null
-                            ? OutlinedButton(
-                                key: const Key('loginButton'),
-                                child: Text(CoreLocalizations.of(context)!
-                                    .loginWithExistingUserName),
-                                onPressed: () async {
-                                  await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return BlocProvider.value(
-                                            value: _authBloc,
-                                            child: const LoginDialog());
-                                      });
-                                })
-                            : const Text('No companies yet, create one!'),
-                        const Expanded(child: SizedBox(height: 10)),
+                        const SizedBox(height: 30),
                         OutlinedButton(
-                            key: const Key('newCompButton'),
-                            child: Text(
-                                'Register ${classificationId == 'AppHealth' ? 'Patient' : 'Customer'} at ${company == null ? 'Company' : company!.name}'),
+                            key: const Key('loginButton'),
+                            child: const Text('Login'),
                             onPressed: () async {
                               await showDialog(
                                   barrierDismissible: true,
@@ -163,15 +146,15 @@ class HomeFormState extends State<HomeForm> {
                                   builder: (BuildContext context) {
                                     return BlocProvider.value(
                                         value: _authBloc,
-                                        child: const NewCompanyDialog(false));
+                                        child: const LoginDialog());
                                   });
                             }),
+                        const Expanded(child: SizedBox(height: 10)),
                         const SizedBox(height: 10),
                         if (company == null)
                           OutlinedButton(
                               key: const Key('newUserButton'),
-                              child:
-                                  const Text('Create a new company and admin'),
+                              child: const Text('Register'),
                               onPressed: () async {
                                 await showDialog(
                                     barrierDismissible: true,
@@ -179,7 +162,8 @@ class HomeFormState extends State<HomeForm> {
                                     builder: (BuildContext context) {
                                       return BlocProvider.value(
                                           value: _authBloc,
-                                          child: const NewCompanyDialog(true));
+                                          child:
+                                              const RegisterUserDialog(true));
                                     });
                               }),
                         const SizedBox(height: 50)

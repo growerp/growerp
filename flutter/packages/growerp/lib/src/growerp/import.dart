@@ -17,29 +17,25 @@ Future<void> login(RestClient client, String username, String password) async {
   var logger = Logger(filter: MyFilter());
 
   if (username.isNotEmpty && password.isNotEmpty) {
-    // email exists?
-    Map result = await client.checkEmail(email: username);
-    if (result['ok'] == false) {
-      // no so register new
-      Map registerResult = await client.registerCompanyAdmin(
-          emailAddress: username,
-          companyEmailAddress: 'q$username',
+    try {
+      // email exists?
+      Map result = await client.checkEmail(email: username);
+      if (result['ok'] == false) {
+        // no so register new
+        final registerResult = await client.register(
+          classificationId: 'AppAdmin',
+          email: username,
           newPassword: password,
           firstName: 'Hans',
           lastName: 'Jansen',
-          companyName: 'test company',
-          currencyId: 'USD',
+/*          currencyId: 'USD',
           demoData: false,
-          classificationId: 'AppAdmin');
-      if (registerResult['ok'] == false) {
-        logger.e(
-            "registration of a new company failed!\nPlease contact support@growerp.com");
-        exit(1);
-      } else {
-        // wait for background server job to finish
-        print(" wait for background job to finish");
-        await Future.delayed(const Duration(seconds: 5));
+          classificationId: 'AppAdmin'*/
+        );
+        print(registerResult.toString());
       }
+    } catch (e) {
+      print("registration failed: ${getDioError(e)}");
     }
 
     // login for key
