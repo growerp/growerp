@@ -695,6 +695,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="userId" from="userAccount.userId" />
                     <econdition field-name="userGroupId" value="GROWERP_M_ADMIN" />
                 </entity-find>
+                <!-- get person name -->
                 <entity-find-one entity-name="mantle.party.Person" value-field="person">
                     <field-map field-name="partyId" from="userAccount.partyId" />
                 </entity-find-one>
