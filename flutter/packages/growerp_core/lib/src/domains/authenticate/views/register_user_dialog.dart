@@ -32,7 +32,6 @@ class RegisterUserDialog extends StatefulWidget {
 
 class _RegisterUserDialogState extends State<RegisterUserDialog> {
   final _registerFormKey = GlobalKey<FormState>();
-  final _companyController = TextEditingController();
   final _companySearchBoxController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -45,7 +44,6 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
   @override
   void initState() {
     super.initState();
-    _companyController.text = kReleaseMode ? '' : 'Demo company from John Doe';
     _firstNameController.text = kReleaseMode ? '' : 'John';
     _lastNameController.text = kReleaseMode ? '' : 'Doe';
     _emailController.text = kReleaseMode ? '' : 'test@example.com';
@@ -153,7 +151,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
               const SizedBox(height: 20),
               if (_presetCompany == null)
                 const Text(
-                    'Either select to be a contact of an existing company..',
+                    'Select an existing company, or leave empty for a new company',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.orange,
@@ -199,40 +197,9 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                 onChanged: (Company? newValue) {
                   setState(() {
                     _selectedCompany = newValue;
-                    _companyController.text = '';
                   });
                 },
-                validator: (value) =>
-                    _companyController.text.isEmpty && _selectedCompany == null
-                        ? "Select a company or enter a new Company below!"
-                        : null,
               ),
-              const SizedBox(height: 10),
-              if (_presetCompany == null)
-                const Text('Or an administrator of a NEW company',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.orange,
-                    )),
-              const SizedBox(height: 10),
-              if (_presetCompany == null)
-                TextFormField(
-                  key: const Key('companyName'),
-                  decoration:
-                      const InputDecoration(labelText: 'New Company Name'),
-                  controller: _companyController,
-                  validator: (value) {
-                    if (value!.isEmpty && _selectedCompany == null) {
-                      return 'Please enter business name OR select a company)';
-                    }
-                    return null;
-                  },
-                  onChanged: (newValue) {
-                    setState(() {
-                      _selectedCompany = null;
-                    });
-                  },
-                ),
               const SizedBox(height: 10),
               OutlinedButton(
                   key: const Key('newUserButton'),
@@ -240,9 +207,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                   onPressed: () async {
                     if (_registerFormKey.currentState!.validate()) {
                       _authBloc.add(AuthRegister(User(
-                        company: Company(
-                            name: _companyController.text,
-                            partyId: _selectedCompany?.partyId),
+                        company: Company(partyId: _selectedCompany?.partyId),
                         firstName: _firstNameController.text,
                         lastName: _lastNameController.text,
                         email: _emailController.text,
