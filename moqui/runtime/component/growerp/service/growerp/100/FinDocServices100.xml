@@ -355,13 +355,13 @@ along with this software (see the LICENSE.md file). If not, see
                         <entity-find offset="start" limit="limit"
                             entity-name="growerp.order.RequestAndParty" list="items">
                             <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                            <!--econditions
+                            <econditions
                                 combine="or">
                                 <econdition field-name="statusId" operator="in" from="statusList"
                                     ignore-if-empty="true" />
                                 <econdition field-name="effectiveDate" operator="greater"
                                     from="lastUpdatedStamp" ignore-if-empty="true" />
-                            </econditions-->
+                            </econditions>
                             <econdition field-name="requestDate" operator="less-equals"
                                 from="tsDate" ignore-if-empty="true" />
                             <econditions combine="or">
@@ -1441,6 +1441,7 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="nowDate" from="ec.user.nowTimestamp.toString().substring(0,10)" />
+            <!-- create 'other Party'-->
             <if
                 condition="finDoc.docType != 'transaction' &amp;&amp; 
                     (!finDoc.otherCompany &amp;&amp; !finDoc.otherUser)">
@@ -3024,3 +3025,4 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 </services>
+ 

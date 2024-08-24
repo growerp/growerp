@@ -450,23 +450,23 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <!-- if switching apps need to check of all basic data is present-->
-            <service-call name="growerp.100.PartyServices100.verifyAndGet#ProductStore"
-                in-map="[ownerPartyId: ownerPartyId, userPartyId: userPartyId,
-                hostName: ec.web.getHostName(false),
-                 companyPartyId: companyPartyId, classificationId: classificationId]" />
+            <!-- get owner -->
             <set field="authenticate"
                 from="[ownerPartyId: ownerPartyId,classificationId: classificationId]" />
+            <!-- get user-->
             <service-call name="growerp.100.PartyServices100.get#User"
                 in-map="[userPartyId: userPartyId]" out-map="userInfo" />
             <set field="authenticate.user" from="userInfo.users[0]" />
+            <!-- get company-->
             <service-call name="growerp.100.PartyServices100.get#Company"
                 in-map="companyPartyId: companyPartyId" out-map="companyInfo" />
             <if condition="companyInfo.companies">
                 <set field="authenticate.company" from="companyInfo.companies[0]" />
             </if>
+            <!-- keys -->
             <set field="authenticate.apiKey" from="ec.user.getLoginKey()" />
             <set field="authenticate.moquiSessionToken" from="ec.web.sessionToken" />
+            <!-- statistics -->
             <service-call name="growerp.100.GeneralServices100.get#Stats"
                 out-map="authenticate" />
         </actions>
@@ -701,82 +701,19 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find-one>
                 <!-- extra info provided?-->
                 <if condition="extraInfo == true">
-                    <if condition="adminAccess">
-                        <then>
-                            <if condition="!companyName || !currencyId"><!-- mandatory info -->
-                                <return error="true"
-                                    message="Admin user needs to provide main company name and currency" />
-                            </if>
-                            <!-- get ownerPartyId -->
-                            <entity-find-one entity-name="mantle.party.Party"
-                                value-field="userParty">
-                                <field-map field-name="partyId" from="userAccount.partyId" />
-                            </entity-find-one>
-                            <set field="ownerPartyId" from="userParty.ownerPartyId" />
-                            <!-- create main company-->
-                            <service-call
-                                name="growerp.100.GeneralServices100.getNext#PseudoId"
-                                in-map="[ownerPartyId: ownerPartyId, seqName: 'party']"
-                                out-map="context" />
-                            <service-call
-                                name="mantle.party.PartyServices.create#Organization"
-                                out-map="context"
-                                in-map="[organizationName: companyName,
-                                        pseudoId: seqNum,
-                                        ownerPartyId: ownerPartyId,
-                                        roleTypeId: 'OrgInternal',
-                                        disabled: 'N']" />
-                            <!-- company to owner relationship obsolete: should use
-                                    ownerPartyId
-                                in entity Party-->
-                            <service-call name="create#mantle.party.PartyRelationship"
-                                in-map="[fromPartyId: partyId, 
-                                    fromRoleTypeId: 'OrgInternal',
-                                    relationshipTypeEnumId: 'PrtOrgRollup',
-                                    fromDate: ec.user.nowTimestamp,
-                                    toPartyId: ownerPartyId,
-                                    toRoleTypeId: 'Owner']" />
-                            <!-- currency -->
-                            <service-call
-                                name="create#mantle.ledger.config.PartyAcctgPreference"
-                                in-map="[organizationPartyId: partyId,
-                                                    baseCurrencyUomId: currencyId]" />
-                            <!-- employee to company relationship-->
-                            <service-call name="create#mantle.party.PartyRelationship"
-                                in-map="[
-                                        fromPartyId: userAccount.partyId,
-                                        fromRoleTypeId: 'Employee',
-                                        toPartyId: partyId,
-                                        toRoleTypeId: 'OrgInternal',
-                                        relationshipTypeEnumId: 'PrtEmployee',
-                                        fromDate: ec.user.nowTimestamp
-                                        ]" />
-                            <!-- initialize accounting with defaults -->
-                            <script>ec.user.loginUser(username, password)</script>
-                            <service-call
-                                name="growerp.100.AccountingServices100.init#PartyAccountingConfiguration"
-                                in-map="[sourcePartyId: 'DefaultSettings',
-                                        organizationPartyId: partyId,
-                                        baseCurrencyUomId: currencyId]" />
-                            <!-- the rest of the setup via the get#Authentication/verify -->
-                            <service-call
-                                name="growerp.100.GeneralServices100.get#Authenticate"
-                                in-map="classificationId: classificationId"
-                                out-map="context" />
-                            <if condition="demoData">
-                                <service-call
-                                    name="growerp.100.PartyServices100.load#DemoData"
-                                    include-user-login="true"
-                                    in-map="[ownerPartyId: ownerPartyId,
-                                                companyPartyId: partyId,
-                                                currencyId: currencyId,
-                                                classificationId: classificationId,
-                                                userPartyId: userAccount.partyId]" />
-
-                            </if>
-                        </then>
-                        <else><!-- customer user with optional company-->
-                            <if condition="companyName">
+                    <then>
+                        <!-- get ownerPartyId -->
+                        <entity-find-one entity-name="mantle.party.Party"
+                            value-field="userParty">
+                            <field-map field-name="partyId" from="userAccount.partyId" />
+                        </entity-find-one>
+                        <set field="ownerPartyId" from="userParty.ownerPartyId" />
+                        <if condition="adminAccess">
+                            <then><!-- new company and admin -->
+                                <if condition="!companyName || !currencyId"><!-- mandatory info -->
+                                    <return error="true"
+                                        message="Admin user needs to provide main company name and currency" />
+                                </if>
                                 <!-- create main company-->
                                 <service-call
                                     name="growerp.100.GeneralServices100.getNext#PseudoId"
@@ -786,14 +723,78 @@ along with this software (see the LICENSE.md file). If not, see
                                     name="mantle.party.PartyServices.create#Organization"
                                     out-map="context"
                                     in-map="[organizationName: companyName,
+                                        pseudoId: seqNum,
+                                        ownerPartyId: ownerPartyId,
+                                        roleTypeId: 'OrgInternal',
+                                        disabled: 'N']" />
+                                <!-- company to owner relationship obsolete: should use
+                                    ownerPartyId
+                                in entity Party-->
+                                <service-call name="create#mantle.party.PartyRelationship"
+                                    in-map="[fromPartyId: partyId, 
+                                    fromRoleTypeId: 'OrgInternal',
+                                    relationshipTypeEnumId: 'PrtOrgRollup',
+                                    fromDate: ec.user.nowTimestamp,
+                                    toPartyId: ownerPartyId,
+                                    toRoleTypeId: 'Owner']" />
+                                <!-- currency -->
+                                <service-call
+                                    name="create#mantle.ledger.config.PartyAcctgPreference"
+                                    in-map="[organizationPartyId: partyId,
+                                                    baseCurrencyUomId: currencyId]" />
+                                <!-- employee to company relationship-->
+                                <service-call name="create#mantle.party.PartyRelationship"
+                                    in-map="[
+                                        fromPartyId: userAccount.partyId,
+                                        fromRoleTypeId: 'Employee',
+                                        toPartyId: partyId,
+                                        toRoleTypeId: 'OrgInternal',
+                                        relationshipTypeEnumId: 'PrtEmployee',
+                                        fromDate: ec.user.nowTimestamp
+                                        ]" />
+                                <!-- initialize accounting with defaults -->
+                                <script>ec.user.loginUser(username, password)</script>
+                                <service-call
+                                    name="growerp.100.AccountingServices100.init#PartyAccountingConfiguration"
+                                    in-map="[sourcePartyId: 'DefaultSettings',
+                                        organizationPartyId: partyId,
+                                        baseCurrencyUomId: currencyId]" />
+                                <!-- the organizational setup -->
+                                <service-call
+                                    name="growerp.100.PartyServices100.setup#MainOrganization"
+                                    in-map="[ownerPartyId: ownerPartyId, userPartyId: userAccount.partyId,
+                                    hostName: ec.web.getHostName(false),
+                                    companyPartyId: partyId, classificationId: classificationId]" />
+                                <if condition="demoData">
+                                    <service-call
+                                        name="growerp.100.PartyServices100.load#DemoData"
+                                        include-user-login="true"
+                                        in-map="[ownerPartyId: ownerPartyId,
+                                                companyPartyId: partyId,
+                                                currencyId: currencyId,
+                                                classificationId: classificationId,
+                                                userPartyId: userAccount.partyId]" />
+                                </if>
+                            </then>
+                            <else><!-- customer/supplier user with optional company-->
+                                <if condition="companyName">
+                                    <!-- create user company-->
+                                    <service-call
+                                        name="growerp.100.GeneralServices100.getNext#PseudoId"
+                                        in-map="[ownerPartyId: ownerPartyId, seqName: 'party']"
+                                        out-map="context" />
+                                    <service-call
+                                        name="mantle.party.PartyServices.create#Organization"
+                                        out-map="context"
+                                        in-map="[organizationName: companyName,
                                             pseudoId: seqNum,
                                             ownerPartyId: ownerPartyId,
                                             roleTypeId: 'Customer',
                                             customerStatusId: 'CUSTOMER_QUALIFIED',
                                             disabled: 'N']" />
-                                <!-- employee to company relationship-->
-                                <service-call name="create#mantle.party.PartyRelationship"
-                                    in-map="[
+                                    <!-- employee to company relationship-->
+                                    <service-call name="create#mantle.party.PartyRelationship"
+                                        in-map="[
                                             fromPartyId: userAccount.partyId,
                                             fromRoleTypeId: 'Employee',
                                             toPartyId: partyId,
@@ -801,11 +802,17 @@ along with this software (see the LICENSE.md file). If not, see
                                             relationshipTypeEnumId: 'PrtEmployee',
                                             fromDate: ec.user.nowTimestamp
                                             ]" />
-                            </if>
-                        </else>
-                    </if>
+                                </if>
+                            </else>
+                        </if>
+                        <!-- specific App setups -->
+                        <service-call
+                            name="growerp.100.PartyServices100.setup#SpecificApp"
+                            in-map="[ownerPartyId: ownerPartyId, userPartyId: userAccount.partyId,
+                                    companyPartyId: partyId, classificationId: classificationId]" />
+                    </then>
                     <else>
-                        <!-- show more infoscreen in frontend -->
+                        <!-- not provided so show more infoscreen in frontend -->
                         <set field="moreInfo" value="true" />
                     </else>
                 </if>
@@ -1006,3 +1013,4 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
 
 </services>
+ 

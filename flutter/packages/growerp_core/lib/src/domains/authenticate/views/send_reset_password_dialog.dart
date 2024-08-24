@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domains.dart';
@@ -30,12 +31,14 @@ class _SendResetPasswordDialogState extends State<SendResetPasswordDialog> {
   late String username;
   late AuthBloc _authBloc;
   final _formKeyResetPassword = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    username = widget.username;
     _authBloc = context.read<AuthBloc>();
+    _usernameController.text = _authBloc.state.authenticate?.user?.loginName ??
+        (kReleaseMode ? '' : 'test@example.com');
   }
 
   @override
@@ -72,7 +75,7 @@ class _SendResetPasswordDialogState extends State<SendResetPasswordDialog> {
                           child: Column(children: [
                             const SizedBox(height: 20),
                             TextFormField(
-                                initialValue: widget.username,
+                                controller: _usernameController,
                                 autofocus: true,
                                 decoration:
                                     const InputDecoration(labelText: 'Email:'),

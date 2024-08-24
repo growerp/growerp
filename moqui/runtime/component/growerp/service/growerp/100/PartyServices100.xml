@@ -1241,22 +1241,24 @@ along with this software (see the LICENSE.md file). If not, see
                         from="[ ccPaymentMethodId: userInfo.paymentMethodId,
                                 ccDescription: ccDescription]" />
                 </if>
-                <if condition="isForDropDown">
-                    <set field="company"
-                        from="[
+                <if condition="userInfo.companyPartyId">
+                    <if condition="isForDropDown">
+                        <set field="company"
+                            from="[
                             partyId: userInfo.companyPartyId,
                             name: userInfo.companyName,
                             ]" />
-                    <else>
-                        <set field="company"
-                            from="[
+                        <else>
+                            <set field="company"
+                                from="[
                             partyId: userInfo.companyPartyId,
                             pseudoId: userInfo.companyPseudoId,
                             name: userInfo.companyName,
                                 role: userInfo.companyRole,
                                 paymentMethod: paymentMethod,
                                 ]" />
-                    </else>
+                        </else>
+                    </if>
                 </if>
                 <set field="telephoneNr"
                     value="${userInfo.telCountryCode?:''}${userInfo.telAreaCode?:''}${userInfo.telContactNumber?:''}" />
@@ -1507,7 +1509,7 @@ along with this software (see the LICENSE.md file). If not, see
                             ]" />
             </if>
             <!-- email-->
-            <if condition="user.email">
+            <if condition="user.email &amp;&amp; !user.loginName"><!-- email created with account-->
                 <service-call name="mantle.party.ContactServices.create#EmailAddress"
                     in-map="[emailAddress:user.email, partyId:userPartyId,
                              contactMechPurposeId:'EmailPrimary']" />
@@ -2062,13 +2064,12 @@ along with this software (see the LICENSE.md file). If not, see
                         out-map="context" />
                 </then>
                 <else-if condition="companyPartyId">
-                    <!-- new user registration of a user within an existing main company-->
+                    <!-- new user registration of a user within an existing owner-->
                     <!-- createUser -->
                     <service-call name="growerp.100.PartyServices100.create#User"
                         in-map="[user: [firstName: firstName, lastName: lastName,
                         email: email, role: 'Customer', userGroupId: 'GROWERP_M_OTHER',
-                        loginName: email, company: [partyId: companyPartyId]], 
-                        password: newPassword, ownerPartyId: ownerPartyId]"
+                        loginName: email], password: newPassword, ownerPartyId: ownerPartyId]"
                         out-map="context" />
                 </else-if>
             </if>
@@ -2103,7 +2104,7 @@ along with this software (see the LICENSE.md file). If not, see
                     ]" />
         </actions>
     </service>
-    <service verb="verifyAndGet" noun="ProductStore">
+    <service verb="setup" noun="MainOrganization">
         <in-parameters>
             <parameter name="ownerPartyId" required="true" />
             <parameter name="userPartyId" required="true" />
@@ -2116,78 +2117,62 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="partyClassification" />
         </out-parameters>
         <actions>
-            <!-- verify classification -->
-            <entity-find-one entity-name="mantle.party.PartyClassification"
-                value-field="classification">
-                <field-map field-name="partyClassificationId" from="classificationId" />
+            <entity-find-one entity-name="mantle.party.Organization" value-field="company">
+                <field-map field-name="partyId" from="companyPartyId" />
             </entity-find-one>
-            <if condition="!classification">
-                <return error="true" message="classificationId: $classificationId invalid" />
-            </if>
-            <!-- check if ANY applications exist-->
-            <entity-find entity-name="mantle.party.PartyClassificationAndAppl" limit="1"
-                list="partyClassifications">
-                <econdition field-name="partyId" from="userPartyId" />
-                <econdition field-name="classificationTypeEnumId" value="PcltMobileApp" />
-            </entity-find>
-            <if condition="!partyClassifications">
-                <!-- not found so new user -->
-                <entity-find-one entity-name="mantle.party.Organization" value-field="company">
-                    <field-map field-name="partyId" from="companyPartyId" />
-                </entity-find-one>
-                <entity-find-one entity-name="mantle.facility.Facility" value-field="facility">
-                    <field-map field-name="facilityId" value="DEFAULT_WH" />
-                </entity-find-one>
-                <service-call name="create#mantle.facility.Facility"
-                    in-map="facility + [
+            <entity-find-one entity-name="mantle.facility.Facility" value-field="facility">
+                <field-map field-name="facilityId" value="DEFAULT_WH" />
+            </entity-find-one>
+            <service-call name="create#mantle.facility.Facility"
+                in-map="facility + [
                         pseudoId: null,
                         facilityId: null,
                         ownerPartyId: companyPartyId,
                         facilityName: company.organizationName + ' Inventory']"
-                    out-map="context" />
+                out-map="context" />
 
-                <!-- create top resource for this company  linkedto
+            <!-- create top resource for this company  linkedto
                         wikiSpace and productStore to organizationPartyId-->
-                <service-call name="create#moqui.resource.DbResource"
-                    in-map="[isFile: 'N']"
-                    out-map="topResource" />
-                <service-call name="update#moqui.resource.DbResource"
-                    in-map="[resourceId: topResource.resourceId,
+            <service-call name="create#moqui.resource.DbResource"
+                in-map="[isFile: 'N']"
+                out-map="topResource" />
+            <service-call name="update#moqui.resource.DbResource"
+                in-map="[resourceId: topResource.resourceId,
                                 filename: topResource.resourceId]" />
 
-                <!-- create wiki space -->
-                <entity-find-one entity-name="moqui.resource.wiki.WikiSpace" value-field="wikiSpace">
-                    <field-map field-name="wikiSpaceId" value="DEFAULT_WS" />
-                </entity-find-one>
-                <service-call name="create#moqui.resource.wiki.WikiSpace"
-                    in-map="wikiSpace + [wikiSpaceId: null,
+            <!-- create wiki space -->
+            <entity-find-one entity-name="moqui.resource.wiki.WikiSpace" value-field="wikiSpace">
+                <field-map field-name="wikiSpaceId" value="DEFAULT_WS" />
+            </entity-find-one>
+            <service-call name="create#moqui.resource.wiki.WikiSpace"
+                in-map="wikiSpace + [wikiSpaceId: null,
                     rootPageLocation: wikiSpace.rootPageLocation.replace('DEFAULT_ROOT', topResource.resourceId)]"
-                    out-map="context" />
+                out-map="context" />
 
-                <!-- wikipages and connect to data resource wikipageId = dbResourceId not use for
+            <!-- wikipages and connect to data resource wikipageId = dbResourceId not use for
                 now-->
-                <entity-find entity-name="moqui.resource.wiki.WikiPage" list="pages">
-                    <econdition field-name="wikiSpaceId" value="DEFAULT_WS" />
-                </entity-find>
-                <iterate list="pages" entry="page">
-                    <service-call name="create#moqui.resource.wiki.WikiPage"
-                        in-map="page + [wikiSpaceId: wikiSpaceId,
+            <entity-find entity-name="moqui.resource.wiki.WikiPage" list="pages">
+                <econdition field-name="wikiSpaceId" value="DEFAULT_WS" />
+            </entity-find>
+            <iterate list="pages" entry="page">
+                <service-call name="create#moqui.resource.wiki.WikiPage"
+                    in-map="page + [wikiSpaceId: wikiSpaceId,
                                 wikiPageId: null]" />
-                </iterate>
+            </iterate>
 
-                <!-- get currency -->
-                <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"
-                    value-field="aPref">
-                    <field-map field-name="organizationPartyId" from="companyPartyId" />
-                </entity-find-one>
-                <!-- create productStore from default -->
-                <entity-find-one entity-name="mantle.product.store.ProductStore"
-                    value-field="defProductStore">
-                    <field-map field-name="productStoreId" value="POPC_DEFAULT" />
-                </entity-find-one>
-                <!-- create map for productStore -->
-                <set field="inMap"
-                    from="defProductStore + [
+            <!-- get currency -->
+            <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"
+                value-field="aPref">
+                <field-map field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find-one>
+            <!-- create productStore from default -->
+            <entity-find-one entity-name="mantle.product.store.ProductStore"
+                value-field="defProductStore">
+                <field-map field-name="productStoreId" value="POPC_DEFAULT" />
+            </entity-find-one>
+            <!-- create map for productStore -->
+            <set field="inMap"
+                from="defProductStore + [
                     productStoreId: null,
                     organizationPartyId: companyPartyId,
                     inventoryFacilityId: facilityId,
@@ -2195,62 +2180,62 @@ along with this software (see the LICENSE.md file). If not, see
                     defaultCurrencyUomId: aPref.baseCurrencyUomId,
                     wikiSpaceId: wikiSpaceId,
                     ]" />
-                <if condition="classificationId == 'AppAdmin'">
-                    <set field="inMap"
-                        from="inMap + [
+            <if condition="classificationId == 'AppAdmin'">
+                <set field="inMap"
+                    from="inMap + [
                     requireInventory: 'N',
                     reservationOrderEnumId:'AsResOrdNoRes',
                     ]" />
-                </if>
-                <if condition="classificationId == 'AppHotel'">
-                    <set field="inMap"
-                        from="inMap + [
+            </if>
+            <if condition="classificationId == 'AppHotel'">
+                <set field="inMap"
+                    from="inMap + [
                     requireInventory: 'N',
                     reservationOrderEnumId:'AsResOrdNoRes',
                     ]" />
-                </if>
-                <service-call name="create#mantle.product.store.ProductStore"
-                    out-map="context" in-map="inMap" />
-                <!-- store shipping options -->
-                <entity-find entity-name="mantle.product.store.ProductStoreShipOption"
-                    list="options">
-                    <econdition field-name="productStoreId" value="POPC_DEFAULT" />
-                </entity-find>
-                <iterate list="options" entry="option">
-                    <service-call name="create#mantle.product.store.ProductStoreShipOption"
-                        in-map="option + [productStoreId: productStoreId]" />
-                </iterate>
+            </if>
+            <service-call name="create#mantle.product.store.ProductStore"
+                out-map="context" in-map="inMap" />
+            <!-- store shipping options -->
+            <entity-find entity-name="mantle.product.store.ProductStoreShipOption"
+                list="options">
+                <econdition field-name="productStoreId" value="POPC_DEFAULT" />
+            </entity-find>
+            <iterate list="options" entry="option">
+                <service-call name="create#mantle.product.store.ProductStoreShipOption"
+                    in-map="option + [productStoreId: productStoreId]" />
+            </iterate>
 
-                <!-- update website settings-->
-                <if condition="hostName == '10.0.2.2' || hostName == '127.0.0.1'">
-                    <set field="hostName" value="localhost" />
-                </if>
-                <if condition="hostName == 'localhost'">
-                    <set field="hostName" value="localhost:8080" />
-                </if>
-                <if condition="hostName.indexOf('.', hostName.indexOf('.') + 1) != -1"><!-- two
+            <!-- update website settings-->
+            <if condition="hostName == '10.0.2.2' || hostName == '127.0.0.1'">
+                <set field="hostName" value="localhost" />
+            </if>
+            <if condition="hostName == 'localhost'">
+                <set field="hostName" value="localhost:8080" />
+            </if>
+            <if condition="hostName.indexOf('.', hostName.indexOf('.') + 1) != -1"><!-- two
                     dots? -->
-                    <set field="hostName" from="hostName.substring(hostName.indexOf('.')+1)" />
-                </if>
-                <set field="hostName" value="${productStoreId}.${hostName}" />
-                <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="stores">
-                    <econdition field-name="productStoreId" value="POPC_DEFAULT" />
-                </entity-find>
-                <iterate list="stores" entry="store">
-                    <service-call name="create#mantle.product.store.ProductStoreSetting"
-                        in-map="store + [ productStoreId: productStoreId,
+                <set field="hostName" from="hostName.substring(hostName.indexOf('.')+1)" />
+            </if>
+            <set field="hostName" value="${productStoreId}.${hostName}" />
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="stores">
+                <econdition field-name="productStoreId" value="POPC_DEFAULT" />
+            </entity-find>
+            <iterate list="stores" entry="store">
+                <service-call name="create#mantle.product.store.ProductStoreSetting"
+                    in-map="store + [ productStoreId: productStoreId,
                         settingValue: store.settingValue.replace('DEFAULT_ROOT',
                             topResource.resourceId).replace('localhost', hostName)]" />
-                </iterate>
+            </iterate>
 
-                <!-- create ecommerce website categories and root for popreststore -->
-                <entity-find entity-name="mantle.product.category.ProductCategory"
-                    list="catgs">
-                    <econdition field-name="ownerPartyId" value="_NA_" />
-                </entity-find>
-                <!-- translate categoryId to store type and root catg-->
-                <set field="typesList"
-                    from="[
+            <!-- create ecommerce website categories and root for popreststore -->
+            <entity-find entity-name="mantle.product.category.ProductCategory"
+                list="catgs">
+                <econdition field-name="ownerPartyId" value="_NA_" />
+            </entity-find>
+            <!-- translate categoryId to store type and root catg-->
+            <set field="typesList"
+                from="[
                     'PopcAllProducts': ['PsctSearch','PsctPurchaseAllow','PsctViewAllow'],
                     'PopcDeals': ['PsctPromotions'],
                     'PopcNew': ['PsctNewProducts'],
@@ -2258,102 +2243,102 @@ along with this software (see the LICENSE.md file). If not, see
                     'PopcHome': ['PsctHomePage'],
                     'PopcBrowseRoot': ['PsctBrowseRoot'],
                     ]" />
-                <iterate list="catgs" entry="catg">
-                    <!-- only do lowercase categoryId's connected to productStore-->
-                    <if condition="catg.productCategoryId == catg.productCategoryId.toUpperCase()">
-                        <continue />
-                    </if>
-                    <if condition="catg.productCategoryId == 'PopcAllProducts'">
-                        <set field="productCategoryTypeEnumId" value="PctRoot" /><!-- rootCatg -->
-                        <else>
-                            <set field="productCategoryTypeEnumId" value="PctCatalog" />
-                        </else>
-                    </if>
-                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[ownerPartyId: 'system', seqName: 'category']"
-                        out-map="context" />
-                    <service-call name="create#mantle.product.category.ProductCategory"
-                        out-map="context"
-                        in-map="catg + [pseudoId: seqNum,
+            <iterate list="catgs" entry="catg">
+                <!-- only do lowercase categoryId's connected to productStore-->
+                <if condition="catg.productCategoryId == catg.productCategoryId.toUpperCase()">
+                    <continue />
+                </if>
+                <if condition="catg.productCategoryId == 'PopcAllProducts'">
+                    <set field="productCategoryTypeEnumId" value="PctRoot" /><!-- rootCatg -->
+                    <else>
+                        <set field="productCategoryTypeEnumId" value="PctCatalog" />
+                    </else>
+                </if>
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: 'system', seqName: 'category']"
+                    out-map="context" />
+                <service-call name="create#mantle.product.category.ProductCategory"
+                    out-map="context"
+                    in-map="catg + [pseudoId: seqNum,
                             productCategoryId: null,
                             ownerPartyId: ownerPartyId,
                             productCategoryTypeEnumId: productCategoryTypeEnumId,
                             ]" />
-                    <if condition="productCategoryTypeEnumId == 'PctRoot'">
-                        <set field="rootProductCategoryId" from="productCategoryId" />
-                    </if>
-                    <set field="types" from="typesList[catg.productCategoryId]" />
-                    <!-- connect to product store -->
-                    <iterate list="types" entry="type">
-                        <service-call name="create#mantle.product.store.ProductStoreCategory"
-                            in-map="[productStoreId: productStoreId,
+                <if condition="productCategoryTypeEnumId == 'PctRoot'">
+                    <set field="rootProductCategoryId" from="productCategoryId" />
+                </if>
+                <set field="types" from="typesList[catg.productCategoryId]" />
+                <!-- connect to product store -->
+                <iterate list="types" entry="type">
+                    <service-call name="create#mantle.product.store.ProductStoreCategory"
+                        in-map="[productStoreId: productStoreId,
                             productCategoryId: productCategoryId,
                             storeCategoryTypeEnumId: type ]" />
-                    </iterate>
                 </iterate>
-                <!-- DBResources just 2 dependent levels-->
-                <entity-find entity-name="moqui.resource.DbResource" list="resources1">
-                    <econdition field-name="parentResourceId" value="DEFAULT_ROOT" />
-                </entity-find>
-                <iterate list="resources1" entry="resource1">
-                    <service-call name="create#moqui.resource.DbResource"
-                        in-map="resource1 + [resourceId: null,
+            </iterate>
+            <!-- DBResources just 2 dependent levels-->
+            <entity-find entity-name="moqui.resource.DbResource" list="resources1">
+                <econdition field-name="parentResourceId" value="DEFAULT_ROOT" />
+            </entity-find>
+            <iterate list="resources1" entry="resource1">
+                <service-call name="create#moqui.resource.DbResource"
+                    in-map="resource1 + [resourceId: null,
                                 parentResourceId: topResource.resourceId]"
-                        out-map="newResource1" />
-                    <if condition="resource1.isFile == 'Y'">
+                    out-map="newResource1" />
+                <if condition="resource1.isFile == 'Y'">
+                    <entity-find-one entity-name="moqui.resource.DbResourceFile"
+                        value-field="rFile">
+                        <field-map field-name="resourceId" from="resource1.resourceId" />
+                    </entity-find-one>
+                    <service-call name="create#moqui.resource.DbResourceFile"
+                        in-map="rFile + [resourceId: newResource1.resourceId]" />
+                    <entity-find entity-name="moqui.resource.DbResourceFileHistory"
+                        list="histories">
+                        <econdition field-name="resourceId" from="resource1.resourceId" />
+                    </entity-find>
+                    <iterate list="histories" entry="history">
+                        <service-call name="create#moqui.resource.DbResourceFileHistory"
+                            in-map="history + [resourceId: newResource1.resourceId]" />
+                    </iterate>
+                </if>
+                <entity-find entity-name="moqui.resource.DbResource" list="resources2">
+                    <econdition field-name="parentResourceId" from="resource1.resourceId" />
+                </entity-find>
+                <iterate list="resources2" entry="resource2">
+                    <service-call name="create#moqui.resource.DbResource"
+                        in-map="resource2 + [resourceId: null, 
+                                    parentResourceId: newResource1.resourceId]"
+                        out-map="newResource2" />
+                    <if condition="resource2.isFile == 'Y'">
                         <entity-find-one entity-name="moqui.resource.DbResourceFile"
                             value-field="rFile">
-                            <field-map field-name="resourceId" from="resource1.resourceId" />
+                            <field-map field-name="resourceId" from="resource2.resourceId" />
                         </entity-find-one>
                         <service-call name="create#moqui.resource.DbResourceFile"
-                            in-map="rFile + [resourceId: newResource1.resourceId]" />
+                            in-map="rFile + [resourceId: newResource2.resourceId]" />
                         <entity-find entity-name="moqui.resource.DbResourceFileHistory"
                             list="histories">
-                            <econdition field-name="resourceId" from="resource1.resourceId" />
+                            <econdition field-name="resourceId" from="resource2.resourceId" />
                         </entity-find>
                         <iterate list="histories" entry="history">
                             <service-call name="create#moqui.resource.DbResourceFileHistory"
-                                in-map="history + [resourceId: newResource1.resourceId]" />
+                                in-map="history + [resourceId: newResource2.resourceId]" />
                         </iterate>
                     </if>
-                    <entity-find entity-name="moqui.resource.DbResource" list="resources2">
-                        <econdition field-name="parentResourceId" from="resource1.resourceId" />
-                    </entity-find>
-                    <iterate list="resources2" entry="resource2">
-                        <service-call name="create#moqui.resource.DbResource"
-                            in-map="resource2 + [resourceId: null, 
-                                    parentResourceId: newResource1.resourceId]"
-                            out-map="newResource2" />
-                        <if condition="resource2.isFile == 'Y'">
-                            <entity-find-one entity-name="moqui.resource.DbResourceFile"
-                                value-field="rFile">
-                                <field-map field-name="resourceId" from="resource2.resourceId" />
-                            </entity-find-one>
-                            <service-call name="create#moqui.resource.DbResourceFile"
-                                in-map="rFile + [resourceId: newResource2.resourceId]" />
-                            <entity-find entity-name="moqui.resource.DbResourceFileHistory"
-                                list="histories">
-                                <econdition field-name="resourceId" from="resource2.resourceId" />
-                            </entity-find>
-                            <iterate list="histories" entry="history">
-                                <service-call name="create#moqui.resource.DbResourceFileHistory"
-                                    in-map="history + [resourceId: newResource2.resourceId]" />
-                            </iterate>
-                        </if>
-                    </iterate>
                 </iterate>
+            </iterate>
 
-                <!-- productStore images -->
-                <entity-find entity-name="growerp.store.ProductStoreContent" list="storeImages">
-                    <econdition field-name="productStoreId" value="POPC_DEFAULT" />
-                </entity-find>
-                <iterate list="storeImages" entry="image">
-                    <service-call name="create#growerp.store.ProductStoreContent"
-                        in-map="image + [productStoreContentId: null, productStoreId: productStoreId]" />
-                </iterate>
+            <!-- productStore images -->
+            <entity-find entity-name="growerp.store.ProductStoreContent" list="storeImages">
+                <econdition field-name="productStoreId" value="POPC_DEFAULT" />
+            </entity-find>
+            <iterate list="storeImages" entry="image">
+                <service-call name="create#growerp.store.ProductStoreContent"
+                    in-map="image + [productStoreContentId: null, productStoreId: productStoreId]" />
+            </iterate>
 
-                <!-- search function -->
-                <!--service-call
+            <!-- search function -->
+            <!--service-call
                 name="org.moqui.impl.EntityServices.clone#DataDocument"
                     in-map="[dataDocumentId: 'MantleProduct', newDataDocumentId: 'P' + productStoreId,
                                 newIndexName: 'i' + productStoreId]" />
@@ -2363,12 +2348,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <service-call name="create#moqui.entity.feed.DataFeedDocument"
                     in-map="[dataFeedId: 'PopCommerceSearch', dataDocumentId: 'P' + productStoreId]" /-->
 
-                <!-- add to productStore-->
-                <!--service-call
+            <!-- add to productStore-->
+            <!--service-call
                 name="update#mantle.product.store.ProductStore"
                     in-map="productStoreId: productStoreId, productDataDocumentId: 'P' + productStoreId" /-->
-                <!-- index documents (copied from -->
-                <!--entity-find
+            <!-- index documents (copied from -->
+            <!--entity-find
                 entity-name="moqui.entity.feed.DataFeedDocument" list="dfDocList"
                     cache="false">
                     <econdition field-name="dataFeedId" value="PopCommerceSearch" />
@@ -2382,7 +2367,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
 
                 <set field="documentsIndexed" from="0" /-->
-                <!--script><![CDATA[
+            <!--script><![CDATA[
                     import org.moqui.context.ExecutionContext
                     import java.util.concurrent.Future
 
@@ -2408,12 +2393,24 @@ along with this software (see the LICENSE.md file). If not, see
                         documentsIndexed += docListSize
                     }
                 ]]></script-->
-            </if>
 
             <!--message>Indexed
             ${documentsIndexed} documents for feed ${dataFeedId} in ${System.currentTimeMillis() -
             startTime}ms</message-->
+        </actions>
+    </service>
 
+    <service verb="setup" noun="SpecificApp">
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="userPartyId" required="true" />
+            <parameter name="companyPartyId" />
+            <parameter name="classificationId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="partyClassification" />
+        </out-parameters>
+        <actions>
             <!-- check for specific classification application-->
             <entity-find-one entity-name="mantle.party.PartyClassificationAndAppl"
                 value-field="partyClassification">
@@ -2449,6 +2446,8 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="[parentProductCategoryId: rootProductCategoryId,
                             productCategoryId: productCategoryId]" />
                 </if>
+
+                <!-- any other specific app setup here -->
             </if>
 
             <!-- finally create classification-->
@@ -2456,12 +2455,6 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[partyId: userPartyId,
                         partyClassificationId: classificationId,
                         ]" />
-
-            <!-- return the created product store -->
-            <entity-find-one entity-name="mantle.product.store.ProductStore"
-                value-field="productStore">
-                <field-map field-name="organizationPartyId" from="companyPartyId" />
-            </entity-find-one>
         </actions>
     </service>
 
@@ -3010,3 +3003,4 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
 
 </services>
+ 

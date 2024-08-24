@@ -210,6 +210,7 @@ class LoginDialogState extends State<LoginDialog> {
         height: user?.userGroup == UserGroup.admin ? 450 : 350,
         context: context,
         title: 'Complete your registration',
+        closeButton: false,
         child: Form(
             key: _moreInfoFormKey,
             child: SingleChildScrollView(
@@ -280,8 +281,8 @@ class LoginDialogState extends State<LoginDialog> {
                               })),
                     const SizedBox(height: 10),
                     OutlinedButton(
-                        key: const Key('newCompany'),
-                        child: const Text('Submit'),
+                        key: const Key('moreInfo'),
+                        child: const Text('Continue'),
                         onPressed: () {
                           if (_moreInfoFormKey.currentState!.validate()) {
                             context.read<AuthBloc>().add(AuthLogin(

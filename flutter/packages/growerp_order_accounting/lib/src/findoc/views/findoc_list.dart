@@ -69,10 +69,14 @@ class FinDocListState extends State<FinDocList> {
   String searchString = '';
   late FocusNode myFocusNode;
   List<FinDoc> searchFinDocs = [];
+  late bool my;
+  late AuthBloc _authBloc;
 
   @override
   void initState() {
     super.initState();
+    _authBloc = context.read<AuthBloc>();
+    my = _authBloc.state.authenticate?.user?.userGroup == UserGroup.other;
     classificationId = context.read<String>();
     myFocusNode = FocusNode();
     entityName =

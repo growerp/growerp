@@ -75,9 +75,13 @@ class UserListState extends State<UserList> {
     return Builder(builder: (BuildContext context) {
       Widget tableView() {
         if (users.isEmpty) {
-          return const Center(
+          return Center(
               heightFactor: 20,
-              child: Text("no users found", textAlign: TextAlign.center));
+              child: Text(
+                  context.read<String>() == 'AppHealth'
+                      ? 'No patients found'
+                      : 'no users found',
+                  textAlign: TextAlign.center));
         }
         // get table data formatted for tableView
         var (

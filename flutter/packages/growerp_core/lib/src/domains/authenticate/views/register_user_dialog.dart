@@ -46,8 +46,9 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
     super.initState();
     _firstNameController.text = kReleaseMode ? '' : 'John';
     _lastNameController.text = kReleaseMode ? '' : 'Doe';
-    _emailController.text = kReleaseMode ? '' : 'test@example.com';
     _authBloc = context.read<AuthBloc>();
+    _emailController.text = _authBloc.state.authenticate?.user?.loginName ??
+        (kReleaseMode ? '' : 'test@example.com');
     _companyBloc = context.read<DataFetchBloc<Companies>>()
       ..add(GetDataEvent(() => context.read<RestClient>().getCompanies(
             limit: 1,

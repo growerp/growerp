@@ -1067,6 +1067,23 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="COMPPCMTEL" join-optional="true">
             <key-map field-name="contactMechId" />
         </member-entity>
+        <!-- person payment method -->
+        <member-entity entity-alias="PAYMENT" entity-name="mantle.account.method.PaymentMethod"
+            join-from-alias="PERSON" join-optional="true">
+            <key-map field-name="partyId" related="ownerPartyId" />
+            <entity-condition>
+                <econdition field-name="paymentMethodTypeEnumId" value="PmtCreditCard" />
+                <date-filter from-field-name="payFromDate" thru-field-name="payThruDate" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="CC" entity-name="mantle.account.method.CreditCard"
+            join-from-alias="PAYMENT" join-optional="true">
+            <key-map field-name="paymentMethodId" />
+        </member-entity>
+        <member-entity entity-alias="CCTYPE" entity-name="moqui.basic.Enumeration"
+            join-from-alias="CC" join-optional="true">
+            <key-map field-name="creditCardTypeEnumId" related="enumId" />
+        </member-entity>
         <!-- person to company -->
         <member-entity entity-alias="PERSONTOCOMPANY" entity-name="mantle.party.PartyRelationship"
             join-from-alias="PERSON" join-optional="true">
@@ -1088,23 +1105,6 @@ along with this software (see the LICENSE.md file). If not, see
         <member-entity entity-alias="ORGCOMPANYROLE" entity-name="mantle.party.PartyRole"
             join-from-alias="ORGCOMPANY" join-optional="true">
             <key-map field-name="partyId" />
-        </member-entity>
-        <!-- company payment method -->
-        <member-entity entity-alias="PAYMENT" entity-name="mantle.account.method.PaymentMethod"
-            join-from-alias="ORGCOMPANY" join-optional="true">
-            <key-map field-name="partyId" related="ownerPartyId" />
-            <entity-condition>
-                <econdition field-name="paymentMethodTypeEnumId" value="PmtCreditCard" />
-                <date-filter from-field-name="payFromDate" thru-field-name="payThruDate" />
-            </entity-condition>
-        </member-entity>
-        <member-entity entity-alias="CC" entity-name="mantle.account.method.CreditCard"
-            join-from-alias="PAYMENT" join-optional="true">
-            <key-map field-name="paymentMethodId" />
-        </member-entity>
-        <member-entity entity-alias="CCTYPE" entity-name="moqui.basic.Enumeration"
-            join-from-alias="CC" join-optional="true">
-            <key-map field-name="creditCardTypeEnumId" related="enumId" />
         </member-entity>
         <alias name="ownerPartyId" field="partyId" entity-alias="PTYOWNER" />
         <alias name="partyTypeEnumId" entity-alias="PTYOWNER" />
@@ -1141,6 +1141,14 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="telAreaCode" field="areaCode" entity-alias="COMPCMTEL" />
         <alias name="telContactNumber" field="contactNumber" entity-alias="COMPCMTEL" />
         <alias name="userTelContactMechId" field="contactMechId" entity-alias="COMPCMTEL" />
+        <!-- person creditcard -->
+        <alias name="payFromDate" field="fromDate" entity-alias="PAYMENT" />
+        <alias name="payThruDate" field="thruDate" entity-alias="PAYMENT" />
+        <alias name="paymentMethodId" entity-alias="CC" />
+        <alias name="cardId" field="enumId" entity-alias="CCTYPE" />
+        <alias name="cardType" field="description" entity-alias="CCTYPE" />
+        <alias name="cardNumber" entity-alias="CC" />
+        <alias name="expireDate" entity-alias="CC" />
         <!-- company -->
         <alias name="userFromDate" field="fromDate" entity-alias="PERSONTOCOMPANY" />
         <alias name="userThruDate" field="thruDate" entity-alias="PERSONTOCOMPANY" />
@@ -1152,14 +1160,6 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="companyRole" field="roleTypeId" entity-alias="ORGCOMPANYROLE" />
         <alias name="companyCustomerStatusId" field="customerStatusId"
             entity-alias="ORGCOMPANYPARTY" />
-        <!-- company creditcard -->
-        <alias name="payFromDate" field="fromDate" entity-alias="PAYMENT" />
-        <alias name="payThruDate" field="thruDate" entity-alias="PAYMENT" />
-        <alias name="paymentMethodId" entity-alias="CC" />
-        <alias name="cardId" field="enumId" entity-alias="CCTYPE" />
-        <alias name="cardType" field="description" entity-alias="CCTYPE" />
-        <alias name="cardNumber" entity-alias="CC" />
-        <alias name="expireDate" entity-alias="CC" />
     </view-entity>
 
     <view-entity entity-name="OwnerCompanyDetailAndEmployee" package="growerp.party">
