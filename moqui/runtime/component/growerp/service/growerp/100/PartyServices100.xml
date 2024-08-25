@@ -43,7 +43,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="productStoreId" from="hostNames[0].productStoreId" />
             </entity-find>
             <if condition="stores">
-                <service-call name="growerp.100.PartyServices100.get#Companies"
+                <service-call name="growerp.100.PartyServices100.get#Company"
                     in-map="[companyPartyId: stores[0].organizationPartyId]"
                     out-map="context" />
                 <set field="company" from="companies[0]" />

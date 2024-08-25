@@ -75,7 +75,7 @@ class HomeFormState extends State<HomeForm> {
       switch (state.status) {
         case AuthStatus.authenticated:
           if (['moreInfo', 'changePassword']
-              .contains(state.authenticate!.apiKey)) return LoginDialog();
+              .contains(state.authenticate!.apiKey)) return const LoginDialog();
           return Column(children: [
             Expanded(
                 child: DisplayMenuOption(
