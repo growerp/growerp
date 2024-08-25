@@ -157,49 +157,51 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                       color: Colors.orange,
                     )),
               if (_presetCompany == null) const SizedBox(height: 10),
-              DropdownSearch<Company>(
-                selectedItem: _selectedCompany,
-                popupProps: PopupProps.menu(
-                  showSelectedItems: true,
-                  isFilterOnline: true,
-                  showSearchBox: true,
-                  searchFieldProps: TextFieldProps(
-                    autofocus: true,
-                    decoration:
-                        const InputDecoration(labelText: " Company Name"),
-                    controller: _companySearchBoxController,
+              if (_presetCompany == null)
+                DropdownSearch<Company>(
+                  selectedItem: _selectedCompany,
+                  popupProps: PopupProps.menu(
+                    showSelectedItems: true,
+                    isFilterOnline: true,
+                    showSearchBox: true,
+                    searchFieldProps: TextFieldProps(
+                      autofocus: true,
+                      decoration:
+                          const InputDecoration(labelText: " Company Name"),
+                      controller: _companySearchBoxController,
+                    ),
+                    title: popUp(
+                      context: context,
+                      title: "Select Company",
+                      height: 50,
+                    ),
                   ),
-                  title: popUp(
-                    context: context,
-                    title: "Select Company",
-                    height: 50,
+                  dropdownDecoratorProps: const DropDownDecoratorProps(
+                    dropdownSearchDecoration: InputDecoration(
+                      labelText: 'Company',
+                    ),
                   ),
+                  key: const Key('selectCompany'),
+                  itemAsString: (Company? u) => "${u!.name}",
+                  asyncItems: (String filter) {
+                    _companyBloc.add(GetDataEvent(
+                        () => context.read<RestClient>().getCompanies(
+                              searchString: filter,
+                              limit: 3,
+                            )));
+                    return Future.delayed(const Duration(milliseconds: 1150),
+                        () {
+                      return Future<List<Company>>.value(
+                          (_companyBloc.state.data as Companies).companies);
+                    });
+                  },
+                  compareFn: (item, sItem) => item.partyId == sItem.partyId,
+                  onChanged: (Company? newValue) {
+                    setState(() {
+                      _selectedCompany = newValue;
+                    });
+                  },
                 ),
-                dropdownDecoratorProps: const DropDownDecoratorProps(
-                  dropdownSearchDecoration: InputDecoration(
-                    labelText: 'Company',
-                  ),
-                ),
-                key: const Key('selectCompany'),
-                itemAsString: (Company? u) => "${u!.name}",
-                asyncItems: (String filter) {
-                  _companyBloc.add(GetDataEvent(
-                      () => context.read<RestClient>().getCompanies(
-                            searchString: filter,
-                            limit: 3,
-                          )));
-                  return Future.delayed(const Duration(milliseconds: 1150), () {
-                    return Future<List<Company>>.value(
-                        (_companyBloc.state.data as Companies).companies);
-                  });
-                },
-                compareFn: (item, sItem) => item.partyId == sItem.partyId,
-                onChanged: (Company? newValue) {
-                  setState(() {
-                    _selectedCompany = newValue;
-                  });
-                },
-              ),
               const SizedBox(height: 10),
               OutlinedButton(
                   key: const Key('newUserButton'),
@@ -207,7 +209,8 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                   onPressed: () async {
                     if (_registerFormKey.currentState!.validate()) {
                       _authBloc.add(AuthRegister(User(
-                        company: Company(partyId: _selectedCompany?.partyId),
+                        company: _presetCompany ??
+                            Company(partyId: _selectedCompany?.partyId),
                         firstName: _firstNameController.text,
                         lastName: _lastNameController.text,
                         email: _emailController.text,

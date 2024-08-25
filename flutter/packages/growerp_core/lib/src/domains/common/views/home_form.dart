@@ -151,21 +151,19 @@ class HomeFormState extends State<HomeForm> {
                             }),
                         const Expanded(child: SizedBox(height: 10)),
                         const SizedBox(height: 10),
-                        if (company == null)
-                          OutlinedButton(
-                              key: const Key('newUserButton'),
-                              child: const Text('Register'),
-                              onPressed: () async {
-                                await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return BlocProvider.value(
-                                          value: _authBloc,
-                                          child:
-                                              const RegisterUserDialog(true));
-                                    });
-                              }),
+                        OutlinedButton(
+                            key: const Key('newUserButton'),
+                            child: const Text('Register'),
+                            onPressed: () async {
+                              await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                        value: _authBloc,
+                                        child: const RegisterUserDialog(true));
+                                  });
+                            }),
                         const SizedBox(height: 50)
                       ]),
                     ))),

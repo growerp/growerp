@@ -79,7 +79,7 @@ Future main() async {
     //webactivate hostName = web.window.location.hostname;
     // ignore: unnecessary_null_comparison
     if (hostName != null) {
-      debugPrint("====hostname: $hostName");
+      debugPrint("++++++=hostname: $hostName");
       company = await restClient.getCompanyFromHost(hostName);
       if (company.partyId == null) company = null;
     }

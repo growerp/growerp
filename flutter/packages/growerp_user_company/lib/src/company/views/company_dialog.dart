@@ -45,9 +45,7 @@ class ShowCompanyDialog extends StatelessWidget {
       return BlocProvider<CompanyBloc>(
           create: (context) => CompanyBloc(restClient, company.role)
             ..add(CompanyFetch(
-                companyPartyId:
-                    company.partyId == null ? companyPartyId : company.partyId!,
-                limit: 1)),
+                companyPartyId: company.partyId ?? companyPartyId, limit: 1)),
           child:
               BlocBuilder<CompanyBloc, CompanyState>(builder: (context, state) {
             if (state.status == CompanyStatus.success) {
