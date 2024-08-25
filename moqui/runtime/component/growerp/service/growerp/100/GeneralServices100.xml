@@ -61,28 +61,36 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="userPartyId" /><!-- logged in user -->
             <parameter name="ownerPartyId" /><!-- the ownerPartyId of the CompanyPartyId party
             record -->
-            <parameter name="companyPartyId" /><!-- the company of the user (when part of the
-            ownercompany, the same) -->
+            <parameter name="companyPartyId" /><!-- the owner main company, not the user company -->
         </out-parameters>
         <actions>
             <if condition="!userPartyId">
-                <if condition="ec.user &amp;&amp; ec.user?.userAccount?.partyId">
-                    <set field="userPartyId" from="ec.user.userAccount.partyId" />
-                    <else>
-                        <return message="No user Provided and not logged in" />
-                    </else>
+                <if condition="!ec.user?.userAccount">
+                    <return message="No user Provided and not logged in" />
                 </if>
+                <set field="userPartyId" from="ec.user?.userAccount?.partyId" />
             </if>
-            <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
-                list="relList" limit="1">
-                <econdition field-name="userPartyId" />
-                <select-field field-name="companyPartyId,ownerPartyId" />
+            <!-- get ownerpartyId  and check if exist-->
+            <entity-find-one entity-name="mantle.party.Party" value-field="userParty">
+                <field-map field-name="partyId" from="userPartyId" />
+                <select-field field-name="ownerPartyId" />
+            </entity-find-one>
+            <if condition="!userParty">
+                <return error="true"
+                    message="Not logged in and provided userPartyId: $userPartyId not found" />
+            </if>
+            <set field="ownerPartyId" from="userParty.ownerPartyId" />
+            <!-- find main company with the Role OrgInternal, user company is in user model-->
+            <entity-find entity-name="mantle.party.PartyDetailAndRole" limit="1" list="companyList">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="partyTypeEnumId" value="PtyOrganization" />
+                <econdition field-name="roleTypeId" value="OrgInternal" />
             </entity-find>
-            <if condition="relList">
-                <set field="companyPartyId" from="relList[0].companyPartyId" />
-                <set field="ownerPartyId" from="relList[0].ownerPartyId" />
+            <if condition="companyList">
+                <set field="companyPartyId" from="companyList[0].partyId" />
                 <else>
-                    <return message="User $userPartyId not found!" />
+                    <log level="warn"
+                        message="No Main company for user: $userPartyId and owner: $ownerPartyId, in the middle of registration?" />
                 </else>
             </if>
         </actions>
@@ -459,7 +467,7 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="authenticate.user" from="userInfo.users[0]" />
             <!-- get company-->
             <service-call name="growerp.100.PartyServices100.get#Company"
-                in-map="companyPartyId: companyPartyId" out-map="companyInfo" />
+                in-map="[companyPartyId: companyPartyId]" out-map="companyInfo" />
             <if condition="companyInfo.companies">
                 <set field="authenticate.company" from="companyInfo.companies[0]" />
             </if>

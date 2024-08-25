@@ -21,21 +21,6 @@ import '../menu_options.dart';
 class AdminDbForm extends StatelessWidget {
   const AdminDbForm({super.key});
 
-  bool access(UserGroup userGroup, MenuOption menuOption) {
-    // print("===1=check for $userGroup in write: ${menuOption.writeGroups}");
-    if (menuOption.writeGroups != null &&
-        menuOption.writeGroups!.contains(userGroup)) return true;
-    // print("==2==check for $userGroup in my: ${menuOption.myGroups}");
-    if (menuOption.myGroups != null &&
-        menuOption.myGroups!.contains(userGroup)) {
-      return true;
-    }
-    // print("=3===check for $userGroup in read: ${menuOption.readGroups}");
-    if (menuOption.readGroups != null &&
-        menuOption.readGroups!.contains(userGroup)) return true;
-    return false;
-  }
-
   @override
   Widget build(BuildContext context) {
     Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;

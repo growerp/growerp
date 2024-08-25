@@ -246,6 +246,8 @@ class LoginDialogState extends State<LoginDialog> {
                       },
                     ),
                     if (user?.userGroup == UserGroup.admin)
+                      const SizedBox(height: 10),
+                    if (user?.userGroup == UserGroup.admin)
                       DropdownButtonFormField<Currency>(
                         key: const Key('currency'),
                         decoration:

@@ -126,8 +126,11 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
     rowContent.add(TableRowContent(
         width: 20,
         name: Text(item.sales ? 'Customer' : 'Supplier'),
-        value:
-            Text(item.otherCompany?.name ?? '', key: Key("otherUser$index"))));
+        value: Text(
+            item.otherCompany?.name.truncate(20) ??
+                item.otherUser?.getName().truncate(20) ??
+                '',
+            key: Key("otherUser$index"))));
     if (item.docType != FinDocType.shipment) {
       rowContent.add(TableRowContent(
           width: 10,

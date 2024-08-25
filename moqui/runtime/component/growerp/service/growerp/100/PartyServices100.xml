@@ -1232,7 +1232,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="userInfo.companyRole == 'Supplier'">
                         <set field="userGroupId" value="GROWERP_M_SUPPLIER"/></if>
                 </if-->
-                <set field="paymentMethod" from="null" />
                 <if condition="userInfo.paymentMethodId">
                     <set field="nrLength" from="userInfo.cardNumber.length()" />
                     <set field="ccDescription"
@@ -1240,6 +1239,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="paymentMethod"
                         from="[ ccPaymentMethodId: userInfo.paymentMethodId,
                                 ccDescription: ccDescription]" />
+                    <else>
+                        <set field="paymentMethod" from="null" />
+                    </else>
                 </if>
                 <if condition="userInfo.companyPartyId">
                     <if condition="isForDropDown">
@@ -1259,6 +1261,9 @@ along with this software (see the LICENSE.md file). If not, see
                                 ]" />
                         </else>
                     </if>
+                    <else>
+                        <set field="company" from="null" />
+                    </else>
                 </if>
                 <set field="telephoneNr"
                     value="${userInfo.telCountryCode?:''}${userInfo.telAreaCode?:''}${userInfo.telContactNumber?:''}" />

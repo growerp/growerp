@@ -46,9 +46,8 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
     super.initState();
     _firstNameController.text = kReleaseMode ? '' : 'John';
     _lastNameController.text = kReleaseMode ? '' : 'Doe';
+    _emailController.text = kReleaseMode ? '' : 'test@example.com';
     _authBloc = context.read<AuthBloc>();
-    _emailController.text = _authBloc.state.authenticate?.user?.loginName ??
-        (kReleaseMode ? '' : 'test@example.com');
     _companyBloc = context.read<DataFetchBloc<Companies>>()
       ..add(GetDataEvent(() => context.read<RestClient>().getCompanies(
             limit: 1,
@@ -152,8 +151,8 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
               const SizedBox(height: 20),
               if (_presetCompany == null)
                 const Text(
-                    'Select an existing company, or leave empty for a new company',
-                    textAlign: TextAlign.center,
+                    'Leave empty for a new company or....\nselect a company to register as a customer',
+                    textAlign: TextAlign.left,
                     style: TextStyle(
                       color: Colors.orange,
                     )),

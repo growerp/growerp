@@ -32,6 +32,7 @@ class UserDialog extends StatelessWidget {
   const UserDialog(this.user, {super.key});
   @override
   Widget build(BuildContext context) {
+    if (user.company == null) return UserDialogStateFull(user);
     return BlocProvider<CompanyBloc>(
         create: (context) =>
             CompanyBloc(context.read<RestClient>(), user.company!.role),
