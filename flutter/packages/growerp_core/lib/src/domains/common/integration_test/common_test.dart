@@ -101,31 +101,96 @@ class CommonTest {
         expect(true, false, reason: "=============backend error =============");
       }
     }
-
-    await CommonTest.tapByKey(tester, 'newCompButton');
-    await tester.pump(const Duration(seconds: 3));
+    // create admin
+    await CommonTest.tapByKey(tester, 'newUserButton');
     await CommonTest.enterText(tester, 'firstName', admin.firstName!);
     await CommonTest.enterText(tester, 'lastName', admin.lastName!);
     var email = admin.email!.replaceFirst('XXX', '$seq');
     await CommonTest.enterText(tester, 'email', email);
-    String companyName = '${initialCompany.name!} $seq';
-    await enterText(tester, 'companyName', companyName);
-    await CommonTest.drag(tester);
-    await enterDropDown(
-        tester, 'currency', initialCompany.currency!.description!);
-    if (demoData == false) {
-      await CommonTest.tapByKey(tester, 'demoData');
-    } // no demo data
-    await CommonTest.tapByKey(tester, 'newCompany', seconds: waitTime);
+    await CommonTest.tapByKey(tester, 'newUserButton', seconds: waitTime);
     // start with clean saveTest
     await waitForSnackbarToGo(tester);
+
     await PersistFunctions.persistTest(SaveTest(
       sequence: ++seq,
       nowDate: DateTime.now(), // used in rental
       admin: admin.copyWith(email: email, loginName: email),
-      company: initialCompany.copyWith(email: email, name: companyName),
     ));
-    await CommonTest.login(tester, testData: testData);
+    await CommonTest.login(tester, testData: testData, demoData: demoData);
+  }
+
+  static Future<void> login(WidgetTester tester,
+      {String? username,
+      String? password,
+      bool demoData = false,
+      int days = 0,
+      Map testData = const {}}) async {
+    CustomizableDateTime.customTime = DateTime.now().add(Duration(days: days));
+    if (find
+        .byKey(const Key('HomeFormAuth'))
+        .toString()
+        .startsWith('Found 0 widgets with key')) {
+      SaveTest test = await PersistFunctions.getTest();
+      await pressLoginWithExistingId(tester);
+      await enterText(tester, 'username', username ?? test.admin!.email!);
+      await enterText(tester, 'password', password ?? 'qqqqqq9!');
+      await pressLogin(tester);
+      await waitForSnackbarToGo(tester);
+      if (find
+          .byKey(const Key('moreInfo'))
+          .toString()
+          .startsWith('Found 1 widget')) {
+        String companyName = '${initialCompany.name!} ${test.sequence}';
+        await enterText(tester, 'companyName', companyName);
+        await enterDropDown(
+            tester, 'currency', initialCompany.currency!.description!);
+        if (demoData == false) {
+          await CommonTest.tapByKey(tester, 'demoData');
+        } // no demo data
+        await CommonTest.tapByKey(tester, 'continue', seconds: waitTime);
+        await waitForSnackbarToGo(tester);
+        await PersistFunctions.persistTest(test.copyWith(
+            company:
+                Company(name: companyName, currency: initialCompany.currency),
+            sequence: test.sequence + 1,
+            nowDate: DateTime.now())); // used in rental
+      }
+    }
+
+    SaveTest test = await PersistFunctions.getTest();
+    String apiKey = CommonTest.getTextField('apiKey');
+    String moquiSessionToken = CommonTest.getTextField('moquiSessionToken');
+    await GlobalConfiguration()
+        .add({"apiKey": apiKey, "moquiSessionToken": moquiSessionToken});
+    int seq = test.sequence;
+    if (!test.testDataLoaded && testData.isNotEmpty) {
+      final restClient = RestClient(await buildDioClient());
+      // replace XXX strings
+      Map<String, dynamic> parsed = {};
+      testData.forEach((k, v) {
+        List newList = [];
+        v.forEach((item) {
+          if (item is Company || item is User) {
+            if (item.email != null) {
+              item = item.copyWith(
+                  email: item.email!.replaceFirst('XXX', '${seq++}'));
+            }
+          }
+          if (item is User) {
+            if (item.loginName != null) {
+              item = item.copyWith(
+                  loginName: item.loginName!.replaceFirst('XXX', '${seq++}'));
+            }
+          }
+          newList.add(item);
+        });
+        parsed[k] = newList;
+      });
+      await restClient.uploadEntities(
+          entities: parsed, classificationId: 'AppAdmin');
+    }
+    await PersistFunctions.persistTest(
+        test.copyWith(sequence: seq, testDataLoaded: true));
   }
 
   static checkCompanyAndAdmin(
@@ -138,8 +203,8 @@ class CommonTest {
     // company
     expect(getTextField('dbCompanyTitle'), equals("Company"));
     expect(getTextField('dbCompanySubTitle0'), equals(test.company!.name));
-    expect(getTextField('dbCompanySubTitle1'),
-        equals("Email: ${test.company!.email}"));
+    //  expect(getTextField('dbCompanySubTitle1'),
+    //      equals("Email: ${test.company!.email}"));
     expect(getTextField('dbCompanySubTitle2'),
         equals("Currency: ${test.company!.currency!.description}"));
     expect(getTextField('dbCompanySubTitle3'),
@@ -194,62 +259,6 @@ class CommonTest {
       await tester.pumpAndSettle(const Duration(seconds: waitTime));
     }
     await checkWidgetKey(tester, formName);
-  }
-
-  static Future<void> login(WidgetTester tester,
-      {String? username,
-      String? password,
-      int days = 0,
-      Map testData = const {}}) async {
-    CustomizableDateTime.customTime = DateTime.now().add(Duration(days: days));
-    SaveTest test = await PersistFunctions.getTest();
-    if ((test.company == null || test.admin == null) &&
-        (username == null || password == null)) {
-      return;
-    }
-    if (find
-        .byKey(const Key('HomeFormAuth'))
-        .toString()
-        .startsWith('Found 0 widgets with key')) {
-      await pressLoginWithExistingId(tester);
-      await enterText(tester, 'username', username ?? test.admin!.email!);
-      await enterText(tester, 'password', password ?? 'qqqqqq9!');
-      await pressLogin(tester);
-      await checkText(tester, 'Main'); // dashboard
-    }
-    String apiKey = CommonTest.getTextField('apiKey');
-    String moquiSessionToken = CommonTest.getTextField('moquiSessionToken');
-    await GlobalConfiguration()
-        .add({"apiKey": apiKey, "moquiSessionToken": moquiSessionToken});
-    int seq = test.sequence;
-    if (!test.testDataLoaded && testData.isNotEmpty) {
-      final restClient = RestClient(await buildDioClient());
-      // replace XXX strings
-      Map<String, dynamic> parsed = {};
-      testData.forEach((k, v) {
-        List newList = [];
-        v.forEach((item) {
-          if (item is Company || item is User) {
-            if (item.email != null) {
-              item = item.copyWith(
-                  email: item.email!.replaceFirst('XXX', '${seq++}'));
-            }
-          }
-          if (item is User) {
-            if (item.loginName != null) {
-              item = item.copyWith(
-                  loginName: item.loginName!.replaceFirst('XXX', '${seq++}'));
-            }
-          }
-          newList.add(item);
-        });
-        parsed[k] = newList;
-      });
-      await restClient.uploadEntities(
-          entities: parsed, classificationId: 'AppAdmin');
-    }
-    await PersistFunctions.persistTest(
-        test.copyWith(sequence: seq, testDataLoaded: true));
   }
 
   static Future<void> gotoMainMenu(WidgetTester tester) async {

@@ -217,7 +217,7 @@ class LoginDialogState extends State<LoginDialog> {
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 key: const Key('listView'),
-                child: Column(children: <Widget>[
+                child: Column(key: const Key('moreInfo'), children: <Widget>[
                   Column(children: [
                     const SizedBox(height: 10),
                     const Text(
@@ -283,7 +283,7 @@ class LoginDialogState extends State<LoginDialog> {
                               })),
                     const SizedBox(height: 10),
                     OutlinedButton(
-                        key: const Key('moreInfo'),
+                        key: const Key('continue'),
                         child: const Text('Continue'),
                         onPressed: () {
                           if (_moreInfoFormKey.currentState!.validate()) {
