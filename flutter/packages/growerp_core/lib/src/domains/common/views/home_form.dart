@@ -105,6 +105,7 @@ class HomeFormState extends State<HomeForm> {
                   style: const TextStyle(fontSize: 0)),
             appInfo
           ]);
+        case AuthStatus.failure:
         case AuthStatus.unAuthenticated:
           ThemeMode? themeMode = context.read<ThemeBloc>().state.themeMode;
           return Column(children: [
@@ -169,8 +170,6 @@ class HomeFormState extends State<HomeForm> {
                     ))),
             Align(alignment: Alignment.bottomCenter, child: appInfo),
           ]);
-        case AuthStatus.failure:
-          return FatalErrorForm(message: state.message!);
         default:
           return const LoadingIndicator();
       }

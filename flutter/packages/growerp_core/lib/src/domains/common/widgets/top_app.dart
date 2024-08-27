@@ -135,14 +135,12 @@ class TopApp extends StatelessWidget {
                       home: BlocBuilder<AuthBloc, AuthState>(
                         builder: (context, authState) {
                           switch (authState.status) {
-                            case AuthStatus.failure:
-                              return FatalErrorForm(
-                                  message: authState.message!);
                             case AuthStatus.initial:
                             case AuthStatus.loading:
                               return const SplashForm();
                             case AuthStatus.changeIp:
                               return const ChangeIpForm();
+                            case AuthStatus.failure:
                             default:
                               return HomeForm(
                                   menuOptions: menuOptions, title: title);

@@ -1,15 +1,22 @@
 name: growerp
 repository: https://github.com/growerp/growerp
 
+# packages also determine the order of test
 packages:
+  - packages/growerp_core
+  - packages/growerp_user_company/example
+  - packages/growerp_catalog/example
+  - packages/growerp_inventory/example
+  - packages/growerp_marketing/example
+  - packages/growerp_order_accounting/example
+  - packages/growerp_website/example
+  - packages/growerp_task/example
   - packages/admin
   - packages/website
   - packages/hotel
   - packages/freelance
   - packages/workflow
-  - packages/growerp*
   - packages/health
-  - packages/growerp*/*example
   - packages/test
 
 command:

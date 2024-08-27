@@ -94,10 +94,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     } on DioException catch (e) {
       await PersistFunctions.persistAuthenticate(defaultAuthenticate);
-      emit(state.copyWith(
-          status: AuthStatus.failure,
-          authenticate: defaultAuthenticate,
-          message: getDioError(e)));
+      print("======${getDioError(e)}====");
+      if (getDioError(e).startsWith('Login key not valid')) {
+        emit(state.copyWith(
+            status: AuthStatus.unAuthenticated,
+            authenticate: defaultAuthenticate,
+            message: getDioError(e)));
+      } else {
+        emit(state.copyWith(
+            status: AuthStatus.failure,
+            authenticate: defaultAuthenticate,
+            message: getDioError(e)));
+      }
     }
   }
 
@@ -169,9 +177,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             authenticate: authenticate,
             message: 'You are logged in now...'));
         PersistFunctions.persistAuthenticate(state.authenticate!);
-        if (state.authenticate!.user!.userId != null)
+        if (state.authenticate!.user!.userId != null) {
           chat.connect(
               state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
+        }
         var box = await Hive.openBox('growerp');
         box.put('apiKey', authenticate.apiKey);
       } else {
