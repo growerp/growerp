@@ -137,10 +137,9 @@ class TopApp extends StatelessWidget {
                           switch (authState.status) {
                             case AuthStatus.initial:
                             case AuthStatus.loading:
-                              return const SplashForm();
+                              return Scaffold(body: Container());
                             case AuthStatus.changeIp:
                               return const ChangeIpForm();
-                            case AuthStatus.failure:
                             default:
                               return HomeForm(
                                   menuOptions: menuOptions, title: title);
