@@ -13,7 +13,7 @@ RUN apt-get update && \
     apt-get install --no-install-recommends -y \
     curl \
     unzip \
-    openjdk-11-jdk && \
+    openjdk-17-jdk && \
     apt-get install -y \
     net-tools \
     socat \
@@ -28,18 +28,18 @@ ARG ANDROID_HOME=/opt/android-sdk
 # DEBIAN_FRONTEND - to prevent timezone questions
 ENV LANG=C.UTF-8 \
     SHELL=/bin/bash \
-    JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 \
+    JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
     DEBIAN_FRONTEND=noninteractive \
     VERSION=${SDK_VERSION} \
     ANDROID_SDK_ROOT=$ANDROID_HOME \
     PATH=$PATH:$ANDROID_HOME/cmdline-tools/tools/bin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools \
-    LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${ANDROID_HOME}/emulator/lib64/qt/lib:${ANDROID_HOME}/emulator/lib64:${ANDROID_HOME}/emulator/lib64/gles_swiftshader
+    LD_LIBRARY_PATH=${ANDROID_HOME}/emulator/lib64/qt/lib:${ANDROID_HOME}/emulator/lib64:${ANDROID_HOME}/emulator/lib64/gles_swiftshader
 # -----------------------------------------------
 
 # ----------------- Android SDK -----------------
-# https://developer.android.com/studio/index.html#command-tools
+# https://developer.android.com/studio/index.html#command-tools at the bottom of the page for latest version
 # Additional info about directory structure: https://stackoverflow.com/a/61176718/981330
-ARG COMMANDLINE_TOOLS_URL=https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip
+ARG COMMANDLINE_TOOLS_URL=https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
 ARG ANDROID_SDK_FILE_NAME=commandlinetools.zip
 
 RUN curl $COMMANDLINE_TOOLS_URL --progress-bar --location --output $ANDROID_SDK_FILE_NAME && \
