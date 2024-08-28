@@ -24,6 +24,12 @@ if [ "$BIRDSEND_API_KEY" != "" ] ; then
     sed -i -e "s/BIRDSEND_API_KEY/${BIRDSEND_API_KEY}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
     sed -i -e "s/BIRDSEND_AUTM_SEQUENCE/${BIRDSEND_AUTM_SEQUENCE}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
 fi
+if [ "$OPENMRS_PASSWORD" != "" ] ; then
+    echo "updating openmrs"
+    sed -i -e "s/OPENMRS_USERNAME/${OPENMRS_USERNAME}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
+    sed -i -e "s/OPENMRS_PASSWORD/${OPENMRS_PASSWORD}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
+    sed -i -e "s/OPENMRS_BASE_URL/${OPENMRS_BASE_URL}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
+fi
 if [ "$STRIPE_SECRET_KEY" != "" ] ; then
     echo "updating stripe key"
     sed -i -e "s/\STRIPE_SECRET_KEY/${STRIPE_SECRET_KEY}/g" runtime/component/mantle-stripe/data/StripeInstallData.xml

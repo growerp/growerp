@@ -14,6 +14,7 @@
 
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
@@ -99,13 +100,18 @@ class RequestDialogState extends State<RequestDialog> {
     user = _authBloc.state.authenticate?.user as User;
     Map jsonDescription =
         finDoc.description != null ? jsonDecode(finDoc.description!) : {};
-    selectedCare = jsonDescription['care'];
-    selectedForWhom = jsonDescription['forWhom'];
-    selectedTimeframe = jsonDescription['timeFrame'];
-    selectedHowSoon = jsonDescription['howSoon'];
-    selectedStatus = jsonDescription['status'];
-    _telephoneController.text = jsonDescription['telephoneNumber'] ?? '';
-    _postalController.text = jsonDescription['postalCode'] ?? '';
+    selectedCare = jsonDescription['care'] ?? !kReleaseMode ? 'resCare' : '';
+    selectedForWhom =
+        jsonDescription['forWhom'] ?? !kReleaseMode ? 'mySelf' : '';
+    selectedTimeframe =
+        jsonDescription['timeFrame'] ?? !kReleaseMode ? 'notSure' : '';
+    selectedHowSoon = jsonDescription['howSoon'] ?? !kReleaseMode ? 'asap' : '';
+    selectedStatus =
+        jsonDescription['status'] ?? !kReleaseMode ? 'notSure' : '';
+    _telephoneController.text =
+        jsonDescription['telephoneNumber'] ?? !kReleaseMode ? '999' : '';
+    _postalController.text =
+        jsonDescription['postalCode'] ?? !kReleaseMode ? '8888' : '';
   }
 
   @override

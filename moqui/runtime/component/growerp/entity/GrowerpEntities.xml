@@ -244,8 +244,11 @@ along with this software (see the LICENSE.md file). If not, see
 
     <entity entity-name="Interface" package="growerp.general">
         <field name="interfaceId" type="id" is-pk="true" />
+        <field name="appHostName" type="id" />
         <field name="baseUrl" type="text-medium" />
         <field name="apiKey" type="text-long" />
+        <field name="username" type="text-medium" />
+        <field name="password" type="text-medium" />
         <field name="secretKey" type="text-medium" />
         <field name="value1" type="text-medium" />
         <field name="value2" type="text-medium" />

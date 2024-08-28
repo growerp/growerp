@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domaicrn Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <service verb="add" noun="PatientAndRequest">
+        <in-parameters>
+            <parameter name="requestor" type="Map" />
+            <parameter name="request" type="Map" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="resultMessage" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find>
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="hostNames">
+                <econdition field-name="productStoreId" from="stores[0].productStoreId" />
+                <econdition field-name="settingTypeEnumId" value="PsstAppHostname" />
+                <date-filter />
+            </entity-find>
+            <if condition="!hostNames">
+                <return />
+            </if>
+            <entity-find entity-name="growerp.general.Interface" list="interfaces">
+                <econdition field-name="appHostName" from="hostNames[0].settingValue" />
+            </entity-find>
+            <if
+                condition="!interfaces || interfaces[0].username.isEmpty()
+                            || interfaces[0].password.isEmpty()
+                            || interfaces[0].baseUrl.isEmpty()">
+                <log message="interface data not found" />
+                <return />
+            </if>
+            <set field="username" from="interfaces[0].username" />
+            <set field="password" from="interfaces[0].password" />
+            <set field="baseUrl" value="https://${interfaces[0].baseUrl}" />
+
+            <set field="setCookie" from="null" />
+            <script><![CDATA[
+                import java.io.BufferedReader;
+                import java.io.IOException;
+                import java.io.InputStreamReader;
+                import java.io.OutputStream;
+                import java.net.HttpURLConnection;
+                import java.net.URL;
+                import java.util.Base64;
+                import java.nio.charset.StandardCharsets
+                import groovy.json.*
+
+                // get session id -----------------
+                URL obj = new URL("$baseUrl/openmrs/ws/rest/v1/session");
+                HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+                String auth = username + ":" + password;
+                String authHeaderValue = "Basic " + 
+                        Base64.getEncoder().encodeToString(auth.getBytes());
+                con.setRequestProperty("Authorization", authHeaderValue);
+                con.setRequestMethod("GET");
+                if (con.getResponseCode() == HttpURLConnection.HTTP_OK) { // success
+                    BufferedReader in = new BufferedReader(
+                        new InputStreamReader(con.getInputStream()));
+                    String inputLine;
+                    StringBuffer content = new StringBuffer();
+                    while ((inputLine = in.readLine()) != null) {
+                        content.append(inputLine);
+                    }
+                    in.close();
+                    def result = (Map) new JsonSlurper().parseText(content.toString());
+                    ec.logger.info("auth response: Set-Cookie: ${con.getHeaderField('Set-Cookie')}");
+                    setCookie = con.getHeaderField('Set-Cookie');
+                } else {
+                    ec.logger.info("===GET request did not work: ${con.getResponseCode()} ${con.getResponseMessage()}");
+                }
+
+                ]]></script>
+
+            <if condition="requestor.externalId == null">
+                <script><![CDATA[
+                // get sequence id -----------------
+                Map result = sendGET("openmrs/ws/rest/v1/idgen/nextIdentifier?source=1");
+                def identUuid = result.results[0].identifierValue
+
+                // create patient ------------------
+                def identifiers = [
+                        [
+                            identifier: identUuid,
+                            identifierType: "OpenMRS ID",
+                        ]
+                    ]
+                def names = [
+                        [
+                            givenName: "${requestor.firstName}",
+                            familyName: "${requestor.lastName}",
+                        ]
+                    ]
+                def person = [ names: names, age: 55, gender: "M" ]
+                def json = new JsonBuilder(identifiers: identifiers,
+                                        person: person) 
+                ec.logger.info("===json string: ${json.toString()}");
+                result = sendPOST("openmrs/ws/rest/v1/patient",json.toString());
+                ec.logger.info("=======result of create patient: ${result}");
+                ]]></script>
+            </if>
+
+            <script><![CDATA[
+                //============ closures =============
+
+                def Map sendGET(String path) throws IOException {
+                    URL obj = new URL("$baseUrl/$path");
+                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+                    con.setRequestMethod("GET");
+                    con.setRequestProperty("Cookie", "$setCookie")
+                    con.setRequestProperty("Content-Type", "application/json")
+                    con.setRequestProperty("Accept", "application/json")
+                    BufferedReader input = null;
+                    String inputLine;
+                    StringBuffer response = new StringBuffer();
+                    Map json;
+                    if (100 <= con.getResponseCode() && con.getResponseCode() <= 399) {
+                        input = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                        while ((inputLine = input.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+                        json = new groovy.json.JsonSlurper().parseText(response.toString())
+                    } else {
+                        input = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+                        ec.logger.warn("error response code: ${con.getResponseCode()} msg: ${con.getResponseMessage()}");
+                    }
+                    input.close();
+                    //logger.info("=== GET reponse: ${response.toString()}");
+                    return json;
+                }
+
+
+                def Map sendPOST(String path, String paramsJSON) throws IOException {
+                    URL obj = new URL("$baseUrl/$path");
+                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+                    con.setRequestMethod("POST");
+                    con.setRequestProperty("Cookie", "$setCookie")
+                    con.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+                    con.setRequestProperty("Accept", "application/json")
+                    con.setDoInput(true);
+                    con.setDoOutput(true);
+
+                    OutputStream os = con.getOutputStream()
+                    os.write(paramsJSON.getBytes("UTF-8"));
+                    os.flush()
+
+                    BufferedReader input = null;
+                    if (100 <= con.getResponseCode() && con.getResponseCode() <= 399) {
+                        input = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                    } else {
+                        input = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+                        ec.logger.warn("POST error response code: ${con.getResponseCode()}");
+                    }
+                    String inputLine;
+                    StringBuffer response = new StringBuffer();
+
+                    while ((inputLine = input.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    input.close();
+                    //logger.info("=== POST reponse: ${response.toString()}");
+                    return new groovy.json.JsonSlurper().parseText(response.toString())
+                }
+           ]]></script>
+        </actions>
+    </service>
+</services>
