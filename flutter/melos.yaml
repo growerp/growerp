@@ -11,6 +11,14 @@ packages:
   - packages/growerp_order_accounting/example
   - packages/growerp_website/example
   - packages/growerp_task/example
+  - packages/growerp_user_company
+  - packages/growerp_catalog
+  - packages/growerp_inventory
+  - packages/growerp_marketing
+  - packages/growerp_order_accounting
+  - packages/growerp_website
+  - packages/growerp_task
+  - packages/growerp_models
   - packages/admin
   - packages/website
   - packages/hotel

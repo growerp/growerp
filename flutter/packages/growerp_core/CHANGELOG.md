@@ -1,3 +1,6 @@
+## 1.3.0
+* various changes
+
 ## 1.2.4
 * upgraded models package 1.2.3
 * added data conversion framework

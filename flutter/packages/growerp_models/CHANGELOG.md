@@ -1,3 +1,6 @@
+## 1.3.0
+* various model changes
+
 ## 1.2.4
 * various model changes
 

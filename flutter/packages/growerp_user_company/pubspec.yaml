@@ -1,6 +1,6 @@
 name: growerp_user_company
 description: A package providing user and company functions.
-version: 1.2.1
+version: 1.3.0
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
 platforms: 
@@ -52,9 +52,12 @@ dependencies:
   archive: ^3.3.0
   growerp_core: ^1.2.4
   growerp_models: ^1.2.1
-dev_dependencies:
+  two_dimensional_scrollables: ^0.3.1
+  universal_io: ^2.2.2
   flutter_test: 
     sdk: flutter
+
+dev_dependencies:
   flutter_driver: 
     sdk: flutter
   integration_test:

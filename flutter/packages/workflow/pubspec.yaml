@@ -11,8 +11,10 @@ environment:
 dependencies: 
   flutter: 
     sdk: flutter
-  growerp_core: ^1.2.4
-  growerp_task: ^1.0.0
+  growerp_core: ^1.3.0
+  growerp_task: ^1.3.0
+  growerp_order_accounting: ^1.3.0
+  growerp_user_company: ^1.3.0
   decimal: ^2.1.0
   flutter_bloc: ^8.1.4
   flutter_localizations: 
@@ -27,8 +29,6 @@ dependencies:
   star_menu: ^4.0.1
   path_provider: ^2.0.11
   flutter_colorpicker: ^1.1.0
-  growerp_order_accounting: ^1.2.1
-  growerp_user_company: ^1.2.1
 
 dev_dependencies: 
   flutter_test:

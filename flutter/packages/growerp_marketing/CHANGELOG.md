@@ -1,3 +1,6 @@
+## 1.3.0
+* various changes
+
 ## 1.2.1
 * upgrade to growerp_core 1.2.3
 
