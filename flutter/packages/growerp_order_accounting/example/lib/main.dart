@@ -64,7 +64,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
-    readGroups: [UserGroup.admin, UserGroup.employee, UserGroup.other],
+    userGroups: [UserGroup.admin, UserGroup.employee, UserGroup.other],
     child: const MainMenuForm(),
   ),
   MenuOption(
@@ -72,8 +72,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/order.png',
     title: 'Orders',
     route: '/orders',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
         form: const FinDocList(
@@ -94,13 +93,13 @@ List<MenuOption> menuOptions = [
       selectedImage: 'packages/growerp_core/images/accounting.png',
       title: 'Accounting',
       route: '/accounting',
-      readGroups: [UserGroup.admin]),
+      userGroups: [UserGroup.admin]),
   MenuOption(
     image: 'packages/growerp_core/images/supplierGrey.png',
     selectedImage: 'packages/growerp_core/images/supplier.png',
     title: 'Shipments',
     route: '/shipments',
-    readGroups: [UserGroup.admin, UserGroup.employee],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
         form: const FinDocList(
@@ -125,7 +124,7 @@ List<MenuOption> menuOptions = [
       selectedImage: 'packages/growerp_core/images/supplier.png',
       title: 'Inventory',
       route: '/inventory',
-      readGroups: [
+      userGroups: [
         UserGroup.admin,
         UserGroup.employee,
       ],
@@ -135,7 +134,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/accounting.png',
     title: 'Requests',
     route: '/requests',
-    readGroups: [UserGroup.admin],
+    userGroups: [UserGroup.admin],
     child: const FinDocList(
         key: Key('Request'), sales: false, docType: FinDocType.request),
   ),

@@ -6,15 +6,13 @@ List<MenuOption> workflowMenuOptions = [
   MenuOption(
     title: "Workflow running here",
     route: '/',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     child: const Text("dummy"),
   ),
   MenuOption(
     title: "Related Workflow diagram",
     route: '/showDiagram',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     child: const Text(''), // will be updated by the bloc with paramaters
   ),
 ];

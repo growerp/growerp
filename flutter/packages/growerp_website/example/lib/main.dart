@@ -49,8 +49,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     child: const MainMenuForm(),
   ),
   MenuOption(
@@ -58,8 +57,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/crm.png',
     title: 'Website',
     route: '/website',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     child: const WebsiteForm(),
   ),
 ];

@@ -23,8 +23,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     child: const local.WorkflowDbForm(),
   ),
   MenuOption(
@@ -32,8 +31,7 @@ List<MenuOption> menuOptions = [
     selectedImage: "packages/growerp_core/images/workflow.png",
     title: "Workflows",
     route: '/workflows',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin, UserGroup.employee],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     child: const TaskList(TaskType.workflow),
   ),
   MenuOption(
@@ -41,8 +39,7 @@ List<MenuOption> menuOptions = [
     selectedImage: "packages/growerp_core/images/workflow.png",
     title: "Workflow Templates",
     route: '/workflowTemplates',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin, UserGroup.employee],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     child: const TaskList(TaskType.workflowTemplate),
   ),
 /*  MenuOption(
@@ -50,8 +47,7 @@ List<MenuOption> menuOptions = [
     selectedImage: "packages/growerp_core/images/workflow.png",
     title: "Workflow Task Templates",
     route: '/workflowTaskTemplates',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin, UserGroup.employee],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     child: const TaskList(TaskType.workflowTaskTemplate),
   ),
 */
@@ -60,8 +56,7 @@ List<MenuOption> menuOptions = [
     selectedImage: "packages/growerp_core/images/tasks.png",
     title: "ToDo List",
     route: '/toDo',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin, UserGroup.employee],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     child: const TaskList(TaskType.todo),
   ),
 ];

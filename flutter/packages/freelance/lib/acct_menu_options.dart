@@ -27,7 +27,7 @@ List<MenuOption> acctMenuOptions = [
     selectedImage: "packages/growerp_core/images/accounting.png",
     title: "Accounting\nDashBoard",
     route: '/accounting',
-    readGroups: [UserGroup.admin, UserGroup.employee],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     child: const AccountingForm(),
   ),
   MenuOption(
@@ -35,8 +35,9 @@ List<MenuOption> acctMenuOptions = [
       selectedImage: "packages/growerp_core/images/order.png",
       title: "Accounting Sales",
       route: '/acctSales',
-      readGroups: [
+      userGroups: [
         UserGroup.admin,
+        UserGroup.employee
       ],
       tabItems: [
         TabItem(
@@ -69,11 +70,9 @@ List<MenuOption> acctMenuOptions = [
       selectedImage: "packages/growerp_core/images/supplier.png",
       title: "Accounting Purch.",
       route: '/acctPurchase',
-      readGroups: [
+      userGroups: [
         UserGroup.admin,
-      ],
-      writeGroups: [
-        UserGroup.admin
+        UserGroup.employee
       ],
       tabItems: [
         TabItem(
@@ -104,13 +103,11 @@ List<MenuOption> acctMenuOptions = [
   MenuOption(
       image: "packages/growerp_core/images/accountingGrey.png",
       selectedImage: "packages/growerp_core/images/accounting.png",
-      title: "Accounting Ledger",
+      title: "Accounting Ledger\n",
       route: '/acctLedger',
-      readGroups: [
+      userGroups: [
         UserGroup.admin,
-      ],
-      writeGroups: [
-        UserGroup.admin
+        UserGroup.employee
       ],
       tabItems: [
         TabItem(
@@ -138,61 +135,53 @@ List<MenuOption> acctMenuOptions = [
         ),
       ]),
   MenuOption(
-      image: "packages/growerp_core/images/reportGrey.png",
-      selectedImage: "packages/growerp_core/images/report.png",
-      title: "Reports",
-      route: '/acctReports',
-      tabItems: [
-        TabItem(
-          form: const BalanceSheetForm(),
-          label: "Balance Sheet",
-          icon: const Icon(Icons.list),
-        ),
-        TabItem(
-          form: const BalanceSummaryList(),
-          label: "Balance Summary",
-          icon: const Icon(Icons.list),
-        ),
-      ],
-      readGroups: [
-        UserGroup.admin
-      ],
-      writeGroups: [
-        UserGroup.admin
-      ]),
+    image: "packages/growerp_core/images/reportGrey.png",
+    selectedImage: "packages/growerp_core/images/report.png",
+    title: "Reports",
+    route: '/acctReports',
+    tabItems: [
+      TabItem(
+        form: const BalanceSheetForm(),
+        label: "Balance Sheet",
+        icon: const Icon(Icons.list),
+      ),
+      TabItem(
+        form: const BalanceSummaryList(),
+        label: "Balance Summary",
+        icon: const Icon(Icons.list),
+      ),
+    ],
+    userGroups: [UserGroup.admin, UserGroup.employee],
+  ),
   MenuOption(
-      image: "packages/growerp_core/images/setupGrey.png",
-      selectedImage: "packages/growerp_core/images/setup.png",
-      title: "SetUp",
-      route: '/acctSetup',
-      tabItems: [
-        TabItem(
-          form: const TimePeriodListForm(),
-          label: "Time Periods",
-          icon: const Icon(Icons.list),
-        ),
-        TabItem(
-          form: const ItemTypeList(),
-          label: "Item Types",
-          icon: const Icon(Icons.list),
-        ),
-        TabItem(
-          form: const PaymentTypeList(),
-          label: "Paymt Types",
-          icon: const Icon(Icons.list),
-        ),
-      ],
-      readGroups: [
-        UserGroup.admin
-      ],
-      writeGroups: [
-        UserGroup.admin
-      ]),
+    image: "packages/growerp_core/images/setupGrey.png",
+    selectedImage: "packages/growerp_core/images/setup.png",
+    title: "SetUp",
+    route: '/acctSetup',
+    tabItems: [
+      TabItem(
+        form: const TimePeriodListForm(),
+        label: "Time Periods",
+        icon: const Icon(Icons.list),
+      ),
+      TabItem(
+        form: const ItemTypeList(),
+        label: "Item Types",
+        icon: const Icon(Icons.list),
+      ),
+      TabItem(
+        form: const PaymentTypeList(),
+        label: "Paymt Types",
+        icon: const Icon(Icons.list),
+      ),
+    ],
+    userGroups: [UserGroup.admin, UserGroup.employee],
+  ),
   MenuOption(
     image: "packages/growerp_core/images/dashBoardGrey.png",
     selectedImage: "packages/growerp_core/images/dashBoard.png",
     title: "Main dashboard",
     route: '/',
-    readGroups: [UserGroup.admin, UserGroup.employee],
+    userGroups: [UserGroup.admin, UserGroup.employee],
   ),
 ];

@@ -49,8 +49,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     child: const MainMenu(),
   ),
   MenuOption(
@@ -58,8 +57,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/company.png',
     title: 'Companies',
     route: '/companies',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
         form: ShowCompanyDialog(
@@ -109,8 +107,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/users.png',
     title: 'Users',
     route: '/users',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
         form: const UserList(

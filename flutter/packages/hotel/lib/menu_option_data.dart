@@ -29,8 +29,7 @@ List<MenuOption> menuOptions = [
     selectedImage: "packages/growerp_core/images/dashBoard.png",
     title: "Main",
     route: '/',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     child: const GanttForm(),
   ),
   MenuOption(
@@ -38,8 +37,7 @@ List<MenuOption> menuOptions = [
     selectedImage: "packages/growerp_core/images/company.png",
     title: "My Hotel",
     route: '/myHotel',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
         form: ShowCompanyDialog(
@@ -70,7 +68,7 @@ List<MenuOption> menuOptions = [
     selectedImage: "packages/growerp_core/images/single-bed.png",
     title: "Rooms",
     route: '/rooms',
-    readGroups: [UserGroup.admin, UserGroup.employee],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
         form: const AssetList(),
@@ -89,12 +87,9 @@ List<MenuOption> menuOptions = [
       selectedImage: "packages/growerp_core/images/reservation.png",
       title: "Reservations",
       route: '/reservations',
-      readGroups: [
+      userGroups: [
         UserGroup.admin,
         UserGroup.employee
-      ],
-      writeGroups: [
-        UserGroup.admin
       ],
       tabItems: [
         TabItem(
@@ -128,12 +123,9 @@ List<MenuOption> menuOptions = [
       selectedImage: "packages/growerp_core/images/check-in-out.png",
       title: "In-Out",
       route: '/checkInOut',
-      readGroups: [
+      userGroups: [
         UserGroup.admin,
         UserGroup.employee
-      ],
-      writeGroups: [
-        UserGroup.admin
       ],
       tabItems: [
         TabItem(
@@ -162,5 +154,5 @@ List<MenuOption> menuOptions = [
       selectedImage: "packages/growerp_core/images/accounting.png",
       title: "Accounting",
       route: '/accounting',
-      readGroups: [UserGroup.admin]),
+      userGroups: [UserGroup.admin]),
 ];

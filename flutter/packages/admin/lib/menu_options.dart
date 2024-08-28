@@ -29,8 +29,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     child: const local.AdminDbForm(),
   ),
   MenuOption(
@@ -38,8 +37,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/company.png',
     title: 'Company',
     route: '/companies',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
         form: ShowCompanyDialog(
@@ -70,7 +68,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/crm.png',
     title: 'CRM',
     route: '/crm',
-    readGroups: [UserGroup.admin, UserGroup.employee],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
         form: const OpportunityListForm(),
@@ -122,12 +120,9 @@ List<MenuOption> menuOptions = [
       selectedImage: 'packages/growerp_core/images/products.png',
       title: 'Catalog',
       route: '/catalog',
-      readGroups: [
+      userGroups: [
         UserGroup.admin,
         UserGroup.employee
-      ],
-      writeGroups: [
-        UserGroup.admin
       ],
       tabItems: [
         TabItem(
@@ -151,8 +146,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/order.png',
     title: 'Orders',
     route: '/orders',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
         form: const FinDocList(
@@ -189,7 +183,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/supplier.png',
     title: 'Inventory',
     route: '/inventory',
-    readGroups: [UserGroup.admin, UserGroup.employee],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
         form: const FinDocList(
@@ -226,11 +220,11 @@ List<MenuOption> menuOptions = [
       selectedImage: 'packages/growerp_core/images/accounting.png',
       title: 'Accounting',
       route: '/accounting',
-      readGroups: [UserGroup.admin]),
+      userGroups: [UserGroup.admin, UserGroup.employee]),
   MenuOption(
       image: 'packages/growerp_core/images/infoGrey.png',
       selectedImage: 'packages/growerp_core/images/info.png',
       title: 'About',
       route: '/about',
-      readGroups: [UserGroup.admin]),
+      userGroups: [UserGroup.admin, UserGroup.employee]),
 ];

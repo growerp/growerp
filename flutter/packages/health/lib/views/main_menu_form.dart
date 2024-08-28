@@ -24,36 +24,26 @@ class AdminDbForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
-    var userGroup =
-        context.read<AuthBloc>().state.authenticate!.user!.userGroup;
+    List<Widget> dashboardItems = [];
+
+    for (final option in menuOptions) {
+      if (option.userGroups!.contains(authenticate.user?.userGroup!)) {
+        dashboardItems
+            .add(makeDashboardItem(option.key ?? '', context, option, [
+          if (option.key == 'dbRequests')
+            "#: ${authenticate.stats?.requests ?? 0}",
+          if (option.key == 'dbCustomers')
+            "#: ${authenticate.stats?.customers}",
+          if (option.key == 'dbEmployees')
+            "#: ${authenticate.stats?.employees ?? 0}",
+          ""
+        ]));
+      }
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Expanded(
-          child: DashBoardForm(dashboardItems: [
-            if (access(userGroup!, menuOptions[1]))
-              makeDashboardItem('dbRequests', context, menuOptions[1], [
-                "#: ${authenticate.stats?.requests ?? 0}",
-              ]),
-            if (access(userGroup, menuOptions[2]))
-              makeDashboardItem('dbCustomers', context, menuOptions[2], [
-                "#: ${authenticate.stats?.customers ?? 0}",
-              ]),
-            if (access(userGroup, menuOptions[3]))
-              makeDashboardItem('dbEmployees', context, menuOptions[3], [
-                "#: ${authenticate.stats?.opportunities ?? 0}",
-              ]),
-            if (access(userGroup, menuOptions[4]))
-              makeDashboardItem('dbCompany', context, menuOptions[4], [
-                authenticate.company!.name!.length > 20
-                    ? "${authenticate.company!.name!.substring(0, 20)}..."
-                    : "${authenticate.company!.name}",
-              ]),
-            /*       if (access(userGroup, menuOptions[5]))
-              makeDashboardItem('dbCompany', context, menuOptions[5], []),
-     */
-          ]),
-        ),
+        Expanded(child: DashBoardForm(dashboardItems: dashboardItems)),
       ],
     );
   }

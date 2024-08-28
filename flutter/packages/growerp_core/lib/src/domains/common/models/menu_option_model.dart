@@ -19,7 +19,7 @@ import 'models.dart';
 
 /// item on the main menu, containing tabitems on a lower level.
 class MenuOption {
-  // main menu item shown on the left or in drawer
+  final String? key;
   final String? image; // image when not seleced
   final String? selectedImage; // image when selected
   final String title; // a the top of the page
@@ -28,12 +28,10 @@ class MenuOption {
   final Object? arguments; // optional arguments to used with route
   final List<TabItem>? tabItems; // top/bottom tabs
   final Widget? child; // when no tabs this is single page
-  final List<UserGroup>? readGroups; // user groups who can read
-  final List<UserGroup>? writeGroups; // user groups who can add/update/delete
-  final List<UserGroup>?
-      myGroups; // user groups who add/update/delete own records
+  final List<UserGroup>? userGroups;
 
   MenuOption({
+    this.key,
     this.image,
     this.selectedImage,
     required this.title,
@@ -41,12 +39,11 @@ class MenuOption {
     this.arguments,
     this.tabItems,
     this.child,
-    this.readGroups,
-    this.writeGroups,
-    this.myGroups,
+    this.userGroups, // access to the option
   });
 
   MenuOption copyWith({
+    String? key,
     String? image,
     String? selectedImage,
     String? title,
@@ -54,10 +51,10 @@ class MenuOption {
     Object? arguments,
     List<TabItem>? tabItems,
     Widget? child,
-    List<UserGroup>? readGroups,
-    List<UserGroup>? writeGroups,
+    List<UserGroup>? userGroups,
   }) {
     return MenuOption(
+      key: key ?? this.key,
       image: image ?? this.image,
       selectedImage: selectedImage ?? this.selectedImage,
       title: title ?? this.title,
@@ -65,8 +62,7 @@ class MenuOption {
       arguments: arguments ?? this.arguments,
       tabItems: tabItems ?? this.tabItems,
       child: child ?? this.child,
-      readGroups: readGroups ?? this.readGroups,
-      writeGroups: writeGroups ?? this.writeGroups,
+      userGroups: userGroups ?? this.userGroups,
     );
   }
 

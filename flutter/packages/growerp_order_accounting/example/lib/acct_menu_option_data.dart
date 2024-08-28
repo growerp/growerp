@@ -26,7 +26,7 @@ List<MenuOption> acctMenuOptions = [
     selectedImage: "packages/growerp_core/images/accounting.png",
     title: "Accounting\nDashBoard",
     route: '/accounting',
-    readGroups: [UserGroup.admin, UserGroup.employee],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     child: const AccountingForm(),
   ),
   MenuOption(
@@ -34,7 +34,7 @@ List<MenuOption> acctMenuOptions = [
       selectedImage: "packages/growerp_core/images/order.png",
       title: "Accounting Sales",
       route: '/acctSales',
-      readGroups: [
+      userGroups: [
         UserGroup.admin,
       ],
       tabItems: [
@@ -60,11 +60,8 @@ List<MenuOption> acctMenuOptions = [
       selectedImage: "packages/growerp_core/images/supplier.png",
       title: "Acctg. Purchasing",
       route: '/acctPurchase',
-      readGroups: [
+      userGroups: [
         UserGroup.admin,
-      ],
-      writeGroups: [
-        UserGroup.admin
       ],
       tabItems: [
         TabItem(
@@ -89,11 +86,8 @@ List<MenuOption> acctMenuOptions = [
       selectedImage: "packages/growerp_core/images/accounting.png",
       title: "Acctg. Ledger",
       route: '/acctLedger',
-      readGroups: [
+      userGroups: [
         UserGroup.admin,
-      ],
-      writeGroups: [
-        UserGroup.admin
       ],
       tabItems: [
         TabItem(
@@ -137,10 +131,7 @@ List<MenuOption> acctMenuOptions = [
           icon: const Icon(Icons.list),
         ),
       ],
-      readGroups: [
-        UserGroup.admin
-      ],
-      writeGroups: [
+      userGroups: [
         UserGroup.admin
       ]),
   MenuOption(
@@ -165,10 +156,7 @@ List<MenuOption> acctMenuOptions = [
           icon: const Icon(Icons.list),
         ),
       ],
-      readGroups: [
-        UserGroup.admin
-      ],
-      writeGroups: [
+      userGroups: [
         UserGroup.admin
       ]),
   MenuOption(
@@ -176,6 +164,6 @@ List<MenuOption> acctMenuOptions = [
     selectedImage: "packages/growerp_core/images/dashBoard.png",
     title: "Main dashboard",
     route: '/',
-    readGroups: [UserGroup.admin, UserGroup.employee],
+    userGroups: [UserGroup.admin, UserGroup.employee],
   ),
 ];

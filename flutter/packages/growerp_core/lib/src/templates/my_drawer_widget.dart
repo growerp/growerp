@@ -24,12 +24,10 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
   List<MenuOption> options = [];
   for (var option in menu) {
     {
-      if (access(auth?.user?.userGroup!, option)) {
-        options.add(option);
-      }
+      options.add(option);
     }
   }
-  options.add(MenuOption(route: 'theme', title: 'Theme', readGroups: []));
+  options.add(MenuOption(route: 'theme', title: 'Theme', userGroups: []));
   bool loggedIn = auth?.apiKey != null;
   if (loggedIn && isPhone) {
     return Drawer(

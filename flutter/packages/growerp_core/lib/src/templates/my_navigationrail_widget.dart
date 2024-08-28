@@ -23,29 +23,20 @@ Widget myNavigationRail(
   List<NavigationRailDestination> items = [];
   ThemeBloc themeBloc = context.read<ThemeBloc>();
   AuthBloc authBloc = context.read<AuthBloc>();
-  Authenticate auth = authBloc.state.authenticate!;
+  Authenticate? auth = authBloc.state.authenticate;
   for (var option in menu) {
-    {
-      if (access(auth.user!.userGroup!, option)) {
-        //print("====tap available: tap${option.route}");
-
-        items.add(NavigationRailDestination(
-          icon: Image.asset(
-              option.image ?? 'packages/growerp_core/images/selectGrey.png',
-              height: 40,
-              key: Key('tap${option.route}')),
-          selectedIcon: Image.asset(option.selectedImage ??
-              'packages/growerp_core/images/select.png'),
-          label: Text(option.title),
-        ));
-      }
-    }
+    items.add(NavigationRailDestination(
+      icon: Image.asset(
+          option.image ?? 'packages/growerp_core/images/selectGrey.png',
+          height: 40,
+          key: Key('tap${option.route}')),
+      selectedIcon: Image.asset(
+          option.selectedImage ?? 'packages/growerp_core/images/select.png'),
+      label: Text(option.title),
+    ));
   }
   if (items.isEmpty) {
-    return FatalErrorForm(
-        message: "No access to any option here, "
-            "have: ${auth.user?.userGroup} "
-            "should have: ${menu[0].readGroups}");
+    return const FatalErrorForm(message: "No access to any option here, ");
   }
 
   return Row(children: <Widget>[
@@ -73,7 +64,7 @@ Widget myNavigationRail(
                                           : 5),
                                   CircleAvatar(
                                       radius: 15,
-                                      child: auth.user?.image != null
+                                      child: auth!.user?.image != null
                                           ? Image.memory(auth.user!.image!)
                                           : Text(
                                               auth.user?.firstName

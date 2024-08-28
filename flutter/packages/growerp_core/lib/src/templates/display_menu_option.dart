@@ -18,7 +18,6 @@ import 'package:growerp_models/growerp_models.dart';
 import '../../growerp_core.dart';
 
 class DisplayMenuOption extends StatefulWidget {
-  final MenuOption? menuOption; // display not an item from the list like chat
   final List<MenuOption> menuList; // menu list to be used
   final int menuIndex; // navigator rail menu selected
   final int? tabIndex; // tab selected, if none create new
@@ -27,7 +26,6 @@ class DisplayMenuOption extends StatefulWidget {
   final Task? workflow;
   const DisplayMenuOption({
     super.key,
-    this.menuOption,
     required this.menuList,
     required this.menuIndex,
     this.tabIndex,
@@ -59,16 +57,30 @@ class MenuOptionState extends State<DisplayMenuOption>
   late bool isPhone;
   late TaskBloc taskBloc;
   late AuthBloc authBloc;
+  List<MenuOption> menuList = [];
+  int menuIndex = 0;
 
   @override
   void initState() {
     super.initState();
     authBloc = context.read<AuthBloc>();
+    // apply security
+    int newIndex = 0;
+    for (final option in widget.menuList) {
+      if (option.userGroups != null &&
+          option.userGroups!
+              .contains(authBloc.state.authenticate?.user?.userGroup)) {
+        menuList.add(option);
+        if (option.route == widget.menuList[widget.menuIndex].route) {
+          menuIndex = newIndex;
+        }
+        newIndex++;
+      }
+    }
+    MenuOption menuOption = menuList[menuIndex];
     if (widget.workflow != null) {
       taskBloc = context.read<TaskBloc>();
     }
-    MenuOption menuOption =
-        widget.menuOption ?? widget.menuList[widget.menuIndex];
     tabItems = menuOption.tabItems ?? [];
     title = menuOption.title;
     child = menuOption.child;
@@ -225,7 +237,7 @@ class MenuOptionState extends State<DisplayMenuOption>
               leading: leadAction,
               title: appBarTitle(context, title, isPhone),
               actions: actions),
-          drawer: myDrawer(context, isPhone, widget.menuList),
+          drawer: myDrawer(context, isPhone, menuList),
           floatingActionButton: floatingActionButton,
           body: Column(children: simpleChildren));
     }
@@ -274,7 +286,7 @@ class MenuOptionState extends State<DisplayMenuOption>
                   '$title ${isPhone ? '\n' : ', '}${tabItems[tabIndex].label}',
                   isPhone),
               actions: actions),
-          drawer: myDrawer(context, isPhone, widget.menuList),
+          drawer: myDrawer(context, isPhone, menuList),
           floatingActionButton: floatingActionButtonList[tabIndex],
           bottomNavigationBar: isPhone
               ? BottomNavigationBar(
@@ -299,8 +311,8 @@ class MenuOptionState extends State<DisplayMenuOption>
         return myNavigationRail(
           context,
           simplePage(isPhone),
-          widget.menuIndex,
-          widget.menuList,
+          menuIndex,
+          menuList,
         );
       }
     } else {
@@ -311,8 +323,8 @@ class MenuOptionState extends State<DisplayMenuOption>
         return myNavigationRail(
           context,
           tabPage(isPhone),
-          widget.menuIndex,
-          widget.menuList,
+          menuIndex,
+          menuList,
         );
       }
     }
