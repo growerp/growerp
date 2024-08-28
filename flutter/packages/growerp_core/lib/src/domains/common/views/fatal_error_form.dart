@@ -39,7 +39,7 @@ class FatalErrorForm extends StatelessWidget {
               height: 100,
               child: Text(
                 message,
-                style: const TextStyle(color: Colors.red, fontSize: 15),
+                style: const TextStyle(color: Colors.red, fontSize: 25),
               ),
             ),
             OutlinedButton(

@@ -133,11 +133,15 @@ class TopApp extends StatelessWidget {
                       onGenerateRoute: router,
                       navigatorObservers: [AppNavObserver()],
                       home: BlocBuilder<AuthBloc, AuthState>(
-                        builder: (context, authState) {
-                          switch (authState.status) {
+                        builder: (context, state) {
+                          switch (state.status) {
                             case AuthStatus.initial:
                             case AuthStatus.loading:
-                              return Scaffold(body: Container());
+                              return Scaffold(
+                                  backgroundColor: Colors.transparent,
+                                  body: Container());
+                            case AuthStatus.failure:
+                              return FatalErrorForm(message: state.message!);
                             case AuthStatus.changeIp:
                               return const ChangeIpForm();
                             default:

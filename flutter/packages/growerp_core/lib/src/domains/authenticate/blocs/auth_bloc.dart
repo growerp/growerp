@@ -94,18 +94,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     } on DioException catch (e) {
       await PersistFunctions.persistAuthenticate(defaultAuthenticate);
-      print("======${getDioError(e)}====");
-      if (getDioError(e).startsWith('Login key not valid')) {
-        emit(state.copyWith(
-            status: AuthStatus.unAuthenticated,
-            authenticate: defaultAuthenticate,
-            message: getDioError(e)));
-      } else {
-        emit(state.copyWith(
-            status: AuthStatus.failure,
-            authenticate: defaultAuthenticate,
-            message: getDioError(e)));
-      }
+      emit(state.copyWith(
+          status: AuthStatus.failure,
+          authenticate: defaultAuthenticate,
+          message: getDioError(e)));
     }
   }
 
