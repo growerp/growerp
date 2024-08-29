@@ -55,7 +55,7 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: 'packages/growerp_core/images/companyGrey.png',
     selectedImage: 'packages/growerp_core/images/company.png',
-    title: 'Company',
+    title: 'Organization',
     route: '/company',
     userGroups: [UserGroup.admin, UserGroup.employee],
     child: const MainMenu(),

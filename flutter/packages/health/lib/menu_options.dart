@@ -43,7 +43,7 @@ List<MenuOption> menuOptions = [
     key: 'dbCustomers',
     image: 'packages/growerp_core/images/accountingGrey.png',
     selectedImage: 'packages/growerp_core/images/accounting.png',
-    title: 'Patients',
+    title: 'Clients',
     route: '/customers',
     userGroups: [UserGroup.employee, UserGroup.admin],
     child: const UserList(
@@ -67,7 +67,7 @@ List<MenuOption> menuOptions = [
     key: 'dbCompany',
     image: 'packages/growerp_core/images/accountingGrey.png',
     selectedImage: 'packages/growerp_core/images/accounting.png',
-    title: 'Hospital',
+    title: 'Organization',
     route: '/company',
     userGroups: [UserGroup.admin, UserGroup.employee, UserGroup.other],
     child: ShowCompanyDialog(

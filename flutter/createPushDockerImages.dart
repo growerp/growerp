@@ -141,7 +141,7 @@ void main() async {
       "with tag $gitTag";
   if (upgradeVersion.toUpperCase() == 'Y') {
     print("=== save version files in git with message: $commitMessage");
-    for (var name in names) {
+    for (var name in names.isEmpty ? apps : names) {
       switch (name) {
         case 'growerp-moqui':
           run('git add $home/moqui/runtime/component/growerp/component.xml',
