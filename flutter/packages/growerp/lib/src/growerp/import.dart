@@ -10,13 +10,17 @@ import 'package:logger/logger.dart';
 
 import '../src.dart';
 
-Future<void> login(RestClient client, String username, String password) async {
+Future<void> login(RestClient client, String username, String password,
+    {String companyName = '', String currencyId = ''}) async {
   Hive.init('growerpDB');
   var box = await Hive.openBox('growerp');
   late Authenticate authenticate;
   var logger = Logger(filter: MyFilter());
 
-  if (username.isNotEmpty && password.isNotEmpty) {
+  if (username.isNotEmpty &&
+      password.isNotEmpty &&
+      companyName.isNotEmpty &&
+      currencyId.isNotEmpty) {
     try {
       // email exists?
       Map result = await client.checkEmail(email: username);
@@ -26,37 +30,37 @@ Future<void> login(RestClient client, String username, String password) async {
           classificationId: 'AppAdmin',
           email: username,
           newPassword: password,
-          firstName: 'Hans',
-          lastName: 'Jansen',
+          firstName: 'admin',
+          lastName: 'user',
         );
       }
     } catch (e) {
       print("registration failed: ${getDioError(e)}");
     }
-
-    // login
-    await client.login(
-        username: username, password: password, classificationId: 'AppAdmin');
-    // login again to provide more info and get apikey
-    authenticate = await client.login(
-        username: username,
-        password: password,
-        classificationId: 'AppAdmin',
-        companyName: 'import data',
-        currencyId: 'USD',
-        demoData: false,
-        extraInfo: true);
-    // save key
-    box.put('apiKey', authenticate.apiKey);
-    await box.put('authenticate', jsonEncode(authenticate.toJson()));
-
-    logger.i("logged in with admin user: "
-        "${authenticate.user?.email}");
   }
+
+  // login
+  await client.login(
+      username: username, password: password, classificationId: 'AppAdmin');
+  // login again to provide more info and get apikey
+  authenticate = await client.login(
+      username: username,
+      password: password,
+      classificationId: 'AppAdmin',
+      companyName: companyName,
+      currencyId: currencyId,
+      demoData: false,
+      extraInfo: true);
+  // save key
+  box.put('apiKey', authenticate.apiKey);
+  await box.put('authenticate', jsonEncode(authenticate.toJson()));
+
+  logger.i("logged in with admin user: "
+      "${authenticate.user?.email}");
 }
 
-import(String inputFile, String? backendUrl, String username,
-    String password) async {
+import(String inputFile, String? backendUrl, String username, String password,
+    String companyName, String currencyId) async {
   FileType overrideFileType = FileType.unknown;
   var logger = Logger(filter: MyFilter());
   int timeout = 600; //in seconds
@@ -72,7 +76,8 @@ import(String inputFile, String? backendUrl, String username,
       timeout: Duration(seconds: timeout), miniLog: true));
   FileType fileType = FileType.unknown;
   try {
-    await login(client, username, password);
+    await login(client, username, password,
+        companyName: companyName, currencyId: currencyId);
     // import
     for (fileType in FileType.values) {
       if (overrideFileType != FileType.unknown &&

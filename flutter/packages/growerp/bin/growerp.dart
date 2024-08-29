@@ -31,6 +31,8 @@ Future<void> main(List<String> args) async {
   String inputFile = '';
   String username = '';
   String password = '';
+  String companyName = '';
+  String currencyId = '';
   int timeout = 600; //in seconds
   FileType overrideFileType = FileType.unknown;
   Hive.init('growerpDB');
@@ -45,24 +47,22 @@ Future<void> main(List<String> args) async {
       switch (args[i]) {
         case '-dev':
           branch = 'development';
-          break;
         case '-url':
           backendUrl = args[++i];
-          break;
         case '-i':
           inputFile = args[++i];
-          break;
         case '-u':
           username = args[++i];
-          break;
+        case '-n':
+          companyName = args[++i];
+        case '-c':
+          currencyId = args[++i];
         case '-p':
           password = args[++i];
-          break;
         case '-o':
           outputDirectory = args[++i];
         case '-t':
           timeout = int.parse(args[++i]);
-          break;
         case '-f':
           i++;
           overrideFileType = FileType.values.firstWhere(
@@ -72,31 +72,60 @@ Future<void> main(List<String> args) async {
             logger.e("Filetype: ${args[i]}  not recognized");
             exit(1);
           }
-          break;
         default:
           modifiedArgs.add(args[i]);
       }
     }
     logger.i(
-        "Growerp command: ${modifiedArgs[0].toLowerCase()} i: $inputFile u: $username p: $password -branch: $branch -f ${overrideFileType.name}");
+        "Growerp command: ${modifiedArgs[0].toLowerCase()} i: $inputFile u: $username p: $password -branch: $branch -f ${overrideFileType.name} -n");
 
     // commands
     if (modifiedArgs.isEmpty) {
       logger.e("No growerp subcommand found.");
     }
     switch (modifiedArgs[0].toLowerCase()) {
+      case 'help':
+        print("Help for the growerp command\n"
+            " -- install:\n "
+            "     will install the complete system: frontend, backend and chat\n"
+            "     and will start the backend and chat in the background.\n"
+            "     The install directory will be $HOME/growerp\n"
+            "     The admin frontend can now be started with the 'flutter run' command\n"
+            "       in the directory growerp/flutter/packages/admin\n"
+            " -- import:\n "
+            "     will import standard csv files into a local or remote system\n"
+            "     these standard csv files can be created by the conversion framework\n"
+            "     in the command convert_to_csv\n"
+            "     A new company and admin will be created in the process\n"
+            "     Parameters:\n"
+            "     -i    input directory which contains the csv files and images\n"
+            "     -u    user email address to for logging in.\n"
+            "     -p    password for logging in.\n"
+            "     -url  The backend url or empty for localhost\n"
+            "     -n    The new company name\n"
+            "     -c    The currency id to be used, example: USD,EUR\n"
+            " -- export: (under development)\n "
+            "     Will export all company related information in csv files\n"
+            "     -u    user email address to for logging in.\n"
+            "     -p    password for logging in.\n"
+            "     -o    output directory name\n"
+            " -- finalize:\n "
+            "     wil finalize the import process by completing finished \n"
+            "     documents and accounting time periods.\n"
+            "     -u    user email address to for logging in.\n"
+            "     -p    password for logging in.\n");
+        exit(1);
       case 'install':
         install(growerpPath, branch);
-        break;
       case 'import':
-        import(inputFile, backendUrl, username, password);
-        break;
+        import(
+            inputFile, backendUrl, username, password, companyName, currencyId);
       case 'finalize':
         final client = RestClient(await buildDioClient(backendUrl,
             timeout: Duration(seconds: timeout), miniLog: true));
-        await login(client, username, password);
+        await login(client, username, password,
+            companyName: companyName, currencyId: currencyId);
         client.finalizeImport();
-        break;
       case 'export':
         if (modifiedArgs.length > 1) {
           try {
@@ -109,7 +138,6 @@ Future<void> main(List<String> args) async {
           }
         }
         export(backendUrl, outputDirectory, username, password);
-        break;
       case 'report':
         // (hansbak): create a data (conversion) report
         // how many open documents order,invoices, payments  value
