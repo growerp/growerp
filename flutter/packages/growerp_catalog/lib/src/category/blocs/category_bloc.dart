@@ -80,7 +80,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: CategoryStatus.failure, message: getDioError(e)));
+          status: CategoryStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -119,7 +119,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       emit(state.copyWith(
           status: CategoryStatus.failure,
           categories: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -143,7 +143,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       emit(state.copyWith(
           status: CategoryStatus.failure,
           categories: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -174,7 +174,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       emit(state.copyWith(
           status: CategoryStatus.failure,
           categories: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -196,7 +196,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       emit(state.copyWith(
           status: CategoryStatus.failure,
           categories: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 }

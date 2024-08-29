@@ -24,6 +24,7 @@ dependencies:
   dcli: ^6.0.4
   universal_io: ^2.2.2
   json_annotation: ^4.9.0
+  hive_flutter: ^1.1.0
 
 dev_dependencies: 
   flutter_lints: ^4.0.0

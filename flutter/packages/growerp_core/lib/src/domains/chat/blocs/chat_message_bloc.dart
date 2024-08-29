@@ -85,7 +85,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
       emit(state.copyWith(
           status: ChatMessageStatus.failure,
           chatMessages: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 

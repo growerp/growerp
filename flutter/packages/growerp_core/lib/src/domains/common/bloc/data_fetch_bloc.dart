@@ -23,7 +23,7 @@ class DataFetchBloc<T> extends Bloc<DataFetchBlocEvent, DataFetchState>
         emit(state.copyWith(
             status: DataFetchStatus.failure,
             data: [],
-            message: getDioError(e)));
+            message: await getDioError(e)));
       }
     });
   }

@@ -55,7 +55,7 @@ class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: WebsiteStatus.failure, message: getDioError(e)));
+          status: WebsiteStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -74,7 +74,7 @@ class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: WebsiteStatus.failure, message: getDioError(e)));
+          status: WebsiteStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -113,7 +113,7 @@ class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
               : 'obsidian removed'));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: WebsiteStatus.failure, message: getDioError(e)));
+          status: WebsiteStatus.failure, message: await getDioError(e)));
     }
   }
 }

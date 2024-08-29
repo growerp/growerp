@@ -114,7 +114,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
       }
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+          status: TaskBlocStatus.failure,
+          tasks: [],
+          message: await getDioError(e)));
     }
   }
 
@@ -147,7 +149,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
       }
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+          status: TaskBlocStatus.failure,
+          tasks: [],
+          message: await getDioError(e)));
     }
   }
 
@@ -178,7 +182,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
       emit(state.copyWith(tasks: tasks));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+          status: TaskBlocStatus.failure,
+          tasks: [],
+          message: await getDioError(e)));
     }
   }
 
@@ -201,7 +207,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+          status: TaskBlocStatus.failure,
+          tasks: [],
+          message: await getDioError(e)));
     }
   }
 
@@ -376,7 +384,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+          status: TaskBlocStatus.failure,
+          tasks: [],
+          message: await getDioError(e)));
     }
   }
 
@@ -393,7 +403,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+          status: TaskBlocStatus.failure,
+          tasks: [],
+          message: await getDioError(e)));
     }
   }
 
@@ -410,7 +422,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+          status: TaskBlocStatus.failure,
+          tasks: [],
+          message: await getDioError(e)));
     }
   }
 
@@ -427,7 +441,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+          status: TaskBlocStatus.failure,
+          tasks: [],
+          message: await getDioError(e)));
     }
   }
 
@@ -451,7 +467,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
           status: TaskBlocStatus.success, myTasks: result.tasks));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+          status: TaskBlocStatus.failure,
+          tasks: [],
+          message: await getDioError(e)));
     }
   }
 
@@ -469,7 +487,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
           message: 'workflow added'));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+          status: TaskBlocStatus.failure,
+          tasks: [],
+          message: await getDioError(e)));
     }
   }
 
@@ -490,7 +510,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
           message: 'Workflow deleted'));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+          status: TaskBlocStatus.failure,
+          tasks: [],
+          message: await getDioError(e)));
     }
   }
 }

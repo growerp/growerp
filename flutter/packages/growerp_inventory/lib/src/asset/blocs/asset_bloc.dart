@@ -63,7 +63,9 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: AssetStatus.failure, assets: [], message: getDioError(e)));
+          status: AssetStatus.failure,
+          assets: [],
+          message: await getDioError(e)));
     }
   }
 
@@ -97,7 +99,9 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
       }
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: AssetStatus.failure, assets: [], message: getDioError(e)));
+          status: AssetStatus.failure,
+          assets: [],
+          message: await getDioError(e)));
     }
   }
 }

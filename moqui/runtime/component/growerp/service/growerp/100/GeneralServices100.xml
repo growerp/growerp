@@ -524,7 +524,7 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <service verb="logout" noun="User" authenticate="anonymous-all">
+    <service verb="logout" noun="User">
         <description>logout of the system</description>
         <actions>
             <service-call out-map="context"

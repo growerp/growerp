@@ -73,7 +73,7 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
       emit(state.copyWith(
           status: LocationStatus.failure,
           locations: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -103,7 +103,7 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
       emit(state.copyWith(
           status: LocationStatus.failure,
           locations: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -123,7 +123,7 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
       emit(state.copyWith(
           status: LocationStatus.failure,
           locations: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 }

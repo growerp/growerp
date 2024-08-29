@@ -68,7 +68,7 @@ class LedgerJournalBloc extends Bloc<LedgerJournalEvent, LedgerJournalState> {
       emit(state.copyWith(
           status: LedgerJournalStatus.failure,
           ledgerJournals: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -103,7 +103,7 @@ class LedgerJournalBloc extends Bloc<LedgerJournalEvent, LedgerJournalState> {
       emit(state.copyWith(
           status: LedgerJournalStatus.failure,
           ledgerJournals: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 }

@@ -81,7 +81,7 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: LedgerStatus.failure, message: getDioError(e)));
+          status: LedgerStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -98,7 +98,7 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: LedgerStatus.failure, message: getDioError(e)));
+          status: LedgerStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -118,7 +118,7 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: LedgerStatus.failure, message: getDioError(e)));
+          status: LedgerStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -135,7 +135,7 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
               "Re-calculation ledger summaries started in the background...."));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: LedgerStatus.failure, message: getDioError(e)));
+          status: LedgerStatus.failure, message: await getDioError(e)));
     }
   }
 }

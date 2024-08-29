@@ -85,7 +85,7 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
       emit(state.copyWith(
           status: CompanyStatus.failure,
           companies: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -129,7 +129,7 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
       emit(state.copyWith(
           status: CompanyStatus.failure,
           companies: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 

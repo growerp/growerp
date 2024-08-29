@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-String getDioError(e) {
+Future<String> getDioError(e) async {
   DioException exception =
       DioException(response: e.response, requestOptions: e.requestOptions);
   late String expression;
@@ -44,5 +46,11 @@ String getDioError(e) {
     returnMessage += "${response['errors']}[${response['errorCode']}]";
   }
   if (returnMessage.isEmpty) returnMessage = "Server Connection error";
+
+  // remove key from db when not valid
+  if (returnMessage == 'Login key not valid ') {
+    var box = await Hive.openBox('growerp');
+    box.delete('apiKey');
+  }
   return returnMessage;
 }

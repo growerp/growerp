@@ -97,7 +97,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(state.copyWith(
           status: AuthStatus.failure,
           authenticate: defaultAuthenticate,
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -126,7 +126,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(state.copyWith(
           status: AuthStatus.failure,
           authenticate: Authenticate(classificationId: classificationId),
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -143,7 +143,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           message: "Logged off"));
       PersistFunctions.persistAuthenticate(state.authenticate!);
     } on DioException catch (e) {
-      emit(state.copyWith(status: AuthStatus.failure, message: getDioError(e)));
+      emit(state.copyWith(
+          status: AuthStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -163,7 +164,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         demoData: event.demoData,
         classificationId: classificationId,
       );
-      if (authenticate.apiKey != null) {
+      if (authenticate.apiKey != null &&
+          !['moreInfo', 'passwordChange'].contains(authenticate.apiKey)) {
+        // apiKey found so save and authenticated
         emit(state.copyWith(
             status: AuthStatus.authenticated,
             authenticate: authenticate,
@@ -176,13 +179,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         var box = await Hive.openBox('growerp');
         box.put('apiKey', authenticate.apiKey);
       } else {
+        // either login in process or failed....
         emit(state.copyWith(
             status: AuthStatus.unAuthenticated,
             authenticate: authenticate,
-            message: 'Login did not work...'));
+            message:
+                ['moreInfo', 'passwordChange'].contains(authenticate.apiKey)
+                    ? 'Login in process...'
+                    : 'Login did not work...'));
       }
     } on DioException catch (e) {
-      emit(state.copyWith(status: AuthStatus.failure, message: getDioError(e)));
+      emit(state.copyWith(
+          status: AuthStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -198,7 +206,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           message: 'An email with password has been '
               'send to ${event.username}'));
     } on DioException catch (e) {
-      emit(state.copyWith(status: AuthStatus.failure, message: getDioError(e)));
+      emit(state.copyWith(
+          status: AuthStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -222,7 +231,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       chat.connect(
           state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
     } on DioException catch (e) {
-      emit(state.copyWith(status: AuthStatus.failure, message: getDioError(e)));
+      emit(state.copyWith(
+          status: AuthStatus.failure, message: await getDioError(e)));
     }
   }
 }

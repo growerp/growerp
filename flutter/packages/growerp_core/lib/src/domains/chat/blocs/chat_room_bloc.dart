@@ -86,7 +86,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
       emit(state.copyWith(
           status: ChatRoomStatus.failure,
           chatRooms: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -158,7 +158,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
       emit(state.copyWith(
           status: ChatRoomStatus.failure,
           chatRooms: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -187,7 +187,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
       emit(state.copyWith(
           status: ChatRoomStatus.failure,
           chatRooms: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -251,7 +251,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
       emit(state.copyWith(
           status: ChatRoomStatus.failure,
           chatRooms: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 */
@@ -281,7 +281,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
       emit(state.copyWith(
           status: ChatRoomStatus.failure,
           chatRooms: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 }

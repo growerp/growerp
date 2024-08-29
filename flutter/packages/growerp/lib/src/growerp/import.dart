@@ -35,7 +35,7 @@ Future<void> login(RestClient client, String username, String password,
         );
       }
     } catch (e) {
-      print("registration failed: ${getDioError(e)}");
+      print("registration failed: ${await getDioError(e)}");
     }
   }
 
@@ -138,6 +138,7 @@ import(String inputFile, String? backendUrl, String username, String password,
       }
     }
   } on DioException catch (e) {
-    logger.e("Importing filetype: ${fileType.name} Error: ${getDioError(e)}");
+    logger.e(
+        "Importing filetype: ${fileType.name} Error: ${await getDioError(e)}");
   }
 }

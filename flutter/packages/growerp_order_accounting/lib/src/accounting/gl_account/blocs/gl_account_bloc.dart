@@ -70,7 +70,7 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
             );
     } catch (e) {
       emit(state.copyWith(
-          status: GlAccountStatus.failure, message: getDioError(e)));
+          status: GlAccountStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -105,7 +105,7 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
       emit(state.copyWith(
           status: GlAccountStatus.failure,
           glAccounts: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -121,7 +121,7 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
           status: GlAccountStatus.success));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: GlAccountStatus.failure, message: getDioError(e)));
+          status: GlAccountStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -139,7 +139,7 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
       emit(state.copyWith(
           status: GlAccountStatus.failure,
           glAccounts: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -172,7 +172,7 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
       emit(state.copyWith(
           status: GlAccountStatus.failure,
           glAccounts: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -192,7 +192,7 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
       emit(state.copyWith(
           status: GlAccountStatus.failure,
           glAccounts: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 }

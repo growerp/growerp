@@ -57,7 +57,7 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: ContentStatus.failure, message: getDioError(e)));
+          status: ContentStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -75,7 +75,7 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
           message: 'Content ${event.content.title} updated'));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: ContentStatus.failure, message: getDioError(e)));
+          status: ContentStatus.failure, message: await getDioError(e)));
     }
   }
 }

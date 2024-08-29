@@ -97,7 +97,7 @@ class CommonTest {
         expect(times++, lessThan(20),
             reason: "Could not find free email address");
       } on DioException catch (e) {
-        debugPrint("error checking email: ${getDioError(e)}");
+        debugPrint("error checking email: ${await getDioError(e)}");
         expect(true, false, reason: "=============backend error =============");
       }
     }

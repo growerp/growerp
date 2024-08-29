@@ -84,7 +84,7 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
       emit(state.copyWith(
           status: OpportunityStatus.failure,
           opportunities: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -120,7 +120,7 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
       emit(state.copyWith(
           status: OpportunityStatus.failure,
           opportunities: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -143,7 +143,7 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
       emit(state.copyWith(
           status: OpportunityStatus.failure,
           opportunities: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 }

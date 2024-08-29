@@ -86,7 +86,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       emit(state.copyWith(
           status: ProductStatus.failure,
           products: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -122,7 +122,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       emit(state.copyWith(
           status: ProductStatus.failure,
           products: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -145,7 +145,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       emit(state.copyWith(
           status: ProductStatus.failure,
           products: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -190,7 +190,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       emit(state.copyWith(
           status: ProductStatus.failure,
           products: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -210,7 +210,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       emit(state.copyWith(
           status: ProductStatus.failure,
           products: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 
@@ -239,7 +239,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       emit(state.copyWith(
           status: ProductStatus.failure,
           products: [],
-          message: getDioError(e)));
+          message: await getDioError(e)));
     }
   }
 }
