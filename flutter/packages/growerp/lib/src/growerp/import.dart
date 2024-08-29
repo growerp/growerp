@@ -22,38 +22,37 @@ Future<void> login(RestClient client, String username, String password) async {
       Map result = await client.checkEmail(email: username);
       if (result['ok'] == false) {
         // no so register new
-        final registerResult = await client.register(
+        await client.register(
           classificationId: 'AppAdmin',
           email: username,
           newPassword: password,
           firstName: 'Hans',
           lastName: 'Jansen',
-/*          currencyId: 'USD',
-          demoData: false,
-          classificationId: 'AppAdmin'*/
         );
-        print(registerResult.toString());
       }
     } catch (e) {
       print("registration failed: ${getDioError(e)}");
     }
 
-    // login for key
-    authenticate = await client.login(
+    // login
+    await client.login(
         username: username, password: password, classificationId: 'AppAdmin');
+    // login again to provide more info and get apikey
+    authenticate = await client.login(
+        username: username,
+        password: password,
+        classificationId: 'AppAdmin',
+        companyName: 'import data',
+        currencyId: 'USD',
+        demoData: false,
+        extraInfo: true);
     // save key
     box.put('apiKey', authenticate.apiKey);
     await box.put('authenticate', jsonEncode(authenticate.toJson()));
-  } else {
-    // get authenticate
-    String? result = box.get('authenticate');
-    if (result != null) {
-      authenticate =
-          Authenticate.fromJson({'authenticate': jsonDecode(result)});
-    }
+
+    logger.i("logged in with admin user: "
+        "${authenticate.user?.email}");
   }
-  logger.i("logged in with admin user: "
-      "${authenticate.user?.email}");
 }
 
 import(String inputFile, String? backendUrl, String username,
