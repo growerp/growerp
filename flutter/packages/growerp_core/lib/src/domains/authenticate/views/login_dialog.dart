@@ -87,9 +87,9 @@ class LoginDialogState extends State<LoginDialog> {
               child: furtherAction == 'moreInfo'
                   ? moreInfoForm(
                       _usernameController.text, authenticate.moquiSessionToken!)
-                  : furtherAction == 'changePassword'
+                  : furtherAction == 'passwordChange'
                       ? changePasswordForm(
-                          _usernameController.text, oldPassword)
+                          _usernameController.text, _passwordController.text)
                       : loginForm()));
 
 /*      if (state.status == AuthStatus.passwordChange) {
@@ -113,7 +113,7 @@ class LoginDialogState extends State<LoginDialog> {
     });
   }
 
-  Widget changePasswordForm(String? username, String? oldPassword) {
+  Widget changePasswordForm(String username, String oldPassword) {
     return Dialog(
         insetPadding: const EdgeInsets.all(10),
         child: popUp(
@@ -193,8 +193,8 @@ class LoginDialogState extends State<LoginDialog> {
                       if (_loginFormKey1.currentState!.validate()) {
                         _authBloc.add(
                           AuthChangePassword(
-                            username!,
-                            oldPassword!,
+                            username,
+                            oldPassword,
                             _password4Controller.text,
                           ),
                         );

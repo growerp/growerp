@@ -132,7 +132,18 @@ class TopApp extends StatelessWidget {
                       ),
                       onGenerateRoute: router,
                       navigatorObservers: [AppNavObserver()],
-                      home: BlocBuilder<AuthBloc, AuthState>(
+                      home: BlocConsumer<AuthBloc, AuthState>(
+                        listener: (context, state) {
+                          switch (state.status) {
+                            case AuthStatus.failure:
+                              HelperFunctions.showMessage(
+                                  context, '${state.message}', Colors.red);
+                              break;
+                            default:
+                              HelperFunctions.showMessage(
+                                  context, state.message, Colors.green);
+                          }
+                        },
                         builder: (context, state) {
                           switch (state.status) {
                             case AuthStatus.initial:
@@ -140,8 +151,6 @@ class TopApp extends StatelessWidget {
                               return Scaffold(
                                   backgroundColor: Colors.transparent,
                                   body: Container());
-                            case AuthStatus.failure:
-                              return FatalErrorForm(message: state.message!);
                             case AuthStatus.changeIp:
                               return const ChangeIpForm();
                             default:

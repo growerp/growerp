@@ -75,19 +75,17 @@ class _SendResetPasswordDialogState extends State<SendResetPasswordDialog> {
                           child: Column(children: [
                             const SizedBox(height: 20),
                             TextFormField(
-                                controller: _usernameController,
-                                autofocus: true,
-                                decoration:
-                                    const InputDecoration(labelText: 'Email:'),
-                                onChanged: (value) {
-                                  username = value;
-                                }),
+                              controller: _usernameController,
+                              autofocus: true,
+                              decoration:
+                                  const InputDecoration(labelText: 'Email:'),
+                            ),
                             const SizedBox(height: 20),
                             OutlinedButton(
                               child: const Text('Ok'),
                               onPressed: () {
-                                _authBloc
-                                    .add(AuthResetPassword(username: username));
+                                _authBloc.add(AuthResetPassword(
+                                    username: _usernameController.text));
                               },
                             ),
                           ])),

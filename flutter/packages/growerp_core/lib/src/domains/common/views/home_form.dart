@@ -74,7 +74,7 @@ class HomeFormState extends State<HomeForm> {
     }, builder: (context, state) {
       switch (state.status) {
         case AuthStatus.authenticated:
-          if (['moreInfo', 'changePassword']
+          if (['moreInfo', 'passwordChange']
               .contains(state.authenticate!.apiKey)) return const LoginDialog();
           return Column(children: [
             Expanded(
