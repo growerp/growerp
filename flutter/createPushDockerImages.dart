@@ -137,7 +137,7 @@ void main() async {
   var gitTag = newVersion.substring(0, newVersion.indexOf('+'));
 
   var commitMessage =
-      "Image(s) created for App(s) ${names.isEmpty ? apps : names} "
+      "Image(s) created for App(s) ${(names.isEmpty ? apps : names).join(',')} "
       "with tag $gitTag";
   if (upgradeVersion.toUpperCase() == 'Y') {
     print("=== save version files in git with message: $commitMessage");
@@ -151,8 +151,7 @@ void main() async {
               workingDirectory: home);
       }
     }
-    // ignore: unnecessary_string_escapes
-    run('git commit -m \"$commitMessage\"', workingDirectory: home);
+    run('git commit -m "$commitMessage"', workingDirectory: home);
     run('git tag $gitTag', workingDirectory: home);
     run('git push', workingDirectory: home);
     run('git push origin $gitTag', workingDirectory: home);
