@@ -12,9 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-// ignore_for_file: depend_on_referenced_packages
 import 'dart:async';
-
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
@@ -76,12 +75,17 @@ Future main() async {
   Company? company;
   if (kIsWeb) {
     String? hostName;
-    //webactivate hostName = web.window.location.hostname;
+    //webactivate  hostName = web.window.location.hostname;
     // ignore: unnecessary_null_comparison
     if (hostName != null) {
-      debugPrint("++++++=hostname: $hostName");
-      company = await restClient.getCompanyFromHost(hostName);
-      if (company.partyId == null) company = null;
+      // ignore: avoid_print
+      print("=====hostname: $hostName");
+      try {
+        company = await restClient.getCompanyFromHost(hostName);
+      } on DioException catch (e) {
+        print("getting hostname error: ${await getDioError(e)}");
+      }
+      if (company?.partyId == null) company = null;
     }
   }
 

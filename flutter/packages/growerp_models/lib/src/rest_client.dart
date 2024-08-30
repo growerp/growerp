@@ -67,6 +67,7 @@ abstract class RestClient {
 
   // company
   @GET("rest/s1/growerp/100/CompanyFromHost")
+  @Extra({'noApiKey': true})
   Future<Company> getCompanyFromHost(
     @Query('hostName') String? hostName,
   );

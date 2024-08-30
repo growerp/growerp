@@ -134,6 +134,7 @@ services:
       - 80
     volumes:
       - ./app_settings.json:/usr/share/nginx/html/assets/assets/cfg/app_settings.json
+      #- ./nginx/html:/usr/share/nginx/html #flutter build web in app dir and copy web dir in nginx.html 
     environment:
       - VIRTUAL_HOST=admin.growerp.local
     networks:

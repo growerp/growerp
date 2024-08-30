@@ -12,7 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-// ignore_for_file: depend_on_referenced_packages
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
@@ -31,7 +31,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'router.dart' as router;
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
-//webactivate import 'package:web/web.dart' as web;
+//webactivate  import 'package:web/web.dart' as web;
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,6 +66,15 @@ Future main() async {
   }
 
   await Hive.initFlutter();
+  var box = await Hive.openBox('growerp');
+  String? apiKey = box.get('apiKey');
+  Authenticate? authenticate = await PersistFunctions.getAuthenticate();
+  await box.clear();
+  box.put('apiKey', apiKey);
+  PersistFunctions.persistAuthenticate(Authenticate(
+      apiKey: apiKey, user: authenticate?.user, classificationId: 'appAdmin'));
+
+  await box.clear();
   Map<String, Widget> screens = orderAccountingScreens;
 
   Bloc.observer = AppBlocObserver();
@@ -76,13 +85,17 @@ Future main() async {
   Company? company;
   if (kIsWeb) {
     String? hostName;
-    //webactivate hostName = web.window.location.hostname;
+    //webactivate  hostName = web.window.location.hostname;
     // ignore: unnecessary_null_comparison
     if (hostName != null) {
       // ignore: avoid_print
       print("=====hostname: $hostName");
-      company = await restClient.getCompanyFromHost(hostName);
-      if (company.partyId == null) company = null;
+      try {
+        company = await restClient.getCompanyFromHost(hostName);
+      } on DioException catch (e) {
+        print("getting hostname error: ${await getDioError(e)}");
+      }
+      if (company?.partyId == null) company = null;
     }
   }
 

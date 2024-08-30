@@ -227,7 +227,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           authenticate: result,
           message:
               'password successfully changed for user: ${event.username}'));
-      PersistFunctions.persistAuthenticate(state.authenticate!);
+      var box = await Hive.openBox('growerp');
+      box.put('apiKey', result.apiKey);
+      PersistFunctions.persistAuthenticate(
+          state.authenticate!.copyWith(apiKey: result.apiKey));
       chat.connect(
           state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
     } on DioException catch (e) {
