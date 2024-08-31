@@ -39,13 +39,13 @@ void main() {
         title: title,
         restClient: restClient,
         blocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
-        clear: false); // use data from previous run, ifnone same as true
+        clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester);
 
     await PaymentTypeTest.selectPaymentType(tester);
-//    await PaymentTypeTest.deleteAllPaymentTypes(tester);
-//    await PaymentTypeTest.addPaymentTypes(tester, paymentTypes.sublist(0, 2));
-//    await CommonTest.gotoMainMenu(tester);
+    await PaymentTypeTest.deleteAllPaymentTypes(tester);
+    await PaymentTypeTest.addPaymentTypes(tester, paymentTypes.sublist(0, 2));
+    await CommonTest.gotoMainMenu(tester);
     await PaymentTypeTest.selectPaymentType(tester);
     await PaymentTypeTest.addPaymentTypes(tester, paymentTypes.sublist(2, 4));
   });

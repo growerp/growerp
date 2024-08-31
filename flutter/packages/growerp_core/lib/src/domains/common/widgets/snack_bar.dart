@@ -34,10 +34,7 @@ SnackBar snackBar(BuildContext context, Color colors, String message,
       key: const Key('dismiss'),
       label: 'Dismiss',
       textColor: Colors.yellow,
-      onPressed: () {
-        // Hide the snackbar before its duration ends
-        ScaffoldMessenger.of(context).removeCurrentSnackBar();
-      },
+      onPressed: () {},
     ),
   );
 }

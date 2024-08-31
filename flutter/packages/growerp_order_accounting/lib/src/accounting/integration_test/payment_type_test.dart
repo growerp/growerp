@@ -67,7 +67,8 @@ class PaymentTypeTest {
               "${paymentType.isPayable ? 'Outgoing' : 'Incoming'} -- "
               "${paymentType.isApplied ? 'Y' : 'N'}");
       await CommonTest.enterDropDownSearch(
-          tester, 'glAccount0', paymentType.accountCode);
+          tester, 'glAccount0', paymentType.accountCode,
+          seconds: CommonTest.waitTime);
       await CommonTest.waitForSnackbarToGo(tester);
     }
   }

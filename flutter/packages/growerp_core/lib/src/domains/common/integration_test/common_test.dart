@@ -333,9 +333,9 @@ class CommonTest {
   static Future<bool> waitForSnackbarToGo(WidgetTester tester) async {
     int times = 0;
     bool found = true;
-//    await tester.pump();
-//    await tapByText(tester, 'dismiss');
-//    await tester.pumpAndSettle();
+    await tester.pump();
+    await tapByText(tester, 'dismiss');
+    await tester.pumpAndSettle();
     while (times++ < 10 && found == true) {
       found = tester.any(find.byType(SnackBar));
       await tester.pump(const Duration(milliseconds: 500));
