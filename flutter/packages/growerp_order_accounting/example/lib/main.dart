@@ -68,6 +68,7 @@ List<MenuOption> menuOptions = [
     child: const MainMenuForm(),
   ),
   MenuOption(
+    key: 'dbOrders',
     image: 'packages/growerp_core/images/orderGrey.png',
     selectedImage: 'packages/growerp_core/images/order.png',
     title: 'Orders',
@@ -89,12 +90,14 @@ List<MenuOption> menuOptions = [
     ],
   ),
   MenuOption(
+      key: 'dbAccounting',
       image: 'packages/growerp_core/images/accountingGrey.png',
       selectedImage: 'packages/growerp_core/images/accounting.png',
       title: 'Accounting',
       route: '/accounting',
       userGroups: [UserGroup.admin]),
   MenuOption(
+    key: 'dbShipments',
     image: 'packages/growerp_core/images/supplierGrey.png',
     selectedImage: 'packages/growerp_core/images/supplier.png',
     title: 'Shipments',
@@ -120,6 +123,7 @@ List<MenuOption> menuOptions = [
     ],
   ),
   MenuOption(
+      key: 'dbInventory',
       image: 'packages/growerp_core/images/supplierGrey.png',
       selectedImage: 'packages/growerp_core/images/supplier.png',
       title: 'Inventory',
@@ -130,6 +134,7 @@ List<MenuOption> menuOptions = [
       ],
       child: const LocationList()),
   MenuOption(
+    key: 'dbRequests',
     image: 'packages/growerp_core/images/accountingGrey.png',
     selectedImage: 'packages/growerp_core/images/accounting.png',
     title: 'Requests',
@@ -165,7 +170,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case '/requests':
       return MaterialPageRoute(
           builder: (context) =>
-              DisplayMenuOption(menuList: menuOptions, menuIndex: 1));
+              DisplayMenuOption(menuList: menuOptions, menuIndex: 5));
     case '/shipments':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
@@ -224,39 +229,55 @@ class MainMenuForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state.status == AuthStatus.authenticated) {
-        Authenticate authenticate = state.authenticate!;
-        return DashBoardForm(dashboardItems: [
-          makeDashboardItem('dbOrders', context, menuOptions[1], [
-            "Sales Orders: ${authenticate.stats?.openSlsOrders ?? 0}",
-            "Customers: ${authenticate.stats?.customers ?? 0}",
-            "Purchase Orders: ${authenticate.stats?.openPurOrders ?? 0}",
-            "Suppliers: ${authenticate.stats?.suppliers ?? 0}",
-          ]),
-          makeDashboardItem('dbAccounting', context, menuOptions[2], [
-            "Sales open invoices: \n"
-                "${authenticate.company!.currency?.currencyId} "
-                "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
-                "(${authenticate.stats?.salesInvoicesNotPaidCount ?? 0})",
-            "Purchase unpaid invoices: \n"
-                "${authenticate.company!.currency?.currencyId} "
-                "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
-                "(${authenticate.stats?.purchInvoicesNotPaidCount ?? 0})",
-          ]),
-          makeDashboardItem('dbShipments', context, menuOptions[3], [
-            "Incoming Shipments: ${authenticate.stats?.incomingShipments ?? 0}",
-            "Outgoing Shipments: ${authenticate.stats?.outgoingShipments ?? 0}",
-          ]),
-          makeDashboardItem('dbInventory', context, menuOptions[4], [
-            "Wh Locations: ${authenticate.stats?.whLocations ?? 0}",
-          ]),
-          makeDashboardItem('dbRequests', context, menuOptions[5], [
-            "Requests: ${authenticate.stats?.requests ?? 0}",
-          ]),
-        ]);
+    Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
+    List<Widget> dashboardItems = [];
+
+    for (final option in menuOptions) {
+      if (option.userGroups!.contains(authenticate.user?.userGroup!)) {
+        switch (option.key) {
+          case 'dbOrders':
+            dashboardItems
+                .add(makeDashboardItem(option.key ?? '', context, option, [
+              "Sales Orders: ${authenticate.stats?.openSlsOrders ?? 0}",
+              "Customers: ${authenticate.stats?.customers ?? 0}",
+              "Purchase Orders: ${authenticate.stats?.openPurOrders ?? 0}",
+              "Suppliers: ${authenticate.stats?.suppliers ?? 0}"
+            ]));
+          case 'dbAccounting':
+            dashboardItems
+                .add(makeDashboardItem(option.key ?? '', context, option, [
+              "Sales open invoices: \n"
+                  "${authenticate.company!.currency?.currencyId} "
+                  "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
+                  "(${authenticate.stats?.salesInvoicesNotPaidCount ?? 0})",
+              "Purchase unpaid invoices: \n"
+                  "${authenticate.company!.currency?.currencyId} "
+                  "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
+                  "(${authenticate.stats?.purchInvoicesNotPaidCount ?? 0})",
+            ]));
+          case 'dbShipments':
+            dashboardItems
+                .add(makeDashboardItem(option.key ?? '', context, option, [
+              "Incoming Shipments: ${authenticate.stats?.incomingShipments ?? 0}",
+              "Outgoing Shipments: ${authenticate.stats?.outgoingShipments ?? 0}"
+            ]));
+          case 'dbInventory':
+            dashboardItems.add(makeDashboardItem(
+                option.key ?? '',
+                context,
+                option,
+                ["Wh Locations: ${authenticate.stats?.whLocations ?? 0}"]));
+          case 'dbRequests':
+            dashboardItems.add(makeDashboardItem(option.key ?? '', context,
+                option, ["Requests: ${authenticate.stats?.requests ?? 0}"]));
+        }
       }
-      return const LoadingIndicator();
-    });
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(child: DashBoardForm(dashboardItems: dashboardItems)),
+      ],
+    );
   }
 }

@@ -83,8 +83,7 @@ class CommonTest {
       {bool demoData = false, Map testData = const {}}) async {
     SaveTest test = await PersistFunctions.getTest();
     int seq = test.sequence + 1;
-    if (test.company != null) return; // company already created
-    await CommonTest.logout(tester);
+    if (test.admin != null) return; // company already created
     // check if email address already exist
     final restClient = RestClient(await buildDioClient(overrideUrl: null));
     var exist = true;
@@ -101,13 +100,20 @@ class CommonTest {
         expect(true, false, reason: "=============backend error =============");
       }
     }
+    // check if logged in, if yes logout first
+    if (find
+        .byKey(const Key('HomeFormAuth'))
+        .toString()
+        .startsWith('Found 1 widgets with key')) {
+      await logout(tester);
+    }
     // create admin
-    await CommonTest.tapByKey(tester, 'newUserButton');
-    await CommonTest.enterText(tester, 'firstName', admin.firstName!);
-    await CommonTest.enterText(tester, 'lastName', admin.lastName!);
+    await tapByKey(tester, 'newUserButton');
+    await enterText(tester, 'firstName', admin.firstName!);
+    await enterText(tester, 'lastName', admin.lastName!);
     var email = admin.email!.replaceFirst('XXX', '$seq');
-    await CommonTest.enterText(tester, 'email', email);
-    await CommonTest.tapByKey(tester, 'newUserButton', seconds: waitTime);
+    await enterText(tester, 'email', email);
+    await tapByKey(tester, 'newUserButton', seconds: waitTime);
     // start with clean saveTest
     await waitForSnackbarToGo(tester);
 
@@ -116,7 +122,7 @@ class CommonTest {
       nowDate: DateTime.now(), // used in rental
       admin: admin.copyWith(email: email, loginName: email),
     ));
-    await CommonTest.login(tester, testData: testData, demoData: demoData);
+    await login(tester, testData: testData, demoData: demoData);
   }
 
   static Future<void> login(WidgetTester tester,
@@ -145,9 +151,9 @@ class CommonTest {
         await enterDropDown(
             tester, 'currency', initialCompany.currency!.description!);
         if (demoData == false) {
-          await CommonTest.tapByKey(tester, 'demoData');
+          await tapByKey(tester, 'demoData');
         } // no demo data
-        await CommonTest.tapByKey(tester, 'continue', seconds: waitTime);
+        await tapByKey(tester, 'continue', seconds: waitTime);
         await waitForSnackbarToGo(tester);
         await PersistFunctions.persistTest(test.copyWith(
             company:
@@ -158,8 +164,8 @@ class CommonTest {
     }
 
     SaveTest test = await PersistFunctions.getTest();
-    String apiKey = CommonTest.getTextField('apiKey');
-    String moquiSessionToken = CommonTest.getTextField('moquiSessionToken');
+    String apiKey = getTextField('apiKey');
+    String moquiSessionToken = getTextField('moquiSessionToken');
     await GlobalConfiguration()
         .add({"apiKey": apiKey, "moquiSessionToken": moquiSessionToken});
     int seq = test.sequence;
@@ -266,8 +272,8 @@ class CommonTest {
   }
 
   static Future<void> selectMainCompany(WidgetTester tester) async {
-    await CommonTest.tapByKey(tester, 'tapCompany');
-    await CommonTest.checkWidgetKey(tester, 'CompanyDialogOrgInternal');
+    await tapByKey(tester, 'tapCompany');
+    await checkWidgetKey(tester, 'CompanyDialogOrgInternal');
   }
 
   static Future<void> doNewSearch(WidgetTester tester,

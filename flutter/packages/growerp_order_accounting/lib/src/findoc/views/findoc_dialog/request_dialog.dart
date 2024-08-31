@@ -98,20 +98,28 @@ class RequestDialogState extends State<RequestDialog> {
     classificationId = context.read<String>();
     _authBloc = context.read<AuthBloc>();
     user = _authBloc.state.authenticate?.user as User;
-    Map jsonDescription =
-        finDoc.description != null ? jsonDecode(finDoc.description!) : {};
-    selectedCare = jsonDescription['care'] ?? !kReleaseMode ? 'resCare' : '';
-    selectedForWhom =
-        jsonDescription['forWhom'] ?? !kReleaseMode ? 'mySelf' : '';
-    selectedTimeframe =
-        jsonDescription['timeFrame'] ?? !kReleaseMode ? 'notSure' : '';
-    selectedHowSoon = jsonDescription['howSoon'] ?? !kReleaseMode ? 'asap' : '';
-    selectedStatus =
-        jsonDescription['status'] ?? !kReleaseMode ? 'notSure' : '';
-    _telephoneController.text =
-        jsonDescription['telephoneNumber'] ?? !kReleaseMode ? '999' : '';
-    _postalController.text =
-        jsonDescription['postalCode'] ?? !kReleaseMode ? '8888' : '';
+    if (finDoc.description != null) {
+      try {
+        Map jsonDescription =
+            finDoc.description != null ? jsonDecode(finDoc.description!) : {};
+        selectedCare =
+            jsonDescription['care'] ?? !kReleaseMode ? 'resCare' : '';
+        selectedForWhom =
+            jsonDescription['forWhom'] ?? !kReleaseMode ? 'mySelf' : '';
+        selectedTimeframe =
+            jsonDescription['timeFrame'] ?? !kReleaseMode ? 'notSure' : '';
+        selectedHowSoon =
+            jsonDescription['howSoon'] ?? !kReleaseMode ? 'asap' : '';
+        selectedStatus =
+            jsonDescription['status'] ?? !kReleaseMode ? 'notSure' : '';
+        _telephoneController.text =
+            jsonDescription['telephoneNumber'] ?? !kReleaseMode ? '999' : '';
+        _postalController.text =
+            jsonDescription['postalCode'] ?? !kReleaseMode ? '8888' : '';
+      } on FormatException catch (_) {
+        _descriptionController.text = finDoc.description ?? '';
+      }
+    }
   }
 
   @override
