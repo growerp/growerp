@@ -66,15 +66,7 @@ Future main() async {
   }
 
   await Hive.initFlutter();
-  var box = await Hive.openBox('growerp');
-  String? apiKey = box.get('apiKey');
-  Authenticate? authenticate = await PersistFunctions.getAuthenticate();
-  await box.clear();
-  box.put('apiKey', apiKey);
-  PersistFunctions.persistAuthenticate(Authenticate(
-      apiKey: apiKey, user: authenticate?.user, classificationId: 'appAdmin'));
 
-  await box.clear();
   Map<String, Widget> screens = orderAccountingScreens;
 
   Bloc.observer = AppBlocObserver();

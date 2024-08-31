@@ -73,7 +73,7 @@ class TopApp extends StatelessWidget {
         child: MultiBlocProvider(
             providers: [
               ...getCoreBlocProviders(
-                  restClient, chatServer, classificationId, screens),
+                  restClient, chatServer, classificationId, screens, company),
               ...extraBlocProviders
             ],
             child:

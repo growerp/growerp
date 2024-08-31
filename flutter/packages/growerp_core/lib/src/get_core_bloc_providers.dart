@@ -5,12 +5,14 @@ import 'package:growerp_models/growerp_models.dart';
 import '../growerp_core.dart';
 
 List<BlocProvider> getCoreBlocProviders(
-    RestClient restClient,
-    ChatServer chatServer,
-    String classificationId,
-    Map<String, Widget> screens) {
-  AuthBloc authBloc = AuthBloc(chatServer, restClient, classificationId);
-
+  RestClient restClient,
+  ChatServer chatServer,
+  String classificationId,
+  Map<String, Widget> screens,
+  Company? company,
+) {
+  AuthBloc authBloc =
+      AuthBloc(chatServer, restClient, classificationId, company);
   List<BlocProvider<StateStreamableSource<Object?>>> blocProviders = [
     BlocProvider<AuthBloc>(create: (context) => authBloc..add(AuthLoad())),
     BlocProvider<ThemeBloc>(

@@ -38,7 +38,7 @@ Future main() async {
     router: generateRoute,
     menuOptions: menuOptions,
     extraBlocProviders:
-        getCoreBlocProviders(restClient, chatServer, 'AppAdmin', {}),
+        getCoreBlocProviders(restClient, chatServer, 'AppAdmin', {}, null),
   ));
 }
 

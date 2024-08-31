@@ -23,7 +23,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'router.dart' as router;
+import '../health/lib/router.dart' as router;
 import 'package:hive_flutter/hive_flutter.dart';
 
 Future main() async {
@@ -40,10 +40,14 @@ Future main() async {
 
 class ChatApp extends StatelessWidget {
   const ChatApp(
-      {super.key, required this.restClient, required this.chatServer});
+      {super.key,
+      required this.restClient,
+      required this.chatServer,
+      this.company});
 
   final RestClient restClient;
   final ChatServer chatServer;
+  final Company? company;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +59,8 @@ class ChatApp extends StatelessWidget {
         providers: [
           BlocProvider<AuthBloc>(
               create: (context) =>
-                  AuthBloc(chatServer, restClient, 'AppAdmin')..add(AuthLoad()),
+                  AuthBloc(chatServer, restClient, 'AppAdmin', company)
+                    ..add(AuthLoad()),
               lazy: false),
           BlocProvider<ChatRoomBloc>(
             create: (context) => ChatRoomBloc(context.read<RestClient>(),

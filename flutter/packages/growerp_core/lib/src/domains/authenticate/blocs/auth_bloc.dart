@@ -32,7 +32,7 @@ part 'auth_state.dart';
 /// keeps the token and apiKey in the [Authenticate] class.
 ///
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc(this.chat, this.restClient, this.classificationId)
+  AuthBloc(this.chat, this.restClient, this.classificationId, this.company)
       : super(const AuthState()) {
     on<AuthLoad>(_onAuthLoad);
     on<AuthRegister>(_onAuthRegister);
@@ -45,6 +45,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final RestClient restClient;
   final ChatServer chat;
   final String classificationId;
+  final Company? company;
 
   Future<void> _onAuthLoad(
     AuthLoad event,
@@ -55,7 +56,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         Authenticate(classificationId: classificationId);
     try {
       // check connection with default company
-      Companies? companies = await restClient.getCompanies(limit: 1);
+      Companies? companies = await restClient.getCompanies(
+          searchString: company?.partyId, limit: 1);
       defaultAuthenticate = Authenticate(
           company:
               companies.companies.isEmpty ? Company() : companies.companies[0],
@@ -93,6 +95,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             authenticate: defaultAuthenticate));
       }
     } on DioException catch (e) {
+      var box = await Hive.openBox('growerp');
+      await box.clear();
       await PersistFunctions.persistAuthenticate(defaultAuthenticate);
       emit(state.copyWith(
           status: AuthStatus.failure,
