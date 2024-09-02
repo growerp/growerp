@@ -1594,10 +1594,11 @@ along with this software (see the LICENSE.md file). If not, see
                             firstName: user.firstName ? user.firstName : oldValue.user.firstName, 
                             lastName: user.lastName ? user.lastName : oldValue.user.lastName]" />
             <!-- update account -->
-            <entity-find-one entity-name="mantle.party.PersonAndUserAccount" value-field="pAccount">
+            <entity-find-one entity-name="mantle.party.PersonAndUserAccount"
+                value-field="userAccount">
                 <field-map field-name="partyId" from="oldValue.user.partyId" />
             </entity-find-one>
-            <if condition="pAccount">
+            <if condition="userAccount">
                 <service-call name="mantle.party.PartyServices.update#PartyUserAccount"
                     in-map="[   partyId: user.partyId, 
                                 emailAddress: user.email ?: oldValue.user.email,
@@ -1623,11 +1624,6 @@ along with this software (see the LICENSE.md file). If not, see
                             in-map="[userId: userAccount.userId,
                                 disabled: user.loginDisabled == true ? 'Y' : 'N']" />
                     </if>
-                    <!-- user security access -->
-                    <service-call name="create#moqui.security.UserGroupMember"
-                        in-map="[userGroupId: user.userGroupId, userId: userAccount.userId]" />
-                    <set field="userPartyId" from="userAccount.partyId" />
-
                 </else-if>
             </if>
             <!-- update role , orgInternal cannot change-->
@@ -1668,102 +1664,22 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
             </if>
             <!-- update security group -->
-            <if condition="user.userGroupId != oldValue.user.userGroupId">
+            <if
+                condition="userAccount?.userId &amp;&amp; user.userGroupId != oldValue.user.userGroupId">
                 <entity-find entity-name="moqui.security.UserGroupMember"
-                    list="userGroupMembers" for-update="true" limit="1">
+                    list="userGroupMembers" limit="1">
                     <econdition field-name="userGroupId" from="oldValue.user.userGroupId" />
                     <econdition field-name="userId" from="oldValue.user.userId" />
                     <date-filter />
                 </entity-find>
-                <!-- finish existing -->
-                <service-call name="update#moqui.security.UserGroupMember"
-                    in-map="userGroupMembers[0] + [thruDate: ec.user.nowTimestamp]" />
+                <if condition="userGroupMembers">
+                    <!-- finish existing -->
+                    <service-call name="update#moqui.security.UserGroupMember"
+                        in-map="userGroupMembers[0] + [thruDate: ec.user.nowTimestamp]" />
+                </if>
                 <!-- create new -->
                 <service-call name="create#moqui.security.UserGroupMember"
-                    in-map="userGroupMembers[0] + [userGroupId: user.userGroupId,
-                                                    fromDate: ec.user.nowTimestamp]" />
-            </if>
-            <!-- check for new login account-->
-            <if condition="user.loginName &amp;&amp; !oldValue.user.loginName">
-                <then>
-                    <if condition="!user.userGroupId">
-                        <return error="true"
-                            message="userGroupId not supplied for login: $user.loginName" />
-                    </if>
-                    <if condition="!user.email">
-                        <return error="true"
-                            message="Login account needs an email address!" />
-                    </if>
-                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[ownerPartyId: relComp.ownerPartyId, seqName: 'party']"
-                        out-map="context" />
-                    <service-call name="create#moqui.security.UserAccount"
-                        in-map="[
-                            partyId: user.partyId, pseudoId: seqNum,
-                            userFullName: user.firstName + ' ' + user.lastName,
-                            emailAddress: user.email, disabled: 'N',
-                            username: user.loginName]"
-                        out-map="userAccount" />
-                    <set field="oldValue.user.userId" from="userAccount.userId" />
-                    <service-call name="create#moqui.security.UserGroupMember"
-                        in-map="[userGroupId: user.userGroupId,
-                                userId: oldValue.user.userId,
-                                fromDate: ec.user.nowTimestamp]" />
-                </then>
-                <else-if condition="oldValue.user.userId">
-                    <!-- update existing user account -->
-                    <if
-                        condition="user.userGroupId &amp;&amp;
-                            user.userGroupId != oldValue.user.userGroupId">
-                        <!-- change of security -->
-                        <if condition="oldValue.user.userGroupId == 'GROWERP_M_ADMIN'">
-                            <!-- check if only a single admin: cannot change -->
-                            <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
-                                list="admins">
-                                <econdition field-name="userGroupId" value="GROWERP_M_ADMIN" />
-                                <econdition field-name="companyPartyId"
-                                    from="relComp.companyPartyId" />
-                                <date-filter from-field-name="ugMemFromDate"
-                                    thru-field-name="ugMemThruDate" />
-                            </entity-find>
-                            <if condition="admins.size() == 1">
-                                <return error="true"
-                                    message="You need at least a single Admin in your company: cannot remove this one!" />
-                            </if>
-                        </if>
-                        <!-- deactivate old security if present -->
-                        <entity-find entity-name="moqui.security.UserGroupMember"
-                            list="groupMembers" for-update="true">
-                            <econdition field-name="userGroupId" from="oldValue.user.userGroupId" />
-                            <econdition field-name="userId" from="oldValue.user.userId" />
-                        </entity-find>
-                        <if condition="groupMembers">
-                            <set field="groupMembers[0].thruDate" from="ec.user.nowTimestamp" />
-                            <entity-update value-field="groupMembers[0]" />
-                        </if>
-                        <service-call name="create#moqui.security.UserGroupMember"
-                            in-map="[userGroupId: user.userGroupId, userId: oldValue.user.userId, fromDate: ec.user.nowTimestamp]" />
-                    </if>
-                    <set field="loginDisabled" value="N" />
-                    <if condition="user.loginDisabled == true">
-                        <set field="loginDisabled" value="Y" />
-                    </if>
-                    <if
-                        condition="user.firstName != oldValue.user.firstName ||
-                            user.lastName != oldValue.user.lastName ||
-                            user.email != oldValue.user.email ||
-                            user.loginName != oldValue.user.loginName ||
-                            loginDisabled != oldValue.user.loginDisabled">
-                        <!-- update user account data -->
-                        <service-call name="update#moqui.security.UserAccount"
-                            in-map="[
-                                userId: user.userId,
-                                userFullName: user.firstName + ' ' + user.lastName,
-                                emailAddress: user.email,
-                                username: user.loginName,
-                                disabled: loginDisabled]" />
-                    </if>
-                </else-if>
+                    in-map="[userGroupId: user.userGroupId, userId: userAccount.userId]" />
             </if>
             <!-- update image -->
             <if condition="user.image">
