@@ -263,7 +263,7 @@ class MyFinDocState extends State<FinDocPage> {
             return const LoadingIndicator();
           case DataFetchStatus.success:
             return Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+              padding: const EdgeInsets.all(5),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -341,7 +341,7 @@ class MyFinDocState extends State<FinDocPage> {
         }
       }),
       Padding(
-        padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+        padding: const EdgeInsets.all(5),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -349,7 +349,8 @@ class MyFinDocState extends State<FinDocPage> {
               width: 145,
               child: DropdownButtonFormField<FinDocStatusVal>(
                 key: const Key('statusDropDown'),
-                decoration: const InputDecoration(labelText: 'Status'),
+                decoration:
+                    InputDecoration(labelText: 'Status', enabled: !readOnly),
                 value: _updatedStatus,
                 validator: (value) => value == null ? 'field required' : null,
                 items: FinDocStatusVal.validStatusList(_updatedStatus)
@@ -374,8 +375,9 @@ class MyFinDocState extends State<FinDocPage> {
               child: TextFormField(
                 key: const Key('description'),
                 readOnly: readOnly,
-                decoration:
-                    InputDecoration(labelText: '${finDoc.docType} Description'),
+                decoration: InputDecoration(
+                    labelText: '${finDoc.docType} Description',
+                    enabled: !readOnly),
                 controller: _descriptionController,
               ),
             ),

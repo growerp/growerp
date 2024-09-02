@@ -130,7 +130,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 child: popUp(
                     context: context,
-                    height: 700,
+                    height: 800,
                     width: 600,
                     title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
                         "Payment #${finDoc.pseudoId ?? 'New'}",
@@ -257,167 +257,182 @@ class PaymentDialogState extends State<PaymentDialog> {
                       })),
                 ],
               ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<FinDocStatusVal>(
-                      key: const Key('statusDropDown'),
-                      decoration: const InputDecoration(labelText: 'Status'),
-                      value: _updatedStatus,
-                      validator: (value) =>
-                          value == null ? 'field required' : null,
-                      items: FinDocStatusVal.validStatusList(
-                              finDoc.status ?? FinDocStatusVal.created)
-                          .map((label) => DropdownMenuItem<FinDocStatusVal>(
-                                value: label,
-                                child: Text(label.name),
-                              ))
-                          .toList(),
-                      onChanged: readOnly
-                          ? null
-                          : (FinDocStatusVal? newValue) {
-                              _updatedStatus = newValue!;
-                            },
-                      isExpanded: true,
-                    ),
-                  ),
-                  Expanded(
-                    child: TextFormField(
-                        enabled: !readOnly,
-                        key: const Key('amount'),
-                        decoration: InputDecoration(
-                            labelText: 'Amount($currencySymbol)'),
-                        controller: _amountController,
-                        keyboardType: TextInputType.number,
-                        validator: (value) =>
-                            value!.isEmpty ? "Enter Price or Amount?" : null),
-                  ),
-                ],
-              ),
-              widget.finDoc.id() == null
-                  ? const SizedBox(height: 20)
-                  : RelatedFinDocs(finDoc: widget.finDoc, context: context),
-              InputDecorator(
-                decoration: InputDecoration(
-                  labelText: 'PaymentMethods',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                ),
-                child: Column(
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    if ((finDoc.sales == true &&
-                            _selectedCompany?.paymentMethod?.ccDescription !=
-                                null) ||
-                        (finDoc.sales == false &&
-                            _authBloc.state.authenticate?.company?.paymentMethod
-                                    ?.ccDescription !=
-                                null))
+                    Expanded(
+                      child: DropdownButtonFormField<FinDocStatusVal>(
+                        key: const Key('statusDropDown'),
+                        decoration: InputDecoration(
+                            labelText: 'Status', enabled: !readOnly),
+                        value: _updatedStatus,
+                        validator: (value) =>
+                            value == null ? 'field required' : null,
+                        items: FinDocStatusVal.validStatusList(
+                                finDoc.status ?? FinDocStatusVal.created)
+                            .map((label) => DropdownMenuItem<FinDocStatusVal>(
+                                  value: label,
+                                  child: Text(label.name),
+                                ))
+                            .toList(),
+                        onChanged: readOnly
+                            ? null
+                            : (FinDocStatusVal? newValue) {
+                                _updatedStatus = newValue!;
+                              },
+                        isExpanded: true,
+                      ),
+                    ),
+                    Expanded(
+                      child: TextFormField(
+                          enabled: !readOnly,
+                          key: const Key('amount'),
+                          decoration: InputDecoration(
+                              labelText: 'Amount($currencySymbol)'),
+                          controller: _amountController,
+                          keyboardType: TextInputType.number,
+                          validator: (value) =>
+                              value!.isEmpty ? "Enter Price or Amount?" : null),
+                    ),
+                  ],
+                ),
+              ),
+              if (widget.finDoc.id() != null)
+                RelatedFinDocs(finDoc: widget.finDoc, context: context),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: 'PaymentMethods',
+                    enabled: !readOnly,
+                  ),
+                  child: Column(
+                    children: [
+                      if ((finDoc.sales == true &&
+                              _selectedCompany?.paymentMethod?.ccDescription !=
+                                  null) ||
+                          (finDoc.sales == false &&
+                              _authBloc.state.authenticate?.company
+                                      ?.paymentMethod?.ccDescription !=
+                                  null))
+                        Row(children: [
+                          Checkbox(
+                              key: const Key('creditCard'),
+                              checkColor: Colors.white,
+                              fillColor:
+                                  WidgetStateProperty.resolveWith(getColor),
+                              value: _paymentInstrument ==
+                                  PaymentInstrument.creditcard,
+                              onChanged: (bool? value) {
+                                !readOnly
+                                    ? setState(() {
+                                        if (value == true) {
+                                          _paymentInstrument =
+                                              PaymentInstrument.creditcard;
+                                        }
+                                      })
+                                    : null;
+                              }),
+                          Expanded(
+                              child: Text(
+                                  "Credit Card ${finDoc.sales == false ? _authBloc.state.authenticate?.company?.paymentMethod?.ccDescription : _selectedCompany?.paymentMethod?.ccDescription}")),
+                        ]),
                       Row(children: [
                         Checkbox(
-                            key: const Key('creditCard'),
+                            key: const Key('cash'),
                             checkColor: Colors.white,
                             fillColor:
                                 WidgetStateProperty.resolveWith(getColor),
-                            value: _paymentInstrument ==
-                                PaymentInstrument.creditcard,
+                            value: _paymentInstrument == PaymentInstrument.cash,
                             onChanged: (bool? value) {
                               !readOnly
                                   ? setState(() {
                                       if (value == true) {
                                         _paymentInstrument =
-                                            PaymentInstrument.creditcard;
+                                            PaymentInstrument.cash;
                                       }
                                     })
                                   : null;
                             }),
-                        Expanded(
-                            child: Text(
-                                "Credit Card ${finDoc.sales == false ? _authBloc.state.authenticate?.company?.paymentMethod?.ccDescription : _selectedCompany?.paymentMethod?.ccDescription}")),
+                        const Text(
+                          "Cash",
+                        ),
                       ]),
-                    Row(children: [
-                      Checkbox(
-                          key: const Key('cash'),
-                          checkColor: Colors.white,
-                          fillColor: WidgetStateProperty.resolveWith(getColor),
-                          value: _paymentInstrument == PaymentInstrument.cash,
-                          onChanged: (bool? value) {
-                            !readOnly
-                                ? setState(() {
-                                    if (value == true) {
-                                      _paymentInstrument =
-                                          PaymentInstrument.cash;
-                                    }
-                                  })
-                                : null;
-                          }),
-                      const Text(
-                        "Cash",
-                      ),
-                    ]),
-                    Row(children: [
-                      Checkbox(
-                          key: const Key('check'),
-                          checkColor: Colors.white,
-                          fillColor: WidgetStateProperty.resolveWith(getColor),
-                          value: _paymentInstrument == PaymentInstrument.check,
-                          onChanged: (bool? value) {
-                            !readOnly
-                                ? setState(() {
-                                    if (value == true) {
-                                      _paymentInstrument =
-                                          PaymentInstrument.check;
-                                    }
-                                  })
-                                : null;
-                          }),
-                      const Text(
-                        "Check",
-                      ),
-                    ]),
-                    Row(children: [
-                      Checkbox(
-                          key: const Key('bank'),
-                          checkColor: Colors.white,
-                          fillColor: WidgetStateProperty.resolveWith(getColor),
-                          value: _paymentInstrument == PaymentInstrument.bank,
-                          onChanged: (bool? value) {
-                            !readOnly
-                                ? setState(() {
-                                    if (value == true) {
-                                      _paymentInstrument =
-                                          PaymentInstrument.bank;
-                                    }
-                                  })
-                                : null;
-                          }),
-                      Text(
-                        "Bank ${finDoc.otherCompany?.paymentMethod?.creditCardNumber ?? ''}",
-                      ),
-                    ]),
-                  ],
+                      Row(children: [
+                        Checkbox(
+                            key: const Key('check'),
+                            checkColor: Colors.white,
+                            fillColor:
+                                WidgetStateProperty.resolveWith(getColor),
+                            value:
+                                _paymentInstrument == PaymentInstrument.check,
+                            onChanged: (bool? value) {
+                              !readOnly
+                                  ? setState(() {
+                                      if (value == true) {
+                                        _paymentInstrument =
+                                            PaymentInstrument.check;
+                                      }
+                                    })
+                                  : null;
+                            }),
+                        const Text(
+                          "Check",
+                        ),
+                      ]),
+                      Row(children: [
+                        Checkbox(
+                            key: const Key('bank'),
+                            checkColor: Colors.white,
+                            fillColor:
+                                WidgetStateProperty.resolveWith(getColor),
+                            value: _paymentInstrument == PaymentInstrument.bank,
+                            onChanged: (bool? value) {
+                              !readOnly
+                                  ? setState(() {
+                                      if (value == true) {
+                                        _paymentInstrument =
+                                            PaymentInstrument.bank;
+                                      }
+                                    })
+                                  : null;
+                            }),
+                        Text(
+                          "Bank ${finDoc.otherCompany?.paymentMethod?.creditCardNumber ?? ''}",
+                        ),
+                      ]),
+                    ],
+                  ),
                 ),
               ),
-              IgnorePointer(
-                ignoring: readOnly,
-                child: DropdownButtonFormField<PaymentType>(
-                  key: const Key('paymentType'),
-                  value: _selectedPaymentType,
-                  validator: (value) =>
-                      value == null && _selectedGlAccount == null
-                          ? 'Enter a item type for posting?'
-                          : null,
-                  items: state.paymentTypes.map((item) {
-                    return DropdownMenuItem<PaymentType>(
-                        value: item,
-                        child: Text(
-                            '${item.paymentTypeName}\n ${item.accountCode} ${item.accountName}',
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 2));
-                  }).toList(),
-                  onChanged: (newValue) => _selectedPaymentType = newValue,
-                  isExpanded: true,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                child: IgnorePointer(
+                  ignoring: readOnly,
+                  child: DropdownButtonFormField<PaymentType>(
+                    decoration: InputDecoration(
+                      labelText: 'Payment Type',
+                      enabled: !readOnly,
+                    ),
+                    key: const Key('paymentType'),
+                    value: _selectedPaymentType,
+                    validator: (value) =>
+                        value == null && _selectedGlAccount == null
+                            ? 'Enter a item type for posting?'
+                            : null,
+                    items: state.paymentTypes.map((item) {
+                      return DropdownMenuItem<PaymentType>(
+                          value: item,
+                          child: Text(
+                              '${item.paymentTypeName}\n ${item.accountCode} ${item.accountName}',
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2));
+                    }).toList(),
+                    onChanged: (newValue) => _selectedPaymentType = newValue,
+                    isExpanded: true,
+                  ),
                 ),
               ),
               BlocBuilder<GlAccountBloc, GlAccountState>(

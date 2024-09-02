@@ -150,7 +150,6 @@ along with this software (see the LICENSE.md file). If not, see
                     out-map="context" />
                 <set field="location.pseudoId" from="seqNum" />
             </if>
-            <log message="====create location: $location" />
             <service-call name="create#mantle.facility.FacilityLocation"
                 in-map="[facilityId: facilities[0].facilityId,
                     locationSeqId: location.locationId,

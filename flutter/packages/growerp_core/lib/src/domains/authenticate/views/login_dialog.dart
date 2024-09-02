@@ -54,6 +54,7 @@ class LoginDialogState extends State<LoginDialog> {
     _demoData = kReleaseMode ? false : true;
     if (!kReleaseMode) {
       _passwordController.text = 'qqqqqq9!';
+      _companyController.text = 'Main Company';
     }
   }
 
