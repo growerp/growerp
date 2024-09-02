@@ -336,7 +336,7 @@ class CommonTest {
     int times = 0;
     bool found = true;
     await tester.pump();
-    await tapByText(tester, 'dismiss');
+    if (hasKey('dismiss')) await tapByText(tester, 'dismiss');
     await tester.pumpAndSettle();
     while (times++ < 10 && found == true) {
       found = tester.any(find.byType(SnackBar));
