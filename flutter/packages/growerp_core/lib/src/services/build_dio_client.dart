@@ -48,7 +48,7 @@ Future<Dio> buildDioClient(
 
   var box = await Hive.openBox('growerp');
   dio.interceptors.add(KeyInterceptor(box));
-
+  // https://pub.dev/packages/dio_cache_interceptor
   dio.interceptors.add(PrettyDioLogger(
       requestHeader: true,
       requestBody: true,

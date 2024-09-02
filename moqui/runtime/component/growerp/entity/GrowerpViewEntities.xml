@@ -346,6 +346,10 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="orderId" />
             <key-map field-name="orderItemSeqId" />
         </member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product"
+            join-from-alias="SIS" join-optional="true">
+            <key-map field-name="productId" />
+        </member-entity>
         <!-- asset receipt and warehouse-->
         <member-entity entity-alias="ASR" entity-name="mantle.product.receipt.AssetReceipt"
             join-from-alias="SITEM" join-optional="true">
@@ -431,6 +435,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="orderItemSeqId" entity-alias="SIS" />
         <alias name="invoiceId" entity-alias="SIS" />
         <alias name="productId" entity-alias="SITEM" />
+        <alias name="productPseudoId" field="pseudoId" entity-alias="PROD" />
         <alias name="quantity" entity-alias="SITEM" />
         <alias name="receivedDate" field="receivedDate" entity-alias="ASR" />
         <alias name="itemDescription" entity-alias="ORDERITEM" />
@@ -490,6 +495,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <alias name="assetId" entity-alias="AST" />
         <alias name="assetName" entity-alias="AST" />
+        <alias name="assetPseudoId" entity-alias="AST" />
         <alias name="assetClassId" field="classEnumId" entity-alias="AST" />
         <alias name="statusId" entity-alias="AST" />
         <alias name="receivedDate" entity-alias="AST" />

@@ -998,10 +998,10 @@ along with this software (see the LICENSE.md file). If not, see
                         entity-name="growerp.warehouse.ShipmentAndPartiesAndWarehouse">
                         <econdition field-name="shipmentId" from="finDocId" ignore-if-empty="true" />
                         <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
-                        <econditions combine="or">
-                            <econdition field-name="fromPartyId" from="companyPartyId" />
-                            <econdition field-name="toPartyId" from="companyPartyId" />
-                        </econditions>
+                        <econdition field-name="vendorPartyId" from="vendorPartyId"
+                            ignore-if-empty="true" />
+                        <econdition field-name="customerPartyId" from="customerPartyId"
+                            ignore-if-empty="true" />
                     </entity-find>
                     <else>
                         <if condition="open == true &amp;&amp; !finDocId &amp;&amp; !search">
@@ -1010,10 +1010,10 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                         <entity-find offset="start" limit="limit" list="items"
                             entity-name="growerp.warehouse.ShipmentAndPartiesAndWarehouse">
-                            <econditions combine="or">
-                                <econdition field-name="fromPartyId" from="companyPartyId" />
-                                <econdition field-name="toPartyId" from="companyPartyId" />
-                            </econditions>
+                            <econdition field-name="vendorPartyId" from="vendorPartyId"
+                                ignore-if-empty="true" />
+                            <econdition field-name="customerPartyId" from="customerPartyId"
+                                ignore-if-empty="true" />
                             <econditions combine="or">
                                 <econdition field-name="statusId" operator="in"
                                     from="status" ignore-if-empty="true" />
@@ -1121,7 +1121,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="finDocItem"
                         from="[
                         itemSeqId: item.orderItemSeqId,
-                        product: [productId: item.productId],
+                        product: [productId: item.productId,pseudoId: item.productPseudoId],
                         quantity: item.quantity ? item.quantity.toString() : null,
                         description: item.itemDescription,
                         asset: asset
@@ -2993,19 +2993,22 @@ along with this software (see the LICENSE.md file). If not, see
                     from="sid.quantity - (sid.quantityAcceptedTotal ?: 0) - (sid.quantityRejectedTotal ?: 0)" />
                 <set field="finDocItem"
                     from="finDoc.items.find {element -> element.product.productId == sid.productId}" />
-                <if condition="!finDocItem.asset.location.locationId"><!-- if empty create new
-                    location -->
-                    <service-call name="create#mantle.facility.FacilityLocation"
-                        in-map="[description: finDocItem.asset.location.locationName ?: '${sid.pseudoId}(${nowDate})',
-                                facilityId: facilityId]"
+                <if condition="!finDocItem.asset.location.locationId">
+                    <!-- if empty create new location -->
+                    <service-call name="growerp.100.InventoryServices100.create#Location"
+                        in-map="[locationName: finDocItem.asset.location.locationName ?: '${sid.pseudoId}(${nowDate})']"
                         out-map="context" />
-                    <set field="finDocItem.asset.location.locationId" from="locationSeqId" />
+                    <set field="finDocItem.asset.location.locationId" from="location.locationId" />
                 </if>
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'asset']"
+                    out-map="context" />
                 <service-call name="mantle.shipment.ShipmentServices.receive#ShipmentProduct"
                     in-map="[shipmentId:finDoc.shipmentId, productId:sid.productId, statusId:'AstAvailable',
                             quantityAccepted:quantityRemaining, facilityId: facilityId,
-                            ownerPartyId: companyPartyId,
-                            locationSeqId: finDocItem.asset.location.locationId]" />
+                            ownerPartyId: companyPartyId, assetPseudoId: seqNum,
+                            locationSeqId: finDocItem.asset.location.locationId]"
+                    out-map="context" />
             </iterate>
             <service-call out-map="context" in-map="[shipmentId:finDoc.shipmentId]"
                 name="mantle.shipment.ShipmentServices.deliver#Shipment" />

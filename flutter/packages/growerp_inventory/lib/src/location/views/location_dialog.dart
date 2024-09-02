@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -32,6 +33,8 @@ class LocationDialogState extends State<LocationDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _pseudoIdController = TextEditingController();
+  final TextEditingController _qohController = TextEditingController();
+  Decimal qohTotal = Decimal.zero;
 
   @override
   void initState() {
@@ -39,6 +42,10 @@ class LocationDialogState extends State<LocationDialog> {
     location = widget.location;
     _nameController.text = location.locationName ?? '';
     _pseudoIdController.text = location.pseudoId ?? '';
+    for (Asset asset in location.assets) {
+      qohTotal += asset.quantityOnHand ?? Decimal.zero;
+    }
+    _qohController.text = qohTotal.toString();
   }
 
   @override
@@ -101,7 +108,15 @@ class LocationDialogState extends State<LocationDialog> {
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
+              TextFormField(
+                readOnly: true, // total of assets can not be updated here
+                controller: _qohController,
+                key: const Key('qoh'),
+                decoration:
+                    const InputDecoration(labelText: 'Quantity on Hand'),
+              ),
+              const SizedBox(height: 10),
               OutlinedButton(
                   key: const Key('update'),
                   child:

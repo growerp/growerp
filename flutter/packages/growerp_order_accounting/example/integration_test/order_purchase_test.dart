@@ -56,7 +56,7 @@ void main() {
 
     await OrderTest.selectPurchaseOrders(tester);
     await OrderTest.addOrders(tester, purchaseOrders.sublist(0, 1));
-    await OrderTest.updateOrders(tester, purchaseOrders.sublist(1, 2));
+    await OrderTest.updateOrders(tester, purchaseOrders.sublist(4, 5));
     await OrderTest.deleteLastOrder(tester);
     await OrderTest.approveOrders(tester);
     await PaymentTest.selectPurchasePayments(tester);
@@ -74,5 +74,6 @@ void main() {
     await OrderTest.checkOrdersComplete(tester);
     await TransactionTest.selectTransactions(tester);
     await TransactionTest.checkTransactionsComplete(tester);
+    await CommonTest.gotoMainMenu(tester);
   });
 }

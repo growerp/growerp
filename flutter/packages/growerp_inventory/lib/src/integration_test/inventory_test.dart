@@ -118,14 +118,8 @@ class InventoryTest {
         } else {
           newQoh = asset.quantityOnHand! - item.quantity!;
         }
-        expect(newQoh, Decimal.parse(CommonTest.getTextField('qoh0')),
-            reason: 'new inventory quantity wrong: '
-                ' orderid: ${order.pseudoId} '
-                ' product name: ${item.description} '
-                'asset quantity: ${asset.quantityOnHand.toString()} '
-                'order quantity: ${item.quantity.toString()}'
-                'actual total quantity: ${CommonTest.getTextField('qoh0')} '
-                'location: ${item.asset?.location?.locationName}');
+        expect(newQoh, Decimal.parse(CommonTest.getTextFormField('qoh')));
+        await CommonTest.tapByKey(tester, 'cancel');
       }
     }
   }

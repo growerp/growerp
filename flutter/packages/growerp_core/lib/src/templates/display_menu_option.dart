@@ -111,7 +111,7 @@ class MenuOptionState extends State<DisplayMenuOption>
         floatingActionButtonList[i] = FloatingActionButton(
             key: const Key("addNew"),
             onPressed: () async {
-              await Navigator.pushNamed(
+              await Navigator.pushReplacementNamed(
                   context, tabItems[tabIndex].floatButtonRoute!,
                   arguments: tabItems[tabIndex].floatButtonArgs);
             },

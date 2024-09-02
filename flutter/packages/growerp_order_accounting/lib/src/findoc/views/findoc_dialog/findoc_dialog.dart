@@ -191,7 +191,6 @@ class MyFinDocState extends State<FinDocPage> {
             // related documents
             RelatedFinDocs(finDoc: finDocUpdated, context: context),
             // update buttons
-            const SizedBox(height: 10),
             if (!readOnly) updateButtons(state),
             const SizedBox(height: 10),
             widget.finDoc.docType == FinDocType.transaction
@@ -683,7 +682,7 @@ class MyFinDocState extends State<FinDocPage> {
       if (!isPhone) {
         rowContent.add(TableRowContent(
             width: 10,
-            name: 'Qty',
+            name: const Text('Qty', textAlign: TextAlign.right),
             value: Text("${item.quantity}",
                 textAlign: TextAlign.right, key: Key('itemQuantity$index'))));
       }
@@ -830,7 +829,7 @@ class MyFinDocState extends State<FinDocPage> {
               },
             )));
       }
-      return TableData(rowHeight: isPhone ? 30 : 20, rowContent: rowContent);
+      return TableData(rowHeight: isPhone ? 35 : 20, rowContent: rowContent);
     }
 
     var padding = const SpanPadding(trailing: 8, leading: 8);

@@ -18,7 +18,7 @@ import 'package:growerp_models/growerp_models.dart';
 Company initialCompany = Company(
   name: "Main Company",
   role: Role.company,
-  currency: currencies[2],
+  currency: currencies[1],
   email: "testXXX@example.com",
 );
 
@@ -602,6 +602,30 @@ List<FinDoc> purchaseOrders = [
             description: products[3].productName,
             quantity: Decimal.parse('80'),
             price: Decimal.parse('47.21')),
+      ]),
+  FinDoc(
+      sales: false,
+      docType: FinDocType.order,
+      description: 'The fifth order',
+      otherCompany: supplierCompanies[1],
+      grandTotal: Decimal.parse('50.00'),
+      items: [
+        FinDocItem(
+            description: products[1].productName,
+            quantity: Decimal.parse('5'),
+            price: Decimal.parse('10.00')),
+      ]),
+  FinDoc(
+      sales: false,
+      docType: FinDocType.order,
+      description: 'The sixth order',
+      otherCompany: supplierCompanies[0],
+      grandTotal: Decimal.parse('30.00'),
+      items: [
+        FinDocItem(
+            description: products[0].productName,
+            quantity: Decimal.parse('10'),
+            price: Decimal.parse('3.00'))
       ]),
 ];
 List<FinDoc> purchaseInvoices = [

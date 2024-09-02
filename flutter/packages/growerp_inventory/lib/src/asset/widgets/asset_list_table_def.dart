@@ -76,7 +76,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
     rowContent.add(TableRowContent(
         name: const Text('Loc Id'),
         width: 10,
-        value: Text(item.acquireCost.currency(currencyId: currencyId))));
+        value: Text(item.location?.locationId ?? '')));
   }
   rowContent.add(TableRowContent(
       name: const Text('Act'),

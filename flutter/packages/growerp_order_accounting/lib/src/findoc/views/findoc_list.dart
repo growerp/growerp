@@ -274,12 +274,11 @@ class FinDocListState extends State<FinDocList> {
                       FloatingActionButton(
                           key: const Key("addNew"),
                           heroTag: "btn2",
-                          onPressed: () async {
-                            await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return BlocProvider.value(
+                          onPressed: () async => showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  BlocProvider.value(
                                       value: _finDocBloc,
                                       child: widget.docType ==
                                               FinDocType.payment
@@ -294,9 +293,7 @@ class FinDocListState extends State<FinDocList> {
                                                       docType: widget.docType))
                                               : FinDocDialog(FinDoc(
                                                   sales: widget.sales,
-                                                  docType: widget.docType)));
-                                });
-                          },
+                                                  docType: widget.docType)))),
                           tooltip: 'Add New',
                           child: const Icon(Icons.add)),
                   ],

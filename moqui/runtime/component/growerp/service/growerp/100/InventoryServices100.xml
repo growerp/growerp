@@ -34,6 +34,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="assets" type="List">
                         <parameter name="asset" type="Map">
                             <parameter name="assetId" />
+                            <parameter name="pseudoId" />
                             <parameter name="statusId" />
                             <parameter name="assetName" />
                             <parameter name="product">
@@ -103,9 +104,10 @@ along with this software (see the LICENSE.md file). If not, see
                             pseudoId: loc.productPseudoId, productName: loc.productName]" />
                 <if condition="loc.assetId">
                     <set field="asset"
-                        from="[assetId: loc.assetId, statusId: loc.statusId,
+                        from="[assetId: loc.assetId, pseudoId: loc.assetPseudoId,
+                            statusId: loc.statusId,
                             assetName: loc.assetName, product: product,
-                            acquireCost: loc.acquireCost.toString(),
+                            acquireCost: loc.acquireCost?.toString(),
                             quantityOnHand: loc.quantityOnHand?.toString(),
                             availableToPromise: loc.availableToPromise?.toString(),
                             acquireShipmentId: loc.acquireShipmentId]" />
@@ -144,7 +146,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <if condition="!location.pseudoId || location.pseudoId == ''">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[ownerPartyId: ownerPartyId, seqName: 'facilityLocation${facilities[0].facilityId}']"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'location']"
                     out-map="context" />
                 <set field="location.pseudoId" from="seqNum" />
             </if>
@@ -361,6 +363,9 @@ along with this software (see the LICENSE.md file). If not, see
                         assetName: item.assetName,
                         receivedDate: item.receivedDate,
                         product: [productId: item.productName, productId: item.productId],
+                        location: [locationId: item.locationId,
+                                    pseudoId: item.locationPseudoId,
+                                    locationName: item.locationName],
                         ])
                     </script>
                     <continue />

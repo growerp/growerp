@@ -101,12 +101,7 @@ class CommonTest {
       }
     }
     // check if logged in, if yes logout first
-    if (find
-        .byKey(const Key('HomeFormAuth'))
-        .toString()
-        .startsWith('Found 1 widgets with key')) {
-      await logout(tester);
-    }
+    await logout(tester);
     // create admin
     await tapByKey(tester, 'newUserButton');
     await enterText(tester, 'firstName', admin.firstName!);
@@ -319,6 +314,7 @@ class CommonTest {
       await tapByKey(tester, 'logoutButton');
       await tester.pump(const Duration(seconds: waitTime));
       expect(find.byKey(const Key('HomeFormUnAuth')), findsOneWidget);
+      await waitForSnackbarToGo(tester);
     }
   }
 
