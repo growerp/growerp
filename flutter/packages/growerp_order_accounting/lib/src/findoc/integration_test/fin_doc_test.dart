@@ -143,32 +143,38 @@ class FinDocTest {
   }
 
   /// check the entered data of a finDoc, company and products
-  static Future<void> checkFinDocDetail(
-      WidgetTester tester, FinDocType docType) async {
+  static Future<void> checkFinDocDetail(WidgetTester tester, FinDocType docType,
+      {bool rental = false}) async {
     List<FinDoc> finDocs = await FinDocTest.getFinDocs(docType);
     for (final finDoc in finDocs) {
       await CommonTest.doNewSearch(tester, searchString: finDoc.pseudoId!);
       expect(
-          finDoc.pseudoId, CommonTest.getTextField('topHeader').split('#')[1]);
+          CommonTest.getTextField('topHeader').split('#')[1], finDoc.pseudoId);
       await CommonTest.checkWidgetKey(tester,
           "FinDocDialog${finDoc.sales ? 'Sales' : 'Purchase'}${finDoc.docType!.toString()}");
       // check supplier/customer
-      expect(finDoc.otherCompany!.name!,
-          CommonTest.getDropdownSearch(finDoc.sales ? 'customer' : 'supplier'));
+      expect(
+          CommonTest.getDropdownSearch(finDoc.sales ? 'customer' : 'supplier'),
+          finDoc.otherCompany!.name!);
       if (finDoc.docType == FinDocType.order ||
           finDoc.docType == FinDocType.invoice) {
-        expect(finDoc.description!, CommonTest.getTextFormField('description'));
+        expect(CommonTest.getTextFormField('description'), finDoc.description!);
       }
       for (final (index, item) in finDoc.items.indexed) {
-        expect(item.product?.pseudoId ?? '',
-            CommonTest.getTextField('itemProductId$index'));
-        expect(item.description!,
-            CommonTest.getTextField('itemDescription$index'));
-        expect(
-            item.price.currency(), CommonTest.getTextField('itemPrice$index'));
+        expect(CommonTest.getTextField('itemProductId$index'),
+            item.product?.pseudoId ?? '');
+        expect(CommonTest.getTextField('itemDescription$index'),
+            item.description!);
+        if (rental) {
+          expect(CommonTest.getTextField('fromDate$index'),
+              contains(item.rentalFromDate?.dateOnly()));
+        } else {
+          expect(CommonTest.getTextField('itemPrice$index'),
+              item.price.currency());
+        }
         if (!CommonTest.isPhone()) {
-          expect(item.quantity.toString(),
-              CommonTest.getTextField('itemQuantity$index'));
+          expect(CommonTest.getTextField('itemQuantity$index'),
+              item.quantity.toString());
         }
       }
       await CommonTest.tapByKey(tester, 'cancel'); // cancel dialog
@@ -202,8 +208,10 @@ class FinDocTest {
       await CommonTest.doNewSearch(tester,
           searchString: id ?? finDoc.pseudoId!);
       // open detail
-      expect(FinDocStatusVal.completed.name,
-          CommonTest.getDropdown('statusDropDown'));
+      expect(
+        CommonTest.getDropdown('statusDropDown'),
+        FinDocStatusVal.completed.name,
+      );
 
       // get transaction id's
       if (type == FinDocType.invoice || subType == FinDocType.invoice) {
@@ -341,20 +349,26 @@ class FinDocTest {
               shipmentId: shipmentId));
         }
         if ((type == FinDocType.order && subType == FinDocType.payment)) {
-          expect(finDoc.pseudoId,
-              await CommonTest.getRelatedFindoc(tester, FinDocType.order));
-          expect(finDoc.invoiceId,
-              await CommonTest.getRelatedFindoc(tester, FinDocType.invoice));
+          expect(await CommonTest.getRelatedFindoc(tester, FinDocType.order),
+              finDoc.pseudoId);
+          expect(
+            await CommonTest.getRelatedFindoc(tester, FinDocType.invoice),
+            finDoc.invoiceId,
+          );
         }
         if ((type == FinDocType.order && subType == FinDocType.invoice)) {
-          expect(finDoc.pseudoId,
-              await CommonTest.getRelatedFindoc(tester, FinDocType.order));
+          expect(
+            await CommonTest.getRelatedFindoc(tester, FinDocType.order),
+            finDoc.pseudoId,
+          );
           expect(finDoc.paymentId,
               await CommonTest.getRelatedFindoc(tester, FinDocType.payment));
         }
         if ((type == FinDocType.order && subType == FinDocType.shipment)) {
-          expect(finDoc.pseudoId,
-              await CommonTest.getRelatedFindoc(tester, FinDocType.order));
+          expect(
+            await CommonTest.getRelatedFindoc(tester, FinDocType.order),
+            finDoc.pseudoId,
+          );
         }
         if (type == FinDocType.invoice && subType == null) {
           String? paymentId =

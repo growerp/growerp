@@ -46,7 +46,7 @@ void main() {
     });
     await OrderTest.selectSalesOrders(tester);
     await OrderTest.createRentalSalesOrder(tester, rentalSalesOrders);
-    await OrderTest.checkOrderDetail(tester);
+    await OrderTest.checkRentalOrderDetail(tester);
     await OrderTest.checkRentalSalesOrderBlocDates(tester);
     await OrderTest.approveOrders(tester);
     await PaymentTest.selectSalesPayments(tester);

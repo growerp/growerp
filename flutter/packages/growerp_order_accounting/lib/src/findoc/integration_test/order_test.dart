@@ -114,7 +114,7 @@ class OrderTest {
       for (final (index, item) in finDoc.items.indexed) {
         FinDocItem newItem = item.copyWith(
             product: Product(
-                productId: CommonTest.getTextField('itemProductId$index')));
+                pseudoId: CommonTest.getTextField('itemProductId$index')));
         newItems.add(newItem);
       }
       await CommonTest.tapByKey(tester, 'cancel'); // close again
@@ -126,8 +126,8 @@ class OrderTest {
     await PersistFunctions.persistTest(test.copyWith(orders: newOrders));
   }
 
-  static Future<void> checkOrderDetail(tester) async {
-    await FinDocTest.checkFinDocDetail(tester, FinDocType.order);
+  static Future<void> checkRentalOrderDetail(tester) async {
+    await FinDocTest.checkFinDocDetail(tester, FinDocType.order, rental: true);
   }
 
   static Future<void> checkRentalSalesOrder(WidgetTester tester) async {
