@@ -337,12 +337,8 @@ class UserDialogState extends State<UserDialogStateFull> {
       if (_selectedRole != Role.company)
         InputDecorator(
             decoration: InputDecoration(
-              labelText: "${_selectedCompany.role?.value ?? Role.unknown}"
-                  " Company information",
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(25.0),
-              ),
-            ),
+                labelText: "${_selectedCompany.role?.value ?? Role.unknown}"
+                    " Company information"),
             child: Column(children: [
               Row(children: [
                 Expanded(
@@ -378,10 +374,11 @@ class UserDialogState extends State<UserDialogStateFull> {
                             ),
                           ),
                           dropdownDecoratorProps: const DropDownDecoratorProps(
-                              dropdownSearchDecoration:
-                                  InputDecoration(labelText: 'Company')),
-                          itemAsString: (Company? u) =>
-                              " ${u!.name}[${u.pseudoId ?? ''}]",
+                              dropdownSearchDecoration: InputDecoration(
+                                  labelText: 'Company name[id]')),
+                          itemAsString: (Company? u) => u?.partyId == null
+                              ? ''
+                              : " ${u!.name}[${u.pseudoId ?? ''}]",
                           asyncItems: (String filter) {
                             _companyBloc.add(CompanyFetch(
                               ownerPartyId:

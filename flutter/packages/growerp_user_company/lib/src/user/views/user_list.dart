@@ -79,8 +79,8 @@ class UserListState extends State<UserList> {
               heightFactor: 20,
               child: Text(
                   context.read<String>() == 'AppHealth'
-                      ? 'No patients found'
-                      : 'no users found',
+                      ? 'No clients found'
+                      : 'no ${widget.role?.name ?? ''} users found',
                   textAlign: TextAlign.center));
         }
         // get table data formatted for tableView

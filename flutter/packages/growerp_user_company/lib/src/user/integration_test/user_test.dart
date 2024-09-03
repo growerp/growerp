@@ -159,6 +159,7 @@ class UserTest {
       await CommonTest.drag(tester);
       // company info
       if (currentRole != Role.company && user.company != null) {
+        await CommonTest.drag(tester);
         await CommonTest.tapByKey(tester, 'newCompany');
         await CommonTest.enterText(
             tester, 'companyName', user.company!.name!); // required!
@@ -169,10 +170,10 @@ class UserTest {
               company: user.company!.copyWith(
                   email: user.company!.email!.replaceFirst('XXX', '${seq++}')));
         }
-        await CommonTest.dragUntil(tester, key: 'email');
-        await CommonTest.enterText(tester, 'email', user.company?.email ?? '');
         await CommonTest.drag(tester);
-        await CommonTest.tapByKey(tester, 'update', seconds: 2);
+        await CommonTest.enterText(tester, 'email', user.company?.email ?? '');
+        await CommonTest.tapByKey(tester, 'update',
+            seconds: CommonTest.waitTime);
       }
 
       // login info for company employees only
@@ -216,7 +217,8 @@ class UserTest {
       expect(CommonTest.getTextFormField('userTelephoneNr'),
           equals(user.telephoneNr ?? ''));
 
-      if (currentRole != Role.company) {
+      if (currentRole != Role.company && user.company != null) {
+        await CommonTest.drag(tester);
         await CommonTest.tapByKey(tester, 'editCompany');
         expect(CommonTest.getTextFormField('companyName'),
             equals(user.company!.name!)); // required!

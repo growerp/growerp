@@ -59,9 +59,16 @@ class User with _$User {
       _$UserFromJson(json['user'] ?? json);
 
   @override
-  String toString() => 'User $firstName $lastName [$partyId] sec: $userGroup '
-      ' email: $email'
-      'company: ${company!.name}[${company!.partyId}] size: ${image?.length}';
+  String toString() {
+    var userString = 'User $firstName $lastName [$partyId] sec: $userGroup '
+        ' email: $email';
+    var companyString = '';
+    if (company != null) {
+      companyString =
+          'company: ${company!.name}[${company!.partyId}] size: ${image?.length}';
+    }
+    return '$userString $companyString';
+  }
 
   String getName() => '$lastName, $firstName';
 }
