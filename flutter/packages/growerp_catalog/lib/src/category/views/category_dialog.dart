@@ -241,7 +241,7 @@ class CategoryDialogState extends State<CategoryDialog> {
                       )),
                       const SizedBox(height: 30),
                       CircleAvatar(
-                          radius: 70,
+                          radius: 60,
                           child: _imageFile != null
                               ? foundation.kIsWeb
                                   ? Image.network(_imageFile!.path, scale: 0.3)

@@ -223,7 +223,7 @@ class WebsiteContentState extends State<WebsiteContent> {
             child: Column(children: <Widget>[
               const SizedBox(height: 40),
               CircleAvatar(
-                  radius: 80,
+                  radius: 60,
                   child: _imageFile != null
                       ? foundation.kIsWeb
                           ? Image.network(_imageFile!.path, scale: 0.3)

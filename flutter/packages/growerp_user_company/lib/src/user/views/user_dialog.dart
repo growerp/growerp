@@ -159,9 +159,6 @@ class UserDialogState extends State<UserDialogStateFull> {
     return Dialog(
       key: Key('UserDialog${_selectedRole.name}'),
       insetPadding: const EdgeInsets.all(10),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
       child: popUp(
           context: context,
           title: "$title #${widget.user.pseudoId ?? ' new'}",
@@ -606,7 +603,7 @@ class UserDialogState extends State<UserDialogStateFull> {
     if (!ResponsiveBreakpoints.of(context).isMobile) {
       rows.add(const SizedBox(height: 20));
       rows.add(SizedBox(
-          height: 350,
+          height: 400,
           child: MasonryGridView.count(
             itemCount: widgets.length,
             crossAxisCount: 2,
@@ -627,7 +624,7 @@ class UserDialogState extends State<UserDialogStateFull> {
             child: Column(children: <Widget>[
               const SizedBox(height: 10),
               CircleAvatar(
-                  radius: 80,
+                  radius: 60,
                   child: _imageFile != null
                       ? kIsWeb
                           ? Image.network(_imageFile!.path, scale: 0.3)

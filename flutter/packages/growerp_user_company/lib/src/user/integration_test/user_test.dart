@@ -156,8 +156,7 @@ class UserTest {
       await CommonTest.enterText(
           tester, 'userTelephoneNr', user.telephoneNr ?? '');
 
-      await CommonTest.drag(tester);
-      // company info
+      // company info fixed for employees
       if (currentRole != Role.company && user.company != null) {
         await CommonTest.drag(tester);
         await CommonTest.tapByKey(tester, 'newCompany');
@@ -176,21 +175,16 @@ class UserTest {
             seconds: CommonTest.waitTime);
       }
 
-      // login info for company employees only
-      if (currentRole == Role.company) {
-        if (user.loginName != null) {
-          user = user.copyWith(
-              loginName: user.loginName!.replaceFirst('XXX', '${seq++}'));
-        }
-
-        await CommonTest.enterText(tester, 'loginName', user.loginName ?? '');
-        if (user.loginName != null) {
-          await CommonTest.enterDropDown(
-              tester, 'userGroup', user.userGroup!.name);
-          if (user.loginDisabled != null &&
-              CommonTest.getCheckbox('loginDisabled') != user.loginDisabled) {
-            await CommonTest.tapByKey(tester, 'loginDisabled');
-          }
+      if (user.loginName != null) {
+        await CommonTest.drag(tester);
+        user = user.copyWith(
+            loginName: user.loginName!.replaceFirst('XXX', '${seq++}'));
+        await CommonTest.enterText(tester, 'loginName', user.loginName!);
+        await CommonTest.enterDropDown(
+            tester, 'userGroup', user.userGroup!.name);
+        if (user.loginDisabled != null &&
+            CommonTest.getCheckbox('loginDisabled') != user.loginDisabled) {
+          await CommonTest.tapByKey(tester, 'loginDisabled');
         }
       }
       await CommonTest.drag(tester);
@@ -233,17 +227,15 @@ class UserTest {
       }
       newUsers.add(user.copyWith(pseudoId: id));
       await CommonTest.drag(tester);
-      if (currentRole == Role.company) {
-        // login
+      // login, check only when login name present, cannot delete userlogin
+      if (user.loginName != null && user.loginName!.isNotEmpty) {
         expect(CommonTest.getTextFormField('loginName'),
             equals(user.loginName ?? ''));
-        if (user.loginName != null && user.loginName!.isNotEmpty) {
-          expect(CommonTest.getDropdown('userGroup'),
-              equals(user.userGroup.toString()));
-          if (user.loginDisabled != null) {
-            expect(CommonTest.getCheckbox('loginDisabled'),
-                equals(user.loginDisabled));
-          }
+        expect(CommonTest.getDropdown('userGroup'),
+            equals(user.userGroup.toString()));
+        if (user.loginDisabled != null) {
+          expect(CommonTest.getCheckbox('loginDisabled'),
+              equals(user.loginDisabled));
         }
       }
       await CommonTest.tapByKey(tester, 'cancel');
