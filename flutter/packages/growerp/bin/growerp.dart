@@ -24,7 +24,7 @@ import 'package:growerp/src/src.dart';
 Future<void> main(List<String> args) async {
   String growerpPath = '$HOME/growerp';
   String validCommands =
-      "valid commands are:'install | import | export | finalize'";
+      "valid commands are:'help | install | import | export | finalize'";
   String? backendUrl;
   String outputDirectory = 'growerpCsv';
   String branch = 'master';
@@ -37,10 +37,13 @@ Future<void> main(List<String> args) async {
   FileType overrideFileType = FileType.unknown;
   Hive.init('growerpDB');
   var logger = Logger(filter: MyFilter());
+  var fileTypeList = FileType.values
+      .join()
+      .replaceAll('FileType.', ',')
+      .replaceAll(',unknown', '');
 
   if (args.isEmpty) {
     logger.e('Please enter a GrowERP command? $validCommands');
-    exit(1);
   } else {
     final modifiedArgs = <String>[];
     for (int i = 0; i < args.length; i++) {
@@ -69,7 +72,8 @@ Future<void> main(List<String> args) async {
               (e) => e.name == args[i],
               orElse: () => FileType.unknown);
           if (overrideFileType == FileType.unknown) {
-            logger.e("Filetype: ${args[i]}  not recognized");
+            logger.e(
+                "Filetype: ${args[i]}  not recognized, existing filetypes $fileTypeList");
             exit(1);
           }
         default:
@@ -104,11 +108,13 @@ Future<void> main(List<String> args) async {
             "     -url  The backend url or empty for localhost\n"
             "     -n    The new company name\n"
             "     -c    The currency id to be used, example: USD,EUR\n"
+            "     -f    just this filetype\n"
             " -- export: (under development)\n "
             "     Will export all company related information in csv files\n"
             "     -u    user email address to for logging in.\n"
             "     -p    password for logging in.\n"
             "     -o    output directory name\n"
+            "     -f    just this filetype\n"
             " -- finalize:\n "
             "     wil finalize the import process by completing finished \n"
             "     documents and accounting time periods.\n"
@@ -119,7 +125,8 @@ Future<void> main(List<String> args) async {
         install(growerpPath, branch);
       case 'import':
         import(
-            inputFile, backendUrl, username, password, companyName, currencyId);
+            inputFile, backendUrl, username, password, companyName, currencyId,
+            overrideFileType: overrideFileType);
       case 'finalize':
         final client = RestClient(await buildDioClient(backendUrl,
             timeout: Duration(seconds: timeout), miniLog: true));
@@ -127,16 +134,6 @@ Future<void> main(List<String> args) async {
             companyName: companyName, currencyId: currencyId);
         client.finalizeImport();
       case 'export':
-        if (modifiedArgs.length > 1) {
-          try {
-            // ignore: unused_local_variable
-            FileType fileType = FileType.values.byName(modifiedArgs[1]);
-          } catch (e) {
-            logger.e(
-                "invalid file type: ${modifiedArgs[1]}, valid types: ${FileType.values.join().replaceAll('FileType.', ',').replaceAll(',unknown', '')}");
-            exit(1);
-          }
-        }
         export(backendUrl, outputDirectory, username, password);
       case 'report':
         // (hansbak): create a data (conversion) report

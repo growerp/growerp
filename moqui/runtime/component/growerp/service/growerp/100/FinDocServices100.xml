@@ -998,10 +998,10 @@ along with this software (see the LICENSE.md file). If not, see
                         entity-name="growerp.warehouse.ShipmentAndPartiesAndWarehouse">
                         <econdition field-name="shipmentId" from="finDocId" ignore-if-empty="true" />
                         <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
-                        <econdition field-name="vendorPartyId" from="vendorPartyId"
-                            ignore-if-empty="true" />
-                        <econdition field-name="customerPartyId" from="customerPartyId"
-                            ignore-if-empty="true" />
+                        <econditions combine="or">
+                            <econdition field-name="fromPartyId" from="companyPartyId" />
+                            <econdition field-name="toPartyId" from="companyPartyId" />
+                        </econditions>
                     </entity-find>
                     <else>
                         <if condition="open == true &amp;&amp; !finDocId &amp;&amp; !search">
@@ -1039,6 +1039,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="lastItem &amp;&amp; lastItem.shipmentId != item.shipmentId">
                         <set field="finDocOut.items" from="finDocItems" />
                         <script>finDocs.add(finDocOut)</script>
+                        <set field="finDocItems" from="[]" />
                         <if condition="current++ == limit">
                             <break />
                         </if>
@@ -1103,25 +1104,28 @@ along with this software (see the LICENSE.md file). If not, see
                             otherUser: userOut,
                             otherCompany: company,
                             ]" />
-                        <set field="finDocItems" from="[]" />
                     </if>
-                    <set field="location"
-                        from="[
-                        locationId: item.locationId,
-                        locationName: item.locationName                        
-                        ]" />
-                    <set field="asset"
-                        from="[
+                    <if condition="item.locationId">
+                        <set field="location"
+                            from="[
+                                locationId: item.locationId,
+                                locationName: item.locationName                        
+                                ]" />
+                    </if>
+                    <if condition="item.assetId">
+                        <set field="asset"
+                            from="[
                         assetId: item.assetId,
                         assetName: item.assetName,
                         receivedDate: item.entryDate 
                             ? ec.l10n.format(item.entryDate,'yyyy-MM-dd')  : null,
                         location: location
                         ]" />
+                    </if>
                     <set field="finDocItem"
                         from="[
                         itemSeqId: item.orderItemSeqId,
-                        product: [productId: item.productId,pseudoId: item.productPseudoId],
+                        product: [productId: item.productId, pseudoId: item.productPseudoId],
                         quantity: item.quantity ? item.quantity.toString() : null,
                         description: item.itemDescription,
                         asset: asset
@@ -2098,6 +2102,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </else-if>
                 <!-- shipment -->
                 <else-if condition="finDoc.docType == 'shipment'">
+                    <log
+                        message="===within update findoc find shipmentId: ${finDoc.shipmentId} pseudoId: ${finDoc.pseudoId}" />
                     <entity-find entity-name="mantle.shipment.Shipment" list="check" limit="1">
                         <econdition field-name="shipmentId" from="finDoc.shipmentId" />
                         <econditions combine="or">
@@ -2108,47 +2114,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="!check">
                         <return message="Shipment ${finDoc.shipmentId} not found!" />
                     </if>
-                    <if condition="finDoc.sales == true &amp;&amp; finDoc.statusId == 'ShipPacked'">
-                        <entity-find entity-name="mantle.shipment.ShipmentItemSource"
-                            list="shipmentItemSourceList">
-                            <econdition field-name="shipmentId" from="finDoc.shipmentId" />
-                        </entity-find>
-                        <iterate list="shipmentItemSourceList" entry="itemSource">
-                            <service-call
-                                name="mantle.shipment.ShipmentServices.pack#ShipmentItemSource"
-                                in-map="[shipmentItemSourceId: itemSource.shipmentItemSourceId,
-                                    quantity: itemSource.quantity]" />
-                        </iterate>
-                        <iterate list="shipmentItemSourceList" entry="shipmentItemSource">
-                            <if
-                                condition="shipmentItemSource.orderId &amp;&amp; shipmentItemSource.orderItemSeqId">
-                                <entity-find-one entity-name="mantle.order.OrderItem"
-                                    value-field="orderItem">
-                                    <field-map field-name="orderId"
-                                        from="shipmentItemSource.orderId" />
-                                    <field-map field-name="orderItemSeqId"
-                                        from="shipmentItemSource.orderItemSeqId" />
-                                </entity-find-one>
-                                <service-call
-                                    name="mantle.order.OrderServices.checkComplete#OrderPart"
-                                    in-map="[orderId:orderItem.orderId, orderPartSeqId:orderItem.orderPartSeqId]" />
-                            </if>
-                        </iterate>
-                    </if>
-                    <service-call name="update#mantle.shipment.Shipment" out-map="context"
-                        in-map="[shipmentId: finDoc.shipmentId, statusId: finDoc.statusId]" />
-                    <!-- check if related transaction has pseudoId -->
-                    <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
-                        list="transactions" for-update="true">
-                        <econdition field-name="shipmentId" from="finDoc.shipmentId" />
-                    </entity-find>
-                    <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
-                        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                            in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
-                            out-map="context" />
-                        <set field="transactions[0].pseudoId" from="seqNum" />
-                        <entity-update value-field="transactions[0]" />
-                    </if>
+                    <service-call name="growerp.100.FinDocServices100.update#Shipment"
+                        in-map="[finDoc: finDoc]" />
                     <set field="inMap"
                         from="[finDocId: finDoc.shipmentId,
                                     docType: 'shipment', sales: finDoc.sales]" />
@@ -2921,6 +2888,93 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="transactions[0].pseudoId" from="seqNum" />
                 <entity-update value-field="transactions[0]" />
             </if>
+        </actions>
+    </service>
+
+    <service verb="update" noun="Shipment">
+        <description> Update a shipment  including items exept for shipments receive.
+            </description>
+        <in-parameters>
+            <parameter name="finDoc" type="Map" required="true" />
+        </in-parameters>
+        <actions>
+            <log
+                message="===updating shipment: ${finDoc.shipmentId} items: ${finDoc.items?.size()} status: ${finDoc.statusId}" />
+            <if condition="finDoc.statusId == 'ShipInput' || finDoc.statusId == 'ShipScheduled'">
+                <!-- in preparation or created stage just create -->
+                <service-call name="growerp.100.FinDocServices100.replace#ShipmentItems"
+                    in-map="[shipmentId: finDoc.shipmentId, items: finDoc.items]" />
+            </if>
+            <!-- outgoing shipments -->
+            <if condition="finDoc.sales == true &amp;&amp; finDoc.statusId == 'ShipPacked'">
+                <entity-find entity-name="mantle.shipment.ShipmentItemSource"
+                    list="shipmentItemSourceList">
+                    <econdition field-name="shipmentId" from="finDoc.shipmentId" />
+                </entity-find>
+                <iterate list="shipmentItemSourceList" entry="itemSource">
+                    <service-call
+                        name="mantle.shipment.ShipmentServices.pack#ShipmentItemSource"
+                        in-map="[shipmentItemSourceId: itemSource.shipmentItemSourceId,
+                                    quantity: itemSource.quantity]" />
+                </iterate>
+                <iterate list="shipmentItemSourceList" entry="shipmentItemSource">
+                    <if
+                        condition="shipmentItemSource.orderId &amp;&amp; shipmentItemSource.orderItemSeqId">
+                        <entity-find-one entity-name="mantle.order.OrderItem"
+                            value-field="orderItem">
+                            <field-map field-name="orderId"
+                                from="shipmentItemSource.orderId" />
+                            <field-map field-name="orderItemSeqId"
+                                from="shipmentItemSource.orderItemSeqId" />
+                        </entity-find-one>
+                        <service-call
+                            name="mantle.order.OrderServices.checkComplete#OrderPart"
+                            in-map="[orderId:orderItem.orderId, orderPartSeqId:orderItem.orderPartSeqId]" />
+                    </if>
+                </iterate>
+            </if>
+            <!-- update status-->
+            <service-call name="update#mantle.shipment.Shipment" out-map="context"
+                in-map="[shipmentId: finDoc.shipmentId, statusId: finDoc.statusId]" />
+            <!-- check if related transaction has pseudoId -->
+            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
+                list="transactions" for-update="true">
+                <econdition field-name="shipmentId" from="finDoc.shipmentId" />
+            </entity-find>
+            <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
+                <service-call out-map="context"
+                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
+                    out-map="context" />
+                <set field="transactions[0].pseudoId" from="seqNum" />
+                <entity-update value-field="transactions[0]" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="replace" noun="ShipmentItems">
+        <description>first delete any items(if any) and create new ones.</description>
+        <in-parameters>
+            <parameter name="shipmentId" required="true" type="String" />
+            <parameter name="items" required="true" type="List" />
+        </in-parameters>
+        <actions>
+            <entity-delete-by-condition entity-name="mantle.shipment.ShipmentItemSource">
+                <econdition field-name="shipmentId" />
+            </entity-delete-by-condition>
+            <entity-delete-by-condition entity-name="mantle.shipment.ShipmentItem">
+                <econdition field-name="shipmentId" />
+            </entity-delete-by-condition>
+            <iterate list="items" entry="item">
+                <log message="====adding product: ${item.product.productId}" />
+                <service-call
+                    name="mantle.shipment.ShipmentServices.create#ShipmentItem"
+                    in-map="context + [ productId: item.product.productId,
+                                        quantity: item.quantity,
+                                        ]"
+                    out-map="context" />
+            </iterate>
         </actions>
     </service>
 

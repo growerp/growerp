@@ -718,23 +718,29 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="itemsOut" from="[]" />
-            <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
-                in-map="[pseudoId: finDocItems[0].pseudoId, docType: finDocItems[0].docType,
-                                classificationId: classificationId]" />
-            <log
-                message="importing ${finDocs[0]?.sales == true ? 'Sales' : 'Purchase'} ${finDocItems[0].docType} ${finDocItems?.size()} finDocItems" />
             <set field="index" value="0" type="Integer" />
             <iterate list="finDocItems" entry="item">
                 <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
-                    <!-- new pseudo id so save lastItem-->
                     <script>ec.user.setEffectiveTime(Timestamp.valueOf("${finDoc.creationDate} 00:00:00"))</script>
-                    <!-- add items collected below to finDoc[0] already got below-->
-                    <set field="finDoc.items" from="itemsOut" />
-                    <if condition="finDoc.docType == 'transaction'">
-                        <set field="finDoc.isPosted" value="true" type="Boolean" />
+                    <!-- get current document id-->
+                    <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
+                        in-map="[pseudoId: lastItem.pseudoId, docType: lastItem.docType,
+                                classificationId: classificationId]" />
+                    <if condition="finDocs.isEmpty()">
+                        <!-- cannot find, so not try to add items -->
+                        <log
+                            message="importing ${lastItem.docType} items could not find company: $companyPartyId and pseudo: ${lastItem.pseudoId}" />
+                        <else>
+                            <set field="finDoc" from="finDocs[0]" />
+                            <!-- add items collected below to finDoc[0] already got below-->
+                            <set field="finDoc.items" from="itemsOut" />
+                            <if condition="finDoc.docType == 'transaction'">
+                                <set field="finDoc.isPosted" value="true" type="Boolean" />
+                            </if>
+                            <service-call name="growerp.100.FinDocServices100.update#FinDoc"
+                                in-map="[finDoc: finDoc, classificationId: classificationId]" />
+                        </else>
                     </if>
-                    <service-call name="growerp.100.FinDocServices100.update#FinDoc"
-                        in-map="[finDoc: finDoc, classificationId: classificationId]" />
                     <set field="itemsOut" from="[]" />
                 </if>
                 <if condition="!lastItem || lastItem.pseudoId != item.pseudoId">
@@ -821,24 +827,25 @@ along with this software (see the LICENSE.md file). If not, see
             </iterate>
             <!-- process last record -->
             <if condition="lastItem">
+                <script>ec.user.setEffectiveTime(Timestamp.valueOf("${finDoc.creationDate} 00:00:00"))</script>
+                <!-- get current document id-->
                 <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
-                    in-map="[pseudoId: lastItem.pseudoId,docType: lastItem.docType, classificationId: classificationId]" />
-                <if condition="!finDocs.isEmpty()">
-                    <set field="finDocs[0].items" from="itemsOut" />
-                    <!-- transaction posted-->
-                    <if condition="finDocs[0].docType == 'transaction'">
-                        <set field="finDocs[0].isPosted" value="true" type="Boolean" />
-                    </if>
-                    <!-- add findoc items-->
-                    <service-call name="growerp.100.FinDocServices100.update#FinDoc"
-                        in-map="[finDoc: finDocs[0], classificationId: classificationId]" />
+                    in-map="[pseudoId: lastItem.pseudoId, docType: lastItem.docType,
+                            classificationId: classificationId]" />
+                <if condition="finDocs.isEmpty()">
+                    <!-- cannot find, so not try to add items -->
+                    <log message="importing items could not find ${lastItem.pseudoId}" />
                     <else>
-                        <return error="true"
-                            message="Could not find ${item.docType} ${item.pseudoId}!" />
+                        <set field="finDoc" from="finDocs[0]" />
+                        <!-- add items collected below to finDoc[0] already got below-->
+                        <set field="finDoc.items" from="itemsOut" />
+                        <if condition="finDoc.docType == 'transaction'">
+                            <set field="finDoc.isPosted" value="true" type="Boolean" />
+                        </if>
+                        <service-call name="growerp.100.FinDocServices100.update#FinDoc"
+                            in-map="[finDoc: finDoc, classificationId: classificationId]" />
                     </else>
                 </if>
-                <!-- if transactions, check latest date and see if previous year period not close
-                yet-->
             </if>
 
             <!-- end of service result -->

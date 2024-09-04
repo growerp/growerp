@@ -60,8 +60,8 @@ Future<void> login(RestClient client, String username, String password,
 }
 
 import(String inputFile, String? backendUrl, String username, String password,
-    String companyName, String currencyId) async {
-  FileType overrideFileType = FileType.unknown;
+    String companyName, String currencyId,
+    {FileType overrideFileType = FileType.unknown}) async {
   var logger = Logger(filter: MyFilter());
   int timeout = 600; //in seconds
 

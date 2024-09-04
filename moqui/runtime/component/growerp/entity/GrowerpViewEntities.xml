@@ -425,28 +425,31 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="countryId" field="countryGeoId" entity-alias="PA" />
         <alias name="country" field="geoName" entity-alias="COUNTRY" />
         <alias name="geoTypeEnumId" entity-alias="COUNTRY" />
-
         <alias name="telephoneNr" field="contactNumber" entity-alias="TELEPHONE" />
         <alias name="toPartyId" entity-alias="SHIP" />
         <alias name="fromPartyId" entity-alias="SHIP" />
         <alias name="statusId" entity-alias="SHIP" />
         <alias name="entryDate" entity-alias="SHIP" />
+        <!-- order-->
         <alias name="orderId" entity-alias="SIS" />
         <alias name="orderItemSeqId" entity-alias="SIS" />
         <alias name="invoiceId" entity-alias="SIS" />
+        <!-- shipment item, source. asset-->
         <alias name="productId" entity-alias="SITEM" />
         <alias name="productPseudoId" field="pseudoId" entity-alias="PROD" />
         <alias name="quantity" entity-alias="SITEM" />
         <alias name="receivedDate" field="receivedDate" entity-alias="ASR" />
         <alias name="itemDescription" entity-alias="ORDERITEM" />
         <alias name="assetId" entity-alias="AST" />
+        <alias name="assetPseudoId" entity-alias="AST" />
         <alias name="assetName" entity-alias="AST" />
         <alias name="originalQuantityUomId" entity-alias="AST" />
         <alias name="uomId" entity-alias="UOM" />
         <alias name="uomAbbreviation" field="abbreviation" entity-alias="UOM" />
         <alias name="locationId" field="locationSeqId" entity-alias="LOC" />
+        <alias name="locationPseudoId" field="positionId" entity-alias="LOC" />
         <alias name="locationName" field="description" entity-alias="LOC" />
-
+        <!-- vendor -->
         <alias name="vendorPartyId" field="partyId" entity-alias="VORG" />
         <alias name="vendorCompanyName" field="organizationName" entity-alias="VORG" />
         <alias name="vendorRoleTypeId" field="roleTypeId" entity-alias="VOPP" />
@@ -454,7 +457,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="vendorFirstName" field="firstName" entity-alias="VPERSON" />
         <alias name="vendorLastName" field="lastName" entity-alias="VPERSON" />
         <alias name="vendorEmail" field="emailAddress" entity-alias="VACCOUNT" />
-
+        <!-- customer -->
         <alias name="customerPartyId" field="partyId" entity-alias="CORG" />
         <alias name="customerCompanyName" field="organizationName" entity-alias="CORG" />
         <alias name="customerRoleTypeId" field="roleTypeId" entity-alias="COPP" />
