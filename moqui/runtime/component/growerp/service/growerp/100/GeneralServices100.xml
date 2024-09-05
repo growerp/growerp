@@ -824,7 +824,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="passwordChange">
                 <then>
                     <set field="authenticate"
-                        from="[apiKey: 'passwordChange',
+                        from="[apiKey: 'passwordChange', user: [loginName: username],
                             classificationId: classificationId]" />
                 </then>
                 <else-if condition="moreInfo">

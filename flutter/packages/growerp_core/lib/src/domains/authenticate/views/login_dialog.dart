@@ -37,7 +37,7 @@ class LoginDialogState extends State<LoginDialog> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _companyController = TextEditingController();
-  final _loginFormKey1 = GlobalKey<FormState>();
+  final _changePasswordFormKey = GlobalKey<FormState>();
   final _password3Controller = TextEditingController();
   final _password4Controller = TextEditingController();
   bool _obscureText3 = true;
@@ -50,6 +50,8 @@ class LoginDialogState extends State<LoginDialog> {
   void initState() {
     super.initState();
     _authBloc = context.read<AuthBloc>();
+    _usernameController.text =
+        _authBloc.state.authenticate?.user?.loginName ?? '';
     _currencySelected = currencies[1];
     _demoData = kReleaseMode ? false : true;
     if (!kReleaseMode) {
@@ -82,9 +84,6 @@ class LoginDialogState extends State<LoginDialog> {
           backgroundColor: Colors.transparent,
           body: Dialog(
               insetPadding: const EdgeInsets.all(10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
               child: furtherAction == 'moreInfo'
                   ? moreInfoForm(
                       _usernameController.text, authenticate.moquiSessionToken!)
@@ -92,117 +91,93 @@ class LoginDialogState extends State<LoginDialog> {
                       ? changePasswordForm(
                           _usernameController.text, _passwordController.text)
                       : loginForm()));
-
-/*      if (state.status == AuthStatus.passwordChange) {
-        username = _usernameController.text;
-        oldPassword = _passwordController.text;
-      }
-      authenticate = state.authenticate!;
-      companyPartyId = authenticate.company?.partyId!;
-      companyName = authenticate.company?.name!;
-      if (_usernameController.text.isEmpty) {
-        _usernameController.text = authenticate.user?.loginName != null
-            ? authenticate.user!.loginName!
-            : kReleaseMode
-                ? ''
-                : 'test@example.com';
-      }
-      if (_passwordController.text.isEmpty && !kReleaseMode) {
-        _passwordController.text = 'qqqqqq9!';
-      }
-*/
     });
   }
 
   Widget changePasswordForm(String username, String oldPassword) {
-    return Dialog(
-        insetPadding: const EdgeInsets.all(10),
-        child: popUp(
-            height: 500,
-            context: context,
-            title: "Create New Password",
-            child: Form(
-              key: _loginFormKey1,
-              child: Column(children: <Widget>[
-                const SizedBox(height: 40),
-                Text("username: $username"),
-                const SizedBox(height: 20),
-                TextFormField(
-                  key: const Key("password1"),
-                  autofocus: true,
-                  controller: _password3Controller,
-                  obscureText: _obscureText3,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    helperText:
-                        'At least 8 characters, including alpha, number '
-                        '&\nspecial character, no previous password.',
-                    suffixIcon: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _obscureText3 = !_obscureText3;
-                        });
-                      },
-                      child: Icon(_obscureText3
-                          ? Icons.visibility
-                          : Icons.visibility_off),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value!.isEmpty) return 'Please enter first password?';
-                    final regExpRequire = RegExp(
-                        r'^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).{8,}');
-                    if (!regExpRequire.hasMatch(value)) {
-                      return 'At least 8 characters, including alpha, number & special character.';
-                    }
-                    return null;
+    return popUp(
+        height: 500,
+        context: context,
+        title: "Create New Password",
+        child: Form(
+          key: _changePasswordFormKey,
+          child: Column(children: <Widget>[
+            const SizedBox(height: 40),
+            Text("username: $username"),
+            const SizedBox(height: 20),
+            TextFormField(
+              key: const Key("password1"),
+              autofocus: true,
+              controller: _password3Controller,
+              obscureText: _obscureText3,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                helperText: 'At least 8 characters, including alpha, number '
+                    '&\nspecial character, no previous password.',
+                suffixIcon: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _obscureText3 = !_obscureText3;
+                    });
                   },
+                  child: Icon(
+                      _obscureText3 ? Icons.visibility : Icons.visibility_off),
                 ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  key: const Key("password2"),
-                  obscureText: _obscureText4,
-                  decoration: InputDecoration(
-                    labelText: 'Verify Password',
-                    helperText: 'Enter the new password again.',
-                    suffixIcon: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _obscureText4 = !_obscureText4;
-                        });
-                      },
-                      child: Icon(_obscureText4
-                          ? Icons.visibility
-                          : Icons.visibility_off),
-                    ),
-                  ),
-                  controller: _password4Controller,
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Enter password again to verify?';
-                    }
-                    if (value != _password4Controller.text) {
-                      return 'Password is not matching';
-                    }
-                    return null;
+              ),
+              validator: (value) {
+                if (value!.isEmpty) return 'Please enter first password?';
+                final regExpRequire =
+                    RegExp(r'^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).{8,}');
+                if (!regExpRequire.hasMatch(value)) {
+                  return 'At least 8 characters, including alpha, number & special character.';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              key: const Key("password2"),
+              obscureText: _obscureText4,
+              decoration: InputDecoration(
+                labelText: 'Verify Password',
+                helperText: 'Enter the new password again.',
+                suffixIcon: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _obscureText4 = !_obscureText4;
+                    });
                   },
+                  child: Icon(
+                      _obscureText4 ? Icons.visibility : Icons.visibility_off),
                 ),
-                const SizedBox(height: 20),
-                OutlinedButton(
-                    child: const Text('Submit new Password'),
-                    onPressed: () {
-                      if (_loginFormKey1.currentState!.validate()) {
-                        _authBloc.add(
-                          AuthChangePassword(
-                            username,
-                            oldPassword,
-                            _password4Controller.text,
-                          ),
-                        );
-                      }
-                    }),
-              ]),
-            )));
+              ),
+              controller: _password4Controller,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Enter password again to verify?';
+                }
+                if (value != _password4Controller.text) {
+                  return 'Password is not matching';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            OutlinedButton(
+                child: const Text('Submit new Password'),
+                onPressed: () {
+                  if (_changePasswordFormKey.currentState!.validate()) {
+                    _authBloc.add(
+                      AuthChangePassword(
+                        username,
+                        oldPassword,
+                        _password4Controller.text,
+                      ),
+                    );
+                  }
+                }),
+          ]),
+        ));
   }
 
   Widget moreInfoForm(String username, String password) {
