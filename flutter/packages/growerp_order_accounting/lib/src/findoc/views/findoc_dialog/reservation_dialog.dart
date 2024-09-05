@@ -198,7 +198,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                                   InputDecoration(labelText: 'Customer')),
                           key: const Key('customer'),
                           itemAsString: (User? u) =>
-                              " ${u!.firstName} ${u.lastName}, ${u.company!.name}",
+                              " ${u!.firstName} ${u.lastName}, ${u.company?.name ?? ''}",
                           asyncItems: (String filter) {
                             _userBloc.add(GetDataEvent(() => context
                                 .read<RestClient>()

@@ -144,20 +144,38 @@ class FinDocTest {
 
   /// check the entered data of a finDoc, company and products
   static Future<void> checkFinDocDetail(WidgetTester tester, FinDocType docType,
-      {bool rental = false}) async {
+      {bool rental = false, String classificationId = 'AppAdmin'}) async {
     List<FinDoc> finDocs = await FinDocTest.getFinDocs(docType);
     for (final finDoc in finDocs) {
       await CommonTest.doNewSearch(tester, searchString: finDoc.pseudoId!);
       expect(
           CommonTest.getTextField('topHeader').split('#')[1], finDoc.pseudoId);
-      await CommonTest.checkWidgetKey(tester,
-          "FinDocDialog${finDoc.sales ? 'Sales' : 'Purchase'}${finDoc.docType!.toString()}");
-      // check supplier/customer
-      expect(
-          CommonTest.getDropdownSearch(finDoc.sales ? 'customer' : 'supplier'),
-          finDoc.otherCompany!.name!);
-      if (finDoc.docType == FinDocType.order ||
-          finDoc.docType == FinDocType.invoice) {
+      if (classificationId != 'AppHotel') {
+        // reservation for hotel is called from ganntChart
+        await CommonTest.checkWidgetKey(tester,
+            "FinDocDialog${finDoc.sales ? 'Sales' : 'Purchase'}${finDoc.docType!.toString()}");
+      } // check supplier/customer
+      if (finDoc.otherUser != null) {
+        if (finDoc.otherUser?.company != null) {
+          expect(
+              CommonTest.getDropdownSearch(
+                  finDoc.sales ? 'customer' : 'supplier'),
+              contains(finDoc.otherUser?.company!.name));
+        } else {
+          expect(
+              CommonTest.getDropdownSearch(
+                  finDoc.sales ? 'customer' : 'supplier'),
+              contains(finDoc.otherUser?.lastName!));
+        }
+      } else {
+        expect(
+            CommonTest.getDropdownSearch(
+                finDoc.sales ? 'customer' : 'supplier'),
+            finDoc.otherCompany?.name!);
+      }
+      if ((finDoc.docType == FinDocType.order ||
+              finDoc.docType == FinDocType.invoice) &&
+          finDoc.description != null) {
         expect(CommonTest.getTextFormField('description'), finDoc.description!);
       }
       for (final (index, item) in finDoc.items.indexed) {
@@ -277,6 +295,7 @@ class FinDocTest {
   /// when cancelled just the last record is cancelled when there are at 2 records
   static Future<void> changeStatusFinDocs(WidgetTester tester, FinDocType type,
       {FinDocType? subType,
+      String classificationId = 'AppAdmin',
       FinDocStatusVal status = FinDocStatusVal.approved}) async {
     List<FinDoc> oldFinDocs = await getFinDocs(type);
     List<FinDoc> newFinDocs = [];
@@ -319,7 +338,8 @@ class FinDocTest {
               FinDocStatusVal.created.name ||
           status != FinDocStatusVal.approved) {
         await CommonTest.tapByKey(tester, 'statusDropDown');
-        await CommonTest.tapByText(tester, status.name);
+        await CommonTest.tapByText(tester,
+            classificationId == 'AppHotel' ? status.hotel : status.name);
         await CommonTest.tapByKey(tester, 'update',
             seconds: CommonTest.waitTime);
         await CommonTest.waitForSnackbarToGo(tester);

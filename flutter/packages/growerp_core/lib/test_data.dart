@@ -1175,12 +1175,16 @@ List<Asset> roomsHotel = [
 ];
 
 List<FinDoc> roomReservations = [
-  FinDoc(otherUser: customers[0], items: [
-    FinDocItem(
-        description: productsHotel[0].productName,
-        rentalFromDate: DateTime.now(),
-        quantity: Decimal.parse('1')) // nbr of days
-  ]),
+  FinDoc(
+      docType: FinDocType.order,
+      sales: true,
+      otherUser: customers[0],
+      items: [
+        FinDocItem(
+            description: productsHotel[0].productName,
+            rentalFromDate: DateTime.now(),
+            quantity: Decimal.parse('1')) // nbr of days
+      ]),
 ];
 
 List<GlAccount> glAccounts = [

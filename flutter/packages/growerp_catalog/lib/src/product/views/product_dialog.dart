@@ -325,38 +325,40 @@ class ProductDialogState extends State<ProductDialog> {
           )
         ],
       ),
-      const SizedBox(height: 10),
-      Visibility(
-          visible: classificationId != 'AppHotel',
+      if (classificationId != 'AppHotel')
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
           child: InputDecorator(
               decoration: InputDecoration(
                   labelText: 'Related categories',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25.0),
                   )),
-              child: Wrap(spacing: 10.0, children: relCategories))),
-      Visibility(
-          visible: classificationId != 'AppHotel',
-          child: DropdownButtonFormField<String>(
-            key: const Key('productTypeDropDown'),
-            value: _selectedTypeId,
-            decoration: const InputDecoration(labelText: 'Product Type'),
-            validator: (value) {
-              return value == null ? 'field required' : null;
-            },
-            items: productTypes.map((item) {
-              return DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(item,
-                      style: const TextStyle(color: Color(0xFF4baa9b))));
-            }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                _selectedTypeId = newValue!;
-              });
-            },
-            isExpanded: true,
-          )),
+              child: Wrap(spacing: 10.0, children: relCategories)),
+        ),
+      if (classificationId != 'AppHotel')
+        Padding(
+            padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+            child: DropdownButtonFormField<String>(
+              key: const Key('productTypeDropDown'),
+              value: _selectedTypeId,
+              decoration: const InputDecoration(labelText: 'Product Type'),
+              validator: (value) {
+                return value == null ? 'field required' : null;
+              },
+              items: productTypes.map((item) {
+                return DropdownMenuItem<String>(
+                    value: item,
+                    child: Text(item,
+                        style: const TextStyle(color: Color(0xFF4baa9b))));
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedTypeId = newValue!;
+                });
+              },
+              isExpanded: true,
+            )),
       if (classificationId != 'AppHotel' && _selectedTypeId != 'Service')
         Container(
             decoration: BoxDecoration(

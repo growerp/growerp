@@ -82,7 +82,7 @@ class LocationDialogState extends State<LocationDialog> {
                     child: _showForm(isPhone),
                     title:
                         'Location Information #${location.pseudoId ?? "New"}',
-                    height: 300,
+                    height: 400,
                     width: 400))));
   }
 
@@ -108,14 +108,17 @@ class LocationDialogState extends State<LocationDialog> {
                   return null;
                 },
               ),
-              const SizedBox(height: 10),
-              TextFormField(
-                readOnly: true, // total of assets can not be updated here
-                controller: _qohController,
-                key: const Key('qoh'),
-                decoration:
-                    const InputDecoration(labelText: 'Quantity on Hand'),
-              ),
+              if (location.locationId != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                  child: TextFormField(
+                    readOnly: true, // total of assets can not be updated here
+                    controller: _qohController,
+                    key: const Key('qoh'),
+                    decoration: const InputDecoration(
+                        labelText: 'Quantity on Hand', enabled: false),
+                  ),
+                ),
               const SizedBox(height: 10),
               OutlinedButton(
                   key: const Key('update'),

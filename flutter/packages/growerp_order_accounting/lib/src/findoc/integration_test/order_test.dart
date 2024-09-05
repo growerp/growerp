@@ -130,20 +130,6 @@ class OrderTest {
     await FinDocTest.checkFinDocDetail(tester, FinDocType.order, rental: true);
   }
 
-  static Future<void> checkRentalSalesOrder(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    //  var intlFormat = DateFormat('yyyy-MM-dd');
-    int x = 0;
-    for (FinDoc order in test.orders) {
-      expect(CommonTest.getTextField('status$x'),
-          equals(FinDocStatusVal.created.name));
-      await CommonTest.tapByKey(tester, 'id$x', seconds: 5);
-      expect(CommonTest.getTextField('itemProductId$x'),
-          equals(order.items[0].product?.productId));
-      x++;
-    }
-  }
-
   static Future<void> checkRentalSalesOrderBlocDates(
       WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
@@ -164,43 +150,32 @@ class OrderTest {
     await CommonTest.tapByKey(tester, 'cancel');
   }
 
-  static Future<void> approveSalesOrder(WidgetTester tester,
-      {String classificationId = 'AppAdmin'}) async {
-    SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> orders = test.orders;
-    for (FinDoc order in orders) {
-      await CommonTest.doNewSearch(tester, searchString: order.orderId!);
-//    starts as 'created' in the app, in the website as inprep
-//      await CommonTest.tapByKey(tester, 'nextStatus0',
-//          seconds: 5); // to created
-      await CommonTest.tapByKey(tester, 'nextStatus0',
-          seconds: 5); // to approved
-      expect(CommonTest.getTextField('status0'),
-          equals(FinDocStatusVal.approved.name));
-    }
-    await CommonTest.gotoMainMenu(tester);
-  }
-
   static Future<void> checkOrderCompleted(WidgetTester tester,
       {String classificationId = 'AppAdmin'}) async {
     SaveTest test = await PersistFunctions.getTest();
     List<FinDoc> orders = test.orders;
     for (FinDoc order in orders) {
       await CommonTest.doNewSearch(tester, searchString: order.orderId!);
-      expect(CommonTest.getTextField('status0'),
-          equals(FinDocStatusVal.completed.name));
+      expect(
+          CommonTest.getTextField('status0'),
+          equals(classificationId == 'AppHotel'
+              ? FinDocStatusVal.completed.hotel
+              : FinDocStatusVal.completed.name));
     }
   }
 
   /// approve orders
-  static Future<void> approveOrders(WidgetTester tester) async {
-    await FinDocTest.changeStatusFinDocs(tester, FinDocType.order);
+  static Future<void> approveOrders(WidgetTester tester,
+      {String classificationId = 'AppAdmin'}) async {
+    await FinDocTest.changeStatusFinDocs(tester, FinDocType.order,
+        classificationId: classificationId);
   }
 
   /// complete orders
-  static Future<void> completeOrders(WidgetTester tester) async {
+  static Future<void> completeOrders(WidgetTester tester,
+      {String classificationId = 'AppAdmin'}) async {
     await FinDocTest.changeStatusFinDocs(tester, FinDocType.order,
-        status: FinDocStatusVal.completed);
+        classificationId: classificationId, status: FinDocStatusVal.completed);
   }
 
   /// approve shipments related to an order

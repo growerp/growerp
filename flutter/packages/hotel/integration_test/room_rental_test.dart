@@ -12,14 +12,11 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/test_data.dart';
-import 'package:growerp_inventory/growerp_inventory.dart';
-import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:hotel/menu_option_data.dart';
 import 'package:integration_test/integration_test.dart';
@@ -53,7 +50,7 @@ Future<void> selectReservations(WidgetTester tester) async {
 }
 
 void main() {
-  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   String classificationId = 'AppHotel';
 /*
   DateTime today = CustomizableDateTime.current;
@@ -69,144 +66,40 @@ void main() {
     await Hive.initFlutter();
   });
 
-  testWidgets("Test room types", (WidgetTester tester) async {
-    try {
-      RestClient restClient = RestClient(await buildDioClient());
-      await CommonTest.startTestApp(
-        clear: true,
-        title: 'Hotel Room type Test',
-        tester,
-        router.generateRoute,
-        menuOptions,
-        delegates,
-        restClient: restClient,
-        blocProviders: getHotelBlocProviders(restClient, classificationId),
-      );
-      await CommonTest.createCompanyAndAdmin(tester);
-      await selectRoomTypes(tester);
-      await ProductTest.addProducts(tester, productsHotel.sublist(0, 1),
-          classificationId: "AppHotel"); // room types
-    } catch (error) {
-      await CommonTest.takeScreenShot(
-          binding: binding, tester: tester, screenShotName: "room_types_Error");
-      rethrow;
-    }
-  }, skip: false);
-
-  testWidgets("test rooms", (WidgetTester tester) async {
-    try {
-      RestClient restClient = RestClient(await buildDioClient());
-      await CommonTest.startTestApp(
-        clear: true,
-        title: 'Hotel Room Test',
-        tester,
-        router.generateRoute,
-        menuOptions,
-        delegates,
-        restClient: restClient,
-        blocProviders: getHotelBlocProviders(restClient, 'AppAdmin'),
-      );
-      await CommonTest.createCompanyAndAdmin(tester,
-          testData: {"products": productsHotel});
-      await selectRooms(tester);
-      await AssetTest.addAssets(tester, roomsHotel.sublist(0, 4),
-          classificationId: "AppHotel"); // actual rooms
-    } catch (error) {
-      await CommonTest.takeScreenShot(
-          binding: binding, tester: tester, screenShotName: "test_rooms_Error");
-      rethrow;
-    }
-  }, skip: false);
-
-  testWidgets("test customer company", (WidgetTester tester) async {
-    try {
-      RestClient restClient = RestClient(await buildDioClient());
-      await CommonTest.startTestApp(
-          clear: true,
-          title: 'Hotel customer,company Test',
-          tester,
-          router.generateRoute,
-          menuOptions,
-          delegates,
-          restClient: restClient,
-          blocProviders: getHotelBlocProviders(restClient, 'AppAdmin'));
-      await CommonTest.createCompanyAndAdmin(tester);
-      await selectCompanyCustomers(tester);
-      await CompanyTest.enterCompanyData(tester, customerCompanies);
-    } catch (error) {
-      await CommonTest.takeScreenShot(
-          binding: binding,
-          tester: tester,
-          screenShotName: "hotel_customer_Error");
-      rethrow;
-    }
-  }, skip: false);
-
-  testWidgets("test customer contact", (WidgetTester tester) async {
-    RestClient restClient = RestClient(await buildDioClient());
-    try {
-      await CommonTest.startTestApp(
-        clear: true,
-        title: 'Hotel customer,contacts Test',
-        tester,
-        router.generateRoute,
-        menuOptions,
-        delegates,
-        restClient: restClient,
-        blocProviders: getHotelBlocProviders(restClient, 'AppAdmin'),
-      );
-      await CommonTest.createCompanyAndAdmin(tester);
-      await selectUserCustomers(tester);
-      await UserTest.addCustomers(tester, customers);
-    } catch (error) {
-      await CommonTest.takeScreenShot(
-          binding: binding,
-          tester: tester,
-          screenShotName: "hotel_customer_contact_Error");
-      rethrow;
-    }
-  }, skip: false);
-
   testWidgets("test room reservation", (WidgetTester tester) async {
-    try {
-      RestClient restClient = RestClient(await buildDioClient());
-      await CommonTest.startTestApp(
-        clear: true,
-        title: 'Hotel reservation Test',
-        tester,
-        router.generateRoute,
-        menuOptions,
-        delegates,
-        restClient: restClient,
-        blocProviders: getHotelBlocProviders(restClient, classificationId),
-        classificationId: classificationId,
-      );
-      await CommonTest.createCompanyAndAdmin(tester, testData: {
-        "assets": roomsHotel, // will also add products
-        "users": customers
-      });
-      await CommonTest.waitForSnackbarToGo(tester);
-      await CommonTest.tapByKey(tester, 'refresh');
-      await createRoomReservation(tester, roomReservations);
-      await selectReservations(tester);
-      await OrderTest.checkRentalSalesOrder(tester);
-      await OrderTest.checkRentalSalesOrderBlocDates(tester);
-      await OrderTest.approveSalesOrder(tester, classificationId: 'AppHotel');
-      await InvoiceTest.selectSalesInvoices(tester);
-      await InvoiceTest.checkInvoices(tester);
-      await InvoiceTest.sendOrApproveInvoices(tester);
-      await CommonTest.gotoMainMenu(tester);
-      await selectReservations(tester);
-      await CommonTest.tapByKey(tester, 'nextStatus0',
-          seconds: 5); // to completed
-      await OrderTest.checkOrderCompleted(tester, classificationId: 'AppHotel');
-    } catch (error) {
-      await CommonTest.takeScreenShot(
-          binding: binding,
-          tester: tester,
-          screenShotName: "hotel_room_reservation_Error");
-      rethrow;
-    }
+    RestClient restClient = RestClient(await buildDioClient());
+    await CommonTest.startTestApp(
+      clear: true,
+      title: 'Hotel reservation Test',
+      tester,
+      router.generateRoute,
+      menuOptions,
+      delegates,
+      restClient: restClient,
+      blocProviders: getHotelBlocProviders(restClient, classificationId),
+      classificationId: classificationId,
+    );
+    await CommonTest.createCompanyAndAdmin(tester, testData: {
+      "assets": roomsHotel, // will also add products
+      "users": customers
+    });
+    await CommonTest.waitForSnackbarToGo(tester);
+    await CommonTest.tapByKey(tester, 'refresh');
+    await createRoomReservation(tester, roomReservations);
+    await selectReservations(tester);
+    await FinDocTest.checkFinDocDetail(tester, FinDocType.order,
+        rental: true, classificationId: 'AppHotel');
+    await OrderTest.checkRentalSalesOrderBlocDates(tester);
+    await OrderTest.approveOrders(tester, classificationId: classificationId);
+    await InvoiceTest.selectSalesInvoices(tester);
+    await InvoiceTest.checkInvoices(tester);
+    await InvoiceTest.sendOrApproveInvoices(tester);
+    await CommonTest.gotoMainMenu(tester);
+    await selectReservations(tester);
+    await OrderTest.completeOrders(tester,
+        classificationId: classificationId); // to completed
+    await OrderTest.checkOrderCompleted(tester,
+        classificationId: classificationId);
   }, skip: false);
 }
 
@@ -218,7 +111,7 @@ Future<void> createRoomReservation(
   for (FinDoc finDoc in finDocs) {
     await CommonTest.tapByKey(tester, 'addNew');
     await CommonTest.tapByKey(tester, 'customer');
-    await CommonTest.tapByText(tester, finDoc.otherUser!.company!.name!);
+    await CommonTest.tapByText(tester, finDoc.otherUser!.company?.name! ?? '');
     await CommonTest.tapByKey(tester, 'product', seconds: 5);
     await CommonTest.tapByText(tester, finDoc.items[0].description!);
     await CommonTest.tapByKey(tester, 'setDate');
@@ -244,7 +137,7 @@ Future<void> createRoomReservation(
     for (int index = 0; index < finDoc.items.length; index++) {
       var productId = CommonTest.getTextField('itemProductId$index');
       FinDocItem newItem =
-          finDoc.items[index].copyWith(product: Product(productId: productId));
+          finDoc.items[index].copyWith(product: Product(pseudoId: productId));
       newItems[index] = newItem;
     }
     await CommonTest.tapByKey(tester, 'cancel'); // close again

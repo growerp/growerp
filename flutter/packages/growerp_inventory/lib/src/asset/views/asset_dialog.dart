@@ -311,64 +311,66 @@ class AssetDialogState extends State<AssetDialog> {
                     isExpanded: true,
                   ),
                 ),
-                Expanded(
-                  child: BlocBuilder<DataFetchBloc<Locations>, DataFetchState>(
-                      builder: (context, state) {
-                    switch (state.status) {
-                      case DataFetchStatus.failure:
-                        return const FatalErrorForm(
-                            message: 'server connection problem');
-                      case DataFetchStatus.success:
-                        return DropdownSearch<Location>(
-                            key: const Key('locationDropDown'),
-                            selectedItem: _selectedLocation,
-                            popupProps: PopupProps.menu(
-                              isFilterOnline: true,
-                              showSearchBox: true,
-                              searchFieldProps: TextFieldProps(
-                                autofocus: true,
-                                decoration: const InputDecoration(
-                                    labelText: "location name"),
-                                controller: _locationSearchBoxController,
+                if (classificationId != 'AppHotel')
+                  Expanded(
+                    child:
+                        BlocBuilder<DataFetchBloc<Locations>, DataFetchState>(
+                            builder: (context, state) {
+                      switch (state.status) {
+                        case DataFetchStatus.failure:
+                          return const FatalErrorForm(
+                              message: 'server connection problem');
+                        case DataFetchStatus.success:
+                          return DropdownSearch<Location>(
+                              key: const Key('locationDropDown'),
+                              selectedItem: _selectedLocation,
+                              popupProps: PopupProps.menu(
+                                isFilterOnline: true,
+                                showSearchBox: true,
+                                searchFieldProps: TextFieldProps(
+                                  autofocus: true,
+                                  decoration: const InputDecoration(
+                                      labelText: "location name"),
+                                  controller: _locationSearchBoxController,
+                                ),
+                                menuProps: MenuProps(
+                                    borderRadius: BorderRadius.circular(20.0)),
+                                title: popUp(
+                                  context: context,
+                                  title: 'Select location',
+                                  height: 50,
+                                ),
                               ),
-                              menuProps: MenuProps(
-                                  borderRadius: BorderRadius.circular(20.0)),
-                              title: popUp(
-                                context: context,
-                                title: 'Select location',
-                                height: 50,
-                              ),
-                            ),
-                            dropdownDecoratorProps:
-                                const DropDownDecoratorProps(
-                                    dropdownSearchDecoration:
-                                        InputDecoration(labelText: 'Location')),
-                            itemAsString: (Location? u) =>
-                                " ${u?.locationName ?? ''}",
-                            asyncItems: (String filter) {
-                              _locationBloc.add(GetDataEvent(() => context
-                                  .read<RestClient>()
-                                  .getLocation(
-                                      searchString: filter, limit: 3)));
-                              return Future.delayed(
-                                  const Duration(milliseconds: 250), () {
-                                return Future.value(
-                                    (_locationBloc.state.data as Locations)
-                                        .locations);
+                              dropdownDecoratorProps:
+                                  const DropDownDecoratorProps(
+                                      dropdownSearchDecoration: InputDecoration(
+                                          labelText: 'Location')),
+                              itemAsString: (Location? u) =>
+                                  " ${u?.locationName ?? ''}",
+                              asyncItems: (String filter) {
+                                _locationBloc.add(GetDataEvent(() => context
+                                    .read<RestClient>()
+                                    .getLocation(
+                                        searchString: filter, limit: 3)));
+                                return Future.delayed(
+                                    const Duration(milliseconds: 250), () {
+                                  return Future.value(
+                                      (_locationBloc.state.data as Locations)
+                                          .locations);
+                                });
+                              },
+                              compareFn: (item, sItem) =>
+                                  item.locationId == sItem.locationId,
+                              onChanged: (Location? newValue) {
+                                setState(() {
+                                  _selectedLocation = newValue!;
+                                });
                               });
-                            },
-                            compareFn: (item, sItem) =>
-                                item.locationId == sItem.locationId,
-                            onChanged: (Location? newValue) {
-                              setState(() {
-                                _selectedLocation = newValue!;
-                              });
-                            });
-                      default:
-                        return const Center(child: LoadingIndicator());
-                    }
-                  }),
-                )
+                        default:
+                          return const Center(child: LoadingIndicator());
+                      }
+                    }),
+                  )
               ],
             ),
             const SizedBox(height: 20),

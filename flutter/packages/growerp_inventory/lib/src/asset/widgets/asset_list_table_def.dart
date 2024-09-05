@@ -79,7 +79,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         value: Text(item.location?.locationId ?? '')));
   }
   rowContent.add(TableRowContent(
-      name: const Text('Act'),
+      name: const Text('Active', textAlign: TextAlign.center),
       width: 8,
       value: Text(item.statusId == 'Deactivated' ? 'N' : 'Y',
           key: Key('status$index'), textAlign: TextAlign.center)));

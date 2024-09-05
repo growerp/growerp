@@ -392,31 +392,33 @@ class CompanyFormState extends State<CompanyDialog> {
           return null;
         },
       ),
-      Row(children: [
-        Expanded(
-            child: TextFormField(
-          key: const Key('vatPerc'),
-          readOnly: !isAdmin,
-          keyboardType: TextInputType.number,
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-          ],
-          decoration: const InputDecoration(labelText: 'VAT. percentage'),
-          controller: _vatPercController,
-        )),
-        const SizedBox(width: 10),
-        Expanded(
-            child: TextFormField(
-          key: const Key('salesPerc'),
-          readOnly: !isAdmin,
-          keyboardType: TextInputType.number,
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-          ],
-          decoration: const InputDecoration(labelText: 'Sales Tax percentage'),
-          controller: _salesPercController,
-        ))
-      ]),
+      if (company.role == Role.company)
+        Row(children: [
+          Expanded(
+              child: TextFormField(
+            key: const Key('vatPerc'),
+            readOnly: !isAdmin,
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+            ],
+            decoration: const InputDecoration(labelText: 'VAT. percentage'),
+            controller: _vatPercController,
+          )),
+          const SizedBox(width: 10),
+          Expanded(
+              child: TextFormField(
+            key: const Key('salesPerc'),
+            readOnly: !isAdmin,
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+            ],
+            decoration:
+                const InputDecoration(labelText: 'Sales Tax percentage'),
+            controller: _salesPercController,
+          ))
+        ]),
       InputDecorator(
           decoration: const InputDecoration(
             labelText: 'Postal Address',

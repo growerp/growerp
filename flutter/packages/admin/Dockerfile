@@ -30,10 +30,12 @@ RUN dart pub global activate melos 3.4.0
 ENV PATH="$PATH":"$HOME/.pub-cache/bin"
 
 # copy source code to folder
-COPY --chown=myuser:myuser . $HOME
-# stup new folder as the working directory
 WORKDIR $HOME
-RUN sed -i 's\//webactivate \\' $HOME/packages/admin/lib/main.dart
+RUN git clone --depth 1 https://github.com/growerp/growerp
+WORKDIR $HOME/growerp/flutter
+# COPY --chown=myuser:myuser . $HOME
+# stup new folder as the working directory
+RUN sed -i 's\//webactivate \\' $HOME/growerp/flutter/packages/admin/lib/main.dart
 RUN melos clean
 RUN melos bootstrap
 # localization
@@ -42,18 +44,18 @@ RUN melos l10n --no-select
 RUN melos build --no-select
 # build flutter app
 # Run build: 1 - clean, 2 - pub get, 3 - build web
-WORKDIR $HOME/packages/admin
+WORKDIR $HOME/growerp/flutter/packages/admin
 RUN flutter clean
 RUN flutter pub get
 RUN flutter build web
 
-# once heare the app will be compiled and ready to deploy
+# once here the app will be compiled and ready to deploy
 
 # use nginx to deploy
 FROM nginx:1.25.2-alpine
 
 # copy the info of the build web app to nginx
-COPY --from=build-env /home/myuser/packages/admin/build/web /usr/share/nginx/html
+COPY --from=build-env /home/myuser/growerp/flutter/packages/admin/build/web /usr/share/nginx/html
 
 # Expose and run nginx
 EXPOSE 80
