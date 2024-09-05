@@ -72,6 +72,6 @@ export(String? backendUrl, String outputDirectory, String username,
       file6.writeAsStringSync(csvContent);
     }
   } on DioException catch (e) {
-    logger.e("Exporting filetype: $fileType Error: ${await getDioError(e)}");
+    logger.e("Exporting filetype: $fileType Error: ${getDioError(e)}");
   }
 }

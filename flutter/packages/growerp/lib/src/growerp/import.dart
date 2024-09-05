@@ -35,7 +35,7 @@ Future<void> login(RestClient client, String username, String password,
         );
       }
     } catch (e) {
-      print("registration failed: ${await getDioError(e)}");
+      print("registration failed: ${getDioError(e)}");
     }
   }
 
