@@ -78,8 +78,10 @@ class CompanyTest {
         c = c.copyWith(email: c.email!.replaceFirst('XXX', '${seq++}'));
       }
       await CommonTest.enterText(tester, 'email', c.email ?? '');
-      await CommonTest.enterText(tester, 'vatPerc', c.vatPerc.toString());
-      await CommonTest.enterText(tester, 'salesPerc', c.salesPerc.toString());
+      if (c.role == Role.company) {
+        await CommonTest.enterText(tester, 'vatPerc', c.vatPerc.toString());
+        await CommonTest.enterText(tester, 'salesPerc', c.salesPerc.toString());
+      }
       // if required add address and payment
       if (c.address != null) {
         await updateAddress(tester, c.address!);
@@ -134,11 +136,13 @@ class CompanyTest {
           equals(c.telephoneNr ?? ''));
       expect(CommonTest.getDropdown('currency'),
           equals(c.currency?.description ?? ''));
-      expect(CommonTest.getTextFormField('vatPerc'),
-          equals(c.vatPerc != null ? c.vatPerc.toString() : '0'));
-      expect(CommonTest.getTextFormField('salesPerc'),
-          equals(c.salesPerc != null ? c.salesPerc.toString() : '0'));
-      await CommonTest.dragNew(tester, key: 'salesPerc');
+      if (c.role == Role.company) {
+        expect(CommonTest.getTextFormField('vatPerc'),
+            equals(c.vatPerc != null ? c.vatPerc.toString() : '0'));
+        expect(CommonTest.getTextFormField('salesPerc'),
+            equals(c.salesPerc != null ? c.salesPerc.toString() : '0'));
+        await CommonTest.dragNew(tester, key: 'salesPerc');
+      }
       expect(
           CommonTest.getTextField('addressLabel'),
           equals(c.address == null

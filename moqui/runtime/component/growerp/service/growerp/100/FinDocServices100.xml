@@ -3050,7 +3050,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="!finDocItem.asset.location.locationId">
                     <!-- if empty create new location -->
                     <service-call name="growerp.100.InventoryServices100.create#Location"
-                        in-map="[locationName: finDocItem.asset.location.locationName ?: '${sid.pseudoId}(${nowDate})']"
+                        in-map="[location: [locationName: finDocItem.asset.location.locationName ?: '${sid.pseudoId}(${nowDate})']]"
                         out-map="context" />
                     <set field="finDocItem.asset.location.locationId" from="location.locationId" />
                 </if>

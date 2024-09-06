@@ -143,8 +143,7 @@ class UserTest {
         expect(
             CommonTest.getTextField('topHeader').split('#')[1], user.pseudoId);
       }
-      expect(find.byKey(Key('UserDialog${user.company!.role!.name}')),
-          findsOneWidget);
+      expect(find.byKey(Key('UserDialog${user.role!.name}')), findsOneWidget);
       await CommonTest.enterText(tester, 'firstName', user.firstName!);
       await CommonTest.enterText(tester, 'lastName', user.lastName!);
 
@@ -157,7 +156,7 @@ class UserTest {
           tester, 'userTelephoneNr', user.telephoneNr ?? '');
 
       // company info fixed for employees
-      if (currentRole != Role.company && user.company != null) {
+      if (currentRole != Role.company && user.company?.partyId != null) {
         await CommonTest.drag(tester);
         await CommonTest.tapByKey(tester, 'newCompany');
         await CommonTest.enterText(
@@ -211,7 +210,7 @@ class UserTest {
       expect(CommonTest.getTextFormField('userTelephoneNr'),
           equals(user.telephoneNr ?? ''));
 
-      if (currentRole != Role.company && user.company != null) {
+      if (currentRole != Role.company && user.company?.partyId != null) {
         await CommonTest.drag(tester);
         await CommonTest.tapByKey(tester, 'editCompany');
         expect(CommonTest.getTextFormField('companyName'),

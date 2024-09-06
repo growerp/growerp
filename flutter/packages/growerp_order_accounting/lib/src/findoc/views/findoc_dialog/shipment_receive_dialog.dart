@@ -257,7 +257,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                       setState(() {
                         if (confirm == false) {
                           newItems.forEachIndexed((index, value) {
-                            final asset = value.asset!.copyWith(
+                            final asset = Asset(
                                 location: _selectedLocations[index]
                                             .locationId !=
                                         null

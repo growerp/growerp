@@ -111,15 +111,15 @@ void main() async {
       print("=== create docker image: $dockerImage with tag: latest");
       if (!test) {
         if (app == 'growerp-moqui') {
-          run('docker build --progress=plain -t $dockerImage:latest . ',
+          run('docker build --progress=plain -t $dockerImage:latest . --no-cache',
               workingDirectory: '$home/moqui');
         } else {
           run(
               'docker build --file $home/flutter/packages/$app/Dockerfile '
-              ' --progress=plain -t $dockerImage:latest . ',
+              '--progress=plain -t $dockerImage:latest . --no-cache',
               workingDirectory: '$home/flutter');
         }
-        print("=== Image $dockerImage:latest created.");
+        print("=== Image $dockerImage:latest created. (version: $dockerTag)");
         if (push.toUpperCase() == 'Y') {
           print(
               "=== pushing docker image: $dockerImage with tag: latest to growerp.org");
