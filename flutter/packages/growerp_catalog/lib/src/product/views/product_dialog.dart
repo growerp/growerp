@@ -175,9 +175,12 @@ class ProductDialogState extends State<ProductDialog> {
               child: popUp(
                   context: context,
                   child: listChild(classificationId, isPhone, categoryState),
-                  title: classificationId == 'AppAdmin'
-                      ? 'Product Information'
-                      : 'Room Type Information',
+                  title: (classificationId == 'AppAdmin'
+                          ? 'Product #'
+                          : 'Room Type #') +
+                      (widget.product.productId.isEmpty
+                          ? 'New'
+                          : widget.product.pseudoId),
                   height: classificationId == 'AppAdmin' ? 750 : 600,
                   width: isPhone ? 450 : 800));
         }
@@ -460,16 +463,6 @@ class ProductDialogState extends State<ProductDialog> {
                   key: const Key('listView'),
                   controller: _scrollController,
                   child: Column(children: <Widget>[
-                    Center(
-                        child: Text(
-                      'Product #${widget.product.productId.isEmpty ? " New" : widget.product.productId}',
-                      style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold),
-                      key: const Key('header'),
-                    )),
-                    const SizedBox(height: 10),
                     CircleAvatar(
                         radius: 60,
                         child: _imageFile != null

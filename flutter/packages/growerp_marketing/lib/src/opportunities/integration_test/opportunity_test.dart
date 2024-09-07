@@ -97,11 +97,10 @@ class OpportunityTest {
       await CommonTest.enterDropDown(tester, 'stageId', opportunity.stageId!);
       await CommonTest.enterDropDownSearch(
           tester, 'lead', opportunity.leadUser!.firstName!,
-          seconds: 3);
+          seconds: CommonTest.waitTime);
       await CommonTest.enterDropDownSearch(
           tester, 'employee', opportunity.employeeUser!.firstName!,
-          seconds: 3);
-      await CommonTest.drag(tester, seconds: 1);
+          seconds: CommonTest.waitTime);
       await CommonTest.tapByKey(tester, 'update');
       await CommonTest.waitForSnackbarToGo(tester);
     }

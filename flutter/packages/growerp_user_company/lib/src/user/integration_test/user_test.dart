@@ -292,7 +292,8 @@ class UserTest {
   static Future<void> deleteUser(WidgetTester tester, int count) async {
     expect(find.byKey(const Key('userItem')),
         findsNWidgets(count)); // initial admin
-    await CommonTest.tapByKey(tester, 'delete${count - 1}', seconds: 5);
+    await CommonTest.tapByKey(tester, 'delete${count - 1}',
+        seconds: CommonTest.waitTime);
     expect(find.byKey(const Key('userItem')), findsNWidgets(count - 1));
   }
 

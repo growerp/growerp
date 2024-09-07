@@ -63,7 +63,8 @@ class LedgerJournalTest {
     if (count == test.ledgerJournals.length) {
       await CommonTest.gotoMainMenu(tester);
       await selectLedgerJournal(tester);
-      await CommonTest.tapByKey(tester, 'delete${count - 1}', seconds: 5);
+      await CommonTest.tapByKey(tester, 'delete${count - 1}',
+          seconds: CommonTest.waitTime);
       await CommonTest.gotoMainMenu(tester);
       await selectLedgerJournal(tester);
       expect(

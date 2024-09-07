@@ -32,7 +32,7 @@ class AuthTest {
     await enterCurrency(tester, company.currency!);
     await CommonTest.drag(tester, seconds: 10);
     await clearDemoData(tester);
-    await CommonTest.drag(tester, seconds: 5);
+    await CommonTest.drag(tester, seconds: CommonTest.waitTime);
     await pressRegisterAndcreateNewAdminAndCompany(tester);
   }
 
@@ -56,7 +56,8 @@ class AuthTest {
 
   static Future<void> logout(WidgetTester tester) async {
     await gotoMainMenu(tester);
-    await CommonTest.tapByKey(tester, 'logoutButton', seconds: 5);
+    await CommonTest.tapByKey(tester, 'logoutButton',
+        seconds: CommonTest.waitTime);
     await CommonTest.checkWidgetKey(tester, 'HomeFormUnAuth');
   }
 
@@ -67,7 +68,7 @@ class AuthTest {
   }
 
   static Future<void> clearDemoData(WidgetTester tester) async {
-    await CommonTest.tapByKey(tester, 'demoData', seconds: 5);
+    await CommonTest.tapByKey(tester, 'demoData', seconds: CommonTest.waitTime);
   }
 
   static Future<void> enterCompanyName(WidgetTester tester, String name) async {
@@ -109,7 +110,7 @@ class AuthTest {
   }
 
   static Future<void> pressLogin(WidgetTester tester) async {
-    await CommonTest.tapByKey(tester, 'login', seconds: 5);
+    await CommonTest.tapByKey(tester, 'login', seconds: CommonTest.waitTime);
   }
 
   static Future<void> logoutIfRequired(WidgetTester tester) async {
@@ -118,7 +119,7 @@ class AuthTest {
     } catch (_) {
       // assumes still logged in, so logout
       await CommonTest.tapByKey(tester, 'logoutButton');
-      await tester.pump(const Duration(seconds: 5));
+      await tester.pump(const Duration(seconds: CommonTest.waitTime));
       expect(find.byKey(const Key('HomeFormUnAuth')), findsOneWidget);
     }
   }
@@ -129,8 +130,9 @@ class AuthTest {
 
   static Future<void> pressRegisterAndcreateNewAdminAndCompany(
       WidgetTester tester) async {
-    await CommonTest.tapByKey(tester, 'newCompany', seconds: 5);
-    await tester.pumpAndSettle(const Duration(seconds: 5));
+    await CommonTest.tapByKey(tester, 'newCompany',
+        seconds: CommonTest.waitTime);
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     await tester.pumpAndSettle();
   }
 }

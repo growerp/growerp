@@ -90,7 +90,8 @@ class OrderTest {
       await CommonTest.tapByText(tester, finDoc.otherCompany!.name!);
       await CommonTest.enterText(tester, 'description', finDoc.description!);
       await CommonTest.tapByKey(tester, 'itemRental');
-      await CommonTest.tapByKey(tester, 'product', seconds: 5);
+      await CommonTest.tapByKey(tester, 'product',
+          seconds: CommonTest.waitTime);
       await CommonTest.tapByText(tester, finDoc.items[0].description!);
       await CommonTest.tapByKey(tester, 'setDate');
       await CommonTest.tapByTooltip(tester, 'Switch to input');
@@ -106,7 +107,7 @@ class OrderTest {
       await CommonTest.drag(tester, listViewName: 'listView4');
       await CommonTest.tapByKey(tester, 'okRental');
       await CommonTest.drag(tester);
-      await CommonTest.tapByKey(tester, 'update', seconds: 3);
+      await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
       // tap orderId added at the top to get detail
       await CommonTest.tapByKey(tester, 'id0');
       // get all productId's

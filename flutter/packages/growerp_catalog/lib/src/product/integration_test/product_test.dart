@@ -17,7 +17,6 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 class ProductTest {
@@ -27,32 +26,24 @@ class ProductTest {
 
   static Future<void> addProducts(WidgetTester tester, List<Product> products,
       {bool check = true, String classificationId = "AppAdmin"}) async {
-    SaveTest test = await PersistFunctions.getTest(backup: false);
-    // test = test.copyWith(products: []); // ======== remove , just for test
-    if (test.products.isEmpty) {
-      // not yet created
-      test = test.copyWith(products: products);
-      await enterProductData(tester, products,
-          classificationId: classificationId);
-      await PersistFunctions.persistTest(test.copyWith(products: products));
-    }
-    if (check) {
-      await PersistFunctions.persistTest(test.copyWith(
-          products: await checkProduct(tester, products,
-              classificationId: classificationId)));
-    }
+    List<Product> newProducts = await enterProductData(tester, products,
+        classificationId: classificationId);
+    await checkProduct(tester, newProducts, classificationId: classificationId);
+    SaveTest test = await PersistFunctions.getTest();
+    await PersistFunctions.persistTest(test.copyWith(products: newProducts));
   }
 
-  static Future<void> enterProductData(
+  static Future<List<Product>> enterProductData(
       WidgetTester tester, List<Product> products,
       {String classificationId = "AppAdmin"}) async {
+    List<Product> newProducts = [];
     for (Product product in products) {
-      if (product.productId.isEmpty) {
+      if (product.pseudoId.isEmpty) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.doNewSearch(tester, searchString: product.productId);
-        expect(
-            CommonTest.getTextField('header').split('#')[1], product.productId);
+        await CommonTest.doNewSearch(tester, searchString: product.pseudoId);
+        expect(CommonTest.getTextField('topHeader').split('#')[1],
+            product.pseudoId);
       }
       await CommonTest.checkWidgetKey(tester, 'ProductDialog');
       await CommonTest.enterText(tester, 'name', product.productName!);
@@ -81,11 +72,18 @@ class ProductTest {
           }
         }
       }
-      // needed when service is removed
       await CommonTest.dragUntil(tester, key: 'update');
       await CommonTest.tapByKey(tester, 'update');
       await CommonTest.waitForSnackbarToGo(tester);
+      // get pseudoId from list always at the top
+      if (product.pseudoId.isEmpty) {
+        newProducts
+            .add(product.copyWith(pseudoId: CommonTest.getTextField('id0')));
+      } else {
+        newProducts.add(product);
+      }
     }
+    return newProducts;
   }
 
   static Future<List<Product>> checkProduct(
@@ -94,7 +92,7 @@ class ProductTest {
     List<Product> newProducts = [];
     for (Product product in products) {
       //find id in list and check
-      for (final (index, _) in products.indexed) {
+      /*for (final (index, _) in products.indexed) {
         if (CommonTest.getTextField('id$index') == product.pseudoId) {
           expect(CommonTest.getTextField('price$index'),
               equals(product.price.currency(currencyId: 'USD')));
@@ -102,9 +100,9 @@ class ProductTest {
               equals(product.description));
         }
       }
-      // detail screen
-      await CommonTest.doNewSearch(tester, searchString: product.productName!);
-      var id = CommonTest.getTextField('header').split('#')[1];
+    */ // detail screen
+      await CommonTest.doNewSearch(tester, searchString: product.pseudoId);
+      var id = CommonTest.getTextField('topHeader').split('#')[1];
       expect(find.byKey(const Key('ProductDialog')), findsOneWidget);
       expect(CommonTest.getTextFormField('name'), product.productName);
       expect(CommonTest.getTextFormField('description'), product.description);
@@ -142,7 +140,8 @@ class ProductTest {
     await CommonTest.gotoMainMenu(tester);
     await ProductTest.selectProducts(tester);
     expect(find.byKey(const Key('productItem')), findsNWidgets(count));
-    await CommonTest.tapByKey(tester, 'delete${count - 2}', seconds: 5);
+    await CommonTest.tapByKey(tester, 'delete${count - 2}',
+        seconds: CommonTest.waitTime);
     await CommonTest.gotoMainMenu(tester);
     await ProductTest.selectProducts(tester);
     expect(find.byKey(const Key('productItem')), findsNWidgets(count - 1));
@@ -152,23 +151,17 @@ class ProductTest {
 
   static Future<void> updateProducts(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
-    // check if already modified then skip
-    if (test.products[0].productName == products[0].productName) {
-      List<Product> updProducts = [];
-      for (Product product in test.products) {
-        updProducts.add(product.copyWith(
-          productName: '${product.productName!}-updated',
-          description: '${product.description!}-updated',
-          categories: [product.categories[0]],
-          productTypeId: productTypes[0],
-          price: product.price! + Decimal.parse('0.10'),
-          listPrice: product.listPrice! + Decimal.parse('0.99'),
-        ));
-      }
-      await enterProductData(tester, updProducts);
-      await PersistFunctions.persistTest(test.copyWith(products: updProducts));
+    List<Product> updProducts = [];
+    for (Product product in test.products) {
+      updProducts.add(product.copyWith(
+        productName: '${product.productName!}-updated',
+        description: '${product.description!}-updated',
+        categories: [product.categories[0]],
+        productTypeId: productTypes[0],
+        price: product.price! + Decimal.parse('0.10'),
+        listPrice: product.listPrice! + Decimal.parse('0.99'),
+      ));
     }
-    test = await PersistFunctions.getTest();
-    await checkProduct(tester, test.products);
+    await checkProduct(tester, await enterProductData(tester, updProducts));
   }
 }

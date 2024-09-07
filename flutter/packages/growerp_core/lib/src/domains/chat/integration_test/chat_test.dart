@@ -64,7 +64,8 @@ class ChatTest {
     await CommonTest.gotoMainMenu(tester);
     await selectChatRoom(tester);
     expect(find.byKey(const Key('chatRoomItem')), findsNWidgets(count));
-    await CommonTest.tapByKey(tester, 'delete${count - 1}', seconds: 5);
+    await CommonTest.tapByKey(tester, 'delete${count - 1}',
+        seconds: CommonTest.waitTime);
     await CommonTest.gotoMainMenu(tester);
     await selectChatRoom(tester);
     expect(find.byKey(const Key('chatRoomItem')), findsNWidgets(count - 1));

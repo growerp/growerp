@@ -35,7 +35,7 @@ class TaskTest {
   }
 
   static Future<void> pressCreate(WidgetTester tester) async {
-    await CommonTest.tapByKey(tester, 'update', seconds: 5);
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
   }
 
   static Future<void> showNewDetail(WidgetTester tester) async {

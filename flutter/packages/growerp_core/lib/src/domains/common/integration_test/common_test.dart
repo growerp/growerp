@@ -44,7 +44,7 @@ class CommonTest {
     await tester.pumpAndSettle();
   }
 
-  static const int waitTime = 3;
+  static const int waitTime = 2;
 
   static Future<void> startTestApp(
       WidgetTester tester,
@@ -239,7 +239,7 @@ class CommonTest {
           reason: "could not find tooltip: 'Open navigation menu' to tap on");
       await tester.tap(find.byTooltip('Open navigation menu'),
           warnIfMissed: false);
-      await tester.pump(const Duration(seconds: 3));
+      await tester.pump(const Duration(seconds: waitTime));
     }
     if (!option.startsWith('tap')) {
       if (option.startsWith('db')) {
@@ -250,7 +250,7 @@ class CommonTest {
       }
       option = "tap$option";
     }
-    await tapByKey(tester, option, seconds: 3);
+    await tapByKey(tester, option, seconds: waitTime);
     if (tapNumber != null) {
       if (isPhone()) {
         await tapByTooltip(tester, tapNumber);

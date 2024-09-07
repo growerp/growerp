@@ -1688,7 +1688,7 @@ along with this software (see the LICENSE.md file). If not, see
                         base64: user.image]" />
             </if>
             <!-- related company changes if any -->
-            <if condition="user.company.partyId != oldValue.user.company.partyId">
+            <if condition="user.company?.partyId != oldValue.user.company?.partyId">
                 <!-- delete  old relationship -->
                 <entity-delete-by-condition entity-name="mantle.party.PartyRelationship">
                     <econdition field-name="fromPartyId" from="oldValue.user.partyId" />
@@ -2554,10 +2554,12 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="productTypeEnumId" value="PtAsset" />
                     </entity-find>
                     <iterate list="products" entry="product">
+                        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                            in-map="[ownerPartyId: ownerPartyId, seqName: 'product']"
+                            out-map="context" />
                         <service-call name="create#mantle.product.Product"
-                            in-map="product + [productId: null, pseudoId: null,
-                                    ownerPartyId: ownerPartyId,
-                                    pseudoId: null]"
+                            in-map="product + [productId: null, pseudoId: seqNum,
+                                    ownerPartyId: ownerPartyId]"
                             out-map="context" />
                         <set field="prodTrans[product.productId]" from="productId" />
                         <!-- content -->

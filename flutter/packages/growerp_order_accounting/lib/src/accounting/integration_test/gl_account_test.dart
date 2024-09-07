@@ -67,7 +67,8 @@ class GlAccountTest {
     if (count == test.glAccounts.length) {
       await CommonTest.gotoMainMenu(tester);
       await selectLedgerAccounts(tester);
-      await CommonTest.tapByKey(tester, 'delete${count - 1}', seconds: 5);
+      await CommonTest.tapByKey(tester, 'delete${count - 1}',
+          seconds: CommonTest.waitTime);
       await CommonTest.gotoMainMenu(tester);
       await selectLedgerAccounts(tester);
       expect(find.byKey(const Key('glAccountItem')), findsNWidgets(count - 1));
@@ -101,7 +102,7 @@ class GlAccountTest {
             tester, 'postedBalance', glAccount.postedBalance.toString());
       }
       await CommonTest.drag(tester);
-      await CommonTest.tapByKey(tester, 'update', seconds: 3);
+      await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
       await CommonTest.waitForSnackbarToGo(tester);
     }
   }

@@ -59,10 +59,11 @@ class InventoryTest {
         reason: 'This test needs orders created in previous steps');
     for (FinDoc order in orders) {
       await CommonTest.doSearch(tester, searchString: order.orderId!);
-      await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
+      await CommonTest.tapByKey(tester, 'nextStatus0',
+          seconds: CommonTest.waitTime);
       await CommonTest.checkWidgetKey(tester, 'ShipmentReceiveDialogPurchase');
-      await CommonTest.tapByKey(tester, 'update', seconds: 3);
-      await CommonTest.tapByKey(tester, 'update', seconds: 5);
+      await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
+      await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     }
   }
 
@@ -76,8 +77,10 @@ class InventoryTest {
       await CommonTest.doSearch(tester, searchString: order.orderId!);
       // save shipment id with order
       finDocs.add(order.copyWith(shipmentId: CommonTest.getTextField('id0')));
-      await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
-      await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
+      await CommonTest.tapByKey(tester, 'nextStatus0',
+          seconds: CommonTest.waitTime);
+      await CommonTest.tapByKey(tester, 'nextStatus0',
+          seconds: CommonTest.waitTime);
       expect(CommonTest.getTextField('status0'), equals('Completed'));
     }
     await PersistFunctions.persistTest(test.copyWith(orders: finDocs));

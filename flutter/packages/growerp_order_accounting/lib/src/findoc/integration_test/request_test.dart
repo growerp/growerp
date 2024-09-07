@@ -73,7 +73,7 @@ class RequestTest {
       await CommonTest.enterText(tester, 'description', request.description!);
       await CommonTest.enterDropDown(
           tester, 'requestType', request.requestType!.name);
-      await CommonTest.tapByKey(tester, 'update', seconds: 3);
+      await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
       await CommonTest.waitForSnackbarToGo(tester);
       newRequests
           .add(request.copyWith(requestId: CommonTest.getTextField('id0')));

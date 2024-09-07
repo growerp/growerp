@@ -112,7 +112,7 @@ Future<void> createRoomReservation(
     await CommonTest.tapByKey(tester, 'addNew');
     await CommonTest.tapByKey(tester, 'customer');
     await CommonTest.tapByText(tester, finDoc.otherUser!.company?.name! ?? '');
-    await CommonTest.tapByKey(tester, 'product', seconds: 5);
+    await CommonTest.tapByKey(tester, 'product', seconds: CommonTest.waitTime);
     await CommonTest.tapByText(tester, finDoc.items[0].description!);
     await CommonTest.tapByKey(tester, 'setDate');
     await CommonTest.tapByTooltip(tester, 'Switch to input');
@@ -129,7 +129,7 @@ Future<void> createRoomReservation(
     await CommonTest.enterText(
         tester, 'nbrOfRooms', finDoc.items.length.toString());
     await CommonTest.drag(tester);
-    await CommonTest.tapByKey(tester, 'update', seconds: 5);
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     // get productId's from reservations
     await selectReservations(tester);
     await CommonTest.tapByKey(tester, 'id0'); // added at the top

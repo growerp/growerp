@@ -132,7 +132,8 @@ class CategoryDialogState extends State<CategoryDialog> {
               child: popUp(
                   context: context,
                   child: listChild(productState),
-                  title: 'Category Information',
+                  title:
+                      'Category ${widget.category.categoryId.isEmpty ? 'New' : widget.category.pseudoId}',
                   height: 650,
                   width: 350));
         }

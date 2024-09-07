@@ -58,6 +58,6 @@ class ShipmentTest {
     }
     await PersistFunctions.persistTest(test.copyWith(orders: newOrders));
     await CommonTest.tapByKey(tester, 'update');
-    await CommonTest.tapByKey(tester, 'update', seconds: 5);
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
   }
 }

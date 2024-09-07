@@ -101,7 +101,7 @@ class CompanyTest {
       }
       await CommonTest.dragNew(tester, key: 'paymentMethodLabel');
       // add/update company record
-      await CommonTest.tapByKey(tester, 'update', seconds: 3);
+      await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
       // get pseudoId if not yet have (not for main company)
       if (clist.length > 1 && c.pseudoId == null) {
         await CommonTest.doNewSearch(tester, searchString: c.name!);

@@ -26,7 +26,8 @@ class WebsiteTest {
 
   static Future<void> updateHost(tester) async {
     await CommonTest.enterText(tester, 'urlInput', 'testingUrl');
-    await CommonTest.tapByKey(tester, 'updateHost', seconds: 3);
+    await CommonTest.tapByKey(tester, 'updateHost',
+        seconds: CommonTest.waitTime);
     expect(CommonTest.getTextFormField('urlInput'), equals('testingurl'));
     expect(CommonTest.getTextField("url"), startsWith('testingurl.'));
   }
@@ -40,33 +41,36 @@ class WebsiteTest {
   static Future<void> updateTextSection(tester) async {
     while (tester.any(find.byKey(const Key("deleteTextChip")))) {
       await CommonTest.tapByKey(tester, "deleteTextChip");
-      await CommonTest.tapByKey(tester, "continue", seconds: 3);
+      await CommonTest.tapByKey(tester, "continue",
+          seconds: CommonTest.waitTime);
     }
     await CommonTest.tapByKey(tester, 'addText');
     await CommonTest.enterText(tester, 'mdInput', '# Testingtext');
-    await CommonTest.tapByKey(tester, 'update', seconds: 3);
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     expect(CommonTest.getTextField("Testingtext"), equals('Testingtext'));
-    await CommonTest.tapByKey(tester, 'Testingtext', seconds: 3);
+    await CommonTest.tapByKey(tester, 'Testingtext',
+        seconds: CommonTest.waitTime);
     await CommonTest.enterText(tester, 'mdInput', '# TestingtextNew');
-    await CommonTest.tapByKey(tester, 'update', seconds: 3);
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     expect(CommonTest.getTextField("TestingtextNew"), equals('TestingtextNew'));
   }
 
   static Future<void> updateImages(tester) async {
     while (tester.any(find.byKey(const Key("deleteImageChip")))) {
       await CommonTest.tapByKey(tester, "deleteImageChip");
-      await CommonTest.tapByKey(tester, "continue", seconds: 3);
+      await CommonTest.tapByKey(tester, "continue",
+          seconds: CommonTest.waitTime);
       await CommonTest.waitForSnackbarToGo(tester);
     }
     await CommonTest.drag(tester);
     await CommonTest.tapByKey(tester, 'addImage');
     await CommonTest.enterText(tester, 'imageName', 'testingImage');
-    await CommonTest.tapByKey(tester, 'update', seconds: 3);
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     expect(tester.any(find.byKey(const Key('testingImage'))), equals(true),
         reason: 'testingImage found?');
     await CommonTest.tapByKey(tester, "testingImage");
     await CommonTest.enterText(tester, 'imageName', 'newTestingImage');
-    await CommonTest.tapByKey(tester, 'update', seconds: 3);
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     expect(tester.any(find.byKey(const Key('testingImage'))), equals(false),
         reason: 'testingImage NOT found?');
     expect(tester.any(find.byKey(const Key('newTestingImage'))), equals(true),
@@ -95,7 +99,8 @@ class WebsiteTest {
   static Future<void> updateShopCategories(tester) async {
     await CommonTest.drag(tester);
     while (tester.any(find.byKey(const Key("deleteCategoryChip")))) {
-      await CommonTest.tapByKey(tester, "deleteCategoryChip", seconds: 3);
+      await CommonTest.tapByKey(tester, "deleteCategoryChip",
+          seconds: CommonTest.waitTime);
       await CommonTest.tapByKey(tester, "continue", seconds: 2);
       await CommonTest.drag(tester);
     }
@@ -108,7 +113,8 @@ class WebsiteTest {
     expect(find.byKey(Key(categories[0].categoryName)), findsOneWidget,
         reason: 'category 0 should be present?');
     await CommonTest.drag(tester);
-    await CommonTest.tapByKey(tester, 'deleteCategoryChip', seconds: 3);
+    await CommonTest.tapByKey(tester, 'deleteCategoryChip',
+        seconds: CommonTest.waitTime);
     await CommonTest.tapByKey(tester, "continue", seconds: 2);
     await CommonTest.drag(tester);
     expect(find.byKey(Key(categories[0].categoryName)), findsNothing,

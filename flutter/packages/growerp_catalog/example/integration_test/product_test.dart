@@ -24,7 +24,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 void main() {
-  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
@@ -32,25 +32,19 @@ void main() {
   });
 
   testWidgets('''GrowERP product test''', (tester) async {
-    try {
-      RestClient restClient = RestClient(await buildDioClient());
-      await CommonTest.startTestApp(tester, generateRoute, menuOptions,
-          CatalogLocalizations.localizationsDelegates,
-          restClient: restClient,
-          blocProviders: getCatalogBlocProviders(restClient, 'AppAdmin'),
-          title: "Product test",
-          clear: true); // use data from previous run, ifnone same as true
-      await CommonTest.createCompanyAndAdmin(tester,
-          testData: {"categories": categories.sublist(0, 2)});
-      await ProductTest.selectProducts(tester);
-      await ProductTest.addProducts(tester, products);
-      await ProductTest.updateProducts(tester);
-      await ProductTest.deleteLastProduct(tester);
-      await CommonTest.logout(tester);
-    } catch (error) {
-      await CommonTest.takeScreenShot(
-          binding: binding, tester: tester, screenShotName: "Product_Error");
-      print("========== ${tester.testDescription} test failed: $error");
-    }
+    RestClient restClient = RestClient(await buildDioClient());
+    await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+        CatalogLocalizations.localizationsDelegates,
+        restClient: restClient,
+        blocProviders: getCatalogBlocProviders(restClient, 'AppAdmin'),
+        title: "Product test",
+        clear: true); // use data from previous run, ifnone same as true
+    await CommonTest.createCompanyAndAdmin(tester,
+        testData: {"categories": categories.sublist(0, 2)});
+    await ProductTest.selectProducts(tester);
+    await ProductTest.addProducts(tester, products);
+    await ProductTest.updateProducts(tester);
+    await ProductTest.deleteLastProduct(tester);
+    await CommonTest.logout(tester);
   });
 }

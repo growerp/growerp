@@ -73,7 +73,7 @@ class CategoryTest {
         }
       }
       await CommonTest.doNewSearch(tester,
-          searchString: category.categoryName, seconds: 5);
+          searchString: category.categoryName, seconds: CommonTest.waitTime);
       // detail
       await CommonTest.tapByKey(tester, 'name0');
       expect(find.byKey(const Key('CategoryDialog')), findsOneWidget);

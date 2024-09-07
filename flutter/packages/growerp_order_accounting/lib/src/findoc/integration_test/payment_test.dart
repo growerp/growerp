@@ -102,7 +102,7 @@ class PaymentTest {
       await CommonTest.enterDropDown(
           tester, 'paymentType', payment.items[0].paymentType!.accountCode);
 //      await CommonTest.drag(tester, listViewName: 'listView2', seconds: 2);
-      await CommonTest.tapByKey(tester, 'update', seconds: 3);
+      await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
       await CommonTest.waitForSnackbarToGo(tester);
       newPayments
           .add(payment.copyWith(paymentId: CommonTest.getTextField('id0')));
@@ -115,7 +115,7 @@ class PaymentTest {
       WidgetTester tester, List<FinDoc> payments) async {
     for (FinDoc payment in payments) {
       await CommonTest.doNewSearch(tester,
-          searchString: payment.paymentId!, seconds: 5);
+          searchString: payment.paymentId!, seconds: CommonTest.waitTime);
       expect(CommonTest.getDropdownSearch('otherCompany'),
           equals(payment.otherCompany!.name));
       expect(CommonTest.getDropdown('statusDropDown'),
