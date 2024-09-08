@@ -19,12 +19,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:hive/hive.dart';
+import 'package:stream_transform/stream_transform.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 
 import '../../../services/chat_server.dart';
 import '../../common/functions/functions.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
+
+EventTransformer<E> authDroppable<E>(Duration duration) {
+  return (events, mapper) {
+    return droppable<E>().call(events.throttle(duration), mapper);
+  };
+}
 
 /// Authbloc controls the connection to the backend
 ///
@@ -35,9 +43,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(this.chat, this.restClient, this.classificationId, this.company)
       : super(const AuthState()) {
     on<AuthLoad>(_onAuthLoad);
-    on<AuthRegister>(_onAuthRegister);
-    on<AuthLoggedOut>(_onAuthLoggedOut);
-    on<AuthLogin>(_onAuthLogin);
+    on<AuthRegister>(_onAuthRegister,
+        transformer: authDroppable(const Duration(milliseconds: 100)));
+    on<AuthLoggedOut>(_onAuthLoggedOut,
+        transformer: authDroppable(const Duration(milliseconds: 100)));
+    on<AuthLogin>(_onAuthLogin,
+        transformer: authDroppable(const Duration(milliseconds: 100)));
     on<AuthResetPassword>(_onAuthResetPassword);
     on<AuthChangePassword>(_onAuthChangePassword);
   }

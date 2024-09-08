@@ -45,6 +45,7 @@ class _GlAccountListHeaderState extends State<GlAccountListHeader> {
                         : MediaQuery.of(context).size.width - 350,
                     child: TextField(
                       key: const Key('searchField'),
+                      textInputAction: TextInputAction.search,
                       autofocus: true,
                       decoration: const InputDecoration(
                         focusedBorder: OutlineInputBorder(

@@ -63,15 +63,7 @@ class HomeFormState extends State<HomeForm> {
                     style: const TextStyle(fontSize: 10))
                 : const Text('')));
 
-    return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-      switch (state.status) {
-        case AuthStatus.failure:
-          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-          break;
-        default:
-          HelperFunctions.showMessage(context, state.message, Colors.green);
-      }
-    }, builder: (context, state) {
+    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       switch (state.status) {
         case AuthStatus.authenticated:
           if (['moreInfo', 'passwordChange']

@@ -58,12 +58,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-      if (state.status == AuthStatus.failure) {
-        HelperFunctions.showMessage(context, state.message, Colors.red);
-      }
       if (state.status == AuthStatus.unAuthenticated) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.green,
-            seconds: 10);
         Navigator.pop(context);
       }
     }, builder: (context, state) {

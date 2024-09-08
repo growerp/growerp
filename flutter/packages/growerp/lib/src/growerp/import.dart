@@ -138,7 +138,6 @@ import(String inputFile, String? backendUrl, String username, String password,
       }
     }
   } on DioException catch (e) {
-    logger.e(
-        "Importing filetype: ${fileType.name} Error: ${await getDioError(e)}");
+    logger.e("Importing filetype: ${fileType.name} Error: ${getDioError(e)}");
   }
 }

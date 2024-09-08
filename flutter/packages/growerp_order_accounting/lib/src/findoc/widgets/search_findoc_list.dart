@@ -96,6 +96,7 @@ class FinDocScaffold extends StatelessWidget {
                 child: Column(children: [
                   TextFormField(
                       key: const Key('searchField'),
+                      textInputAction: TextInputAction.search,
                       autofocus: true,
                       decoration:
                           const InputDecoration(labelText: "Search input"),

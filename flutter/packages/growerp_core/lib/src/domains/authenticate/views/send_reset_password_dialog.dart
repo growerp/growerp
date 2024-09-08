@@ -44,14 +44,8 @@ class _SendResetPasswordDialogState extends State<SendResetPasswordDialog> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-      switch (state.status) {
-        case AuthStatus.failure:
-          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-          break;
-        case AuthStatus.unAuthenticated:
-          Navigator.pop(context);
-        default:
-          HelperFunctions.showMessage(context, state.message, Colors.green);
+      if (state.status == AuthStatus.unAuthenticated) {
+        Navigator.pop(context);
       }
     }, builder: (context, state) {
       if (state.status == AuthStatus.loading) {
