@@ -423,7 +423,8 @@ class MyFinDocState extends State<FinDocPage> {
                         key: const Key('description'),
                         readOnly: readOnly,
                         decoration: InputDecoration(
-                            labelText: '${finDoc.docType} Description'),
+                            labelText: '${finDoc.docType} Description',
+                            enabled: !readOnly),
                         controller: _descriptionController,
                       ),
                     ),

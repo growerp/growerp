@@ -130,8 +130,8 @@ class PaymentDialogState extends State<PaymentDialog> {
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 child: popUp(
                     context: context,
-                    height: 800,
-                    width: 600,
+                    height: 700,
+                    width: 800,
                     title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
                         "Payment #${finDoc.pseudoId ?? 'New'}",
                     child: BlocConsumer<FinDocBloc, FinDocState>(
@@ -488,38 +488,41 @@ class PaymentDialogState extends State<PaymentDialog> {
               const SizedBox(height: 10),
               Row(
                 children: [
-                  OutlinedButton(
-                      key: const Key('cancelFinDoc'),
-                      child: const Text('Cancel Payment'),
-                      onPressed: () {
-                        _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
-                          status: FinDocStatusVal.cancelled,
-                        )));
-                      }),
-                  const SizedBox(width: 20),
                   Expanded(
                     child: OutlinedButton(
-                        key: const Key('update'),
-                        child: Text(
-                            '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
+                        key: const Key('cancelFinDoc'),
+                        child: const Text(
+                          'Cancel\nPayment',
+                          softWrap: false,
+                        ),
                         onPressed: () {
-                          if (paymentDialogFormKey.currentState!.validate()) {
-                            _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
-                              otherCompany: _selectedCompany,
-                              grandTotal: Decimal.parse(_amountController.text),
-                              pseudoId: _pseudoIdController.text,
-                              status: _updatedStatus,
-                              paymentInstrument: _paymentInstrument,
-                              items: [
-                                FinDocItem(
-                                  paymentType: _selectedPaymentType,
-                                  glAccount: _selectedGlAccount,
-                                )
-                              ],
-                            )));
-                          }
+                          _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
+                            status: FinDocStatusVal.cancelled,
+                          )));
                         }),
                   ),
+                  const SizedBox(width: 20),
+                  OutlinedButton(
+                      key: const Key('update'),
+                      child: Text(
+                          '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
+                      onPressed: () {
+                        if (paymentDialogFormKey.currentState!.validate()) {
+                          _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
+                            otherCompany: _selectedCompany,
+                            grandTotal: Decimal.parse(_amountController.text),
+                            pseudoId: _pseudoIdController.text,
+                            status: _updatedStatus,
+                            paymentInstrument: _paymentInstrument,
+                            items: [
+                              FinDocItem(
+                                paymentType: _selectedPaymentType,
+                                glAccount: _selectedGlAccount,
+                              )
+                            ],
+                          )));
+                        }
+                      }),
                 ],
               ),
             ])));
