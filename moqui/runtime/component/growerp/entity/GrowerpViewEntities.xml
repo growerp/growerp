@@ -193,9 +193,8 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="itemTypeEnumId" related="enumId" />
         </member-entity>
         <member-entity entity-alias="OINV" entity-name="mantle.order.OrderItemBilling"
-            join-from-alias="OITEM" join-optional="true">
+            join-from-alias="ORHD" join-optional="true">
             <key-map field-name="orderId" />
-            <key-map field-name="orderItemSeqId" related="invoiceItemSeqId" />
         </member-entity>
         <member-entity entity-alias="OPAY" entity-name="mantle.account.payment.Payment"
             join-from-alias="ORHD" join-optional="true">

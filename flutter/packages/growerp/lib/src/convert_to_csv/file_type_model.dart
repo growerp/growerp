@@ -11,6 +11,10 @@ enum FileType {
   asset,
   finDocTransaction,
   finDocTransactionItem,
+  finDocOrderPurchase,
+  finDocOrderPurchaseItem,
+  finDocOrderSale,
+  finDocOrderSaleItem,
   finDocInvoicePurchase,
   finDocInvoicePurchaseItem,
   finDocInvoiceSale,
@@ -19,10 +23,6 @@ enum FileType {
   finDocPaymentPurchaseItem, // single item for amount, glAccount
   finDocPaymentSale,
   finDocPaymentSaleItem, // single item for amount, glAccount
-  finDocOrderPurchase,
-  finDocOrderPurchaseItem,
-  finDocOrderSale,
-  finDocOrderSaleItem,
   finDocShipmentIncoming,
   finDocShipmentIncomingItem,
   finDocShipmentOutgoing,

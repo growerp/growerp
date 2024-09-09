@@ -145,7 +145,7 @@ List<FinDoc> csvToFinDocs(String csvFile, Logger logger) {
           grandTotal: row[10] != 'null' && row[10].isNotEmpty
               ? Decimal.parse(row[10].replaceAll(',', ''))
               : null,
-          classificationId: row[11], // for invoice/payment matching
+          classificationId: row[11], // for invoice/payment/order matching
         ),
       );
     } catch (e) {

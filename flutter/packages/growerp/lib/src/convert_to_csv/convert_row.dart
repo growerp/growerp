@@ -277,7 +277,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
 
     case FileType.finDocInvoicePurchase:
       // 1:vendorId 2:vendorName, 3:reference id, 4:creditMemo 5:date(mm/dd/yy),
-      // 16:discountAmount, 17: total amount, 22: orderId,
+      // 16:discountAmount, 17: total amount, 22: related orderId,
       // 7: item number, 24: quantity, 25: productId,
       // 26: descr, 27: accountCode, 28: price, 29: amount, 30: terms
       if (columnsFrom.length < 18) return [];
@@ -294,6 +294,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add(columnsFrom[3]); // put refnum here
       columnsTo.add('');
       columnsTo.add(columnsFrom[17]); // total amount
+      columnsTo.add(columnsFrom[22]); // related order
       return columnsTo;
 
     case FileType.finDocInvoicePurchaseItem:
@@ -396,7 +397,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
     case FileType.finDocInvoiceSale:
       // 1:custId 2:custName, 3:reference id, 4: applyInvoiceId 5:creditMemo 6:date(mm/dd/yy),
       // 15: custPO 16:discountAmount, 17: ship date,
-      // 28: quantity, 30: productId,
+      // 28: quantity, 29: related order, 30: productId,
       // 32: descr, 33: accountCode, 34: price, 36: amount, 30: terms
 
       // just use to combine items, need to replace by seq num
@@ -411,6 +412,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add(columnsFrom[3]); // put refnum here
       columnsTo.add('');
       columnsTo.add('');
+      columnsTo.add(columnsFrom[29]); //related order
       return columnsTo;
 
     case FileType.finDocInvoiceSaleItem:

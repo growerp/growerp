@@ -538,6 +538,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </if>
                 </if>
                 <!-- create findoc-->
+                <set field="finDoc.statusId" value="FinDocCreated" />
                 <service-call name="growerp.100.FinDocServices100.create#FinDoc"
                     in-map="[finDoc: finDoc, classificationId: classificationId]"
                     out-map="resultCreateFindoc" />
@@ -654,32 +655,32 @@ along with this software (see the LICENSE.md file). If not, see
                         </else>
                     </if>
                 </if>
-                <!-- link orders to invoice -->
-                <if condition="finDoc.docType == 'order' &amp;&amp; finDoc.reference">
-                    <!-- try to find invoice for payment -->
-                    <set field="pseudoId" from="finDoc.reference" />
+                <!-- link invoices to order order should be created first -->
+                <if condition="finDoc.docType == 'invoice' &amp;&amp; finDoc.classificationId">
+                    <set field="pseudoId" from="finDoc.classificationId" />
                     <if condition="finDoc.sales == true">
-                        <set field="fromPartyId" from="companyPartyId" />
-                        <set field="toPartyId" from="null" />
+                        <set field="vendorPartyId" from="companyPartyId" />
+                        <set field="customerPartyId" from="null" />
                         <else>
-                            <set field="toPartyId" from="companyPartyId" />
-                            <set field="fromPartyId" from="null" />
+                            <set field="customerPartyId" from="companyPartyId" />
+                            <set field="vendorPartyId" from="null" />
                         </else>
                     </if>
-                    <log
-                        message="===looking for invoice from order:${resultCreateFindoc.finDoc.orderId} inv pseudoId: ${pseudoId} from ${fromPartyId} to: ${toPartyId}" />
-                    <entity-find entity-name="mantle.account.invoice.Invoice" limit="1"
-                        list="invoiceFound">
+                    <!--log
+                        message="===looking for order from invoice:${resultCreateFindoc.finDoc.invoiceId} order pseudoId:
+                    ${pseudoId} cust ${customerPartyId} vend: ${vendorPartyId}" /-->
+                    <entity-find entity-name="mantle.order.OrderHeaderAndPart" limit="1"
+                        list="orderFound">
                         <econdition field-name="pseudoId" from="pseudoId" />
-                        <econdition field-name="fromPartyId" ignore-if-empty="true" />
-                        <econdition field-name="toPartyId" ignore-if-empty="true" />
+                        <econdition field-name="customerPartyId" ignore-if-empty="true" />
+                        <econdition field-name="vendorPartyId" ignore-if-empty="true" />
                     </entity-find>
-                    <if condition="invoiceFound">
+                    <if condition="orderFound">
                         <service-call name="create#mantle.order.OrderItemBilling"
-                            in-map="[orderId: resultCreateFindoc.finDoc.orderId, invoiceId: invoiceFound.invoiceId]" />
+                            in-map="[invoiceId: resultCreateFindoc.finDoc.invoiceId, orderId: orderFound[0].orderId]" />
                         <else>
                             <log
-                                message="could not find an invoice ${pseudoId} from order: ${resultCreateFindoc.finDoc.orderId}" />
+                                message="could not find an order ${pseudoId} from invoice: ${resultCreateFindoc.finDoc.pseudoId}[${resultCreateFindoc.finDoc.invoiceId}]" />
                         </else>
                     </if>
                 </if>
