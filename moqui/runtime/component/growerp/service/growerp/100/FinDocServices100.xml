@@ -417,10 +417,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="search">
                     <entity-find list="items" offset="start" limit="limit"
                         entity-name="growerp.order.OrderHeaderPartItemPartiesAndReservation">
-                        <econdition field-name="vendorPartyId" from="vendorPartyId"
-                            ignore-if-empty="true" />
-                        <econdition field-name="customerPartyId" from="customerPartyId"
-                            ignore-if-empty="true" />
+                        <econditions combine="or">
+                            <econdition field-name="vendorPartyId" from="companyPartyId" />
+                            <econdition field-name="customerPartyId" from="companyPartyId" />
+                        </econditions>
                         <econdition field-name="rentalFromDate" from="rentalFromDate"
                             ignore-if-empty="true" />
                         <econdition field-name="rentalThruDate" from="rentalThruDate"
@@ -457,10 +457,12 @@ along with this software (see the LICENSE.md file). If not, see
                                             ignore-if-empty="true" />
                                         <econdition field-name="pseudoId" from="pseudoId"
                                             ignore-if-empty="true" />
-                                        <econdition field-name="vendorPartyId"
-                                            from="vendorPartyId" ignore-if-empty="true" />
-                                        <econdition field-name="customerPartyId"
-                                            from="customerPartyId" ignore-if-empty="true" />
+                                        <econditions combine="or">
+                                            <econdition field-name="vendorPartyId"
+                                                from="companyPartyId" />
+                                            <econdition field-name="customerPartyId"
+                                                from="companyPartyId" />
+                                        </econditions>
                                         <order-by field-name="pseudoId,orderId" />
                                     </entity-find>
                                     <if condition="sales == null">
@@ -480,12 +482,12 @@ along with this software (see the LICENSE.md file). If not, see
                                         </if>
                                         <entity-find offset="start" limit="limit" list="items"
                                             entity-name="growerp.order.OrderHeaderPartAndParties">
-                                            <econdition field-name="vendorPartyId"
-                                                from="vendorPartyId"
-                                                ignore-if-empty="true" />
-                                            <econdition field-name="customerPartyId"
-                                                from="customerPartyId"
-                                                ignore-if-empty="true" />
+                                            <econditions combine="or">
+                                                <econdition field-name="vendorPartyId"
+                                                    from="companyPartyId" />
+                                                <econdition field-name="customerPartyId"
+                                                    from="companyPartyId" />
+                                            </econditions>
                                             <econditions combine="or">
                                                 <econdition field-name="statusId" operator="in"
                                                     from="status"
@@ -2056,7 +2058,8 @@ along with this software (see the LICENSE.md file). If not, see
                     </econditions>
                 </entity-find>
                 <if condition="!check">
-                    <return message="Update Order ${finDoc.orderId} not found!" />
+                    <return
+                        message="Update Order ${finDoc.orderId}/${finDoc.pseudoId} for company: ${companyPartyId} not found!" />
                 </if>
                 <service-call name="growerp.100.FinDocServices100.update#Order"
                     in-map="[order: finDoc]" />
@@ -2102,8 +2105,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </else-if>
                 <!-- shipment -->
                 <else-if condition="finDoc.docType == 'shipment'">
-                    <log
-                        message="===within update findoc find shipmentId: ${finDoc.shipmentId} pseudoId: ${finDoc.pseudoId}" />
                     <entity-find entity-name="mantle.shipment.Shipment" list="check" limit="1">
                         <econdition field-name="shipmentId" from="finDoc.shipmentId" />
                         <econditions combine="or">
@@ -2898,8 +2899,6 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="finDoc" type="Map" required="true" />
         </in-parameters>
         <actions>
-            <log
-                message="===updating shipment: ${finDoc.shipmentId} items: ${finDoc.items?.size()} status: ${finDoc.statusId}" />
             <if condition="finDoc.statusId == 'ShipInput' || finDoc.statusId == 'ShipScheduled'">
                 <!-- in preparation or created stage just create -->
                 <service-call name="growerp.100.FinDocServices100.replace#ShipmentItems"
@@ -2967,7 +2966,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="shipmentId" />
             </entity-delete-by-condition>
             <iterate list="items" entry="item">
-                <log message="====adding product: ${item.product.productId}" />
                 <service-call
                     name="mantle.shipment.ShipmentServices.create#ShipmentItem"
                     in-map="context + [ productId: item.product.productId,
