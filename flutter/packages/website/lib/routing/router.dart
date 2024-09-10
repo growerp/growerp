@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import '../routing/route_names.dart';
-import '../forms/@forms.dart';
+import '../forms/forms.dart';
 
 Route<dynamic>? generateRoute(RouteSettings settings) {
   switch (settings.name) {
-    case HomeRoute:
+    case homeRoute:
       return MaterialPageRoute(
           builder: (context) => const LayoutTemplate(form: HomeForm()));
-    case AboutRoute:
+    case aboutRoute:
       return MaterialPageRoute(
           builder: (context) => const LayoutTemplate(form: AboutForm()));
-    case OfbizRoute:
+    case ofbizRoute:
       return MaterialPageRoute(
           builder: (context) => const LayoutTemplate(form: OfbizForm()));
-    case MoquiRoute:
+    case moquiRoute:
       return MaterialPageRoute(
           builder: (context) => const LayoutTemplate(form: MoquiForm()));
     default:

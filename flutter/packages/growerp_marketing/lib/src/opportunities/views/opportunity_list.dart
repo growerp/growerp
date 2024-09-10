@@ -165,7 +165,8 @@ class OpportunitiesState extends State<OpportunityList> {
                                   return BlocProvider.value(
                                       value: _opportunityBloc,
                                       child: const SearchOpportunityList());
-                                }).then((value) async => value != null
+                                }).then((value) async => value != null &&
+                                    context.mounted
                                 ?
                                 // show detail page
                                 await showDialog(

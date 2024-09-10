@@ -160,7 +160,8 @@ class CategoriesListState extends State<CategoryList> {
                                         value: context
                                             .read<DataFetchBloc<Locations>>(),
                                         child: const SearchCategoryList());
-                                  }).then((value) async => value != null
+                                  }).then((value) async => value != null &&
+                                      context.mounted
                                   ?
                                   // show detail page
                                   await showDialog(

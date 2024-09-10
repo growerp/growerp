@@ -23,7 +23,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
-import '../health/lib/router.dart' as router;
+import 'package:admin/router.dart' as router;
 import 'package:hive_flutter/hive_flutter.dart';
 
 Future main() async {

@@ -143,26 +143,28 @@ class AssetListState extends State<AssetList> {
                           onPressed: () async {
                             // find findoc id to show
                             await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  // search separate from finDocBloc
-                                  return BlocProvider.value(
-                                      value: context
-                                          .read<DataFetchBloc<Locations>>(),
-                                      child: const SearchAssetList());
-                                }).then((value) async => value != null
-                                ?
-                                // show detail page
-                                await showDialog(
                                     barrierDismissible: true,
                                     context: context,
                                     builder: (BuildContext context) {
+                                      // search separate from finDocBloc
                                       return BlocProvider.value(
-                                          value: _assetBloc,
-                                          child: AssetDialog(value));
+                                          value: context
+                                              .read<DataFetchBloc<Locations>>(),
+                                          child: const SearchAssetList());
                                     })
-                                : const SizedBox.shrink());
+                                .then((value) async =>
+                                    value != null && context.mounted
+                                        ?
+                                        // show detail page
+                                        await showDialog(
+                                            barrierDismissible: true,
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return BlocProvider.value(
+                                                  value: _assetBloc,
+                                                  child: AssetDialog(value));
+                                            })
+                                        : const SizedBox.shrink());
                           },
                           child: const Icon(Icons.search)),
                       const SizedBox(height: 10),

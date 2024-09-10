@@ -8,8 +8,8 @@ platforms:
   macos:
   windows:
 executables: 
-  growerp:
-  convert_to_csv:
+  growerp: growerp.dart
+  convertToCsv: convert_to_csv.dart
 environment: 
   sdk: '>=3.2.6 <4.0.0'
 dependencies: 

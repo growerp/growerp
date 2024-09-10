@@ -143,7 +143,8 @@ class LocationListState extends State<LocationList> {
                                   value:
                                       context.read<DataFetchBloc<Locations>>(),
                                   child: const SearchLocationList());
-                            }).then((value) async => value != null
+                            }).then((value) async => value != null &&
+                                context.mounted
                             ?
                             // show detail page
                             await showDialog(

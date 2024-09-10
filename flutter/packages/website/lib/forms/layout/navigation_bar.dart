@@ -55,13 +55,13 @@ class NavigationMenuTabletDesktop extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              const NavBarItem('Home', HomeRoute),
+              const NavBarItem('Home', homeRoute),
               SizedBox(width: spacing),
-              const NavBarItem('About', AboutRoute),
+              const NavBarItem('About', aboutRoute),
               SizedBox(width: spacing),
-              const NavBarItem('Moqui', MoquiRoute),
+              const NavBarItem('Moqui', moquiRoute),
               SizedBox(width: spacing),
-              const NavBarItem('OFBiz', OfbizRoute),
+              const NavBarItem('OFBiz', ofbizRoute),
             ],
           )
         ],
@@ -78,7 +78,7 @@ class NavBarLogo extends StatelessWidget {
     return InkWell(
         mouseCursor: WidgetStateMouseCursor.clickable,
         onTap: () {
-          Navigator.pushNamed(context, HomeRoute);
+          Navigator.pushNamed(context, homeRoute);
         },
         child: SizedBox(
           child: Image.asset('assets/growerp.png'),

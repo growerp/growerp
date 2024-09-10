@@ -4,7 +4,8 @@ class NavBarItem extends StatelessWidget {
   final bool drawer;
   final String title;
   final String navigationPath;
-  const NavBarItem(this.title, this.navigationPath, [this.drawer = false]);
+  const NavBarItem(this.title, this.navigationPath,
+      {this.drawer = false, super.key});
 
   @override
   Widget build(BuildContext context) {

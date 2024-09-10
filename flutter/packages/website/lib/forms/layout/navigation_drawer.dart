@@ -20,10 +20,10 @@ class NavigationDrawer extends StatelessWidget {
           NavigationDrawerHeader(),
           // BONUS: Combine the UI for this widget with the NavBarItem and make it responsive.
           // The UI for the current DrawerItem shows when it's in mobile, else it shows the NavBarItem ui.
-          DrawerItem('Home', Icons.videocam, HomeRoute),
-          DrawerItem('About', Icons.help, AboutRoute),
-          DrawerItem('Moqui', Icons.videocam, MoquiRoute),
-          DrawerItem('Ofbiz', Icons.videocam, OfbizRoute),
+          DrawerItem('Home', Icons.videocam, homeRoute),
+          DrawerItem('About', Icons.help, aboutRoute),
+          DrawerItem('Moqui', Icons.videocam, moquiRoute),
+          DrawerItem('Ofbiz', Icons.videocam, ofbizRoute),
         ],
       ),
     );
@@ -46,7 +46,7 @@ class DrawerItem extends StatelessWidget {
           const SizedBox(
             width: 30,
           ),
-          NavBarItem(title, navigationPath, true)
+          NavBarItem(title, navigationPath, drawer: true)
         ],
       ),
     );

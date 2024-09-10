@@ -85,7 +85,7 @@ Future main() async {
       try {
         company = await restClient.getCompanyFromHost(hostName);
       } on DioException catch (e) {
-        print("getting hostname error: ${await getDioError(e)}");
+        debugPrint("getting hostname error: ${await getDioError(e)}");
       }
       if (company?.partyId == null) company = null;
     }
