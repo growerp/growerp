@@ -123,6 +123,7 @@ class PaymentDialogState extends State<PaymentDialog> {
     return Scaffold(
         backgroundColor: Colors.transparent,
         body: Dialog(
+            insetPadding: const EdgeInsets.all(10), // required for wider dialog
             key: Key("PaymentDialog${finDoc.sales ? 'Sales' : 'Purchase'}"),
             child: SingleChildScrollView(
                 key: const Key('listView2'),

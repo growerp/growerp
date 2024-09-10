@@ -57,11 +57,16 @@ class HomeFormState extends State<HomeForm> {
             alignment: Alignment.bottomCenter,
             child: GlobalConfiguration().get("appName") != ''
                 ? Text(
+                    "GrowERP "
                     "${GlobalConfiguration().get("appName")} "
                     "V${GlobalConfiguration().get("version")} "
                     "#${GlobalConfiguration().get("build")}",
-                    style: const TextStyle(fontSize: 10))
-                : const Text('')));
+                    style:
+                        const TextStyle(color: Colors.lightGreen, fontSize: 10))
+                : const Text(
+                    'GrowERP',
+                    style: TextStyle(color: Colors.grey, fontSize: 10),
+                  )));
 
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       switch (state.status) {

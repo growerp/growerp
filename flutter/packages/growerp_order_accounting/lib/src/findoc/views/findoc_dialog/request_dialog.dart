@@ -128,6 +128,7 @@ class RequestDialogState extends State<RequestDialog> {
     return Scaffold(
         backgroundColor: Colors.transparent,
         body: Dialog(
+            insetPadding: const EdgeInsets.all(10), // need for width
             key: const Key("RequestDialog"),
             child: SingleChildScrollView(
                 key: const Key('listView2'),
