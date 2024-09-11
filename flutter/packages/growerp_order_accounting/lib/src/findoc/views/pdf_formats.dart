@@ -12,6 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 import 'dart:typed_data';
+import 'package:decimal/decimal.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/widgets.dart';
@@ -21,7 +23,8 @@ class PdfFormats {
   //
   // financial document, ivoice, payment, order etc....
   static Future<Uint8List> finDocPdf(
-      PdfPageFormat format, Company company, FinDoc finDoc) async {
+      PdfPageFormat format, Company company, FinDoc finDoc,
+      {String currencyId = 'USD'}) async {
     final pdf = pw.Document();
 
     pdf.addPage(MultiPage(
@@ -29,9 +32,9 @@ class PdfFormats {
         buildHeader(company, finDoc),
         SizedBox(height: 3 * PdfPageFormat.cm),
         buildTitle(finDoc),
-        buildFinDoc(finDoc),
+        buildFinDoc(finDoc, currencyId: currencyId),
         Divider(),
-        buildTotal(finDoc),
+        buildTotal(finDoc, currencyId: currencyId),
       ],
       footer: (context) => buildFooter(company, finDoc),
     ));
@@ -130,15 +133,18 @@ class PdfFormats {
         ],
       );
 
-  static Widget buildFinDoc(FinDoc finDoc) {
+  static Widget buildFinDoc(FinDoc finDoc, {String currencyId = 'USD'}) {
     final headers = ['Description', 'Type', 'Quantity', 'Unit Price', 'Total'];
     final data = finDoc.items.map((item) {
       return [
-        item.description,
+        item.description ?? '',
         item.itemType!.itemTypeName,
-        item.quantity,
-        item.price,
-        item.price! * item.quantity!,
+        item.quantity ?? '',
+        item.price == null
+            ? Decimal.zero.currency(currencyId: currencyId)
+            : item.price.currency(currencyId: currencyId),
+        ((item.price ?? Decimal.zero) * (item.quantity ?? Decimal.zero))
+            .currency(currencyId: currencyId),
       ];
     }).toList();
 
@@ -160,9 +166,10 @@ class PdfFormats {
     );
   }
 
-  static Widget buildTotal(FinDoc finDoc) {
+  static Widget buildTotal(FinDoc finDoc, {String currencyId = 'USD'}) {
     final netTotal = finDoc.items
-        .map((item) => item.price! * item.quantity!)
+        .map((item) =>
+            item.price ?? Decimal.zero * (item.quantity ?? Decimal.zero))
         .reduce((item1, item2) => item1 + item2);
     //final vatPercent = finDoc.items.first.vat;
     //final vat = netTotal * vatPercent;
@@ -180,7 +187,7 @@ class PdfFormats {
               children: [
                 buildText(
                   title: 'Net total',
-                  value: netTotal.toString(),
+                  value: netTotal.currency(currencyId: currencyId),
                   unite: true,
                 ),
 //                buildText(
@@ -195,7 +202,7 @@ class PdfFormats {
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
-                  value: total.toString(),
+                  value: total.currency(currencyId: currencyId),
                   unite: true,
                 ),
                 SizedBox(height: 2 * PdfPageFormat.mm),

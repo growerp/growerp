@@ -415,100 +415,95 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- order -->
             <if condition="docType == 'order'">
                 <if condition="search">
-                    <entity-find list="items" offset="start" limit="limit"
-                        entity-name="growerp.order.OrderHeaderPartItemPartiesAndReservation">
-                        <econditions combine="or">
-                            <econdition field-name="vendorPartyId" from="companyPartyId" />
-                            <econdition field-name="customerPartyId" from="companyPartyId" />
-                        </econditions>
-                        <econdition field-name="rentalFromDate" from="rentalFromDate"
-                            ignore-if-empty="true" />
-                        <econdition field-name="rentalThruDate" from="rentalThruDate"
-                            ignore-if-empty="true" />
-                        <econditions combine="or">
-                            <econdition field-name="orderId" ignore-case="true"
-                                operator="like" from="search" />
-                            <econdition field-name="pseudoId" ignore-case="true"
-                                operator="like" from="search" />
-                            <econdition field-name="vendorCompanyName" ignore-case="true"
-                                operator="like" from="search" />
-                            <econdition field-name="vendorLastName" ignore-case="true"
-                                operator="like" from="search" />
-                            <econdition field-name="customerCompanyName" ignore-case="true"
-                                operator="like" from="search" />
-                            <econdition field-name="customerLastName" ignore-case="true"
-                                operator="like" from="search" />
-                        </econditions>
-                        <order-by field-name="-orderPlacedDate" />
-                    </entity-find>
-                    <else>
-                        <if condition="customerCompanyPartyId"><!-- by customer for ecommerce -->
-                            <entity-find list="items" offset="start" limit="limit"
-                                entity-name="growerp.order.OrderHeaderPartAndParties">
+                    <then>
+                        <entity-find list="items" offset="start" limit="limit"
+                            entity-name="growerp.order.OrderHeaderPartItemPartiesAndReservation">
+                            <econditions combine="or">
+                                <econdition field-name="vendorPartyId" from="vendorPartyId" />
+                                <econdition field-name="customerPartyId" from="customerPartyId" />
+                            </econditions>
+                            <econdition field-name="rentalFromDate" from="rentalFromDate"
+                                ignore-if-empty="true" />
+                            <econdition field-name="rentalThruDate" from="rentalThruDate"
+                                ignore-if-empty="true" />
+                            <econditions combine="or">
+                                <econdition field-name="orderId" ignore-case="true"
+                                    operator="like" from="search" />
+                                <econdition field-name="pseudoId" ignore-case="true"
+                                    operator="like" from="search" />
+                                <econdition field-name="vendorCompanyName" ignore-case="true"
+                                    operator="like" from="search" />
+                                <econdition field-name="vendorLastName" ignore-case="true"
+                                    operator="like" from="search" />
+                                <econdition field-name="customerCompanyName" ignore-case="true"
+                                    operator="like" from="search" />
+                                <econdition field-name="customerLastName" ignore-case="true"
+                                    operator="like" from="search" />
+                            </econditions>
+                            <order-by field-name="-orderPlacedDate" />
+                        </entity-find>
+                        <log message="====was looking for: $search result: ${items?.size()}" />
+                    </then>
+                    <else-if condition="customerCompanyPartyId"><!-- by customer for ecommerce -->
+                        <entity-find list="items" offset="start" limit="limit"
+                            entity-name="growerp.order.OrderHeaderPartAndParties">
+                            <econdition field-name="customerPartyId"
+                                from="customerCompanyPartyId" />
+                            <use-iterator />
+                        </entity-find>
+                    </else-if>
+                    <else-if condition="finDocId || pseudoId"><!-- single document with items -->
+                        <entity-find list="items"
+                            entity-name="growerp.order.OrderHeaderPartAndParties">
+                            <econdition field-name="orderId" from="finDocId"
+                                ignore-if-empty="true" />
+                            <econdition field-name="pseudoId" from="pseudoId"
+                                ignore-if-empty="true" />
+                            <econditions combine="or">
+                                <econdition field-name="vendorPartyId"
+                                    from="companyPartyId" />
                                 <econdition field-name="customerPartyId"
-                                    from="customerCompanyPartyId" />
-                                <use-iterator />
-                            </entity-find>
-                            <else>
-                                <if condition="finDocId || pseudoId"><!-- single document with items -->
-                                    <entity-find list="items"
-                                        entity-name="growerp.order.OrderHeaderPartAndParties">
-                                        <econdition field-name="orderId" from="finDocId"
-                                            ignore-if-empty="true" />
-                                        <econdition field-name="pseudoId" from="pseudoId"
-                                            ignore-if-empty="true" />
-                                        <econditions combine="or">
-                                            <econdition field-name="vendorPartyId"
-                                                from="companyPartyId" />
-                                            <econdition field-name="customerPartyId"
-                                                from="companyPartyId" />
-                                        </econditions>
-                                        <order-by field-name="pseudoId,orderId" />
-                                    </entity-find>
-                                    <if condition="sales == null">
-                                        <set field="sales" value="false" type="Boolean" />
-                                        <if condition="items[0].customerPartyId == companyPartyId">
-                                            <set field="sales" value="true" type="Boolean" />
-                                        </if>
-                                    </if>
-                                    <else><!-- multiple documents -->
-                                        <set field="statusList"
-                                            from="['OrderOpen','OrderPlaced','OrderApproved']" /> <!--
-                                        OrderCompleted OrderCancelled' -->
-                                        <if
-                                            condition="open == true &amp;&amp; !finDocId &amp;&amp; !search">
-                                            <set field="fromDate" from="weekOldDate" />
-                                            <set field="status" from="statusList" />
-                                        </if>
-                                        <entity-find offset="start" limit="limit" list="items"
-                                            entity-name="growerp.order.OrderHeaderPartAndParties">
-                                            <econditions combine="or">
-                                                <econdition field-name="vendorPartyId"
-                                                    from="companyPartyId" />
-                                                <econdition field-name="customerPartyId"
-                                                    from="companyPartyId" />
-                                            </econditions>
-                                            <econditions combine="or">
-                                                <econdition field-name="statusId" operator="in"
-                                                    from="status"
-                                                    ignore-if-empty="true" />
-                                                <econdition field-name="placedDate"
-                                                    operator="greater"
-                                                    from="fromDate" ignore-if-empty="true" />
-                                            </econditions>
-                                            <econdition field-name="placedDate"
-                                                operator="less-equals"
-                                                from="tsDate" ignore-if-empty="true" />
-                                            <order-by field-name="orderId" />
-                                            <!--use-iterator/-->
-                                        </entity-find>
-                                    </else>
-                                </if>
-                            </else>
+                                    from="companyPartyId" />
+                            </econditions>
+                        </entity-find>
+                        <if condition="sales == null">
+                            <set field="sales" value="false" type="Boolean" />
+                            <if condition="items[0].customerPartyId == companyPartyId">
+                                <set field="sales" value="true" type="Boolean" />
+                            </if>
                         </if>
+                    </else-if>
+                    <else><!-- multiple documents -->
+                        <set field="statusList"
+                            from="['OrderOpen','OrderPlaced','OrderApproved']" /> <!--
+                                        OrderCompleted OrderCancelled' -->
+                        <if
+                            condition="open == true &amp;&amp; !finDocId &amp;&amp; !search">
+                            <set field="fromDate" from="weekOldDate" />
+                            <set field="status" from="statusList" />
+                        </if>
+                        <entity-find offset="start" limit="limit" list="items"
+                            entity-name="growerp.order.OrderHeaderPartAndParties">
+                            <econdition field-name="vendorPartyId"
+                                from="vendorPartyId" ignore-if-empty="true" />
+                            <econdition field-name="customerPartyId"
+                                from="customerPartyId" ignore-if-empty="true" />
+                            <econditions combine="or">
+                                <econdition field-name="statusId" operator="in"
+                                    from="status"
+                                    ignore-if-empty="true" />
+                                <econdition field-name="placedDate"
+                                    operator="greater"
+                                    from="fromDate" ignore-if-empty="true" />
+                            </econditions>
+                            <econdition field-name="placedDate"
+                                operator="less-equals"
+                                from="tsDate" ignore-if-empty="true" />
+                            <order-by field-name="orderId" />
+                            <!--use-iterator/-->
+                        </entity-find>
                     </else>
                 </if>
-                <!-- get orderheaders -->
                 <iterate list="items" entry="item">
                     <!-- remove doubles from search -->
                     <if condition="lastItem &amp;&amp; lastItem.orderId == item.orderId">
@@ -519,6 +514,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="company"
                                 from="[
                                         partyId: item.vendorPartyId,
+                                        pseudoId: item.vendorPseudoId,
                                         name: item.vendorCompanyName,
                                         ]" />
                             <set field="userOut"
@@ -534,6 +530,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="company"
                                 from="[
                                     partyId: item.customerPartyId,
+                                    pseudoId: item.customerPseudoId,
                                     name: item.customerCompanyName,
                                     ]" />
                             <set field="userOut"

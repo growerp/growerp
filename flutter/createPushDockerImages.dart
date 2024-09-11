@@ -1,6 +1,5 @@
 #! /usr/bin/env dcli
-// ignore: file_names
-// ignore_for_file: dead_code, avoid_print
+// ignore_for_file: avoid_print, file_names
 
 import 'dart:io';
 import 'package:dcli/dcli.dart';

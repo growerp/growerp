@@ -801,11 +801,12 @@ along with this software (see the LICENSE.md file). If not, see
                                 in-map="[product: products[0], classificationId: classificationId]" />
                         </if>
                         <else>
-                            <!-- not found so better add it-->
-                            <log
-                                message="id: ${item.pseudoId} could not find pseudoProductId ${item.pseudoProductId} for owner: $ownerPartyId, will add it" />
-                            <set field="product"
-                                from="[
+                            <!-- not found so better add it when not null -->
+                            <if condition="item.pseudoProductId != null">
+                                <log
+                                    message="id: ${item.pseudoId} could not find pseudoProductId ${item.pseudoProductId} for owner: $ownerPartyId, will add it" />
+                                <set field="product"
+                                    from="[
                                     ownerPartyId: ownerPartyId,
                                     pseudoId: item.pseudoProductId,
                                     productTypeId: 'Physical Good',
@@ -813,10 +814,11 @@ along with this software (see the LICENSE.md file). If not, see
                                     price: item.price,
                                     listPrice: item.price,
                                     ]" />
-                            <service-call name="growerp.100.CatalogServices100.create#Product"
-                                out-map="context"
-                                in-map="[product: product, classificationId: classificationId]" />
-                            <set field="item.productId" from="product.productId" />
+                                <service-call name="growerp.100.CatalogServices100.create#Product"
+                                    out-map="context"
+                                    in-map="[product: product, classificationId: classificationId]" />
+                                <set field="item.productId" from="product.productId" />
+                            </if>
                         </else>
                     </if>
                 </if>

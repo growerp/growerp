@@ -305,7 +305,7 @@ class MyFinDocState extends State<FinDocPage> {
                         ),
                       ),
                       key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
-                      itemAsString: (Company? u) => "${u!.name}",
+                      itemAsString: (Company? u) => "${u!.name}[${u.pseudoId}]",
                       asyncItems: (String filter) {
                         _companyBloc.add(GetDataEvent(() => context
                             .read<RestClient>()
@@ -673,7 +673,7 @@ class MyFinDocState extends State<FinDocPage> {
       rowContent.add(TableRowContent(
           width: isPhone ? 25 : 30,
           name: 'Description',
-          value: Text("${item.description}",
+          value: Text(item.description ?? '',
               key: Key('itemDescription$index'), textAlign: TextAlign.left)));
       if (!isPhone) {
         rowContent.add(TableRowContent(
@@ -686,15 +686,23 @@ class MyFinDocState extends State<FinDocPage> {
         rowContent.add(TableRowContent(
             width: 10,
             name: const Text('Qty', textAlign: TextAlign.right),
-            value: Text("${item.quantity}",
-                textAlign: TextAlign.right, key: Key('itemQuantity$index'))));
+            value: Text(
+                item.quantity == null
+                    ? Decimal.zero.toString()
+                    : item.quantity.toString(),
+                textAlign: TextAlign.right,
+                key: Key('itemQuantity$index'))));
       }
       if (item.product?.productTypeId != 'Rental') {
         rowContent.add(TableRowContent(
             width: 12,
             name: const Text('Price', textAlign: TextAlign.right),
-            value: Text(item.price!.currency(currencyId: currencyId),
-                textAlign: TextAlign.right, key: Key('itemPrice$index'))));
+            value: Text(
+                item.price == null
+                    ? Decimal.fromInt(0).currency(currencyId: currencyId)
+                    : item.price.currency(currencyId: currencyId),
+                textAlign: TextAlign.right,
+                key: Key('itemPrice$index'))));
       }
       if (item.product?.productTypeId == 'Rental') {
         rowContent.add(TableRowContent(
@@ -708,9 +716,11 @@ class MyFinDocState extends State<FinDocPage> {
             width: 10,
             name: const Text('SubTot.', textAlign: TextAlign.right),
             value: Text(
-                (item.price! * (item.quantity ?? Decimal.parse('1')))
-                    .currency(currencyId: currencyId)
-                    .toString(),
+                item.price == null
+                    ? Decimal.zero.currency(currencyId: currencyId).toString()
+                    : (item.price! * (item.quantity ?? Decimal.one))
+                        .currency(currencyId: currencyId)
+                        .toString(),
                 textAlign: TextAlign.right)));
       }
       if (!readOnly) {
@@ -804,13 +814,17 @@ class MyFinDocState extends State<FinDocPage> {
       rowContent.add(TableRowContent(
           name: 'Description',
           width: isPhone ? 25 : 28,
-          value: Text("${item.description}",
+          value: Text(item.description ?? '',
               key: Key('itemDescription$index'), textAlign: TextAlign.left)));
       rowContent.add(TableRowContent(
           name: 'Qty',
           width: isPhone ? 10 : 10,
-          value: Text("${item.quantity}",
-              textAlign: TextAlign.center, key: Key('itemQuantity$index'))));
+          value: Text(
+              item.quantity == null
+                  ? Decimal.zero.toString()
+                  : item.quantity.toString(),
+              textAlign: TextAlign.center,
+              key: Key('itemQuantity$index'))));
       if (finDoc.status == FinDocStatusVal.completed) {
         rowContent.add(TableRowContent(
             name: 'Location',
