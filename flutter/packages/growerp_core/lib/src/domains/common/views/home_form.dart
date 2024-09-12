@@ -121,9 +121,10 @@ class HomeFormState extends State<HomeForm> {
                         )),
                     body: Center(
                       child: Column(children: <Widget>[
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 100),
                         company != null && company!.image != null
-                            ? Image.memory(company!.image!, scale: 0.3)
+                            ? Image.memory(company!.image!,
+                                height: 100, width: 100)
                             : Image(
                                 image: AssetImage(themeMode == ThemeMode.light
                                     ? 'packages/growerp_core/images/growerp100.png'
