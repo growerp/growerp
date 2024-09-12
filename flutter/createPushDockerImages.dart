@@ -39,10 +39,26 @@ void main() async {
   }
   final String push = ask('Push to growerp.org test system? y/N',
       required: false, defaultValue: 'N');
-  String upgradeVersion = 'N';
+  String upgradePatchVersion = 'N';
+  String upgradeMinorVersion = 'N';
+  String upgradeMajorVersion = 'N';
   if (push.toUpperCase() == 'Y') {
-    upgradeVersion = ask('Upgrade the version and save in Git? y/N',
-        required: false, defaultValue: 'N');
+    upgradePatchVersion = ask(
+        'Upgrade the patch(lowest) version and save in Git? y/N',
+        required: false,
+        defaultValue: 'N');
+    if (upgradePatchVersion.toUpperCase() == 'Y') {
+      upgradeMinorVersion = ask(
+          'Upgrade the minor version and save in Git? y/N',
+          required: false,
+          defaultValue: 'N');
+      if (upgradeMinorVersion.toUpperCase() == 'Y') {
+        upgradeMajorVersion = ask(
+            'Upgrade the major version and save in Git? y/N',
+            required: false,
+            defaultValue: 'N');
+      }
+    }
   }
 
   var home = "${env['HOME']}/growerp";
@@ -65,33 +81,55 @@ void main() async {
   var currentVersion = '';
 
   // always use the higest current version of all apps (all in a monorep)
-  int largestVersionNumber = 0;
+  int largestPatchNumber = 0;
+  int largestMinorNumber = 0;
+  int largestMajorNumber = 0;
   for (var app in apps) {
     currentVersion = getVersion(app);
     print("=== current app $app version: $currentVersion");
-    var appVersionNumber = int.parse(currentVersion.substring(
+    var appPatchNumber = int.parse(currentVersion.substring(
         currentVersion.lastIndexOf('.') + 1, currentVersion.indexOf('+')));
-    // use the largest
-    if (appVersionNumber > largestVersionNumber) {
-      largestVersionNumber = appVersionNumber;
+    if (appPatchNumber > largestPatchNumber) {
+      largestPatchNumber = appPatchNumber;
+    }
+    var appMinorNumber = int.parse(currentVersion.substring(
+        currentVersion.indexOf('.') + 1, currentVersion.lastIndexOf('.')));
+    if (appMinorNumber > largestMinorNumber) {
+      largestMinorNumber = appMinorNumber;
+    }
+    var appMajorNumber =
+        int.parse(currentVersion.substring(0, currentVersion.indexOf('.')));
+    if (appMajorNumber > largestMajorNumber) {
+      largestMajorNumber = appMajorNumber;
+    }
+    print(
+        "=== largest:  major.minor.patch: $largestMajorNumber.$largestMinorNumber.$largestPatchNumber");
+  }
+  // create next version
+  if (upgradePatchVersion.toUpperCase() == 'Y') {
+    largestPatchNumber++;
+    if (upgradeMinorVersion.toUpperCase() == 'Y') {
+      largestPatchNumber = 0;
+      largestMinorNumber++;
+      if (upgradeMajorVersion.toUpperCase() == 'Y') {
+        largestMinorNumber = 0;
+        largestMajorNumber++;
+      }
     }
   }
-
   print(
-      "=== current app(s): $names largest version number: $largestVersionNumber");
-  largestVersionNumber++;
+      "=== next version:  major.minor.patch: $largestMajorNumber.$largestMinorNumber.$largestPatchNumber");
 
   for (var app in apps) {
     if ((names.isNotEmpty && names.contains(app)) || names.isEmpty) {
       // create new version
       currentVersion = getVersion(app);
       newVersion =
-          currentVersion.substring(0, currentVersion.lastIndexOf('.') + 1) +
-              (largestVersionNumber).toString() +
-              currentVersion.substring(currentVersion.indexOf('+'));
+          "$largestMajorNumber.$largestMinorNumber.$largestPatchNumber${currentVersion.substring(currentVersion.indexOf('+'))}";
       print(
-          "=== update versionfile: ${app == 'growerp-moqui' ? '$home/moqui/runtime/component/growerp/component.xml' : '$home/flutter/packages/$app/pubspec.yaml'} old version $currentVersion new version: $newVersion");
-      if (upgradeVersion.toUpperCase() == 'Y') {
+          "=== update versionfile: ${app == 'growerp-moqui' ? '$home/moqui/runtime/component/growerp/component.xml' : '$home/flutter/packages/$app/pubspec.yaml'}"
+          " old version $currentVersion new version: $newVersion");
+      if (upgradePatchVersion.toUpperCase() == 'Y') {
         // write back new version
         if (app == 'growerp-moqui') {
           replace(
@@ -118,13 +156,17 @@ void main() async {
               '--progress=plain -t $dockerImage:latest . --no-cache',
               workingDirectory: '$home/flutter');
         }
-        print("=== Image $dockerImage:latest created. (version: $dockerTag)");
-        if (push.toUpperCase() == 'Y') {
-          print(
-              "=== pushing docker image: $dockerImage with tag: latest to growerp.org");
+      }
+      print("=== Image $dockerImage:latest created. (version: $dockerTag)");
+      if (push.toUpperCase() == 'Y') {
+        print(
+            "=== pushing docker image: $dockerImage with tag: latest to growerp.org");
+        if (!test) {
           run('docker push $dockerImage:latest');
-          if (upgradeVersion.toUpperCase() == 'Y') {
-            print("=== create docker image: $dockerImage with tag: $dockerTag");
+        }
+        if (upgradePatchVersion.toUpperCase() == 'Y') {
+          print("=== create docker image: $dockerImage with tag: $dockerTag");
+          if (!test) {
             run('docker tag $dockerImage:latest $dockerImage:$dockerTag');
             run('docker push $dockerImage:$dockerTag');
           }
@@ -138,21 +180,23 @@ void main() async {
   var commitMessage =
       "Image(s) created for App(s) ${(names.isEmpty ? apps : names).join(',')} "
       "with tag $gitTag";
-  if (upgradeVersion.toUpperCase() == 'Y') {
+  if (upgradePatchVersion.toUpperCase() == 'Y') {
     print("=== save version files in git with message: $commitMessage");
-    for (var name in names.isEmpty ? apps : names) {
-      switch (name) {
-        case 'growerp-moqui':
-          run('git add $home/moqui/runtime/component/growerp/component.xml',
-              workingDirectory: home);
-        default:
-          run('git add $home/flutter/packages/$name/pubspec.yaml',
-              workingDirectory: home);
+    if (!test) {
+      for (var name in names.isEmpty ? apps : names) {
+        switch (name) {
+          case 'growerp-moqui':
+            run('git add $home/moqui/runtime/component/growerp/component.xml',
+                workingDirectory: home);
+          default:
+            run('git add $home/flutter/packages/$name/pubspec.yaml',
+                workingDirectory: home);
+        }
       }
+      run('git commit -m "$commitMessage"', workingDirectory: home);
+      run('git tag $gitTag', workingDirectory: home);
+      run('git push', workingDirectory: home);
+      run('git push origin $gitTag', workingDirectory: home);
     }
-    run('git commit -m "$commitMessage"', workingDirectory: home);
-    run('git tag $gitTag', workingDirectory: home);
-    run('git push', workingDirectory: home);
-    run('git push origin $gitTag', workingDirectory: home);
   }
 }
