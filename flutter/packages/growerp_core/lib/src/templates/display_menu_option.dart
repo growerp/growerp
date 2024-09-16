@@ -77,63 +77,64 @@ class MenuOptionState extends State<DisplayMenuOption>
         newIndex++;
       }
     }
-    MenuOption menuOption = menuList[menuIndex];
-    if (widget.workflow != null) {
-      taskBloc = context.read<TaskBloc>();
-    }
-    tabItems = menuOption.tabItems ?? [];
-    title = menuOption.title;
-    child = menuOption.child;
-    tabIndex = widget.tabIndex ?? 0;
-    if (tabItems.isEmpty) {
-      displayMOFormKey =
-          child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-      // debugPrint("==1== current form key: $displayMOFormKey");
-    }
-    for (var i = 0; i < tabItems.length; i++) {
-      // form key for testing
-      displayMOFormKey =
-          tabItems[i].form.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-      // debugPrint("==1== current form key: $displayMOFormKey");
-      // form to display
-      tabList.add(tabItems[i].form);
-      // text of tabs at top of screen (tablet, web)
-      tabText.add(Align(
-          alignment: Alignment.center,
-          child: Text(tabItems[i].label, key: Key('tap$displayMOFormKey'))));
-      // tabs at bottom of screen : phone
-      bottomItems.add(BottomNavigationBarItem(
-          icon: tabItems[i].icon,
-          label: tabItems[i].label.replaceAll('\n', ' '),
-          tooltip: (i + 1).toString()));
-      // floating actionbutton at each tab; not work with domain org
-      if (tabItems[i].floatButtonRoute != null) {
-        floatingActionButtonList[i] = FloatingActionButton(
-            key: const Key("addNew"),
-            onPressed: () async {
-              await Navigator.pushReplacementNamed(
-                  context, tabItems[tabIndex].floatButtonRoute!,
-                  arguments: tabItems[tabIndex].floatButtonArgs);
-            },
-            tooltip: 'Add New',
-            child: const Icon(Icons.add));
+    if (menuList.isNotEmpty) {
+      MenuOption menuOption = menuList[menuIndex];
+      if (widget.workflow != null) {
+        taskBloc = context.read<TaskBloc>();
       }
-      if (tabItems[i].floatButtonForm != null) {
-        floatingActionButtonList[i] = FloatingActionButton(
-            key: const Key("addNew"),
-            onPressed: () async {
-              await showDialog(
-                  barrierDismissible: true,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return tabItems[i].floatButtonForm!;
-                  });
-            },
-            tooltip: 'Add New',
-            child: const Icon(Icons.add));
+      tabItems = menuOption.tabItems ?? [];
+      title = menuOption.title;
+      child = menuOption.child;
+      tabIndex = widget.tabIndex ?? 0;
+      if (tabItems.isEmpty) {
+        displayMOFormKey =
+            child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
+        // debugPrint("==1== current form key: $displayMOFormKey");
+      }
+      for (var i = 0; i < tabItems.length; i++) {
+        // form key for testing
+        displayMOFormKey =
+            tabItems[i].form.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
+        // debugPrint("==1== current form key: $displayMOFormKey");
+        // form to display
+        tabList.add(tabItems[i].form);
+        // text of tabs at top of screen (tablet, web)
+        tabText.add(Align(
+            alignment: Alignment.center,
+            child: Text(tabItems[i].label, key: Key('tap$displayMOFormKey'))));
+        // tabs at bottom of screen : phone
+        bottomItems.add(BottomNavigationBarItem(
+            icon: tabItems[i].icon,
+            label: tabItems[i].label.replaceAll('\n', ' '),
+            tooltip: (i + 1).toString()));
+        // floating actionbutton at each tab; not work with domain org
+        if (tabItems[i].floatButtonRoute != null) {
+          floatingActionButtonList[i] = FloatingActionButton(
+              key: const Key("addNew"),
+              onPressed: () async {
+                await Navigator.pushReplacementNamed(
+                    context, tabItems[tabIndex].floatButtonRoute!,
+                    arguments: tabItems[tabIndex].floatButtonArgs);
+              },
+              tooltip: 'Add New',
+              child: const Icon(Icons.add));
+        }
+        if (tabItems[i].floatButtonForm != null) {
+          floatingActionButtonList[i] = FloatingActionButton(
+              key: const Key("addNew"),
+              onPressed: () async {
+                await showDialog(
+                    barrierDismissible: true,
+                    context: context,
+                    builder: (BuildContext context) {
+                      return tabItems[i].floatButtonForm!;
+                    });
+              },
+              tooltip: 'Add New',
+              child: const Icon(Icons.add));
+        }
       }
     }
-
     _controller = TabController(
       length: tabList.length,
       vsync: this,
@@ -301,6 +302,13 @@ class MenuOptionState extends State<DisplayMenuOption>
                   })
               : null,
           body: Column(children: tabChildren));
+    }
+
+    if (menuList.isEmpty) {
+      return const FatalErrorForm(
+        message: "no accessible options available to you",
+        buttonText: "Logoff",
+      );
     }
 
     if (tabItems.isEmpty) {

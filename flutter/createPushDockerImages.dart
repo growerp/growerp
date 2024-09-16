@@ -142,7 +142,7 @@ void main() async {
               'version: $currentVersion', 'version: $newVersion');
         }
       }
-      // create image and push to  docker hub
+      // create image with latest tag
       String dockerImage = 'growerp/$app';
       var dockerTag = newVersion.substring(0, newVersion.indexOf('+'));
       print("=== create docker image: $dockerImage with tag: latest");
@@ -157,15 +157,14 @@ void main() async {
               workingDirectory: '$home/flutter');
         }
       }
-      print("=== Image $dockerImage:latest created. (version: $dockerTag)");
       if (push.toUpperCase() == 'Y') {
-        print(
-            "=== pushing docker image: $dockerImage with tag: latest to growerp.org");
+        print("=== pushing docker image: $dockerImage with tag: latest");
         if (!test) {
           run('docker push $dockerImage:latest');
         }
         if (upgradePatchVersion.toUpperCase() == 'Y') {
-          print("=== create docker image: $dockerImage with tag: $dockerTag");
+          print(
+              "=== create/push docker image: $dockerImage with tag: $dockerTag");
           if (!test) {
             run('docker tag $dockerImage:latest $dockerImage:$dockerTag');
             run('docker push $dockerImage:$dockerTag');

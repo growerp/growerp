@@ -255,6 +255,8 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                           const InputDecoration(labelText: "employee,name"),
                       controller: _accountSearchBoxController,
                     ),
+                    menuProps:
+                        MenuProps(borderRadius: BorderRadius.circular(20.0)),
                     title: popUp(
                       context: context,
                       title: 'Select employee',

@@ -46,6 +46,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.PartyServices100.register#User" />
             </method>
         </resource>
+        <resource name="RegisterWebsite" require-authentication="anonymous-all">
+            <method type="post">
+                <service name="growerp.100.PartyServices100.register#WebsiteUser" />
+            </method>
+        </resource>
         <resource name="Login" require-authentication="anonymous-all">
             <method type="post">
                 <service name="growerp.100.GeneralServices100.login#User" />

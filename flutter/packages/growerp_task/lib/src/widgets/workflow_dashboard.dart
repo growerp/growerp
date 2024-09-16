@@ -104,6 +104,8 @@ class WorkflowDashboardState extends State<WorkflowDashboard> {
                     autofocus: true,
                     controller: _taskSearchBoxController,
                   ),
+                  menuProps:
+                      MenuProps(borderRadius: BorderRadius.circular(20.0)),
                 ),
                 dropdownDecoratorProps: DropDownDecoratorProps(
                   dropdownSearchDecoration: InputDecoration(

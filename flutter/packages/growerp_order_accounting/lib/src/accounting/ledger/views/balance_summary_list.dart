@@ -93,6 +93,8 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                                 const InputDecoration(labelText: 'Time period'),
                             controller: _periodSearchBoxController,
                           ),
+                          menuProps: MenuProps(
+                              borderRadius: BorderRadius.circular(20.0)),
                           title: popUp(
                             context: context,
                             title: 'Select period',

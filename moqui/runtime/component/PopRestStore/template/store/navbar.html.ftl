@@ -99,10 +99,10 @@
                     </li>
                 <#else>
                     <li class="nav-item">
-                        <a href="/d#/account/create/${storeInfo.productStore.organizationPartyId}" class="nav-link">Join Now</a>
+                        <a href="/d#/account/create/${storeInfo.productStore.organizationPartyId}" class="nav-link">Register</a>
                     </li>
                     <li class="nav-item">
-                        <a href="/d#/login/${storeInfo.productStore.organizationPartyId}" class="nav-link"><i class="fas fa-user"></i> Sign In</a>
+                        <a href="/d#/login/${storeInfo.productStore.organizationPartyId}" class="nav-link"><i class="fas fa-user"></i> Log In</a>
                     </li>
                 </#if>
 

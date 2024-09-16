@@ -41,6 +41,10 @@ class User with _$User {
     /// email address of this person
     String? email,
 
+    /// postal address and payment method
+    Address? address,
+    PaymentMethod? paymentMethod,
+
     /// when customer register they can give their telephonenr to use as membername
     String? telephoneNr,
 
@@ -67,7 +71,11 @@ class User with _$User {
       companyString =
           'company: ${company!.name}[${company!.partyId}] size: ${image?.length}';
     }
-    return '$userString $companyString';
+    var methodString = '';
+    if (paymentMethod != null) {
+      methodString = "pay method: ${paymentMethod?.ccDescription}";
+    }
+    return '$userString $companyString $methodString';
   }
 
   String getName() => '$lastName, $firstName';

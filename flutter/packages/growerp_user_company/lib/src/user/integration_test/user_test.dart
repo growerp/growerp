@@ -18,6 +18,8 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../../../growerp_user_company.dart';
+
 class UserTest {
   static Future<void> selectEmployees(WidgetTester tester) async {
     await selectUsers(tester, 'dbCompany', 'UserListEmployee', '2');
@@ -155,9 +157,29 @@ class UserTest {
       await CommonTest.enterText(
           tester, 'userTelephoneNr', user.telephoneNr ?? '');
 
+      // if required add address and payment
+      await CommonTest.dragUntil(tester, key: 'addressLabel');
+      if (user.address != null) {
+        await CompanyTest.updateAddress(tester, user.address!);
+      } else {
+        if (CommonTest.getTextField('addressLabel') !=
+            'No postal address yet') {
+          await CommonTest.tapByKey(tester, 'deleteAddress');
+        }
+      }
+      await CommonTest.dragUntil(tester, key: 'paymentMethodLabel');
+      if (user.paymentMethod != null) {
+        await CompanyTest.updatePaymentMethod(tester, user.paymentMethod!);
+      } else {
+        if (!CommonTest.getTextField('paymentMethodLabel')
+            .startsWith('No payment methods yet')) {
+          await CommonTest.tapByKey(tester, 'deletePaymentMethod');
+        }
+      }
+
       // company info fixed for employees
       if (currentRole != Role.company && user.company?.partyId != null) {
-        await CommonTest.drag(tester);
+        await CommonTest.dragUntil(tester, key: 'newCompany');
         await CommonTest.tapByKey(tester, 'newCompany');
         await CommonTest.enterText(
             tester, 'companyName', user.company!.name!); // required!
@@ -168,14 +190,14 @@ class UserTest {
               company: user.company!.copyWith(
                   email: user.company!.email!.replaceFirst('XXX', '${seq++}')));
         }
-        await CommonTest.drag(tester);
+        await CommonTest.dragUntil(tester, key: 'email');
         await CommonTest.enterText(tester, 'email', user.company?.email ?? '');
         await CommonTest.tapByKey(tester, 'update',
             seconds: CommonTest.waitTime);
       }
 
+      await CommonTest.dragUntil(tester, key: 'loginName');
       if (user.loginName != null) {
-        await CommonTest.drag(tester);
         user = user.copyWith(
             loginName: user.loginName!.replaceFirst('XXX', '${seq++}'));
         await CommonTest.enterText(tester, 'loginName', user.loginName!);
@@ -186,7 +208,7 @@ class UserTest {
           await CommonTest.tapByKey(tester, 'loginDisabled');
         }
       }
-      await CommonTest.drag(tester);
+      await CommonTest.dragUntil(tester, key: 'updateUser');
       await CommonTest.tapByKey(tester, 'updateUser');
       await CommonTest.waitForSnackbarToGo(tester);
       newUsers.add(user);
@@ -210,8 +232,28 @@ class UserTest {
       expect(CommonTest.getTextFormField('userTelephoneNr'),
           equals(user.telephoneNr ?? ''));
 
+      await CommonTest.dragUntil(tester, key: 'addressLabel');
+      expect(
+          CommonTest.getTextField('addressLabel'),
+          equals(user.address == null
+              ? 'No postal address yet'
+              : "${user.address!.city} ${user.address!.country}"));
+      if (user.address != null) {
+        await CommonTest.tapByKey(tester, 'address');
+        await CompanyTest.checkAddress(tester, user.address!);
+      }
+      await CommonTest.dragUntil(tester, key: 'paymentMethodLabel');
+      expect(
+          CommonTest.getTextField('paymentMethodLabel'),
+          contains(user.paymentMethod == null
+              ? 'No payment methods yet'
+              : "${user.paymentMethod!.ccDescription}"));
+      if (user.paymentMethod != null) {
+        await CompanyTest.checkPaymentMethod(tester, user.paymentMethod!);
+      }
+
       if (currentRole != Role.company && user.company?.partyId != null) {
-        await CommonTest.drag(tester);
+        await CommonTest.dragUntil(tester, key: 'editCompany');
         await CommonTest.tapByKey(tester, 'editCompany');
         expect(CommonTest.getTextFormField('companyName'),
             equals(user.company!.name!)); // required!
@@ -221,11 +263,10 @@ class UserTest {
             equals(user.company!.telephoneNr ?? ''));
         expect(CommonTest.getTextFormField('email'),
             equals(user.company!.email ?? ''));
-        await CommonTest.drag(tester);
         await CommonTest.tapByKey(tester, 'cancel');
       }
       newUsers.add(user.copyWith(pseudoId: id));
-      await CommonTest.drag(tester);
+      await CommonTest.dragUntil(tester, key: 'loginName');
       // login, check only when login name present, cannot delete userlogin
       if (user.loginName != null && user.loginName!.isNotEmpty) {
         expect(CommonTest.getTextFormField('loginName'),
@@ -239,7 +280,6 @@ class UserTest {
       }
       await CommonTest.tapByKey(tester, 'cancel');
     }
-    await CommonTest.closeSearch(tester);
     return newUsers;
   }
 

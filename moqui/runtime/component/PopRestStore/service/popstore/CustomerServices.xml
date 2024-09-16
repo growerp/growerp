@@ -12,146 +12,119 @@ You should have received a copy of the CC0 Public Domain Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
     <!-- Login and Register for eCommerce -->
 
     <service verb="login" noun="Customer">
         <in-parameters>
-            <parameter name="ownerPartyId" required="true"/>
-            <parameter name="username" required="true"/>
-            <parameter name="password" required="true"/>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="username" required="true" />
+            <parameter name="password" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="apiKey"/>
-            <parameter name="moquiSessionToken"/>
-            <parameter name="customerInfo" type="Map"/>
-            <parameter name="forcePasswordChange"/>
+            <parameter name="apiKey" />
+            <parameter name="moquiSessionToken" />
+            <parameter name="customerInfo" type="Map" />
+            <parameter name="forcePasswordChange" />
         </out-parameters>
         <actions>
-            <set field="forcePasswordChange" value="false" type="Boolean"/>
+            <set field="forcePasswordChange" value="false" type="Boolean" />
             <entity-find-one entity-name="moqui.security.UserAccount"
                 value-field="userAccount" cache="false">
-                <field-map field-name="username"/></entity-find-one>
+                <field-map field-name="username" />
+            </entity-find-one>
 
             <if condition="!userAccount">
-                <return error="true" message="$username not found, please create an account"/></if>
+                <return error="true" message="$username not found, please create an account" />
+            </if>
 
             <if condition="userAccount?.requirePasswordChange == 'Y'">
-                <set field="forcePasswordChange" value="true" type="Boolean"/>
-                <return/>
+                <set field="forcePasswordChange" value="true" type="Boolean" />
+                <return />
             </if>
 
-            <!-- get topOwnerpartyId -->
-            <entity-find entity-name="mantle.party.PartyRelationship" list="getOwners">
-                <econdition field-name="fromPartyId" from="ownerPartyId"/>
-                <econdition field-name="relationshipTypeEnumId" value="PrtOrgRollup"/>
-                <date-filter/>
-            </entity-find>
-            <set field="topOwnerPartyId" from="getOwners[0].toPartyId"/>
-            <!-- get related customer company -->
-            <entity-find entity-name="mantle.party.PartyRelationship"
-                list="getCompany" limit="1">
-                <econdition field-name="fromPartyId" from="userAccount.partyId"/>
-                <econdition field-name="relationshipTypeEnumId" value="PrtEmployee"/>
-                <date-filter/>
-            </entity-find>
-            <!-- check if connected to top owner -->
-            <entity-find entity-name="mantle.party.PartyRelationship"
-                list="checkCustomerOwner" limit="1">
-                <econdition field-name="fromPartyId" from="getCompany[0].toPartyId"/>
-                <econdition field-name="relationshipTypeEnumId" value="PrtOrgRollup"/>
-                <econdition field-name="toPartyId" from="topOwnerPartyId"/>
-                <date-filter/>
-            </entity-find>
-            <if condition="!checkCustomerOwner">
-                <!-- add connect to top owner as customer-->
-                <service-call name="create#mantle.party.PartyRelationship"
-                    in-map="[   fromPartyId: getCompany[0].toPartyId,
-                                fromRoleTypeId: 'Customer',
-                                toPartyId: topOwnerPartyId,
-                                toRoleTypeId: 'Owner',
-                                relationshipTypeEnumId: 'PrtOrgRollup',
-                                fromDate: ec.user.nowTimestamp
-                                ]"/>
-            </if>
-            <set field="sessionAttributes" from="ec.web.sessionAttributes"/>
+            <set field="sessionAttributes" from="ec.web.sessionAttributes" />
             <script>ec.user.loginUser(username, password)</script>
-            <service-call name="popstore.CustomerServices.postLogin#Customer" in-map="context" out-map="context"/>
+            <service-call name="popstore.CustomerServices.postLogin#Customer" in-map="context"
+                out-map="context" />
             <!-- create the login key to return -->
-            <set field="apiKey" from="ec.user.getLoginKey()"/>
+            <set field="apiKey" from="ec.user.getLoginKey()" />
         </actions>
     </service>
     <service verb="postLogin" noun="Customer">
         <out-parameters>
-            <parameter name="moquiSessionToken"/>
-            <parameter name="customerInfo" type="Map"/>
+            <parameter name="moquiSessionToken" />
+            <parameter name="customerInfo" type="Map" />
         </out-parameters>
         <actions>
             <if condition="ec.user.userAccount != null">
-                <set field="customerPartyId" from="ec.user.userAccount.partyId"/>
+                <set field="customerPartyId" from="ec.user.userAccount.partyId" />
                 <!-- get related company -->
                 <entity-find entity-name="mantle.party.PartyRelationship"
-                        list="getCompany" limit="1">
-                    <econdition field-name="fromPartyId" from="customerPartyId"/>
-                    <econdition field-name="relationshipTypeEnumId" value="PrtEmployee"/>
-                    <date-filter/>
-                </entity-find>    
-                <set field="companyPartyId" from="getCompany[0].toPartyId"/>
-                <!-- NOTE: use the web session for attributes such as cartOrderId for security; this won't work in a stateless mode or outside a web session -->
-                <set field="sessionAttributes" from="ec.web.sessionAttributes"/>
-                <set field="sessionAttributes.customerPartyId" from="customerPartyId"/>
-                <set field="sessionAttributes.companyPartyId" from="companyPartyId"/>
-                <set field="cartOrderId" from="sessionAttributes.cartOrderId"/>
+                    list="getCompany" limit="1">
+                    <econdition field-name="fromPartyId" from="customerPartyId" />
+                    <econdition field-name="relationshipTypeEnumId" value="PrtEmployee" />
+                    <date-filter />
+                </entity-find>
+                <if condition="getCompany">
+                    <set field="companyPartyId" from="getCompany[0].toPartyId" />
+                </if>
+                <!-- NOTE: use the web session for attributes such as cartOrderId for security; this
+                won't work in a stateless mode or outside a web session -->
+                <set field="sessionAttributes" from="ec.web.sessionAttributes" />
+                <set field="sessionAttributes.customerPartyId" from="customerPartyId" />
+                <set field="sessionAttributes.companyPartyId" from="companyPartyId" />
+                <set field="cartOrderId" from="sessionAttributes.cartOrderId" />
 
                 <!-- see if there is an open order for user and get that ID into session -->
                 <entity-find entity-name="mantle.order.OrderHeaderAndPart" list="existingOrderList">
-                    <econdition field-name="statusId" value="OrderOpen"/>
-                    <econdition field-name="customerPartyId" from="companyPartyId"/>
-                    <select-field field-name="orderId"/><select-field field-name="orderPartSeqId"/>
-                    <order-by field-name="-entryDate"/><!-- get most recent open order -->
+                    <econdition field-name="statusId" value="OrderOpen" />
+                    <econdition field-name="customerPartyId" from="companyPartyId?:customerPartyId" />
+                    <select-field field-name="orderId" />
+                    <select-field field-name="orderPartSeqId" />
+                    <order-by field-name="-entryDate" /><!-- get most recent open order -->
                 </entity-find>
-                <if condition="existingOrderList"><then>
-                    <set field="orderPartSeqId" from="existingOrderList[0].orderPartSeqId"/>
-                    <if condition="cartOrderId">
-                        <!-- if a cartOrderId is in the session, merge its items into the existing order -->
-                        <service-call name="mantle.order.OrderServices.merge#OrderItems"
-                                in-map="[orderId:existingOrderList[0].orderId, fromOrderId:cartOrderId]"/>
-                    </if>
-                    <!-- whether there was one in the session or not always set the existing orderId there -->
-                    <set field="sessionAttributes.cartOrderId" from="existingOrderList[0].orderId"/>
-                </then><else>
-                    <!-- no existing open order, if a cartOrderId is in the session set the logged in user as the customer -->
-                    <if condition="cartOrderId">
-                        <!-- NOTE: make sure cartOrder has no customerPartyId, ie only find those with null to avoid order takeover -->
-                        <entity-find entity-name="OrderPart" list="orderPartList">
-                            <econdition field-name="orderId" from="cartOrderId"/>
-                            <econdition field-name="customerPartyId" operator="is-null"/>
-                        </entity-find>
-                        <if condition="orderPartList">
-                            <set field="orderPart" from="orderPartList[0]"/>
-                            <set field="orderPartSeqId" from="orderPart.orderPartSeqId"/>
-                            <set field="orderPart.customerPartyId" from="companyPartyId"/>
-                            <entity-update value-field="orderPart"/>
+                <if condition="existingOrderList">
+                    <then>
+                        <set field="orderPartSeqId" from="existingOrderList[0].orderPartSeqId" />
+                        <if condition="cartOrderId">
+                            <!-- if a cartOrderId is in the session, merge its items into the
+                            existing order -->
+                            <service-call name="mantle.order.OrderServices.merge#OrderItems"
+                                in-map="[orderId:existingOrderList[0].orderId, fromOrderId:cartOrderId]" />
                         </if>
-                    </if>
-                </else></if>
-
-                <!-- create partParty when not there yet-->
-                <entity-find entity-name="mantle.order.OrderPartParty" list="partParty">
-                    <econdition field-name="orderId"/>
-                    <econdition field-name="orderPartSeqId"/>
-                </entity-find>
-                <if condition="!partParty">
-                    <service-call name="create#mantle.order.OrderPartParty"
-                        in-map="[orderId: cartOrderId, orderPartSeqId: orderPartSeqId,
-                                partyId: customerPartyId, roleTypeId: 'CustomerContactPerson']"/>
+                        <!-- whether there was one in the session or not always set the existing
+                        orderId there -->
+                        <set field="sessionAttributes.cartOrderId"
+                            from="existingOrderList[0].orderId" />
+                    </then>
+                    <else>
+                        <!-- no existing open order, if a cartOrderId is in the session set the
+                        logged in user as the customer -->
+                        <if condition="cartOrderId">
+                            <!-- NOTE: make sure cartOrder has no customerPartyId, ie only find
+                            those with null to avoid order takeover -->
+                            <entity-find entity-name="OrderPart" list="orderPartList">
+                                <econdition field-name="orderId" from="cartOrderId" />
+                                <econdition field-name="customerPartyId" operator="is-null" />
+                            </entity-find>
+                            <if condition="orderPartList">
+                                <set field="orderPart" from="orderPartList[0]" />
+                                <set field="orderPartSeqId" from="orderPart.orderPartSeqId" />
+                                <set field="orderPart.customerPartyId" from="customerPartyId" />
+                                <entity-update value-field="orderPart" />
+                            </if>
+                        </if>
+                    </else>
                 </if>
 
-                <set field="moquiSessionToken" from="ec.web.sessionToken"/>
+                <set field="moquiSessionToken" from="ec.web.sessionToken" />
 
                 <!-- get customer info for convenience -->
-                <service-call name="popstore.CustomerServices.get#CustomerInfo" out-map="customerInfo"/>
+                <service-call name="popstore.CustomerServices.get#CustomerInfo"
+                    out-map="customerInfo" />
             </if>
         </actions>
     </service>
@@ -159,14 +132,14 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- Login with facebook -->
     <service verb="loginFB" noun="Customer">
         <in-parameters>
-            <parameter name="firstName" required="true"/>
-            <parameter name="lastName" required="true"/>
-            <parameter name="email" required="true"/>
+            <parameter name="firstName" required="true" />
+            <parameter name="lastName" required="true" />
+            <parameter name="email" required="true" />
         </in-parameters>
         <out-parameters>
             <!-- <parameter name="apiKey"/> -->
-            <parameter name="moquiSessionToken"/>
-            <parameter name="customerInfo" type="Map"/>
+            <parameter name="moquiSessionToken" />
+            <parameter name="customerInfo" type="Map" />
         </out-parameters>
         <actions>
             <script>
@@ -203,7 +176,8 @@ along with this software (see the LICENSE.md file). If not, see
                 userFacade.internalLoginUser(fbUser.email)
             </script>
 
-            <service-call name="popstore.CustomerServices.postLogin#Customer" in-map="context" out-map="context"/>
+            <service-call name="popstore.CustomerServices.postLogin#Customer" in-map="context"
+                out-map="context" />
         </actions>
     </service>
 
@@ -212,27 +186,30 @@ along with this software (see the LICENSE.md file). If not, see
         the list will have just one entry. A few parties with the same emails probably are duplicates. The first id
         on the list belongs to a party where specified email was registered last.</description>
         <in-parameters>
-            <parameter name="emailAddress" required="true"/>
+            <parameter name="emailAddress" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="partyIds" type="Set"/>
+            <parameter name="partyIds" type="Set" />
         </out-parameters>
         <actions>
-            <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="partyInfoList" distinct="true">
-                <econdition field-name="infoString" from="emailAddress" ignore-if-empty="true" ignore-case="true"/>
-                <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress"/>
+            <entity-find entity-name="mantle.party.contact.PartyContactMechInfo"
+                list="partyInfoList" distinct="true">
+                <econdition field-name="infoString" from="emailAddress" ignore-if-empty="true"
+                    ignore-case="true" />
+                <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress" />
                 <date-filter />
-                <select-field field-name="partyId"/><select-field field-name="infoString"/>
-                <order-by field-name="fromDate DESC"/>
+                <select-field field-name="partyId" />
+                <select-field field-name="infoString" />
+                <order-by field-name="fromDate DESC" />
             </entity-find>
-            <set field="partyIds" from="[] as Set"/>
+            <set field="partyIds" from="[] as Set" />
             <iterate list="partyInfoList" entry="partyInfo">
                 <entity-find-count entity-name="mantle.party.Party" count-field="isDisabled">
-                    <econdition field-name="partyId" from="partyInfo.partyId"/>
-                    <econdition field-name="disabled" value="Y" ignore-case="true"/>
+                    <econdition field-name="partyId" from="partyInfo.partyId" />
+                    <econdition field-name="disabled" value="Y" ignore-case="true" />
                 </entity-find-count>
                 <if condition="isDisabled==0">
-                    <set field="partyIds" from="partyIds + [partyInfo.partyId]"/>
+                    <set field="partyIds" from="partyIds + [partyInfo.partyId]" />
                 </if>
             </iterate>
         </actions>
@@ -240,14 +217,15 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="reset" noun="Password" authenticate="anonymous-all">
         <in-parameters>
-            <parameter name="username"/>
+            <parameter name="username" />
         </in-parameters>
         <out-parameters>
-            <parameter name="response"/>
+            <parameter name="response" />
         </out-parameters>
         <actions>
-            <service-call name="org.moqui.impl.UserServices.reset#Password" in-map="[username: username]" 
-                out-map="response"/>
+            <service-call name="org.moqui.impl.UserServices.reset#Password"
+                in-map="[username: username]"
+                out-map="response" />
         </actions>
     </service>
 
@@ -256,59 +234,66 @@ along with this software (see the LICENSE.md file). If not, see
             <script>ec.user.logoutUser()</script>
         </actions>
     </service>
-    
+
     <service verb="register" noun="Customer" authenticate="anonymous-all">
         <in-parameters>
-            <parameter name="ownerPartyId" required="true"/>
-            <parameter name="firstName" required="true"/>
-            <parameter name="middleName"/>
-            <parameter name="lastName" required="true"/>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="firstName" required="true" />
+            <parameter name="middleName" />
+            <parameter name="lastName" required="true" />
 
-            <parameter name="emailAddress" required="true"><text-email/></parameter>
-            <parameter name="username" default="emailAddress"/>
-            <parameter name="newPassword" required="true"/>
-            <parameter name="newPasswordVerify" required="true"/>
+            <parameter name="emailAddress" required="true">
+                <text-email />
+            </parameter>
+            <parameter name="username" default="emailAddress" />
+            <parameter name="newPassword" required="true" />
+            <parameter name="newPasswordVerify" required="true" />
 
-            <parameter name="currencyUomId"/><parameter name="locale"/><parameter name="timeZone"/>
+            <parameter name="currencyUomId" />
+            <parameter name="locale" />
+            <parameter name="timeZone" />
         </in-parameters>
         <out-parameters>
-            <parameter name="emailContactMechId"/>
-            <parameter name="apiKey"/>
-            <parameter name="moquiSessionToken"/>
-            <parameter name="customerInfo" type="Map"/>
+            <parameter name="emailContactMechId" />
+            <parameter name="apiKey" />
+            <parameter name="moquiSessionToken" />
+            <parameter name="customerInfo" type="Map" />
         </out-parameters>
         <actions>
             <!-- create account and login -->
-            <service-call name="mantle.party.PartyServices.create#Account" 
-                in-map="context + [ownerPartyId: ownerPartyId, roleTypeId:'Customer', loginAfterCreate:false]"/>
+            <service-call name="mantle.party.PartyServices.create#Account"
+                in-map="context + [ownerPartyId: ownerPartyId, roleTypeId:'Customer', loginAfterCreate:false]" />
 
             <if condition="ec.user.userAccount != null">
-                <set field="customerPartyId" from="ec.user.userAccount.partyId"/>
-                <!-- NOTE: use the web session for attributes such as cartOrderId for security; this won't work in a stateless mode or outside a web session -->
-                <set field="sessionAttributes" from="ec.web.sessionAttributes"/>
-                <set field="sessionAttributes.customerPartyId" from="customerPartyId"/>
-                <set field="cartOrderId" from="sessionAttributes.cartOrderId"/>
+                <set field="customerPartyId" from="ec.user.userAccount.partyId" />
+                <!-- NOTE: use the web session for attributes such as cartOrderId for security; this
+                won't work in a stateless mode or outside a web session -->
+                <set field="sessionAttributes" from="ec.web.sessionAttributes" />
+                <set field="sessionAttributes.customerPartyId" from="customerPartyId" />
+                <set field="cartOrderId" from="sessionAttributes.cartOrderId" />
 
                 <!-- if a cartOrderId is in the session set the logged in user as the customer -->
                 <if condition="cartOrderId">
-                    <!-- NOTE: make sure cartOrder has no customerPartyId, ie only find those with null to avoid order takeover -->
+                    <!-- NOTE: make sure cartOrder has no customerPartyId, ie only find those with
+                    null to avoid order takeover -->
                     <entity-find entity-name="OrderPart" list="orderPartList">
-                        <econdition field-name="orderId" from="cartOrderId"/>
-                        <econdition field-name="customerPartyId" operator="is-null"/>
+                        <econdition field-name="orderId" from="cartOrderId" />
+                        <econdition field-name="customerPartyId" operator="is-null" />
                     </entity-find>
                     <if condition="orderPartList">
-                        <set field="orderPart" from="orderPartList[0]"/>
-                        <set field="orderPart.customerPartyId" from="customerPartyId"/>
-                        <entity-update value-field="orderPart"/>
+                        <set field="orderPart" from="orderPartList[0]" />
+                        <set field="orderPart.customerPartyId" from="customerPartyId" />
+                        <entity-update value-field="orderPart" />
                     </if>
                 </if>
 
                 <!-- create the login key to return -->
-                <set field="apiKey" from="ec.user.getLoginKey()"/>
-                <set field="moquiSessionToken" from="ec.web.sessionToken"/>
+                <set field="apiKey" from="ec.user.getLoginKey()" />
+                <set field="moquiSessionToken" from="ec.web.sessionToken" />
 
                 <!-- get customer info for convenience -->
-                <service-call name="popstore.CustomerServices.get#CustomerInfo" out-map="customerInfo"/>
+                <service-call name="popstore.CustomerServices.get#CustomerInfo"
+                    out-map="customerInfo" />
             </if>
         </actions>
     </service>
@@ -317,77 +302,99 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="CustomerInfo">
         <out-parameters>
-            <parameter name="userId"/><parameter name="partyId"/><parameter name="username"/>
-            <parameter name="firstName"/><parameter name="middleName"/><parameter name="lastName"/>
-            <parameter name="locale"/><parameter name="timeZone"/><parameter name="disabled"/>
-            <parameter name="emailAddress"/><parameter name="telecomNumber"/>
-            <parameter name="companyName"/>
+            <parameter name="userId" />
+            <parameter name="partyId" />
+            <parameter name="username" />
+            <parameter name="firstName" />
+            <parameter name="middleName" />
+            <parameter name="lastName" />
+            <parameter name="locale" />
+            <parameter name="timeZone" />
+            <parameter name="disabled" />
+            <parameter name="emailAddress" />
+            <parameter name="telecomNumber" />
+            <parameter name="companyName" />
         </out-parameters>
         <actions>
-            <!-- NOTE: use the web session for attributes such as customerPartyId for security; this won't work in a stateless mode or outside a web session -->
-            <set field="sessionAttributes" from="ec.web.sessionAttributes"/>
-            <set field="userId" from="ec.user.userId"/>
-            <set field="partyId" from="ec.user.userAccount?.partyId ?: sessionAttributes.customerPartyId"/>
-            <if condition="!partyId"><return message="No active customer"/></if>
+            <!-- NOTE: use the web session for attributes such as customerPartyId for security; this
+            won't work in a stateless mode or outside a web session -->
+            <set field="sessionAttributes" from="ec.web.sessionAttributes" />
+            <set field="userId" from="ec.user.userId" />
+            <set field="partyId"
+                from="ec.user.userAccount?.partyId ?: sessionAttributes.customerPartyId" />
+            <if condition="!partyId">
+                <log level="warn" message="No active customer" />
+            </if>
 
-            <entity-find-one entity-name="mantle.party.PersonAndUserAccount" value-field="personAndUserAccount"/>
-            <script>context.putAll(personAndUserAccount)</script>
+            <entity-find-one entity-name="mantle.party.PersonAndUserAccount"
+                value-field="personAndUserAccount" />
+            <if condition="personAndUserAccount">
+                <log level="warn" message="Customer user account not found." />
+            </if>
+            <script>context.putAll(personAndUserAccount as Map)</script>
             <!-- get company name -->
             <entity-find entity-name="mantle.party.PartyRelationship" list="rel">
-                <econdition field-name="fromPartyId" from="partyId"/>
-                <econdition field-name="relationshipTypeEnumId" value="PrtEmployee"/>
-                <date-filter/></entity-find>
+                <econdition field-name="fromPartyId" from="partyId" />
+                <econdition field-name="relationshipTypeEnumId" value="PrtEmployee" />
+                <date-filter />
+            </entity-find>
             <entity-find-one entity-name="mantle.party.Organization" value-field="company">
-                <field-map field-name="partyId" from="rel.toPartyId"/></entity-find-one>
-            <set field="companyName" from="company.organizationName"/>
+                <field-map field-name="partyId" from="rel.toPartyId" />
+            </entity-find-one>
+            <set field="companyName" from="company?.organizationName" />
+            <!-- get contact info company or not available from person -->
             <service-call name="mantle.party.ContactServices.get#PartyContactInfo"
-                in-map="[partyId:partyId, telecomContactMechPurposeId: 'PhonePrimary',
-                        emailContactMechPurposeId:'EmailPrimary']" out-map="context"/>
+                in-map="[partyId:rel.toPartyId ?: partyId, telecomContactMechPurposeId: 'PhonePrimary',
+                        emailContactMechPurposeId:'EmailPrimary']"
+                out-map="context" />
         </actions>
     </service>
 
     <service verb="update" noun="Customer">
         <in-parameters>
-            <parameter name="partyId"/>
-            <parameter name="userId"/>
-            <parameter name="username"/>
-            <parameter name="firstName"/>
-            <parameter name="lastName"/>
-            <parameter name="middleName"/>
-            <parameter name="emailAddress"/>
-            <parameter name="contactMechId"/>
-            <parameter name="contactNumber"/>
-            <parameter name="locale"/>
-            <parameter name="timeZone"/>
+            <parameter name="partyId" />
+            <parameter name="userId" />
+            <parameter name="username" />
+            <parameter name="firstName" />
+            <parameter name="lastName" />
+            <parameter name="middleName" />
+            <parameter name="emailAddress" />
+            <parameter name="contactMechId" />
+            <parameter name="contactNumber" />
+            <parameter name="locale" />
+            <parameter name="timeZone" />
         </in-parameters>
         <out-parameters>
-            <parameter name="customerInfo" type="Map"/>
+            <parameter name="customerInfo" type="Map" />
         </out-parameters>
         <actions>
-            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context"/>
-            <if condition="!customerPartyId"><return message="No active customer"/></if>
-            <set field="partyId" from="customerPartyId"/>
-            <set field="orderId" from="cartOrderId"/>
+            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context" />
+            <if condition="!customerPartyId">
+                <return message="No active customer" />
+            </if>
+            <set field="partyId" from="customerPartyId" />
+            <set field="orderId" from="cartOrderId" />
 
-            <service-call name="mantle.party.PartyServices.update#Account" in-map="context"/>
+            <service-call name="mantle.party.PartyServices.update#Account" in-map="context" />
 
-            <service-call name="mantle.party.ContactServices.store#PartyContactInfo" in-map="[partyId:companyPartyId, telecomContactMechPurposeId: 'PhonePrimary', contactNumber: contactNumber, contactMechId: contactMechId]"
-                out-map="context"/>
+            <service-call name="mantle.party.ContactServices.store#PartyContactInfo"
+                in-map="[partyId:companyPartyId ?: customerPartyId, telecomContactMechPurposeId: 'PhonePrimary', contactNumber: contactNumber, contactMechId: contactMechId]"
+                out-map="context" />
 
-            <service-call name="popstore.CustomerServices.get#CustomerInfo" out-map="customerInfo"/>
+            <service-call name="popstore.CustomerServices.get#CustomerInfo" out-map="customerInfo" />
         </actions>
     </service>
 
     <service verb="update" noun="CustomerPassword" authenticate="anonymous-all">
         <in-parameters>
-            <parameter name="userId"/>
-            <parameter name="username"/>
-            <parameter name="oldPassword"/>
-            <parameter name="newPassword"/>
-            <parameter name="newPasswordVerify"/>
+            <parameter name="userId" />
+            <parameter name="username" />
+            <parameter name="oldPassword" />
+            <parameter name="newPassword" />
+            <parameter name="newPasswordVerify" />
         </in-parameters>
         <actions>
-            <service-call name="org.moqui.impl.UserServices.update#Password" in-map="context"/>
+            <service-call name="org.moqui.impl.UserServices.update#Password" in-map="context" />
         </actions>
     </service>
 
@@ -395,68 +402,92 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="PaymentMethods">
         <out-parameters>
-            <parameter name="methodInfoList" type="List"><parameter name="methodInfo" type="Map"/></parameter>
+            <parameter name="methodInfoList" type="List">
+                <parameter name="methodInfo" type="Map" />
+            </parameter>
         </out-parameters>
         <actions>
-            <!-- NOTE: use the web session for attributes such as customerPartyId for security; this won't work in a stateless mode or outside a web session -->
-            <set field="sessionAttributes" from="ec.web.sessionAttributes"/>
-            <set field="partyId" from="ec.user.userAccount?.partyId ?: sessionAttributes.companyPartyId"/>
-            <if condition="!partyId"><return message="No active customer"/></if>
-            <set field="companyPartyId" from="sessionAttributes.companyPartyId"/>
+            <!-- NOTE: use the web session for attributes such as customerPartyId for security; this
+            won't work in a stateless mode or outside a web session -->
+            <set field="sessionAttributes" from="ec.web.sessionAttributes" />
+            <set field="partyId"
+                from="ec.user.userAccount?.partyId ?: sessionAttributes.companyPartyId" />
+            <if condition="!partyId">
+                <return message="No active customer" />
+            </if>
+            <set field="companyPartyId" from="sessionAttributes.companyPartyId" />
             <service-call name="mantle.account.PaymentMethodServices.get#PartyPaymentMethodInfoList"
-                    in-map="[partyId:companyPartyId]" out-map="context"/>
+                in-map="[partyId:partyId]" out-map="context" />
         </actions>
     </service>
     <service verb="store" noun="CreditCard">
         <in-parameters>
-            <auto-parameters entity-name="mantle.account.method.PaymentMethod" include="nonpk"/>
-            <parameter name="paymentMethodId"/>
-            <parameter name="paymentMethodTypeEnumId" default-value="PmtCreditCard"/>
+            <auto-parameters entity-name="mantle.account.method.PaymentMethod" include="nonpk" />
+            <parameter name="paymentMethodId" />
+            <parameter name="paymentMethodTypeEnumId" default-value="PmtCreditCard" />
 
-            <parameter name="cardNumber"><credit-card/></parameter><!-- not required because often empty on update, ie for public facing masked cards -->
-            <parameter name="validateSecurityCode"><description>Not persisted, just passed through so available to SECA rules for validation by gateway, etc</description></parameter>
-            <parameter name="expireMonth"/>
-            <parameter name="expireYear"/>
-            <parameter name="creditCardTypeEnumId"/>
-            <parameter name="cardSecurityCode"/>
+            <parameter name="cardNumber">
+                <credit-card />
+            </parameter><!-- not required because often empty on
+            update, ie for public facing masked cards -->
+            <parameter name="validateSecurityCode">
+                <description>Not persisted, just passed through so available to SECA rules for validation by gateway, etc</description>
+            </parameter>
+            <parameter name="expireMonth" />
+            <parameter name="expireYear" />
+            <parameter name="creditCardTypeEnumId" />
+            <parameter name="cardSecurityCode" />
             <parameter name="expireDate" default-value="${expireMonth?:''}/${expireYear?:''}">
-                <time-range after="now" format="MM/yyyy"/></parameter>
+                <time-range after="now" format="MM/yyyy" />
+            </parameter>
 
-            <parameter name="postalContactMechId"/>
-            <parameter name="postalContactMechPurposeId" default-value="PostalBilling"/>
-            <auto-parameters entity-name="mantle.party.contact.PostalAddress" include="nonpk"/>
-            <parameter name="toName" default="companyNameOnAccount ?: (firstNameOnAccount ? firstNameOnAccount + ' ' + lastNameOnAccount : null)"/>
-            <parameter name="attnName" default="companyNameOnAccount &amp;&amp; firstNameOnAccount ? firstNameOnAccount + ' ' + lastNameOnAccount : null"/>
+            <parameter name="postalContactMechId" />
+            <parameter name="postalContactMechPurposeId" default-value="PostalBilling" />
+            <auto-parameters entity-name="mantle.party.contact.PostalAddress" include="nonpk" />
+            <parameter name="toName"
+                default="companyNameOnAccount ?: (firstNameOnAccount ? firstNameOnAccount + ' ' + lastNameOnAccount : null)" />
+            <parameter name="attnName"
+                default="companyNameOnAccount &amp;&amp; firstNameOnAccount ? firstNameOnAccount + ' ' + lastNameOnAccount : null" />
 
-            <parameter name="telecomContactMechId"/>
-            <parameter name="telecomContactMechPurposeId" default-value="PhoneBilling"/>
-            <auto-parameters entity-name="mantle.party.contact.TelecomNumber" include="nonpk"/>
-            <parameter name="areaCode"><text-digits/></parameter>
-            <parameter name="contactNumber"><matches regexp="^\d\d[-\. \d]*\d\d$" message="Please enter a valid phone number"/></parameter>
+            <parameter name="telecomContactMechId" />
+            <parameter name="telecomContactMechPurposeId" default-value="PhoneBilling" />
+            <auto-parameters entity-name="mantle.party.contact.TelecomNumber" include="nonpk" />
+            <parameter name="areaCode">
+                <text-digits />
+            </parameter>
+            <parameter name="contactNumber">
+                <matches regexp="^\d\d[-\. \d]*\d\d$" message="Please enter a valid phone number" />
+            </parameter>
 
-            <parameter name="emailContactMechId"/>
-            <parameter name="emailContactMechPurposeId" default-value="EmailBilling"/>
-            <parameter name="emailAddress"><text-email/></parameter>
+            <parameter name="emailContactMechId" />
+            <parameter name="emailContactMechPurposeId" default-value="EmailBilling" />
+            <parameter name="emailAddress">
+                <text-email />
+            </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="paymentMethodId"/>
-            <parameter name="postalContactMechId"/>
-            <parameter name="telecomContactMechId"/>
-            <parameter name="emailContactMechId"/>
+            <parameter name="paymentMethodId" />
+            <parameter name="postalContactMechId" />
+            <parameter name="telecomContactMechId" />
+            <parameter name="emailContactMechId" />
         </out-parameters>
         <actions>
-            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context"/>
-            <if condition="!customerPartyId"><return message="No active customer"/></if>
-            <set field="partyId" from="companyPartyId"/>
-            <set field="orderId" from="cartOrderId"/>
+            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context" />
+            <if condition="!customerPartyId">
+                <return message="No active customer" />
+            </if>
+            <set field="partyId" from="companyPartyId ?: customerPartyId" />
+            <set field="orderId" from="cartOrderId" />
 
-            <!-- TODO: if no customerPartyId call service to create one now and set in session (no user account aka 'anonymous') -->
+            <!-- TODO: if no customerPartyId call service to create one now and set in session (no
+            user account aka 'anonymous') -->
 
             <!-- set gateway info -->
-            <set field="gatewayCimId" from="companyPartyId"/>
-            <set field="paymentGatewayConfigId" from="System.getProperty('paymentGatewayConfigId')"/>
+            <set field="gatewayCimId" from="companyPartyId?:customerPartyId" />
+            <set field="paymentGatewayConfigId" from="System.getProperty('paymentGatewayConfigId')" />
 
-            <service-call name="mantle.account.PaymentMethodServices.store#PaymentMethodInfo" in-map="context" out-map="context"/>
+            <service-call name="mantle.account.PaymentMethodServices.store#PaymentMethodInfo"
+                in-map="context" out-map="context" />
 
             <!-- TODO: for CIM setups do anything here for CIM storage failure? -->
         </actions>
@@ -464,15 +495,18 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="delete" noun="PaymentMethod">
         <in-parameters>
-            <parameter name="paymentMethodId"/>
+            <parameter name="paymentMethodId" />
         </in-parameters>
         <actions>
-            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context"/>
-            <if condition="!customerPartyId"><return message="No active customer"/></if>
-            <set field="partyId" from="customerPartyId"/>
-            <set field="orderId" from="cartOrderId"/>
+            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context" />
+            <if condition="!customerPartyId">
+                <return message="No active customer" />
+            </if>
+            <set field="partyId" from="customerPartyId" />
+            <set field="orderId" from="cartOrderId" />
 
-            <service-call name="mantle.account.PaymentMethodServices.delete#PaymentMethod" in-map="context"/>
+            <service-call name="mantle.account.PaymentMethodServices.delete#PaymentMethod"
+                in-map="context" />
         </actions>
     </service>
 
@@ -480,81 +514,111 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="ShippingAddresses">
         <out-parameters>
-            <parameter name="postalAddressList" type="List"><parameter name="postalAddressInfo" type="Map"/></parameter>
+            <parameter name="postalAddressList" type="List">
+                <parameter name="postalAddressInfo" type="Map" />
+            </parameter>
         </out-parameters>
         <actions>
-            <!-- NOTE: use the web session for attributes such as customerPartyId for security; this won't work in a stateless mode or outside a web session -->
-            <set field="sessionAttributes" from="ec.web.sessionAttributes"/>
-            <set field="partyId" from="ec.user.userAccount?.partyId ?: sessionAttributes.customerPartyId"/>
-            <if condition="!partyId"><return message="No active customer"/></if>
+            <!-- NOTE: use the web session for attributes such as customerPartyId for security; this
+            won't work in a stateless mode or outside a web session -->
+            <set field="sessionAttributes" from="ec.web.sessionAttributes" />
+            <set field="partyId"
+                from="ec.user.userAccount?.partyId ?: sessionAttributes.customerPartyId" />
+            <if condition="!partyId">
+                <return message="No active customer" />
+            </if>
 
             <!-- get related company -->
             <entity-find entity-name="mantle.party.PartyRelationship" list="rel">
-                <econdition field-name="fromPartyId" from="partyId"/>
-                <econdition field-name="relationshipTypeEnumId" value="PrtEmployee"/>
-                <date-filter/>
+                <econdition field-name="fromPartyId" from="customerPartyId" />
+                <econdition field-name="relationshipTypeEnumId" value="PrtEmployee" />
+                <date-filter />
             </entity-find>
             <if condition="rel">
-                <set field="companyPartyId" from="rel[0].toPartyId ?: sessionAttributes.companyPartyId"/>
+                <set field="companyPartyId"
+                    from="rel[0].toPartyId ?: sessionAttributes.companyPartyId" />
             </if>
-            <service-call name="mantle.party.ContactServices.get#PartyContactInfoList" out-map="shippingContactListInfo"
-                    in-map="[partyId:companyPartyId, postalContactMechPurposeId:'PostalShippingDest']"/>            
-            <set field="postalAddressList" from="shippingContactListInfo.postalAddressList"/>
+            <service-call name="mantle.party.ContactServices.get#PartyContactInfoList"
+                out-map="shippingContactListInfo"
+                in-map="[partyId:companyPartyId ?: partyId, postalContactMechPurposeId:'PostalShippingDest']" />
+            <set field="postalAddressList" from="shippingContactListInfo.postalAddressList" />
         </actions>
     </service>
 
     <service verb="store" noun="ShippingAddress">
         <in-parameters>
-            <parameter name="postalContactMechId"/>
-            <parameter name="postalContactMechPurposeId" default-value="PostalPrimary"/>
-            <auto-parameters entity-name="mantle.party.contact.PostalAddress" include="nonpk"/>
-            <parameter name="address1" required="true"/>
-            <parameter name="postalCode" required="true"/>
+            <parameter name="postalContactMechId" />
+            <parameter name="postalContactMechPurposeId" default-value="PostalPrimary" />
+            <auto-parameters entity-name="mantle.party.contact.PostalAddress" include="nonpk" />
+            <parameter name="address1" required="true" />
+            <parameter name="postalCode" required="true" />
 
-            <parameter name="telecomContactMechId"/>
-            <parameter name="telecomContactMechPurposeId"/>
-            <auto-parameters entity-name="mantle.party.contact.TelecomNumber" include="nonpk"/>
-            <parameter name="countryCode"><text-digits/></parameter>
-            <parameter name="areaCode"><text-digits/></parameter>
-            <parameter name="contactNumber"><matches regexp="^\d\d[-\. \d]*\d\d$" message="Please enter a valid phone number"/></parameter>
-            <parameter name="telecomExtension"><text-digits/></parameter>
-            <parameter name="telecomAllowSolicitation"/>
+            <parameter name="telecomContactMechId" />
+            <parameter name="telecomContactMechPurposeId" />
+            <auto-parameters entity-name="mantle.party.contact.TelecomNumber" include="nonpk" />
+            <parameter name="countryCode">
+                <text-digits />
+            </parameter>
+            <parameter name="areaCode">
+                <text-digits />
+            </parameter>
+            <parameter name="contactNumber">
+                <matches regexp="^\d\d[-\. \d]*\d\d$" message="Please enter a valid phone number" />
+            </parameter>
+            <parameter name="telecomExtension">
+                <text-digits />
+            </parameter>
+            <parameter name="telecomAllowSolicitation" />
 
-            <parameter name="emailContactMechId"/>
-            <parameter name="emailContactMechPurposeId"/>
-            <parameter name="emailAddress"><text-email/></parameter>
+            <parameter name="emailContactMechId" />
+            <parameter name="emailContactMechPurposeId" />
+            <parameter name="emailAddress">
+                <text-email />
+            </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="postalContactMechId"/>
-            <parameter name="telecomContactMechId"/>
-            <parameter name="emailContactMechId"/>
+            <parameter name="postalContactMechId" />
+            <parameter name="telecomContactMechId" />
+            <parameter name="emailContactMechId" />
         </out-parameters>
         <actions>
-            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context"/>
-            <if condition="!customerPartyId"><return message="No active customer"/></if>
-            <set field="partyId" from="companyPartyId"/>
-            <set field="orderId" from="cartOrderId"/>
+            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context" />
+            <if condition="!customerPartyId">
+                <return message="No active customer" />
+            </if>
+            <set field="partyId" from="companyPartyId ?: customerPartyId" />
+            <set field="orderId" from="cartOrderId" />
 
-            <!-- TODO: if no customerPartyId call service to create one now and set in session (no user account aka 'anonymous') -->
+            <!-- TODO: if no customerPartyId call service to create one now and set in session (no
+            user account aka 'anonymous') -->
 
-            <service-call name="mantle.party.ContactServices.store#PartyContactInfo" in-map="context" out-map="context"/>
+            <service-call name="mantle.party.ContactServices.store#PartyContactInfo"
+                in-map="context" out-map="context" />
 
-            <!-- TODO: if address verification/validation available call explicitly so customer knows of potential issues right away -->
+            <!-- TODO: if address verification/validation available call explicitly so customer
+            knows of potential issues right away -->
         </actions>
     </service>
 
     <service verb="delete" noun="ShippingAddress">
         <in-parameters>
-            <parameter name="contactMechId"/>
-            <parameter name="contactMechPurposeId"/>
+            <parameter name="contactMechId" />
+            <parameter name="contactMechPurposeId" />
         </in-parameters>
         <actions>
-            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context"/>
-            <if condition="!customerPartyId"><return message="No active customer"/></if>
-            <set field="partyId" from="companyPartyId"/>
-            <set field="orderId" from="cartOrderId"/>
-
-            <service-call name="mantle.party.ContactServices.delete#PartyContactMech" in-map="context"/>
+            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context" />
+            <if condition="!customerPartyId">
+                <return message="No active customer" />
+            </if>
+            <set field="partyId" from="companyPartyId ?: customerPartyId" />
+            <entity-find entity-name="mantle.party.contact.PartyContactMech" for-update="true"
+                list="cmList">
+                <econdition field-name="partyId" from="partyId" />
+                <econdition field-name="contactMechPurposeId" value="PostalPrimary" />
+                <date-filter />
+            </entity-find>
+            <set field="cmList[0].thruDate" from="ec.user.nowTimestamp" />
+            <entity-update value-field="cmList[0]" />
         </actions>
     </service>
 

@@ -12,8 +12,9 @@ You should have received a copy of the CC0 Public Domain Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
-        standalone="true" require-authentication="anonymous-view" allow-extra-path="true">
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    standalone="true" require-authentication="anonymous-view" allow-extra-path="true">
 
     <always-actions>
         <service-call name="popstore.StoreServices.get#ProductStoreIdFromHostName" in-map="[
@@ -31,7 +32,8 @@ along with this software (see the LICENSE.md file). If not, see
         </if>
     </always-actions>
 
-    <transition name="getLogo" read-only="true"><!-- should use rest interface -->
+    <transition name="getLogo" read-only="true"><!--
+        should use rest interface -->
         <actions>
             <entity-find entity-name="mantle.party.PartyContent" list="partyContentList" cache="true">
                 <econdition field-name="partyContentTypeEnumId" value="PcntLogoImage"/>
@@ -46,7 +48,8 @@ along with this software (see the LICENSE.md file). If not, see
         </actions><default-response type="none"/>
     </transition>
 
-    <transition name="getContent" read-only="true"><!-- should use rest interface -->
+    <transition name="getContent" read-only="true"><!--
+        should use rest interface -->
         <parameter name="contentId"/>
         <actions>
             <entity-find entity-name="mantle.party.PartyContent" list="partyContentList" cache="true">
@@ -63,7 +66,8 @@ along with this software (see the LICENSE.md file). If not, see
         </actions><default-response type="none"/>
     </transition>
 
-    <transition name="getImage" read-only="true"><!-- should use rest interface -->
+    <transition name="getImage" read-only="true">
+        <!-- should use rest interface -->
         <actions>
             <entity-find entity-name="growerp.store.ProductStoreContent" list="storeImages" cache="true" limit="1">
                 <econdition field-name="productStoreId" from="productStore.productStoreId"/>

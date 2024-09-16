@@ -103,7 +103,7 @@ class MyFinDocState extends State<FinDocPage> {
   final _companySearchBoxController = TextEditingController();
   final _pseudoIdController = TextEditingController();
   late CartBloc _cartBloc;
-  late DataFetchBloc<Companies> _companyBloc;
+  late DataFetchBloc<CompaniesUsers> _companyUserBloc;
   late DataFetchBloc<Products> _productBloc;
   late GlAccountBloc _glAccountBloc;
   late FinDocBloc _finDocBloc;
@@ -111,7 +111,7 @@ class MyFinDocState extends State<FinDocPage> {
   late FinDoc finDocUpdated;
   late FinDoc finDoc; // incoming finDoc
   bool? _isPosted = false;
-  Company? _selectedCompany;
+  CompanyUser? _selectedCompanyUser;
   late bool isPhone;
   late bool readOnly;
   late FinDocStatusVal _updatedStatus;
@@ -136,11 +136,12 @@ class MyFinDocState extends State<FinDocPage> {
         : FinDocStatusVal.statusFixed(finDoc.status!);
     _isPosted = finDocUpdated.isPosted ?? false;
     _updatedStatus = finDocUpdated.status ?? FinDocStatusVal.created;
-    _selectedCompany = finDocUpdated.otherCompany ?? finDocUpdated.otherCompany;
+    _selectedCompanyUser = CompanyUser.tryParse(
+        finDocUpdated.otherCompany ?? finDocUpdated.otherUser);
     _pseudoIdController.text = finDocUpdated.pseudoId ?? '';
     _finDocBloc = context.read<FinDocBloc>();
-    _companyBloc = context.read<DataFetchBloc<Companies>>()
-      ..add(GetDataEvent(() => context.read<RestClient>().getCompany(
+    _companyUserBloc = context.read<DataFetchBloc<CompaniesUsers>>()
+      ..add(GetDataEvent(() => context.read<RestClient>().getCompanyUser(
           limit: 3,
           role: finDoc.sales && finDoc.docType != FinDocType.transaction
               ? Role.customer
@@ -254,92 +255,91 @@ class MyFinDocState extends State<FinDocPage> {
   Widget headerEntry() {
     // list of widgets to display
     List<Widget> widgets = [
-      BlocBuilder<DataFetchBloc<Companies>, DataFetchState>(
-          builder: (context, state) {
-        switch (state.status) {
-          case DataFetchStatus.failure:
-            return const FatalErrorForm(message: 'server connection problem');
-          case DataFetchStatus.loading:
-            return const LoadingIndicator();
-          case DataFetchStatus.success:
-            return Padding(
-              padding: const EdgeInsets.all(5),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  SizedBox(
-                    width: 80,
-                    child: TextFormField(
-                      key: const Key('pseudoId'),
-                      enabled: !readOnly,
-                      decoration: const InputDecoration(labelText: 'Id'),
-                      controller: _pseudoIdController,
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                  Expanded(
-                    child: DropdownSearch<Company>(
-                      enabled: !readOnly,
-                      selectedItem: _selectedCompany,
-                      popupProps: PopupProps.menu(
-                        isFilterOnline: true,
-                        showSearchBox: true,
-                        searchFieldProps: TextFieldProps(
-                          autofocus: true,
-                          decoration: InputDecoration(
-                              labelText:
-                                  "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name"),
-                          controller: _companySearchBoxController,
-                        ),
-                        title: popUp(
-                          context: context,
-                          title:
-                              "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
-                          height: 50,
-                        ),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          SizedBox(
+            width: 80,
+            child: TextFormField(
+              key: const Key('pseudoId'),
+              enabled: !readOnly,
+              decoration: const InputDecoration(labelText: 'Id'),
+              controller: _pseudoIdController,
+              keyboardType: TextInputType.number,
+            ),
+          ),
+          BlocBuilder<DataFetchBloc<CompaniesUsers>, DataFetchState>(
+              builder: (context, state) {
+            switch (state.status) {
+              case DataFetchStatus.failure:
+              case DataFetchStatus.success:
+                return Expanded(
+                  child: DropdownSearch<CompanyUser>(
+                    enabled: !readOnly,
+                    selectedItem: _selectedCompanyUser,
+                    popupProps: PopupProps.menu(
+                      isFilterOnline: true,
+                      showSearchBox: true,
+                      searchFieldProps: TextFieldProps(
+                        autofocus: true,
+                        decoration: InputDecoration(
+                            labelText:
+                                "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name"),
+                        controller: _companySearchBoxController,
                       ),
-                      dropdownDecoratorProps: DropDownDecoratorProps(
-                        dropdownSearchDecoration: InputDecoration(
-                          labelText:
-                              finDocUpdated.sales ? 'Customer' : 'Supplier',
-                        ),
+                      menuProps:
+                          MenuProps(borderRadius: BorderRadius.circular(20.0)),
+                      title: popUp(
+                        context: context,
+                        title:
+                            "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
+                        height: 50,
                       ),
-                      key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
-                      itemAsString: (Company? u) => "${u!.name}[${u.pseudoId}]",
-                      asyncItems: (String filter) {
-                        _companyBloc.add(GetDataEvent(() => context
-                            .read<RestClient>()
-                            .getCompany(
-                                searchString: filter,
-                                limit: 3,
-                                isForDropDown: true,
-                                role: widget.finDoc.sales
-                                    ? Role.customer
-                                    : Role.supplier)));
-                        return Future.delayed(const Duration(milliseconds: 150),
-                            () {
-                          return Future<List<Company>>.value(
-                              (_companyBloc.state.data as Companies).companies);
-                        });
-                      },
-                      compareFn: (item, sItem) => item.partyId == sItem.partyId,
-                      onChanged: (Company? newValue) {
-                        setState(() {
-                          _selectedCompany = newValue;
-                        });
-                      },
-                      validator: (value) => value == null
-                          ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
-                          : null,
                     ),
+                    dropdownDecoratorProps: DropDownDecoratorProps(
+                      dropdownSearchDecoration: InputDecoration(
+                        labelText:
+                            finDocUpdated.sales ? 'Customer' : 'Supplier',
+                      ),
+                    ),
+                    key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
+                    itemAsString: (CompanyUser? u) =>
+                        u?.name != null ? "${u!.name}[${u.pseudoId}]" : "",
+                    asyncItems: (String filter) {
+                      _companyUserBloc.add(GetDataEvent(() => context
+                          .read<RestClient>()
+                          .getCompanyUser(
+                              searchString: filter,
+                              limit: 3,
+                              isForDropDown: true,
+                              role: widget.finDoc.sales
+                                  ? Role.customer
+                                  : Role.supplier)));
+                      return Future.delayed(const Duration(milliseconds: 150),
+                          () {
+                        return Future<List<CompanyUser>>.value(
+                            (_companyUserBloc.state.data as CompaniesUsers)
+                                .companiesUsers);
+                      });
+                    },
+                    compareFn: (item, sItem) => item.partyId == sItem.partyId,
+                    onChanged: (CompanyUser? newValue) {
+                      setState(() {
+                        _selectedCompanyUser = newValue;
+                      });
+                    },
+                    validator: (value) => value == null
+                        ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
+                        : null,
                   ),
-                ],
-              ),
-            );
-          default:
-            return const Center(child: LoadingIndicator());
-        }
-      }),
+                );
+
+              default:
+                return const Center(child: LoadingIndicator());
+            }
+          }),
+        ],
+      ),
       Padding(
         padding: const EdgeInsets.all(5),
         child: Row(
@@ -433,9 +433,9 @@ class MyFinDocState extends State<FinDocPage> {
                 Row(
                   children: [
                     Expanded(
-                      child: DropdownSearch<Company>(
+                      child: DropdownSearch<CompanyUser>(
                         enabled: !readOnly,
-                        selectedItem: _selectedCompany,
+                        selectedItem: _selectedCompanyUser,
                         popupProps: PopupProps.menu(
                           isFilterOnline: true,
                           showSelectedItems: true,
@@ -447,6 +447,8 @@ class MyFinDocState extends State<FinDocPage> {
                                     "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name"),
                             controller: _companySearchBoxController,
                           ),
+                          menuProps: MenuProps(
+                              borderRadius: BorderRadius.circular(20.0)),
                           title: popUp(
                             context: context,
                             title:
@@ -460,10 +462,10 @@ class MyFinDocState extends State<FinDocPage> {
                           ),
                         ),
                         key: const Key('company'),
-                        itemAsString: (Company? u) => u!.name ?? '',
+                        itemAsString: (CompanyUser? u) => u!.name ?? '',
                         asyncItems: (String filter) {
-                          _companyBloc.add(GetDataEvent(
-                              () => context.read<RestClient>().getCompany(
+                          _companyUserBloc.add(GetDataEvent(
+                              () => context.read<RestClient>().getCompanyUser(
                                     searchString: filter,
                                     limit: 3,
                                     isForDropDown: true,
@@ -471,14 +473,14 @@ class MyFinDocState extends State<FinDocPage> {
                           return Future.delayed(
                               const Duration(milliseconds: 150), () {
                             return Future.value(
-                                (_companyBloc.state.data as Companies)
-                                    .companies);
+                                (_companyUserBloc.state.data as CompaniesUsers)
+                                    .companiesUsers);
                           });
                         },
                         compareFn: (item, sItem) =>
                             item.partyId == sItem.partyId,
-                        onChanged: (Company? newValue) {
-                          _selectedCompany = newValue;
+                        onChanged: (CompanyUser? newValue) {
+                          _selectedCompanyUser = newValue;
                         },
                       ),
                     ),
@@ -509,7 +511,8 @@ class MyFinDocState extends State<FinDocPage> {
           child: const Text("Update Header"),
           onPressed: () {
             _cartBloc.add(CartHeader(finDocUpdated.copyWith(
-                otherCompany: _selectedCompany,
+                otherCompany: _selectedCompanyUser?.getCompany(),
+                otherUser: _selectedCompanyUser?.getUser(),
                 description: _descriptionController.text,
                 isPosted: _isPosted)));
           }),
@@ -530,7 +533,8 @@ class MyFinDocState extends State<FinDocPage> {
             if (finDocItem != null) {
               _cartBloc.add(CartAdd(
                   finDoc: finDocUpdated.copyWith(
-                      otherCompany: _selectedCompany,
+                      otherCompany: _selectedCompanyUser?.getCompany(),
+                      otherUser: _selectedCompanyUser?.getUser(),
                       description: _descriptionController.text,
                       isPosted: _isPosted),
                   newItem: finDocItem));
@@ -546,7 +550,8 @@ class MyFinDocState extends State<FinDocPage> {
               if (finDocItem != null) {
                 _cartBloc.add(CartAdd(
                     finDoc: finDocUpdated.copyWith(
-                        otherCompany: _selectedCompany,
+                        otherCompany: _selectedCompanyUser?.getCompany(),
+                        otherUser: _selectedCompanyUser?.getUser(),
                         description: _descriptionController.text),
                     newItem: finDocItem));
               }
@@ -560,7 +565,8 @@ class MyFinDocState extends State<FinDocPage> {
               if (finDocItem != null) {
                 _cartBloc.add(CartAdd(
                     finDoc: finDocUpdated.copyWith(
-                        otherCompany: _selectedCompany,
+                        otherCompany: _selectedCompanyUser?.getCompany(),
+                        otherUser: _selectedCompanyUser?.getUser(),
                         description: _descriptionController.text),
                     newItem: finDocItem));
               }
@@ -620,12 +626,14 @@ class MyFinDocState extends State<FinDocPage> {
                   finDocUpdated = finDocUpdated.copyWith(
                       // set order to created, others not. inprep only used by website.
                       status: _updatedStatus,
-                      otherCompany: _selectedCompany,
+                      otherCompany: _selectedCompanyUser?.getCompany(),
+                      otherUser: _selectedCompanyUser?.getUser(),
                       description: _descriptionController.text);
                   if ((finDocUpdated.docType == FinDocType.transaction &&
                           finDocUpdated.items.isNotEmpty) ||
                       (finDocUpdated.items.isNotEmpty &&
-                          finDocUpdated.otherCompany != null)) {
+                          (finDocUpdated.otherCompany != null ||
+                              finDocUpdated.otherUser != null))) {
                     _cartBloc.add(CartCreateFinDoc(finDocUpdated));
                   } else {
                     HelperFunctions.showMessage(

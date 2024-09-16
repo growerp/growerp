@@ -673,7 +673,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="glAccountId" entity-alias="GLACCOUNT" />
         <alias name="accountCode" entity-alias="GLACCOUNT" />
         <alias name="accountName" entity-alias="GLACCOUNT" />
-        <alias name="description" entity-alias="ITEM"></alias>
+        <alias name="description" entity-alias="ITEM" />
         <alias name="orderId" entity-alias="OIB" />
         <alias name="shipmentId" entity-alias="OIB" />
         <alias name="paymentId" entity-alias="PAY" />
@@ -803,7 +803,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="personCompanyPartyId" field="partyId" entity-alias="PERSONPTYORG" />
         <alias name="personCompanyPseudoId" field="pseudoId" entity-alias="PERSONPTYORG" />
         <alias name="companyName" field="organizationName" entity-alias="ORG" />
-        <alias name="companyPseudoId" field="pseudoId" entity-alias="PTYORG"></alias>
+        <alias name="companyPseudoId" field="pseudoId" entity-alias="PTYORG" />
         <alias name="companyEmailFromDate" field="fromDate" entity-alias="ORGEMAIL" />
         <alias name="companyEmailThruDate" field="thruDate" entity-alias="ORGEMAIL" />
         <alias name="companyEmailPurposeId" field="contactMechPurposeId" entity-alias="ORGEMAIL" />
@@ -905,7 +905,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="effectiveDate" entity-alias="PAY" />
         <alias name="amount" entity-alias="PAY" />
         <alias name="paymentInstrumentId" field="paymentInstrumentEnumId" entity-alias="PAY" />
-        <alias name="paymentTypeId" field="enumId" entity-alias="ENUM"></alias>
+        <alias name="paymentTypeId" field="enumId" entity-alias="ENUM" />
         <alias name="paymentTypeDescription" field="description" entity-alias="ENUM" />
         <alias name="overrideGlAccountId" field="glAccountId" entity-alias="OVACCOUNT" />
         <alias name="overrideAccountCode" field="accountCode" entity-alias="OVACCOUNT" />
@@ -1047,6 +1047,9 @@ along with this software (see the LICENSE.md file). If not, see
         <member-entity entity-alias="PTYPERSON" entity-name="mantle.party.Party"
             join-from-alias="PTYOWNER">
             <key-map field-name="partyId" related="ownerPartyId" />
+            <entity-condition>
+                <econdition field-name="partyTypeEnumId" value="PtyPerson" />
+            </entity-condition>
         </member-entity>
         <member-entity entity-alias="PERSONROLE" entity-name="mantle.party.PartyRole"
             join-from-alias="PTYPERSON" join-optional="true">
@@ -1099,6 +1102,26 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="COMPPCMTEL" join-optional="true">
             <key-map field-name="contactMechId" />
         </member-entity>
+        <!-- person postal -->
+        <member-entity entity-alias="PCMPOSTAL" entity-name="mantle.party.contact.PartyContactMech"
+            join-from-alias="PERSON" join-optional="true">
+            <key-map field-name="partyId" />
+            <entity-condition>
+                <econdition field-name="postalPurposeId" value="PostalPrimary" />
+                <date-filter from-field-name="pcmFromDate" thru-field-name="pcmThruDate" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="PA" entity-name="mantle.party.contact.PostalAddress"
+            join-from-alias="PCMPOSTAL" join-optional="true">
+            <key-map field-name="contactMechId" />
+        </member-entity>
+        <member-entity entity-alias="COUNTRY" entity-name="moqui.basic.Geo"
+            join-from-alias="PA" join-optional="true">
+            <key-map field-name="countryGeoId" related="geoId" />
+            <entity-condition>
+                <econdition field-name="geoTypeEnumId" value="GEOT_COUNTRY" />
+            </entity-condition>
+        </member-entity>
         <!-- person payment method -->
         <member-entity entity-alias="PAYMENT" entity-name="mantle.account.method.PaymentMethod"
             join-from-alias="PERSON" join-optional="true">
@@ -1139,9 +1162,10 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="partyId" />
         </member-entity>
         <alias name="ownerPartyId" field="partyId" entity-alias="PTYOWNER" />
-        <alias name="partyTypeEnumId" entity-alias="PTYOWNER" />
+        <alias name="ownerTypeEnumId" field="partyTypeEnumId" entity-alias="PTYOWNER" />
         <alias name="ownerDisabled" field="disabled" entity-alias="PTYOWNER" />
         <alias name="userDisabled" field="disabled" entity-alias="PTYPERSON" />
+        <alias name="userTypeEnumId" field="partyTypeEnumId" entity-alias="PTYPERSON" />
         <alias name="userPartyId" field="partyId" entity-alias="PERSON" />
         <alias name="userPseudoId" field="pseudoId" entity-alias="PTYPERSON" />
         <alias name="firstName" entity-alias="PERSON" />
@@ -1173,6 +1197,20 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="telAreaCode" field="areaCode" entity-alias="COMPCMTEL" />
         <alias name="telContactNumber" field="contactNumber" entity-alias="COMPCMTEL" />
         <alias name="userTelContactMechId" field="contactMechId" entity-alias="COMPCMTEL" />
+        <!-- person postal -->
+        <alias name="postalPurposeId" field="contactMechPurposeId" entity-alias="PCMPOSTAL" />
+        <alias name="pcmFromDate" field="fromDate" entity-alias="PCMPOSTAL" />
+        <alias name="pcmThruDate" field="thruDate" entity-alias="PCMPOSTAL" />
+        <alias name="postalContactMechId" field="contactMechId" entity-alias="PA" />
+        <alias name="address1" entity-alias="PA" />
+        <alias name="address2" entity-alias="PA" />
+        <alias name="city" entity-alias="PA" />
+        <alias name="stateProvince" entity-alias="PA" />
+        <alias name="stateProvinceGeoId" entity-alias="PA" />
+        <alias name="postalCode" entity-alias="PA" />
+        <alias name="countryId" field="countryGeoId" entity-alias="PA" />
+        <alias name="countryName" field="geoName" entity-alias="COUNTRY" />
+        <alias name="geoTypeEnumId" entity-alias="COUNTRY" />
         <!-- person creditcard -->
         <alias name="payFromDate" field="fromDate" entity-alias="PAYMENT" />
         <alias name="payThruDate" field="thruDate" entity-alias="PAYMENT" />
@@ -1202,17 +1240,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="partyTypeEnumId" value="PtyOwner" />
             </entity-condition>
         </member-entity>
-        <member-entity entity-alias="COMPANYTOOWNER" entity-name="mantle.party.PartyRelationship"
-            join-from-alias="PTYOWNER">
-            <key-map field-name="partyId" related="toPartyId" />
-            <entity-condition>
-                <econdition field-name="relationshipTypeEnumId" value="PrtOrgRollup" />
-                <date-filter from-field-name="companyFromDate" thru-field-name="companyThruDate" />
-            </entity-condition>
-        </member-entity>
         <member-entity entity-alias="ORGCOMPANYPARTY" entity-name="mantle.party.Party"
-            join-from-alias="COMPANYTOOWNER">
-            <key-map field-name="fromPartyId" related="partyId" />
+            join-from-alias="PTYOWNER">
+            <key-map field-name="partyId" related="ownerPartyId" />
+            <entity-condition>
+                <econdition field-name="partyTypeEnumId" value="PtyOrganization" />
+            </entity-condition>
         </member-entity>
         <member-entity entity-alias="ORGCOMPANY" entity-name="mantle.party.Organization"
             join-from-alias="ORGCOMPANYPARTY">
@@ -1343,9 +1376,6 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="ownerDisabled" field="disabled" entity-alias="PTYOWNER" />
         <alias name="ownerCompanyPartyId" field="ownerPartyId" entity-alias="PTYOWNER" />
         <alias name="partyTypeEnumId" entity-alias="PTYOWNER" />
-        <!-- Company to owner -->
-        <alias name="companyFromDate" field="fromDate" entity-alias="COMPANYTOOWNER" />
-        <alias name="companyThruDate" field="thruDate" entity-alias="COMPANYTOOWNER" />
         <!-- Company -->
         <alias name="companyPartyId" field="partyId" entity-alias="ORGCOMPANYPARTY" />
         <alias name="companyPseudoId" field="pseudoId" entity-alias="ORGCOMPANYPARTY" />
@@ -1450,8 +1480,8 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="partyId" entity-alias="PARTY" />
         <alias name="pseudoId" entity-alias="PARTY" />
         <alias name="name" field="organizationName" entity-alias="COMPANY" />
-        <alias name="role" field="roleTypeId" entity-alias="ROLE"></alias>
-        <alias name="email" field="infoString" entity-alias="CM"></alias>
+        <alias name="role" field="roleTypeId" entity-alias="ROLE" />
+        <alias name="email" field="infoString" entity-alias="CM" />
         <alias name="fromDate" entity-alias="EMAIL" />
         <alias name="thruDate" entity-alias="EMAIL" />
         <alias name="emailPurposeId" field="contactMechPurposeId" entity-alias="EMAIL" />
@@ -1503,7 +1533,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="role" field="roleTypeId" entity-alias="ROLE" />
         <alias name="firstName" entity-alias="PERSON" />
         <alias name="lastName" entity-alias="PERSON" />
-        <alias name="email" field="infoString" entity-alias="CM"></alias>
+        <alias name="email" field="infoString" entity-alias="CM" />
         <alias name="fromDate" entity-alias="EMAIL" />
         <alias name="thruDate" entity-alias="EMAIL" />
         <alias name="emailPurposeId" field="contactMechPurposeId" entity-alias="EMAIL" />
@@ -1717,7 +1747,7 @@ along with this software (see the LICENSE.md file). If not, see
     <view-entity entity-name="ProductCategoryParentsAndChild"
         package="growerp.mobile.party.category">
         <member-entity entity-alias="PARENT"
-            entity-name="mantle.product.category.ProductCategory"></member-entity>
+            entity-name="mantle.product.category.ProductCategory" />
         <member-entity entity-alias="ROLLUP"
             entity-name="mantle.product.category.ProductCategoryRollup" join-from-alias="PARENT">
             <key-map field-name="productCategoryId"
@@ -1858,7 +1888,7 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="PA" join-optional="true">
             <key-map field-name="stateProvinceGeoId" related="geoId" />
         </member-entity>
-        <alias name="partyId" entity-alias="PCM"></alias>
+        <alias name="partyId" entity-alias="PCM" />
         <alias name="contactMechPurposeId" entity-alias="PCM" />
         <alias name="fromDate" entity-alias="PCM" />
         <alias name="thruDate" entity-alias="PCM" />
@@ -1870,8 +1900,8 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="provinceName" field="geoName" entity-alias="PROVINCEGEO" />
         <alias name="province" field="stateProvince" entity-alias="PA" />
         <alias name="provinceId" field="stateProvinceGeoId" entity-alias="PA" />
-        <alias name="city" entity-alias="PA"></alias>
-        <alias name="countryId" field="countryGeoId" entity-alias="PA"></alias>
+        <alias name="city" entity-alias="PA" />
+        <alias name="countryId" field="countryGeoId" entity-alias="PA" />
         <alias name="countryName" field="geoName" entity-alias="COUNTRYGEO" />
     </view-entity>
 
@@ -1893,8 +1923,8 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="provinceName" field="geoName" entity-alias="PROVINCEGEO" />
         <alias name="province" field="stateProvince" entity-alias="PA" />
         <alias name="provinceId" field="stateProvinceGeoId" entity-alias="PA" />
-        <alias name="city" entity-alias="PA"></alias>
-        <alias name="countryId" field="countryGeoId" entity-alias="PA"></alias>
+        <alias name="city" entity-alias="PA" />
+        <alias name="countryId" field="countryGeoId" entity-alias="PA" />
         <alias name="countryName" field="geoName" entity-alias="COUNTRYGEO" />
     </view-entity>
 
@@ -2152,8 +2182,7 @@ along with this software (see the LICENSE.md file). If not, see
     </view-entity>
 
     <view-entity entity-name="GlAccountClassAndLevels" package="growerp.ledger.account">
-        <member-entity entity-alias="TOP1" entity-name="moqui.basic.Enumeration">
-        </member-entity>
+        <member-entity entity-alias="TOP1" entity-name="moqui.basic.Enumeration" />
         <member-entity
             entity-alias="PARENT1" entity-name="moqui.basic.Enumeration"
             join-from-alias="TOP1" join-optional="true">

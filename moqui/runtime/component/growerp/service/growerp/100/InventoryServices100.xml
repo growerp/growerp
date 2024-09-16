@@ -334,10 +334,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <!--econdition
                 field-name="statusId"
                     operator="not-equals" from="activated" ignore-if-empty="true"/-->
-                <econdition field-name="classEnumId"
+                <econdition
+                    field-name="classEnumId"
                     from="assetClass.convertedStatusId" ignore-if-empty="true" />
-                <econdition field-name="ownerPartyId" from="companyPartyId" />
-                <econdition field-name="productId" ignore-if-empty="true" />
+                <econdition
+                    field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition
+                    field-name="productId" ignore-if-empty="true" />
                 <econdition field-name="assetName" operator="like" ignore-case="true"
                     from="filter" ignore-if-empty="true" />
                 <econditions combine="or">
@@ -352,6 +355,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </econditions>
                 <order-by field-name="assetName" />
             </entity-find>
+            <log message="====assets found: ${assetList?.size()}" />
             <set field="assets" from="[]" />
             <iterate entry="item" list="assetList">
                 <if condition="filter != null">
@@ -483,6 +487,12 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
                 <if condition="checkProducts">
                     <set field="asset.product.productId" from="checkProducts[0].productId" />
+                    <entity-find entity-name="mantle.product.ProductPrice" list="prices">
+                        <econdition field-name="productId" from="checkProducts[0].productId" />
+                        <econdition field-name="priceTypeEnumId" value="PptCurrent" />
+                    </entity-find>
+                    <set field="asset.acquireCost"
+                        from="asset.acquireCost ?: prices[0].price / 4 * 3" />
                     <else>
                         <service-call name="growerp.100.CatalogServices100.create#Product"
                             in-map="[product: asset.product,classificationId: classificationId]"

@@ -243,6 +243,8 @@ class AssetDialogState extends State<AssetDialog> {
                                 "${classificationId == 'AppHotel' ? 'Room Type' : 'Product id'} name"),
                         controller: _productSearchBoxController,
                       ),
+                      menuProps:
+                          MenuProps(borderRadius: BorderRadius.circular(20.0)),
                       title: popUp(
                         context: context,
                         title:

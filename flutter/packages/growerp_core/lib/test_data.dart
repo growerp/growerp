@@ -412,6 +412,19 @@ List<User> customers = [
     company: customerCompanies[1],
     email: 'emailXXX@example.org',
     telephoneNr: '111111111111',
+    paymentMethod: PaymentMethod(
+        ccDescription: 'Master Card**********4444 11/2032',
+        creditCardNumber: '5555555555554444',
+        creditCardType: CreditCardType.mc,
+        expireMonth: '11',
+        expireYear: '2032'),
+    address: Address(
+        address1: 'soi 5',
+        address2: 'suite 23',
+        postalCode: '30071',
+        city: 'Pucket',
+        province: 'California',
+        country: countries[3].name),
   ),
   User(
     firstName: 'customer2',

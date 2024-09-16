@@ -232,6 +232,8 @@ class TaskDialogState extends State<TaskDialog> {
                                   const InputDecoration(labelText: 'Task id'),
                               controller: _workflowSearchBoxController,
                             ),
+                            menuProps: MenuProps(
+                                borderRadius: BorderRadius.circular(20.0)),
                             title: popUp(
                               context: context,
                               title: 'Select Workflow Task Template',

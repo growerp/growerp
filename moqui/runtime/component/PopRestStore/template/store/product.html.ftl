@@ -54,9 +54,9 @@
                 <span class="product-title">${product.productName}</span>
                 <br>
                 <span class="product-review-text">${reviewsList.productReviewList?size} reviews</span>
-                <hr style="margin-top: -10px;">
+                <#--hr style="margin-top: -10px;">
                 <br>
-                <!--<#list 1..5 as x>
+                <#list 1..5 as x>
                     <span class="star-rating">
                         <i class="fas fa-star"></i>
                     </span>
@@ -96,7 +96,7 @@
                         -->
                     </div>
                     <div class="form-group col">
-                        <input type="hidden" value="${product.pseudoId}" name="productId" id="productId" />
+                        <input type="hidden" value="${product.productId}" name="productId" id="productId" />
                         <input type="hidden" value="${product.priceUomId}" name="currencyUomId" />
                         <input type="hidden" value="${ec.web.sessionToken}" name="moquiSessionToken"/>
                         <span class="product-description">Quantity</span>

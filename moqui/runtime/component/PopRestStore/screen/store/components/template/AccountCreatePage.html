@@ -1,5 +1,5 @@
 <div>
-    <navbar sub-bar="true"/>
+    <navbar sub-bar="true" />
     <div class="container account-container">
         <br>
         <div class="row">
@@ -35,14 +35,6 @@
                         <input type="email" v-model="accountInfo.emailAddress" class="form-control">
                     </div>
                 </div>
-                <div class="form-group row">
-                    <label for="" class=" col-form-label col-sm-3 text-left">
-                        Company Name (Opt)
-                    </label>
-                    <div class="col-sm-7">
-                        <input type="text" v-model="accountInfo.companyName" class="form-control">
-                    </div>
-                </div>
                 <p class="offset-sm-3 col-sm-7" style="font-size: 0.9em; color: orange;">
                     A password will be sent to your email Address.
                 </p>
@@ -56,11 +48,11 @@
             <div class="col col-lg-3">
                 <p class="already-text">Already have an account?</p>
                 <router-link :to="'/login/' + accountInfo.ownerPartyId" tag="a">
-                    <p class="sign-in">Sign in here</p>
+                    <p class="sign-in">Log in here</p>
                 </router-link>
             </div>
         </div>
     </div>
     <br>
-    <footer-page :infoLink="false"/>
+    <footer-page :infoLink="false" />
 </div>

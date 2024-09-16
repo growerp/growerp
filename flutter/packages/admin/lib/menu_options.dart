@@ -159,7 +159,15 @@ List<MenuOption> menuOptions = [
           key: Key('Customer'),
           role: Role.customer,
         ),
-        label: 'Customers',
+        label: 'Customer Companies',
+        icon: const Icon(Icons.business),
+      ),
+      TabItem(
+        form: const UserList(
+          key: Key('CustomerUser'),
+          role: Role.customer,
+        ),
+        label: 'Customer Persons',
         icon: const Icon(Icons.business),
       ),
       TabItem(

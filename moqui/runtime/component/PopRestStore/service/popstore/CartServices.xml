@@ -12,15 +12,19 @@ You should have received a copy of the CC0 Public Domain Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
-<!--
+    <!--
 General Order Placement and eCommerce Usage
 
 | create customer | PartyServices.create#Account |
-| create/update/delete customer address | ContactServices.create#PostalAddress, .update#PartyPostalAddress |
-| create/update/delete customer phone | ContactServices.create#TelecomNumber, .update#PartyTelecomNumber |
-| create/update/delete customer credit card | PaymentMethodServices.create#CreditCard, .update#CreditCard |
+| create/update/delete customer address | ContactServices.create#PostalAddress,
+    .update#PartyPostalAddress |
+| create/update/delete customer phone | ContactServices.create#TelecomNumber,
+    .update#PartyTelecomNumber |
+| create/update/delete customer credit card | PaymentMethodServices.create#CreditCard,
+    .update#CreditCard |
 
 | login: merge with previous open | merge#OrderItems |
 
@@ -38,84 +42,136 @@ General Order Placement and eCommerce Usage
 
     <service verb="interface" noun="OrderInfo">
         <out-parameters>
-            <parameter name="orderHeader" type="Map"><auto-parameters entity-name="mantle.order.OrderHeader"/></parameter>
-            <parameter name="orderPart" type="Map"><auto-parameters entity-name="mantle.order.OrderPart"/></parameter>
-            <parameter name="orderPromoCodeDetailList" type="List"><parameter name="orderPromoCode" type="Map"/></parameter>
+            <parameter name="orderHeader" type="Map">
+                <auto-parameters entity-name="mantle.order.OrderHeader" />
+            </parameter>
+            <parameter name="orderPart" type="Map">
+                <auto-parameters entity-name="mantle.order.OrderPart" />
+            </parameter>
+            <parameter name="orderPromoCodeDetailList" type="List">
+                <parameter name="orderPromoCode" type="Map" />
+            </parameter>
 
-            <parameter name="orderItemList" type="List"><parameter name="orderItem" type="Map">
-                <auto-parameters entity-name="mantle.order.OrderItem"/></parameter></parameter>
-            <parameter name="orderItemWithChildrenSet" type="Set"><parameter name="orderItemSeqId"/></parameter>
+            <parameter name="orderItemList" type="List">
+                <parameter name="orderItem" type="Map">
+                    <auto-parameters entity-name="mantle.order.OrderItem" />
+                </parameter>
+            </parameter>
+            <parameter name="orderItemWithChildrenSet" type="Set">
+                <parameter name="orderItemSeqId" />
+            </parameter>
 
-            <parameter name="paymentInfoList" type="List"><parameter name="partPaymentInfo" type="Map">
-                <parameter name="payment" type="Map"><auto-parameters entity-name="mantle.account.payment.Payment"/></parameter>
-                <parameter name="statusItem" type="Map"><auto-parameters entity-name="moqui.basic.StatusItem"/></parameter>
-                <parameter name="paymentMethod" type="Map"><auto-parameters entity-name="mantle.account.method.PaymentMethod"/></parameter>
-                <parameter name="creditCard" type="Map"><auto-parameters entity-name="mantle.account.method.CreditCard"/></parameter>
-                <parameter name="creditCardTypeEnum" type="Map"><auto-parameters entity-name="moqui.basic.Enumeration"/></parameter>
-                <parameter name="maskedCardNumber"/>
-                <parameter name="postalAddress" type="Map"><auto-parameters entity-name="mantle.party.contact.PostalAddress"/></parameter>
-                <parameter name="postalAddressStateGeo" type="Map"><auto-parameters entity-name="moqui.basic.Geo"/></parameter>
-                <parameter name="telecomNumber" type="Map"><auto-parameters entity-name="mantle.party.contact.TelecomNumber"/></parameter>
-                <parameter name="paymentMethodTypeEnum" type="Map"><auto-parameters entity-name="moqui.basic.Enumeration"/></parameter>
-                <parameter name="paymentInstrumentEnum" type="Map"><auto-parameters entity-name="moqui.basic.Enumeration"/></parameter>
-            </parameter></parameter>
-            <parameter name="paymentsTotal" type="BigDecimal"/>
-            <parameter name="totalUnpaid" type="BigDecimal"/>
+            <parameter name="paymentInfoList" type="List">
+                <parameter name="partPaymentInfo" type="Map">
+                    <parameter name="payment" type="Map">
+                        <auto-parameters entity-name="mantle.account.payment.Payment" />
+                    </parameter>
+                    <parameter name="statusItem" type="Map">
+                        <auto-parameters entity-name="moqui.basic.StatusItem" />
+                    </parameter>
+                    <parameter name="paymentMethod" type="Map">
+                        <auto-parameters entity-name="mantle.account.method.PaymentMethod" />
+                    </parameter>
+                    <parameter name="creditCard" type="Map">
+                        <auto-parameters entity-name="mantle.account.method.CreditCard" />
+                    </parameter>
+                    <parameter name="creditCardTypeEnum" type="Map">
+                        <auto-parameters entity-name="moqui.basic.Enumeration" />
+                    </parameter>
+                    <parameter name="maskedCardNumber" />
+                    <parameter name="postalAddress" type="Map">
+                        <auto-parameters entity-name="mantle.party.contact.PostalAddress" />
+                    </parameter>
+                    <parameter name="postalAddressStateGeo" type="Map">
+                        <auto-parameters entity-name="moqui.basic.Geo" />
+                    </parameter>
+                    <parameter name="telecomNumber" type="Map">
+                        <auto-parameters entity-name="mantle.party.contact.TelecomNumber" />
+                    </parameter>
+                    <parameter name="paymentMethodTypeEnum" type="Map">
+                        <auto-parameters entity-name="moqui.basic.Enumeration" />
+                    </parameter>
+                    <parameter name="paymentInstrumentEnum" type="Map">
+                        <auto-parameters entity-name="moqui.basic.Enumeration" />
+                    </parameter>
+                </parameter>
+            </parameter>
+            <parameter name="paymentsTotal" type="BigDecimal" />
+            <parameter name="totalUnpaid" type="BigDecimal" />
 
             <parameter name="postalAddress" type="Map">
-                <auto-parameters entity-name="mantle.party.contact.PostalAddress"/></parameter>
+                <auto-parameters entity-name="mantle.party.contact.PostalAddress" />
+            </parameter>
             <parameter name="postalAddressStateGeo" type="Map">
-                <auto-parameters entity-name="moqui.basic.Geo"/></parameter>
+                <auto-parameters entity-name="moqui.basic.Geo" />
+            </parameter>
             <parameter name="telecomNumber" type="Map">
-                <auto-parameters entity-name="mantle.party.contact.TelecomNumber"/></parameter>
+                <auto-parameters entity-name="mantle.party.contact.TelecomNumber" />
+            </parameter>
         </out-parameters>
     </service>
     <service verb="get" noun="CartInfo">
         <description>Get information for current cart order (cartOrderId managed server side)</description>
-        <implements service="popstore.CartServices.interface#OrderInfo"/>
+        <implements service="popstore.CartServices.interface#OrderInfo" />
         <actions>
-            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context"/>
-            <if condition="!cartOrderId"><return/></if>
-            <service-call name="popstore.CartServices.get#OrderInfoInternal" in-map="[orderId:cartOrderId]" out-map="context"/>
+            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context" />
+            <if condition="!cartOrderId">
+                <return />
+            </if>
+            <service-call name="popstore.CartServices.get#OrderInfoInternal"
+                in-map="[orderId:cartOrderId]" out-map="context" />
         </actions>
     </service>
     <service verb="get" noun="OrderInfo">
         <description>Get information for a specific order, must be associated with active customer</description>
-        <implements service="popstore.CartServices.interface#OrderInfo"/>
+        <implements service="popstore.CartServices.interface#OrderInfo" />
         <in-parameters>
-            <parameter name="orderId" required="true"/>
+            <parameter name="orderId" required="true" />
         </in-parameters>
         <actions>
-            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context"/>
-            <if condition="!customerPartyId"><return message="No active customer, cannot view order" public="true" type="danger"/></if>
+            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context" />
+            <if condition="!customerPartyId">
+                <return message="No active customer, cannot view order" public="true" type="danger" />
+            </if>
             <entity-find entity-name="OrderPart" list="orderPartList">
-                <econdition field-name="orderId"/>
-                <econdition field-name="customerPartyId" from="companyPartyId"/></entity-find>
-            <if condition="!orderPartList"><return message="Order ${orderId} not found or not owned by active customer" public="true" type="danger"/></if>
+                <econdition field-name="orderId" />
+                <econdition field-name="customerPartyId" from="companyPartyId?:customerPartyId" />
+            </entity-find>
+            <if condition="!orderPartList">
+                <return message="Order ${orderId} not found or not owned by active customer"
+                    public="true" type="danger" />
+            </if>
 
-            <service-call name="popstore.CartServices.get#OrderInfoInternal" in-map="[orderId:orderId]" out-map="context"/>
+            <service-call name="popstore.CartServices.get#OrderInfoInternal"
+                in-map="[orderId:orderId]" out-map="context" />
         </actions>
     </service>
     <service verb="get" noun="OrderInfoInternal">
         <description>Internal service to get order info (for cart or order history);
             get#CartInfo restricts to server side managed cartOrderId; get#OrderInfo restricts by active customerPartyId</description>
-        <implements service="popstore.CartServices.interface#OrderInfo"/>
+        <implements service="popstore.CartServices.interface#OrderInfo" />
         <in-parameters>
-            <parameter name="orderId" required="true"/>
+            <parameter name="orderId" required="true" />
         </in-parameters>
         <actions>
-            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader"/>
-            <if condition="orderHeader == null"><return message="Order not found with ID ${orderId}" public="true" type="danger"/></if>
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader" />
+            <if condition="orderHeader == null">
+                <return message="Order not found with ID ${orderId}" public="true" type="danger" />
+            </if>
 
-            <entity-find-related value-field="orderHeader" relationship-name="mantle.order.OrderPart" list="orderPartList"/>
-            <set field="orderPart" from="orderPartList ? orderPartList[0] : null"/>
+            <entity-find-related value-field="orderHeader"
+                relationship-name="mantle.order.OrderPart" list="orderPartList" />
+            <set field="orderPart" from="orderPartList ? orderPartList[0] : null" />
 
             <!-- get orderPromoCodeDetailList -->
-            <entity-find entity-name="mantle.product.store.OrderPromoCodeDetail" list="orderPromoCodeDetailList">
-                <econdition field-name="orderId"/></entity-find>
+            <entity-find entity-name="mantle.product.store.OrderPromoCodeDetail"
+                list="orderPromoCodeDetailList">
+                <econdition field-name="orderId" />
+            </entity-find>
 
-            <entity-find-related value-field="orderHeader" relationship-name="mantle.order.OrderItem"
-                    list="orderItemList" order-by-list="['orderItemSeqId']"/>
+            <entity-find-related value-field="orderHeader"
+                relationship-name="mantle.order.OrderItem"
+                list="orderItemList" order-by-list="['orderItemSeqId']" />
             <script><![CDATA[
                 orderItemWithChildrenSet = new HashSet()
                 List reverseList = orderItemList.cloneList().orderByFields(["-orderItemSeqId"])
@@ -129,9 +185,11 @@ General Order Placement and eCommerce Usage
             ]]></script>
 
             <!-- get paymentList -->
-            <entity-find-related value-field="orderHeader" relationship-name="mantle.account.payment.Payment"
-                    list="paymentList" order-by-list="['paymentId']"/>
-            <set field="paymentList" from="paymentList.findAll{ it.paymentInstrumentEnumId == 'PiCreditCard'}"/>
+            <entity-find-related value-field="orderHeader"
+                relationship-name="mantle.account.payment.Payment"
+                list="paymentList" order-by-list="['paymentId']" />
+            <set field="paymentList"
+                from="paymentList.findAll{ it.paymentInstrumentEnumId == 'PiCreditCard'}" />
             <script><![CDATA[
                 import org.moqui.entity.EntityList
                 import org.moqui.entity.EntityValue
@@ -171,17 +229,21 @@ General Order Placement and eCommerce Usage
     <service verb="get" noun="CustomerOrders">
         <!-- TODO: handle pagination -->
         <out-parameters>
-            <parameter name="orderInfoList" type="List"><parameter name="orderInfo" type="Map"/></parameter>
+            <parameter name="orderInfoList" type="List">
+                <parameter name="orderInfo" type="Map" />
+            </parameter>
         </out-parameters>
         <actions>
-            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context"/>
-            <if condition="!customerPartyId"><return message="No active customer, cannot get orders" public="true" type="warning"/></if>
+            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context" />
+            <if condition="!customerPartyId">
+                <return message="No active customer, cannot get orders" public="true" type="warning" />
+            </if>
 
             <entity-find entity-name="mantle.order.OrderHeaderAndPart" list="existingOrderList">
-                <econdition field-name="customerPartyId" from="companyPartyId"/>
-                <order-by field-name="-entryDate"/>
+                <econdition field-name="customerPartyId" from="companyPartyId?:customerPartyId" />
+                <order-by field-name="-entryDate" />
             </entity-find>
-            <set field="orderInfoList" from="[]"/>
+            <set field="orderInfoList" from="[]" />
             <iterate list="existingOrderList" entry="existingOrder">
                 <script>orderInfoList.add(existingOrder.getMap())</script>
             </iterate>
@@ -194,59 +256,69 @@ General Order Placement and eCommerce Usage
             <parameter name="promoCode" />
         </in-parameters>
         <actions>
-            <service-call name="mantle.product.PromotionServices.add#OrderPromoCode" in-map="[orderId:cartOrderId, promoCode:promoCode]"/>
+            <service-call name="mantle.product.PromotionServices.add#OrderPromoCode"
+                in-map="[orderId:cartOrderId, promoCode:promoCode]" />
         </actions>
     </service>
 
     <service verb="add" noun="Product" authenticate="anonymous-all">
-        <implements service="popstore.CartServices.get#CartInfo"/>
+        <implements service="popstore.CartServices.get#CartInfo" />
         <in-parameters>
-            <parameter name="productId" required="true"/>
-            <parameter name="quantity" type="BigDecimal" default="1.0"/>
-            <parameter name="currencyUomId"/>
-            <parameter name="productStoreId"/>
+            <parameter name="productId" required="true" />
+            <parameter name="quantity" type="BigDecimal" default="1.0" />
+            <parameter name="currencyUomId" />
+            <parameter name="productStoreId" />
         </in-parameters>
         <actions>
-            <!-- NOTE: use the web session for attributes such as cartOrderId for security; this won't work in a stateless mode or outside a web session -->
-            <set field="carrierPartyId" from="'_NA_'"/>
-            <set field="shipmentMethodEnumId" from="'ShMthGround'"/>
-            <set field="sessionAttributes" from="ec.web.sessionAttributes"/>
+            <log message="====add  product $productId to order" />
+            <!-- NOTE: use the web session for attributes such as cartOrderId for security; this
+            won't work in a stateless mode or outside a web session -->
+            <set field="carrierPartyId" from="'_NA_'" />
+            <set field="shipmentMethodEnumId" from="'ShMthGround'" />
+            <set field="sessionAttributes" from="ec.web.sessionAttributes" />
 
-            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context"/>
-            <set field="orderId" from="cartOrderId"/>
+            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context" />
+            <set field="orderId" from="cartOrderId" />
             <set field="defaultOrderParameters" from="[salesChannelEnumId:'ScWeb']" />
-            <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="store"/>
-            <!-- use the company partyId for the order -->
+            <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="store" />
+            <!-- use the company partyId for the order if available -->
             <service-call name="mantle.order.OrderServices.add#OrderProductQuantity"
                 in-map="context + defaultOrderParameters + 
-                        [customerPartyId: companyPartyId, 
-                        vendorPartyId: store.organizationPartyId]" out-map="addOut"/>
-            <set field="sessionAttributes.cartOrderId" from="addOut.orderId"/>
-            <if condition="!cartOrderId &amp;&amp; customerPartyId"><!-- new order? -->
-                <!-- add customer contact person as an extra party at orderPartParty -->
-                <service-call name="create#mantle.order.OrderPartParty"
-                    in-map="[orderId: addOut.orderId, orderPartSeqId: addOut.orderPartSeqId,
-                            partyId: customerPartyId, roleTypeId: 'CustomerContactPerson']"/>
+                        [customerPartyId: companyPartyId?: customerPartyId, 
+                        vendorPartyId: store.organizationPartyId, pseudoId: seqNum]"
+                out-map="addOut" />
+            <!-- add pseudoId to order -->
+            <log
+                message="companyPartyId ${store.organizationPartyId} order cartid: $cartOrderId ret from add item: ${addOut.orderId}" />
+            <if condition="!orderId">
+                <entity-find-one entity-name="mantle.party.Party" value-field="companyParty">
+                    <field-map field-name="partyId" from="store.organizationPartyId" />
+                </entity-find-one>
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: companyParty.ownerPartyId, seqName: 'order']"
+                    out-map="context" />
+                <service-call name="update#mantle.order.OrderHeader"
+                    in-map="[orderId: addOut.orderId, pseudoId: seqNum]" />
             </if>
-
-            <service-call name="popstore.CartServices.get#CartInfo" out-map="context"/>
+            <set field="sessionAttributes.cartOrderId" from="addOut.orderId" />
+            <service-call name="popstore.CartServices.get#CartInfo" out-map="context" />
         </actions>
     </service>
 
     <service verb="update" noun="OrderProductQuantity" authenticate="anonymous-all">
         <in-parameters>
-            <parameter name="orderId" required="true"/>
-            <parameter name="orderItemSeqId" required="true"/>
-            <parameter name="quantity" type="BigDecimal" required="true"/>
+            <parameter name="orderId" required="true" />
+            <parameter name="orderItemSeqId" required="true" />
+            <parameter name="quantity" type="BigDecimal" required="true" />
         </in-parameters>
         <actions>
 
-           <if condition="quantity == 0">
+            <if condition="quantity == 0">
                 <service-call name="popstore.CartServices.delete#OrderItem"
-                    in-map="[orderId:orderId, orderItemSeqId:orderItemSeqId]"/>
+                    in-map="[orderId:orderId, orderItemSeqId:orderItemSeqId]" />
                 <else>
                     <service-call name="mantle.order.OrderServices.update#OrderItem"
-                        in-map="[orderId:orderId, orderItemSeqId:orderItemSeqId, quantity:quantity]"/>
+                        in-map="[orderId:orderId, orderItemSeqId:orderItemSeqId, quantity:quantity]" />
                 </else>
             </if>
         </actions>
@@ -259,109 +331,134 @@ General Order Placement and eCommerce Usage
         </in-parameters>
         <actions>
             <service-call name="mantle.order.OrderServices.delete#OrderItem"
-                        in-map="[orderId:orderId, orderItemSeqId:orderItemSeqId]"/>
+                in-map="[orderId:orderId, orderItemSeqId:orderItemSeqId]" />
         </actions>
     </service>
 
     <service verb="get" noun="ShippingOptions">
         <out-parameters>
-            <parameter name="shippingOptions"/>
+            <parameter name="shippingOptions" />
         </out-parameters>
         <actions>
-            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context"/>
-            <if condition="!cartOrderId"><return message="Cart is empty" public="true" type="warning"/></if>
+            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context" />
+            <if condition="!cartOrderId">
+                <return message="Cart is empty" public="true" type="warning" />
+            </if>
 
             <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader">
-            <field-map field-name="orderId" from="cartOrderId"/></entity-find-one>
+                <field-map field-name="orderId" from="cartOrderId" />
+            </entity-find-one>
             <entity-find-one entity-name="mantle.order.OrderPart" value-field="orderPart">
-                <field-map field-name="orderId" from="cartOrderId"/></entity-find-one>
+                <field-map field-name="orderId" from="cartOrderId" />
+            </entity-find-one>
 
-            <service-call name="mantle.party.ContactServices.get#PartyContactInfoList" out-map="shippingContactListInfo"
-                in-map="[partyId:companyPartyId, postalContactMechPurposeId:'PostalShippingDest',
-                    telecomContactMechPurposeId:'PhoneShippingDest']"/>
+            <service-call name="mantle.party.ContactServices.get#PartyContactInfoList"
+                out-map="shippingContactListInfo"
+                in-map="[partyId:companyPartyId?:customerPartyId, postalContactMechPurposeId:'PostalShippingDest',
+                    telecomContactMechPurposeId:'PhoneShippingDest']" />
 
             <service-call name="mantle.product.StoreServices.get#StoreShippingOptions"
                 in-map="[productStoreId:productStoreId, orderId:cartOrderId,
                         orderPartSeqId:orderPart.orderPartSeqId,
                         postalContactMechId:shippingContactListInfo.postalAddressList?.first?.postalContactMechId,
-                        getRates:true]" out-map="context"/>
+                        getRates:true]"
+                out-map="context" />
         </actions>
     </service>
     <service verb="set" noun="BillingShippingInfo">
         <in-parameters>
-            <parameter name="orderPartSeqId"/>
+            <parameter name="orderPartSeqId" />
 
-            <parameter name="paymentId"><description>Specify when there is more than one Payment per order;
-                is checked server side to make sure associated with order</description></parameter>
-            <parameter name="paymentInstrumentEnumId"/>
-            <parameter name="paymentMethodId"/>
-            <parameter name="finAccountId"/>
+            <parameter name="paymentId">
+                <description>Specify when there is more than one Payment per order;
+                is checked server side to make sure associated with order</description>
+            </parameter>
+            <parameter name="paymentInstrumentEnumId" />
+            <parameter name="paymentMethodId" />
+            <parameter name="finAccountId" />
 
-            <parameter name="shippingPostalContactMechId"/>
-            <parameter name="shippingTelecomContactMechId"/>
-            <parameter name="carrierAndShipmentMethod"/>
-            <parameter name="carrierPartyId"/>
-            <parameter name="shipmentMethodEnumId"/>
+            <parameter name="shippingPostalContactMechId" />
+            <parameter name="shippingTelecomContactMechId" />
+            <parameter name="carrierAndShipmentMethod" />
+            <parameter name="carrierPartyId" />
+            <parameter name="shipmentMethodEnumId" />
         </in-parameters>
         <out-parameters>
-            <parameter name="paymentId"/>
+            <parameter name="paymentId" />
         </out-parameters>
         <actions>
-            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context"/>
-            <if condition="!cartOrderId"><return message="Cart is empty" public="true" type="warning"/></if>
-            <set field="orderId" from="cartOrderId"/>
-            <set field="paymentInstrumentEnumId" value="PiCreditCard"/>
+            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context" />
+            <if condition="!cartOrderId">
+                <return message="Cart is empty" public="true" type="warning" />
+            </if>
+            <set field="orderId" from="cartOrderId" />
+            <set field="paymentInstrumentEnumId" value="PiCreditCard" />
+            <set field="partyId" from="companyPartyId?:customerPartyId" />
 
-            <!-- TODO: if no customerPartyId call service to create one now and set in session (no user account aka 'anonymous') -->
-
-            <service-call name="mantle.order.OrderServices.set#OrderBillingShippingInfo" in-map="context" out-map="context"/>
+            <!-- TODO: if no customerPartyId call service to create one now and set in session (no
+            user account aka 'anonymous') -->
+            <log message="====session: ${ec.web.sessionAttributes}" />
+            <log message="=====company: $companyPartyId user: $customerPartyId" />
+            <service-call name="mantle.order.OrderServices.set#OrderBillingShippingInfo"
+                in-map="context" out-map="context" />
         </actions>
     </service>
 
     <service verb="place" noun="CartOrder">
-        <implements service="popstore.CartServices.interface#OrderInfo"/>
+        <implements service="popstore.CartServices.interface#OrderInfo" />
         <in-parameters>
-            <parameter name="cardSecurityCodeByPaymentId" type="Map"/>
+            <parameter name="cardSecurityCodeByPaymentId" type="Map" />
         </in-parameters>
         <out-parameters>
-            <parameter name="oldStatusId"/>
-            <parameter name="statusChanged" type="Boolean"/>
+            <parameter name="oldStatusId" />
+            <parameter name="statusChanged" type="Boolean" />
         </out-parameters>
         <actions>
-            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context"/>
-            <if condition="!cartOrderId"><return message="Cart is empty" public="true" type="warning"/></if>
-            <set field="orderId" from="cartOrderId"/>
+            <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer" out-map="context" />
+            <if condition="!cartOrderId">
+                <return message="Cart is empty" public="true" type="warning" />
+            </if>
+            <set field="orderId" from="cartOrderId" />
 
             <!-- TODO: check shipping and payment info -->
             <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader">
-                <field-map field-name="orderId"/>
+                <field-map field-name="orderId" />
             </entity-find-one>
 
-            <!-- authorize CC/etc payment(s), calling place#Order will trigger this, but do in advance to better support CC edits before placed -->
-            <service-call name="mantle.account.PaymentServices.authorize#OrderPayments" in-map="context" out-map="authResult"/>
+            <!-- authorize CC/etc payment(s), calling place#Order will trigger this, but do in
+            advance to better support CC edits before placed -->
+            <service-call name="mantle.account.PaymentServices.authorize#OrderPayments"
+                in-map="context" out-map="authResult" />
             <!-- if any don't authorize return message here... or optionally allow place anyway? -->
-            <if condition="authResult.authFailed"><return message="Payment authorize failed" public="true" type="danger"/></if>
+            <if condition="authResult.authFailed">
+                <return message="Payment authorize failed" public="true" type="danger" />
+            </if>
 
-            <!-- Validate if the orderHeader.grandTotal is different from total authorized payment.Amount for the CC, this in order to avoid not making a proper charge-->
+            <!-- Validate if the orderHeader.grandTotal is different from total authorized
+            payment.Amount for the CC, this in order to avoid not making a proper charge-->
             <if condition="orderHeader.grandTotal != authResult.totalAuthorized">
-                <return message="Payment authorize failed" public="true" type="danger"/>
-                <log level="error" message="Authorize Payment failed because total order (${orderHeader.grandTotal}) is different to authorize amount (${authResult.totalAuthorized})"/>
+                <return message="Payment authorize failed" public="true" type="danger" />
+                <log level="error"
+                    message="Authorize Payment failed because total order (${orderHeader.grandTotal}) is different to authorize amount (${authResult.totalAuthorized})" />
             </if>
             <!-- add contact person -->
             <entity-find entity-name="mantle.order.OrderPartParty" list="orderParties">
-                <econdition field-name="orderId" from="orderId"/>
-                <econdition field-name="partyId" from="customerPartyId"/>
-                <econdition field-name="roleTypeId" value="CustomerContactPerson"/>
+                <econdition field-name="orderId" from="orderId" />
+                <econdition field-name="partyId" from="customerPartyId" />
+                <econdition field-name="roleTypeId" value="CustomerContactPerson" />
             </entity-find>
             <if condition="!orderParties">
                 <service-call name="create#mantle.order.OrderPartParty"
-                in-map="[orderId: cartOrderId, partyId: customerPartyId,
-                    orderPartSeqId: '01', roleTypeId: 'CustomerContactPerson']"/>
+                    in-map="[orderId: cartOrderId, partyId: customerPartyId,
+                    orderPartSeqId: '01', roleTypeId: 'CustomerContactPerson']" />
             </if>
             <!-- place order -->
-            <service-call name="mantle.order.OrderServices.place#Order" in-map="[orderId:orderId]" out-map="context"/>
+            <service-call name="mantle.order.OrderServices.place#Order"
+                in-map="[orderId:orderId, customerPartyId: companyPartyId?:customerPartyId]"
+                out-map="context" />
             <!-- get order info to return for confirmation -->
-            <service-call name="popstore.CartServices.get#OrderInfoInternal" in-map="[orderId:orderId]" out-map="context"/>
+            <service-call name="popstore.CartServices.get#OrderInfoInternal"
+                in-map="[orderId:orderId]" out-map="context" />
             <!-- if all is well we're done with this cart order -->
             <script>ec.web.sessionAttributes.remove("cartOrderId")</script>
         </actions>
@@ -370,51 +467,56 @@ General Order Placement and eCommerce Usage
     <service verb="get" noun="ActiveOrderAndCustomer">
         <description>Get active cart order, for internal (server-side) use only</description>
         <out-parameters>
-            <parameter name="productStoreId"/>
-            <parameter name="cartOrderId"/>
-            <parameter name="customerPartyId"/>
-            <parameter name="companyPartyId"/><!-- customer company -->
+            <parameter name="productStoreId" />
+            <parameter name="cartOrderId" />
+            <parameter name="customerPartyId" />
+            <parameter name="companyPartyId" /><!-- customer company -->
         </out-parameters>
         <actions>
-            <!-- NOTE: use the web session for attributes such as cartOrderId for security; this won't work in a stateless mode or outside a web session -->
-            <set field="sessionAttributes" from="ec.web.sessionAttributes"/>
-            <set field="cartOrderId" from="sessionAttributes.cartOrderId"/>
-            <set field="productStoreId" from="sessionAttributes.productStoreId"/>
-            <set field="customerPartyId" from="sessionAttributes.customerPartyId"/>
-            <set field="companyPartyId" from="sessionAttributes.companyPartyId"/>
+            <!-- NOTE: use the web session for attributes such as cartOrderId for security; this
+            won't work in a stateless mode or outside a web session -->
+            <set field="sessionAttributes" from="ec.web.sessionAttributes" />
+            <set field="cartOrderId" from="sessionAttributes.cartOrderId" />
+            <set field="productStoreId" from="sessionAttributes.productStoreId" />
+            <set field="customerPartyId" from="sessionAttributes.customerPartyId" />
+            <set field="companyPartyId" from="sessionAttributes.companyPartyId" />
             <!-- user changed on the device? -->
-            <if condition="ec.user.userAccount &amp;&amp; ec.user.userAccount.partyId != sessionAttributes.customerPartyId">
-                <set field="customerPartyId" from="ec.user.userAccount?.partyId"/>
-                <set field="sessionAttributes.customerPartyId" from="ec.user.userAccount?.partyId"/>
+            <if
+                condition="ec.user.userAccount &amp;&amp; ec.user.userAccount.partyId != sessionAttributes.customerPartyId">
+                <set field="customerPartyId" from="ec.user.userAccount?.partyId" />
+                <set field="sessionAttributes.customerPartyId" from="ec.user.userAccount?.partyId" />
                 <!-- get related company of the employee i-->
                 <entity-find entity-name="mantle.party.PartyRelationship" list="rel">
-                    <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId"/>
-                    <econdition field-name="fromRoleTypeId" value="Employee"/>
-                    <econdition field-name="relationshipTypeEnumId" value="PrtEmployee"/>
-                    <date-filter/>
+                    <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId" />
+                    <econdition field-name="fromRoleTypeId" value="Employee" />
+                    <econdition field-name="relationshipTypeEnumId" value="PrtEmployee" />
+                    <date-filter />
                 </entity-find>
                 <if condition="rel">
-                    <set field="companyPartyId" from="rel[0].toPartyId"/>
+                    <set field="companyPartyId" from="rel[0].toPartyId" />
                     <else>
-                        <set field="companyPartyId" from="ec.user.userAccount?.partyId"/>
+                        <set field="companyPartyId" from="ec.user.userAccount?.partyId" />
                     </else>
                 </if>
-                <set field="sessionAttributes.companyPartyId" from="companyPartyId"/>
+                <set field="sessionAttributes.companyPartyId" from="companyPartyId" />
             </if>
             <if condition="!cartOrderId &amp;&amp; companyPartyId">
                 <!-- see if there is an open order for user and get that ID into session -->
                 <entity-find entity-name="mantle.order.OrderHeaderAndPart" list="existingOrderList">
-                    <econdition field-name="statusId" value="OrderOpen"/>
-                    <econdition field-name="customerPartyId" from="companyPartyId"/>
-                    <select-field field-name="orderId"/><select-field field-name="orderPartSeqId"/>
-                    <order-by field-name="-entryDate"/><!-- get most recent open order -->
+                    <econdition field-name="statusId" value="OrderOpen" />
+                    <econdition field-name="customerPartyId" from="companyPartyId?:customerPartyId" />
+                    <select-field field-name="orderId" />
+                    <select-field field-name="orderPartSeqId" />
+                    <order-by field-name="-entryDate" /><!-- get most recent open order -->
                 </entity-find>
                 <if condition="existingOrderList">
-                    <set field="cartOrderId" from="existingOrderList[0].orderId"/>
-                    <set field="sessionAttributes.cartOrderId" from="cartOrderId"/>
+                    <set field="cartOrderId" from="existingOrderList[0].orderId" />
+                    <set field="sessionAttributes.cartOrderId" from="cartOrderId" />
                 </if>
             </if>
-            <!--log message=" ======== ps: $productStoreId or:$cartOrderId cus:$customerPartyId comp:$companyPartyId"/-->
+            <!--log
+            message=" ======== ps: $productStoreId or:$cartOrderId cus:$customerPartyId
+            comp:$companyPartyId"/-->
         </actions>
     </service>
 </services>

@@ -149,6 +149,8 @@ class AddressDialogState extends State<AddressDialog> {
                       decoration: const InputDecoration(labelText: 'Country'),
                       controller: _countrySearchBoxController,
                     ),
+                    menuProps:
+                        MenuProps(borderRadius: BorderRadius.circular(20.0)),
                     title: popUp(
                       context: context,
                       title: 'Select country',

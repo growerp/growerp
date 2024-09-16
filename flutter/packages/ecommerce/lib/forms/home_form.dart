@@ -57,8 +57,6 @@ class _HomeState extends State<HomePage> {
   late int limit;
   bool? search;
   String? searchString;
-  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
-      GlobalKey<ScaffoldMessengerState>();
   _HomeState(this.message) {
     HelperFunctions.showTopMessage(scaffoldMessengerKey, message, 4);
   }

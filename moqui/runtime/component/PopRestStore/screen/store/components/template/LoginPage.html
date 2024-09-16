@@ -1,17 +1,18 @@
 <div>
-    <navbar sub-bar="true"/>
+    <navbar sub-bar="true" />
     <div class="container">
         <br>
         <div class="row">
             <form class="login-form col-lg-5 col-sm-12" @submit.prevent="login" method="post">
-                <h1 class="text-left">Sign In</h1>
+                <h1 class="text-left">Log In</h1>
                 <div v-if="loginErrormessage && loginErrormessage.length" class="alert alert-primary" role="alert">
                     {{loginErrormessage}}
                 </div>
                 <div class="form-group row">
                     <label for="" class=" col-form-label col-lg-3 col-sm-12 text-left">Email</label>
                     <div class="col-lg-9 col-sm-12">
-                        <input v-model="user.username" type="text" class="form-control" required name="username" id="username" autocomplete="username">
+                        <input v-model="user.username" type="text" class="form-control" required name="username"
+                            id="username" autocomplete="username">
                     </div>
                 </div>
                 <div class="form-group row">
@@ -20,7 +21,7 @@
                         <input v-model="user.password" type="password" class="form-control" required>
                     </div>
                 </div>
-                <button class="btn btn-login offset-lg-3 btn-block col-sm-12 col-lg-9" type="submit">Sign In</button>
+                <button class="btn btn-login offset-lg-3 btn-block col-sm-12 col-lg-9" type="submit">Log In</button>
                 <router-link :to="'/resetPassword/' + ownerPartyId" tag="a">
                     <span class="login-forgot mt-2 mb-5">Forgot Your Password?</span>
                 </router-link>
@@ -30,7 +31,8 @@
             </div>
             <div class="new-customer col-sm-12 col-lg-5">
                 <h1 class="text-left">New Customer</h1>
-                <router-link :to="'/account/create/' + ownerPartyId" tag="button" class="btn btn-create-account btn-block col-sm-12 col-lg-10">Create an Account</router-link>
+                <router-link :to="'/account/create/' + ownerPartyId" tag="button"
+                    class="btn btn-create-account btn-block col-sm-12 col-lg-10">Create an Account</router-link>
                 <p class="new-customer-text mt-3">
                     Don't have an Account? Don't worry. It's easy, free and only takes a minute.
                 </p>
@@ -43,36 +45,37 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLongTitle">Password Change Required</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <form class="modal-body" @submit.prevent="changePassword" method="post">
-                    <div v-if="responseMessage != null && responseMessage != ''" class="alert alert-primary" role="alert">
+                    <div v-if="responseMessage != null && responseMessage != ''" class="alert alert-primary"
+                        role="alert">
                         {{responseMessage}}
                     </div>
                     <div class="form-group row">
                         <label class="col-sm-4 col-form-label modal-text">Username *</label>
                         <div class="col-sm-7">
-                            <input class="form-control" type="text" v-model="passwordInfo.username" required/>
+                            <input class="form-control" type="text" v-model="passwordInfo.username" required />
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-sm-4 col-form-label modal-text">Old Password *</label>
                         <div class="col-sm-7">
-                            <input class="form-control" type="password" v-model="passwordInfo.oldPassword" required/>
+                            <input class="form-control" type="password" v-model="passwordInfo.oldPassword" required />
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-sm-4 col-form-label modal-text">New Password *</label>
-                            <div class="col-sm-7">
-                                <input class="form-control" type="password" v-model="passwordInfo.newPassword" required/>
+                        <div class="col-sm-7">
+                            <input class="form-control" type="password" v-model="passwordInfo.newPassword" required />
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-sm-4 col-form-label modal-text">Confirm New Password *</label>
                         <div class="col-sm-7">
-                            <input class="form-control" type="password" v-model="passwordInfo.newPasswordVerify" 
-                                required/>
+                            <input class="form-control" type="password" v-model="passwordInfo.newPasswordVerify"
+                                required />
                         </div>
                     </div>
                     <div class="form-group row">

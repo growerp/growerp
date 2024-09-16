@@ -9,33 +9,33 @@ const STEPS = [STEP_ADDRESS, STEP_SHIPPING, STEP_BILLING, STEP_REVIEW, STEP_PEND
 
 
 storeComps.CheckoutNavbar = {
-  name: "checkout-navbar",
-  data: function() { return {STEP_ADDRESS: STEP_ADDRESS, STEP_SHIPPING: STEP_SHIPPING, STEP_BILLING: STEP_BILLING, STEP_REVIEW: STEP_REVIEW, STEP_PENDING: STEP_PENDING, STEP_SUCCESS: STEP_SUCCESS, STEPS: STEPS} },
-  props: ["option"],
-  methods: {
-        getCurrentStep: function() {
-            var step =  window.location.hash ? window.location.hash.split("/")[2] : this.STEP_ADDRESS;
-            return  (this.STEPS.indexOf(step) > -1) ? step : this.STEP_ADDRESS;
+    name: "checkout-navbar",
+    data: function () { return { STEP_ADDRESS: STEP_ADDRESS, STEP_SHIPPING: STEP_SHIPPING, STEP_BILLING: STEP_BILLING, STEP_REVIEW: STEP_REVIEW, STEP_PENDING: STEP_PENDING, STEP_SUCCESS: STEP_SUCCESS, STEPS: STEPS } },
+    props: ["option"],
+    methods: {
+        getCurrentStep: function () {
+            var step = window.location.hash ? window.location.hash.split("/")[2] : this.STEP_ADDRESS;
+            return (this.STEPS.indexOf(step) > -1) ? step : this.STEP_ADDRESS;
         },
-        setCurrentStep: function(step) {
+        setCurrentStep: function (step) {
             if (this.STEPS.indexOf(step) == -1)
                 return;
-            window.history.pushState('', 'ignored param', window.location.pathname + "#/checkout/"+step);
+            window.history.pushState('', 'ignored param', window.location.pathname + "#/checkout/" + step);
             var event = new CustomEvent("hashchange");
             window.dispatchEvent(event);
             this.$forceUpdate();
         },
-        isCurrentStep: function(step) {
+        isCurrentStep: function (step) {
             return this.getCurrentStep() == step;
         },
-        isCompleteStep: function(step) {
+        isCompleteStep: function (step) {
             return this.STEPS.indexOf(step) < this.STEPS.indexOf(this.getCurrentStep())
         },
-        isIncompleteStep: function(step) {
+        isIncompleteStep: function (step) {
             return this.STEPS.indexOf(step) >= this.STEPS.indexOf(this.getCurrentStep())
         }
     },
-    mounted: function() {
+    mounted: function () {
         // Redirects to the address step if none found.
         var currentStep = this.getCurrentStep();
         if (!window.location.hash.indexOf(currentStep) > -1) {
@@ -44,7 +44,7 @@ storeComps.CheckoutNavbar = {
 
         // Triggers a refresh if the hash changes
         var reference = this;
-        window.addEventListener('hashchange', function() {
+        window.addEventListener('hashchange', function () {
             reference.$forceUpdate()
         }, false);
     }
@@ -54,15 +54,20 @@ storeComps.CheckoutNavbar = {
 storeComps.CheckOutPage = {
     name: "checkout-page",
     extends: storeComps.CheckoutNavbar,
-    data: function() { return {
+    data: function () {
+        return {
             cvv: "", showCvvError: false, homePath: "", storePath: "", customerInfo: {}, productsInCart: {}, shippingAddress: {}, shippingAddressSelect: {}, paymentMethod: {}, shippingMethod: {},
-            showCheckoutMessages:false, billingAddress: {}, billingAddressOption: "", listShippingAddress: [], listPaymentMethods: [],  promoCode: "", promoError: "", postalAddressStateGeoSelected: null,
+            showCheckoutMessages: false, billingAddress: {}, billingAddressOption: "", listShippingAddress: [], listPaymentMethods: [], promoCode: "", promoError: "", postalAddressStateGeoSelected: null,
             countriesList: [], regionsList: [], shippingOption: "", addressOption: "", paymentOption: "", isSameAddress: "0", shippingItemPrice: 0,
-            isUpdate: false, isSpinner: false, responseMessage: "", toNameErrorMessage: "", countryErrorMessage: "", addressErrorMessage: "", 
-            cityErrorMessage: "", stateErrorMessage: "", postalCodeErrorMessage: "", contactNumberErrorMessage: "", paymentId: 0, 
-            freeShipping:false, promoSuccess: "", loading: false, mouseInPopover: false, currencyFormat: "",
-            listShippingOptions: [],  axiosConfig: { headers: { "Content-Type": "application/json;charset=UTF-8", "Access-Control-Allow-Origin": "*",
-            "api_key":this.$root.apiKey, "moquiSessionToken":this.$root.moquiSessionToken } }
+            isUpdate: false, isSpinner: false, responseMessage: "", toNameErrorMessage: "", countryErrorMessage: "", addressErrorMessage: "",
+            cityErrorMessage: "", stateErrorMessage: "", postalCodeErrorMessage: "", contactNumberErrorMessage: "", paymentId: 0,
+            freeShipping: false, promoSuccess: "", loading: false, mouseInPopover: false, currencyFormat: "",
+            listShippingOptions: [], axiosConfig: {
+                headers: {
+                    "Content-Type": "application/json;charset=UTF-8", "Access-Control-Allow-Origin": "*",
+                    "api_key": this.$root.apiKey, "moquiSessionToken": this.$root.moquiSessionToken
+                }
+            }
         };
     },
     computed: {
@@ -75,7 +80,7 @@ storeComps.CheckOutPage = {
         productTotal: function () {
             return this.productsInCart.orderItemList ? this.getCartValueByItemEnum('ItemProduct') : 0;
         },
-        productCount: function(){
+        productCount: function () {
             return this.productsInCart.orderItemList ? this.getCartCountByItemEnum('ItemProduct') : 0;
         },
         //TODO Getting the applied promo codes should be done server-side
@@ -89,66 +94,66 @@ storeComps.CheckOutPage = {
         }
     },
     watch: {
-        shippingItemPrice: function(val){
+        shippingItemPrice: function (val) {
             this.shippingMethod.shippingTotal = parseFloat(val).toFixed(2);
         }
     },
     methods: {
-        getUniqueValuesByProperty: function (items, property, filter){
+        getUniqueValuesByProperty: function (items, property, filter) {
             var uniqueVals = {};
             items.forEach(function (val) {
-                if(filter(val) && !(val[property] in uniqueVals) && val[property] != undefined)
+                if (filter(val) && !(val[property] in uniqueVals) && val[property] != undefined)
                     uniqueVals[val[property]] = true;
             });
             return Object.getOwnPropertyNames(uniqueVals);
         },
-        getCartValueByItemEnum: function(itemEnum) {
+        getCartValueByItemEnum: function (itemEnum) {
             return this.productsInCart.orderItemList.reduce(function (a, c) {
                 var value = c.itemTypeEnumId == itemEnum ? c.unitAmount * c.quantity : 0;
                 return a + value;
             }, 0);
         },
-        getCartCountByItemEnum: function(itemEnum){
+        getCartCountByItemEnum: function (itemEnum) {
             return this.productsInCart.orderItemList.reduce(function (acc, item) {
                 return item.itemTypeEnumId == itemEnum ? acc + item.quantity : acc + 0;
             }, 0)
         },
-        notAddressSeleted: function() {
+        notAddressSeleted: function () {
             return (this.addressOption == null || this.addressOption == ''
                 || this.listShippingAddress == null || this.listShippingAddress.length == 0);
         },
-        notPaymentSeleted: function() {
+        notPaymentSeleted: function () {
             return (this.paymentOption == null || this.paymentOption == ''
                 || this.listPaymentMethods == null || this.listPaymentMethods.length == 0);
         },
-        getCustomerInfo: function() {
-            return new Promise(function(resolve){
+        getCustomerInfo: function () {
+            return new Promise(function (resolve) {
                 CustomerService.getCustomerInfo(this.axiosConfig).then(function (data) {
                     this.customerInfo = data;
                     resolve()
                 }.bind(this));
             }.bind(this));
         },
-        getCustomerShippingAddresses: function() {
-            return new Promise(function(resolve){
+        getCustomerShippingAddresses: function () {
+            return new Promise(function (resolve) {
                 CustomerService.getShippingAddresses(this.axiosConfig).then(function (data) {
                     this.listShippingAddress = data.postalAddressList || [];
                     resolve()
                 }.bind(this));
             }.bind(this))
         },
-        onAddressCancel: function() {
+        onAddressCancel: function () {
             this.hideModal("addressFormModal");
         },
 
-        onAddressUpserted: function(data) {
+        onAddressUpserted: function (data) {
             this.shippingAddress = {};
-            this.addressOption = data.postalContactMechId + ':' + data.telecomContactMechId;
+            this.addressOption = data.postalContactMechId;// + ':' + data.telecomContactMechId;
             this.getCustomerShippingAddresses();
             this.hideModal("addressFormModal");
         },
 
-        onCreditCardCancel: function() {
+        onCreditCardCancel: function () {
             this.hideModal("creditCardModal");
         },
 
@@ -158,13 +163,13 @@ storeComps.CheckOutPage = {
          * "paymentMethodId" : "100004",
          * "telecomContactMechId" : "CustJqpTeln"
         **/
-        onCreditCardSet: function(data) {
+        onCreditCardSet: function (data) {
             this.getCustomerPaymentMethods();
             this.hideModal("creditCardModal");
         },
 
-        getCartShippingOptions: function() {
-            return new Promise(function(resolve){
+        getCartShippingOptions: function () {
+            return new Promise(function (resolve) {
                 ProductService.getCartShippingOptions(this.axiosConfig)
                     .then(function (data) {
                         this.listShippingOptions = data.shippingOptions;
@@ -175,7 +180,7 @@ storeComps.CheckOutPage = {
                             }
                         }
 
-                        if(this.shippingMethod.shipmentMethodDescription === undefined){
+                        if (this.shippingMethod.shipmentMethodDescription === undefined) {
                             // Look for shipping option
                             var option = this.listShippingOptions ?
                                 this.listShippingOptions.find(function (item) { return item.shipmentMethodDescription == "Ground Parcel" }) : 0;
@@ -191,24 +196,24 @@ storeComps.CheckOutPage = {
                     }.bind(this));
             }.bind(this))
         },
-        getCartInfo: function() {
-            new Promise( function(resolve) {
+        getCartInfo: function () {
+            new Promise(function (resolve) {
                 ProductService.getCartInfo(this.axiosConfig).then(function (data) {
-                    this.currencyFormat = new Intl.NumberFormat('en-US', 
+                    this.currencyFormat = new Intl.NumberFormat('en-US',
                         { style: 'currency', currency: data.orderHeader == undefined ? 'USD' : data.orderHeader.currencyUomId });
                     if (data.postalAddress) {
                         this.postalAddressStateGeoSelected = data.postalAddressStateGeo;
-                        this.addressOption = data.postalAddress.contactMechId + ':' + data.postalAddress.telecomContactMechId;
+                        this.addressOption = data.postalAddress.contactMechId;// + ':' + data.postalAddress.telecomContactMechId;
                         this.shippingAddressSelect = data.postalAddress;
-                        this.shippingAddressSelect.contactNumber = data.telecomNumber == undefined ? "": data.telecomNumber.contactNumber;
+                        //      this.shippingAddressSelect.contactNumber = data.telecomNumber == undefined ? "" : data.telecomNumber.contactNumber;
                     } else if (this.listShippingAddress.length) {
                         // Preselect first address
-                        this.addressOption = this.listShippingAddress[0].postalContactMechId + ':' + this.listShippingAddress[0].telecomContactMechId;
+                        this.addressOption = this.listShippingAddress[0].postalContactMechId;// + ':' + this.listShippingAddress[0].telecomContactMechId;
                     }
 
                     if (data.paymentInfoList && data.paymentInfoList.length) {
                         this.paymentOption = data.paymentInfoList[0].payment.paymentMethodId;
-                        this.billingAddressOption = data.paymentInfoList[0].paymentMethod.postalContactMechId + ':' + data.paymentInfoList[0].paymentMethod.telecomContactMechId;
+                        this.billingAddressOption = data.paymentInfoList[0].paymentMethod.postalContactMechId;// + ':' + data.paymentInfoList[0].paymentMethod.telecomContactMechId;
                         this.selectBillingAddress(data.paymentInfoList[0]);
                         for (var x in this.listPaymentMethods) {
                             if (this.paymentOption === this.listPaymentMethods[x].paymentMethodId) {
@@ -232,18 +237,18 @@ storeComps.CheckOutPage = {
                 }.bind(this));
             }.bind(this))
         },
-        setShippingItemPrice: function(){
+        setShippingItemPrice: function () {
             // Retrieve the ItemShipping from orderItemList
-            var item = this.productsInCart.orderItemList?
-                       this.productsInCart.orderItemList.find(function(item) {return item.itemTypeEnumId == 'ItemShipping'; }):0;
+            var item = this.productsInCart.orderItemList ?
+                this.productsInCart.orderItemList.find(function (item) { return item.itemTypeEnumId == 'ItemShipping'; }) : 0;
             // Parse the default value retrieved from orderItemList setting two decimal
-            this.shippingItemPrice = parseFloat(item? item.unitAmount : 0);
+            this.shippingItemPrice = parseFloat(item ? item.unitAmount : 0);
         },
-        addressContinue: function() {
+        addressContinue: function () {
             this.addCartBillingShipping();
             this.setCurrentStep(STEP_SHIPPING)
         },
-        shippingContinue: function() {
+        shippingContinue: function () {
             this.addCartBillingShipping();
             this.setCurrentStep(STEP_BILLING)
         },
@@ -260,28 +265,28 @@ storeComps.CheckOutPage = {
             this.addCartBillingShipping();
             this.setCurrentStep(STEP_REVIEW)
         },
-        addCartBillingShipping: function() {
+        addCartBillingShipping: function () {
             var currentListShippingOptions = this.listShippingOptions.slice();
             this.listShippingOptions = [];
             var info = {
-                "shippingPostalContactMechId":this.addressOption.split(':')[0],
-                "shippingTelecomContactMechId":this.addressOption.split(':')[1],
-                "paymentMethodId":this.paymentOption,
-                "carrierPartyId":this.shippingOption.split(':')[0],
-                "shipmentMethodEnumId":this.shippingOption.split(':')[1]
+                "shippingPostalContactMechId": this.addressOption.split(':')[0],
+                //                "shippingTelecomContactMechId": this.addressOption.split(':')[1],
+                "paymentMethodId": this.paymentOption,
+                "carrierPartyId": this.shippingOption.split(':')[0],
+                "shipmentMethodEnumId": this.shippingOption.split(':')[1]
             };
-            ProductService.addCartBillingShipping(info,this.axiosConfig).then(function (data) {
+            ProductService.addCartBillingShipping(info, this.axiosConfig).then(function (data) {
                 this.paymentId = data.paymentId;
                 this.getCartInfo();
                 this.getCartShippingOptions();
-            }.bind(this)).catch(function(error){
+            }.bind(this)).catch(function (error) {
                 this.listShippingOptions = currentListShippingOptions;
             }.bind(this));
         },
-        getCustomerPaymentMethods: function() {
-            return new Promise(function(resolve){
+        getCustomerPaymentMethods: function () {
+            return new Promise(function (resolve) {
                 CustomerService.getPaymentMethods(this.axiosConfig).then(function (data) {
-                    this.listPaymentMethods = data.methodInfoList.filter(function(method){
+                    this.listPaymentMethods = data.methodInfoList.filter(function (method) {
                         return method.isCreditCard
                     });
                     if (this.listPaymentMethods.length) {
@@ -292,27 +297,27 @@ storeComps.CheckOutPage = {
                 }.bind(this));
             }.bind(this))
         },
-        placeCartOrder: function() {
+        placeCartOrder: function () {
             var data = { cardSecurityCodeByPaymentId: {} };
             data.cardSecurityCodeByPaymentId[this.paymentId] = this.cvv;
 
             // temporarily go to sending step
             this.setCurrentStep(STEP_PENDING);
-            ProductService.placeCartOrder(data,this.axiosConfig).then(function (data) {
-                if(data.orderHeader != null) {
-                    this.$router.push({ name: 'successcheckout', params: { orderId: data.orderHeader.orderId }});
+            ProductService.placeCartOrder(data, this.axiosConfig).then(function (data) {
+                if (data.orderHeader != null) {
+                    this.$router.push({ name: 'successcheckout', params: { orderId: data.orderHeader.orderId } });
                 } else {
                     this.showModal("modal-error");
                     this.setCurrentStep(STEP_BILLING);
                 }
-                if(data.messages != undefined && data.messages.includes("error") && data.messages.includes("122")) {
+                if (data.messages != undefined && data.messages.includes("error") && data.messages.includes("122")) {
                     this.responseMessage = "Please provide a valid Billing ZIP";
                     this.setCurrentStep(STEP_BILLING);
                 } else {
                     this.responseMessage = data.messages;
                 }
             }.bind(this)).catch(function (error) {
-                if(!!error.response.headers.moquisessiontoken){
+                if (!!error.response.headers.moquisessiontoken) {
                     this.axiosConfig.headers.moquiSessionToken = error.response.headers.moquisessiontoken;
                     this.$root.moquiSessionToken = error.response.headers.moquisessiontoken;
                 }
@@ -321,10 +326,10 @@ storeComps.CheckOutPage = {
                 this.setCurrentStep(STEP_BILLING);
             }.bind(this));
         },
-        applyPromotionCode: function() {
-            var dataCode = {promoCode: this.promoCode, orderId: this.productsInCart.orderHeader.orderId};
-            ProductService.addPromoCode(dataCode,this.axiosConfig).then(function (data) {
-                if(data.messages && data.messages.includes("not valid")) {
+        applyPromotionCode: function () {
+            var dataCode = { promoCode: this.promoCode, orderId: this.productsInCart.orderHeader.orderId };
+            ProductService.addPromoCode(dataCode, this.axiosConfig).then(function (data) {
+                if (data.messages && data.messages.includes("not valid")) {
                     this.promoError = data.messages;
                 } else {
                     this.promoSuccess = data.messages;
@@ -333,17 +338,17 @@ storeComps.CheckOutPage = {
                 }
             }.bind(this));
         },
-        deletePaymentMethod: function(paymentMethodId) {
-            CustomerService.deletePaymentMethod(paymentMethodId,this.axiosConfig).then(function (data) {
+        deletePaymentMethod: function (paymentMethodId) {
+            CustomerService.deletePaymentMethod(paymentMethodId, this.axiosConfig).then(function (data) {
                 this.getCustomerPaymentMethods();
             }.bind(this));
         },
-        deleteShippingAddress: function(contactMechId,contactMechPurposeId) {
-            CustomerService.deleteShippingAddress(contactMechId,contactMechPurposeId, this.axiosConfig).then(function (data) {
+        deleteShippingAddress: function (contactMechId, contactMechPurposeId) {
+            CustomerService.deleteShippingAddress(contactMechId, contactMechPurposeId, this.axiosConfig).then(function (data) {
                 this.getCustomerShippingAddresses();
             }.bind(this));
         },
-        updateProductQuantity: function(item) {
+        updateProductQuantity: function (item) {
             this.loading = true;
             var data = { "orderId": item.orderId, "orderItemSeqId": item.orderItemSeqId, "quantity": item.quantity };
             ProductService.updateProductQuantity(data, this.axiosConfig)
@@ -352,56 +357,56 @@ storeComps.CheckOutPage = {
                         this.getCartInfo(),
                         this.getCartShippingOptions()
                     ]).finally(function () {
-                            this.loading = false;
-                        }.bind(this)
+                        this.loading = false;
+                    }.bind(this)
                     )
                 }.bind(this)).catch(function (error) {
-                    if(!!error.response.headers.moquisessiontoken){
+                    if (!!error.response.headers.moquisessiontoken) {
                         this.axiosConfig.headers.moquiSessionToken = error.response.headers.moquisessiontoken;
                         this.$root.moquiSessionToken = error.response.headers.moquisessiontoken;
                     }
                     this.loading = false;
                 }.bind(this));
         },
-        afterDelete: function(){
-            let qtyProducts = 0 ;
+        afterDelete: function () {
+            let qtyProducts = 0;
             if (this.productsInCart.orderItemList) {
-                this.productsInCart.orderItemList.forEach(function(item){
-                    if(item.itemTypeEnumId == 'ItemProduct'){
+                this.productsInCart.orderItemList.forEach(function (item) {
+                    if (item.itemTypeEnumId == 'ItemProduct') {
                         qtyProducts += 1;
                     }
                 });
             }
-            if(qtyProducts == 0){
+            if (qtyProducts == 0) {
                 window.location.href = this.storePath;
             }
         },
-        deleteOrderProduct: function(item) {
+        deleteOrderProduct: function (item) {
             ProductService.deleteOrderProduct(item.orderId, item.orderItemSeqId, this.axiosConfig)
                 .then(function (data) { this.getCartInfo(); this.getCartShippingOptions(); }.bind(this));
         },
-        deletePromoCode: function(promo) {
+        deletePromoCode: function (promo) {
             var promoInfo = this.productsInCart.orderPromoCodeDetailList.find(function (val) {
                 return val.promoCode == promo;
             });
-            ProductService.deletePromoCode({orderId: promoInfo.orderId, promoCodeId: promoInfo.promoCodeId},
+            ProductService.deletePromoCode({ orderId: promoInfo.orderId, promoCodeId: promoInfo.promoCodeId },
                 this.axiosConfig.headers).then(function (data) { this.getCartInfo(); this.getCartShippingOptions(); }.bind(this));
         },
-        selectBillingAddress: function(address) {
+        selectBillingAddress: function (address) {
             this.paymentMethod.address1 = address.postalAddress.address1;
             this.paymentMethod.address2 = address.postalAddress.address2;
             this.paymentMethod.toName = address.postalAddress.toName;
             this.paymentMethod.attnName = address.postalAddress.attnName;
             this.paymentMethod.city = address.postalAddress.city;
             this.paymentMethod.countryGeoId = address.postalAddress.countryGeoId;
-            if(typeof(address.telecomNumber) != 'undefined') {
-                this.paymentMethod.contactNumber = address.telecomNumber.contactNumber;
-            }
+            //            if (typeof (address.telecomNumber) != 'undefined') {
+            //                this.paymentMethod.contactNumber = address.telecomNumber.contactNumber;
+            //            }
             this.paymentMethod.postalCode = address.postalAddress.postalCode;
             this.paymentMethod.stateProvinceGeoId = address.postalAddress.stateProvinceGeoId;
             this.responseMessage = "";
         },
-        selectAddress: function(address) {
+        selectAddress: function (address) {
             this.shippingAddress = {};
             this.shippingAddress.address1 = address.postalAddress.address1;
             this.shippingAddress.address2 = address.postalAddress.address2;
@@ -409,14 +414,14 @@ storeComps.CheckOutPage = {
             this.shippingAddress.attnName = address.postalAddress.attnName;
             this.shippingAddress.city = address.postalAddress.city;
             this.shippingAddress.countryGeoId = address.postalAddress.countryGeoId;
-            this.shippingAddress.contactNumber = address.telecomNumber ? address.telecomNumber.contactNumber : null;
+            //            this.shippingAddress.contactNumber = address.telecomNumber ? address.telecomNumber.contactNumber : null;
             this.shippingAddress.postalCode = address.postalAddress.postalCode;
             this.shippingAddress.stateProvinceGeoId = address.postalAddress.stateProvinceGeoId;
             this.shippingAddress.postalContactMechId = address.postalContactMechId;
-            this.shippingAddress.telecomContactMechId = address.telecomContactMechId;
+            //            this.shippingAddress.telecomContactMechId = address.telecomContactMechId;
             this.responseMessage = "";
         },
-        selectPaymentMethod: function(method) {
+        selectPaymentMethod: function (method) {
             this.paymentMethod = {};
             this.paymentMethod.paymentMethodId = method.paymentMethodId;
             this.paymentMethod.description = method.paymentMethod.description;
@@ -427,19 +432,19 @@ storeComps.CheckOutPage = {
             this.paymentMethod.expireYear = method.expireYear;
             this.paymentMethod.cardSecurityCode = "";
             this.paymentMethod.postalContactMechId = method.paymentMethod.postalContactMechId;
-            this.paymentMethod.telecomContactMechId = method.paymentMethod.telecomContactMechId;
+            //            this.paymentMethod.telecomContactMechId = method.paymentMethod.telecomContactMechId;
             this.responseMessage = "";
         },
-        hideModal: function(modalId) { $('#'+modalId).modal('hide'); },
-        showModal: function(modalId) { $('#'+modalId).modal('show'); },
-        changeShippingAddress: function(data) {
+        hideModal: function (modalId) { $('#' + modalId).modal('hide'); },
+        showModal: function (modalId) { $('#' + modalId).modal('show'); },
+        changeShippingAddress: function (data) {
             this.shippingAddressSelect = data.postalAddress;
-            this.shippingAddressSelect.contactNumber = data.telecomNumber.contactNumber;
-            this.postalAddressStateGeoSelected = {geoName: data.postalAddressStateGeo == undefined ? "" : data.postalAddressStateGeo.geoName};
+            //            this.shippingAddressSelect.contactNumber = data.telecomNumber.contactNumber;
+            this.postalAddressStateGeoSelected = { geoName: data.postalAddressStateGeo == undefined ? "" : data.postalAddressStateGeo.geoName };
         },
-        cleanShippingAddress: function() { this.shippingAddress = {}; this.isUpdate = false; },
-        cleanPaymentMethod: function() { this.paymentMethod = {}; this.isUpdate = false; },
-        resetData: function(){
+        cleanShippingAddress: function () { this.shippingAddress = {}; this.isUpdate = false; },
+        cleanPaymentMethod: function () { this.paymentMethod = {}; this.isUpdate = false; },
+        resetData: function () {
             this.paymentMethod = {};
             this.shippingAddress = {};
             this.isUpdate = false;
@@ -449,8 +454,8 @@ storeComps.CheckOutPage = {
             this.cvv = "";
         },
         showPopover: function (elementId, popoverId) {
-            var element = $("#"+elementId).first();
-            var popover = $("#"+popoverId).first();
+            var element = $("#" + elementId).first();
+            var popover = $("#" + popoverId).first();
             var pop = new Popper(element, popover, {
                 placement: "top",
                 modifiers: {
@@ -463,24 +468,24 @@ storeComps.CheckOutPage = {
         },
         hidePopover: function (popoverId, source) {
             //If user leaves the popover parent element without entering the popover, close it.
-            if(source == 'element') {
+            if (source == 'element') {
                 //We need to allow time for the user to enter the popover
-                setTimeout(function() {
-                    if(!this.mouseInPopover)
-                    $("#"+popoverId).first().removeClass("show");
+                setTimeout(function () {
+                    if (!this.mouseInPopover)
+                        $("#" + popoverId).first().removeClass("show");
                 }.bind(this), 250);
             } else {
-                $("#"+popoverId).first().removeClass("show");
+                $("#" + popoverId).first().removeClass("show");
                 this.mouseInPopover = false;
             }
         }
     },
     components: { "product-image": storeComps.ProductImageTemplate },
-    mounted: function() {
+    mounted: function () {
         this.loading = true;
         if (this.$root.apiKey == null) {
             localStorage.redirect = 'checkout';
-            this.$router.push({ name: 'login'});
+            this.$router.push({ name: 'login' });
         } else {
             this.homePath = storeConfig.homePath;
             this.storePath = storeConfig.storePath;
@@ -491,12 +496,12 @@ storeComps.CheckOutPage = {
                 this.getCartShippingOptions(),
                 this.getCustomerShippingAddresses(),
                 this.getCustomerPaymentMethods()
-            ]).then( function() {
-                    this.getCartInfo();
-                }.bind(this)
-            ).finally( function() {
-                    this.loading = false;
-                }.bind(this)
+            ]).then(function () {
+                this.getCartInfo();
+            }.bind(this)
+            ).finally(function () {
+                this.loading = false;
+            }.bind(this)
             )
         }
     }
@@ -505,34 +510,42 @@ storeComps.CheckOutPageTemplate = getPlaceholderRoute("template_client_checkout"
 
 storeComps.SuccessCheckOut = {
     name: "success-checkout",
-    data: function() { return {
-        customerInfo: {}, deliveryPrice:0, ordersList:[], orderList:{}, currencyFormat: "",
-        axiosConfig: { headers: { "Content-Type": "application/json;charset=UTF-8", "Access-Control-Allow-Origin": "*",
-                "api_key":this.$root.apiKey, "moquiSessionToken":this.$root.moquiSessionToken } }
-    }; },
+    data: function () {
+        return {
+            customerInfo: {}, deliveryPrice: 0, ordersList: [], orderList: {}, currencyFormat: "",
+            axiosConfig: {
+                headers: {
+                    "Content-Type": "application/json;charset=UTF-8", "Access-Control-Allow-Origin": "*",
+                    "api_key": this.$root.apiKey, "moquiSessionToken": this.$root.moquiSessionToken
+                }
+            }
+        };
+    },
     methods: {
-        getCustomerInfo: function() { CustomerService.getCustomerInfo(this.axiosConfig)
-            .then(function (data) { this.customerInfo = data; }.bind(this)); },
-        getCustomerOrders: function() {
+        getCustomerInfo: function () {
+            CustomerService.getCustomerInfo(this.axiosConfig)
+                .then(function (data) { this.customerInfo = data; }.bind(this));
+        },
+        getCustomerOrders: function () {
             CustomerService.getCustomerOrders(this.axiosConfig)
                 .then(function (data) { this.ordersList = data.orderInfoList; }.bind(this));
         },
-        getCustomerOrderById: function() {
-            CustomerService.getCustomerOrderById(this.$route.params.orderId,this.axiosConfig)
+        getCustomerOrderById: function () {
+            CustomerService.getCustomerOrderById(this.$route.params.orderId, this.axiosConfig)
                 .then(function (data) {
-                    this.currencyFormat = new Intl.NumberFormat('en-US', 
+                    this.currencyFormat = new Intl.NumberFormat('en-US',
                         { style: 'currency', currency: data.orderHeader.currencyUomId });
                     this.orderList = data;
                     var event = new CustomEvent("ordercomplete", { 'detail': data });
                     window.dispatchEvent(event);
                 }.bind(this));
         },
-        formatDate: function(date) {
+        formatDate: function (date) {
             return moment(date).format('Do MMM, YY');
         }
     },
     components: { "product-image": storeComps.ProductImageTemplate },
-    mounted: function() {
+    mounted: function () {
         this.homePath = storeConfig.homePath;
         this.getCustomerInfo();
         this.getCustomerOrderById();

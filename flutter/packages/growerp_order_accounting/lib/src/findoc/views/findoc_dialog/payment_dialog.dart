@@ -131,7 +131,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 child: popUp(
                     context: context,
-                    height: 750,
+                    height: 700,
                     width: 800,
                     title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
                         "Payment #${finDoc.pseudoId ?? 'New'}",

@@ -260,7 +260,7 @@ class FinDocTest {
         String? pseudoId =
             await CommonTest.getRelatedFindoc(tester, FinDocType.transaction);
         expect(pseudoId, isNot(equals(isNull)),
-            reason: "pseudoId should not be null!");
+            reason: "shipment does not have a related transaction!");
         newFinDocs.add(FinDoc(
             docType: FinDocType.transaction,
             pseudoId: pseudoId,

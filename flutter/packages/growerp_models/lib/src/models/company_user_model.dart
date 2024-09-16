@@ -58,13 +58,13 @@ class CompanyUser with _$CompanyUser {
     switch (obj) {
       case User _:
         return CompanyUser(
-            type: PartyType.company,
+            type: PartyType.user,
             partyId: obj.partyId,
             pseudoId: obj.pseudoId,
             name: '${obj.lastName}, ${obj.firstName}');
       case Company _:
         return CompanyUser(
-            type: PartyType.user,
+            type: PartyType.company,
             partyId: obj.partyId,
             pseudoId: obj.pseudoId,
             name: obj.name);

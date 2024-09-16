@@ -75,7 +75,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                 child: popUp(
                   context: context,
                   title: "Registration",
-                  height: 600,
+                  height: 500,
                   child: _registerForm(_authBloc.state.authenticate!),
                 )));
       }
@@ -130,8 +130,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
               const SizedBox(height: 10),
               TextFormField(
                 key: const Key('email'),
-                decoration: const InputDecoration(
-                    labelText: 'Email address = Username'),
+                decoration: const InputDecoration(labelText: 'Email address'),
                 controller: _emailController,
                 validator: (String? value) {
                   if (value!.isEmpty) return 'Please enter Email address?';
@@ -165,6 +164,8 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                           const InputDecoration(labelText: " Company Name"),
                       controller: _companySearchBoxController,
                     ),
+                    menuProps:
+                        MenuProps(borderRadius: BorderRadius.circular(20.0)),
                     title: popUp(
                       context: context,
                       title: "Select Company",
@@ -184,7 +185,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                               searchString: filter,
                               limit: 3,
                             )));
-                    return Future.delayed(const Duration(milliseconds: 1150),
+                    return Future.delayed(const Duration(milliseconds: 150),
                         () {
                       return Future<List<Company>>.value(
                           (_companyBloc.state.data as Companies).companies);

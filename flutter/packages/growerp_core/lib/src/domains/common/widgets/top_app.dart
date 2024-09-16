@@ -25,6 +25,9 @@ import '../../../services/chat_server.dart';
 import '../../domains.dart';
 import '../../../l10n/generated/core_localizations.dart';
 
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
+
 class TopApp extends StatelessWidget {
   TopApp({
     super.key,
@@ -88,6 +91,7 @@ class TopApp extends StatelessWidget {
                     }
                   },
                   child: MaterialApp(
+                      scaffoldMessengerKey: scaffoldMessengerKey,
                       navigatorKey: _rootNavigatorKey,
                       title: title,
                       supportedLocales: const [Locale('en'), Locale('th')],

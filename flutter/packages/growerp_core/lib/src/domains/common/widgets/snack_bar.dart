@@ -18,13 +18,12 @@ SnackBar snackBar(BuildContext context, Color colors, String message,
     {int? seconds}) {
   var screenWidth = MediaQuery.of(context).size.width;
   return SnackBar(
+    behavior: SnackBarBehavior.floating,
+    width: screenWidth < 800 ? screenWidth * 0.8 : 500,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(10),
     ),
-    content: Container(
-        padding: const EdgeInsets.all(16.0),
-        width: screenWidth < 800 ? screenWidth * 0.8 : 500,
-        child: Text(message)),
+    content: Text(message),
     duration: seconds == null
         ? Duration(milliseconds: colors == Colors.red ? 5000 : 2000)
         : Duration(seconds: seconds),

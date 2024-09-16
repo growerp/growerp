@@ -146,7 +146,11 @@ class WorkflowEditorContextMenuState extends State<WorkflowEditorContextMenu> {
                               const InputDecoration(labelText: 'Task id'),
                           controller: _taskSearchBoxController,
                         ),
-                        title: popUp(
+                      menuProps: MenuProps(
+                        borderRadius:
+                        BorderRadius.circular(
+                        20.0)),
+                      title: popUp(
                           context: context,
                           title: 'Select Workflow Task Template',
                           height: 50,

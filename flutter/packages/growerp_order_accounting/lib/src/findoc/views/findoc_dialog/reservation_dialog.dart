@@ -187,6 +187,8 @@ class ReservationDialogState extends State<ReservationDialog> {
                                   labelText: "customer,name"),
                               controller: _userSearchBoxController,
                             ),
+                            menuProps: MenuProps(
+                                borderRadius: BorderRadius.circular(20.0)),
                             title: popUp(
                               context: context,
                               title: 'Select customer',
@@ -254,6 +256,8 @@ class ReservationDialogState extends State<ReservationDialog> {
                               ),
                               controller: _productSearchBoxController,
                             ),
+                            menuProps: MenuProps(
+                                borderRadius: BorderRadius.circular(20.0)),
                             title: popUp(
                               context: context,
                               title: 'Select product',

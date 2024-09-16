@@ -76,6 +76,7 @@ class UserDialogState extends State<UserDialogStateFull> {
   bool _hasLogin = false;
   final ScrollController _scrollController = ScrollController();
   late User currentUser;
+  late bool isAdmin;
 
   @override
   void initState() {
@@ -106,6 +107,8 @@ class UserDialogState extends State<UserDialogStateFull> {
           ownerPartyId: _authBloc.state.authenticate!.ownerPartyId!,
           limit: 3,
           isForDropDown: true));
+    isAdmin = context.read<AuthBloc>().state.authenticate!.user!.userGroup ==
+        UserGroup.admin;
   }
 
   @override
@@ -331,6 +334,118 @@ class UserDialogState extends State<UserDialogStateFull> {
           ],
         ),
       ),
+      InputDecorator(
+          decoration: const InputDecoration(
+            labelText: 'Postal Address',
+          ),
+          child: Row(children: [
+            Expanded(
+                child: InkWell(
+                    key: const Key('address'),
+                    onTap: () async {
+                      var result = await showDialog(
+                          barrierDismissible: true,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AddressDialog(address: updatedUser.address);
+                          });
+                      if (!mounted) return;
+                      if (result is Address) {
+                        setState(() {
+                          updatedUser = updatedUser.copyWith(address: result);
+                        });
+                      }
+                    },
+                    child: Row(children: [
+                      Expanded(
+                        child: Text(
+                            updatedUser.address?.address1 != null &&
+                                    updatedUser.address?.address2 != "_DELETE_"
+                                ? "${updatedUser.address?.city} "
+                                    "${updatedUser.address?.country ?? ''}"
+                                : "No postal address yet",
+                            key: const Key('addressLabel')),
+                      ),
+                      Row(
+                        children: [
+                          const Icon(Icons.arrow_drop_down),
+                          const SizedBox(width: 10),
+                          if (updatedUser.address != null &&
+                              updatedUser.address?.address2 != "_DELETE_")
+                            IconButton(
+                              key: const Key('deleteAddress'),
+                              onPressed: isAdmin
+                                  ? () => setState(() => updatedUser =
+                                      updatedUser.copyWith(
+                                          address: updatedUser.address!
+                                              .copyWith(address2: "_DELETE_")))
+                                  : null,
+                              icon: const Icon(Icons.clear),
+                            ),
+                        ],
+                      )
+                    ]))),
+          ])),
+      InputDecorator(
+          decoration: const InputDecoration(
+            labelText: 'Payment method',
+          ),
+          child: Row(children: [
+            Expanded(
+                child: InkWell(
+                    key: const Key('paymentMethod'),
+                    onTap: isAdmin && updatedUser.address != null
+                        ? () async {
+                            var result = await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return PaymentMethodDialog(
+                                      paymentMethod: updatedUser.paymentMethod);
+                                });
+                            if (!mounted) return;
+                            if (result is PaymentMethod) {
+                              setState(() {
+                                updatedUser =
+                                    updatedUser.copyWith(paymentMethod: result);
+                              });
+                            }
+                          }
+                        : null,
+                    child: Row(children: [
+                      Expanded(
+                        child: Text(
+                            updatedUser.paymentMethod != null &&
+                                    updatedUser.paymentMethod?.ccDescription !=
+                                        "_DELETE_"
+                                ? "${updatedUser.paymentMethod?.ccDescription}"
+                                : "No payment methods yet"
+                                    "${updatedUser.address == null ? ",\nneed postal address to add" : ""}",
+                            key: const Key('paymentMethodLabel')),
+                      ),
+                      Row(
+                        children: [
+                          const Icon(Icons.arrow_drop_down),
+                          const SizedBox(width: 10),
+                          if (updatedUser.paymentMethod != null &&
+                              updatedUser.paymentMethod?.ccDescription !=
+                                  "_DELETE_")
+                            IconButton(
+                                key: const Key('deletePaymentMethod'),
+                                onPressed: isAdmin &&
+                                        updatedUser.paymentMethod != null
+                                    ? () => setState(() => updatedUser =
+                                        updatedUser.copyWith(
+                                            paymentMethod: updatedUser
+                                                .paymentMethod!
+                                                .copyWith(
+                                                    ccDescription: "_DELETE_")))
+                                    : null,
+                                icon: const Icon(Icons.clear)),
+                        ],
+                      )
+                    ]))),
+          ])),
       if (_selectedRole != Role.company)
         InputDecorator(
             decoration: InputDecoration(
@@ -569,6 +684,8 @@ class UserDialogState extends State<UserDialogStateFull> {
                       email: _emailController.text,
                       loginName: _loginNameController.text,
                       telephoneNr: _telephoneController.text,
+                      address: updatedUser.address,
+                      paymentMethod: updatedUser.paymentMethod,
                       loginDisabled: _isLoginDisabled,
                       userGroup: _selectedUserGroup,
                       role: _selectedRole,

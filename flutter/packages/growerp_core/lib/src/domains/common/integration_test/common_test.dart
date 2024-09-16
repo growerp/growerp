@@ -385,9 +385,8 @@ class CommonTest {
     int times = 0;
     bool found = false;
     do {
-      await tester.drag(
-          find.byKey(Key(listViewName)).last, const Offset(0, -400));
-      await tester.pumpAndSettle(const Duration(milliseconds: 1000));
+      await tester.drag(find.byKey(Key(listViewName)), const Offset(0, -200));
+      await tester.pumpAndSettle(const Duration(milliseconds: 50));
       found = tester.any(find.byKey(Key(key)));
     } while (times++ < 10 && found == false);
   }
@@ -466,6 +465,7 @@ class CommonTest {
     if (tff.selectedItem is Product) return tff.selectedItem.productName;
     if (tff.selectedItem is User) return tff.selectedItem.company.name;
     if (tff.selectedItem is Company) return tff.selectedItem.name;
+    if (tff.selectedItem is CompanyUser) return tff.selectedItem.name;
     if (tff.selectedItem is AccountClass) {
       return "${tff.selectedItem.topDescription}-${tff.selectedItem.parentDescription}-${tff.selectedItem.description}-${tff.selectedItem.detailDescription}";
     }

@@ -1,48 +1,54 @@
 <div class="">
-    <navbar sub-bar="true"/>
+    <navbar sub-bar="true" />
     <div class="container-fluid px-lg-6 px-4 py-4 body-padding min-height-for-footer">
         <div class="row no-gutters align-left">
             <div class="col mb-3">
-                <a class="customer-link" :href="homePath">Home </a><i class="fas fa-angle-right mx-2 fa-line-height"></i>
-                <router-link class="customer-link" :to="'/orders'" tag="a">My Orders <i class="fas fa-angle-right mx-2 fa-line-height"></i></router-link>
+                <a class="customer-link" :href="homePath">Home </a><i
+                    class="fas fa-angle-right mx-2 fa-line-height"></i>
+                <router-link class="customer-link" :to="'/orders'" tag="a">My Orders <i
+                        class="fas fa-angle-right mx-2 fa-line-height"></i></router-link>
                 Order Detail
             </div>
         </div>
         <div class="row mb-8">
             <div class="d-lg-block col-lg-3">
-                <menu-left type="true"/>
+                <menu-left type="true" />
             </div>
             <div class="col-lg-9 col-12" v-if="orderList.orderHeader">
                 <div class="row">
                     <div class="col">
-                        <h1 class="page-heading text-uppercase"><span class="text-green">ORDER</span> #{{orderList.orderHeader.orderId}}</h1>
+                        <h1 class="page-heading text-uppercase"><span class="text-green">ORDER</span>
+                            #{{orderList.orderHeader.orderId}}</h1>
                     </div>
                 </div>
                 <!-- <div class="breakline no-gutters mb-3"></div> -->
                 <div class="row mb-3">
                     <div class="col-12 col-lg-4">
-                        <span class="text-green">Order Status: </span><span class="font-size-09">{{orderList.orderHeader.statusId}}</span>
+                        <span class="text-green">Order Status: </span><span
+                            class="font-size-09">{{orderList.orderHeader.statusId}}</span>
                     </div>
                     <div class="col-12 col-lg-4">
-                        <span class="text-green">Order Date: </span><span class="font-size-09">{{formatDate(orderList.orderHeader.placedDate)}}</span>
+                        <span class="text-green">Order Date: </span><span
+                            class="font-size-09">{{formatDate(orderList.orderHeader.placedDate)}}</span>
                     </div>
                     <div class="col-12 col-lg-4">
-                        <span class="text-green">Expected Arrival: </span><span class="font-size-09">{{formatDate(getExpectedArrivalDate(orderList.orderHeader.placedDate))}}</span>
+                        <span class="text-green">Expected Arrival: </span><span
+                            class="font-size-09">{{formatDate(getExpectedArrivalDate(orderList.orderHeader.placedDate))}}</span>
                     </div>
                 </div>
                 <div class="breakline no-gutters mb-3"></div>
                 <div class="row mb-3">
                     <div class="col-6 col-sm-8">
                         <h2 class="lead text-cyan">Item</h2>
-                            <template v-for="(item, index) in orderList.orderItemList">
-                                    <a v-if="item.itemTypeEnumId == 'ItemProduct'" class="row no-gutters font-size-09" 
-                                        :href="'/product/' + item.productId">
-                                        {{item.itemDescription}}
-                                    </a>
-                                    <span v-if="item.itemTypeEnumId != 'ItemProduct'" class="row no-gutters font-size-09">
-                                        {{item.itemDescription}}
-                                    </span>
-                            </template>
+                        <template v-for="(item, index) in orderList.orderItemList">
+                            <a v-if="item.itemTypeEnumId == 'ItemProduct'" class="row no-gutters font-size-09"
+                                :href="'/product/' + item.productId">
+                                {{item.itemDescription}}
+                            </a>
+                            <span v-if="item.itemTypeEnumId != 'ItemProduct'" class="row no-gutters font-size-09">
+                                {{item.itemDescription}}
+                            </span>
+                        </template>
                     </div>
                     <div class="col-3 col-sm-2">
                         <h2 class="lead text-cyan text-center">Quantity</h2>
@@ -53,7 +59,8 @@
                     <div class="col-3 col-sm-2">
                         <h2 class="lead text-cyan text-right pr-4">Price</h2>
                         <template v-for="(item, index) in orderList.orderItemList">
-                            <div class="row no-gutters text-right pr-4 font-size-09"><span class="col-12">{{currencyFormat.format(item.unitAmount)}}</span></div>
+                            <div class="row no-gutters text-right pr-4 font-size-09"><span
+                                    class="col-12">{{currencyFormat.format(item.unitAmount)}}</span></div>
                         </template>
                     </div>
                 </div>
@@ -63,7 +70,8 @@
                         <span class="row no-gutters justify-content-center font-size-09">SubTotal</span>
                     </div>
                     <div class="col-3 col-sm-2">
-                        <div class="row no-gutters text-right pr-4 font-size-09"><span class="col-12">{{currencyFormat.format(orderList.orderPart.partTotal)}}</span></div>
+                        <div class="row no-gutters text-right pr-4 font-size-09"><span
+                                class="col-12">{{currencyFormat.format(orderList.orderPart.partTotal)}}</span></div>
                     </div>
                 </div>
                 <div class="row justify-content-end mb-3">
@@ -79,31 +87,38 @@
                         <span class="row no-gutters justify-content-center font-size-09">Total</span>
                     </div>
                     <div class="col-3 col-sm-2">
-                        <div class="row no-gutters text-right pr-4 font-size-09"><span class="col-12">{{currencyFormat.format(orderList.orderHeader.grandTotal)}}</span></div>
+                        <div class="row no-gutters text-right pr-4 font-size-09"><span
+                                class="col-12">{{currencyFormat.format(orderList.orderHeader.grandTotal)}}</span></div>
                     </div>
                 </div>
                 <div class="breakline no-gutters mb-3"></div>
                 <!-- Addresses -->
                 <div class="row mt-5">
                     <ul v-if="orderList.postalAddress" class="col-12 col-sm-6 list-unstyled">
-                        <li><h2 class="lead text-cyan">Shipping Address</h2></li>
+                        <li>
+                            <h2 class="lead text-cyan">Shipping Address</h2>
+                        </li>
                         <li>{{orderList.postalAddress.toName}}</li>
                         <li>{{orderList.postalAddress.address1}}</li>
                         <li>{{orderList.postalAddress.city}} {{orderList.postalAddress.address2}}</li>
-                        <li><i class="fa fa-phone phone-icon"></i> {{orderList.telecomNumber.contactNumber}}</li>
+                        <!--li><i class="fa fa-phone phone-icon"></i> {{orderList.telecomNumber.contactNumber}}</li-->
                     </ul>
-                    <ul v-if="orderList.paymentInfoList && orderList.paymentInfoList.length" class="col-12 col-sm-6 list-unstyled">
-                        <li><h2 class="lead text-cyan">Billing Address<Address></Address></h2></li>
+                    <ul v-if="orderList.paymentInfoList && orderList.paymentInfoList.length"
+                        class="col-12 col-sm-6 list-unstyled">
+                        <li>
+                            <h2 class="lead text-cyan">Billing Address<Address></Address>
+                            </h2>
+                        </li>
                         <li>{{orderList.paymentInfoList[0].postalAddress.toName}}</li>
-                            <li>{{orderList.paymentInfoList[0].postalAddress.address1}}</li>
-                            <li>
-                                {{orderList.paymentInfoList[0].postalAddress.city}} 
-                                {{orderList.paymentInfoList[0].postalAddress.address2}}
-                            </li>
-                            <li>
+                        <li>{{orderList.paymentInfoList[0].postalAddress.address1}}</li>
+                        <li>
+                            {{orderList.paymentInfoList[0].postalAddress.city}}
+                            {{orderList.paymentInfoList[0].postalAddress.address2}}
+                        </li>
+                        <!--li>
                                 <i class="fa fa-phone phone-icon"></i> 
                                 {{orderList.paymentInfoList[0].telecomNumber.contactNumber}}
-                            </li>
+                            </li-->
                     </ul>
                 </div>
             </div>

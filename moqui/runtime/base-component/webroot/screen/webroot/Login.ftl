@@ -37,7 +37,7 @@
     <div id="login" class="tab-pane active">
         <form method="post" action="${sri.buildUrl("login").url}" class="form-signin" id="login_form">
             <input type="hidden" name="initialTab" value="login">
-            <#-- people know what to do <p class="text-muted text-center">${ec.l10n.localize("Enter your username and password to sign in")}</p> -->
+            <#-- people know what to do <p class="text-muted text-center">${ec.l10n.localize("Enter your username and password to log in")}</p> -->
             <#-- not needed for this request: <input type="hidden" name="moquiSessionToken" value="${ec.web.sessionToken}"> -->
             <input type="text" name="username" value="${(username!"")?html}"
                     <#if username?has_content && secondFactorRequired>disabled="disabled"</#if>

@@ -101,6 +101,9 @@ class WorkflowDialogState extends State<WorkflowDialog> {
                                             controller:
                                                 _taskSearchBoxController,
                                           ),
+                                          menuProps: MenuProps(
+                                              borderRadius:
+                                                  BorderRadius.circular(20.0)),
                                           title: popUp(
                                             context: context,
                                             title:

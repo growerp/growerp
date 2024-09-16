@@ -419,8 +419,10 @@ along with this software (see the LICENSE.md file). If not, see
                         <entity-find list="items" offset="start" limit="limit"
                             entity-name="growerp.order.OrderHeaderPartItemPartiesAndReservation">
                             <econditions combine="or">
-                                <econdition field-name="vendorPartyId" from="vendorPartyId" />
-                                <econdition field-name="customerPartyId" from="customerPartyId" />
+                                <econdition field-name="vendorPartyId" from="vendorPartyId"
+                                    ignore-if-empty="true" />
+                                <econdition field-name="customerPartyId" from="customerPartyId"
+                                    ignore-if-empty="true" />
                             </econditions>
                             <econdition field-name="rentalFromDate" from="rentalFromDate"
                                 ignore-if-empty="true" />
@@ -442,7 +444,6 @@ along with this software (see the LICENSE.md file). If not, see
                             </econditions>
                             <order-by field-name="-orderPlacedDate" />
                         </entity-find>
-                        <log message="====was looking for: $search result: ${items?.size()}" />
                     </then>
                     <else-if condition="customerCompanyPartyId"><!-- by customer for ecommerce -->
                         <entity-find list="items" offset="start" limit="limit"
@@ -574,8 +575,8 @@ along with this software (see the LICENSE.md file). If not, see
                                 ? ec.l10n.format(item.placedDate,'yyyy-MM-dd')  : null,
                             sales: sales,
                             docType: docType,
-                            otherUser: userOut,
-                            otherCompany: company,
+                            otherUser: userOut?.partyId ? userOut : null,
+                            otherCompany: company?.partyId ? company : null,
                             grandTotal: item.grandTotal ? item.grandTotal.toString(): null,
                             items: finDocItems,
                             ]" />
@@ -795,8 +796,8 @@ along with this software (see the LICENSE.md file). If not, see
                             statusId: convertedStatusId,
                             creationDate: item.invoiceDate
                                 ? ec.l10n.format(item.invoiceDate,'yyyy-MM-dd')  : null,
-                            otherUser: userOut,
-                            otherCompany: company,
+                            otherUser: userOut?.partyId ? userOut : null,
+                            otherCompany: company?.partyId ? company : null,
                             grandTotal: item.invoiceTotal
                                 ? item.invoiceTotal.toString() : null,
                             ]" />
@@ -978,8 +979,8 @@ along with this software (see the LICENSE.md file). If not, see
                             ? ec.l10n.format(item.effectiveDate,'yyyy-MM-dd') : null,
                         sales: sales,
                         docType: docType,
-                        otherUser: userOut,
-                        otherCompany: company,
+                        otherUser: userOut?.partyId ? userOut : null,
+                        otherCompany: company?.partyId ? company : null,
                         grandTotal: item.amount ? item.amount.toString() : 0,
                         items: [[paymentType: paymentType, glAccount: glAccount]],
                         ]" />
@@ -1100,8 +1101,8 @@ along with this software (see the LICENSE.md file). If not, see
                             shipmentMethod: item.shipmentMethod,
                             creationDate: item.entryDate 
                                 ? ec.l10n.format(item.entryDate,'yyyy-MM-dd')  : null,
-                            otherUser: userOut,
-                            otherCompany: company,
+                            otherUser: userOut?.partyId ? userOut : null,
+                            otherCompany: company?.partyId ? company : null,
                             ]" />
                     </if>
                     <if condition="item.locationId">

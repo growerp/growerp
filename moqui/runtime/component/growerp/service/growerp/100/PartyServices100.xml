@@ -320,6 +320,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <!-- first item -->
                 <if condition="!lastItem || lastItem.companyPartyId != item.companyPartyId">
+                    <!-- postal address -->
+                    <set field="address" from="null" />
                     <if condition="item.postalContactMechId">
                         <set field="address"
                             from="[
@@ -333,11 +335,8 @@ along with this software (see the LICENSE.md file). If not, see
                         country: item.countryName,
                         countryId: item.countryId,
                         ]" />
-                        <else>
-                            <set field="address" from="null" />
-                        </else>
                     </if>
-
+                    <!-- payment method -->
                     <set field="paymentMethod" from="null" />
                     <if condition="item.paymentMethodId">
                         <set field="nrLength" from="item.cardNumber.length()" />
@@ -346,15 +345,14 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="paymentMethod"
                             from="[ ccPaymentMethodId: item.paymentMethodId,
                                     ccDescription: ccDescription]" />
-                        <else>
-                            <set field="paymentMethod" from="null" />
-                        </else>
                     </if>
+                    <!-- telephone -->
                     <set field="telephoneNr" from="null" />
                     <if condition="item.telContactNumber">
                         <set field="telephoneNr"
                             value="${item.telCountryCode?:''}${item.telAreaCode?:''}${item.telContactNumber?:''}" />
                     </if>
+                    <!-- currency -->
                     <set field="currency" from="null" />
                     <if condition="item.baseCurrencyUomId">
                         <set field="currency"
@@ -1207,6 +1205,25 @@ along with this software (see the LICENSE.md file). If not, see
                     condition="userInfo.companyRole == 'Customer' &amp;&amp; userInfo.companyCustomerStatusId == 'CUSTOMER_ASSIGNED'">
                     <set field="userInfo.companyRole" value="Lead" />
                 </if>
+                <!-- postal address -->
+                <set field="address" from="null" />
+                <if condition="userInfo.postalContactMechId">
+                    <set field="address"
+                        from="[
+                        addressId: userInfo.postalContactMechId,
+                        address1: userInfo.address1,
+                        address2: userInfo.address2,
+                        city: userInfo.city,
+                        postalCode: userInfo.postalCode,
+                        province: userInfo.stateProvince,
+                        provinceId: userInfo.stateProvinceGeoId,
+                        country: userInfo.countryName,
+                        countryId: userInfo.countryId,
+                        ]" />
+                    <else>
+                        <set field="address" from="null" />
+                    </else>
+                </if>
                 <!-- image -->
                 <entity-find entity-name="mantle.party.PartyContent" list="contents">
                     <econdition field-name="partyId" from="userInfo.userPartyId" />
@@ -1288,6 +1305,8 @@ along with this software (see the LICENSE.md file). If not, see
                                 loginDisabled: userInfo?.loginDisabled == 'Y'? true : false,
                                 loginName: userInfo?.loginName,
                                 userGroupId: userGroupId,
+                                address: address,
+                                paymentMethod: paymentMethod,
                                 groupDescription: userInfo?.ugDescription,
                                 language: userInfo?.locale ? userInfo?.locale .toString() : '',
                                 image: imageFile,
@@ -1327,6 +1346,24 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="userId" />
                 <parameter name="locale" />
                 <parameter name="telephoneNr" />
+                <parameter name="address" type="Map">
+                    <parameter name="addressId" />
+                    <parameter name="address1" />
+                    <parameter name="address2" />
+                    <parameter name="city" />
+                    <parameter name="postalCode" />
+                    <parameter name="province" />
+                    <parameter name="provinceId" />
+                    <parameter name="country" />
+                    <parameter name="countryId" />
+                </parameter>
+                <parameter name="image" />
+                <parameter name="paymentMethod" type="Map">
+                    <parameter name="creditCardType" />
+                    <parameter name="creditCardNumber" />
+                    <parameter name="expireMonth" />
+                    <parameter name="expireYear" />
+                </parameter>
                 <parameter name="company" type="Map">
                     <parameter name="partyId" />
                     <parameter name="pseudoId" />
@@ -1342,24 +1379,6 @@ along with this software (see the LICENSE.md file). If not, see
                     </parameter>
                     <parameter name="salesPerc">
                         <description>Percentage used for sales tax</description>
-                    </parameter>
-                    <parameter name="address" type="Map">
-                        <parameter name="addressId" />
-                        <parameter name="address1" />
-                        <parameter name="address2" />
-                        <parameter name="city" />
-                        <parameter name="postalCode" />
-                        <parameter name="province" />
-                        <parameter name="provinceId" />
-                        <parameter name="country" />
-                        <parameter name="countryId" />
-                    </parameter>
-                    <parameter name="image" />
-                    <parameter name="paymentMethod" type="Map">
-                        <parameter name="creditCardType" />
-                        <parameter name="creditCardNumber" />
-                        <parameter name="expireMonth" />
-                        <parameter name="expireYear" />
                     </parameter>
                     <parameter name="telephoneNr" />
                 </parameter>
@@ -1382,24 +1401,35 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="userGroupId" />
                 <parameter name="groupDescription" />
                 <parameter name="language" />
+                <parameter name="address" type="Map">
+                    <parameter name="addressId" />
+                    <parameter name="address1" />
+                    <parameter name="address2" />
+                    <parameter name="city" />
+                    <parameter name="postalCode" />
+                    <parameter name="province" />
+                    <parameter name="provinceId" />
+                    <parameter name="country" />
+                    <parameter name="countryId" />
+                </parameter>
+                <parameter name="image" />
+                <parameter name="paymentMethod" type="Map">
+                    <parameter name="ccPaymentMethodId" />
+                    <parameter name="ccDescription" />
+                </parameter>
                 <parameter name="company" type="Map">
                     <parameter name="partyId" />
                     <parameter name="pseudoId" />
                     <parameter name="name" />
                     <parameter name="email" />
                     <parameter name="role" />
-                    <parameter name="paymentMethod">
-                        <parameter name="ccPaymentMethodId" />
-                        <parameter name="ccDescription" />
-                    </parameter>
                 </parameter>
-                <parameter name="image" />
                 <parameter name="userId" />
                 <parameter name="locale" />
                 <parameter name="telephoneNr" />
             </parameter>
             <parameter name="password" />
-            <parameter name="login" type="bool" default-value="false"></parameter>
+            <parameter name="login" type="bool" default-value="false" />
         </out-parameters>
         <actions>
             <service-call
@@ -1501,6 +1531,58 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[type: 'user', id: userPartyId,
                         base64: user.image]" />
             </if>
+            <!-- address -->
+            <if condition="user.address">
+                <if condition="user.address.country">
+                    <entity-find entity-name="moqui.basic.Geo" list="countries">
+                        <econdition field-name="geoName" from="user.address.country" />
+                        <econdition field-name="geoTypeEnumId" value="GEOT_COUNTRY" />
+                    </entity-find>
+                    <if condition="countries">
+                        <set field="countryGeoId" from="countries[0].geoId" />
+                    </if>
+                </if>
+                <if condition="user.address.province">
+                    <entity-find entity-name="moqui.basic.Geo" list="provinces">
+                        <econdition field-name="geoName" from="user.address.province" />
+                        <econdition field-name="geoTypeEnumId" value="GEOT_STATE" />
+                    </entity-find>
+                    <if condition="provinces">
+                        <set field="stateProvinceGeoId" from="provinces[0].geoId" />
+                    </if>
+                </if>
+                <service-call name="mantle.party.ContactServices.create#PostalAddress"
+                    in-map="[partyId: userPartyId, contactMechPurposeId: 'PostalPrimary', 
+                            address1: user.address.address1,
+                            address2: user.address.address2,
+                            city: user.address.city,
+                            postalCode: user.address.postalCode,
+                            stateProvince: user.address.province,
+                            stateProvinceGeoId: stateProvinceGeoId, 
+                            countryGeoId: countryGeoId]"
+                    out-map="resultAddress" />
+
+                <!-- payment only possible if address provided -->
+                <if condition="user.paymentMethod?.creditCardNumber">
+                    <set field="expireDate"
+                        value="${user.paymentMethod.expireMonth}/${user.paymentMethod.expireYear}" />
+                    <set field="inMap"
+                        from="[
+                        ownerPartyId: userPartyId,
+                        cardNumber: user.paymentMethod.creditCardNumber,
+                        creditCardTypeEnumId: ec.entity.find('moqui.basic.Enumeration')
+                            .condition('description', user.paymentMethod.creditCardType).one().enumId,
+                        expireDate: expireDate,
+                        postalContactMechId: resultAddress.contactMechId,
+                        firstNameOnAccount: user.firstName,
+                        lastNameOnAccount: user.lastName,
+                        paymentGatewayConfigId: System.getProperty('paymentGatewayConfigId'),
+                    ]" />
+                    <service-call
+                        name="mantle.account.PaymentMethodServices.create#CreditCard"
+                        in-map="inMap" />
+                </if>
+            </if>
             <!-- telephone -->
             <if condition="user.telephoneNr">
                 <service-call
@@ -1546,6 +1628,26 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="userId" />
                 <parameter name="locale" />
                 <parameter name="telephoneNr" />
+                <parameter name="address" type="Map">
+                    <parameter name="addressId" />
+                    <parameter name="address1" />
+                    <parameter name="address2" />
+                    <parameter name="city" />
+                    <parameter name="postalCode" />
+                    <parameter name="province" />
+                    <parameter name="provinceId" />
+                    <parameter name="country" />
+                    <parameter name="countryId" />
+                </parameter>
+                <parameter name="image" />
+                <parameter name="paymentMethod" type="Map">
+                    <parameter name="ccPaymentMethodId" />
+                    <parameter name="ccDescription" />
+                    <parameter name="creditCardType" />
+                    <parameter name="creditCardNumber" />
+                    <parameter name="expireMonth" />
+                    <parameter name="expireYear" />
+                </parameter>
                 <parameter name="company" type="Map">
                     <parameter name="partyId" />
                     <parameter name="name" />
@@ -1570,6 +1672,22 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="userId" />
                 <parameter name="locale" />
                 <parameter name="telephoneNr" />
+                <parameter name="address" type="Map">
+                    <parameter name="addressId" />
+                    <parameter name="address1" />
+                    <parameter name="address2" />
+                    <parameter name="city" />
+                    <parameter name="postalCode" />
+                    <parameter name="province" />
+                    <parameter name="provinceId" />
+                    <parameter name="country" />
+                    <parameter name="countryId" />
+                </parameter>
+                <parameter name="image" />
+                <parameter name="paymentMethod" type="Map">
+                    <parameter name="ccPaymentMethodId" />
+                    <parameter name="ccDescription" />
+                </parameter>
                 <parameter name="company" type="Map">
                     <parameter name="partyId" />
                     <parameter name="name" />
@@ -1701,6 +1819,126 @@ along with this software (see the LICENSE.md file). If not, see
                     toPartyId: user.company.partyId,
                     toRoleTypeId: user.company.role == 'Lead'? 'Customer' : user.company.role
                     ]" />
+                </if>
+            </if>
+            <!-- postal address -->
+            <!-- get geoId of country and province-->
+            <if condition="user.address">
+                <if condition="user.address.country">
+                    <entity-find entity-name="moqui.basic.Geo" list="countries">
+                        <econdition field-name="geoName" from="user.address.country" />
+                        <econdition field-name="geoTypeEnumId" value="GEOT_COUNTRY" />
+                    </entity-find>
+                    <if condition="countries">
+                        <set field="countryGeoId" from="countries[0].geoId" />
+                    </if>
+                </if>
+                <if condition="user.address.province">
+                    <entity-find entity-name="moqui.basic.Geo" list="provinces">
+                        <econdition field-name="geoName" from="user.address.province" />
+                        <econdition field-name="geoTypeEnumId" value="GEOT_STATE" />
+                    </entity-find>
+                    <if condition="provinces">
+                        <set field="stateProvinceGeoId" from="provinces[0].geoId" />
+                    </if>
+                </if>
+                <if
+                    condition="
+                        user.address.address1 != oldValue.user.address?.address1 ||
+                        user.address.address2 != oldValue.user.address?.address2 ||
+                        user.address.city != oldValue.user.address?.city ||
+                        user.address.postalCode != oldValue.user.address?.postalCode ||
+                        user.address.province != oldValue.user.address?.province ||
+                        user.address.country != oldValue.user.address?.country
+                        ">
+                    <!-- disable (set thruDate) all postal duplicates -->
+                    <entity-find entity-name="mantle.party.contact.PartyContactMech"
+                        for-update="true" list="partyContactMechs">
+                        <econdition field-name="partyId" from="user.partyId" />
+                        <econdition field-name="contactMechPurposeId" value="PostalPrimary" />
+                        <econdition field-name="thruDate" operator="is-null" />
+                    </entity-find>
+                    <iterate list="partyContactMechs" entry="contMech">
+                        <set field="contMech.thruDate" from="ec.user.nowTimestamp" />
+                        <entity-update value-field="contMech" />
+                    </iterate>
+                    <if condition="user.address.address2 != '_DELETE_'">
+                        <service-call name="mantle.party.ContactServices.create#PostalAddress"
+                            in-map="[partyId: user.partyId, contactMechPurposeId: 'PostalPrimary', 
+                                    address1: user.address.address1,
+                                    address2: user.address.address2,
+                                    city: user.address.city,
+                                    postalCode: user.address.postalCode,
+                                    stateProvince: user.address.province,
+                                    stateProvinceGeoId: stateProvinceGeoId, 
+                                    countryGeoId: countryGeoId]"
+                            out-map="result" />
+                    </if>
+                </if>
+            </if>
+            <!-- payment methods -->
+            <if condition="user.paymentMethod">
+                <!-- credit card -->
+                <if condition="user.paymentMethod.ccDescription == '_DELETE_'">
+                    <then>
+                        <service-call
+                            name="update#mantle.account.method.PaymentMethod"
+                            in-map="[paymentMethodId: user.paymentMethod.ccPaymentMethodId,
+                                    thruDate: ec.user.nowTimestamp]" />
+                    </then>
+                    <else-if condition="user.paymentMethod?.creditCardType">
+                        <set field="expireDate"
+                            value="${user.paymentMethod.expireMonth}/${user.paymentMethod.expireYear}" />
+                        <entity-find entity-name="mantle.party.contact.PartyContactMech"
+                            list="partyContactMechs">
+                            <econdition field-name="partyId" from="user.partyId" />
+                            <econdition field-name="contactMechPurposeId" value="PostalPrimary" />
+                            <date-filter />
+                        </entity-find>
+                        <if condition="!partyContactMechs">
+                            <return error="true" message="Need postal address for creditcard" />
+                        </if>
+                        <set field="inMap"
+                            from="[
+                            ownerPartyId: oldValue.user.partyId,
+                            cardNumber: user.paymentMethod.creditCardNumber,
+                            creditCardTypeEnumId: ec.entity.find('moqui.basic.Enumeration')
+                                .condition('description', user.paymentMethod.creditCardType).one().enumId,
+                            expireDate: expireDate,
+                            postalContactMechId: partyContactMechs[0].contactMechId,
+                            firstNameOnAccount: user.firstName,
+                            lastNameOnAccount: user.lastName,
+                            paymentGatewayConfigId: System.getProperty('paymentGatewayConfigId'),
+                            ]" />
+                        <entity-find entity-name="mantle.account.method.PaymentMethod"
+                            list="paymentMethods">
+                            <econdition field-name="ownerPartyId"
+                                from="oldValue.user.partyId" />
+                            <econdition field-name="paymentMethodTypeEnumId" value="PmtCreditCard" />
+                            <date-filter />
+                        </entity-find>
+                        <if condition="!paymentMethods">
+                            <service-call
+                                name="mantle.account.PaymentMethodServices.create#CreditCard"
+                                in-map="inMap" />
+                            <else>
+                                <entity-find-one entity-name="mantle.account.method.CreditCard"
+                                    value-field="cc">
+                                    <field-map field-name="paymentMethodId"
+                                        from="paymentMethods[0].paymentMethodId" />
+                                </entity-find-one>
+                                <if
+                                    condition="inMap.cardNumber != cc.cardNumber ||
+                                                inMap.expireDate != cc.expireDate">
+                                    <set field="inMap.paymentMethodId"
+                                        from="paymentMethods[0].paymentMethodId" />
+                                    <service-call
+                                        name="mantle.account.PaymentMethodServices.update#CreditCard"
+                                        in-map="inMap" />
+                                </if>
+                            </else>
+                        </if>
+                    </else-if>
                 </if>
             </if>
             <!-- telephone -->
@@ -1913,13 +2151,160 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="register" noun="WebsiteUser" authenticate="anonymous-all">
+        <description>registration on the e-commerce webapp for a specific company just for non-employees</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true"><!-- owner company not top owner -->
+                <description>Party Id of the organization</description>
+            </parameter>
+            <parameter name="classificationId">
+                <description>The App id the user want to register for, valid entries: AppAdmin, AppHotel etc </description>
+            </parameter>
+            <parameter name="user" type="Map" required="true">
+                <parameter name="partyId" />
+                <parameter name="email" />
+                <parameter name="firstName" />
+                <parameter name="lastName" />
+                <parameter name="loginDisabled" type="Boolean" default-value="false" />
+                <parameter name="loginName" default="email" />
+                <parameter name="userGroupId" />
+                <parameter name="groupDescription" />
+                <parameter name="language" />
+                <parameter name="companyPartyId" />
+                <parameter name="companyName" />
+                <parameter name="image" />
+                <parameter name="userId" />
+                <parameter name="locale" />
+                <parameter name="telephoneNr" />
+                <parameter name="companyAddress" type="Map">
+                    <parameter name="addressId" />
+                    <parameter name="address1" />
+                    <parameter name="address2" />
+                    <parameter name="city" />
+                    <parameter name="postalCode" />
+                    <parameter name="province" />
+                    <parameter name="country" />
+                </parameter>
+                <parameter name="companyPaymentMethod" type="Map">
+                    <parameter name="ccPaymentMethodId" />
+                    <parameter name="ccDescription" />
+                </parameter>
+            </parameter>
+            <parameter name="newPassword" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="user" type="Map">
+                <parameter name="partyId" />
+                <parameter name="email" />
+                <parameter name="firstName" />
+                <parameter name="lastName" />
+                <parameter name="loginDisabled" type="Boolean" default-value="'N'" />
+                <parameter name="loginName" />
+                <parameter name="userGroupId" />
+                <parameter name="groupDescription" />
+                <parameter name="companyPartyId" />
+                <parameter name="companyName" />
+                <parameter name="language" />
+                <parameter name="image" />
+                <parameter name="userId" />
+                <parameter name="locale" />
+                <parameter name="telephoneNr" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <!-- get main company party id with ownerPartyId-->
+            <entity-find-one entity-name="growerp.party.CompanyPreferenceAndRole"
+                value-field="companyParty">
+                <field-map field-name="partyId" from="ownerPartyId" />
+                <field-map field-name="roleTypeId" value="OrgInternal" />
+            </entity-find-one>
+            <if condition="!companyParty">
+                <return message="Not a valid companyId" />
+            </if>
+            <entity-find-one entity-name="mantle.party.PartyClassification"
+                value-field="classification">
+                <field-map field-name="partyClassificationId" from="classificationId" />
+            </entity-find-one>
+            <if condition="!classification">
+                <return message="Not a valid classificationId: ${classificationId}" />
+            </if>
+            <!-- create account, not active when no login provided -->
+            <set field="disabled" value="N" />
+            <if condition="!user.loginName">
+                <set field="disabled" value="Y" />
+                <set field="loginName" from="user.email" />
+                <else>
+                    <set field="loginName" from="user.loginName" />
+                </else>
+            </if>
+            <if condition="!newPassword">
+                <set field="newPassword"
+                    from="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
+            </if>
+            <set field="newPasswordVerify" from="newPassword" />
+            <!-- role -->
+            <if
+                condition="user.userGroupId == 'GROWERP_M_LEAD' ||
+                        user.userGroupId == 'GROWERP_M_CUSTOMER'">
+                <set field="roleTypeId" value="Customer" />
+                <else-if condition="user.userGroupId == 'GROWERP_M_SUPPLIER'">
+                    <set field="roleTypeId" value="Supplier" />
+                </else-if>
+                <else>
+                    <return message="Not a valid userGroupId: ${user.userGroupId}" />
+                </else>
+            </if>
+            <!-- create account-->
+            <service-call name="mantle.party.PartyServices.create#Account"
+                in-map="context + [roleTypeId: roleTypeId, loginAfterCreate: false,
+                            firstName: user.firstName, lastName: user.lastName,
+                            username: loginName, roleTypeId: roleTypeId,
+                            ownerPartyId: companyParty.ownerPartyId,
+                            emailAddress: user.email, disabled: disabled]"
+                out-map="userAccount" />
+            <set field="userPartyId" from="userAccount.partyId" />
+            <!-- provide security -->
+            <service-call name="create#moqui.security.UserGroupMember"
+                in-map="[userGroupId: user.userGroupId, userId: userAccount.userId]" />
+            <!-- only send email when login name provided -->
+            <if condition="user.email">
+                <entity-find-one entity-name="moqui.basic.email.EmailServer"
+                    value-field="emailExist">
+                    <field-map field-name="emailServerId" value="SYSTEM" />
+                </entity-find-one>
+                <if condition="emailExist &amp;&amp; emailExist.mailPassword != 'SMTP_PASSWORD'">
+                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
+                        async="true">
+                        <field-map field-name="emailTemplateId" value="WELCOME" />
+                        <field-map field-name="toAddresses" from="user.email" />
+                        <field-map field-name="bodyParameters"
+                            from="[classification: classificationId.substring(3),
+                                    newPassword:newPassword, firstName: user.firstName,
+                                    lastName: user.lastName]" />
+                    </service-call>
+                    <else>
+                        <log level="warn"
+                            message="====== Email not configured, ${user.email} password: $newPassword" />
+                    </else>
+                </if>
+            </if>
+            <!-- return all user info -->
+            <service-call name="growerp.100.PartyServices100.get#User"
+                in-map="[ownerPartyId: companyParty.partyId,userPartyId: userAccount.partyId]"
+                out-map="userInfo" />
+            <if condition="userInfo.users">
+                <set field="user" from="userInfo.users[0]" />
+            </if>
+        </actions>
+    </service>
+
     <service verb="register" noun="User" authenticate="anonymous-all">
         <in-parameters>
             <parameter name="classificationId" />
             <parameter name="firstName" required="true" />
             <parameter name="lastName" required="true" />
             <parameter name="email" required="true" />
-            <parameter name="companyPartyId" />
+            <parameter name="companyPartyId" /><!-- if empty create new owner-->
             <parameter name="newPassword"
                 default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
         </in-parameters>
@@ -1928,6 +2313,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="ownerPartyId" />
                 <parameter name="classificationId" />
                 <parameter name="user" type="Map">
+                    <parameter name="partyId" />
                     <parameter name="email" />
                     <parameter name="loginName" />
                 </parameter>
@@ -1936,19 +2322,24 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <!-- check input parameters because anonymous access -->
             <if condition="companyPartyId">
-                <entity-find entity-name="mantle.party.Party" list="parties">
-                    <econdition field-name="partyId" from="companyPartyId" />
-                </entity-find>
-                <set field="ownerPartyId" from="parties[0].ownerPartyId" />
+                <!-- check if a 'main' company -->
                 <entity-find-one entity-name="growerp.party.CompanyPreferenceAndRole"
                     value-field="party">
                     <field-map field-name="partyId" from="companyPartyId" />
                     <field-map field-name="roleTypeId" value="OrgInternal" />
                 </entity-find-one>
                 <if condition="!party">
-                    <return message="Not a valid companyPartyId: $companyPartyId" />
+                    <return error="true" message="Not a valid companyPartyId: $companyPartyId" />
+                </if>
+                <!-- get related owner -->
+                <entity-find entity-name="mantle.party.Party" list="parties">
+                    <econdition field-name="partyId" from="companyPartyId" />
+                </entity-find>
+                <if condition="parties">
+                    <set field="ownerPartyId" from="parties[0].ownerPartyId" />
                 </if>
             </if>
+            <!-- check classification -->
             <entity-find-one entity-name="mantle.party.PartyClassification"
                 value-field="classification">
                 <field-map field-name="partyClassificationId" from="classificationId" />
@@ -1963,8 +2354,7 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="[ownerPartyId: 'system', seqName: 'party']"
                         out-map="context" />
                     <service-call name="create#mantle.party.Party"
-                        in-map="[partyTypeEnumId: 'PtyOwner', pseudoId: seqNum,
-                        disabled: 'N']"
+                        in-map="[partyTypeEnumId: 'PtyOwner', pseudoId: seqNum, disabled: 'N']"
                         out-map="owner" />
                     <set field="ownerPartyId" from="owner.partyId" />
                     <!-- create user -->
@@ -2018,7 +2408,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <set field="authenticate"
                 from="[ ownerPartyId: ownerPartyId,
-                        user: [loginName: email, email: email],
+                        user: [partyId: user.partyId, loginName: email, email: email],
                         classificationId: classificationId,
                     ]" />
         </actions>
@@ -2378,18 +2768,17 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
 
                 <!-- any other specific app setup here -->
-            </if>
 
-            <!-- finally create classification-->
-            <service-call name="create#mantle.party.PartyClassificationAppl"
-                in-map="[partyId: userPartyId,
-                        partyClassificationId: classificationId,
-                        ]" />
+            </if>
         </actions>
     </service>
 
     <!-- internal service used in register to run async-->
     <service verb="load" noun="DemoData" transaction-timeout="3600">
+        <description>
+        General setup of demo data independent of specfic app demo data which is 
+        done in the setup#specific service
+        </description>
         <!-- not reachable outside -->
         <in-parameters>
             <parameter name="ownerPartyId" required="true" />
@@ -2635,8 +3024,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="classificationId == 'AppHotel'">
                     <set field="productsIn" from="productsHotel" />
                 </if>
-                <!-- for hotel just create a one count list -->
-                <if condition="classificationId == 'AppHotel' &amp;&amp; counter == 1">
+                <!-- just create assets the first count -->
+                <if condition="counter == 1">
                     <iterate list="productsIn" entry="el">
                         <entity-find entity-name="mantle.product.category.ProductCategory"
                             list="categories">
@@ -2697,16 +3086,10 @@ along with this software (see the LICENSE.md file). If not, see
                         ]" />
                     <set field="assetsAdmin"
                         from="[
-                        [ assetName: '01', productName: 'wiskey'],
-                        [ assetName: '02', productName: 'wiskey'],
-                        [ assetName: '03', productName: 'wiskey'],
-                        [ assetName: '04', productName: 'macaroni'],
-                        [ assetName: '05', productName: 'macaroni'],
-                        [ assetName: '06', productName: 'macaroni'],
-                        [ assetName: '07', productName: 'hamburger'],
-                        [ assetName: '08', productName: 'hamburger'],
-                        [ assetName: '09', productName: 'cola'],           
-                        [ assetName: '10', productName: 'cola'],
+                        [ assetName: '01', productName: 'Baseball Cap'],
+                        [ assetName: '02', productName: '32GB USB Drive'],
+                        [ assetName: '03', productName: 'Hoodie'],
+                        [ assetName: '04', productName: 'Coffee Mug'],
                         ]" />
                     <if condition="classificationId == 'AppHotel'">
                         <set field="assetsIn" from="assetsHotel" />
@@ -2714,7 +3097,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="classificationId == 'AppAdmin'">
                         <set field="assetsIn" from="assetsAdmin" />
                     </if>
-
                     <!-- find warehouse -->
                     <entity-find entity-name="mantle.facility.Facility" limit="1" list="facilities">
                         <econdition field-name="ownerPartyId" from="companyPartyId" />
@@ -2727,40 +3109,33 @@ along with this software (see the LICENSE.md file). If not, see
                     <iterate list="assetsIn" entry="asset">
                         <set field="asset"
                             from="[
-                            product: [productName: asset.productName + (classificationId != 'AppHotel'? counter : '')],
+                            product: [productName: asset.productName],
                             quantityOnHand: 10,
                             availableToPromise: 10,
                             assetName: asset.assetName,
                             ownerPartyId: companyPartyId,
-                            statusId: 'AstAvailable',
+                            statusId: 'Available',
                             location: [locationName: asset.productName],
                         ]" />
                         <script>assets.add(asset)</script>
                     </iterate>
+                    <set field="entities" from="[:]" />
                     <set field="entities['assets']" from="assets" />
-                    <service-call name="growerp.100.ImportExportServices.import#entities"
-                        in-map="entities" />
+                    <service-call name="growerp.100.ImportExportServices100.import#Entities"
+                        in-map="entities: entities, classificationId: classificationId," />
                 </if>
 
-                <!-- users only load with the first app of an owner-->
-                <entity-find-count entity-name="mantle.party.PartyClassificationAndAppl"
-                    count-field="partyClassifications">
-                    <econdition field-name="partyId" from="userPartyId" />
-                    <econdition field-name="classificationTypeEnumId" value="PcltMobileApp" />
-                </entity-find-count>
-
-                <if condition="partyClassifications == 1">
-                    <set field="dbLeads" from="[]" />
-                    <set field="dbEmployees" from="[]" />
-                    <iterate list="users" entry="us">
-                        <if condition="us.companyName">
-                            <set field="company" from="[name: us.companyName, role: us.role]" />
-                            <else>
-                                <set field="company" from="[partyId: companyPartyId]" />
-                            </else>
-                        </if>
-                        <set field="userIn"
-                            from="[
+                <set field="dbLeads" from="[]" />
+                <set field="dbEmployees" from="[]" />
+                <iterate list="users" entry="us">
+                    <if condition="us.companyName">
+                        <set field="company" from="[name: us.companyName, role: us.role]" />
+                        <else>
+                            <set field="company" from="[partyId: companyPartyId]" />
+                        </else>
+                    </if>
+                    <set field="userIn"
+                        from="[
                             pseudoId: lastname,
                             firstName: us.firstName,
                             lastName: us.lastName + counter,
@@ -2771,24 +3146,24 @@ along with this software (see the LICENSE.md file). If not, see
                             role: us.role,
                             company: company ,
                         ]" />
-                        <service-call name="growerp.100.PartyServices100.create#User"
-                            in-map="[user: userIn, ownerPartyId: ownerPartyId]" out-map="outMap" />
-                        <script>
+                    <service-call name="growerp.100.PartyServices100.create#User"
+                        in-map="[user: userIn, ownerPartyId: ownerPartyId]" out-map="outMap" />
+                    <script>
                             if(us.role == 'OrgInternal') dbEmployees.add(outMap)
                             if(us.role == 'Lead') dbLeads.add(outMap)
                         </script>
-                    </iterate>
-                    <!-- opportunities -->
-                    <set field="index" value="0" type="Integer" />
-                    <iterate list="opportunities" entry="opp">
-                        <set field="employeeUser"
-                            from="[partyId: index%2 == 0
+                </iterate>
+                <!-- opportunities -->
+                <set field="index" value="0" type="Integer" />
+                <iterate list="opportunities" entry="opp">
+                    <set field="employeeUser"
+                        from="[partyId: index%2 == 0
                             ? dbEmployees[0].user.partyId : dbEmployees[1].user.partyId]" />
-                        <set field="leadUser"
-                            from="[partyId: index%2 == 0
+                    <set field="leadUser"
+                        from="[partyId: index%2 == 0
                             ? dbLeads[0].user.partyId : dbLeads[1].user.partyId]" />
-                        <set field="oppIn"
-                            from="[
+                    <set field="oppIn"
+                        from="[
                             opportunityName: opp.opportunityName,
                             description: opp.description,
                             nextStep: opp.nextStep,
@@ -2799,11 +3174,10 @@ along with this software (see the LICENSE.md file). If not, see
                             employeeUser: employeeUser,
                             leadUser: leadUser
                         ]" />
-                        <service-call name="growerp.100.CrmServices100.create#Opportunity"
-                            in-map="[opportunity: oppIn]" out-map="context" />
-                        <set field="index" from="index + 1" />
-                    </iterate>
-                </if>
+                    <service-call name="growerp.100.CrmServices100.create#Opportunity"
+                        in-map="[opportunity: oppIn]" out-map="context" />
+                    <set field="index" from="index + 1" />
+                </iterate>
 
                 <!-- create facility locations if not exist yet-->
                 <entity-find entity-name="mantle.facility.FacilityLocation" list="locations">

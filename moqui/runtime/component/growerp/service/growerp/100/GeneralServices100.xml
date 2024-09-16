@@ -463,12 +463,16 @@ along with this software (see the LICENSE.md file). If not, see
                 from="[ownerPartyId: ownerPartyId,classificationId: classificationId]" />
             <!-- get user-->
             <service-call name="growerp.100.PartyServices100.get#User"
-                in-map="[userPartyId: userPartyId]" out-map="userInfo" />
-            <set field="authenticate.user" from="userInfo.users[0]" />
+                in-map="[userPartyId: userPartyId, ownerPartyId: ownerPartyId]"
+                out-map="userInfo" />
+            <if condition="!userInfo.users.isEmpty()">
+                <set field="authenticate.user" from="userInfo.users[0]" />
+            </if>
             <!-- get company-->
             <service-call name="growerp.100.PartyServices100.get#Company"
-                in-map="[companyPartyId: companyPartyId]" out-map="companyInfo" />
-            <if condition="companyInfo.companies">
+                in-map="[companyPartyId: companyPartyId, ownerPartyId: ownerPartyId]"
+                out-map="companyInfo" />
+            <if condition="!companyInfo.companies.isEmpty()">
                 <set field="authenticate.company" from="companyInfo.companies[0]" />
             </if>
             <!-- keys -->
@@ -487,7 +491,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="currencyList" type="List">
                 <parameter name="description" />
-                <parameter name="abbreviation"></parameter>
+                <parameter name="abbreviation" />
             </parameter>
         </out-parameters>
         <actions>
@@ -552,7 +556,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
             <parameter name="extraInfo" type="Boolean" default-value="false">
                 <description>
-                Inital login with extrainfo is false, just person name and email
+                Initial login with extrainfo is false, just person name and email
                     will return request for extra info.
                 Second login with extraInfo is true, provide extra info
                     containing company name for admin user mandatory,
@@ -651,6 +655,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <!-- get user account info -->
             <entity-find-one entity-name="moqui.security.UserAccount"
                 value-field="userAccount" cache="false">
                 <field-map field-name="username" />
@@ -660,6 +665,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <return error="true"
                     message="cannot find username: ${username}" public="true" />
             </if>
+            <!-- check password -->
             <script>
                 def token = new org.apache.shiro.authc.UsernamePasswordToken(
                     (String) userAccount.username, (String) oldPassword)
@@ -736,8 +742,7 @@ along with this software (see the LICENSE.md file). If not, see
                                         roleTypeId: 'OrgInternal',
                                         disabled: 'N']" />
                                 <!-- company to owner relationship obsolete: should use
-                                    ownerPartyId
-                                in entity Party-->
+                                    ownerPartyId in entity Party-->
                                 <service-call name="create#mantle.party.PartyRelationship"
                                     in-map="[fromPartyId: partyId, 
                                     fromRoleTypeId: 'OrgInternal',
@@ -778,6 +783,11 @@ along with this software (see the LICENSE.md file). If not, see
                                                 classificationId: classificationId,
                                                 userPartyId: userAccount.partyId]" />
                                 </if>
+                                <!-- specific App setups for new company and first admin-->
+                                <service-call
+                                    name="growerp.100.PartyServices100.setup#SpecificApp"
+                                    in-map="[ownerPartyId: ownerPartyId, userPartyId: userAccount.partyId,
+                                        companyPartyId: partyId, classificationId: classificationId]" />
                             </then>
                             <else><!-- customer/supplier user with optional company-->
                                 <if condition="companyName">
@@ -808,11 +818,10 @@ along with this software (see the LICENSE.md file). If not, see
                                 </if>
                             </else>
                         </if>
-                        <!-- specific App setups -->
-                        <service-call
-                            name="growerp.100.PartyServices100.setup#SpecificApp"
-                            in-map="[ownerPartyId: ownerPartyId, userPartyId: userAccount.partyId,
-                                    companyPartyId: partyId, classificationId: classificationId]" />
+                        <!-- finally create classification-->
+                        <service-call name="create#mantle.party.PartyClassificationAppl"
+                            in-map="[partyId: userAccount.partyId,
+                                partyClassificationId: classificationId]" />
                     </then>
                     <else>
                         <!-- not provided so show more infoscreen in frontend -->

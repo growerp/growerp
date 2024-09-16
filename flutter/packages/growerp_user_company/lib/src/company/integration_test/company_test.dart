@@ -169,7 +169,6 @@ class CompanyTest {
 
   static Future<void> updateAddress(
       WidgetTester tester, Address address) async {
-    await CommonTest.dragNew(tester);
     await CommonTest.tapByKey(tester, 'address');
     await CommonTest.enterText(tester, 'address1', address.address1!);
     await CommonTest.enterText(tester, 'address2', address.address2!);
@@ -199,7 +198,6 @@ class CompanyTest {
 
   static Future<void> updatePaymentMethod(
       WidgetTester tester, PaymentMethod paymentMethod) async {
-    await CommonTest.dragNew(tester);
     await CommonTest.tapByKey(tester, 'paymentMethod');
     await CommonTest.enterDropDown(
         tester, 'cardTypeDropDown', paymentMethod.creditCardType.toString());

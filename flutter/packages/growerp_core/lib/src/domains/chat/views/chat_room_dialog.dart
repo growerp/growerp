@@ -107,6 +107,8 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
                         const InputDecoration(labelText: "Select chat partner"),
                     controller: _userSearchBoxController,
                   ),
+                  menuProps:
+                      MenuProps(borderRadius: BorderRadius.circular(20.0)),
                   title: popUp(
                     context: context,
                     title: 'Select chat partner',
