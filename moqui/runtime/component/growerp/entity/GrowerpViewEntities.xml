@@ -434,6 +434,7 @@ along with this software (see the LICENSE.md file). If not, see
         </member-entity>
         <alias name="shipmentId" entity-alias="SHIP" />
         <alias name="pseudoId" entity-alias="SHIP" />
+        <alias name="externalId" entity-alias="SHIP" />
         <alias name="transactionId" field="acctgTransId" entity-alias="TRANS" />
         <alias name="shipmentMethodId" field="enumId" entity-alias="METHOD" />
         <alias name="shipmentMethod" field="description" entity-alias="METHOD" />

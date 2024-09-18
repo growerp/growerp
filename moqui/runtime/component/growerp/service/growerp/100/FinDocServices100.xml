@@ -345,6 +345,9 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
                         <econdition field-name="ownerPartyId" from="ownerPartyId" />
                     </entity-find>
+                    <if condition="sales == null">
+                        <set field="sales" value="false" type="Boolean" />
+                    </if>
                     <else>
                         <if
                             condition="open == true &amp;&amp; !finDocId
@@ -1003,6 +1006,12 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="toPartyId" from="companyPartyId" />
                         </econditions>
                     </entity-find>
+                    <if condition="sales == null">
+                        <set field="sales" value="false" type="Boolean" />
+                        <if condition="items[0].fromPartyId == companyPartyId">
+                            <set field="sales" value="true" type="Boolean" />
+                        </if>
+                    </if>
                     <else>
                         <if condition="open == true &amp;&amp; !finDocId &amp;&amp; !search">
                             <set field="status" from="openStatusList" />
@@ -1098,6 +1107,7 @@ along with this software (see the LICENSE.md file). If not, see
                             transactionId: item.transactionId,
                             pseudoId: item.pseudoId ?:'',
                             statusId: convertedStatusId,
+                            reference: item.externalId,
                             shipmentMethod: item.shipmentMethod,
                             creationDate: item.entryDate 
                                 ? ec.l10n.format(item.entryDate,'yyyy-MM-dd')  : null,

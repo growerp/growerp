@@ -497,46 +497,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="finDoc.docType == 'transaction'">
                     <set field="finDoc.isPosted" value="false" type="Boolean" />
                 </if>
-                <!-- looking for invoice of shipment to get quantity -->
-                <if condition="finDoc.docType == 'shipment' &amp;&amp; finDoc.reference">
-                    <if condition="finDoc.sales">
-                        <set field="fromPartyId" from="companyPartyId" />
-                        <else>
-                            <set field="toPartyId" from="companyPartyId" />
-                        </else>
-                    </if>
-                    <entity-find entity-name="mantle.account.invoice.Invoice"
-                        list="invoices" limit="1">
-                        <econdition field-name="externalId" from="finDoc.reference" />
-                        <econdition field-name="fromPartyId" from="fromPartyId"
-                            ignore-if-empty="true" />
-                        <econdition field-name="toPartyId" from="toPartyId" ignore-if-empty="true" />
-                    </entity-find>
-                    <if condition="invoices">
-                        <entity-find entity-name="mantle.account.invoice.InvoiceItem"
-                            list="invoiceItems">
-                            <econdition field-name="invoiceId" from="invoices[0].invoiceId" />
-                        </entity-find>
-                        <!-- find a matching invoice item to get quantity -->
-                        <iterate list="finDoc.items" entry="shipmentItem">
-                            <set field="quantityUpdated" value="false" type="Boolean" />
-                            <iterate list="invoiceItems" entry="invoiceItem">
-                                <if condition="invoiceItem.productId == shipmentItem.productId">
-                                    <set field="shipmentItem.quantity" from="invoiceItem.quantity" />
-                                    <set field="quantityUpdated" value="true" type="Boolean" />
-                                </if>
-                            </iterate>
-                            <if condition="quantityUpdated == false">
-                                <log
-                                    message="Could not update shipment quantity, shipmentId/productId: ${shipmentItem.shipmentId}/${shipmentItem.productId}  invoiceId/products: ${invoiceItems[0].invoiceId}/${invoiceItems.productId} " />
-                            </if>
-                        </iterate>
-                        <else>
-                            <log
-                                message="Could not find related invoice for company: $companyPartyId sales: ${finDoc.sales} shipment: ${finDoc.pseudoId} ref: ${finDoc.reference}" />
-                        </else>
-                    </if>
-                </if>
                 <!-- create findoc-->
                 <set field="finDoc.statusId" value="FinDocCreated" />
                 <service-call name="growerp.100.FinDocServices100.create#FinDoc"
@@ -655,7 +615,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </else>
                     </if>
                 </if>
-                <!-- link invoices to order order should be created first -->
+                <!-- link invoices to order, so order should be created first -->
                 <if condition="finDoc.docType == 'invoice' &amp;&amp; finDoc.classificationId">
                     <set field="pseudoId" from="finDoc.classificationId" />
                     <if condition="finDoc.sales == true">
@@ -740,6 +700,12 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="finDoc.items" from="itemsOut" />
                             <if condition="finDoc.docType == 'transaction'">
                                 <set field="finDoc.isPosted" value="true" type="Boolean" />
+                            </if>
+                            <if condition="finDoc.docType == 'shipment' &amp;&amp; finDoc.reference">
+                                <service-call
+                                    name="growerp.100.ImportExportServices100.get#InvoiceItemsForShipmentQuantities"
+                                    in-map="[companyPartyId: companyPartyId, finDoc: finDoc]"
+                                    out-map="context" />
                             </if>
                             <service-call name="growerp.100.FinDocServices100.update#FinDoc"
                                 in-map="[finDoc: finDoc, classificationId: classificationId]" />
@@ -848,6 +814,12 @@ along with this software (see the LICENSE.md file). If not, see
                         <if condition="finDoc.docType == 'transaction'">
                             <set field="finDoc.isPosted" value="true" type="Boolean" />
                         </if>
+                        <if condition="finDoc.docType == 'shipment' &amp;&amp; finDoc.reference">
+                            <service-call
+                                name="growerp.100.ImportExportServices100.get#InvoiceItemsForShipmentQuantities"
+                                in-map="[companyPartyId: companyPartyId, finDoc: finDoc]"
+                                out-map="context" />
+                        </if>
                         <service-call name="growerp.100.FinDocServices100.update#FinDoc"
                             in-map="[finDoc: finDoc, classificationId: classificationId]" />
                     </else>
@@ -857,6 +829,65 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- end of service result -->
             <if condition="!ec.message.hasError()">
                 <message type="success">${finDocItems?.size()} findoc items ${finDocItems[0].docType} imported</message>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="InvoiceItemsForShipmentQuantities">
+        <in-parameters>
+            <parameter name="companyPartyId" />
+            <parameter name="finDoc" type="Map" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="finDoc" type="Map" />
+        </out-parameters>
+        <actions>
+            <!-- looking for invoice of shipment to get quantity -->
+            <if condition="finDoc.sales">
+                <set field="fromPartyId" from="companyPartyId" />
+                <else>
+                    <set field="toPartyId" from="companyPartyId" />
+                </else>
+            </if>
+            <!--log
+                message="matching invoice externalId on finDoc ref: ${finDoc.reference} with fromPartyId:
+            $fromPartyId toPartyId: $toPartyId sales: ${finDoc.sales}" /-->
+            <entity-find entity-name="mantle.account.invoice.Invoice"
+                list="invoices" limit="1">
+                <econdition field-name="externalId" from="finDoc.reference" />
+                <econdition field-name="fromPartyId" from="fromPartyId"
+                    ignore-if-empty="true" />
+                <econdition field-name="toPartyId" from="toPartyId" ignore-if-empty="true" />
+            </entity-find>
+            <if condition="invoices">
+                <entity-find entity-name="mantle.account.invoice.InvoiceItem"
+                    list="invoiceItems">
+                    <econdition field-name="invoiceId" from="invoices[0].invoiceId" />
+                </entity-find>
+                <!--log
+                message="matching items: ${finDoc.items?.size()}" /-->
+                <!-- find a matching invoice item to get quantity -->
+                <set field="newShipmentItems" from="[]" />
+                <iterate list="finDoc.items" entry="shipmentItem">
+                    <set field="quantityUpdated" value="false" type="Boolean" />
+                    <iterate list="invoiceItems" entry="invoiceItem">
+                        <if
+                            condition="shipmentItem.product?.productId &amp;&amp; invoiceItem.product?.productId == shipmentItem.product?.productId">
+                            <script>newShipmentItems.add(shipmentItem + 
+                                                            [itemSeqId: invoiceItem.invoiceItemSeqId, quantity: invoiceItem.quantity])</script>
+                            <set field="quantityUpdated" value="true" type="Boolean" />
+                        </if>
+                    </iterate>
+                    <if condition="quantityUpdated == false">
+                        <log
+                            message="Could not update shipment # quantity, shipmentId/productId: ${finDoc.shipmentId}/${shipmentItem.productId}  invoiceId/products: ${invoiceId}/${invoiceItems.productId} " />
+                    </if>
+                </iterate>
+                <set field="finDoc.items" from="newShipmentItems" />
+                <else>
+                    <log
+                        message="Could not find related invoice for company: $companyPartyId sales: ${finDoc.sales} shipment: ${finDoc.pseudoId} ref: ${finDoc.reference}" />
+                </else>
             </if>
         </actions>
     </service>
@@ -1080,7 +1111,7 @@ along with this software (see the LICENSE.md file). If not, see
             Get Categories information into a CSV file attachement
         </description>
         <in-parameters>
-            <parameter name="classificationId"></parameter>
+            <parameter name="classificationId" />
         </in-parameters>
         <out-parameters>
             <parameter name="fileText" />
