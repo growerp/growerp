@@ -338,7 +338,7 @@ along with this software (see the LICENSE.md file). If not, see
                     field-name="classEnumId"
                     from="assetClass.convertedStatusId" ignore-if-empty="true" />
                 <econdition
-                    field-name="ownerPartyId" from="ownerPartyId" />
+                    field-name="ownerPartyId" from="companyPartyId" />
                 <econdition
                     field-name="productId" ignore-if-empty="true" />
                 <econdition field-name="assetName" operator="like" ignore-case="true"
@@ -355,7 +355,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </econditions>
                 <order-by field-name="assetName" />
             </entity-find>
-            <log message="====assets found: ${assetList?.size()}" />
             <set field="assets" from="[]" />
             <iterate entry="item" list="assetList">
                 <if condition="filter != null">
