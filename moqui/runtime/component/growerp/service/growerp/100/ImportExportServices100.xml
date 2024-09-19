@@ -860,21 +860,31 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="toPartyId" from="toPartyId" ignore-if-empty="true" />
             </entity-find>
             <if condition="invoices">
+                <!-- connect to invoice/order-->
+                <entity-find entity-name="mantle.order.OrderItemBilling" limit="1" list="billings"
+                    for-update="true">
+                    <econdition field-name="invoiceId" from="invoices[0].invoiceId" />
+                </entity-find>
+                <if condition="billings">
+                    <set field="billings[0].shipmentId" from="finDoc.shipmentId" />
+                    <entity-update value-field="billings[0]" />
+                </if>
+                <!-- find a matching invoice item to get quantity -->
                 <entity-find entity-name="mantle.account.invoice.InvoiceItem"
                     list="invoiceItems">
                     <econdition field-name="invoiceId" from="invoices[0].invoiceId" />
                 </entity-find>
                 <!--log
                 message="matching items: ${finDoc.items?.size()}" /-->
-                <!-- find a matching invoice item to get quantity -->
                 <set field="newShipmentItems" from="[]" />
                 <iterate list="finDoc.items" entry="shipmentItem">
                     <set field="quantityUpdated" value="false" type="Boolean" />
                     <iterate list="invoiceItems" entry="invoiceItem">
                         <if
-                            condition="shipmentItem.product?.productId &amp;&amp; invoiceItem.product?.productId == shipmentItem.product?.productId">
-                            <script>newShipmentItems.add(shipmentItem + 
-                                                            [itemSeqId: invoiceItem.invoiceItemSeqId, quantity: invoiceItem.quantity])</script>
+                            condition="shipmentItem.product?.productId &amp;&amp;
+                                invoiceItem.product?.productId == shipmentItem.product?.productId">
+                            <script>newShipmentItems.add(
+                                    shipmentItem + [quantity: invoiceItem.quantity])</script>
                             <set field="quantityUpdated" value="true" type="Boolean" />
                         </if>
                     </iterate>
