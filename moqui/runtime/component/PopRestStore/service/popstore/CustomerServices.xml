@@ -86,8 +86,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <select-field field-name="orderPartSeqId" />
                     <order-by field-name="-entryDate" /><!-- get most recent open order -->
                 </entity-find>
+                <log
+                    message="======existing cartOrderId: $cartOrderId customerId: $customerPartyId company: $companyPartyId" />
                 <if condition="existingOrderList">
                     <then>
+                        <log message="===== found existing order customerpartyId" />
                         <set field="orderPartSeqId" from="existingOrderList[0].orderPartSeqId" />
                         <if condition="cartOrderId">
                             <!-- if a cartOrderId is in the session, merge its items into the
@@ -101,19 +104,22 @@ along with this software (see the LICENSE.md file). If not, see
                             from="existingOrderList[0].orderId" />
                     </then>
                     <else>
+                        <log message="===== try to find with orderId: $cartOrderId" />
                         <!-- no existing open order, if a cartOrderId is in the session set the
                         logged in user as the customer -->
                         <if condition="cartOrderId">
                             <!-- NOTE: make sure cartOrder has no customerPartyId, ie only find
                             those with null to avoid order takeover -->
-                            <entity-find entity-name="OrderPart" list="orderPartList">
+                            <entity-find entity-name="OrderPart" list="orderPartList"
+                                for-update="true">
                                 <econdition field-name="orderId" from="cartOrderId" />
                                 <econdition field-name="customerPartyId" operator="is-null" />
                             </entity-find>
                             <if condition="orderPartList">
                                 <set field="orderPart" from="orderPartList[0]" />
                                 <set field="orderPartSeqId" from="orderPart.orderPartSeqId" />
-                                <set field="orderPart.customerPartyId" from="customerPartyId" />
+                                <set field="orderPart.customerPartyId"
+                                    from="companyPartyId?:customerPartyId" />
                                 <entity-update value-field="orderPart" />
                             </if>
                         </if>
@@ -235,6 +241,7 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <!-- replaced by growerp.100.PartServices100.register#WebsiteUser-->
     <service verb="register" noun="Customer" authenticate="anonymous-all">
         <in-parameters>
             <parameter name="ownerPartyId" required="true" />
@@ -328,8 +335,8 @@ along with this software (see the LICENSE.md file). If not, see
 
             <entity-find-one entity-name="mantle.party.PersonAndUserAccount"
                 value-field="personAndUserAccount" />
-            <if condition="personAndUserAccount">
-                <log level="warn" message="Customer user account not found." />
+            <if condition="!personAndUserAccount">
+                <log level="warn" message="Customer user account $partyId not found." />
             </if>
             <script>context.putAll(personAndUserAccount as Map)</script>
             <!-- get company name -->

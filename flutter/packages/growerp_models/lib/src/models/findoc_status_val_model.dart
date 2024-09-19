@@ -13,7 +13,7 @@
  */
 
 enum FinDocStatusVal {
-  inPreparation('FinDocPrep', 'In Preparation', 'In Preparation'),
+  inPreparation('FinDocPrep', 'Preparation', 'Preparation'),
   created('FinDocCreated', 'Created', 'Created'),
   approved('FinDocApproved', 'Checked In', 'Approved'),
   completed('FinDocCompleted', 'Checked Out', 'Completed'),

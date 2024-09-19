@@ -284,12 +284,13 @@ General Order Placement and eCommerce Usage
             <!-- use the company partyId for the order if available -->
             <service-call name="mantle.order.OrderServices.add#OrderProductQuantity"
                 in-map="context + defaultOrderParameters + 
-                        [customerPartyId: companyPartyId?: customerPartyId, 
-                        vendorPartyId: store.organizationPartyId, pseudoId: seqNum]"
+                        [customerPartyId: companyPartyId?: customerPartyId,
+                        productStoreId: productStoreId,
+                        vendorPartyId: store.organizationPartyId]"
                 out-map="addOut" />
-            <!-- add pseudoId to order -->
             <log
-                message="companyPartyId ${store.organizationPartyId} order cartid: $cartOrderId ret from add item: ${addOut.orderId}" />
+                message="==== add product to order: store companyPartyId ${store.organizationPartyId} companyId: $companyPartyId customerId: $customerPartyId order cartid: $cartOrderId ret from add item: ${addOut.orderId}" />
+            <!-- add pseudoId to order -->
             <if condition="!orderId">
                 <entity-find-one entity-name="mantle.party.Party" value-field="companyParty">
                     <field-map field-name="partyId" from="store.organizationPartyId" />

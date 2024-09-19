@@ -2082,9 +2082,9 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="companiesUsers" type="List">
                 <parameter name="partyId" />
                 <parameter name="pseudoId" />
+                <parameter name="partyType" />
                 <parameter name="email" />
                 <parameter name="name" />
-                <parameter name="email" />
                 <parameter name="telephoneNr" />
             </parameter>
         </out-parameters>
@@ -2098,12 +2098,16 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="search">
                 <set field="searchString" value="%$search%" />
             </if>
-            <entity-find offset="start" limit="limit" list="companies"
-                entity-name="growerp.party.OwnerCompany">
+            <entity-find offset="start" limit="limit" list="items"
+                entity-name="growerp.party.OwnerCompanyUser">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <econdition field-name="role" ignore-if-empty="true" />
                 <econditions combine="or">
-                    <econdition field-name="name" from="searchString" ignore-case="true"
+                    <econdition field-name="companyName" from="searchString" ignore-case="true"
+                        operator="like" ignore-if-empty="true" />
+                    <econdition field-name="firstName" from="searchString" ignore-case="true"
+                        operator="like" ignore-if-empty="true" />
+                    <econdition field-name="lastName" from="searchString" ignore-case="true"
                         operator="like" ignore-if-empty="true" />
                     <econdition field-name="pseudoId" from="searchString" ignore-case="true"
                         operator="like" ignore-if-empty="true" />
@@ -2113,40 +2117,23 @@ along with this software (see the LICENSE.md file). If not, see
                 <order-by field-name="name" />
             </entity-find>
 
-            <entity-find offset="start" limit="limit" list="users"
-                entity-name="growerp.party.OwnerUser">
-                <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                <econdition field-name="role" ignore-if-empty="true" />
-                <econditions combine="or">
-                    <econdition field-name="firstName" from="searchString" ignore-case="true"
-                        operator="like" ignore-if-empty="true" />
-                    <econdition field-name="lastName" from="searchString" ignore-case="true"
-                        operator="like" ignore-if-empty="true" />
-                    <econdition field-name="pseudoId" from="searchString" ignore-case="true"
-                        operator="like" ignore-if-empty="true" />
-                    <econdition field-name="email" from="searchString" ignore-if-empty="true" />
-                </econditions>
-                <order-by field-name="lastName,firstName" />
-            </entity-find>
-
             <set field="companiesUsers" from="[]" />
-            <iterate list="users" entry="user">
-                <set field="name" value="${user.lastName}, ${user.firstName}" />
+            <iterate list="items" entry="item">
+                <if condition="item.partyType == 'PtyOrganization'">
+                    <set field="type" value="company" />
+                    <set field="name" value="${item.companyName}" />
+                    <else>
+                        <set field="type" value="user" />
+                        <set field="name" value="${item.lastName}, ${item.firstName}" />
+                    </else>
+                </if>
                 <script>companiesUsers.add([
-                        type: 'user',
-                        partyId: user.partyId,
-                        pseudoId: user.pseudoId,
-                        role: user.role,
-                        name: name])</script>
-            </iterate>
-            <script>companies.sort{it.name}</script>
-            <iterate list="companies" entry="company">
-                <script>companiesUsers.add([
-                    type: 'company',
-                    partyId: company.partyId,
-                    pseudoId: company.pseudoId,
-                    role: company.role,
-                    name: company.name])</script>
+                        type: type,
+                        partyId: item.partyId,
+                        pseudoId: item.pseudoId,
+                        role: item.role,
+                        name: name,
+                        email: item.email])</script>
             </iterate>
         </actions>
     </service>
@@ -2193,7 +2180,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="newPassword" />
         </in-parameters>
         <out-parameters>
-            <parameter name="user" type="Map">
+            <parameter name="customerInfo" type="Map">
                 <parameter name="partyId" />
                 <parameter name="email" />
                 <parameter name="firstName" />
@@ -2255,8 +2242,13 @@ along with this software (see the LICENSE.md file). If not, see
                 </else>
             </if>
             <!-- create account-->
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: companyParty.ownerPartyId, seqName: 'party']"
+                out-map="context" />
+
             <service-call name="mantle.party.PartyServices.create#Account"
                 in-map="context + [roleTypeId: roleTypeId, loginAfterCreate: false,
+                            pseudoId: seqNum,
                             firstName: user.firstName, lastName: user.lastName,
                             username: loginName, roleTypeId: roleTypeId,
                             ownerPartyId: companyParty.ownerPartyId,
@@ -2293,7 +2285,7 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[ownerPartyId: companyParty.partyId,userPartyId: userAccount.partyId]"
                 out-map="userInfo" />
             <if condition="userInfo.users">
-                <set field="user" from="userInfo.users[0]" />
+                <set field="customerInfo" from="userInfo.users[0]" />
             </if>
         </actions>
     </service>
