@@ -82,35 +82,19 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.question_answer),
       ),
       TabItem(
-        form: const UserList(
+        form: const CompanyUserList(
           key: Key('Lead'),
           role: Role.lead,
         ),
-        label: '   Lead Contacts',
-        icon: const Icon(Icons.business),
-      ),
-      TabItem(
-        form: const CompanyList(
-          key: Key('CompanyLead'),
-          role: Role.lead,
-        ),
-        label: '     Lead Companies',
-        icon: const Icon(Icons.business),
-      ),
-      TabItem(
-        form: const UserList(
-          key: Key('Customer'),
-          role: Role.customer,
-        ),
-        label: 'Customer Contacts',
+        label: 'Leads',
         icon: const Icon(Icons.school),
       ),
       TabItem(
-        form: const CompanyList(
-          key: Key('CompanyCustomer'),
+        form: const CompanyUserList(
+          key: Key('Customer'),
           role: Role.customer,
         ),
-        label: 'Cust.Companies',
+        label: 'Customers',
         icon: const Icon(Icons.school),
       ),
     ],
@@ -155,20 +139,12 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const CompanyList(
+        form: const CompanyUserList(
           key: Key('Customer'),
           role: Role.customer,
         ),
-        label: 'Customer Companies',
-        icon: const Icon(Icons.business),
-      ),
-      TabItem(
-        form: const UserList(
-          key: Key('CustomerUser'),
-          role: Role.customer,
-        ),
-        label: 'Customer Persons',
-        icon: const Icon(Icons.business),
+        label: 'Customers',
+        icon: const Icon(Icons.school),
       ),
       TabItem(
         form: const FinDocList(
@@ -177,7 +153,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const CompanyList(
+        form: const CompanyUserList(
           key: Key('Supplier'),
           role: Role.supplier,
         ),

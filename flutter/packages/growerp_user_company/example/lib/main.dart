@@ -151,6 +151,47 @@ List<MenuOption> menuOptions = [
       ),
     ],
   ),
+  MenuOption(
+    image: 'packages/growerp_core/images/usersGrey.png',
+    selectedImage: 'packages/growerp_core/images/users.png',
+    title: 'Companies & Users',
+    route: '/companiesUsers',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    tabItems: [
+      TabItem(
+        form: const CompanyUserList(
+          key: Key('Lead'),
+          role: Role.lead,
+        ),
+        label: 'Leads',
+        icon: const Icon(Icons.business),
+      ),
+      TabItem(
+        form: const CompanyUserList(
+          key: Key('Customer'),
+          role: Role.customer,
+        ),
+        label: 'Customers',
+        icon: const Icon(Icons.school),
+      ),
+      TabItem(
+        form: const CompanyUserList(
+          key: Key('Supplier'),
+          role: Role.supplier,
+        ),
+        label: 'Suppliers',
+        icon: const Icon(Icons.business),
+      ),
+      TabItem(
+        form: const CompanyUserList(
+          key: Key('All'),
+          role: Role.unknown,
+        ),
+        label: 'All',
+        icon: const Icon(Icons.business),
+      ),
+    ],
+  ),
 ];
 
 // routing
@@ -177,6 +218,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 2, tabIndex: 0));
+    case '/companiesUsers':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: menuOptions, menuIndex: 3, tabIndex: 0));
     default:
       return MaterialPageRoute(
           builder: (context) => FatalErrorForm(
@@ -189,10 +234,10 @@ class MainMenu extends StatelessWidget {
   const MainMenu({super.key});
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state.status == AuthStatus.authenticated) {
-        Authenticate authenticate = state.authenticate!;
-        return DashBoardForm(dashboardItems: [
+    Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
+    return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+      Expanded(
+        child: DashBoardForm(dashboardItems: [
           makeDashboardItem('dbCompanies', context, menuOptions[1], [
             authenticate.company!.name!.length > 20
                 ? "${authenticate.company!.name!.substring(0, 20)}..."
@@ -210,9 +255,16 @@ class MainMenu extends StatelessWidget {
             "Leads: ${authenticate.stats != null ? authenticate.stats?.leads ?? 0 : 0}",
             "Suppliers: ${authenticate.stats != null ? authenticate.stats?.suppliers ?? 0 : 0}",
           ]),
-        ]);
-      }
-      return const LoadingIndicator();
-    });
+          makeDashboardItem('dbCompaniesUsers', context, menuOptions[3], [
+            authenticate.company!.name!.length > 20
+                ? "${authenticate.company!.name!.substring(0, 20)}..."
+                : "${authenticate.company!.name}",
+            "Customers: ${authenticate.stats != null ? authenticate.stats?.customers ?? 0 : 0}",
+            "Leads: ${authenticate.stats != null ? authenticate.stats?.leads ?? 0 : 0}",
+            "Suppliers: ${authenticate.stats != null ? authenticate.stats?.suppliers ?? 0 : 0}",
+          ])
+        ]),
+      ),
+    ]);
   }
 }

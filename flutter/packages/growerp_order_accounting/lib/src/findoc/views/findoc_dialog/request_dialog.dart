@@ -208,7 +208,6 @@ class RequestDialogState extends State<RequestDialog> {
                               .getCompanyUser(
                                   searchString: filter,
                                   limit: 4,
-                                  isForDropDown: true,
                                   role: Role.unknown)));
                           return Future.delayed(
                               const Duration(milliseconds: 150), () {
@@ -543,7 +542,6 @@ class RequestDialogState extends State<RequestDialog> {
                             .getCompanyUser(
                                 searchString: filter,
                                 limit: 4,
-                                isForDropDown: true,
                                 role: Role.unknown)));
                         return Future.delayed(const Duration(milliseconds: 150),
                             () {

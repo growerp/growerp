@@ -69,6 +69,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
           start: start,
           limit: event.limit,
           role: role,
+          partyId: event.partyId,
           searchString: event.searchString);
 
       return emit(state.copyWith(

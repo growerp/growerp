@@ -6,8 +6,16 @@ import '../growerp_user_company.dart';
 List<BlocProvider> getUserCompanyBlocProviders(
     RestClient restClient, String classificationId) {
   List<BlocProvider> blocProviders = [
+    BlocProvider<CompanyUserBloc>(
+        create: (context) => CompanyUserBloc(restClient, Role.unknown)),
+    BlocProvider<CompanyUserCustomerBloc>(
+        create: (context) => CompanyUserBloc(restClient, Role.customer)),
+    BlocProvider<CompanyUserSupplierBloc>(
+        create: (context) => CompanyUserBloc(restClient, Role.supplier)),
+    BlocProvider<CompanyUserLeadBloc>(
+        create: (context) => CompanyUserBloc(restClient, Role.lead)),
     BlocProvider<CompanyBloc>(
-        create: (context) => CompanyBloc(restClient, Role.company)),
+        create: (context) => CompanyBloc(restClient, Role.unknown)),
     BlocProvider<CompanyCustomerBloc>(
         create: (context) => CompanyBloc(restClient, Role.customer)),
     BlocProvider<CompanySupplierBloc>(

@@ -57,7 +57,7 @@ List<MenuOption> acctMenuOptions = [
           icon: const Icon(Icons.home),
         ),
         TabItem(
-          form: const CompanyList(
+          form: const CompanyUserList(
             key: Key('Customer'),
             role: Role.customer,
           ),
@@ -92,7 +92,7 @@ List<MenuOption> acctMenuOptions = [
           icon: const Icon(Icons.home),
         ),
         TabItem(
-          form: const CompanyList(
+          form: const CompanyUserList(
             key: Key('Supplier'),
             role: Role.supplier,
           ),

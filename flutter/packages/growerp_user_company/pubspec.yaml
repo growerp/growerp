@@ -56,6 +56,7 @@ dependencies:
   universal_io: ^2.2.2
   flutter_test: 
     sdk: flutter
+  flutter_expandable_fab: ^2.3.0
 
 dev_dependencies:
   flutter_driver: 

@@ -192,6 +192,7 @@ class MyFinDocState extends State<FinDocPage> {
             // related documents
             RelatedFinDocs(finDoc: finDocUpdated, context: context),
             // update buttons
+            const SizedBox(height: 10),
             if (!readOnly) updateButtons(state),
             const SizedBox(height: 10),
             widget.finDoc.docType == FinDocType.transaction
@@ -268,6 +269,7 @@ class MyFinDocState extends State<FinDocPage> {
               keyboardType: TextInputType.number,
             ),
           ),
+          const SizedBox(width: 10),
           BlocBuilder<DataFetchBloc<CompaniesUsers>, DataFetchState>(
               builder: (context, state) {
             switch (state.status) {
@@ -311,7 +313,6 @@ class MyFinDocState extends State<FinDocPage> {
                           .getCompanyUser(
                               searchString: filter,
                               limit: 3,
-                              isForDropDown: true,
                               role: widget.finDoc.sales
                                   ? Role.customer
                                   : Role.supplier)));
@@ -392,7 +393,7 @@ class MyFinDocState extends State<FinDocPage> {
             key: _formKeyHeader,
             child: isPhone
                 ? Column(children: widgets)
-                : Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                : Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
                     Expanded(child: widgets[0]),
                     Expanded(child: widgets[1]),
                   ])));
@@ -468,7 +469,6 @@ class MyFinDocState extends State<FinDocPage> {
                               () => context.read<RestClient>().getCompanyUser(
                                     searchString: filter,
                                     limit: 3,
-                                    isForDropDown: true,
                                   )));
                           return Future.delayed(
                               const Duration(milliseconds: 150), () {

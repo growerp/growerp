@@ -22,12 +22,14 @@ abstract class UserEvent extends Equatable {
 
 class UserFetch extends UserEvent {
   final UserGroup? userGroup;
+  final String? partyId;
   final String searchString;
   final bool refresh;
   final int limit;
 
   const UserFetch(
       {this.limit = 20,
+      this.partyId,
       this.userGroup,
       this.searchString = '',
       this.refresh = false});

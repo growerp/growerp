@@ -100,15 +100,13 @@ abstract class RestClient {
     @Query('role') Role? role,
     @Query('start') int? start,
     @Query('limit') int? limit,
-    @Query('name') String? firstName,
     @Query('search') String? searchString,
-    @Query('isForDropDown') bool? isForDropDown,
   });
 
   // user
   @GET("rest/s1/growerp/100/User")
   Future<Users> getUser({
-    @Query('userpartyId') String? userpartyId,
+    @Query('userPartyId') String? partyId,
     @Query('role') Role? role,
     @Query('start') int? start,
     @Query('limit') int? limit,

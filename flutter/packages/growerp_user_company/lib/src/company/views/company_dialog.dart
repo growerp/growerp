@@ -48,7 +48,8 @@ class ShowCompanyDialog extends StatelessWidget {
                 companyPartyId: company.partyId ?? companyPartyId, limit: 1)),
           child:
               BlocBuilder<CompanyBloc, CompanyState>(builder: (context, state) {
-            if (state.status == CompanyStatus.success) {
+            if (state.status == CompanyStatus.success &&
+                state.companies.isNotEmpty) {
               return CompanyDialog(state.companies[0], dialog: dialog);
             }
             return const LoadingIndicator();
@@ -106,7 +107,7 @@ class CompanyFormState extends State<CompanyDialog> {
     _companyDialogFormKey = GlobalKey<FormState>();
     authenticate = context.read<AuthBloc>().state.authenticate!;
     _selectedRole = widget.company.role!;
-/*    switch (widget.company.partyId) {
+    switch (widget.company.partyId) {
       case null:
         company = authenticate.company!;
         companyBloc
@@ -120,7 +121,7 @@ class CompanyFormState extends State<CompanyDialog> {
         companyBloc.add(
             CompanyFetch(companyPartyId: widget.company.partyId!, limit: 1));
     }
-*/
+
     employees = List.of(company.employees);
     if (company.currency != null) {
       _selectedCurrency = currencies.firstWhere(
@@ -193,7 +194,7 @@ class CompanyFormState extends State<CompanyDialog> {
             child: popUp(
                 context: context,
                 title:
-                    "$_selectedRole Company #${company.partyId == null ? 'New' : company.pseudoId}",
+                    "Organization #${company.partyId == null ? 'New' : company.pseudoId}",
                 width: isPhone ? 400 : 1000,
                 height: isPhone ? 600 : 750,
                 child: listChild()))

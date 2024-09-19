@@ -12,6 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:typed_data';
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'models.dart';
 import '../json_converters.dart';
@@ -27,9 +29,11 @@ class CompanyUser with _$CompanyUser {
     String? partyId,
     String? pseudoId,
     @RoleConverter() Role? role,
+    @Uint8ListConverter() Uint8List? image,
     String? name, // either first/last name or company name
     String? email,
     String? telephoneNr,
+    Address? address,
   }) = _CompanyUser;
 
   factory CompanyUser.fromJson(Map<String, dynamic> json) =>

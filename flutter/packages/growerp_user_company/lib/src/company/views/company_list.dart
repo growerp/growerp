@@ -21,8 +21,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
-import '../company.dart';
-import '../widgets/widgets.dart';
+import '../../../growerp_user_company.dart';
 
 class CompanyList extends StatefulWidget {
   const CompanyList({required this.role, super.key});
@@ -97,16 +96,18 @@ class CompanyListState extends State<CompanyList> {
           columnBuilder: (index) => index >= tableViewCells[0].length
               ? null
               : TableSpan(
-                  padding: padding,
-                  backgroundDecoration: getBackGround(context, index),
+                  padding: companyUserPadding,
+                  backgroundDecoration:
+                      getCompanyUserBackGround(context, index),
                   extent: FixedTableSpanExtent(fieldWidths[index]),
                 ),
           pinnedColumnCount: 1,
           rowBuilder: (index) => index >= tableViewCells.length
               ? null
               : TableSpan(
-                  padding: padding,
-                  backgroundDecoration: getBackGround(context, index),
+                  padding: companyUserPadding,
+                  backgroundDecoration:
+                      getCompanyUserBackGround(context, index),
                   extent: FixedTableSpanExtent(rowHeight!),
                   recognizerFactories: <Type, GestureRecognizerFactory>{
                       TapGestureRecognizer:
@@ -196,6 +197,7 @@ class CompanyListState extends State<CompanyList> {
                               return BlocProvider.value(
                                   value: _companyBloc,
                                   child: CompanyDialog(Company(
+                                    partyId: '_NEW_',
                                     role: widget.role,
                                   )));
                             });

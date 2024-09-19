@@ -513,38 +513,50 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="lastItem &amp;&amp; lastItem.orderId == item.orderId">
                         <continue />
                     </if>
+                    <set field="company" from="null" />
+                    <set field="userOut" from="null" />
                     <if condition="!sales">
                         <then>
-                            <set field="company"
-                                from="[
+                            <if condition="item.vendorPartyType == 'PtyOrganization'">
+                                <set field="company"
+                                    from="[
                                         partyId: item.vendorPartyId,
                                         pseudoId: item.vendorPseudoId,
                                         name: item.vendorCompanyName,
                                         ]" />
-                            <set field="userOut"
-                                from="[
-                                            partyId: item.vendorUserPartyId,
+                                <else>
+                                    <set field="userOut"
+                                        from="[
+                                            partyId: item.vendorPartyId,
+                                            pseudoId: item.vendorPseudoId,
                                             firstName: item.vendorFirstName,
                                             lastName: item.vendorLastName,
                                             email: item.vendorEmail,
                                             company: company,
                                         ]" />
+                                </else>
+                            </if>
                         </then>
                         <else>
-                            <set field="company"
-                                from="[
+                            <if condition="item.customerPartyType == 'PtyOrganization'">
+                                <set field="company"
+                                    from="[
                                     partyId: item.customerPartyId,
                                     pseudoId: item.customerPseudoId,
                                     name: item.customerCompanyName,
                                     ]" />
-                            <set field="userOut"
-                                from="[
-                                            partyId: item.customerUserPartyId,
+                                <else>
+                                    <set field="userOut"
+                                        from="[
+                                            partyId: item.customerPartyId,
+                                            pseudoId: item.customerPseudoId,
                                             firstName: item.customerFirstName,
                                             lastName: item.customerLastName,
                                             email: item.customerEmail,
                                             company: company,
                                         ]" />
+                                </else>
+                            </if>
                         </else>
                     </if>
                     <service-call name="growerp.100.FinDocServices100.convert#StatusId"
@@ -578,8 +590,8 @@ along with this software (see the LICENSE.md file). If not, see
                                 ? ec.l10n.format(item.placedDate,'yyyy-MM-dd')  : null,
                             sales: sales,
                             docType: docType,
-                            otherUser: userOut?.partyId ? userOut : null,
-                            otherCompany: company?.partyId ? company : null,
+                            otherUser: userOut,
+                            otherCompany: company,
                             grandTotal: item.grandTotal ? item.grandTotal.toString(): null,
                             items: finDocItems,
                             ]" />

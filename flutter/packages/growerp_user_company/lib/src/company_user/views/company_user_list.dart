@@ -12,75 +12,78 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+// ignore_for_file: exhaustive_cases
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import '../../../growerp_user_company.dart';
 
-class UserList extends StatefulWidget {
-  const UserList({super.key, this.role});
+class CompanyUserList extends StatefulWidget {
+  const CompanyUserList({required this.role, super.key});
   final Role? role;
 
   @override
-  UserListState createState() => UserListState();
+  CompanyUserListState createState() => CompanyUserListState();
 }
 
-class UserListState extends State<UserList> {
+class CompanyUserListState extends State<CompanyUserList> {
   final _scrollController = ScrollController();
   final _horizontalController = ScrollController();
-  final double _scrollThreshold = 200.0;
+  late CompanyUserBloc _companyUserBloc;
+  late CompanyBloc _companyBloc;
   late UserBloc _userBloc;
-  late AuthBloc _authBloc;
-  List<User> users = const <User>[];
+  List<CompanyUser> companiesUsers = const <CompanyUser>[];
   bool showSearchField = false;
   String searchString = '';
-  bool isLoading = false;
   bool hasReachedMax = false;
   late bool isPhone;
+  int limit = (WidgetsBinding
+              .instance.platformDispatcher.views.first.physicalSize.height /
+          35)
+      .toInt();
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _authBloc = context.read<AuthBloc>();
+    _companyBloc = context.read<CompanyBloc>();
+    _userBloc = context.read<UserBloc>();
     switch (widget.role) {
-      case Role.company:
-        _userBloc = (context.read<EmployeeBloc>() as UserBloc)
-          ..add(const UserFetch());
-        break;
       case Role.supplier:
-        _userBloc = (context.read<SupplierBloc>() as UserBloc)
-          ..add(const UserFetch());
+        _companyUserBloc = context.read<CompanyUserSupplierBloc>()
+            as CompanyUserBloc
+          ..add(CompanyUserFetch(limit: limit));
         break;
       case Role.customer:
-        _userBloc = (context.read<CustomerBloc>() as UserBloc)
-          ..add(const UserFetch());
+        _companyUserBloc = context.read<CompanyUserCustomerBloc>()
+            as CompanyUserBloc
+          ..add(CompanyUserFetch(limit: limit));
         break;
       case Role.lead:
-        (_userBloc = context.read<LeadBloc>() as UserBloc)
-            .add(const UserFetch());
+        _companyUserBloc = context.read<CompanyUserLeadBloc>()
+            as CompanyUserBloc
+          ..add(CompanyUserFetch(limit: limit));
         break;
       default:
-        _userBloc = (context.read<UserBloc>())..add(const UserFetch());
+        _companyUserBloc = context.read<CompanyUserBloc>()
+          ..add(CompanyUserFetch(limit: limit));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    isPhone = isAPhone(context);
+    isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return Builder(builder: (BuildContext context) {
       Widget tableView() {
-        if (users.isEmpty) {
-          return Center(
+        if (companiesUsers.isEmpty) {
+          return const Center(
               heightFactor: 20,
-              child: Text(
-                  context.read<String>() == 'AppHealth'
-                      ? 'No clients found'
-                      : 'no ${widget.role?.name ?? ''} users found',
+              child: Text("no companies/users found",
                   textAlign: TextAlign.center));
         }
         // get table data formatted for tableView
@@ -88,12 +91,11 @@ class UserListState extends State<UserList> {
           List<List<TableViewCell>> tableViewCells,
           List<double> fieldWidths,
           double? rowHeight
-        ) = get2dTableData<User>(getUserListTableData,
-            bloc: _userBloc,
+        ) = get2dTableData<CompanyUser>(getCompanyUserTableData,
+            bloc: _companyUserBloc,
             classificationId: 'AppAdmin',
             context: context,
-            items: users,
-            extra: widget.role);
+            items: companiesUsers);
         return TableView.builder(
           diagonalDragBehavior: DiagonalDragBehavior.free,
           verticalDetails:
@@ -128,16 +130,27 @@ class UserListState extends State<UserList> {
                                       barrierDismissible: true,
                                       context: context,
                                       builder: (BuildContext context) {
-                                        return index > users.length
+                                        return index > companiesUsers.length
                                             ? const BottomLoader()
                                             : Dismissible(
-                                                key: const Key('locationItem'),
+                                                key: const Key(
+                                                    'companyUserItem'),
                                                 direction:
                                                     DismissDirection.startToEnd,
-                                                child: BlocProvider.value(
-                                                    value: _userBloc,
-                                                    child: UserDialogStateFull(
-                                                        users[index - 1])));
+                                                child: companiesUsers[index - 1]
+                                                            .type ==
+                                                        PartyType.company
+                                                    ? BlocProvider.value(
+                                                        value: _companyBloc,
+                                                        child: ShowCompanyDialog(
+                                                            companiesUsers[index - 1]
+                                                                .getCompany()!))
+                                                    : BlocProvider.value(
+                                                        value: _userBloc,
+                                                        child: ShowUserDialog(
+                                                            companiesUsers[
+                                                                    index - 1]
+                                                                .getUser()!)));
                                       }))
                     }),
           pinnedRowCount: 1,
@@ -145,23 +158,19 @@ class UserListState extends State<UserList> {
       }
 
       blocListener(context, state) {
-        if (state.status == UserStatus.failure) {
+        if (state.status == CompanyUserStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
         }
-        if (state.status == UserStatus.success) {
+        if (state.status == CompanyUserStatus.success) {
           HelperFunctions.showMessage(
               context, '${state.message}', Colors.green);
         }
       }
 
       blocBuilder(context, state) {
-        if (state.status == UserStatus.failure) {
-          return FatalErrorForm(
-              message: "Could not load ${widget.role.toString()}s!");
-        }
-        if (state.status == UserStatus.success) {
-          isLoading = false;
-          users = state.users;
+        if (state.status == CompanyUserStatus.failure ||
+            state.status == CompanyUserStatus.success) {
+          companiesUsers = state.companiesUsers;
           hasReachedMax = state.hasReachedMax;
           return Scaffold(
               floatingActionButton: Column(
@@ -178,8 +187,9 @@ class UserListState extends State<UserList> {
                             builder: (BuildContext context) {
                               // search separate from finDocBloc
                               return BlocProvider.value(
-                                  value: context.read<DataFetchBloc<Users>>(),
-                                  child: const SearchUserList());
+                                  value: context
+                                      .read<DataFetchBloc<CompaniesUsers>>(),
+                                  child: const SearchCompanyUserList());
                             }).then((value) async => value != null
                             ?
                             // show detail page
@@ -188,15 +198,34 @@ class UserListState extends State<UserList> {
                                 context: context,
                                 builder: (BuildContext context) {
                                   return BlocProvider.value(
-                                      value: _userBloc,
-                                      child: UserDialog(value));
+                                      value: _companyUserBloc,
+                                      child: CompanyDialog(value));
                                 })
                             : const SizedBox.shrink());
                       },
                       child: const Icon(Icons.search)),
                   const SizedBox(height: 10),
                   FloatingActionButton(
-                      key: const Key("addNew"),
+                      key: const Key("addNewOrg"),
+                      onPressed: () async {
+                        await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return BlocProvider.value(
+                                  value: _companyBloc,
+                                  child: CompanyDialog(Company(
+                                    role: widget.role,
+                                  )));
+                            });
+                      },
+                      tooltip: 'Add New',
+                      child: const Column(
+                        children: [Icon(Icons.add), Text('Org')],
+                      )),
+                  const SizedBox(height: 10),
+                  FloatingActionButton(
+                      key: const Key("addNewPerson"),
                       onPressed: () async {
                         await showDialog(
                             barrierDismissible: true,
@@ -205,40 +234,33 @@ class UserListState extends State<UserList> {
                               return BlocProvider.value(
                                   value: _userBloc,
                                   child: UserDialog(User(
-                                      role: widget.role,
-                                      company: widget.role == Role.company
-                                          ? _authBloc
-                                              .state.authenticate!.company
-                                          : Company(
-                                              role: widget.role,
-                                            ))));
+                                    role: widget.role,
+                                  )));
                             });
                       },
                       tooltip: 'Add New',
-                      child: const Icon(Icons.add)),
+                      child: const Column(
+                        children: [Icon(Icons.add), Text('Person')],
+                      )),
                 ],
               ),
               body: tableView());
         }
-        isLoading = true;
         return const LoadingIndicator();
       }
 
       switch (widget.role) {
         case Role.lead:
-          return BlocConsumer<LeadBloc, UserState>(
+          return BlocConsumer<CompanyUserLeadBloc, CompanyUserState>(
               listener: blocListener, builder: blocBuilder);
         case Role.customer:
-          return BlocConsumer<CustomerBloc, UserState>(
-              listener: blocListener, builder: blocBuilder);
-        case Role.company:
-          return BlocConsumer<EmployeeBloc, UserState>(
+          return BlocConsumer<CompanyUserCustomerBloc, CompanyUserState>(
               listener: blocListener, builder: blocBuilder);
         case Role.supplier:
-          return BlocConsumer<SupplierBloc, UserState>(
+          return BlocConsumer<CompanyUserSupplierBloc, CompanyUserState>(
               listener: blocListener, builder: blocBuilder);
         default:
-          return BlocConsumer<UserBloc, UserState>(
+          return BlocConsumer<CompanyUserBloc, CompanyUserState>(
               listener: blocListener, builder: blocBuilder);
       }
     });
@@ -246,15 +268,22 @@ class UserListState extends State<UserList> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
     super.dispose();
   }
 
   void _onScroll() {
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
-    if (currentScroll > 0 && maxScroll - currentScroll <= _scrollThreshold) {
-      _userBloc.add(UserFetch(searchString: searchString));
+    if (_isBottom) {
+      _companyUserBloc.add(CompanyUserFetch(limit: limit));
     }
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
   }
 }

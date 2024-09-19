@@ -16,12 +16,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import '../user.dart';
 
-TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
-    User item, int index,
+TableData getUserListTableData(Bloc bloc, String classificationId,
+    BuildContext context, User item, int index,
     {dynamic extra}) {
   bool isPhone = isAPhone(context);
   List<TableRowContent> rowContent = [];
@@ -111,12 +110,4 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
       )));
 
   return TableData(rowHeight: isPhone ? 65 : 20, rowContent: rowContent);
-}
-
-// general settings
-var padding = const SpanPadding(trailing: 5, leading: 5);
-SpanDecoration? getBackGround(BuildContext context, int index) {
-  return index == 0
-      ? SpanDecoration(color: Theme.of(context).colorScheme.tertiaryContainer)
-      : null;
 }
