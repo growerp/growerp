@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:universal_io/io.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart';
@@ -22,7 +23,10 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
-import '../../../growerp_user_company.dart';
+
+import '../../common/common.dart';
+import '../company_user.dart';
+import 'user_dialog.dart';
 
 /// a class to start the <CompanyDialog> from anywhere
 /// 1. a null [Company] input will show the current main company information
@@ -37,32 +41,32 @@ class ShowCompanyDialog extends StatelessWidget {
   const ShowCompanyDialog(this.company, {super.key, this.dialog = true});
   @override
   Widget build(BuildContext context) {
-    AuthBloc authBloc = context.read<AuthBloc>();
-    RestClient restClient = context.read<RestClient>();
-    String companyPartyId = authBloc.state.authenticate!.company!.partyId!;
-    if (company.partyId == null || company.partyId != '_NEW_') {
+    late String? companyPartyId;
+    if (company.partyId == null && company.partyId != '_NEW_') {
       // display (main) company
-      return BlocProvider<CompanyBloc>(
-          create: (context) => CompanyBloc(restClient, company.role)
-            ..add(CompanyFetch(
-                companyPartyId: company.partyId ?? companyPartyId, limit: 1)),
-          child:
-              BlocBuilder<CompanyBloc, CompanyState>(builder: (context, state) {
-            if (state.status == CompanyStatus.success &&
-                state.companies.isNotEmpty) {
-              return CompanyDialog(state.companies[0], dialog: dialog);
-            }
-            return const LoadingIndicator();
-          }));
+      AuthBloc authBloc = context.read<AuthBloc>();
+      companyPartyId = authBloc.state.authenticate!.company!.partyId!;
+    } else {
+      companyPartyId = company.partyId;
     }
-    return BlocProvider<CompanyBloc>(
-        // new company, empty screen
-        create: (context) => CompanyBloc(restClient, company.role)
-          ..add(const CompanyFetch(limit: 0)),
-        child: CompanyDialog(
-          Company(role: company.role),
-          dialog: dialog,
-        ));
+    context
+        .read<DataFetchBloc<Companies>>()
+        .add(GetDataEvent(() => context.read<RestClient>().getCompany(
+              companyPartyId: companyPartyId,
+              limit: 1,
+            )));
+    return BlocBuilder<DataFetchBloc<Companies>, DataFetchState>(
+        builder: (context, state) {
+      if (state.status == DataFetchStatus.success ||
+          state.status == DataFetchStatus.failure) {
+        if ((state.data as Companies).companies.isEmpty) {
+          //print("not found: company: ${company.name}[${company.pseudoId}]");
+          return const SizedBox.shrink();
+        }
+        return CompanyDialog((state.data as Companies).companies[0]);
+      }
+      return const LoadingIndicator();
+    });
   }
 }
 
@@ -97,29 +101,21 @@ class CompanyFormState extends State<CompanyDialog> {
   final ImagePicker _picker = ImagePicker();
   late bool isPhone;
   final ScrollController _scrollController = ScrollController();
-  late CompanyBloc companyBloc;
+  late CompanyUserBloc companyUserBloc;
 
   @override
   void initState() {
     super.initState();
     company = widget.company;
-    companyBloc = context.read<CompanyBloc>();
+    companyUserBloc = context.read<CompanyUserBloc>();
     _companyDialogFormKey = GlobalKey<FormState>();
     authenticate = context.read<AuthBloc>().state.authenticate!;
     _selectedRole = widget.company.role!;
     switch (widget.company.partyId) {
       case null:
         company = authenticate.company!;
-        companyBloc
-            .add(CompanyFetch(companyPartyId: company.partyId!, limit: 1));
-        break;
       case '_NEW_':
         company = widget.company.copyWith(partyId: null);
-        companyBloc.add(const CompanyFetch(limit: 0));
-        break;
-      default:
-        companyBloc.add(
-            CompanyFetch(companyPartyId: widget.company.partyId!, limit: 1));
     }
 
     employees = List.of(company.employees);
@@ -590,7 +586,8 @@ class CompanyFormState extends State<CompanyDialog> {
                               HelperFunctions.showMessage(
                                   context, "Image upload error!", Colors.red);
                             } else {
-                              companyBloc.add(CompanyUpdate(updatedCompany));
+                              companyUserBloc.add(
+                                  CompanyUserUpdate(company: updatedCompany));
                             }
                           }
                         }
@@ -627,38 +624,33 @@ class CompanyFormState extends State<CompanyDialog> {
         backgroundColor: Colors.transparent,
         floatingActionButton:
             ImageButtons(_scrollController, _onImageButtonPressed),
-        body: BlocConsumer<CompanyBloc, CompanyState>(
-            listenWhen: (previous, current) =>
-                previous.status == CompanyStatus.loading,
+        body: BlocConsumer<CompanyUserBloc, CompanyUserState>(
             listener: (context, state) {
-              if (state.status == CompanyStatus.failure) {
-                HelperFunctions.showMessage(context, state.message, Colors.red);
-              }
-              if (state.status == CompanyStatus.success) {
-                if (widget.dialog == true && _nameController.text != '') {
-                  Navigator.of(context).pop(state.companies[0]);
-                } else {
-                  HelperFunctions.showMessage(
-                      context, state.message, Colors.green);
-                }
-              }
-            },
-            builder: (context, state) {
-              if (state.status == CompanyStatus.failure ||
-                  state.status == CompanyStatus.success) {
-                return CompanyForm(
-                    companyDialogFormKey: _companyDialogFormKey,
-                    scrollController: _scrollController,
-                    company: company,
-                    imageFile: _imageFile,
-                    rows: rows,
-                    column: column,
-                    updateButton: updateButton,
-                    widget: widget,
-                    employeeChips: employeeChips);
-              }
-              return const LoadingIndicator();
-            }));
+          if (state.status == CompanyUserStatus.failure) {
+            HelperFunctions.showMessage(context, state.message, Colors.red);
+          }
+          if (state.status == CompanyUserStatus.success) {
+            if (widget.dialog == true && _nameController.text != '') {
+              Navigator.of(context).pop(state.companiesUsers[0]);
+            }
+            HelperFunctions.showMessage(context, state.message, Colors.green);
+          }
+        }, builder: (context, state) {
+          if (state.status == CompanyUserStatus.failure ||
+              state.status == CompanyUserStatus.success) {
+            return CompanyForm(
+                companyDialogFormKey: _companyDialogFormKey,
+                scrollController: _scrollController,
+                company: company,
+                imageFile: _imageFile,
+                rows: rows,
+                column: column,
+                updateButton: updateButton,
+                widget: widget,
+                employeeChips: employeeChips);
+          }
+          return const LoadingIndicator();
+        }));
   }
 }
 

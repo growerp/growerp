@@ -43,7 +43,12 @@ class CompanyUser with _$CompanyUser {
   String toString() => 'CompanyUser name: $name[$partyId/$pseudoId] ';
 
   Company? getCompany() => type == PartyType.company
-      ? Company(partyId: partyId, pseudoId: pseudoId, name: name)
+      ? Company(
+          partyId: partyId,
+          pseudoId: pseudoId,
+          name: name,
+          address: address,
+          role: role)
       : null;
 
   User? getUser() {
@@ -52,8 +57,10 @@ class CompanyUser with _$CompanyUser {
       return User(
           partyId: partyId,
           pseudoId: pseudoId,
+          role: role,
           firstName: names != null && names.length > 1 ? names[1] : '',
-          lastName: names != null ? names[0] : '');
+          lastName: names != null ? names[0] : '',
+          address: address);
     }
     return null;
   }

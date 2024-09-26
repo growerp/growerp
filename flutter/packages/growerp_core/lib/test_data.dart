@@ -439,14 +439,11 @@ List<User> customers = [
     lastName: 'customer3NoComp',
     role: Role.customer,
     email: 'emailXXX@example.org',
-    company: Company(),
   ),
   User(
     firstName: 'customer4',
-    lastName: 'customer4NoComp',
+    lastName: 'customer4NoCompNOEmail',
     role: Role.customer,
-    email: 'emailXXX@example.org',
-    company: Company(),
   ),
 ];
 

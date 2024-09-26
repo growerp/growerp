@@ -34,7 +34,7 @@ class User with _$User {
     String? firstName,
     String? lastName,
 
-    /// login account is required if disabled just dummy
+    /// login account
     bool? loginDisabled,
     String? loginName,
 

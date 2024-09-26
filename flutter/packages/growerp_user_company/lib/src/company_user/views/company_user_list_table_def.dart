@@ -64,7 +64,7 @@ TableData getCompanyUserTableData(Bloc bloc, String classificationId,
       value: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("${item.name ?? ''} ",
+          Text("${item.name.truncate(25)} ",
               textAlign: TextAlign.start, key: Key('name$index')),
           Text(item.email ?? '', key: const Key("companyEmail")),
         ],
@@ -120,10 +120,10 @@ TableData getCompanyUserTableData(Bloc bloc, String classificationId,
       key: Key("delete$index"),
       icon: const Icon(Icons.delete_forever),
       onPressed: () {
-        bloc.add(CompanyUserDelete(item.copyWith(image: null)));
+        bloc.add(const CompanyUserDelete());
       },
     ),
   ));
 
-  return TableData(rowHeight: isPhone ? 50 : 20, rowContent: rowContent);
+  return TableData(rowHeight: isPhone ? 42 : 20, rowContent: rowContent);
 }

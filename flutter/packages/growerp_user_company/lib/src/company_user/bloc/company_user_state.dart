@@ -35,6 +35,14 @@ class CompanyUserState extends Equatable {
   final bool hasReachedMax;
   final String searchString;
 
+  @override
+  List<Object> get props => [status];
+
+  @override
+  String toString() => '$status { #companiesUsers: ${companiesUsers.length}, '
+      'hasReachedMax: $hasReachedMax message $message} '
+      'company: ${company?.name} user: ${user?.lastName}';
+
   CompanyUserState copyWith({
     CompanyUserStatus? status,
     String? message,
@@ -42,21 +50,17 @@ class CompanyUserState extends Equatable {
     bool error = false,
     bool? hasReachedMax,
     String? searchString,
+    Company? company,
+    User? user,
   }) {
     return CompanyUserState(
       status: status ?? this.status,
       companiesUsers: companiesUsers ?? this.companiesUsers,
+      company: company ?? this.company,
+      user: user ?? this.user,
       message: message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,
     );
   }
-
-  @override
-  List<Object?> get props =>
-      [status, hasReachedMax, message, companiesUsers, hasReachedMax];
-
-  @override
-  String toString() => '$status { #companiesUsers: ${companiesUsers.length}, '
-      'hasReachedMax: $hasReachedMax message $message}';
 }

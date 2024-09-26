@@ -101,6 +101,7 @@ abstract class RestClient {
     @Query('start') int? start,
     @Query('limit') int? limit,
     @Query('search') String? searchString,
+    @Query('partyId') String? partyId,
   });
 
   // user

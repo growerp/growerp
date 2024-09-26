@@ -58,7 +58,7 @@ class CompanyTest {
       if (clist.length > 1) {
         // single (main) company no selection
         if (c.pseudoId == null) {
-          await CommonTest.tapByKey(tester, 'addNew');
+          await CommonTest.tapByKey(tester, 'addNewCompany');
         } else {
           await CommonTest.doNewSearch(tester, searchString: c.pseudoId!);
           expect(
@@ -102,7 +102,6 @@ class CompanyTest {
       await CommonTest.dragNew(tester, key: 'paymentMethodLabel');
       // add/update company record
       await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
-      // get pseudoId if not yet have (not for main company)
       if (clist.length > 1 && c.pseudoId == null) {
         await CommonTest.doNewSearch(tester, searchString: c.name!);
         var id = CommonTest.getTextField('topHeader').split('#')[1];

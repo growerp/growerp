@@ -139,7 +139,7 @@ class UserTest {
     List<User> newUsers = [];
     for (User user in npUsers) {
       if (user.pseudoId == null) {
-        await CommonTest.tapByKey(tester, 'addNew');
+        await CommonTest.tapByKey(tester, 'addNewUser');
       } else {
         await CommonTest.doNewSearch(tester, searchString: user.pseudoId!);
         expect(

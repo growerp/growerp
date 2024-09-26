@@ -67,18 +67,32 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
       current = List.of(state.companiesUsers);
     }
     try {
-      print(
-          "==== company user fetch: start: $start limit: ${event.limit} reachMax: ${state.hasReachedMax}");
       emit(state.copyWith(status: CompanyUserStatus.loading));
-      CompaniesUsers compResult = await restClient.getCompanyUser(
+      if (event.type == PartyType.company && event.partyId != null) {
+        Companies compUserResult =
+            await restClient.getCompany(companyPartyId: event.partyId);
+        return emit(state.copyWith(
+            status: CompanyUserStatus.success,
+            company: compUserResult.companies.isNotEmpty
+                ? compUserResult.companies[0]
+                : null));
+      }
+      if (event.type == PartyType.user && event.partyId != null) {
+        Users userResult = await restClient.getUser(partyId: event.partyId);
+        return emit(state.copyWith(
+            status: CompanyUserStatus.success,
+            user: userResult.users.isNotEmpty ? userResult.users[0] : null));
+      }
+      final CompaniesUsers compUserResult = await restClient.getCompanyUser(
           role: role,
           searchString: event.searchString,
           start: start,
           limit: event.limit);
-      emit(state.copyWith(
+
+      return emit(state.copyWith(
         status: CompanyUserStatus.success,
-        companiesUsers: current..addAll(compResult.companiesUsers),
-        hasReachedMax: compResult.companiesUsers.length < event.limit,
+        companiesUsers: current..addAll(compUserResult.companiesUsers),
+        hasReachedMax: compUserResult.companiesUsers.length < event.limit,
         searchString: event.searchString,
       ));
     } on DioException catch (e) {
@@ -97,56 +111,58 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
       emit(state.copyWith(status: CompanyUserStatus.loading));
       List<CompanyUser> companiesUsers = List.from(state.companiesUsers);
       String message = '';
-      if (event.companyUser.partyId != null) {
-        // update
-        if (event.companyUser.type == PartyType.company) {
-          Company compResult = await restClient.updateCompany(
-              company: event.companyUser.getCompany()!);
+      if (event.company != null) {
+        Company compResult;
+        if (event.company?.partyId != null) {
+          // update company
+          compResult = await restClient.updateCompany(company: event.company!);
           if (companiesUsers.isNotEmpty) {
             int index = companiesUsers.indexWhere(
-                (element) => element.partyId == event.companyUser.partyId);
+                (element) => element.partyId == event.company!.partyId);
             companiesUsers[index] = CompanyUser.tryParse(compResult)!;
           } else {
             companiesUsers.add(CompanyUser.tryParse(compResult)!);
           }
           message = 'Company ${compResult.name} updated...';
-        }
-        if (event.companyUser.type == PartyType.user) {
-          User compResult =
-              await restClient.updateUser(user: event.companyUser.getUser()!);
-          if (companiesUsers.isNotEmpty) {
-            int index = companiesUsers.indexWhere(
-                (element) => element.partyId == event.companyUser.partyId);
-            companiesUsers[index] = CompanyUser.tryParse(compResult)!;
-          } else {
-            companiesUsers.add(CompanyUser.tryParse(compResult)!);
-          }
-          message =
-              'user ${compResult.firstName} ${compResult.lastName} updated...';
+        } else {
+          // add company
+          compResult = await restClient.createCompany(company: event.company!);
+          companiesUsers.insert(0, CompanyUser.tryParse(compResult)!);
+          message = 'Company ${compResult.name} added';
         }
         return emit(state.copyWith(
-            searchString: '',
             status: CompanyUserStatus.success,
+            company: compResult,
             companiesUsers: companiesUsers,
             message: message));
-      } else {
-        // add
-        if (event.companyUser.type == PartyType.company) {
-          Company compResult = await restClient.createCompany(
-              company: event.companyUser.getCompany()!);
-          companiesUsers.insert(0, CompanyUser.tryParse(compResult)!);
-          message = 'CompanyUser ${event.companyUser.name} added';
-        }
-        if (event.companyUser.type == PartyType.company) {
-          User compResult =
-              await restClient.createUser(user: event.companyUser.getUser()!);
-          companiesUsers.insert(0, CompanyUser.tryParse(compResult)!);
-        }
       }
-      return emit(state.copyWith(
-          status: CompanyUserStatus.success,
-          companiesUsers: companiesUsers,
-          message: 'CompanyUser ${event.companyUser.name} added'));
+      if (event.user != null) {
+        User userResult;
+        if (event.user?.partyId != null) {
+          // update user
+          userResult = await restClient.updateUser(user: event.user!);
+          if (companiesUsers.isNotEmpty) {
+            int index = companiesUsers.indexWhere(
+                (element) => element.partyId == event.user?.partyId);
+            companiesUsers[index] = CompanyUser.tryParse(userResult)!;
+          } else {
+            companiesUsers.add(CompanyUser.tryParse(userResult)!);
+          }
+          message =
+              'user ${userResult.firstName} ${userResult.lastName} updated...';
+        } else {
+          // add user
+          userResult = await restClient.createUser(user: event.user!);
+          companiesUsers.insert(0, CompanyUser.tryParse(userResult)!);
+          message =
+              'user ${userResult.firstName} ${userResult.lastName} Added...';
+        }
+        return emit(state.copyWith(
+            status: CompanyUserStatus.success,
+            user: userResult,
+            companiesUsers: companiesUsers,
+            message: message));
+      }
     } on DioException catch (e) {
       emit(state.copyWith(
           status: CompanyUserStatus.failure,

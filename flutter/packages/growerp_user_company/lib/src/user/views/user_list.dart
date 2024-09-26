@@ -169,7 +169,7 @@ class UserListState extends State<UserList> {
                 children: [
                   FloatingActionButton(
                       key: const Key("search"),
-                      heroTag: "btn1",
+                      heroTag: "userBtn1",
                       onPressed: () async {
                         // find findoc id to show
                         await showDialog(
@@ -196,7 +196,8 @@ class UserListState extends State<UserList> {
                       child: const Icon(Icons.search)),
                   const SizedBox(height: 10),
                   FloatingActionButton(
-                      key: const Key("addNew"),
+                      key: const Key("addNewUser"),
+                      heroTag: "userBtn2",
                       onPressed: () async {
                         await showDialog(
                             barrierDismissible: true,

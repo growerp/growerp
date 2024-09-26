@@ -21,7 +21,10 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
-import '../../../growerp_user_company.dart';
+import '../../common/common.dart';
+import '../company_user.dart';
+import 'company_dialog.dart';
+import 'user_dialog.dart';
 
 class CompanyUserList extends StatefulWidget {
   const CompanyUserList({required this.role, super.key});
@@ -35,8 +38,6 @@ class CompanyUserListState extends State<CompanyUserList> {
   final _scrollController = ScrollController();
   final _horizontalController = ScrollController();
   late CompanyUserBloc _companyUserBloc;
-  late CompanyBloc _companyBloc;
-  late UserBloc _userBloc;
   List<CompanyUser> companiesUsers = const <CompanyUser>[];
   bool showSearchField = false;
   String searchString = '';
@@ -51,8 +52,6 @@ class CompanyUserListState extends State<CompanyUserList> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _companyBloc = context.read<CompanyBloc>();
-    _userBloc = context.read<UserBloc>();
     switch (widget.role) {
       case Role.supplier:
         _companyUserBloc = context.read<CompanyUserSupplierBloc>()
@@ -137,17 +136,17 @@ class CompanyUserListState extends State<CompanyUserList> {
                                                     'companyUserItem'),
                                                 direction:
                                                     DismissDirection.startToEnd,
-                                                child: companiesUsers[index - 1]
-                                                            .type ==
-                                                        PartyType.company
-                                                    ? BlocProvider.value(
-                                                        value: _companyBloc,
-                                                        child: ShowCompanyDialog(
-                                                            companiesUsers[index - 1]
-                                                                .getCompany()!))
-                                                    : BlocProvider.value(
-                                                        value: _userBloc,
-                                                        child: ShowUserDialog(
+                                                child: BlocProvider.value(
+                                                    value: _companyUserBloc,
+                                                    child: companiesUsers[
+                                                                    index - 1]
+                                                                .type ==
+                                                            PartyType.company
+                                                        ? ShowCompanyDialog(
+                                                            companiesUsers[
+                                                                    index - 1]
+                                                                .getCompany()!)
+                                                        : ShowUserDialog(
                                                             companiesUsers[
                                                                     index - 1]
                                                                 .getUser()!)));
@@ -178,43 +177,42 @@ class CompanyUserListState extends State<CompanyUserList> {
                 children: [
                   FloatingActionButton(
                       key: const Key("search"),
-                      heroTag: "btn1",
+                      heroTag: "companUserBtn1",
                       onPressed: () async {
                         // find findoc id to show
                         await showDialog(
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
-                              // search separate from finDocBloc
-                              return BlocProvider.value(
-                                  value: context
-                                      .read<DataFetchBloc<CompaniesUsers>>(),
-                                  child: const SearchCompanyUserList());
-                            }).then((value) async => value != null
-                            ?
-                            // show detail page
-                            await showDialog(
+                              return const SearchCompanyUserList();
+                            }).then((value) async => value == null
+                            ? const SizedBox.shrink()
+                            : await showDialog(
                                 barrierDismissible: true,
                                 context: context,
                                 builder: (BuildContext context) {
                                   return BlocProvider.value(
                                       value: _companyUserBloc,
-                                      child: CompanyDialog(value));
-                                })
-                            : const SizedBox.shrink());
+                                      child: value.type == PartyType.company
+                                          ? ShowCompanyDialog(
+                                              value.getCompany()!)
+                                          : ShowUserDialog(value.getUser()!));
+                                }));
                       },
                       child: const Icon(Icons.search)),
                   const SizedBox(height: 10),
                   FloatingActionButton(
-                      key: const Key("addNewOrg"),
+                      key: const Key("addNewCompany"),
+                      heroTag: "companUserBtn2",
                       onPressed: () async {
                         await showDialog(
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
                               return BlocProvider.value(
-                                  value: _companyBloc,
+                                  value: _companyUserBloc,
                                   child: CompanyDialog(Company(
+                                    partyId: '_NEW_',
                                     role: widget.role,
                                   )));
                             });
@@ -225,14 +223,15 @@ class CompanyUserListState extends State<CompanyUserList> {
                       )),
                   const SizedBox(height: 10),
                   FloatingActionButton(
-                      key: const Key("addNewPerson"),
+                      key: const Key("addNewUser"),
+                      heroTag: "companUserBtn3",
                       onPressed: () async {
                         await showDialog(
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
                               return BlocProvider.value(
-                                  value: _userBloc,
+                                  value: _companyUserBloc,
                                   child: UserDialog(User(
                                     role: widget.role,
                                   )));

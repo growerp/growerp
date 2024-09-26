@@ -25,47 +25,39 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-import '../../../growerp_user_company.dart';
+import '../../common/common.dart';
+import '../company_user.dart';
+import 'company_dialog.dart';
 
 class ShowUserDialog extends StatelessWidget {
   final User user;
   const ShowUserDialog(this.user, {super.key});
   @override
   Widget build(BuildContext context) {
-    RestClient restClient = context.read<RestClient>();
-    return BlocProvider<UserBloc>(
-        create: (context) => UserBloc(restClient, user.role ?? Role.unknown)
-          ..add(UserFetch(partyId: user.partyId)),
-        child: BlocBuilder<UserBloc, UserState>(builder: (context, state) {
-          if (state.status == UserStatus.success) {
-            return UserDialogStateFull(state.users[0]);
-          } else {
-            return const LoadingIndicator();
-          }
-        }));
+    DataFetchBloc userBloc = context.read<DataFetchBloc<Users>>()
+      ..add(GetDataEvent(() => context.read<RestClient>().getUser(
+            partyId: user.partyId,
+            limit: 1,
+          )));
+    return BlocBuilder<DataFetchBloc<Users>, DataFetchState>(
+        builder: (context, state) {
+      if (state.status == DataFetchStatus.success ||
+          state.status == DataFetchStatus.failure) {
+        return UserDialog((userBloc.state.data as Users).users[0]);
+      }
+      return const LoadingIndicator();
+    });
   }
 }
 
-class UserDialog extends StatelessWidget {
+class UserDialog extends StatefulWidget {
   final User user;
   const UserDialog(this.user, {super.key});
-  @override
-  Widget build(BuildContext context) {
-    if (user.company == null) return UserDialogStateFull(user);
-    return BlocProvider<CompanyBloc>(
-        create: (context) => CompanyBloc(context.read<RestClient>(), user.role),
-        child: UserDialogStateFull(user));
-  }
-}
-
-class UserDialogStateFull extends StatefulWidget {
-  final User user;
-  const UserDialogStateFull(this.user, {super.key});
   @override
   UserDialogState createState() => UserDialogState();
 }
 
-class UserDialogState extends State<UserDialogStateFull> {
+class UserDialogState extends State<UserDialog> {
   late final GlobalKey<FormState> _userDialogFormKey;
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -76,7 +68,6 @@ class UserDialogState extends State<UserDialogStateFull> {
   final _companyController = TextEditingController();
   final _companySearchBoxController = TextEditingController();
 
-  bool loading = false;
   late List<UserGroup> localUserGroups;
   late UserGroup _selectedUserGroup;
   late Role _selectedRole;
@@ -86,8 +77,8 @@ class UserDialogState extends State<UserDialogStateFull> {
   String? _retrieveDataError;
   late User updatedUser;
   final ImagePicker _picker = ImagePicker();
-  late UserBloc _userBloc;
-  late CompanyBloc _companyBloc;
+  late CompanyUserBloc _companyUserBloc;
+  late DataFetchBloc<Companies> _companyBloc;
   late AuthBloc _authBloc;
   bool _isLoginDisabled = false;
   late bool isPhone;
@@ -100,7 +91,6 @@ class UserDialogState extends State<UserDialogStateFull> {
   void initState() {
     super.initState();
     _userDialogFormKey = GlobalKey<FormState>();
-
     if (widget.user.partyId != null) {
       _idController.text = widget.user.pseudoId ?? '';
       _firstNameController.text = widget.user.firstName ?? '';
@@ -111,19 +101,18 @@ class UserDialogState extends State<UserDialogStateFull> {
       _isLoginDisabled = widget.user.loginDisabled ?? false;
       _hasLogin = widget.user.userId != null;
     }
-    _selectedCompany = widget.user.company ?? Company(role: Role.unknown);
-    _selectedRole = widget.user.role ?? widget.user.role ?? Role.unknown;
+    _selectedCompany = widget.user.company ?? Company();
+    _selectedRole =
+        widget.user.role ?? widget.user.company?.role ?? Role.unknown;
     _selectedUserGroup = widget.user.userGroup ?? UserGroup.employee;
     localUserGroups = UserGroup.values;
     updatedUser = widget.user;
-    _userBloc = context.read<UserBloc>();
     _authBloc = context.read<AuthBloc>();
+    _companyUserBloc = context.read<CompanyUserBloc>();
+    _companyBloc = context.read<DataFetchBloc<Companies>>()
+      ..add(
+          GetDataEvent<Companies>(() => Future<Companies>.value(Companies())));
     currentUser = _authBloc.state.authenticate!.user!;
-    _companyBloc = context.read<CompanyBloc>()
-      ..add(CompanyFetch(
-          ownerPartyId: _authBloc.state.authenticate!.ownerPartyId!,
-          limit: 3,
-          isForDropDown: true));
     isAdmin = context.read<AuthBloc>().state.authenticate!.user!.userGroup ==
         UserGroup.admin;
   }
@@ -179,27 +168,22 @@ class UserDialogState extends State<UserDialogStateFull> {
               backgroundColor: Colors.transparent,
               floatingActionButton:
                   ImageButtons(_scrollController, _onImageButtonPressed),
-              body: BlocConsumer<UserBloc, UserState>(
-                  listenWhen: (previous, current) =>
-                      previous.status == UserStatus.loading,
+              body: BlocConsumer<CompanyUserBloc, CompanyUserState>(
                   listener: (context, state) {
-                    if (state.status == UserStatus.failure) {
-                      loading = false;
-                      HelperFunctions.showMessage(
-                          context, state.message, Colors.red);
-                    }
-                    if (state.status == UserStatus.success) {
-                      Navigator.of(context).pop(state.users[0]);
-                    }
-                  },
-                  builder: (context, state) {
-                    if (state.status == UserStatus.success ||
-                        state.status == UserStatus.failure) {
-                      return listChild();
-                    } else {
-                      return const LoadingIndicator();
-                    }
-                  }))),
+                if (state.status == CompanyUserStatus.failure) {
+                  HelperFunctions.showMessage(
+                      context, state.message, Colors.red);
+                }
+                if (state.status == CompanyUserStatus.success) {
+                  Navigator.of(context).pop();
+                }
+              }, builder: (context, state) {
+                if (state.status == CompanyUserStatus.success ||
+                    state.status == CompanyUserStatus.failure) {
+                  return listChild();
+                }
+                return const LoadingIndicator();
+              }))),
     );
   }
 
@@ -464,13 +448,13 @@ class UserDialogState extends State<UserDialogStateFull> {
             child: Column(children: [
               Row(children: [
                 Expanded(
-                  child: BlocBuilder<CompanyBloc, CompanyState>(
+                  child: BlocBuilder<CompanyUserBloc, CompanyUserState>(
                       builder: (context, state) {
                     switch (state.status) {
-                      case CompanyStatus.failure:
+                      case CompanyUserStatus.failure:
                         return const FatalErrorForm(
                             message: 'server connection problem');
-                      case CompanyStatus.success:
+                      case CompanyUserStatus.success:
                         return DropdownSearch<Company>(
                           key: const Key('userCompanyName'),
                           selectedItem: _selectedCompany.name == null
@@ -502,16 +486,16 @@ class UserDialogState extends State<UserDialogStateFull> {
                               ? ''
                               : " ${u!.name}[${u.pseudoId ?? ''}]",
                           asyncItems: (String filter) {
-                            _companyBloc.add(CompanyFetch(
-                              ownerPartyId:
-                                  _authBloc.state.authenticate!.ownerPartyId!,
-                              searchString: filter,
-                              limit: 3,
-                              isForDropDown: true,
-                            ));
+                            _companyBloc.add(GetDataEvent(
+                                () => context.read<RestClient>().getCompanies(
+                                      searchString: filter,
+                                      limit: 3,
+                                    )));
                             return Future.delayed(
-                                const Duration(milliseconds: 100), () {
-                              return Future.value(_companyBloc.state.companies);
+                                const Duration(milliseconds: 150), () {
+                              return Future<List<Company>>.value(
+                                  (_companyBloc.state.data as Companies)
+                                      .companies);
                             });
                           },
                           compareFn: (item, sItem) =>
@@ -672,11 +656,11 @@ class UserDialogState extends State<UserDialogStateFull> {
                 if (!mounted) return;
                 // delete company too?
                 if (widget.user.partyId == currentUser.partyId!) {
-                  _userBloc.add(UserDelete(widget.user.copyWith(image: null)));
+                  _companyUserBloc.add(CompanyUserDelete(user: widget.user));
                   Navigator.of(context).pop(updatedUser);
                   context.read<AuthBloc>().add(const AuthLoggedOut());
                 } else {
-                  _userBloc.add(UserDelete(widget.user.copyWith(image: null)));
+                  _companyUserBloc.add(CompanyUserDelete(user: widget.user));
                 }
               }
             }),
@@ -710,11 +694,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                     HelperFunctions.showMessage(
                         context, "Image upload error!", Colors.red);
                   } else {
-                    _userBloc.add(UserUpdate(updatedUser));
-                    if (_authBloc.state.authenticate!.user!.partyId ==
-                        updatedUser.partyId) {
-                      _userBloc.add(UserUpdate(updatedUser));
-                    }
+                    _companyUserBloc.add(CompanyUserUpdate(user: updatedUser));
                   }
                 }
               }))

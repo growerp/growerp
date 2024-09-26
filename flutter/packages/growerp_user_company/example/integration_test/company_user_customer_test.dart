@@ -32,7 +32,7 @@ void main() {
 
   Future<void> selectCustomers(WidgetTester tester) async {
     await CommonTest.selectOption(
-        tester, 'dbCompaniesUsers', 'CompanyUserListCustomer', '3');
+        tester, 'companiesUsers', 'CompanyUserListCustomer', '2');
   }
 
   testWidgets('''GrowERP company/user customer test''', (tester) async {
@@ -44,8 +44,6 @@ void main() {
         blocProviders: getUserCompanyBlocProviders(restClient, 'AppAdmin'),
         clear: true);
     await CommonTest.createCompanyAndAdmin(tester);
-    await CompanyTest.selectCompany(tester);
-    await CompanyTest.checkCompany(tester);
     await selectCustomers(tester); // create
     await UserTest.addCustomers(tester, customers.sublist(0, 1));
     await CompanyTest.enterCompanyData(tester, customerCompanies.sublist(0, 2));
@@ -53,6 +51,7 @@ void main() {
     await CompanyTest.checkCompany(tester);
     await selectCustomers(tester); // update
     await CompanyTest.enterCompanyData(tester, customerCompanies.sublist(2, 4));
+    await selectCustomers(tester); // update
     await UserTest.updateCustomers(tester, customers.sublist(1, 2));
   }, skip: false);
 }

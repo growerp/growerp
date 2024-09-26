@@ -24,36 +24,37 @@ class CompanyUserFetch extends CompanyUserEvent {
   const CompanyUserFetch(
       {this.refresh = false,
       this.searchString = '',
-      this.partyId = '',
+      this.partyId,
       this.type,
       this.hasReachedMax = false,
       this.limit = 20,
       this.ownerPartyId = ''});
   final bool refresh;
-  final String partyId;
+  final String? partyId;
   final PartyType? type;
   final String ownerPartyId;
   final String searchString;
   final bool hasReachedMax;
   final int limit;
   @override
-  List<Object> get props =>
-      [refresh, searchString, limit, type.toString(), partyId];
+  List<Object> get props => [refresh, searchString, limit];
   @override
   String toString() =>
       "companyPartyId: $partyId, limit: $limit, owner: $ownerPartyId";
 }
 
 class CompanyUserUpdate extends CompanyUserEvent {
-  final CompanyUser companyUser;
-  const CompanyUserUpdate(this.companyUser);
+  final Company? company;
+  final User? user;
+  const CompanyUserUpdate({this.company, this.user});
   @override
-  String toString() => "UpdateCompanyUser: $companyUser";
+  String toString() => "UpdateCompanyUser: $company $user";
 }
 
 class CompanyUserDelete extends CompanyUserEvent {
-  final CompanyUser company;
-  const CompanyUserDelete(this.company);
+  final Company? company;
+  final User? user;
+  const CompanyUserDelete({this.company, this.user});
   @override
-  String toString() => "UpdateCompanyUser: $company";
+  String toString() => "Update Company/User: $company $user";
 }

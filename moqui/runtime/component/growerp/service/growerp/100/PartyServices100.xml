@@ -420,7 +420,9 @@ along with this software (see the LICENSE.md file). If not, see
                                     partyId: item.companyPartyId,
                                     pseudoId: item.companyPseudoId ?:'',
                                     name: item.companyName,
-                                    role: item.companyRole == 'Customer' &amp;&amp; item.customerStatusId == 'CUSTOMER_ASSIGNED'? 'Lead': item.companyRole,
+                                    role: item.companyRole == 'Customer'
+                                            &amp;&amp; item.customerStatusId == 'CUSTOMER_ASSIGNED'
+                                            ? 'Lead': item.companyRole,
                                     email: item.companyEmail ?:'',
                                     currency: currency,
                                     image: imageFile,
@@ -1094,8 +1096,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="lastName" />
             <parameter name="companyName" />
             <parameter name="role" /><!-- if present select user from specific role-->
-            <parameter name="userGroupId" /><!-- if present select user from specific security
-            group-->
+            <parameter name="userGroupId" /><!-- select user from specific security group-->
             <parameter name="ownerPartyId" /><!-- required when registering company customers-->
             <parameter name="start" type="Integer" default-value="0" />
             <parameter name="limit" type="Integer" default-value="20" />
@@ -1116,16 +1117,27 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="userGroupId" />
                     <parameter name="groupDescription" />
                     <parameter name="language" />
+                    <parameter name="address" type="Map">
+                        <parameter name="addressId" />
+                        <parameter name="address1" />
+                        <parameter name="address2" />
+                        <parameter name="city" />
+                        <parameter name="postalCode" />
+                        <parameter name="province" />
+                        <parameter name="provinceId" />
+                        <parameter name="country" />
+                        <parameter name="countryId" />
+                    </parameter>
+                    <parameter name="paymentMethod" type="Map">
+                        <parameter name="ccPaymentMethodId" />
+                        <parameter name="ccDescription" />
+                    </parameter>
                     <parameter name="company" type="Map">
                         <parameter name="partyId" />
                         <parameter name="pseudoId" />
                         <parameter name="name" />
                         <parameter name="email" />
                         <parameter name="role" />
-                        <parameter name="paymentMethod">
-                            <parameter name="ccPaymentMethodId" />
-                            <parameter name="ccDescription" />
-                        </parameter>
                     </parameter>
                     <parameter name="image" />
                     <parameter name="userId" />
@@ -1198,7 +1210,8 @@ along with this software (see the LICENSE.md file). If not, see
             <iterate entry="userInfo" list="userInfos">
                 <!-- adjust role -->
                 <if
-                    condition="userInfo.role == 'Customer' &amp;&amp; userInfo.customerStatusId == 'CUSTOMER_ASSIGNED'">
+                    condition="userInfo.role == 'Customer' 
+                        &amp;&amp; userInfo.customerStatusId == 'CUSTOMER_ASSIGNED'">
                     <set field="userInfo.role" value="Lead" />
                 </if>
                 <if
@@ -1268,11 +1281,10 @@ along with this software (see the LICENSE.md file). If not, see
                         <else>
                             <set field="company"
                                 from="[
-                            partyId: userInfo.companyPartyId,
-                            pseudoId: userInfo.companyPseudoId,
-                            name: userInfo.companyName,
+                                partyId: userInfo.companyPartyId,
+                                pseudoId: userInfo.companyPseudoId,
+                                name: userInfo.companyName,
                                 role: userInfo.companyRole,
-                                paymentMethod: paymentMethod,
                                 ]" />
                         </else>
                     </if>
@@ -1297,7 +1309,7 @@ along with this software (see the LICENSE.md file). If not, see
                             from="[
                                 partyId: userInfo?.userPartyId,
                                 pseudoId: userInfo?.userPseudoId,
-                                role: userInfo.companyRole ?: role,
+                                role: userInfo.companyRole ?: userInfo.role,
                                 email: userInfo?.emailAddress ?: userInfo.emailAddressCm,
                                 emailContactMechId: userInfo.emailContactMechId,
                                 firstName: userInfo?.firstName,
@@ -2074,6 +2086,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="start" type="Integer" default-value="0" />
             <parameter name="limit" type="Integer" default-value="20" />
             <parameter name="search" default="null" />
+            <parameter name="partyId" />
         </in-parameters>
         <out-parameters>
             <parameter name="companiesUsers" type="List">
@@ -2081,6 +2094,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="pseudoId" />
                 <parameter name="partyType" />
                 <parameter name="role" />
+                <parameter name="partyType" />
                 <parameter name="email" />
                 <parameter name="name" />
                 <parameter name="telephoneNr" />
@@ -2107,10 +2121,26 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="search">
                 <set field="searchString" value="%$search%" />
             </if>
+            <!-- adjust role -->
+            <if condition="role == 'Customer'">
+                <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
+            </if>
+            <if condition="role == 'Lead'">
+                <set field="customerStatusId" value="CUSTOMER_ASSIGNED" />
+                <set field="role" value="Customer" />
+            </if>
+            <if condition="role == 'Unknown'">
+                <set field="role" from="null" />
+            </if>
+            <if condition="role == 'Company'">
+                <set field="role" value="OrgInternal" />
+            </if>
             <entity-find offset="start" limit="limit" list="items"
                 entity-name="growerp.party.OwnerCompanyUser">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="partyId" from="partyId" ignore-if-empty="true" />
                 <econdition field-name="role" ignore-if-empty="true" />
+                <econdition field-name="customerStatusId" ignore-if-empty="true" />
                 <econditions combine="or">
                     <econdition field-name="companyName" from="searchString" ignore-case="true"
                         operator="like" ignore-if-empty="true" />
@@ -2136,39 +2166,13 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="name" value="${item.lastName}, ${item.firstName}" />
                     </else>
                 </if>
-                <!-- postal address -->
-                <set field="address" from="null" />
-                <if condition="item.postalContactMechId">
-                    <set field="address"
-                        from="[
-                                        addressId: item.postalContactMechId,
-                                        address1: item.address1,
-                                        address2: item.address2,
-                                        city: item.city,
-                                        postalCode: item.postalCode,
-                                        province: item.stateProvince,
-                                        provinceId: item.stateProvinceGeoId,
-                                        country: item.countryName,
-                                        countryId: item.countryId,
-                                        ]" />
-                </if>
-                <!-- telephone -->
-                <set field="telephoneNr" from="null" />
-                <if condition="item.telContactNumber">
-                    <set field="telephoneNr"
-                        value="${item.telCountryCode?:''}${item.telAreaCode?:''}${item.telContactNumber?:''}" />
-                </if>
-
                 <script>companiesUsers.add([
                         type: type,
                         partyId: item.partyId,
                         pseudoId: item.pseudoId,
                         role: item.role,
                         name: name,
-                        email: item.email,
-                        address: address,
-                        telephoneNr: telephoneNr ?: '',
-                    ])</script>
+                        email: item.email])</script>
             </iterate>
         </actions>
     </service>

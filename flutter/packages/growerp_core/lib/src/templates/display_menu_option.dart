@@ -89,13 +89,13 @@ class MenuOptionState extends State<DisplayMenuOption>
       if (tabItems.isEmpty) {
         displayMOFormKey =
             child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-        debugPrint("==1== current form key: $displayMOFormKey");
+        // debugPrint("==1== current form key: $displayMOFormKey");
       }
       for (var i = 0; i < tabItems.length; i++) {
         // form key for testing
         displayMOFormKey =
             tabItems[i].form.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-        debugPrint("==1== current form key: $displayMOFormKey");
+        //debugPrint("==1== current form key: $displayMOFormKey");
         // form to display
         tabList.add(tabItems[i].form);
         // text of tabs at top of screen (tablet, web)
@@ -222,7 +222,7 @@ class MenuOptionState extends State<DisplayMenuOption>
     Widget simplePage(bool isPhone) {
       displayMOFormKey =
           child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-      debugPrint("==2-simple= current form key: $displayMOFormKey");
+      // debugPrint("==2-simple= current form key: $displayMOFormKey");
 
       List<Widget> simpleChildren = [Expanded(child: child!)];
       if (widget.workflow != null) {

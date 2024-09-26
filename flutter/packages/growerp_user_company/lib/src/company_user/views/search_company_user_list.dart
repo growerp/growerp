@@ -25,15 +25,15 @@ class SearchCompanyUserList extends StatefulWidget {
 }
 
 class SearchCompanyUserState extends State<SearchCompanyUserList> {
-  late DataFetchBloc _companyBloc;
+  late DataFetchBloc _companyUserBloc;
   List<CompanyUser> companiesUsers = [];
 
   @override
   void initState() {
     super.initState();
-    _companyBloc = context.read<DataFetchBloc<CompaniesUsers>>()
-      ..add(
-          GetDataEvent(() => context.read<RestClient>().getCompany(limit: 0)));
+    _companyUserBloc = context.read<DataFetchBloc<CompaniesUsers>>()
+      ..add(GetDataEvent(
+          () => context.read<RestClient>().getCompanyUser(limit: 0)));
   }
 
   @override
@@ -44,22 +44,16 @@ class SearchCompanyUserState extends State<SearchCompanyUserList> {
         HelperFunctions.showMessage(context, '${state.message}', Colors.red);
       }
     }, builder: (context, state) {
-      if (state.status == DataFetchStatus.failure) {
-        return Center(
-            child: Text('failed to fetch search items: ${state.message}'));
-      }
-      if (state.status == DataFetchStatus.success) {
+      if (state.status == DataFetchStatus.failure ||
+          state.status == DataFetchStatus.success) {
         companiesUsers = (state.data as CompaniesUsers).companiesUsers;
+        return CompanyUserScaffold(
+            companyUserBloc: _companyUserBloc,
+            widget: widget,
+            companiesUsers: companiesUsers);
+      } else {
+        return const LoadingIndicator();
       }
-      return Stack(
-        children: [
-          CompanyUserScaffold(
-              finDocBloc: _companyBloc,
-              widget: widget,
-              companiesUsers: companiesUsers),
-          if (state.status == DataFetchStatus.loading) const LoadingIndicator(),
-        ],
-      );
     });
   }
 }
@@ -67,12 +61,12 @@ class SearchCompanyUserState extends State<SearchCompanyUserList> {
 class CompanyUserScaffold extends StatelessWidget {
   const CompanyUserScaffold({
     super.key,
-    required DataFetchBloc finDocBloc,
+    required DataFetchBloc companyUserBloc,
     required this.widget,
     required this.companiesUsers,
-  }) : _companyBloc = finDocBloc;
+  }) : _companyUserBloc = companyUserBloc;
 
-  final DataFetchBloc _companyBloc;
+  final DataFetchBloc _companyUserBloc;
   final SearchCompanyUserList widget;
   final List<CompanyUser> companiesUsers;
 
@@ -89,7 +83,7 @@ class CompanyUserScaffold extends StatelessWidget {
             ),
             child: popUp(
                 context: context,
-                title: 'Company Search ',
+                title: 'Company/User Search ',
                 height: 500,
                 width: 350,
                 child: Column(children: [
@@ -105,10 +99,10 @@ class CompanyUserScaffold extends StatelessWidget {
                         }
                         return null;
                       },
-                      onFieldSubmitted: (value) => _companyBloc.add(
+                      onFieldSubmitted: (value) => _companyUserBloc.add(
                           GetDataEvent(() => context
                               .read<RestClient>()
-                              .getCompany(limit: 5, searchString: value)))),
+                              .getCompanyUser(limit: 5, searchString: value)))),
                   const SizedBox(height: 20),
                   const Text('Search results'),
                   Expanded(

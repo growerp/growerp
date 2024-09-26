@@ -43,7 +43,7 @@ class AppBlocObserver extends BlocObserver {
   @override
   void onTransition(Bloc bloc, Transition transition) {
     super.onTransition(bloc, transition);
-    logger.i("Event: ${transition.event.toString().truncate(110)}\n"
+    logger.i("EVENT: ${transition.event.toString().truncate(110)}\n"
         "Curr.State: ${transition.currentState.toString().truncate(110)}\n"
         "Next State: ${transition.nextState.toString().truncate(110)}");
   }
