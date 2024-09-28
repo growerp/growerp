@@ -14,7 +14,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:growerp_models/growerp_models.dart';
 import 'package:universal_io/io.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/foundation.dart';
@@ -24,27 +23,9 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 import '../../../growerp_user_company.dart';
-
-class ShowUserDialog extends StatelessWidget {
-  final User user;
-  const ShowUserDialog(this.user, {super.key});
-  @override
-  Widget build(BuildContext context) {
-    RestClient restClient = context.read<RestClient>();
-    return BlocProvider<UserBloc>(
-        create: (context) => UserBloc(restClient, user.role ?? Role.unknown)
-          ..add(UserFetch(partyId: user.partyId)),
-        child: BlocBuilder<UserBloc, UserState>(builder: (context, state) {
-          if (state.status == UserStatus.success) {
-            return UserDialogStateFull(state.users[0]);
-          } else {
-            return const LoadingIndicator();
-          }
-        }));
-  }
-}
 
 class UserDialog extends StatelessWidget {
   final User user;
@@ -53,7 +34,8 @@ class UserDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     if (user.company == null) return UserDialogStateFull(user);
     return BlocProvider<CompanyBloc>(
-        create: (context) => CompanyBloc(context.read<RestClient>(), user.role),
+        create: (context) =>
+            CompanyBloc(context.read<RestClient>(), user.company!.role),
         child: UserDialogStateFull(user));
   }
 }
@@ -112,7 +94,8 @@ class UserDialogState extends State<UserDialogStateFull> {
       _hasLogin = widget.user.userId != null;
     }
     _selectedCompany = widget.user.company ?? Company(role: Role.unknown);
-    _selectedRole = widget.user.role ?? widget.user.role ?? Role.unknown;
+    _selectedRole =
+        widget.user.role ?? widget.user.company!.role ?? Role.unknown;
     _selectedUserGroup = widget.user.userGroup ?? UserGroup.employee;
     localUserGroups = UserGroup.values;
     updatedUser = widget.user;
@@ -167,12 +150,21 @@ class UserDialogState extends State<UserDialogStateFull> {
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    String title = '';
+    if (_selectedRole == Role.company) {
+      title = widget.user.userGroup != null &&
+              widget.user.userGroup == UserGroup.admin
+          ? 'Admininistrator'
+          : 'Employee';
+    } else {
+      title = _selectedRole.name;
+    }
     return Dialog(
       key: Key('UserDialog${_selectedRole.name}'),
       insetPadding: const EdgeInsets.all(10),
       child: popUp(
           context: context,
-          title: "Person #${widget.user.pseudoId ?? ' new'}",
+          title: "$title #${widget.user.pseudoId ?? ' new'}",
           width: isPhone ? 400 : 1000,
           height: isPhone ? 700 : 700,
           child: Scaffold(
@@ -193,12 +185,10 @@ class UserDialogState extends State<UserDialogStateFull> {
                     }
                   },
                   builder: (context, state) {
-                    if (state.status == UserStatus.success ||
-                        state.status == UserStatus.failure) {
-                      return listChild();
-                    } else {
+                    if (state.status == UserStatus.loading) {
                       return const LoadingIndicator();
                     }
+                    return listChild();
                   }))),
     );
   }
@@ -460,7 +450,7 @@ class UserDialogState extends State<UserDialogStateFull> {
         InputDecorator(
             decoration: InputDecoration(
                 labelText: "${_selectedCompany.role?.value ?? Role.unknown}"
-                    " Related Company information"),
+                    " Company information"),
             child: Column(children: [
               Row(children: [
                 Expanded(

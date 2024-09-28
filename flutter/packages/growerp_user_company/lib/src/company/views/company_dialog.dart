@@ -48,8 +48,7 @@ class ShowCompanyDialog extends StatelessWidget {
                 companyPartyId: company.partyId ?? companyPartyId, limit: 1)),
           child:
               BlocBuilder<CompanyBloc, CompanyState>(builder: (context, state) {
-            if (state.status == CompanyStatus.success &&
-                state.companies.isNotEmpty) {
+            if (state.status == CompanyStatus.success) {
               return CompanyDialog(state.companies[0], dialog: dialog);
             }
             return const LoadingIndicator();
@@ -121,7 +120,6 @@ class CompanyFormState extends State<CompanyDialog> {
         companyBloc.add(
             CompanyFetch(companyPartyId: widget.company.partyId!, limit: 1));
     }
-
     employees = List.of(company.employees);
     if (company.currency != null) {
       _selectedCurrency = currencies.firstWhere(
@@ -194,7 +192,7 @@ class CompanyFormState extends State<CompanyDialog> {
             child: popUp(
                 context: context,
                 title:
-                    "Organization #${company.partyId == null ? 'New' : company.pseudoId}",
+                    "$_selectedRole Company #${company.partyId == null ? 'New' : company.pseudoId}",
                 width: isPhone ? 400 : 1000,
                 height: isPhone ? 600 : 750,
                 child: listChild()))
@@ -632,7 +630,8 @@ class CompanyFormState extends State<CompanyDialog> {
                 previous.status == CompanyStatus.loading,
             listener: (context, state) {
               if (state.status == CompanyStatus.failure) {
-                HelperFunctions.showMessage(context, state.message, Colors.red);
+                HelperFunctions.showMessage(
+                    context, state.message, Colors.green);
               }
               if (state.status == CompanyStatus.success) {
                 if (widget.dialog == true && _nameController.text != '') {
@@ -644,8 +643,10 @@ class CompanyFormState extends State<CompanyDialog> {
               }
             },
             builder: (context, state) {
-              if (state.status == CompanyStatus.failure ||
-                  state.status == CompanyStatus.success) {
+              if (state.status == CompanyStatus.failure) {
+                return FatalErrorForm(message: state.message!);
+              }
+              if (state.status == CompanyStatus.success) {
                 return CompanyForm(
                     companyDialogFormKey: _companyDialogFormKey,
                     scrollController: _scrollController,

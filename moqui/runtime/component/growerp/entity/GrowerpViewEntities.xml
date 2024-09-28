@@ -295,7 +295,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <alias name="customerPartyId" entity-alias="OPRT" />
         <alias name="customerPseudoId" field="pseudoId" entity-alias="CPARTY" />
-        <alias name="vendorPartyType" field="partyTypeEnumId" entity-alias="VPARTY" />
+        <alias name="customerPartyType" field="partyTypeEnumId" entity-alias="CPARTY" />
         <alias name="customerCompanyName" field="organizationName" entity-alias="CORG" />
         <alias name="customerRoleTypeId" field="roleTypeId" entity-alias="CROLE" />
         <alias name="customerUserPartyId" field="partyId" entity-alias="CPERSON" />
