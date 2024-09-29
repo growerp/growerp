@@ -1589,14 +1589,17 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if condition="order.sales == true"><!-- inside this order object this field is NOT a
-                string -->
+            <if condition="order.sales == true">
                 <set field="vendorPartyId" from="companyPartyId" />
-                <set field="customerPartyId" from="order.otherCompany.partyId" />
+                <set field="customerPartyId"
+                    from="order.otherCompany?.partyId ?:
+                            order.otherUser?.partyId" />
                 <set field="contactRole" value="CustomerContactPerson" />
                 <else>
                     <set field="customerPartyId" from="companyPartyId" />
-                    <set field="vendorPartyId" from="order.otherCompany.partyId" />
+                    <set field="vendorPartyId"
+                        from="order.otherCompany?.partyId ?:
+                            order.otherUser?.partyId" />
                     <set field="contactRole" value="VendorContactPerson" />
                 </else>
             </if>
@@ -2447,13 +2450,17 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- order part-->
             <if condition="order.otherUser || order.otherCompany">
                 <!-- get existing record -->
-                <entity-find entity-name="mantle.order.OrderPart" list="parts" for-update="true"
+                <entity-find entity-name="mantle.order.OrderPart"
+                    list="parts" for-update="true"
                     limit="1">
                     <econdition field-name="orderId" />
                 </entity-find>
                 <if
-                    condition="order.sales == true &amp;&amp; parts[0].customerPartyId != order.otherCompany.partyId">
-                    <set field="parts[0].customerPartyId" from="order.otherCompany.partyId" />
+                    condition="order.sales == true &amp;&amp;
+                        parts[0].customerPartyId !=
+                            order.otherCompany?.partyId ?: order.otherUser?.partyId">
+                    <set field="parts[0].customerPartyId"
+                        from="order.otherCompany?.partyId ?: order.otherUser?.partyId" />
                     <entity-update value-field="parts[0]" />
                 </if>
                 <if

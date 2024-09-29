@@ -35,8 +35,8 @@ class ReservationDialog extends StatefulWidget {
 
 class ReservationDialogState extends State<ReservationDialog> {
   final _userSearchBoxController = TextEditingController();
-  late DataFetchBloc<Users> _userBloc;
-  User? _selectedUser;
+  late DataFetchBloc<CompaniesUsers> _companyUserBloc;
+  CompanyUser? _selectedCompanyUser;
   bool loading = false;
   late DataFetchBloc<Products> _productBloc;
   Product? _selectedProduct;
@@ -53,9 +53,10 @@ class ReservationDialogState extends State<ReservationDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedUser = widget.finDoc.otherUser;
-    _userBloc = context.read<DataFetchBloc<Users>>()
-      ..add(GetDataEvent(() => context.read<RestClient>().getUser(
+    _selectedCompanyUser = CompanyUser.tryParse(
+        widget.finDoc.otherCompany ?? widget.finDoc.otherUser);
+    _companyUserBloc = context.read<DataFetchBloc<CompaniesUsers>>()
+      ..add(GetDataEvent(() => context.read<RestClient>().getCompanyUser(
           limit: 3,
           role: widget.finDoc.sales ? Role.customer : Role.supplier)));
     _productBloc = context.read<DataFetchBloc<Products>>()
@@ -167,17 +168,15 @@ class ReservationDialogState extends State<ReservationDialog> {
             child: Form(
                 key: _formKey,
                 child: ListView(key: const Key('listView'), children: <Widget>[
-                  BlocBuilder<DataFetchBloc<Users>, DataFetchState>(
+                  BlocBuilder<DataFetchBloc<CompaniesUsers>, DataFetchState>(
                       builder: (context, state) {
                     switch (state.status) {
-                      case DataFetchStatus.failure:
-                        return const FatalErrorForm(
-                            message: 'server connection problem');
                       case DataFetchStatus.loading:
                         return const LoadingIndicator();
+                      case DataFetchStatus.failure:
                       case DataFetchStatus.success:
-                        return DropdownSearch<User>(
-                          selectedItem: _selectedUser,
+                        return DropdownSearch<CompanyUser>(
+                          selectedItem: _selectedCompanyUser,
                           popupProps: PopupProps.menu(
                             isFilterOnline: true,
                             showSearchBox: true,
@@ -199,29 +198,28 @@ class ReservationDialogState extends State<ReservationDialog> {
                               dropdownSearchDecoration:
                                   InputDecoration(labelText: 'Customer')),
                           key: const Key('customer'),
-                          itemAsString: (User? u) =>
-                              " ${u!.firstName} ${u.lastName}, ${u.company?.name ?? ''}",
+                          itemAsString: (CompanyUser? u) => " ${u!.name ?? ''}",
                           asyncItems: (String filter) {
-                            _userBloc.add(GetDataEvent(() => context
+                            _companyUserBloc.add(GetDataEvent(() => context
                                 .read<RestClient>()
-                                .getUser(
+                                .getCompanyUser(
                                     searchString: filter,
                                     limit: 3,
-                                    isForDropDown: true,
                                     role: widget.finDoc.sales
                                         ? Role.customer
                                         : Role.supplier)));
                             return Future.delayed(
                                 const Duration(milliseconds: 150), () {
-                              return Future.value(
-                                  (_userBloc.state.data as Users).users);
+                              return Future.value((_companyUserBloc.state.data
+                                      as CompaniesUsers)
+                                  .companiesUsers);
                             });
                           },
                           compareFn: (item, sItem) =>
                               item.partyId == sItem.partyId,
-                          onChanged: (User? newValue) {
+                          onChanged: (CompanyUser? newValue) {
                             setState(() {
-                              _selectedUser = newValue;
+                              _selectedCompanyUser = newValue;
                             });
                           },
                           validator: (value) =>
@@ -375,8 +373,9 @@ class ReservationDialogState extends State<ReservationDialog> {
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {
                                 FinDoc newFinDoc = widget.finDoc.copyWith(
-                                    otherUser: _selectedUser,
-                                    otherCompany: _selectedUser?.company,
+                                    otherUser: _selectedCompanyUser?.getUser(),
+                                    otherCompany:
+                                        _selectedCompanyUser?.getCompany(),
                                     status: widget.finDoc.docType ==
                                             FinDocType.order
                                         ? FinDocStatusVal.created

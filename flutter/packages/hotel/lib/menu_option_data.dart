@@ -102,20 +102,28 @@ List<MenuOption> menuOptions = [
           icon: const Icon(Icons.home),
         ),
         TabItem(
-          form: const UserList(
+          form: const CompanyUserList(
             key: Key('Customer'),
             role: Role.customer,
           ),
-          label: 'Contacts',
+          label: 'Customers',
           icon: const Icon(Icons.school),
         ),
         TabItem(
-          form: const CompanyList(
-            key: Key('Customer'),
-            role: Role.customer,
+          form: const FinDocList(
+              key: Key('PurchaseOrder'),
+              sales: false,
+              docType: FinDocType.order),
+          label: 'Purchase orders',
+          icon: const Icon(Icons.home),
+        ),
+        TabItem(
+          form: const CompanyUserList(
+            key: Key('Supplier'),
+            role: Role.supplier,
           ),
-          label: 'Companies',
-          icon: const Icon(Icons.school),
+          label: 'Suppliers',
+          icon: const Icon(Icons.business),
         ),
       ]),
   MenuOption(

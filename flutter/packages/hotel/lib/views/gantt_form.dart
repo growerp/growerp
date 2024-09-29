@@ -481,8 +481,9 @@ class _GanttFormState extends State<GanttForm> {
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Text(
                       "${reservation.orderId} "
-                      " ${reservation.otherUser!.firstName}"
-                      " ${reservation.otherUser!.lastName}",
+                      " ${reservation.otherCompany?.name ?? ''}"
+                      " ${reservation.otherUser?.firstName ?? ''}"
+                      " ${reservation.otherUser?.lastName ?? ''}",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 10.0),
