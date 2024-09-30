@@ -107,7 +107,7 @@ class HomeFormState extends State<HomeForm> {
         case AuthStatus.failure:
         case AuthStatus.unAuthenticated:
           String title =
-              'Login / Register ${company == null ? '/ New company' : ''}';
+              'Register new user ${company == null ? '/ New company' : ''}';
           ThemeMode? themeMode = context.read<ThemeBloc>().state.themeMode;
           return Column(children: [
             Expanded(

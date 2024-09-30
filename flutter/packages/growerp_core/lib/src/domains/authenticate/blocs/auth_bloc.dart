@@ -200,7 +200,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             authenticate: authenticate,
             message:
                 ['moreInfo', 'passwordChange'].contains(authenticate.apiKey)
-                    ? 'Login in process...'
+                    ? null
                     : 'Login did not work...'));
       }
     } on DioException catch (e) {
