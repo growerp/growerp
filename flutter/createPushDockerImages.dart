@@ -61,8 +61,21 @@ void main() async {
     }
   }
 
-  var home = "${env['HOME']}/growerp";
-
+  // push to test only from repository
+  String home = '';
+  if (push.toUpperCase() == 'Y') {
+    print("get or update growerp from repository");
+    home = "/tmp/growerp";
+    if (exists(home)) {
+      run('git pull', workingDirectory: home);
+    } else {
+      run('git clone "https://github.com/growerp/growerp.git"',
+          workingDirectory: "/tmp");
+    }
+  } else {
+    home = "${env['HOME']}/growerp";
+    print("Use local home directory at: $home");
+  }
   String getVersion(String appName) {
     var pubspec = '';
     if (appName == 'growerp-moqui') {
