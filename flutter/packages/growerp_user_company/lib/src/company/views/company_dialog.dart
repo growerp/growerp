@@ -106,20 +106,6 @@ class CompanyFormState extends State<CompanyDialog> {
     _companyDialogFormKey = GlobalKey<FormState>();
     authenticate = context.read<AuthBloc>().state.authenticate!;
     _selectedRole = widget.company.role!;
-    switch (widget.company.partyId) {
-      case null:
-        company = authenticate.company!;
-        companyBloc
-            .add(CompanyFetch(companyPartyId: company.partyId!, limit: 1));
-        break;
-      case '_NEW_':
-        company = widget.company.copyWith(partyId: null);
-        companyBloc.add(const CompanyFetch(limit: 0));
-        break;
-      default:
-        companyBloc.add(
-            CompanyFetch(companyPartyId: widget.company.partyId!, limit: 1));
-    }
     employees = List.of(company.employees);
     if (company.currency != null) {
       _selectedCurrency = currencies.firstWhere(
