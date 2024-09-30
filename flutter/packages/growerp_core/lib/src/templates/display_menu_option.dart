@@ -66,7 +66,7 @@ class MenuOptionState extends State<DisplayMenuOption>
     authBloc = context.read<AuthBloc>();
     // apply security
     int newIndex = 0;
-/*    for (final option in widget.menuList) {
+    for (final option in widget.menuList) {
       if (option.userGroups != null &&
           option.userGroups!
               .contains(authBloc.state.authenticate?.user?.userGroup)) {
@@ -77,7 +77,7 @@ class MenuOptionState extends State<DisplayMenuOption>
         newIndex++;
       }
     }
-*/
+
     if (menuList.isEmpty) {
       menuList = [
         MenuOption(
