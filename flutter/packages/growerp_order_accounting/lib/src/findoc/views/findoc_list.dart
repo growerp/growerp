@@ -199,11 +199,6 @@ class FinDocListState extends State<FinDocList> {
       builder(context, state) {
         switch (state.status) {
           case FinDocStatus.failure:
-            return Center(
-                child: OutlinedButton(
-                    onPressed: () =>
-                        _finDocBloc.add(const FinDocFetch(refresh: true)),
-                    child: const Text('Press here to continue')));
           case FinDocStatus.success:
             finDocs = state.finDocs;
             hasReachedMax = state.hasReachedMax;

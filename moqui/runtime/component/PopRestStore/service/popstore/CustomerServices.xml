@@ -271,8 +271,14 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="mantle.party.PartyServices.create#Account"
                 in-map="context + [ownerPartyId: ownerPartyId, roleTypeId:'Customer', loginAfterCreate:false]" />
 
+            <service-call name="update#mantle.party.Party"
+                in-map="[partyId: customerAccount.partyId, customerStatusId: customerStatusId]" />
+
             <if condition="ec.user.userAccount != null">
                 <set field="customerPartyId" from="ec.user.userAccount.partyId" />
+                <!-- set customer qualifier -->
+                <service-call name="update#mantle.party.Party"
+                    in-map="[partyId: customerPartyId, customerStatusId: 'CUSTOMER_QUALIFIED']" />
                 <!-- NOTE: use the web session for attributes such as cartOrderId for security; this
                 won't work in a stateless mode or outside a web session -->
                 <set field="sessionAttributes" from="ec.web.sessionAttributes" />

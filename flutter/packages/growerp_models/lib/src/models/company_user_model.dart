@@ -34,6 +34,7 @@ class CompanyUser with _$CompanyUser {
     String? email,
     String? telephoneNr,
     Address? address,
+    PaymentMethod? paymentMethod,
   }) = _CompanyUser;
 
   factory CompanyUser.fromJson(Map<String, dynamic> json) =>

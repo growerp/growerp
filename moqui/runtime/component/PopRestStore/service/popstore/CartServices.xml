@@ -281,10 +281,9 @@ General Order Placement and eCommerce Usage
             <set field="orderId" from="cartOrderId" />
             <set field="defaultOrderParameters" from="[salesChannelEnumId:'ScWeb']" />
             <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="store" />
-            <!-- use the company partyId for the order if available -->
             <service-call name="mantle.order.OrderServices.add#OrderProductQuantity"
                 in-map="context + defaultOrderParameters + 
-                        [customerPartyId: companyPartyId?: customerPartyId,
+                        [customerPartyId: companyPartyId ?: customerPartyId,
                         productStoreId: productStoreId,
                         vendorPartyId: store.organizationPartyId]"
                 out-map="addOut" />
@@ -394,14 +393,19 @@ General Order Placement and eCommerce Usage
             </if>
             <set field="orderId" from="cartOrderId" />
             <set field="paymentInstrumentEnumId" value="PiCreditCard" />
-            <set field="partyId" from="companyPartyId?:customerPartyId" />
+            <set field="partyId" from="companyPartyId ?: customerPartyId" />
 
             <!-- TODO: if no customerPartyId call service to create one now and set in session (no
             user account aka 'anonymous') -->
-            <log message="====session: ${ec.web.sessionAttributes}" />
-            <log message="=====company: $companyPartyId user: $customerPartyId" />
             <service-call name="mantle.order.OrderServices.set#OrderBillingShippingInfo"
                 in-map="context" out-map="context" />
+            <!-- create pseudoId and date for payment -->
+            <entity-find-one entity-name="mantle.party.Party" value-field="companyParty" />
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: companyParty.ownerPartyId, seqName: 'payment']"
+                out-map="context" />
+            <service-call name="update#mantle.account.payment.Payment"
+                in-map="[paymentId: paymentId, pseudoId: seqNum, effectiveDate: ec.user.nowTimestamp]" />
         </actions>
     </service>
 

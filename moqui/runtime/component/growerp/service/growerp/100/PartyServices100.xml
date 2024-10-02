@@ -2140,7 +2140,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <econdition field-name="partyId" from="partyId" ignore-if-empty="true" />
                 <econdition field-name="role" ignore-if-empty="true" />
-                <econdition field-name="customerStatusId" ignore-if-empty="true" />
+                <econdition field-name="customerStatusId" ignore-if-empty="true" or-null="true" />
                 <econditions combine="or">
                     <econdition field-name="companyName" from="searchString" ignore-case="true"
                         operator="like" ignore-if-empty="true" />
@@ -2158,6 +2158,11 @@ along with this software (see the LICENSE.md file). If not, see
 
             <set field="companiesUsers" from="[]" />
             <iterate list="items" entry="item">
+                <!-- remove duplicates -->
+                <if
+                    condition="item.partyId == lastPartyId">
+                    <continue />
+                </if>
                 <if condition="item.partyType == 'PtyOrganization'">
                     <set field="type" value="company" />
                     <set field="name" value="${item.companyName}" />
@@ -2173,6 +2178,7 @@ along with this software (see the LICENSE.md file). If not, see
                         role: item.role,
                         name: name,
                         email: item.email])</script>
+                <set field="lastPartyId" from="item.partyId" />
             </iterate>
         </actions>
     </service>
@@ -2546,8 +2552,12 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="option + [productStoreId: productStoreId]" />
             </iterate>
 
-            <!-- disable autoapprove sales orders -->
-            <service-call name="create#mantle.product.store.ProductStoreSetting"
+            <!-- disable autoapprove sales orders for now because not generating shipping note -->
+            <entity-delete-by-condition entity-name="moqui.service.job.ServiceJob">
+                <econdition field-name="jobName" value="autoApprove_OrdersDelayed" />
+            </entity-delete-by-condition>
+            <!--service-call
+            name="create#mantle.product.store.ProductStoreSetting"
                 in-map="productStoreId: productStoreId, settingTypeEnumId: 'PsstOrdApproveNewCust',
                 settingValue: false" />
             <service-call name="create#mantle.product.store.ProductStoreSetting"
@@ -2556,6 +2566,10 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="create#mantle.product.store.ProductStoreSetting"
                 in-map="productStoreId: productStoreId, settingTypeEnumId: 'PsstOrdApproveAddrNotValid',
                 settingValue: false" />
+            <service-call
+            name="create#mantle.product.store.ProductStoreSetting"
+                in-map="productStoreId: productStoreId, settingTypeEnumId: 'PsstOrdApprovePayMethNameDiff',
+                settingValue: false" /-->
 
             <!-- update website settings-->
             <if condition="hostName == '10.0.2.2' || hostName == '127.0.0.1'">

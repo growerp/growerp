@@ -32,6 +32,11 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="OPRT" join-optional="true">
             <key-map field-name="orderId" />
         </member-entity>
+        <!-- payment used by web orders -->
+        <member-entity entity-alias="PAYMENT" entity-name="mantle.account.payment.Payment"
+            join-from-alias="ORHD" join-optional="true">
+            <key-map field-name="orderId" />
+        </member-entity>
         <!-- vendor data -->
         <member-entity
             entity-alias="VPARTY" entity-name="mantle.party.Party"
@@ -128,6 +133,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <alias name="invoiceId" entity-alias="OINV" />
         <alias name="paymentId" entity-alias="OPAY" />
+        <alias name="orderPaymentId" field="paymentId" entity-alias="PAYMENT" />
         <alias name="shipmentId" entity-alias="SIS" />
     </view-entity>
 

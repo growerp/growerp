@@ -29,16 +29,18 @@ class ShowPaymentDialog extends StatelessWidget {
   const ShowPaymentDialog(this.finDoc, {super.key});
   @override
   Widget build(BuildContext context) {
-    context
-        .read<FinDocBloc>()
-        .add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!));
-    return BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
-      if (state.status == FinDocStatus.success) {
-        return PaymentDialog(finDoc: state.finDocs[0]);
-      } else {
-        return const LoadingIndicator();
-      }
-    });
+    RestClient restClient = context.read<RestClient>();
+    return BlocProvider<FinDocBloc>(
+        create: (context) => FinDocBloc(
+            restClient, finDoc.sales, finDoc.docType!, context.read<String>())
+          ..add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!)),
+        child: BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
+          if (state.status == FinDocStatus.success) {
+            return SelectFinDocDialog(finDoc: state.finDocs[0]);
+          } else {
+            return const LoadingIndicator();
+          }
+        }));
   }
 }
 
@@ -56,9 +58,9 @@ class PaymentDialogState extends State<PaymentDialog> {
   late FinDoc finDocUpdated;
   late FinDocBloc _finDocBloc;
   GlAccount? _selectedGlAccount;
-  Company? _selectedCompany;
+  CompanyUser? _selectedCompanyUser;
   PaymentType? _selectedPaymentType;
-  late DataFetchBloc<Companies> _companyBloc;
+  late DataFetchBloc<CompaniesUsers> _companyUserBloc;
   // ignore: unused_field
   late GlAccountBloc _accountBloc; // needed for accountlist
   late FinDocStatusVal _updatedStatus;
@@ -90,12 +92,12 @@ class PaymentDialogState extends State<PaymentDialog> {
     readOnly = finDoc.status == null
         ? false
         : FinDocStatusVal.statusFixed(finDoc.status!);
-    _selectedCompany = finDocUpdated.otherCompany;
+    _selectedCompanyUser = CompanyUser.tryParse(
+        finDocUpdated.otherCompany ?? finDocUpdated.otherUser);
     _selectedGlAccount = finDocUpdated.items.isNotEmpty
         ? finDocUpdated.items[0].glAccount
         : null;
     _updatedStatus = finDocUpdated.status ?? FinDocStatusVal.created;
-    _selectedCompany = finDocUpdated.otherCompany;
     _amountController.text = finDoc.grandTotal == null
         ? ''
         : finDoc.grandTotal.currency(currencyId: ''); // not show currency
@@ -109,9 +111,12 @@ class PaymentDialogState extends State<PaymentDialog> {
         : finDocUpdated.paymentInstrument!;
     _finDocBloc = context.read<FinDocBloc>()
       ..add(FinDocGetPaymentTypes(sales: finDoc.sales));
-    _companyBloc = context.read<DataFetchBloc<Companies>>()
-      ..add(
-          GetDataEvent<Companies>(() => Future<Companies>.value(Companies())));
+    _companyUserBloc = context.read<DataFetchBloc<CompaniesUsers>>()
+      ..add(GetDataEvent(() => context.read<RestClient>().getCompanyUser(
+          limit: 3,
+          role: finDoc.sales && finDoc.docType != FinDocType.transaction
+              ? Role.customer
+              : Role.supplier)));
     _accountBloc = context.read<GlAccountBloc>()
       ..add(const GlAccountFetch(limit: 0));
     _authBloc = context.read<AuthBloc>();
@@ -192,14 +197,13 @@ class PaymentDialogState extends State<PaymentDialog> {
                   ),
                   Expanded(
                       flex: 2,
-                      child:
-                          BlocBuilder<DataFetchBloc<Companies>, DataFetchState>(
-                              builder: (context, state) {
+                      child: BlocBuilder<DataFetchBloc<CompaniesUsers>,
+                          DataFetchState>(builder: (context, state) {
                         switch (state.status) {
                           case DataFetchStatus.success:
-                            return DropdownSearch<Company>(
+                            return DropdownSearch<CompanyUser>(
                               enabled: !readOnly,
-                              selectedItem: _selectedCompany,
+                              selectedItem: _selectedCompanyUser,
                               popupProps: PopupProps.menu(
                                 isFilterOnline: true,
                                 showSelectedItems: true,
@@ -219,30 +223,32 @@ class PaymentDialogState extends State<PaymentDialog> {
                               dropdownDecoratorProps: DropDownDecoratorProps(
                                   dropdownSearchDecoration:
                                       InputDecoration(labelText: companyLabel)),
-                              key: const Key('otherCompany'),
-                              itemAsString: (Company? u) => " ${u!.name}",
-                              asyncItems: (String filter) async {
-                                _companyBloc.add(GetDataEvent(() => context
+                              key: Key(finDocUpdated.sales
+                                  ? 'customer'
+                                  : 'supplier'),
+                              itemAsString: (CompanyUser? u) => " ${u!.name}",
+                              asyncItems: (String filter) {
+                                _companyUserBloc.add(GetDataEvent(() => context
                                     .read<RestClient>()
-                                    .getCompany(
+                                    .getCompanyUser(
                                         searchString: filter,
                                         limit: 3,
-                                        isForDropDown: true,
                                         role: widget.finDoc.sales
                                             ? Role.customer
                                             : Role.supplier)));
                                 return Future.delayed(
                                     const Duration(milliseconds: 150), () {
-                                  return Future.value(
-                                      (_companyBloc.state.data as Companies)
-                                          .companies);
+                                  return Future<List<CompanyUser>>.value(
+                                      (_companyUserBloc.state.data
+                                              as CompaniesUsers)
+                                          .companiesUsers);
                                 });
                               },
                               compareFn: (item, sItem) =>
                                   item.partyId == sItem.partyId,
-                              onChanged: (Company? newValue) {
+                              onChanged: (CompanyUser? newValue) {
                                 setState(() {
-                                  _selectedCompany = newValue;
+                                  _selectedCompanyUser = newValue;
                                 });
                               },
                               validator: (value) => value == null
@@ -312,7 +318,8 @@ class PaymentDialogState extends State<PaymentDialog> {
                   child: Column(
                     children: [
                       if ((finDoc.sales == true &&
-                              _selectedCompany?.paymentMethod?.ccDescription !=
+                              _selectedCompanyUser
+                                      ?.paymentMethod?.ccDescription !=
                                   null) ||
                           (finDoc.sales == false &&
                               _authBloc.state.authenticate?.company
@@ -338,7 +345,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                               }),
                           Expanded(
                               child: Text(
-                                  "Credit Card ${finDoc.sales == false ? _authBloc.state.authenticate?.company?.paymentMethod?.ccDescription : _selectedCompany?.paymentMethod?.ccDescription}")),
+                                  "Credit Card ${finDoc.sales == false ? _authBloc.state.authenticate?.company?.paymentMethod?.ccDescription : _selectedCompanyUser?.paymentMethod?.ccDescription}")),
                         ]),
                       Row(children: [
                         Checkbox(
@@ -510,7 +517,8 @@ class PaymentDialogState extends State<PaymentDialog> {
                       onPressed: () {
                         if (paymentDialogFormKey.currentState!.validate()) {
                           _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
-                            otherCompany: _selectedCompany,
+                            otherCompany: _selectedCompanyUser?.getCompany(),
+                            otherUser: _selectedCompanyUser?.getUser(),
                             grandTotal: Decimal.parse(_amountController.text),
                             pseudoId: _pseudoIdController.text,
                             status: _updatedStatus,

@@ -107,7 +107,7 @@ class HomeFormState extends State<HomeForm> {
         case AuthStatus.failure:
         case AuthStatus.unAuthenticated:
           String title =
-              'Register new user ${company == null ? '/ New company' : ''}';
+              'Register new user ${company == null ? '/ organiz.' : ''}';
           ThemeMode? themeMode = context.read<ThemeBloc>().state.themeMode;
           return Column(children: [
             Expanded(
@@ -142,8 +142,8 @@ class HomeFormState extends State<HomeForm> {
                         OutlinedButton(
                             key: const Key('loginButton'),
                             child: const Text('Login'),
-                            onPressed: () async {
-                              await showDialog(
+                            onPressed: () {
+                              showDialog(
                                   barrierDismissible: true,
                                   context: context,
                                   builder: (BuildContext context) {
@@ -158,8 +158,8 @@ class HomeFormState extends State<HomeForm> {
                             child: OutlinedButton(
                                 key: const Key('newUserButton'),
                                 child: Text(title),
-                                onPressed: () async {
-                                  await showDialog(
+                                onPressed: () {
+                                  showDialog(
                                       barrierDismissible: true,
                                       context: context,
                                       builder: (BuildContext context) {

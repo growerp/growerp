@@ -578,7 +578,7 @@ along with this software (see the LICENSE.md file). If not, see
                         from="[
                             pseudoId: item.pseudoId,
                             orderId: item.orderId,
-                            paymentId: item.paymentId,
+                            paymentId: item.paymentId ?: item.orderPaymentId,
                             invoiceId: item.invoiceId,
                             shipmentId: item.shipmentId,
                             description: item.orderName,
@@ -2539,7 +2539,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="order.sales == true &amp;&amp; !isRoomRental">
                         <service-call name="mantle.party.ContactServices.get#PartyContactInfoList"
                             out-map="customerShippingInfo"
-                            in-map="[partyId: order.otherCompany.partyId,
+                            in-map="[partyId: order.otherCompany?.partyId ?: order.otherUser?.partyId,
                                     postalContactMechPurposeId:'PostalShippingDest']" />
                         <if condition="customerShippingInfo.postalAddressList == null">
                             <return error="true"
@@ -2554,35 +2554,42 @@ along with this software (see the LICENSE.md file). If not, see
                     </if>
                     <service-call name="mantle.order.OrderServices.approve#Order"
                         in-map="[orderId: order.orderId]" />
-                    <!-- create invoice -->
-                    <if condition="order.sales == true">
-                        <set field="invStatusId" value="InvoiceFinalized" />
-                        <else>
-                            <set field="invStatusId" value="InvoiceReceived" />
-                        </else>
-                    </if>
-                    <service-call in-map="context + [statusId: invStatusId]" out-map="context"
-                        name="mantle.account.InvoiceServices.create#EntireOrderPartInvoice" />
-                    <entity-find-one entity-name="mantle.account.invoice.Invoice"
-                        value-field="updInvoice" for-update="true" />
-                    <if condition="updInvoice">
+                    <!-- for websales do not create invoice aand payment is already created
+                    approved-->
+                    <entity-find entity-name="mantle.account.payment.Payment" list="payments">
+                        <econdition field-name="orderId" from="order.orderId" />
+                    </entity-find>
+                    <if condition="!payments">
+                        <!-- create invoice -->
+                        <if condition="order.sales == true">
+                            <set field="invStatusId" value="InvoiceFinalized" />
+                            <else>
+                                <set field="invStatusId" value="InvoiceReceived" />
+                            </else>
+                        </if>
+                        <service-call in-map="context + [statusId: invStatusId]" out-map="context"
+                            name="mantle.account.InvoiceServices.create#EntireOrderPartInvoice" />
+                        <entity-find-one entity-name="mantle.account.invoice.Invoice"
+                            value-field="updInvoice" for-update="true" />
+                        <if condition="updInvoice">
+                            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                                in-map="[ownerPartyId: ownerPartyId, seqName: 'invoice']"
+                                out-map="context" />
+                            <set field="updInvoice.pseudoId" from="seqNum" />
+                            <entity-update value-field="updInvoice" />
+                        </if>
+                        <!-- create payment -->
+                        <set field="effectiveDate" from="ec.user.nowTimestamp" />
                         <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                            in-map="[ownerPartyId: ownerPartyId, seqName: 'invoice']"
+                            in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']"
                             out-map="context" />
-                        <set field="updInvoice.pseudoId" from="seqNum" />
-                        <entity-update value-field="updInvoice" />
-                    </if>
-                    <!-- create payment -->
-                    <set field="effectiveDate" from="ec.user.nowTimestamp" />
-                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']"
-                        out-map="context" />
-                    <service-call
-                        name="mantle.account.PaymentServices.create#InvoicePayment"
-                        in-map="[invoiceId: invoiceId, effectiveDate:effectiveDate,
+                        <service-call
+                            name="mantle.account.PaymentServices.create#InvoicePayment"
+                            in-map="[invoiceId: invoiceId, effectiveDate:effectiveDate,
                                 statusId: 'PmntPromised', orderId: order.orderId,
                                 pseudoId: seqNum]"
-                        out-map="context" />
+                            out-map="context" />
+                    </if>
                     <!-- create shipment -->
                     <entity-find entity-name="mantle.facility.Facility" list="facilities" limit="1">
                         <econdition field-name="ownerPartyId" from="companyPartyId" />
@@ -2613,17 +2620,19 @@ along with this software (see the LICENSE.md file). If not, see
                             </if>
                         </else>
                     </if>
-                    <!-- check if related invoice transaction has pseudoId -->
-                    <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
-                        list="transactions" for-update="true">
-                        <econdition field-name="invoiceId" from="invoiceId" />
-                    </entity-find>
-                    <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
-                        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                            in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
-                            out-map="context" />
-                        <set field="transactions[0].pseudoId" from="seqNum" />
-                        <entity-update value-field="transactions[0]" />
+                    <if condition="!payments">
+                        <!-- check if related invoice transaction has pseudoId -->
+                        <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
+                            list="transactions" for-update="true">
+                            <econdition field-name="invoiceId" from="invoiceId" />
+                        </entity-find>
+                        <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
+                            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                                in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
+                                out-map="context" />
+                            <set field="transactions[0].pseudoId" from="seqNum" />
+                            <entity-update value-field="transactions[0]" />
+                        </if>
                     </if>
                 </if>
                 <if condition="order.statusId == 'OrderCompleted'">

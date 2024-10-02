@@ -191,9 +191,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
       }
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: FinDocStatus.failure,
-          finDocs: [],
-          message: await getDioError(e)));
+          status: FinDocStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -213,9 +211,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
           state.copyWith(status: FinDocStatus.success, finDocs: finDocs));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: FinDocStatus.failure,
-          finDocs: [],
-          message: await getDioError(e)));
+          status: FinDocStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -245,9 +241,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
           state.copyWith(itemTypes: itemTypes, status: FinDocStatus.success));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: FinDocStatus.failure,
-          finDocs: [],
-          message: await getDioError(e)));
+          status: FinDocStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -287,9 +281,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
               "${event.update != null ? 'updated' : 'removed'}"));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: FinDocStatus.failure,
-          finDocs: [],
-          message: await getDioError(e)));
+          status: FinDocStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -320,9 +312,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
           paymentTypes: paymentTypes, status: FinDocStatus.success));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: FinDocStatus.failure,
-          finDocs: [],
-          message: await getDioError(e)));
+          status: FinDocStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -366,9 +356,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
               "${event.update != null ? 'updated' : 'removed'}"));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: FinDocStatus.failure,
-          finDocs: [],
-          message: await getDioError(e)));
+          status: FinDocStatus.failure, message: await getDioError(e)));
     }
   }
 }
