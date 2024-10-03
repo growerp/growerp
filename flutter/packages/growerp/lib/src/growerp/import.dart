@@ -17,14 +17,14 @@ Future<void> login(RestClient client, String username, String password,
   late Authenticate authenticate;
   var logger = Logger(filter: MyFilter());
 
-  if (username.isNotEmpty &&
-      password.isNotEmpty &&
-      companyName.isNotEmpty &&
-      currencyId.isNotEmpty) {
-    try {
-      // email exists?
-      Map result = await client.checkEmail(email: username);
-      if (result['ok'] == false) {
+  try {
+    // email exists?
+    Map result = await client.checkEmail(email: username);
+    if (result['ok'] == false) {
+      if (username.isNotEmpty &&
+          password.isNotEmpty &&
+          companyName.isNotEmpty &&
+          currencyId.isNotEmpty) {
         // no so register new
         await client.register(
           classificationId: 'AppAdmin',
@@ -33,10 +33,15 @@ Future<void> login(RestClient client, String username, String password,
           firstName: 'admin',
           lastName: 'user',
         );
+      } else {
+        print("Email adddress not registered yet, however "
+            "Without company name and currency you can not register"
+            ", use the -n for company name and -c for currency");
+        exit(1);
       }
-    } catch (e) {
-      print("registration failed: ${getDioError(e)}");
     }
+  } catch (e) {
+    print("registration failed: ${getDioError(e)}");
   }
 
   // login

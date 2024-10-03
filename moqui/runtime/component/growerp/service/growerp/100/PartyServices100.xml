@@ -1472,7 +1472,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- create account with or without login-->
             <!-- create#Account will always create a login even if username == null-->
             <set field="inMap"
-                from="[ roleTypeId: user.role,
+                from="[ roleTypeId: user.company?.role ?: user.role,
                     pseudoId: user.pseudoId,  loginAfterCreate: login,
                     firstName: user.firstName, lastName: user.lastName,
                     emailAddress: user.email,
@@ -1489,7 +1489,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="create#mantle.party.Person"
                         in-map="inMap + [partyId: userPartyId]" />
                     <service-call name="create#mantle.party.PartyRole"
-                        in-map="[partyId:userPartyId, roleTypeId:user.role]" />
+                        in-map="[partyId:userPartyId, roleTypeId: user.company?.role ?: user.role]" />
                 </else>
             </if>
             <if condition="customerStatusId">
@@ -2553,10 +2553,11 @@ along with this software (see the LICENSE.md file). If not, see
             </iterate>
 
             <!-- disable autoapprove sales orders for now because not generating shipping note -->
-            <entity-delete-by-condition entity-name="moqui.service.job.ServiceJob">
+            <!--entity-delete-by-condition
+            entity-name="moqui.service.job.ServiceJob">
                 <econdition field-name="jobName" value="autoApprove_OrdersDelayed" />
             </entity-delete-by-condition>
-            <!--service-call
+            <service-call
             name="create#mantle.product.store.ProductStoreSetting"
                 in-map="productStoreId: productStoreId, settingTypeEnumId: 'PsstOrdApproveNewCust',
                 settingValue: false" />

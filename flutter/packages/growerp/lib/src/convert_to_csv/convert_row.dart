@@ -3,10 +3,27 @@ import 'package:growerp_models/growerp_models.dart';
 import 'file_type_model.dart';
 
 /// specify columns to columns mapping for every row here
-List<String> convertRow(FileType fileType, List<String> columnsFrom,
-    String fileName, List<List<String>> images, DateTime? startDate) {
+List<String> convertRow(
+    FileType fileType,
+    List<String> columnsFrom,
+    String fileName,
+    List<List<String>> images,
+    DateTime? startDate,
+    DateTime? endDate) {
   List<String> columnsTo = [];
   List<String> ids = []; //keep id's to avoid duplicates
+
+  bool dateOk(String stringDate) {
+    if (stringDate.isEmpty) return false;
+    // yyyy-mm-dd
+    bool start = true, end = true;
+    List stringDates = stringDate.split('-');
+    DateTime date = DateTime(int.parse(stringDates[0]),
+        int.parse(stringDates[1]), int.parse(stringDates[2]));
+    if (startDate != null && startDate.isAfter(date)) start = false;
+    if (endDate != null && endDate.isBefore(date)) end = false;
+    return start && end;
+  }
 
   String getImageFileName(FileType fileType, String id) {
     if (images[0].isEmpty) return '';
@@ -23,6 +40,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
   }
 
   String dateConvert(String date) {
+    // convert to yyyy-month-day
     if (date.isEmpty) return '';
     if (date.contains('/')) {
       // csv file
@@ -245,6 +263,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 11:closed(TRUE/FALSE) 27: item number, 28: quantity, 29: productId,
       // 30: descr, 31: accountCode, 32: price, 33: amount
       if (columnsFrom.length < 11) return [];
+      if (!dateOk(dateConvert(columnsFrom[10]))) return [];
 
       columnsTo.add(columnsFrom[9]);
       columnsTo.add('false');
@@ -262,6 +281,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 11:closed(TRUE/FALSE) 27: seq number, 28: quantity, 29: productId,
       // 30: descr, 31: accountCode, 32: price, 33: amount
       if (columnsFrom.length < 33) return [];
+      if (!dateOk(dateConvert(columnsFrom[10]))) return [];
 
       columnsTo.add(columnsFrom[9]); // will be replaced by sequential id
       columnsTo.add('Order');
@@ -281,6 +301,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 7: item number, 24: quantity, 25: productId,
       // 26: descr, 27: accountCode, 28: price, 29: amount, 30: terms
       if (columnsFrom.length < 18) return [];
+      if (!dateOk(dateConvert(columnsFrom[5]))) return [];
 
       // just use to combine items, need to replace by seq num
       columnsTo.add(columnsFrom[3]); // will be replaced by sequential id
@@ -303,6 +324,8 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 7: item number, 24: quantity, 25: productId,
       // 26: descr, 27: accountCode, 28: price, 29: amount, 30: terms
       if (columnsFrom.length < 28) return [];
+      if (!dateOk(dateConvert(columnsFrom[5]))) return [];
+
       columnsTo.add(columnsFrom[3]); // will be replaced by sequential id
       columnsTo.add('Invoice');
       columnsTo.add(''); //seqId by system
@@ -320,6 +343,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 12: memo // contains reference to invoice/order,  13: cash accountCode,
       // 14: total amount, 18: date cleared, 20: acct Transaction invoiceId, 21: discount Amount
       if (columnsFrom.length < 21) return [];
+      if (!dateOk(dateConvert(columnsFrom[11]))) return [];
       // date/checknumber is key here because checknumber is reference in ledger
       columnsTo.add(
           "${dateConvert(columnsFrom[11])}-${columnsFrom[10]}"); // will be replaced by sequential id
@@ -347,6 +371,8 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 13: cash accountCode, 18: date cleared, 20: invoiceId, 21: discount Amount,
       // 24: productId, 23: quantity, 25: description 26: accountCode, 28: price
       if (columnsFrom.length < 28) return [];
+      if (!dateOk(dateConvert(columnsFrom[11]))) return [];
+
       columnsTo.add(
           "${dateConvert(columnsFrom[11])}-${columnsFrom[10]}"); // will be replaced by sequential id
       columnsTo.add('Payment');
@@ -364,6 +390,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 1:custId 2:custName, 3:order id, 4:date(mm/dd/yy),
       // 6:closed(TRUE/FALSE) 21: item number, 22: quantity, 23: productId,
       // 24: descr, 25: accountCode, 26: price, 28: amount
+      if (!dateOk(dateConvert(columnsFrom[4]))) return [];
 
       columnsTo.add(columnsFrom[3]);
       columnsTo.add('true');
@@ -381,6 +408,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 6:closed(TRUE/FALSE) 21: item number, 22: quantity, 23: productId,
       // 24: descr, 25: accountCode, 26: price, 28: amount
       if (columnsFrom.length < 28) return [];
+      if (!dateOk(dateConvert(columnsFrom[4]))) return [];
 
       columnsTo.add(columnsFrom[3]);
       columnsTo.add('Order');
@@ -399,6 +427,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 15: custPO 16:discountAmount, 17: ship date,
       // 28: quantity, 29: related order, 30: productId,
       // 32: descr, 33: accountCode, 34: price, 36: amount, 30: terms
+      if (!dateOk(dateConvert(columnsFrom[6]))) return [];
 
       // just use to combine items, need to replace by seq num
       columnsTo.add(columnsFrom[3]);
@@ -421,6 +450,8 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 28: quantity, 30: productId,
       // 32: descr, 33: accountCode, 34: price, 36: amount, 30: terms
       if (columnsFrom.length < 30) return [];
+      if (!dateOk(dateConvert(columnsFrom[6]))) return [];
+
       columnsTo.add(columnsFrom[3]); // will be replaced by sequential id
       columnsTo.add('Invoice');
       columnsTo.add(''); //seqId by system
@@ -439,6 +470,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 16: discount amount, 7: glaccount, 11: discount account 18: rec account
       // 21: amount
       if (columnsFrom.length < 22) return [];
+      if (!dateOk(dateConvert(columnsFrom[5]))) return [];
 
       columnsTo.add(
           "${dateConvert(columnsFrom[5])}-${columnsFrom[4]}"); // will be replaced by sequential id
@@ -457,11 +489,12 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       return columnsTo;
 
     case FileType.finDocPaymentSaleItem: // just a single record for amount
-      // 0: partyId, 1:custId 2:custName, 3:dep date, 4:reference 6: pay method,
+      // 0: partyId, 1:custId 2:custName, 3:dep date, 4:reference 5: date 6: pay method,
       // 8: amount, 11: paid on invoices,  14: invoiceId paid
       // 16: discount amount, 7: glaccount, 11: discount account 18: rec account
       // 21: amount
       if (columnsFrom.length < 22) return [];
+      if (!dateOk(dateConvert(columnsFrom[5]))) return [];
       columnsTo.add(
           "${dateConvert(columnsFrom[5])}-${columnsFrom[0]}"); // will be replaced by sequential id
       columnsTo.add('Payment');
@@ -477,7 +510,9 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // generate the initial posted balances from the leger organization, if any
       // 1: account code, 2,3 not used here
       // 4: debit amount, 5 credit
-      // only do when start date present becaue will also generate timeperiods
+      // only do when start date present because will also generate timeperiods
+      if (!dateOk(dateConvert(columnsFrom[2]))) return [];
+
       if (columnsFrom[0] == '10100') {
         columnsTo.add(
             "${dateConvert(columnsFrom[2])}-00000"); // will be replaced by sequential id
@@ -495,18 +530,18 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 11: customerId, 13: vendorId, 15: employeeId,
       String otherCompanyId = '', otherCompanyName = '', otherUserId = '';
       bool sales = false;
-      if (columnsFrom[11].isNotEmpty) {
+      if (columnsFrom.length > 11 && columnsFrom[11].isNotEmpty) {
         otherCompanyId = columnsFrom[11];
         otherCompanyName = columnsFrom[12];
         sales = true;
       }
-      if (columnsFrom[13].isNotEmpty) {
+      if (columnsFrom.length > 13 && columnsFrom[13].isNotEmpty) {
         otherCompanyId = columnsFrom[13];
         otherCompanyName = columnsFrom[14];
         sales = false;
       }
 
-      if (columnsFrom[15].isNotEmpty) {
+      if (columnsFrom.length > 15 && columnsFrom[15].isNotEmpty) {
         otherUserId = columnsFrom[15];
         otherCompanyId = 'Main Company';
         otherCompanyName = columnsFrom[16];
@@ -530,16 +565,19 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // generate the initial posted balances from the leger organization, if any
       // 1: account code, 2,3 not used here
       // 5: debit amount, 6 credit amount
+      if (!dateOk(dateConvert(columnsFrom[2]))) return [];
 
       bool isDebit = true;
       var amount = columnsFrom[6];
-      if (columnsFrom[7].isNotEmpty) {
+      if (columnsFrom.length > 7 && columnsFrom[7].isNotEmpty) {
         isDebit = false;
         amount = columnsFrom[7];
       }
 
       // posting balance
-      if (columnsFrom[5] == 'Beginning Balance' && columnsFrom[8] != '') {
+      if (columnsFrom.length > 8 &&
+          columnsFrom[5] == 'Beginning Balance' &&
+          columnsFrom[8] != '') {
         columnsTo.add("${dateConvert(columnsFrom[2])}-00000}");
         columnsTo.add('Transaction');
         columnsTo.add('');
@@ -581,6 +619,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       /// 1: accountId 3: date, 4: reference, 7: debit amount 8: credit amount
       /// 12: customerId, 13 customer name 14: vendorId, 15: vendor name
       ///  18: productId 19: description
+      if (!dateOk(dateConvert(columnsFrom[2]))) return [];
 
       /// to: [finDocCsvFormat]
       if (columnsFrom.length < 18) return [];
@@ -604,6 +643,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       return columnsTo;
 
     case FileType.finDocShipmentIncomingItem:
+      if (!dateOk(dateConvert(columnsFrom[2]))) return [];
 
       /// from:(start from 1)
       /// 1: accountId 3: date, 4: reference, 7: debit amount 8: credit amount
@@ -630,6 +670,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       return columnsTo;
 
     case FileType.finDocShipmentOutgoing:
+      if (!dateOk(dateConvert(columnsFrom[2]))) return [];
 
       /// from:(start from 1)
       /// 1: accountId 3: date, 4: reference, 7: debit amount 8: credit amount
@@ -659,6 +700,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       return columnsTo;
 
     case FileType.finDocShipmentOutgoingItem:
+      if (!dateOk(dateConvert(columnsFrom[2]))) return [];
 
       /// from:(start from 1)
       /// 1: accountId 3: date, 4: reference, 7: debit amount 8: credit amount

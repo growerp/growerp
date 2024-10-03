@@ -30,12 +30,6 @@ Future<void> main(List<String> args) async {
   DateTime? startDate, endDate;
   FileType? requestedFileType;
 
-  DateTime convertDateString(dateString) {
-    // format yyyy/mm/dd
-    return DateTime.parse("${dateString.substring(0, 4)}-"
-        "${dateString.substring(5, 7)}-${dateString.substring(8, 10)} 00:00:00.000");
-  }
-
   if (args.isEmpty) {
     logger.e("Need at least a directory name with the GrowERP CSV formatted "
         "files, and optionally:\n -f a fileType\n -start start date in "
@@ -156,7 +150,7 @@ Future<void> main(List<String> args) async {
           continue; // header line
         }
         List<String> convertedRow =
-            convertRow(fileType, row, fileInput, images, startDate);
+            convertRow(fileType, row, fileInput, images, startDate, endDate);
         if (convertedRow.isNotEmpty) convertedRows.add(convertedRow);
       }
       logger.i(
@@ -228,11 +222,6 @@ Future<void> main(List<String> args) async {
         List<List<String>> headerRows = [];
         int seqNumber = 10000;
         for (final row in convertedRows) {
-          if (startDate != null &&
-              convertDateString(row[0]).isBefore(startDate)) continue;
-          if (endDate != null && convertDateString(row[0]).isAfter(endDate)) {
-            continue;
-          }
           if (row[0].isEmpty) continue;
           if (lastRow.isEmpty || row[0] != lastRow[0]) {
             List<String> newRow = List.from(row);
@@ -251,6 +240,9 @@ Future<void> main(List<String> args) async {
           }
           lastRow = row;
         }
+        // sort by date
+        headerRows
+            .sort((a, b) => (a.asMap()[4] ?? '').compareTo(b.asMap()[4] ?? ''));
         convertedRows = headerRows;
         break;
       case FileType.finDocTransactionItem:
@@ -271,11 +263,6 @@ Future<void> main(List<String> args) async {
         List<String> lastRow = [];
         int seqNumber = 10000;
         for (final row in convertedRows) {
-          if (startDate != null &&
-              convertDateString(row[0]).isBefore(startDate)) continue;
-          if (endDate != null && convertDateString(row[0]).isAfter(endDate)) {
-            continue;
-          }
           if (lastRow.isNotEmpty && row[0] != lastRow[0]) {
             seqNumber++;
           }
@@ -295,6 +282,7 @@ Future<void> main(List<String> args) async {
           itemRows.add(newRow);
           lastRow = row;
         }
+        // sort by date
         convertedRows = itemRows;
         // sort better use maps for empty values
         // sort by just reference number

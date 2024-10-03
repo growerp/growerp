@@ -83,7 +83,7 @@ class User with _$User {
 
 String userCsvFormat =
     'User Id, First Name*, Last Name*, Email, Login Name, Telephone Number, '
-    'User Group, language, image, Company Name, Company Role\r\n';
+    'User Group, language, image, Company Name, Company/User Role\r\n';
 int userCsvLength = userCsvFormat.split(',').length;
 
 List<User> csvToUsers(String csvFile) {

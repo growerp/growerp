@@ -13,7 +13,7 @@
  */
 
 enum Role {
-  company('OrgInternal'),
+  company('OrgInternal'), // employee of the organization
   customer('Customer'),
   lead('Lead'),
   supplier('Supplier'),
