@@ -30,6 +30,13 @@ Future<void> main(List<String> args) async {
   DateTime? startDate, endDate;
   FileType? requestedFileType;
 
+  DateTime convertDateString(dateString) {
+    // format yyyy/mm/dd
+    print("===proc date: $dateString");
+    return DateTime.parse("${dateString.substring(0, 4)}-"
+        "${dateString.substring(5, 7)}-${dateString.substring(8, 10)} 00:00:00.000");
+  }
+
   if (args.isEmpty) {
     logger.e("Need at least a directory name with the GrowERP CSV formatted "
         "files, and optionally:\n -f a fileType\n -start start date in "
@@ -164,31 +171,36 @@ Future<void> main(List<String> args) async {
       case FileType.itemType:
         csvFormat = itemTypeCsvFormat;
         csvLength = itemTypeCsvLength;
-        break;
       case FileType.paymentType:
         csvFormat = paymentTypeCsvFormat;
         csvLength = paymentTypeCsvLength;
-        break;
       case FileType.glAccount:
         csvFormat = glAccountCsvFormat;
         csvLength = glAccountCsvLength;
-        break;
       case FileType.category:
         csvFormat = categoryCsvFormat;
         csvLength = categoryCsvLength;
-        break;
       case FileType.asset:
         csvFormat = assetCsvFormat;
         csvLength = assetCsvLength;
-        break;
       case FileType.product:
         csvFormat = productCsvFormat;
         csvLength = productCsvLength;
-        break;
+        // remove doubles in the file
+        convertedRows
+            .sort((a, b) => (a.asMap()[0] ?? '').compareTo(b.asMap()[0] ?? ''));
+        List<List<String>> temp = [];
+        var last = [];
+        for (final convertedRow in convertedRows) {
+          if (last.isEmpty || convertedRow[0] != last[0]) {
+            temp.add(convertedRow);
+          }
+          last = convertedRow;
+        }
+        convertedRows = temp;
       case FileType.company:
         csvFormat = companyCsvFormat;
         csvLength = companyCsvLength;
-        break;
       case FileType.user:
         csvFormat = userCsvFormat;
         csvLength = userCsvLength;
@@ -240,11 +252,10 @@ Future<void> main(List<String> args) async {
           }
           lastRow = row;
         }
-        // sort by date
+        //sort by date
         headerRows
             .sort((a, b) => (a.asMap()[4] ?? '').compareTo(b.asMap()[4] ?? ''));
         convertedRows = headerRows;
-        break;
       case FileType.finDocTransactionItem:
       case FileType.finDocOrderPurchaseItem:
       case FileType.finDocOrderSaleItem:
@@ -284,9 +295,8 @@ Future<void> main(List<String> args) async {
         }
         // sort by date
         convertedRows = itemRows;
-        // sort better use maps for empty values
-        // sort by just reference number
-        break;
+      // sort better use maps for empty values
+      // sort by just reference number
       default:
     }
 

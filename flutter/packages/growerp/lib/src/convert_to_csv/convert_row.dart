@@ -11,7 +11,6 @@ List<String> convertRow(
     DateTime? startDate,
     DateTime? endDate) {
   List<String> columnsTo = [];
-  List<String> ids = []; //keep id's to avoid duplicates
 
   bool dateOk(String stringDate) {
     if (stringDate.isEmpty) return false;
@@ -119,29 +118,25 @@ List<String> convertRow(
     case FileType.product:
       // 17: productId 18: description
       //  print(columnsFrom.join(','));
-      if (columnsFrom.length > 17 &&
-          columnsFrom[17] != '' &&
-          !ids.contains(columnsFrom[17])) {
-        ids.add(columnsFrom[17]);
-        columnsTo.add(columnsFrom[17]); // id
-        columnsTo.add('Physical Good'); // type
-        columnsTo.add(columnsFrom[18]); // name
-        columnsTo.add(''); // description
-        columnsTo.add(''); // list price
-        columnsTo.add(''); // sales price
-        columnsTo.add(''); // cost price
-        columnsTo.add('true'); // use warehouse
-        if (columnsFrom[12] != '') {
-          columnsTo.add('sales product');
-        } // category
-        if (columnsFrom[14] != '') {
-          columnsTo.add('purchase product'); // category
-        }
-        columnsTo.add(''); // category 1
-        columnsTo.add(''); // category 2
-        columnsTo.add(''); // category 3
-        columnsTo.add(getImageFileName(fileType, columnsFrom[17])); //image
+      if (columnsFrom.length <= 18) return [];
+      columnsTo.add(columnsFrom[17]); // id
+      columnsTo.add('Physical Good'); // type
+      columnsTo.add(columnsFrom[18]); // name
+      columnsTo.add(''); // description
+      columnsTo.add(''); // list price
+      columnsTo.add(''); // sales price
+      columnsTo.add(''); // cost price
+      columnsTo.add('true'); // use warehouse
+      if (columnsFrom[12] != '') {
+        columnsTo.add('sales product');
+      } // category
+      if (columnsFrom[14] != '') {
+        columnsTo.add('purchase product'); // category
       }
+      columnsTo.add(''); // category 1
+      columnsTo.add(''); // category 2
+      columnsTo.add(''); // category 3
+      columnsTo.add(getImageFileName(fileType, columnsFrom[17])); //image
       return columnsTo;
 
     /// convert to [assetCsvFormat]
@@ -213,15 +208,11 @@ List<String> convertRow(
       if (fileName.endsWith('.ods')) {
         columnsTo.add('');
         if (columnsFrom[11].isNotEmpty) {
-          if (ids.contains(columnsFrom[11])) return [];
-          ids.add(columnsFrom[11]);
           columnsTo.add(columnsFrom[11]);
           columnsTo.add(Role.customer.value);
           columnsTo.add(columnsFrom[12]);
         }
         if (columnsFrom[13].isNotEmpty) {
-          if (ids.contains(columnsFrom[13])) return [];
-          ids.add(columnsFrom[13]);
           columnsTo.add(columnsFrom[13]);
           columnsTo.add(Role.supplier.value);
           columnsTo.add(columnsFrom[14]);
