@@ -79,8 +79,8 @@ class PaymentTest {
       }
       await CommonTest.checkWidgetKey(
           tester, "PaymentDialog${payment.sales ? 'Sales' : 'Purchase'}");
-      await CommonTest.enterDropDownSearch(
-          tester, 'otherCompany', payment.otherCompany!.name!);
+      await CommonTest.enterDropDownSearch(tester,
+          payment.sales ? 'customer' : 'supplier', payment.otherCompany!.name!);
       await CommonTest.enterText(tester, 'amount',
           payment.grandTotal!.toString()); // required because keyboard come up
       await CommonTest.drag(tester, listViewName: 'listView2');
@@ -116,7 +116,8 @@ class PaymentTest {
     for (FinDoc payment in payments) {
       await CommonTest.doNewSearch(tester,
           searchString: payment.paymentId!, seconds: CommonTest.waitTime);
-      expect(CommonTest.getDropdownSearch('otherCompany'),
+      expect(
+          CommonTest.getDropdownSearch(payment.sales ? 'customer' : 'supplier'),
           equals(payment.otherCompany!.name));
       expect(CommonTest.getDropdown('statusDropDown'),
           equals(FinDocStatusVal.created.name));
