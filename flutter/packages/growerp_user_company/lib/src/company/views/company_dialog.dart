@@ -117,16 +117,14 @@ class CompanyFormState extends State<CompanyDialog> {
     switch (widget.company.partyId) {
       case null:
         company = authenticate.company!;
-        companyBloc
-            .add(CompanyFetch(companyPartyId: company.partyId!, limit: 1));
-        break;
       case '_NEW_':
         company = widget.company.copyWith(partyId: null);
-        companyBloc.add(const CompanyFetch(limit: 0));
         break;
       default:
-        companyBloc.add(
-            CompanyFetch(companyPartyId: widget.company.partyId!, limit: 1));
+        if (widget.company.partyId != authenticate.company?.partyId) {
+          companyBloc.add(
+              CompanyFetch(companyPartyId: widget.company.partyId!, limit: 1));
+        }
     }
     _emailController.text = company.email ?? '';
     _backendController.text = company.secondaryBackend ?? '';
