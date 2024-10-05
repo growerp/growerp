@@ -1462,10 +1462,15 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="user.pseudoId" from="seqNum" />
             </if>
             <!-- role -->
-            <if condition="user.role == 'Lead'">
-                <set field="user.role" value="Customer" />
-                <set field="customerStatusId" value="CUSTOMER_ASSIGNED" />
-                <else-if condition="user.role == 'Customer'">
+            <if condition="user.role == 'Lead' || user.company?.role == 'Lead' ">
+                <then>
+                    <set field="user.role" value="Customer" />
+                    <if condition="user.company">
+                        <set field="user.company.role" value="Customer" />
+                    </if>
+                    <set field="customerStatusId" value="CUSTOMER_ASSIGNED" />
+                </then>
+                <else-if condition="user.role == 'Customer' || user.company?.role == 'Customer'">
                     <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
                 </else-if>
             </if>
