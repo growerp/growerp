@@ -2114,6 +2114,10 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="country" />
                     <parameter name="countryId" />
                 </parameter>
+                <parameter name="paymentMethod">
+                    <parameter name="ccPaymentMethodId" />
+                    <parameter name="ccDescription" />
+                </parameter>
             </parameter>
         </out-parameters>
         <actions>
@@ -2176,13 +2180,25 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="name" value="${item.lastName}, ${item.firstName}" />
                     </else>
                 </if>
+                <!-- payment method -->
+                <set field="paymentMethod" from="null" />
+                <if condition="item.paymentMethodId">
+                    <set field="nrLength" from="item.cardNumber.length()" />
+                    <set field="ccDescription"
+                        value="${item.cardType}**********${item.cardNumber.substring(nrLength-4,nrLength)} ${item.expireDate}" />
+                    <set field="paymentMethod"
+                        from="[ ccPaymentMethodId: item.paymentMethodId,
+                                                    ccDescription: ccDescription]" />
+                </if>
                 <script>companiesUsers.add([
                         type: type,
                         partyId: item.partyId,
                         pseudoId: item.pseudoId,
                         role: item.role,
                         name: name,
-                        email: item.email])</script>
+                        email: item.email,
+                        paymentMethod: paymentMethod,
+                    ])</script>
                 <set field="lastPartyId" from="item.partyId" />
             </iterate>
         </actions>
