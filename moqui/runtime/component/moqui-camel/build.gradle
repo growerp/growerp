@@ -1,0 +1,107 @@
+/*
+ * This software is in the public domain under CC0 1.0 Universal plus a 
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
+apply plugin: 'groovy'
+
+def componentNode = parseComponent(project)
+version = componentNode.'@version'
+def jarBaseName = 'moqui-camel'
+def moquiDir = projectDir.parentFile.parentFile.parentFile
+def frameworkDir = file(moquiDir.absolutePath + '/framework')
+
+// to run use "gradle dependencyUpdates"
+apply plugin: 'com.github.ben-manes.versions'
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+  dependencies { classpath 'com.github.ben-manes:gradle-versions-plugin:0.42.0' }
+}
+dependencyUpdates.resolutionStrategy = { componentSelection { rules -> rules.all { ComponentSelection selection ->
+    boolean rejected = ['alpha', 'beta', 'rc', 'cr', 'm', 'b'].any { qualifier -> selection.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-].*/ }
+    if (rejected) selection.reject('Release candidate')
+} } }
+repositories {
+    flatDir name: 'localLib', dirs: frameworkDir.absolutePath + '/lib'
+    mavenCentral()
+}
+
+// Log4J has annotation processors, disable to avoid warning
+tasks.withType(JavaCompile) { options.compilerArgs << "-proc:none" }
+tasks.withType(GroovyCompile) { options.compilerArgs << "-proc:none" }
+
+dependencies {
+    implementation project(':framework')
+    testImplementation project(':framework').configurations.testImplementation.allDependencies
+
+    // Apache Camel
+    // NOTE: there is a classloading issue with Camel 2.24.0 with the default Caffeine cache so not updating for now
+    // "Caused by: java.lang.ClassNotFoundException: Class org.apache.camel.com.github.benmanes.caffeine.cache.SSLMS not found."
+    // NOTE: updating to Camel 3 will require various code changes...
+    implementation 'org.apache.camel:camel-core:2.22.5' // Apache 2.0
+    runtimeOnly 'org.apache.camel:camel-csv:2.22.5' // Apache 2.0
+    runtimeOnly 'org.apache.camel:camel-freemarker:2.22.5' // Apache 2.0
+    // module for camel-groovy because depends on groovy-all and moqui-framework now using selected groovy modules
+    runtimeOnly module('org.apache.camel:camel-groovy:2.22.5') // Apache 2.0
+    /* Uncomment these as desired for use in Camel: */
+    runtimeOnly ('org.apache.camel:camel-http-common:2.22.5') { exclude group: 'org.apache.geronimo.specs' } // Apache 2.0
+    runtimeOnly 'org.apache.camel:camel-http4:2.22.5' // Apache 2.0
+ /*   runtimeOnly 'org.apache.camel:camel-jms:2.22.5' // Apache 2.0
+    runtimeOnly 'org.apache.camel:camel-lucene:2.22.5' // Apache 2.0
+    runtimeOnly 'org.apache.camel:camel-lucene:2.22.5' // Apache 2.0
+    runtimeOnly 'org.apache.camel:camel-mail:2.22.5' // Apache 2.0
+    runtimeOnly 'org.apache.camel:camel-mqtt:2.22.5' // Apache 2.0
+    runtimeOnly 'org.apache.camel:camel-quartz2:2.22.5' // Apache 2.0
+    runtimeOnly 'org.apache.camel:camel-shiro:2.22.5' // Apache 2.0
+    runtimeOnly 'org.apache.camel:camel-xmlrpc:2.22.5' // Apache 2.0
+    */
+}
+
+// by default the Java plugin runs test on build, change to not do that (only run test if explicit task)
+// no longer workds as of gradle 4.8 or possibly earlier, use clear() instead: check.dependsOn.remove(test)
+check.dependsOn.clear()
+
+task cleanLib(type: Delete) { delete fileTree(dir: projectDir.absolutePath+'/lib', include: '*') }
+clean.dependsOn cleanLib
+
+jar {
+    destinationDirectory = file(projectDir.absolutePath + '/lib')
+    archiveBaseName = jarBaseName
+}
+task copyDependencies { doLast {
+    copy { from (configurations.runtimeClasspath - project(':framework').configurations.runtimeClasspath - project(':framework').jar.archivePath)
+        into file(projectDir.absolutePath + '/lib') }
+} }
+copyDependencies.dependsOn cleanLib
+jar.dependsOn copyDependencies
+
+test {
+    dependsOn cleanTest
+
+    systemProperty 'moqui.runtime', moquiDir.absolutePath + '/runtime'
+    systemProperty 'moqui.conf', 'conf/MoquiDevConf.xml'
+    systemProperty 'moqui.init.static', 'true'
+    maxHeapSize = "512M"
+
+    testLogging.showStandardStreams = true
+
+    classpath += files(sourceSets.main.output.classesDirs)
+    // filter out classpath entries that don't exist (gradle adds a bunch of these), or ElasticSearch JarHell will blow up
+    classpath = classpath.filter { it.exists() }
+
+    beforeTest { descriptor ->
+        logger.lifecycle("Running test: ${descriptor}")
+    }
+}
