@@ -195,6 +195,11 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="ORHD" join-optional="true">
             <key-map field-name="orderId" />
         </member-entity>
+        <!-- payment used by web orders -->
+        <member-entity entity-alias="PAYMENT" entity-name="mantle.account.payment.Payment"
+            join-from-alias="ORHD" join-optional="true">
+            <key-map field-name="orderId" />
+        </member-entity>
         <member-entity entity-alias="OPRT" entity-name="mantle.order.OrderPart"
             join-from-alias="ORHD">
             <key-map field-name="orderId" />
@@ -209,13 +214,18 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="OITEM" join-optional="true">
             <key-map field-name="itemTypeEnumId" related="enumId" />
         </member-entity>
-        <member-entity entity-alias="OINV" entity-name="mantle.order.OrderItemBilling"
+        <member-entity entity-alias="OIBILL" entity-name="mantle.order.OrderItemBilling"
             join-from-alias="ORHD" join-optional="true">
             <key-map field-name="orderId" />
         </member-entity>
         <member-entity entity-alias="OPAY" entity-name="mantle.account.payment.Payment"
-            join-from-alias="ORHD" join-optional="true">
+            join-from-alias="OIBILL" join-optional="true">
             <key-map field-name="orderId" />
+        </member-entity>
+        <member-entity
+            entity-alias="OINV" entity-name="mantle.account.invoice.Invoice"
+            join-from-alias="OIBILL" join-optional="true">
+            <key-map field-name="invoiceId" />
         </member-entity>
         <member-entity
             entity-alias="RESERV" entity-name="growerp.product.AssetRental"
@@ -324,6 +334,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="assetName" entity-alias="ASSET" />
         <alias name="invoiceId" entity-alias="OINV" />
         <alias name="paymentId" entity-alias="OPAY" />
+        <alias name="orderPaymentId" field="paymentId" entity-alias="PAYMENT" />
         <alias name="shipmentId" entity-alias="SIS" />
     </view-entity>
 
