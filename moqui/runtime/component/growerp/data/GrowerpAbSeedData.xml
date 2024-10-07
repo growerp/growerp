@@ -22,8 +22,11 @@ along with this software (see the LICENSE.md file). If not, see
 
     <!-- birdsend email registration -->
     <growerp.general.Interface interfaceId="birdSend" baseUrl="https://api.birdsend.co"
-        apiVersion="v1"
-        value1="BIRDSEND_AUTM_SEQUENCE" apiKey="BIRDSEND_API_KEY" />
+        apiVersion="v1" value1="BIRDSEND_AUTM_SEQUENCE" apiKey="BIRDSEND_API_KEY" />
+
+    <!-- OpenMRS credentials -->
+    <growerp.general.Interface interfaceId="openMRS" baseUrl="OPENMRS_BASE_URL"
+        apiVersion="v1" username="OPENMRS_USERNAME" password="OPENMRS_PASSWORD" />
 
     <!-- workeffort types for workflow -->
     <moqui.basic.Enumeration description="Workflow" enumId="WetWorkflow" enumTypeId="WorkEffortType" />

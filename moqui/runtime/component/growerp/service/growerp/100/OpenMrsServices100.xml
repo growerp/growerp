@@ -22,6 +22,7 @@ along with this software (see the LICENSE.md file). If not, see
         </in-parameters>
         <out-parameters>
             <parameter name="resultMessage" />
+            <parameter name="error" />
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -31,25 +32,25 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="hostNames">
                 <econdition field-name="productStoreId" from="stores[0].productStoreId" />
-                <econdition field-name="settingTypeEnumId" value="PsstAppHostname" />
+                <econdition field-name="settingTypeEnumId" value="PsstSecBackend" />
                 <date-filter />
             </entity-find>
             <if condition="!hostNames">
                 <return />
             </if>
             <entity-find entity-name="growerp.general.Interface" list="interfaces">
-                <econdition field-name="appHostName" from="hostNames[0].settingValue" />
+                <econdition field-name="baseUrl" from="hostNames[0].settingValue" />
             </entity-find>
             <if
                 condition="!interfaces || interfaces[0].username.isEmpty()
                             || interfaces[0].password.isEmpty()
                             || interfaces[0].baseUrl.isEmpty()">
-                <log message="interface data not found" />
+                <log level="error" message="OpenMRS system hostname not found in CompanyData" />
                 <return />
             </if>
             <set field="username" from="interfaces[0].username" />
             <set field="password" from="interfaces[0].password" />
-            <set field="baseUrl" value="https://${interfaces[0].baseUrl}" />
+            <set field="baseUrl" from="interfaces[0].baseUrl" />
 
             <set field="setCookie" from="null" />
             <script><![CDATA[
@@ -87,12 +88,28 @@ along with this software (see the LICENSE.md file). If not, see
                     ec.logger.info("===GET request did not work: ${con.getResponseCode()} ${con.getResponseMessage()}");
                 }
 
-                ]]></script>
+            ]]></script>
 
             <if condition="requestor.externalId == null">
+                <set field="error" value="" />
                 <script><![CDATA[
+                // get id sources
+                Map sourceResult = sendGET("openmrs/ws/rest/v1//idgen/identifiersource?v=default");
+                ec.logger.info("=== result from sources's: $sourceResult");
+                sourceUid = sourceResult.results[0].uuid;
+
                 // get sequence id -----------------
-                Map result = sendGET("openmrs/ws/rest/v1/idgen/nextIdentifier?source=1");
+                def jason = new JsonBuilder(
+                        generateIdentifiers: true,
+                        sourceUuid: sourceUid,
+                        numberToGenerate: 1);
+
+                Map result = sendPOST("openmrs/ws/rest/v1/idgen/identifiersource",jason.toString());
+                ec.logger.info("=== result from id's: $result");
+                if (results == null) {
+                    error = "could not get next patient identifier"
+                    return
+                }
                 def identUuid = result.results[0].identifierValue
 
                 // create patient ------------------
@@ -114,8 +131,43 @@ along with this software (see the LICENSE.md file). If not, see
                 ec.logger.info("===json string: ${json.toString()}");
                 result = sendPOST("openmrs/ws/rest/v1/patient",json.toString());
                 ec.logger.info("=======result of create patient: ${result}");
+
+                requestor.externalId = identUuid;
                 ]]></script>
+                <service-call name="update#mantle.party.Party"
+                    in-map="[partyId: requestor.partyId, externalId: requestor.externalId]" />
             </if>
+
+            <!-- get/create patient attributes  -->
+            <script><![CDATA[
+                def result = sendGet("openmrs/ws/rest/v1/person/${requestor.externalId}/attribute");
+                ec.logger.info("=======result of attribute list: ${result}");
+                def attributes = new groovy.json.JsonSlurper().parseText(result);
+                def inAttributes = new groovy.json.JsonSlurper().parseText(request.description);
+                // update patient attributes
+                def newAttributes = [[:]];
+                for (at in attributes) {
+                    for (inAt in inAttributes) {
+                        if (inAt[at.name] != null)
+                            newAttributes.add(
+                                { attributeType: at[uuid], value: inAt[at.name] }
+                            );
+                    }
+                }
+
+                // update patient
+                def identifiers = [
+                        [
+                            identifier: identUuid,
+                            identifierType: "OpenMRS ID",
+                        ]
+                    ]
+
+                def json = new JsonBuilder(identifiers: identifiers,
+                                        attributes: newAttributes) 
+                result = sendPOST("openmrs/ws/rest/v1/patient/${requestor.externalId}",json.toString());
+                ec.logger.info("=======result of update patient: ${result}");
+            ]]></script>
 
             <script><![CDATA[
                 //============ closures =============

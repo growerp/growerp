@@ -102,20 +102,13 @@ class RequestDialogState extends State<RequestDialog> {
       try {
         Map jsonDescription =
             finDoc.description != null ? jsonDecode(finDoc.description!) : {};
-        selectedCare =
-            jsonDescription['care'] ?? !kReleaseMode ? 'resCare' : '';
-        selectedForWhom =
-            jsonDescription['forWhom'] ?? !kReleaseMode ? 'mySelf' : '';
-        selectedTimeframe =
-            jsonDescription['timeFrame'] ?? !kReleaseMode ? 'notSure' : '';
-        selectedHowSoon =
-            jsonDescription['howSoon'] ?? !kReleaseMode ? 'asap' : '';
-        selectedStatus =
-            jsonDescription['status'] ?? !kReleaseMode ? 'notSure' : '';
-        _telephoneController.text =
-            jsonDescription['telephoneNumber'] ?? !kReleaseMode ? '999' : '';
-        _postalController.text =
-            jsonDescription['postalCode'] ?? !kReleaseMode ? '8888' : '';
+        _telephoneController.text = jsonDescription['Telephone Number'] ?? '';
+        _postalController.text = jsonDescription['CarePostCode'] ?? '';
+        selectedCare = jsonDescription['TypeOfCare'] ?? '';
+        selectedForWhom = jsonDescription['CareRelationShip'] ?? '';
+        selectedTimeframe = jsonDescription['CareTimeFrame'] ?? '';
+        selectedHowSoon = jsonDescription['HowSoonCare'] ?? '';
+        selectedStatus = jsonDescription['ACAT_Status'] ?? '';
       } on FormatException catch (_) {
         _descriptionController.text = finDoc.description ?? '';
       }
@@ -163,6 +156,15 @@ class RequestDialogState extends State<RequestDialog> {
   Widget healthRequestForm(FinDocState state,
       GlobalKey<FormState> requestDialogFormKey, bool isPhone, User user) {
     var companyLabel = 'Company';
+    if (kDebugMode && widget.finDoc.requestId == null) {
+      _telephoneController.text = '99999999';
+      _postalController.text = '5555555';
+      selectedCare = 'resCare';
+      selectedForWhom = 'mySelf';
+      selectedTimeframe = 'notSure';
+      selectedHowSoon = 'asap';
+      selectedStatus = 'notSure';
+    }
     return Padding(
         padding: EdgeInsets.fromLTRB(isPhone ? 8 : 80, 0, isPhone ? 8 : 80, 0),
         child: Form(
@@ -436,13 +438,13 @@ class RequestDialogState extends State<RequestDialog> {
                       '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
                   onPressed: () {
                     var description = jsonEncode({
-                      'care': selectedCare,
-                      'forWhom': selectedForWhom,
-                      'howSoon': selectedHowSoon,
-                      'timeFrame': selectedTimeframe,
-                      'status': selectedStatus,
-                      'telephoneNumber': _telephoneController.text,
-                      'postalCode': _postalController.text,
+                      'CarePostCode': _postalController.text,
+                      'Telephone Number': _telephoneController.text,
+                      'TypeOfCare': selectedCare,
+                      'CareRelationShip': selectedForWhom,
+                      'CareTimeFrame': selectedTimeframe,
+                      'HowSoonCare': selectedHowSoon,
+                      'ACAT_Status': selectedStatus,
                     });
                     if (requestDialogFormKey.currentState!.validate()) {
                       _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(

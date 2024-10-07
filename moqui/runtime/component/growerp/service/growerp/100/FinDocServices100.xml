@@ -1528,7 +1528,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.PartyServices100.get#User"
                         in-map="partyId: otherPartyId" out-map="context" />
                     <service-call name="growerp.100.OpenMrsServices100.add#PatientAndRequest"
-                        in-map="[request: finDoc, requestor: users[0] ]" />
+                        in-map="[request: finDoc, requestor: users[0] ]"
+                        out-map="result" />
+                    <if condition="result?.error">
+                        <return error="true" message="${result.error}" />
+                    </if>
                     <set field="finDocId" from="requestId" />
                 </else-if>
                 <!-- transaction -->

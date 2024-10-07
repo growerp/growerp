@@ -1,5 +1,8 @@
-# GrowERP Flutter ERP Admin App.
+# GrowERP Flutter ERP Health App.
 
-This is the admin app, showing the capabilities of the growerp application.
+This the health app with an optional interface to the openMRS system
 
-check the readme at  https://github.com/growerp/growerp for more information.
+users which registers at this app will also be registered in the openMRS system
+when: secondary backend is defined in the organization app
+
+

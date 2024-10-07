@@ -27,7 +27,8 @@ class AdminDbForm extends StatelessWidget {
     List<Widget> dashboardItems = [];
 
     for (final option in menuOptions) {
-      if (option.userGroups!.contains(authenticate.user?.userGroup!)) {
+      if (option.userGroups!.contains(authenticate.user?.userGroup!) &&
+          option.title != 'Main') {
         dashboardItems
             .add(makeDashboardItem(option.key ?? '', context, option, [
           if (option.key == 'dbRequests')
@@ -36,7 +37,6 @@ class AdminDbForm extends StatelessWidget {
             "#: ${authenticate.stats?.customers}",
           if (option.key == 'dbEmployees')
             "#: ${authenticate.stats?.employees ?? 0}",
-          ""
         ]));
       }
     }
