@@ -49,7 +49,7 @@ class FinDocItem with _$FinDocItem {
       _$FinDocItemFromJson(json['finDocItem'] ?? json);
 }
 
-String finDocItemCsvFormat = "finDoc Id, finDocType, item Seq, "
+String finDocItemCsvFormat = "finDoc Id, finDocType, reference, "
     " productId, description, quantity, price/amount, accountCode, "
     " isDebit, itemType, paymentType, \r\n";
 List<String> finDocItemCsvTitles = finDocItemCsvFormat.split(',');

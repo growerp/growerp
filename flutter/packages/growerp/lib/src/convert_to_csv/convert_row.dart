@@ -56,17 +56,11 @@ List<String> convertRow(
     return date.substring(0, 10);
   }
 
-  // ignore if no begining amount
+  // create initial transaction for ledger
   if (columnsFrom.length > 4 &&
       columnsFrom[0] == '10100' &&
       columnsFrom[5] == 'Beginning Balance') {
-    // create initial transaction for ledger
     columnsFrom[5] = '';
-  }
-  if (columnsFrom.length > 8 && fileType != FileType.finDocTransactionItem) {
-    if (columnsFrom[5] == 'Beginning Balance' ||
-        columnsFrom[5] == 'Ending Balance' ||
-        columnsFrom[3].isEmpty) return [];
   }
 
   // reject balances
@@ -498,15 +492,16 @@ List<String> convertRow(
       return columnsTo;
 
     case FileType.finDocTransaction:
+      if (!dateOk(dateConvert(columnsFrom[2]))) return [];
+
       // generate the initial posted balances from the leger organization, if any
-      // 1: account code, 2,3 not used here
+      // 1: account code, 2: date ,3: reference
       // 4: debit amount, 5 credit
       // only do when start date present because will also generate timeperiods
-      if (!dateOk(dateConvert(columnsFrom[2]))) return [];
 
       if (columnsFrom[0] == '10100') {
         columnsTo.add(
-            "${dateConvert(columnsFrom[2])}-00000"); // will be replaced by sequential id
+            "${dateConvert(columnsFrom[2])}-P00000"); // will be replaced by sequential id
         columnsTo.add("true");
         columnsTo.add('Transaction');
         columnsTo.add('Initial ledger posted values');
@@ -514,9 +509,10 @@ List<String> convertRow(
         columnsTo.add('');
         columnsTo.add('');
         columnsTo.add('');
-        columnsTo.add(''); // reference
+        columnsTo.add('00000'); // reference
         return columnsTo;
       }
+      if (columnsFrom[5] == 'Beginning Balance') return [];
       // 0: accountId, 2:date, 3:reference, 4:journalId, 5:description,
       // 11: customerId, 13: vendorId, 15: employeeId,
       String otherCompanyId = '', otherCompanyName = '', otherUserId = '';
@@ -554,9 +550,26 @@ List<String> convertRow(
 
       // create initial transaction from ledger
       // generate the initial posted balances from the leger organization, if any
-      // 1: account code, 2,3 not used here
+      // 1: account code, 2:date ,3 not used here
       // 5: debit amount, 6 credit amount
+
+      // ignore if wrong date
       if (!dateOk(dateConvert(columnsFrom[2]))) return [];
+
+      // make sure there is at least a single item for initial ledger start
+      if (columnsFrom[0] == '10100') {
+        columnsTo.add("${dateConvert(columnsFrom[2])}-P00000");
+        columnsTo.add('Transaction');
+        columnsTo.add('');
+        columnsTo.add('');
+        columnsTo.add(columnsFrom[5]); // descr
+        columnsTo.add('');
+        columnsTo.add('');
+        columnsTo.add(columnsFrom[0]); // account code
+        columnsTo.add(''); // get isDebit from account setting
+        return columnsTo;
+      }
+      if (columnsFrom[5] == 'Beginning Balance') return [];
 
       bool isDebit = true;
       var amount = columnsFrom[6];
@@ -569,7 +582,7 @@ List<String> convertRow(
       if (columnsFrom.length > 8 &&
           columnsFrom[5] == 'Beginning Balance' &&
           columnsFrom[8] != '') {
-        columnsTo.add("${dateConvert(columnsFrom[2])}-00000}");
+        columnsTo.add("${dateConvert(columnsFrom[2])}-P00000}");
         columnsTo.add('Transaction');
         columnsTo.add('');
         columnsTo.add('');
@@ -595,7 +608,7 @@ List<String> convertRow(
       columnsTo.add(
           "${dateConvert(columnsFrom[2])}-${columnsFrom[3]}"); // will be replaced by sequential id
       columnsTo.add('Transaction');
-      columnsTo.add('');
+      columnsTo.add(columnsFrom[3]);
       columnsTo.add(columnsFrom[17]);
       columnsTo.add(columnsFrom[18]);
       columnsTo.add('');

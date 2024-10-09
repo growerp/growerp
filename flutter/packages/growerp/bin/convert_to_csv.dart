@@ -30,13 +30,6 @@ Future<void> main(List<String> args) async {
   DateTime? startDate, endDate;
   FileType? requestedFileType;
 
-  DateTime convertDateString(dateString) {
-    // format yyyy/mm/dd
-    print("===proc date: $dateString");
-    return DateTime.parse("${dateString.substring(0, 4)}-"
-        "${dateString.substring(5, 7)}-${dateString.substring(8, 10)} 00:00:00.000");
-  }
-
   if (args.isEmpty) {
     logger.e("Need at least a directory name with the GrowERP CSV formatted "
         "files, and optionally:\n -f a fileType\n -start start date in "
@@ -233,28 +226,28 @@ Future<void> main(List<String> args) async {
         List<String> lastRow = [];
         List<List<String>> headerRows = [];
         int seqNumber = 10000;
+
         for (final row in convertedRows) {
-          if (row[0].isEmpty) continue;
+          List<String> newRow = List.from(row);
           if (lastRow.isEmpty || row[0] != lastRow[0]) {
-            List<String> newRow = List.from(row);
-            // replace by sequential number
+            // replace by sequential number when not these types
+            // because like to show the original id in the new system
+            // only transaction
             if (fileType != FileType.finDocInvoiceSale &&
                 fileType != FileType.finDocInvoicePurchase &&
                 fileType != FileType.finDocOrderSale &&
                 fileType != FileType.finDocOrderPurchase &&
-                fileType != FileType.finDocShipmentOutgoing &&
-                fileType != FileType.finDocShipmentIncoming) {
+                fileType != FileType.finDocShipmentIncoming &&
+                fileType != FileType.finDocShipmentOutgoing) {
               newRow[0] = (seqNumber++).toString();
             }
-//            print(
-//                "==T=new row: ${newRow[0]} ${newRow[8]} ===oldrow: ${row[0]} ${row[8]}");
             headerRows.add(newRow);
           }
           lastRow = row;
         }
         //sort by date
-        headerRows
-            .sort((a, b) => (a.asMap()[4] ?? '').compareTo(b.asMap()[4] ?? ''));
+        // headerRows
+        //    .sort((a, b) => (a.asMap()[4] ?? '').compareTo(b.asMap()[4] ?? ''));
         convertedRows = headerRows;
       case FileType.finDocTransactionItem:
       case FileType.finDocOrderPurchaseItem:
@@ -280,6 +273,7 @@ Future<void> main(List<String> args) async {
           List<String> newRow = List.from(row);
           // replace by sequential number when not these types
           // because like to show the original id in the new system
+          // only transactionitem
           if (fileType != FileType.finDocInvoiceSaleItem &&
               fileType != FileType.finDocInvoicePurchaseItem &&
               fileType != FileType.finDocOrderSaleItem &&
@@ -288,8 +282,6 @@ Future<void> main(List<String> args) async {
               fileType != FileType.finDocShipmentOutgoingItem) {
             newRow[0] = seqNumber.toString();
           }
-          // print(
-          //    "==I=new row: ${newRow[0]} ${newRow[8]} ===oldrow: ${row[0]} ${row[8]}");
           itemRows.add(newRow);
           lastRow = row;
         }

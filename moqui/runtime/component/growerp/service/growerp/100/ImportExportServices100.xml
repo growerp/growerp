@@ -976,6 +976,15 @@ along with this software (see the LICENSE.md file). If not, see
             </iterate>
             <log
                 message="${payments.size()} not completed payments found ${updatedCount} updated, ${notFoundCount} not found in ledger" />
+            <!-- close oldest period -->
+            <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
+                <econdition field-name="partyId" from="companyPartyId" />
+                <econdition field-name="timePeriodTypeId" value="FiscalYear" />
+                <econdition field-name="isClosed" value="N" />
+                <order-by field-name="periodNum" />
+            </entity-find>
+            <service-call name="mantle.ledger.LedgerServices.close#FinancialTimePeriod"
+                in-map="[timePeriodId: periods[0].timePeriodId, closeChildren: true]" />
         </actions>
     </service>
 

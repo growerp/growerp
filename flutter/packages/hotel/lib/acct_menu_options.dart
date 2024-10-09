@@ -103,7 +103,7 @@ List<MenuOption> acctMenuOptions = [
   MenuOption(
       image: "packages/growerp_core/images/accountingGrey.png",
       selectedImage: "packages/growerp_core/images/accounting.png",
-      title: "Accounting Ledger\n",
+      title: "Accounting Ledger",
       route: '/acctLedger',
       userGroups: [
         UserGroup.admin,

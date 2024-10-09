@@ -195,6 +195,8 @@ along with this software (see the LICENSE.md file). If not, see
                         FinDocPrep: 'NotPosted',
                         Posted: 'FinDocCompleted',
                         FinDocCompleted: 'Posted',
+                        Cancelled: 'FinDocCancelled',
+                        FinDocCancelled: 'Cancelled',
                     ]" />
                 <set field="convertedStatusId" from="transactionStatusValues[statusId]" />
             </if>
@@ -223,6 +225,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="rentalFromDate" />
             <parameter name="rentalThruDate" />
             <parameter name="journalId" />
+            <parameter name="isPosted" type="Boolean" default-value="false" />
         </in-parameters>
         <out-parameters>
             <parameter name="finDocs" type="List">
@@ -1209,7 +1212,9 @@ along with this software (see the LICENSE.md file). If not, see
                                 ignore-if-empty="true" />
                             <econdition field-name="isPosted" from="isPosted"
                                 ignore-if-empty="true" />
-                            <order-by field-name="transactionDate" />
+                            <econdition field-name="transactionDate" operator="less-equals"
+                                from="tsDate" ignore-if-empty="true" />
+                            <order-by field-name="isPosted,transactionDate" />
                         </entity-find>
                     </else>
                 </if>
@@ -1622,12 +1627,18 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="ownerPartyId" from="companyPartyId" />
             </entity-find>
             <if condition="order.sales == true">
+                <entity-find entity-name="mantle.party.contact.PartyContactMech"
+                    list="postalContactMechs">
+                    <econdition field-name="partyId" from="customerPartyId" />
+                    <econdition field-name="contactMechPurposeId" value="PostalPrimary" />
+                </entity-find>
                 <service-call name="mantle.order.OrderServices.create#Order"
                     in-map="[productStoreId: productStoreId,
                             pseudoId: order.pseudoId,
                             facilityId: facilities[0].facilityId,
                             vendorPartyId: vendorPartyId,
                             customerPartyId: customerPartyId,
+                            postalContactMechId: postalContactMechs ? postalContactMechs[0].contactMechId : null,
                             orderName: order.description]"
                     out-map="context" />
                 <else>
@@ -2151,7 +2162,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- transaction -->
                 <else-if condition="finDoc.docType == 'transaction'">
                     <entity-find-one entity-name="mantle.ledger.transaction.AcctgTrans"
-                        value-field="transaction">
+                        value-field="transaction" for-update="true">
                         <field-map field-name="acctgTransId" from="finDoc.transactionId" />
                         <field-map field-name="organizationPartyId" from="companyPartyId" />
                     </entity-find-one>
@@ -2195,9 +2206,28 @@ along with this software (see the LICENSE.md file). If not, see
                         <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
                             in-map="[acctgTransId: finDoc.transactionId]" />
                     </if>
-                    <set field="inMap"
-                        from="[finDocId: finDoc.transactionId,
-                                    docType: 'transaction', sales: true]" />
+                    <!-- remove physically unposted transaction with status cancelled -->
+                    <if condition="finDoc.statusId == 'Cancelled'">
+                        <!-- delete transactions -->
+                        <entity-delete-by-condition
+                            entity-name="mantle.ledger.transaction.AcctgTransEntry">
+                            <econdition field-name="acctgTransId" from="finDoc.transactionId" />
+                        </entity-delete-by-condition>
+                        <if condition="transaction.isPosted == 'N'">
+                            <entity-delete value-field="transaction" />
+                            <else>
+                                <return error="true"
+                                    message="Transaction ${transaction.pseudoId} is posted, cannot be deleted!" />
+                            </else>
+                        </if>
+                        <set field="inMap" from="[:]" />
+                        <else>
+                            <set field="inMap"
+                                from="[finDocId: finDoc.transactionId,
+                                        docType: 'transaction', sales: true]" />
+                        </else>
+                    </if>
+                    <!-- -->
                 </else-if>
                 <!-- request -->
                 <else-if condition="finDoc.docType == 'request'">
@@ -2228,9 +2258,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <return error="true" message="doctype ${finDoc.docType} not supported!" />
                 </else>
             </if>
-            <service-call name="growerp.100.FinDocServices100.get#FinDoc"
-                in-map="inMap" out-map="context" />
-            <set field="finDoc" from="finDocs[0]" />
+            <if condition="finDoc.docType != 'transaction'">
+                <service-call name="growerp.100.FinDocServices100.get#FinDoc"
+                    in-map="inMap" out-map="context" />
+                <set field="finDoc" from="finDocs[0]" />
+            </if>
         </actions>
     </service>
 
@@ -2996,7 +3028,7 @@ along with this software (see the LICENSE.md file). If not, see
         <description>first delete any items(if any) and create new ones.</description>
         <in-parameters>
             <parameter name="shipmentId" required="true" type="String" />
-            <parameter name="items" required="true" type="List" />
+            <parameter name="items" type="List" default="[]" />
         </in-parameters>
         <actions>
             <entity-delete-by-condition entity-name="mantle.shipment.ShipmentItemSource">

@@ -149,9 +149,13 @@
             "type": "dart",
             "request": "launch",
             "cwd": "flutter/packages/growerp/bin",
-            "program": "csvToCsv.dart",
+            "program": "convert_to_csv.dart",
             "args": [
-                "/home/hans/accugeo/accugeoConvert"
+                "/home/hans/accugeo/accugeoConvert",
+                "-start",
+                "1999-01-01",
+                "-end",
+                "1999-12-31"
             ]
         },
         {

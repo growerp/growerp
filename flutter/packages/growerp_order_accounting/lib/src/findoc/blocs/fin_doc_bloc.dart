@@ -183,11 +183,17 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
                 (element) => element.requestId == event.finDoc.requestId);
           default:
         }
-        finDocs[index] = compResult;
+        if (docType == FinDocType.transaction &&
+            event.finDoc.status == FinDocStatusVal.cancelled) {
+          finDocs.removeAt(index);
+        } else {
+          finDocs[index] = compResult;
+        }
         return emit(state.copyWith(
             status: FinDocStatus.success,
             finDocs: finDocs,
-            message: "$docType ${compResult.pseudoId!} updated"));
+            message: "$docType ${compResult.pseudoId!} "
+                "${docType == FinDocType.transaction && event.finDoc.status == FinDocStatusVal.cancelled ? 'Deleted' : 'updated'}"));
       }
     } on DioException catch (e) {
       emit(state.copyWith(

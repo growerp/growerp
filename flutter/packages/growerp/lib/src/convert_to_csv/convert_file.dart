@@ -2,7 +2,7 @@
 import 'file_type_model.dart';
 
 String convertFile(FileType fileType, String string, String fileName) {
-  /// file type dependent changes here
+  /// file type dependent changes here,
   switch (fileType) {
     case FileType.glAccount:
       string = string
@@ -30,9 +30,9 @@ String convertFile(FileType fileType, String string, String fileName) {
               '50050,Raw Materials,Good and Material Cost (contra),')
           .replaceFirst('89500,Discount for Early Payment,Cost of Sales,',
               '89500,Discount for Early Payment,Expenses (contra),');
-      break;
     default:
       string = string.replaceAll('�', '°');
+      string = string.replaceAll(',"H1002",', ',"1002",');
   }
 
   /// filename dependent changes here

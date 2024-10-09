@@ -64,9 +64,9 @@ TableData getCompanyUserTableData(Bloc bloc, String classificationId,
       value: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("${item.name.truncate(25)} ",
+          Text("${item.name.truncate(20)} ",
               textAlign: TextAlign.start, key: Key('name$index')),
-          Text(item.email ?? '', key: const Key("companyEmail")),
+          Text(item.email.truncate(20), key: const Key("companyEmail")),
         ],
       ),
     ));
