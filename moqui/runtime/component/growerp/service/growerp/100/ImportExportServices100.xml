@@ -596,9 +596,9 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="pseudoId" from="finDoc.reference" />
                         </else>
                     </if>
-                    <!--log
+                    <log
                         message="===looking for invoice: pseudoId: ${pseudoId} from ${fromPartyId} to: ${toPartyId} refnum:
-                    ${paymentRefNum}" /-->
+                    ${paymentRefNum}" />
                     <entity-find entity-name="mantle.account.invoice.Invoice" limit="1"
                         list="invoiceFound">
                         <econdition field-name="pseudoId" from="pseudoId" />

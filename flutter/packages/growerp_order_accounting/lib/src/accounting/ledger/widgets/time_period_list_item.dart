@@ -16,6 +16,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../accounting.dart';
@@ -56,7 +57,9 @@ class TimePeriodListItem extends StatelessWidget {
           }));
     }
 */
-    if (!timePeriod.hasNextPeriod && timePeriod.periodType == 'Y') {
+    if (!timePeriod.hasNextPeriod &&
+        timePeriod.periodType == 'Y' &&
+        !timePeriod.isClosed) {
       buttons.add(IconButton(
           padding: EdgeInsets.zero,
           key: Key('next$index'),
@@ -64,7 +67,28 @@ class TimePeriodListItem extends StatelessWidget {
           tooltip: 'create next period',
           onPressed: () {
             ledgerBloc.add(LedgerTimePeriodsUpdate(
-                createNext: true, timePeriodId: timePeriod.periodId));
+                createNext: true,
+                timePeriodId: timePeriod.periodId,
+                timePeriodName: timePeriod.periodName));
+          }));
+    }
+
+    if (!timePeriod.isClosed) {
+      buttons.add(IconButton(
+          visualDensity: VisualDensity.compact,
+          padding: EdgeInsets.zero,
+          key: Key('close$index'),
+          icon: const Icon(Icons.close),
+          tooltip: 'close Timeperiod',
+          onPressed: () async {
+            bool? result = await confirmDialog(
+                context,
+                "Close Time period ${timePeriod.periodName}?",
+                "cannot be undone!");
+            if (result == true) {
+              ledgerBloc.add(LedgerTimePeriodClose(timePeriod.periodId,
+                  timePeriodName: timePeriod.periodName));
+            }
           }));
     }
 

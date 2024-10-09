@@ -294,6 +294,43 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="close" noun="TimePeriod">
+        <description>add, update and delete timeperiods</description>
+        <in-parameters>
+            <parameter name="timePeriodId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="timePeriods" type="List">
+                <parameter name="timePeriod" type="Map">
+                    <parameter name="periodId" />
+                    <parameter name="periodName" />
+                    <parameter name="fromDate" />
+                    <parameter name="thruDate" />
+                    <parameter name="isClosed" type="Boolean" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.AccountingServices100.get#TimePeriod"
+                out-map="context" />
+            <entity-find-one entity-name="mantle.party.time.TimePeriod"
+                value-field="timePeriod">
+                <field-map field-name="partyId" from="companyPartyId" />
+                <field-map field-name="timePeriodId" from="timePeriodId" />
+            </entity-find-one>
+            <if condition="!timePeriod">
+                <return error="true"
+                    message="TimePeriodId: $periodId not found for company party id: $companyPartyId" />
+            </if>
+            <service-call name="mantle.ledger.LedgerServices.close#FinancialTimePeriod"
+                in-map="[timePeriodId: timePeriodId, closeChildren: 'Y']" />
+            <service-call name="growerp.100.AccountingServices100.get#TimePeriod"
+                out-map="context" />
+        </actions>
+    </service>
+
     <service verb="get" noun="BalanceSummary">
         <in-parameters>
             <parameter name="periodName" required="true" />
@@ -1255,7 +1292,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="accountCode" />
         </in-parameters>
         <out-parameters>
-            <parameter name="parentGlAccountId"></parameter>
+            <parameter name="parentGlAccountId" />
         </out-parameters>
         <actions>
             <service-call out-map="context"

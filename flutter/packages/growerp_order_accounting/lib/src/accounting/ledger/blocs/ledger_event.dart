@@ -41,12 +41,21 @@ class LedgerTimePeriodsUpdate extends LedgerEvent {
   final bool? createPrevious;
   final bool? delete;
   final String timePeriodId;
+  final String? timePeriodName;
 
   const LedgerTimePeriodsUpdate(
       {this.createNext,
       this.createPrevious,
       this.delete,
-      required this.timePeriodId});
+      required this.timePeriodId,
+      this.timePeriodName});
+}
+
+class LedgerTimePeriodClose extends LedgerEvent {
+  final String timePeriodId;
+  final String? timePeriodName;
+
+  const LedgerTimePeriodClose(this.timePeriodId, {this.timePeriodName});
 }
 
 class LedgerCalculate extends LedgerEvent {}

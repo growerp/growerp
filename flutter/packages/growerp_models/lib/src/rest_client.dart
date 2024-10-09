@@ -362,6 +362,11 @@ abstract class RestClient {
     @Field() bool? delete,
   });
 
+  @POST("rest/s1/growerp/100/TimePeriod")
+  Future<TimePeriods> closeTimePeriod({
+    @Field() required String timePeriodId,
+  });
+
   @GET("rest/s1/growerp/100/LedgerJournal")
   Future<LedgerJournals> getLedgerJournal({
     @Query('ledgerJournalId') String? ledgerJournalId,
