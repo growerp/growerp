@@ -316,8 +316,10 @@ List<String> convertRow(
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[25]); // product id
       columnsTo.add(columnsFrom[26]); // descr
-      columnsTo.add(columnsFrom[24]); // quant
-      columnsTo.add(columnsFrom[28]); // price
+      columnsTo.add(columnsFrom[24] == '0.00' ? '1' : columnsFrom[24]); // quant
+      columnsTo.add(columnsFrom[28] == '0.0000'
+          ? columnsFrom[29]
+          : columnsFrom[28]); // price
       columnsTo.add(columnsFrom[27]); // itemType accountCode
       columnsTo.add('');
       columnsTo.add(accountCodeToItemType(columnsFrom[27], columnsFrom[25]));
@@ -325,13 +327,14 @@ List<String> convertRow(
 
     case FileType.finDocPaymentPurchase:
       // 0: partyId, 1:vendorId 2:vendorName, 3:checkname, 10: checkNumber, 11:date(mm/dd/yy),
-      // 12: memo // contains reference to invoice/order,  13: cash accountCode,
-      // 14: total amount, 18: date cleared, 20: acct Transaction invoiceId, 21: discount Amount
+      // 12: memo // contains reference to invoice/order manual inp,  13: cash accountCode,
+      // 14: total amount, 18: date cleared, 20: acct Transaction invoiceId,
+      // 21: discount Amount
       if (columnsFrom.length < 21) return [];
       if (!dateOk(dateConvert(columnsFrom[11]))) return [];
       // date/checknumber is key here because checknumber is reference in ledger
       columnsTo.add(
-          "${dateConvert(columnsFrom[11])}-${columnsFrom[10]}"); // will be replaced by sequential id
+          "${dateConvert(columnsFrom[11])}-${columnsFrom[10]}-${columnsFrom[20]}"); // will be replaced by sequential id
       columnsTo.add('false');
       columnsTo.add('Payment');
       columnsTo.add('converted');
@@ -339,9 +342,8 @@ List<String> convertRow(
       columnsTo.add('');
       columnsTo.add(columnsFrom[1]);
       columnsTo.add(columnsFrom[2]);
-      columnsTo.add(columnsFrom[20] != ''
-          ? columnsFrom[20]
-          : columnsFrom[12]); // trans invoice id in reference
+      columnsTo.add(columnsFrom[20]
+          .replaceFirst(' & ', ',')); // trans invoice id in reference
       columnsTo.add(columnsFrom[10]); // checknumber
       String amount = columnsFrom[14].replaceAll('-', ''); // check number
       columnsTo.add(amount); // total amount
@@ -442,8 +444,10 @@ List<String> convertRow(
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[30]); // product id
       columnsTo.add(columnsFrom[32]); // descr
-      columnsTo.add(columnsFrom[28]); // quant
-      columnsTo.add(columnsFrom[34]); // price
+      columnsTo.add(columnsFrom[28] == '0.00' ? '1' : columnsFrom[28]); // quant
+      columnsTo.add(columnsFrom[34] == '0.0000'
+          ? columnsFrom[36]
+          : columnsFrom[34]); // price
       columnsTo.add(columnsFrom[33]); // itemType accountCode
       columnsTo.add('');
       columnsTo.add(accountCodeToItemType(columnsFrom[33], columnsFrom[30]));

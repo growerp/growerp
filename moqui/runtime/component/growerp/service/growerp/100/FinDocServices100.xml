@@ -1866,7 +1866,7 @@ along with this software (see the LICENSE.md file). If not, see
                         itemTypeGlAccountId: paymentTypeGlAccountId,
                         overrideGlAccountId: payment.items? payment.items[0].glAccount?.glAccountId : null,
                         fromPartyId: fromPartyId,
-                        paymentRefNum: payment.reference]"
+                        paymentRefNum: payment.reference.length() &lt;= 60 ? payment.reference : payment.reference.substring(0,60) + '..']"
                 out-map="context" />
         </actions>
     </service>

@@ -589,31 +589,40 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="finDoc.sales == true">
                         <set field="fromPartyId" from="companyPartyId" />
                         <set field="toPartyId" from="null" />
-                        <set field="pseudoId" from="finDoc.classificationId" />
+                        <set field="pseudoIds" from="[finDoc.classificationId]" />
                         <else>
                             <set field="toPartyId" from="companyPartyId" />
                             <set field="fromPartyId" from="null" />
-                            <set field="pseudoId" from="finDoc.reference" />
+                            <set field="pseudoIds" from="finDoc.reference.split(',')" />
                         </else>
                     </if>
-                    <log
-                        message="===looking for invoice: pseudoId: ${pseudoId} from ${fromPartyId} to: ${toPartyId} refnum:
-                    ${paymentRefNum}" />
-                    <entity-find entity-name="mantle.account.invoice.Invoice" limit="1"
-                        list="invoiceFound">
-                        <econdition field-name="pseudoId" from="pseudoId" />
-                        <econdition field-name="fromPartyId" ignore-if-empty="true" />
-                        <econdition field-name="toPartyId" ignore-if-empty="true" />
-                    </entity-find>
-                    <if condition="invoiceFound">
-                        <service-call
-                            name="mantle.account.PaymentServices.apply#PaymentForInvoice"
-                            in-map="[invoiceId: invoiceFound[0].invoiceId, paymentId: resultCreateFindoc.finDoc.paymentId]" />
-                        <else>
-                            <log
-                                message="could not find an invoice ${pseudoId} to apply for payment: ${resultCreateFindoc.finDoc.paymentId} amount: ${resultCreateFindoc.finDoc.grandTotal}" />
-                        </else>
-                    </if>
+                    <iterate list="pseudoIds" entry="pseudoId">
+                        <if condition="pseudoId == ''">
+                            <continue />
+                        </if>
+                        <entity-find entity-name="mantle.account.invoice.Invoice" limit="3"
+                            list="invoiceFound">
+                            <econdition field-name="pseudoId" from="pseudoId" />
+                            <econdition field-name="fromPartyId" ignore-if-empty="true" />
+                            <econdition field-name="toPartyId" ignore-if-empty="true" />
+                        </entity-find>
+                        <!--log
+                            message="looking from ${finDoc.sales ? 'sales' : 'purchase'} payment: ${finDoc.pseudoId} for
+                        invoice: $pseudoId from: $fromPartyId to: $toPartyId result:
+                        ${invoiceFound?.size()}" /-->
+                        <if condition="invoiceFound">
+                            <service-call name="update#mantle.account.payment.Payment"
+                                in-map="[paymentId: resultCreateFindoc.finDoc.paymentId,
+                                    forInvoiceId:  invoiceFound[0].invoiceId, status: 'PmntDelivered']" />
+                            <service-call
+                                name="mantle.account.PaymentServices.apply#PaymentForInvoice"
+                                in-map="[paymentId: resultCreateFindoc.finDoc.paymentId]" />
+                            <else>
+                                <log
+                                    message="could not find an invoice ${pseudoId} to apply for payment: ${resultCreateFindoc.finDoc.paymentId} amount: ${resultCreateFindoc.finDoc.grandTotal}" />
+                            </else>
+                        </if>
+                    </iterate>
                 </if>
                 <!-- link invoices to order, so order should be created first -->
                 <if condition="finDoc.docType == 'invoice' &amp;&amp; finDoc.classificationId">

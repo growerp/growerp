@@ -144,8 +144,7 @@ Future<void> main(List<String> args) async {
       int index = 0;
       inputCsvFile = fast_csv.parse(fileContent);
       for (final row in inputCsvFile) {
-        // ignore: avoid_print
-        if (++index % 10000 == 0) print("processing row: $index");
+        //if (++index % 10000 == 0) print("processing row: $index");
         if (fileInput.endsWith('.csv') && row == inputCsvFile.first) {
           continue; // header line
         }
@@ -227,9 +226,32 @@ Future<void> main(List<String> args) async {
         List<List<String>> headerRows = [];
         int seqNumber = 10000;
 
-        for (final row in convertedRows) {
+        var invoiceRef = [];
+        for (final (index, row) in convertedRows.indexed) {
           List<String> newRow = List.from(row);
           if (lastRow.isEmpty || row[0] != lastRow[0]) {
+            // payment can cover more than a single invoice so group
+            // them in the 'reference' field separated by ','
+            // check if checknumer is the same
+            if (fileType == FileType.finDocPaymentPurchase &&
+                index + 1 < convertedRows.length) {
+              if (row[10] == convertedRows[index + 1][10]) {
+                // same check number in next record
+                invoiceRef.add(row[8]);
+                continue;
+              } else {
+                if (invoiceRef.isNotEmpty) {
+                  invoiceRef.add(row[8]);
+                  newRow[8] = invoiceRef.join(',');
+                  invoiceRef = [];
+                }
+              }
+            } else {
+              if (invoiceRef.isNotEmpty) {
+                newRow[8] = invoiceRef.join(',');
+                invoiceRef = [];
+              }
+            }
             // replace by sequential number when not these types
             // because like to show the original id in the new system
             // only transaction

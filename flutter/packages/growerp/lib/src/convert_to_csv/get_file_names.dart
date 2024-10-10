@@ -20,8 +20,6 @@ List<String> getFileNames(FileType fileType) {
       searchFiles.add('main-company.csv');
     case FileType.glAccount:
       searchFiles.add('4-1-chart_of_accounts_list.csv'); // basic layout
-//    case FileType.asset:
-//      searchFiles.add('5-3-inventory_item_list.csv');
     case FileType.product:
     case FileType.user:
     case FileType.finDocTransaction:
@@ -60,6 +58,9 @@ List<String> getFileNames(FileType fileType) {
     case FileType.finDocPaymentPurchaseItem:
     case FileType.category:
     case FileType.website:
+    case FileType.asset:
+      // searchFiles.add('5-3-inventory_item_list.csv');
+      // ignore these types
       break;
     default:
       logger.w("No files found for fileType: ${fileType.name}");
