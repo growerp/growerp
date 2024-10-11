@@ -60,6 +60,14 @@ Run:
 ### run the flutter emulator or browser
 ```sh
 cd flutter/packages/admin
+dart pub global activate melos 3.4.0
+export PATH="$PATH":"$HOME/.pub-cache/bin"
+melos clean
+melos bootstrap
+# localization
+melos l10n --no-select
+# build
+melos build --no-select
 flutter run
 ```
 ## Use GrowERP locally with docker
