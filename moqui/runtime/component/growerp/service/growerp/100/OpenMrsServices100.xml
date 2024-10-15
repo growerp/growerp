@@ -17,10 +17,11 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="add" noun="PatientAndRequest">
         <in-parameters>
-            <parameter name="requestor" type="Map" />
+            <parameter name="requester" type="Map" />
             <parameter name="request" type="Map" />
         </in-parameters>
         <out-parameters>
+            <parameter name="externalId" />
             <parameter name="resultMessage" />
             <parameter name="error" />
         </out-parameters>
@@ -45,7 +46,8 @@ along with this software (see the LICENSE.md file). If not, see
                 condition="!interfaces || interfaces[0].username.isEmpty()
                             || interfaces[0].password.isEmpty()
                             || interfaces[0].baseUrl.isEmpty()">
-                <log level="error" message="OpenMRS system hostname not found in CompanyData" />
+                <log level="error"
+                    message="OpenMRS system hostname ${hostNames[0].settingValue} not found in CompanyData" />
                 <return />
             </if>
             <set field="username" from="interfaces[0].username" />
@@ -53,6 +55,7 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="baseUrl" from="interfaces[0].baseUrl" />
 
             <set field="setCookie" from="null" />
+            <set field="patientUuid" from="null" />
             <script><![CDATA[
                 import java.io.BufferedReader;
                 import java.io.IOException;
@@ -82,6 +85,10 @@ along with this software (see the LICENSE.md file). If not, see
                     }
                     in.close();
                     def result = (Map) new JsonSlurper().parseText(content.toString());
+                    if (result.authenticated == false) {
+                        error = "OpenMRS credentials not valid";
+                        return
+                    }
                     ec.logger.info("auth response: Set-Cookie: ${con.getHeaderField('Set-Cookie')}");
                     setCookie = con.getHeaderField('Set-Cookie');
                 } else {
@@ -90,12 +97,15 @@ along with this software (see the LICENSE.md file). If not, see
 
             ]]></script>
 
-            <if condition="requestor.externalId == null">
+            <if condition="requester.externalId == null">
                 <set field="error" value="" />
                 <script><![CDATA[
                 // get id sources
-                Map sourceResult = sendGET("openmrs/ws/rest/v1//idgen/identifiersource?v=default");
-                ec.logger.info("=== result from sources's: $sourceResult");
+                Map sourceResult = sendGET("openmrs/ws/rest/v1/idgen/identifiersource?v=default");
+                if(sourceResult == null) {
+                    error = "could not find sources for Id in openMRS"
+                }
+                // ec.logger.info("=== result from sources's: $sourceResult");
                 sourceUid = sourceResult.results[0].uuid;
 
                 // get sequence id -----------------
@@ -104,25 +114,25 @@ along with this software (see the LICENSE.md file). If not, see
                         sourceUuid: sourceUid,
                         numberToGenerate: 1);
 
-                Map result = sendPOST("openmrs/ws/rest/v1/idgen/identifiersource",jason.toString());
+                def result = sendPOST("openmrs/ws/rest/v1/idgen/identifiersource",jason.toString());
                 ec.logger.info("=== result from id's: $result");
-                if (results == null) {
+                if (result == null) {
                     error = "could not get next patient identifier"
                     return
                 }
-                def identUuid = result.results[0].identifierValue
-
+                def identId = result.identifiers[0]
+                ec.logger.info("====id: ${identId}")
                 // create patient ------------------
                 def identifiers = [
                         [
-                            identifier: identUuid,
+                            identifier: identId,
                             identifierType: "OpenMRS ID",
                         ]
                     ]
                 def names = [
                         [
-                            givenName: "${requestor.firstName}",
-                            familyName: "${requestor.lastName}",
+                            givenName: "${requester.name.split(',')[1]}",
+                            familyName: "${requester.name.split(',')[0]}",
                         ]
                     ]
                 def person = [ names: names, age: 55, gender: "M" ]
@@ -130,43 +140,55 @@ along with this software (see the LICENSE.md file). If not, see
                                         person: person) 
                 ec.logger.info("===json string: ${json.toString()}");
                 result = sendPOST("openmrs/ws/rest/v1/patient",json.toString());
-                ec.logger.info("=======result of create patient: ${result}");
+                ec.logger.info("=======result of create patient: ${result.display}");
+                patientUuid = result.uuid;
 
-                requestor.externalId = identUuid;
+                externalId = patientUuid;
                 ]]></script>
                 <service-call name="update#mantle.party.Party"
-                    in-map="[partyId: requestor.partyId, externalId: requestor.externalId]" />
+                    in-map="[partyId: requester.partyId, externalId: requester.externalId]" />
             </if>
 
             <!-- get/create patient attributes  -->
             <script><![CDATA[
-                def result = sendGet("openmrs/ws/rest/v1/person/${requestor.externalId}/attribute");
-                ec.logger.info("=======result of attribute list: ${result}");
-                def attributes = new groovy.json.JsonSlurper().parseText(result);
+                // get available attribute type for the uuid
+                def attrTypes = sendGET("openmrs/ws/rest/v1/personattributetype")
+                if(attrTypes == null) {
+                    error = "could not find any person attribute types"
+                }
+                def attributes = attrTypes.results
+                ec.logger.info("=======result of attribute list: ${attributes}");
                 def inAttributes = new groovy.json.JsonSlurper().parseText(request.description);
+                ec.logger.info("=======result of inAttribute list: ${inAttributes}");
+
                 // update patient attributes
                 def newAttributes = [[:]];
-                for (at in attributes) {
-                    for (inAt in inAttributes) {
-                        if (inAt[at.name] != null)
-                            newAttributes.add(
-                                { attributeType: at[uuid], value: inAt[at.name] }
-                            );
+                for (at in attributes) { // scan available attributes
+                    ec.logger.info("== processing attrib: ${at.display}")
+                    // find attribute in inAttribute
+                    def inAttribute = inAttributes[at.display]
+                    if (inAttribute == null) continue
+                    ec.logger.info("== selected attrib: ${at.display}")
+
+                    // check if attribute exist
+                    ec.logger.info("== looking for patient: $patientUuid attribute: ${at.uuid}")
+                    def attExist = sendGET("openmrs/ws/rest/v1/person/${patientUuid}/attribute/${at.uuid}")
+                    ec.logger.info("=== attrib exist: ${attExist}")
+                    // if present update
+                    if (attExist != null) {
+                        def json = new JsonBuilder(attributeType: at.uuid, value: inAttribute)  
+                        if (sendPOST("openmrs/ws/rest/v1/person/${patientUuid}/attribute/${at.uuid}",json.toString()) == null) {
+                            error = "could not update person attribute"
+                            return
+                        }
+                    } else { // add
+                        def json = new JsonBuilder(attributeType: at.uuid, value: inAttribute)  
+                        if (sendPOST("openmrs/ws/rest/v1/person/${patientUuid}/attribute",json.toString()) == null) {
+                            error = "could not add person attribute"
+                            return
+                        }
                     }
                 }
-
-                // update patient
-                def identifiers = [
-                        [
-                            identifier: identUuid,
-                            identifierType: "OpenMRS ID",
-                        ]
-                    ]
-
-                def json = new JsonBuilder(identifiers: identifiers,
-                                        attributes: newAttributes) 
-                result = sendPOST("openmrs/ws/rest/v1/patient/${requestor.externalId}",json.toString());
-                ec.logger.info("=======result of update patient: ${result}");
             ]]></script>
 
             <script><![CDATA[
@@ -194,7 +216,7 @@ along with this software (see the LICENSE.md file). If not, see
                         ec.logger.warn("error response code: ${con.getResponseCode()} msg: ${con.getResponseMessage()}");
                     }
                     input.close();
-                    //logger.info("=== GET reponse: ${response.toString()}");
+                    // logger.info("=== GET reponse: ${response.toString()}");
                     return json;
                 }
 
@@ -227,7 +249,7 @@ along with this software (see the LICENSE.md file). If not, see
                         response.append(inputLine);
                     }
                     input.close();
-                    //logger.info("=== POST reponse: ${response.toString()}");
+                    // logger.info("=== POST reponse: ${response.toString()}");
                     return new groovy.json.JsonSlurper().parseText(response.toString())
                 }
            ]]></script>

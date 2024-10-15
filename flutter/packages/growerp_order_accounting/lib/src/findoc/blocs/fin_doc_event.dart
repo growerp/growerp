@@ -31,6 +31,7 @@ class FinDocFetch extends FinDocEvent {
     this.refresh = false,
     this.journalId,
     this.limit = 20,
+    this.my = false,
   });
   final String searchString;
   final bool refresh;
@@ -41,6 +42,7 @@ class FinDocFetch extends FinDocEvent {
   final FinDocType? docType; // to get a single document id, docType
   final String customerCompanyPartyId;
   final int limit;
+  final bool my; // only show 'my' documents
 
   @override
   List<Object> get props => [customerCompanyPartyId, searchString, refresh];

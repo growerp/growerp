@@ -59,9 +59,9 @@ along with this software (see the LICENSE.md file). If not, see
         </in-parameters>
         <out-parameters>
             <parameter name="userPartyId" /><!-- logged in user -->
-            <parameter name="ownerPartyId" /><!-- the ownerPartyId of the CompanyPartyId party
-            record -->
-            <parameter name="companyPartyId" /><!-- the owner main company, not the user company -->
+            <parameter name="userCompanyPartyId" /><!-- the related company of the userPartyId -->
+            <parameter name="companyPartyId" /><!-- the main company, not the user company -->
+            <parameter name="ownerPartyId" /><!-- the ownerPartyId of the CompanyPartyId -->
         </out-parameters>
         <actions>
             <if condition="!userPartyId">
@@ -80,7 +80,16 @@ along with this software (see the LICENSE.md file). If not, see
                     message="Not logged in and provided userPartyId: $userPartyId not found" />
             </if>
             <set field="ownerPartyId" from="userParty.ownerPartyId" />
-            <!-- find main company with the Role OrgInternal, user company is in user model-->
+            <!-- get user related company -->
+            <entity-find entity-name="mantle.party.PartyRelationship" list="relCompanies">
+                <econdition field-name="fromPartyId" from="userPartyId" />
+                <econdition field-name="relationshipTypeEnumId" value="PrtEmployee" />
+                <date-filter />
+            </entity-find>
+            <if condition="relCompanies">
+                <set field="userCompanyPartyId" from="relCompanies[0].toPartyId" />
+            </if>
+            <!-- find main company with the Role OrgInternal -->
             <entity-find entity-name="mantle.party.PartyDetailAndRole" limit="1" list="companyList">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <econdition field-name="partyTypeEnumId" value="PtyOrganization" />

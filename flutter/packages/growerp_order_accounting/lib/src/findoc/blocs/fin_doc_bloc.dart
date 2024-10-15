@@ -116,6 +116,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         docType: event.docType ?? docType,
         searchString: event.searchString,
         journalId: event.journalId,
+        my: event.my,
       );
 
       emit(state.copyWith(

@@ -213,6 +213,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
             <parameter name="pseudoId" />
             <parameter name="sales" type="Boolean" />
+            <parameter name="my" type="Boolean" default-value="false" />
             <parameter name="docType" />
             <parameter name="open" type="Boolean" default-value="true" />
             <parameter name="startDate">
@@ -331,9 +332,15 @@ along with this software (see the LICENSE.md file). If not, see
 
             <if condition="sales == true">
                 <set field="vendorPartyId" from="companyPartyId" />
+                <if condition="my">
+                    <set field="customerPartyId" from="userCompanyPartyId ?: userPartyId" />
+                </if>
             </if>
             <if condition="sales == false">
                 <set field="customerPartyId" from="companyPartyId" />
+                <if condition="my">
+                    <set field="vendorPartyId" from="userCompanyPartyId ?: userPartyId" />
+                </if>
             </if>
             <set field="current" value="0" type="Integer" />
             <!-- request -->
@@ -341,12 +348,16 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- 'ReqDraft','ReqSubmitted','ReqInProgress','ReqCompleted','ReqCancelled' -->
                 <set field="openStatusList"
                     from="['ReqDraft','ReqSubmitted','ReqInProgress']" />
+                <if condition="my">
+                    <set field="requesterPartyId" from="userCompanyPartyid ?: userPartyId" />
+                </if>
                 <if condition="finDocId || pseudoId">
                     <entity-find
                         entity-name="growerp.order.RequestAndParty" list="items">
                         <econdition field-name="requestId" from="finDocId" ignore-if-empty="true" />
                         <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
-                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                        <econdition field-name="requesterPartyId" from="requesterPartyId"
+                            ignore-if-empty="true" />
                     </entity-find>
                     <if condition="sales == null">
                         <set field="sales" value="false" type="Boolean" />
@@ -360,7 +371,8 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                         <entity-find offset="start" limit="limit"
                             entity-name="growerp.order.RequestAndParty" list="items">
-                            <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                            <econdition field-name="requesterPartyId" from="requesterPartyId"
+                                ignore-if-empty="true" />
                             <econditions
                                 combine="or">
                                 <econdition field-name="statusId" operator="in" from="statusList"
@@ -1524,16 +1536,16 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="[   requestPseudoId: finDoc.pseudoId,
                                     requestTypeEnumId: requestType.convertedStatusId,
                                     description: finDoc.description,
-                                    requestOwnerPartyId: ownerPartyId,
+                                    requestOwnerPartyId: companyUserPartyId ?: userpartyId,
                                     statusId: convertedStatusId,
                                     filedByPartyId: otherPartyId,
                                     requestDate: nowDate,                                   
                                 ]"
                         out-map="context" />
-                    <service-call name="growerp.100.PartyServices100.get#User"
-                        in-map="partyId: otherPartyId" out-map="context" />
+                    <service-call name="growerp.100.PartyServices100.get#CompanyUser"
+                        in-map="partyId: companyUserPartyId ?: userPartyId" out-map="context" />
                     <service-call name="growerp.100.OpenMrsServices100.add#PatientAndRequest"
-                        in-map="[request: finDoc, requestor: users[0] ]"
+                        in-map="[request: finDoc, requester: companiesUsers[0] ]"
                         out-map="result" />
                     <if condition="result?.error">
                         <return error="true" message="${result.error}" />

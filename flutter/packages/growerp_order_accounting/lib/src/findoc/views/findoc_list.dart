@@ -107,7 +107,7 @@ class FinDocListState extends State<FinDocList> {
         _finDocBloc = context.read<RequestBloc>() as FinDocBloc;
       default:
     }
-    _finDocBloc.add(const FinDocFetch(limit: 15));
+    _finDocBloc.add(FinDocFetch(limit: 15, my: my));
   }
 
   @override

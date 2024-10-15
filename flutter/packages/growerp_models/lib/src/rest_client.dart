@@ -267,6 +267,7 @@ abstract class RestClient {
     @Query('journalId') String? journalId,
     @Query('start') int? start,
     @Query('limit') int? limit,
+    @Query('my') bool? my,
   });
 
   @POST("rest/s1/growerp/100/FinDoc")

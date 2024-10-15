@@ -84,12 +84,12 @@ along with this software (see the LICENSE.md file). If not, see
     </extend-entity>
 
     <extend-entity entity-name="PostalAddress" package="mantle.party.contact">
-        <field name="stateProvince" type="text-medium"></field>
+        <field name="stateProvince" type="text-medium" />
     </extend-entity>
 
     <extend-entity entity-name="OrderHeader" package="mantle.order"
         sequence-primary-prefix="ord">
-        <field name="pseudoId" type="id"></field>
+        <field name="pseudoId" type="id" />
         <index name="ORDER_PSEUDOID" unique="false">
             <index-field name="pseudoId" />
         </index>
@@ -97,7 +97,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <extend-entity entity-name="Invoice" package="mantle.account.invoice"
         sequence-primary-prefix="inv">
-        <field name="pseudoId" type="id"></field>
+        <field name="pseudoId" type="id" />
         <index name="INVOICE_PSEUDOID" unique="false">
             <index-field name="pseudoId" />
         </index>
@@ -105,7 +105,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <extend-entity entity-name="Asset" package="mantle.product.asset"
         sequence-primary-prefix="ast">
-        <field name="assetPseudoId" type="id"></field><!-- pseudoId give conflict in many views -->
+        <field name="assetPseudoId" type="id" /><!-- pseudoId give conflict in many views -->
         <index name="ASSET_PSEUDOID" unique="false">
             <index-field name="assetPseudoId" />
         </index>
@@ -113,7 +113,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <extend-entity entity-name="Shipment" package="mantle.shipment"
         sequence-primary-prefix="shp">
-        <field name="pseudoId" type="id"></field>
+        <field name="pseudoId" type="id" />
         <index name="SHIPMENT_PSEUDOID" unique="false">
             <index-field name="pseudoId" />
         </index>
@@ -121,9 +121,9 @@ along with this software (see the LICENSE.md file). If not, see
 
     <extend-entity entity-name="AcctgTrans" package="mantle.ledger.transaction"
         sequence-primary-prefix="trn">
-        <field name="pseudoId" type="id"></field>
-        <field name="pseudoFinDocId" type="id"></field>
-        <field name="docType" type="id"></field>
+        <field name="pseudoId" type="id" />
+        <field name="pseudoFinDocId" type="id" />
+        <field name="docType" type="id" />
         <index name="TRANS_PSEUDOID" unique="false">
             <index-field name="pseudoId" />
         </index>

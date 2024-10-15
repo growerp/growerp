@@ -18,7 +18,7 @@ Let us know if you have suggestions at support@growerp.com
 
 # Releases
 
-## Conversion Framework & Workflow(Exp) release May 10 2024 (v1.4.0 for Flutter 3.16.9)
+## Conversion Framework & Workflow(Exp) release October 31 2024 (v1.4.0 for Flutter 3.24.3)
 1. Created an initial version of a workflow system with graphical editor in a new package growerp_tasks.
 2. Created a data conversion framework: a 2 step process to import existing data from CSV or spreadsheet (ODS/XSLS)
 3. Documents(invoice/payment/order/transaction) and  product/category now have sequential or customized numbering.
@@ -28,6 +28,9 @@ Let us know if you have suggestions at support@growerp.com
 7. Refactored BlocProviders and moved blocs into their own package.
 8. Background automated integration test in the flutter directory using docker.
 9. Fully automated installation at the test system growerp.org using Docker.
+10. Added a health app as a frontend to the openMRS system
+11. Converted all lists now using tables for better positioning of fields
+12. 
 ## Small fix release December 15, 2023(v1.3.0)
 1. Fixed the general growerp install command
 2. fixed reset password.

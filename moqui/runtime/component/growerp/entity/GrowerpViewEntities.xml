@@ -799,7 +799,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="requestId" entity-alias="REQ" />
         <alias name="pseudoId" field="requestPseudoId" entity-alias="REQ" />
         <alias name="requestType" field="requestTypeEnumId" entity-alias="REQ" />
-        <alias name="ownerPartyId" field="requestOwnerPartyId" entity-alias="REQ" />
+        <alias name="requesterPartyId" field="requestOwnerPartyId" entity-alias="REQ" />
         <alias name="statusId" entity-alias="REQ" />
         <alias name="requestDate" entity-alias="REQ" />
         <alias name="description" entity-alias="REQ" />

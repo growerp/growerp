@@ -105,8 +105,8 @@ class RequestDialogState extends State<RequestDialog> {
         _telephoneController.text = jsonDescription['Telephone Number'] ?? '';
         _postalController.text = jsonDescription['CarePostCode'] ?? '';
         selectedCare = jsonDescription['TypeOfCare'] ?? '';
-        selectedForWhom = jsonDescription['CareRelationShip'] ?? '';
-        selectedTimeframe = jsonDescription['CareTimeFrame'] ?? '';
+        selectedForWhom = jsonDescription['CareRelationship'] ?? '';
+        selectedTimeframe = jsonDescription['CareTimeframe'] ?? '';
         selectedHowSoon = jsonDescription['HowSoonCare'] ?? '';
         selectedStatus = jsonDescription['ACAT_Status'] ?? '';
       } on FormatException catch (_) {
@@ -441,8 +441,8 @@ class RequestDialogState extends State<RequestDialog> {
                       'CarePostCode': _postalController.text,
                       'Telephone Number': _telephoneController.text,
                       'TypeOfCare': selectedCare,
-                      'CareRelationShip': selectedForWhom,
-                      'CareTimeFrame': selectedTimeframe,
+                      'CareRelationship': selectedForWhom,
+                      'CareTimeframe': selectedTimeframe,
                       'HowSoonCare': selectedHowSoon,
                       'ACAT_Status': selectedStatus,
                     });
