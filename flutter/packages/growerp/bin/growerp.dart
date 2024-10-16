@@ -89,6 +89,7 @@ Future<void> main(List<String> args) async {
     }
     switch (modifiedArgs[0].toLowerCase()) {
       case 'help':
+        // ignore: avoid_print
         print("Help for the growerp command\n"
             " -- install:\n "
             "     will install the complete system: frontend, backend and chat\n"

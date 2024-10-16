@@ -69,7 +69,7 @@ void main() async {
     if (exists(home)) {
       run('git pull', workingDirectory: home);
     } else {
-      run('git clone "https://github.com/growerp/growerp.git"',
+      run('git clone "git@github.com:growerp/growerp.git"',
           workingDirectory: "/tmp");
     }
   } else {

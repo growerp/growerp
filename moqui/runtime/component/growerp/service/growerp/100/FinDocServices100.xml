@@ -346,14 +346,12 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- request -->
             <if condition="docType == 'request'">
                 <!-- 'ReqDraft','ReqSubmitted','ReqInProgress','ReqCompleted','ReqCancelled' -->
-                <set field="openStatusList"
-                    from="['ReqDraft','ReqSubmitted','ReqInProgress']" />
+                <set field="openStatusList" from="['ReqDraft','ReqSubmitted','ReqInProgress']" />
                 <if condition="my">
                     <set field="requesterPartyId" from="userCompanyPartyid ?: userPartyId" />
                 </if>
                 <if condition="finDocId || pseudoId">
-                    <entity-find
-                        entity-name="growerp.order.RequestAndParty" list="items">
+                    <entity-find entity-name="growerp.order.RequestAndParty" list="items">
                         <econdition field-name="requestId" from="finDocId" ignore-if-empty="true" />
                         <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
                         <econdition field-name="requesterPartyId" from="requesterPartyId"
@@ -373,8 +371,7 @@ along with this software (see the LICENSE.md file). If not, see
                             entity-name="growerp.order.RequestAndParty" list="items">
                             <econdition field-name="requesterPartyId" from="requesterPartyId"
                                 ignore-if-empty="true" />
-                            <econditions
-                                combine="or">
+                            <econditions combine="or">
                                 <econdition field-name="statusId" operator="in" from="statusList"
                                     ignore-if-empty="true" />
                                 <econdition field-name="effectiveDate" operator="greater"
@@ -383,8 +380,8 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="requestDate" operator="less-equals"
                                 from="tsDate" ignore-if-empty="true" />
                             <econditions combine="or">
-                                <econdition field-name="pseudoId" ignore-case="true"
-                                    operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="pseudoId" ignore-case="true" operator="like"
+                                    from="search" ignore-if-empty="true" />
                                 <econdition field-name="description" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                             </econditions>
@@ -447,10 +444,10 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="rentalThruDate" from="rentalThruDate"
                                 ignore-if-empty="true" />
                             <econditions combine="or">
-                                <econdition field-name="orderId" ignore-case="true"
-                                    operator="like" from="search" />
-                                <econdition field-name="pseudoId" ignore-case="true"
-                                    operator="like" from="search" />
+                                <econdition field-name="orderId" ignore-case="true" operator="like"
+                                    from="search" />
+                                <econdition field-name="pseudoId" ignore-case="true" operator="like"
+                                    from="search" />
                                 <econdition field-name="vendorCompanyName" ignore-case="true"
                                     operator="like" from="search" />
                                 <econdition field-name="vendorLastName" ignore-case="true"
@@ -463,26 +460,21 @@ along with this software (see the LICENSE.md file). If not, see
                             <order-by field-name="-orderPlacedDate" />
                         </entity-find>
                     </then>
-                    <else-if condition="customerCompanyPartyId"><!-- by customer for ecommerce -->
+                    <else-if condition="customerCompanyPartyId">                        <!-- by customer for ecommerce -->
                         <entity-find list="items" offset="start" limit="limit"
                             entity-name="growerp.order.OrderHeaderPartAndParties">
-                            <econdition field-name="customerPartyId"
-                                from="customerCompanyPartyId" />
+                            <econdition field-name="customerPartyId" from="customerCompanyPartyId" />
                             <use-iterator />
                         </entity-find>
                     </else-if>
-                    <else-if condition="finDocId || pseudoId"><!-- single document with items -->
+                    <else-if condition="finDocId || pseudoId">                        <!-- single document with items -->
                         <entity-find list="items"
                             entity-name="growerp.order.OrderHeaderPartAndParties">
-                            <econdition field-name="orderId" from="finDocId"
-                                ignore-if-empty="true" />
-                            <econdition field-name="pseudoId" from="pseudoId"
-                                ignore-if-empty="true" />
+                            <econdition field-name="orderId" from="finDocId" ignore-if-empty="true" />
+                            <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
                             <econditions combine="or">
-                                <econdition field-name="vendorPartyId"
-                                    from="companyPartyId" />
-                                <econdition field-name="customerPartyId"
-                                    from="companyPartyId" />
+                                <econdition field-name="vendorPartyId" from="companyPartyId" />
+                                <econdition field-name="customerPartyId" from="companyPartyId" />
                             </econditions>
                         </entity-find>
                         <if condition="sales == null">
@@ -492,32 +484,28 @@ along with this software (see the LICENSE.md file). If not, see
                             </if>
                         </if>
                     </else-if>
-                    <else><!-- multiple documents -->
-                        <set field="statusList"
-                            from="['OrderOpen','OrderPlaced','OrderApproved']" /> <!--
+                    <else>                        <!-- multiple documents -->
+                        <set field="statusList" from="['OrderOpen','OrderPlaced','OrderApproved']" />
+                        <!--
                                         OrderCompleted OrderCancelled' -->
-                        <if
-                            condition="open == true &amp;&amp; !finDocId &amp;&amp; !search">
+                        <if condition="open == true &amp;&amp; !finDocId &amp;&amp; !search">
                             <set field="fromDate" from="weekOldDate" />
                             <set field="status" from="statusList" />
                         </if>
                         <entity-find offset="start" limit="limit" list="items"
                             entity-name="growerp.order.OrderHeaderPartAndParties">
-                            <econdition field-name="vendorPartyId"
-                                from="vendorPartyId" ignore-if-empty="true" />
-                            <econdition field-name="customerPartyId"
-                                from="customerPartyId" ignore-if-empty="true" />
+                            <econdition field-name="vendorPartyId" from="vendorPartyId"
+                                ignore-if-empty="true" />
+                            <econdition field-name="customerPartyId" from="customerPartyId"
+                                ignore-if-empty="true" />
                             <econditions combine="or">
-                                <econdition field-name="statusId" operator="in"
-                                    from="status"
+                                <econdition field-name="statusId" operator="in" from="status"
                                     ignore-if-empty="true" />
-                                <econdition field-name="placedDate"
-                                    operator="greater"
+                                <econdition field-name="placedDate" operator="greater"
                                     from="fromDate" ignore-if-empty="true" />
                             </econditions>
-                            <econdition field-name="placedDate"
-                                operator="less-equals"
-                                from="tsDate" ignore-if-empty="true" />
+                            <econdition field-name="placedDate" operator="less-equals" from="tsDate"
+                                ignore-if-empty="true" />
                             <order-by field-name="orderId" />
                             <!--use-iterator/-->
                         </entity-find>
@@ -679,8 +667,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </else>
                 </if>
                 <if condition="finDocId || pseudoId">
-                    <entity-find
-                        entity-name="growerp.account.InvoiceItemsAndParties" list="items">
+                    <entity-find entity-name="growerp.account.InvoiceItemsAndParties" list="items">
                         <econdition field-name="invoiceId" from="finDocId" ignore-if-empty="true" />
                         <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
                         <econditions combine="or">
@@ -699,15 +686,14 @@ along with this software (see the LICENSE.md file). If not, see
                             </if>
                         </if>
                     </if>
-                    <else><!-- invoice list -->
+                    <else>                        <!-- invoice list -->
                         <if condition="search">
                             <entity-find offset="start" limit="limit"
                                 entity-name="growerp.account.InvoiceItemsAndParties" list="items">
-                                <econdition
-                                    field-name="toPartyId"
-                                    from="customerPartyId" ignore-if-empty="true" />
-                                <econdition field-name="fromPartyId"
-                                    from="vendorPartyId" ignore-if-empty="true" />
+                                <econdition field-name="toPartyId" from="customerPartyId"
+                                    ignore-if-empty="true" />
+                                <econdition field-name="fromPartyId" from="vendorPartyId"
+                                    ignore-if-empty="true" />
                                 <econditions combine="or">
                                     <econdition field-name="statusId" operator="in"
                                         from="statusList" ignore-if-empty="true" />
@@ -735,11 +721,10 @@ along with this software (see the LICENSE.md file). If not, see
                                 <!-- just a list to scroll get Id's-->
                                 <entity-find offset="start" limit="limit"
                                     entity-name="mantle.account.invoice.Invoice" list="invoiceIds">
-                                    <econdition
-                                        field-name="toPartyId"
-                                        from="customerPartyId" ignore-if-empty="true" />
-                                    <econdition field-name="fromPartyId"
-                                        from="vendorPartyId" ignore-if-empty="true" />
+                                    <econdition field-name="toPartyId" from="customerPartyId"
+                                        ignore-if-empty="true" />
+                                    <econdition field-name="fromPartyId" from="vendorPartyId"
+                                        ignore-if-empty="true" />
                                     <econditions combine="or">
                                         <econdition field-name="statusId" operator="in"
                                             from="statusList" ignore-if-empty="true" />
@@ -862,11 +847,9 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- payment -->
             <if condition="docType == 'payment'">
-                <set field="openStatusList"
-                    from="['PmntProposed','PmntPromised','PmntAuthorized']" />
+                <set field="openStatusList" from="['PmntProposed','PmntPromised','PmntAuthorized']" />
                 <if condition="finDocId || pseudoId">
-                    <entity-find
-                        entity-name="growerp.order.PaymentAndInfo" list="items">
+                    <entity-find entity-name="growerp.order.PaymentAndInfo" list="items">
                         <econdition field-name="paymentId" from="finDocId" ignore-if-empty="true" />
                         <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
                         <econditions combine="or">
@@ -895,25 +878,23 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="toPartyId" from="vendorPartyId"
                                 ignore-if-empty="true" />
                             <!--econditions
-                                combine="or">
-                                <econdition field-name="statusId" operator="in" from="statusList"
-                                    ignore-if-empty="true" />
-                                <econdition field-name="effectiveDate" operator="greater"
-                                    from="fromDate" ignore-if-empty="true" />
+                            combine="or">
+                                <econdition field-name="statusId" operator="in" from="statusList" ignore-if-empty="true" />
+                                <econdition field-name="effectiveDate" operator="greater" from="fromDate" ignore-if-empty="true" />
                             </econditions-->
                             <econdition field-name="paymentDate" operator="less-equals"
                                 from="tsDate" ignore-if-empty="true" />
                             <econditions combine="or">
-                                <econdition field-name="pseudoId" ignore-case="true"
-                                    operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="pseudoId" ignore-case="true" operator="like"
+                                    from="search" ignore-if-empty="true" />
                                 <econdition field-name="paymentId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="invoiceId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="forInvoiceId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
-                                <econdition field-name="orderId" ignore-case="true"
-                                    operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="orderId" ignore-case="true" operator="like"
+                                    from="search" ignore-if-empty="true" />
                             </econditions>
                             <order-by field-name="paymentId" />
                         </entity-find>
@@ -1051,20 +1032,20 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="customerPartyId" from="customerPartyId"
                                 ignore-if-empty="true" />
                             <econditions combine="or">
-                                <econdition field-name="statusId" operator="in"
-                                    from="status" ignore-if-empty="true" />
+                                <econdition field-name="statusId" operator="in" from="status"
+                                    ignore-if-empty="true" />
                                 <econdition field-name="entryDate" operator="greater"
                                     from="fromDate" ignore-if-empty="true" />
                             </econditions>
-                            <econdition field-name="entryDate" operator="less-equals"
-                                from="tsDate" ignore-if-empty="true" />
+                            <econdition field-name="entryDate" operator="less-equals" from="tsDate"
+                                ignore-if-empty="true" />
                             <econditions combine="or">
-                                <econdition field-name="pseudoId" ignore-case="true"
-                                    operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="pseudoId" ignore-case="true" operator="like"
+                                    from="search" ignore-if-empty="true" />
                                 <econdition field-name="shipmentId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
-                                <econdition field-name="orderId" ignore-case="true"
-                                    operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="orderId" ignore-case="true" operator="like"
+                                    from="search" ignore-if-empty="true" />
                             </econditions>
                             <order-by field-name="pseudoId" />
                         </entity-find>
@@ -1176,11 +1157,14 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
             </if>
             <if condition="docType == 'transaction'">
-                <if condition="isPosted == true">
-                    <set field="isPosted" value="Y" />
-                </if>
-                <if condition="isPosted == false">
-                    <set field="isPosted" value="N" />
+                <if condition="!search">
+                    <if condition="isPosted == true">
+                        <set field="isPosted" value="Y" />
+                    </if>
+                    <if condition="isPosted == false">
+                        <set field="isPosted" value="N" />
+                    </if>
+                    <set field="weekOldDate" from="null" />
                 </if>
                 <if condition="journalId?.endsWith('Error')">
                     <set field="isPosted" value="'N'" />
@@ -1192,8 +1176,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="companyPartyId" from="companyPartyId" />
                             <econdition field-name="transactionId" from="finDocId"
                                 ignore-if-empty="true" />
-                            <econdition field-name="pseudoId" from="pseudoId"
-                                ignore-if-empty="true" />
+                            <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
                         </entity-find>
                         <if condition="!items">
                             <log level="warn"
@@ -1201,12 +1184,13 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                     </then>
                     <else>
+                        <log message="========tsDate $tsDate" />
                         <entity-find offset="start" limit="limit" list="items"
                             entity-name="growerp.account.AcctgTransAndCompany">
                             <econdition field-name="companyPartyId" from="companyPartyId" />
                             <econditions combine="or">
-                                <econdition field-name="pseudoId" ignore-case="true"
-                                    operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="pseudoId" ignore-case="true" operator="like"
+                                    from="search" ignore-if-empty="true" />
                                 <econdition field-name="theirAcctgTransId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="shipmentId" ignore-case="true"
@@ -1222,8 +1206,13 @@ along with this software (see the LICENSE.md file). If not, see
                             </econditions>
                             <econdition field-name="journalId" from="journal?.journalId"
                                 ignore-if-empty="true" />
-                            <econdition field-name="isPosted" from="isPosted"
-                                ignore-if-empty="true" />
+                            <econditions combine="or">
+                                <econdition field-name="isPosted" operator="not-equals"
+                                    from="isPosted"
+                                    ignore-if-empty="true" />
+                                <econdition field-name="transactionDate" operator="greater"
+                                    from="weekOldDate" ignore-if-empty="true" />
+                            </econditions>
                             <econdition field-name="transactionDate" operator="less-equals"
                                 from="tsDate" ignore-if-empty="true" />
                             <order-by field-name="isPosted,transactionDate" />
@@ -1503,8 +1492,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- create pseudoId when not provided -->
             <if condition="!finDoc.pseudoId || finDoc.pseudoId == ''">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[ownerPartyId: ownerPartyId, seqName: finDoc.docType]"
-                    out-map="context" />
+                    in-map="[ownerPartyId: ownerPartyId, seqName: finDoc.docType]" out-map="context" />
                 <set field="finDoc.pseudoId" from="seqNum" />
             </if>
             <!-- order -->
@@ -1545,8 +1533,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.PartyServices100.get#CompanyUser"
                         in-map="partyId: companyUserPartyId ?: userPartyId" out-map="context" />
                     <service-call name="growerp.100.OpenMrsServices100.add#PatientAndRequest"
-                        in-map="[request: finDoc, requester: companiesUsers[0] ]"
-                        out-map="result" />
+                        in-map="[request: finDoc, requester: companiesUsers[0] ]" out-map="result" />
                     <if condition="result?.error">
                         <return error="true" message="${result.error}" />
                     </if>
@@ -1695,7 +1682,7 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if condition="invoice.sales == false"><!-- inside this payment object this field is NOT
+            <if condition="invoice.sales == false">                <!-- inside this payment object this field is NOT
                 a string -->
                 <set field="toPartyId" from="companyPartyId" />
                 <set field="fromPartyId" from="invoice.otherCompany.partyId" />
@@ -1788,7 +1775,7 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="payment.sales == true">
-                <then><!-- incoming sales payment -->
+                <then>                    <!-- incoming sales payment -->
                     <set field="fromPartyId" from="payment.otherCompany.partyId" />
                     <set field="toPartyId" from="companyPartyId" />
                     <set field="contactRole" value="CustomerContactPerson" />
@@ -1809,7 +1796,7 @@ along with this software (see the LICENSE.md file). If not, see
                             from="System.getProperty('paymentGatewayConfigId')" />
                     </if>
                 </then>
-                <else><!-- outgoing purchase payment -->
+                <else>                    <!-- outgoing purchase payment -->
                     <set field="fromPartyId" from="companyPartyId" />
                     <set field="toPartyId" from="payment.otherCompany.partyId" />
                     <set field="contactRole" value="VendorContactPerson" />
@@ -1878,7 +1865,7 @@ along with this software (see the LICENSE.md file). If not, see
                         itemTypeGlAccountId: paymentTypeGlAccountId,
                         overrideGlAccountId: payment.items? payment.items[0].glAccount?.glAccountId : null,
                         fromPartyId: fromPartyId,
-                        paymentRefNum: payment.reference.length() &lt;= 60 ? payment.reference : payment.reference.substring(0,60) + '..']"
+                        paymentRefNum: payment.reference &amp;&amp; payment.reference.length() &gt;= 60 ? payment.reference.substring(0,60) + '..' : payment.reference]"
                 out-map="context" />
         </actions>
     </service>
@@ -1901,16 +1888,14 @@ along with this software (see the LICENSE.md file). If not, see
                 <if
                     condition="item.itemType.itemTypeId == 'ItemProduct'
                         &amp;&amp; !item.product.productId.isEmpty()">
-                    <service-call
-                        name="mantle.order.OrderServices.add#OrderProductQuantity"
+                    <service-call name="mantle.order.OrderServices.add#OrderProductQuantity"
                         in-map="context + [ itemTypeId: item.itemType.itemTypeId,
                                             productId: item.product.productId,
                                             quantity: item.quantity,
                                             unitAmount: item.price]"
                         out-map="context" />
                     <else-if condition="item.itemType.itemTypeId == 'ItemRental'">
-                        <service-call
-                            name="mantle.order.OrderServices.add#OrderProductQuantity"
+                        <service-call name="mantle.order.OrderServices.add#OrderProductQuantity"
                             in-map="context + [ itemTypeId: item.itemType.itemTypeId,
                                             productId: item.product.productId,
                                             quantity: item.quantity,
@@ -1952,8 +1937,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="invoiceId" />
             </entity-delete-by-condition>
             <iterate list="invoiceItems" entry="item">
-                <service-call
-                    name="mantle.account.InvoiceServices.create#InvoiceItem"
+                <service-call name="mantle.account.InvoiceServices.create#InvoiceItem"
                     in-map="context + [ itemTypeEnumId: item.itemType.itemTypeId,
                                         productId: item.product.productId,
                                         quantity: item.quantity,
@@ -2271,8 +2255,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </else>
             </if>
             <if condition="finDoc.docType != 'transaction'">
-                <service-call name="growerp.100.FinDocServices100.get#FinDoc"
-                    in-map="inMap" out-map="context" />
+                <service-call name="growerp.100.FinDocServices100.get#FinDoc" in-map="inMap"
+                    out-map="context" />
                 <set field="finDoc" from="finDocs[0]" />
             </if>
         </actions>
@@ -2288,7 +2272,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="productId" />
                 <parameter name="productName" />
                 <parameter name="fullDates" type="List">
-                    <parameter name="fullDate" /><!-- YYYY-MM-DD -->
+                    <parameter name="fullDate" />
+                    <!-- YYYY-MM-DD -->
                 </parameter>
             </parameter>
         </out-parameters>
@@ -2303,8 +2288,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find entity-name="growerp.product.ProductAndAssetRental" list="rentals">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <econdition field-name="productId" from="productId" ignore-if-empty="true" />
-                <econdition field-name="rentalThruDate"
-                    operator="greater-equals"
+                <econdition field-name="rentalThruDate" operator="greater-equals"
                     from="Timestamp.valueOf(nowBeginOfNextDay.toLocalDateTime())" />
                 <order-by field-name="productName,productId" />
             </entity-find>
@@ -2432,24 +2416,24 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="assetId" from="asset.assetId" />
                     <econdition field-name="ownerPartyId" from="companyPartyId" />
                     <econditions combine="or">
-                        <econditions combine="and"><!--order
+                        <econditions combine="and">                            <!--order
                             fromdate within -->
-                            <econdition field-name="rentalFromDate"
-                                operator="less-equals" from="fromDate" />
-                            <econdition field-name="rentalThruDate"
-                                operator="greater-equals" from="fromDate" />
+                            <econdition field-name="rentalFromDate" operator="less-equals"
+                                from="fromDate" />
+                            <econdition field-name="rentalThruDate" operator="greater-equals"
+                                from="fromDate" />
                         </econditions>
-                        <econditions combine="and"><!-- order thruDate within -->
-                            <econdition field-name="rentalFromDate"
-                                operator="less-equals" from="thruDate" />
-                            <econdition field-name="rentalThruDate"
-                                operator="greater-equals" from="thruDate" />
+                        <econditions combine="and">                            <!-- order thruDate within -->
+                            <econdition field-name="rentalFromDate" operator="less-equals"
+                                from="thruDate" />
+                            <econdition field-name="rentalThruDate" operator="greater-equals"
+                                from="thruDate" />
                         </econditions>
-                        <econditions combine="and"><!-- both outside -->
-                            <econdition field-name="rentalFromDate"
-                                operator="greater-equals" from="fromDate" />
-                            <econdition field-name="rentalThruDate"
-                                operator="less-equals" from="thruDate" />
+                        <econditions combine="and">                            <!-- both outside -->
+                            <econdition field-name="rentalFromDate" operator="greater-equals"
+                                from="fromDate" />
+                            <econdition field-name="rentalThruDate" operator="less-equals"
+                                from="thruDate" />
                         </econditions>
                     </econditions>
                 </entity-find-count>
@@ -2498,8 +2482,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- order part-->
             <if condition="order.otherUser || order.otherCompany">
                 <!-- get existing record -->
-                <entity-find entity-name="mantle.order.OrderPart"
-                    list="parts" for-update="true"
+                <entity-find entity-name="mantle.order.OrderPart" list="parts" for-update="true"
                     limit="1">
                     <econdition field-name="orderId" />
                 </entity-find>
@@ -2631,8 +2614,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                             in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']"
                             out-map="context" />
-                        <service-call
-                            name="mantle.account.PaymentServices.create#InvoicePayment"
+                        <service-call name="mantle.account.PaymentServices.create#InvoicePayment"
                             in-map="[invoiceId: invoiceId, effectiveDate:effectiveDate,
                                 statusId: 'PmntPromised', orderId: order.orderId,
                                 pseudoId: seqNum]"
@@ -2657,7 +2639,7 @@ along with this software (see the LICENSE.md file). If not, see
                             in-map="[shipmentId: shipmentId,
                                     statusId: 'ShipScheduled',
                                     pseudoId: seqNum]" />
-                        <else><!-- no shipable items so complete order already here not with rental
+                        <else>                            <!-- no shipable items so complete order already here not with rental
                             though-->
                             <entity-find entity-name="growerp.product.AssetRental" list="rentals">
                                 <econdition field-name="orderId" from="order.orderId" />
@@ -2684,8 +2666,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </if>
                 </if>
                 <if condition="order.statusId == 'OrderCompleted'">
-                    <service-call name="mantle.order.OrderServices.complete#Order"
-                        in-map="context" />
+                    <service-call name="mantle.order.OrderServices.complete#Order" in-map="context" />
                     <!-- invoice only be updated is required? it can make the order completed-->
                     <!--entity-find-one
                     entity-name="mantle.account.invoice.Invoice" value-field="invoice">
@@ -2700,10 +2681,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="update#mantle.account.invoice.Invoice" in-map="invoice"/-->
                 </if>
                 <if condition="order.statusId == 'OrderCancelled'">
-                    <service-call name="mantle.order.OrderServices.cancel#Order"
-                        in-map="context" />
+                    <service-call name="mantle.order.OrderServices.cancel#Order" in-map="context" />
                 </if>
-                <else><!-- only update items when no status changes -->
+                <else>                    <!-- only update items when no status changes -->
                     <!-- delete and recreate all orderitems -->
                     <if condition="order.items &amp;&amp; !order.items.isEmpty()">
                         <service-call name="growerp.100.FinDocServices100.replace#OrderItems"
@@ -2772,15 +2752,13 @@ along with this software (see the LICENSE.md file). If not, see
                             invoice.statusId == 'InvoiceSent'">
                     <!-- create payment for approved/sent invoices -->
                     <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']"
-                        out-map="context" />
-                    <service-call
-                        name="mantle.account.PaymentServices.create#InvoicePayment"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']" out-map="context" />
+                    <service-call name="mantle.account.PaymentServices.create#InvoicePayment"
                         in-map="[invoiceId: invoice.invoiceId, statusId: 'PmntProposed',
                         effectiveDate: ec.user.nowTimestamp, pseudoId: seqNum]"
                         out-map="context" />
                 </if>
-                <else><!-- only update items when no status changes -->
+                <else>                    <!-- only update items when no status changes -->
                     <if
                         condition="items[0].statusId != 'InvoiceInProcess' &amp;&amp;
                         items[0].statusId != 'InvoiceIncoming'">
@@ -2801,8 +2779,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
-                    out-map="context" />
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']" out-map="context" />
                 <set field="transactions[0].pseudoId" from="seqNum" />
                 <entity-update value-field="transactions[0]" />
             </if>
@@ -2816,8 +2793,8 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <entity-find-one entity-name="mantle.account.payment.Payment"
-                value-field="paymentOld" for-update="true">
+            <entity-find-one entity-name="mantle.account.payment.Payment" value-field="paymentOld"
+                for-update="true">
                 <field-map field-name="paymentId" from="payment.paymentId" />
             </entity-find-one>
             <if condition="payment.sales">
@@ -2900,14 +2877,12 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- finally update -->
             <entity-update value-field="paymentOld" />
             <!-- status updates -->
-            <entity-find entity-name="mantle.order.OrderItemBilling"
-                limit="1" list="invoices">
+            <entity-find entity-name="mantle.order.OrderItemBilling" limit="1" list="invoices">
                 <econdition field-name="orderId" from="payment.orderId" />
             </entity-find>
             <if condition="invoices">
                 <then>
-                    <service-call
-                        name="mantle.account.PaymentServices.send#PromisedPayment"
+                    <service-call name="mantle.account.PaymentServices.send#PromisedPayment"
                         in-map="[invoiceId: invoices[0].invoiceId,
                                     paymentId: payment.paymentId]" />
                 </then>
@@ -2928,8 +2903,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <if condition="payment.statusId == 'PmntDelivered'">
                             <service-call
                                 name="mantle.account.PaymentServices.capture#SinglePayment"
-                                in-map="[paymentId: payment.paymentId]"
-                                out-map="context" />
+                                in-map="[paymentId: payment.paymentId]" out-map="context" />
                             <if condition="paymentGatewayResponse?.resultSuccess != 'Y'">
                                 <return error="true"
                                     message="payment capture failed: ${paymentGatewayResponse.reasonMessage}" />
@@ -2942,9 +2916,7 @@ along with this software (see the LICENSE.md file). If not, see
                         statusId: payment.statusId]" />
                 </else>
             </if>
-            <entity-find
-                entity-name="mantle.ledger.transaction.AcctgTransAndEntry"
-                list="entries">
+            <entity-find entity-name="mantle.ledger.transaction.AcctgTransAndEntry" list="entries">
                 <econdition field-name="paymentId" from="paymentOld.paymentId" />
             </entity-find>
             <if condition="entries">
@@ -2968,8 +2940,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
-                    out-map="context" />
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']" out-map="context" />
                 <set field="transactions[0].pseudoId" from="seqNum" />
                 <entity-update value-field="transactions[0]" />
             </if>
@@ -2978,7 +2949,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="update" noun="Shipment">
         <description> Update a shipment  including items exept for shipments receive.
-            </description>
+        </description>
         <in-parameters>
             <parameter name="finDoc" type="Map" required="true" />
         </in-parameters>
@@ -2995,8 +2966,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="shipmentId" from="finDoc.shipmentId" />
                 </entity-find>
                 <iterate list="shipmentItemSourceList" entry="itemSource">
-                    <service-call
-                        name="mantle.shipment.ShipmentServices.pack#ShipmentItemSource"
+                    <service-call name="mantle.shipment.ShipmentServices.pack#ShipmentItemSource"
                         in-map="[shipmentItemSourceId: itemSource.shipmentItemSourceId,
                                     quantity: itemSource.quantity]" />
                 </iterate>
@@ -3005,13 +2975,11 @@ along with this software (see the LICENSE.md file). If not, see
                         condition="shipmentItemSource.orderId &amp;&amp; shipmentItemSource.orderItemSeqId">
                         <entity-find-one entity-name="mantle.order.OrderItem"
                             value-field="orderItem">
-                            <field-map field-name="orderId"
-                                from="shipmentItemSource.orderId" />
+                            <field-map field-name="orderId" from="shipmentItemSource.orderId" />
                             <field-map field-name="orderItemSeqId"
                                 from="shipmentItemSource.orderItemSeqId" />
                         </entity-find-one>
-                        <service-call
-                            name="mantle.order.OrderServices.checkComplete#OrderPart"
+                        <service-call name="mantle.order.OrderServices.checkComplete#OrderPart"
                             in-map="[orderId:orderItem.orderId, orderPartSeqId:orderItem.orderPartSeqId]" />
                     </if>
                 </iterate>
@@ -3020,16 +2988,15 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="update#mantle.shipment.Shipment" out-map="context"
                 in-map="[shipmentId: finDoc.shipmentId, statusId: finDoc.statusId]" />
             <!-- check if related transaction has pseudoId -->
-            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
-                list="transactions" for-update="true">
+            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transactions"
+                for-update="true">
                 <econdition field-name="shipmentId" from="finDoc.shipmentId" />
             </entity-find>
             <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
                 <service-call out-map="context"
                     name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
-                    out-map="context" />
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']" out-map="context" />
                 <set field="transactions[0].pseudoId" from="seqNum" />
                 <entity-update value-field="transactions[0]" />
             </if>
@@ -3050,8 +3017,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="shipmentId" />
             </entity-delete-by-condition>
             <iterate list="items" entry="item">
-                <service-call
-                    name="mantle.shipment.ShipmentServices.create#ShipmentItem"
+                <service-call name="mantle.shipment.ShipmentServices.create#ShipmentItem"
                     in-map="context + [ productId: item.product.productId,
                                         quantity: item.quantity,
                                         ]"
@@ -3063,7 +3029,7 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="receive" noun="Shipment">
         <description> Receive an incoming shipment either purchase or return.
                         copied from receive#EntireShipment and then modified"
-            </description>
+        </description>
         <in-parameters>
             <parameter name="finDoc" type="Map" required="true">
                 <parameter name="docType" />
@@ -3117,7 +3083,8 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find list="shipmentItemDetailList"
                 entity-name="mantle.shipment.ShipmentItemDetail">
                 <econdition field-name="shipmentId" from="finDoc.shipmentId" />
-                <econdition field-name="ownerPartyId" from="ownerPartyId" /><!-- product owner -->
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <!-- product owner -->
                 <order-by field-name="productId" />
             </entity-find>
             <entity-find entity-name="mantle.facility.Facility" list="facilities">
@@ -3137,8 +3104,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="finDocItem.asset.location.locationId" from="location.locationId" />
                 </if>
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[ownerPartyId: ownerPartyId, seqName: 'asset']"
-                    out-map="context" />
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'asset']" out-map="context" />
                 <service-call name="mantle.shipment.ShipmentServices.receive#ShipmentProduct"
                     in-map="[shipmentId:finDoc.shipmentId, productId:sid.productId, statusId:'AstAvailable',
                             quantityAccepted:quantityRemaining, facilityId: facilityId,
@@ -3155,8 +3121,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
-                    out-map="context" />
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']" out-map="context" />
                 <set field="transactions[0].pseudoId" from="seqNum" />
                 <entity-update value-field="transactions[0]" />
             </if>

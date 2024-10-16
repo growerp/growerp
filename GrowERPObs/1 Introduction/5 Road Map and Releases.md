@@ -18,19 +18,26 @@ Let us know if you have suggestions at support@growerp.com
 
 # Releases
 
-## Conversion Framework & Workflow(Exp) release October 31 2024 (v1.4.0 for Flutter 3.24.3)
-1. Created an initial version of a workflow system with graphical editor in a new package growerp_tasks.
-2. Created a data conversion framework: a 2 step process to import existing data from CSV or spreadsheet (ODS/XSLS)
-3. Documents(invoice/payment/order/transaction) and  product/category now have sequential or customized numbering.
-4. Added an accounting setup: Time periods, payment and invoice type for auto posting
-5. Added accounting reports: balance sheet and balance summary with period selection.
-6. Improved system result/confirmation messages.
-7. Refactored BlocProviders and moved blocs into their own package.
-8. Background automated integration test in the flutter directory using docker.
-9. Fully automated installation at the test system growerp.org using Docker.
-10. Added a health app as a frontend to the openMRS system
-11. Converted all lists now using tables for better positioning of fields
-12. 
+## Conversion Framework & Workflow(Exp) release October 31 2024 (v1.6.0 for Flutter 3.24.3)
+#### General
+1. Now use of flexcolor scheme: https://pub.dev/packages/flex_color_scheme
+2. Currency fields now show proper currency
+3. Main company can have own domain with just customer registration
+4. Registration process now in two steps: 1.email//name 2: other data
+5. Add mixed person/company customer/supplier lists  
+6. Created a data conversion framework: a 2 step process to import existing data from CSV or spreadsheet (ODS/XSLS)
+7. Documents(invoice/payment/order/transaction) and  product/category now have sequential or customized numbering.
+8. Improved system result/confirmation messages.
+9. Refactored BlocProviders and moved blocs into their own package.
+10. Background automated integration test in the flutter directory using docker.
+11. Fully automated installation at the test system using Docker.
+12. Added a health app as a patient front-end to the openMRS system
+13. All lists now using tables for better positioning of fields
+#### Accounting
+1. Accounting documents can have optional manual id.
+2. Accounting now shows related documents
+3. Added an accounting setup: Time periods, payment and invoice type for auto posting
+4. Added accounting reports: balance sheet and balance summary with period selection.
 ## Small fix release December 15, 2023(v1.3.0)
 1. Fixed the general growerp install command
 2. fixed reset password.

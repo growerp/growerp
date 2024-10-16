@@ -981,6 +981,11 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="PARTY" join-optional="true">
             <key-map field-name="partyId" />
         </member-entity>
+        <member-entity entity-alias="PERSON" entity-name="mantle.party.Person"
+            join-from-alias="PARTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        
         <alias name="transactionId" field="acctgTransId" entity-alias="ATX" />
         <alias name="companyPartyId" field="organizationPartyId" entity-alias="ATX" />
         <alias name="pseudoId" entity-alias="ATX" />
@@ -997,6 +1002,8 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="otherCompanyPartyId" field="partyId" entity-alias="PARTY" />
         <alias name="otherCompanyPseudoId" field="pseudoId" entity-alias="PARTY" />
         <alias name="otherCompanyName" field="organizationName" entity-alias="CORG" />
+        <alias name="otherPersonFirstName" field="firstName" entity-alias="PERSON" />
+        <alias name="otherPersonLastName" field="lastName" entity-alias="PERSON" />
     </view-entity>
 
     <view-entity entity-name="AcctgEntryAndGlAccount" package="growerp.account">
