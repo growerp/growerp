@@ -61,20 +61,35 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
                     ])));
           }
           if (options[i - 1].route == "theme") {
-            return InkWell(
-                key: const Key('theme'),
-                onTap: () => themeBloc.add(ThemeSwitch()),
-                child: Column(children: [
-                  Icon(themeBloc.state.themeMode == ThemeMode.light
-                      ? Icons.light_mode
-                      : Icons.dark_mode),
-                  const Text("Theme"),
-                ]));
+            return Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: InkWell(
+                  key: const Key('theme'),
+                  onTap: () => themeBloc.add(ThemeSwitch()),
+                  child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(width: 5),
+                        Icon(
+                            size: 40,
+                            themeBloc.state.themeMode == ThemeMode.light
+                                ? Icons.light_mode
+                                : Icons.dark_mode),
+                        const SizedBox(width: 20),
+                        const Text(
+                          "Theme",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ])),
+            );
           }
           return ListTile(
               key: Key('tap${options[i - 1].route}'),
               contentPadding: const EdgeInsets.all(5.0),
-              title: Text(options[i - 1].title),
+              title: Text(
+                options[i - 1].title,
+                style: const TextStyle(fontSize: 16),
+              ),
               leading: Image.asset(
                 options[i - 1].selectedImage ??
                     'packages/growerp_core/images/select.png',

@@ -3067,19 +3067,19 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="productsHotel"
                     from="[
                     [ productName: 'Single Room', description:'The Single bed room',
-                        productTypeId: 'Rental', assetClassId: 'room', assetTypeId: 'AstTpFixed',
+                        productTypeId: 'Rental', assetClassId: 'Hotel Room', assetTypeId: 'AstTpFixed',
                         price: 50, image: 'demoRooms/room1', categoryName: 'rooms'],
                     [ productName: 'Standard Room', description:'The Standard room',
-                        productTypeId: 'rental', assetClassId: 'room', assetTypeId: 'AstTpFixed',
+                        productTypeId: 'Rental', assetClassId: 'Hotel Room', assetTypeId: 'AstTpFixed',
                         price: 80, image: 'demoRooms/room2', categoryName: 'rooms'],
                     [ productName: 'Deluxe Room', description:'The Deluxe room offering',
-                        productTypeId: 'rental', assetClassId: 'room', assetTypeId: 'AstTpFixed',
+                        productTypeId: 'Rental', assetClassId: 'Hotel Room', assetTypeId: 'AstTpFixed',
                         price: 170, image: 'demoRooms/room3', categoryName: 'rooms'],
                     [ productName: 'Suite', description:'The Suite',
-                        productTypeId: 'rental', assetClassId: 'room', assetTypeId: 'AstTpFixed',
+                        productTypeId: 'Rental', assetClassId: 'Hotel Room', assetTypeId: 'AstTpFixed',
                         price: 360, image: 'demoRooms/room4', categoryName: 'rooms'],
                     [ productName: 'Appartment', description:'The living,  two bedroom appartment',
-                        productTypeId: 'rental', assetClassId: 'room', assetTypeId: 'AstTpFixed',
+                        productTypeId: 'Rental', assetClassId: 'Hotel Room', assetTypeId: 'AstTpFixed',
                         price: 460, image: 'demoRooms/room5', categoryName: 'rooms'],
                 ]" />
 
@@ -3108,12 +3108,15 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                         <service-call name="growerp.100.CatalogServices100.create#Product"
                             in-map="[
-                            productTypeId: el.productTypeId,
-                            assetClassId: el.assetClassId,
-                            productName: el.productName + (classificationId != 'AppHotel'? counter : ''),
-                            description: el.description,
+                                product: [
+                                    productTypeId: el.productTypeId,
+                                    assetClassId: el.assetClassId,
+                                    productName: el.productName + (classificationId != 'AppHotel'? counter : ''),
+                                    description: el.description],
+                                classificationId: classificationId,
                             ]"
                             out-map="context" />
+                        <set field="productId" from="product.productId" />
                         <service-call
                             name="create#mantle.product.category.ProductCategoryMember"
                             in-map="[productId: productId, productCategoryId: productCategoryId, fromDate: fromDate]" />
@@ -3139,17 +3142,17 @@ along with this software (see the LICENSE.md file). If not, see
                     <!-- assets -->
                     <set field="assetsHotel"
                         from="[
-                        [ assetName: 'Room 01', productName: 'Single Room', ],
-                        [ assetName: 'Room 02', productName: 'Single Room'],
-                        [ assetName: 'Room 03', productName: 'Single Room'],
-                        [ assetName: 'Room 04', productName: 'Standard Room'],                
-                        [ assetName: 'Room 05', productName: 'Standard Room'],                
-                        [ assetName: 'Room 06', productName: 'Standard Room'],                
-                        [ assetName: 'Room 07', productName: 'Deluxe Room'],                
-                        [ assetName: 'Room 08', productName: 'Deluxe Room'],                
-                        [ assetName: 'Room 09', productName: 'Suite'],                
-                        [ assetName: 'Room 10', productName: 'Suite'],                
-                        [ assetName: 'Room 11', productName: 'Appartment'],                
+                        [ assetName: '01 Single', productName: 'Single Room', ],
+                        [ assetName: '02 Single', productName: 'Single Room'],
+                        [ assetName: '03 Single', productName: 'Single Room'],
+                        [ assetName: '04 Stand', productName: 'Standard Room'],                
+                        [ assetName: '05 Stand', productName: 'Standard Room'],                
+                        [ assetName: '06 Stand', productName: 'Standard Room'],                
+                        [ assetName: '07 Lux', productName: 'Deluxe Room'],                
+                        [ assetName: '06 Lux', productName: 'Deluxe Room'],                
+                        [ assetName: '08 Suite', productName: 'Suite'],                
+                        [ assetName: '10 Suite', productName: 'Suite'],                
+                        [ assetName: '11 Appt', productName: 'Appartment'],                
                         ]" />
                     <set field="assetsAdmin"
                         from="[
@@ -3171,25 +3174,24 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="facilityId" from="facilities[0].facilityId" />
 
                     <set field="xLoc" value="0" type="Integer" />
-                    <!-- create data for assets -->
+                    <!-- create data for assets will also create products-->
                     <set field="assets" from="[]" />
                     <iterate list="assetsIn" entry="asset">
                         <set field="asset"
                             from="[
-                            product: [productName: asset.productName],
+                            product: [productName: asset.productName, productTypeId: 'Rental' ],
                             quantityOnHand: 10,
+                            assetClassId: 'Hotel Room',
                             availableToPromise: 10,
                             assetName: asset.assetName,
                             ownerPartyId: companyPartyId,
                             statusId: 'Available',
                             location: [locationName: asset.productName],
                         ]" />
-                        <script>assets.add(asset)</script>
+                        <service-call name="growerp.100.InventoryServices100.create#Asset"
+                            in-map="[asset: asset, classificationId: classificationId]" />
+                        <!-- check if-->
                     </iterate>
-                    <set field="entities" from="[:]" />
-                    <set field="entities['assets']" from="assets" />
-                    <service-call name="growerp.100.ImportExportServices100.import#Entities"
-                        in-map="entities: entities, classificationId: classificationId," />
                 </if>
 
                 <set field="dbLeads" from="[]" />
@@ -3327,7 +3329,66 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="ownerPartyId" from="ownerPartyId" />
                     <econdition field-name="companyRole" value="Supplier" />
                 </entity-find>
+
                 <set field="index" type="Integer" value="0" />
+
+                <iterate list="ordersIn" entry="order">
+
+                    <entity-find entity-name="growerp.mobile.product.ProductAndCategoryAndPrices"
+                        list="products" limit="1">
+                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                        <econdition field-name="productName" operator="like"
+                            value="%${order.productName}%" />
+                    </entity-find>
+
+                    <set field="items" from="[]" />
+                    <if condition="classificationId == 'AppHotel'">
+                        <then>
+                            <while condition="order.quantity--">
+                                <set field="item"
+                                    from="[
+                                    itemType: [itemTypeId: 'ItemRental'],
+                                    product: [productId: products[0].productId],
+                                    rentalFromDate: order.rentalFromDate.toString(),
+                                    rentalThruDate: order.rentalThruDate.toString(),
+                                ]" />
+
+                                <script>items.add(item)</script>
+                            </while>
+                        </then>
+                        <else>
+                            <set field="item"
+                                from="[
+                                    product: [productId: products[0].productId],
+                                    itemType: [itemTypeId: 'ItemProduct'],
+                                    description: order.productName,
+                                    unitAmount: order.price ?: products[0].price,
+                                    quantity: order.quantity,
+                                ]" />
+                            <script>items.add(item)</script>
+                        </else>
+                    </if>
+                    <set field="finDoc"
+                        from="[
+                            statusId: 'FinDocPrep',
+                            docType: 'order',
+                            sales: true,
+                            currencyUomId: aPref.baseCurrencyUomId,
+                            productStoreId: productStore.productStoreId,
+                            otherCompany: [partyId: customers[index%2].companyPartyId],
+                            items: items]" />
+                    <service-call
+                        name="growerp.100.FinDocServices100.create#FinDoc"
+                        in-map="[finDoc: finDoc, classificationId: classificationId]"
+                        out-map="context" />
+                    <service-call
+                        in-map="[finDoc: [orderId: finDoc.orderId,
+                                    docType: 'order',
+                                    sales: true,
+                                    statusId:'FinDocCreated']]"
+                        name="growerp.100.FinDocServices100.update#FinDoc" />
+                    <set field="index" from="index + 1" />
+                </iterate>
 
                 <!-- tasks -->
                 <entity-find entity-name="growerp.party.OwnerCompanyDetailAndEmployee"

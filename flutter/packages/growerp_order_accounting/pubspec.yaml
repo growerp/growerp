@@ -1,11 +1,11 @@
 name: growerp_order_accounting
 description:
-  A package providing order and accounting functions such as order, invoice,       
+  A package providing order and accounting functions such as order, invoice,
   payments and ledger for the GrowERP system both for sales and purchase.
-version: 1.3.0
+version: 1.6.0
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
-platforms: 
+platforms:
   android:
   ios:
   linux:
@@ -13,15 +13,17 @@ platforms:
   web:
   windows:
 
-environment: 
-  sdk: '>=3.2.6 <4.0.0'
-  flutter: '>=1.17.0'
+environment:
+  sdk: ">=3.2.6 <4.0.0"
+  flutter: ">=1.17.0"
 
-dependencies: 
-  flutter: 
+dependencies:
+  flutter:
     sdk: flutter
-  flutter_localizations: 
+  flutter_localizations:
     sdk: flutter
+  growerp_core: ^1.6.0
+  growerp_models: ^1.6.0
   decimal: ^2.1.0
   intl: ^0.19.0
   global_configuration: ^2.0.0
@@ -50,16 +52,14 @@ dependencies:
   file_picker: ^5.2.0+1
   fast_csv: ^0.2.6
   archive: ^3.3.0
-  growerp_core: ^1.2.4
-  growerp_models: ^1.2.1
   scrollable_positioned_list: ^0.3.8
   two_dimensional_scrollables: ^0.3.1
   universal_io: ^2.2.2
-  flutter_test: 
+  flutter_test:
     sdk: flutter
 
-dev_dependencies: 
-  integration_test: 
+dev_dependencies:
+  integration_test:
     sdk: flutter
   mockito: ^5.0.2
   very_good_analysis: ^5.1.0
@@ -68,9 +68,9 @@ dev_dependencies:
   json_serializable: ^6.7.1
   flutter_lints: ^4.0.0
 
-flutter: 
+flutter:
   uses-material-design: true
-  assets: 
+  assets:
     - packages/growerp_core/images/report.png
     - packages/growerp_core/images/reportGrey.png
     - packages/growerp_core/images/setup.png

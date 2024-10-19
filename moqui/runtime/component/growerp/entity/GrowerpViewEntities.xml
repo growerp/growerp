@@ -985,7 +985,7 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="PARTY" join-optional="true">
             <key-map field-name="partyId" />
         </member-entity>
-        
+
         <alias name="transactionId" field="acctgTransId" entity-alias="ATX" />
         <alias name="companyPartyId" field="organizationPartyId" entity-alias="ATX" />
         <alias name="pseudoId" entity-alias="ATX" />

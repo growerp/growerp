@@ -1,23 +1,21 @@
 name: health
-version: 1.5.21+1
+version: 0.1.0+1
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none
-environment: 
-  sdk: '>=3.2.6 <4.0.0'
-  flutter: '>=1.17.0'
-dependencies: 
-  flutter: 
+environment:
+  sdk: ">=3.2.6 <4.0.0"
+  flutter: ">=1.17.0"
+dependencies:
+  flutter:
     sdk: flutter
-  growerp_core: ^1.3.0
-  growerp_models: ^1.3.0
-  growerp_marketing: ^1.3.0
-  growerp_order_accounting: ^1.3.0
-  growerp_user_company: ^1.3.0
-  growerp_website: ^1.3.0
+  growerp_marketing: ^1.6.0
+  growerp_website: ^1.6.0
+  growerp_order_accounting: ^1.6.0
+  growerp_user_company: ^1.6.0
   decimal: ^2.1.0
   flutter_bloc: ^8.1.4
-  flutter_localizations: 
+  flutter_localizations:
     sdk: flutter
   global_configuration: ^2.0.0
   intl: ^0.19.0
@@ -29,13 +27,12 @@ dependencies:
   dio: ^5.4.3
   http: ^1.1.2
 
-
-dev_dependencies: 
+dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_driver: 
+  flutter_driver:
     sdk: flutter
-  integration_test: 
+  integration_test:
     sdk: flutter
   webdriver: ^3.0.2
   test: ^1.19.5
@@ -43,7 +40,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets: 
+  assets:
     - assets/cfg/
     - packages/growerp_core/images/select.png
     - packages/growerp_core/images/selectGrey.png
@@ -96,5 +93,5 @@ flutter:
     - packages/growerp_core/images/chatGrey.png
     - packages/growerp_core/images/info.png
     - packages/growerp_core/images/infoGrey.png
-flutter_intl: 
+flutter_intl:
   enabled: true

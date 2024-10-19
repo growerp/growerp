@@ -41,7 +41,9 @@ Card makeDashboardItem(String key, BuildContext context, MenuOption menuOption,
       elevation: 1.0,
       margin: const EdgeInsets.all(5.0),
       child: Container(
-        decoration: const BoxDecoration(),
+        decoration: BoxDecoration(
+            color:
+                Theme.of(context).colorScheme.primaryContainer.withAlpha(100)),
         child: InkWell(
           key: Key(key),
           onTap: () {

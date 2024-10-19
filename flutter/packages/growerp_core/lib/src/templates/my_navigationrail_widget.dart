@@ -32,7 +32,7 @@ Widget myNavigationRail(
           key: Key('tap${option.route}')),
       selectedIcon: Image.asset(
           option.selectedImage ?? 'packages/growerp_core/images/select.png'),
-      label: Text(option.title),
+      label: Text(option.title, style: const TextStyle(fontSize: 16)),
     ));
   }
   if (items.isEmpty) {
@@ -97,10 +97,13 @@ Widget myNavigationRail(
                             key: const Key('theme'),
                             onTap: () => themeBloc.add(ThemeSwitch()),
                             child: Column(children: [
-                              Icon(themeBloc.state.themeMode == ThemeMode.light
-                                  ? Icons.light_mode
-                                  : Icons.dark_mode),
-                              const Text("Theme"),
+                              Icon(
+                                  size: 40,
+                                  themeBloc.state.themeMode == ThemeMode.light
+                                      ? Icons.light_mode
+                                      : Icons.dark_mode),
+                              const Text("Theme",
+                                  style: TextStyle(fontSize: 16)),
                             ]))))));
       },
     ),

@@ -1,3 +1,6 @@
+## 1.6.0
+* varous model changes
+
 ## 1.3.0
 * various changes
 

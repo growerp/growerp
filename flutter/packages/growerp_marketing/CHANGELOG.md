@@ -1,3 +1,6 @@
+## 1.6.0
+* package updates
+
 ## 1.3.0
 * various changes
 

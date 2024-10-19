@@ -1,3 +1,7 @@
+## 1.6.0
+* extended import sub command
+* added finalyze conversion sub command
+
 ## 1.3.0
 * created a conversion framework
 

@@ -1,3 +1,6 @@
+## 1.6.0
+* package upgrade
+
 ## 1.3.0
 * upgrade to growerp_core 1.2.3
 

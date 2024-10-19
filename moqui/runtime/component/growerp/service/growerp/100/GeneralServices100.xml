@@ -782,21 +782,23 @@ along with this software (see the LICENSE.md file). If not, see
                                     in-map="[ownerPartyId: ownerPartyId, userPartyId: userAccount.partyId,
                                     hostName: ec.web.getHostName(false),
                                     companyPartyId: partyId, classificationId: classificationId]" />
-                                <if condition="demoData">
-                                    <service-call
-                                        name="growerp.100.PartyServices100.load#DemoData"
-                                        include-user-login="true"
-                                        in-map="[ownerPartyId: ownerPartyId,
-                                                companyPartyId: partyId,
-                                                currencyId: currencyId,
-                                                classificationId: classificationId,
-                                                userPartyId: userAccount.partyId]" />
-                                </if>
                                 <!-- specific App setups for new company and first admin-->
                                 <service-call
                                     name="growerp.100.PartyServices100.setup#SpecificApp"
                                     in-map="[ownerPartyId: ownerPartyId, userPartyId: userAccount.partyId,
                                         companyPartyId: partyId, classificationId: classificationId]" />
+                                <!-- demo data -->
+                                <if condition="demoData">
+                                    <log message="calling demo data with classif: $classificationId" />
+                                    <service-call
+                                        name="growerp.100.PartyServices100.load#DemoData"
+                                        include-user-login="true"
+                                        in-map="[ownerPartyId: ownerPartyId,
+                                                        companyPartyId: partyId,
+                                                        currencyId: currencyId,
+                                                        classificationId: classificationId,
+                                                        userPartyId: userAccount.partyId]" />
+                                </if>
                             </then>
                             <else><!-- customer/supplier user with optional company-->
                                 <if condition="companyName">

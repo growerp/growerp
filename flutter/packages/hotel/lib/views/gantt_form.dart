@@ -381,12 +381,12 @@ class _GanttFormState extends State<GanttForm> {
         .where((element) => int.parse(element.shipmentId ?? '') == index)
         .toList();
     for (FinDoc reservation in roomReservations) {
-/*      debugPrint(
-          "==${reservation.shipmentId}==room: ${reservation.items[0].assetName} "
+      /*  debugPrint(
+          "==${reservation.shipmentId}==room: ${reservation.items[0].asset?.assetName} "
           "orderId: ${reservation.orderId} "
           "fr:${reservation.items[0].rentalFromDate?.dateOnly()} "
           "to: ${reservation.items[0].rentalThruDate?.dateOnly()}");
-*/ // occupation by product
+    */ // occupation by product
       if (reservation.items[0].description != null &&
           // all dates concatenated in description
           reservation.items[0].description!.startsWith('!!') &&
@@ -428,8 +428,8 @@ class _GanttFormState extends State<GanttForm> {
                   .inDays >=
               0) {
         // show occupation by room(asset) ==================================
-        roomReservations.sort((b, a) => (a.items[0].rentalFromDate!.dateOnly())
-            .compareTo(b.items[0].rentalFromDate!.dateOnly()));
+        //roomReservations.sort((b, a) => (a.items[0].rentalFromDate!.dateOnly())
+        //    .compareTo(b.items[0].rentalFromDate!.dateOnly()));
         DateTime from = reservation.items[0].rentalFromDate!;
         DateTime thru = reservation.items[0].rentalThruDate!;
         // started before today only borderradius on the right

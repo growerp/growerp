@@ -69,7 +69,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/accounting.png',
     title: 'Organization',
     route: '/company',
-    userGroups: [UserGroup.admin, UserGroup.employee, UserGroup.other],
+    userGroups: [UserGroup.admin, UserGroup.employee],
     child: ShowCompanyDialog(
       Company(),
       dialog: false,

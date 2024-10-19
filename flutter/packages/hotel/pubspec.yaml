@@ -1,12 +1,12 @@
 name: hotel
-version: 1.5.21+19
+version: 1.5.21+20
 publish_to: none
 
-environment: 
-  sdk: '>=3.2.6 <4.0.0'
-  flutter: '>=1.17.0'
-  
-dependencies: 
+environment:
+  sdk: ">=3.2.6 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
   growerp_core: ^1.3.0
   growerp_marketing: ^1.3.0
   growerp_website: ^1.3.0
@@ -17,23 +17,23 @@ dependencies:
   package_info_plus: ^8.0.2
   horizontal_data_table: ^4.3.1
 
-dev_dependencies: 
+dev_dependencies:
   flutter_test:
     sdk: flutter
-  integration_test: 
+  integration_test:
     sdk: flutter
-  flutter_driver: 
+  flutter_driver:
     sdk: flutter
   mockito: ^5.0.3
   bloc_test: ^9.0.1
   flutter_lints: ^4.0.0
-flutter_icons: 
+flutter_icons:
   android: launcher_icon
   ios: true
   image_path: packages/growerp_core/images/hotel1.jpg
-flutter: 
+flutter:
   uses-material-design: true
-  assets: 
+  assets:
     - packages/growerp_core/images/growerp100.png
     - packages/growerp_core/images/growerpDark100.png
     - packages/growerp_core/images/growerp.jpg

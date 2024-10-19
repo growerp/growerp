@@ -331,16 +331,14 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find offset="start" limit="limit" list="assetList"
                 entity-name="growerp.product.asset.AssetProductAndLocation">
                 <econdition field-name="assetId" ignore-if-empty="true" />
-                <!--econdition
-                field-name="statusId"
-                    operator="not-equals" from="activated" ignore-if-empty="true"/-->
+                <econdition
+                    field-name="statusId"
+                    operator="not-equals" from="activated" ignore-if-empty="true" />
                 <econdition
                     field-name="classEnumId"
                     from="assetClass.convertedStatusId" ignore-if-empty="true" />
-                <econdition
-                    field-name="ownerPartyId" from="companyPartyId" />
-                <econdition
-                    field-name="productId" ignore-if-empty="true" />
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="productId" ignore-if-empty="true" />
                 <econdition field-name="assetName" operator="like" ignore-case="true"
                     from="filter" ignore-if-empty="true" />
                 <econditions combine="or">
@@ -478,6 +476,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
             </entity-find>
+            <!-- if no productId, check if related product name exist, when not create -->
             <if condition="!asset.product?.productId &amp;&amp; asset.product?.productName">
                 <!-- check first if exist by name -->
                 <entity-find entity-name="mantle.product.Product" list="checkProducts" limit="1">
@@ -485,13 +484,20 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 </entity-find>
                 <if condition="checkProducts">
-                    <set field="asset.product.productId" from="checkProducts[0].productId" />
-                    <entity-find entity-name="mantle.product.ProductPrice" list="prices">
-                        <econdition field-name="productId" from="checkProducts[0].productId" />
-                        <econdition field-name="priceTypeEnumId" value="PptCurrent" />
-                    </entity-find>
-                    <set field="asset.acquireCost"
-                        from="asset.acquireCost ?: prices[0].price / 4 * 3" />
+                    <then>
+                        <!-- found so use productId-->
+                        <set field="asset.product.productId" from="checkProducts[0].productId" />
+                        <!-- create artificial acquire cost-->
+                        <entity-find entity-name="mantle.product.ProductPrice" list="prices">
+                            <econdition field-name="productId" from="checkProducts[0].productId" />
+                            <econdition field-name="priceTypeEnumId" value="PptCurrent" />
+                        </entity-find>
+                        <if condition="prices &amp;&amp; prices[0].price != null">
+                            <set field="asset.acquireCost"
+                                from="asset.acquireCost ?: prices[0].price / 4 * 3" />
+                        </if>
+                        <then />
+                    </then>
                     <else>
                         <service-call name="growerp.100.CatalogServices100.create#Product"
                             in-map="[product: asset.product,classificationId: classificationId]"
@@ -594,7 +600,6 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <log message="====updating asset: $asset" />
             <!-- for update no owner needed in single company use -->
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
@@ -631,7 +636,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="assetOld.classEnumId" from="assetClass.convertedStatusId" />
                 <set field="assetOld.productId" from="asset.product?.productId" />
                 <set field="assetOld.locationSeqId" from="asset.location?.locationId" />
-                <log message="====updating asset1: $assetOld" />
                 <entity-update value-field="assetOld" />
             </if>
             <service-call name="growerp.100.InventoryServices100.get#Assets"

@@ -1,23 +1,23 @@
 name: growerp
-version: 1.3.0
+version: 1.6.0
 description: GrowERP installation and tools such as import and export.
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp/tree/master/flutter/packages/growerp
-platforms: 
+platforms:
   linux:
   macos:
   windows:
-executables: 
-  growerp: growerp.dart
-  convertToCsv: convert_to_csv.dart
-environment: 
-  sdk: '>=3.2.6 <4.0.0'
-dependencies: 
+executables:
+  growerp: growerp
+  convertToCsv: convert_to_csv
+environment:
+  sdk: ">=3.2.6 <4.0.0"
+dependencies:
   dcli: ^6.0.4
   dio: ^5.4.3
   fast_csv: ^0.2.6
   get_it: ^7.6.4
-  growerp_models: ^1.2.4
+  growerp_models: ^1.6.0
   hive: ^2.2.3
   logger: ^2.0.2+1
   retrofit: ^4.3.0
@@ -26,6 +26,3 @@ dependencies:
 
 dev_dependencies:
   flutter_lints: ^4.0.0
-
-
-

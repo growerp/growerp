@@ -62,7 +62,7 @@ storeFile=xxxxxxx
 
 (do NOT upload the actual file into git!)
 to create a link in linux in the android directory:
-    ln -s key.properties here/your/actual/file
+    ln -s ~/here/your/actual/file key.properties
 
 #### should have local.properties file
 which contains the following info:

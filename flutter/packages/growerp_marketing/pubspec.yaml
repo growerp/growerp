@@ -1,9 +1,9 @@
 name: growerp_marketing
 description: A marketing package for the GrowERP system
-version: 1.3.0
+version: 1.6.0
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
-platforms: 
+platforms:
   android:
   ios:
   linux:
@@ -11,15 +11,17 @@ platforms:
   web:
   windows:
 
-environment: 
-  sdk: '>=3.2.6 <4.0.0'
-  flutter: '>=1.17.0'
+environment:
+  sdk: ">=3.2.6 <4.0.0"
+  flutter: ">=1.17.0"
 
-dependencies: 
-  flutter: 
+dependencies:
+  flutter:
     sdk: flutter
-  flutter_localizations: 
+  flutter_localizations:
     sdk: flutter
+  growerp_core: ^1.6.0
+  growerp_models: ^1.6.0
   decimal: ^2.1.0
   intl: ^0.19.0
   global_configuration: ^2.0.0
@@ -48,25 +50,23 @@ dependencies:
   file_picker: ^5.2.0+1
   fast_csv: ^0.2.6
   archive: ^3.3.0
-  growerp_core: ^1.2.4
-  growerp_models: ^1.2.1
   two_dimensional_scrollables: ^0.3.1
+  flutter_test:
+    sdk: flutter
 
-dev_dependencies: 
-  flutter_test: 
+dev_dependencies:
+  flutter_driver:
     sdk: flutter
-  flutter_driver: 
-    sdk: flutter
-  integration_test: 
+  integration_test:
     sdk: flutter
   flutter_lints: ^4.0.0
   build_runner: ^2.4.12
   json_serializable: ^6.8.0
   freezed: ^2.5.2
-  
-flutter: 
+
+flutter:
   uses-material-design: true
-  assets: 
+  assets:
     - packages/growerp_core/images/about.png
     - packages/growerp_core/images/aboutGrey.png
     - packages/growerp_core/images/accounting.png

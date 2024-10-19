@@ -3,33 +3,34 @@
 Let us know if you have suggestions at support@growerp.com
 
 ## Functional requests
-
 * Update the freelancer app with a project manager
 * Create a manufacturing app
 * Create a logistic app
+* Create a POS for a small shop (https://github.com/elrizwiraswara/flutter_pos?)
 ## Technical internal requests
+* Creation of a system integration package probably:  https://github.com/apache/camel-quarkus-examples
 * Introduction of a new router: [go_router](https://pub.dev/packages/go_router)
 * [Dart macros](https://news.ycombinator.com/item?id=39174612) to replace `freezed` and `json_serializable`
-* Separate the order/accounting package
 * Move flutter chat into their own package.
+* Add dependency injection with  [get_it](https://pub.dev/packages/get_it) and [injectable](https://pub.dev/packages/injectable) 
 * Deep linking into the Android/IOS apps so they can also be used with your own backend.
 * Keep the system updated with the latest Flutter/dart releases, [Flutter roadmap is here](https://github.com/flutter/flutter/wiki/Roadmap)
 * [Wasm, Web Assembly is upcoming](https://docs.flutter.dev/development/platform-integration/web/wasm)
 
 # Releases
 
-## Conversion Framework & Workflow(Exp) release October 31 2024 (v1.6.0 for Flutter 3.24.3)
+## Conversion Framework release October 31 2024 (v1.6.0 for Flutter 3.24.3)
 #### General
-1. Now use of flexcolor scheme: https://pub.dev/packages/flex_color_scheme
-2. Currency fields now show proper currency
-3. Main company can have own domain with just customer registration
-4. Registration process now in two steps: 1.email//name 2: other data
-5. Add mixed person/company customer/supplier lists  
-6. Created a data conversion framework: a 2 step process to import existing data from CSV or spreadsheet (ODS/XSLS)
+1. Created a data conversion framework: a 2 step process to import existing data from CSV or spreadsheet (ODS/XSLS)
+2. Now use of the flexcolor scheme: https://pub.dev/packages/flex_color_scheme
+3. Currency fields now show proper currency
+4. Main company can have own domain and startup screen with just customer registration
+5. Registration process now in two steps:  email/name  and other data
+6. Add mixed person/company customer/supplier lists  
 7. Documents(invoice/payment/order/transaction) and  product/category now have sequential or customized numbering.
 8. Improved system result/confirmation messages.
 9. Refactored BlocProviders and moved blocs into their own package.
-10. Background automated integration test in the flutter directory using docker.
+10. Background automated integration test using docker.
 11. Fully automated installation at the test system using Docker.
 12. Added a health app as a patient front-end to the openMRS system
 13. All lists now using tables for better positioning of fields

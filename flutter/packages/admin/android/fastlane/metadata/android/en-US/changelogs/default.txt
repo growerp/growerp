@@ -1,1 +1,1 @@
-First version which has all basic ERP functions including accounting.
+Please check the change log at https://github.com/growerp/growerp/releases
