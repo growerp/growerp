@@ -11,7 +11,7 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 /// https://kamaravichow.medium.com/caching-with-dio-hive-in-flutter-e630ac5fc777
 Future<Dio> buildDioClient(
-    {Duration timeout = const Duration(seconds: 10),
+    {Duration timeout = const Duration(seconds: 15),
     String? overrideUrl}) async {
   bool android = false;
   try {

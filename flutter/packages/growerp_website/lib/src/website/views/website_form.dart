@@ -384,8 +384,10 @@ class WebsiteFormState extends State<WebsiteForm> {
                     ),
                   ),
                   Text(
-                      state.website!.hostName
-                          .substring(state.website!.hostName.indexOf('.')),
+                      state.website!.hostName.contains('.')
+                          ? state.website!.hostName
+                              .substring(state.website!.hostName.indexOf('.'))
+                          : '',
                       style: const TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(width: 10),

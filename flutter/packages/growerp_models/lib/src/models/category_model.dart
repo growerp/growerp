@@ -26,8 +26,8 @@ part 'category_model.g.dart';
 
 @freezed
 class Category extends Equatable with _$Category {
-  Category._();
-  factory Category({
+  const Category._();
+  const factory Category({
     @Default("") String categoryId,
     @Default("") String pseudoId,
     @Default("") String categoryName,

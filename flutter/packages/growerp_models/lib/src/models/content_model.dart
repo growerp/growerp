@@ -21,8 +21,8 @@ part 'content_model.g.dart';
 
 @freezed
 class Content extends Equatable with _$Content {
-  Content._();
-  factory Content({
+  const Content._();
+  const factory Content({
     @Default("") String path, // filename when image
     @Default("") String title,
     @Default("") String text,

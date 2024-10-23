@@ -22,7 +22,7 @@ Card makeDashboardItem(String key, BuildContext context, MenuOption menuOption,
   bool phone = ResponsiveBreakpoints.of(context).isMobile;
 
   List<Widget> textList = [
-    Center(child: Image.asset(menuOption.selectedImage!, height: 80.0)),
+    Center(child: Image.asset(menuOption.selectedImage!, height: 70.0)),
     Center(
         child: Text(menuOption.title.replaceAll('\n', ''),
             style: TextStyle(

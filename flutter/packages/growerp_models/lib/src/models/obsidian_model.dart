@@ -22,8 +22,8 @@ part 'obsidian_model.g.dart';
 
 @freezed
 class Obsidian extends Equatable with _$Obsidian {
-  Obsidian._();
-  factory Obsidian({
+  const Obsidian._();
+  const factory Obsidian({
     @Default("") String title,
     @Uint8ListConverter() Uint8List? zip,
   }) = _Obsidian;

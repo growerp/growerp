@@ -22,8 +22,8 @@ part 'task_model.g.dart';
 
 @freezed
 class Task extends Equatable with _$Task {
-  Task._();
-  factory Task({
+  const Task._();
+  const factory Task({
     @Default("") String taskId,
     @Default(TaskType.unkwown)
     TaskType taskType, // todo, workflow, workflowTask

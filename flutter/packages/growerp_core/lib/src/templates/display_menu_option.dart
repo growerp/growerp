@@ -265,7 +265,7 @@ class MenuOptionState extends State<DisplayMenuOption>
               actions: actions),
           drawer: myDrawer(context, isPhone, menuList),
           floatingActionButton: floatingActionButton,
-          body: Column(children: simpleChildren));
+          body: child!);
     }
 
     Widget tabPage(bool isPhone) {

@@ -3,12 +3,7 @@
 start emulators from command line:
 flutter emulators --launch pixel
 
-<b>to create a missing emulator ipad</b>: (adjust ios version and ipad version)
-xcrun simctl create "iPad Pro (12.9-inch) (3rd generation)" "com.apple.CoreSimulator.SimDeviceType.iPad-Pro--12-9-inch---3rd-generation-" "com.apple.CoreSimulator.SimRuntime.iOS-15-4"
-
-1. Start all emulators you need screen shots from
-    iPhone 12 pro max, iPhone 8 Plus, iPad Pro 12.9 (2nd gen), iPad Pro 12.9 (3rd gen)
-2. switch Ipad to horizontal layout
+missing emulators can be added in xcode : devices and emulators
 
 install frameit-chrome:
 flutter pub global activate frameit_chrome
@@ -45,7 +40,7 @@ export FLUTTER_ROOT=/Users/hans/flutter/bin
 install: brew install fastlane
 
 1. increase numbers pubspec.yaml version: x.x.x+1
-2. set the target backend!!!! and back again!!!!
+2. set the target backend!!!! and back after build again!!!!
 3. build flutter: (project home)
     flutter build ios --release --no-codesign
 4. compile and sign (in ios dir)

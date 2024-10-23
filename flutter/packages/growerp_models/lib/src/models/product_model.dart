@@ -29,8 +29,8 @@ part 'product_model.g.dart';
 
 @freezed
 class Product extends Equatable with _$Product {
-  Product._();
-  factory Product({
+  const Product._();
+  const factory Product({
     @Default("") String productId,
     @Default("") String pseudoId,
     String? productTypeId, // good, service, rental)
