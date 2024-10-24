@@ -73,7 +73,7 @@ flutter run
 ## Use GrowERP locally with docker
 In the docker directory there is a README.md to run the complete system with docker images locally.
 
-## Some phone screen shots:
+## Some phone screen shots from the admin App:
 <div style="text-align: center">
     <table>
         <tr>
@@ -101,7 +101,7 @@ In the docker directory there is a README.md to run the complete system with doc
     </table>
 </div>
 
-### Some web/tablet screen shots:
+### Some web/tablet admin screen shots:
 <div style="text-align: center">
     <table>
         <tr>
@@ -137,6 +137,69 @@ In the docker directory there is a README.md to run the complete system with doc
         <tr>
             <td style="text-align: center">
                     <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/Screenshot_products.png" width="600">
+            </td>
+        </tr>
+    </table>
+</div>
+## Some phone screen shots from the *hotel* App:
+<div style="text-align: center">
+    <table>
+        <tr>
+            <td style="text-align: center">
+                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/phoneScreenshots/main-day.png" width="200">
+            </td>            
+            <td style="text-align: center">
+                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/phoneScreenshots/main-week-menu.png" width="200">
+            </td>
+            <td style="text-align: center">
+                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/phoneScreenshots/rooms.png" width="200">
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/phoneScreenshots/reservations.png" width="200">
+            </td>            
+            <td style="text-align: center">
+                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/phoneScreenshots/accounting.png" width="200">
+            </td>
+            <td style="text-align: center">
+                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/phoneScreenshots/ledger.png" width="200">
+            </td>
+        </tr>
+    </table>
+</div>
+
+### Some web/tablet *Hotel* screen shots:
+<div style="text-align: center">
+    <table>
+        <tr>
+            <td style="text-align: center">
+                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/main_day.png" width="600">
+            </td>            
+        </tr>
+        <tr>
+            <td style="text-align: center">
+                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/main-week.png" width="600">
+            </td>            
+        </tr>
+        <tr>
+            <td style="text-align: center">
+                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/rooms.png" width="600">
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/reservations.png" width="600">
+            </td>            
+        </tr>
+        <tr>
+            <td style="text-align: center">
+                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/accounting.png" width="600">
+            </td>            
+        </tr>
+        <tr>
+            <td style="text-align: center">
+                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/ledger.png" width="600">
             </td>
         </tr>
     </table>
