@@ -174,7 +174,7 @@ In the docker directory there is a README.md to run the complete system with doc
     <table>
         <tr>
             <td style="text-align: center">
-                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/main_day.png" width="600">
+                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/main-day.png" width="600">
             </td>            
         </tr>
         <tr>
