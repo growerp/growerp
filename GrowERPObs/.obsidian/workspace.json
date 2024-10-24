@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md",
+                "file": "1 Introduction/6 Releases.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "5 Road Map and Releases"
+              "title": "6 Releases"
             }
           }
         ]
@@ -188,9 +188,13 @@
   },
   "active": "cd2ba6fa8750f0f9",
   "lastOpenFiles": [
-    "1 Introduction/4 Getting started.md",
-    "1 Introduction/5 Road Map and Releases.md",
+    "2 End User documentation/1 Introduction/2 Getting Started.md",
     "1 Introduction/3 Feature list.md",
+    "1 Introduction/6 Releases.md",
+    "1 Introduction/5 Road Map.md",
+    "3 Technical documentation/5 HTML Website.md",
+    "1 Introduction/topten.png",
+    "1 Introduction/4 Getting started.md",
     "2 End User documentation/1 Introduction/3 General business flow.md",
     "3 Technical documentation/7 Integration tests.md",
     "4 Applications/4 workflow/Workflow data organization.md",
@@ -209,15 +213,12 @@
     "1 Introduction/1 Overview.md",
     "3 Technical documentation/8 Deployment.md",
     "2 End User documentation/1 Introduction/1 Overview.md",
-    "2 End User documentation/1 Introduction/2 Getting Started.md",
     "GrowERP documentation.md",
     "Stripe.md",
     "2 End User documentation/9 Authentication & users/2 Authentication.md",
     "2 End User documentation/9 Authentication & users/2 Usertypes.md",
     "2 End User documentation/9 Authentication & users",
-    "2 End User documentation/5 Order management/1 Introduction.md",
     "2 End User documentation/5 Order management",
-    "2 End User documentation/2 Website/3 Publish products.md",
     "2 End User documentation/6 inventory management",
     "2 End User documentation/2 Website",
     "2 End User documentation/1 Introduction",

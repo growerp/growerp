@@ -1,6 +1,6 @@
 # Functional feature List.
 
-The features currently implemented in the system are listed below. For a roadmap please check the  [[5 Road Map and Releases]] page
+The features currently implemented in the system are listed below. For a roadmap please check the  [[5 Road Map]] page
 
 ## General
 * Application available on IOS/Android phone or tablet and within the browser.([Flutter](https://flutter.dev))
@@ -18,13 +18,15 @@ The features currently implemented in the system are listed below. For a roadmap
 * Standard categories and website categories
 ## Order management
  * Purchase and Sales
- * Items can be products, rental or with no productId
+ * Items can be products, rental or without productId
  * will create invoices and payments and shipments from orders
 ## Inventory
 * location management
 * in/outgoing shipments
+* Asset management
 ## Accounting
-* invoice and payment
+* Sales and purchase management
+* Invoices and payments
 * Automatic posting over configuration entities
 * Double entry ledger
 * Any ledger organization

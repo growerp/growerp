@@ -8,7 +8,7 @@ We have made this system available directly from the cloud either by using a mob
 
 ## Installation
 
-Except for the website, this system is an application, which need to be downloaded, yes even in the browser which can take up to a minute depending the the speed of your internet connection.
+Except for the website, this system is an application, which need to be downloaded, yes even in the browser which can take some time depending the the speed of your internet connection.
 
 ### Download the mobile APP from the app/play store.
 

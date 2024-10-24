@@ -88,6 +88,9 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 
 #### build the aab bundle:
+make sure flutter/packages/admin/assets/cfg/app_settings.json backend url is set correctly
+reverse the change afterwards!
+
 flutter build appbundle
 
 #### First time upload by hand, make sure bundle id is set correctly:
@@ -97,8 +100,8 @@ init: fastlane supply init
 #### Upload in Play store: (android dir)
 (everything including build/meta/screenshots)
 fastlane supply \
-    --aab /home/dell/admin/build/app/outputs/bundle/release/app-release.aab \
-    --track beta --in_app_update_priority 3 
+    --aab /home/hans/growerp/flutter/packages/admin/build/app/outputs/bundle/release/app-release.aab \
+    --track release --in_app_update_priority 3 
 
 (upload just binary)
     fastlane upload
