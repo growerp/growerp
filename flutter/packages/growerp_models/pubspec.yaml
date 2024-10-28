@@ -1,5 +1,5 @@
 name: growerp_models
-version: 1.6.0
+version: 1.6.1
 description: GrowERP models and Moqui backend REST interface
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
@@ -24,7 +24,6 @@ dependencies:
   dcli: ^6.0.4
   universal_io: ^2.2.2
   json_annotation: ^4.9.0
-  hive_flutter: ^1.1.0
 
 dev_dependencies:
   flutter_lints: ^4.0.0
@@ -32,4 +31,3 @@ dev_dependencies:
   json_serializable: ^6.8.0
   freezed: ^2.5.2
   retrofit_generator: ^9.0.0
-  hive_generator: ^2.0.1

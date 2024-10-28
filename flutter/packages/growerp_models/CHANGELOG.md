@@ -1,3 +1,6 @@
+## 1.6.1
+* remove flutter_hive blocking execution in native dart
+
 ## 1.6.0
 * various model changes
 

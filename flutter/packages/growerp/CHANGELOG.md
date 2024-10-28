@@ -1,3 +1,6 @@
+## 1.6.1
+* upgraded models package
+
 ## 1.6.0
 * extended import sub command
 * added finalyze conversion sub command
