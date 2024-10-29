@@ -324,7 +324,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <return error="true"
                     message="TimePeriodId: $periodId not found for company party id: $companyPartyId" />
             </if>
-            <service-call name="mantle.ledger.LedgerServices.close#FinancialTimePeriod"
+            <service-call name="growerp.100.AccountingServices100.close#FinancialTimePeriod"
                 in-map="[timePeriodId: timePeriodId, closeChildren: 'Y']" />
             <service-call name="growerp.100.AccountingServices100.get#TimePeriod"
                 out-map="context" />
@@ -1505,4 +1505,94 @@ along with this software (see the LICENSE.md file). If not, see
             </iterate>
         </actions>
     </service>
+
+    <service verb="close" noun="FinancialTimePeriod" transaction-timeout="1800"
+        transaction="force-new">
+        <in-parameters>
+            <parameter name="timePeriodId" required="true" />
+            <parameter name="closePrevious" type="Boolean" default="false" />
+            <parameter name="closeChildren" type="Boolean" default="false" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.party.time.TimePeriod" value-field="timePeriod"
+                for-update="true" />
+            <service-call name="mantle.party.TimeServices.get#TimePeriodInfo"
+                in-map="[timePeriod:timePeriod]" out-map="periodInfo" />
+            <set field="fromTimestamp" from="periodInfo.fromTimestamp" />
+            <set field="thruTimestamp" from="periodInfo.thruTimestamp" />
+
+            <log message="Closing period ${timePeriodId} ${timePeriod.periodName}" />
+
+            <if condition="timePeriod.isClosed == 'Y'">
+                <message error="true">Not closing period ${ec.resource.expand('TimePeriodNameTemplate','',timePeriod)}, already closed.</message>
+            </if>
+            <if condition="ec.user.nowTimestamp.before(timePeriod.thruDate)">
+                <message error="true">Not closing period ${ec.resource.expand('TimePeriodNameTemplate','',timePeriod)}, period has not ended (ends on ${timePeriod.thruDate}).</message>
+            </if>
+
+            <!-- don't allow a period to close if the previous period is not closed -->
+            <set field="previousTimePeriod" from="timePeriod.previous" />
+            <if condition="previousTimePeriod &amp;&amp; previousTimePeriod.isClosed != 'Y'">
+                <if condition="closePrevious">
+                    <then>
+                        <service-call
+                            name="growerp.100.AccountingServices100.close#FinancialTimePeriod"
+                            in-map="[timePeriodId:previousTimePeriod.timePeriodId, closePrevious:closePrevious, closeChildren:closeChildren]" />
+                    </then>
+                    <else>
+                        <message error="true">Not closing period ${ec.resource.expand('TimePeriodNameTemplate','',timePeriod)}, previous period ${ec.resource.expand('TimePeriodNameTemplate','',previousTimePeriod)} not closed.</message>
+                    </else>
+                </if>
+            </if>
+
+            <!-- if any child periods make sure they are closed -->
+            <entity-find entity-name="mantle.party.time.TimePeriod" list="childTimePeriodList">
+                <econdition field-name="parentPeriodId" from="timePeriodId" />
+                <order-by field-name="fromDate" />
+            </entity-find>
+            <iterate list="childTimePeriodList" entry="childTimePeriod">
+                <if condition="childTimePeriod.isClosed != 'Y'">
+                    <if condition="closeChildren">
+                        <then>
+                            <service-call
+                                name="growerp.100.AccountingServices100.close#FinancialTimePeriod"
+                                in-map="[timePeriodId:childTimePeriod.timePeriodId, closePrevious:closePrevious, closeChildren:closeChildren]" />
+                        </then>
+                        <else>
+                            <message error="true">Not closing period ${ec.resource.expand('TimePeriodNameTemplate','',timePeriod)}, child period ${ec.resource.expand('TimePeriodNameTemplate','',childTimePeriod)} not closed.</message>
+                        </else>
+                    </if>
+                </if>
+            </iterate>
+
+            <!-- make sure there are no unposted transactions within the time period -->
+            <entity-find-count entity-name="growerp.account.AcctgTransAndCompany"
+                count-field="unpostedTransCount">
+                <econdition field-name="isPosted" operator="not-equals" value="Y" or-null="true" />
+                <econdition field-name="companyPartyId" from="companyPartyId" />
+                <econdition field-name="transactionDate" operator="greater-equals"
+                    from="fromTimestamp" />
+                <econdition field-name="transactionDate" operator="less-equals" from="thruTimestamp" />
+            </entity-find-count>
+            <if condition="unpostedTransCount &gt; 0">
+                <message error="true">Not closing period ${ec.resource.expand('TimePeriodNameTemplate','',timePeriod)}, found ${unpostedTransCount} unposted transactions in period.</message>
+            </if>
+
+            <!-- check errors before continuing -->
+            <check-errors />
+
+            <!-- first close the TimePeriod to avoid further postings -->
+            <set field="timePeriod.isClosed" value="Y" />
+            <entity-update value-field="timePeriod" />
+
+            <!-- recalculate postedDebits, postedCredits, endingBalance, etc on
+            GlAccountOrgTimePeriod records for this time period -->
+            <service-call
+                name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgTimePeriodAmounts"
+                in-map="[timePeriodId:timePeriodId]" />
+
+            <message>Closed period ${timePeriod.periodName} and verified summary totals</message>
+        </actions>
+    </service>
+
 </services>

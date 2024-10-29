@@ -273,8 +273,10 @@ List<String> convertRow(
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[29]); // product id
       columnsTo.add(columnsFrom[30]); // descr
-      columnsTo.add(columnsFrom[28]); // quant
-      columnsTo.add(columnsFrom[32]); // price
+      columnsTo.add(columnsFrom[28] == '0' ? '1' : columnsFrom[28]); // quant
+      columnsTo.add(double.parse(columnsFrom[32]) == 0.0
+          ? columnsFrom[33]
+          : columnsFrom[32]); // price
       columnsTo.add(columnsFrom[31]); // itemType accountCode
       columnsTo.add('');
       columnsTo.add(accountCodeToItemType(columnsFrom[31], columnsFrom[29]));
@@ -316,8 +318,10 @@ List<String> convertRow(
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[25]); // product id
       columnsTo.add(columnsFrom[26]); // descr
-      columnsTo.add(columnsFrom[24] == '0.00' ? '1' : columnsFrom[24]); // quant
-      columnsTo.add(columnsFrom[28] == '0.0000'
+      columnsTo.add(double.parse(columnsFrom[24]) == 0.00
+          ? '1'
+          : columnsFrom[24]); // quant
+      columnsTo.add(double.parse(columnsFrom[28]) == 0.0
           ? columnsFrom[29]
           : columnsFrom[28]); // price
       columnsTo.add(columnsFrom[27]); // itemType accountCode
@@ -402,8 +406,12 @@ List<String> convertRow(
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[23]); // product id
       columnsTo.add(columnsFrom[24]); // descr
-      columnsTo.add(columnsFrom[22]); // quant
-      columnsTo.add(columnsFrom[26]); // price
+      columnsTo.add(double.parse(columnsFrom[22]) == 0.0
+          ? '1'
+          : columnsFrom[22]); // quant
+      columnsTo.add(double.parse(columnsFrom[26]) == 0.0
+          ? columnsFrom[28].replaceAll('-', '')
+          : columnsFrom[26]); // price
       columnsTo.add(columnsFrom[25]); // itemType accountCode
       columnsTo.add('');
       columnsTo.add(accountCodeToItemType(columnsFrom[25], ''));
@@ -444,9 +452,11 @@ List<String> convertRow(
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[30]); // product id
       columnsTo.add(columnsFrom[32]); // descr
-      columnsTo.add(columnsFrom[28] == '0.00' ? '1' : columnsFrom[28]); // quant
-      columnsTo.add(columnsFrom[34] == '0.0000'
-          ? columnsFrom[36]
+      columnsTo.add(double.parse(columnsFrom[28]) == 0.0
+          ? '1'
+          : columnsFrom[28]); // quant
+      columnsTo.add(double.parse(columnsFrom[34]) == 0.0
+          ? columnsFrom[36].replaceAll('-', '')
           : columnsFrom[34]); // price
       columnsTo.add(columnsFrom[33]); // itemType accountCode
       columnsTo.add('');

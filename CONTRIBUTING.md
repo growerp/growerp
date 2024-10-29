@@ -4,9 +4,10 @@ In general you can make a pull request to the https://github.com/growerp/growerp
 
 1. Fork it!
 2. Create your feature branch from development branch: git checkout -b my-new-feature
-3. Commit your changes: git commit -am 'Add some feature'
-4. Push to the branch: git push --set-upstream origin my-new-feature
-5. Submit a pull request.
+3. Create your changes
+4. Commit your changes: git commit -am 'Add some feature'
+5. Push to the branch: git push --set-upstream origin my-new-feature
+6. Submit a pull request.
 
 
 Start your commit message with:

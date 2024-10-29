@@ -4,13 +4,6 @@ repository: https://github.com/growerp/growerp
 # packages also determine the order of test
 packages:
   - packages/growerp_core
-  - packages/growerp_user_company/example
-  - packages/growerp_catalog/example
-  - packages/growerp_inventory/example
-  - packages/growerp_marketing/example
-  - packages/growerp_order_accounting/example
-  - packages/growerp_website/example
-  - packages/growerp_task/example
   - packages/growerp_user_company
   - packages/growerp_catalog
   - packages/growerp_inventory
@@ -19,18 +12,17 @@ packages:
   - packages/growerp_website
   - packages/growerp_task
   - packages/growerp_models
+  - packages/growerp
   - packages/admin
   - packages/website
   - packages/hotel
   - packages/freelance
-  - packages/workflow
   - packages/health
-  - packages/test
 
 command:
   bootstrap:
     runPubGetInParallel: false
-    
+
 scripts:
   analyze:
     exec: dart analyze .
@@ -42,7 +34,7 @@ scripts:
       concurrency: 1
       orderDependents: true
     packageFilters:
-      dependsOn: build_runner     
+      dependsOn: build_runner
   buildclean:
     description: build_runner clean.
     run: "flutter clean && flutter pub run build_runner clean"
@@ -50,7 +42,7 @@ scripts:
       concurrency: 1
       orderDependents: true
     packageFilters:
-      dependsOn: build_runner     
+      dependsOn: build_runner
   watch:
     description: watch package.
     run: "dart run build_runner watch"
@@ -58,7 +50,7 @@ scripts:
       concurrency: 1
       orderDependents: true
     packageFilters:
-      dependsOn: build_runner     
+      dependsOn: build_runner
   l10n:
     description: Generates l10n for all app packages.
     run: "flutter gen-l10n"
@@ -67,7 +59,7 @@ scripts:
       failFast: true
     packageFilters:
       fileExists: "l10n.yaml"
-      
+
   test_package:
     description: run all integration tests.
     run: "flutter test integration_test"
@@ -93,4 +85,3 @@ scripts:
       concurrency: 1
     packageFilters:
       dirExists: "integration_test"
-

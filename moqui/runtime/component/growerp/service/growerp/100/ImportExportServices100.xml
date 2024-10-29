@@ -22,7 +22,8 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="itemTypes" required="true" type="List" />
         </in-parameters>
         <actions>
-            <script>System.out.println("importing ${itemTypes?.size()} item types")</script>
+            <script>System.out.println(">>>>importing ${itemTypes?.size()} item types")</script>
+            <set field="itemTypesImported" type="Integer" value="0" />
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="context" />
             <!-- delete existing -->
@@ -37,7 +38,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="accountCode" from="itemType.accountCode" />
                 </entity-find>
                 <if condition="!glAccounts">
-                    <script>System.out.println("Could not find accountCode: ${itemType.accountCode} for company: $companyPartyId")</script>
+                    <script>System.out.println(">>>Could not find accountCode: ${itemType.accountCode} for company: $companyPartyId")</script>
                     <else>
                         <service-call name="create#mantle.ledger.config.ItemTypeGlAccount"
                             in-map="[
@@ -46,11 +47,12 @@ along with this software (see the LICENSE.md file). If not, see
                                 direction: itemType.direction,
                                 glAccountId: glAccounts[0].glAccountId,
                             ]" />
+                        <script>itemTypesImported++;</script>
                     </else>
                 </if>
             </iterate>
             <if condition="!ec.message.hasError()">
-                <script>System.out.println("${itemTypes.size()} itemTypes imported")</script>
+                <script>System.out.println(">>>${itemTypesImported} itemTypes imported")</script>
             </if>
         </actions>
     </service>
@@ -61,7 +63,9 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="paymentTypes" required="true" type="List" />
         </in-parameters>
         <actions>
-            <script>System.out.println("importing ${paymentTypes?.size()} paymentTypes")</script>
+            <script>System.out.println(">>>>importing ${paymentTypes?.size()} paymentTypes")</script>
+            <set field="paymentTypesImported" type="Integer" value="0" />
+            <set field="paymentTypesIgnored" type="Integer" value="0" />
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="context" />
             <!-- delete existing -->
@@ -92,10 +96,15 @@ along with this software (see the LICENSE.md file). If not, see
                                 isApplied: paymentType.isApplied == true ? 'Y' : 'N',
                                 glAccountId: glAccountId,
                             ]" />
+                    <script>paymentTypesImported++;</script>
+                    <else>
+                        <script>System.out.println(">>> PaymentType ${paymentType.paymentTypeId} ignored: GLAccount empty")</script>
+                        <script>paymentTypesIgnored++;</script>
+                    </else>
                 </if>
             </iterate>
             <if condition="!ec.message.hasError()">
-                <script>System.out.println("${paymentTypes.size()} paymentTypes imported")</script>
+                <script>System.out.println(">>>${paymentTypesImported} paymentTypes imported ${paymentTypesIgnored} ignored")</script>
             </if>
         </actions>
     </service>
@@ -107,7 +116,9 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
-            <script>System.out.println("importing ${glAccounts?.size()} GL Accounts")</script>
+            <script>System.out.println(">>>>importing ${glAccounts?.size()} GL Accounts")</script>
+            <set field="glAccountsImported" type="Integer" value="0" />
+            <set field="glAccountsUpdated" type="Integer" value="0" />
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="relComp" />
             <!-- delete existing transactions only initial if present-->
@@ -169,12 +180,15 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.AccountingServices100.create#GlAccount"
                         in-map="[glAccount: newGlAccount]"
                         out-map="createdGlAccount" />
+                    <script>glAccountsImported++</script>
                     <set field="newGlAccountId" from="createdGlAccount.glAccount.glAccountId" />
                     <set field="isDebit" from="createdGlAccount.glAccount.isDebit" />
                     <else>
                         <set field="newGlAccountId" from="glAccountsOrg[0].glAccountId" />
                         <set field="isDebit" from="glAccountsOrg[0].isDebit == 'Y' ? true : false"
                             type="Boolean" />
+                        <script>System.out.println(">>>>importing existing GlAccount: ${newGlAccount?.glAccountId}")</script>
+                        <script>glAccountsUpdated++</script>
                     </else>
                 </if>
                 <!-- collect posted balances -->
@@ -203,7 +217,7 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="growerp.100.AccountingServices100.recalculate#GlAccountOrgSummaries"
                 in-map="companyPartyId: relComp.companyPartyId" />
             <if condition="!ec.message.hasError()">
-                <script>System.out.println("${glAccounts.size()} glAccounts imported")</script>
+                <script>System.out.println(">>>${glAccountsImported} glAccounts imported, updated: ${glAccountsUpdated}")</script>
             </if>
         </actions>
     </service>
@@ -214,11 +228,11 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
-            <script>System.out.println("===== importing ${companies?.size()} companies")</script>
+            <script>System.out.println(">>>===== importing ${companies?.size()} companies")</script>
             <service-call
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="context" />
-            <script>int created = 0</script>
+            <set field="companiesImported" type="Integer" value="0" />
             <iterate list="companies" entry="company">
                 <if condition="company.partyId == '_MOD_'"><!-- used in automated test-->
                     <entity-find entity-name="growerp.party.OwnerCompanyDetailAndEmployee"
@@ -231,20 +245,20 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="company.partyId" from="parties[0].companyPartyId" />
                         <service-call name="growerp.100.PartyServices100.update#Company"
                             in-map="[company: company]" />
-                        <script>created++</script>
+                        <script>companiesImported++;</script>
                     </if>
                     <else>
                         <if condition="!company.role">
-                            <script>System.out.println("Company id: ${company.pseudoId} ${company.name} not processed, role is missing!")</script>
+                            <script>System.out.println(">>>Company id: ${company.pseudoId} ${company.name} not processed, role is missing!")</script>
                             <continue />
                         </if>
                         <if condition="!company.name">
-                            <script>System.out.println("Company id: ${company.pseudoId} ${company.name} name is missing, set to pseudoId!")</script>
+                            <script>System.out.println(">>>Company id: ${company.pseudoId} ${company.name} name is missing, set to pseudoId!")</script>
                             <set field="company.name" from="company.pseudoId" />
                         </if>
                         <if
                             condition="company.email &amp;&amp; company.email != '' &amp;&amp; !org.apache.commons.validator.routines.EmailValidator.getInstance().isValid(company.email)">
-                            <script>System.out.println("Company id: ${company.pseudoId} ${company.name} email: ${company.email} is not valid")</script>
+                            <script>System.out.println(">>>Company id: ${company.pseudoId} ${company.name} email: ${company.email} is not valid")</script>
                             <set field="company.email" value="" />
                         </if>
                         <!-- main company already exist so need update -->
@@ -255,13 +269,14 @@ along with this software (see the LICENSE.md file). If not, see
                                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
                             </entity-find>
                             <if condition="mainCompanies.isEmpty()">
-                                <script>System.out.println("Main company supplied but cannot find within owner: $ownerPartyId")</script>
+                                <script>System.out.println(">>>Main company supplied but cannot find within owner: $ownerPartyId")</script>
                                 <else>
                                     <set field="company.partyId"
                                         from="mainCompanies[0].companyPartyId" />
                                     <service-call
                                         name="growerp.100.PartyServices100.update#Company"
                                         in-map="[company: company]" />
+                                    <script>companiesImported++;</script>
                                     <continue />
                                 </else>
                             </if>
@@ -282,7 +297,7 @@ along with this software (see the LICENSE.md file). If not, see
                                         in-map="[   partyId: parties[0].partyId,
                                                         roleTypeId: company.role]" />
                                     <else>
-                                        <script>System.out.println("Company: ${company.name} not processed, pseudoId: ${company.pseudoId} ${company.role} already exist!")</script>
+                                        <script>System.out.println(">>>Company: ${company.name} not processed, pseudoId: ${company.pseudoId} ${company.role} already exist!")</script>
                                     </else>
                                 </if>
                             </then>
@@ -290,14 +305,14 @@ along with this software (see the LICENSE.md file). If not, see
                                 <service-call
                                     name="growerp.100.PartyServices100.create#Company"
                                     in-map="[company: company]" />
-                                <script>created++;</script>
+                                <script>companiesImported++;</script>
                             </else>
                         </if>
                     </else>
                 </if>
             </iterate>
             <if condition="!ec.message.hasError()">
-                <script>System.out.println("===== $created companies imported")</script>
+                <script>System.out.println(">>>===== $companiesImported companies imported")</script>
             </if>
         </actions>
     </service>
@@ -307,12 +322,15 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="users" required="true" type="List" />
         </in-parameters>
         <actions>
+            <script>System.out.println(">>>>importing ${users?.size()} users")</script>
+            <set field="usersImported" type="Integer" value="0" />
             <iterate list="users" entry="user">
                 <service-call name="growerp.100.PartyServices100.create#User"
                     in-map="[user: user]" />
+                <script>usersImported++;</script>
             </iterate>
             <if condition="!ec.message.hasError()">
-                <script>System.out.println("${users?.size()} users imported")</script>
+                <script>System.out.println(">>>${usersImported} users imported")</script>
             </if>
         </actions>
     </service>
@@ -323,6 +341,8 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="classificationId" required="true" />
         </in-parameters>
         <actions>
+            <script>System.out.println(">>>>importing ${products?.size()} products")</script>
+            <set field="productsImported" type="Integer" value="0" />
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="relComp" />
             <script>ec.user.setEffectiveTime(Timestamp.valueOf("1999-01-01 00:00:00"))</script>
@@ -347,10 +367,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.CatalogServices100.create#Product"
                         out-map="result"
                         in-map="[product: product, classificationId: classificationId]" />
+                    <script>productsImported++</script>
                 </if>
             </iterate>
             <if condition="!ec.message.hasError()">
-                <script>System.out.println("${products.size()} products imported")</script>
+                <script>System.out.println(">>>${productsImported} products imported")</script>
             </if>
         </actions>
     </service>
@@ -361,13 +382,14 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
+            <script>System.out.println(">>>>importing ${categories?.size()} categories")</script>
             <script>ec.user.setEffectiveTime(Timestamp.valueOf("1999-01-01 00:00:00"))</script>
             <iterate list="categories" entry="category">
                 <service-call name="growerp.100.CatalogServices100.create#ProductCategory"
                     in-map="[category: category, classificationId: classificationId]" />
             </iterate>
             <if condition="!ec.message.hasError()">
-                <script>System.out.println("${categories?.size()} categories imported")</script>
+                <script>System.out.println(">>>${categories?.size()} categories imported")</script>
             </if>
         </actions>
     </service>
@@ -378,14 +400,14 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
-            <script>System.out.println("importing ${assets?.size()} assets")</script>
+            <script>System.out.println(">>>>importing ${assets?.size()} assets")</script>
             <iterate list="assets" entry="asset">
                 <service-call name="growerp.100.InventoryServices100.create#Asset"
                     out-map="result"
                     in-map="[asset: asset, classificationId: classificationId]" />
             </iterate>
             <if condition="!ec.message.hasError()">
-                <script>System.out.println("${assets?.size()} assets imported")</script>
+                <script>System.out.println(">>>${assets?.size()} assets imported")</script>
             </if>
         </actions>
     </service>
@@ -396,7 +418,9 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
-            <script>System.out.println("importing ${finDocs[0].sales == true ? 'Sales' : 'Purchase'} ${finDocs[0].docType} ${finDocs?.size()} finDocs")</script>
+            <script>System.out.println(">>>>importing ${finDocs[0].sales == true ? 'Sales' : 'Purchase'} ${finDocs[0].docType} ${finDocs?.size()} finDocs")</script>
+            <set field="finDocsImported" type="Integer" value="0" />
+            <set field="companiesCreated" type="Integer" value="0" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <!-- check if we have a timeperiod here just for transactions.....-->
@@ -411,8 +435,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
                 <!-- when not yet create all until next year -->
                 <if condition="!periods">
-                    <log
-                        message="Creating time periods starting with ${finDocs[0].creationDate.substring(0,4)} for company $companyPartyId" />
+                    <script>System.out.println(">>>Creating time periods starting with ${finDocs[0].creationDate.substring(0,4)} for company $companyPartyId")</script>
                     <!-- delete existing timeperiods-->
                     <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
                         <econdition field-name="partyId" from="companyPartyId" />
@@ -453,7 +476,6 @@ along with this software (see the LICENSE.md file). If not, see
                         count-field="periods">
                         <econdition field-name="partyId" from="companyPartyId" />
                     </entity-find-count>
-                    <log message="${periods} time periods created for company ${companyPartyId}" />
                 </if>
             </if>
             <iterate list="finDocs" entry="finDoc">
@@ -485,11 +507,10 @@ along with this software (see the LICENSE.md file). If not, see
                                 in-map="[company: finDoc.otherCompany, ownerPartyId: ownerPartyId]"
                                 out-map="context" />
                             <set field="finDoc.otherCompany.partyId" from="company.partyId" />
-                            <log
-                                message="finDocId ${finDoc.pseudoId} company pseudoId: ${finDoc.otherCompany.pseudoId} not found under owner: $ownerPartyId : added" />
+                            <script>companiesCreated++</script>
                         </else-if>
                         <else>
-                            <script>System.out.println("Import finDocId ${finDoc.pseudoId} company pseudoId: ${finDoc.otherCompany.pseudoId} not found under owner: $ownerPartyId : need also name to add")</script>
+                            <script>System.out.println(">>>Import finDocId ${finDoc.pseudoId} company pseudoId: ${finDoc.otherCompany.pseudoId} not found under owner: $ownerPartyId : need also name to add")</script>
                         </else>
                     </if>
                 </if>
@@ -502,6 +523,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <service-call name="growerp.100.FinDocServices100.create#FinDoc"
                     in-map="[finDoc: finDoc, classificationId: classificationId]"
                     out-map="resultCreateFindoc" />
+                <script>finDocsImported++</script>
                 <!-- create references-->
                 <if condition="finDoc.docType == 'invoice'">
                     <if condition="finDoc.reference">
@@ -512,7 +534,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="theirAcctgTransId" from="finDoc.reference" />
                         </entity-find>
                         <if condition="!transactions">
-                            <script>System.out.println("Import : could not find ${finDoc.sales?'sales':'purchase'} invoice ${resultCreateFindoc.finDoc.invoiceId} reference ${finDoc.reference}")</script>
+                            <script>System.out.println(">>>Import : could not find ${finDoc.sales?'sales':'purchase'} invoice ${resultCreateFindoc.finDoc.invoiceId} reference ${finDoc.reference}")</script>
                             <else>
                                 <if condition="!transactions[0].invoiceId">
                                     <!-- ok found empty transaction -->
@@ -520,7 +542,7 @@ along with this software (see the LICENSE.md file). If not, see
                                         from="resultCreateFindoc.finDoc.invoiceId" />
                                     <entity-update value-field="transactions[0]" />
                                     <else>
-                                        <script>System.out.println("Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has invoiceId: ${transactions[0].invoiceId} cannot add ${finDoc.sales?'sales':'purchase'} ${resultCreateFindoc.finDoc.invoiceId} reference: ${finDoc.reference} otherCompany: ${finDoc.otherCompany.partyId} trans other partyId: ${transactions[0].otherPartyId}")</script>
+                                        <script>System.out.println(">>>Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has invoiceId: ${transactions[0].invoiceId} cannot add ${finDoc.sales?'sales':'purchase'} ${resultCreateFindoc.finDoc.invoiceId} reference: ${finDoc.reference} otherCompany: ${finDoc.otherCompany.partyId} trans other partyId: ${transactions[0].otherPartyId}")</script>
                                     </else>
                                 </if>
                             </else>
@@ -537,7 +559,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="otherPartyId" from="finDoc.otherCompany.partyId" />
                     </entity-find>
                     <if condition="!transactions">
-                        <script>System.out.println("Import : could not find ${finDoc.sales?'sales':'purchase'} payment ${resultCreateFindoc.finDoc.paymentId} reference ${finDoc.reference}  otherCompany: ${finDoc.otherCompany.partyId}")</script>
+                        <script>System.out.println(">>>Import : could not find ${finDoc.sales?'sales':'purchase'} payment ${resultCreateFindoc.finDoc.paymentId} reference ${finDoc.reference}  otherCompany: ${finDoc.otherCompany.partyId}")</script>
                         <else>
                             <if condition="!transactions[0].paymentId">
                                 <!-- ok found empty transaction -->
@@ -545,7 +567,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     from="resultCreateFindoc.finDoc.paymentId" />
                                 <entity-update value-field="transactions[0]" />
                                 <else>
-                                    <script>System.out.println("Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has ${finDoc.sales?'sales':'purchase'} paymentId: ${transactions[0].paymentId} cannot add ${resultCreateFindoc.finDoc.paymentId} reference: ${finDoc.reference} otherCompany: ${finDoc.otherCompany.partyId} trans other partyId: ${transactions[0].otherPartyId}")</script>
+                                    <script>System.out.println(">>>Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has ${finDoc.sales?'sales':'purchase'} paymentId: ${transactions[0].paymentId} cannot add ${resultCreateFindoc.finDoc.paymentId} reference: ${finDoc.reference} otherCompany: ${finDoc.otherCompany.partyId} trans other partyId: ${transactions[0].otherPartyId}")</script>
                                 </else>
                             </if>
                         </else>
@@ -564,7 +586,7 @@ along with this software (see the LICENSE.md file). If not, see
                             from="finDoc.paymentMethod?.checkNumber" />
                     </entity-find>
                     <if condition="!transactions">
-                        <script>System.out.println("Import : could not find ${finDoc.sales?'sales':'purchase'} payment ${resultCreateFindoc.finDoc.paymentId} checknumber ${finDoc.paymentMethod?.checkNumber}")</script>
+                        <script>System.out.println(">>>Import : could not find ${finDoc.sales?'sales':'purchase'} payment ${resultCreateFindoc.finDoc.paymentId} checknumber ${finDoc.paymentMethod?.checkNumber}")</script>
                         <else>
                             <if condition="!transactions[0].paymentId">
                                 <!-- ok found empty transaction -->
@@ -572,7 +594,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     from="resultCreateFindoc.finDoc.paymentId" />
                                 <entity-update value-field="transactions[0]" />
                                 <else>
-                                    <script>System.out.println("Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has paymentId: ${transactions[0].paymentId} cannot add ${resultCreateFindoc.finDoc.sales?'sales':'purchase'} ${resultCreateFindoc.finDoc.paymentId} checkNr: ${finDoc.paymentMethod?.checkNumber} otherCompany: ${finDoc.otherCompany.partyId} trans: ${transactions[0].otherPartyId}")</script>
+                                    <script>System.out.println(">>>Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has paymentId: ${transactions[0].paymentId} cannot add ${resultCreateFindoc.finDoc.sales?'sales':'purchase'} ${resultCreateFindoc.finDoc.paymentId} checkNr: ${finDoc.paymentMethod?.checkNumber} otherCompany: ${finDoc.otherCompany.partyId} trans: ${transactions[0].otherPartyId}")</script>
                                 </else>
                             </if>
                         </else>
@@ -612,7 +634,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 name="mantle.account.PaymentServices.apply#PaymentForInvoice"
                                 in-map="[paymentId: resultCreateFindoc.finDoc.paymentId]" />
                             <else>
-                                <script>System.out.println("could not find an invoice ${pseudoId} to apply for payment: ${resultCreateFindoc.finDoc.paymentId} amount: ${resultCreateFindoc.finDoc.grandTotal}")</script>
+                                <script>System.out.println(">>>could not find an invoice ${pseudoId} to apply for payment: ${resultCreateFindoc.finDoc.paymentId} amount: ${resultCreateFindoc.finDoc.grandTotal}")</script>
                             </else>
                         </if>
                     </iterate>
@@ -641,7 +663,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <service-call name="create#mantle.order.OrderItemBilling"
                             in-map="[invoiceId: resultCreateFindoc.finDoc.invoiceId, orderId: orderFound[0].orderId]" />
                         <else>
-                            <script>System.out.println("could not find an order ${pseudoId} from invoice: ${resultCreateFindoc.finDoc.pseudoId}[${resultCreateFindoc.finDoc.invoiceId}]")</script>
+                            <script>System.out.println(">>>could not find an order ${pseudoId} from invoice: ${resultCreateFindoc.finDoc.pseudoId}[${resultCreateFindoc.finDoc.invoiceId}]")</script>
                         </else>
                     </if>
                 </if>
@@ -657,17 +679,17 @@ along with this software (see the LICENSE.md file). If not, see
                             <service-call name="update#mantle.ledger.transaction.AcctgTrans"
                                 in-map="transactions[0] + [shipmentId: resultCreateFindoc.finDoc.shipmentId] " />
                             <else>
-                                <script>System.out.println("transaction already has shipment: ${resultCreateFindoc.finDoc.shipmentId} could not create relation to shipment: ${resultCreateFindoc.finDoc.shipmentId} and reference: ${finDoc.reference}")</script>
+                                <script>System.out.println(">>>transaction already has shipment: ${resultCreateFindoc.finDoc.shipmentId} could not create relation to shipment: ${resultCreateFindoc.finDoc.shipmentId} and reference: ${finDoc.reference}")</script>
                             </else>
                         </if>
                         <else>
-                            <script>System.out.println("transaction could not be found for shipment: ${resultCreateFindoc.finDoc.shipmentId} and reference: ${finDoc.reference}")</script>
+                            <script>System.out.println(">>>transaction could not be found for shipment: ${resultCreateFindoc.finDoc.shipmentId} and reference: ${finDoc.reference}")</script>
                         </else>
                     </if>
                 </if>
             </iterate>
             <if condition="!ec.message.hasError()">
-                <script>System.out.println("${finDocs?.size()} finDocs  ${finDocs[0].docType} imported")</script>
+                <script>System.out.println(">>>${finDocsImported} finDocs  ${finDocs[0].docType} imported, Companies created: ${companiesCreated}")</script>
             </if>
         </actions>
     </service>
@@ -678,7 +700,8 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="classificationId" required="true" />
         </in-parameters>
         <actions>
-            <script>System.out.println("importing ${finDocItems?.size()} ${!finDocItems.isEmpty() ? finDocItems[0].docType : ''}")</script>
+            <script>System.out.println(">>>>importing ${finDocItems?.size()} ${!finDocItems.isEmpty() ? finDocItems[0].docType : ''} items")</script>
+            <set field="itemsImported" type="Integer" value="0" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="itemsOut" from="[]" />
@@ -692,7 +715,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 classificationId: classificationId]" />
                     <if condition="finDocs.isEmpty()">
                         <!-- cannot find, so not try to add items -->
-                        <script>System.out.println("importing ${lastItem.docType} items could not find company: $companyPartyId and pseudo: ${lastItem.pseudoId}")</script>
+                        <script>System.out.println(">>>>importing ${lastItem.docType} items could not find company: $companyPartyId and pseudo: ${lastItem.pseudoId}")</script>
                         <else>
                             <set field="finDoc" from="finDocs[0]" />
                             <!-- add items collected below to finDoc[0] already got below-->
@@ -708,6 +731,7 @@ along with this software (see the LICENSE.md file). If not, see
                             </if>
                             <service-call name="growerp.100.FinDocServices100.update#FinDoc"
                                 in-map="[finDoc: finDoc, classificationId: classificationId]" />
+                            <script>itemsImported += finDoc.items?.size()</script>
                         </else>
                     </if>
                     <set field="itemsOut" from="[]" />
@@ -718,7 +742,7 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="[pseudoId: item.pseudoId, docType: item.docType]"
                         out-map="context" />
                     <if condition="finDocs.isEmpty()">
-                        <script>System.out.println("Import ${item.docType} pseudoId: ${item.pseudoId} not found")</script>
+                        <script>System.out.println(">>>Import ${item.docType} pseudoId: ${item.pseudoId} not found")</script>
                         <set field="lastItem" from="null" />
                         <continue />
                         <else>
@@ -736,7 +760,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="glAccounts">
                         <set field="item.glAccount.glAccountId" from="glAccounts[0].glAccountId" />
                         <else>
-                            <script>System.out.println("id: ${item.pseudoId} could not find item accountCode ${item.glAccount.accountCode} for company: $companyPartyId")</script>
+                            <script>System.out.println(">>>id: ${item.pseudoId} could not find item accountCode ${item.glAccount.accountCode} for company: $companyPartyId")</script>
                         </else>
                     </if>
                     <if condition="finDocs[0].docType == 'transaction'">
@@ -766,7 +790,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <else>
                             <!-- not found so better add it when not null -->
                             <if condition="item.pseudoProductId != null">
-                                <script>System.out.println("id: ${item.pseudoId} could not find pseudoProductId ${item.pseudoProductId} for owner: $ownerPartyId, will add it")</script>
+                                <script>System.out.println(">>>id: ${item.pseudoId} could not find pseudoProductId ${item.pseudoProductId} for owner: $ownerPartyId, will add it")</script>
                                 <set field="product"
                                     from="[
                                     ownerPartyId: ownerPartyId,
@@ -786,7 +810,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <!-- item type on orders if missing create some: -->
                 <if condition="finDoc.docType == 'order' &amp;&amp; !item.itemType">
-                    <script>System.out.println("id: ${item.pseudoId} no item type for ${item.glAccount.glAccountId} set to ItemExpense")</script>
+                    <script>System.out.println(">>>id: ${item.pseudoId} no item type for ${item.glAccount.glAccountId} set to ItemExpense")</script>
                     <set field="item.itemType" from="[itemTypeId: 'ItemExpense']" />
                 </if>
                 <script>itemsOut.add(item)</script>
@@ -801,7 +825,7 @@ along with this software (see the LICENSE.md file). If not, see
                             classificationId: classificationId]" />
                 <if condition="finDocs.isEmpty()">
                     <!-- cannot find, so not try to add items -->
-                    <script>System.out.println("importing items could not find ${lastItem.pseudoId}")</script>
+                    <script>System.out.println(">>>>importing items could not find ${lastItem.pseudoId}")</script>
                     <else>
                         <set field="finDoc" from="finDocs[0]" />
                         <!-- add items collected below to finDoc[0] already got below-->
@@ -817,13 +841,14 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                         <service-call name="growerp.100.FinDocServices100.update#FinDoc"
                             in-map="[finDoc: finDoc, classificationId: classificationId]" />
+                        <script>itemsImported + finDoc.items?.size()</script>
                     </else>
                 </if>
             </if>
 
             <!-- end of service result -->
             <if condition="!ec.message.hasError()">
-                <script>System.out.println("${finDocItems?.size()} findoc items ${finDocItems[0].docType} imported")</script>
+                <script>System.out.println(">>>${itemsImported} findoc items ${finDocItems[0].docType} imported")</script>
             </if>
         </actions>
     </service>
@@ -884,12 +909,12 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                     </iterate>
                     <if condition="quantityUpdated == false">
-                        <script>System.out.println("Could not update shipment # quantity, shipmentId/productId: ${finDoc.shipmentId}/${shipmentItem.productId}  invoiceId/products: ${invoiceId}/${invoiceItems.productId}")</script>
+                        <script>System.out.println(">>>Could not update shipment # quantity, shipmentId/productId: ${finDoc.shipmentId}/${shipmentItem.productId}  invoiceId/products: ${invoiceId}/${invoiceItems.productId}")</script>
                     </if>
                 </iterate>
                 <set field="finDoc.items" from="newShipmentItems" />
                 <else>
-                    <script>System.out.println("Could not find related invoice for company: $companyPartyId sales: ${finDoc.sales} shipment: ${finDoc.pseudoId} ref: ${finDoc.reference}")</script>
+                    <script>System.out.println(">>>Could not find related invoice for company: $companyPartyId sales: ${finDoc.sales} shipment: ${finDoc.pseudoId} ref: ${finDoc.reference}")</script>
                 </else>
             </if>
         </actions>
@@ -938,7 +963,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </else>
                 </if>
             </iterate>
-            <script>System.out.println("${invoices.size()} not completed invoices found ${updatedCount} updated, ${notFoundCount} not found in ledger")</script>
+            <script>System.out.println(">>>${invoices.size()} not completed invoices found ${updatedCount} updated, ${notFoundCount} not found in ledger")</script>
             <!-- payments -->
             <entity-find entity-name="mantle.account.payment.Payment" for-update="true"
                 list="payments">
@@ -966,7 +991,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </else>
                 </if>
             </iterate>
-            <script>System.out.println("${payments.size()} not completed payments found ${updatedCount} updated, ${notFoundCount} not found in ledger")</script>
+            <script>System.out.println(">>>${payments.size()} not completed payments found ${updatedCount} updated, ${notFoundCount} not found in ledger")</script>
             <!-- close oldest period -->
             <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
                 <econdition field-name="partyId" from="companyPartyId" />
@@ -974,7 +999,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="isClosed" value="N" />
                 <order-by field-name="periodNum" />
             </entity-find>
-            <service-call name="mantle.ledger.LedgerServices.close#FinancialTimePeriod"
+            <service-call name="growerp.100.AccountingServices100.close#FinancialTimePeriod"
                 in-map="[timePeriodId: periods[0].timePeriodId, closeChildren: true]" />
         </actions>
     </service>
