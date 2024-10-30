@@ -479,6 +479,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
             </if>
             <iterate list="finDocs" entry="finDoc">
+                <!-- change system date -->
                 <script>ec.user.setEffectiveTime(Timestamp.valueOf(finDoc.creationDate))</script>
                 <!-- find partyId of other company-->
                 <if condition="!finDoc.otherCompany.pseudoId &amp;&amp; finDoc.otherCompany.name">
@@ -926,6 +927,24 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- find oldest non-closed period -->
+            <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
+                <econdition field-name="partyId" from="companyPartyId" />
+                <econdition field-name="timePeriodTypeId" value="FiscalYear" />
+                <econdition field-name="isClosed" value="N" />
+                <order-by field-name="periodNum" />
+            </entity-find>
+            <if condition="!periods">
+                <return error="true" message="Could not find the oldest not closed period" />
+            </if>
+            <service-call name="mantle.party.TimeServices.get#TimePeriodInfo"
+                in-map="[timePeriod:periods[0]]" out-map="periodInfo" />
+            <set field="fromTimestamp" from="periodInfo.fromTimestamp" />
+            <set field="thruTimestamp" from="periodInfo.thruTimestamp" />
+
+            <!-- change system date to end of period -->
+            <script>ec.user.setEffectiveTime(thruTimestamp)</script>
+
             <!-- invoices -->
             <entity-find entity-name="mantle.account.invoice.Invoice" for-update="true"
                 list="invoices">
@@ -992,13 +1011,45 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
             </iterate>
             <script>System.out.println(">>>${payments.size()} not completed payments found ${updatedCount} updated, ${notFoundCount} not found in ledger")</script>
-            <!-- close oldest period -->
-            <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
-                <econdition field-name="partyId" from="companyPartyId" />
-                <econdition field-name="timePeriodTypeId" value="FiscalYear" />
-                <econdition field-name="isClosed" value="N" />
-                <order-by field-name="periodNum" />
+
+            <!-- with the assumption that the old system tranactions  balance, group all unposted
+            transaction entries in a single transaction and post that -->
+            <entity-find entity-name="growerp.account.AcctgTransAndCompany" list="unpostedTrans">
+                <econdition field-name="isPosted" operator="not-equals" value="Y" or-null="true" />
+                <econdition field-name="companyPartyId" from="companyPartyId" />
+                <econdition field-name="transactionDate" operator="greater-equals"
+                    from="fromTimestamp" />
+                <econdition field-name="transactionDate" operator="less-equals" from="thruTimestamp" />
             </entity-find>
+            <if condition="unpostedTrans">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']" out-map="context" />
+                <service-call name="create#mantle.ledger.transaction.AcctgTrans"
+                    in-map="[pseudoId: seqNum, description: 'Conversion combined unposted entries',
+                            organizationPartyId: companyPartyId]"
+                    out-map="context" />
+                <!-- re-assign all unposted entries to ne transaction -->
+                <set field="index" value="1" type="Integer" />
+                <iterate list="unpostedTrans" entry="trans">
+                    <entity-find entity-name="mantle.ledger.transaction.AcctgTransEntry"
+                        list="transEntries" for-update="true">
+                        <econdition field-name="acctgTransId" from="trans.transactionId" />
+                    </entity-find>
+                    <iterate list="transEntries" entry="transEntry">
+                        <entity-delete value-field="transEntry" />
+                        <set field="transEntry.acctgTransId" from="acctgTransId" />
+                        <set field="transEntry.acctgTransEntrySeqId" from="(index++).toString()" />
+                        <entity-create value-field="transEntry" />
+                    </iterate>
+                    <!-- delete original transaction -->
+                    <service-call name="delete#mantle.ledger.transaction.AcctgTrans"
+                        in-map="[acctgTransId: trans.transactionId]" />
+                </iterate>
+                <!-- post found entries -->
+                <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
+                    in-map="[acctgTransId: acctgTransId]" />
+            </if>
+            <!-- period should succeeed to close -->
             <service-call name="growerp.100.AccountingServices100.close#FinancialTimePeriod"
                 in-map="[timePeriodId: periods[0].timePeriodId, closeChildren: true]" />
         </actions>
