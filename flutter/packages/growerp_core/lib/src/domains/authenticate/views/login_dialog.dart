@@ -31,7 +31,6 @@ class LoginDialogState extends State<LoginDialog> {
   final _loginFormKey = GlobalKey<FormState>();
   final _moreInfoFormKey = GlobalKey<FormState>();
   late Authenticate authenticate;
-  bool _obscureText = true;
   List<Company>? companies;
   String? oldPassword;
   final _usernameController = TextEditingController();
@@ -40,8 +39,9 @@ class LoginDialogState extends State<LoginDialog> {
   final _changePasswordFormKey = GlobalKey<FormState>();
   final _password3Controller = TextEditingController();
   final _password4Controller = TextEditingController();
-  bool _obscureText3 = true;
-  bool _obscureText4 = true;
+  late bool _obscureText;
+  late bool _obscureText3;
+  late bool _obscureText4;
   late AuthBloc _authBloc;
   late Currency _currencySelected;
   late bool _demoData;
@@ -50,14 +50,18 @@ class LoginDialogState extends State<LoginDialog> {
   void initState() {
     super.initState();
     _authBloc = context.read<AuthBloc>();
-    _usernameController.text =
-        _authBloc.state.authenticate?.user?.loginName ?? '';
+    authenticate = _authBloc.state.authenticate!;
+    _usernameController.text = authenticate.user?.loginName ??
+        (kReleaseMode ? '' : 'test@example.com');
     _currencySelected = currencies[1];
     _demoData = kReleaseMode ? false : true;
     if (!kReleaseMode) {
       _passwordController.text = 'qqqqqq9!';
       _companyController.text = 'Main Company';
     }
+    _obscureText = true;
+    _obscureText3 = true;
+    _obscureText4 = true;
   }
 
   @override
@@ -69,9 +73,6 @@ class LoginDialogState extends State<LoginDialog> {
     }, builder: (context, state) {
       if (state.status == AuthStatus.loading) return const LoadingIndicator();
       var furtherAction = state.authenticate!.apiKey;
-      authenticate = state.authenticate!;
-      _usernameController.text = authenticate.user?.loginName ??
-          (kReleaseMode ? '' : 'test@example.com');
       return Scaffold(
           backgroundColor: Colors.transparent,
           body: Dialog(
