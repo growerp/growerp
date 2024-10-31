@@ -551,7 +551,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </if>
                 </if>
                 <!-- incoming receipts-->
-                <if condition="finDoc.docType == 'payment' &amp;&amp; finDoc.sale == true">
+                <if condition="finDoc.docType == 'payment' &amp;&amp; finDoc.sales == true">
                     <!-- find transaction for payment-->
                     <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
                         list="transactions" for-update="true">
@@ -945,73 +945,6 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- change system date to end of period -->
             <script>ec.user.setEffectiveTime(thruTimestamp)</script>
 
-            <!-- invoices -->
-            <entity-find entity-name="mantle.account.invoice.Invoice" for-update="true"
-                list="invoices">
-                <econditions combine="or">
-                    <econdition field-name="fromPartyId" from="companyPartyId" />
-                    <econdition field-name="toPartyId" from="companyPartyId" />
-                </econditions>
-                <econdition field-name="statusId" value="InvoiceInProcess" />
-                <econdition field-name="statusId" value="InvoiceIncoming" />
-            </entity-find>
-            <set field="updatedCount" value="0" type="Integer" />
-            <set field="notFoundCount" value="0" type="Integer" />
-            <iterate list="invoices" entry="invoice">
-                <!-- check if referenced in the ledger-->
-                <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transList">
-                    <econdition field-name="organizationPartyId" from="companyPartyId" />
-                    <econdition field-name="invoiceId" from="invoice.invoiceId" />
-                </entity-find>
-                <if condition="transList">
-                    <if condition="invoice.statusId == 'InvoiceInProcess'">
-                        <set field="statusId1" value="InvoiceFinalized" />
-                        <set field="statusId2" value="InvoiceSend" />
-                        <else>
-                            <set field="statusId1" value="InvoiceReceived" />
-                            <set field="statusId2" value="InvoiceApproved" />
-                        </else>
-                    </if>
-                    <service-call name="update#mantle.account.invoice.Invoice"
-                        in-map="[invoiceId: invoice.invoiceId, statusId: statusId1]" />
-                    <service-call name="update#mantle.account.invoice.Invoice"
-                        in-map="[invoiceId: invoice.invoiceId, statusId: statusId2]" />
-                    <set field="updatedCount" from="updatedCount + 1" />
-                    <else>
-                        <set field="notFoundCount" from="notFoundCount + 1" />
-                    </else>
-                </if>
-            </iterate>
-            <script>System.out.println(">>>${invoices.size()} not completed invoices found ${updatedCount} updated, ${notFoundCount} not found in ledger")</script>
-            <!-- payments -->
-            <entity-find entity-name="mantle.account.payment.Payment" for-update="true"
-                list="payments">
-                <econditions combine="or">
-                    <econdition field-name="fromPartyId" from="companyPartyId" />
-                    <econdition field-name="toPartyId" from="companyPartyId" />
-                </econditions>
-                <econdition field-name="statusId" value="PmntPromised" />
-            </entity-find>
-            <set field="updatedCount" value="0" type="Integer" />
-            <set field="notFoundCount" value="0" type="Integer" />
-            <iterate list="payments" entry="payment">
-                <!-- check if referenced in the ledger-->
-                <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transList">
-                    <econdition field-name="organizationPartyId" from="companyPartyId" />
-                    <econdition field-name="paymentId" from="payment.paymentId" />
-                </entity-find>
-                <if condition="transList">
-                    <set field="payment.statusId" value="PmntConfirmed" />
-                    <service-call name="update#mantle.account.payment.Payment"
-                        in-map="[paymentId: payment.paymentId, statusId: statusId]" />
-                    <set field="updatedCount" from="updatedCount + 1" />
-                    <else>
-                        <set field="notFoundCount" from="notFoundCount + 1" />
-                    </else>
-                </if>
-            </iterate>
-            <script>System.out.println(">>>${payments.size()} not completed payments found ${updatedCount} updated, ${notFoundCount} not found in ledger")</script>
-
             <!-- with the assumption that the old system tranactions  balance, group all unposted
             transaction entries in a single transaction and post that -->
             <entity-find entity-name="growerp.account.AcctgTransAndCompany" list="unpostedTrans">
@@ -1052,6 +985,85 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- period should succeeed to close -->
             <service-call name="growerp.100.AccountingServices100.close#FinancialTimePeriod"
                 in-map="[timePeriodId: periods[0].timePeriodId, closeChildren: true]" />
+
+            <!-- invoices -->
+            <entity-find entity-name="mantle.account.invoice.Invoice" for-update="true"
+                list="invoices">
+                <econditions combine="or">
+                    <econdition field-name="fromPartyId" from="companyPartyId" />
+                    <econdition field-name="toPartyId" from="companyPartyId" />
+                </econditions>
+                <econditions combine="or">
+                    <econdition field-name="statusId" value="InvoiceInProcess" />
+                    <econdition field-name="statusId" value="InvoiceIncoming" />
+                </econditions>
+            </entity-find>
+            <set field="updatedCount" value="0" type="Integer" />
+            <set field="notFoundCount" value="0" type="Integer" />
+            <iterate list="invoices" entry="invoice">
+                <!-- check if referenced in the ledger-->
+                <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transList">
+                    <econdition field-name="organizationPartyId" from="companyPartyId" />
+                    <econdition field-name="invoiceId" from="invoice.invoiceId" />
+                </entity-find>
+                <if condition="transList">
+                    <if condition="invoice.statusId == 'InvoiceInProcess'">
+                        <set field="statusId1" value="InvoiceFinalized" />
+                        <set field="statusId2" value="InvoiceSent" />
+                        <else>
+                            <set field="statusId1" value="InvoiceReceived" />
+                            <set field="statusId2" value="InvoiceApproved" />
+                        </else>
+                    </if>
+                    <service-call name="update#mantle.account.invoice.Invoice"
+                        in-map="[invoiceId: invoice.invoiceId, statusId: statusId1]" />
+                    <set field="updatedCount" from="updatedCount + 1" />
+                    <entity-find-one entity-name="mantle.account.invoice.Invoice" value-field="inv">
+                        <field-map field-name="invoiceId" from="invoice.invoiceId" />
+                    </entity-find-one>
+                    <if condition="inv.statusId == statusId1">
+                        <service-call name="update#mantle.account.invoice.Invoice"
+                            in-map="[invoiceId: invoice.invoiceId, statusId: statusId2]" />
+                    </if>
+                    <else>
+                        <set field="notFoundCount" from="notFoundCount + 1" />
+                        <script>System.out.println(">>>Could not find invoice in the ledger, sales: ${finDoc?.sales} invoice: ${finDoc?.invoiceId}/${finDoc?.pseudoId} ref: ${finDoc?.reference}")</script>
+                    </else>
+                </if>
+            </iterate>
+            <script>System.out.println(">>>${invoices.size()} not completed invoices found ${updatedCount} updated, ${notFoundCount} not found in ledger")</script>
+
+            <!-- payments -->
+            <entity-find entity-name="mantle.account.payment.Payment" for-update="true"
+                list="payments">
+                <econditions combine="or">
+                    <econdition field-name="fromPartyId" from="companyPartyId" />
+                    <econdition field-name="toPartyId" from="companyPartyId" />
+                </econditions>
+                <econdition field-name="statusId" value="PmntPromised" />
+            </entity-find>
+            <set field="updatedCount" value="0" type="Integer" />
+            <set field="notFoundCount" value="0" type="Integer" />
+            <iterate list="payments" entry="payment">
+                <!-- check if referenced in the ledger-->
+                <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transList">
+                    <econdition field-name="organizationPartyId" from="companyPartyId" />
+                    <econdition field-name="paymentId" from="payment.paymentId" />
+                </entity-find>
+                <if condition="transList">
+                    <!-- found, so can be completed -->
+                    <service-call name="update#mantle.account.payment.Payment"
+                        in-map="[paymentId: payment.paymentId, statusId: 'PmntDelivered']" />
+                    <set field="updatedCount" from="updatedCount + 1" />
+                    <else>
+                        <script>System.out.println(">>>Could not find payment in the ledger, payment: ${payment.paymentId}/${payment.pseudoId} ref: ${payment.paymentRefNum}")</script>
+                        <log message="payment not found in ledger: ${payment.paymentId}" />
+                        <set field="notFoundCount" from="notFoundCount + 1" />
+                    </else>
+                </if>
+            </iterate>
+            <script>System.out.println(">>>${payments.size()} not completed payments found ${updatedCount} updated, ${notFoundCount} not found in ledger")</script>
+
         </actions>
     </service>
 

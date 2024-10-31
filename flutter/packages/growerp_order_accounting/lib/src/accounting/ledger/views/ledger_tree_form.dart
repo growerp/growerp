@@ -81,8 +81,7 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
             SizedBox(
                 width: 100,
                 child: Text(
-                    (Decimal.parse(glAccount.postedBalance.toString()) +
-                            Decimal.parse(glAccount.rollUp.toString()))
+                    (Decimal.parse(glAccount.postedBalance.toString()))
                         .currency(currencyId: currencyId),
                     textAlign: TextAlign.right)),
             if (isLargerThanPhone(context))
@@ -155,11 +154,12 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
                 width: isPhone(context) ? 220 : 410,
                 child: const Text('Gl Account ID  GL Account Name')),
             const SizedBox(
-                width: 100, child: Text('Posted', textAlign: TextAlign.right)),
+                width: 100,
+                child: Text('This Account', textAlign: TextAlign.right)),
             if (isLargerThanPhone(context))
               const SizedBox(
                   width: 100,
-                  child: Text('Roll Up', textAlign: TextAlign.right))
+                  child: Text('Total Tree', textAlign: TextAlign.right))
           ]),
           const Divider(),
           TreeView(

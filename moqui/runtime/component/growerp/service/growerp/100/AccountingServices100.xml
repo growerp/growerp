@@ -643,6 +643,7 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')" />
             <script>
                 def getGlAccountTree(Map dbGlAccount, int dept) {
+                    // ec.logger.info("===accountCode: ${dbGlAccount.accountCode} posted: ${dbGlAccount.postedBalance}")
                     def glAccount = [:];
                     glAccount.level = dept;
                     // glAccount.accountCode = accountCodeFormatter != null ? accountCodeFormatter.valueToString(dbGlAccount.accountCode) : dbGlAccount.accountCode;
@@ -669,7 +670,10 @@ along with this software (see the LICENSE.md file). If not, see
                 def rootAccounts = dbGlAccounts.findAll {
                     it.parentGlAccountId == null }
                 rootAccounts.each {
-                    ledgerReport.glAccounts.add(getGlAccountTree(it, 1));
+                 //   if(it.accountCode == '70000') {
+                 //       ec.logger.info("====tree ${it.accountCode}: ${getGlAccountTree(it, 1)}")
+                        ledgerReport.glAccounts.add(getGlAccountTree(it, 1));
+                 //   }
                 }
             </script>
         </actions>

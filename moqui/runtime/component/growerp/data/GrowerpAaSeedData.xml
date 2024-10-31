@@ -28,9 +28,10 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.basic.Enumeration enumCode="product_store_id_measurement_id" description="MeasurementId"
         enumId="PsstMeasurementId" enumTypeId="ProductStoreSettingType" />
 
-    <!-- remove required permission to approved invoice -->
-    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="InvoiceIncoming"
-        toStatusId="InvoiceApproved" transitionName="Approve" userPermissionId="" />
+    <!-- remove required permission to approved invoice used in import -->
+    <moqui.basic.StatusFlowTransition statusFlowId="InvoicePayable" statusId="InvoiceIncoming"
+        toStatusId="InvoiceApproved" transitionSequence="2" transitionName="Approve"
+        userPermissionId="" />
     <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="InvoiceReceived"
         toStatusId="InvoiceApproved" transitionName="Approve" userPermissionId="" />
 

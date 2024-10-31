@@ -709,8 +709,21 @@ along with this software (see the LICENSE.md file). If not, see
                                         operator="like" from="search" ignore-if-empty="true" />
                                     <econdition field-name="orderId" ignore-case="true"
                                         operator="like" from="search" ignore-if-empty="true" />
+                                    <econdition field-name="vendorCompanyName" ignore-case="true"
+                                        operator="like" from="search" ignore-if-empty="true" />
+                                    <econdition field-name="vendorFirstName" ignore-case="true"
+                                        operator="like" from="search" ignore-if-empty="true" />
+                                    <econdition field-name="vendorLastName" ignore-case="true"
+                                        operator="like" from="search" ignore-if-empty="true" />
+                                    <econdition field-name="customerCompanyName" ignore-case="true"
+                                        operator="like" from="search" ignore-if-empty="true" />
+                                    <econdition field-name="customerFirstName" ignore-case="true"
+                                        operator="like" from="search" ignore-if-empty="true" />
+                                    <econdition field-name="customerLastName" ignore-case="true"
+                                        operator="like" from="search" ignore-if-empty="true" />
                                 </econditions>
-                                <order-by field-name="invoiceId,invoiceItemSeqId,rentalFromDate" />
+                                <order-by
+                                    field-name="-invoiceDate,invoiceId,invoiceItemSeqId,rentalFromDate" />
                                 <!--use-iterator/-->
                             </entity-find>
                             <else>
@@ -895,8 +908,20 @@ along with this software (see the LICENSE.md file). If not, see
                                     operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="orderId" ignore-case="true" operator="like"
                                     from="search" ignore-if-empty="true" />
+                                <econdition field-name="vendorCompanyName" ignore-case="true"
+                                    operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="vendorFirstName" ignore-case="true"
+                                    operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="vendorLastName" ignore-case="true"
+                                    operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="customerCompanyName" ignore-case="true"
+                                    operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="customerFirstName" ignore-case="true"
+                                    operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="customerLastName" ignore-case="true"
+                                    operator="like" from="search" ignore-if-empty="true" />
                             </econditions>
-                            <order-by field-name="paymentId" />
+                            <order-by field-name="-effectiveDate,paymentId" />
                         </entity-find>
                     </else>
                 </if>
@@ -1199,6 +1224,8 @@ along with this software (see the LICENSE.md file). If not, see
                                 <econdition field-name="theirAcctgTransId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="paymentId" ignore-case="true"
+                                    operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="transactionId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="transactionId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
@@ -1633,6 +1660,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <service-call name="mantle.order.OrderServices.create#Order"
                     in-map="[productStoreId: productStoreId,
                             pseudoId: order.pseudoId,
+                            statusId: order.statusId,
                             facilityId: facilities[0].facilityId,
                             vendorPartyId: vendorPartyId,
                             customerPartyId: customerPartyId,
@@ -1643,6 +1671,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="mantle.order.OrderServices.create#Order"
                         in-map="[   
                                 facilityId: facilities[0].facilityId,
+                                statusId: order.statusId,
                                 pseudoId: order.pseudoId,
                                 vendorPartyId: vendorPartyId,
                                 customerPartyId: customerPartyId,
@@ -1711,6 +1740,7 @@ along with this software (see the LICENSE.md file). If not, see
                         description: invoice.description,
                         externalId: invoice.reference]"
                 out-map="context" />
+
             <!-- add vendor/customer contact person as an extra party at invoicePartParty -->
             <if condition="invoice.otherUser &amp;&amp; invoice.otherUser.partyId">
                 <service-call name="create#mantle.account.invoice.InvoiceParty"
@@ -1750,6 +1780,7 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[   pseudoId: shipment.pseudoId,
                             fromPartyId: fromPartyId,
                             toPartyId: toPartyId,
+                            statusId: shipment.statusId,
                             description: shipment.description,
                             externalId: shipment.reference]"
                 out-map="context" />
@@ -1854,6 +1885,7 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="mantle.account.PaymentServices.create#Payment"
                 in-map="[
                         pseudoId: payment.pseudoId,
+                        statusId: payment.statusId,
                         paymentTypeEnumId: paymentTypeEnumId,
                         amount: payment.grandTotal,
                         paymentInstrumentEnumId: instrument,
