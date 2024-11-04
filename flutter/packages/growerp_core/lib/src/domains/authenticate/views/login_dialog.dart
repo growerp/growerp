@@ -78,8 +78,7 @@ class LoginDialogState extends State<LoginDialog> {
           body: Dialog(
               insetPadding: const EdgeInsets.all(10),
               child: furtherAction == 'moreInfo'
-                  ? moreInfoForm(_usernameController.text,
-                      state.authenticate!.moquiSessionToken!)
+                  ? moreInfoForm(state.authenticate!)
                   : furtherAction == 'passwordChange'
                       ? changePasswordForm(
                           _usernameController.text, _passwordController.text)
@@ -173,7 +172,7 @@ class LoginDialogState extends State<LoginDialog> {
         ));
   }
 
-  Widget moreInfoForm(String username, String password) {
+  Widget moreInfoForm(Authenticate authenticate) {
     var user = authenticate.user;
     return popUp(
         height: user?.userGroup == UserGroup.admin ? 450 : 350,
@@ -257,7 +256,8 @@ class LoginDialogState extends State<LoginDialog> {
                         onPressed: () {
                           if (_moreInfoFormKey.currentState!.validate()) {
                             context.read<AuthBloc>().add(AuthLogin(
-                                username, password,
+                                user!.loginName!,
+                                authenticate.moquiSessionToken!,
                                 extraInfo: true,
                                 companyName: _companyController.text,
                                 currency: _currencySelected,
