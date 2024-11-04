@@ -78,8 +78,8 @@ class LoginDialogState extends State<LoginDialog> {
           body: Dialog(
               insetPadding: const EdgeInsets.all(10),
               child: furtherAction == 'moreInfo'
-                  ? moreInfoForm(
-                      _usernameController.text, authenticate.moquiSessionToken!)
+                  ? moreInfoForm(_usernameController.text,
+                      state.authenticate!.moquiSessionToken!)
                   : furtherAction == 'passwordChange'
                       ? changePasswordForm(
                           _usernameController.text, _passwordController.text)
