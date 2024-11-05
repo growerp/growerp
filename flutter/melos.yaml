@@ -5,12 +5,19 @@ repository: https://github.com/growerp/growerp
 packages:
   - packages/growerp_core
   - packages/growerp_user_company
+  - packages/growerp_user_company/example
   - packages/growerp_catalog
+  - packages/growerp_catalog/example
   - packages/growerp_inventory
+  - packages/growerp_inventory/exmaple
   - packages/growerp_marketing
+  - packages/growerp_marketing/example
   - packages/growerp_order_accounting
+  - packages/growerp_order_accounting/example
   - packages/growerp_website
+  - packages/growerp_website/example
   - packages/growerp_task
+  - packages/growerp_task/example
   - packages/growerp_models
   - packages/growerp
   - packages/admin
