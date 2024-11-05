@@ -11,7 +11,7 @@ ENV HOME=/home/myuser
 
 # define variables
 ARG FLUTTER_SDK=$HOME/flutter
-ARG FLUTTER_VERSION=3.24.2
+ARG FLUTTER_VERSION=3.24.4
 
 #clone flutter
 RUN git clone https://github.com/flutter/flutter.git $FLUTTER_SDK

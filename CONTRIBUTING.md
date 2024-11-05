@@ -18,4 +18,5 @@ Start your commit message with:
     perf:   - A change that improves performance.
     refactor: - A change that neither fixes a bug nor adds a feature.
     revert: - A change that reverts a previous commit.
+    upgrade: - upgrade third party packages
 
