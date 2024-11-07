@@ -36,7 +36,7 @@ class ShowPaymentDialog extends StatelessWidget {
           ..add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!)),
         child: BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
           if (state.status == FinDocStatus.success) {
-            return SelectFinDocDialog(finDoc: state.finDocs[0]);
+            return PaymentDialog(finDoc: state.finDocs[0]);
           } else {
             return const LoadingIndicator();
           }
@@ -141,9 +141,8 @@ class PaymentDialogState extends State<PaymentDialog> {
                     title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
                         "Payment #${finDoc.pseudoId ?? 'New'}",
                     child: BlocConsumer<FinDocBloc, FinDocState>(
-                      listenWhen: (previous, current) =>
-                          previous.status == FinDocStatus.loading,
                       listener: (context, state) {
+                        print("==== lsitener ${state.status}");
                         if (state.status == FinDocStatus.success) {
                           Navigator.of(context).pop();
                         }
@@ -153,6 +152,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                         }
                       },
                       builder: (context, state) {
+                        print("==== builder ${state.status}");
                         return paymentForm(state, paymentDialogFormKey);
                       },
                     )))));

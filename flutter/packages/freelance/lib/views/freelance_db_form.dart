@@ -16,6 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:intl/intl.dart';
+import 'package:universal_io/io.dart';
 
 import '../menu_options.dart';
 
@@ -24,6 +26,16 @@ class FreelanceDbForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String currencyId = context
+        .read<AuthBloc>()
+        .state
+        .authenticate!
+        .company!
+        .currency!
+        .currencyId!;
+    String currencySymbol = NumberFormat.simpleCurrency(
+            locale: Platform.localeName, name: currencyId)
+        .currencySymbol;
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state.status == AuthStatus.authenticated) {
         Authenticate authenticate = state.authenticate!;
@@ -54,11 +66,11 @@ class FreelanceDbForm extends StatelessWidget {
           ]),
           makeDashboardItem('dbAccounting', context, menuOptions[6], [
             "Sales open invoices: \n"
-                "${authenticate.company!.currency!.currencyId} "
+                "$currencySymbol "
                 "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
                 "(${authenticate.stats?.salesInvoicesNotPaidCount ?? 0})",
             "Purchase unpaid invoices: \n"
-                "${authenticate.company!.currency!.currencyId} "
+                "$currencySymbol "
                 "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
                 "(${authenticate.stats?.purchInvoicesNotPaidCount ?? 0})",
           ]),

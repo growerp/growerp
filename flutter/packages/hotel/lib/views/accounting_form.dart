@@ -17,6 +17,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:intl/intl.dart';
+import 'package:universal_io/io.dart';
 
 import '../acct_menu_options.dart';
 
@@ -25,20 +27,30 @@ class AccountingForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String currencyId = context
+        .read<AuthBloc>()
+        .state
+        .authenticate!
+        .company!
+        .currency!
+        .currencyId!;
+    String currencySymbol = NumberFormat.simpleCurrency(
+            locale: Platform.localeName, name: currencyId)
+        .currencySymbol;
     Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
     return DashBoardForm(
       key: const Key('AcctDashBoard'),
       dashboardItems: [
         makeDashboardItem('acctSales', context, acctMenuOptions[1], [
-          "Sales open invoices: ",
-          "${authenticate.company!.currency!.description} "
+          "Open invoices: ",
+          "$currencySymbol "
               "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.salesInvoicesNotPaidCount})",
         ]),
         makeDashboardItem('acctPurchase', context, acctMenuOptions[2], [
-          "Purchase unpaid invoices: ",
-          "${authenticate.company!.currency!.description} "
-              "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
+          "Open invoices: "
+              "$currencySymbol ",
+          "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.purchInvoicesNotPaidCount})",
         ]),
         makeDashboardItem('acctLedger', context, acctMenuOptions[3], []),

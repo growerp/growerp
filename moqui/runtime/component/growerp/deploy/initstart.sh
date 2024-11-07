@@ -34,6 +34,15 @@ if [ "$STRIPE_SECRET_KEY" != "" ] ; then
     echo "updating stripe key"
     sed -i -e "s/\STRIPE_SECRET_KEY/${STRIPE_SECRET_KEY}/g" runtime/component/mantle-stripe/data/StripeInstallData.xml
 fi
+if [ "$DISABLE_SECA" == "true" ] ; then
+    echo "removing seca files for conversion load"
+    rm runtime/component/mantle-usl/service/AccountingInvoice.secas.xml
+    rm runtime/component/mantle-usl/service/AccountingLedger.secas.xml
+    rm runtime/component/mantle-usl/service/AccountingPayment.secas.xml
+    rm runtime/component/mantle-usl/service/ProductAssetPayment.secas.xml
+    rm runtime/component/mantle-usl/service/ProductSubscription.secas.xml
+fi
+
 
 #load data if required
 if [ ! -z "$DB_DATA" ] && [ "$DB_DATA" != "NONE" ] ; then

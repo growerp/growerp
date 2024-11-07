@@ -167,7 +167,7 @@ class MyFinDocState extends State<FinDocPage> {
     screenWidth = isPhone ? 400 : 900;
 
     blocConsumerListener(BuildContext context, CartState state,
-        [bool mounted = true]) async {
+        [bool mounted = true]) {
       switch (state.status) {
         case CartStatus.complete:
           Navigator.of(context).pop();
@@ -813,7 +813,7 @@ class MyFinDocState extends State<FinDocPage> {
       rowContent.add(TableRowContent(
           name: '#',
           width: isPhone ? 6 : 4,
-          value: CircleAvatar(child: Text(item.itemSeqId.toString()))));
+          value: CircleAvatar(child: Text((index + 1).toString()))));
       rowContent.add(TableRowContent(
           name: 'ProdId',
           width: isPhone ? 14 : 8,
@@ -826,7 +826,7 @@ class MyFinDocState extends State<FinDocPage> {
               key: Key('itemDescription$index'), textAlign: TextAlign.left)));
       rowContent.add(TableRowContent(
           name: 'Qty',
-          width: isPhone ? 10 : 10,
+          width: isPhone ? 15 : 10,
           value: Text(
               item.quantity == null
                   ? Decimal.zero.toString()
@@ -843,7 +843,7 @@ class MyFinDocState extends State<FinDocPage> {
       if (!readOnly) {
         rowContent.add(TableRowContent(
             name: ' ',
-            width: isPhone ? 20 : 20,
+            width: isPhone ? 15 : 20,
             value: IconButton(
               visualDensity: VisualDensity.compact,
               icon: const Icon(Icons.delete_forever),

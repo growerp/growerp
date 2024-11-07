@@ -119,7 +119,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         my: event.my,
       );
 
-      emit(state.copyWith(
+      return emit(state.copyWith(
           status: FinDocStatus.success,
           finDocs: current..addAll(result.finDocs),
           itemTypes: itemTypes.itemTypes,
@@ -128,7 +128,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
           searchString: event.searchString,
           message: event.refresh ? '${docType}s reloaded' : null));
     } on DioException catch (e) {
-      emit(state.copyWith(
+      return emit(state.copyWith(
           status: FinDocStatus.failure,
           finDocs: state.finDocs,
           message: await getDioError(e)));
@@ -197,7 +197,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
                 "${docType == FinDocType.transaction && event.finDoc.status == FinDocStatusVal.cancelled ? 'Deleted' : 'updated'}"));
       }
     } on DioException catch (e) {
-      emit(state.copyWith(
+      return emit(state.copyWith(
           status: FinDocStatus.failure, message: await getDioError(e)));
     }
   }

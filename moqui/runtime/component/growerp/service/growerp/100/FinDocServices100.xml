@@ -484,7 +484,8 @@ along with this software (see the LICENSE.md file). If not, see
                             </if>
                         </if>
                     </else-if>
-                    <else>                        <!-- multiple documents -->
+                    <else>
+                        <!-- multiple documents -->
                         <set field="statusList" from="['OrderOpen','OrderPlaced','OrderApproved']" />
                         <!--
                                         OrderCompleted OrderCancelled' -->
@@ -498,16 +499,12 @@ along with this software (see the LICENSE.md file). If not, see
                                 ignore-if-empty="true" />
                             <econdition field-name="customerPartyId" from="customerPartyId"
                                 ignore-if-empty="true" />
-                            <econditions combine="or">
+                            <!-- econditions combine="or">
                                 <econdition field-name="statusId" operator="in" from="status"
                                     ignore-if-empty="true" />
                                 <econdition field-name="placedDate" operator="greater"
                                     from="fromDate" ignore-if-empty="true" />
-                            </econditions>
-                            <econdition field-name="placedDate" operator="less-equals" from="tsDate"
-                                ignore-if-empty="true" />
-                            <order-by field-name="orderId" />
-                            <!--use-iterator/-->
+                            </econditions-->
                         </entity-find>
                     </else>
                 </if>
@@ -738,14 +735,13 @@ along with this software (see the LICENSE.md file). If not, see
                                         ignore-if-empty="true" />
                                     <econdition field-name="fromPartyId" from="vendorPartyId"
                                         ignore-if-empty="true" />
-                                    <econditions combine="or">
+                                    <!--econditions
+                                    combine="or">
                                         <econdition field-name="statusId" operator="in"
                                             from="statusList" ignore-if-empty="true" />
                                         <econdition field-name="invoiceDate" operator="greater"
                                             from="fromDate" ignore-if-empty="true" />
-                                    </econditions>
-                                    <econdition field-name="invoiceDate" operator="less-equals"
-                                        from="tsDate" ignore-if-empty="true" />
+                                    </econditions-->
                                     <select-field field-name="invoiceId" />
                                 </entity-find>
                                 <!-- get the records-->
@@ -1056,14 +1052,12 @@ along with this software (see the LICENSE.md file). If not, see
                                 ignore-if-empty="true" />
                             <econdition field-name="customerPartyId" from="customerPartyId"
                                 ignore-if-empty="true" />
-                            <econditions combine="or">
+                            <!-- econditions combine="or">
                                 <econdition field-name="statusId" operator="in" from="status"
                                     ignore-if-empty="true" />
                                 <econdition field-name="entryDate" operator="greater"
                                     from="fromDate" ignore-if-empty="true" />
-                            </econditions>
-                            <econdition field-name="entryDate" operator="less-equals" from="tsDate"
-                                ignore-if-empty="true" />
+                            </econditions-->
                             <econditions combine="or">
                                 <econdition field-name="pseudoId" ignore-case="true" operator="like"
                                     from="search" ignore-if-empty="true" />
@@ -1072,7 +1066,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <econdition field-name="orderId" ignore-case="true" operator="like"
                                     from="search" ignore-if-empty="true" />
                             </econditions>
-                            <order-by field-name="pseudoId" />
+                            <order-by field-name="entryDate" />
                         </entity-find>
                     </else>
                 </if>
@@ -2669,7 +2663,7 @@ along with this software (see the LICENSE.md file). If not, see
                             in-map="[shipmentId: shipmentId,
                                     statusId: 'ShipScheduled',
                                     pseudoId: seqNum]" />
-                        <else>                            <!-- no shipable items so complete order already here not with rental
+                        <else><!-- no shipable items so complete order already here not with rental
                             though-->
                             <entity-find entity-name="growerp.product.AssetRental" list="rentals">
                                 <econdition field-name="orderId" from="order.orderId" />
@@ -2978,7 +2972,7 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
 
     <service verb="update" noun="Shipment">
-        <description> Update a shipment  including items exept for shipments receive.
+        <description> Update a shipment  including items except for shipments receive.
         </description>
         <in-parameters>
             <parameter name="finDoc" type="Map" required="true" />
@@ -2996,6 +2990,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="shipmentId" from="finDoc.shipmentId" />
                 </entity-find>
                 <iterate list="shipmentItemSourceList" entry="itemSource">
+                    <log
+                        message="===pack shipment: ${finDoc.shipmentId} source: ${itemSource.shipmentItemSourceId} qty: ${itemSource.quantity}" />
                     <service-call name="mantle.shipment.ShipmentServices.pack#ShipmentItemSource"
                         in-map="[shipmentItemSourceId: itemSource.shipmentItemSourceId,
                                     quantity: itemSource.quantity]" />
@@ -3126,10 +3122,17 @@ along with this software (see the LICENSE.md file). If not, see
                     from="sid.quantity - (sid.quantityAcceptedTotal ?: 0) - (sid.quantityRejectedTotal ?: 0)" />
                 <set field="finDocItem"
                     from="finDoc.items.find {element -> element.product.productId == sid.productId}" />
-                <if condition="!finDocItem.asset.location.locationId">
+                <if condition="!finDocItem.asset?.location?.locationId">
+                    <if condition="!finDocItem.asset">
+                        <set field="finDocItem.asset" from="[:]" />
+                    </if>
+                    <if condition="!finDocItem.asset.location">
+                        <set field="finDocItem.asset.location" from="[:]" />
+                    </if>
                     <!-- if empty create new location -->
+                    <set field="defaultName" value="${sid.pseudoId}(${nowDate})" />
                     <service-call name="growerp.100.InventoryServices100.create#Location"
-                        in-map="[location: [locationName: finDocItem.asset.location.locationName ?: '${sid.pseudoId}(${nowDate})']]"
+                        in-map="[location: [locationName: finDocItem.asset?.location?.locationName ?: defaultName]]"
                         out-map="context" />
                     <set field="finDocItem.asset.location.locationId" from="location.locationId" />
                 </if>

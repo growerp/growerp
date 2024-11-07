@@ -34,6 +34,10 @@ along with this software (see the LICENSE.md file). If not, see
         userPermissionId="" />
     <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="InvoiceReceived"
         toStatusId="InvoiceApproved" transitionName="Approve" userPermissionId="" />
+    <!-- quick complete payment -->
+    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="PmntAuthorized"
+        toStatusId="PmntConfirmed" transitionName="Confirm" />
+
 
     <!-- Configuration send email GMAIL-->
     <!--moqui.basic.email.EmailServer

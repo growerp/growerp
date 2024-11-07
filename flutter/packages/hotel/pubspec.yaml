@@ -22,6 +22,8 @@ dependencies:
   horizontal_data_table: ^4.3.1
   flutter_localizations:
     sdk: flutter
+  universal_io: ^2.2.2
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:

@@ -21,7 +21,7 @@ dependencies:
   growerp_order_accounting: ^1.6.0
   growerp_user_company: ^1.6.0
   growerp_task: ^1.6.0
-
+  universal_io: ^2.2.2
   global_configuration: ^2.0.0
   responsive_framework: ^1.4.0
   flutter_simple_treeview: ^3.0.2

@@ -54,7 +54,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
       'Qty.',
       textAlign: TextAlign.right,
     ),
-    width: isPhone(context) ? 10 : 15,
+    width: isPhone(context) ? 16 : 15,
     value: Text(
       qohTotal.toString(),
       key: Key('qoh$index'),
@@ -69,7 +69,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             key: Key('assetsCount$index'))));
   }
   rowContent.add(TableRowContent(
-      width: isPhone(context) ? 25 : 15,
+      width: isPhone(context) ? 15 : 15,
       name: ' ',
       value: IconButton(
           visualDensity: VisualDensity.compact,
@@ -86,7 +86,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
           })));
 
   return TableData(
-      rowHeight: isPhone(context) ? 30 : 20, rowContent: rowContent);
+      rowHeight: isPhone(context) ? 36 : 20, rowContent: rowContent);
 }
 
 // general settings

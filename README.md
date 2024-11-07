@@ -1,4 +1,4 @@
-# Welcome to flutter open source GrowERP.
+# Welcome to Flutter open source GrowERP.
 
 GrowERP is an open source multi platform ERP application you can use right now!
 
@@ -25,8 +25,6 @@ When the application is started, create a new company, select demo data or an em
 Documentation available at https://www.growerp.com
 
 ## Install GrowERP locally using global growerp command
-## <span style="color:red">required flutter version channel stable</span> 
-
 ```sh
 dart pub global activate growerp
 growerp install
@@ -46,10 +44,10 @@ cd chat
 ```
 
 ### start backend in separate terminal
-Initialize:
+Initialize: (only the first time)
 ```sh
     cd moqui
-    ./gradlew build      #only one time
+    ./gradlew build
     java -jar moqui.war load types=seed,seed-initial,install no-run-es
 ```
 Run:
@@ -58,6 +56,7 @@ Run:
     java -jar moqui.war no-run-es
 ```
 ### run the flutter emulator or browser
+Initialize; (only the first time)
 ```sh
 cd flutter/packages/admin
 dart pub global activate melos 3.4.0
@@ -68,8 +67,13 @@ melos bootstrap
 melos l10n --no-select
 # build
 melos build --no-select
+```
+Run:
+```sh
 flutter run
 ```
+for hotel go to the flutter/packages/hotel directory and submit 'flutter run' command
+
 ## Use GrowERP locally with docker
 In the docker directory there is a README.md to run the complete system with docker images locally.
 

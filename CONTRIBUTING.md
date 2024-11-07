@@ -9,6 +9,8 @@ In general you can make a pull request to the https://github.com/growerp/growerp
 5. Push to the branch: git push --set-upstream origin my-new-feature
 6. Submit a pull request.
 
+More detailed information at the [GitHub blog](https://github.blog/developer-skills/github/beginners-guide-to-github-creating-a-pull-request/) 
+
 
 Start your commit message with:
     docs:   - A documentation change.
@@ -17,6 +19,6 @@ Start your commit message with:
     bug:    - A bug fix.
     perf:   - A change that improves performance.
     refactor: - A change that neither fixes a bug nor adds a feature.
-    revert: - A change that reverts a previous commit.
+    revert: - A change that reverts (part of) a previous commit.
     upgrade: - upgrade third party packages
 

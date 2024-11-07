@@ -51,15 +51,15 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         value: Text(item.pseudoId, key: Key('id$index'))));
   }
   rowContent.add(TableRowContent(
-      name: 'Name',
-      width: isPhone(context) ? 40 : 25,
-      value: Text(item.assetName ?? '', key: Key('name$index'))));
+      name: 'Product Name',
+      width: isPhone(context) ? 40 : 30,
+      value: Text(item.product?.productName ?? '', key: Key('name$index'))));
   rowContent.add(TableRowContent(
     name: const Text(
       'Qty.',
       textAlign: TextAlign.right,
     ),
-    width: isPhone(context) ? 10 : 10,
+    width: isPhone(context) ? 15 : 10,
     value: Text(
       item.quantityOnHand.toString(),
       key: Key('qoh$index'),
@@ -79,7 +79,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         value: Text(item.location?.locationId ?? '')));
   }
   rowContent.add(TableRowContent(
-      name: const Text('Active', textAlign: TextAlign.center),
+      name: const Text('Act.', textAlign: TextAlign.center),
       width: 8,
       value: Text(item.statusId == 'Deactivated' ? 'N' : 'Y',
           key: Key('status$index'), textAlign: TextAlign.center)));
@@ -103,7 +103,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             }),
   ));
   return TableData(
-      rowHeight: isPhone(context) ? 40 : 20, rowContent: rowContent);
+      rowHeight: isPhone(context) ? 35 : 20, rowContent: rowContent);
 }
 
 // general settings

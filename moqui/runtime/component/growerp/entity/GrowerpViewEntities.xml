@@ -485,7 +485,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="productPseudoId" field="pseudoId" entity-alias="PROD" />
         <alias name="quantity" entity-alias="SITEM" />
         <alias name="receivedDate" field="receivedDate" entity-alias="ASR" />
-        <alias name="itemDescription" entity-alias="ORDERITEM" />
+        <alias name="itemDescription" field="productName" entity-alias="PROD" />
         <alias name="assetId" entity-alias="AST" />
         <alias name="assetPseudoId" entity-alias="AST" />
         <alias name="assetName" entity-alias="AST" />

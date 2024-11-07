@@ -870,8 +870,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="toPartyId" from="companyPartyId" />
                 </else>
             </if>
-            <!--log
-                message="matching invoice externalId on finDoc ref: ${finDoc.reference} with fromPartyId:
+            <!-- log
+                message="matching invoice ${finDoc.invoiceId}/${finDoc.pseudoId} on finDoc ref: ${finDoc.reference}
+            with fromPartyId:
             $fromPartyId toPartyId: $toPartyId sales: ${finDoc.sales}" /-->
             <entity-find entity-name="mantle.account.invoice.Invoice"
                 list="invoices" limit="1">
@@ -895,8 +896,7 @@ along with this software (see the LICENSE.md file). If not, see
                     list="invoiceItems">
                     <econdition field-name="invoiceId" from="invoices[0].invoiceId" />
                 </entity-find>
-                <!--log
-                message="matching items: ${finDoc.items?.size()}" /-->
+                <!-- log message="matching items: ${finDoc.items?.size()}" /-->
                 <set field="newShipmentItems" from="[]" />
                 <iterate list="finDoc.items" entry="shipmentItem">
                     <set field="quantityUpdated" value="false" type="Boolean" />
@@ -915,7 +915,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </iterate>
                 <set field="finDoc.items" from="newShipmentItems" />
                 <else>
-                    <script>System.out.println(">>>Could not find related invoice for company: $companyPartyId sales: ${finDoc.sales} shipment: ${finDoc.pseudoId} ref: ${finDoc.reference}")</script>
+                    <script>System.out.println(">>>Could not find related invoice for company: $companyPartyId sales: ${finDoc.sales} shipment: ${finDoc.shipmentId}/${finDoc.pseudoId} ref: ${finDoc.reference}")</script>
                 </else>
             </if>
         </actions>
@@ -927,6 +927,7 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
             <!-- find oldest non-closed period -->
             <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
                 <econdition field-name="partyId" from="companyPartyId" />
@@ -987,8 +988,7 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[timePeriodId: periods[0].timePeriodId, closeChildren: true]" />
 
             <!-- invoices -->
-            <entity-find entity-name="mantle.account.invoice.Invoice" for-update="true"
-                list="invoices">
+            <entity-find entity-name="mantle.account.invoice.Invoice" list="invoices">
                 <econditions combine="or">
                     <econdition field-name="fromPartyId" from="companyPartyId" />
                     <econdition field-name="toPartyId" from="companyPartyId" />
@@ -1006,7 +1006,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="organizationPartyId" from="companyPartyId" />
                     <econdition field-name="invoiceId" from="invoice.invoiceId" />
                 </entity-find>
-                <if condition="transList">
+                <if condition="transList"><!-- only close when in the ledger-->
                     <if condition="invoice.statusId == 'InvoiceInProcess'">
                         <set field="statusId1" value="InvoiceFinalized" />
                         <set field="statusId2" value="InvoiceSent" />
@@ -1034,8 +1034,7 @@ along with this software (see the LICENSE.md file). If not, see
             <script>System.out.println(">>>${invoices.size()} not completed invoices found ${updatedCount} updated, ${notFoundCount} not found in ledger")</script>
 
             <!-- payments -->
-            <entity-find entity-name="mantle.account.payment.Payment" for-update="true"
-                list="payments">
+            <entity-find entity-name="mantle.account.payment.Payment" list="payments">
                 <econditions combine="or">
                     <econdition field-name="fromPartyId" from="companyPartyId" />
                     <econdition field-name="toPartyId" from="companyPartyId" />
@@ -1057,13 +1056,71 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="updatedCount" from="updatedCount + 1" />
                     <else>
                         <script>System.out.println(">>>Could not find payment in the ledger, payment: ${payment.paymentId}/${payment.pseudoId} ref: ${payment.paymentRefNum}")</script>
-                        <log message="payment not found in ledger: ${payment.paymentId}" />
                         <set field="notFoundCount" from="notFoundCount + 1" />
                     </else>
                 </if>
             </iterate>
             <script>System.out.println(">>>${payments.size()} not completed payments found ${updatedCount} updated, ${notFoundCount} not found in ledger")</script>
 
+            <!-- complete invoices and orders -->
+            <entity-find
+                entity-name="mantle.account.invoice.Invoice" list="invoices">
+                <econditions combine="or">
+                    <econdition field-name="fromPartyId" from="companyPartyId" />
+                    <econdition field-name="toPartyId" from="companyPartyId" />
+                </econditions>
+                <econditions combine="or">
+                    <econdition field-name="statusId" value="InvoiceApproved" />
+                    <econdition field-name="statusId" value="InvoiceSent" />
+                </econditions>
+            </entity-find>
+            <set field="updatedCount" value="0" type="Integer" />
+            <set field="notFoundCount" value="0" type="Integer" />
+            <iterate list="invoices" entry="invoice">
+                <service-call name="update#mantle.account.invoice.Invoice"
+                    in-map="[invoiceId: invoice.invoiceId,
+                        statusId: invoice.statusId == 'InvoiceSent'? 'InvoicePmtRecvd' : 'InvoicePmtSent']" />
+                <entity-find entity-name="mantle.order.OrderItemBilling" list="orders">
+                    <econdition field-name="invoiceId" from="invoice.invoiceId" />
+                </entity-find>
+                <if condition="orders">
+                    <service-call name="update#mantle.order.OrderHeader"
+                        in-map="[orderId: orders[0].orderId, statusId: 'OrderApproved']" />
+                    <service-call name="update#mantle.order.OrderHeader"
+                        in-map="[orderId: orders[0].orderId, statusId: 'OrderCompleted']" />
+                </if>
+            </iterate>
+            <!-- receive incoming shipments-->
+            <entity-find entity-name="mantle.shipment.Shipment" list="shipments">
+                <econdition field-name="toPartyId" from="companyPartyId" />
+                <econdition field-name="statusId" value="ShipScheduled" />
+            </entity-find>
+            <iterate list="shipments" entry="shipment">
+                <log message="==== processing incoming shipment: ${shipment.shipmentId}" />
+                <service-call name="growerp.100.FinDocServices100.get#FinDoc"
+                    in-map="[finDocId: shipment.shipmentId, docType: 'shipment']" out-map="context" />
+                <service-call name="growerp.100.FinDocServices100.update#FinDoc"
+                    in-map="[finDoc: finDocs[0] + [statusId: 'FinDocApproved']]" />
+                <service-call name="growerp.100.FinDocServices100.get#FinDoc"
+                    in-map="[finDocId: shipment.shipmentId, docType: 'shipment']" out-map="context" />
+                <service-call name="growerp.100.FinDocServices100.receive#Shipment"
+                    in-map="[finDoc: finDocs[0] + [statusId: 'FinDocApproved']]" />
+            </iterate>
+            <!-- send outgoing shipments -->
+            <!--entity-find
+                entity-name="mantle.shipment.Shipment" list="shipments">
+                <econdition field-name="fromPartyId" from="companyPartyId" />
+                <econdition field-name="statusId" value="ShipScheduled" />
+            </entity-find>
+            <iterate list="shipments" entry="shipment">
+                <service-call name="growerp.100.FinDocServices100.get#FinDoc"
+                    in-map="[finDocId: shipment.shipmentId, docType: 'shipment']" out-map="context" />
+                <log message="=====processing outgoing shipment: ${finDocs[0]}" />
+                <service-call name="growerp.100.FinDocServices100.update#FinDoc"
+                    in-map="[finDoc: finDocs[0] + [statusId: 'FinDocApproved']]" />
+                <service-call name="growerp.100.FinDocServices100.update#FinDoc"
+                    in-map="[finDoc: finDocs[0] + [statusId: 'FinDocCompleted']]" />
+            </iterate-->
         </actions>
     </service>
 
