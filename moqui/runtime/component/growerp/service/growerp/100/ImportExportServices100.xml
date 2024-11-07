@@ -1096,7 +1096,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="statusId" value="ShipScheduled" />
             </entity-find>
             <iterate list="shipments" entry="shipment">
-                <log message="==== processing incoming shipment: ${shipment.shipmentId}" />
                 <service-call name="growerp.100.FinDocServices100.get#FinDoc"
                     in-map="[finDocId: shipment.shipmentId, docType: 'shipment']" out-map="context" />
                 <service-call name="growerp.100.FinDocServices100.update#FinDoc"
