@@ -39,7 +39,7 @@ if [ "$DISABLE_SECA" == "true" ] ; then
     rm runtime/component/mantle-usl/service/AccountingInvoice.secas.xml
     rm runtime/component/mantle-usl/service/AccountingLedger.secas.xml
     rm runtime/component/mantle-usl/service/AccountingPayment.secas.xml
-    rm runtime/component/mantle-usl/service/ProductAssetPayment.secas.xml
+    rm runtime/component/mantle-usl/service/ProductAsset.secas.xml
     rm runtime/component/mantle-usl/service/ProductSubscription.secas.xml
 fi
 

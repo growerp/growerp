@@ -13,7 +13,7 @@ docker system prune -f
 if [ -d /tmp/growerp ]; then
   cd /tmp/growerp && git pull
 else
-  git clone https://github.com/growerp/growerp.git /tmp/growerp
+  git clone git@github.com:growerp/growerp.git /tmp/growerp
 fi
 docker compose -f /tmp/growerp/flutter/docker-compose.test.yml up
 
