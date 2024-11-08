@@ -278,7 +278,8 @@ class RequestDialogState extends State<RequestDialog> {
               TextFormField(
                 key: const Key('postalCode'),
                 enabled: !readOnly,
-                decoration: const InputDecoration(labelText: 'Postal Code'),
+                decoration: const InputDecoration(
+                    labelText: 'In which Post Code are you looking for care?'),
                 controller: _postalController,
                 //keyboardType: TextInputType.number,
               ),
@@ -286,8 +287,8 @@ class RequestDialogState extends State<RequestDialog> {
               TextFormField(
                 key: const Key('telephone'),
                 enabled: !readOnly,
-                decoration:
-                    const InputDecoration(labelText: 'Telephone Number'),
+                decoration: const InputDecoration(
+                    labelText: 'What is your telephone number?'),
                 controller: _telephoneController,
                 //keyboardType: _telephoneController.number,
               ),
@@ -298,8 +299,8 @@ class RequestDialogState extends State<RequestDialog> {
                     child: DropdownButtonFormField<String>(
                       key: const Key('care'),
                       value: selectedCare,
-                      decoration:
-                          const InputDecoration(labelText: 'Care Selection'),
+                      decoration: const InputDecoration(
+                          labelText: 'What type of care are you looking for?'),
                       validator: (value) =>
                           value == null ? 'field required' : null,
                       items: const [
@@ -325,8 +326,8 @@ class RequestDialogState extends State<RequestDialog> {
                     child: DropdownButtonFormField<String>(
                       key: const Key('forWhom'),
                       value: selectedForWhom,
-                      decoration:
-                          const InputDecoration(labelText: 'Fore Whom?'),
+                      decoration: const InputDecoration(
+                          labelText: 'Who is the care for?'),
                       validator: (value) =>
                           value == null ? 'field required' : null,
                       items: const [
@@ -359,13 +360,14 @@ class RequestDialogState extends State<RequestDialog> {
                     child: DropdownButtonFormField<String>(
                       key: const Key('timeframe'),
                       value: selectedTimeframe,
-                      decoration:
-                          const InputDecoration(labelText: 'Time frame'),
+                      decoration: const InputDecoration(
+                          labelText:
+                              'What sort of timeframe are you looking for?'),
                       validator: (value) =>
                           value == null ? 'field required' : null,
                       items: const [
                         DropdownMenuItem<String>(
-                            value: 'notSure', child: Text('I am not sure')),
+                            value: 'unSure', child: Text('I am not sure')),
                         DropdownMenuItem<String>(
                             value: 'shortTerm', child: Text('Short-term')),
                         DropdownMenuItem<String>(
@@ -383,7 +385,8 @@ class RequestDialogState extends State<RequestDialog> {
                     child: DropdownButtonFormField<String>(
                       key: const Key('howSoon'),
                       value: selectedHowSoon,
-                      decoration: const InputDecoration(labelText: 'How soon?'),
+                      decoration: const InputDecoration(
+                          labelText: 'How soon may you require care?'),
                       validator: (value) =>
                           value == null ? 'field required' : null,
                       items: const [
@@ -411,13 +414,14 @@ class RequestDialogState extends State<RequestDialog> {
               DropdownButtonFormField<String>(
                 key: const Key('status'),
                 value: selectedStatus,
-                decoration: const InputDecoration(labelText: 'Status'),
+                decoration: const InputDecoration(
+                    labelText: 'What is the status of your ACAT assessment?'),
                 validator: (value) => value == null ? 'field required' : null,
                 items: const [
                   DropdownMenuItem<String>(
-                      value: 'notSure', child: Text('I am not sure')),
+                      value: 'unSure', child: Text('I am not sure')),
                   DropdownMenuItem<String>(
-                      value: 'notStarted',
+                      value: 'yettobestarted',
                       child: Text('Have not started the assesment')),
                   DropdownMenuItem<String>(
                       value: 'inProgress',
