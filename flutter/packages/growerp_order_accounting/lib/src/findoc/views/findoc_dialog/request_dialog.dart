@@ -161,9 +161,9 @@ class RequestDialogState extends State<RequestDialog> {
       _postalController.text = '5555555';
       selectedCare = 'resCare';
       selectedForWhom = 'mySelf';
-      selectedTimeframe = 'notSure';
+      selectedTimeframe = 'unSure';
       selectedHowSoon = 'asap';
-      selectedStatus = 'notSure';
+      selectedStatus = 'unSure';
     }
     return Padding(
         padding: EdgeInsets.fromLTRB(isPhone ? 8 : 80, 0, isPhone ? 8 : 80, 0),

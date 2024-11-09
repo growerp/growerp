@@ -16,19 +16,19 @@ CONF_FILE="conf/MoquiProductionConf.xml"
 # insert some sensitive data from docker-compose
 if [ "$SMTP_USER" != "" ] ; then
     echo "updating email"
-    sed -i -e "s/SMTP_USER/${SMTP_USER}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
-    sed -i -e "s/SMTP_PASSWORD/${SMTP_PASSWORD}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
+    sed -i -e "s/SMTP_USER/${SMTP_USER}/g" runtime/component/growerp/data/GrowerpAaSeedData.xml
+    sed -i -e "s/SMTP_PASSWORD/${SMTP_PASSWORD}/g" runtime/component/growerp/data/GrowerpAaSeedData.xml
 fi
 if [ "$BIRDSEND_API_KEY" != "" ] ; then
-    echo "updating birdsend"
-    sed -i -e "s/BIRDSEND_API_KEY/${BIRDSEND_API_KEY}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
-    sed -i -e "s/BIRDSEND_AUTM_SEQUENCE/${BIRDSEND_AUTM_SEQUENCE}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
+    echo "updating birdSend"
+    sed -i -e "s/BIRDSEND_API_KEY/${BIRDSEND_API_KEY}/g" runtime/component/growerp/data/GrowerpAaSeedData.xml
+    sed -i -e "s/BIRDSEND_AUTM_SEQUENCE/${BIRDSEND_AUTM_SEQUENCE}/g" runtime/component/growerp/data/GrowerpAaSeedData.xml
 fi
 if [ "$OPENMRS_PASSWORD" != "" ] ; then
     echo "updating openmrs"
-    sed -i -e "s/OPENMRS_USERNAME/${OPENMRS_USERNAME}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
-    sed -i -e "s/OPENMRS_PASSWORD/${OPENMRS_PASSWORD}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
-    sed -i -e "s/OPENMRS_BASE_URL/${OPENMRS_BASE_URL}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
+    sed -i -e "s/OPENMRS_USERNAME/${OPENMRS_USERNAME}/g" runtime/component/growerp/data/GrowerpAaSeedData.xml
+    sed -i -e "s/OPENMRS_PASSWORD/${OPENMRS_PASSWORD}/g" runtime/component/growerp/data/GrowerpAaSeedData.xml
+    sed -i -e "s#OPENMRS_BASE_URL#${OPENMRS_BASE_URL}#g" runtime/component/growerp/data/GrowerpAaSeedData.xml
 fi
 if [ "$STRIPE_SECRET_KEY" != "" ] ; then
     echo "updating stripe key"
