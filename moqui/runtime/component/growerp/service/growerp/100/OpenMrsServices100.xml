@@ -47,7 +47,7 @@ along with this software (see the LICENSE.md file). If not, see
                             || interfaces[0].password.isEmpty()
                             || interfaces[0].baseUrl.isEmpty()">
                 <log level="error"
-                    message="OpenMRS system hostname ${hostNames[0].settingValue} not found in CompanyData" />
+                    message="OpenMRS system hostname ${hostNames[0].settingValue} in CompanyData not found" />
                 <return />
             </if>
             <set field="username" from="interfaces[0].username" />

@@ -102,7 +102,7 @@ class RequestDialogState extends State<RequestDialog> {
       try {
         Map jsonDescription =
             finDoc.description != null ? jsonDecode(finDoc.description!) : {};
-        _telephoneController.text = jsonDescription['Telephone Number'] ?? '';
+        _telephoneController.text = jsonDescription['Telephone_Number'] ?? '';
         _postalController.text = jsonDescription['CarePostCode'] ?? '';
         selectedCare = jsonDescription['TypeOfCare'] ?? '';
         selectedForWhom = jsonDescription['CareRelationship'] ?? '';
@@ -443,7 +443,7 @@ class RequestDialogState extends State<RequestDialog> {
                   onPressed: () {
                     var description = jsonEncode({
                       'CarePostCode': _postalController.text,
-                      'Telephone Number': _telephoneController.text,
+                      'Telephone_Number': _telephoneController.text,
                       'TypeOfCare': selectedCare,
                       'CareRelationship': selectedForWhom,
                       'CareTimeframe': selectedTimeframe,
