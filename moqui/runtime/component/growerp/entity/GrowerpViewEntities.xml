@@ -496,7 +496,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="locationPseudoId" field="positionId" entity-alias="LOC" />
         <alias name="locationName" field="description" entity-alias="LOC" />
         <!-- vendor -->
-        <alias name="vendorPartyId" field="partyId" entity-alias="VORG" />
+        <alias name="vendorPartyId" field="partyId" entity-alias="VPARTY" />
         <alias name="vendorCompanyName" field="organizationName" entity-alias="VORG" />
         <alias name="vendorRoleTypeId" field="roleTypeId" entity-alias="VROLE" />
         <alias name="vendorUserPartyId" field="partyId" entity-alias="VPERSON" />
@@ -504,7 +504,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="vendorLastName" field="lastName" entity-alias="VPERSON" />
         <alias name="vendorEmail" field="emailAddress" entity-alias="VACCOUNT" />
         <!-- customer -->
-        <alias name="customerPartyId" field="partyId" entity-alias="CORG" />
+        <alias name="customerPartyId" field="partyId" entity-alias="CPARTY" />
         <alias name="customerCompanyName" field="organizationName" entity-alias="CORG" />
         <alias name="customerRoleTypeId" field="roleTypeId" entity-alias="CROLE" />
         <alias name="customerUserPartyId" field="partyId" entity-alias="CPERSON" />

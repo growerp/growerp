@@ -483,6 +483,14 @@ along with this software (see the LICENSE.md file). If not, see
                                 <set field="sales" value="true" type="Boolean" />
                             </if>
                         </if>
+                        <if condition="!items">
+                            <entity-find entity-name="mantle.order.OrderHeaderAndPart"
+                                list="orderFind">
+                                <econdition field-name="orderId" from="finDocId" />
+                            </entity-find>
+                            <return error="true"
+                                message="$docType $finDocId/$pseudoId not found for company: $companyPartyId found: $orderFind" />
+                        </if>
                     </else-if>
                     <else>
                         <!-- multiple documents -->
@@ -1046,6 +1054,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="status" from="openStatusList" />
                             <set field="fromDate" from="weekOldDate" />
                         </if>
+                        <log message="=================search: $search party: $companyPartyId" />
                         <entity-find offset="start" limit="limit" list="items"
                             entity-name="growerp.warehouse.ShipmentAndPartiesAndWarehouse">
                             <econdition field-name="vendorPartyId" from="vendorPartyId"
@@ -1339,7 +1348,7 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="create" noun="FinDoc">
         <description>Create a financial document either order, invoice or payment</description>
         <in-parameters>
-            <parameter name="finDoc" type="Map">
+            <parameter name="finDoc" type="Map" required="true">
                 <parameter name="docType" />
                 <parameter name="sales" type="Boolean" />
                 <parameter name="pseudoId" />
@@ -1490,6 +1499,10 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <if condition="finDoc.docType == null">
+                <return error="true"
+                    message="DocType is missing when creating a financial document" />
+            </if>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="nowDate" from="ec.user.nowTimestamp.toString().substring(0,10)" />
@@ -1767,11 +1780,19 @@ along with this software (see the LICENSE.md file). If not, see
                 <else>
                     <set field="fromPartyId" from="companyPartyId" />
                     <set field="toPartyId" from="shipment.otherCompany.partyId" />
+                    <entity-find entity-name="mantle.facility.Facility" list="facilities">
+                        <econdition field-name="ownerPartyId" from="companyPartyId" />
+                    </entity-find>
+                    <set field="originFacilityId" from="facilities[0].facilityId" />
                 </else>
             </if>
             <!-- create shipment -->
+            <entity-find entity-name="mantle.facility.Facility" list="facilities">
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+            </entity-find>
             <service-call name="mantle.shipment.ShipmentServices.create#Shipment"
                 in-map="[   pseudoId: shipment.pseudoId,
+                            originFacilityId: originFacilityId,
                             fromPartyId: fromPartyId,
                             toPartyId: toPartyId,
                             statusId: shipment.statusId,
@@ -2990,8 +3011,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="shipmentId" from="finDoc.shipmentId" />
                 </entity-find>
                 <iterate list="shipmentItemSourceList" entry="itemSource">
-                    <log
-                        message="===pack shipment: ${finDoc.shipmentId} source: ${itemSource.shipmentItemSourceId} qty: ${itemSource.quantity}" />
                     <service-call name="mantle.shipment.ShipmentServices.pack#ShipmentItemSource"
                         in-map="[shipmentItemSourceId: itemSource.shipmentItemSourceId,
                                     quantity: itemSource.quantity]" />
