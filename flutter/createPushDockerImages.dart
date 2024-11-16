@@ -205,7 +205,7 @@ void main() async {
                 workingDirectory: home);
         }
       }
-      run('git commit -m "$commitMessage"', workingDirectory: home);
+      run('git commit -m "build: $commitMessage"', workingDirectory: home);
       run('git tag $gitTag', workingDirectory: home);
       run('git push', workingDirectory: home);
       run('git push origin $gitTag', workingDirectory: home);

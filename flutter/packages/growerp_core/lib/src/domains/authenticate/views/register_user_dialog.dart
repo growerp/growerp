@@ -14,7 +14,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
@@ -32,12 +31,10 @@ class RegisterUserDialog extends StatefulWidget {
 
 class _RegisterUserDialogState extends State<RegisterUserDialog> {
   final _registerFormKey = GlobalKey<FormState>();
-  final _companySearchBoxController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   late AuthBloc _authBloc;
-  late DataFetchBloc<Companies> _companyBloc;
   Company? _presetCompany;
   Company? _selectedCompany;
 
@@ -49,10 +46,6 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
     _authBloc = context.read<AuthBloc>();
     _emailController.text = _authBloc.state.authenticate?.user?.loginName ??
         (kReleaseMode ? '' : 'test@example.com');
-    _companyBloc = context.read<DataFetchBloc<Companies>>()
-      ..add(GetDataEvent(() => context.read<RestClient>().getCompanies(
-            limit: 1,
-          )));
     _presetCompany = context.read<Company?>();
   }
 
@@ -76,7 +69,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                 child: popUp(
                   context: context,
                   title: "Registration",
-                  height: 500,
+                  height: 300,
                   child: _registerForm(_authBloc.state.authenticate!),
                 )));
       }
@@ -144,61 +137,6 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                 },
               ),
               const SizedBox(height: 20),
-              if (_presetCompany == null)
-                const Text(
-                    'Leave empty for a new company or....\nselect a company to register as a customer',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      color: Colors.orange,
-                    )),
-              if (_presetCompany == null) const SizedBox(height: 10),
-              if (_presetCompany == null)
-                DropdownSearch<Company>(
-                  selectedItem: _selectedCompany,
-                  popupProps: PopupProps.menu(
-                    showSelectedItems: true,
-                    isFilterOnline: true,
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      autofocus: true,
-                      decoration:
-                          const InputDecoration(labelText: " Company Name"),
-                      controller: _companySearchBoxController,
-                    ),
-                    menuProps:
-                        MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                    title: popUp(
-                      context: context,
-                      title: "Select Company",
-                      height: 50,
-                    ),
-                  ),
-                  dropdownDecoratorProps: const DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: 'Company',
-                    ),
-                  ),
-                  key: const Key('selectCompany'),
-                  itemAsString: (Company? u) => "${u!.name}",
-                  asyncItems: (String filter) {
-                    _companyBloc.add(GetDataEvent(
-                        () => context.read<RestClient>().getCompanies(
-                              searchString: filter,
-                              limit: 3,
-                            )));
-                    return Future.delayed(const Duration(milliseconds: 150),
-                        () {
-                      return Future<List<Company>>.value(
-                          (_companyBloc.state.data as Companies).companies);
-                    });
-                  },
-                  compareFn: (item, sItem) => item.partyId == sItem.partyId,
-                  onChanged: (Company? newValue) {
-                    setState(() {
-                      _selectedCompany = newValue;
-                    });
-                  },
-                ),
               const SizedBox(height: 10),
               OutlinedButton(
                   key: const Key('newUserButton'),

@@ -21,4 +21,5 @@ Start your commit message with:
     refactor: - A change that neither fixes a bug nor adds a feature.
     revert: - A change that reverts (part of) a previous commit.
     upgrade: - upgrade third party packages
+    build:  tagged a version of a docker image
 
