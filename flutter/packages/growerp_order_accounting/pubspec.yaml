@@ -57,6 +57,7 @@ dependencies:
   universal_io: ^2.2.2
   flutter_test:
     sdk: flutter
+  fl_chart: ^0.69.0
 
 dev_dependencies:
   integration_test:

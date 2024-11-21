@@ -16,6 +16,8 @@ dependencies:
   growerp_order_accounting: ^1.6.0
   growerp_user_company: ^1.6.0
   growerp_task: ^1.6.0
+  growerp_core: ^1.6.0
+  growerp_models: ^1.6.0
   decimal: ^2.1.0
   flutter_localizations:
     sdk: flutter
@@ -31,8 +33,7 @@ dependencies:
   flutter_bloc: ^8.1.4
   dio: ^5.4.3
   http: ^1.1.2
-  growerp_core: ^1.6.0
-  growerp_models: ^1.6.0
+  fl_chart: ^0.69.0
 
 dev_dependencies:
   flutter_test:

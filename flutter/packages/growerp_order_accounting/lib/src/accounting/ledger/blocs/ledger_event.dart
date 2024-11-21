@@ -14,7 +14,7 @@
 
 part of 'ledger_bloc.dart';
 
-enum ReportType { ledger, sheet, summary }
+enum ReportType { ledger, sheet, summary, revenueExpense }
 
 abstract class LedgerEvent extends Equatable {
   const LedgerEvent();

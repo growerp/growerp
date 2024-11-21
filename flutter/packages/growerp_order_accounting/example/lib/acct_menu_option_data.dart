@@ -121,6 +121,11 @@ List<MenuOption> acctMenuOptions = [
       route: '/acctReports',
       tabItems: [
         TabItem(
+          form: const RevenueExpenseChart(),
+          label: "Revenue/Expense",
+          icon: const Icon(Icons.list),
+        ),
+        TabItem(
           form: const BalanceSheetForm(),
           label: "Balance Sheet",
           icon: const Icon(Icons.list),

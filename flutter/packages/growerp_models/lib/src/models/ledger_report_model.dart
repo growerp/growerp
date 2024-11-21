@@ -29,6 +29,7 @@ class LedgerReport with _$LedgerReport {
     TimePeriod? period,
     DateTime? printDate,
     @Default([]) List<GlAccount> glAccounts,
+    List<List<String>>? csvRows,
   }) = _LedgerReport;
 
   factory LedgerReport.fromJson(Map<String, dynamic> json) =>

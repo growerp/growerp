@@ -41,19 +41,17 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
       emit(state.copyWith(status: LedgerStatus.loading));
       String periodType = 'Y', year = DateTime.now().year.toString();
       // get periodType from periodname
-      if (event.periodName.isNotEmpty) {
-        if (event.periodName.contains('q')) {
-          periodType = 'Q';
-        } else if (event.periodName.contains('m')) {
-          periodType = 'M';
-        } else {
-          periodType = 'Y';
-        }
-        if (periodType != 'Y') {
-          year = event.periodName.substring(1, 5);
-        } else {
-          year = ''; // get all years
-        }
+      if (event.periodName.contains('q')) {
+        periodType = 'Q';
+      } else if (event.periodName.contains('m')) {
+        periodType = 'M';
+      } else {
+        periodType = 'Y';
+      }
+      if (periodType != 'Y') {
+        year = event.periodName.substring(1, 5);
+      } else {
+        year = ''; // get all years
       }
       final TimePeriods timePeriods =
           await restClient.getTimePeriod(year: year, periodType: periodType);
@@ -62,15 +60,15 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
       switch (event.reportType) {
         case ReportType.ledger:
           result = await restClient.getLedger();
-          break;
         case ReportType.sheet:
           result =
               await restClient.getBalanceSheet(periodName: event.periodName);
-          break;
         case ReportType.summary:
           result =
               await restClient.getBalanceSummary(periodName: event.periodName);
-          break;
+        case ReportType.revenueExpense:
+          result = await restClient.getOperatingRevenueExpenseChart(
+              periodName: event.periodName);
         default:
           result = LedgerReport();
       }

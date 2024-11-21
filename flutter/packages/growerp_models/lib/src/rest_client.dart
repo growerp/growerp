@@ -407,7 +407,9 @@ abstract class RestClient {
   });
 
   @GET("rest/s1/growerp/100/OperatingRevenueExpenseChart")
-  Future<LedgerReport> getOperatingRevenueExpenseChart();
+  Future<LedgerReport> getOperatingRevenueExpenseChart({
+    @Query('periodName') String? periodName,
+  });
 
   @GET("rest/s1/growerp/100/AccountClass")
   Future<AccountClasses> getAccountClass({
