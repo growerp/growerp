@@ -160,11 +160,13 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
                   ),
                 ]),
               ),
-              if (state.ledgerReport?.csvRows == null)
+              if (state.ledgerReport?.csvRows == null ||
+                  (minY == 0.0 && maxY == 0.0))
                 Text(
-                    "no data found for this period ${state.ledgerReport?.period!.periodName}",
+                    "no data found for period ${state.ledgerReport?.period!.periodName.substring(1, 5)}",
                     textAlign: TextAlign.center),
-              if (state.ledgerReport?.csvRows != null)
+              if (state.ledgerReport?.csvRows != null &&
+                  (minY != 0.0 || maxY != 0.0))
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
