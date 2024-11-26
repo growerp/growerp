@@ -24,6 +24,7 @@ import 'package:growerp/src/src.dart';
 
 var logger = Logger(filter: MyFilter());
 String outputDirectory = 'growerpOutput';
+String inputDirectory = '';
 
 Future<void> main(List<String> args) async {
   var logger = Logger(filter: MyFilter());
@@ -33,7 +34,9 @@ Future<void> main(List<String> args) async {
   if (args.isEmpty) {
     logger.e("Need at least a directory name with the GrowERP CSV formatted "
         "files, and optionally:\n -f a fileType\n -start start date in "
-        "format yyyy/mm/dd\n -end and enddate in the same format");
+        "format yyyy/mm/dd\n -end and enddate in the same format"
+        "The default output directory is 'growerpOutput' and should not exist"
+        "It is possble to specify an output directory with the -out parameter");
     exit(1);
   } else {
     final modifiedArgs = <String>[];
@@ -42,11 +45,9 @@ Future<void> main(List<String> args) async {
         case '-start':
           startDate = DateTime.parse("${args[++i].substring(0, 4)}-"
               "${args[i].substring(5, 7)}-${args[i].substring(8, 10)} 00:00:00.000");
-          break;
         case '-end':
           endDate = DateTime.parse("${args[++i].substring(0, 4)}-"
               "${args[i].substring(5, 7)}-${args[i].substring(8, 10)} 00:00:00.000");
-          break;
         case '-f':
           i++;
           requestedFileType = FileType.values.firstWhere(
@@ -56,7 +57,9 @@ Future<void> main(List<String> args) async {
             logger.e("Filetype: ${args[i]}  not recognized");
             exit(1);
           }
-          break;
+        case '-out':
+          i++;
+          outputDirectory = args[i];
         default:
           modifiedArgs.add(args[i]);
       }
@@ -66,8 +69,10 @@ Future<void> main(List<String> args) async {
       logger.e("unrecognized argument: ${modifiedArgs[1]}");
       exit(1);
     }
-    var outputDirectory = modifiedArgs[0];
-    logger.i("convertToCsv command: directory $outputDirectory "
+    inputDirectory = modifiedArgs[0];
+    logger.i("convertToCsv command: "
+        "input directory: $inputDirectory "
+        "output directory: $outputDirectory "
         "startDate: ${startDate.toString()}  "
         "endDate: ${endDate.toString()} -f ${requestedFileType?.name}");
   }
@@ -83,15 +88,16 @@ Future<void> main(List<String> args) async {
 
   // copy images if present
   List<List<String>> images = [[]];
-  if (isDirectory('${args[0]}/images')) {
+  if (isDirectory('$inputDirectory/images')) {
     if (!isDirectory('$outputDirectory/images')) {
       createDir('$outputDirectory/images');
     }
-    copyTree('${args[0]}/images', '$outputDirectory/images', overwrite: true);
-    copy('${args[0]}/images.csv', '$outputDirectory/images.csv',
+    copyTree('$inputDirectory/images', '$outputDirectory/images',
+        overwrite: true);
+    copy('$inputDirectory/images.csv', '$outputDirectory/images.csv',
         overwrite: true);
     // get images file
-    String imagesCsv = File('${args[0]}/images.csv').readAsStringSync();
+    String imagesCsv = File('$inputDirectory/images.csv').readAsStringSync();
     images = fast_csv.parse(imagesCsv);
   }
 
@@ -105,11 +111,11 @@ Future<void> main(List<String> args) async {
     // list of files to process
     List<String> files = [];
     for (String searchFile in searchFiles) {
-      files.addAll(find(searchFile, workingDirectory: args[0]).toList());
+      files.addAll(find(searchFile, workingDirectory: inputDirectory).toList());
     }
     if (files.isEmpty) {
       logger.e(
-          "No ${searchFiles.join()} files found in directory ${args[0]}, skipping");
+          "No ${searchFiles.join()} files found in directory $inputDirectory, skipping");
     }
 
     // convert from CSV or XLSX or ODF to CSV rows

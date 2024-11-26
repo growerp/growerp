@@ -786,20 +786,25 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <if condition="!item.product.pseudoId.isEmpty()">
                     <!-- find productId from pseudoProductId -->
-                    <service-call name="growerp.100.CatalogServices100.get#Products"
-                        out-map="context"
-                        in-map="[pseudoId: item.product.pseudoId,
-                                classificationId: classificationId,
-                                ownerPartyId: ownerPartyId]" />
-                    <if condition="!products.isEmpty()"><!-- get services always provide list -->
+                    <entity-find entity-name="mantle.product.Product" list="products">
+                        <econdition field-name="pseudoId" from="item.product.pseudoId" />
+                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                    </entity-find>
+                    <if condition="products">
                         <set field="item.product.productId" from="products[0].productId" />
                         <!-- update prices when on an invoice -->
                         <if condition="item.docType == 'invoice'">
-                            <set field="products[0].price" from="item.price" />
-                            <set field="products[0].listPrice" from="item.price" />
-                            <service-call name="growerp.100.CatalogServices100.update#Product"
-                                out-map="context"
-                                in-map="[product: products[0], classificationId: classificationId]" />
+                            <set field="priceMap"
+                                from="[productId: products[0].productId,
+                                    priceTypeEnumId: 'PptList',
+                                    price: item.price,
+                                    quantityUomId: 'OTH_ea',
+                                    fromDate: ec.user.nowTimestamp,
+                                    pricePurposeEnumId: 'PppPurchase']" />
+                            <service-call name="create#mantle.product.ProductPrice"
+                                in-map="priceMap" />
+                            <service-call name="create#mantle.product.ProductPrice"
+                                in-map="priceMap + [priceTypeEnumId: 'PptCurrent']" />
                         </if>
                         <else>
                             <!-- not found so better add it when not null -->
@@ -909,14 +914,13 @@ along with this software (see the LICENSE.md file). If not, see
                     list="invoiceItems">
                     <econdition field-name="invoiceId" from="invoices[0].invoiceId" />
                 </entity-find>
-                <!-- log message="matching items: ${finDoc.items?.size()}" /-->
                 <set field="newShipmentItems" from="[]" />
                 <iterate list="finDoc.items" entry="shipmentItem">
                     <set field="quantityUpdated" value="false" type="Boolean" />
                     <iterate list="invoiceItems" entry="invoiceItem">
                         <if
                             condition="shipmentItem.product?.productId &amp;&amp;
-                                invoiceItem.product?.productId == shipmentItem.product?.productId">
+                                invoiceItem.productId == shipmentItem.product?.productId">
                             <script>newShipmentItems.add(
                                     shipmentItem + [quantity: invoiceItem.quantity])</script>
                             <set field="quantityUpdated" value="true" type="Boolean" />
@@ -992,11 +996,6 @@ along with this software (see the LICENSE.md file). If not, see
                             in-map="[orderId: orderId,
                                          orderPartSeqId: orderPartSeqId,
                                          orderItems: newShipmentItems]" />
-                        <!-- update status -->
-                        <service-call name="mantle.order.OrderServices.place#Order"
-                            out-map="context" in-map="context" />
-                        <service-call name="mantle.order.OrderServices.update#OrderStatus"
-                            out-map="context" in-map="context + [statusId:'OrderApproved']" />
 
                         <if condition="billings">
                             <entity-update
@@ -1009,8 +1008,8 @@ along with this software (see the LICENSE.md file). If not, see
                     </else>
                 </if>
                 <!-- approve order -->
-                <service-call name="mantle.order.OrderServices.update#OrderStatus"
-                    in-map="[orderId: orderId, orderPartSeqId: '01',statusId:'OrderPlaced']" />
+                <service-call name="mantle.order.OrderServices.place#Order"
+                    in-map="[orderId: orderId, orderPartSeqId: '01']" />
                 <service-call name="mantle.order.OrderServices.update#OrderStatus"
                     in-map="[orderId: orderId, orderPartSeqId: '01',statusId:'OrderApproved']" />
                 <else>

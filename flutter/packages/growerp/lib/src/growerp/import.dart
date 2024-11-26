@@ -10,12 +10,13 @@ import 'package:logger/logger.dart';
 
 import '../src.dart';
 
-Future<void> login(RestClient client, String username, String password,
+Future<bool> login(RestClient client, String username, String password,
     {String companyName = '', String currencyId = ''}) async {
   Hive.init('growerpDB');
   var box = await Hive.openBox('growerp');
   late Authenticate authenticate;
   var logger = Logger(filter: MyFilter());
+  bool alreadyRegistered = false;
 
   try {
     // email exists?
@@ -39,6 +40,8 @@ Future<void> login(RestClient client, String username, String password,
             ", use the -n for company name and -c for currency");
         exit(1);
       }
+    } else {
+      alreadyRegistered = true;
     }
   } catch (e) {
     print("registration failed: ${getDioError(e)}");
@@ -60,8 +63,8 @@ Future<void> login(RestClient client, String username, String password,
   box.put('apiKey', authenticate.apiKey);
   await box.put('authenticate', jsonEncode(authenticate.toJson()));
 
-  logger.i("logged in with admin user: "
-      "${authenticate.user?.email}");
+  logger.i("logged in with admin user: ");
+  return alreadyRegistered;
 }
 
 import(String inputFile, String? backendUrl, String username, String password,
@@ -81,7 +84,7 @@ import(String inputFile, String? backendUrl, String username, String password,
       timeout: Duration(seconds: timeout), miniLog: true));
   FileType fileType = FileType.unknown;
   try {
-    await login(client, username, password,
+    final bool alreadyRegistered = await login(client, username, password,
         companyName: companyName, currencyId: currencyId);
     // import
     for (fileType in FileType.values) {
@@ -95,26 +98,46 @@ import(String inputFile, String? backendUrl, String username, String password,
       for (final fileName in fileNames) {
         logger.i("Importing $fileType: $fileName");
         String csvFile = File(fileName).readAsStringSync();
+        if (!alreadyRegistered) {}
         switch (fileType) {
           case FileType.itemType:
-            await client.importItemTypes(csvToItemTypes(csvFile));
+            if (!alreadyRegistered) {
+              await client.importItemTypes(csvToItemTypes(csvFile));
+            }
           case FileType.paymentType:
-            await client.importPaymentTypes(csvToPaymentTypes(csvFile));
+            if (!alreadyRegistered) {
+              await client.importPaymentTypes(csvToPaymentTypes(csvFile));
+            }
           case FileType.glAccount:
-            await client.importGlAccounts(csvToGlAccounts(csvFile));
+            if (!alreadyRegistered) {
+              await client.importGlAccounts(csvToGlAccounts(csvFile));
+            }
           case FileType.product:
-            await client.importProducts(
-                csvToProducts(csvFile, logger), 'AppAdmin');
+            if (!alreadyRegistered) {
+              await client.importProducts(
+                  csvToProducts(csvFile, logger), 'AppAdmin');
+            }
           case FileType.category:
-            await client.importCategories(csvToCategories(csvFile));
+            if (!alreadyRegistered) {
+              await client.importCategories(csvToCategories(csvFile));
+            }
           case FileType.asset:
-            await client.importAssets(csvToAssets(csvFile, logger), 'AppAdmin');
+            if (!alreadyRegistered) {
+              await client.importAssets(
+                  csvToAssets(csvFile, logger), 'AppAdmin');
+            }
           case FileType.company:
-            await client.importCompanies(csvToCompanies(csvFile));
+            if (!alreadyRegistered) {
+              await client.importCompanies(csvToCompanies(csvFile));
+            }
           case FileType.user:
-            await client.importUsers(csvToUsers(csvFile));
+            if (!alreadyRegistered) {
+              await client.importUsers(csvToUsers(csvFile));
+            }
           case FileType.website:
-            await client.importWebsite(csvToWebsite(csvFile));
+            if (!alreadyRegistered) {
+              await client.importWebsite(csvToWebsite(csvFile));
+            }
           case FileType.finDocTransaction:
           case FileType.finDocOrderSale:
           case FileType.finDocOrderPurchase:
@@ -142,6 +165,8 @@ import(String inputFile, String? backendUrl, String username, String password,
         }
       }
     }
+    // recalculate ledger totals
+    await client.calculateLedger();
   } on DioException catch (e) {
     logger.e("Importing filetype: ${fileType.name} Error: ${getDioError(e)}");
   }

@@ -427,15 +427,9 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
 
     <service verb="recalculate" noun="GlAccountOrgSummaries">
-        <in-parameters>
-            <parameter name="companyPartyId" />
-        </in-parameters>
         <actions>
-            <if condition="!companyPartyId">
-                <service-call out-map="relComp"
-                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-                <set field="companyPartyId" from="relComp.companyPartyId" />
-            </if>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call in-map="organizationPartyId: companyPartyId" async="true"
                 name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries" />
         </actions>
