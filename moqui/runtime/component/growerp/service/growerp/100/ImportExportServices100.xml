@@ -1022,244 +1022,355 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="finalize" noun="Import">
         <description> Post imported findocs of which the status is not finalized and already have a link
             in the ledger so the status will update but will not change the ledger</description>
+        <in-parameters>
+            <parameter name="limit" type="Integer" default="2000" />
+            <parameter name="start" type="Integer" default="0" />
+            <!-- closePeriod, approveInvoices, completePayments,
+                completeInvoicesOrders, receiveShipments, sendShipments -->
+            <parameter name="part" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="limitOut" />
+        </out-parameters>
         <actions>
+            <log message="=============start: $start limit: $limit part: $part" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <!-- find oldest non-closed period -->
-            <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
-                <econdition field-name="partyId" from="companyPartyId" />
-                <econdition field-name="timePeriodTypeId" value="FiscalYear" />
-                <econdition field-name="isClosed" value="N" />
-                <order-by field-name="periodNum" />
-            </entity-find>
-            <if condition="!periods">
-                <return error="true" message="Could not find the oldest not closed period" />
-            </if>
-            <service-call name="mantle.party.TimeServices.get#TimePeriodInfo"
-                in-map="[timePeriod:periods[0]]" out-map="periodInfo" />
-            <set field="fromTimestamp" from="periodInfo.fromTimestamp" />
-            <set field="thruTimestamp" from="periodInfo.thruTimestamp" />
-
-            <!-- change system date to end of period -->
-            <script>ec.user.setEffectiveTime(thruTimestamp)</script>
-
-            <!-- with the assumption that the old system transactions  balance, group all unposted
-            transaction entries in a single transaction and post that -->
-            <entity-find entity-name="growerp.account.AcctgTransAndCompany" list="unpostedTrans">
-                <econdition field-name="isPosted" operator="not-equals" value="Y" or-null="true" />
-                <econdition field-name="companyPartyId" from="companyPartyId" />
-                <econdition field-name="transactionDate" operator="greater-equals"
-                    from="fromTimestamp" />
-                <econdition field-name="transactionDate" operator="less-equals" from="thruTimestamp" />
-            </entity-find>
-            <if condition="unpostedTrans">
-                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']" out-map="context" />
-                <service-call name="create#mantle.ledger.transaction.AcctgTrans"
-                    in-map="[pseudoId: seqNum, description: 'Conversion combined unposted entries',
-                            organizationPartyId: companyPartyId]"
-                    out-map="context" />
-                <!-- re-assign all unposted entries to ne transaction -->
-                <set field="index" value="1" type="Integer" />
-                <iterate list="unpostedTrans" entry="trans">
-                    <entity-find entity-name="mantle.ledger.transaction.AcctgTransEntry"
-                        list="transEntries" for-update="true">
-                        <econdition field-name="acctgTransId" from="trans.transactionId" />
-                    </entity-find>
-                    <iterate list="transEntries" entry="transEntry">
-                        <entity-delete value-field="transEntry" />
-                        <set field="transEntry.acctgTransId" from="acctgTransId" />
-                        <set field="transEntry.acctgTransEntrySeqId" from="(index++).toString()" />
-                        <entity-create value-field="transEntry" />
-                    </iterate>
-                    <!-- delete original transaction -->
-                    <service-call name="delete#mantle.ledger.transaction.AcctgTrans"
-                        in-map="[acctgTransId: trans.transactionId]" />
-                </iterate>
-
-                <!-- post found entries -->
-                <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
-                    in-map="[acctgTransId: acctgTransId]" />
-                <script>System.out.println(">>>Grouped ${transEntries?.size()} unposted ledger entries in a single transaction and posted these")</script>
-            </if>
-            <!-- period should succeeed to close -->
-            <service-call name="growerp.100.AccountingServices100.close#FinancialTimePeriod"
-                in-map="[timePeriodId: periods[0].timePeriodId, closeChildren: true]" />
-            <script>System.out.println(">>>Posted ledger time period ${periods[0].periodName}")</script>
-
-            <!-- invoices -->
-            <entity-find entity-name="mantle.account.invoice.Invoice" list="invoices">
-                <econditions combine="or">
-                    <econdition field-name="fromPartyId" from="companyPartyId" />
-                    <econdition field-name="toPartyId" from="companyPartyId" />
-                </econditions>
-                <econditions combine="or">
-                    <econdition field-name="statusId" value="InvoiceInProcess" />
-                    <econdition field-name="statusId" value="InvoiceIncoming" />
-                </econditions>
-            </entity-find>
-            <script>System.out.println(">>>Approving ${invoices?.size()} invoices}")</script>
-            <set field="updatedCount" value="0" type="Integer" />
-            <set field="notFoundCount" value="0" type="Integer" />
-            <iterate list="invoices" entry="invoice">
-                <!-- check if referenced in the ledger-->
-                <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transList">
-                    <econdition field-name="organizationPartyId" from="companyPartyId" />
-                    <econdition field-name="invoiceId" from="invoice.invoiceId" />
+            <if condition="part == 'closePeriod'">
+                <entity-find entity-name="mantle.party.time.TimePeriod"
+                    list="periods" offset="start" limit="limit">
+                    <econdition field-name="partyId" from="companyPartyId" />
+                    <econdition field-name="timePeriodTypeId" value="FiscalYear" />
+                    <econdition field-name="isClosed" value="N" />
+                    <econdition field-name="periodNum" operator="less"
+                        from="ec.user.nowTimestamp.getYear() + 1900" />
+                    <order-by field-name="periodNum" />
                 </entity-find>
-                <if condition="transList"><!-- only close when in the ledger-->
-                    <if condition="invoice.statusId == 'InvoiceInProcess'">
-                        <set field="statusId1" value="InvoiceFinalized" />
-                        <set field="statusId2" value="InvoiceSent" />
+                <if condition="!periods">
+                    <set field="limitOut" value="-1" />
+                    <return />
+                </if>
+                <iterate list="periods" entry="period">
+                    <service-call name="mantle.party.TimeServices.get#TimePeriodInfo"
+                        in-map="[period]" out-map="periodInfo" />
+                    <set field="fromTimestamp" from="periodInfo.fromTimestamp" />
+                    <set field="thruTimestamp" from="periodInfo.thruTimestamp" />
+
+                    <!-- change system date to end of period -->
+                    <script>ec.user.setEffectiveTime(thruTimestamp)</script>
+
+                    <!-- with the assumption that the old system transactions  balance, group all
+                unposted transaction entries in a single transaction and post that -->
+                    <entity-find entity-name="growerp.account.AcctgTransAndCompany"
+                        list="unpostedTrans">
+                        <econdition field-name="isPosted" operator="not-equals" value="Y"
+                            or-null="true" />
+                        <econdition field-name="companyPartyId" from="companyPartyId" />
+                        <econdition field-name="transactionDate" operator="greater-equals"
+                            from="fromTimestamp" />
+                        <econdition field-name="transactionDate" operator="less-equals"
+                            from="thruTimestamp" />
+                    </entity-find>
+                    <if condition="unpostedTrans">
+                        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                            in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
+                            out-map="context" />
+                        <service-call name="create#mantle.ledger.transaction.AcctgTrans"
+                            in-map="[pseudoId: seqNum, description: 'Conversion combined unposted entries',
+                            organizationPartyId: companyPartyId]"
+                            out-map="context" />
+                        <!-- re-assign all unposted entries to ne transaction -->
+                        <set field="index" value="1" type="Integer" />
+                        <iterate list="unpostedTrans" entry="trans">
+                            <entity-find entity-name="mantle.ledger.transaction.AcctgTransEntry"
+                                list="transEntries" for-update="true">
+                                <econdition field-name="acctgTransId" from="trans.transactionId" />
+                            </entity-find>
+                            <iterate list="transEntries" entry="transEntry">
+                                <entity-delete value-field="transEntry" />
+                                <set field="transEntry.acctgTransId" from="acctgTransId" />
+                                <set field="transEntry.acctgTransEntrySeqId"
+                                    from="(index++).toString()" />
+                                <entity-create value-field="transEntry" />
+                            </iterate>
+                            <!-- delete original transaction -->
+                            <service-call name="delete#mantle.ledger.transaction.AcctgTrans"
+                                in-map="[acctgTransId: trans.transactionId]" />
+                        </iterate>
+
+                        <!-- post found entries -->
+                        <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
+                            in-map="[acctgTransId: acctgTransId]" />
+                        <script>System.out.println(">>>Grouped ${transEntries?.size()} unposted ledger entries in a single transaction and posted these")</script>
+                    </if>
+                    <!-- period should succeeed to close -->
+                    <service-call name="growerp.100.AccountingServices100.close#FinancialTimePeriod"
+                        in-map="[timePeriodId: period.timePeriodId, closeChildren: true]" />
+                    <script>System.out.println(">>>Posted ledger time period ${period.periodName}")</script>
+                </iterate>
+                <set field="limit" value="0" />
+            </if>
+            <!-- invoices -->
+            <if condition="part == 'approveInvoices'">
+                <entity-find entity-name="mantle.account.invoice.Invoice" list="invoices"
+                    limit="limit" offset="start" for-update="true">
+                    <econditions combine="or">
+                        <econdition field-name="fromPartyId" from="companyPartyId" />
+                        <econdition field-name="toPartyId" from="companyPartyId" />
+                    </econditions>
+                    <econditions combine="or">
+                        <econdition field-name="statusId" value="InvoiceInProcess" />
+                        <econdition field-name="statusId" value="InvoiceIncoming" />
+                    </econditions>
+                    <order-by field-name="invoiceDate" />
+                </entity-find>
+                <if condition="!invoices">
+                    <set field="limitOut" value="-1" />
+                    <return />
+                </if>
+                <script>System.out.println(">>>Approving ${invoices?.size()} invoices}")</script>
+                <set field="updatedCount" value="0" type="Integer" />
+                <set field="notFoundCount" value="0" type="Integer" />
+                <iterate list="invoices" entry="invoice">
+                    <!-- check if referenced in the ledger-->
+                    <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transList">
+                        <econdition field-name="organizationPartyId" from="companyPartyId" />
+                        <econdition field-name="invoiceId" from="invoice.invoiceId" />
+                    </entity-find>
+                    <if condition="transList"><!-- only close when in the ledger-->
+                        <!-- change system date to the transActiondate -->
+                        <script>ec.user.setEffectiveTime(transList[0].postedDate)</script>
+
+                        <!-- convert to credit memo if total negative -->
+                        <if condition="invoice.invoiceTotal.signum() == -1">
+                            <set field="temp" from="invoice.toPartyId" />
+                            <set field="invoice.toPartyId" from="invoice.fromPartyId" />
+                            <set field="invoice.fromPartyId" from="temp" />
+                            <set field="invoice.invoiceTypeEnumId" value="InvoiceCreditMemo" />
+                            <set field="invoice.statusId"
+                                from="invoice.statusId == 'InvoiceIncoming' ? 'InvoiceInProcess' : 'InvoiceIncoming'" />
+                            <entity-update value-field="invoice" />
+                            <entity-find entity-name="mantle.account.invoice.InvoiceItem"
+                                list="items" for-update="true">
+                                <econdition field-name="invoiceId" from="invoice.invoiceId" />
+                            </entity-find>
+                            <iterate list="items" entry="item">
+                                <set field="item.amount" from="item.amount.negate()" />
+                                <entity-update value-field="item" />
+                            </iterate>
+                        </if>
+
+                        <if condition="invoice.statusId == 'InvoiceInProcess'">
+                            <set field="statusId1" value="InvoiceFinalized" />
+                            <set field="statusId2" value="InvoiceSent" />
+                            <else>
+                                <set field="statusId1" value="InvoiceReceived" />
+                                <set field="statusId2" value="InvoiceApproved" />
+                            </else>
+                        </if>
+                        <service-call name="update#mantle.account.invoice.Invoice"
+                            in-map="[invoiceId: invoice.invoiceId, statusId: statusId1]" />
+                        <set field="updatedCount" from="updatedCount + 1" />
+                        <entity-find-one entity-name="mantle.account.invoice.Invoice"
+                            value-field="inv">
+                            <field-map field-name="invoiceId" from="invoice.invoiceId" />
+                        </entity-find-one>
+                        <if condition="inv.statusId == statusId1">
+                            <service-call name="update#mantle.account.invoice.Invoice"
+                                in-map="[invoiceId: invoice.invoiceId, statusId: statusId2]" />
+                        </if>
                         <else>
-                            <set field="statusId1" value="InvoiceReceived" />
-                            <set field="statusId2" value="InvoiceApproved" />
+                            <set field="notFoundCount" from="notFoundCount + 1" />
+                            <script>System.out.println(">>>Could not find invoice in the ledger,  invoice: ${invoice?.invoiceId}/${invoice.pseudoId} ref: ${invoice.externalId}")</script>
                         </else>
                     </if>
-                    <service-call name="update#mantle.account.invoice.Invoice"
-                        in-map="[invoiceId: invoice.invoiceId, statusId: statusId1]" />
-                    <set field="updatedCount" from="updatedCount + 1" />
-                    <entity-find-one entity-name="mantle.account.invoice.Invoice" value-field="inv">
+                    <entity-find-one entity-name="mantle.account.invoice.Invoice"
+                        value-field="inv">
                         <field-map field-name="invoiceId" from="invoice.invoiceId" />
                     </entity-find-one>
-                    <if condition="inv.statusId == statusId1">
-                        <service-call name="update#mantle.account.invoice.Invoice"
-                            in-map="[invoiceId: invoice.invoiceId, statusId: statusId2]" />
-                    </if>
-                    <else>
-                        <set field="notFoundCount" from="notFoundCount + 1" />
-                        <script>System.out.println(">>>Could not find invoice in the ledger, sales: ${finDoc?.sales} invoice: ${finDoc?.invoiceId}/${finDoc?.pseudoId} ref: ${finDoc?.reference}")</script>
-                    </else>
-                </if>
-            </iterate>
-            <script>System.out.println(">>>${invoices.size()} not approved invoices found ${updatedCount} updated, ${notFoundCount} not found in ledger")</script>
-
+                </iterate>
+                <script>System.out.println(">>>${invoices.size()} not approved invoices found ${updatedCount} updated, ${notFoundCount} not found in ledger")</script>
+                <set field="limit" from="notFoundCount" />
+            </if>
             <!-- payments -->
-            <entity-find entity-name="mantle.account.payment.Payment" list="payments">
-                <econditions combine="or">
-                    <econdition field-name="fromPartyId" from="companyPartyId" />
-                    <econdition field-name="toPartyId" from="companyPartyId" />
-                </econditions>
-                <econdition field-name="statusId" value="PmntPromised" />
-            </entity-find>
-            <script>System.out.println(">>>Closing ${payments?.size()} Payments}")</script>
-            <set field="updatedCount" value="0" type="Integer" />
-            <set field="notFoundCount" value="0" type="Integer" />
-            <iterate list="payments" entry="payment">
-                <!-- check if referenced in the ledger-->
-                <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transList">
-                    <econdition field-name="organizationPartyId" from="companyPartyId" />
-                    <econdition field-name="paymentId" from="payment.paymentId" />
+            <if condition="part == 'completePayments'">
+                <entity-find entity-name="mantle.account.payment.Payment"
+                    list="payments" limit="limit" offset="start">
+                    <econditions combine="or">
+                        <econdition field-name="fromPartyId" from="companyPartyId" />
+                        <econdition field-name="toPartyId" from="companyPartyId" />
+                    </econditions>
+                    <econdition field-name="statusId" value="PmntPromised" />
                 </entity-find>
-                <if condition="transList">
-                    <!-- found, so can be completed -->
-                    <service-call name="update#mantle.account.payment.Payment"
-                        in-map="[paymentId: payment.paymentId, statusId: 'PmntDelivered']" />
-                    <set field="updatedCount" from="updatedCount + 1" />
-                    <else>
-                        <script>System.out.println(">>>Could not find payment in the ledger, payment: ${payment.paymentId}/${payment.pseudoId} ref: ${payment.paymentRefNum}")</script>
-                        <set field="notFoundCount" from="notFoundCount + 1" />
-                    </else>
+                <if condition="!payments">
+                    <set field="limitOut" value="-1" />
+                    <return />
                 </if>
-            </iterate>
-            <script>System.out.println(">>>${payments.size()} not completed payments found ${updatedCount} updated, ${notFoundCount} not found in ledger")</script>
+                <script>System.out.println(">>>Closing ${payments?.size()} Payments}")</script>
+                <set field="updatedCount" value="0" type="Integer" />
+                <set field="notFoundCount" value="0" type="Integer" />
+                <iterate list="payments" entry="payment">
+                    <!-- check if referenced in the ledger-->
+                    <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transList">
+                        <econdition field-name="organizationPartyId" from="companyPartyId" />
+                        <econdition field-name="paymentId" from="payment.paymentId" />
+                    </entity-find>
+                    <if condition="transList">
+                        <!-- change system date to the transActiondate -->
+                        <script>ec.user.setEffectiveTime(transList[0].postedDate)</script>
 
-            <!-- complete invoices and orders -->
-            <entity-find
-                entity-name="mantle.account.invoice.Invoice" list="invoices">
-                <econditions combine="or">
-                    <econdition field-name="fromPartyId" from="companyPartyId" />
-                    <econdition field-name="toPartyId" from="companyPartyId" />
-                </econditions>
-                <econditions combine="or">
-                    <econdition field-name="statusId" value="InvoiceApproved" />
-                    <econdition field-name="statusId" value="InvoiceSent" />
-                </econditions>
-            </entity-find>
-            <script>System.out.println(">>>Closing ${invoices?.size()} Invoices and related orders}")</script>
-            <set field="updatedCountOrder" value="0" type="Integer" />
-            <set field="notFoundCountOrder" value="0" type="Integer" />
-            <set field="updatedCount" value="0" type="Integer" />
-            <iterate list="invoices" entry="invoice">
-                <service-call name="update#mantle.account.invoice.Invoice"
-                    in-map="[invoiceId: invoice.invoiceId,
-                        statusId: invoice.statusId == 'InvoiceSent'? 'InvoicePmtRecvd' : 'InvoicePmtSent']" />
-                <script>updatedCount++</script>
-                <entity-find entity-name="mantle.order.OrderItemBilling" list="orders">
-                    <econdition field-name="invoiceId" from="invoice.invoiceId" />
-                </entity-find>
-                <if condition="orders">
-                    <service-call name="update#mantle.order.OrderHeader"
-                        in-map="[orderId: orders[0].orderId, statusId: 'OrderApproved']" />
-                    <service-call name="update#mantle.order.OrderHeader"
-                        in-map="[orderId: orders[0].orderId, statusId: 'OrderCompleted']" />
-                    <script>updatedCountOrder++</script>
-                    <else>
-                        <script>System.out.println(">>>Not found an order for invoice ${invoice.invoiceId}/${invoice.pseudoId}")</script>
-                        <script>notFoundCountOrder++</script>
-                    </else>
-                </if>
-            </iterate>
-            <script>System.out.println(">>>${invoices.size()} not completed invoices found ${updatedCount} updated, ${notFoundCountOrder} related orders not found")</script>
-            <!-- receive incoming shipments-->
-            <entity-find entity-name="mantle.shipment.Shipment" list="shipments">
-                <econdition field-name="toPartyId" from="companyPartyId" />
-                <econdition field-name="statusId" value="ShipScheduled" />
-            </entity-find>
-            <set field="updatedCount" value="0" type="Integer" />
-            <script>System.out.println(">>>Receiving and Closing incoming ${shipments.size()} shipments")</script>
-            <iterate list="shipments" entry="shipment">
-                <service-call name="growerp.100.FinDocServices100.get#FinDoc"
-                    in-map="[finDocId: shipment.shipmentId, docType: 'shipment']" out-map="context" />
-                <service-call name="growerp.100.FinDocServices100.update#FinDoc"
-                    in-map="[finDoc: finDocs[0] + [statusId: 'FinDocApproved']]" />
-                <service-call name="growerp.100.FinDocServices100.get#FinDoc"
-                    in-map="[finDocId: shipment.shipmentId, docType: 'shipment']" out-map="context" />
-                <service-call name="growerp.100.FinDocServices100.receive#Shipment"
-                    in-map="[finDoc: finDocs[0] + [statusId: 'FinDocApproved']]" />
-                <script>updatedCount++</script>
-            </iterate>
-            <set field="notUpdated" from="shipments?.size() - updatedCount" />
-            <script>System.out.println(">>>${shipments?.size()} not completed incomong shipments found, ${updatedCount} updated, ${notUpdated} shipments not updated")</script>
-            <!-- send outgoing shipments -->
-            <entity-find
-                entity-name="mantle.shipment.Shipment" list="shipments">
-                <econdition field-name="fromPartyId" from="companyPartyId" />
-                <econdition field-name="statusId" value="ShipScheduled" />
-            </entity-find>
-            <set field="updatedCount" value="0" type="Integer" />
-            <script>System.out.println(">>>Sending and Closing outgoing ${shipments.size()} shipments")</script>
-            <entity-find entity-name="mantle.facility.Facility" list="facilities">
-                <econdition field-name="ownerPartyId" from="companyPartyId" />
-            </entity-find>
-            <iterate list="shipments" entry="shipment">
-                <!-- check for available inventory -->
-                <set field="products" from="[]" />
-                <iterate list="shipment.items" entry="item">
-                    <service-call name="mantle.product.AssetServices.get#AvailableInventory"
-                        in-map="[productId: item.productId,
-                                    facilityId: facilities[0].facilityId]"
-                        out-map="context" />
-                    <if condition="availableToPromiseTotal &lt; item.quantity">
-                        <script>"productId: ${products.add(item.productId)} required: ${item.quantity} available: ${availableToPromiseTotal}"</script>
+                        <!-- found, so can be completed -->
+                        <service-call name="update#mantle.account.payment.Payment"
+                            in-map="[paymentId: payment.paymentId, statusId: 'PmntDelivered']" />
+                        <set field="updatedCount" from="updatedCount + 1" />
+                        <else>
+                            <script>System.out.println(">>>Could not find payment in the ledger, payment: ${payment.paymentId}/${payment.pseudoId} ref: ${payment.paymentRefNum}")</script>
+                            <set field="notFoundCount" from="notFoundCount + 1" />
+                        </else>
                     </if>
                 </iterate>
-                <if condition="products.size() == 0">
+                <script>System.out.println(">>>${payments.size()} not completed payments found ${updatedCount} updated, ${notFoundCount} not found in ledger")</script>
+                <set field="limit" from="notFoundCount" />
+            </if>
+            <!-- complete invoices and orders -->
+            <if condition="part == 'completeInvoicesOrders'">
+                <entity-find
+                    entity-name="mantle.account.invoice.Invoice"
+                    list="invoices" offset="start" limit="limit">
+                    <econditions combine="or">
+                        <econdition field-name="fromPartyId" from="companyPartyId" />
+                        <econdition field-name="toPartyId" from="companyPartyId" />
+                    </econditions>
+                    <econditions combine="or">
+                        <econdition field-name="statusId" value="InvoiceApproved" />
+                        <econdition field-name="statusId" value="InvoiceSent" />
+                    </econditions>
+                </entity-find>
+                <if condition="!invoices">
+                    <set field="limitOut" value="-1" />
+                    <return />
+                </if>
+                <script>System.out.println(">>>Closing ${invoices?.size()} Invoices and related orders}")</script>
+                <set field="updatedCountOrder" value="0" type="Integer" />
+                <set field="notFoundCountOrder" value="0" type="Integer" />
+                <set field="updatedCount" value="0" type="Integer" />
+                <iterate list="invoices" entry="invoice">
+                    <!-- change system date to the invoicedate -->
+                    <script>ec.user.setEffectiveTime(invoice.invoiceDate)</script>
+                    <service-call name="mantle.account.InvoiceServices.get#InvoiceTotal"
+                        in-map="[invoiceId:invoice.invoiceId]" out-map="totalOut" />
+                    <if condition="totalOut.unpaidTotal &gt; 0.0">
+                        <script>System.out.println(">>>Cannot complete invoice, not fully paid: ${invoice.invoiceId}/${invoice.pseudoId} unpaid: ${totalOut.unpaidTotal }")</script>
+                        <else>
+                            <service-call name="update#mantle.account.invoice.Invoice"
+                                in-map="[invoiceId: invoice.invoiceId,
+                                statusId: invoice.statusId == 'InvoiceSent'? 'InvoicePmtRecvd' : 'InvoicePmtSent']" />
+                            <script>updatedCount++</script>
+                        </else>
+                    </if>
+                    <entity-find entity-name="mantle.order.OrderItemBilling" list="orders">
+                        <econdition field-name="invoiceId" from="invoice.invoiceId" />
+                    </entity-find>
+                    <if condition="orders">
+                        <service-call name="update#mantle.order.OrderHeader"
+                            in-map="[orderId: orders[0].orderId, statusId: 'OrderApproved']" />
+                        <service-call name="update#mantle.order.OrderHeader"
+                            in-map="[orderId: orders[0].orderId, statusId: 'OrderCompleted']" />
+                        <script>updatedCountOrder++</script>
+                        <else>
+                            <script>System.out.println(">>>Not found an order for invoice ${invoice.invoiceId}/${invoice.pseudoId}")</script>
+                            <script>notFoundCountOrder++</script>
+                        </else>
+                    </if>
+                </iterate>
+                <script>System.out.println(">>>${invoices?.size()} not completed invoices found ${updatedCount} updated, ${notFoundCountOrder} related orders not found")</script>
+                <set field="limit" from="invoices?.size() - updatedCount" />
+            </if>
+
+            <!-- receive incoming shipments-->
+            <if condition="part == 'receiveShipments'">
+                <entity-find entity-name="mantle.shipment.Shipment" list="shipments"
+                    offset="start" limit="limit">
+                    <econdition field-name="toPartyId" from="companyPartyId" />
+                    <econdition field-name="statusId" value="ShipScheduled" />
+                </entity-find>
+                <if condition="!shipments">
+                    <set field="limitOut" value="-1" />
+                    <return />
+                </if>
+                <set field="updatedCount" value="0" type="Integer" />
+                <script>System.out.println(">>>Receiving and Closing incoming ${shipments.size()} shipments")</script>
+                <iterate list="shipments" entry="shipment">
+                    <!-- change system date to the shipmentdate -->
+                    <script>ec.user.setEffectiveTime(shipment.entryDate)</script>
                     <service-call name="growerp.100.FinDocServices100.get#FinDoc"
                         in-map="[finDocId: shipment.shipmentId, docType: 'shipment']"
                         out-map="context" />
                     <service-call name="growerp.100.FinDocServices100.update#FinDoc"
                         in-map="[finDoc: finDocs[0] + [statusId: 'FinDocApproved']]" />
-                    <service-call name="growerp.100.FinDocServices100.update#FinDoc"
-                        in-map="[finDoc: finDocs[0] + [statusId: 'FinDocCompleted']]" />
+                    <service-call name="growerp.100.FinDocServices100.get#FinDoc"
+                        in-map="[finDocId: shipment.shipmentId, docType: 'shipment']"
+                        out-map="context" />
+                    <service-call name="growerp.100.FinDocServices100.receive#Shipment"
+                        in-map="[finDoc: finDocs[0] + [statusId: 'FinDocApproved']]" />
                     <script>updatedCount++</script>
-                    <else>
-                        <script>System.out.println(">>>Shipment ${shipment.shipmentId} with products ${products} has not enough inventory")</script>
-                    </else>
+                </iterate>
+                <set field="notUpdated" from="shipments?.size() - updatedCount" />
+                <script>System.out.println(">>>${shipments?.size()} not completed incomong shipments found, ${updatedCount} updated, ${notUpdated} shipments not updated")</script>
+                <set field="limit" from="notUpdated" />
+            </if>
+            <!-- send outgoing shipments -->
+            <if condition="part == 'sendShipments'">
+                <entity-find
+                    entity-name="mantle.shipment.Shipment" list="shipments"
+                    offset="start" limit="limit">
+                    <econdition field-name="fromPartyId" from="companyPartyId" />
+                    <econdition field-name="statusId" value="ShipScheduled" />
+                </entity-find>
+                <if condition="!shipments">
+                    <set field="limitOut" value="-1" />
+                    <return />
                 </if>
-            </iterate>
-            <set field="notUpdated" from="shipments?.size() - updatedCount" />
-            <script>System.out.println(">>>${shipments?.size()} not completed shipments found, ${updatedCount} updated, ${notUpdated} shipments not updated")</script>
+                <set field="updatedCount" value="0" type="Integer" />
+                <script>System.out.println(">>>Sending and Closing outgoing ${shipments.size()} shipments")</script>
+                <entity-find entity-name="mantle.facility.Facility" list="facilities">
+                    <econdition field-name="ownerPartyId" from="companyPartyId" />
+                </entity-find>
+                <iterate list="shipments" entry="shipment">
+                    <!-- change system date to the shipmentdate -->
+                    <script>ec.user.setEffectiveTime(shipment.entryDate)</script>
+
+                    <!-- check for available inventory -->
+                    <set field="products" from="[]" />
+                    <iterate list="shipment.items" entry="item">
+                        <service-call name="mantle.product.AssetServices.get#AvailableInventory"
+                            in-map="[productId: item.productId,
+                                    facilityId: facilities[0].facilityId]"
+                            out-map="context" />
+                        <if condition="availableToPromiseTotal &lt; item.quantity">
+                            <script>"productId: ${products.add(item.productId)} required: ${item.quantity} available: ${availableToPromiseTotal}"</script>
+                        </if>
+                    </iterate>
+                    <if condition="products.size() == 0">
+                        <service-call name="growerp.100.FinDocServices100.get#FinDoc"
+                            in-map="[finDocId: shipment.shipmentId, docType: 'shipment']"
+                            out-map="context" />
+                        <service-call name="growerp.100.FinDocServices100.update#FinDoc"
+                            in-map="[finDoc: finDocs[0] + [statusId: 'FinDocApproved']]" />
+                        <service-call name="growerp.100.FinDocServices100.update#FinDoc"
+                            in-map="[finDoc: finDocs[0] + [statusId: 'FinDocCompleted']]" />
+                        <script>updatedCount++</script>
+                        <else>
+                            <script>System.out.println(">>>Shipment ${shipment.shipmentId} with products ${products} has not enough inventory")</script>
+                        </else>
+                    </if>
+                </iterate>
+                <set field="notUpdated" from="shipments?.size() - updatedCount" />
+                <script>System.out.println(">>>${shipments?.size()} not completed shipments found, ${updatedCount} updated, ${notUpdated} shipments not updated")</script>
+                <set field="limit" from="notUpdated" />
+            </if>
+            <set field="limitOut" from="limit.toString()" />
+            <log message="==========result: ==========start: $start limit: $limit out: $limitOut" />
         </actions>
     </service>
 

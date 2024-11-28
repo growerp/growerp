@@ -322,7 +322,6 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="search != null">
                 <set field="search" value="%${search}%" />
             </if>
-
             <set field="finDocOut" from="[:]" />
             <set field="finDocs" from="[]" />
             <set field="finDocItems" from="[]" />
@@ -726,9 +725,11 @@ along with this software (see the LICENSE.md file). If not, see
                                         operator="like" from="search" ignore-if-empty="true" />
                                     <econdition field-name="customerLastName" ignore-case="true"
                                         operator="like" from="search" ignore-if-empty="true" />
+                                    <econdition field-name="externalId" ignore-case="true"
+                                        operator="like" from="search" ignore-if-empty="true" />
                                 </econditions>
                                 <order-by
-                                    field-name="-invoiceDate,invoiceId,invoiceItemSeqId,rentalFromDate" />
+                                    field-name="invoiceDate,invoiceId,invoiceItemSeqId,rentalFromDate" />
                                 <!--use-iterator/-->
                             </entity-find>
                             <else>

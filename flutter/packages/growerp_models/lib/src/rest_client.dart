@@ -314,7 +314,13 @@ abstract class RestClient {
 
   // finalize import
   @POST("rest/s1/growerp/100/ImportExport/finalizeImport")
-  Future<void> finalizeImport();
+  Future<Map<String, String>> finalizeImport({
+    @Field() required int start,
+    @Field() required int limit,
+    @Field() required String part, //
+    // closePeriod, approveInvoices, completePayments,
+    // completeInvoicesOrders, receiveShipments, sendShipments
+  });
 
   // Inventory locations
   @GET("rest/s1/growerp/100/Location")

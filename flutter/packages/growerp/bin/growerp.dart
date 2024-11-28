@@ -33,6 +33,7 @@ Future<void> main(List<String> args) async {
   String password = '';
   String companyName = '';
   String currencyId = '';
+  String fiscalYear = '';
   int timeout = 600; //in seconds
   FileType overrideFileType = FileType.unknown;
   Hive.init('growerpDB');
@@ -76,12 +77,14 @@ Future<void> main(List<String> args) async {
                 "Filetype: ${args[i]}  not recognized, existing filetypes $fileTypeList");
             exit(1);
           }
+        case '-y':
+          fiscalYear = args[++i];
         default:
           modifiedArgs.add(args[i]);
       }
     }
     logger.i(
-        "Growerp command: ${modifiedArgs[0].toLowerCase()} i: $inputFile u: $username p: $password -branch: $branch -f ${overrideFileType.name} -n");
+        "Growerp command: ${modifiedArgs[0].toLowerCase()} i: $inputFile u: $username p: $password -branch: $branch -f ${overrideFileType.name} -n $companyName -y $fiscalYear");
 
     // commands
     if (modifiedArgs.isEmpty) {
@@ -120,7 +123,8 @@ Future<void> main(List<String> args) async {
             "     wil finalize the import process by completing finished \n"
             "     documents and accounting time periods.\n"
             "     -u    user email address to for logging in.\n"
-            "     -p    password for logging in.\n");
+            "     -p    password for logging in.\n"
+            "     -Y    YYYY  close a specific fiscal year, when missing close all except current year\n");
         exit(1);
       case 'install':
         install(growerpPath, branch);
@@ -133,7 +137,35 @@ Future<void> main(List<String> args) async {
             timeout: Duration(seconds: timeout), miniLog: true));
         await login(client, username, password,
             companyName: companyName, currencyId: currencyId);
-        client.finalizeImport();
+
+        Map<String, int> parts = {
+          'closePeriod': 2,
+          'approveInvoices': 10000,
+          'completePayments': 10000,
+          'completeInvoicesOrders': 10000,
+          'receiveShipments': 10000,
+          'sendShipments': 10000,
+        };
+        int start = 0, limitOut; // count = 1;
+        Map<String, dynamic> result = {};
+        try {
+          parts.forEach((part, limit) async {
+            logger.i("processing finalize part: $part");
+            start = 0;
+            do {
+              logger.i("start: $start limit: $limit");
+              result = await client.finalizeImport(
+                  start: start, limit: limit, part: part);
+              logger.i("result part: $part ${result['limitOut']}");
+              limitOut = int.parse(result['limitOut']);
+              start += limitOut;
+            } while (limitOut != -1); // && count-- != 0);
+          });
+        } catch (e) {
+          logger.e("====error: $e");
+          exit;
+        }
+
       case 'export':
         export(backendUrl, outputDirectory, username, password);
       case 'report':

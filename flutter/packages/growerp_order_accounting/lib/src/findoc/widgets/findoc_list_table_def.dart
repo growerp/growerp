@@ -92,10 +92,12 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
           Row(
             children: [
               Text(
-                  classificationId == 'AppHotel' &&
-                          item.docType == FinDocType.order
-                      ? item.status!.hotel
-                      : item.status!.name,
+                  item.status == null
+                      ? '?'
+                      : classificationId == 'AppHotel' &&
+                              item.docType == FinDocType.order
+                          ? item.status!.hotel
+                          : item.status!.name,
                   key: Key("status$index")),
               const SizedBox(width: 10),
               if (item.docType != FinDocType.shipment &&

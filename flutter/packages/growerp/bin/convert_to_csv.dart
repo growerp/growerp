@@ -321,10 +321,12 @@ Future<void> main(List<String> args) async {
     }
 
     // create csv content
+    int nbrOfItems = 2000;
+    if (fileType == FileType.finDocShipmentOutgoingItem) nbrOfItems = 500;
     List<String> fileContent = [];
     int fileIndex = 0;
     for (int record = 0; record < convertedRows.length; record++) {
-      if (record % 2000 == 0 && record != 0) {
+      if (record % nbrOfItems == 0 && record != 0) {
         // wait for id change
         while (convertedRows[record][0] == convertedRows[record - 1][0]) {
           fileContent.add(createCsvRow(convertedRows[record++], csvLength));

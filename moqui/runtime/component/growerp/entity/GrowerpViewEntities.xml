@@ -667,6 +667,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="pseudoId" entity-alias="INV" />
         <alias name="fromPartyId" entity-alias="INV" />
         <alias name="toPartyId" entity-alias="INV" />
+        <alias name="externalId" entity-alias="INV" />
         <alias name="invoiceName" field="description" entity-alias="INV" />
         <alias name="statusId" entity-alias="INV" />
         <alias name="invoiceDate" entity-alias="INV" />

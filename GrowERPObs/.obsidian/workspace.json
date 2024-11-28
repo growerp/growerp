@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "1 Introduction/6 Releases.md",
+                "file": "3 Technical documentation/3 Moqui Backend.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "6 Releases"
+              "title": "3 Moqui Backend"
             }
           }
         ]
@@ -188,9 +188,9 @@
   },
   "active": "cd2ba6fa8750f0f9",
   "lastOpenFiles": [
+    "1 Introduction/6 Releases.md",
     "2 End User documentation/1 Introduction/2 Getting Started.md",
     "1 Introduction/3 Feature list.md",
-    "1 Introduction/6 Releases.md",
     "1 Introduction/5 Road Map.md",
     "3 Technical documentation/5 HTML Website.md",
     "1 Introduction/topten.png",
