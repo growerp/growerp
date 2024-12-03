@@ -1,3 +1,7 @@
+## 1.6.2
+* conversion updates
+* accounting reports
+
 ## 1.6.1
 * remove flutter_hive blocking execution in native dart
 

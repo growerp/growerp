@@ -14,7 +14,7 @@ environment:
   sdk: ">=3.2.6 <4.0.0"
   flutter: ">=1.17.0"
 dependencies:
-  growerp_models: ^1.6.0
+  growerp_models: ^1.6.2
   flutter:
     sdk: flutter
   flutter_localizations:

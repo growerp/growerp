@@ -1,3 +1,6 @@
+## 1.6.2
+* minor fixes
+
 ## 1.6.1
 * upgraded models package
 
