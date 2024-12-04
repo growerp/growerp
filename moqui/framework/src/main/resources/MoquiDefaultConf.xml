@@ -1,13 +1,18 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!-- No copyright or license for configuration file, details here are not considered a creative work. -->
-<moqui-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="moqui-conf-3.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- No copyright or license for configuration file, details here are not considered a creative
+work. -->
+<moqui-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="moqui-conf-3.xsd">
 
-    <!-- Settings in this file can be overridden in a component (MoquiConf.xml) and/or runtime conf file that has
+    <!-- Settings in this file can be overridden in a component (MoquiConf.xml) and/or runtime conf
+    file that has
         any of the desired sub-elements. -->
 
-    <!-- Default Properties: only set if there is no Java property or environment variable of the same name (or with underscores replaced by dots) -->
+    <!-- Default Properties: only set if there is no Java property or environment variable of the
+    same name (or with underscores replaced by dots) -->
 
-    <!-- recommended values: production, dev, test; any code may look at these Java System properties to vary behavior (System.getProperty("instance_purpose")) -->
+    <!-- recommended values: production, dev, test; any code may look at these Java System
+    properties to vary behavior (System.getProperty("instance_purpose")) -->
     <default-property name="instance_purpose" value="production"/>
 
     <!-- Locale and Time Zone Properties -->
@@ -28,11 +33,16 @@
 
     <!--
         While there is no default value for webapp_client_ip_header, embedded Jetty looks at Forwarded and
-        X-Forwarded-For headers via ForwardedRequestCustomizer (see MoquiStart.java); this is necessary so that
-        Jetty knows if a proxied request came via HTTPS vs HTTP, but is risky because clients can set a value for
-        the header to spoof any of these settings including a client IP address; if the outer-most proxy handles
-        X-Forwarded-For by always setting it to its client IP address instead of the common default behavior of
-        appending to an existing X-Forwarded-For header then it is fine, but to avoid this set webapp_client_ip_header
+        X-Forwarded-For headers via ForwardedRequestCustomizer (see MoquiStart.java); this is necessary so
+    that
+        Jetty knows if a proxied request came via HTTPS vs HTTP, but is risky because clients can set a
+    value for
+        the header to spoof any of these settings including a client IP address; if the outer-most proxy
+    handles
+        X-Forwarded-For by always setting it to its client IP address instead of the common default
+    behavior of
+        appending to an existing X-Forwarded-For header then it is fine, but to avoid this set
+    webapp_client_ip_header
         to something more reliable for the proxy used.
 
         nginx-proxy: X-Real-IP (see https://github.com/nginx-proxy/nginx-proxy/blob/main/nginx.tmpl)
@@ -46,7 +56,8 @@
     <default-property name="entity_ds_host" value="127.0.0.1"/>
     <default-property name="entity_ds_port" value=""/>
     <default-property name="entity_ds_database" value="moqui"/>
-    <default-property name="entity_ds_url" value="jdbc:h2:${moqui_runtime}/db/h2/${entity_ds_database};lock_timeout=30000"/>
+    <default-property name="entity_ds_url"
+        value="jdbc:h2:${moqui_runtime}/db/h2/${entity_ds_database};lock_timeout=30000"/>
     <default-property name="entity_ds_schema" value=""/>
     <default-property name="entity_ds_user" value="sa"/>
     <default-property name="entity_ds_password" value="sa"/>
@@ -58,8 +69,10 @@
     <default-property name="entity_statement_timeout" value="false"/>
     <default-property name="entity_empty_db_load" value="seed,seed-initial,install"/>
 
-    <!-- Properties for a database clone; note that without overriding the transactional#clone1 datasource the default works only
-        with MySQL and Postgres because of different properties on XADataSource classes of other JDBC drivers -->
+    <!-- Properties for a database clone; note that without overriding the transactional#clone1
+    datasource the default works only
+        with MySQL and Postgres because of different properties on XADataSource classes of other JDBC
+    drivers -->
     <default-property name="entity_ds_c1_disabled" value="true"/>
     <default-property name="entity_ds_c1_db_conf" value="mysql"/>
     <default-property name="entity_ds_c1_schema" value=""/>
@@ -69,7 +82,8 @@
     <default-property name="entity_ds_c1_user" value=""/>
     <default-property name="entity_ds_c1_password" value=""/>
 
-    <!-- How often (in seconds) to check for scheduled jobs to run, set to 0 to not run scheduled jobs -->
+    <!-- How often (in seconds) to check for scheduled jobs to run, set to 0 to not run scheduled
+    jobs -->
     <default-property name="scheduled_job_check_time" value="60"/>
 
     <!-- ElasticSearch Client and Proxy Servlet settings -->
@@ -81,39 +95,58 @@
     <default-property name="kibana_host" value="127.0.0.1"/>
     <default-property name="kibana_port" value="5601"/>
 
-    <tools empty-db-load="${entity_empty_db_load}" worker-queue="65535" worker-pool-core="16" worker-pool-max="24" worker-pool-alive="60">
-        <tool-factory class="org.moqui.impl.tools.MCacheToolFactory" init-priority="03" disabled="false"/>
-        <!-- Apache Commons JCS, an alternative for distributed caches (cannot be used as local cache as requires Serializable keys/values just like Hazelcast) -->
-        <!-- <tool-factory class="org.moqui.impl.tools.JCSCacheToolFactory" init-priority="09" disabled="true"/> -->
-        <!-- H2 Database ToolFactory - if h2 database active runs the H2 server for external access (local only depending on conf) -->
-        <tool-factory class="org.moqui.impl.tools.H2ServerToolFactory" init-priority="12" disabled="false"/>
+    <tools empty-db-load="${entity_empty_db_load}" worker-queue="65535" worker-pool-core="16"
+        worker-pool-max="24" worker-pool-alive="60">
+        <tool-factory class="org.moqui.impl.tools.MCacheToolFactory" init-priority="03"
+            disabled="false"/>
+        <!-- Apache Commons JCS, an alternative for distributed caches (cannot be used as local
+        cache as requires Serializable keys/values just like Hazelcast) -->
+        <!-- <tool-factory class="org.moqui.impl.tools.JCSCacheToolFactory" init-priority="09"
+        disabled="true"/> -->
+        <!-- H2 Database ToolFactory - if h2 database active runs the H2 server for external access
+        (local only depending on conf) -->
+        <tool-factory class="org.moqui.impl.tools.H2ServerToolFactory" init-priority="12"
+            disabled="false"/>
         <!-- Jackrabbit ToolFactory for running Jackrabbit if plugged in -->
-        <tool-factory class="org.moqui.impl.tools.JackrabbitRunToolFactory" init-priority="40" disabled="true"/>
-        <!-- SubEtha SMTP ToolFactory starts an SMTP server using the MOQUI_LOCAL EmailServer settings, emails received trigger EMECA rules -->
-        <tool-factory class="org.moqui.impl.tools.SubEthaSmtpToolFactory" init-priority="50" disabled="true"/>
+        <tool-factory class="org.moqui.impl.tools.JackrabbitRunToolFactory" init-priority="40"
+            disabled="true"/>
+        <!-- SubEtha SMTP ToolFactory starts an SMTP server using the MOQUI_LOCAL EmailServer
+        settings, emails received trigger EMECA rules -->
+        <tool-factory class="org.moqui.impl.tools.SubEthaSmtpToolFactory" init-priority="50"
+            disabled="true"/>
     </tools>
 
     <cache-list warm-on-start="true" local-factory="MCache" distributed-factory="MCache">
         <!-- Entity Database Record Caches (and cache clear assist data) -->
         <!-- set type="distributed" to use the distributed cache -->
-        <cache name="entity.record.one." max-elements="20000" eviction-strategy="least-frequently-used"
-                key-type="org.moqui.entity.EntityCondition" value-type="org.moqui.impl.entity.EntityValueBase"/>
-        <cache name="entity.record.list." max-elements="10000" eviction-strategy="least-frequently-used"
-                key-type="org.moqui.entity.EntityCondition" value-type="org.moqui.impl.entity.EntityListImpl"/>
-        <cache name="entity.record.count." max-elements="10000" eviction-strategy="least-frequently-used"
-                key-type="org.moqui.entity.EntityCondition" value-type="Long"/>
+        <cache name="entity.record.one." max-elements="20000"
+            eviction-strategy="least-frequently-used"
+            key-type="org.moqui.entity.EntityCondition"
+            value-type="org.moqui.impl.entity.EntityValueBase"/>
+        <cache name="entity.record.list." max-elements="10000"
+            eviction-strategy="least-frequently-used"
+            key-type="org.moqui.entity.EntityCondition"
+            value-type="org.moqui.impl.entity.EntityListImpl"/>
+        <cache name="entity.record.count." max-elements="10000"
+            eviction-strategy="least-frequently-used"
+            key-type="org.moqui.entity.EntityCondition" value-type="Long"/>
 
-        <cache name="entity.record.one_ra." max-elements="40000" eviction-strategy="least-frequently-used"
-                key-type="org.moqui.entity.EntityCondition" value-type="Set"/>
-        <cache name="entity.record.one_view_ra." max-elements="40000" eviction-strategy="least-frequently-used"
-                key-type="org.moqui.entity.EntityCondition" value-type="Set"/>
-        <cache name="entity.record.one_bf" max-elements="1000" eviction-strategy="least-frequently-used"
-                value-type="Set"/>
+        <cache name="entity.record.one_ra." max-elements="40000"
+            eviction-strategy="least-frequently-used"
+            key-type="org.moqui.entity.EntityCondition" value-type="Set"/>
+        <cache name="entity.record.one_view_ra." max-elements="40000"
+            eviction-strategy="least-frequently-used"
+            key-type="org.moqui.entity.EntityCondition" value-type="Set"/>
+        <cache name="entity.record.one_bf" max-elements="1000"
+            eviction-strategy="least-frequently-used"
+            value-type="Set"/>
 
-        <cache name="entity.record.list_ra." max-elements="20000" eviction-strategy="least-frequently-used"
-                key-type="org.moqui.entity.EntityCondition" value-type="Set"/>
-        <cache name="entity.record.list_view_ra." max-elements="20000" eviction-strategy="least-frequently-used"
-                key-type="org.moqui.entity.EntityCondition" value-type="Set"/>
+        <cache name="entity.record.list_ra." max-elements="20000"
+            eviction-strategy="least-frequently-used"
+            key-type="org.moqui.entity.EntityCondition" value-type="Set"/>
+        <cache name="entity.record.list_view_ra." max-elements="20000"
+            eviction-strategy="least-frequently-used"
+            key-type="org.moqui.entity.EntityCondition" value-type="Set"/>
 
         <!-- Framework configuration and artifact caches -->
         <!-- NOTE: Production mode by default - No expiration of conf and impl artifacts. -->
@@ -121,7 +154,8 @@
         <cache name="entity.definition" value-type="org.moqui.impl.entity.EntityDefinition"/>
         <cache name="entity.location" value-type="Map"/>
         <cache name="entity.sequence.bank" value-type="long[]"/>
-        <!-- this is info for each entity for real-time push DataFeeds; expires every 15 min to get DataFeed and DataDocument updates -->
+        <!-- this is info for each entity for real-time push DataFeeds; expires every 15 min to get
+        DataFeed and DataDocument updates -->
         <cache name="entity.data.feed.info" expire-time-live="900" value-type="ArrayList"/>
 
         <cache name="service.location" value-type="org.moqui.impl.service.ServiceDefinition"/>
@@ -144,21 +178,29 @@
         <cache name="resource.groovy.location" value-type="java.lang.Class"/>
         <cache name="resource.javascript.location" value-type="java.lang.Class"/>
 
-        <!-- These caches must be local caches (use additional methods on MCache not in javax.cache.Cache) -->
-        <cache name="resource.ftl.location" value-type="freemarker.template.Template" type="local" max-elements="10000"/>
-        <cache name="resource.gstring.location" value-type="groovy.text.Template" type="local" max-elements="10000"/>
-        <cache name="resource.wiki.location" value-type="String" type="local" max-elements="10000" expire-time-live="3600"/>
-        <cache name="resource.markdown.location" value-type="String" type="local" max-elements="10000" expire-time-live="3600"/>
-        <cache name="resource.text.location" value-type="String" type="local" max-elements="10000" expire-time-live="3600"/>
+        <!-- These caches must be local caches (use additional methods on MCache not in
+        javax.cache.Cache) -->
+        <cache name="resource.ftl.location" value-type="freemarker.template.Template" type="local"
+            max-elements="10000"/>
+        <cache name="resource.gstring.location" value-type="groovy.text.Template" type="local"
+            max-elements="10000"/>
+        <cache name="resource.wiki.location" value-type="String" type="local" max-elements="10000"
+            expire-time-live="3600"/>
+        <cache name="resource.markdown.location" value-type="String" type="local"
+            max-elements="10000" expire-time-live="3600"/>
+        <cache name="resource.text.location" value-type="String" type="local" max-elements="10000"
+            expire-time-live="3600"/>
 
         <cache name="resource.reference.location" value-type="org.moqui.resource.ResourceReference"/>
 
         <cache name="l10n.message" expire-time-live="3600" max-elements="50000" value-type="String"/>
 
         <!-- this is a count of all artifact hits, expire once idle for over 15 minutes -->
-        <cache name="artifact.tarpit.hits" expire-time-idle="900" max-elements="10000" value-type="ArrayList"/>
+        <cache name="artifact.tarpit.hits" expire-time-idle="900" max-elements="10000"
+            value-type="ArrayList"/>
     </cache-list>
-    <server-stats bin-length-seconds="900" visit-enabled="true" visit-ip-info-on-login="true" visitor-enabled="true">
+    <server-stats bin-length-seconds="900" visit-enabled="true" visit-ip-info-on-login="true"
+        visitor-enabled="true">
         <!-- these are meant to be good production settings -->
         <artifact-stats type="AT_XML_SCREEN" persist-bin="true" persist-hit="true"/>
         <artifact-stats type="AT_XML_SCREEN_CONTENT" persist-bin="true" persist-hit="false"/>
@@ -168,12 +210,15 @@
     </server-stats>
 
     <webapp-list>
-        <!-- The webapp.@name is looked up based on the value of the 'moqui-name' context-param in the web.xml file -->
+        <!-- The webapp.@name is looked up based on the value of the 'moqui-name' context-param in
+        the web.xml file -->
         <webapp name="webroot" http-port="${webapp_http_port}" http-host="${webapp_http_host}"
-                https-port="${webapp_https_port}" https-host="${webapp_http_host}" https-enabled="${webapp_https_enabled}"
-                handle-cors="${webapp_handle_cors}" allow-origins="${webapp_allow_origins}"
-                require-session-token="${webapp_require_session_token}" upload-executable-allow="${webapp_upload_executable_allow}"
-                websocket-timeout="600000" client-ip-header="${webapp_client_ip_header}">
+            https-port="${webapp_https_port}" https-host="${webapp_http_host}"
+            https-enabled="${webapp_https_enabled}"
+            handle-cors="${webapp_handle_cors}" allow-origins="${webapp_allow_origins}"
+            require-session-token="${webapp_require_session_token}"
+            upload-executable-allow="${webapp_upload_executable_allow}"
+            websocket-timeout="600000" client-ip-header="${webapp_client_ip_header}">
             <!-- root and error screens for OOTB runtime directory (moqui/moqui-runtime repository) -->
             <root-screen host=".*" location="component://webroot/screen/webroot.xml"/>
             <error-screen error="unauthorized" screen-path="error/Unauthorized"/>
@@ -182,26 +227,39 @@
             <error-screen error="too-many" screen-path="error/TooMany"/>
             <error-screen error="internal-error" screen-path="error/InternalError"/>
             <!-- lifecycle actions examples, none by default:
-            <first-hit-in-visit><actions><log level="info" message="========================== first-hit-in-visit actions"/></actions></first-hit-in-visit>
-            <before-request><actions><log level="info" message="========================== before-request actions"/></actions></before-request>
-            <after-request><actions><log level="info" message="========================== after-request actions"/></actions></after-request>
-            <after-login><actions><log level="info" message="========================== after-login actions"/></actions></after-login>
-            <before-logout><actions><log level="info" message="========================== before-logout actions"/></actions></before-logout>
-            <after-startup><actions><log level="info" message="========================== after-startup actions"/></actions></after-login>
-            <before-shutdown><actions><log level="info" message="========================== before-shutdown actions"/></actions></before-logout>
+            <first-hit-in-visit><actions><log level="info" message="==========================
+            first-hit-in-visit actions"/></actions></first-hit-in-visit>
+            <before-request><actions><log level="info" message="========================== before-request
+            actions"/></actions></before-request>
+            <after-request><actions><log level="info" message="========================== after-request
+            actions"/></actions></after-request>
+            <after-login><actions><log level="info" message="========================== after-login
+            actions"/></actions></after-login>
+            <before-logout><actions><log level="info" message="========================== before-logout
+            actions"/></actions></before-logout>
+            <after-startup><actions><log level="info" message="========================== after-startup
+            actions"/></actions></after-login>
+            <before-shutdown><actions><log level="info" message="========================== before-shutdown
+            actions"/></actions></before-logout>
             -->
 
             <!-- ElasticSearch Request Log Filter (log requests directly to ElasticSearch) -->
-            <filter name="ElasticRequestLogFilter" class="org.moqui.impl.webapp.ElasticRequestLogFilter" async-supported="true">
+            <!--filter
+            name="ElasticRequestLogFilter" class="org.moqui.impl.webapp.ElasticRequestLogFilter"
+            async-supported="true">
                 <url-pattern>/*</url-pattern>
                 <dispatcher>REQUEST</dispatcher>
-            </filter>
-            <!-- ElasticSearch and Kibana auth filters, see below for proxy servlets on the same url-pattern -->
-            <filter name="ElasticAuthFilter" class="org.moqui.impl.webapp.MoquiAuthFilter" async-supported="true">
-                <init-param name="permission" value="ElasticRemote"/>
+            </filter-->
+            <!-- ElasticSearch and Kibana auth filters, see below for proxy servlets on the same
+            url-pattern -->
+            <!--filter
+            name="ElasticAuthFilter" class="org.moqui.impl.webapp.MoquiAuthFilter"
+                async-supported="true">
+                <init-param name="permission" value="ElasticRemote" />
                 <url-pattern>/elastic/*</url-pattern>
-            </filter>
-            <filter name="KibanaAuthFilter" class="org.moqui.impl.webapp.MoquiAuthFilter" async-supported="true">
+            </filter-->
+            <filter name="KibanaAuthFilter" class="org.moqui.impl.webapp.MoquiAuthFilter"
+                async-supported="true">
                 <init-param name="permission" value="KibanaRemote"/>
                 <url-pattern>/kibana/*</url-pattern>
             </filter>
@@ -209,21 +267,26 @@
             <!-- Moqui Session Listener (necessary to handle expired sessions, etc) -->
             <listener class="org.moqui.impl.webapp.MoquiSessionListener"/>
 
-            <servlet name="MoquiServlet" class="org.moqui.impl.webapp.MoquiServlet" load-on-startup="1">
+            <servlet name="MoquiServlet" class="org.moqui.impl.webapp.MoquiServlet"
+                load-on-startup="1">
                 <url-pattern>/*</url-pattern>
             </servlet>
-            <servlet name="MoquiFopServlet" class="org.moqui.impl.webapp.MoquiFopServlet" load-on-startup="1">
+            <servlet name="MoquiFopServlet" class="org.moqui.impl.webapp.MoquiFopServlet"
+                load-on-startup="1">
                 <url-pattern>/fop/*</url-pattern>
             </servlet>
 
-            <!-- ElasticSearch and Kibana proxy servlets, see above for auth filters on the same url-pattern -->
-            <servlet name="ElasticSearchProxy" class="org.eclipse.jetty.proxy.ProxyServlet$Transparent" load-on-startup="1" async-supported="true">
-                <!-- this proxies to the embedded ElasticSearch instance -->
+            <!-- ElasticSearch and Kibana proxy servlets, see above for auth filters on the same
+            url-pattern -->
+            <!--servlet
+            name="ElasticSearchProxy" class="org.eclipse.jetty.proxy.ProxyServlet$Transparent"
+            load-on-startup="1" async-supported="true">
                 <init-param name="proxyTo" value="${elasticsearch_url ?: 'http://127.0.0.1:9200'}"/>
                 <init-param name="prefix" value="/elastic"/>
                 <url-pattern>/elastic/*</url-pattern>
-            </servlet>
-            <servlet name="KibanaProxy" class="org.eclipse.jetty.proxy.ProxyServlet$Transparent" load-on-startup="1" async-supported="true">
+            </servlet-->
+            <servlet name="KibanaProxy" class="org.eclipse.jetty.proxy.ProxyServlet$Transparent"
+                load-on-startup="1" async-supported="true">
                 <!-- this proxies to a Kibana instance run locally, in another container, etc -->
                 <!-- in kibana.yml set server.basePath: "/kibana" -->
                 <init-param name="proxyTo" value="http://${kibana_host}:${kibana_port}"/>
@@ -235,46 +298,71 @@
             <session-config timeout="60"/>
 
             <!-- Notification Message Endpoint -->
-            <endpoint path="/notws" class="org.moqui.impl.webapp.NotificationEndpoint" timeout="3600000" enabled="true"/>
-            <endpoint path="/groovysh" class="org.moqui.impl.webapp.GroovyShellEndpoint" timeout="900000" enabled="true"/>
+            <endpoint path="/notws" class="org.moqui.impl.webapp.NotificationEndpoint"
+                timeout="3600000" enabled="true"/>
+            <endpoint path="/groovysh" class="org.moqui.impl.webapp.GroovyShellEndpoint"
+                timeout="900000" enabled="true"/>
 
             <!-- Default response headers, for override keyed on type+name -->
-            <response-header type="web-resource-inline" name="Cache-Control" value="max-age=86400, must-revalidate, public"/>
-            <response-header type="screen-resource-binary" name="Cache-Control" value="max-age=86400, must-revalidate, public"/>
-            <response-header type="screen-resource-text" name="Cache-Control" value="max-age=86400, must-revalidate, public"/>
-            <response-header type="screen-resource-template" name="Cache-Control" value="no-cache, no-store, must-revalidate, private"/>
-            <response-header type="screen-server-static" name="Cache-Control" value="max-age=86400, must-revalidate, public"/>
-            <response-header type="screen-secure" name="Strict-Transport-Security" value="max-age=31536000"/>
-            <response-header type="screen-render" name="Cache-Control" value="no-cache, no-store, must-revalidate, private"/>
+            <response-header type="web-resource-inline" name="Cache-Control"
+                value="max-age=86400, must-revalidate, public"/>
+            <response-header type="screen-resource-binary" name="Cache-Control"
+                value="max-age=86400, must-revalidate, public"/>
+            <response-header type="screen-resource-text" name="Cache-Control"
+                value="max-age=86400, must-revalidate, public"/>
+            <response-header type="screen-resource-template" name="Cache-Control"
+                value="no-cache, no-store, must-revalidate, private"/>
+            <response-header type="screen-server-static" name="Cache-Control"
+                value="max-age=86400, must-revalidate, public"/>
+            <response-header type="screen-secure" name="Strict-Transport-Security"
+                value="max-age=31536000"/>
+            <response-header type="screen-render" name="Cache-Control"
+                value="no-cache, no-store, must-revalidate, private"/>
             <!--
-            Content-Security-Policy by default to not allow use in iframe or allow form actions on different host
+            Content-Security-Policy by default to not allow use in iframe or allow form actions on different
+            host
             see https://content-security-policy.com/
-            consider "child-src 'self';", leaving out as default because 3rd party hosts needed for payment processing hosted forms, etc
+            consider "child-src 'self';", leaving out as default because 3rd party hosts needed for payment
+            processing hosted forms, etc
             consider "connect-src 'self';" Applies to XMLHttpRequest (AJAX), WebSocket or EventSource
-            CSP more secure, should work for back office (internal) but may not for ecommerce or custom apps depending on external resources used and their domain names:
+            CSP more secure, should work for back office (internal) but may not for ecommerce or custom apps
+            depending on external resources used and their domain names:
                 see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src
-                value="frame-ancestors 'none'; form-action 'self'; default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;"
+                value="frame-ancestors 'none'; form-action 'self'; default-src 'self'; script-src 'self'
+            'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self'
+            'unsafe-inline' https://cdnjs.cloudflare.com;"
             -->
-            <response-header type="screen-render" name="Content-Security-Policy" value="frame-ancestors 'none'; form-action 'self';"/>
-            <response-header type="screen-render" name="X-Frame-Options" add="true" value="sameorigin"/>
-            <!-- X-XSS-Protection: this is largely useless with the Content-Security-Policy but here because some web security scanners look for it -->
+            <response-header type="screen-render" name="Content-Security-Policy"
+                value="frame-ancestors 'none'; form-action 'self';"/>
+            <response-header type="screen-render" name="X-Frame-Options" add="true"
+                value="sameorigin"/>
+            <!-- X-XSS-Protection: this is largely useless with the Content-Security-Policy but here
+            because some web security scanners look for it -->
             <response-header type="screen-render" name="X-XSS-Protection" value="1; mode=block"/>
-            <!-- X-Content-Type-Options: this could cause problems as much as help but here because some web security scanners look for it -->
-            <response-header type="screen-render" name="X-Content-Type-Options" add="true" value="nosniff"/>
+            <!-- X-Content-Type-Options: this could cause problems as much as help but here because
+            some web security scanners look for it -->
+            <response-header type="screen-render" name="X-Content-Type-Options" add="true"
+                value="nosniff"/>
             <!-- CORS actual and preflight headers -->
-            <!-- NOTE: Access-Control-Allow-Origin is set dynamically by MoquiServlet if Origin request header value is in the value of the webapp.@allow-origins attribute -->
-            <!-- Access-Control-Allow-Credentials - always true so cookies, authc, etc always allowed -->
+            <!-- NOTE: Access-Control-Allow-Origin is set dynamically by MoquiServlet if Origin
+            request header value is in the value of the webapp.@allow-origins attribute -->
+            <!-- Access-Control-Allow-Credentials - always true so cookies, authc, etc always
+            allowed -->
             <response-header type="cors-actual" name="Vary" value="Origin"/>
             <response-header type="cors-actual" name="Access-Control-Allow-Credentials" value="true"/>
             <response-header type="cors-actual" name="Access-Control-Expose-Headers" add="true"
-                    value="Access-Control-Allow-Origin,Access-Control-Allow-Credentials,X-CSRF-Token,moquiSessionToken"/>
+                value="Access-Control-Allow-Origin,Access-Control-Allow-Credentials,X-CSRF-Token,moquiSessionToken"/>
             <response-header type="cors-preflight" name="Vary" value="Origin"/>
-            <response-header type="cors-preflight" name="Access-Control-Allow-Credentials" value="true"/>
-            <!-- doesn't seem these are needed, allowed by default: ,Authorization,Referrer,User-Agent -->
+            <response-header type="cors-preflight" name="Access-Control-Allow-Credentials"
+                value="true"/>
+            <!-- doesn't seem these are needed, allowed by default:
+            ,Authorization,Referrer,User-Agent -->
             <response-header type="cors-preflight" name="Access-Control-Allow-Headers" add="true"
-                    value="Accept,Accept-Encoding,Content-Type,Content-Encoding,Origin,X-Requested-With,Access-Control-Request-Method,Access-Control-Request-Headers,api_key,login_key,X-HTTP-Method-Override,moquiSessionToken,SessionToken,X-CSRF-Token,Authorization"/>
-            <!-- TODO: would be nice to handle this differently, ie dynamically based on preflight request path -->
-            <response-header type="cors-preflight" name="Access-Control-Allow-Methods" add="true" value="GET,PUT,POST,PATCH,DELETE,OPTIONS"/>
+                value="Accept,Accept-Encoding,Content-Type,Content-Encoding,Origin,X-Requested-With,Access-Control-Request-Method,Access-Control-Request-Headers,api_key,login_key,X-HTTP-Method-Override,moquiSessionToken,SessionToken,X-CSRF-Token,Authorization"/>
+            <!-- TODO: would be nice to handle this differently, ie dynamically based on preflight
+            request path -->
+            <response-header type="cors-preflight" name="Access-Control-Allow-Methods" add="true"
+                value="GET,PUT,POST,PATCH,DELETE,OPTIONS"/>
             <response-header type="cors-preflight" name="Access-Control-Max-Age" value="3600"/>
         </webapp>
     </webapp-list>
@@ -288,12 +376,16 @@
     </artifact-execution-facade>
     <user-facade>
         <password encrypt-hash-type="SHA-256" min-length="8" min-digits="1" min-others="1"
-                  history-limit="5" change-weeks="104" email-require-change="false" email-expire-hours="48"/>
-        <login-key encrypt-hash-type="SHA-256" expire-hours="144"/><!-- default expire 6 days, 144 hours -->
-        <login max-failures="3" disable-minutes="5" history-store="true" history-incorrect-password="false"/>
+            history-limit="5" change-weeks="104" email-require-change="false"
+            email-expire-hours="48"/>
+        <login-key encrypt-hash-type="SHA-256" expire-hours="144"/><!-- default expire 6 days, 144
+        hours -->
+        <login max-failures="3" disable-minutes="5" history-store="true"
+            history-incorrect-password="false"/>
     </user-facade>
 
-    <transaction-facade use-transaction-cache="true" use-connection-stash="true" use-lock-track="${entity_lock_track}" use-statement-timeout="${entity_statement_timeout}">
+    <transaction-facade use-transaction-cache="true" use-connection-stash="true"
+        use-lock-track="${entity_lock_track}" use-statement-timeout="${entity_statement_timeout}">
         <!-- Use this for the internal transaction manager (not through JNDI) -->
         <transaction-internal class="org.moqui.impl.context.TransactionInternalBitronix"/>
 
@@ -306,12 +398,14 @@
         <!-- Use this for getting JTA objects from JNDI -->
         <!-- <transaction-jndi transaction-manager-jndi-name="java:comp/UserTransaction"
                              user-transaction-jndi-name="java:comp/UserTransaction"/> -->
-        <!-- UserTransaction JNDI name for most servers: java:comp/UserTransaction (Resin, Orion, OC4J, etc);
+        <!-- UserTransaction JNDI name for most servers: java:comp/UserTransaction (Resin, Orion,
+        OC4J, etc);
             JBoss (separate objects): "java:comp/UserTransaction" and "java:comp/TransactionManager" -->
     </transaction-facade>
 
     <resource-facade xml-actions-template-location="classpath://template/XmlActions.groovy.ftl">
-        <!-- resource reference class needs to implement the org.moqui.resource.ResourceReference interface -->
+        <!-- resource reference class needs to implement the org.moqui.resource.ResourceReference
+        interface -->
         <resource-reference scheme="http" class="org.moqui.resource.UrlResourceReference"/>
         <resource-reference scheme="https" class="org.moqui.resource.UrlResourceReference"/>
         <resource-reference scheme="file" class="org.moqui.resource.UrlResourceReference"/>
@@ -322,63 +416,79 @@
         <resource-reference scheme="runtime" class="org.moqui.resource.UrlResourceReference"/>
 
         <resource-reference scheme="classpath" class="org.moqui.resource.ClasspathResourceReference"/>
-        <resource-reference scheme="component" class="org.moqui.impl.context.reference.ComponentResourceReference"/>
-        <resource-reference scheme="content" class="org.moqui.impl.context.reference.ContentResourceReference"/>
-        <resource-reference scheme="dbresource" class="org.moqui.impl.context.reference.DbResourceReference"/>
+        <resource-reference scheme="component"
+            class="org.moqui.impl.context.reference.ComponentResourceReference"/>
+        <resource-reference scheme="content"
+            class="org.moqui.impl.context.reference.ContentResourceReference"/>
+        <resource-reference scheme="dbresource"
+            class="org.moqui.impl.context.reference.DbResourceReference"/>
 
         <!-- renderer class needs to implement the org.moqui.context.TemplateRenderer interface -->
-        <template-renderer extension="ftl" class="org.moqui.impl.context.renderer.FtlTemplateRenderer"/>
-        <template-renderer extension="html.ftl" class="org.moqui.impl.context.renderer.FtlTemplateRenderer"/>
-        <template-renderer extension="gstring" class="org.moqui.impl.context.renderer.GStringTemplateRenderer"/>
-        <template-renderer extension="html.gstring" class="org.moqui.impl.context.renderer.GStringTemplateRenderer"/>
+        <template-renderer extension="ftl"
+            class="org.moqui.impl.context.renderer.FtlTemplateRenderer"/>
+        <template-renderer extension="html.ftl"
+            class="org.moqui.impl.context.renderer.FtlTemplateRenderer"/>
+        <template-renderer extension="gstring"
+            class="org.moqui.impl.context.renderer.GStringTemplateRenderer"/>
+        <template-renderer extension="html.gstring"
+            class="org.moqui.impl.context.renderer.GStringTemplateRenderer"/>
 
-        <template-renderer extension="md" class="org.moqui.impl.context.renderer.MarkdownTemplateRenderer"/>
-        <template-renderer extension="markdown" class="org.moqui.impl.context.renderer.MarkdownTemplateRenderer"/>
-        <template-renderer extension="md.ftl" class="org.moqui.impl.context.renderer.FtlMarkdownTemplateRenderer"/>
-        <template-renderer extension="markdown.ftl" class="org.moqui.impl.context.renderer.FtlMarkdownTemplateRenderer"/>
+        <template-renderer extension="md"
+            class="org.moqui.impl.context.renderer.MarkdownTemplateRenderer"/>
+        <template-renderer extension="markdown"
+            class="org.moqui.impl.context.renderer.MarkdownTemplateRenderer"/>
+        <template-renderer extension="md.ftl"
+            class="org.moqui.impl.context.renderer.FtlMarkdownTemplateRenderer"/>
+        <template-renderer extension="markdown.ftl"
+            class="org.moqui.impl.context.renderer.FtlMarkdownTemplateRenderer"/>
 
-        <!-- a renderer for .html isn't necessary because the default is to write the text as-is, however this is useful
+        <!-- a renderer for .html isn't necessary because the default is to write the text as-is,
+        however this is useful
             so that the extension becomes a default extension and doesn't have to be in the URL -->
-        <template-renderer extension="html" class="org.moqui.impl.context.renderer.NoTemplateRenderer"/>
+        <template-renderer extension="html"
+            class="org.moqui.impl.context.renderer.NoTemplateRenderer"/>
 
-        <!-- this is just an example, always use the ScriptRunner interface instead of javax.script because javax.script
+        <!-- this is just an example, always use the ScriptRunner interface instead of javax.script
+        because javax.script
             does not support compiling class scripts and running methods within the class, but Groovy does
         <script-runner extension=".groovy" engine="groovy"/>
         -->
         <script-runner extension=".groovy" class="org.moqui.impl.context.runner.GroovyScriptRunner"/>
         <script-runner extension=".xml" class="org.moqui.impl.context.runner.XmlActionsScriptRunner"/>
 
-        <!-- the javascript engine (Rhino) is built into Java starting with version 6, so we can support it without extra libs -->
+        <!-- the javascript engine (Rhino) is built into Java starting with version 6, so we can
+        support it without extra libs -->
         <script-runner extension=".js" engine="javascript"/>
     </resource-facade>
 
-    <screen-facade boundary-comments="false" default-autocomplete-rows="20" default-paginate-rows="20">
+    <screen-facade boundary-comments="false" default-autocomplete-rows="20"
+        default-paginate-rows="20">
         <screen-text-output type="csv" mime-type="text/csv" always-standalone="true"
-                macro-template-location="template/screen-macro/DefaultScreenMacros.csv.ftl"/>
+            macro-template-location="template/screen-macro/DefaultScreenMacros.csv.ftl"/>
         <screen-text-output type="html" mime-type="text/html"
-                macro-template-location="template/screen-macro/DefaultScreenMacros.html.ftl"/>
+            macro-template-location="template/screen-macro/DefaultScreenMacros.html.ftl"/>
         <screen-text-output type="text" mime-type="text/plain"
-                macro-template-location="template/screen-macro/DefaultScreenMacros.text.ftl"/>
+            macro-template-location="template/screen-macro/DefaultScreenMacros.text.ftl"/>
         <screen-text-output type="xml" mime-type="text/xml"
-                macro-template-location="template/screen-macro/DefaultScreenMacros.xml.ftl"/>
+            macro-template-location="template/screen-macro/DefaultScreenMacros.xml.ftl"/>
         <screen-text-output type="xsl-fo" mime-type="text/xml" always-standalone="true"
-                macro-template-location="template/screen-macro/DefaultScreenMacros.xsl-fo.ftl"/>
+            macro-template-location="template/screen-macro/DefaultScreenMacros.xsl-fo.ftl"/>
 
         <!-- vuet is a custom extension for Vue JS component templates (extended HTML) -->
         <screen-text-output type="vuet" mime-type="text/html" always-standalone="true"
-                macro-template-location="template/screen-macro/DefaultScreenMacros.vuet.ftl"/>
+            macro-template-location="template/screen-macro/DefaultScreenMacros.vuet.ftl"/>
         <screen-text-output type="js" mime-type="application/javascript" always-standalone="true"
-                macro-template-location="template/screen-macro/DefaultScreenMacros.plain.ftl"/>
+            macro-template-location="template/screen-macro/DefaultScreenMacros.plain.ftl"/>
         <screen-text-output type="vue" mime-type="text/html" always-standalone="true"
-                macro-template-location="template/screen-macro/DefaultScreenMacros.plain.ftl"/>
+            macro-template-location="template/screen-macro/DefaultScreenMacros.plain.ftl"/>
 
         <!-- qvt is a custom extension for Quasar & Vue JS component templates (extended HTML) -->
         <screen-text-output type="qvt" mime-type="text/html" always-standalone="true"
-                macro-template-location="template/screen-macro/DefaultScreenMacros.qvt.ftl"/>
+            macro-template-location="template/screen-macro/DefaultScreenMacros.qvt.ftl"/>
         <screen-text-output type="qjs" mime-type="application/javascript" always-standalone="true"
-                macro-template-location="template/screen-macro/DefaultScreenMacros.plain.ftl"/>
+            macro-template-location="template/screen-macro/DefaultScreenMacros.plain.ftl"/>
         <screen-text-output type="qvue" mime-type="text/html" always-standalone="true"
-                macro-template-location="template/screen-macro/DefaultScreenMacros.plain.ftl"/>
+            macro-template-location="template/screen-macro/DefaultScreenMacros.plain.ftl"/>
     </screen-facade>
 
     <service-facade distributed-factory="" scheduled-job-check-time="${scheduled_job_check_time}">
@@ -386,13 +496,17 @@
 
         <!-- runner-class needs to implement the org.moqui.impl.service.ServiceRunner interface -->
         <service-type name="inline" runner-class="org.moqui.impl.service.runner.InlineServiceRunner"/>
-        <service-type name="entity-auto" runner-class="org.moqui.impl.service.runner.EntityAutoServiceRunner"/>
+        <service-type name="entity-auto"
+            runner-class="org.moqui.impl.service.runner.EntityAutoServiceRunner"/>
         <service-type name="script" runner-class="org.moqui.impl.service.runner.ScriptServiceRunner"/>
         <service-type name="java" runner-class="org.moqui.impl.service.runner.JavaServiceRunner"/>
-        <service-type name="remote-json-rpc" runner-class="org.moqui.impl.service.runner.RemoteJsonRpcServiceRunner"/>
-        <service-type name="remote-rest" runner-class="org.moqui.impl.service.runner.RemoteRestServiceRunner"/>
+        <service-type name="remote-json-rpc"
+            runner-class="org.moqui.impl.service.runner.RemoteJsonRpcServiceRunner"/>
+        <service-type name="remote-rest"
+            runner-class="org.moqui.impl.service.runner.RemoteRestServiceRunner"/>
 
-        <!-- These are not needed for running classpath services, are for service reference (known services) -->
+        <!-- These are not needed for running classpath services, are for service reference (known
+        services) -->
         <service-file location="classpath://service/org/moqui/EmailServices.xml"/>
         <service-file location="classpath://service/org/moqui/EntityServices.xml"/>
         <service-file location="classpath://service/org/moqui/SmsServices.xml"/>
@@ -414,23 +528,33 @@
     </service-facade>
 
     <elastic-facade>
-        <!-- NOTE: elasticsearch_host1 used from moqui-elasticsearch with elasticsearch_mode=rest for compatibility until moqui-elasticsearch deprecated -->
-        <cluster name="default" url="${elasticsearch_host1 ?: elasticsearch_url}" user="${elasticsearch_user}" password="${elasticsearch_password}"
-                index-prefix="${elasticsearch_index_prefix}" pool-max="64" queue-size="1024"/>
+        <!-- NOTE: elasticsearch_host1 used from moqui-elasticsearch with elasticsearch_mode=rest
+        for compatibility until moqui-elasticsearch deprecated -->
+        <cluster name="default" url="${elasticsearch_host1 ?: elasticsearch_url}"
+            user="${elasticsearch_user}" password="${elasticsearch_password}"
+            index-prefix="${elasticsearch_index_prefix}" pool-max="64" queue-size="1024"/>
     </elastic-facade>
 
-    <entity-facade default-group-name="transactional" entity-eca-enabled="true" sequenced-id-prefix=""
-            distributed-cache-invalidate="false" dci-topic-factory="" query-stats="false"
-            database-locale="${default_locale}" database-time-zone="${database_time_zone ?: default_time_zone}"
-            crypt-salt="20201202" crypt-iter="10" crypt-algo="PBEWithHmacSHA256AndAES_128" crypt-pass="${entity_ds_crypt_pass}">
+    <entity-facade default-group-name="transactional" entity-eca-enabled="true"
+        sequenced-id-prefix=""
+        distributed-cache-invalidate="false" dci-topic-factory="" query-stats="false"
+        database-locale="${default_locale}"
+        database-time-zone="${database_time_zone ?: default_time_zone}"
+        crypt-salt="20201202" crypt-iter="10" crypt-algo="PBEWithHmacSHA256AndAES_128"
+        crypt-pass="${entity_ds_crypt_pass}">
 
-        <!-- alternate decrypt using original algo (PBEWithMD5AndDES), etc for decrypting old values, all new values will encrypt using the 4 attributes on entity-facade element -->
-        <decrypt-alt crypt-salt="SkcorIuqom" crypt-iter="10" crypt-algo="PBEWithMD5AndDES" crypt-pass="${entity_ds_crypt_pass}"/>
+        <!-- alternate decrypt using original algo (PBEWithMD5AndDES), etc for decrypting old
+        values, all new values will encrypt using the 4 attributes on entity-facade element -->
+        <decrypt-alt crypt-salt="SkcorIuqom" crypt-iter="10" crypt-algo="PBEWithMD5AndDES"
+            crypt-pass="${entity_ds_crypt_pass}"/>
         <!-- alternate decrypts for crypt pass migration with both DES and AES -->
-        <decrypt-alt crypt-salt="SkcorIuqom" crypt-iter="10" crypt-algo="PBEWithMD5AndDES" crypt-pass="${entity_ds_crypt_pass_old}"/>
-        <decrypt-alt crypt-salt="20201202" crypt-iter="10" crypt-algo="PBEWithHmacSHA256AndAES_128" crypt-pass="${entity_ds_crypt_pass_old}"/>
+        <decrypt-alt crypt-salt="SkcorIuqom" crypt-iter="10" crypt-algo="PBEWithMD5AndDES"
+            crypt-pass="${entity_ds_crypt_pass_old}"/>
+        <decrypt-alt crypt-salt="20201202" crypt-iter="10" crypt-algo="PBEWithHmacSHA256AndAES_128"
+            crypt-pass="${entity_ds_crypt_pass_old}"/>
 
-        <!-- The entity-facade.@default-group-name=transactional, so if other entity groups do not have a data source
+        <!-- The entity-facade.@default-group-name=transactional, so if other entity groups do not
+        have a data source
             the transactional group's datasource will be used. -->
 
         <!-- If this is not present the default JNDI server will be used:
@@ -441,68 +565,93 @@
          -->
 
         <!--
-            The configurations below will use the XADataSource directly to connect, which is required for proper
+            The configurations below will use the XADataSource directly to connect, which is required for
+        proper
             transaction handling with multiple data sources.
 
-            To use the non-XA variety just specify the normal JDBC parameters (like jdbc-uri, etc) and leave out the
-            xa-properties element. If the xa-properties element is present the normal JDBC parameters will be ignored.
+            To use the non-XA variety just specify the normal JDBC parameters (like jdbc-uri, etc) and leave
+        out the
+            xa-properties element. If the xa-properties element is present the normal JDBC parameters will be
+        ignored.
 
             To use a DataSource from JNDI use something the jndi-jdbc element under the datasource element:
                 <jndi-jdbc jndi-name="java:/MoquiDataSource"/>
 
-            NOTE: for production usage there is one connection pool per datasource so use as few datasources as possible.
+            NOTE: for production usage there is one connection pool per datasource so use as few datasources as
+        possible.
 
-            The main datasource should have a max size large enough for all servlet container threads plus a few for
-            the worker pool (see tools.@worker-pool-max). Note that Bitronix has a 30 second timeout waiting for a
-            connection from the pool, and currently connections are NOT shared between transactions (only released when
+            The main datasource should have a max size large enough for all servlet container threads plus a
+        few for
+            the worker pool (see tools.@worker-pool-max). Note that Bitronix has a 30 second timeout waiting
+        for a
+            connection from the pool, and currently connections are NOT shared between transactions (only
+        released when
             a tx is closed).
 
-            Good numbers for a decent sized server are 100 servlet container (Jetty) threads, 16 worker threads, plus a
+            Good numbers for a decent sized server are 100 servlet container (Jetty) threads, 16 worker
+        threads, plus a
             few extra so 120 connections in the main pool.
         -->
-        <datasource group-name="transactional" database-conf-name="${entity_ds_db_conf}" schema-name="${entity_ds_schema}"
-                runtime-add-missing="${entity_add_missing_runtime}" startup-add-missing="${entity_add_missing_startup}">
+        <datasource group-name="transactional" database-conf-name="${entity_ds_db_conf}"
+            schema-name="${entity_ds_schema}"
+            runtime-add-missing="${entity_add_missing_runtime}"
+            startup-add-missing="${entity_add_missing_startup}">
             <!-- by default no inline-jdbc or jndi-jdbc elements, use default from database conf -->
         </datasource>
 
         <!-- H2 clone for testing, use same URL as just for testing
         <datasource group-name="transactional#clone1" database-conf-name="h2" schema-name=""
                 runtime-add-missing="false" startup-add-missing="false">
-            <inline-jdbc><xa-properties url="${entity_ds_url}" user="${entity_ds_user}" password="${entity_ds_password}"/></inline-jdbc>
+            <inline-jdbc><xa-properties url="${entity_ds_url}" user="${entity_ds_user}"
+        password="${entity_ds_password}"/></inline-jdbc>
         </datasource>
         -->
 
         <!--
-            MySQL clone server example configuration, for reporting/etc queries to run against a read-only clone.
-            NOTE: this is only for MySQL, adjust or override for other databases as the xa-properties attributes differ.
-            This will also work for Postgres but you will get warnings about errors setting invalid properties on the XADataSource.
+            MySQL clone server example configuration, for reporting/etc queries to run against a read-only
+        clone.
+            NOTE: this is only for MySQL, adjust or override for other databases as the xa-properties
+        attributes differ.
+            This will also work for Postgres but you will get warnings about errors setting invalid properties
+        on the XADataSource.
         -->
-        <datasource group-name="transactional#clone1" database-conf-name="${entity_ds_c1_db_conf}" schema-name="${entity_ds_c1_schema}"
-                runtime-add-missing="false" startup-add-missing="false" disabled="${entity_ds_c1_disabled}">
-            <!-- NOTE: isolation-level="None" not supported (by Bitronix?), use most lenient instead: ReadUncommitted -->
+        <datasource group-name="transactional#clone1" database-conf-name="${entity_ds_c1_db_conf}"
+            schema-name="${entity_ds_c1_schema}"
+            runtime-add-missing="false" startup-add-missing="false"
+            disabled="${entity_ds_c1_disabled}">
+            <!-- NOTE: isolation-level="None" not supported (by Bitronix?), use most lenient
+            instead: ReadUncommitted -->
             <inline-jdbc pool-maxsize="40" isolation-level="ReadUncommitted">
                 <xa-properties serverName="${entity_ds_c1_host}" port="${entity_ds_c1_port?:'3306'}"
-                        databaseName="${entity_ds_c1_database}" user="${entity_ds_c1_user}" password="${entity_ds_c1_password}"
-                        pinGlobalTxToPhysicalConnection="true" autoReconnectForPools="true" useUnicode="true" encoding="UTF-8"/>
+                    databaseName="${entity_ds_c1_database}" user="${entity_ds_c1_user}"
+                    password="${entity_ds_c1_password}"
+                    pinGlobalTxToPhysicalConnection="true" autoReconnectForPools="true"
+                    useUnicode="true" encoding="UTF-8"/>
             </inline-jdbc>
         </datasource>
 
-        <!-- The nontransactional group is in the transactional db by default. To use OrientDB use the datasource below.
+        <!-- The nontransactional group is in the transactional db by default. To use OrientDB use
+        the datasource below.
             NOTE: startup-add-missing=true is required because OrientDB doesn't allow class create in a TX
-            NOTE: adding more entities to the nontransactional group is a work in progress, this will not currently run,
+            NOTE: adding more entities to the nontransactional group is a work in progress, this will not
+        currently run,
                 but you can use a similar configuration for your own entity groups
-            NOTE: to test on an entity that is not used in general in view entities (can't join across DBs) try adding
+            NOTE: to test on an entity that is not used in general in view entities (can't join across DBs) try
+        adding
                 group="nontransactional" to ArtifactHit in ServerEntities.xml
         -->
         <!--
         <datasource group-name="nontransactional" startup-add-missing="true"
                 object-factory="org.moqui.impl.entity.orientdb.OrientDatasourceFactory">
-            <inline-other uri="plocal:${ORIENTDB_HOME}/databases/MoquiNoSql" username="admin" password="admin"/>
+            <inline-other uri="plocal:${ORIENTDB_HOME}/databases/MoquiNoSql" username="admin"
+        password="admin"/>
         </datasource>
         -->
 
-        <!-- Refer to these explicitly instead of by directory name convention as is done in components.
-             There is no reliable way to search within directories on the classpath (if in a file or jar is fine, but
+        <!-- Refer to these explicitly instead of by directory name convention as is done in
+        components.
+             There is no reliable way to search within directories on the classpath (if in a file or jar is
+        fine, but
              not in a war/ear file or from special ClassLoaders) -->
         <!-- in framework/entity -->
         <load-entity location="classpath://entity/BasicEntities.xml"/>
@@ -530,111 +679,154 @@
 
         <dictionary-type type="date" java-type="java.sql.Date" default-sql-type="DATE"/>
         <dictionary-type type="time" java-type="java.sql.Time" default-sql-type="TIME"/>
-        <dictionary-type type="date-time" java-type="java.sql.Timestamp" default-sql-type="TIMESTAMP"/>
+        <dictionary-type type="date-time" java-type="java.sql.Timestamp"
+            default-sql-type="TIMESTAMP"/>
 
-        <dictionary-type type="number-integer" java-type="java.lang.Long" default-sql-type="NUMERIC(20,0)"/>
-        <dictionary-type type="number-decimal" java-type="java.math.BigDecimal" default-sql-type="NUMERIC(26,6)"/>
+        <dictionary-type type="number-integer" java-type="java.lang.Long"
+            default-sql-type="NUMERIC(20,0)"/>
+        <dictionary-type type="number-decimal" java-type="java.math.BigDecimal"
+            default-sql-type="NUMERIC(26,6)"/>
         <dictionary-type type="number-float" java-type="java.lang.Double" default-sql-type="DOUBLE"/>
 
-        <dictionary-type type="currency-amount" java-type="java.math.BigDecimal" default-sql-type="NUMERIC(24,4)"/>
-        <dictionary-type type="currency-precise" java-type="java.math.BigDecimal" default-sql-type="NUMERIC(25,5)"/>
+        <dictionary-type type="currency-amount" java-type="java.math.BigDecimal"
+            default-sql-type="NUMERIC(24,4)"/>
+        <dictionary-type type="currency-precise" java-type="java.math.BigDecimal"
+            default-sql-type="NUMERIC(25,5)"/>
 
-        <dictionary-type type="text-indicator" java-type="java.lang.String" default-sql-type="CHAR(1)"/>
-        <dictionary-type type="text-short" java-type="java.lang.String" default-sql-type="VARCHAR(63)"/>
-        <dictionary-type type="text-medium" java-type="java.lang.String" default-sql-type="VARCHAR(255)"/>
-        <dictionary-type type="text-intermediate" java-type="java.lang.String" default-sql-type="VARCHAR(1023)"/>
-        <!-- text-long was 32000, but changed to 4095 because MySQL max size is 21K or so for a VARCHAR, and 64K for a
-            row (not including text-very-long), and it seems that the limit is bytes, not characters, so 4K characters
-            is 12K bytes... just like the old annoying column size which is now in characters, but the row size still
+        <dictionary-type type="text-indicator" java-type="java.lang.String"
+            default-sql-type="CHAR(1)"/>
+        <dictionary-type type="text-short" java-type="java.lang.String"
+            default-sql-type="VARCHAR(63)"/>
+        <dictionary-type type="text-medium" java-type="java.lang.String"
+            default-sql-type="VARCHAR(255)"/>
+        <dictionary-type type="text-intermediate" java-type="java.lang.String"
+            default-sql-type="VARCHAR(1023)"/>
+        <!-- text-long was 32000, but changed to 4095 because MySQL max size is 21K or so for a
+        VARCHAR, and 64K for a
+            row (not including text-very-long), and it seems that the limit is bytes, not characters, so 4K
+        characters
+            is 12K bytes... just like the old annoying column size which is now in characters, but the row size
+        still
             in bytes -->
-        <dictionary-type type="text-long" java-type="java.lang.String" default-sql-type="VARCHAR(4095)"/>
+        <dictionary-type type="text-long" java-type="java.lang.String"
+            default-sql-type="VARCHAR(4095)"/>
         <dictionary-type type="text-very-long" java-type="java.lang.String" default-sql-type="CLOB"/>
 
         <dictionary-type type="binary-very-long" java-type="java.sql.Blob" default-sql-type="BLOB"/>
 
         <!--
         * DB2:
-        * to support LIMIT and OFFSET: "db2set DB2_COMPATIBILITY_VECTOR=MYS" (and if already running: db2stop then db2start)
+        * to support LIMIT and OFFSET: "db2set DB2_COMPATIBILITY_VECTOR=MYS" (and if already running:
+        db2stop then db2start)
         * default page size of 4k not adequate, use something like: "create database moqui pagesize 32 k"
-        * the database name in the example is 'moqui', note that in DB2 database names are limits to 8 bytes
+        * the database name in the example is 'moqui', note that in DB2 database names are limits to 8
+        bytes
 
-        <datasource group-name="transactional" database-conf-name="db2" schema-name="DB2INST1" startup-add-missing="true" runtime-add-missing="false">
-            <inline-jdbc><xa-properties user="db2inst1" password="db2inst1" serverName="localhost" portNumber="50000"
+        <datasource group-name="transactional" database-conf-name="db2" schema-name="DB2INST1"
+        startup-add-missing="true" runtime-add-missing="false">
+            <inline-jdbc><xa-properties user="db2inst1" password="db2inst1" serverName="localhost"
+        portNumber="50000"
                     driverType="4" databaseName="moqui"/></inline-jdbc>
         </datasource>
-        <datasource group-name="transactional" database-conf-name="db2" schema-name="" startup-add-missing="true" runtime-add-missing="false">
-            <inline-jdbc jdbc-uri="jdbc:db2://localhost:50000/moqui" jdbc-username="moqui" jdbc-password="moqui"/>
+        <datasource group-name="transactional" database-conf-name="db2" schema-name=""
+        startup-add-missing="true" runtime-add-missing="false">
+            <inline-jdbc jdbc-uri="jdbc:db2://localhost:50000/moqui" jdbc-username="moqui"
+        jdbc-password="moqui"/>
         </datasource>
         -->
-        <database name="db2" join-style="ansi" offset-style="limit" from-lateral-style="lateral" never-nulls="true"
-                default-isolation-level="ReadCommitted" for-update="FOR UPDATE WITH RS"
-                use-schema-for-all="true" use-indexes-unique="false" use-pk-constraint-names="false" fk-style="name_fk"
-                default-test-query="SELECT 1 FROM SYSIBM.SYSDUMMY1"
-                default-jdbc-driver="com.ibm.db2.jcc.DB2Driver"
-                default-xa-ds-class="com.ibm.db2.jcc.DB2XADataSource"
-                default-startup-add-missing="true" default-runtime-add-missing="false">
+        <database name="db2" join-style="ansi" offset-style="limit" from-lateral-style="lateral"
+            never-nulls="true"
+            default-isolation-level="ReadCommitted" for-update="FOR UPDATE WITH RS"
+            use-schema-for-all="true" use-indexes-unique="false" use-pk-constraint-names="false"
+            fk-style="name_fk"
+            default-test-query="SELECT 1 FROM SYSIBM.SYSDUMMY1"
+            default-jdbc-driver="com.ibm.db2.jcc.DB2Driver"
+            default-xa-ds-class="com.ibm.db2.jcc.DB2XADataSource"
+            default-startup-add-missing="true" default-runtime-add-missing="false">
             <database-type type="number-integer" sql-type="DECIMAL(20,0)"/>
             <database-type type="number-decimal" sql-type="DECIMAL(26,6)"/>
             <database-type type="number-float" sql-type="DECIMAL(30,12)"/>
             <database-type type="currency-amount" sql-type="DECIMAL(24,4)"/>
             <database-type type="currency-precise" sql-type="DECIMAL(25,5)"/>
 
-            <inline-jdbc><xa-properties driverType="4" serverName="${entity_ds_host}" portNumber="${entity_ds_port?:'50000'}"
-                    databaseName="${entity_ds_database}" user="${entity_ds_user}" password="${entity_ds_password}"/></inline-jdbc>
+            <inline-jdbc>
+                <xa-properties driverType="4" serverName="${entity_ds_host}"
+                    portNumber="${entity_ds_port?:'50000'}"
+                    databaseName="${entity_ds_database}" user="${entity_ds_user}"
+                    password="${entity_ds_password}"/>
+            </inline-jdbc>
         </database>
-        <database name="db2i" lb-name="db2" join-style="ansi" offset-style="limit" from-lateral-style="lateral" never-nulls="true"
-                default-isolation-level="ReadCommitted"  for-update="FOR UPDATE WITH RS"
-                use-schema-for-all="true" use-indexes-unique-where-not-null="true"
-                default-test-query="SELECT 1 FROM SYSIBM.SYSDUMMY1"
-                default-jdbc-driver="com.ibm.as400.access.AS400JDBCDriver"
-                default-xa-ds-class="com.ibm.as400.access.AS400JDBCXADataSource"
-                default-startup-add-missing="true" default-runtime-add-missing="false">
+        <database name="db2i" lb-name="db2" join-style="ansi" offset-style="limit"
+            from-lateral-style="lateral" never-nulls="true"
+            default-isolation-level="ReadCommitted" for-update="FOR UPDATE WITH RS"
+            use-schema-for-all="true" use-indexes-unique-where-not-null="true"
+            default-test-query="SELECT 1 FROM SYSIBM.SYSDUMMY1"
+            default-jdbc-driver="com.ibm.as400.access.AS400JDBCDriver"
+            default-xa-ds-class="com.ibm.as400.access.AS400JDBCXADataSource"
+            default-startup-add-missing="true" default-runtime-add-missing="false">
             <database-type type="number-integer" sql-type="DECIMAL(20,0)"/>
             <database-type type="number-decimal" sql-type="DECIMAL(26,6)"/>
             <database-type type="number-float" sql-type="DECIMAL(30,12)"/>
             <database-type type="currency-amount" sql-type="DECIMAL(24,4)"/>
             <database-type type="currency-precise" sql-type="DECIMAL(25,5)"/>
 
-            <inline-jdbc><xa-properties serverName="${entity_ds_host}" databaseName="${entity_ds_database}" dateFormat="iso"
-                    user="${entity_ds_user}" password="${entity_ds_password}" cursorHold="false" threadUsed="false"/></inline-jdbc>
+            <inline-jdbc>
+                <xa-properties serverName="${entity_ds_host}" databaseName="${entity_ds_database}"
+                    dateFormat="iso"
+                    user="${entity_ds_user}" password="${entity_ds_password}" cursorHold="false"
+                    threadUsed="false"/>
+            </inline-jdbc>
         </database>
         <!--
         * Derby:
         <datasource group-name="transactional" database-conf-name="derby" schema-name="MOQUI">
-            <inline-jdbc><xa-properties databaseName="${moqui_runtime}/db/derby/moqui" createDatabase="create"/></inline-jdbc>
+            <inline-jdbc><xa-properties databaseName="${moqui_runtime}/db/derby/moqui"
+        createDatabase="create"/></inline-jdbc>
         </datasource>
         <datasource group-name="transactional" database-conf-name="derby" schema-name="MOQUI">
             <inline-jdbc jdbc-uri="jdbc:derby:moqui;create=true" jdbc-username="moqui" jdbc-password="moqui"/>
         </datasource>
         -->
-        <database name="derby" use-pk-constraint-names="false" use-indexes-unique="false" default-isolation-level="ReadCommitted"
-                default-jdbc-driver="org.apache.derby.jdbc.EmbeddedDriver"
-                default-xa-ds-class="org.apache.derby.jdbc.EmbeddedXADataSource">
+        <database name="derby" use-pk-constraint-names="false" use-indexes-unique="false"
+            default-isolation-level="ReadCommitted"
+            default-jdbc-driver="org.apache.derby.jdbc.EmbeddedDriver"
+            default-xa-ds-class="org.apache.derby.jdbc.EmbeddedXADataSource">
             <!-- default-test-query="???" maybe like SELECT 1 FROM SEQUENCE_VALUE_ITEM WHERE 1=0 -->
-            <inline-jdbc><xa-properties databaseName="${moqui_runtime}/db/derby/${entity_ds_database}" createDatabase="create"/></inline-jdbc>
+            <inline-jdbc>
+                <xa-properties databaseName="${moqui_runtime}/db/derby/${entity_ds_database}"
+                    createDatabase="create"/>
+            </inline-jdbc>
         </database>
         <!--
         * H2 Database:
-        * NOTE: With this embedded H2 setup you can connect remotely using "jdbc:h2:tcp://localhost:9092/moqui"
+        * NOTE: With this embedded H2 setup you can connect remotely using
+        "jdbc:h2:tcp://localhost:9092/moqui"
 
         <datasource group-name="transactional" database-conf-name="h2" schema-name="">
-            <inline-jdbc><xa-properties url="jdbc:h2:${moqui_runtime}/db/h2/moqui;lock_timeout=30000" user="sa" password=""/></inline-jdbc>
+            <inline-jdbc><xa-properties url="jdbc:h2:${moqui_runtime}/db/h2/moqui;lock_timeout=30000" user="sa"
+        password=""/></inline-jdbc>
         </datasource>
         <datasource group-name="transactional" database-conf-name="h2" schema-name="">
-            <inline-jdbc jdbc-uri="jdbc:h2:${moqui_runtime}/db/h2/moqui;lock_timeout=30000" jdbc-username="sa" jdbc-password="sa"/>
+            <inline-jdbc jdbc-uri="jdbc:h2:${moqui_runtime}/db/h2/moqui;lock_timeout=30000" jdbc-username="sa"
+        jdbc-password="sa"/>
         </datasource>
         -->
-        <database name="h2" use-pk-constraint-names="false" use-indexes-unique="true" add-unique-as="true" default-isolation-level="ReadCommitted"
-                default-jdbc-driver="org.h2.Driver" default-xa-ds-class="org.h2.jdbcx.JdbcDataSource"
-                default-start-server-args="-tcpPort 9092 -ifExists -baseDir ${moqui_runtime}/db/h2">
+        <database name="h2" use-pk-constraint-names="false" use-indexes-unique="true"
+            add-unique-as="true" default-isolation-level="ReadCommitted"
+            default-jdbc-driver="org.h2.Driver" default-xa-ds-class="org.h2.jdbcx.JdbcDataSource"
+            default-start-server-args="-tcpPort 9092 -ifExists -baseDir ${moqui_runtime}/db/h2">
             <!-- 'VALUE' is a reserved word in H2 starting with version 2.0.202 -->
             <name-replace original="VALUE" replace="THE_VALUE"/>
-            <inline-jdbc><xa-properties url="${entity_ds_url}" user="${entity_ds_user}" password="${entity_ds_password}"/></inline-jdbc>
+            <inline-jdbc>
+                <xa-properties url="${entity_ds_url}" user="${entity_ds_user}"
+                    password="${entity_ds_password}"/>
+            </inline-jdbc>
         </database>
         <!-- TODO: add configuration examples -->
-        <database name="hsql" lb-name="hsqldb" use-fk-initially-deferred="false" join-style="ansi-no-parenthesis"
-                default-isolation-level="ReadUncommitted" default-jdbc-driver="org.hsqldb.jdbcDriver"
-                default-test-query="SELECT 1 FROM SEQUENCE_VALUE_ITEM WHERE 1=0">
+        <database name="hsql" lb-name="hsqldb" use-fk-initially-deferred="false"
+            join-style="ansi-no-parenthesis"
+            default-isolation-level="ReadUncommitted" default-jdbc-driver="org.hsqldb.jdbcDriver"
+            default-test-query="SELECT 1 FROM SEQUENCE_VALUE_ITEM WHERE 1=0">
             <database-type type="id" sql-type="VARCHAR"/>
             <database-type type="id-long" sql-type="VARCHAR"/>
 
@@ -661,15 +853,20 @@
                     databaseName="moqui" selectMethod="Cursor"/></inline-jdbc>
         </datasource>
         <datasource group-name="transactional" database-conf-name="mssql" schema-name="">
-            <inline-jdbc jdbc-uri="jdbc:sqlserver://localhost:1433;databaseName=moqui;SelectMethod=Cursor" jdbc-username="moqui" jdbc-password="moqui"/>
+            <inline-jdbc jdbc-uri="jdbc:sqlserver://localhost:1433;databaseName=moqui;SelectMethod=Cursor"
+        jdbc-username="moqui" jdbc-password="moqui"/>
         </datasource>
 
-        NOTE: for MS SQL Server 2012 and later can use offset-style=fetch for better performance and consistent behavior
+        NOTE: for MS SQL Server 2012 and later can use offset-style=fetch for better performance and
+        consistent behavior
         -->
-        <database name="mssql" join-style="ansi" default-isolation-level="ReadCommitted" offset-style="fetch" from-lateral-style="apply"
-                default-test-query="SELECT 1" default-jdbc-driver="com.microsoft.sqlserver.jdbc.SQLServerDriver"
-                default-xa-ds-class="com.microsoft.sqlserver.jdbc.SQLServerXADataSource"
-                default-startup-add-missing="true" default-runtime-add-missing="false" never-nulls="true">
+        <database name="mssql" join-style="ansi" default-isolation-level="ReadCommitted"
+            offset-style="fetch" from-lateral-style="apply"
+            default-test-query="SELECT 1"
+            default-jdbc-driver="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+            default-xa-ds-class="com.microsoft.sqlserver.jdbc.SQLServerXADataSource"
+            default-startup-add-missing="true" default-runtime-add-missing="false"
+            never-nulls="true">
             <database-type type="id" sql-type="NVARCHAR(40)"/>
             <database-type type="id-long" sql-type="NVARCHAR(255)"/>
 
@@ -693,9 +890,12 @@
 
             <database-type type="binary-very-long" sql-type="IMAGE"/>
 
-            <inline-jdbc><xa-properties serverName="${entity_ds_host}" portNumber="${entity_ds_port?:'1433'}"
-                    databaseName="${entity_ds_database}" user="${entity_ds_user}" password="${entity_ds_password}"
-                    selectMethod="Cursor"/></inline-jdbc>
+            <inline-jdbc>
+                <xa-properties serverName="${entity_ds_host}" portNumber="${entity_ds_port?:'1433'}"
+                    databaseName="${entity_ds_database}" user="${entity_ds_user}"
+                    password="${entity_ds_password}"
+                    selectMethod="Cursor"/>
+            </inline-jdbc>
         </database>
         <!--
         * MySQL (similar for Percona Server, MariaDB, AWS Aurora):
@@ -705,25 +905,32 @@
                     useUnicode="true" encoding="UTF-8"/></inline-jdbc>
         </datasource>
         <datasource group-name="transactional" database-conf-name="mysql" schema-name="">
-            <inline-jdbc jdbc-uri="jdbc:mysql://127.0.0.1:3306/moqui?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8"
+            <inline-jdbc
+        jdbc-uri="jdbc:mysql://127.0.0.1:3306/moqui?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8"
                     jdbc-username="moqui" jdbc-password="moqui"/>
         </datasource>
         -->
-        <database name="mysql" join-style="ansi-no-parenthesis" offset-style="limit" never-nulls="true"
-                table-engine="InnoDB" character-set="utf8" collate="utf8_general_ci" fk-style="name_fk"
-                constraint-name-clip-length="60"
-                default-isolation-level="ReadCommitted" default-test-query="SELECT 1"
-                default-jdbc-driver="com.mysql.jdbc.Driver"
-                default-xa-ds-class="com.mysql.jdbc.jdbc2.optional.MysqlXADataSource">
+        <database name="mysql" join-style="ansi-no-parenthesis" offset-style="limit"
+            never-nulls="true"
+            table-engine="InnoDB" character-set="utf8" collate="utf8_general_ci" fk-style="name_fk"
+            constraint-name-clip-length="60"
+            default-isolation-level="ReadCommitted" default-test-query="SELECT 1"
+            default-jdbc-driver="com.mysql.jdbc.Driver"
+            default-xa-ds-class="com.mysql.jdbc.jdbc2.optional.MysqlXADataSource">
             <!--
-                NOTE: to support 4 byte UTF-8 characters use 'utf8mb4' for character-set, and a corresponding collate such as
-                'utf8mb4_col'. Use this character set and collate when creating your database/schema in MySQL before running Moqui,
-                and if set here it will be set on tables that are created as well. For existing databases already set to plain utf8
+                NOTE: to support 4 byte UTF-8 characters use 'utf8mb4' for character-set, and a corresponding
+            collate such as
+                'utf8mb4_col'. Use this character set and collate when creating your database/schema in MySQL
+            before running Moqui,
+                and if set here it will be set on tables that are created as well. For existing databases already
+            set to plain utf8
                 you'll need to run SQL statements on MySQL to change the character set and collate for each table.
             -->
 
-            <!-- use DATETIME instead of TIMESTAMP so can be null and gets no default value; issue with newer MySQL versions -->
-            <!-- NOTE: DATETIME(3) is supported, and needed, on MySQL 5.7; for earlier versions removed the '(3)' as it has millisecond precision by default -->
+            <!-- use DATETIME instead of TIMESTAMP so can be null and gets no default value; issue
+            with newer MySQL versions -->
+            <!-- NOTE: DATETIME(3) is supported, and needed, on MySQL 5.7; for earlier versions
+            removed the '(3)' as it has millisecond precision by default -->
             <database-type type="date-time" sql-type="DATETIME(3)"/>
 
             <database-type type="number-integer" sql-type="DECIMAL(20,0)"/>
@@ -739,17 +946,23 @@
             <name-replace original="CONDITION" replace="THE_CONDITION"/>
 
             <!-- default max connections for MySQL is 151 -->
-            <inline-jdbc pool-maxsize="140"><xa-properties serverName="${entity_ds_host}" port="${entity_ds_port?:'3306'}"
-                    pinGlobalTxToPhysicalConnection="true" autoReconnectForPools="true" useUnicode="true" encoding="UTF-8" useCursorFetch="true"
-                    databaseName="${entity_ds_database}" user="${entity_ds_user}" password="${entity_ds_password}"/></inline-jdbc>
+            <inline-jdbc pool-maxsize="140">
+                <xa-properties serverName="${entity_ds_host}" port="${entity_ds_port?:'3306'}"
+                    pinGlobalTxToPhysicalConnection="true" autoReconnectForPools="true"
+                    useUnicode="true" encoding="UTF-8" useCursorFetch="true"
+                    databaseName="${entity_ds_database}" user="${entity_ds_user}"
+                    password="${entity_ds_password}"/>
+            </inline-jdbc>
         </database>
-        <database name="mysql8" lb-name="mysql" join-style="ansi-no-parenthesis" offset-style="limit" from-lateral-style="lateral"
-                never-nulls="true" table-engine="InnoDB" character-set="utf8" collate="utf8_general_ci" fk-style="name_fk"
-                constraint-name-clip-length="60"
-                default-isolation-level="ReadCommitted" default-test-query="SELECT 1"
-                default-startup-add-missing="true" default-runtime-add-missing="false"
-                default-jdbc-driver="com.mysql.cj.jdbc.Driver"
-                default-xa-ds-class="com.mysql.cj.jdbc.MysqlXADataSource">
+        <database name="mysql8" lb-name="mysql" join-style="ansi-no-parenthesis"
+            offset-style="limit" from-lateral-style="lateral"
+            never-nulls="true" table-engine="InnoDB" character-set="utf8" collate="utf8_general_ci"
+            fk-style="name_fk"
+            constraint-name-clip-length="60"
+            default-isolation-level="ReadCommitted" default-test-query="SELECT 1"
+            default-startup-add-missing="true" default-runtime-add-missing="false"
+            default-jdbc-driver="com.mysql.cj.jdbc.Driver"
+            default-xa-ds-class="com.mysql.cj.jdbc.MysqlXADataSource">
             <!-- NOTE that from-lateral-style=lateral requires MySQL 8.0.14 or later -->
             <!--
                 When Bitronix starts it attempts to recover transactions, this may result in an error like:
@@ -757,7 +970,8 @@
 
                 See https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin
 
-                The MySQL user Moqui uses to access the database must have 'XA_RECOVER_ADMIN' privilege, if not the 'root' user:
+                The MySQL user Moqui uses to access the database must have 'XA_RECOVER_ADMIN' privilege, if not the
+            'root' user:
                 GRANT XA_RECOVER_ADMIN ON *.* TO 'username'@'%'; FLUSH PRIVILEGES;
             -->
             <database-type type="date-time" sql-type="DATETIME(3)"/>
@@ -775,24 +989,33 @@
             <name-replace original="CONDITION" replace="THE_CONDITION"/>
 
             <!-- default max connections for MySQL is 151 -->
-            <inline-jdbc pool-maxsize="140"><xa-properties serverName="${entity_ds_host}" port="${entity_ds_port?:'3306'}"
-                    pinGlobalTxToPhysicalConnection="true" autoReconnectForPools="true" useCursorFetch="true"
-                    serverTimezone="${database_time_zone ?: default_time_zone}" useSSL="false" allowPublicKeyRetrieval="true"
-                    databaseName="${entity_ds_database}" user="${entity_ds_user}" password="${entity_ds_password}"/></inline-jdbc>
+            <inline-jdbc pool-maxsize="140">
+                <xa-properties serverName="${entity_ds_host}" port="${entity_ds_port?:'3306'}"
+                    pinGlobalTxToPhysicalConnection="true" autoReconnectForPools="true"
+                    useCursorFetch="true"
+                    serverTimezone="${database_time_zone ?: default_time_zone}" useSSL="false"
+                    allowPublicKeyRetrieval="true"
+                    databaseName="${entity_ds_database}" user="${entity_ds_user}"
+                    password="${entity_ds_password}"/>
+            </inline-jdbc>
         </database>
         <!--
         * Oracle:
         <datasource group-name="transactional" database-conf-name="oracle" schema-name="MOQUI">
-            <inline-jdbc><xa-properties user="moqui" password="moqui" URL="jdbc:oracle:thin:@127.0.0.1:1521:moqui"/></inline-jdbc>
+            <inline-jdbc><xa-properties user="moqui" password="moqui"
+        URL="jdbc:oracle:thin:@127.0.0.1:1521:moqui"/></inline-jdbc>
         </datasource>
         <datasource group-name="transactional" database-conf-name="oracle" schema-name="MOQUI">
-            <inline-jdbc jdbc-uri="jdbc:oracle:thin:@127.0.0.1:1521:moqui" jdbc-username="moqui" jdbc-password="moqui"/>
+            <inline-jdbc jdbc-uri="jdbc:oracle:thin:@127.0.0.1:1521:moqui" jdbc-username="moqui"
+        jdbc-password="moqui"/>
         </datasource>
         -->
-        <database name="oracle" add-unique-as="true" join-style="ansi" from-lateral-style="apply" default-isolation-level="ReadCommitted"
-                default-test-query="SELECT 1 FROM DUAL" default-jdbc-driver="oracle.jdbc.driver.OracleDriver"
-                default-xa-ds-class="oracle.jdbc.xa.client.OracleXADataSource"
-                default-startup-add-missing="true" default-runtime-add-missing="false">
+        <database name="oracle" add-unique-as="true" join-style="ansi" from-lateral-style="apply"
+            default-isolation-level="ReadCommitted"
+            default-test-query="SELECT 1 FROM DUAL"
+            default-jdbc-driver="oracle.jdbc.driver.OracleDriver"
+            default-xa-ds-class="oracle.jdbc.xa.client.OracleXADataSource"
+            default-startup-add-missing="true" default-runtime-add-missing="false">
             <database-type type="id" sql-type="VARCHAR2(40)"/>
             <database-type type="id-long" sql-type="VARCHAR2(255)"/>
 
@@ -810,8 +1033,10 @@
             <database-type type="text-intermediate" sql-type="VARCHAR2(1023)"/>
             <database-type type="text-long" sql-type="VARCHAR2(4000)"/>
 
-            <inline-jdbc><xa-properties user="${entity_ds_user}" password="${entity_ds_password}"
-                    URL="jdbc:oracle:thin:@${entity_ds_host}:${entity_ds_port?:'1521'}:${entity_ds_database}"/></inline-jdbc>
+            <inline-jdbc>
+                <xa-properties user="${entity_ds_user}" password="${entity_ds_password}"
+                    URL="jdbc:oracle:thin:@${entity_ds_host}:${entity_ds_port?:'1521'}:${entity_ds_database}"/>
+            </inline-jdbc>
         </database>
 
         <!-- for future reference (OrientDB with JDBC driver): <database name="orientdb"
@@ -822,19 +1047,26 @@
 
         <!--
         * PostgreSQL:
-        <datasource group-name="transactional" database-conf-name="postgres" schema-name="public" startup-add-missing="true" runtime-add-missing="false">
+        <datasource group-name="transactional" database-conf-name="postgres" schema-name="public"
+        startup-add-missing="true" runtime-add-missing="false">
             <inline-jdbc><xa-properties user="moqui" password="moqui" serverName="localhost" portNumber="5432"
                     databaseName="moqui"/></inline-jdbc>
         </datasource>
-        <datasource group-name="transactional" database-conf-name="postgres" schema-name="public" startup-add-missing="true" runtime-add-missing="false">
-            <inline-jdbc jdbc-uri="jdbc:postgresql://127.0.0.1/moqui" jdbc-username="moqui" jdbc-password="moqui"/>
+        <datasource group-name="transactional" database-conf-name="postgres" schema-name="public"
+        startup-add-missing="true" runtime-add-missing="false">
+            <inline-jdbc jdbc-uri="jdbc:postgresql://127.0.0.1/moqui" jdbc-username="moqui"
+        jdbc-password="moqui"/>
         </datasource>
         -->
-        <database name="postgres" lb-name="postgresql" join-style="ansi" from-lateral-style="lateral" result-fetch-size="50"
-                never-try-insert="true" default-isolation-level="ReadCommitted" use-tm-join="true" default-test-query="SELECT 1"
-                constraint-name-clip-length="60"
-                default-jdbc-driver="org.postgresql.Driver" default-xa-ds-class="org.postgresql.xa.PGXADataSource"
-                default-startup-add-missing="true" default-runtime-add-missing="false" use-binary-type-for-blob="true">
+        <database name="postgres" lb-name="postgresql" join-style="ansi"
+            from-lateral-style="lateral" result-fetch-size="50"
+            never-try-insert="true" default-isolation-level="ReadCommitted" use-tm-join="true"
+            default-test-query="SELECT 1"
+            constraint-name-clip-length="60"
+            default-jdbc-driver="org.postgresql.Driver"
+            default-xa-ds-class="org.postgresql.xa.PGXADataSource"
+            default-startup-add-missing="true" default-runtime-add-missing="false"
+            use-binary-type-for-blob="true">
             <!-- NOTE: when Postgres JDBC driver updated can set use-tm-join="true" -->
             <database-type type="number-float" sql-type="FLOAT8"/>
 
@@ -846,8 +1078,11 @@
             <database-type type="binary-very-long" sql-type="BYTEA"/>
 
             <!-- default max connections for PostgreSQL is 100 -->
-            <inline-jdbc pool-maxsize="90"><xa-properties serverName="${entity_ds_host}" portNumber="${entity_ds_port?:'5432'}"
-                    databaseName="${entity_ds_database}" user="${entity_ds_user}" password="${entity_ds_password}"/></inline-jdbc>
+            <inline-jdbc pool-maxsize="90">
+                <xa-properties serverName="${entity_ds_host}" portNumber="${entity_ds_port?:'5432'}"
+                    databaseName="${entity_ds_database}" user="${entity_ds_user}"
+                    password="${entity_ds_password}"/>
+            </inline-jdbc>
         </database>
     </database-list>
 
@@ -855,10 +1090,12 @@
         <!-- No JCR repo by default, but here are some examples: -->
         <!-- requires 'org.apache.jackrabbit:jackrabbit-jcr-rmi' in the classpath:
         <repository name="main" workspace="default" username="admin" password="admin">
-            <init-param name="org.apache.jackrabbit.repository.uri" value="http://localhost:8081/rmi"/></repository> -->
+            <init-param name="org.apache.jackrabbit.repository.uri"
+        value="http://localhost:8081/rmi"/></repository> -->
         <!-- requires 'org.apache.jackrabbit:jackrabbit-jcr2dav' in the classpath:
         <repository name="main" workspace="default" username="admin" password="admin">
-            <init-param name="org.apache.jackrabbit.spi2davex.uri" value="http://localhost:8081/server"/></repository> -->
+            <init-param name="org.apache.jackrabbit.spi2davex.uri"
+        value="http://localhost:8081/server"/></repository> -->
     </repository-list>
 
     <component-list>

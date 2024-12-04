@@ -148,8 +148,8 @@ class EntityFacadeImpl implements EntityFacade {
         initAllDatasources()
 
         entityCache = new EntityCache(this)
-        entityDataFeed = new EntityDataFeed(this)
-        entityDataDocument = new EntityDataDocument(this)
+        //entityDataFeed = new EntityDataFeed(this)
+        //entityDataDocument = new EntityDataDocument(this)
 
         emptyList = new EntityListImpl(this)
         emptyList.setFromCache()
@@ -186,8 +186,8 @@ class EntityFacadeImpl implements EntityFacade {
     }
 
     EntityCache getEntityCache() { return entityCache }
-    EntityDataFeed getEntityDataFeed() { return entityDataFeed }
-    EntityDataDocument getEntityDataDocument() { return entityDataDocument }
+    //EntityDataFeed getEntityDataFeed() { return entityDataFeed }
+    //EntityDataDocument getEntityDataDocument() { return entityDataDocument }
     String getDefaultGroupName() { return defaultGroupName }
 
     // NOTE: used in scripts, etc

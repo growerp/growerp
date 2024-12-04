@@ -1389,12 +1389,13 @@ public abstract class EntityValueBase implements EntityValue {
     @Override public abstract EntityValue cloneValue();
     public abstract EntityValue cloneDbValue(boolean getOld);
 
+    /*
     private boolean doDataFeed(ExecutionContextImpl ec) {
         if (ec.artifactExecutionFacade.entityDataFeedDisabled()) return false;
         // skip ArtifactHitBin, causes funny recursion
         return !"moqui.server.ArtifactHitBin".equals(entityName);
     }
-
+    */
     private void checkSetFieldDefaults(EntityDefinition ed, ExecutionContext ec, Boolean pks) {
         // allow updating a record without specifying default PK fields, so don't check this: if (isCreate) {
         Map<String, String> pkDefaults = ed.entityInfo.pkFieldDefaults;
@@ -1520,7 +1521,7 @@ public abstract class EntityValueBase implements EntityValue {
             efi.runEecaRules(entityName, this, "create", true);
 
             // do this before the db change so modified flag isn't cleared
-            if (doDataFeed(ec)) efi.getEntityDataFeed().dataFeedCheckAndRegister(this, false, valueMapInternal, null);
+          //  if (doDataFeed(ec)) efi.getEntityDataFeed().dataFeedCheckAndRegister(this, false, valueMapInternal, null);
 
             // if there is not a txCache or the txCache doesn't handle the create, call the abstract method to create the main record
             TransactionCache curTxCache = getTxCache(ecfi);
@@ -1593,14 +1594,15 @@ public abstract class EntityValueBase implements EntityValue {
         if (hasFieldDefaults) checkSetFieldDefaults(ed, ec, true);
 
         // if there is one or more DataFeed configs associated with this entity get info about them
+/*
         boolean curDataFeed = doDataFeed(ec);
         if (curDataFeed) {
             ArrayList<EntityDataFeed.DocumentEntityInfo> entityInfoList = efi.getEntityDataFeed().getDataFeedEntityInfoList(entityName);
             if (entityInfoList.size() == 0) curDataFeed = false;
         }
-
+*/
         // need actual DB values for various scenarios? get them here
-        if (needsAuditLog || createOnlyAny || curDataFeed || optimisticLock || hasFieldDefaults) {
+        if (needsAuditLog || createOnlyAny || optimisticLock || hasFieldDefaults) {
             EntityValueBase refreshedValue = (EntityValueBase) this.cloneValue();
             refreshedValue.refresh();
             this.setDbValueMap(refreshedValue.getValueMap());
@@ -1673,7 +1675,7 @@ public abstract class EntityValueBase implements EntityValue {
             }
 
             // do this before the db change so modified flag isn't cleared
-            if (curDataFeed) efi.getEntityDataFeed().dataFeedCheckAndRegister(this, true, valueMapInternal, originalValues);
+  //          if (curDataFeed) efi.getEntityDataFeed().dataFeedCheckAndRegister(this, true, valueMapInternal, originalValues);
 
             // if there is not a txCache or the txCache doesn't handle the update, call the abstract method to update the main record
             if (curTxCache == null || !curTxCache.update(this)) {
@@ -1759,7 +1761,7 @@ public abstract class EntityValueBase implements EntityValue {
             efi.runEecaRules(entityName, this, "delete", true);
 
             // check DataDocuments to update (if not primary entity) or delete (if primary entity)
-            efi.getEntityDataFeed().dataFeedCheckDelete(this);
+       //     efi.getEntityDataFeed().dataFeedCheckDelete(this);
 
             // if there is not a txCache or the txCache doesn't handle the delete, call the abstract method to delete the main record
             TransactionCache curTxCache = getTxCache(ecfi);
