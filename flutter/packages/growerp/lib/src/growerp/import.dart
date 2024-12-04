@@ -69,7 +69,9 @@ Future<bool> login(RestClient client, String username, String password,
 
 import(String inputFile, String? backendUrl, String username, String password,
     String companyName, String currencyId,
-    {FileType overrideFileType = FileType.unknown}) async {
+    {FileType startFileType = FileType.unknown,
+    FileType stopFileType = FileType.unknown,
+    String startFileName = ''}) async {
   var logger = Logger(filter: MyFilter());
   int timeout = 600; //in seconds
 
@@ -87,15 +89,21 @@ import(String inputFile, String? backendUrl, String username, String password,
     final bool alreadyRegistered = await login(client, username, password,
         companyName: companyName, currencyId: currencyId);
     // import
+    bool continueFileType = false;
+    if (startFileType != FileType.unknown) continueFileType = true;
+    bool continueFileName = false;
+    if (startFileName != '') continueFileName = true;
     for (fileType in FileType.values) {
-      if (overrideFileType != FileType.unknown &&
-          overrideFileType != fileType) {
-        continue;
-      }
+      if (stopFileType != FileType.unknown && fileType == stopFileType) exit(0);
+      // check for resume starfiletype
+      if (startFileType == fileType) continueFileType = false;
+      if (continueFileType) continue;
       var fileNames =
           find('${fileType.name}-*.csv', workingDirectory: inputFile).toList();
       fileNames.sort();
       for (final fileName in fileNames) {
+        if (fileName.contains(startFileName)) continueFileName = false;
+        if (continueFileName) continue;
         logger.i("Importing $fileType: $fileName");
         String csvFile = File(fileName).readAsStringSync();
         if (!alreadyRegistered) {}

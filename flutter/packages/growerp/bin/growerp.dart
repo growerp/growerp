@@ -35,7 +35,9 @@ Future<void> main(List<String> args) async {
   String currencyId = '';
   String fiscalYear = '';
   int timeout = 600; //in seconds
-  FileType overrideFileType = FileType.unknown;
+  FileType startFileType = FileType.unknown;
+  FileType stopFileType = FileType.unknown;
+  String startFileName = '';
   Hive.init('growerpDB');
   var logger = Logger(filter: MyFilter());
   var fileTypeList = FileType.values
@@ -67,24 +69,35 @@ Future<void> main(List<String> args) async {
           outputDirectory = args[++i];
         case '-t':
           timeout = int.parse(args[++i]);
-        case '-f':
+        case '-ft':
           i++;
-          overrideFileType = FileType.values.firstWhere(
-              (e) => e.name == args[i],
+          startFileType = FileType.values.firstWhere((e) => e.name == args[i],
               orElse: () => FileType.unknown);
-          if (overrideFileType == FileType.unknown) {
+          if (startFileType == FileType.unknown) {
             logger.e(
-                "Filetype: ${args[i]}  not recognized, existing filetypes $fileTypeList");
+                "Start Filetype: ${args[i]}  not recognized, existing filetypes $fileTypeList");
             exit(1);
           }
+        case '-sft':
+          i++;
+          stopFileType = FileType.values.firstWhere((e) => e.name == args[i],
+              orElse: () => FileType.unknown);
+          if (stopFileType == FileType.unknown) {
+            logger.e(
+                "Stop Filetype: ${args[i]}  not recognized, existing filetypes $fileTypeList");
+            exit(1);
+          }
+        case '-fn':
+          startFileName = args[++i];
         case '-y':
           fiscalYear = args[++i];
         default:
           modifiedArgs.add(args[i]);
       }
     }
-    logger.i(
-        "Growerp command: ${modifiedArgs[0].toLowerCase()} i: $inputFile u: $username p: $password -branch: $branch -f ${overrideFileType.name} -n $companyName -y $fiscalYear");
+    logger.i("Growerp command: ${modifiedArgs[0].toLowerCase()} i: $inputFile "
+        "u: $username p: $password -branch: $branch -ft ${startFileType.name} "
+        "-fn $startFileName -n $companyName -y $fiscalYear");
 
     // commands
     if (modifiedArgs.isEmpty) {
@@ -112,7 +125,9 @@ Future<void> main(List<String> args) async {
             "     -url  The backend url or empty for localhost\n"
             "     -n    The new company name\n"
             "     -c    The currency id to be used, example: USD,EUR\n"
-            "     -f    just this filetype\n"
+            "     -ft   resume from this filetype\n"
+            "     -fn   resume from this filename\n"
+            "     -sft  stop just before this filetype\n"
             " -- export: (under development)\n "
             "     Will export all company related information in csv files\n"
             "     -u    user email address to for logging in.\n"
@@ -131,7 +146,9 @@ Future<void> main(List<String> args) async {
       case 'import':
         import(
             inputFile, backendUrl, username, password, companyName, currencyId,
-            overrideFileType: overrideFileType);
+            startFileType: startFileType,
+            startFileName: startFileName,
+            stopFileType: stopFileType);
       case 'finalize':
         final client = RestClient(await buildDioClient(backendUrl,
             timeout: Duration(seconds: timeout), miniLog: true));

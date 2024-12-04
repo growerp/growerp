@@ -638,7 +638,7 @@ packages:
       path: "../growerp_models"
       relative: true
     source: path
-    version: "1.6.1"
+    version: "1.6.2"
   growerp_order_accounting:
     dependency: "direct main"
     description:
