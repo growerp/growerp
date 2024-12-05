@@ -97,7 +97,7 @@ Future<void> main(List<String> args) async {
     }
     logger.i("Growerp command: ${modifiedArgs[0].toLowerCase()} i: $inputFile "
         "u: $username p: $password -branch: $branch -ft ${startFileType.name} "
-        "-fn $startFileName -n $companyName -y $fiscalYear");
+        "-fn $startFileName -sft ${stopFileType.name} -n $companyName -y $fiscalYear");
 
     // commands
     if (modifiedArgs.isEmpty) {

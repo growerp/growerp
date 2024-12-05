@@ -142,7 +142,6 @@ class PaymentDialogState extends State<PaymentDialog> {
                         "Payment #${finDoc.pseudoId ?? 'New'}",
                     child: BlocConsumer<FinDocBloc, FinDocState>(
                       listener: (context, state) {
-                        print("==== lsitener ${state.status}");
                         if (state.status == FinDocStatus.success) {
                           Navigator.of(context).pop();
                         }
@@ -152,7 +151,6 @@ class PaymentDialogState extends State<PaymentDialog> {
                         }
                       },
                       builder: (context, state) {
-                        print("==== builder ${state.status}");
                         return paymentForm(state, paymentDialogFormKey);
                       },
                     )))));
