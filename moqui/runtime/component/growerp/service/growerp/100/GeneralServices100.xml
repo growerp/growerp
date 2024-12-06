@@ -26,7 +26,7 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <set field="seqName" value="$ownerPartyId-$seqName" />
             <entity-find-one entity-name="moqui.entity.SequenceValueItem" value-field="seqItem"
-                for-update="true">
+                for-update="true" cache="false">
                 <field-map field-name="seqName" from="seqName" />
             </entity-find-one>
             <if condition="!seqItem">
