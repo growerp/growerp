@@ -321,10 +321,10 @@ Future<void> main(List<String> args) async {
     }
 
     // create csv content
-    int nbrOfItems = 500;
+    int nbrOfItems = 500; // maximum number of lines per csv file
     if (fileType == FileType.finDocTransaction ||
         fileType == FileType.finDocTransactionItem) {
-      nbrOfItems = 5000;
+      nbrOfItems = 2000;
     }
     List<String> fileContent = [];
     int fileIndex = 0;
