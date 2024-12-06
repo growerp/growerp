@@ -960,7 +960,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <service-call out-map="context"
                             name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
                         <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                            in-map="[ownerPartyId: ownerPartyId, seqName: finDoc.docType]"
+                            in-map="[ownerPartyId: ownerPartyId, seqName: 'order']"
                             out-map="context" />
                         <if condition="finDoc.sales == true">
                             <entity-find entity-name="mantle.party.contact.PartyContactMech"
