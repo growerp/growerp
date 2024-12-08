@@ -34,26 +34,28 @@ public class RestJsonTest {
 
         /* Assert the initial fruits are there */
         given()
-                .when().get("/fruits")
+                .when().get("/rest/fruits")
                 .then()
                 .statusCode(200)
                 .body(
-                        "$.size()", is(2),
-                        "name", containsInAnyOrder("Apple", "Pineapple"),
-                        "description", containsInAnyOrder("Winter fruit", "Tropical fruit"));
+                        "result.size()", is(2),
+                        "result.name", containsInAnyOrder("Apple", "Pineapple"),
+                        "result.description", containsInAnyOrder("Winter fruit", "Tropical fruit"),
+                        "message", is("OK")
+                        );
 
         /* Add a new fruit */
         given()
                 .body("{\"name\": \"Pear\", \"description\": \"Winter fruit\"}")
                 .header("Content-Type", "application/json")
                 .when()
-                .post("/fruits")
+                .post("/rest/fruits")
                 .then()
                 .statusCode(200)
                 .body(
-                        "$.size()", is(3),
-                        "name", containsInAnyOrder("Apple", "Pineapple", "Pear"),
-                        "description", containsInAnyOrder("Winter fruit", "Tropical fruit", "Winter fruit"));
+                        "result.size()", is(3),
+                        "result.name", containsInAnyOrder("Apple", "Pineapple", "Pear"),
+                        "result.description", containsInAnyOrder("Winter fruit", "Tropical fruit", "Winter fruit"));
     }
 
     @Test

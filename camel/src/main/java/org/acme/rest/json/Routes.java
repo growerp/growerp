@@ -17,7 +17,6 @@
 package org.acme.rest.json;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -70,7 +69,7 @@ public class Routes extends RouteBuilder {
 
         from("direct:addFruit")
                 .process().body(Fruit.class, fruits::add)
-                .setBody().constant(fruits);
+                .setBody().constant(fruitMap);
 
         from("direct:getLegumes")
                 .setBody().constant(legumes);
