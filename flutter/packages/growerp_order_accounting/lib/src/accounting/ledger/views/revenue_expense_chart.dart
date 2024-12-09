@@ -151,7 +151,7 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
                       onChanged: (TimePeriod? newValue) {
                         setState(() => _selectedPeriod = newValue!);
                         _ledgerBloc.add(LedgerFetch(ReportType.revenueExpense,
-                            periodName: '${newValue!.periodName}m01'));
+                            periodName: newValue!.periodName));
                       },
                       items: state.timePeriods,
                       validator: (value) =>

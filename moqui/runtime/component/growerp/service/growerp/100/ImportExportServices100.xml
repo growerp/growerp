@@ -535,7 +535,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="theirAcctgTransId" from="finDoc.reference" />
                         </entity-find>
                         <if condition="!transactions">
-                            <script>System.out.println(">>>Import : could not find ${finDoc.sales?'sales':'purchase'} invoice ${resultCreateFindoc.finDoc.invoiceId} reference ${finDoc.reference}")</script>
+                            <script>System.out.println(">>>Import : could not find transaction for ${finDoc.sales?'sales':'purchase'} invoice ${resultCreateFindoc.finDoc.invoiceId} reference ${finDoc.reference}")</script>
                             <else>
                                 <if condition="!transactions[0].invoiceId">
                                     <!-- ok found empty transaction -->
@@ -560,7 +560,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="otherPartyId" from="finDoc.otherCompany.partyId" />
                     </entity-find>
                     <if condition="!transactions">
-                        <script>System.out.println(">>>Import : could not find ${finDoc.sales?'sales':'purchase'} payment ${resultCreateFindoc.finDoc.paymentId} reference ${finDoc.reference}  otherCompany: ${finDoc.otherCompany.partyId}")</script>
+                        <script>System.out.println(">>>Import : could not find transaction ${finDoc.sales?'sales':'purchase'} payment ${resultCreateFindoc.finDoc.paymentId} reference ${finDoc.reference}  otherCompany: ${finDoc.otherCompany.partyId}")</script>
                         <else>
                             <if condition="!transactions[0].paymentId">
                                 <!-- ok found empty transaction -->
@@ -587,7 +587,7 @@ along with this software (see the LICENSE.md file). If not, see
                             from="finDoc.paymentMethod?.checkNumber" />
                     </entity-find>
                     <if condition="!transactions">
-                        <script>System.out.println(">>>Import : could not find ${finDoc.sales?'sales':'purchase'} payment ${resultCreateFindoc.finDoc.paymentId} checknumber ${finDoc.paymentMethod?.checkNumber}")</script>
+                        <script>System.out.println(">>>Import : could not find transaction for ${finDoc.sales?'sales':'purchase'} payment ${resultCreateFindoc.finDoc.paymentId} checknumber ${finDoc.paymentMethod?.checkNumber}")</script>
                         <else>
                             <if condition="!transactions[0].paymentId">
                                 <!-- ok found empty transaction -->
@@ -844,7 +844,7 @@ along with this software (see the LICENSE.md file). If not, see
                             classificationId: classificationId]" />
                 <if condition="finDocs.isEmpty()">
                     <!-- cannot find, so not try to add items -->
-                    <script>System.out.println(">>>>importing items could not find ${lastItem.pseudoId}")</script>
+                    <script>System.out.println(">>>>importing items ${lastItem.docType} could not find header ${lastItem.pseudoId}")</script>
                     <else>
                         <set field="finDoc" from="finDocs[0]" />
                         <!-- add items collected below to finDoc[0] already got below-->
@@ -1046,10 +1046,6 @@ along with this software (see the LICENSE.md file). If not, see
                         from="ec.user.nowTimestamp.getYear() + 1900" />
                     <order-by field-name="periodNum" />
                 </entity-find>
-                <if condition="!periods">
-                    <set field="limitOut" value="-1" />
-                    <return />
-                </if>
                 <iterate list="periods" entry="period">
                     <service-call name="mantle.party.TimeServices.get#TimePeriodInfo"
                         in-map="[period]" out-map="periodInfo" />
@@ -1060,7 +1056,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <script>ec.user.setEffectiveTime(thruTimestamp)</script>
 
                     <!-- with the assumption that the old system transactions  balance, group all
-                unposted transaction entries in a single transaction and post that -->
+                        unposted transaction entries in a single transaction and post that -->
                     <entity-find entity-name="growerp.account.AcctgTransAndCompany"
                         list="unpostedTrans">
                         <econdition field-name="isPosted" operator="not-equals" value="Y"
@@ -1079,7 +1075,7 @@ along with this software (see the LICENSE.md file). If not, see
                             in-map="[pseudoId: seqNum, description: 'Conversion combined unposted entries',
                             organizationPartyId: companyPartyId]"
                             out-map="context" />
-                        <!-- re-assign all unposted entries to ne transaction -->
+                        <!-- re-assign all unposted entries to one new transaction -->
                         <set field="index" value="1" type="Integer" />
                         <iterate list="unpostedTrans" entry="trans">
                             <entity-find entity-name="mantle.ledger.transaction.AcctgTransEntry"
@@ -1103,12 +1099,21 @@ along with this software (see the LICENSE.md file). If not, see
                             in-map="[acctgTransId: acctgTransId]" />
                         <script>System.out.println(">>>Grouped ${transEntries?.size()} unposted ledger entries in a single transaction and posted these")</script>
                     </if>
+                    <log message="=========closing period ${period.periodName}" />
                     <!-- period should succeeed to close -->
                     <service-call name="growerp.100.AccountingServices100.close#FinancialTimePeriod"
                         in-map="[timePeriodId: period.timePeriodId, closeChildren: true]" />
+                    <!-- calculate totals for the closed period -->
+                    <log message="=========recalculateclosing period ${period.periodName}" />
+                    <service-call
+                        name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries"
+                        in-map="[timePeriodId: period.timePeriodId,
+                                organizationPartyId: companyPartyId,
+                                recalculateClosed: true,
+                                lastRunTime: fromTimestamp]" />
                     <script>System.out.println(">>>Posted ledger time period ${period.periodName}")</script>
                 </iterate>
-                <set field="limit" value="0" />
+                <set field="limit" from="periods? 0 :  -1" />
             </if>
             <!-- invoices -->
             <if condition="part == 'approveInvoices'">

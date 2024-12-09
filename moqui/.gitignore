@@ -9,7 +9,7 @@ build
 /Save*.zip
 
 # runtime local db
-/runtime/db
+/runtime/db*
 /runtime/elasticsearch
 /runtime/log
 /runtime/txlog

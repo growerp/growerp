@@ -36,6 +36,7 @@ if [ "$STRIPE_SECRET_KEY" != "" ] ; then
 fi
 if [ "$DISABLE_SECA" == "true" ] ; then
     echo "removing seca files for conversion load"
+    rm runtime/component/mantle-usl/service/OrderReturn.secas.xml
     rm runtime/component/mantle-usl/service/AccountingInvoice.secas.xml
     rm runtime/component/mantle-usl/service/AccountingLedger.secas.xml
     rm runtime/component/mantle-usl/service/AccountingPayment.secas.xml

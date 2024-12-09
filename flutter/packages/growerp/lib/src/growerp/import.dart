@@ -173,8 +173,6 @@ import(String inputFile, String? backendUrl, String username, String password,
         }
       }
     }
-    // recalculate ledger totals
-    await client.calculateLedger();
   } on DioException catch (e) {
     logger.e("Importing filetype: ${fileType.name} Error: ${getDioError(e)}");
   }

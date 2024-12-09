@@ -601,12 +601,15 @@ along with this software (see the LICENSE.md file). If not, see
             </script>
             <set field="thruDate"
                 from='java.sql.Timestamp.valueOf("${periodName.substring(1,5)}-12-31 23:59:59.0")' />
+            <log
+                message="====rev report thrudate ${thruDate.toString()} period: $periodName party: $companyPartyId" />
             <service-call name="mantle.party.TimeServices.find#PartyTimePeriodGroups"
                 out-map="periodsOut"
                 in-map="[partyId:companyPartyId,
-                        timePeriodTypeId: typeConvert[periodName.size() > 5 ? periodName.substring(5,6): 'FiscalMonth'],
+                        timePeriodTypeId: typeConvert[periodName.substring(0,1)],
                         thruDate:thruDate,
                         groups:(periods?:13)]" />
+            <log message="=====groups found: ${periodsOut?.timePeriodGroups?.size()}" />
             <if condition="periodsOut.timePeriodGroups">
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummary"
                     out-map="context"

@@ -156,27 +156,28 @@ Future<void> main(List<String> args) async {
             companyName: companyName, currencyId: currencyId);
 
         Map<String, int> parts = {
-          'closePeriod': 2,
+          'closePeriod': 1,
           'approveInvoices': 10000,
           'completePayments': 10000,
           'completeInvoicesOrders': 10000,
           'receiveShipments': 10000,
           'sendShipments': 10000,
         };
-        int start = 0, limitOut; // count = 1;
+        int start = 0, limitOut; //, count = 2;
         Map<String, dynamic> result = {};
         try {
           parts.forEach((part, limit) async {
             logger.i("processing finalize part: $part");
             start = 0;
             do {
-              logger.i("start: $start limit: $limit");
+              print("start: $start limit: $limit");
               result = await client.finalizeImport(
                   start: start, limit: limit, part: part);
-              logger.i("result part: $part ${result['limitOut']}");
+              print("result part: $part ${result['limitOut']}");
               limitOut = int.parse(result['limitOut']);
               start += limitOut;
-            } while (limitOut != -1); // && count-- != 0);
+              print("===end of while: $limitOut != -1");
+            } while (limitOut != -1); // && --count != 0);
           });
         } catch (e) {
           logger.e("====error: $e");
