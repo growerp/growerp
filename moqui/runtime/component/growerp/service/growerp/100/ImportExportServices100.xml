@@ -1104,12 +1104,13 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.AccountingServices100.close#FinancialTimePeriod"
                         in-map="[timePeriodId: period.timePeriodId, closeChildren: true]" />
                     <!-- calculate totals for the closed period -->
-                    <log message="=========recalculateclosing period ${period.periodName}" />
+                    <!--log
+                    message="=========recalculateclosing period ${period.periodName}" />
                     <service-call
                         name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries"
                         in-map="[year: period.periodName.substring(1),
                                 organizationPartyId: companyPartyId,
-                                recalculateClosed: true]" />
+                                recalculateClosed: true]" /-->
                     <script>System.out.println(">>>Posted ledger time period ${period.periodName}")</script>
                 </iterate>
                 <set field="limit" from="periods? 0 :  -1" />
