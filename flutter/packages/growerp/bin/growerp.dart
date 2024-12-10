@@ -177,6 +177,9 @@ Future<void> main(List<String> args) async {
               limitOut = int.parse(result['limitOut']);
               start += limitOut;
               print("===end of while: $limitOut != -1");
+              if (part == 'closePeriod') {
+                sleep(10, interval: Interval.seconds);
+              }
             } while (limitOut != -1); // && --count != 0);
           });
         } catch (e) {

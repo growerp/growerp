@@ -2009,6 +2009,7 @@ along with this software (see the LICENSE.md file). If not, see
         don't expose to unprotected access -->
         <in-parameters>
             <parameter name="organizationPartyId" />
+            <parameter name="year" />
             <parameter name="lastRunTime" type="Timestamp" />
             <parameter name="recalculateClosed" type="Boolean" default="false" />
             <parameter name="deleteExisting" type="Boolean" default="false" />
@@ -2020,8 +2021,14 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="gaoUpdated" from="0" />
             <set field="gaotpUpdated" from="0" />
 
+            <!-- GROWERP added parameter 'YEAR' to recalculate a specific year only -->
+            <if condition="year">
+                <set field="yearLike" value="%${year}%" />
+            </if>
             <!-- find all open fiscal TimePeriods and use for GlAccountOrgTimePeriod records -->
             <entity-find entity-name="mantle.party.time.TimePeriodAndType" list="timePeriodList">
+                <econdition field-name="periodName" operator="like" from="yearLike"
+                    ignore-if-empty="true" />
                 <econdition field-name="fromDate" operator="less-equals" from="nowDate" /><!--
                 filter future periods, may remove this if future posting allowed -->
                 <econdition field-name="periodPurposeEnumId" value="Fiscal" />

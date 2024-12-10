@@ -1107,10 +1107,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <log message="=========recalculateclosing period ${period.periodName}" />
                     <service-call
                         name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries"
-                        in-map="[timePeriodId: period.timePeriodId,
+                        in-map="[year: period.periodName.substring(1),
                                 organizationPartyId: companyPartyId,
-                                recalculateClosed: true,
-                                lastRunTime: fromTimestamp]" />
+                                recalculateClosed: true]" />
                     <script>System.out.println(">>>Posted ledger time period ${period.periodName}")</script>
                 </iterate>
                 <set field="limit" from="periods? 0 :  -1" />
