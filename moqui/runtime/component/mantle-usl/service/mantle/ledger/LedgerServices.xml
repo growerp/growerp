@@ -2004,7 +2004,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="recalculate" noun="GlAccountOrgSummaries" semaphore="wait"
         semaphore-parameter="organizationPartyId"
-        authenticate="anonymous-all" transaction-timeout="1800">
+        authenticate="anonymous-all" transaction-timeout="9000">
         <!-- NOTE: this service is not protected for authz/authc so that it can run in background;
         don't expose to unprotected access -->
         <in-parameters>
