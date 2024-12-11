@@ -20,16 +20,19 @@ void main() async {
       required: false);
 
   // check names
-  List<String> names = [];
+  Map<String, String> names = {};
   if (nameList.isEmpty) {
-    names = apps;
+    for (final app in apps) {
+      names[app] = '';
+    }
   } else {
-    names = nameList.split(',');
     bool error = false;
-    for (var name in names) {
+    for (var name in nameList.split(',')) {
       if (!apps.contains(name)) {
         print("$name is not a valid appName");
         error = true;
+      } else {
+        names[name] = '';
       }
     }
     if (error == true) {
@@ -133,69 +136,68 @@ void main() async {
   print(
       "=== next version:  major.minor.patch: $largestMajorNumber.$largestMinorNumber.$largestPatchNumber");
 
-  for (var app in apps) {
-    if ((names.isNotEmpty && names.contains(app)) || names.isEmpty) {
-      // create new version
-      currentVersion = getVersion(app);
-      newVersion =
-          "$largestMajorNumber.$largestMinorNumber.$largestPatchNumber${currentVersion.substring(currentVersion.indexOf('+'))}";
-      print(
-          "=== update versionfile: ${app == 'growerp-moqui' ? '$home/moqui/runtime/component/growerp/component.xml' : '$home/flutter/packages/$app/pubspec.yaml'}"
-          " old version $currentVersion new version: $newVersion");
-      if (upgradePatchVersion.toUpperCase() == 'Y') {
-        // write back new version
-        if (app == 'growerp-moqui') {
-          replace(
-              '$home/moqui/runtime/component/growerp/component.xml',
-              'name="growerp" version="$currentVersion',
-              'name="growerp" version="$newVersion');
-        } else {
-          // write back to pubspec file:
-          replace('$home/flutter/packages/$app/pubspec.yaml',
-              'version: $currentVersion', 'version: $newVersion');
-        }
+  for (var app in names.keys) {
+    // create new version
+    currentVersion = getVersion(app);
+    newVersion =
+        "$largestMajorNumber.$largestMinorNumber.$largestPatchNumber${currentVersion.substring(currentVersion.indexOf('+'))}";
+    print(
+        "=== update versionfile: ${app == 'growerp-moqui' ? '$home/moqui/runtime/component/growerp/component.xml' : '$home/flutter/packages/$app/pubspec.yaml'}"
+        " old version $currentVersion new version: $newVersion");
+    if (upgradePatchVersion.toUpperCase() == 'Y') {
+      // write back new version
+      if (app == 'growerp-moqui') {
+        replace(
+            '$home/moqui/runtime/component/growerp/component.xml',
+            'name="growerp" version="$currentVersion',
+            'name="growerp" version="$newVersion');
+      } else {
+        // write back to pubspec file:
+        replace('$home/flutter/packages/$app/pubspec.yaml',
+            'version: $currentVersion', 'version: $newVersion');
       }
-      // create image with latest tag
-      String dockerImage = 'growerp/$app';
-      var dockerTag = newVersion.substring(0, newVersion.indexOf('+'));
-      print("=== create docker image: $dockerImage with tag: latest");
+    }
+    // create image with latest tag
+    String dockerImage = 'growerp/$app';
+    var dockerTag = newVersion.substring(0, newVersion.indexOf('+'));
+    print("=== create docker image: $dockerImage with tag: latest");
+    if (!test) {
+      if (app == 'growerp-moqui') {
+        run('docker build --progress=plain -t $dockerImage:latest . --no-cache',
+            workingDirectory: '$home/moqui');
+      } else {
+        run(
+            'docker build --file $home/flutter/packages/$app/Dockerfile '
+            '--progress=plain -t $dockerImage:latest . --no-cache',
+            workingDirectory: '$home/flutter');
+      }
+      names[app] = "docker images -q $dockerImage:latest".firstLine ?? '?';
+    }
+    if (push.toUpperCase() == 'Y') {
+      print("=== pushing docker image: $dockerImage with tag: latest");
       if (!test) {
-        if (app == 'growerp-moqui') {
-          run('docker build --progress=plain -t $dockerImage:latest . --no-cache',
-              workingDirectory: '$home/moqui');
-        } else {
-          run(
-              'docker build --file $home/flutter/packages/$app/Dockerfile '
-              '--progress=plain -t $dockerImage:latest . --no-cache',
-              workingDirectory: '$home/flutter');
-        }
+        run('docker push $dockerImage:latest');
       }
-      if (push.toUpperCase() == 'Y') {
-        print("=== pushing docker image: $dockerImage with tag: latest");
+      if (upgradePatchVersion.toUpperCase() == 'Y') {
+        print(
+            "=== create/push docker image: $dockerImage with tag: $dockerTag");
         if (!test) {
-          run('docker push $dockerImage:latest');
-        }
-        if (upgradePatchVersion.toUpperCase() == 'Y') {
-          print(
-              "=== create/push docker image: $dockerImage with tag: $dockerTag");
-          if (!test) {
-            run('docker tag $dockerImage:latest $dockerImage:$dockerTag');
-            run('docker push $dockerImage:$dockerTag');
-          }
+          run('docker tag $dockerImage:latest $dockerImage:$dockerTag');
+          run('docker push $dockerImage:$dockerTag');
         }
       }
     }
   }
-  // update git
   var gitTag = newVersion.substring(0, newVersion.indexOf('+'));
 
-  var commitMessage =
-      "Image(s) created for App(s) ${(names.isEmpty ? apps : names).join(',')} "
+  var appsData = [];
+  names.forEach((k, v) => appsData.add('$k:$v '));
+  var commitMessage = "Image(s) created for App(s):  ${appsData.join(',')}))  "
       "with tag $gitTag";
   if (upgradePatchVersion.toUpperCase() == 'Y') {
     print("=== save version files in git with message: $commitMessage");
     if (!test) {
-      for (var name in names.isEmpty ? apps : names) {
+      for (var name in names.keys) {
         switch (name) {
           case 'growerp-moqui':
             run('git add $home/moqui/runtime/component/growerp/component.xml',
