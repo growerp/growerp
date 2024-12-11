@@ -166,22 +166,16 @@ Future<void> main(List<String> args) async {
         int start = 0, limitOut; //, count = 2;
         Map<String, dynamic> result = {};
         try {
-          parts.forEach((part, limit) async {
-            logger.i("processing finalize part: $part");
+          for (var part in parts.entries) {
+            logger.i("processing finalize part: ${part.key}");
             start = 0;
             do {
-              print("start: $start limit: $limit");
               result = await client.finalizeImport(
-                  start: start, limit: limit, part: part);
-              print("result part: $part ${result['limitOut']}");
+                  start: start, limit: part.value, part: part.key);
               limitOut = int.parse(result['limitOut']);
               start += limitOut;
-              print("===end of while: $limitOut != -1");
-              if (part == 'closePeriod') {
-                sleep(10, interval: Interval.seconds);
-              }
             } while (limitOut != -1); // && --count != 0);
-          });
+          }
         } catch (e) {
           logger.e("====error: $e");
           exit;

@@ -1147,7 +1147,9 @@ along with this software (see the LICENSE.md file). If not, see
                         <script>ec.user.setEffectiveTime(transList[0].postedDate)</script>
 
                         <!-- convert to credit memo if total negative -->
-                        <if condition="invoice.invoiceTotal.signum() == -1">
+                        <service-call name="mantle.account.InvoiceServices.get#InvoiceTotal"
+                            in-map="[invoiceId:invoice.invoiceId]" out-map="totalOut" />
+                        <if condition="totalOut.invoiceTotal &lt; 0.0">
                             <set field="temp" from="invoice.toPartyId" />
                             <set field="invoice.toPartyId" from="invoice.fromPartyId" />
                             <set field="invoice.fromPartyId" from="temp" />
