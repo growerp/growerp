@@ -109,8 +109,7 @@ class PaymentDialogState extends State<PaymentDialog> {
     _paymentInstrument = finDocUpdated.paymentInstrument == null
         ? PaymentInstrument.cash
         : finDocUpdated.paymentInstrument!;
-    _finDocBloc = context.read<FinDocBloc>()
-      ..add(FinDocGetPaymentTypes(sales: finDoc.sales));
+    _finDocBloc = context.read<FinDocBloc>();
     _companyUserBloc = context.read<DataFetchBloc<CompaniesUsers>>()
       ..add(GetDataEvent(() => context.read<RestClient>().getCompanyUser(
           limit: 3,

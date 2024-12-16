@@ -304,7 +304,7 @@ class FinDocListState extends State<FinDocList> {
                           heroTag: "btn3",
                           onPressed: () async =>
                               _finDocBloc.add(const FinDocFetch(refresh: true)),
-                          tooltip: 'Add New',
+                          tooltip: 'refresh',
                           child: const Icon(Icons.refresh)),
                     )
                   ],
