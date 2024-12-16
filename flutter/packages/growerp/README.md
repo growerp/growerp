@@ -103,3 +103,15 @@ will create a new directory: growerpOutput with the converted file(s).
     ```bash
     growerp import -i growerpOutput -u username -p password
     ```
+
+# the complete conversion process.
+
+1. Export files from the old system
+2. adjust the convert_to_csv program
+3. Import process
+  1. [pause](http://localhost:8080/vapps/system/ServiceJob/Jobs/ServiceJobDetail?jobName=recalculate_GlAccountOrgSummaries) the 'recalculate account summaries' program
+  2. run the import growerp command
+  3. disable the accounting seca by removing the programs as listed in the [initstart](moqui/runtime/component/growerp/deploy/initstart.sh) file under 'DISABLE_SECA' setting
+  4. run the finalize growerp command
+4. enable the recalculate job and restore the seca files.
+

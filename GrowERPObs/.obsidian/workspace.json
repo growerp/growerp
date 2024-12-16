@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "3 Technical documentation/3 Moqui Backend.md",
+                "file": "1 Introduction/5 Road Map.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "3 Moqui Backend"
+              "title": "5 Road Map"
             }
           }
         ]
@@ -61,16 +61,6 @@
               },
               "icon": "lucide-search",
               "title": "Search"
-            }
-          },
-          {
-            "id": "bdd5b9c949b7ec83",
-            "type": "leaf",
-            "state": {
-              "type": "starred",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "Plugin no longer active"
             }
           },
           {
@@ -188,6 +178,7 @@
   },
   "active": "cd2ba6fa8750f0f9",
   "lastOpenFiles": [
+    "3 Technical documentation/3 Moqui Backend.md",
     "1 Introduction/6 Releases.md",
     "2 End User documentation/1 Introduction/2 Getting Started.md",
     "1 Introduction/3 Feature list.md",
@@ -207,7 +198,6 @@
     "2 End User documentation/7 Accounting/9 Account Class reference.md",
     "2 End User documentation/7 Accounting/1 getting started.md",
     "2 End User documentation/7 Accounting/8 Account type reference.md",
-    "3 Technical documentation/3 Moqui Backend.md",
     "1 Introduction/2 What is GrowERP.md",
     "media/growerp-overview.jpg",
     "1 Introduction/1 Overview.md",
