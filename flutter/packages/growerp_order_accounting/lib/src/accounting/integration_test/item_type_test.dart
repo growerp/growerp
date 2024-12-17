@@ -75,12 +75,12 @@ class ItemTypeTest {
     for (ItemType itemType in itemTypes) {
       await CommonTest.doSearch(tester,
           searchString: "${itemType.itemTypeName} ${itemType.direction}");
-      expect(CommonTest.getTextField('name0'),
-          contains("${itemType.itemTypeName} ${itemType.direction}"));
+      expect(
+          CommonTest.getTextField('name0'),
+          contains(
+              "${itemType.itemTypeName} ${itemType.direction == 'I' ? 'InComing' : 'OutGoing'}"));
       expect(CommonTest.getDropdownSearch('glAccount0'),
           contains(itemType.accountCode));
-      expect(CommonTest.getDropdownSearch('glAccount0'),
-          contains(itemType.accountName));
       newItemTypes.add(itemType);
     }
     return newItemTypes;

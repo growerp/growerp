@@ -226,6 +226,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     FinDocGetItemTypes event,
     Emitter<FinDocState> emit,
   ) async {
+    emit(state.copyWith(status: FinDocStatus.loading));
     try {
       late List<ItemType> itemTypes;
       if (event.searchString == null) {
@@ -296,6 +297,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     FinDocGetPaymentTypes event,
     Emitter<FinDocState> emit,
   ) async {
+    emit(state.copyWith(status: FinDocStatus.loading));
     try {
       late List<PaymentType> paymentTypes;
       if (event.searchString == null) {
