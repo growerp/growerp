@@ -69,8 +69,6 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
         case ReportType.revenueExpense:
           result = await restClient.getOperatingRevenueExpenseChart(
               periodName: event.periodName);
-        default:
-          result = LedgerReport();
       }
 
       return emit(state.copyWith(

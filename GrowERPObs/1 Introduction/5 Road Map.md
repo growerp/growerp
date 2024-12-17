@@ -10,7 +10,7 @@ Let us know if you have suggestions at support@growerp.com
 	 4. Blog/article list
  2. Support content marketing
 	 1. mailing list integration
-	 2. twitter/X  linkedin medium integration
+	 2. twitter/X  Linkedin Medium integration
 	 3. article/post management
 	 4. Tutorial/course application
  3. External system interfaces
@@ -19,7 +19,7 @@ Let us know if you have suggestions at support@growerp.com
  4. Update the freelancer app with a project manager
  5. Create a manufacturing app
  6. Create a logistic app
- 7. Create a POS for a small shop (https://github.com/elrizwiraswara/flutter_pos?)
+ 7. Create a POS for a shop (https://github.com/elrizwiraswara/flutter_pos?)
 ## Technical internal requests
 * Creation of a system integration package probably:  https://github.com/apache/camel-quarkus-examples
 * Introduction of a new router: [go_router](https://pub.dev/packages/go_router)

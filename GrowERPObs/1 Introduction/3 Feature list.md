@@ -30,10 +30,6 @@ The features currently implemented in the system are listed below. For a roadmap
 * Automatic posting over configuration entities
 * Double entry ledger
 * Any ledger organization
-## Ecommerce
-* sales of products with category menu
-* Deals and featured promotion
-* Including payment processing with monthly payments
 ## Marketing
 * Opportunity management
 

@@ -47,14 +47,15 @@ class AccountingForm extends StatelessWidget {
               "(${authenticate.stats?.salesInvoicesNotPaidCount})",
         ]),
         makeDashboardItem('acctPurchase', context, acctMenuOptions[2], [
-          "Open invoices: "
-              "$currencySymbol ",
-          "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
+          "Open invoices: ",
+          "$currencySymbol "
+              "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.purchInvoicesNotPaidCount})",
         ]),
         makeDashboardItem('acctLedger', context, acctMenuOptions[3],
             ["Accounts", "Transactions", "Journal"]),
         makeDashboardItem('acctReports', context, acctMenuOptions[4], [
+          "Revenue Expense",
           "Balance Sheet",
           "Balance summary",
         ]),

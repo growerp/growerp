@@ -15,5 +15,5 @@ if [ -d /tmp/growerp ]; then
 else
   git clone git@github.com:growerp/growerp.git /tmp/growerp
 fi
-docker compose -f /tmp/growerp/flutter/docker-compose.test.yml up
+docker compose -f /tmp/growerp/flutter/docker-compose-test.yml up
 

@@ -1,3 +1,4 @@
+
 networks:
   my-network:
     driver: bridge
@@ -82,7 +83,7 @@ services:
       - my-network
 
   moqui-database:
-    image: postgres:12.1
+    image: postgres:17.2
     container_name: postgres
     restart: always
     ports:

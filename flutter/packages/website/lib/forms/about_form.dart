@@ -71,7 +71,6 @@ class AboutForm extends StatelessWidget {
                   'https://apps.apple.com/us/app/growerp-hotel-open-source/id1531267095',
                   '2c. Apple app store\n'),
               _text("Hotel front desk reservation and room management\n\n"),
-              _textLink('https://ecommerce.growerp.org', '3. ecommerce\n'),
               _text('via categories/products create order and send to '
                   'related company\n\n'),
               _text('4. restaurant\n'),

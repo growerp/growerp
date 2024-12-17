@@ -1055,7 +1055,6 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="status" from="openStatusList" />
                             <set field="fromDate" from="weekOldDate" />
                         </if>
-                        <log message="=================search: $search party: $companyPartyId" />
                         <entity-find offset="start" limit="limit" list="items"
                             entity-name="growerp.warehouse.ShipmentAndPartiesAndWarehouse">
                             <econdition field-name="vendorPartyId" from="vendorPartyId"

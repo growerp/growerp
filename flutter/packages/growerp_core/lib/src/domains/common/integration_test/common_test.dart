@@ -356,7 +356,9 @@ class CommonTest {
     if (find
         .byKey(Key(widgetKey))
         .toString()
-        .startsWith('Found 0 widgets with key')) return false;
+        .startsWith('Found 0 widgets with key')) {
+      return false;
+    }
     return true;
   }
 
