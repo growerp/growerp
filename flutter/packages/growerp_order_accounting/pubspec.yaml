@@ -49,7 +49,7 @@ dependencies:
   flutter_colorpicker: ^1.1.0
   from_css_color: ^2.0.0
   path_provider: ^2.0.11
-  file_picker: ^8.0.7
+  file_picker: ^5.2.0+1
   fast_csv: ^0.2.6
   archive: ^3.3.0
   scrollable_positioned_list: ^0.3.8
