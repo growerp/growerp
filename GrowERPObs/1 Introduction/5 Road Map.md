@@ -5,7 +5,7 @@ Let us know if you have suggestions at support@growerp.com
 ## Functional requests
  1. Website update
 	 1. One page checkout
-	 2. multi user stripe
+	 2. use your own stripe account
 	 3. integrate flutter admin/freelance/health in website
 	 4. Blog/article list
  2. Support content marketing

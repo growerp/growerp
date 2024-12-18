@@ -4,8 +4,8 @@ version: 1.0.0+1
 publish_to: none
 
 environment:
-  sdk: '>=3.2.6 <4.0.0'
-  flutter: '>=1.17.0'
+  sdk: ">=3.2.6 <4.0.0"
+  flutter: ">=1.17.0"
 
 dependencies:
   flutter:
@@ -20,8 +20,6 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^8.1.4
 
-dev_dependencies:
-
 flutter:
   uses-material-design: true
   assets:
@@ -34,4 +32,3 @@ flutter:
     - packages/growerp_core/images/growerpDark.jpg
     - packages/growerp_core/images/growerp100.png
     - packages/growerp_core/images/growerpDark100.png
-
