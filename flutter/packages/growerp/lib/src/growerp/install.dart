@@ -60,5 +60,6 @@ install(String growerpPath, String branch) {
   }
   logger.i("Install successfull, now starting the admin app with chrome\n"
       " You can create company and login, parameters are provided...");
-  run('flutter run', workingDirectory: '$growerpPath/flutter/packages/admin');
+  run('flutter run -d chrome',
+      workingDirectory: '$growerpPath/flutter/packages/admin');
 }

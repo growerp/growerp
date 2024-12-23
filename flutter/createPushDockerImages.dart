@@ -191,8 +191,8 @@ void main() async {
   var gitTag = newVersion.substring(0, newVersion.indexOf('+'));
 
   var appsData = [];
-  names.forEach((k, v) => appsData.add('$k:$v '));
-  var commitMessage = "Image(s) created for App(s):  ${appsData.join(',')}))  "
+  names.forEach((k, v) => appsData.add('$k:$v \n'));
+  var commitMessage = "Image(s) created for App(s):\n  ${appsData.join(',')} "
       "with tag $gitTag";
   if (upgradePatchVersion.toUpperCase() == 'Y') {
     print("=== save version files in git with message: $commitMessage");

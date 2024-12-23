@@ -2,7 +2,7 @@
 
 GrowERP is an open source multi platform ERP application you can use right now!
 
-### PRODUCTION version:
+## PRODUCTION version:
 Admin application
 - Web:     https://admin.growerp.com
 - Android: https://play.google.com/store/apps/details?id=org.growerp.admin
@@ -13,7 +13,7 @@ Hotel application:
 - Android: https://play.google.com/store/apps/details?id=org.growerp.hotel
 - IOS:     https://apps.apple.com/app/growerp-hotel-open-source/id1531267095 
 
-### TEST NEXT version:
+## TEST NEXT version:
 Admin application
 - Web:     https://admin.growerp.org
 
@@ -24,7 +24,18 @@ When the application is started, create a new company, select demo data or an em
 
 Documentation available at https://www.growerp.com
 
-## Install GrowERP locally using global growerp command
+# Install GrowERP locally
+
+## What is needed? 
+    Java JDK 11:    https://www.oracle.com/th/java/technologies/javase/jdk11-archive-downloads.html  
+    Flutter:        https://flutter.dev/  
+    Chrome:         https://www.google.com/chrome/  
+    Git:            https://git-scm.com/downloads  
+    Android studio: https://developer.android.com/studio  
+    VS code:        https://code.visualstudio.com/  
+
+## To install GrowERP the easy way:
+
 ```sh
 dart pub global activate growerp
 growerp install
@@ -46,14 +57,14 @@ cd chat
 ### start backend in separate terminal
 Initialize: (only the first time)
 ```sh
-    cd moqui
-    ./gradlew build
-    java -jar moqui.war load types=seed,seed-initial,install no-run-es
+cd moqui
+./gradlew build
+java -jar moqui.war load types=seed,seed-initial,install no-run-es
 ```
 Run:
 ```sh
-    cd moqui
-    java -jar moqui.war no-run-es
+cd moqui
+java -jar moqui.war no-run-es
 ```
 ### run the flutter emulator or browser
 Initialize; (only the first time)
