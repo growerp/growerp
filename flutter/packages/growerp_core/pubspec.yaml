@@ -44,7 +44,7 @@ dependencies:
   flutter_colorpicker: ^1.1.0
   from_css_color: ^2.0.0
   path_provider: ^2.0.11
-  file_picker: ^5.2.0+1
+  file_picker: ^8.1.7
   fast_csv: ^0.2.6
   archive: ^3.3.0
   image: ^4.0.17
