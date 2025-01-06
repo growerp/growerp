@@ -701,9 +701,10 @@ class UserDialogState extends State<UserDialogStateFull> {
                         context, "Image upload error!", Colors.red);
                   } else {
                     _userBloc.add(UserUpdate(updatedUser));
+                    // if logged-in user update authBloc
                     if (_authBloc.state.authenticate!.user!.partyId ==
                         updatedUser.partyId) {
-                      _userBloc.add(UserUpdate(updatedUser));
+                      _authBloc.add(AuthLoad());
                     }
                   }
                 }
