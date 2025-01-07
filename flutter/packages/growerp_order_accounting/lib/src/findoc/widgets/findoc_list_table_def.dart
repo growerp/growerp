@@ -74,12 +74,14 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
               const SizedBox(width: 10),
               Text(
                 classificationId == 'AppHotel'
-                    ? item.items[0].rentalFromDate != null
-                        ? item.items[0].rentalFromDate
-                            .toString()
-                            .substring(0, 10)
-                        : '???'
-                    : "${item.creationDate?.toString().substring(0, 11)}",
+                    ? (item.items[0].rentalFromDate != null
+                        ? '${item.items[0].rentalFromDate?.dateOnly()}'
+                        : '??')
+                    : item.placedDate != null
+                        ? '${item.placedDate?.dateOnly()}'
+                        : item.creationDate != null
+                            ? '${item.creationDate?.dateOnly()}'
+                            : '??',
                 key: const Key('date'),
               ),
             ],
@@ -116,15 +118,22 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         name: Text('${item.docType} Id'),
         value: Text(item.pseudoId ?? '', key: Key('id$index'))));
     rowContent.add(TableRowContent(
-        width: 12,
-        name: Text(
-            classificationId == 'AppHotel' ? 'Reserv. Date' : 'Creation Date'),
-        value: Text(
-            classificationId == 'AppHotel' &&
-                    item.items[0].rentalFromDate != null
-                ? item.items[0].rentalFromDate.toString().substring(0, 10)
-                : "${item.creationDate?.toString().substring(0, 11)}",
-            key: Key("date$index"))));
+      width: 12,
+      name: Text(
+          classificationId == 'AppHotel' ? 'Reserv. Date' : 'Creation Date'),
+      value: Text(
+        classificationId == 'AppHotel'
+            ? (item.items[0].rentalFromDate != null
+                ? '${item.items[0].rentalFromDate?.dateOnly()}'
+                : '??')
+            : item.placedDate != null
+                ? '${item.placedDate?.dateOnly()}'
+                : item.creationDate != null
+                    ? '${item.creationDate?.dateOnly()}'
+                    : '??',
+        key: const Key('date'),
+      ),
+    ));
     rowContent.add(TableRowContent(
         width: 20,
         name: Text(item.sales ? 'Customer' : 'Supplier'),
@@ -192,7 +201,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
               })
       ])));
   return TableData(
-      rowHeight: isPhone(context) ? 63 : 20, rowContent: rowContent);
+      rowHeight: isPhone(context) ? 65 : 20, rowContent: rowContent);
 }
 
 // general settings
