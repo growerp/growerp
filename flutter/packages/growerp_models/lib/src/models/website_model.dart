@@ -35,6 +35,7 @@ class Website with _$Website {
     @Default('') String colorJson,
     @Default('') String obsidianName,
     @Default('') String measurementId,
+    @Default('') String stripeApiKey,
   }) = _Website;
 
   factory Website.fromJson(Map<String, dynamic> json) =>

@@ -44,11 +44,13 @@ class WebsiteFormState extends State<WebsiteForm> {
   final _titleController = TextEditingController();
   final _obsidianController = TextEditingController();
   final _measurementIdController = TextEditingController();
+  final _stripeApiKeyController = TextEditingController();
   final _productSearchBoxController = TextEditingController();
   final _categorySearchBoxController = TextEditingController();
   final _websiteFormKey1 = GlobalKey<FormState>();
   final _websiteFormKey2 = GlobalKey<FormState>();
   final _websiteFormKey3 = GlobalKey<FormState>();
+  final _websiteFormKey4 = GlobalKey<FormState>();
   ScrollController myScrollController = ScrollController();
   late String classificationId;
   late RestClient restClient;
@@ -89,6 +91,7 @@ class WebsiteFormState extends State<WebsiteForm> {
           _titleController.text = websiteState.website!.title;
           _obsidianController.text = websiteState.website!.obsidianName;
           _measurementIdController.text = websiteState.website!.measurementId;
+          _stripeApiKeyController.text = websiteState.website!.stripeApiKey;
           _updatedContent = List.of(websiteState.website!.websiteContent);
           _selectedCategories =
               List.of(websiteState.website!.productCategories);
@@ -690,6 +693,34 @@ class WebsiteFormState extends State<WebsiteForm> {
                         _websiteBloc.add(WebsiteUpdate(Website(
                             id: state.website!.id,
                             measurementId: _measurementIdController.text)));
+                      }
+                    }),
+              ]))),
+      Form(
+          key: _websiteFormKey4,
+          child: InputDecorator(
+              decoration: InputDecoration(
+                  labelText: 'Stripe Api Key',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                  )),
+              child: Row(children: [
+                Expanded(
+                  child: TextFormField(
+                      key: const Key('stripeApi'),
+                      controller: _stripeApiKeyController,
+                      decoration:
+                          const InputDecoration(labelText: 'Stripe Api key')),
+                ),
+                const SizedBox(width: 10),
+                OutlinedButton(
+                    key: const Key('stripeApiButton'),
+                    child: const Text('update'),
+                    onPressed: () async {
+                      if (_websiteFormKey4.currentState!.validate()) {
+                        _websiteBloc.add(WebsiteUpdate(Website(
+                            id: state.website!.id,
+                            stripeApiKey: _stripeApiKeyController.text)));
                       }
                     }),
               ]))),

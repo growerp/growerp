@@ -49,6 +49,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="colorJson" />
                 <parameter name="obsidianName" />
                 <parameter name="measurementId" />
+                <parameter name="stripeApiKey" />
             </parameter>
         </out-parameters>
         <actions>
@@ -196,6 +197,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="settingTypeEnumId" value="PsstMeasurementId" />
             </entity-find>
             <set field="website.measurementId" from="measurementIds[0]?.settingValue" />
+            <!-- check if apikey is set -->
+            <set field="paymentGatewayConfigId"
+                from="System.getProperty('paymentGatewayConfigId')" />
+            <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="paymentGateway" />
+            <set field="website.stripeApiKey" from="paymentGateway.secretKey" />
         </actions>
     </service>
 
@@ -234,6 +240,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="colorJson" />
                 <parameter name="obsidianName" />
                 <parameter name="measurementId" />
+                <parameter name="stripeApiKey" />
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -270,6 +277,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="colorJson" />
             <parameter name="obsidianName" />
             <parameter name="measurementId" />
+            <parameter name="stripeApiKey" />
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -421,6 +429,26 @@ along with this software (see the LICENSE.md file). If not, see
                             </else>
                         </if>
                     </if>
+                    <!-- stripe api key -->
+                    <if condition="website?.stripeApiKey">
+                        <set field="paymentGatewayConfigId"
+                            from="System.getProperty('paymentGatewayConfigId')" />
+                        <entity-find-one entity-name="Stripe.PaymentGatewayStripe"
+                            value-field="paymentGatewayConfig" />
+                        <if condition="paymentGatewayConfig == null">
+                            <service-call name="create#Stripe.PaymentGatewayStripe"
+                                in-map="[paymentGatewayConfigId: paymentGatewayConfigId,
+                                ownerPartyId: ownerPartyId,
+                                secretKey: website.stripeApiKey]" />
+                            <else>
+                                <service-call name="update#Stripe.PaymentGatewayStripe"
+                                    in-map="[paymentGatewayConfigId: paymentGatewayConfigId,
+                                    ownerPartyId: ownerPartyId,
+                                    secretKey: website.stripeApiKey]" />
+                            </else>
+                        </if>
+                    </if>
+
                     <!-- get changed website -->
                     <service-call name="growerp.100.WebsiteServices100.get#Website"
                         out-map="context" />

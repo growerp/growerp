@@ -25,6 +25,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <!-- Add your Stripe secret key here for use with the Stripe API -->
     <Stripe.PaymentGatewayStripe paymentGatewayConfigId="StripeDemo"
+        ownerPartyId="_NA_"
         secretKey="STRIPE_SECRET_KEY" apiVersion="7.1.0" />
 
     <!-- these are the global settings for CIM since it is system-wide and not store-specific -->

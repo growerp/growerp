@@ -242,6 +242,13 @@ along with this software (see the LICENSE.md file). If not, see
         </seed-data>
     </entity>
 
+    <extend-entity entity-name="PaymentGatewayStripe" package="Stripe">
+        <field name="ownerPartyId" type="id" is-pk="true" />
+        <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
+            <key-map field-name="ownerPartyId" />
+        </relationship>
+    </extend-entity>
+
     <entity entity-name="Interface" package="growerp.general">
         <field name="interfaceId" type="id" is-pk="true" />
         <field name="appHostName" type="id" />
