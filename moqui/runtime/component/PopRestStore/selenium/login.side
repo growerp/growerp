@@ -1,0 +1,127 @@
+{
+  "id": "2acf10d9-eda3-40cc-8e71-8c62e8010c79",
+  "version": "2.0",
+  "name": "website",
+  "url": "http://100000.localhost:8080",
+  "tests": [{
+    "id": "e2874e25-985c-44c2-83ea-744a00357d6a",
+    "name": "login",
+    "commands": [{
+      "id": "8a24c15e-86d0-4bc6-8c3d-eed5f8ce8ba9",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "f6140a52-d27f-415f-a1c8-366ba7c2bb71",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1510x771",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "5935ab4b-e797-41ac-9cc1-84dec9c640d9",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Log In",
+      "targets": [
+        ["linkText=Log In", "linkText"],
+        ["css=.nav-item:nth-child(2) > .nav-link", "css:finder"],
+        ["xpath=//a[contains(text(),'Log In')]", "xpath:link"],
+        ["xpath=//div[@id='nav_collapse1']/ul[2]/li[2]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/d#/login/100002')]", "xpath:href"],
+        ["xpath=//li[2]/a", "xpath:position"],
+        ["xpath=//a[contains(.,' Log In')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "05695b4f-7da8-4259-be0f-0acc4ea0b813",
+      "comment": "",
+      "command": "click",
+      "target": "css=.btn-login",
+      "targets": [
+        ["css=.btn-login", "css:finder"],
+        ["xpath=(//button[@type='submit'])[2]", "xpath:attributes"],
+        ["xpath=//div[@id='app']/div/div/div/form/button", "xpath:idRelative"],
+        ["xpath=//div/form/button", "xpath:position"],
+        ["xpath=//button[contains(.,'Log In')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "4acd3112-545b-4590-ba8a-f606648a71f1",
+      "comment": "",
+      "command": "click",
+      "target": "id=navbarMenuAccount",
+      "targets": [
+        ["id=navbarMenuAccount", "id"],
+        ["linkText=John Denver", "linkText"],
+        ["css=#navbarMenuAccount", "css:finder"],
+        ["xpath=//a[contains(text(),'John Denver')]", "xpath:link"],
+        ["xpath=//a[@id='navbarMenuAccount']", "xpath:attributes"],
+        ["xpath=//div[@id='nav_collapse1']/ul[2]/li/a", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '#')])[2]", "xpath:href"],
+        ["xpath=//ul[2]/li/a", "xpath:position"],
+        ["xpath=//a[contains(.,' John Denver ')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "639d6c7f-1f59-4bc5-a08e-8ca90e40a924",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Logout",
+      "targets": [
+        ["linkText=Logout", "linkText"],
+        ["css=.dropdown-item:nth-child(4)", "css:finder"],
+        ["xpath=//a[contains(text(),'Logout')]", "xpath:link"],
+        ["xpath=//div[@id='nav_collapse1']/ul[2]/li/div/a[3]", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '#')])[5]", "xpath:href"],
+        ["xpath=//a[3]", "xpath:position"],
+        ["xpath=//a[contains(.,'Logout')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "641b21ce-cf9d-4f7b-989e-8f3e70569dff",
+      "comment": "",
+      "command": "click",
+      "target": "id=navbarMenuAccount",
+      "targets": [
+        ["id=navbarMenuAccount", "id"],
+        ["linkText=John Denver", "linkText"],
+        ["css=#navbarMenuAccount", "css:finder"],
+        ["xpath=//a[contains(text(),'John Denver')]", "xpath:link"],
+        ["xpath=//a[@id='navbarMenuAccount']", "xpath:attributes"],
+        ["xpath=//div[@id='nav_collapse1']/ul[2]/li/a", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '#')])[2]", "xpath:href"],
+        ["xpath=//ul[2]/li/a", "xpath:position"],
+        ["xpath=//a[contains(.,' John Denver ')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "1df4b6a7-9c17-49d4-a702-926099dcad1f",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Logout",
+      "targets": [
+        ["linkText=Logout", "linkText"],
+        ["css=.dropdown-item:nth-child(4)", "css:finder"],
+        ["xpath=//a[contains(text(),'Logout')]", "xpath:link"],
+        ["xpath=//div[@id='nav_collapse1']/ul[2]/li/div/a[3]", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '#')])[5]", "xpath:href"],
+        ["xpath=//a[3]", "xpath:position"],
+        ["xpath=//a[contains(.,'Logout')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "825f3ec7-03ed-4274-a300-071bdeb84372",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["e2874e25-985c-44c2-83ea-744a00357d6a"]
+  }],
+  "urls": ["http://100000.localhost:8080/"],
+  "plugins": []
+}

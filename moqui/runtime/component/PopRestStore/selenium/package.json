@@ -1,0 +1,16 @@
+{
+  "name": "Html Website Testing",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "npx mocha *.spec.js --timeout 60000"
+  },
+  "author": "The Selenium project",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "assert": "2.1.0",
+    "selenium-webdriver": "4.27.0"
+  },
+  "devDependencies": {
+    "mocha": "11.0.1"
+  }
+}
