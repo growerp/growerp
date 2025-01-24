@@ -21,9 +21,11 @@
                         <input v-model="user.password" type="password" class="form-control" required>
                     </div>
                 </div>
-                <button class="btn btn-login offset-lg-3 btn-block col-sm-12 col-lg-9" type="submit">Log In</button>
+                <button id="loginButton" class="btn btn-login offset-lg-3 btn-block col-sm-12 col-lg-9"
+                    type="submit">Log
+                    In</button>
                 <router-link :to="'/resetPassword/' + ownerPartyId" tag="a">
-                    <span class="login-forgot mt-2 mb-5">Forgot Your Password?</span>
+                    <span id="resetPassword" class="login-forgot mt-2 mb-5">Forgot Your Password?</span>
                 </router-link>
             </form>
             <div class="col-sm-2 d-none d-lg-block d-xl-block">
@@ -31,7 +33,7 @@
             </div>
             <div class="new-customer col-sm-12 col-lg-5">
                 <h1 class="text-left">New Customer</h1>
-                <router-link :to="'/account/create/' + ownerPartyId" tag="button"
+                <router-link :to="'/account/create/' + ownerPartyId" tag="button" id="createAccount"
                     class="btn btn-create-account btn-block col-sm-12 col-lg-10">Create an Account</router-link>
                 <p class="new-customer-text mt-3">
                     Don't have an Account? Don't worry. It's easy, free and only takes a minute.

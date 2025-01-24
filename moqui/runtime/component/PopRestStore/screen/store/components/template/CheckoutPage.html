@@ -189,7 +189,7 @@
                                 <input :id="index + 'r1'" type="radio" :value="option.postalContactMechId + ':' +
                                     option.telecomContactMechId" v-model="addressOption"
                                     @click="changeShippingAddress(option)" />
-                                <span class="checkmark"></span>
+                                <span id="addressCheckmark" class="checkmark"></span>
                                 <span class="span-description">{{option.postalAddress.toName}}</span>
                                 <span class="span-description">
                                     {{option.postalAddress.address1}} {{option.postalAddress.address2}}
@@ -221,12 +221,13 @@
                     </div>
                     <br-->
                     <!-- Buttons    -->
-                    <button @click="addressContinue()" class="btn btn-continue float-right"
+                    <button id="contAddress" @click="addressContinue()" class="btn btn-continue float-right"
                         :disabled="addressOption == null || addressOption == ''
                         || listShippingAddress == null || listShippingAddress.length == 0 || (addressOption && addressOption.split(':')[1] != 'undefined')">
                         Continue
                     </button>
-                    <a data-toggle="modal" data-target="#addressFormModal" class="text-add" @click="resetData()">
+                    <a data-toggle="modal" data-target="#addressFormModal" id="newAddress" class="text-add"
+                        @click="resetData()">
                         Add a New Address
                     </a>
                 </div>
@@ -272,7 +273,7 @@
                         </div>
                     </div>
                     <br>
-                    <button @click="shippingContinue()" class="btn btn-continue float-right"
+                    <button id="contSM" @click="shippingContinue()" class="btn btn-continue float-right"
                         :disabled="shippingOption == null || shippingOption == '' ||  listShippingOptions == null || listShippingOptions.length == 0"
                         style="margin-top: -15px;"><!-- Style needed to keep button away from next section -->
                         Continue
@@ -334,10 +335,11 @@
                         <br />
                     </div>
                     <br />
-                    <a data-toggle="modal" data-target="#creditCardModal" class="text-add" @click="resetData()">
+                    <a data-toggle="modal" id="addCreditCard" data-target="#creditCardModal" class="text-add"
+                        @click="resetData()">
                         Add a Credit Card
                     </a>
-                    <button class="btn btn-continue float-right" @click="validateCvv()" :disabled="paymentOption == null || paymentOption == '' || listPaymentMethods == null ||
+                    <button id="contCC" class="btn btn-continue float-right" @click="validateCvv()" :disabled="paymentOption == null || paymentOption == '' || listPaymentMethods == null ||
                         listPaymentMethods.length == 0">
                         Continue
                     </button>
@@ -360,7 +362,8 @@
                         </p>
                         <p class="text-center place-order-text">Place order below to complete your purchase</p>
                     </div>
-                    <button class="btn btn-place-order col col-lg-12" @click="placeCartOrder()">Place Order</button>
+                    <button id="placeOrder" class="btn btn-place-order col col-lg-12" @click="placeCartOrder()">Place
+                        Order</button>
                 </div>
                 <div class="text-center" v-if="!isCurrentStep(STEP_PENDING)">
                     <a :href="storePath" class="btn text-add">Keep Shopping</a>

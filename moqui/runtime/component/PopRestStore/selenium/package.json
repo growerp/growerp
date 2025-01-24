@@ -2,12 +2,13 @@
   "name": "Html Website Testing",
   "version": "1.0.0",
   "scripts": {
-    "test": "npx mocha *.spec.js --timeout 60000"
+    "test": "mocha *.spec.js --timeout 60000"
   },
   "author": "The Selenium project",
   "license": "Apache-2.0",
   "dependencies": {
     "assert": "2.1.0",
+    "chai": "^5.1.2",
     "selenium-webdriver": "4.27.0"
   },
   "devDependencies": {

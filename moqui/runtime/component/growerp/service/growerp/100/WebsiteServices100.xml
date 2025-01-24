@@ -201,7 +201,7 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="paymentGatewayConfigId"
                 from="System.getProperty('paymentGatewayConfigId')" />
             <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="paymentGateway" />
-            <set field="website.stripeApiKey" from="paymentGateway.secretKey" />
+            <set field="website.stripeApiKey" from="paymentGateway?.secretKey" />
         </actions>
     </service>
 

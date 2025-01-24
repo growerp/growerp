@@ -121,7 +121,7 @@
         <!-- Action buttons-->
         <div class="row justify-content-center">
             <button @click="addCustomerShippingAddress" class="btn btn-info flex-fill col col-sm-6"
-                :disabled='isDisabled'>
+                :disabled='isDisabled' id="updateAddress">
                 <span v-if="isUpdate">Update Address</span>
                 <span v-else>Add Address</span>
             </button>

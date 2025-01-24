@@ -54,22 +54,23 @@
                             <i class="fas fa-user"></i> {{customerInfo.firstName}} {{customerInfo.lastName}} <i
                                 class="fas fa-angle-down icon-down"></i></a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <router-link :to="'/account'" tag="a" class="dropdown-item item-color">Account
+                            <router-link id="myAccount" :to="'/account'" tag="a"
+                                class="dropdown-item item-color">Account
                                 Settings</router-link>
-                            <router-link :to="'/orders'" tag="a" class="dropdown-item item-color">My
+                            <router-link id="myOrders" :to="'/orders'" tag="a" class="dropdown-item item-color">My
                                 Orders</router-link>
                             <div role="separator" class="dropdown-divider"></div>
-                            <a class="dropdown-item item-color" href="#" @click="logout()">Logout</a>
+                            <a id="logout" class="dropdown-item item-color" href="#" @click="logout()">Logout</a>
                         </div>
                     </li>
                 </template>
                 <template v-else>
                     <li class="nav-item">
                         <router-link :to="'/account/create/' + storeInfo.productStore.organizationPartyId" tag="a"
-                            class="nav-link">Register now</router-link>
+                            id="register" class="nav-link">Register now</router-link>
                     </li>
                     <li class="nav-item">
-                        <router-link :to="'/login/' + storeInfo.productStore.organizationPartyId" tag="a"
+                        <router-link :to="'/login/' + storeInfo.productStore.organizationPartyId" tag="a" id="login"
                             class="nav-link"><i class="fas fa-user"></i> Log In</router-link>
                     </li>
                 </template>
@@ -78,7 +79,7 @@
                     <span class="pointer" data-toggle="modal" data-target="#emptyCartModal">Cart</span>
                 </li>
                 <li class="nav-item" v-else>
-                    <router-link :to="'/checkout/' + storeInfo.productStore.organizationPartyId" tag="a"
+                    <router-link :to="'/checkout/' + storeInfo.productStore.organizationPartyId" tag="a" id="checkOut"
                         class="nav-link">
                         <span class="cart-quantity">{{productsQuantity}}</span> <i class="fa fa-shopping-cart"></i> Cart
                     </router-link>

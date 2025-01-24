@@ -45,12 +45,12 @@
                 </label>
                 <div class="col-sm-8 col-xs-12 d-inline-flex flex-wrap">
                     <div class="d-flex">
-                        <select v-model="paymentMethod.expireMonth" class="form-control" required>
+                        <select id="month" v-model="paymentMethod.expireMonth" class="form-control" required>
                             <option value="" disabled selected>Month</option>
                             <option v-for="n in 12" :value="(n < 10) ? '0'+n : ''+n">
                                 {{(n < 10) ? '0' +n : n}}</option>
                         </select>
-                        <select v-model="paymentMethod.expireYear" class="form-control ml-3" required>
+                        <select id="year" v-model="paymentMethod.expireYear" class="form-control ml-3" required>
                             <option value="" disabled selected>Year</option>
                             <option v-for="n in 10" :value="(2023+ n)">{{2023 + n}}</option>
                         </select>
@@ -65,7 +65,7 @@
             <div class="form-group row justify-content-between" v-if="!isUpdate">
                 <label class="col col-form-label">Select Billing Address*</label>
                 <div class="col-12 col-sm-8">
-                    <select v-model="paymentAddressOption" class="form-control"
+                    <select id="address" v-model="paymentAddressOption" class="form-control"
                         @change="selectBillingAddress(paymentAddressOption)">
                         <option value="NEW_ADDRESS">New Address</option>
                         <option v-for="item in addressList" :value="item">
@@ -161,7 +161,7 @@
             </template>
             <div class="container">
                 <div class="row justify-content-center button-spacing">
-                    <button type="submit" class="btn btn-info col-sm-6" :disabled='isDisabled'>
+                    <button id="updateCC" type="submit" class="btn btn-info col-sm-6" :disabled='isDisabled'>
                         <span v-if="isUpdate">Update Card</span>
                         <span v-else>Add Card</span>
                     </button>
