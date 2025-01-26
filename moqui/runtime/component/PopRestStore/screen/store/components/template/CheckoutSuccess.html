@@ -16,7 +16,7 @@
                             class="mb-1" />
                         <span v-else></span>
                         <router-link v-if="item.itemTypeEnumId == 'ItemProduct'" class="order-link-text pl-3 align-top"
-                            :to="'/product/'+item.productId" tag="span">
+                            :to="'/product/'+item.productId" tag="a">
                             {{item.itemDescription}}
                         </router-link>
                         <span v-else class="order-link-text pl-3 align-top">{{item.itemDescription}}</span>
@@ -61,7 +61,7 @@
                 <hr class="hr-title">
                 <div class="row mb-2">
                     <span class="col text-blight">ORDER NUMBER: </span>
-                    <a class="col order-link-text" :href="'/d#/orders/'+orderList.orderHeader.orderId">
+                    <a id="orderId" class="col order-link-text" :href="'/d#/orders/'+orderList.orderHeader.orderId">
                         {{orderList.orderHeader.orderId}}
                     </a>
                 </div>
@@ -106,7 +106,8 @@
                     </span>
                 </div>
                 <div class="row justify-content-center mt-5">
-                    <a class="btn btn-block btn-info btn-lg btn-keep-shoping" :href="homePath">Keep Shopping</a>
+                    <a id="keepShopping" class="btn btn-block btn-info btn-lg btn-keep-shoping" :href="homePath">Keep
+                        Shopping</a>
                 </div>
             </div>
         </div>

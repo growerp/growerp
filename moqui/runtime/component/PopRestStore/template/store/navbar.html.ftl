@@ -93,7 +93,7 @@
                             <a class="dropdown-item item-color" href="/d#/orders">My Orders</a>
                             <div role="separator" class="dropdown-divider"></div>
                             <form method="get" action="/logOut">
-                                <button type="submit" class="dropdown-item item-color">Signout</button>
+                                <button id="logout" type="submit" class="dropdown-item item-color">Logout</button>
                             </form>
                         </div>
                     </li>

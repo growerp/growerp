@@ -1,4 +1,3 @@
-
 networks:
   my-network:
     driver: bridge
@@ -71,8 +70,6 @@ services:
       - default_time_zone=US/Pacific
       - DB_DATA=INSTALL
       # do not use quotes here
-      - paymentGatewayConfigId=StripeDemo
-      - STRIPE_SECRET_KEY=
       - SMTP_USER=
       - SMTP_PASSWORD=
       - BIRDSEND_API_KEY=
@@ -155,4 +152,3 @@ services:
       - VIRTUAL_HOST=health.growerp.local
     networks:
       - my-network
-      

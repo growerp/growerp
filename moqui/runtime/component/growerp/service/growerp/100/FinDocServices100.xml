@@ -2511,7 +2511,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <order-by field-name="orderItemSeqId" />
             </entity-find>
             <if condition="!items">
-                <return error="true" message="Order not found: $orderId" />
+                <return error="true" message="Order $orderId has no items!" />
             </if>
             <set field="paymentId" from="items[0].paymentId" />
             <set field="invoiceId" from="items[0].invoiceId" />
@@ -2613,9 +2613,15 @@ along with this software (see the LICENSE.md file). If not, see
                         <field-map field-name="orderId" from="order.orderId" />
                     </entity-find-one>
                     <if condition="order.sales == true &amp;&amp; !isRoomRental">
+                        <if condition="!order.otherCompany">
+                            <!-- needed when just changing status for sales order -->
+                            <entity-find entity-name="mantle.order.OrderPart" list="parts" limit="1">
+                                <econdition field-name="orderId" />
+                            </entity-find>
+                        </if>
                         <service-call name="mantle.party.ContactServices.get#PartyContactInfoList"
                             out-map="customerShippingInfo"
-                            in-map="[partyId: order.otherCompany?.partyId ?: order.otherUser?.partyId,
+                            in-map="[partyId: order.otherCompany?.partyId ?: order.otherUser?.partyId ?: parts[0].customerPartyId,
                                     postalContactMechPurposeId:'PostalShippingDest']" />
                         <if condition="customerShippingInfo.postalAddressList == null">
                             <return error="true"

@@ -198,8 +198,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <set field="website.measurementId" from="measurementIds[0]?.settingValue" />
             <!-- check if apikey is set -->
-            <set field="paymentGatewayConfigId"
-                from="System.getProperty('paymentGatewayConfigId')" />
+            <set field="paymentGatewayConfigId" value="STRIPE" />
             <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="paymentGateway" />
             <set field="website.stripeApiKey" from="paymentGateway?.secretKey" />
         </actions>
@@ -209,7 +208,7 @@ along with this software (see the LICENSE.md file). If not, see
         <description>update the website information except for webcontent text and images exclude delete</description>
         <in-parameters>
             <parameter name="website" type="Map" required="true">
-                <parameter name="id" required="true" />
+                <parameter name="id" />
                 <parameter name="title" />
                 <parameter name="hostName" />
                 <parameter name="websiteContent" type="List">
@@ -282,10 +281,11 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- Every company just has a single website which initialy 
+                has the product store id subdomain-->
             <entity-find entity-name="mantle.product.store.ProductStore"
                 list="stores" limit="1" for-update="true">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
-                <econdition field-name="productStoreId" from="website.id" />
             </entity-find>
             <if condition="!stores">
                 <then>
@@ -345,7 +345,8 @@ along with this software (see the LICENSE.md file). If not, see
                             <!-- change sequence -->
                             <entity-find entity-name="growerp.website.ProductStoreAndWebsiteContent"
                                 list="seqPages">
-                                <econdition field-name="productStoreId" from="website.id" />
+                                <econdition field-name="productStoreId"
+                                    from="stores[0].productStoreId" />
                                 <econdition field-name="pagePath" from="content.path" />
                             </entity-find>
                             <if
@@ -375,7 +376,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="website.productCategories">
                         <entity-find entity-name="mantle.product.store.ProductStoreCategory"
                             list="browseRootCategories">
-                            <econdition field-name="productStoreId" from="website.id" />
+                            <econdition field-name="productStoreId" from="stores[0].productStoreId" />
                             <econdition field-name="storeCategoryTypeEnumId" value="PsctBrowseRoot" />
                         </entity-find>
                         <!-- delete all -->
@@ -424,31 +425,55 @@ along with this software (see the LICENSE.md file). If not, see
                             <else>
                                 <service-call name="create#mantle.product.store.ProductStoreSetting"
                                     in-map="[productStoreId: stores[0].productStoreId,
-                                settingTypeEnumId: 'PsstMeasurementId',
-                                settingValue: website.measurementId]" />
+                                            settingTypeEnumId: 'PsstMeasurementId',
+                                            settingValue: website.measurementId]" />
                             </else>
                         </if>
                     </if>
                     <!-- stripe api key -->
-                    <if condition="website?.stripeApiKey">
-                        <set field="paymentGatewayConfigId"
-                            from="System.getProperty('paymentGatewayConfigId')" />
-                        <entity-find-one entity-name="Stripe.PaymentGatewayStripe"
-                            value-field="paymentGatewayConfig" />
-                        <if condition="paymentGatewayConfig == null">
-                            <service-call name="create#Stripe.PaymentGatewayStripe"
-                                in-map="[paymentGatewayConfigId: paymentGatewayConfigId,
-                                ownerPartyId: ownerPartyId,
-                                secretKey: website.stripeApiKey]" />
-                            <else>
-                                <service-call name="update#Stripe.PaymentGatewayStripe"
+                    <set field="paymentGatewayConfigId" value="STRIPE" />
+                    <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="old" />
+                    <log message="old: ${old?.secretKey} new: ${website.stripeKey} " />
+                    <log message="old: $old " />
+                    <if condition="website.stripeApiKey">
+                        <if condition="website.stripeApiKey == ' '">
+                            <log message="========delete ====" />
+                            <!-- delete -->
+                            <if condition="old">
+                                <service-call name="delete#Stripe.PaymentGatewayStripe"
                                     in-map="[paymentGatewayConfigId: paymentGatewayConfigId,
-                                    ownerPartyId: ownerPartyId,
-                                    secretKey: website.stripeApiKey]" />
+                                            ownerPartyId: ownerPartyId]" />
+                                <service-call
+                                    name="delete#mantle.product.store.ProductStorePaymentGateway"
+                                    in-map="[productStoreId: stores[0].productStoreId,
+                                            paymentInstrumentEnumId: 'PiCreditCard']" />
+                            </if>
+                            <else>
+                                <if condition="old">
+                                    <log message="========update ====" />
+                                    <!-- update -->
+                                    <service-call name="update#Stripe.PaymentGatewayStripe"
+                                        in-map="[paymentGatewayConfigId: paymentGatewayConfigId,
+                                            ownerPartyId: ownerPartyId,
+                                            secretKey: website.stripeApiKey]" />
+                                    <else>
+                                        <log message="========create ====" />
+
+                                        <!-- create -->
+                                        <service-call name="create#Stripe.PaymentGatewayStripe"
+                                            in-map="[paymentGatewayConfigId: paymentGatewayConfigId,
+                                            ownerPartyId: ownerPartyId,
+                                            secretKey: website.stripeApiKey]" />
+                                        <service-call
+                                            name="create#mantle.product.store.ProductStorePaymentGateway"
+                                            in-map="[productStoreId: stores[0].productStoreId,
+                                            paymentInstrumentEnumId: 'PiCreditCard',
+                                            paymentGatewayConfigId: paymentGatewayConfigId]" />
+                                    </else>
+                                </if>
                             </else>
                         </if>
                     </if>
-
                     <!-- get changed website -->
                     <service-call name="growerp.100.WebsiteServices100.get#Website"
                         out-map="context" />

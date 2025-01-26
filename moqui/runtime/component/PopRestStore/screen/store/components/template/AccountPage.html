@@ -25,7 +25,7 @@
                 </div>
 
                 <!-- profile section -->
-                <router-link :to="'/account#profile'" tag="div" id="profile" class="lead">PROFILE</router-link>
+                <router-link :to="'/account#profile'" tag="a" id="profile" class="lead">PROFILE</router-link>
                 <div class="breakline no-gutters mb-3"></div>
                 <div class="form-group row">
                     <label for="username" class="col-sm-3 col-form-label modal-text left-menu-heading">Username</label>
@@ -83,7 +83,7 @@
 
                 <!-- shipping addresses -->
                 <div class="d-flex justify-content-between mt-5">
-                    <router-link :to="'/account#shipping'" tag="span" id="shipping" class="lead">
+                    <router-link :to="'/account#shipping'" tag="a" id="shipping" class="lead">
                         SHIPPING ADDRESSES</router-link>
                     <span class="pointer text-cyan" @click="scrollTo()">Back to Top</span>
                 </div>
@@ -124,7 +124,7 @@
 
                 <!-- payment methods -->
                 <div class="d-flex justify-content-between mt-5">
-                    <router-link :to="'/account#payment'" tag="span" id="payment" class="lead">
+                    <router-link :to="'/account#payment'" tag="a" id="payment" class="lead">
                         PAYMENT METHODS</router-link>
                     <span class="text-cyan pointer" @click="scrollTo()">Back to Top</span>
                 </div>

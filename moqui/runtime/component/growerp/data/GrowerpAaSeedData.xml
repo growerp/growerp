@@ -19,10 +19,7 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.basic.Enumeration enumCode="product_store_id_from_hostname"
         description="Hostname of the html website" enumId="PsstHostname"
         enumTypeId="ProductStoreSettingType" />
-    <moqui.basic.Enumeration enumCode="product_store_id_from_hostname"
-        description="Hostname of flutter app" enumId="PsstAppHostname"
-        enumTypeId="ProductStoreSettingType" />
-    <moqui.basic.Enumeration enumCode="product_store_id_from_hostname"
+    <moqui.basic.Enumeration enumCode="product_store_id_from_secondary_hostname"
         description="Hostname of the secondary backend" enumId="PsstSecBackend"
         enumTypeId="ProductStoreSettingType" />
     <moqui.basic.Enumeration enumCode="product_store_id_measurement_id" description="MeasurementId"
@@ -289,6 +286,15 @@ along with this software (see the LICENSE.md file). If not, see
         <paymentGateways paymentInstrumentEnumId="PiCreditCard"
             paymentGatewayConfigId="TEST_APPROVE" />
     </mantle.product.store.ProductStore>
+
+    <moqui.basic.Enumeration description="Stripe Gateway" enumId="PgtStripe"
+        enumTypeId="PaymentGatewayType" />
+    <mantle.account.method.PaymentGatewayConfig paymentGatewayConfigId="STRIPE"
+        paymentGatewayTypeEnumId="PgtStripe" description="Stripe Production"
+        authorizeServiceName="Stripe.StripePaymentServices.authorize#Payment"
+        captureServiceName="Stripe.StripePaymentServices.capture#Payment"
+        releaseServiceName="Stripe.StripePaymentServices.release#Payment"
+        refundServiceName="Stripe.StripePaymentServices.refund#Payment" />
 
     <!-- ecommerce and general root categories  -->
     <mantle.product.category.ProductCategory productCategoryId="PopcAllProducts" ownerPartyId="_NA_"

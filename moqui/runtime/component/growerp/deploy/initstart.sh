@@ -30,10 +30,6 @@ if [ "$OPENMRS_PASSWORD" != "" ] ; then
     sed -i -e "s/OPENMRS_PASSWORD/${OPENMRS_PASSWORD}/g" runtime/component/growerp/data/GrowerpAaSeedData.xml
     sed -i -e "s#OPENMRS_BASE_URL#${OPENMRS_BASE_URL}#g" runtime/component/growerp/data/GrowerpAaSeedData.xml
 fi
-if [ "$STRIPE_SECRET_KEY" != "" ] ; then
-    echo "updating stripe key"
-    sed -i -e "s/\STRIPE_SECRET_KEY/${STRIPE_SECRET_KEY}/g" runtime/component/mantle-stripe/data/StripeInstallData.xml
-fi
 if [ "$DISABLE_SECA" == "true" ] ; then
     echo "removing seca files for conversion load"
     rm runtime/component/mantle-usl/service/OrderReturn.secas.xml

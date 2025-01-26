@@ -32,7 +32,7 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="hostNames">
-                <econdition field-name="settingTypeEnumId" value="PsstAppHostname" />
+                <econdition field-name="settingTypeEnumId" value="PsstHostname" />
                 <econdition field-name="settingValue" from="hostName" />
                 <date-filter />
             </entity-find>
@@ -384,11 +384,11 @@ along with this software (see the LICENSE.md file). If not, see
                             list="hosts">
                             <econdition field-name="productStoreId"
                                 from="productStore.productStoreId" />
-                            <econdition field-name="settingTypeEnumId" value="PsstAppHostname" />
+                            <econdition field-name="settingTypeEnumId" value="PsstHostname" />
                             <date-filter />
                         </entity-find>
                         <if condition="hosts">
-                            <set field="appHostName" from="hosts[0].settingValue" />
+                            <set field="hostName" from="hosts[0].settingValue" />
                         </if>
                         <entity-find entity-name="mantle.product.store.ProductStoreSetting"
                             list="backends">
@@ -431,7 +431,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     salesPerc: item.salesPerc?item.salesPerc.toString():'0',
                                     paymentMethod: paymentMethod,
                                     telephoneNr: telephoneNr ?: '',
-                                    hostName: appHostName,
+                                    hostName: hostName,
                                     secondaryBackend: backendName,
                                     ]" />
                         </else>
@@ -678,7 +678,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="company.hostName">
                 <service-call name="create#mantle.product.store.ProductStoreSetting"
                     in-map="[productStoreId: productStore.productStoreId,
-                            settingTypeEnumId: PsstAppHostname,
+                            settingTypeEnumId: PsstHostname,
                             settingValue: company.hostName]" />
             </if>
             <if condition="company.secondaryBackend">
@@ -1047,7 +1047,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="company.hostName != oldValue.companies[0].hostName">
                 <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="settings">
                     <econdition field-name="productStoreId" from="productStore.productStoreId" />
-                    <econdition field-name="settingTypeEnumId" value="PsstAppHostname" />
+                    <econdition field-name="settingTypeEnumId" value="PsstHostname" />
                     <date-filter />
                 </entity-find>
                 <if condition="settings"><!-- update/delete existing -->
@@ -1056,7 +1056,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <service-call name="create#mantle.product.store.ProductStoreSetting"
                     in-map="[productStoreId: productStore.productStoreId,
-                            settingTypeEnumId: 'PsstAppHostname',
+                            settingTypeEnumId: 'PsstHostname',
                             settingValue: company.hostName,
                             fromDate: nowDate]" />
             </if>

@@ -16,6 +16,8 @@ $ git clone https://github.com/akasiri/mantle-stripe
 
 ##### To use:
 
+**Now the owner is added and the configId changes depending if the secretkey is available or not**
+
 1. In `data/StripeDemoData.xml` add the secretKey from Stripe into the `<Stripe.PaymentGatewayStripe />` record
     
     > secretKey="**sk_test_...**"

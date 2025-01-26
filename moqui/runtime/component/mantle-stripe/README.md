@@ -14,6 +14,7 @@ To add this component to Moqui just clone this repo into your `runtime/component
     $ git clone https://github.com/akasiri/mantle-stripe
 
 ##### To use:
+*** Please note! the secret key is now stored by owner adding a key will activate the stripe processing ***
 1. In `data/StripeDemoData.xml` add the secretKey from Stripe into the `<Stripe.PaymentGatewayStripe />` record
     > secretKey="**sk_test_...**"
 

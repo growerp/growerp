@@ -1,0 +1,10 @@
+# to store stripeKey with:
+# module.exports = {
+#    stripeKey: "sk_xxxxxxxxxxx"
+# };
+# and use:
+# var config = require('./.mocharc.js');
+#    await setPaymentApiKey(config.stripeKey);
+.mocharc.js
+current_test_data.json
+
