@@ -995,6 +995,27 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="paymentMethod.ccDescription" from="cardNumberHidden" />
                         </if>
                     </if>
+                    <entity-find entity-name="growerp.account.PaymentGatewayResponseAndInfo"
+                        list="responses">
+                        <econdition field-name="paymentId" from="item.paymentId" />
+                    </entity-find>
+                    <set field="gatewayResponses" from="[]" />
+                    <iterate list="responses" entry="response">
+                        <script>gatewayResponses.add([
+                            gatewayResponseId: response.paymentGatewayResponseId,
+                            paymentOperation: response.paymentOperation,
+                            paymentMethod: [ccPaymentMethodId: response.paymentMethodId,
+                                ccDescription: response.description],
+                            paymentId: response.paymentId,
+                            pseudoId: response.pseudoId,
+                            amount: response.amount.toString(),
+                            referenceNum: response.referenceNum,
+                            transactionDate: response.transactionDate
+                                ? ec.l10n.format(response.transactionDate,'yyyy-MM-dd') : null,
+                            resultSuccess: response.resultSuccess == 'Y' ? true : false,
+                            resultMessage: response.resultMessage
+                        ])</script>
+                    </iterate>
                     <set field="glAccount"
                         from="[
                             glAccountId: overrideGlAccountId,
@@ -1012,7 +1033,6 @@ along with this software (see the LICENSE.md file). If not, see
                         paymentInstrument: item.paymentInstrumentId.substring(2),
                         paymentId: item.paymentId,
                         pseudoId: item.pseudoId ?: '',
-                        transactionId: item.transactionId,
                         id: item.paymentId,
                         invoiceId: item.invoiceId ? item.invoiceId : item.forInvoiceId,
                         statusId: convertedStatusId,
@@ -1024,6 +1044,7 @@ along with this software (see the LICENSE.md file). If not, see
                         otherCompany: company?.partyId ? company : null,
                         grandTotal: item.amount ? item.amount.toString() : 0,
                         items: [[paymentType: paymentType, glAccount: glAccount]],
+                        gatewayResponses: gatewayResponses
                         ]" />
                     <script>finDocs.add(finDocOut)</script>
                 </iterate>

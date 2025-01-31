@@ -63,6 +63,7 @@ class FinDoc with _$FinDoc {
     PaymentMethod? paymentMethod, // check , credit card, electronic
     RequestType? requestType,
     @Default([]) List<FinDocItem> items,
+    @Default([]) List<GatewayResponse> gatewayResponses,
   }) = _FinDoc;
 
   factory FinDoc.fromJson(Map<String, dynamic> json) =>
