@@ -160,27 +160,29 @@ class PaymentDialogState extends State<PaymentDialog> {
         dividerThickness: 0,
         dataRowMaxHeight: 50,
         headingRowHeight: 50,
+        columnSpacing: 20,
         columns: _createColumns(),
         rows: _createRows());
   }
 
   List<DataColumn> _createColumns() {
     return [
-      const DataColumn(label: Text('ID')),
+      if (!isPhone) const DataColumn(label: Text('ID')),
       const DataColumn(label: Text('Operation')),
-      const DataColumn(label: Text('Method')),
+      if (!isPhone) const DataColumn(label: Text('Method')),
       const DataColumn(label: Text('Amount')),
       const DataColumn(label: Text('Date')),
-      const DataColumn(label: Text('Success?')),
+      const DataColumn(label: Text('OK?')),
     ];
   }
 
   List<DataRow> _createRows() {
     return finDoc.gatewayResponses
         .map((resp) => DataRow(cells: [
-              DataCell(Text(resp.gatewayResponseId)),
+              if (!isPhone) DataCell(Text(resp.gatewayResponseId)),
               DataCell(Text(resp.paymentOperation)),
-              DataCell(Text(resp.paymentMethod?.ccDescription! ?? '')),
+              if (!isPhone)
+                DataCell(Text(resp.paymentMethod?.ccDescription! ?? '')),
               DataCell(Text(resp.amount.toString())),
               DataCell(Text(resp.transactionDate.toString().substring(0, 10))),
               DataCell(Text(resp.resultSuccess ? 'Y' : 'N')),
