@@ -10,6 +10,7 @@
     "assert": "2.1.0",
     "axios": "^1.7.9",
     "chai": "^5.1.2",
+    "json-stringify-safe": "^5.0.1",
     "selenium-webdriver": "4.27.0"
   },
   "devDependencies": {

@@ -1033,7 +1033,6 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="limitOut" />
         </out-parameters>
         <actions>
-            <log message="=============start: $start limit: $limit part: $part" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="part == 'closePeriod'">
@@ -1099,7 +1098,6 @@ along with this software (see the LICENSE.md file). If not, see
                             in-map="[acctgTransId: acctgTransId]" />
                         <script>System.out.println(">>>Grouped ${transEntries?.size()} unposted ledger entries in a single transaction and posted these")</script>
                     </if>
-                    <log message="=========closing period ${period.periodName}" />
                     <!-- period should succeeed to close -->
                     <service-call name="growerp.100.AccountingServices100.close#FinancialTimePeriod"
                         in-map="[timePeriodId: period.timePeriodId, closeChildren: true]" />
@@ -1377,7 +1375,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="limit" from="notUpdated" />
             </if>
             <set field="limitOut" from="limit.toString()" />
-            <log message="==========result: ==========start: $start limit: $limit out: $limitOut" />
         </actions>
     </service>
 

@@ -135,6 +135,18 @@ async function completeBackendShipment(apiKey, shipmentId) {
     if (response.status == 200) return response.data.finDoc;
 
 }
+async function getPayment(apiKey, paymentId) {
+    const response = await axios.get(baseUrl + 'FinDoc?sales=true&docType=payment&finDocId=' + paymentId,
+        {
+            headers: {
+                'Content-Type': 'application/json',
+                'api_key': apiKey
+            }
+        });
+    //     if (response.status == 200) return JSON.stringify(response.data.finDocs[0], null, 2);
+    if (response.status == 200) return response.data.finDocs[0];
+
+}
 async function login(driver, email) {
     await tapByLink(driver, "Log In")
     await enterTextByKey(driver, 'username', email)
@@ -198,6 +210,7 @@ module.exports = {
     approveBackendOrder,
     approveBackendShipment,
     completeBackendShipment,
+    getPayment,
     // low
     getCurrentTestData,
     saveCurrentTestData,

@@ -10,6 +10,7 @@ const { enterTextByKey,
   approveBackendOrder,
   approveBackendShipment,
   completeBackendShipment,
+  getPayment,
   logout,
   login,
   getCurrentTestData,
@@ -44,7 +45,7 @@ describe('basic website order process', function () {
       newEmail,
       vars.company.name,
       vars.company.currencyId);
-    console.log(auth);
+    // console.log(auth);
     assert.notEqual(auth, null, "create new company error");
 
     // insert stripeKey
@@ -108,8 +109,6 @@ describe('basic website order process', function () {
     orderId = await getLinkTextById(driver, "orderId")
     await tapByKey(driver, "keepShopping")
     await logout(driver, vars.user.firstName, vars.user.lastName)
-    await driver.executeScript("window.scrollTo(0,0)")
-
     currentTestData["orderId"] = orderId;
     currentTestData["email"] = newEmail;
     saveCurrentTestData(currentTestData);
@@ -117,24 +116,32 @@ describe('basic website order process', function () {
   })
   it('process order in the backend', async function () {
 
-    if (currentTestData.shipment != null) this.skip();
+    if (currentTestData.payment != null) this.skip();
 
     var order = await approveBackendOrder(
       currentTestData.auth.apiKey, currentTestData.orderId);
-    console.log(order)
+    //console.log(order)
+    currentTestData["order"] = order;
     var shipment = await approveBackendShipment(
       currentTestData.auth.apiKey, order.shipmentId);
-    console.log(shipment)
+    //console.log(shipment)
     shipment = await completeBackendShipment(
       currentTestData.auth.apiKey, order.shipmentId);
-    console.log(shipment)
+    //console.log(shipment)
     currentTestData["shipment"] = shipment;
+
+    var payment = await getPayment(currentTestData.auth.apiKey, currentTestData.order.paymentId);
+    currentTestData["payment"] = payment;
+
+    assert.equal(payment.gatewayResponses.filter(el =>
+      el.paymentOperation == "Capture" && el.resultSuccess == true).length, 1,
+      "no succesfull gateway capture found");
+
     saveCurrentTestData(currentTestData);
+
   })
   it('check website order complete', async function () {
-
     driver = await new Builder().forBrowser('firefox').build()
-
     await driver.get('http://' + currentTestData.auth.company.hostName)
     await login(driver, currentTestData.email)
     await tapByLink(driver, vars.user.firstName + ' ' + vars.user.lastName)

@@ -212,7 +212,6 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="year">
                 <set field="year" value="%${year}%" />
             </if>
-            <log message="get time period $periodType comp: $companyPartyId year: $year" />
             <entity-find entity-name="growerp.party.time.TimePeriodChildAndType" list="periods">
                 <econdition field-name="partyId" from="companyPartyId" />
                 <econdition field-name="timePeriodTypeId" from="typeConvert[periodType]" />
@@ -601,15 +600,12 @@ along with this software (see the LICENSE.md file). If not, see
             </script>
             <set field="thruDate"
                 from='java.sql.Timestamp.valueOf("${periodName.substring(1,5)}-12-31 23:59:59.0")' />
-            <log
-                message="====rev report thrudate ${thruDate.toString()} period: $periodName party: $companyPartyId" />
             <service-call name="mantle.party.TimeServices.find#PartyTimePeriodGroups"
                 out-map="periodsOut"
                 in-map="[partyId:companyPartyId,
                         timePeriodTypeId: typeConvert[periodName.substring(0,1)],
                         thruDate:thruDate,
                         groups:(periods?:13)]" />
-            <log message="=====groups found: ${periodsOut?.timePeriodGroups?.size()}" />
             <if condition="periodsOut.timePeriodGroups">
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummary"
                     out-map="context"
@@ -622,7 +618,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="revenueExpenseCsv" from="rowsList.collect({ it.join(',') }).join('\n')" />
                 <set field="csvRows" from="[]" />
                 <iterate list="rowsList" entry="row">
-                    <log message="Row ${row_index}: ${row}" />
                     <set field="csvCells" from="[]" />
                     <iterate list="row" entry="cell">
                         <script>csvCells.add(cell.toString())</script>
@@ -1575,9 +1570,6 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[timePeriod:timePeriod]" out-map="periodInfo" />
             <set field="fromTimestamp" from="periodInfo.fromTimestamp" />
             <set field="thruTimestamp" from="periodInfo.thruTimestamp" />
-
-            <log message="Closing period ${timePeriodId} ${timePeriod.periodName}" />
-
             <if condition="timePeriod.isClosed == 'Y'">
                 <message error="true">Not closing period ${ec.resource.expand('TimePeriodNameTemplate','',timePeriod)}, already closed.</message>
             </if>

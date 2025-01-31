@@ -433,11 +433,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <!-- stripe api key -->
                     <set field="paymentGatewayConfigId" value="STRIPE" />
                     <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="old" />
-                    <log message="old: ${old?.secretKey} new: ${website.stripeKey} " />
-                    <log message="old: $old " />
                     <if condition="website.stripeApiKey">
                         <if condition="website.stripeApiKey == ' '">
-                            <log message="========delete ====" />
                             <!-- delete -->
                             <if condition="old">
                                 <service-call name="delete#Stripe.PaymentGatewayStripe"
@@ -450,15 +447,12 @@ along with this software (see the LICENSE.md file). If not, see
                             </if>
                             <else>
                                 <if condition="old">
-                                    <log message="========update ====" />
                                     <!-- update -->
                                     <service-call name="update#Stripe.PaymentGatewayStripe"
                                         in-map="[paymentGatewayConfigId: paymentGatewayConfigId,
                                             ownerPartyId: ownerPartyId,
                                             secretKey: website.stripeApiKey]" />
                                     <else>
-                                        <log message="========create ====" />
-
                                         <!-- create -->
                                         <service-call name="create#Stripe.PaymentGatewayStripe"
                                             in-map="[paymentGatewayConfigId: paymentGatewayConfigId,
