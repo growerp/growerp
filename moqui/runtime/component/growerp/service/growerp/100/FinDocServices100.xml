@@ -545,6 +545,17 @@ along with this software (see the LICENSE.md file). If not, see
                             </if>
                         </then>
                         <else>
+                            <if condition="finDocId || pseudoId">
+                                <set field="address"
+                                    from="[
+                                    addressId: item.postalContactMechId,
+                                    address1: item.address1,
+                                    address2: item.address2,
+                                    city: item.city,
+                                    postalCode: item.postalCode,
+                                    country: item.country
+                                    ]" />
+                            </if>
                             <if condition="item.customerPartyType == 'PtyOrganization'">
                                 <set field="company"
                                     from="[
@@ -560,7 +571,7 @@ along with this software (see the LICENSE.md file). If not, see
                                             firstName: item.customerFirstName,
                                             lastName: item.customerLastName,
                                             email: item.customerEmail,
-                                            company: company,
+                                            address: address,
                                         ]" />
                                 </else>
                             </if>
@@ -758,6 +769,15 @@ along with this software (see the LICENSE.md file). If not, see
                                     list="items">
                                     <econdition field-name="invoiceId" operator="in"
                                         from="invoiceIds.invoiceId" />
+                                    <econditions combine="or">
+                                        <!-- ignore payment applications -->
+                                        <econdition field-name="transactionTypeId"
+                                            value="AttSalesInvoice"
+                                            or-null="true" />
+                                        <econdition field-name="transactionTypeId"
+                                            value="AttPurchaseInvoice"
+                                            or-null="true" />
+                                    </econditions>
                                     <order-by field-name="invoiceId,invoiceItemSeqId,rentalFromDate" />
                                 </entity-find>
                             </else>
@@ -774,32 +794,15 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                     </if>
                     <if condition="!lastItem || lastItem.invoiceId != item.invoiceId">
-                        <if condition="!sales">
-                            <set field="company"
-                                from="[
-                                            partyId: item.vendorPartyId,
-                                            pseudoPartyId: item.vendorPseudoId,
-                                            name: item.vendorCompanyName,
-                                        ]" />
-                            <if condition="item.vendorUserPartyId">
-                                <set field="userOut"
+                        <if condition="sales">
+                            <if condition="item.customerPartyId">
+                                <set field="company"
                                     from="[
-                                            partyId: item.vendorUserPartyId,
-                                            pseudoPartyId: item.vendorUserPseudoId,
-                                            firstName: item.vendorFirstName,
-                                            lastName: item.vendorLastName,
-                                            email: item.vendorEmail,
-                                            company: company,
-                                        ]" />
-                            </if>
-                            <else>
-                                <if condition="item.customerPartyId">
-                                    <set field="company"
-                                        from="[
                                         partyId: item.customerPartyId,
                                         pseudoId: item.customerPseudoId,
                                         name: item.customerCompanyName,
                                         ]" />
+                                <else>
                                     <set field="userOut"
                                         from="[
                                         partyId: item.customerUserPartyId,
@@ -807,8 +810,27 @@ along with this software (see the LICENSE.md file). If not, see
                                         firstName: item.customerFirstName,
                                             lastName: item.customerLastName,
                                             email: item.customerEmail,
-                                            company: company,
                                         ]" />
+                                </else>
+                            </if>
+                            <else><!-- purchase -->
+                                <if condition="item.vendorPartyId">
+                                    <set field="company"
+                                        from="[
+                                            partyId: item.vendorPartyId,
+                                            pseudoPartyId: item.vendorPseudoId,
+                                            name: item.vendorCompanyName,
+                                        ]" />
+                                    <else>
+                                        <set field="userOut"
+                                            from="[
+                                            partyId: item.vendorUserPartyId,
+                                            pseudoPartyId: item.vendorUserPseudoId,
+                                            firstName: item.vendorFirstName,
+                                            lastName: item.vendorLastName,
+                                            email: item.vendorEmail,
+                                        ]" />
+                                    </else>
                                 </if>
                             </else>
                         </if>
@@ -895,8 +917,16 @@ along with this software (see the LICENSE.md file). If not, see
                                 ignore-if-empty="true" />
                             <econdition field-name="toPartyId" from="vendorPartyId"
                                 ignore-if-empty="true" />
-                            <!--econditions
-                            combine="or">
+                            <econditions combine="or">
+                                <!-- ignore payment applications -->
+                                <econdition field-name="transactionTypeId"
+                                    value="AttIncomingPayment"
+                                    or-null="true" />
+                                <econdition field-name="transactionTypeId"
+                                    value="AttOutgoingPayment"
+                                    or-null="true" />
+                            </econditions>
+                            <!-- econditions combine="or">
                                 <econdition field-name="statusId" operator="in" from="statusList" ignore-if-empty="true" />
                                 <econdition field-name="effectiveDate" operator="greater" from="fromDate" ignore-if-empty="true" />
                             </econditions-->
@@ -934,36 +964,43 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="paymentMethod" from="[:]" />
                 <set field="fpaymentMethod" from="[:]" />
                 <iterate entry="item" list="items">
-                    <if condition="!sales">
-                        <set field="company"
-                            from="[
-                                        partyId: item.vendorPartyId,
-                                        name: item.vendorCompanyName,
-                                        paymentMethod: paymentMethod,
-                                        ]" />
-                        <set field="userOut"
-                            from="[
-                                            partyId: item.vendorUserPartyId,
-                                            firstName: item.vendorFirstName,
-                                            lastName: item.vendorLastName,
-                                            email: item.vendorEmail,
-                                            company: company,
-                                        ]" />
-                        <else>
+                    <if condition="sales">
+                        <if condition="item.customerPartyId">
                             <set field="company"
                                 from="[
                                         partyId: item.customerPartyId,
                                         name: item.customerCompanyName,
                                         paymentMethod: paymentMethod,
                                         ]" />
-                            <set field="userOut"
-                                from="[
+                            <else>
+                                <set field="userOut"
+                                    from="[
                                             partyId: item.customerUserPartyId,
                                             firstName: item.customerFirstName,
                                             lastName: item.customerLastName,
                                             email: item.customerEmail,
+                                        ]" />
+                            </else>
+                        </if>
+                        <else><!-- purchase -->
+                            <if condition="item.vendorPartyId">
+                                <set field="company"
+                                    from="[
+                                        partyId: item.vendorPartyId,
+                                        name: item.vendorCompanyName,
+                                        paymentMethod: paymentMethod,
+                                        ]" />
+                                <else>
+                                    <set field="userOut"
+                                        from="[
+                                            partyId: item.vendorUserPartyId,
+                                            firstName: item.vendorFirstName,
+                                            lastName: item.vendorLastName,
+                                            email: item.vendorEmail,
                                             company: company,
                                         ]" />
+                                </else>
+                            </if>
                         </else>
                     </if>
                     <service-call name="growerp.100.FinDocServices100.convert#StatusId"
@@ -1033,6 +1070,7 @@ along with this software (see the LICENSE.md file). If not, see
                         paymentInstrument: item.paymentInstrumentId.substring(2),
                         paymentId: item.paymentId,
                         pseudoId: item.pseudoId ?: '',
+                        transactionId: item.transactionId,
                         id: item.paymentId,
                         invoiceId: item.invoiceId ? item.invoiceId : item.forInvoiceId,
                         statusId: convertedStatusId,
@@ -1111,36 +1149,42 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                     </if>
                     <if condition="!lastItem || lastItem.shipmentId != item.shipmentId">
-                        <if condition="!sales">
-                            <set field="company"
-                                from="[
-                                    partyId: item.vendorPartyId,
-                                    name: item.vendorCompanyName,
-                                    ]" />
-                            <set field="userOut"
-                                from="[
-                                    partyId: item.vendorUserPartyId,
-                                    firstName: item.vendorFirstName,
-                                    lastName: item.vendorLastName,
-                                    email: item.vendorEmail,
-                                    company: company,
-                                ]" />
-                            <else>
+                        <if condition="sales">
+                            <if condition="item.customerPartyId">
                                 <set field="company"
                                     from="[
-                                            partyId: item.customerPartyId,
-                                            name: item.customerCompanyName,
-                                            address: address,
+                                        partyId: item.customerPartyId,
+                                        name: item.customerCompanyName,
+                                        address: address,
+                                    ]" />
+                                <else>
+                                    <set field="userOut"
+                                        from="[
+                                            partyId: item.customerUserPartyId,
+                                            firstName: item.customerFirstName,
+                                            lastName: item.customerLastName,
+                                            email: item.customerEmail,
+                                            telephoneNr: item.telephoneNr,
                                         ]" />
-                                <set field="userOut"
-                                    from="[
-                                        partyId: item.customerUserPartyId,
-                                        firstName: item.customerFirstName,
-                                        lastName: item.customerLastName,
-                                        email: item.customerEmail,
-                                        telephoneNr: item.telephoneNr,
-                                        company: company,
+                                </else>
+                            </if>
+                            <else><!-- incoming  purchase -->
+                                <if condition="item.vendorPartyId">
+                                    <set field="company"
+                                        from="[
+                                            partyId: item.vendorPartyId,
+                                            name: item.vendorCompanyName,
                                         ]" />
+                                    <else>
+                                        <set field="userOut"
+                                            from="[
+                                                partyId: item.vendorUserPartyId,
+                                                firstName: item.vendorFirstName,
+                                                lastName: item.vendorLastName,
+                                                email: item.vendorEmail,
+                                            ]" />
+                                    </else>
+                                </if>
                             </else>
                         </if>
                         <set field="address"
@@ -1153,6 +1197,14 @@ along with this software (see the LICENSE.md file). If not, see
                         <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                             in-map="[sales: sales, docType: docType, statusId: item.statusId]"
                             out-map="context" />
+                        <!-- get first of related transaction id's -->
+                        <!-- shipment seems to have a tranaction id for every shipment item -->
+                        <!-- intend to merge these (type: AttInventoryIssuance) when display -->
+                        <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
+                            list="transactions" limit="1">
+                            <econdition field-name="shipmentId" from="item.shipmentId" />
+                            <select-field field-name="acctgTransId" />
+                        </entity-find>
                         <set field="finDocOut"
                             from="[
                             docType: docType,
@@ -1161,7 +1213,7 @@ along with this software (see the LICENSE.md file). If not, see
                             pseudoId: item.pseudoId,
                             Id: item.shipmentId,
                             shipmentId: item.shipmentId,
-                            transactionId: item.transactionId,
+                            transactionId: transactions ? transactions[0].acctgTransId : null,
                             pseudoId: item.pseudoId ?:'',
                             statusId: convertedStatusId,
                             reference: item.externalId,
@@ -1271,15 +1323,23 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <!-- get transaction headers -->
                 <iterate entry="item" list="items">
-                    <set field="company"
-                        from="[
-                            partyId: item.otherCompanyPartyId,
+                    <if condition="item.otherCompanyName">
+                        <set field="company"
+                            from="[
+                            partyId: item.otherPartyId,
+                            pseudoId: item.otherPseudoId,
                             name: item.otherCompanyName,
                         ]" />
-                    <set field="userOut"
-                        from="[
-                            company: company,
+                    </if>
+                    <if condition="item.otherPersonLastName">
+                        <set field="userOut"
+                            from="[
+                            partyId: item.otherPartyId,
+                            pseudoId: item.otherPseudoId,
+                            firstName: item.otherPersonFirstName,
+                            lastName: item.otherPersonLastName,
                         ]" />
+                    </if>
                     <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                         in-map="[docType: 'transaction', 
                                 statusId: item.isPosted == 'Y'? 'Posted' : 'NotPosted']"
@@ -1287,6 +1347,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="finDocOut"
                         from="[
                             docType: 'transaction',
+                            docSubType: item.transactionType,
                             sales: sales,
                             description: item.transDescription,
                             paymentId: item.paymentId,
@@ -1295,7 +1356,6 @@ along with this software (see the LICENSE.md file). If not, see
                             id: item.transactionId,
                             pseudoId: item.pseudoId ?: '',
                             transactionId: item.transactionId,
-                            itemType: [itemTypeId: item.typeId],
                             statusId: convertedStatusId,
                             creationDate: item.transactionDate 
                                 ? ec.l10n.format(item.transactionDate,'yyyy-MM-dd')  : null,
@@ -1310,12 +1370,39 @@ along with this software (see the LICENSE.md file). If not, see
                         finDocIds.add(item.transactionId);
                     </script>
                 </iterate>
-                <!-- get transaction entries -->
                 <set field="transactionTotal" value="0" type="BigDecimal" />
-                <entity-find entity-name="growerp.account.AcctgEntryAndGlAccount" list="entries">
-                    <econdition field-name="transactionId" operator="in" from="finDocIds" />
-                    <order-by field-name="transactionId,accountCode" />
-                </entity-find>
+                <!-- merge all shipment transactions together -->
+                <if
+                    condition="(finDocId || pseudoId) 
+                        &amp;&amp; items[0].transactionTypeId == 'AttInventoryIssuance'">
+                    <then>
+                        <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
+                            list="transIds">
+                            <econdition field-name="organizationPartyId" from="companyPartyId" />
+                            <econdition field-name="shipmentId" from="items[0].shipmentId" />
+                            <select-field field-name="acctgTransId" />
+                        </entity-find>
+                        <entity-find entity-name="growerp.account.AcctgEntryAndGlAccount"
+                            list="sepEntries">
+                            <econdition field-name="transactionId" operator="in"
+                                from="transIds.acctgTransId" />
+                            <order-by field-name="transactionId,accountCode" />
+                        </entity-find>
+                        <set field="entries" from="[]" />
+                        <iterate list="sepEntries" entry="entry">
+                            <set field="entry.transactionId" from="items[0].transactionId" />
+                            <script>entries.add(entry)</script>
+                        </iterate>
+                    </then>
+                    <else>
+                        <!-- get transaction entries -->
+                        <entity-find entity-name="growerp.account.AcctgEntryAndGlAccount"
+                            list="entries">
+                            <econdition field-name="transactionId" operator="in" from="finDocIds" />
+                            <order-by field-name="transactionId,accountCode" />
+                        </entity-find>
+                    </else>
+                </if>
                 <iterate list="entries" entry="item">
                     <!-- add items to a single transaction when transactionId changes-->
                     <if
@@ -2531,216 +2618,242 @@ along with this software (see the LICENSE.md file). If not, see
                 </econditions>
                 <order-by field-name="orderItemSeqId" />
             </entity-find>
-            <if condition="!items">
-                <return error="true" message="Order $orderId has no items!" />
-            </if>
-            <set field="paymentId" from="items[0].paymentId" />
-            <set field="invoiceId" from="items[0].invoiceId" />
-            <set field="orderPartSeqId" value="01" />
-            <!-- orderheader -->
-            <if condition="order.description &amp;&amp; items[0].orderName != order.description">
-                <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader">
-                    <field-map field-name="orderId" from="order.orderId" />
-                </entity-find-one>
-                <set field="orderHeader.orderName" from="order.description" />
-                <entity-update value-field="orderHeader" />
-            </if>
-            <!-- order part-->
-            <if condition="order.otherUser || order.otherCompany">
-                <!-- get existing record -->
-                <entity-find entity-name="mantle.order.OrderPart" list="parts" for-update="true"
-                    limit="1">
-                    <econdition field-name="orderId" />
-                </entity-find>
-                <if
-                    condition="order.sales == true &amp;&amp;
+            <if condition="items[0].statusId == 'OrderOpen' || items[0].statusId == 'OrderPlaced'">
+                <if condition="!items">
+                    <return error="true" message="Order $orderId has no items!" />
+                </if>
+                <set field="paymentId" from="items[0].paymentId" />
+                <set field="invoiceId" from="items[0].invoiceId" />
+                <set field="orderPartSeqId" value="01" />
+                <!-- orderheader -->
+                <if condition="order.description &amp;&amp; items[0].orderName != order.description">
+                    <entity-find-one entity-name="mantle.order.OrderHeader"
+                        value-field="orderHeader">
+                        <field-map field-name="orderId" from="order.orderId" />
+                    </entity-find-one>
+                    <set field="orderHeader.orderName" from="order.description" />
+                    <entity-update value-field="orderHeader" />
+                </if>
+                <!-- order part-->
+                <if condition="order.otherUser || order.otherCompany">
+                    <!-- get existing record -->
+                    <entity-find entity-name="mantle.order.OrderPart" list="parts" for-update="true"
+                        limit="1">
+                        <econdition field-name="orderId" />
+                    </entity-find>
+                    <if
+                        condition="order.sales == true &amp;&amp;
                         parts[0].customerPartyId !=
                             order.otherCompany?.partyId ?: order.otherUser?.partyId">
-                    <set field="parts[0].customerPartyId"
-                        from="order.otherCompany?.partyId ?: order.otherUser?.partyId" />
-                    <entity-update value-field="parts[0]" />
-                </if>
-                <if
-                    condition="order.sales == false &amp;&amp; parts[0].vendorPartyId != order.otherCompany.partyId">
-                    <set field="parts[0].vendorPartyId" from="order.otherCompany.partyId" />
-                    <entity-update value-field="parts[0]" />
-                </if>
-                <!-- contact person (add if missing)-->
-                <if condition="order.otherUser?.partyId">
-                    <if condition="order.sales == true">
-                        <set field="contactRole" value="CustomerContactPerson" />
-                        <else>
-                            <set field="contactRole" value="VendorContactPerson" />
-                        </else>
+                        <set field="parts[0].customerPartyId"
+                            from="order.otherCompany?.partyId ?: order.otherUser?.partyId" />
+                        <entity-update value-field="parts[0]" />
                     </if>
-                    <entity-find entity-name="mantle.order.OrderPartParty" list="parties"
-                        for-update="true">
-                        <econdition field-name="orderId" />
-                        <econdition field-name="orderPartSeqId" from="parts[0].orderPartSeqId" />
-                        <econdition field-name="roleTypeId" from="contactRole" />
-                    </entity-find>
-                    <if condition="!parties">
-                        <service-call name="create#mantle.order.OrderPartParty"
-                            in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId,
+                    <if
+                        condition="order.sales == false &amp;&amp; parts[0].vendorPartyId != order.otherCompany.partyId">
+                        <set field="parts[0].vendorPartyId" from="order.otherCompany.partyId" />
+                        <entity-update value-field="parts[0]" />
+                    </if>
+                    <!-- contact person (add if missing)-->
+                    <if condition="order.otherUser?.partyId">
+                        <if condition="order.sales == true">
+                            <set field="contactRole" value="CustomerContactPerson" />
+                            <else>
+                                <set field="contactRole" value="VendorContactPerson" />
+                            </else>
+                        </if>
+                        <entity-find entity-name="mantle.order.OrderPartParty" list="parties"
+                            for-update="true">
+                            <econdition field-name="orderId" />
+                            <econdition field-name="orderPartSeqId" from="parts[0].orderPartSeqId" />
+                            <econdition field-name="roleTypeId" from="contactRole" />
+                        </entity-find>
+                        <if condition="!parties">
+                            <service-call name="create#mantle.order.OrderPartParty"
+                                in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId,
                             partyId:order.otherUser.partyId, roleTypeId: contactRole]" />
-                        <else>
-                            <if condition="parties[0].partyId != order.otherUser.partyId">
-                                <entity-delete value-field="parties[0]" />
-                                <service-call name="create#mantle.order.OrderPartParty"
-                                    in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId,
+                            <else>
+                                <if condition="parties[0].partyId != order.otherUser.partyId">
+                                    <entity-delete value-field="parties[0]" />
+                                    <service-call name="create#mantle.order.OrderPartParty"
+                                        in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId,
                                     partyId:order.otherUser.partyId, roleTypeId: contactRole]" />
-                            </if>
-                        </else>
+                                </if>
+                            </else>
+                        </if>
                     </if>
                 </if>
+                <if condition="order.items &amp;&amp; !order.items.isEmpty()">
+                    <service-call name="growerp.100.FinDocServices100.replace#OrderItems"
+                        in-map="[orderId: orderId,
+                                         orderPartSeqId: orderPartSeqId,
+                                         orderItems: order.items]" />
+                </if>
+                <else>
+                    <return error="true"
+                        message="Order $orderId status: ${items[0].statusId} does not allow updates!" />
+                </else>
             </if>
             <!-- handle status changes -->
             <if condition="order.statusId &amp;&amp; order.statusId != items[0].statusId">
                 <if condition="order.statusId == 'OrderPlaced'">
-                    <service-call in-map="context" out-map="context"
-                        name="mantle.order.OrderServices.place#Order" />
-                    <!-- assign asset when rental order (one item per order only)-->
-                    <if
-                        condition="items[0].rentalFromDate &amp;&amp;
+                    <then>
+                        <service-call in-map="context" out-map="context"
+                            name="mantle.order.OrderServices.place#Order" />
+                        <!-- assign asset when rental order (one item per order only)-->
+                        <if
+                            condition="items[0].rentalFromDate &amp;&amp;
                                         items[0].rentalThruDate">
-                        <service-call
-                            name="growerp.100.FinDocServices100.get#AssetsAvailableForProduct"
-                            in-map="productId: items[0].productId,
+                            <service-call
+                                name="growerp.100.FinDocServices100.get#AssetsAvailableForProduct"
+                                in-map="productId: items[0].productId,
                                     fromDate: items[0].rentalFromDate,
                                     thruDate: items[0].rentalThruDate"
-                            out-map="context" />
-                        <if condition="availableAssetIds.size() &lt; items.size()">
-                            <return error="true"
-                                message="not enough assets available for this date: required ${items.size()} available: ${availableAssetIds.size()}" />
+                                out-map="context" />
+                            <if condition="availableAssetIds.size() &lt; items.size()">
+                                <return error="true"
+                                    message="not enough assets available for this date: required ${items.size()} available: ${availableAssetIds.size()}" />
+                            </if>
+                            <set field="index" value="0" type="Integer" />
+                            <iterate list="items" entry="item">
+                                <!-- when items replaced assetRentalId not available -->
+                                <entity-find-one entity-name="growerp.product.AssetRental"
+                                    value-field="assetRental">
+                                    <field-map field-name="orderId" from="order.orderId" />
+                                    <field-map field-name="orderItemSeqId"
+                                        from="item.orderItemSeqId" />
+                                </entity-find-one>
+                                <set field="assetRental.assetId" from="availableAssetIds[index++]" />
+                                <entity-update value-field="assetRental" />
+                            </iterate>
                         </if>
-                        <set field="index" value="0" type="Integer" />
-                        <iterate list="items" entry="item">
-                            <!-- when items replaced assetRentalId not available -->
-                            <entity-find-one entity-name="growerp.product.AssetRental"
-                                value-field="assetRental">
-                                <field-map field-name="orderId" from="order.orderId" />
-                                <field-map field-name="orderItemSeqId" from="item.orderItemSeqId" />
-                            </entity-find-one>
-                            <set field="assetRental.assetId" from="availableAssetIds[index++]" />
-                            <entity-update value-field="assetRental" />
-                        </iterate>
-                    </if>
-                </if>
-                <if condition="order.statusId == 'OrderApproved'">
-                    <!-- when sales order: set shipping address and method -->
-                    <!-- Simplescreens orderDetail.xml line 1138 -->
-                    <entity-find-one entity-name="growerp.product.AssetRental"
-                        value-field="isRoomRental">
-                        <field-map field-name="orderId" from="order.orderId" />
-                    </entity-find-one>
-                    <if condition="order.sales == true &amp;&amp; !isRoomRental">
-                        <if condition="!order.otherCompany">
-                            <!-- needed when just changing status for sales order -->
-                            <entity-find entity-name="mantle.order.OrderPart" list="parts" limit="1">
-                                <econdition field-name="orderId" />
-                            </entity-find>
-                        </if>
-                        <service-call name="mantle.party.ContactServices.get#PartyContactInfoList"
-                            out-map="customerShippingInfo"
-                            in-map="[partyId: order.otherCompany?.partyId ?: order.otherUser?.partyId ?: parts[0].customerPartyId,
+                    </then>
+                    <else-if condition="order.statusId == 'OrderApproved'">
+                        <!-- when sales order: set shipping address and method -->
+                        <!-- Simplescreens orderDetail.xml line 1138 -->
+                        <entity-find-one entity-name="growerp.product.AssetRental"
+                            value-field="isRoomRental">
+                            <field-map field-name="orderId" from="order.orderId" />
+                        </entity-find-one>
+                        <if condition="order.sales == true &amp;&amp; !isRoomRental">
+                            <if condition="!order.otherCompany">
+                                <!-- needed when just changing status for sales order -->
+                                <entity-find entity-name="mantle.order.OrderPart" list="parts"
+                                    limit="1">
+                                    <econdition field-name="orderId" />
+                                </entity-find>
+                            </if>
+                            <service-call
+                                name="mantle.party.ContactServices.get#PartyContactInfoList"
+                                out-map="customerShippingInfo"
+                                in-map="[partyId: order.otherCompany?.partyId ?: order.otherUser?.partyId ?: parts[0].customerPartyId,
                                     postalContactMechPurposeId:'PostalShippingDest']" />
-                        <if condition="customerShippingInfo.postalAddressList == null">
-                            <return error="true"
-                                message="Customer does not have a shipping address!" />
-                        </if>
-                        <set field="postalAddress" from="customerShippingInfo.postalAddressList[0]" />
-                        <service-call name="mantle.order.OrderServices.set#OrderBillingShippingInfo"
-                            in-map="[orderId: order.orderId, orderPartSeqId: orderPartSeqId,
+                            <if condition="customerShippingInfo.postalAddressList == null">
+                                <return error="true"
+                                    message="Customer does not have a shipping address!" />
+                            </if>
+                            <set field="postalAddress"
+                                from="customerShippingInfo.postalAddressList[0]" />
+                            <service-call
+                                name="mantle.order.OrderServices.set#OrderBillingShippingInfo"
+                                in-map="[orderId: order.orderId, orderPartSeqId: orderPartSeqId,
                             shippingPostalContactMechId: postalAddress.postalContactMechId,
                             carrierAndShipmentMethod: '_NA_:ShMthPickUp']" />
-                        <!-- carrierPartyId:shipmentMethodEnumId -->
-                    </if>
-                    <service-call name="mantle.order.OrderServices.approve#Order"
-                        in-map="[orderId: order.orderId]" />
-                    <!-- for websales do not create invoice aand payment is already created
-                    approved-->
-                    <entity-find entity-name="mantle.account.payment.Payment" list="payments">
-                        <econdition field-name="orderId" from="order.orderId" />
-                    </entity-find>
-                    <if condition="!payments">
-                        <!-- create invoice -->
-                        <if condition="order.sales == true">
-                            <set field="invStatusId" value="InvoiceFinalized" />
-                            <else>
-                                <set field="invStatusId" value="InvoiceReceived" />
-                            </else>
+                            <!-- carrierPartyId:shipmentMethodEnumId -->
                         </if>
-                        <service-call in-map="context + [statusId: invStatusId]" out-map="context"
-                            name="mantle.account.InvoiceServices.create#EntireOrderPartInvoice" />
-                        <entity-find-one entity-name="mantle.account.invoice.Invoice"
-                            value-field="updInvoice" for-update="true" />
-                        <if condition="updInvoice">
+                        <service-call name="mantle.order.OrderServices.approve#Order"
+                            in-map="[orderId: order.orderId]" />
+                        <!-- for websales do not create invoice aand payment is already created
+                                approved-->
+                        <entity-find entity-name="mantle.account.payment.Payment" list="payments">
+                            <econdition field-name="orderId" from="order.orderId" />
+                        </entity-find>
+                        <if condition="!payments">
+                            <!-- create invoice -->
+                            <if condition="order.sales == true">
+                                <set field="invStatusId" value="InvoiceFinalized" />
+                                <else>
+                                    <set field="invStatusId" value="InvoiceReceived" />
+                                </else>
+                            </if>
+                            <service-call in-map="context + [statusId: invStatusId]"
+                                out-map="context"
+                                name="mantle.account.InvoiceServices.create#EntireOrderPartInvoice" />
+                            <entity-find-one entity-name="mantle.account.invoice.Invoice"
+                                value-field="updInvoice" for-update="true" />
+                            <if condition="updInvoice">
+                                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                                    in-map="[ownerPartyId: ownerPartyId, seqName: 'invoice']"
+                                    out-map="context" />
+                                <set field="updInvoice.pseudoId" from="seqNum" />
+                                <entity-update value-field="updInvoice" />
+                            </if>
+                            <!-- create payment -->
+                            <set field="effectiveDate" from="ec.user.nowTimestamp" />
                             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                                in-map="[ownerPartyId: ownerPartyId, seqName: 'invoice']"
+                                in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']"
                                 out-map="context" />
-                            <set field="updInvoice.pseudoId" from="seqNum" />
-                            <entity-update value-field="updInvoice" />
-                        </if>
-                        <!-- create payment -->
-                        <set field="effectiveDate" from="ec.user.nowTimestamp" />
-                        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                            in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']"
-                            out-map="context" />
-                        <service-call name="mantle.account.PaymentServices.create#InvoicePayment"
-                            in-map="[invoiceId: invoiceId, effectiveDate:effectiveDate,
+                            <service-call
+                                name="mantle.account.PaymentServices.create#InvoicePayment"
+                                in-map="[invoiceId: invoiceId, effectiveDate:effectiveDate,
                                 statusId: 'PmntPromised', orderId: order.orderId,
                                 pseudoId: seqNum]"
-                            out-map="context" />
-                    </if>
-                    <!-- create shipment -->
-                    <entity-find entity-name="mantle.facility.Facility" list="facilities" limit="1">
-                        <econdition field-name="ownerPartyId" from="companyPartyId" />
-                    </entity-find>
-                    <service-call name="mantle.shipment.ShipmentServices.create#OrderPartShipment"
-                        in-map="[orderId: order.orderId, facilityId: facilities[0].facilityId,
+                                out-map="context" />
+                        </if>
+                        <!-- create shipment -->
+                        <entity-find entity-name="mantle.facility.Facility" list="facilities"
+                            limit="1">
+                            <econdition field-name="ownerPartyId" from="companyPartyId" />
+                        </entity-find>
+                        <service-call
+                            name="mantle.shipment.ShipmentServices.create#OrderPartShipment"
+                            in-map="[orderId: order.orderId, facilityId: facilities[0].facilityId,
                                 orderPartSeqId: orderPartSeqId]"
-                        out-map="context" />
-                    <if condition="shipmentId != null">
-                        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                            in-map="[ownerPartyId: ownerPartyId, seqName: 'shipment']"
                             out-map="context" />
-                        <!-- shipment created with status created -> ShipScheduled better then
+                        <if condition="shipmentId != null">
+                            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                                in-map="[ownerPartyId: ownerPartyId, seqName: 'shipment']"
+                                out-map="context" />
+                            <!-- shipment created with status created -> ShipScheduled better then
                         approved -> ShipPacked because when approved, you have to show the 
                         receive or send screen shipment -->
-                        <service-call name="update#mantle.shipment.Shipment" out-map="context"
-                            in-map="[shipmentId: shipmentId,
+                            <service-call name="update#mantle.shipment.Shipment" out-map="context"
+                                in-map="[shipmentId: shipmentId,
                                     statusId: 'ShipScheduled',
                                     pseudoId: seqNum]" />
-                        <else><!-- no shipable items so complete order already here not with rental
+                            <else><!-- no shipable items so complete order already here not with
+                                rental
                             though-->
-                            <entity-find entity-name="growerp.product.AssetRental" list="rentals">
-                                <econdition field-name="orderId" from="order.orderId" />
-                            </entity-find>
-                            <if condition="!rentals">
-                                <service-call name="mantle.order.OrderServices.complete#Order"
-                                    in-map="[orderId: order.orderId]" />
-                            </if>
-                        </else>
-                    </if>
-                    <if condition="!payments">
-                        <!-- check if related invoice transaction has pseudoId -->
-                        <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
-                            list="transactions" for-update="true">
-                            <econdition field-name="invoiceId" from="invoiceId" />
-                        </entity-find>
-                        <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
-                            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                                in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
-                                out-map="context" />
-                            <set field="transactions[0].pseudoId" from="seqNum" />
-                            <entity-update value-field="transactions[0]" />
+                                <entity-find entity-name="growerp.product.AssetRental"
+                                    list="rentals">
+                                    <econdition field-name="orderId" from="order.orderId" />
+                                </entity-find>
+                                <if condition="!rentals">
+                                    <service-call name="mantle.order.OrderServices.complete#Order"
+                                        in-map="[orderId: order.orderId]" />
+                                </if>
+                            </else>
                         </if>
-                    </if>
-                </if>
-                <if condition="order.statusId == 'OrderCompleted'">
-                    <service-call name="mantle.order.OrderServices.complete#Order" in-map="context" />
-                    <!-- invoice only be updated is required? it can make the order completed-->
-                    <!--entity-find-one
+                        <if condition="!payments">
+                            <!-- check if related invoice transaction has pseudoId -->
+                            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
+                                list="transactions" for-update="true">
+                                <econdition field-name="invoiceId" from="invoiceId" />
+                            </entity-find>
+                            <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
+                                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
+                                    out-map="context" />
+                                <set field="transactions[0].pseudoId" from="seqNum" />
+                                <entity-update value-field="transactions[0]" />
+                            </if>
+                        </if>
+                    </else-if>
+                    <else-if condition="order.statusId == 'OrderCompleted'">
+                        <service-call name="mantle.order.OrderServices.complete#Order"
+                            in-map="context" />
+                        <!-- invoice only be updated is required? it can make the order completed-->
+                        <!--entity-find-one
                     entity-name="mantle.account.invoice.Invoice" value-field="invoice">
                         <field-map field-name="invoiceId" from="order.invoiceId"/>
                     </entity-find-one>
@@ -2751,19 +2864,12 @@ along with this software (see the LICENSE.md file). If not, see
                         </else>
                     </if>
                     <service-call name="update#mantle.account.invoice.Invoice" in-map="invoice"/-->
+                    </else-if>
+                    <else-if condition="order.statusId == 'OrderCancelled'">
+                        <service-call name="mantle.order.OrderServices.cancel#Order"
+                            in-map="context" />
+                    </else-if>
                 </if>
-                <if condition="order.statusId == 'OrderCancelled'">
-                    <service-call name="mantle.order.OrderServices.cancel#Order" in-map="context" />
-                </if>
-                <else>                    <!-- only update items when no status changes -->
-                    <!-- delete and recreate all orderitems -->
-                    <if condition="order.items &amp;&amp; !order.items.isEmpty()">
-                        <service-call name="growerp.100.FinDocServices100.replace#OrderItems"
-                            in-map="[orderId: orderId,
-                                         orderPartSeqId: orderPartSeqId,
-                                         orderItems: order.items]" />
-                    </if>
-                </else>
             </if>
         </actions>
     </service>
@@ -2797,22 +2903,22 @@ along with this software (see the LICENSE.md file). If not, see
                 value-field="invoiceHeader" for-update="true">
                 <field-map field-name="invoiceId" from="invoice.invoiceId" />
             </entity-find-one>
-            <!-- desription change -->
+            <!-- description change -->
             <if
                 condition="invoice.description &amp;&amp; 
                 items[0].invoiceName != invoice.description">
                 <set field="invoiceHeader.description" from="invoice.description" />
             </if>
-            <!-- party changes -->
-            <if
-                condition="invoice.sales &amp;&amp;
-                invoice.otherCompany.partyId != items[0].toPartyId">
-                <set field="invoiceHeader.toPartyId" from="invoice.otherCompany.partyId" />
-            </if>
-            <if
-                condition="!invoice.sales &amp;&amp;
-                invoice.otherCompany.partyId != items[0].fromPartyId">
-                <set field="invoiceHeader.fromPartyId" from="invoice.otherCompany.partyId" />
+            <!-- related customer/vendor change -->
+            <if condition="invoice.sales">
+                <then>
+                    <set field="invoiceHeader.toPartyId"
+                        from="invoice.otherCompany? invoice.otherCompany.partyId: invoice.otherUser.partyId" />
+                </then>
+                <else>
+                    <set field="invoiceHeader.fromPartyId"
+                        from="invoice.otherCompany? invoice.otherCompany.partyId: invoice.otherUser.partyId" />
+                </else>
             </if>
             <entity-update value-field="invoiceHeader" />
             <!-- handle status changes -->
@@ -2845,7 +2951,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </else>
             </if>
             <!-- check if related transaction has pseudoId -->
-            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transactions"
+            <!-- entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transactions"
                 for-update="true">
                 <econdition field-name="invoiceId" from="invoice.invoiceId" />
             </entity-find>
@@ -2854,7 +2960,7 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']" out-map="context" />
                 <set field="transactions[0].pseudoId" from="seqNum" />
                 <entity-update value-field="transactions[0]" />
-            </if>
+            </if-->
         </actions>
     </service>
 
@@ -2865,91 +2971,116 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <entity-find-one entity-name="mantle.account.payment.Payment" value-field="paymentOld"
-                for-update="true">
-                <field-map field-name="paymentId" from="payment.paymentId" />
-            </entity-find-one>
-            <if condition="payment.sales">
-                <then>
-                    <set field="paymentOld.fromPartyId" from="payment.otherCompany.partyId" />
-                </then>
-                <else>
-                    <set field="paymentOld.toPartyId" from="payment.otherCompany.partyId" />
-                </else>
-            </if>
-            <set field="amount" from="payment.grandTotal" type="BigDecimal" />
-            <set field="paymentOld.amount" from="amount" />
-            <!-- first item stores the paymentType needed for posting -->
-            <if condition="payment.items &amp;&amp; payment.items[0].paymentType">
-                <entity-find entity-name="mantle.ledger.config.PaymentTypeGlAccount"
-                    list="glAccounts">
-                    <econdition field-name="organizationPartyId" from="companyPartyId" />
-                    <econdition field-name="paymentTypeEnumId"
-                        from="payment.items[0].paymentType.paymentTypeId" />
-                    <econditions combine="or">
-                        <econdition field-name="isPayable" from="payment.sales == true ? 'N' : 'Y'" />
-                        <econdition field-name="isPayable" value="E" />
-                    </econditions>
-                    <econdition field-name="glAccountId" operator="is-not-null" />
-                </entity-find>
-                <if
-                    condition="glAccounts &amp;&amp; glAccounts[0].glAccountId != paymentOld.itemTypeGlAccountId">
-                    <set field="paymentOld.itemTypeGlAccountId" from="glAccounts[0].glAccountId" />
-                </if>
-            </if>
-            <!-- if no glaccount found cannot be posted -->
-            <if
-                condition="!paymentOld.itemTypeGlAccountId &amp;&amp; !payment.items[0].glAccount?.glAccountId ">
+            <entity-find entity-name="mantle.account.payment.Payment" list="payments">
+                <econditions combine="or">
+                    <econdition field-name="fromPartyId" from="companyPartyId" />
+                    <econdition field-name="toPartyId" from="companyPartyId" />
+                </econditions>
+                <econdition field-name="paymentId" from="payment.paymentId" />
+            </entity-find>
+            <if condition="!payments">
                 <return error="true"
-                    message="No Gl Account ID found for payment type: ${payment.items[0].itemType?.itemTypeName}[${payment.items[0].itemType?.itemTypeId}]" />
+                    message="Payment: ${payment.paymentId} noy found for company: $companyPartyId" />
             </if>
-            <!-- payment instrument changed? -->
-            <set field="newInstrument" value="Pi${payment.paymentInstrument}" />
-            <if condition="paymentOld.paymentInstrumentEnumId != newInstrument">
-                <!-- credit card removed -->
-                <if condition="paymentOld.paymentInstrumentEnumId == 'PiCreditCard'">
-                    <set field="paymentOld.paymentMethodId" from="null" />
-                    <set field="paymentOld.paymentGatewayConfigId" from="null" />
-                </if>
-                <!-- credit card added -->
-                <if condition="payment.paymentInstrument == 'CreditCard'">
+            <!-- check first for status change-->
+            <if condition="payments[0].statusId != payment.statusId">
+                <service-call name="update#mantle.account.payment.Payment"
+                    in-map="[paymentId: payment.paymentId, statusId: payment.statusId]" />
+                <else>
+                    <entity-find-one entity-name="mantle.account.payment.Payment"
+                        value-field="paymentOld" for-update="true">
+                        <field-map field-name="paymentId" from="payment.paymentId" />
+                    </entity-find-one>
+                    <!-- related customer/vendor change -->
                     <if condition="payment.sales">
                         <then>
-                            <set field="paymentOld.paymentMethodId"
-                                from="payment.otherCompany.paymentMethod.ccPaymentMethodId" />
-                            <set field="paymentOld.paymentGatewayConfigId"
-                                from="System.getProperty('paymentGatewayConfigId')" />
+                            <set field="paymentOld.fromPartyId"
+                                from="payment.otherCompany? payment.otherCompany.partyId: payment.otherUser.partyId" />
                         </then>
                         <else>
-                            <entity-find entity-name="mantle.account.method.PaymentMethod" limit="1"
-                                list="pms">
-                                <econdition field-name="ownerPartyId" from="companyPartyId" />
-                                <econdition field-name="paymentMethodTypeEnumId"
-                                    value="PmtCreditCard" />
-                            </entity-find>
-                            <if condition="pms">
-                                <set field="paymentOld.paymentMethodId"
-                                    from="pms[0].paymentMethodId" />
-                                <set field="paymentOld.paymentGatewayConfigId"
-                                    from="System.getProperty('paymentGatewayConfigId')" />
-                            </if>
+                            <set field="paymentOld.toPartyId"
+                                from="payment.otherCompany? payment.otherCompany.partyId: payment.otherUser.partyId" />
                         </else>
                     </if>
-                </if>
-                <set field="paymentOld.paymentInstrumentEnumId"
-                    value="Pi${payment.paymentInstrument}" />
+                    <set field="amount" from="payment.grandTotal" type="BigDecimal" />
+                    <set field="paymentOld.amount" from="amount" />
+                    <!-- first item stores the paymentType needed for posting -->
+                    <if condition="payment.items &amp;&amp; payment.items[0].paymentType">
+                        <entity-find entity-name="mantle.ledger.config.PaymentTypeGlAccount"
+                            list="glAccounts">
+                            <econdition field-name="organizationPartyId" from="companyPartyId" />
+                            <econdition field-name="paymentTypeEnumId"
+                                from="payment.items[0].paymentType.paymentTypeId" />
+                            <econditions combine="or">
+                                <econdition field-name="isPayable"
+                                    from="payment.sales == true ? 'N' : 'Y'" />
+                                <econdition field-name="isPayable" value="E" />
+                            </econditions>
+                            <econdition field-name="glAccountId" operator="is-not-null" />
+                        </entity-find>
+                        <if
+                            condition="glAccounts &amp;&amp; glAccounts[0].glAccountId != paymentOld.itemTypeGlAccountId">
+                            <set field="paymentOld.itemTypeGlAccountId"
+                                from="glAccounts[0].glAccountId" />
+                        </if>
+                    </if>
+                    <!-- if no glaccount found cannot be posted -->
+                    <if
+                        condition="!paymentOld.itemTypeGlAccountId &amp;&amp; !payment.items[0].glAccount?.glAccountId ">
+                        <return error="true"
+                            message="No Gl Account ID found for payment type: ${payment.items[0].itemType?.itemTypeName}[${payment.items[0].itemType?.itemTypeId}]" />
+                    </if>
+                    <!-- payment instrument changed? -->
+                    <set field="newInstrument" value="Pi${payment.paymentInstrument}" />
+                    <if condition="paymentOld.paymentInstrumentEnumId != newInstrument">
+                        <!-- credit card removed -->
+                        <if condition="paymentOld.paymentInstrumentEnumId == 'PiCreditCard'">
+                            <set field="paymentOld.paymentMethodId" from="null" />
+                            <set field="paymentOld.paymentGatewayConfigId" from="null" />
+                        </if>
+                        <!-- credit card added -->
+                        <if condition="payment.paymentInstrument == 'CreditCard'">
+                            <if condition="payment.sales">
+                                <then>
+                                    <set field="paymentOld.paymentMethodId"
+                                        from="payment.otherCompany.paymentMethod.ccPaymentMethodId" />
+                                    <set field="paymentOld.paymentGatewayConfigId"
+                                        from="System.getProperty('paymentGatewayConfigId')" />
+                                </then>
+                                <else>
+                                    <entity-find entity-name="mantle.account.method.PaymentMethod"
+                                        limit="1"
+                                        list="pms">
+                                        <econdition field-name="ownerPartyId" from="companyPartyId" />
+                                        <econdition field-name="paymentMethodTypeEnumId"
+                                            value="PmtCreditCard" />
+                                    </entity-find>
+                                    <if condition="pms">
+                                        <set field="paymentOld.paymentMethodId"
+                                            from="pms[0].paymentMethodId" />
+                                        <set field="paymentOld.paymentGatewayConfigId"
+                                            from="System.getProperty('paymentGatewayConfigId')" />
+                                    </if>
+                                </else>
+                            </if>
+                        </if>
+                        <set field="paymentOld.paymentInstrumentEnumId"
+                            value="Pi${payment.paymentInstrument}" />
+                    </if>
+                    <!-- override gl account -->
+                    <if condition="payment.items[0].glAccount?.glAccountId">
+                        <set field="paymentOld.overrideGlAccountId"
+                            from="payment.items[0].glAccount?.glAccountId" />
+                    </if>
+                    <!-- pseudoId-->
+                    <set field="paymentOld.pseudoId" from="payment.pseudoId" />
+                    <!-- finally update -->
+                    <entity-update value-field="paymentOld" />
+                </else>
             </if>
-            <!-- override gl account -->
-            <if condition="payment.items[0].glAccount?.glAccountId">
-                <set field="paymentOld.overrideGlAccountId"
-                    from="payment.items[0].glAccount?.glAccountId" />
-            </if>
-            <!-- pseudoId-->
-            <set field="paymentOld.pseudoId" from="payment.pseudoId" />
-            <!-- finally update -->
-            <entity-update value-field="paymentOld" />
             <!-- status updates -->
-            <entity-find entity-name="mantle.order.OrderItemBilling" limit="1" list="invoices">
+            <!--entity-find
+            entity-name="mantle.order.OrderItemBilling" limit="1" list="invoices">
                 <econdition field-name="orderId" from="payment.orderId" />
             </entity-find>
             <if condition="invoices">
@@ -2959,7 +3090,6 @@ along with this software (see the LICENSE.md file). If not, see
                                     paymentId: payment.paymentId]" />
                 </then>
                 <else>
-                    <!-- payment gateway -->
                     <if condition="paymentOld.paymentGatewayConfigId">
                         <if condition="payment.statusId == 'PmntAuthorized'">
                             <service-call
@@ -2982,13 +3112,13 @@ along with this software (see the LICENSE.md file). If not, see
                             </if>
                         </if>
                     </if>
-                    <!-- status  go to next one -->
                     <service-call name="update#mantle.account.payment.Payment"
                         in-map="[paymentId: payment.paymentId,
                         statusId: payment.statusId]" />
                 </else>
-            </if>
-            <entity-find entity-name="mantle.ledger.transaction.AcctgTransAndEntry" list="entries">
+            </if-->
+            <!--entity-find
+            entity-name="mantle.ledger.transaction.AcctgTransAndEntry" list="entries">
                 <econdition field-name="paymentId" from="paymentOld.paymentId" />
             </entity-find>
             <if condition="entries">
@@ -3004,9 +3134,10 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[acctgTransId: entries[0].acctgTransId]" />
                 <service-call name="update#mantle.account.payment.Payment"
                     in-map="[paymentId: paymentOld.paymentId, statusId: 'PmntConfirmed']" />
-            </if>
+            </if-->
             <!-- check if related transaction has pseudoId -->
-            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transactions"
+            <!--entity-find
+            entity-name="mantle.ledger.transaction.AcctgTrans" list="transactions"
                 for-update="true">
                 <econdition field-name="paymentId" from="paymentOld.paymentId" />
             </entity-find>
@@ -3015,7 +3146,7 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']" out-map="context" />
                 <set field="transactions[0].pseudoId" from="seqNum" />
                 <entity-update value-field="transactions[0]" />
-            </if>
+            </if-->
         </actions>
     </service>
 
@@ -3059,19 +3190,6 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- update status-->
             <service-call name="update#mantle.shipment.Shipment" out-map="context"
                 in-map="[shipmentId: finDoc.shipmentId, statusId: finDoc.statusId]" />
-            <!-- check if related transaction has pseudoId -->
-            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transactions"
-                for-update="true">
-                <econdition field-name="shipmentId" from="finDoc.shipmentId" />
-            </entity-find>
-            <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
-                <service-call out-map="context"
-                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']" out-map="context" />
-                <set field="transactions[0].pseudoId" from="seqNum" />
-                <entity-update value-field="transactions[0]" />
-            </if>
         </actions>
     </service>
 

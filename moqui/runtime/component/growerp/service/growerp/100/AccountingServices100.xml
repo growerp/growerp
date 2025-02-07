@@ -117,6 +117,16 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="paymentType + [glAccountId: translate[paymentType.glAccountId],
                             organizationPartyId: organizationPartyId]" />
             </iterate>
+            <!-- payment instrument -->
+            <entity-find entity-name="mantle.ledger.config.PaymentInstrumentGlAccount"
+                list="instrumentAccounts">
+                <econdition field-name="organizationPartyId" from="sourcePartyId" />
+            </entity-find>
+            <iterate list="instrumentAccounts" entry="instAccount">
+                <service-call name="create#mantle.ledger.config.PaymentInstrumentGlAccount"
+                    in-map="instAccount + [glAccountId: translate[instAccount.glAccountId],
+                            organizationPartyId: organizationPartyId]" />
+            </iterate>
             <!-- financial account -->
             <entity-find entity-name="mantle.ledger.config.FinancialAccountTypeGlAccount"
                 list="finAccounts">

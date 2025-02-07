@@ -47,7 +47,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         )));
 
     rowContent.add(TableRowContent(
-        width: 60,
+        width: 65,
         name: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
             Text('${item.docType} Id'),
@@ -117,8 +117,15 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         width: 8,
         name: Text('${item.docType} Id'),
         value: Text(item.pseudoId ?? '', key: Key('id$index'))));
+    if (item.docType == FinDocType.transaction) {
+      rowContent.add(TableRowContent(
+        width: 12,
+        name: const Text('Type'),
+        value: Text(item.docSubType ?? ''),
+      ));
+    }
     rowContent.add(TableRowContent(
-      width: 12,
+      width: 8,
       name: Text(
           classificationId == 'AppHotel' ? 'Reserv. Date' : 'Creation Date'),
       value: Text(
@@ -138,8 +145,8 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         width: 20,
         name: Text(item.sales ? 'Customer' : 'Supplier'),
         value: Text(
-            item.otherCompany?.name.truncate(20) ??
-                item.otherUser?.getName().truncate(20) ??
+            item.otherCompany?.name.truncate(30) ??
+                item.otherUser?.getName().truncate(30) ??
                 '',
             key: Key("otherUser$index"))));
     if (item.docType != FinDocType.shipment) {

@@ -34,4 +34,7 @@ class Address with _$Address {
 
   factory Address.fromJson(Map<String, dynamic> json) =>
       _$AddressFromJson(json);
+  @override
+  String toString() =>
+      "$address1,${address2 ?? ''},$province,$postalCode $city,$country";
 }

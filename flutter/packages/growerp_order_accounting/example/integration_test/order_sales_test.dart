@@ -51,6 +51,7 @@ void main() {
     // prepare
     await CommonTest.createCompanyAndAdmin(tester, testData: {
       "companies": customerCompanies,
+      "users": customers,
       "assets": assets, // create locations and products too
     });
     await OrderTest.selectSalesOrders(tester);
@@ -64,6 +65,7 @@ void main() {
     await OrderTest.checkOrderShipmentsComplete(tester);
     await PaymentTest.selectSalesPayments(tester);
     await OrderTest.approveOrderPayments(tester);
+    await OrderTest.completeOrderPayments(tester);
     await OrderTest.checkOrderPaymentsComplete(tester);
     await CommonTest.gotoMainMenu(tester);
     await OrderTest.selectSalesOrders(tester);

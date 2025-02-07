@@ -100,8 +100,14 @@ class FinDocTest {
       await CommonTest.checkWidgetKey(tester,
           "FinDocDialog${finDoc.sales ? 'Sales' : 'Purchase'}${finDoc.docType!.toString()}");
       // enter supplier/customer
-      await CommonTest.enterDropDownSearch(tester,
-          finDoc.sales ? 'customer' : 'supplier', finDoc.otherCompany!.name!);
+      await CommonTest.enterDropDownSearch(
+          tester,
+          finDoc.sales ? 'customer' : 'supplier',
+          // in the case of a person just use last name
+          CompanyUser.tryParse(finDoc.otherCompany ?? finDoc.otherUser)
+                  ?.name!
+                  .split(',')[0] ??
+              '');
       if (finDoc.docType == FinDocType.order ||
           finDoc.docType == FinDocType.invoice) {
         await CommonTest.enterText(tester, 'description', finDoc.description!);
@@ -187,10 +193,10 @@ class FinDocTest {
           expect(CommonTest.getTextField('fromDate$index'),
               contains(item.rentalFromDate?.dateOnly()));
         } else {
-          expect(CommonTest.getTextField('itemPrice$index'),
-              item.price.currency());
-        }
-        if (!CommonTest.isPhone()) {
+          if (!CommonTest.isPhone()) {
+            expect(CommonTest.getTextField('itemPrice$index'),
+                item.price.currency());
+          }
           expect(CommonTest.getTextField('itemQuantity$index'),
               item.quantity.toString());
         }
@@ -274,7 +280,7 @@ class FinDocTest {
   }
 
   /// same as approve findocs with the difference to set the status to 'complete'
-  static Future<void> completeFinDocs(WidgetTester tester, FinDocType type,
+  Future<void> completeFinDocs(WidgetTester tester, FinDocType type,
       {FinDocType? subType}) async {
     await changeStatusFinDocs(tester, type,
         subType: subType, status: FinDocStatusVal.completed);

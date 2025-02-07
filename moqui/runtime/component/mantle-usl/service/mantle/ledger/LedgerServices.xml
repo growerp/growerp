@@ -474,6 +474,12 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[organizationPartyId:organizationPartyId]" />
                 <set field="amountUomId" from="partyAcctgPreference?.baseCurrencyUomId ?: 'USD'" />
             </if>
+            <!-- growerp add pseudoId -->
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']" out-map="context" />
+            <set field="pseudoId" from="seqNum" />
             <set field="isPosted" value="N" />
             <service-call name="create#mantle.ledger.transaction.AcctgTrans" in-map="context"
                 out-map="context" />
@@ -577,6 +583,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="amount" from="amount.abs()" />
                 <set field="debitCreditFlag" from="debitCreditFlag == 'D' ? 'C' : 'D'" />
             </if>
+            <!-- growerp add pseudoId -->
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']" out-map="context" />
+            <set field="pseudoId" from="seqNum" />
             <service-call name="create#mantle.ledger.transaction.AcctgTransEntry" in-map="context"
                 out-map="context" />
         </actions>

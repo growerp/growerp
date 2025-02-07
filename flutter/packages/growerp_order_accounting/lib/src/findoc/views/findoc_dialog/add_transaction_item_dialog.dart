@@ -22,11 +22,13 @@ import 'package:growerp_models/growerp_models.dart';
 import '../../../accounting/accounting.dart';
 import '../../findoc.dart';
 
-Future addTransactionItemDialog(BuildContext context, bool sales,
-    CartState state, GlAccountBloc glAccountBloc) async {
+Future addTransactionItemDialog(
+    BuildContext context, bool sales, CartState state) async {
   final priceController = TextEditingController();
   bool? isDebit;
   GlAccount? selectedGlAccount;
+  GlAccountBloc glAccountBloc = context.read<GlAccountBloc>()
+    ..add(const GlAccountFetch(limit: 3));
   return showDialog<FinDocItem>(
     context: context,
     barrierDismissible: true,

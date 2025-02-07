@@ -425,6 +425,24 @@ along with this software (see the LICENSE.md file). If not, see
                 <entity-find-one entity-name="mantle.ledger.account.GlAccount" value-field="glAccount" cache="true">
                     <field-map field-name="glAccountId"/></entity-find-one>
                 <set field="glAccountTypeEnumId" from="glAccount?.glAccountTypeEnumId"/>
+                <else>
+                    <if condition="payment">
+                        <log
+                            message="=== could not find payment method: ${payment.paymentMethodId} in PaymentMethod" />
+                    </if>
+                    <if condition="!creditCardTypeGlAccountList">
+                        <log
+                            message="=== could not find credit card type: $creditCardTypeEnumId in CreditCardTypeGlAccount" />
+                    </if>
+                    <if condition="!paymentInstrumentGlAccountList">
+                        <log
+                            message="=== org: $organizationPartyId payment: ${payment?.fromPartyId}" />
+                        <log
+                            message="=== could not find pay instr id: $paymentInstrumentEnumId payable: $payable org: in PaymentInstrumentGlAccount orgs: $orgPartyIdList" />
+                    </if>
+                    <log
+                        message="====Could not find payment method gl account: $creditCardTypeEnumId org: $organizationPartyId  paymentid: $paymentId" />
+                </else>
             </if>
         </actions>
     </service>

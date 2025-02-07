@@ -270,7 +270,6 @@ General Order Placement and eCommerce Usage
             <parameter name="productStoreId" />
         </in-parameters>
         <actions>
-            <log message="====add  product $productId to order" />
             <!-- NOTE: use the web session for attributes such as cartOrderId for security; this
             won't work in a stateless mode or outside a web session -->
             <set field="carrierPartyId" from="'_NA_'" />
@@ -287,8 +286,6 @@ General Order Placement and eCommerce Usage
                         productStoreId: productStoreId,
                         vendorPartyId: store.organizationPartyId]"
                 out-map="addOut" />
-            <log
-                message="==== add product to order: store companyPartyId ${store.organizationPartyId} companyId: $companyPartyId customerId: $customerPartyId order cartid: $cartOrderId ret from add item: ${addOut.orderId}" />
             <!-- add pseudoId to order -->
             <if condition="!orderId">
                 <entity-find-one entity-name="mantle.party.Party" value-field="companyParty">

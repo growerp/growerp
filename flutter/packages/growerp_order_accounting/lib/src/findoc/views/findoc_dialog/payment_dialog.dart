@@ -135,7 +135,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 child: popUp(
                     context: context,
-                    height: 700,
+                    height: 720,
                     width: 800,
                     title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
                         "Payment #${finDoc.pseudoId ?? 'New'}",
@@ -550,10 +550,10 @@ class PaymentDialogState extends State<PaymentDialog> {
                 ],
               ),
               const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
+              if (!readOnly)
+                Row(
+                  children: [
+                    OutlinedButton(
                         key: const Key('cancelFinDoc'),
                         child: const Text(
                           'Cancel\nPayment',
@@ -564,32 +564,31 @@ class PaymentDialogState extends State<PaymentDialog> {
                             status: FinDocStatusVal.cancelled,
                           )));
                         }),
-                  ),
-                  const SizedBox(width: 20),
-                  OutlinedButton(
-                      key: const Key('update'),
-                      child: Text(
-                          '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
-                      onPressed: () {
-                        if (paymentDialogFormKey.currentState!.validate()) {
-                          _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
-                            otherCompany: _selectedCompanyUser?.getCompany(),
-                            otherUser: _selectedCompanyUser?.getUser(),
-                            grandTotal: Decimal.parse(_amountController.text),
-                            pseudoId: _pseudoIdController.text,
-                            status: _updatedStatus,
-                            paymentInstrument: _paymentInstrument,
-                            items: [
-                              FinDocItem(
-                                paymentType: _selectedPaymentType,
-                                glAccount: _selectedGlAccount,
-                              )
-                            ],
-                          )));
-                        }
-                      }),
-                ],
-              ),
+                    const SizedBox(width: 20),
+                    OutlinedButton(
+                        key: const Key('update'),
+                        child: Text(
+                            '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
+                        onPressed: () {
+                          if (paymentDialogFormKey.currentState!.validate()) {
+                            _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
+                              otherCompany: _selectedCompanyUser?.getCompany(),
+                              otherUser: _selectedCompanyUser?.getUser(),
+                              grandTotal: Decimal.parse(_amountController.text),
+                              pseudoId: _pseudoIdController.text,
+                              status: _updatedStatus,
+                              paymentInstrument: _paymentInstrument,
+                              items: [
+                                FinDocItem(
+                                  paymentType: _selectedPaymentType,
+                                  glAccount: _selectedGlAccount,
+                                )
+                              ],
+                            )));
+                          }
+                        }),
+                  ],
+                ),
               const SizedBox(height: 20),
               if (finDoc.gatewayResponses.isNotEmpty)
                 InputDecorator(
@@ -598,7 +597,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                       enabled: false,
                     ),
                     child: SizedBox(
-                        height: 150,
+                        height: isPhone ? 100 : 150,
                         child: SingleChildScrollView(
                             child: _createGatewayTable()))),
             ])));

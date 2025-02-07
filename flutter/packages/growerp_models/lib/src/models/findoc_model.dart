@@ -32,6 +32,7 @@ class FinDoc with _$FinDoc {
   FinDoc._();
   factory FinDoc({
     FinDocType? docType, // order, invoice, payment, shipment, transaction
+    String? docSubType,
     @Default(true) bool sales,
     String? pseudoId,
     String? orderId,

@@ -459,7 +459,7 @@ class MyFinDocState extends State<FinDocPage> {
                         ),
                         dropdownDecoratorProps: const DropDownDecoratorProps(
                           dropdownSearchDecoration: InputDecoration(
-                            labelText: 'Company',
+                            labelText: 'Company/Person',
                           ),
                         ),
                         key: const Key('company'),
@@ -497,9 +497,15 @@ class MyFinDocState extends State<FinDocPage> {
                                 _isPosted = newValue;
                               }),
                       ),
-                    ])
+                    ]),
                   ],
-                )
+                ),
+                if (finDoc.docSubType != null)
+                  InputDecorator(
+                      decoration: const InputDecoration(
+                        labelText: 'Type',
+                      ),
+                      child: Text(finDoc.docSubType!))
               ],
             )));
   }
@@ -528,7 +534,7 @@ class MyFinDocState extends State<FinDocPage> {
                   context, finDocUpdated.sales, state);
             } else {
               finDocItem = await addTransactionItemDialog(
-                  context, finDocUpdated.sales, state, _glAccountBloc);
+                  context, finDocUpdated.sales, state);
             }
             if (finDocItem != null) {
               _cartBloc.add(CartAdd(
@@ -679,7 +685,7 @@ class MyFinDocState extends State<FinDocPage> {
           value: Text("${item.product?.pseudoId}",
               textAlign: TextAlign.center, key: Key('itemProductId$index'))));
       rowContent.add(TableRowContent(
-          width: isPhone ? 25 : 30,
+          width: isPhone ? 25 : 27,
           name: 'Description',
           value: Text(item.description ?? '',
               key: Key('itemDescription$index'), textAlign: TextAlign.left)));
@@ -690,18 +696,16 @@ class MyFinDocState extends State<FinDocPage> {
             value: Text(itemType.itemTypeName,
                 textAlign: TextAlign.left, key: Key('itemType$index'))));
       }
-      if (!isPhone) {
-        rowContent.add(TableRowContent(
-            width: 10,
-            name: const Text('Qty', textAlign: TextAlign.right),
-            value: Text(
-                item.quantity == null
-                    ? Decimal.zero.toString()
-                    : item.quantity.toString(),
-                textAlign: TextAlign.right,
-                key: Key('itemQuantity$index'))));
-      }
-      if (item.product?.productTypeId != 'Rental') {
+      rowContent.add(TableRowContent(
+          width: 10,
+          name: const Text('Qty', textAlign: TextAlign.right),
+          value: Text(
+              item.quantity == null
+                  ? Decimal.zero.toString()
+                  : item.quantity.toString(),
+              textAlign: TextAlign.right,
+              key: Key('itemQuantity$index'))));
+      if (!isPhone && item.product?.productTypeId != 'Rental') {
         rowContent.add(TableRowContent(
             width: 12,
             name: const Text('Price', textAlign: TextAlign.right),
@@ -920,7 +924,7 @@ class MyFinDocState extends State<FinDocPage> {
       rowContent.add(TableRowContent(
           name: 'Account',
           width: 12,
-          value: Text(item.glAccount!.accountCode!,
+          value: Text(item.glAccount!.accountCode ?? '??',
               key: Key('accountCode$index'))));
       rowContent.add(TableRowContent(
           name: 'Debit',

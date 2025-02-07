@@ -409,7 +409,6 @@ List<User> customers = [
     firstName: 'customer1',
     lastName: 'lastName1',
     role: Role.customer,
-    company: customerCompanies[1],
     email: 'emailXXX@example.org',
     telephoneNr: '111111111111',
     paymentMethod: PaymentMethod(
@@ -836,6 +835,18 @@ List<FinDoc> salesOrders = [
       sales: true,
       docType: FinDocType.order,
       description: 'The second sales order',
+      otherUser: customers[0],
+      items: [
+        FinDocItem(
+          description: products[1].productName,
+          price: products[1].price,
+          quantity: Decimal.parse('30'),
+        ),
+      ]),
+  FinDoc(
+      sales: true,
+      docType: FinDocType.order,
+      description: 'The third sales order',
       otherCompany: customerCompanies[1],
       items: [
         FinDocItem(
@@ -957,14 +968,15 @@ List<Asset> assets = [
     location: locations[0],
   ),
   Asset(
-      assetName: 'asset name 2',
-      availableToPromise: Decimal.parse('200'),
-      quantityOnHand: Decimal.parse('200'),
-      product: products[1],
-      statusId: assetStatusValues[0],
-      acquireCost: Decimal.parse('22'),
-      receivedDate: DateTime.now().subtract(const Duration(days: 4)),
-      location: locations[1]),
+    assetName: 'asset name 2',
+    availableToPromise: Decimal.parse('200'),
+    quantityOnHand: Decimal.parse('200'),
+    product: products[1],
+    statusId: assetStatusValues[0],
+    acquireCost: Decimal.parse('22'),
+    receivedDate: DateTime.now().subtract(const Duration(days: 4)),
+    location: locations[1],
+  ),
   Asset(
     assetName: 'asset name 3 for rental',
     availableToPromise: Decimal.parse('1'),

@@ -150,8 +150,13 @@ class FinDocScaffold extends StatelessWidget {
                                         "ID: ${finDocs[index].pseudoId}  "
                                         "Date: ${finDocs[index].creationDate?.dateOnly()}",
                                         key: Key("searchResult$index")),
-                                    subtitle:
-                                        Text("${party!.type}: ${party.name} "),
+                                    subtitle: Column(children: [
+                                      if (finDocs[index].docSubType != null)
+                                        Text(finDocs[index].docSubType!),
+                                      if (party != null)
+                                        Text(
+                                            "${party.type}: ${party.name ?? '??'} "),
+                                    ]),
                                     onTap: () => Navigator.of(context)
                                         .pop(finDocs[index]),
                                   ));

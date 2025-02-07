@@ -121,7 +121,7 @@ class InventoryTest {
         } else {
           newQoh = asset.quantityOnHand! - item.quantity!;
         }
-        expect(newQoh, Decimal.parse(CommonTest.getTextFormField('qoh')));
+        expect(Decimal.parse(CommonTest.getTextFormField('qoh')), newQoh);
         await CommonTest.tapByKey(tester, 'cancel');
       }
     }

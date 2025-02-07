@@ -65,20 +65,20 @@ class PdfFormats {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              buildCustomerAddress(finDoc.otherUser, finDoc.otherCompany!),
+              buildCustomerAddress(CompanyUser.tryParse(
+                  finDoc.otherCompany ?? finDoc.otherUser)!),
               buildFinDocInfo(finDoc),
             ],
           ),
         ],
       );
 
-  static Widget buildCustomerAddress(User? customer, Company company) => Column(
+  static Widget buildCustomerAddress(CompanyUser customer) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("${customer?.company?.name ?? company.name}"),
-          Text("${customer?.firstName ?? ''} ${customer?.lastName ?? ''}",
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          Text(customer?.email ?? company.email ?? ''),
+          Text("${customer.name}"),
+          Text(customer.email ?? ''),
+          Text(customer.address != null ? customer.address.toString() : ''),
         ],
       );
 

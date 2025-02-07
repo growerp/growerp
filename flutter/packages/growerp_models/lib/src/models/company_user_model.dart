@@ -69,17 +69,31 @@ class CompanyUser with _$CompanyUser {
   static CompanyUser? tryParse(dynamic obj) {
     switch (obj) {
       case User _:
-        return CompanyUser(
-            type: PartyType.user,
-            partyId: obj.partyId,
-            pseudoId: obj.pseudoId,
-            name: '${obj.lastName}, ${obj.firstName}');
+        if (obj.company == null) {
+          return CompanyUser(
+              type: PartyType.user,
+              partyId: obj.partyId,
+              pseudoId: obj.pseudoId,
+              name: '${obj.lastName}, ${obj.firstName}',
+              email: obj.email,
+              address: obj.address);
+        } else {
+          return CompanyUser(
+              type: PartyType.company,
+              partyId: obj.company?.partyId,
+              pseudoId: obj.company?.pseudoId,
+              name: obj.company?.name,
+              email: obj.company?.email,
+              address: obj.company?.address);
+        }
       case Company _:
         return CompanyUser(
             type: PartyType.company,
             partyId: obj.partyId,
             pseudoId: obj.pseudoId,
-            name: obj.name);
+            name: obj.name,
+            email: obj.email,
+            address: obj.address);
       default:
         return null;
     }

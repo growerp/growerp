@@ -72,6 +72,25 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="CPARTY" join-optional="true">
             <key-map field-name="partyId" />
         </member-entity>
+        <member-entity entity-alias="PCMPOSTAL" entity-name="mantle.party.contact.PartyContactMech"
+            join-from-alias="CPARTY" join-optional="true">
+            <key-map field-name="partyId" />
+            <entity-condition>
+                <econdition field-name="postalPurposeId" value="PostalPrimary" />
+                <date-filter from-field-name="pcmFromDate" thru-field-name="pcmThruDate" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="PA" entity-name="mantle.party.contact.PostalAddress"
+            join-from-alias="PCMPOSTAL" join-optional="true">
+            <key-map field-name="contactMechId" />
+        </member-entity>
+        <member-entity entity-alias="COUNTRY" entity-name="moqui.basic.Geo"
+            join-from-alias="PA" join-optional="true">
+            <key-map field-name="countryGeoId" related="geoId" />
+            <entity-condition>
+                <econdition field-name="geoTypeEnumId" value="GEOT_COUNTRY" />
+            </entity-condition>
+        </member-entity>
         <!-- company-->
         <member-entity
             entity-alias="CORG" entity-name="mantle.party.Organization"
@@ -130,7 +149,19 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="customerFirstName" field="firstName" entity-alias="CPERSON" />
         <alias name="customerLastName" field="lastName" entity-alias="CPERSON" />
         <alias name="customerEmail" field="emailAddress" entity-alias="CACCOUNT" />
-
+        <alias name="postalPurposeId" field="contactMechPurposeId" entity-alias="PCMPOSTAL" />
+        <alias name="pcmFromDate" field="fromDate" entity-alias="PCMPOSTAL" />
+        <alias name="pcmThruDate" field="thruDate" entity-alias="PCMPOSTAL" />
+        <alias name="postalContactMechId" field="contactMechId" entity-alias="PA" />
+        <alias name="address1" entity-alias="PA" />
+        <alias name="address2" entity-alias="PA" />
+        <alias name="city" entity-alias="PA" />
+        <alias name="stateProvince" entity-alias="PA" />
+        <alias name="stateProvinceGeoId" entity-alias="PA" />
+        <alias name="postalCode" entity-alias="PA" />
+        <alias name="countryId" field="countryGeoId" entity-alias="PA" />
+        <alias name="country" field="geoName" entity-alias="COUNTRY" />
+        <alias name="geoTypeEnumId" entity-alias="COUNTRY" />
         <alias name="invoiceId" entity-alias="OINV" />
         <alias name="paymentId" entity-alias="OPAY" />
         <alias name="orderPaymentId" field="paymentId" entity-alias="PAYMENT" />
@@ -344,11 +375,6 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="SHIP" join-optional="true">
             <key-map field-name="shipmentId" />
         </member-entity>
-        <!-- ledger transaction-->
-        <member-entity entity-alias="TRANS" entity-name="mantle.ledger.transaction.AcctgTrans"
-            join-from-alias="SHIP" join-optional="true">
-            <key-map field-name="shipmentId" />
-        </member-entity>
         <member-entity entity-alias="METHOD" entity-name="moqui.basic.Enumeration"
             join-from-alias="ROUTE" join-optional="true">
             <key-map field-name="shipmentMethodEnumId" related="enumId" />
@@ -457,7 +483,6 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="shipmentId" entity-alias="SHIP" />
         <alias name="pseudoId" entity-alias="SHIP" />
         <alias name="externalId" entity-alias="SHIP" />
-        <alias name="transactionId" field="acctgTransId" entity-alias="TRANS" />
         <alias name="shipmentMethodId" field="enumId" entity-alias="METHOD" />
         <alias name="shipmentMethod" field="description" entity-alias="METHOD" />
 
@@ -496,7 +521,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="locationPseudoId" field="positionId" entity-alias="LOC" />
         <alias name="locationName" field="description" entity-alias="LOC" />
         <!-- vendor -->
-        <alias name="vendorPartyId" field="partyId" entity-alias="VPARTY" />
+        <alias name="vendorPartyId" field="partyId" entity-alias="VORG" />
         <alias name="vendorCompanyName" field="organizationName" entity-alias="VORG" />
         <alias name="vendorRoleTypeId" field="roleTypeId" entity-alias="VROLE" />
         <alias name="vendorUserPartyId" field="partyId" entity-alias="VPERSON" />
@@ -504,7 +529,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="vendorLastName" field="lastName" entity-alias="VPERSON" />
         <alias name="vendorEmail" field="emailAddress" entity-alias="VACCOUNT" />
         <!-- customer -->
-        <alias name="customerPartyId" field="partyId" entity-alias="CPARTY" />
+        <alias name="customerPartyId" field="partyId" entity-alias="CORG" />
         <alias name="customerCompanyName" field="organizationName" entity-alias="CORG" />
         <alias name="customerRoleTypeId" field="roleTypeId" entity-alias="CROLE" />
         <alias name="customerUserPartyId" field="partyId" entity-alias="CPERSON" />
@@ -692,6 +717,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="shipmentId" entity-alias="OIB" />
         <alias name="paymentId" entity-alias="PAY" />
         <alias name="transactionId" field="acctgTransId" entity-alias="TRANS" />
+        <alias name="transactionTypeId" field="acctgTransTypeEnumId" entity-alias="TRANS" />
         <!--alias
         name="paymentId" entity-alias="PAY"/-->
 
@@ -832,11 +858,11 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="PAY" join-optional="true">
             <key-map field-name="paymentTypeEnumId" related="enumId" />
         </member-entity>
-        <!-- transaction not sure why this was included, causes double payment records-->
-        <!-- member-entity entity-alias="TRANS" entity-name="mantle.ledger.transaction.AcctgTrans"
+        <!-- transaction -->
+        <member-entity entity-alias="TRANS" entity-name="mantle.ledger.transaction.AcctgTrans"
             join-from-alias="PAY" join-optional="true">
             <key-map field-name="paymentId" />
-        </member-entity-->
+        </member-entity>
         <!-- override gl account -->
         <member-entity entity-alias="OVACCOUNT" entity-name="mantle.ledger.account.GlAccount"
             join-from-alias="PAY" join-optional="true">
@@ -924,7 +950,8 @@ along with this software (see the LICENSE.md file). If not, see
         </member-entity>
         <alias name="paymentId" entity-alias="PAY" />
         <alias name="pseudoId" entity-alias="PAY" />
-        <!-- alias name="transactionId" field="acctgTransId" entity-alias="TRANS" /-->
+        <alias name="transactionId" field="acctgTransId" entity-alias="TRANS" />
+        <alias name="transactionTypeId" field="acctgTransTypeEnumId" entity-alias="TRANS" />
         <alias name="fromPartyId" entity-alias="PAY" />
         <alias name="toPartyId" entity-alias="PAY" />
         <alias name="invoiceId" field="forInvoiceId" entity-alias="PAY" />
@@ -970,6 +997,10 @@ along with this software (see the LICENSE.md file). If not, see
 
     <view-entity entity-name="AcctgTransAndCompany" package="growerp.account">
         <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans" />
+        <member-entity entity-alias="TRANSTYPE" entity-name="moqui.basic.Enumeration"
+            join-from-alias="ATX" join-optional="true">
+            <key-map field-name="acctgTransTypeEnumId" related="enumId" />
+        </member-entity>
         <member-entity entity-alias="JRNL" entity-name="mantle.ledger.transaction.GlJournal"
             join-from-alias="ATX" join-optional="true">
             <key-map field-name="glJournalId" />
@@ -978,7 +1009,7 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="ATX" join-optional="true">
             <key-map field-name="otherPartyId" related="partyId" />
         </member-entity>
-        <member-entity entity-alias="CORG" entity-name="mantle.party.Organization"
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization"
             join-from-alias="PARTY" join-optional="true">
             <key-map field-name="partyId" />
         </member-entity>
@@ -988,21 +1019,23 @@ along with this software (see the LICENSE.md file). If not, see
         </member-entity>
 
         <alias name="transactionId" field="acctgTransId" entity-alias="ATX" />
+        <alias name="transactionTypeId" field="acctgTransTypeEnumId" entity-alias="ATX" />
+        <alias name="assetIssuanceId" entity-alias="ATX" />
+        <alias name="transactionType" field="description" entity-alias="TRANSTYPE" />
         <alias name="companyPartyId" field="organizationPartyId" entity-alias="ATX" />
         <alias name="pseudoId" entity-alias="ATX" />
         <alias name="invoiceId" entity-alias="ATX" />
         <alias name="paymentId" entity-alias="ATX" />
         <alias name="shipmentId" entity-alias="ATX" />
         <alias name="transDescription" field="description" entity-alias="ATX" />
-        <alias name="typeId" field="acctgTransTypeEnumId" entity-alias="ATX" />
         <alias name="transactionDate" entity-alias="ATX" />
         <alias name="isPosted" entity-alias="ATX" />
         <alias name="theirAcctgTransId" entity-alias="ATX" />
         <alias name="journalId" field="glJournalId" entity-alias="JRNL" />
         <alias name="journalName" field="glJournalName" entity-alias="JRNL" />
-        <alias name="otherCompanyPartyId" field="partyId" entity-alias="PARTY" />
-        <alias name="otherCompanyPseudoId" field="pseudoId" entity-alias="PARTY" />
-        <alias name="otherCompanyName" field="organizationName" entity-alias="CORG" />
+        <alias name="otherPartyId" field="partyId" entity-alias="PARTY" />
+        <alias name="otherPseudoId" field="pseudoId" entity-alias="PARTY" />
+        <alias name="otherCompanyName" field="organizationName" entity-alias="ORG" />
         <alias name="otherPersonFirstName" field="firstName" entity-alias="PERSON" />
         <alias name="otherPersonLastName" field="lastName" entity-alias="PERSON" />
     </view-entity>
