@@ -41,8 +41,10 @@ class ChatServer {
       if (chatUrl.isEmpty) {
         if (kIsWeb || Platform.isIOS || Platform.isLinux) {
           chatUrl = 'ws://localhost:8081';
+//        chatUrl = 'ws://localhost:8080/notws';
         } else if (Platform.isAndroid) {
           chatUrl = 'ws://10.0.2.2:8081';
+//        chatUrl = 'ws://10.0.2.2:8080/notws';
         }
       }
     }

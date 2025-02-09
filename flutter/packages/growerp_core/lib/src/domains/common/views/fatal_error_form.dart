@@ -13,8 +13,6 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:growerp_core/growerp_core.dart';
 
 class FatalErrorForm extends StatelessWidget {
   final String message;
@@ -36,15 +34,15 @@ class FatalErrorForm extends StatelessWidget {
               children: [
             SizedBox(
               width: 300,
-              height: 100,
+              height: 200,
               child: Text(
                 message,
-                style: const TextStyle(color: Colors.red, fontSize: 25),
+                style: const TextStyle(color: Colors.red, fontSize: 15),
               ),
             ),
             OutlinedButton(
                 child: Text(buttonText),
-                onPressed: () => context.read<AuthBloc>().add(AuthLoad())),
+                onPressed: () => Navigator.pushNamed(context, '/')),
           ])),
     );
   }

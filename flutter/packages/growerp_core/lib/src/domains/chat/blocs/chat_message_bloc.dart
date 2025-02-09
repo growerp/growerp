@@ -112,12 +112,19 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
   ) async {
     chatServer.send(event.chatMessage.toJson().toString());
     List<ChatMessage> chatMessages = List.from(state.chatMessages);
-    chatMessages.insert(
-        0,
-        ChatMessage(
-          fromUserId: authBloc.state.authenticate!.user!.userId,
-          content: event.chatMessage.content,
-        ));
+    if (chatMessages.isEmpty) {
+      chatMessages.add(ChatMessage(
+        fromUserId: authBloc.state.authenticate!.user!.userId,
+        content: event.chatMessage.content,
+      ));
+    } else {
+      chatMessages.insert(
+          0,
+          ChatMessage(
+            fromUserId: authBloc.state.authenticate!.user!.userId,
+            content: event.chatMessage.content,
+          ));
+    }
     emit(state.copyWith(chatMessages: chatMessages));
   }
 }

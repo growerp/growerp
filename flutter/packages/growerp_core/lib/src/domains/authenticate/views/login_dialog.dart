@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../domains/domains.dart';
 import '../../../l10n/generated/core_localizations.dart';
@@ -178,7 +179,6 @@ class LoginDialogState extends State<LoginDialog> {
         height: user?.userGroup == UserGroup.admin ? 450 : 350,
         context: context,
         title: 'Complete your registration',
-        closeButton: false,
         child: Form(
             key: _moreInfoFormKey,
             child: SingleChildScrollView(
@@ -269,8 +269,10 @@ class LoginDialogState extends State<LoginDialog> {
   }
 
   Widget loginForm() {
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return popUp(
-        height: 350,
+        height: isPhone ? 300 : 280,
+        width: 400,
         context: context,
         title: CoreLocalizations.of(context)!.loginWithExistingUserName,
         child: Form(

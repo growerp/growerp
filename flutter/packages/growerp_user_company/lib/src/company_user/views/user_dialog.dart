@@ -43,6 +43,9 @@ class ShowUserDialog extends StatelessWidget {
         builder: (context, state) {
       if (state.status == DataFetchStatus.success ||
           state.status == DataFetchStatus.failure) {
+        if ((userBloc.state.data as Users).users.isEmpty) {
+          return FatalErrorForm(message: 'User ${user.partyId} not found');
+        }
         return UserDialog((userBloc.state.data as Users).users[0]);
       }
       return const LoadingIndicator();

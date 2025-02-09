@@ -52,7 +52,8 @@ class ChatRoomState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [chatRooms, hasReachedMax, search, message];
+  List<Object?> get props =>
+      [chatRooms, hasReachedMax, status, search, message];
 
   @override
   String toString() => '$status { #chatRooms: ${chatRooms.length}, '

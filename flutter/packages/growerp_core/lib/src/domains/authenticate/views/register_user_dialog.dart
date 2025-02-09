@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../../domains.dart';
 
 class RegisterUserDialog extends StatefulWidget {
@@ -51,6 +52,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
 
   @override
   Widget build(BuildContext context) {
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
       if (state.status == AuthStatus.unAuthenticated) {
         Navigator.pop(context);
@@ -69,7 +71,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                 child: popUp(
                   context: context,
                   title: "Registration",
-                  height: 300,
+                  height: isPhone ? 350 : 300,
                   child: _registerForm(_authBloc.state.authenticate!),
                 )));
       }

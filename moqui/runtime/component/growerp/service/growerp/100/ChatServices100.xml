@@ -386,22 +386,25 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <entity-find-one entity-name="growerp.general.ChatRoom"
-                value-field="room" for-update="true">
-                <field-map field-name="chatRoomId: chatRoomId" />
-                <field-map field-name="ownerId" from="ownerId" />
+            <entity-find-one entity-name="growerp.general.ChatRoomsAndMembers"
+                value-field="chatRoom" for-update="true">
+                <field-map field-name="chatRoomId" from="chatRoomId" />
+                <field-map field-name="ownerPartyId" from="ownerId" />
+                <field-map field-name="userId" from="ec.user.userAccount.userId" />
             </entity-find-one>
-            <if condition="!room">
+            <if condition="!chatRoom">
                 <then>
-                    <return error="true" message="Room $roomId not found" />
+                    <return error="true" message="Room ${chatRoomId} not found" />
                 </then>
                 <else>
-                    <set field="room.active" value="false" />
-                    <entity-update value-field="room" />
+                    <service-call name="update#growerp.general.ChatRoomMember"
+                        in-map="[chatRoomId: chatRoom.chatRoomId,
+                                userId: ec.user.userAccount.userId,
+                                isActive: 'N']" />
                 </else>
             </if>
             <service-call name="growerp.100.ChatServices100.get#ChatRoom"
-                in-map="[chatRoomId: chatRoom.chatRoomId]" out-map="context" />
+                in-map="chatRoomId: chatRoomId" out-map="context" />
             <set field="chatRoom" from="chatRooms[0]" />
         </actions>
     </service>

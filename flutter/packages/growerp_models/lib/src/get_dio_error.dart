@@ -39,6 +39,7 @@ Future<String> getDioError(e) async {
   if (returnMessage == 'Login key not valid ') {
     var box = await Hive.openBox('growerp');
     box.delete('apiKey');
+    returnMessage = 'Login key expired, please login again';
   }
   return returnMessage;
 }

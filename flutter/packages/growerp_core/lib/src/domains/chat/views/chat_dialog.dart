@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../services/chat_server.dart';
 import '../../domains.dart';
@@ -44,6 +45,7 @@ class ChatState extends State<ChatDialog> {
   @override
   Widget build(BuildContext context) {
     chat = context.read<ChatServer>();
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     if (chat == null) return (const Center(child: Text("chat not active!")));
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state.status == AuthStatus.authenticated) {
@@ -58,32 +60,19 @@ class ChatState extends State<ChatDialog> {
         if (state.status == ChatMessageStatus.success ||
             state.status == ChatMessageStatus.failure) {
           messages = state.chatMessages;
-          return Container(
-              padding: const EdgeInsets.all(20),
-              child: GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: GestureDetector(
-                      onTap: () {},
-                      child: Dialog(
-                        key: const Key('ChatDialog'),
-                        insetPadding: const EdgeInsets.all(10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child:
-                            Stack(clipBehavior: Clip.none, children: <Widget>[
-                          Container(
-                              padding: const EdgeInsets.all(20),
-                              width: 500,
-                              height: 600,
-                              child: Scaffold(
-                                backgroundColor: Colors.transparent,
-                                body: chatPage(context),
-                              )),
-                          const Positioned(
-                              top: 5, right: 5, child: DialogCloseButton())
-                        ]),
-                      ))));
+          return Dialog(
+              key: const Key('ChatDialog'),
+              insetPadding: const EdgeInsets.only(left: 20, right: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: popUp(
+                context: context,
+                title: (widget.chatRoom.chatRoomName ?? '??'),
+                height: 600,
+                width: isPhone ? 300 : 800,
+                child: chatPage(context),
+              ));
         } else {
           return const Center(child: LoadingIndicator());
         }
@@ -92,10 +81,8 @@ class ChatState extends State<ChatDialog> {
   }
 
   Widget chatPage(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(children: [
-      Center(
-          child: Text("To: ${widget.chatRoom.chatRoomName} "
-              "#${widget.chatRoom.chatRoomId}")),
       Expanded(
           child: RefreshIndicator(
               onRefresh: (() async => context
@@ -122,8 +109,8 @@ class ChatState extends State<ChatDialog> {
                                   borderRadius: BorderRadius.circular(20),
                                   color: (messages[index].fromUserId ==
                                           authenticate.user!.userId
-                                      ? Colors.grey.shade200
-                                      : Colors.blue[200]),
+                                      ? theme.primaryColor
+                                      : theme.secondaryHeaderColor),
                                 ),
                                 padding: const EdgeInsets.all(16),
                                 child: Text(

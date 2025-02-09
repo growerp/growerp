@@ -167,22 +167,16 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     Emitter<ChatRoomState> emit,
   ) async {
     try {
-      final toUserId = event.chatRoom
-          .getToUserId(authBloc.state.authenticate?.user?.userId ?? '');
       List<ChatRoom> chatRooms = List.of(state.chatRooms);
+      ChatRoom result = await restClient.deleteChatRoom(
+          chatRoomId: event.chatRoom.chatRoomId);
       int chatRoomIndex = chatRooms
           .indexWhere((cr) => cr.chatRoomId == event.chatRoom.chatRoomId);
-      int memberIndex = event.chatRoom
-          .getMemberIndex(authBloc.state.authenticate?.user?.userId ?? '');
-      ChatRooms roomsResult = await restClient.getChatRooms(
-          chatRoomName: ' ', // server should interprete as null
-          userId: toUserId);
-      roomsResult.chatRooms[0].members[memberIndex] = roomsResult
-          .chatRooms[0].members[memberIndex]
-          .copyWith(isActive: false, hasRead: true);
-      add(ChatRoomUpdate(roomsResult.chatRooms[0]));
       chatRooms.removeAt(chatRoomIndex);
-      return emit(state.copyWith(chatRooms: chatRooms));
+      return emit(state.copyWith(
+          chatRooms: chatRooms,
+          status: ChatRoomStatus.success,
+          message: "left chatroom ${result.chatRoomName}"));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: ChatRoomStatus.failure,

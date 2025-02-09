@@ -189,48 +189,49 @@ class OpportunityDialogState extends State<OpportunityDialog> {
               return const LoadingIndicator();
             case DataFetchStatus.success:
               return DropdownSearch<User>(
-                selectedItem: _selectedLead,
-                popupProps: PopupProps.menu(
-                  isFilterOnline: true,
-                  showSearchBox: true,
-                  searchFieldProps: TextFieldProps(
-                    autofocus: true,
-                    decoration: const InputDecoration(labelText: "lead,name"),
-                    controller: _leadSearchBoxController,
+                  selectedItem: _selectedLead,
+                  popupProps: PopupProps.menu(
+                    isFilterOnline: true,
+                    showSearchBox: true,
+                    searchFieldProps: TextFieldProps(
+                      autofocus: true,
+                      decoration: const InputDecoration(labelText: "lead,name"),
+                      controller: _leadSearchBoxController,
+                    ),
+                    menuProps:
+                        MenuProps(borderRadius: BorderRadius.circular(20.0)),
+                    title: popUp(
+                      context: context,
+                      title: 'Select Lead',
+                      height: 50,
+                    ),
                   ),
-                  menuProps:
-                      MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                  title: popUp(
-                    context: context,
-                    title: 'Select Lead',
-                    height: 50,
-                  ),
-                ),
-                dropdownDecoratorProps: const DropDownDecoratorProps(
-                    dropdownSearchDecoration:
-                        InputDecoration(labelText: 'Lead')),
-                key: const Key('lead'),
-                itemAsString: (User? u) => " ${u?.firstName} ${u?.lastName} "
-                    "${u?.company!.name}",
-                asyncItems: (String filter) {
-                  _leadBloc.add(GetDataEvent(() => context
-                      .read<RestClient>()
-                      .getUser(
-                          searchString: filter,
-                          limit: 3,
-                          isForDropDown: true,
-                          role: Role.lead)));
-                  return Future.delayed(const Duration(milliseconds: 150), () {
-                    return Future.value((_leadBloc.state.data as Users).users);
+                  dropdownDecoratorProps: const DropDownDecoratorProps(
+                      dropdownSearchDecoration:
+                          InputDecoration(labelText: 'Lead')),
+                  key: const Key('lead'),
+                  itemAsString: (User? u) => " ${u?.firstName} ${u?.lastName} "
+                      "${u?.company!.name}",
+                  asyncItems: (String filter) {
+                    _leadBloc.add(GetDataEvent(() => context
+                        .read<RestClient>()
+                        .getUser(
+                            searchString: filter,
+                            limit: 3,
+                            isForDropDown: true,
+                            role: Role.lead)));
+                    return Future.delayed(const Duration(milliseconds: 150),
+                        () {
+                      return Future.value(
+                          (_leadBloc.state.data as Users).users);
+                    });
+                  },
+                  compareFn: (item, sItem) => item.partyId == sItem.partyId,
+                  onChanged: (User? newValue) {
+                    setState(() {
+                      _selectedLead = newValue;
+                    });
                   });
-                },
-                compareFn: (item, sItem) => item.partyId == sItem.partyId,
-                onChanged: (User? newValue) {
-                  setState(() {
-                    _selectedLead = newValue;
-                  });
-                },
-              );
             default:
               return const Center(child: LoadingIndicator());
           }

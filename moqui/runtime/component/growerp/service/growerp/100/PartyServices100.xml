@@ -1101,7 +1101,8 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="start" type="Integer" default-value="0" />
             <parameter name="limit" type="Integer" default-value="20" />
             <parameter name="search" default="null" />
-            <parameter name="isForDropDown" type="Boolean" />
+            <parameter name="isForDropDown" type="Boolean" default-value="false" />
+            <parameter name="loginOnly" type="Boolean" default-value="false" />
         </in-parameters>
         <out-parameters>
             <parameter name="users" type="List">
@@ -1181,6 +1182,11 @@ along with this software (see the LICENSE.md file). If not, see
                 entity-name="growerp.party.OwnerPersonDetailAndCompany">
                 <econdition field-name="ownerPartyId" ignore-if-empty="true" />
                 <econdition field-name="userPartyId" ignore-if-empty="true" />
+                <econdition
+                    field-name="userId" operator="is-not-null" ignore="!loginOnly" />
+                <econdition
+                    field-name="loginDisabled" operator="not-equals" from="Y" or-null="true"
+                    ignore="!loginOnly" />
                 <econditions combine="or">
                     <econdition field-name="userPseudoId" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
@@ -2915,7 +2921,7 @@ along with this software (see the LICENSE.md file). If not, see
                 [ firstName: 'Mary-e', lastName: 'Davis', emailAddress: 'Mary@example.com',
                     locale: 'EN', image: 'demoFaces/1_f.jpg',  role: 'OrgInternal' ],
                 [ firstName: 'Linda-c', lastName: 'Garcia',  role: 'Customer',
-                    locale: 'EN', image: 'demoFaces/2_f.jpg', companyName: 'Miami Learning Center-c'],
+                    locale: 'EN', image: 'demoFaces/2_f.jpg'],
                 [ firstName: 'Barbara-l', lastName: 'Rodriguez', role: 'Lead',
                     locale: 'EN', image: 'demoFaces/3_f.jpg', companyName: 'TestMasters-l'],
                 [ firstName: 'Maria-s', lastName: 'Wilson',  role: 'Supplier',
@@ -3199,9 +3205,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <iterate list="users" entry="us">
                     <if condition="us.companyName">
                         <set field="company" from="[name: us.companyName, role: us.role]" />
-                        <else>
-                            <set field="company" from="[partyId: companyPartyId]" />
-                        </else>
                     </if>
                     <set field="userIn"
                         from="[

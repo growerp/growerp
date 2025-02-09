@@ -173,16 +173,17 @@ class ProductDialogState extends State<ProductDialog> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: popUp(
-                  context: context,
-                  child: listChild(classificationId, isPhone, categoryState),
-                  title: (classificationId == 'AppAdmin'
-                          ? 'Product #'
-                          : 'Room Type #') +
-                      (widget.product.productId.isEmpty
-                          ? 'New'
-                          : widget.product.pseudoId),
-                  height: classificationId == 'AppAdmin' ? 750 : 600,
-                  width: isPhone ? 450 : 800));
+                context: context,
+                title: (classificationId == 'AppAdmin'
+                        ? 'Product #'
+                        : 'Room Type #') +
+                    (widget.product.productId.isEmpty
+                        ? 'New'
+                        : widget.product.pseudoId),
+                height: classificationId == 'AppAdmin' ? 750 : 600,
+                width: isPhone ? 450 : 800,
+                child: listChild(classificationId, isPhone, categoryState),
+              ));
         }
       });
     });

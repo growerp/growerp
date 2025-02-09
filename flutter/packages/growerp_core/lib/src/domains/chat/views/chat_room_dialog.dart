@@ -42,13 +42,14 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
     super.initState();
     _nameController.text = widget.chatRoom.chatRoomName ?? '';
     _userBloc = context.read<DataFetchBloc<Users>>()
-      ..add(GetDataEvent(() => context.read<RestClient>().getUser(limit: 3)));
+      ..add(GetDataEvent(() => context
+          .read<RestClient>()
+          .getUser(limit: 3, isForDropDown: true, loginOnly: true)));
   }
 
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    var repos = context.read<RestClient>();
     return BlocConsumer<ChatRoomBloc, ChatRoomState>(
         listener: (context, state) {
       if (state.status == ChatRoomStatus.failure) {
@@ -60,30 +61,23 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
         Navigator.of(context).pop();
       }
     }, builder: (BuildContext context, state) {
-      return Container(
-          padding: const EdgeInsets.all(20),
-          child: Dialog(
-            key: const Key('ChatRoomDialog'),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Stack(clipBehavior: Clip.none, children: <Widget>[
-              Container(
-                  padding: const EdgeInsets.all(20),
-                  width: 500,
-                  height: 500,
-                  child: Scaffold(
-                    backgroundColor: Colors.transparent,
-                    body: _showForm(repos, isPhone),
-                  )),
-              const Positioned(top: 5, right: 5, child: DialogCloseButton())
-            ]),
+      return Dialog(
+          key: const Key('ChatRoomDialog'),
+          insetPadding: const EdgeInsets.only(left: 20, right: 20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: popUp(
+            context: context,
+            title: ('Add partner'),
+            height: 600,
+            width: isPhone ? 300 : 800,
+            child: _showForm(isPhone),
           ));
     });
   }
 
-  Widget _showForm(var repos, bool isPhone) {
+  Widget _showForm(bool isPhone) {
     return Center(
         child: Form(
             key: _formKey,
@@ -121,12 +115,13 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
                         InputDecoration(labelText: 'Chat partner')),
                 itemAsString: (User? u) => " ${u!.firstName} ${u.lastName}",
                 asyncItems: (String filter) {
-                  _userBloc.add(
-                      GetDataEvent(() => context.read<RestClient>().getUser(
-                            searchString: filter,
-                            limit: 3,
-                            isForDropDown: true,
-                          )));
+                  _userBloc.add(GetDataEvent(() => context
+                      .read<RestClient>()
+                      .getUser(
+                          searchString: filter,
+                          limit: 3,
+                          isForDropDown: true,
+                          loginOnly: true)));
                   return Future.delayed(const Duration(milliseconds: 150), () {
                     return Future.value((_userBloc.state.data as Users).users);
                   });

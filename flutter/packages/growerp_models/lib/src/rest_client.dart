@@ -115,6 +115,7 @@ abstract class RestClient {
     @Query('lastName') String? lastName,
     @Query('search') String? searchString,
     @Query('isForDropDown') bool? isForDropDown,
+    @Query('loginOnly') bool? loginOnly,
   });
 
   @POST("rest/s1/growerp/100/User")
@@ -453,7 +454,7 @@ abstract class RestClient {
   });
 
   @DELETE("rest/s1/growerp/100/ChatRoom")
-  Future<ChatRoom> deleteChatRoom({@Field() required ChatRoom chatRoom});
+  Future<ChatRoom> deleteChatRoom({@Field() required String chatRoomId});
 
   @GET("rest/s1/growerp/100/ChatMessage")
   Future<ChatMessages> getChatMessages({
