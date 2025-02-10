@@ -19,8 +19,6 @@ import 'models.dart';
 part 'chat_room_model.freezed.dart';
 part 'chat_room_model.g.dart';
 
-// backend relation: product -> chatRoom -> chatRoomReservation -> orderItem
-
 @freezed
 class ChatRoom with _$ChatRoom {
   ChatRoom._();

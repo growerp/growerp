@@ -1144,6 +1144,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="userId" />
                     <parameter name="locale" />
                     <parameter name="telephoneNr" />
+                    <parameter name="appsUsed" type="List" />
                 </parameter>
             </parameter>
             <parameter name="personToCompanyId" /><!-- used in update user for reassign of company -->
@@ -1300,6 +1301,15 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <set field="telephoneNr"
                     value="${userInfo.telCountryCode?:''}${userInfo.telAreaCode?:''}${userInfo.telContactNumber?:''}" />
+                <entity-find entity-name="mantle.party.PartyClassificationAndAppl"
+                    list="partyClassifications">
+                    <econdition field-name="partyId" from="userInfo?.userPartyId" />
+                    <econdition field-name="classificationTypeEnumId" value="PcltMobileApp" />
+                </entity-find>
+                <set field="appsUsed" from="[]" />
+                <iterate list="partyClassifications" entry="pc">
+                    <script>appsUsed.add(pc.partyClassificationId)</script>
+                </iterate>
                 <if condition="isForDropDown">
                     <set field="userOut"
                         from="[
@@ -1332,6 +1342,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 locale: userInfo?.locale ?:'',
                                 telephoneNr: telephoneNr,
                                 company: company,
+                                appsUsed: appsUsed,
                                 ]" />
                     </else>
                 </if>
@@ -1400,11 +1411,13 @@ along with this software (see the LICENSE.md file). If not, see
                     </parameter>
                     <parameter name="telephoneNr" />
                 </parameter>
+                <parameter name="appsUsed" type="List" />
             </parameter>
             <parameter name="password"
                 default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
             <parameter name="ownerPartyId" /><!-- only required when no user logged in after
-            creating owner company -->
+                                                creating owner company -->
+            <parameter name="classificationId" />
         </in-parameters>
         <out-parameters>
             <parameter name="user" type="Map">
@@ -1445,6 +1458,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="userId" />
                 <parameter name="locale" />
                 <parameter name="telephoneNr" />
+                <parameter name="appsUsed" type="List" />
             </parameter>
             <parameter name="password" />
             <parameter name="login" type="bool" default-value="false" />
@@ -1622,9 +1636,33 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[emailAddress:user.email, partyId:userPartyId,
                              contactMechPurposeId:'EmailPrimary']" />
             </if>
-            <entity-find entity-name="OwnerPersonDetailAndCompany" list="results">
-                <econdition field-name="userPartyId" from="userPartyId" />
-            </entity-find>
+            <!-- send email to new user with password -->
+            <if condition="user.loginName">
+                <entity-find-one entity-name="moqui.basic.email.EmailServer"
+                    value-field="emailExist">
+                    <field-map field-name="emailServerId" value="SYSTEM" />
+                </entity-find-one>
+                <if condition="emailExist &amp;&amp; emailExist.mailPassword != 'SMTP_PASSWORD'">
+                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
+                        async="true">
+                        <field-map field-name="emailTemplateId" value="WELCOME" />
+                        <field-map field-name="toAddresses" from="user.email" />
+                        <field-map field-name="bodyParameters"
+                            from="[classification: classificationId.substring(3),
+                                newPassword:password, firstName: user.firstName,
+                                lastName: user.lastName]" />
+                    </service-call>
+                    <else>
+                        <log level="warn"
+                            message="====== Email not configured, ${user.loginName} password: $password" />
+                    </else>
+                </if>
+            </if>
+            <!-- appsUsed -->
+            <if condition="user.appsUsed &amp;&amp; user.appsUsed.size() &gt; 0">
+                <service-call name="create#mantle.party.PartyClassificationAppl"
+                    in-map="[partyId: userPartyId, partyClassificationId: user.appsUsed[0]]" />
+            </if>
             <service-call name="growerp.100.PartyServices100.get#User"
                 in-map="[ownerPartyId: ownerPartyId, userPartyId: userPartyId]" out-map="userInfo" />
             <set field="user" from="userInfo.users?[0]" />
@@ -1677,6 +1715,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="email" />
                     <parameter name="role" />
                 </parameter>
+                <parameter name="appsUsed" type="List" />
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -1717,6 +1756,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="email" />
                     <parameter name="role" />
                 </parameter>
+                <parameter name="appsUsed" type="List" />
             </parameter>
         </out-parameters>
         <actions>
@@ -2021,6 +2061,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="email" />
                     <parameter name="role" />
                 </parameter>
+                <parameter name="appsUsed" type="List" />
             </parameter>
         </out-parameters>
         <actions>
@@ -2348,7 +2389,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </service-call>
                     <else>
                         <log level="warn"
-                            message="====== Email not configured, ${user.email} password: $newPassword" />
+                            message="====== Email not configured, ${user.loginName} password: $newPassword" />
                     </else>
                 </if>
             </if>
@@ -2433,7 +2474,8 @@ along with this software (see the LICENSE.md file). If not, see
                         ]" />
                     <service-call name="growerp.100.PartyServices100.create#User"
                         in-map="[user: user, password: newPassword,
-                            ownerPartyId: ownerPartyId, login: false]"
+                            ownerPartyId: ownerPartyId, login: false,
+                            classificationId: classificationId]"
                         out-map="context" />
                 </then>
                 <else-if condition="companyPartyId">
@@ -2442,28 +2484,10 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.PartyServices100.create#User"
                         in-map="[user: [firstName: firstName, lastName: lastName,
                         email: email, role: 'Customer', userGroupId: 'GROWERP_M_OTHER',
-                        loginName: email], password: newPassword, ownerPartyId: ownerPartyId]"
+                        loginName: email], password: newPassword, ownerPartyId: ownerPartyId,
+                        classificationId: classificationId]"
                         out-map="context" />
                 </else-if>
-            </if>
-            <entity-find-one entity-name="moqui.basic.email.EmailServer"
-                value-field="emailExist">
-                <field-map field-name="emailServerId" value="SYSTEM" />
-            </entity-find-one>
-            <if condition="emailExist &amp;&amp; emailExist.mailPassword != 'SMTP_PASSWORD'">
-                <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
-                    async="true">
-                    <field-map field-name="emailTemplateId" value="WELCOME" />
-                    <field-map field-name="toAddresses" from="email" />
-                    <field-map field-name="bodyParameters"
-                        from="[classification: classificationId.substring(3),
-                                newPassword:newPassword, firstName: firstName,
-                                lastName: lastName]" />
-                </service-call>
-                <else>
-                    <log level="warn"
-                        message="====== Email not configured, $email password: $newPassword" />
-                </else>
             </if>
             <!-- add to mailing list -->
             <service-call name="growerp.100.BirdSendServices100.registerAdd#UserToGroup"
@@ -3217,9 +3241,12 @@ along with this software (see the LICENSE.md file). If not, see
                             userGroupId: us.userGroupId ? us.userGroupId : null,
                             role: us.role,
                             company: company ,
+                            appsUsed: [classificationId],
                         ]" />
                     <service-call name="growerp.100.PartyServices100.create#User"
-                        in-map="[user: userIn, ownerPartyId: ownerPartyId]" out-map="outMap" />
+                        in-map="[user: userIn, ownerPartyId: ownerPartyId,
+                                classificationId: classificationId]"
+                        out-map="outMap" />
                     <script>
                             if(us.role == 'OrgInternal') dbEmployees.add(outMap)
                             if(us.role == 'Lead') dbLeads.add(outMap)

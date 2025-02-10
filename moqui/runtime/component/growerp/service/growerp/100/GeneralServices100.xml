@@ -693,6 +693,11 @@ along with this software (see the LICENSE.md file). If not, see
                         condition="ec.ecfi.getCredentialsMatcher(userAccount.passwordHashType,
                          'Y'.equals(userAccount.passwordBase64)).doCredentialsMatch(token, info)">
                         <set field="passwordChange" value="true" />
+                        <else>
+                            <return message="Password incorrect for user ${username}" public="true"
+                                type="danger" />
+                        </else>
+
                     </if>
                 </if>
             </if>
@@ -881,17 +886,31 @@ along with this software (see the LICENSE.md file). If not, see
                 <else>
                     <!-- copied from UserServices.xml -->
                     <entity-find-one entity-name="moqui.security.UserAccount"
-                        value-field="userAccount" for-update="true" />
-                    <set field="resetPassword" from="getRandomString(12)" />
-                    <set field="passwordNode"
-                        from="ec.ecfi.confXmlRoot.first('user-facade').first('password')" />
-                    <set field="userAccount.resetPassword"
-                        from="ec.ecfi.getSimpleHash(resetPassword, userAccount.passwordSalt, userAccount.passwordHashType, 'Y'.equals(userAccount.passwordBase64))" />
-                    <set field="userAccount.requirePasswordChange"
-                        from="(passwordNode.attribute('email-require-change') == 'true') ? 'Y' : 'N'" />
-                    <entity-update value-field="userAccount" />
-                    <log level="warn"
-                        message="====== Email not configured, not send email to: $username but password reset, password: $resetPassword" />
+                        value-field="userAccount" for-update="true">
+                        <field-map field-name="username" from="username" />
+                    </entity-find-one>
+                    <if condition="!userAccount">
+                        <entity-find-one entity-name="moqui.security.UserAccount"
+                            value-field="userAccount" for-update="true">
+                            <field-map field-name="emailAddress" from="username" />
+                        </entity-find-one>
+                    </if>
+                    <if condition="userAccount">
+                        <set field="resetPassword" from="getRandomString(12)" />
+                        <set field="passwordNode"
+                            from="ec.ecfi.confXmlRoot.first('user-facade').first('password')" />
+                        <set field="userAccount.resetPassword"
+                            from="ec.ecfi.getSimpleHash(resetPassword, userAccount.passwordSalt, userAccount.passwordHashType, 'Y'.equals(userAccount.passwordBase64))" />
+                        <set field="userAccount.requirePasswordChange"
+                            from="(passwordNode.attribute('email-require-change') == 'true') ? 'Y' : 'N'" />
+                        <entity-update value-field="userAccount" />
+                        <log level="warn"
+                            message="====== Email not configured, not send email to: $username but password reset, password: $resetPassword" />
+                        <else>
+                            <return error="true"
+                                message="Could not find a user account for $username" />
+                        </else>
+                    </if>
                 </else>
             </if>
         </actions>

@@ -56,6 +56,10 @@ class User with _$User {
     @Default('GMT') String timeZone,
     @Uint8ListConverter() Uint8List? image,
     Company? company,
+
+    /// field is used to see of a user registered with an app,
+    /// when not will show the extra info screen at first login.
+    @Default([]) List<String> appsUsed,
   }) = _User;
   User._();
 
