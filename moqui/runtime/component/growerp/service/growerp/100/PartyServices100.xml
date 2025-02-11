@@ -1642,7 +1642,9 @@ along with this software (see the LICENSE.md file). If not, see
                     value-field="emailExist">
                     <field-map field-name="emailServerId" value="SYSTEM" />
                 </entity-find-one>
-                <if condition="emailExist &amp;&amp; emailExist.mailPassword != 'SMTP_PASSWORD'">
+                <if
+                    condition="emailExist &amp;&amp; emailExist.mailPassword != 'SMTP_PASSWORD'
+                                &amp;&amp; !user.email.contains('example.com')">
                     <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
                         async="true">
                         <field-map field-name="emailTemplateId" value="WELCOME" />
@@ -1654,7 +1656,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </service-call>
                     <else>
                         <log level="warn"
-                            message="====== Email not configured, ${user.loginName} password: $password" />
+                            message="====== Email not Send, ${user.loginName} password: $password email: ${user.email}" />
                     </else>
                 </if>
             </if>
