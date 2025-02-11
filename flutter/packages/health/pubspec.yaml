@@ -27,7 +27,7 @@ dependencies:
   dio: ^5.4.3
   http: ^1.1.2
   growerp_core: ^1.6.0
-  growerp_models: ^1.6.0
+  growerp_models: ^1.6.2
 
 dev_dependencies:
   flutter_test:

@@ -3,13 +3,15 @@ repository: https://github.com/growerp/growerp
 
 # packages also determine the order of test
 packages:
+  - packages/growerp_models
   - packages/growerp_core
+  - packages/growerp_core/example
   - packages/growerp_user_company
   - packages/growerp_user_company/example
   - packages/growerp_catalog
   - packages/growerp_catalog/example
   - packages/growerp_inventory
-  - packages/growerp_inventory/exmaple
+  - packages/growerp_inventory/example
   - packages/growerp_marketing
   - packages/growerp_marketing/example
   - packages/growerp_order_accounting
@@ -18,7 +20,6 @@ packages:
   - packages/growerp_website/example
   - packages/growerp_task
   - packages/growerp_task/example
-  - packages/growerp_models
   - packages/growerp
   - packages/admin
   - packages/website
@@ -36,7 +37,7 @@ scripts:
     description: Analyse all packages for possible problems.
   build:
     description: build_runner build all modules.
-    run: "flutter pub run build_runner build --delete-conflicting-outputs"
+    run: "dart run build_runner build --delete-conflicting-outputs"
     exec:
       concurrency: 1
       orderDependents: true
@@ -44,7 +45,7 @@ scripts:
       dependsOn: build_runner
   buildclean:
     description: build_runner clean.
-    run: "flutter clean && flutter pub run build_runner clean"
+    run: "flutter clean && dart run build_runner clean"
     exec:
       concurrency: 1
       orderDependents: true
