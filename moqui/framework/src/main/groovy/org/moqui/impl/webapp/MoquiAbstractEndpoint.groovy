@@ -85,11 +85,11 @@ abstract class MoquiAbstractEndpoint extends Endpoint implements MessageHandler.
                 eci.destroy()
             }
         }
-        /*
+        
         logger.info("Opened WebSocket Session ${session.getId()}, parameters: ${session.getRequestParameterMap()}, username: ${session.getUserPrincipal()?.getName()}, config props: ${config.userProperties}")
-        for (String attrName in httpSession.getAttributeNames())
-            logger.info("WebSocket Session ${session.getId()}, session attribute: ${attrName}=${httpSession.getAttribute(attrName)}")
-        */
+    //    for (String attrName in httpSession.getAttributeNames())
+    //        logger.info("WebSocket Session ${session.getId()}, session attribute: ${attrName}=${httpSession.getAttribute(attrName)}")
+        
     }
 
     @Override

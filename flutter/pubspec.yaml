@@ -8,7 +8,7 @@ environment:
 dependencies:
   flutter: 
     sdk: flutter
-  dcli: ^6.0.4
+  dcli: ^6.1.2
 
 dev_dependencies:
   flutter_lints: ^4.0.0

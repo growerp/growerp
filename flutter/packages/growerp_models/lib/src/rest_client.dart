@@ -464,6 +464,11 @@ abstract class RestClient {
     @Query('search') String? searchString,
   });
 
+  @POST("rest/s1/growerp/100/ChatMessage")
+  Future<ChatMessage> createChatMessage({
+    @Field() required ChatMessage chatMessage,
+  });
+
   // tasks
   @GET("rest/s1/growerp/100/Task")
   Future<Tasks> getTask({

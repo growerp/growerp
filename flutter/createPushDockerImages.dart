@@ -5,6 +5,11 @@ import 'dart:io';
 import 'package:dcli/dcli.dart';
 import 'package:yaml/yaml.dart';
 
+/// script to install growerp in the test server.
+/// Install dcli before running:
+///   dart pub global activate dcli
+///   dcli install
+///
 void main() async {
   List<String> apps = [
     'admin',
@@ -70,6 +75,7 @@ void main() async {
     print("get or update growerp from repository");
     home = "/tmp/growerp";
     if (exists(home)) {
+      run('git stash', workingDirectory: home);
       run('git pull', workingDirectory: home);
     } else {
       run('git clone "git@github.com:growerp/growerp.git"',

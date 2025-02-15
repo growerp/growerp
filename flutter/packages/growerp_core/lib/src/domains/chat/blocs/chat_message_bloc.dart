@@ -59,7 +59,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
       final myStream = chatServer.stream();
       // ignore: unused_local_variable
       final subscription = myStream.listen((data) =>
-          add(ChatMessageReceiveWs(WsChatMessage.fromJson(jsonDecode(data)))));
+          add(ChatMessageReceiveWs(ChatMessage.fromJson(jsonDecode(data)))));
     }
     try {
       // start from record zero for initial and refresh
@@ -110,21 +110,32 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     ChatMessageSendWs event,
     Emitter<ChatMessageState> emit,
   ) async {
-    chatServer.send(event.chatMessage.toJson().toString());
-    List<ChatMessage> chatMessages = List.from(state.chatMessages);
-    if (chatMessages.isEmpty) {
-      chatMessages.add(ChatMessage(
-        fromUserId: authBloc.state.authenticate!.user!.userId,
-        content: event.chatMessage.content,
-      ));
-    } else {
-      chatMessages.insert(
-          0,
-          ChatMessage(
-            fromUserId: authBloc.state.authenticate!.user!.userId,
-            content: event.chatMessage.content,
-          ));
+    try {
+      chatServer.send(event.chatMessage);
+      await restClient.createChatMessage(
+          chatMessage: ChatMessage(
+              chatRoom:
+                  ChatRoom(chatRoomId: event.chatMessage.chatRoom!.chatRoomId),
+              content: event.chatMessage.content,
+              fromUserId: event.chatMessage.fromUserId));
+      List<ChatMessage> chatMessages = List.from(state.chatMessages);
+      if (chatMessages.isEmpty) {
+        chatMessages.add(ChatMessage(
+          fromUserId: authBloc.state.authenticate!.user!.userId,
+          content: event.chatMessage.content,
+        ));
+      } else {
+        chatMessages.insert(
+            0,
+            ChatMessage(
+              fromUserId: authBloc.state.authenticate!.user!.userId,
+              content: event.chatMessage.content,
+            ));
+      }
+      emit(state.copyWith(chatMessages: chatMessages));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: ChatMessageStatus.failure, message: await getDioError(e)));
     }
-    emit(state.copyWith(chatMessages: chatMessages));
   }
 }

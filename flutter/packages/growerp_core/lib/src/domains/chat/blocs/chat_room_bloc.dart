@@ -66,7 +66,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     if (state.status == ChatRoomStatus.initial) {
       final myStream = chatServer.stream();
       myStream.listen((data) => add(ChatRoomReceiveWsChatMessage(
-          WsChatMessage.fromJson(jsonDecode(data)))));
+          ChatMessage.fromJson(jsonDecode(data)))));
     }
     try {
       // start from record zero for initial and refresh
@@ -259,12 +259,11 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
           authBloc.state.authenticate!.user!.userId) {
         if (state.status == ChatRoomStatus.success) {
           // only take NON system messages
-          if (event.chatMessage.chatRoomId != null &&
-              event.chatMessage.chatRoomId != "%%system%%") {
+          if (event.chatMessage.chatRoom!.chatRoomId != "%%system%%") {
             if (!state.chatRooms.any((element) =>
-                element.chatRoomId == event.chatMessage.chatRoomId)) {
+                element.chatRoomId == event.chatMessage.chatRoom!.chatRoomId)) {
               ChatRooms roomResult = await restClient.getChatRooms(
-                  chatRoomId: event.chatMessage.chatRoomId);
+                  chatRoomId: event.chatMessage.chatRoom!.chatRoomId);
               chatRooms.add(roomResult.chatRooms[0]);
               return emit(state.copyWith(chatRooms: chatRooms));
             }

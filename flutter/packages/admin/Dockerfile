@@ -33,8 +33,7 @@ ENV PATH="$PATH":"$HOME/.pub-cache/bin"
 WORKDIR $HOME
 RUN git clone --depth 1 https://github.com/growerp/growerp
 WORKDIR $HOME/growerp/flutter
-# COPY --chown=myuser:myuser . $HOME
-# stup new folder as the working directory
+# COPY --chown=myuser:myuser . $HOME # copy from local
 RUN sed -i 's\//webactivate \\' $HOME/growerp/flutter/packages/admin/lib/main.dart
 RUN melos clean
 RUN melos bootstrap

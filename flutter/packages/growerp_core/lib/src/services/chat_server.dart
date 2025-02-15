@@ -13,9 +13,11 @@
  */
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'package:growerp_models/growerp_models.dart';
 import 'package:logger/logger.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:io' show Platform;
@@ -40,26 +42,27 @@ class ChatServer {
       chatUrl = GlobalConfiguration().get("chatUrlDebug");
       if (chatUrl.isEmpty) {
         if (kIsWeb || Platform.isIOS || Platform.isLinux) {
-          chatUrl = 'ws://localhost:8081';
-//        chatUrl = 'ws://localhost:8080/notws';
+          chatUrl = 'ws://localhost:8080/chat';
         } else if (Platform.isAndroid) {
-          chatUrl = 'ws://10.0.2.2:8081';
-//        chatUrl = 'ws://10.0.2.2:8080/notws';
+          chatUrl = 'ws://10.0.2.2:8080/chat';
         }
       }
     }
     logger.i('Using base chat backend url: $chatUrl');
   }
 
-  connect(String apiKey, String userId) {
-    logger.i("WS connect url/userId/apikey: $chatUrl/$userId/$apiKey");
-    channel = WebSocketChannel.connect(Uri.parse('$chatUrl/$userId/$apiKey'));
+  connect(String apiKey, String userId) async {
+    logger.i("WS connect $chatUrl");
+    channel = WebSocketChannel.connect(
+        Uri.parse("$chatUrl?apiKey=$apiKey&userId=$userId"));
+    await channel.ready;
     streamController = StreamController.broadcast()..addStream(channel.stream);
   }
 
-  send(String message) {
-    debugPrint("WS send message: $message");
-    channel.sink.add(message);
+  send(ChatMessage message) {
+    debugPrint("Send message: $message");
+    const JsonEncoder encoder = JsonEncoder();
+    channel.sink.add(encoder.convert(message.toJson()));
   }
 
   stream() {

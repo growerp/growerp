@@ -246,8 +246,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       box.put('apiKey', result.apiKey);
       PersistFunctions.persistAuthenticate(
           state.authenticate!.copyWith(apiKey: result.apiKey));
-      chat.connect(
-          state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
     } on DioException catch (e) {
       emit(state.copyWith(
           status: AuthStatus.failure, message: await getDioError(e)));

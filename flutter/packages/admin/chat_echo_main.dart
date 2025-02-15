@@ -201,11 +201,12 @@ class ChatRoomsEchoState extends State<ChatRooms> {
                     messages = state.chatMessages;
                     if (chatRooms.isNotEmpty && messages.isNotEmpty) {
                       // echo message
-                      _chatMessageBloc.add(ChatMessageSendWs(WsChatMessage(
+                      _chatMessageBloc.add(ChatMessageSendWs(ChatMessage(
                           toUserId: chatRooms[0]
                               .getToUserId(authenticate.user!.userId!),
                           fromUserId: authenticate.user!.userId!,
-                          chatRoomId: chatRooms[0].chatRoomId,
+                          chatRoom:
+                              ChatRoom(chatRoomId: chatRooms[0].chatRoomId),
                           content: messages[0].content!)));
                       // delete chatroom: set not active
                       _chatRoomBloc.add(

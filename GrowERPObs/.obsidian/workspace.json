@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "1 Introduction/5 Road Map.md",
+                "file": "3 Technical documentation/4 Chat Server.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "5 Road Map"
+              "title": "4 Chat Server"
             }
           }
         ]
@@ -40,7 +40,8 @@
             "state": {
               "type": "file-explorer",
               "state": {
-                "sortOrder": "alphabetical"
+                "sortOrder": "alphabetical",
+                "autoReveal": false
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
@@ -178,11 +179,11 @@
   },
   "active": "cd2ba6fa8750f0f9",
   "lastOpenFiles": [
+    "1 Introduction/5 Road Map.md",
     "3 Technical documentation/3 Moqui Backend.md",
     "1 Introduction/6 Releases.md",
     "2 End User documentation/1 Introduction/2 Getting Started.md",
     "1 Introduction/3 Feature list.md",
-    "1 Introduction/5 Road Map.md",
     "3 Technical documentation/5 HTML Website.md",
     "1 Introduction/topten.png",
     "1 Introduction/4 Getting started.md",

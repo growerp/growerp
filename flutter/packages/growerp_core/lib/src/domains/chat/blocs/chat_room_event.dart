@@ -46,11 +46,11 @@ class ChatRoomDelete extends ChatRoomEvent {
 }
 
 class ChatRoomReceiveWsChatMessage extends ChatRoomEvent {
-  final WsChatMessage chatMessage;
+  final ChatMessage chatMessage;
   ChatRoomReceiveWsChatMessage(this.chatMessage);
   @override
   String toString() =>
       "Receive chat server message in ChatRoombloc ${chatMessage.content} "
-      "chatroom: ${chatMessage.chatRoomId} from: ${chatMessage.fromUserId} "
+      "chatroom: ${chatMessage.chatRoom!.chatRoomId} from: ${chatMessage.fromUserId} "
       " to: ${chatMessage.toUserId} ";
 }

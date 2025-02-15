@@ -14,17 +14,18 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../json_converters.dart';
+import 'chat_room_model.dart';
 
 part 'chat_message_model.freezed.dart';
 part 'chat_message_model.g.dart';
-
-// backend relation: product -> chatMessage -> chatMessageReservation -> orderItem
 
 @freezed
 class ChatMessage with _$ChatMessage {
   ChatMessage._();
   factory ChatMessage({
+    ChatRoom? chatRoom,
     String? fromUserId,
+    String? toUserId,
     String? chatMessageId,
     String? content,
     @DateTimeConverter() DateTime? creationDate,

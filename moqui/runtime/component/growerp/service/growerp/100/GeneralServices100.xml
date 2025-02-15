@@ -453,7 +453,7 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <if condition="classificationId == 'chat'">
-                <set field="authenticate" value="[:]" />
+                <set field="authenticate" from="[moquiSessionToken: ec.web.sessionToken]" />
                 <!-- used by chat to see if apiKey is valid -->
                 <return />
             </if>

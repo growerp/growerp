@@ -443,6 +443,11 @@ along with this software (see the LICENSE.md file). If not, see
             <iterate list="messages" entry="message">
                 <set field="chatMessage"
                     from="[
+                    chatRoom: [
+                        chatRoomId: message.chatRoomId,
+                        chatRoomName: message.chatRoomName,
+                        isPrivate: message.isPrivate == 'Y' ? true : false,
+                        ],
                     chatMessageId : message.chatMessageId,
                     fromUserId: message.fromUserId,
                     content: message.content,
@@ -457,12 +462,18 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="create" noun="ChatMessage">
         <in-parameters>
-            <parameter name="chatRoomId" required="true" />
-            <parameter name="message" required="true" />
+            <parameter name="chatMessage" type="Map" required="true">
+                <parameter name="chatRoom" type="Map">
+                    <parameter name="chatRoomId" />
+                </parameter>
+                <parameter name="fromUserId" />
+                <parameter name="content" />
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="chatMessage" type="Map">
                 <parameter name="chatMessageId" />
+                <parameter name="chatRoomId" />
                 <parameter name="fromUserId" />
                 <parameter name="content" />
                 <parameter name="creationDate" />
@@ -470,13 +481,13 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <service-call name="create#growerp.general.ChatMessage"
-                in-map="[chatRoomId: chatRoomId,
+                in-map="[chatRoomId: chatMessage.chatRoom.chatRoomId,
                     fromUserId : ec.user.userAccount.userId,
-                    content: message]" />
-            <!-- read everything for verification -->
+                    content: chatMessage.content]"
+                out-map="context" />
             <service-call name="growerp.100.ChatServices100.get#ChatMessage"
                 in-map="[chatMessageId: chatMessageId]" out-map="context" />
-            <set field="chatMessage" from="chatMessages[0]" />
+            <set field="chatMessageId" from="chatMessageId" />
         </actions>
     </service>
 </services>

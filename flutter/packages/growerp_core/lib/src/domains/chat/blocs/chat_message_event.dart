@@ -35,7 +35,7 @@ class ChatMessageFetch extends ChatMessageEvent {
 }
 
 class ChatMessageReceiveWs extends ChatMessageEvent {
-  final WsChatMessage chatMessage;
+  final ChatMessage chatMessage;
   ChatMessageReceiveWs(this.chatMessage);
   @override
   String toString() =>
@@ -43,7 +43,7 @@ class ChatMessageReceiveWs extends ChatMessageEvent {
 }
 
 class ChatMessageSendWs extends ChatMessageEvent {
-  final WsChatMessage chatMessage;
+  final ChatMessage chatMessage;
   ChatMessageSendWs(this.chatMessage);
   @override
   String toString() => "SendWsChatMessage send wsChat message: $chatMessage";
