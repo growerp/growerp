@@ -43,7 +43,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
   }
 
   final RestClient restClient;
-  final ChatServer chatServer;
+  final WsServer chatServer;
   final AuthBloc authBloc;
   int start = 0;
 

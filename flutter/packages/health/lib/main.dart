@@ -69,7 +69,7 @@ Future main() async {
 
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
-  ChatServer chatServer = ChatServer('chat');
+  WsServer chatServer = WsServer('chat');
   String classificationId = 'AppHealth';
 
   Company? company;

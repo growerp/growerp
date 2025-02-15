@@ -48,7 +48,7 @@ class TopApp extends StatelessWidget {
   final Map<String, Widget> screens; // string to widget translation
   final Company? company;
 
-  final ChatServer chatServer;
+  final WsServer chatServer;
   final String title;
   final Route<dynamic> Function(RouteSettings) router;
   final List<MenuOption> menuOptions;

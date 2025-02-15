@@ -12,7 +12,8 @@ You should have received a copy of the CC0 Public Domain Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd">
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd">
     <widgets>
         <render-mode>
             <text type="html"><![CDATA[
@@ -21,7 +22,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <#if  classification == 'Admin'>    
                 You can now start a website, sell products, manage your inventory and your accounting is done automatically.<br/>
 
-                If you sell products on your website, the payments will be forwarded to you monthly.<br/><br/>
+                If you sell products on your website, you can enter your Stripe secret key on the website admin screen and incoming payments will be handled by your own stripe account.
+                Your secret key is safe with us: it is encrypted in our database<br/><br/>
                 </#if>
                 When you need any support, please let us know at
                 <a href="mailto:support@growerp.com?subject=Question%20about%20Growerp-${classification}">support@growerp.com</a><br/><br/>

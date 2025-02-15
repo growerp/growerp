@@ -7,7 +7,7 @@ import '../growerp_core.dart';
 
 List<BlocProvider> getCoreBlocProviders(
   RestClient restClient,
-  ChatServer chatServer,
+  WsServer chatServer,
   String classificationId,
   Map<String, Widget> screens,
   Company? company,

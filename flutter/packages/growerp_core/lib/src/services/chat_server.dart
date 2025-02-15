@@ -22,7 +22,7 @@ import 'package:logger/logger.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:io' show Platform;
 
-class ChatServer {
+class WsServer {
   late WebSocketChannel channel;
   late String chatUrl;
   late StreamController streamController;
@@ -35,7 +35,7 @@ class ChatServer {
     output: null, // Use the default LogOutput (-> send everything to console)
   );
 
-  ChatServer(String path) {
+  WsServer(String path) {
     if (kReleaseMode) {
       chatUrl = GlobalConfiguration().get("chatUrl");
     } else {

@@ -23,7 +23,7 @@ class ChatState extends State<ChatDialog> {
   final double _scrollThreshold = 200.0;
   late ChatMessageBloc _chatMessageBloc;
   late Authenticate authenticate;
-  late ChatServer? chat;
+  late WsServer? chat;
   int limit = 20;
   late bool search;
   String? searchString;
@@ -45,7 +45,7 @@ class ChatState extends State<ChatDialog> {
 
   @override
   Widget build(BuildContext context) {
-    chat = context.read<ChatServer>();
+    chat = context.read<WsServer>();
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     if (chat == null) return (const Center(child: Text("chat not active!")));
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {

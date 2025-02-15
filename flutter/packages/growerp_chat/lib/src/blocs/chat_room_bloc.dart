@@ -35,7 +35,7 @@ EventTransformer<E> chatRoomDroppable<E>(Duration duration) {
 
 class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
   final RestClient restClient;
-  final ChatServer chatServer;
+  final WsServer chatServer;
   final AuthBloc authBloc;
   int start = 0;
 

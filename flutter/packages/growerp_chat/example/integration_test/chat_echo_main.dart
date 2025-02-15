@@ -35,7 +35,7 @@ Future main() async {
   Bloc.observer = AppBlocObserver();
   runApp(ChatApp(
       restClient: RestClient(await buildDioClient()),
-      chatServer: ChatServer('chat')));
+      chatServer: WsServer('chat')));
 }
 
 class ChatApp extends StatelessWidget {
@@ -46,7 +46,7 @@ class ChatApp extends StatelessWidget {
       this.company});
 
   final RestClient restClient;
-  final ChatServer chatServer;
+  final WsServer chatServer;
   final Company? company;
 
   @override

@@ -50,6 +50,6 @@ cloned versions, with small modifications in the 'growerp' branch (when exist)
 * Website: https://github.com/growerp/PopRestStore
 * PDF: https://github.com/moqui/moqui-fop
 
-## ChatServer
+## WsServer
 * https://github.com/growerp/growerp-chat
 

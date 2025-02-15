@@ -54,7 +54,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   final RestClient restClient;
-  final ChatServer chat;
+  final WsServer chat;
   final String classificationId;
   final Company? company;
 
