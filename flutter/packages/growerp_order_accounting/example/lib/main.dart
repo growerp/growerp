@@ -28,7 +28,7 @@ Future main() async {
   await GlobalConfiguration().loadFromAsset('app_settings');
   await Hive.initFlutter();
   RestClient restClient = RestClient(await buildDioClient());
-  ChatServer chatServer = ChatServer();
+  ChatServer chatServer = ChatServer('chat');
   Bloc.observer = AppBlocObserver();
 
   runApp(

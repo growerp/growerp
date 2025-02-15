@@ -35,7 +35,7 @@ Future main() async {
   Bloc.observer = AppBlocObserver();
   runApp(ChatApp(
       restClient: RestClient(await buildDioClient()),
-      chatServer: ChatServer()));
+      chatServer: ChatServer('chat')));
 }
 
 class ChatApp extends StatelessWidget {

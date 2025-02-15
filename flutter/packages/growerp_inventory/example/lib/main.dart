@@ -28,7 +28,7 @@ Future main() async {
   await Hive.initFlutter();
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
-  ChatServer chatServer = ChatServer();
+  ChatServer chatServer = ChatServer('chat');
 
   runApp(
     TopApp(

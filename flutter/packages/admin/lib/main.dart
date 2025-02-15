@@ -71,7 +71,7 @@ Future main() async {
 
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
-  ChatServer chatServer = ChatServer();
+  ChatServer chatServer = ChatServer('chat');
   String classificationId = GlobalConfiguration().get("classificationId");
 
   Company? company;

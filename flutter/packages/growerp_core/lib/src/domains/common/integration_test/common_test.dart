@@ -68,7 +68,7 @@ class CommonTest {
     runApp(TopApp(
       restClient: restClient,
       classificationId: classificationId,
-      chatServer: ChatServer(),
+      chatServer: ChatServer('chat'),
       router: router,
       title: title,
       menuOptions: menuOptions,

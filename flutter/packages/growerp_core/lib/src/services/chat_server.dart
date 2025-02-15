@@ -35,20 +35,20 @@ class ChatServer {
     output: null, // Use the default LogOutput (-> send everything to console)
   );
 
-  ChatServer() {
+  ChatServer(String path) {
     if (kReleaseMode) {
       chatUrl = GlobalConfiguration().get("chatUrl");
     } else {
       chatUrl = GlobalConfiguration().get("chatUrlDebug");
       if (chatUrl.isEmpty) {
         if (kIsWeb || Platform.isIOS || Platform.isLinux) {
-          chatUrl = 'ws://localhost:8080/chat';
+          chatUrl = 'ws://localhost:8080/$path';
         } else if (Platform.isAndroid) {
-          chatUrl = 'ws://10.0.2.2:8080/chat';
+          chatUrl = 'ws://10.0.2.2:8080/$path';
         }
       }
     }
-    logger.i('Using base chat backend url: $chatUrl');
+    logger.i('Using base websocket backend url: $chatUrl/$path');
   }
 
   connect(String apiKey, String userId) async {
