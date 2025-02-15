@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_chat/growerp_chat.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../../growerp_core.dart';
 

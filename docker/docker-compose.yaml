@@ -1,9 +1,3 @@
-version: "2"
-
-networks:
-  my-network:
-    driver: bridge
-
 services:
 
   watch:
@@ -38,8 +32,6 @@ services:
       # change this for the default host to use when accessing directly by IP, etc
       # use SSL_POLICY to disable TLSv1.0, etc in nginx-proxy
       # - SSL_POLICY=AWS-TLS-1-1-2017-01
-    networks:
-      - my-network
 
   moqui-server:
     image: growerp/growerp-moqui
@@ -89,8 +81,6 @@ services:
       - SMTP_PASSWORD=
       - BIRDSEND_API_KEY=
       - BIRDSEND_AUTM_SEQUENCE=
-    networks:
-      - my-network
 
   moqui-database:
     image: postgres:17.2
@@ -108,33 +98,6 @@ services:
       - POSTGRES_USER=moqui
       - POSTGRES_PASSWORD=moqui
     # PGDATA, POSTGRES_INITDB_ARGS
-    networks:
-      - my-network
-
-  chat:
-    container_name: chat
-    image: growerp/chat
-    build:
-      context: ../chat
-    mem_limit: 100m
-    restart: unless-stopped
-    expose:
-      - 8080
-    environment:
-      - DATABASEBACKEND=https://backend.growerp.local
-      - VIRTUAL_HOST=chat.growerp.local
-      - VIRTUAL_PORT=8080
-    external_links:
-      - internet_gateway
-    networks:
-      - my-network
-
-  # internet gateway required by chat to validate api_key with moqui
-  internet_gateway:
-    image: alpine # or any other suitable image
-    container_name: gateway
-    network_mode: host
-    command: sh -c "sleep infinity"
 
   admin:
     container_name: admin
@@ -150,8 +113,6 @@ services:
       - ./app_settings.json:/usr/share/nginx/html/assets/assets/cfg/app_settings.json
     environment:
       - VIRTUAL_HOST=admin.growerp.local
-    networks:
-      - my-network
 
   hotel:
     container_name: hotel
@@ -167,5 +128,3 @@ services:
       - ./app_settings.json:/usr/share/nginx/html/assets/assets/cfg/app_settings.json
     environment:
       - VIRTUAL_HOST=hotel.growerp.local
-    networks:
-      - my-network

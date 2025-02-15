@@ -6,6 +6,8 @@ packages:
   - packages/growerp_models
   - packages/growerp_core
   - packages/growerp_core/example
+  - packages/growerp_chat
+  - packages/growerp_chat/example
   - packages/growerp_user_company
   - packages/growerp_user_company/example
   - packages/growerp_catalog

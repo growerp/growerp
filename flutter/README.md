@@ -8,6 +8,7 @@ Applications are stored as packages in the packages directory. Most packages hav
 
 Packages are dependent of each other, bottom up:
     1. growerp_models
+    2. growerp_chat
         1. growerp_core
         2. growerp
             1. growerp_catalog

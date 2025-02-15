@@ -89,26 +89,8 @@ class ChatEndpoint extends MoquiAbstractEndpoint {
                     " content: " + message.content +
                     " chatRoomId: " + message.chatRoomId);
         message.fromUserId = users.get(session.getId());
-/*        RestClient restClient = ec.service.rest().method(RestClient.POST)
-                .uri("http://localhost:8080/rest/s1/growerp/100/ChatMessage")
-                .addHeader("Content-Type", "application/json")
-                .addHeader("api_key", "${usersApiKey.get(session.getId())}")
-                .addHeader("X-CSRF-Token", "${usersToken.get(session.getId())}")
-                .addBodyParameter("message", (String) message.content)
-                .addBodyParameter("chatRoomId", (String) message.chatRoomId)
-        RestClient.RestResponse restResponse = restClient.call()
-        result = (Map) restResponse.jsonObject()
-        if (restResponse.statusCode < 200 || restResponse.statusCode >= 300 ) {
-            ec.logger.warn("====Unsuccessful send message result: ${result}")
-            return
-        }
-        Map auth = (Map) result.authenticate
-        usersToken.put(session.getId(), (String) auth.moquiSessionToken);
-*/
-        logger.info("#endpoints: ${chatEndpoints.size()}");           
+
         chatEndpoints.forEach(endpoint -> {
-            logger.info("====comparing endPoint: ${endpoint.session.getId()} " 
-                    + "uid:  ${users.get(endpoint.session.getId())} and ${message.toUserId}")
             if (users.get(endpoint.session.getId()).equals(message.toUserId)) {
 
                 synchronized (endpoint) {

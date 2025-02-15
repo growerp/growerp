@@ -9,3 +9,4 @@ export 'src/l10n/generated/core_localizations.dart';
 export 'src/services/chat_server.dart';
 export 'src/services/build_dio_client.dart';
 export 'src/get_core_bloc_providers.dart';
+export 'src/domains/authenticate/authenticate.dart';

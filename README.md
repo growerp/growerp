@@ -48,12 +48,6 @@ git clone https://github.com/growerp/growerp
 cd growerp
 ```
 
-### start the chat server
-```sh
-cd chat
-./gradlew/apprun
-```
-
 ### start backend in separate terminal
 Initialize: (only the first time)
 ```sh

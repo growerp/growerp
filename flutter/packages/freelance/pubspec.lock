@@ -643,6 +643,13 @@ packages:
       relative: true
     source: path
     version: "1.6.0"
+  growerp_chat:
+    dependency: "direct overridden"
+    description:
+      path: "../growerp_chat"
+      relative: true
+    source: path
+    version: "1.6.0"
   growerp_core:
     dependency: "direct main"
     description:

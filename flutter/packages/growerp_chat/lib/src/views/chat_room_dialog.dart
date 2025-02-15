@@ -18,7 +18,9 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domains.dart';
+import 'package:growerp_core/growerp_core.dart';
+
+import '../blocs/blocs.dart';
 
 class ChatRoomDialog extends StatefulWidget {
   final ChatRoom chatRoom;

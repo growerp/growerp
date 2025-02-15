@@ -20,8 +20,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
-import '../../authenticate/blocs/auth_bloc.dart';
-import '../../../services/chat_server.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 part 'chat_message_event.dart';
 part 'chat_message_state.dart';

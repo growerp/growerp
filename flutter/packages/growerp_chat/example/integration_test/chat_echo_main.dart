@@ -16,6 +16,7 @@
 
 // ignore_for_file: depend_on_referenced_packages
 import 'dart:async';
+import 'package:growerp_chat/src/chat.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,7 +24,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:admin/router.dart' as router;
 import 'package:hive_flutter/hive_flutter.dart';
 
 Future main() async {
@@ -103,7 +103,7 @@ class MyChatApp extends StatelessWidget {
             ),
         theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
         darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
-        onGenerateRoute: router.generateRoute,
+        //      onGenerateRoute: router.generateRoute,
         home: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
             if (state.status == AuthStatus.failure) {

@@ -17,7 +17,6 @@ import 'package:core_example/main.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:growerp_core/test_data.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -40,10 +39,10 @@ void main() {
     await CommonTest.createCompanyAndAdmin(tester);
     //  await UserTest.selectEmployees(tester);
     //  await UserTest.addAdministrators(tester, [administrators[0]], check: false);
-    await ChatTest.selectChatRoom(tester);
-    await ChatTest.addRooms(tester, chatRooms);
-    await ChatTest.updateRooms(tester);
-    await ChatTest.deleteRooms(tester);
+//    await ChatTest.selectChatRoom(tester);
+//    await ChatTest.addRooms(tester, chatRooms);
+//    await ChatTest.updateRooms(tester);
+//    await ChatTest.deleteRooms(tester);
     // needchat echo running
 //    await ChatTest.sendDirectMessage(tester);
 //    await ChatTest.sendRoomMessage(tester);

@@ -28,14 +28,6 @@ install(String growerpPath, String branch) {
     run('git clone -b $branch https://github.com/growerp/growerp.git $growerpPath',
         workingDirectory: HOME);
   }
-  logger.i('Starting chat server in separate window...');
-  run('gnome-terminal -- bash -c "cd $growerpPath/chat && ./gradlew apprun"');
-  logger.i('Build moqui app server backend...');
-  if (!exists('$growerpPath/moqui/moqui.war')) {
-    run('./gradlew build', workingDirectory: '$growerpPath/moqui');
-    run('java -jar moqui.war load types=seed,seed-initial,install',
-        workingDirectory: '$growerpPath/moqui');
-  }
   logger.i('Start backend in separate window...');
   run('gnome-terminal -- bash -c "cd $growerpPath/moqui && java -jar moqui.war"');
   if (!exists("$growerpPath/flutter/packages/admin/pubspec_overrides.yaml")) {
