@@ -27,12 +27,14 @@ Future main() async {
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
   WsServer chatServer = WsServer('chat');
+  WsServer notificationServer = WsServer('notws');
   String classificationId = GlobalConfiguration().get("classificationId");
 
   runApp(TopApp(
     restClient: restClient,
     classificationId: classificationId,
     chatServer: chatServer,
+    notificationServer: notificationServer,
     title: 'GrowERP package: growerp_user_company.',
     router: generateRoute,
     menuOptions: menuOptions,

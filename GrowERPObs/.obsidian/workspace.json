@@ -20,8 +20,21 @@
               "icon": "lucide-file",
               "title": "4 Chat Server"
             }
+          },
+          {
+            "id": "a5321e1845a1a864",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.8.7"
+              },
+              "icon": "lucide-book-up",
+              "title": "Release Notes 1.8.7"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -177,7 +190,7 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "cd2ba6fa8750f0f9",
+  "active": "a5321e1845a1a864",
   "lastOpenFiles": [
     "1 Introduction/5 Road Map.md",
     "3 Technical documentation/3 Moqui Backend.md",

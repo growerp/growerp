@@ -29,18 +29,29 @@ class HelperFunctions {
     }
   }
 
-  static showTopMessage(dynamic scaffoldKey, String? message, [int? duration]) {
-    if (message != null) {
-      scheduleMicrotask(() => scaffoldKey.currentState.showSnackBar(SnackBar(
-            duration: Duration(seconds: duration ?? 2),
-            content: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(message),
-              ],
-            ),
-          )));
-    }
+  static showTopMessage(
+    context,
+    String message, {
+    Duration? duration,
+  }) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        dismissDirection: DismissDirection.up,
+        duration: duration ?? const Duration(milliseconds: 1000),
+        backgroundColor: Colors.yellow,
+        margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height - 150,
+            left: 10,
+            right: 10),
+        behavior: SnackBarBehavior.floating,
+        content: Text(
+          message,
+          style: const TextStyle(
+            fontSize: 20,
+          ),
+        ),
+      ),
+    );
   }
 
   static Future<Uint8List?> getResizedImage(imagePath) async {

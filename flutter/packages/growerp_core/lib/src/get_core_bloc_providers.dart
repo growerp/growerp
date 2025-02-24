@@ -8,12 +8,13 @@ import '../growerp_core.dart';
 List<BlocProvider> getCoreBlocProviders(
   RestClient restClient,
   WsServer chatServer,
+  WsServer notificationServer,
   String classificationId,
   Map<String, Widget> screens,
   Company? company,
 ) {
-  AuthBloc authBloc =
-      AuthBloc(chatServer, restClient, classificationId, company);
+  AuthBloc authBloc = AuthBloc(
+      chatServer, notificationServer, restClient, classificationId, company);
   List<BlocProvider<StateStreamableSource<Object?>>> blocProviders = [
     BlocProvider<AuthBloc>(create: (context) => authBloc..add(AuthLoad())),
     BlocProvider<ThemeBloc>(
@@ -21,6 +22,10 @@ List<BlocProvider> getCoreBlocProviders(
     BlocProvider<ChatRoomBloc>(
         create: (context) => ChatRoomBloc(restClient, chatServer, authBloc)
           ..add(ChatRoomFetch())),
+    BlocProvider<NotificationBloc>(
+        create: (context) =>
+            NotificationBloc(restClient, notificationServer, authBloc)
+              ..add(const NotificationFetch())),
     BlocProvider<ChatMessageBloc>(
         create: (context) => ChatMessageBloc(restClient, chatServer, authBloc)),
     BlocProvider<TaskToDoBloc>(

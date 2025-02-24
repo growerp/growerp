@@ -69,6 +69,7 @@ class CommonTest {
       restClient: restClient,
       classificationId: classificationId,
       chatServer: WsServer('chat'),
+      notificationServer: WsServer('notws'),
       router: router,
       title: title,
       menuOptions: menuOptions,

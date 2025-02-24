@@ -21,7 +21,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../get_core_bloc_providers.dart';
-import '../../../services/chat_server.dart';
+import '../../../services/ws_server.dart';
 import '../../domains.dart';
 import '../../../l10n/generated/core_localizations.dart';
 
@@ -34,6 +34,7 @@ class TopApp extends StatelessWidget {
     required this.restClient,
     required this.classificationId,
     required this.chatServer,
+    required this.notificationServer,
     this.title = '',
     required this.router,
     required this.menuOptions,
@@ -49,6 +50,7 @@ class TopApp extends StatelessWidget {
   final Company? company;
 
   final WsServer chatServer;
+  final WsServer notificationServer;
   final String title;
   final Route<dynamic> Function(RouteSettings) router;
   final List<MenuOption> menuOptions;
@@ -69,14 +71,15 @@ class TopApp extends StatelessWidget {
         providers: [
           RepositoryProvider(create: (context) => restClient),
           RepositoryProvider(create: (context) => chatServer),
+          RepositoryProvider(create: (context) => notificationServer),
           RepositoryProvider(create: (context) => classificationId),
           RepositoryProvider(create: (context) => screens),
           RepositoryProvider(create: (context) => company),
         ],
         child: MultiBlocProvider(
             providers: [
-              ...getCoreBlocProviders(
-                  restClient, chatServer, classificationId, screens, company),
+              ...getCoreBlocProviders(restClient, chatServer,
+                  notificationServer, classificationId, screens, company),
               ...extraBlocProviders
             ],
             child:

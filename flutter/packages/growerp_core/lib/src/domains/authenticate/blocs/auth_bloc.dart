@@ -22,7 +22,7 @@ import 'package:hive/hive.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 
-import '../../../services/chat_server.dart';
+import '../../../services/ws_server.dart';
 import '../../common/functions/functions.dart';
 
 part 'auth_event.dart';
@@ -40,7 +40,8 @@ EventTransformer<E> authDroppable<E>(Duration duration) {
 /// keeps the token and apiKey in the [Authenticate] class.
 ///
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc(this.chat, this.restClient, this.classificationId, this.company)
+  AuthBloc(this.chat, this.notification, this.restClient, this.classificationId,
+      this.company)
       : super(const AuthState()) {
     on<AuthLoad>(_onAuthLoad);
     on<AuthRegister>(_onAuthRegister,
@@ -55,6 +56,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   final RestClient restClient;
   final WsServer chat;
+  final WsServer notification;
   final String classificationId;
   final Company? company;
 
@@ -94,9 +96,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (authResult.apiKey == null) {
           return emit(state.copyWith(status: AuthStatus.unAuthenticated));
         }
-        //Authenticated
+        // Authenticated
         await PersistFunctions.persistAuthenticate(authResult);
+        // chat
         chat.connect(authResult.apiKey!, authResult.user!.userId!);
+        // notification
+        notification.connect(authResult.apiKey!, authResult.user!.userId!);
         return emit(state.copyWith(
             status: AuthStatus.authenticated, authenticate: authResult));
       } else {
@@ -190,7 +195,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (state.authenticate!.user!.userId != null) {
           chat.connect(
               state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
+          notification.connect(
+              state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
         }
+
         var box = await Hive.openBox('growerp');
         box.put('apiKey', authenticate.apiKey);
       } else {
@@ -237,6 +245,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           oldPassword: event.oldPassword,
           newPassword: event.newPassword,
           classificationId: classificationId);
+      if (state.authenticate!.user!.userId != null) {
+        chat.connect(
+            state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
+        notification.connect(
+            state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
+      }
+
       emit(state.copyWith(
           status: AuthStatus.authenticated,
           authenticate: result,

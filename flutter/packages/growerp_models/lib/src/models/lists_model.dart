@@ -220,6 +220,17 @@ class ChatMessages with _$ChatMessages {
 }
 
 @freezed
+class Notifications with _$Notifications {
+  factory Notifications({
+    @Default([]) List<NotificationWs> notifications,
+  }) = _Notifications;
+  Notifications._();
+
+  factory Notifications.fromJson(Map<String, dynamic> json) =>
+      _$NotificationsFromJson(json);
+}
+
+@freezed
 class Tasks with _$Tasks {
   factory Tasks({
     @Default([]) List<Task> tasks,

@@ -20,6 +20,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:logger/logger.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/status.dart' as status;
 import 'dart:io' show Platform;
 
 class WsServer {
@@ -48,21 +49,29 @@ class WsServer {
         }
       }
     }
-    logger.i('Using base websocket backend url: $chatUrl/$path');
+    logger.i('Using base websocket backend url: $chatUrl');
   }
 
   connect(String apiKey, String userId) async {
     logger.i("WS connect $chatUrl");
     channel = WebSocketChannel.connect(
         Uri.parse("$chatUrl?apiKey=$apiKey&userId=$userId"));
-    await channel.ready;
+
+    //await channel.ready;
+
     streamController = StreamController.broadcast()..addStream(channel.stream);
   }
 
-  send(ChatMessage message) {
+  send(Object message) {
+    String out;
     debugPrint("Send message: $message");
-    const JsonEncoder encoder = JsonEncoder();
-    channel.sink.add(encoder.convert(message.toJson()));
+    if (message is ChatMessage) {
+      const JsonEncoder encoder = JsonEncoder();
+      out = encoder.convert(message.toJson());
+    } else {
+      out = message as String;
+    }
+    channel.sink.add(out);
   }
 
   stream() {
@@ -70,7 +79,7 @@ class WsServer {
   }
 
   close() {
-    channel.sink.close();
+    channel.sink.close(status.goingAway);
     streamController.close();
   }
 }

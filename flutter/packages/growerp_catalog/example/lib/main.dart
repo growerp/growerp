@@ -30,12 +30,14 @@ Future main() async {
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
   WsServer chatServer = WsServer('chat');
+  WsServer notificationServer = WsServer('notws');
   Bloc.observer = AppBlocObserver();
 
   runApp(TopApp(
     restClient: RestClient(await buildDioClient()),
     classificationId: 'AppAdmin',
     chatServer: chatServer,
+    notificationServer: notificationServer,
     title: 'GrowERP Catalog.',
     router: generateRoute,
     menuOptions: menuOptions,

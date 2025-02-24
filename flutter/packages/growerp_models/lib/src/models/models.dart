@@ -44,3 +44,4 @@ export 'request_type_model.dart';
 export 'company_user_model.dart';
 export 'party_type_model.dart';
 export 'gateway_response_model.dart';
+export 'notification_ws_model.dart';

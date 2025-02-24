@@ -34,7 +34,7 @@ dependencies:
   printing: ^5.11.1
   pdf: ^3.10.8
   about: ^2.1.1
-  web_socket_channel: ^2.1.0
+  web_socket_channel: ^3.0.2
   shared_preferences: ^2.3.2
   stream_transform: ^2.1.0
   collection: ^1.16.0

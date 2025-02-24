@@ -18,6 +18,7 @@ import org.moqui.impl.context.ExecutionContextFactoryImpl
 import org.moqui.impl.context.ExecutionContextImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.moqui.util.*
 
 import javax.servlet.http.HttpSession
 import javax.websocket.*
@@ -42,6 +43,7 @@ abstract class MoquiAbstractEndpoint extends Endpoint implements MessageHandler.
     protected HttpSession httpSession = (HttpSession) null
     protected HandshakeRequest handshakeRequest = (HandshakeRequest) null
     protected String userId = (String) null
+    protected String apiKey = (String) null
     protected String username = (String) null
     protected boolean destroyInitialEci = true
 
@@ -60,6 +62,7 @@ abstract class MoquiAbstractEndpoint extends Endpoint implements MessageHandler.
         handshakeRequest = (HandshakeRequest) config.userProperties.get("handshakeRequest")
         httpSession = handshakeRequest != null ? (HttpSession) handshakeRequest.getHttpSession() : (HttpSession) config.userProperties.get("httpSession")
         ExecutionContextImpl eci = ecfi.getEci()
+
         try {
             if (handshakeRequest != null) {
                 eci.userFacade.initFromHandshakeRequest(handshakeRequest)
@@ -69,9 +72,23 @@ abstract class MoquiAbstractEndpoint extends Endpoint implements MessageHandler.
                 logger.warn("No HandshakeRequest or HttpSession found opening WebSocket Session ${session.id}, not logging in user")
             }
 
-
-            userId = eci.user.userId
-            username = eci.user.username
+            if (session.getRequestParameterMap()["userId"] != null) {
+                userId = session.getRequestParameterMap()["userId"][0]
+                apiKey = session.getRequestParameterMap()["apiKey"][0]
+                RestClient restClient = eci.service.rest().method(RestClient.GET)
+                    .uri("http://localhost:8080/rest/s1/growerp/100/Authenticate?classificationId=token")
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("api_key", "${apiKey}")
+                RestClient.RestResponse restResponse = restClient.call()
+                Map result = (Map) restResponse.jsonObject()
+                if (restResponse.statusCode < 200 || restResponse.statusCode >= 300 ) {
+                    eci.logger.warn("Websocket Authorisation error: ${result}")
+                    return
+                }
+            } else {
+                userId = eci.user.userId
+                username = eci.user.username
+            }
 
             Long timeout = (Long) config.userProperties.get("maxIdleTimeout")
             if (timeout != null && session.getMaxIdleTimeout() > 0 && session.getMaxIdleTimeout() < timeout)

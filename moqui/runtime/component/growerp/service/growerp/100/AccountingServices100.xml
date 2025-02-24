@@ -439,7 +439,9 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- include userlogin for notification -->
             <service-call in-map="organizationPartyId: companyPartyId" async="true"
+                include-user-login="true"
                 name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries" />
         </actions>
     </service>

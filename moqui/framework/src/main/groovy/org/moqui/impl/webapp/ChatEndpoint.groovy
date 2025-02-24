@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory
 import groovy.json.*
 import org.moqui.impl.context.ExecutionContextImpl
 import org.moqui.entity.*
-import org.moqui.util.*
 
 import javax.websocket.CloseReason
 import javax.websocket.EndpointConfig
@@ -39,68 +38,34 @@ class ChatEndpoint extends MoquiAbstractEndpoint {
 
     private static final Set<ChatEndpoint> chatEndpoints = new CopyOnWriteArraySet<>();
     private static HashMap<String, String> users = new HashMap<>();
-    private static HashMap<String, String> usersApiKey = new HashMap<>();
-    private static HashMap<String, String> usersToken = new HashMap<>();
 
     Logger logger = LoggerFactory.getLogger(ChatEndpoint.class);
-    ExecutionContextImpl ec
-    String apiKey,userid,moquiSessionToken
-    Map result
 
     @Override
     void onOpen(Session session, EndpointConfig config) {
-        this.destroyInitialEci = false
         super.onOpen(session, config)
-        logger.info("====parameters: ${session.getRequestParameterMap()}")
-        logger.info("New connection request received sessionId: ${session.getId()}  for user ${userId}:${username}");
-        ec = ecf.getEci()
-        Map<String,List<String>> params = session.getRequestParameterMap()
-        apiKey = params.get("apiKey")[0]
-        userId = params.get("userId")[0]
-        logger.info("===apikey: $apiKey  userId: $userId")
-        RestClient restClient = ec.service.rest().method(RestClient.GET)
-                .uri("http://localhost:8080/rest/s1/growerp/100/Authenticate?classificationId=chat")
-                .addHeader("Content-Type", "application/json")
-                .addHeader("api_key", "${apiKey}")
-        RestClient.RestResponse restResponse = restClient.call()
-        result = (Map) restResponse.jsonObject()
-        logger.info("===result of auth check: $result")
-        if (restResponse.statusCode < 200 || restResponse.statusCode >= 300 ) {
-            ec.logger.warn("====Unsuccessful val result: ${result}")
-            return
-        }
-        Map auth = (Map) result.authenticate
-        moquiSessionToken = (String) auth.moquiSessionToken
-
+        users.put(session.getId(), getUserId());
         this.session = session;
-        chatEndpoints.add(this);
-        users.put(session.getId(), userId);
-        usersApiKey.put(session.getId(), apiKey);
-        usersToken.put(session.getId(), moquiSessionToken);
-
+        chatEndpoints.add(this)
     }
 
     @Override
-    void onMessage(String messageJson)
-            throws IOException, EncodeException {
+    void onMessage(String messageJson) {
         Map message = (Map) new JsonSlurper().parseText(messageJson)
         logger.info("receiving uid: ${getUserId()} message from:" + message.fromUserId + 
-                    " to: " + message.toUserId +
-                    " content: " + message.content +
-                    " chatRoomId: " + message.chatRoomId);
+                    " to: ${message.toUserId} content: ${message.content}" +
+                    " chatRoomId: ${message.chatRoomId}");
         message.fromUserId = users.get(session.getId());
 
         chatEndpoints.forEach(endpoint -> {
             if (users.get(endpoint.session.getId()).equals(message.toUserId)) {
-
                 synchronized (endpoint) {
                     try {
-                        logger.info("Sending chatmessage: " + message.content +
-                                " to: " + message.oUserId + " sessionId:" + 
-                            endpoint.session.getId());
+                        logger.info("Sending chatmessage: ${message.content}" +
+                                " to: ${message.toUserId} sessionId: ${endpoint.session.getId()}");
                         endpoint.session.asyncRemote.sendText(JsonOutput.toJson(message))
                     } catch (IOException | EncodeException e) {
-                        logger.info("chat message send failed....");
+                        logger.warn("chat message send failed....");
                     }
                 }
             }
