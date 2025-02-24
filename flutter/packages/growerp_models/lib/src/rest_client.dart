@@ -469,6 +469,10 @@ abstract class RestClient {
     @Field() required ChatMessage chatMessage,
   });
 
+  // notification
+  @GET("rest/s1/growerp/100/Notification")
+  Future<Notifications> getNotifications({@Query('limit') int? limit});
+
   // tasks
   @GET("rest/s1/growerp/100/Task")
   Future<Tasks> getTask({

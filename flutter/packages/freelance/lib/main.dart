@@ -68,6 +68,7 @@ Future main() async {
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
   WsServer chatServer = WsServer('chat');
+  WsServer notificationServer = WsServer('notws');
   String classificationId = GlobalConfiguration().get("classificationId");
 
   Bloc.observer = AppBlocObserver();
@@ -75,6 +76,7 @@ Future main() async {
     restClient: restClient,
     classificationId: classificationId,
     chatServer: chatServer,
+    notificationServer: notificationServer,
     title: 'GrowERP Freelance.',
     router: router.generateRoute,
     menuOptions: menuOptions,

@@ -92,17 +92,15 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     ChatMessageReceiveWs event,
     Emitter<ChatMessageState> emit,
   ) async {
-    if (event.chatMessage.toUserId ==
-        authBloc.state.authenticate!.user!.userId) {
-      List<ChatMessage> chatMessages = List.from(state.chatMessages);
-      chatMessages.insert(
-          0,
-          ChatMessage(
-            fromUserId: event.chatMessage.fromUserId,
-            content: event.chatMessage.content,
-          ));
-      emit(state.copyWith(chatMessages: chatMessages));
-    }
+    print("=====receiving message ${event.chatMessage.content}");
+    List<ChatMessage> chatMessages = List.from(state.chatMessages);
+    chatMessages.insert(
+        0,
+        ChatMessage(
+          fromUserId: event.chatMessage.fromUserId,
+          content: event.chatMessage.content,
+        ));
+    emit(state.copyWith(chatMessages: chatMessages));
   }
 
   Future<void> _onChatMessageSendWs(

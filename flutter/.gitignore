@@ -21,6 +21,7 @@ screenshots
 .buildlog/
 .history
 .svn/
+.cxx
 
 # IntelliJ related
 *.iml

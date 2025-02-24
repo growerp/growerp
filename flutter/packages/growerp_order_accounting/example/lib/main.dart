@@ -29,6 +29,7 @@ Future main() async {
   await Hive.initFlutter();
   RestClient restClient = RestClient(await buildDioClient());
   WsServer chatServer = WsServer('chat');
+  WsServer notificationServer = WsServer('notws');
   Bloc.observer = AppBlocObserver();
 
   runApp(
@@ -36,6 +37,7 @@ Future main() async {
       restClient: restClient,
       classificationId: 'AppAdmin',
       chatServer: chatServer,
+      notificationServer: notificationServer,
       title: 'GrowERP Order and Accounting.',
       router: generateRoute,
       menuOptions: menuOptions,

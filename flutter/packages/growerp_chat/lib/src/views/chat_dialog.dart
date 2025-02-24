@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:growerp_chat/src/blocs/chat_message_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -71,7 +70,7 @@ class ChatState extends State<ChatDialog> {
                 context: context,
                 title: (widget.chatRoom.chatRoomName ?? '??'),
                 height: 600,
-                width: isPhone ? 300 : 800,
+                width: isPhone ? 300 : 500,
                 child: chatPage(context),
               ));
         } else {
@@ -103,8 +102,8 @@ class ChatState extends State<ChatDialog> {
                         child: Align(
                             alignment: (messages[index].fromUserId ==
                                     authenticate.user!.userId
-                                ? Alignment.topLeft
-                                : Alignment.topRight),
+                                ? Alignment.topRight
+                                : Alignment.topLeft),
                             child: Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),

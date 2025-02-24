@@ -29,12 +29,14 @@ Future main() async {
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
   WsServer chatServer = WsServer('chat');
+  WsServer notificationServer = WsServer('notws');
 
   runApp(
     TopApp(
       restClient: restClient,
       classificationId: 'AppAdmin',
       chatServer: chatServer,
+      notificationServer: notificationServer,
       title: 'GrowERP package: growerp_inventory.',
       router: generateRoute,
       menuOptions: menuOptions,

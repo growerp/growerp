@@ -490,4 +490,77 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="chatMessageId" from="chatMessageId" />
         </actions>
     </service>
+
+    <service verb="get" noun="Notification">
+        <in-parameters>
+            <parameter name="limit" default-value="20" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="notifications" type="List">
+                <parameter name="notification" type="Map">
+                    <parameter name="topic" type="Map">
+                        <parameter name="topicName" />
+                        <parameter name="description" />
+                        <parameter name="email" type="bool" />
+                        <parameter name="user" type="Map">
+                            <parameter name="userid" />
+                        </parameter>
+                    </parameter>
+                    <parameter name="messageJson" />
+                    <parameter name="title" />
+                    <parameter name="link" />
+                    <parameter name="showAlert" type="bool" />
+                    <parameter name="user" type="Map">
+                        <parameter name="userid" />
+                    </parameter>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="nowTimestamp" from="ec.user.nowTimestamp" />
+            <entity-find entity-name="moqui.security.UserPreference" list="lastReadDate">
+                <econdition field-name="userId" from="ec.user.userAccount.userId" />
+                <econdition field-name="preferenceKey" value="notification-lastReadDate" />
+            </entity-find>
+            <if condition="!lastReadDate">
+                <service-call name="create#moqui.security.UserPreference"
+                    in-map="[userId: ec.user.userAccount.userId,
+                            preferenceKey: 'notification-lastReadDate',
+                            preferenceValue: nowTimestamp]" />
+                <else>
+                    <set field="lastReadTimeStamp" from="lastReadDate[0].preferenceValue" />
+                    <service-call name="update#moqui.security.UserPreference"
+                        in-map="[userId: ec.user.userAccount.userId,
+                            preferenceKey: 'notification-lastReadDate',
+                            preferenceValue: nowTimestamp]" />
+                </else>
+            </if>
+
+            <entity-find entity-name="moqui.security.user.NotificationMessage"
+                list="messages" limit="limit">
+                <econdition field-name="sentDate" operator="greater-equals" from="lastReadTimeStamp"
+                    ignore-if-empty="true" />
+            </entity-find>
+            <set field="notifications" from="[]" />
+            <iterate list="messages" entry="message">
+                <set field="mapMessage" type="NewMap"
+                    from="new groovy.json.JsonSlurper().parseText(message.messageJson)" />
+                <set field="outMessage" from="[message: mapMessage.message]" type="NewMap" />
+                <set field="notification"
+                    from="[
+                    topic: message.topic,
+                    message: [message: mapMessage.message],
+                    sentDate: message.sentDate
+                        ? ec.l10n.format(message.sentDate,'yyyy-MM-dd')  : null,
+                    title: message.titleText,
+                    link: message.linkText,
+                    type: message.typeString,
+                    showAlert: message.showAlert == 'Y'? true : false,
+                    ]" />
+                <script>notifications.add(notification)</script>
+            </iterate>
+        </actions>
+    </service>
 </services>

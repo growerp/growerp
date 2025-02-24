@@ -34,8 +34,10 @@ Future main() async {
 
   Bloc.observer = AppBlocObserver();
   runApp(ChatApp(
-      restClient: RestClient(await buildDioClient()),
-      chatServer: WsServer('chat')));
+    restClient: RestClient(await buildDioClient()),
+    chatServer: WsServer('chat'),
+    notificationServer: WsServer('notws'),
+  ));
 }
 
 class ChatApp extends StatelessWidget {
@@ -43,10 +45,12 @@ class ChatApp extends StatelessWidget {
       {super.key,
       required this.restClient,
       required this.chatServer,
+      required this.notificationServer,
       this.company});
 
   final RestClient restClient;
   final WsServer chatServer;
+  final WsServer notificationServer;
   final Company? company;
 
   @override
@@ -58,9 +62,9 @@ class ChatApp extends StatelessWidget {
       child: MultiBlocProvider(
         providers: [
           BlocProvider<AuthBloc>(
-              create: (context) =>
-                  AuthBloc(chatServer, restClient, 'AppAdmin', company)
-                    ..add(AuthLoad()),
+              create: (context) => AuthBloc(chatServer, notificationServer,
+                  restClient, 'AppAdmin', company)
+                ..add(AuthLoad()),
               lazy: false),
           BlocProvider<ChatRoomBloc>(
             create: (context) => ChatRoomBloc(context.read<RestClient>(),
