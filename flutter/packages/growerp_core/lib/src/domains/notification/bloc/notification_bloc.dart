@@ -34,7 +34,7 @@ EventTransformer<E> notificationDroppable<E>(Duration duration) {
 int _notificationLimit = 20;
 
 class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
-  NotificationBloc(this.restClient, this.notificationServer, this.authBloc)
+  NotificationBloc(this.restClient, this.notificationClient, this.authBloc)
       : super(const NotificationState()) {
     on<NotificationFetch>(_onNotificationFetch);
     on<NotificationReceive>(_onNotificationReceive);
@@ -42,7 +42,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   }
 
   final RestClient restClient;
-  final WsServer notificationServer;
+  final WsClient notificationClient;
   final AuthBloc authBloc;
 
   Future<void> _onNotificationFetch(
@@ -50,8 +50,8 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     Emitter<NotificationState> emit,
   ) async {
     if (state.status == NotificationStatus.initial) {
-      notificationServer.send("subscribe: ALL");
-      final myStream = notificationServer.stream();
+      notificationClient.send("subscribe: ALL");
+      final myStream = notificationClient.stream();
       myStream.listen((data) =>
           add(NotificationReceive(NotificationWs.fromJson(jsonDecode(data)))));
     }
@@ -89,7 +89,7 @@ Future<void> _onNotificationSend(
   Emitter<NotificationState> emit,
 ) async {
 /*    try {
-      notificationServer.send(event.notification);
+      notificationClient.send(event.notification);
       await restClient.createNotification(
           notification: Notification(
               chatRoom:

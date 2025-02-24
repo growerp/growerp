@@ -28,19 +28,19 @@ Future main() async {
   await Hive.initFlutter();
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
-  WsServer chatServer = WsServer('chat');
-  WsServer notificationServer = WsServer('notws');
+  WsClient chatClient = WsClient('chat');
+  WsClient notificationClient = WsClient('notws');
 
   runApp(TopApp(
     restClient: restClient,
     classificationId: 'AppAdmin',
-    chatServer: chatServer,
-    notificationServer: notificationServer,
+    chatClient: chatClient,
+    notificationClient: notificationClient,
     title: 'GrowERP package: growerp_core.',
     router: generateRoute,
     menuOptions: menuOptions,
     extraBlocProviders: getCoreBlocProviders(
-        restClient, chatServer, notificationServer, 'AppAdmin', {}, null),
+        restClient, chatClient, notificationClient, 'AppAdmin', {}, null),
   ));
 }
 

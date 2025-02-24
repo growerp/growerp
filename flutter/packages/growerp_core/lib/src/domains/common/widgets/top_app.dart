@@ -33,8 +33,8 @@ class TopApp extends StatelessWidget {
     super.key,
     required this.restClient,
     required this.classificationId,
-    required this.chatServer,
-    required this.notificationServer,
+    required this.chatClient,
+    required this.notificationClient,
     this.title = '',
     required this.router,
     required this.menuOptions,
@@ -49,8 +49,8 @@ class TopApp extends StatelessWidget {
   final Map<String, Widget> screens; // string to widget translation
   final Company? company;
 
-  final WsServer chatServer;
-  final WsServer notificationServer;
+  final WsClient chatClient;
+  final WsClient notificationClient;
   final String title;
   final Route<dynamic> Function(RouteSettings) router;
   final List<MenuOption> menuOptions;
@@ -70,16 +70,16 @@ class TopApp extends StatelessWidget {
     return MultiRepositoryProvider(
         providers: [
           RepositoryProvider(create: (context) => restClient),
-          RepositoryProvider(create: (context) => chatServer),
-          RepositoryProvider(create: (context) => notificationServer),
+          RepositoryProvider(create: (context) => chatClient),
+          RepositoryProvider(create: (context) => notificationClient),
           RepositoryProvider(create: (context) => classificationId),
           RepositoryProvider(create: (context) => screens),
           RepositoryProvider(create: (context) => company),
         ],
         child: MultiBlocProvider(
             providers: [
-              ...getCoreBlocProviders(restClient, chatServer,
-                  notificationServer, classificationId, screens, company),
+              ...getCoreBlocProviders(restClient, chatClient,
+                  notificationClient, classificationId, screens, company),
               ...extraBlocProviders
             ],
             child:

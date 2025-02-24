@@ -34,7 +34,7 @@ EventTransformer<E> chatMessageDroppable<E>(Duration duration) {
 }
 
 class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
-  ChatMessageBloc(this.restClient, this.chatServer, this.authBloc)
+  ChatMessageBloc(this.restClient, this.chatClient, this.authBloc)
       : super(const ChatMessageState()) {
     on<ChatMessageFetch>(_onChatMessageFetch,
         transformer: chatMessageDroppable(const Duration(milliseconds: 100)));
@@ -43,7 +43,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
   }
 
   final RestClient restClient;
-  final WsServer chatServer;
+  final WsClient chatClient;
   final AuthBloc authBloc;
   int start = 0;
 
@@ -55,7 +55,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
       return;
     }
     if (state.status == ChatMessageStatus.initial) {
-      final myStream = chatServer.stream();
+      final myStream = chatClient.stream();
       // ignore: unused_local_variable
       final subscription = myStream.listen((data) =>
           add(ChatMessageReceiveWs(ChatMessage.fromJson(jsonDecode(data)))));
@@ -92,7 +92,6 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     ChatMessageReceiveWs event,
     Emitter<ChatMessageState> emit,
   ) async {
-    print("=====receiving message ${event.chatMessage.content}");
     List<ChatMessage> chatMessages = List.from(state.chatMessages);
     chatMessages.insert(
         0,
@@ -108,7 +107,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     Emitter<ChatMessageState> emit,
   ) async {
     try {
-      chatServer.send(event.chatMessage);
+      chatClient.send(event.chatMessage);
       await restClient.createChatMessage(
           chatMessage: ChatMessage(
               chatRoom:

@@ -72,16 +72,16 @@ Future main() async {
   await Hive.initFlutter();
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
-  WsServer chatServer = WsServer('chat');
-  WsServer notificationServer = WsServer('notws');
+  WsClient chatClient = WsClient('chat');
+  WsClient notificationClient = WsClient('notws');
   String classificationId = GlobalConfiguration().get("classificationId");
 
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
     restClient: restClient,
     classificationId: classificationId,
-    chatServer: chatServer,
-    notificationServer: notificationServer,
+    chatClient: chatClient,
+    notificationClient: notificationClient,
     title: 'GrowERP Hotel.',
     router: router.generateRoute,
     menuOptions: menuOptions,
