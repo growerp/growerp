@@ -35,11 +35,11 @@ EventTransformer<E> chatRoomDroppable<E>(Duration duration) {
 
 class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
   final RestClient restClient;
-  final WsServer chatServer;
+  final WsClient chatClient;
   final AuthBloc authBloc;
   int start = 0;
 
-  ChatRoomBloc(this.restClient, this.chatServer, this.authBloc)
+  ChatRoomBloc(this.restClient, this.chatClient, this.authBloc)
       : super(const ChatRoomState()) {
     on<ChatRoomFetch>(_onChatRoomFetch,
         transformer: chatRoomDroppable(const Duration(milliseconds: 100)));
@@ -63,7 +63,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
       start = state.chatRooms.length;
     }
     if (state.status == ChatRoomStatus.initial) {
-      final myStream = chatServer.stream();
+      final myStream = chatClient.stream();
       myStream.listen((data) => add(ChatRoomReceiveWsChatMessage(
           ChatMessage.fromJson(jsonDecode(data)))));
     }

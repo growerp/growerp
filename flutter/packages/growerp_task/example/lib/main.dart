@@ -65,8 +65,8 @@ Future main() async {
   runApp(TopApp(
     restClient: RestClient(await buildDioClient()),
     classificationId: GlobalConfiguration().get("classificationId"),
-    chatServer: WsServer('chat'),
-    notificationServer: WsServer('notws'),
+    chatClient: WsClient('chat'),
+    notificationClient: WsClient('notws'),
     title: 'GrowERP Workflow Management.',
     router: router.generateRoute,
     menuOptions: menuOptions,

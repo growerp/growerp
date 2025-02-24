@@ -35,8 +35,8 @@ Future main() async {
   Bloc.observer = AppBlocObserver();
   runApp(ChatApp(
     restClient: RestClient(await buildDioClient()),
-    chatServer: WsServer('chat'),
-    notificationServer: WsServer('notws'),
+    chatClient: WsClient('chat'),
+    notificationClient: WsClient('notws'),
   ));
 }
 
@@ -44,36 +44,36 @@ class ChatApp extends StatelessWidget {
   const ChatApp(
       {super.key,
       required this.restClient,
-      required this.chatServer,
-      required this.notificationServer,
+      required this.chatClient,
+      required this.notificationClient,
       this.company});
 
   final RestClient restClient;
-  final WsServer chatServer;
-  final WsServer notificationServer;
+  final WsClient chatClient;
+  final WsClient notificationClient;
   final Company? company;
 
   @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider(create: (context) => chatServer),
+        RepositoryProvider(create: (context) => chatClient),
       ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider<AuthBloc>(
-              create: (context) => AuthBloc(chatServer, notificationServer,
+              create: (context) => AuthBloc(chatClient, notificationClient,
                   restClient, 'AppAdmin', company)
                 ..add(AuthLoad()),
               lazy: false),
           BlocProvider<ChatRoomBloc>(
             create: (context) => ChatRoomBloc(context.read<RestClient>(),
-                chatServer, context.read<AuthBloc>())
+                chatClient, context.read<AuthBloc>())
               ..add(ChatRoomFetch()),
           ),
           BlocProvider<ChatMessageBloc>(
             create: (context) => ChatMessageBloc(context.read<RestClient>(),
-                chatServer, context.read<AuthBloc>()),
+                chatClient, context.read<AuthBloc>()),
             lazy: false,
           ),
         ],

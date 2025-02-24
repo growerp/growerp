@@ -7,27 +7,27 @@ import '../growerp_core.dart';
 
 List<BlocProvider> getCoreBlocProviders(
   RestClient restClient,
-  WsServer chatServer,
-  WsServer notificationServer,
+  WsClient chatClient,
+  WsClient notificationClient,
   String classificationId,
   Map<String, Widget> screens,
   Company? company,
 ) {
   AuthBloc authBloc = AuthBloc(
-      chatServer, notificationServer, restClient, classificationId, company);
+      chatClient, notificationClient, restClient, classificationId, company);
   List<BlocProvider<StateStreamableSource<Object?>>> blocProviders = [
     BlocProvider<AuthBloc>(create: (context) => authBloc..add(AuthLoad())),
     BlocProvider<ThemeBloc>(
         create: (context) => ThemeBloc()..add(ThemeSwitch())),
     BlocProvider<ChatRoomBloc>(
-        create: (context) => ChatRoomBloc(restClient, chatServer, authBloc)
+        create: (context) => ChatRoomBloc(restClient, chatClient, authBloc)
           ..add(ChatRoomFetch())),
     BlocProvider<NotificationBloc>(
         create: (context) =>
-            NotificationBloc(restClient, notificationServer, authBloc)
+            NotificationBloc(restClient, notificationClient, authBloc)
               ..add(const NotificationFetch())),
     BlocProvider<ChatMessageBloc>(
-        create: (context) => ChatMessageBloc(restClient, chatServer, authBloc)),
+        create: (context) => ChatMessageBloc(restClient, chatClient, authBloc)),
     BlocProvider<TaskToDoBloc>(
         create: (context) => TaskBloc(restClient, TaskType.todo, null)),
     BlocProvider<TaskWorkflowBloc>(

@@ -29,15 +29,15 @@ Future main() async {
   await Hive.initFlutter();
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
-  WsServer chatServer = WsServer('chat');
-  WsServer notificationServer = WsServer('notws');
+  WsClient chatClient = WsClient('chat');
+  WsClient notificationClient = WsClient('notws');
   Bloc.observer = AppBlocObserver();
 
   runApp(TopApp(
     restClient: RestClient(await buildDioClient()),
     classificationId: 'AppAdmin',
-    chatServer: chatServer,
-    notificationServer: notificationServer,
+    chatClient: chatClient,
+    notificationClient: notificationClient,
     title: 'GrowERP Catalog.',
     router: generateRoute,
     menuOptions: menuOptions,

@@ -68,8 +68,8 @@ class CommonTest {
     runApp(TopApp(
       restClient: restClient,
       classificationId: classificationId,
-      chatServer: WsServer('chat'),
-      notificationServer: WsServer('notws'),
+      chatClient: WsClient('chat'),
+      notificationClient: WsClient('notws'),
       router: router,
       title: title,
       menuOptions: menuOptions,
