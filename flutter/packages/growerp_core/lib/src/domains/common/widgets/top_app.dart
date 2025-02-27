@@ -21,12 +21,9 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../get_core_bloc_providers.dart';
-import '../../../services/ws_server.dart';
+import '../../../services/ws_client.dart';
 import '../../domains.dart';
 import '../../../l10n/generated/core_localizations.dart';
-
-final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
-    GlobalKey<ScaffoldMessengerState>();
 
 class TopApp extends StatelessWidget {
   TopApp({
@@ -94,7 +91,6 @@ class TopApp extends StatelessWidget {
                     }
                   },
                   child: MaterialApp(
-                      scaffoldMessengerKey: scaffoldMessengerKey,
                       navigatorKey: _rootNavigatorKey,
                       title: title,
                       supportedLocales: const [Locale('en'), Locale('th')],

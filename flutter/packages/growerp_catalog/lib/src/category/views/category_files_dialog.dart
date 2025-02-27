@@ -44,12 +44,11 @@ class _FilesHeaderState extends State<CategoryFilesDialog> {
     return BlocConsumer<CategoryBloc, CategoryState>(
         listener: (context, state) async {
       if (state.status == CategoryStatus.failure) {
-        categoryFilesDialogKey.currentState!
-            .showSnackBar(snackBar(context, Colors.red, state.message ?? ''));
+        HelperFunctions.showMessage(
+            context, 'Error: ${state.message}', Colors.red);
       }
       if (state.status == CategoryStatus.success) {
-        categoryFilesDialogKey.currentState!
-            .showSnackBar(snackBar(context, Colors.green, state.message ?? ''));
+        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
         Navigator.of(context).pop();
       }
     }, builder: (context, state) {

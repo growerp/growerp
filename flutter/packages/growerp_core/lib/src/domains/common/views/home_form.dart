@@ -77,11 +77,13 @@ class HomeFormState extends State<HomeForm> {
           }
           return BlocListener<NotificationBloc, NotificationState>(
               listener: (context, notiFicationState) {
-                if (notiFicationState.status == NotificationStatus.success) {
-                  HelperFunctions.showTopMessage(
-                    context,
-                    notiFicationState.notifications.last.message?["message"],
-                  );
+                if (notiFicationState.status == NotificationStatus.success &&
+                    notiFicationState.notifications.isNotEmpty) {
+                  String messages = '';
+                  for (var note in notiFicationState.notifications) {
+                    messages += "${note.message!["message"]}/n";
+                  }
+                  HelperFunctions.showTopMessage(context, messages);
                 }
               },
               child: Column(children: [

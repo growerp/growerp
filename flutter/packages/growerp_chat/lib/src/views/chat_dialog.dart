@@ -134,12 +134,15 @@ class ChatState extends State<ChatDialog> {
             key: const Key('send'),
             child: const Text('Send'),
             onPressed: () {
-              _chatMessageBloc.add(ChatMessageSendWs(ChatMessage(
-                  toUserId:
-                      widget.chatRoom.getToUserId(authenticate.user!.userId!),
-                  fromUserId: authenticate.user!.userId!,
-                  chatRoom: ChatRoom(chatRoomId: widget.chatRoom.chatRoomId),
-                  content: messageController.text)));
+              messageController.text.isEmpty
+                  ? null
+                  : _chatMessageBloc.add(ChatMessageSendWs(ChatMessage(
+                      fromUserId: authenticate.user!.userId!,
+                      fromUserFullName: authenticate.user!.fullName!,
+                      chatRoom: ChatRoom(
+                          chatRoomId: widget.chatRoom.chatRoomId,
+                          chatRoomName: widget.chatRoom.chatRoomName),
+                      content: messageController.text)));
               messageController.text = '';
               Timer(
                 const Duration(seconds: 1),

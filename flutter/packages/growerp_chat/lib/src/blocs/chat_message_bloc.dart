@@ -71,6 +71,10 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
       }
       ChatMessages compResult = await restClient.getChatMessages(
           chatRoomId: event.chatRoomId, searchString: event.searchString);
+      authBloc.add(AuthUpdateLocal(
+          delNotReadChatRoom:
+              compResult.chatMessages[0].chatRoom!.chatRoomName));
+
       return emit(state.copyWith(
         status: ChatMessageStatus.success,
         chatMessages: start == 0
@@ -99,6 +103,12 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
           fromUserId: event.chatMessage.fromUserId,
           content: event.chatMessage.content,
         ));
+    String chatRoomName = event.chatMessage.chatRoom!.chatRoomName!;
+    // rename the name of the chatroom for private rooms
+    if (event.chatMessage.chatRoom!.isPrivate) {
+      chatRoomName = event.chatMessage.fromUserFullName!;
+    }
+    authBloc.add(AuthUpdateLocal(addNotReadChatRoom: chatRoomName));
     emit(state.copyWith(chatMessages: chatMessages));
   }
 
@@ -108,25 +118,12 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
   ) async {
     try {
       chatClient.send(event.chatMessage);
-      await restClient.createChatMessage(
-          chatMessage: ChatMessage(
-              chatRoom:
-                  ChatRoom(chatRoomId: event.chatMessage.chatRoom!.chatRoomId),
-              content: event.chatMessage.content,
-              fromUserId: event.chatMessage.fromUserId));
+      await restClient.createChatMessage(chatMessage: event.chatMessage);
       List<ChatMessage> chatMessages = List.from(state.chatMessages);
       if (chatMessages.isEmpty) {
-        chatMessages.add(ChatMessage(
-          fromUserId: authBloc.state.authenticate!.user!.userId,
-          content: event.chatMessage.content,
-        ));
+        chatMessages.add(event.chatMessage);
       } else {
-        chatMessages.insert(
-            0,
-            ChatMessage(
-              fromUserId: authBloc.state.authenticate!.user!.userId,
-              content: event.chatMessage.content,
-            ));
+        chatMessages.insert(0, event.chatMessage);
       }
       emit(state.copyWith(chatMessages: chatMessages));
     } on DioException catch (e) {

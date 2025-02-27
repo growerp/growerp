@@ -22,7 +22,7 @@ import 'package:hive/hive.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 
-import '../../../services/ws_server.dart';
+import '../../../services/ws_client.dart';
 import '../../common/functions/functions.dart';
 
 part 'auth_event.dart';
@@ -44,6 +44,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       this.company)
       : super(const AuthState()) {
     on<AuthLoad>(_onAuthLoad);
+    on<AuthUpdateLocal>(_onAuthUpdateLocal);
     on<AuthRegister>(_onAuthRegister,
         transformer: authDroppable(const Duration(milliseconds: 100)));
     on<AuthLoggedOut>(_onAuthLoggedOut,
@@ -59,6 +60,36 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final WsClient notification;
   final String classificationId;
   final Company? company;
+
+  void _onAuthUpdateLocal(
+    AuthUpdateLocal event,
+    Emitter<AuthState> emit,
+  ) {
+    if (state.status != AuthStatus.authenticated) return;
+    emit(state.copyWith(status: AuthStatus.loading));
+//    return emit(state.copyWith(status: AuthStatus.authenticated));
+    var stats = state.authenticate!.stats;
+    var notReadChatRooms = List.of(state.authenticate!.stats!.notReadChatRooms);
+    if (event.addNotReadChatRoom != null) {
+      notReadChatRooms.add(event.addNotReadChatRoom!);
+      return emit(state.copyWith(
+          status: AuthStatus.authenticated,
+          authenticate: state.authenticate?.copyWith(
+              stats: stats!.copyWith(notReadChatRooms: notReadChatRooms))));
+    } else if (event.delNotReadChatRoom != null) {
+      if (notReadChatRooms.isEmpty) {
+        return emit(state.copyWith(status: AuthStatus.authenticated));
+      }
+      notReadChatRooms.removeWhere((el) => el == event.delNotReadChatRoom);
+      return emit(state.copyWith(
+          status: AuthStatus.authenticated,
+          authenticate: state.authenticate?.copyWith(
+              stats: stats!.copyWith(notReadChatRooms: notReadChatRooms))));
+    } else if (event.authenticate != null) {
+      return emit(state.copyWith(authenticate: event.authenticate));
+    }
+    return emit(state.copyWith(status: AuthStatus.authenticated));
+  }
 
   Future<void> _onAuthLoad(
     AuthLoad event,

@@ -29,7 +29,8 @@ class NotificationReceive extends NotificationEvent {
   final NotificationWs notification;
   const NotificationReceive(this.notification);
   @override
-  String toString() => "ReceiveWsNotification receive notification";
+  String toString() =>
+      "ReceiveWsNotification: receive notification: ${notification.message?['message']}";
 }
 
 class NotificationSend extends NotificationEvent {

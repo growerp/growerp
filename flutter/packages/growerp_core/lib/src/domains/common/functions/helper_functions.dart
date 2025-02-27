@@ -24,8 +24,8 @@ class HelperFunctions {
   static showMessage(BuildContext context, String? message, dynamic colors,
       {int? seconds}) {
     if (message != null && message != "null") {
-      scaffoldMessengerKey.currentState
-          ?.showSnackBar(snackBar(context, colors, message, seconds: seconds));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(snackBar(context, colors, message, seconds: seconds));
     }
   }
 

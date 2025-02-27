@@ -120,7 +120,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="accountPartyId"
                     from="ec.user.userAccount.partyId" />
             </entity-find-count>
-
+            <service-call name="growerp.100.ChatServices100.get#ChatRoom"
+                in-map="[hasRead: false]" out-map="context" />
             <if condition="st">
                 <set field="stats"
                     from="[
@@ -146,6 +147,7 @@ along with this software (see the LICENSE.md file). If not, see
                 incomngShipments: st.incomingShipments,
                 whLocations: st.whLocations,
                 requests: st.requests,
+                notReadChatRooms: chatRooms,
                 ]" />
             </if>
         </actions>
@@ -363,7 +365,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="email" />
                     <parameter name="firstName" />
                     <parameter name="lastName" />
-                    <parameter name="loginDisabled" type="bool" />
+                    <parameter name="loginDisabled" type="Boolean" />
                     <parameter name="loginName" />
                     <parameter name="userGroupId" />
                     <parameter name="groupDescription" />
@@ -578,7 +580,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="email" />
                     <parameter name="firstName" />
                     <parameter name="lastName" />
-                    <parameter name="loginDisabled" type="bool" />
+                    <parameter name="loginDisabled" type="Boolean" />
                     <parameter name="loginName" />
                     <parameter name="userGroupId" />
                     <parameter name="groupDescription" />
@@ -931,7 +933,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="email" />
                     <parameter name="firstName" />
                     <parameter name="lastName" />
-                    <parameter name="loginDisabled" type="bool" />
+                    <parameter name="loginDisabled" type="Boolean" />
                     <parameter name="loginName" />
                     <parameter name="userGroupId" />
                     <parameter name="groupDescription" />

@@ -51,6 +51,5 @@ class ChatRoomReceiveWsChatMessage extends ChatRoomEvent {
   @override
   String toString() =>
       "Receive chat server message in ChatRoombloc ${chatMessage.content} "
-      "chatroom: ${chatMessage.chatRoom!.chatRoomId} from: ${chatMessage.fromUserId} "
-      " to: ${chatMessage.toUserId} ";
+      "chatroom: ${chatMessage.chatRoom!.chatRoomId} from: ${chatMessage.fromUserId} ";
 }
