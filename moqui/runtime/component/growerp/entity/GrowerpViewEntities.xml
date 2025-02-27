@@ -2232,6 +2232,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="hasRead" entity-alias="CMEM" />
         <alias name="userId" entity-alias="ACCOUNT" />
         <alias name="partyId" entity-alias="ACCOUNT" />
+        <alias name="fullName" field="userFullName" entity-alias="ACCOUNT" />
         <alias name="firstName" entity-alias="PERSON" />
         <alias name="lastName" entity-alias="PERSON" />
     </view-entity>
@@ -2259,10 +2260,12 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="hasRead1" field="hasRead" entity-alias="CMEM1" />
         <alias name="userId1" field="userId" entity-alias="ACCOUNT1" />
         <alias name="partyId1" field="partyId" entity-alias="ACCOUNT1" />
+        <alias name="userFullName1" field="userFullName" entity-alias="ACCOUNT1" />
         <alias name="isActive2" field="isActive" entity-alias="CMEM2" />
         <alias name="hasRead2" field="hasRead" entity-alias="CMEM2" />
         <alias name="userId2" field="userId" entity-alias="ACCOUNT2" />
         <alias name="partyId2" field="partyId" entity-alias="ACCOUNT2" />
+        <alias name="userFullName2" field="userFullName" entity-alias="ACCOUNT2" />
     </view-entity>
 
     <view-entity entity-name="ChatRoomAndMessages" package="growerp.general">

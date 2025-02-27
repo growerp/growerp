@@ -2385,10 +2385,17 @@ along with this software (see the LICENSE.md file). If not, see
             </iterate>
             <if condition="ec.user.userAccount">
                 <script>
-                ec.makeNotificationMessage().topic("TestTopic").type("info").title("Test notification message").userId(ec.user.userAccount.userId)
-                .message([message: "Ledger recalculated in ${System.currentTimeMillis() - startTime}ms"]).persistOnSend(true).send()</script>
-                <message>Updated GL Account Org Summaries for orgs ${organizationPartyIds} in ${System.currentTimeMillis() - startTime}ms; updated ${gaoUpdated} Organization and ${gaotpUpdated} Period summary records</message>
+                    ec.makeNotificationMessage()
+                        .topic("TestTopic")
+                        .type("info")
+                        .title("Test notification message")
+                        .userId(ec.user.userAccount.userId)
+                        .message([message: "Ledger recalculated in ${System.currentTimeMillis() - startTime}ms"]).persistOnSend(true)
+                        .showAlert(true)
+                        .send()
+                </script>
             </if>
+            <message>Updated GL Account Org Summaries for orgs ${organizationPartyIds} in ${System.currentTimeMillis() - startTime}ms; updated ${gaoUpdated} Organization and ${gaotpUpdated} Period summary records</message>
         </actions>
     </service>
 

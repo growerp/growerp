@@ -433,6 +433,7 @@ abstract class RestClient {
   // chat
   @GET("rest/s1/growerp/100/ChatRoom")
   Future<ChatRooms> getChatRooms({
+    @Query('hasRead') bool? hasRead, // return rooms with unread messages
     @Query('userId') String? userId,
     @Query('chatRoomName') String? chatRoomName,
     @Query('chatRoomId') String? chatRoomId,

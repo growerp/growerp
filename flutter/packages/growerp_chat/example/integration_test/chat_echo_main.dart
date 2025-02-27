@@ -206,8 +206,6 @@ class ChatRoomsEchoState extends State<ChatRooms> {
                     if (chatRooms.isNotEmpty && messages.isNotEmpty) {
                       // echo message
                       _chatMessageBloc.add(ChatMessageSendWs(ChatMessage(
-                          toUserId: chatRooms[0]
-                              .getToUserId(authenticate.user!.userId!),
                           fromUserId: authenticate.user!.userId!,
                           chatRoom:
                               ChatRoom(chatRoomId: chatRooms[0].chatRoomId),

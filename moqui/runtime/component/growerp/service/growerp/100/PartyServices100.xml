@@ -1332,6 +1332,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 lastName: userInfo?.lastName,
                                 loginDisabled: userInfo?.loginDisabled == 'Y'? true : false,
                                 loginName: userInfo?.loginName,
+                                fullName: userInfo?.userFullName,
                                 userGroupId: userGroupId,
                                 address: address,
                                 paymentMethod: paymentMethod,
@@ -1461,7 +1462,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="appsUsed" type="List" />
             </parameter>
             <parameter name="password" />
-            <parameter name="login" type="bool" default-value="false" />
+            <parameter name="login" type="Boolean" default-value="false" />
         </out-parameters>
         <actions>
             <service-call

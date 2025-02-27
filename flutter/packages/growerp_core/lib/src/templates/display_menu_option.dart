@@ -184,22 +184,30 @@ class MenuOptionState extends State<DisplayMenuOption>
     currentRoute = ModalRoute.of(context)?.settings.name ?? '';
     isPhone = isAPhone(context);
     actions = List.of(widget.actions);
+    List<String> unReadRooms =
+        authBloc.state.authenticate!.stats!.notReadChatRooms;
     actions.insert(
         0,
         IconButton(
-            key: const Key('chatButton'), // causes a duplicate key?
-            icon: const Icon(Icons.chat),
-            padding: EdgeInsets.zero,
-            tooltip: 'Chat',
-            onPressed: () async => {
-                  await showDialog(
-                    barrierDismissible: true,
-                    context: context,
-                    builder: (BuildContext context) {
-                      return const ChatRoomListDialog();
-                    },
-                  )
-                }));
+          key: const Key('chatButton'), // causes a duplicate key?
+          icon: Badge(
+              label: unReadRooms.isNotEmpty
+                  ? Text(unReadRooms.length.toString())
+                  : null,
+              backgroundColor: Colors.red,
+              child: const Icon(Icons.chat)),
+          padding: EdgeInsets.zero,
+          tooltip: unReadRooms.isEmpty ? 'Chat' : unReadRooms.toString(),
+          onPressed: () async => {
+            await showDialog(
+              barrierDismissible: true,
+              context: context,
+              builder: (BuildContext context) {
+                return const ChatRoomListDialog();
+              },
+            )
+          },
+        ));
     if (currentRoute != '/' && widget.workflow == null) {
       actions.add(IconButton(
           key: const Key('homeButton'),

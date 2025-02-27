@@ -26,41 +26,62 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="search" default="null" />
             <parameter name="filter" default="null" />
             <parameter name="isPrivate" default="null" />
+            <parameter name="hasRead" type="Boolean" default="null" />
         </in-parameters>
         <out-parameters>
             <parameter name="chatRooms" type="List">
-                <parameter name="chatRoom" type="Map">
-                    <parameter name="chatRoomId" />
-                    <parameter name="chatRoomName" />
+                <parameter name="chatRoomId" />
+                <parameter name="chatRoomName" />
+                <parameter name="hasRead" type="Boolean" />
+                <parameter name="isPrivate" type="Boolean" />
+                <parameter name="members" type="List">
+                    <parameter name="partyId" />
+                    <parameter name="email" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
+                    <parameter name="loginDisabled" type="Boolean" />
+                    <parameter name="loginName" />
+                    <parameter name="userGroupId" />
+                    <parameter name="groupDescription" />
+                    <parameter name="language" />
+                    <parameter name="companyPartyId" />
+                    <parameter name="companyName" />
+                    <parameter name="image" />
+                    <parameter name="userId" />
+                    <parameter name="locale" />
+                    <parameter name="telephoneNr" />
                     <parameter name="hasRead" type="Boolean" />
-                    <parameter name="isPrivate" type="Boolean" />
-                    <parameter name="members" type="List">
-                        <parameter name="member" type="Map"><!-- user -->
-                            <parameter name="partyId" />
-                            <parameter name="email" />
-                            <parameter name="firstName" />
-                            <parameter name="lastName" />
-                            <parameter name="loginDisabled" type="bool" />
-                            <parameter name="loginName" />
-                            <parameter name="userGroupId" />
-                            <parameter name="groupDescription" />
-                            <parameter name="language" />
-                            <parameter name="companyPartyId" />
-                            <parameter name="companyName" />
-                            <parameter name="image" />
-                            <parameter name="userId" />
-                            <parameter name="locale" />
-                            <parameter name="telephoneNr" />
-                            <parameter name="hasRead" type="Boolean" />
-                            <parameter name="isActive" type="Boolean" />
-                        </parameter>
-                    </parameter>
+                    <parameter name="isActive" type="Boolean" />
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="hasRead != null">
+                <!-- get just the unread rooms names -->
+                <entity-find entity-name="growerp.general.ChatRoomsAndMembers" list="rooms">
+                    <econdition field-name="userId" from="ec.user.userAccount.userId" />
+                    <econdition field-name="hasRead" value="N" />
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                </entity-find>
+                <set field="chatRooms" from="[]" />
+                <iterate entry="room" list="rooms">
+                    <!-- get full name of other private chat -->
+                    <if condition="room.isPrivate == 'Y'">
+                        <entity-find entity-name="growerp.general.ChatRoomsAndMembers" list="others">
+                            <econdition field-name="userId" operator="not-equals"
+                                from="ec.user.userAccount.userId" />
+                            <econdition field-name="chatRoomId" value="room.chatRoomId" />
+                            <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                        </entity-find>
+                        <set field="roomName" from="others[0].fullName" />
+                    </if>
+                    <script>chatRooms.add(room.chatRoomName ?: roomName)</script>
+                </iterate>
+                <log message="======unread rooms: $chatRooms" />
+                <return />
+            </if>
             <if condition="filter">
                 <set field="filter" value="%$filter%" />
             </if>
@@ -143,8 +164,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </iterate>
                         <set field="roomOut"
                             from="[
-                                chatRoomId: room.chatRoomId,
-                                chatRoomName: room.chatRoomName,
+                                chatRoom: [chatRoomId: room.chatRoomId, chatRoomName: room.chatRoomName],
                                 hasRead: hasRead,
                                 isPrivate: room.isPrivate == 'Y' ? true : false,
                                 members: members]" />
@@ -185,7 +205,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="email" />
                         <parameter name="firstName" />
                         <parameter name="lastName" />
-                        <parameter name="loginDisabled" type="bool" />
+                        <parameter name="loginDisabled" type="Boolean" />
                         <parameter name="loginName" />
                         <parameter name="userGroupId" />
                         <parameter name="groupDescription" />
@@ -274,7 +294,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="email" />
                         <parameter name="firstName" />
                         <parameter name="lastName" />
-                        <parameter name="loginDisabled" type="bool" />
+                        <parameter name="loginDisabled" type="Boolean" />
                         <parameter name="loginName" />
                         <parameter name="userGroupId" />
                         <parameter name="groupDescription" />
@@ -353,7 +373,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="email" />
                         <parameter name="firstName" />
                         <parameter name="lastName" />
-                        <parameter name="loginDisabled" type="bool" />
+                        <parameter name="loginDisabled" type="Boolean" />
                         <parameter name="loginName" />
                         <parameter name="userGroupId" />
                         <parameter name="groupDescription" />
@@ -421,6 +441,10 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="chatMessages" type="List">
                 <parameter name="chatMessage" type="Map">
                     <parameter name="chatMessageId" />
+                    <parameter name="chatRoom">
+                        <parameter name="chatRoomId" />
+                        <parameter name="chatRoomName" />
+                    </parameter>
                     <parameter name="fromUserId" />
                     <parameter name="content" />
                     <parameter name="creationDate" />
@@ -439,13 +463,23 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="ownerPartyId" from="companyPartyId" />
                 <order-by field-name="-lastUpdatedStamp" />
             </entity-find>
+            <if condition="messages &amp;&amp; messages[0].isPrivate == 'Y'">
+                <entity-find entity-name="growerp.general.ChatRoomsAndFromToMembers"
+                    list="others" limit="1">
+                    <econdition field-name="chatRoomId" from="messages.chatRoomId" />
+                    <econdition field-name="isPrivate" value="Y" />
+                    <econdition field-name="userId1" operator="not-equals"
+                        from="ec.user.userAccount.userId" />
+                </entity-find>
+                <set field="chatRoomName" from="others[0].userFullName1" />
+            </if>
             <set field="chatMessages" from="[]" />
             <iterate list="messages" entry="message">
                 <set field="chatMessage"
                     from="[
                     chatRoom: [
                         chatRoomId: message.chatRoomId,
-                        chatRoomName: message.chatRoomName,
+                        chatRoomName: message.chatRoomName ?: chatRoomName,
                         isPrivate: message.isPrivate == 'Y' ? true : false,
                         ],
                     chatMessageId : message.chatMessageId,
@@ -457,6 +491,11 @@ along with this software (see the LICENSE.md file). If not, see
                     ]" />
                 <script>chatMessages.add(chatMessage)</script>
             </iterate>
+            <!-- if reading room, set as read -->
+            <if condition="chatRoomId">
+                <service-call name="update#growerp.general.ChatRoomMember"
+                    in-map="[chatRoomId: chatRoomId, userId: ec.user.userAccount.userId, hasRead: 'Y']" />
+            </if>
         </actions>
     </service>
 
@@ -473,18 +512,33 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="chatMessage" type="Map">
                 <parameter name="chatMessageId" />
-                <parameter name="chatRoomId" />
+                <parameter name="chatRoom" type="Map" />
                 <parameter name="fromUserId" />
                 <parameter name="content" />
                 <parameter name="creationDate" />
             </parameter>
         </out-parameters>
         <actions>
-            <service-call name="create#growerp.general.ChatMessage"
+            <service-call
+                name="create#growerp.general.ChatMessage"
                 in-map="[chatRoomId: chatMessage.chatRoom.chatRoomId,
                     fromUserId : ec.user.userAccount.userId,
                     content: chatMessage.content]"
                 out-map="context" />
+            <!-- update all members of related rooms to unread -->
+            <entity-find entity-name="growerp.general.ChatRoomMember"
+                list="roomMembers">
+                <econdition field-name="chatRoomId" from="chatMessage.chatRoom.chatRoomId" />
+            </entity-find>
+            <iterate
+                list="roomMembers" entry="member">
+                <if
+                    condition="ec.user.userAccount.userId != member.userId &amp;&amp; member.hasRead != 'N'">
+                    <service-call name="update#growerp.general.ChatRoomMember"
+                        in-map="[chatRoomId: member.chatRoomId,
+                                    userId: member.userId, hasRead: 'N']" />
+                </if>
+            </iterate>
             <service-call name="growerp.100.ChatServices100.get#ChatMessage"
                 in-map="[chatMessageId: chatMessageId]" out-map="context" />
             <set field="chatMessageId" from="chatMessageId" />
@@ -501,17 +555,17 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="topic" type="Map">
                         <parameter name="topicName" />
                         <parameter name="description" />
-                        <parameter name="email" type="bool" />
+                        <parameter name="email" type="Boolean" />
                         <parameter name="user" type="Map">
-                            <parameter name="userid" />
+                            <parameter name="userId" />
                         </parameter>
                     </parameter>
                     <parameter name="messageJson" />
                     <parameter name="title" />
                     <parameter name="link" />
-                    <parameter name="showAlert" type="bool" />
+                    <parameter name="showAlert" type="Boolean" />
                     <parameter name="user" type="Map">
-                        <parameter name="userid" />
+                        <parameter name="userId" />
                     </parameter>
                 </parameter>
             </parameter>

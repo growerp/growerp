@@ -25,7 +25,7 @@ class ChatMessage with _$ChatMessage {
   factory ChatMessage({
     ChatRoom? chatRoom,
     String? fromUserId,
-    String? toUserId,
+    String? fromUserFullName,
     String? chatMessageId,
     String? content,
     @DateTimeConverter() DateTime? creationDate,

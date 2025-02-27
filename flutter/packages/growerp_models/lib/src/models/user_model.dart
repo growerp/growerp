@@ -37,6 +37,7 @@ class User with _$User {
     /// login account
     bool? loginDisabled,
     String? loginName,
+    String? fullName,
 
     /// email address of this person
     String? email,

@@ -47,8 +47,9 @@ class ChatRoom with _$ChatRoom {
   }
 
   String? getToUserId(String currentUserId) {
-    ChatRoomMember chatRoomMember = members
-        .firstWhere((element) => element.member?.userId != currentUserId);
+    ChatRoomMember chatRoomMember = members.firstWhere(
+        (element) => element.member?.userId != currentUserId,
+        orElse: () => ChatRoomMember());
     return chatRoomMember.member?.userId;
   }
 

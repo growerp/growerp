@@ -51,11 +51,9 @@ Widget popUpDialog({
               Expanded(
                   child: Padding(
                 padding: const EdgeInsets.all(20),
-                child: ScaffoldMessenger(
-                    key: scaffoldkey,
-                    child: Scaffold(
-                        backgroundColor: Colors.transparent,
-                        body: Center(child: Column(children: children)))),
+                child: Scaffold(
+                    backgroundColor: Colors.transparent,
+                    body: Center(child: Column(children: children))),
               ))
             ])),
         const Positioned(top: 10, right: 10, child: DialogCloseButton())

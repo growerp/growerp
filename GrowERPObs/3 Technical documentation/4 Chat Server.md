@@ -1,24 +1,26 @@
-## GrowERP chat
+## Overview
+The Moqui back-end provides [WebSocket notification services](https://github.com/growerp/growerp/blob/master/moqui/framework/src/main/groovy/org/moqui/impl/webapp/NotificationEndpoint.groovy) which we used as a basis for the new back-end [chat server](https://github.com/growerp/growerp/blob/master/moqui/framework/src/main/groovy/org/moqui/impl/webapp/ChatEndpoint.groovy) because they are both using the WebSocket protocol.
 
-this is companion for flutter GrowERP to enable simple chatting in a room or privately between company employees and customers/suppliers. All messages are exchanged in JSON format.
+In the front-end we moved the [chat functionality in its own package](https://github.com/growerp/growerp/tree/master/flutter/packages/growerp_chat) to keep things organized. We also modified the automated tests- and docker generation scripts in the flutter directory by removing the external chat server image. 
 
-### Server part
-It is a component which will run independently of the Moqui backend system but will communicate over a REST interface to the moqui backend for user information and authorization.
+Messaging is done in two parallel ways, one way is via Websocket to get a 'live' connection where chat message data on the screen is updated without refreshing the screen and secondly via a REST interface to save the messages in the database for history purposes and when the other user is not logged in.
+## The Moqui back-end
+For the WebSocket chatserver within the backend we created a new web app with the path 'chat' in the [GrowERP Moqui configuration](https://github.com/growerp/growerp/blob/master/moqui/runtime/component/growerp/MoquiConf.xml) file which will be merged with the [default configuration file](https://github.com/growerp/growerp/blob/master/moqui/framework/src/main/resources/MoquiDefaultConf.xml) and a [groovy file in the moqui webapp directory.](https://github.com/growerp/growerp/blob/master/moqui/framework/src/main/groovy/org/moqui/impl/webapp/ChatEndpoint.groovy)
 
-to build: ./gradlew build to run in a jetty server locally: ./gradlew appRun
+The notification service where this chat endpoint is based on is relying on a user being logged in via a web browser via a HTTP session, which we obviously do not have in GrowERP because even the browser implementation of our front-end also uses the REST interface.
 
-### Client part
-The flutter part is located in the [core package](https://github.com/growerp/growerp/tree/master/flutter/packages/growerp_core/lib/src/domains/chat) and has the standard implementation with blocs, and views and even an integration test
+This problem we solved by having a rest call within the chat server with an ApiKey as part of the WebSocket connect function which will fail when the ApiKey is not valid.
 
-### [](https://github.com/growerp/growerp-chat#relevant-articles-where-this-component-is-based-on)
+Because the userid is now not available we provide its value in the WebSocket connect function send by the front-end.
 
-### Relevant articles where this component is based on:
-- [A Guide to the Java API for WebSocket](https://www.baeldung.com/java-websockets)
-- [A nice simple introduction](https://developer.vonage.com/en/blog/create-websocket-server-java-api-dr)
+## The flutter front-end
+#### The chat client setup file
+The [chat client](https://github.com/growerp/growerp/blob/master/flutter/packages/growerp_core/lib/src/services/ws_client.dart) provides the basic function like setting up the url for the connect service,the send , close and provide a stream of incoming data
+#### the chat message bloc(business logic)
+The chat message bloc will subscribe to the stream function of the client setup file when initializing and will make sure that initial unread chats are requested from the database and when chats are send, are saved in the database.|
+Data incoming from the stream will be added to the list by the ChatMessageReceiveWs bloc function.
+#### The chat message dialog
+Finally the chat message dialog will show the data send by the message bloc
+and will refresh the screen when data is added by the bloc.
 
-The second one is easy to create locally. The first one a bit more difficult but was the basis of this component.
-
-Interface to the Moqui server:
-- [a simple java http REST client](https://www.baeldung.com/java-http-request)
-
-start docker instance: docker run -p 8081:8080 -e "DATABASEBACKEND=http://host_ip_number:8080" chat
+This concludes the chat implementation in the back-end. Next week we will show you how you can use the Moqui notification services not just for sending messages but also for updating the order list screen automatically when orders come in.

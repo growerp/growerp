@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory
 import groovy.json.*
 import org.moqui.impl.context.ExecutionContextImpl
 import org.moqui.entity.*
+import org.moqui.util.*
 
 import javax.websocket.CloseReason
 import javax.websocket.EndpointConfig
@@ -52,17 +53,35 @@ class ChatEndpoint extends MoquiAbstractEndpoint {
     @Override
     void onMessage(String messageJson) {
         Map message = (Map) new JsonSlurper().parseText(messageJson)
-        logger.info("receiving uid: ${getUserId()} message from:" + message.fromUserId + 
-                    " to: ${message.toUserId} content: ${message.content}" +
-                    " chatRoomId: ${message.chatRoomId}");
+        logger.info("receiving message from: ${message.fromUserId}" + 
+                    " content: ${message.content}" +
+                    " to chatRoomId: ${message.chatRoom['chatRoomId']}");
         message.fromUserId = users.get(session.getId());
 
+        // get member
+        ExecutionContextImpl eci = super.ecfi.getEci()
+        RestClient restClient = eci.service.rest().method(RestClient.GET)
+                .uri("http://localhost:8080/rest/s1/growerp/100/ChatRoom?chatRoomId=${message.chatRoom['chatRoomId']}")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("api_key", "${apiKey}")
+        RestClient.RestResponse restResponse = restClient.call()
+        Map result = (Map) restResponse.jsonObject()
+        if (restResponse.statusCode < 200 || restResponse.statusCode >= 300 ) {
+            logger.warn("Websocket Authorisation error: ${result}")
+            return
+        }
+        List chatRooms = (List) result.chatRooms
+        List members = (List) chatRooms[0]["members"]
+        List userIds = (List) members["member"]["userId"]
+
         chatEndpoints.forEach(endpoint -> {
-            if (users.get(endpoint.session.getId()).equals(message.toUserId)) {
+            var toUserId = users.get(endpoint.session.getId())
+            if (toUserId != getUserId() && userIds.find{it == toUserId} != null) {
                 synchronized (endpoint) {
                     try {
                         logger.info("Sending chatmessage: ${message.content}" +
-                                " to: ${message.toUserId} sessionId: ${endpoint.session.getId()}");
+                                " to: ${toUserId} roomId: ${message.chatRoom['chatRoomId']} " +
+                                "sessionId: ${endpoint.session.getId()}");
                         endpoint.session.asyncRemote.sendText(JsonOutput.toJson(message))
                     } catch (IOException | EncodeException e) {
                         logger.warn("chat message send failed....");
