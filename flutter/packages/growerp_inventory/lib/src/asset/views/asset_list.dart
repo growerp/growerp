@@ -31,6 +31,7 @@ class AssetListState extends State<AssetList> {
   late AssetBloc _assetBloc;
   late String classificationId;
   late String entityName;
+  late double top, left;
 
   @override
   void initState() {
@@ -40,6 +41,8 @@ class AssetListState extends State<AssetList> {
     _scrollController.addListener(_onScroll);
     _assetBloc = context.read<AssetBloc>();
     _assetBloc.add(const AssetFetch());
+    top = 450;
+    left = 320;
   }
 
   @override
@@ -66,9 +69,8 @@ class AssetListState extends State<AssetList> {
               Widget tableView() {
                 if (state.assets.isEmpty) {
                   return const Center(
-                      heightFactor: 20,
-                      child:
-                          Text("no assets found", textAlign: TextAlign.center));
+                      child: Text("no assets found",
+                          style: TextStyle(fontSize: 20.0)));
                 }
                 // get table data formatted for tableView
                 var (
@@ -132,60 +134,72 @@ class AssetListState extends State<AssetList> {
                   pinnedRowCount: 1,
                 );
               }
-
-              return Scaffold(
-                  floatingActionButton: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      FloatingActionButton(
-                          key: const Key("search"),
-                          heroTag: "btn1",
-                          onPressed: () async {
-                            // find findoc id to show
-                            await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      // search separate from finDocBloc
-                                      return BlocProvider.value(
-                                          value: context
-                                              .read<DataFetchBloc<Locations>>(),
-                                          child: const SearchAssetList());
-                                    })
-                                .then((value) async =>
-                                    value != null && context.mounted
-                                        ?
-                                        // show detail page
-                                        await showDialog(
-                                            barrierDismissible: true,
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return BlocProvider.value(
-                                                  value: _assetBloc,
-                                                  child: AssetDialog(value));
-                                            })
-                                        : const SizedBox.shrink());
-                          },
-                          child: const Icon(Icons.search)),
-                      const SizedBox(height: 10),
-                      FloatingActionButton(
-                          heroTag: "assetNew",
-                          key: const Key("addNew"),
-                          onPressed: () async {
-                            await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return BlocProvider.value(
-                                      value: _assetBloc,
-                                      child: AssetDialog(Asset()));
-                                });
-                          },
-                          tooltip: CoreLocalizations.of(context)!.addNew,
-                          child: const Icon(Icons.add)),
-                    ],
+              return Stack(
+                children: [
+                  tableView(),
+                  Positioned(
+                    left: left,
+                    top: top,
+                    child: GestureDetector(
+                        onPanUpdate: (details) {
+                          setState(() {
+                            left += details.delta.dx;
+                            top += details.delta.dy;
+                          });
+                        },
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            FloatingActionButton(
+                                key: const Key("search"),
+                                heroTag: "btn1",
+                                onPressed: () async {
+                                  // find findoc id to show
+                                  await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        // search separate from finDocBloc
+                                        return BlocProvider.value(
+                                            value: context.read<
+                                                DataFetchBloc<Locations>>(),
+                                            child: const SearchAssetList());
+                                      }).then((value) async => value != null &&
+                                          context.mounted
+                                      ?
+                                      // show detail page
+                                      await showDialog(
+                                          barrierDismissible: true,
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return BlocProvider.value(
+                                                value: _assetBloc,
+                                                child: AssetDialog(value));
+                                          })
+                                      : const SizedBox.shrink());
+                                },
+                                child: const Icon(Icons.search)),
+                            const SizedBox(height: 10),
+                            FloatingActionButton(
+                                heroTag: "assetNew",
+                                key: const Key("addNew"),
+                                onPressed: () async {
+                                  await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return BlocProvider.value(
+                                            value: _assetBloc,
+                                            child: AssetDialog(Asset()));
+                                      });
+                                },
+                                tooltip: CoreLocalizations.of(context)!.addNew,
+                                child: const Icon(Icons.add)),
+                          ],
+                        )),
                   ),
-                  body: tableView());
+                ],
+              );
             default:
               return const Center(child: LoadingIndicator());
           }

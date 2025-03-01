@@ -53,7 +53,7 @@ class SearchProductState extends State<SearchProductList> {
       }
       return Stack(
         children: [
-          ProductScaffold(
+          ProductSearchDialog(
               finDocBloc: _productBloc, widget: widget, products: products),
           if (state.status == DataFetchStatus.loading) const LoadingIndicator(),
         ],
@@ -62,8 +62,8 @@ class SearchProductState extends State<SearchProductList> {
   }
 }
 
-class ProductScaffold extends StatelessWidget {
-  const ProductScaffold({
+class ProductSearchDialog extends StatelessWidget {
+  const ProductSearchDialog({
     super.key,
     required DataFetchBloc finDocBloc,
     required this.widget,
@@ -77,70 +77,67 @@ class ProductScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ScrollController scrollController = ScrollController();
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Dialog(
-            key: const Key('SearchDialog'),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: popUp(
-                context: context,
-                title: 'Product Search ',
-                height: 500,
-                width: 350,
-                child: Column(children: [
-                  TextFormField(
-                      key: const Key('searchField'),
-                      textInputAction: TextInputAction.search,
-                      autofocus: true,
-                      decoration:
-                          const InputDecoration(labelText: "Search input"),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please enter a search value?';
+    return Dialog(
+        key: const Key('SearchDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: popUp(
+            context: context,
+            title: 'Product Search ',
+            height: 500,
+            width: 350,
+            child: Column(children: [
+              TextFormField(
+                  key: const Key('searchField'),
+                  textInputAction: TextInputAction.search,
+                  autofocus: true,
+                  decoration: const InputDecoration(labelText: "Search input"),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter a search value?';
+                    }
+                    return null;
+                  },
+                  onFieldSubmitted: (value) => _productBloc.add(GetDataEvent(
+                      () => context
+                          .read<RestClient>()
+                          .getProduct(limit: 5, searchString: value)))),
+              const SizedBox(height: 20),
+              const Text('Search results'),
+              Expanded(
+                  child: ListView.builder(
+                      key: const Key('listView'),
+                      shrinkWrap: true,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: products.length + 2,
+                      controller: scrollController,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (index == 0) {
+                          return Visibility(
+                              visible: products.isEmpty,
+                              child: const Center(
+                                  heightFactor: 20,
+                                  child: Text('No search items found (yet)',
+                                      key: Key('empty'),
+                                      textAlign: TextAlign.center)));
                         }
-                        return null;
-                      },
-                      onFieldSubmitted: (value) => _productBloc.add(
-                          GetDataEvent(() => context
-                              .read<RestClient>()
-                              .getProduct(limit: 5, searchString: value)))),
-                  const SizedBox(height: 20),
-                  const Text('Search results'),
-                  Expanded(
-                      child: ListView.builder(
-                          key: const Key('listView'),
-                          shrinkWrap: true,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: products.length + 2,
-                          controller: scrollController,
-                          itemBuilder: (BuildContext context, int index) {
-                            if (index == 0) {
-                              return Visibility(
-                                  visible: products.isEmpty,
-                                  child: const Center(
-                                      heightFactor: 20,
-                                      child: Text('No search items found (yet)',
-                                          key: Key('empty'),
-                                          textAlign: TextAlign.center)));
-                            }
-                            index--;
-                            return index >= products.length
-                                ? const Text('')
-                                : Dismissible(
-                                    key: const Key('searchItem'),
-                                    direction: DismissDirection.startToEnd,
-                                    child: ListTile(
-                                      title: Text(
-                                          "ID: ${products[index].pseudoId}\n"
-                                          "Name: ${products[index].productName}",
-                                          key: Key("searchResult$index")),
-                                      onTap: () => Navigator.of(context)
-                                          .pop(products[index]),
-                                    ));
-                          }))
-                ]))));
+                        index--;
+                        return index >= products.length
+                            ? const Text('')
+                            : Dismissible(
+                                key: const Key('searchItem'),
+                                direction: DismissDirection.startToEnd,
+                                child: ListTile(
+                                  title: Text(
+                                      "ID: ${products[index].pseudoId}\n"
+                                      "Name: ${products[index].productName}",
+                                      key: Key("searchResult$index")),
+                                  onTap: () => Navigator.of(context)
+                                      .pop(products[index]),
+                                ));
+                      }))
+            ])));
   }
 }

@@ -57,23 +57,21 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Dialog(
-            key: Key(
-                "ShipmentReceiveDialog${widget.finDoc.sales ? 'Sales' : 'Purchase'}"),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: popUp(
-                context: context,
-                title: 'Incoming Shipment# ${widget.finDoc.pseudoId}',
-                width: isPhone ? 400 : 800,
-                height: isPhone
-                    ? 600
-                    : 600, // not increase height otherwise tests will fail
-                child: shipmentItemList())));
+    return Dialog(
+        key: Key(
+            "ShipmentReceiveDialog${widget.finDoc.sales ? 'Sales' : 'Purchase'}"),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: popUp(
+            context: context,
+            title: 'Incoming Shipment# ${widget.finDoc.pseudoId}',
+            width: isPhone ? 400 : 800,
+            height: isPhone
+                ? 600
+                : 600, // not increase height otherwise tests will fail
+            child: shipmentItemList()));
   }
 
   Widget shipmentItemList() {

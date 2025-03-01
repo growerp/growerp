@@ -86,30 +86,28 @@ class ReservationDialogState extends State<ReservationDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: BlocListener<FinDocBloc, FinDocState>(
-            listenWhen: (previous, current) =>
-                previous.status == FinDocStatus.loading,
-            listener: (context, finDocState) async {
-              switch (finDocState.status) {
-                case FinDocStatus.success:
-                  HelperFunctions.showMessage(
-                      context,
-                      '${widget.finDoc.idIsNull() ? "Add" : "Update"} successfull',
-                      Colors.green);
-                  Navigator.of(context).pop();
-                  break;
-                case FinDocStatus.failure:
-                  HelperFunctions.showMessage(
-                      context, 'Error: ${finDocState.message}', Colors.red);
-                  break;
-                default:
-                  const Text("????");
-              }
-            },
-            child: SizedBox(
-                height: 600, width: 400, child: _addRentalItemDialog())));
+    return BlocListener<FinDocBloc, FinDocState>(
+        listenWhen: (previous, current) =>
+            previous.status == FinDocStatus.loading,
+        listener: (context, finDocState) async {
+          switch (finDocState.status) {
+            case FinDocStatus.success:
+              HelperFunctions.showMessage(
+                  context,
+                  '${widget.finDoc.idIsNull() ? "Add" : "Update"} successfull',
+                  Colors.green);
+              Navigator.of(context).pop();
+              break;
+            case FinDocStatus.failure:
+              HelperFunctions.showMessage(
+                  context, 'Error: ${finDocState.message}', Colors.red);
+              break;
+            default:
+              const Text("????");
+          }
+        },
+        child:
+            SizedBox(height: 600, width: 400, child: _addRentalItemDialog()));
   }
 
   bool whichDayOk(DateTime day) {

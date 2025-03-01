@@ -113,8 +113,7 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
       switch (state.status) {
         case LedgerStatus.success:
         case LedgerStatus.failure:
-          return Scaffold(
-              body: Column(
+          return Column(
             children: [
               SizedBox(
                 height: 100,
@@ -221,7 +220,7 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
                   ),
                 )
             ],
-          ));
+          );
         default:
           return const LoadingIndicator();
       }

@@ -75,34 +75,31 @@ class GlAccountDialogState extends State<GlAccountDialog> {
               const Text("????");
           }
         },
-        child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Dialog(
-                key: const Key('GlAccountDialog'),
-                insetPadding: const EdgeInsets.all(10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: popUp(
-                    context: context,
-                    title:
-                        "GlAccount #${widget.glAccount.accountCode ?? " New"}",
-                    width: columns.toDouble() * 400,
-                    height: columns == 1
-                        ? 1 / columns.toDouble() * 650
-                        : 1 / columns.toDouble() * 700,
-                    child: BlocBuilder<GlAccountBloc, GlAccountState>(
-                        builder: (context, state) {
-                      switch (state.status) {
-                        case GlAccountStatus.failure:
-                          return const FatalErrorForm(
-                              message: 'server connection problem');
-                        case GlAccountStatus.success:
-                          return _glAccountForm(state);
-                        default:
-                          return const Center(child: LoadingIndicator());
-                      }
-                    })))));
+        child: Dialog(
+            key: const Key('GlAccountDialog'),
+            insetPadding: const EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: popUp(
+                context: context,
+                title: "GlAccount #${widget.glAccount.accountCode ?? " New"}",
+                width: columns.toDouble() * 400,
+                height: columns == 1
+                    ? 1 / columns.toDouble() * 650
+                    : 1 / columns.toDouble() * 700,
+                child: BlocBuilder<GlAccountBloc, GlAccountState>(
+                    builder: (context, state) {
+                  switch (state.status) {
+                    case GlAccountStatus.failure:
+                      return const FatalErrorForm(
+                          message: 'server connection problem');
+                    case GlAccountStatus.success:
+                      return _glAccountForm(state);
+                    default:
+                      return const Center(child: LoadingIndicator());
+                  }
+                }))));
   }
 
   Widget _glAccountForm(state) {

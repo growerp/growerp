@@ -21,9 +21,6 @@ import 'package:flutter/foundation.dart' as foundation;
 
 import '../product.dart';
 
-final GlobalKey<ScaffoldMessengerState> productFilesDialogKey =
-    GlobalKey<ScaffoldMessengerState>();
-
 class ProductFilesDialog extends StatefulWidget {
   const ProductFilesDialog({super.key});
 
@@ -44,53 +41,46 @@ class _FilesHeaderState extends State<ProductFilesDialog> {
     return BlocConsumer<ProductBloc, ProductState>(
         listener: (context, state) async {
       if (state.status == ProductStatus.failure) {
-        productFilesDialogKey.currentState!
-            .showSnackBar(snackBar(context, Colors.red, state.message ?? ''));
+        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
       }
       if (state.status == ProductStatus.success) {
-        productFilesDialogKey.currentState!
-            .showSnackBar(snackBar(context, Colors.green, state.message ?? ''));
+        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
         Navigator.of(context).pop();
       }
     }, builder: (context, state) {
       return Stack(children: [
-        popUpDialog(
-            scaffoldkey: productFilesDialogKey,
-            context: context,
-            title: "Product Up/Download",
-            children: [
-              const SizedBox(height: 40),
-              const Text("Download first to obtain the format"),
-              const SizedBox(height: 10),
-              OutlinedButton(
-                  key: const Key('upload'),
-                  child: const Text('Upload CSV file'),
-                  onPressed: () async {
-                    FilePickerResult? result = await FilePicker.platform
-                        .pickFiles(
-                            allowedExtensions: ['csv'], type: FileType.custom);
-                    if (result != null) {
-                      String fileString = '';
-                      if (foundation.kIsWeb) {
-                        foundation.Uint8List bytes = result.files.first.bytes!;
-                        fileString = String.fromCharCodes(bytes);
-                      } else {
-                        File file = File(result.files.single.path!);
-                        fileString = await file.readAsString();
-                      }
-                      productBloc.add(ProductUpload(fileString));
-                    }
-                  }),
-              const SizedBox(height: 20),
-              OutlinedButton(
-                  key: const Key('download'),
-                  child: const Text('Download via email'),
-                  onPressed: () {
-                    productBloc.add(ProductDownload());
-                  }),
-              const SizedBox(height: 20),
-              const Text("A data file will be send by email"),
-            ]),
+        popUpDialog(context: context, title: "Product Up/Download", children: [
+          const SizedBox(height: 40),
+          const Text("Download first to obtain the format"),
+          const SizedBox(height: 10),
+          OutlinedButton(
+              key: const Key('upload'),
+              child: const Text('Upload CSV file'),
+              onPressed: () async {
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                    allowedExtensions: ['csv'], type: FileType.custom);
+                if (result != null) {
+                  String fileString = '';
+                  if (foundation.kIsWeb) {
+                    foundation.Uint8List bytes = result.files.first.bytes!;
+                    fileString = String.fromCharCodes(bytes);
+                  } else {
+                    File file = File(result.files.single.path!);
+                    fileString = await file.readAsString();
+                  }
+                  productBloc.add(ProductUpload(fileString));
+                }
+              }),
+          const SizedBox(height: 20),
+          OutlinedButton(
+              key: const Key('download'),
+              child: const Text('Download via email'),
+              onPressed: () {
+                productBloc.add(ProductDownload());
+              }),
+          const SizedBox(height: 20),
+          const Text("A data file will be send by email"),
+        ]),
         if (state.status == ProductStatus.filesLoading)
           const LoadingIndicator(),
       ]);

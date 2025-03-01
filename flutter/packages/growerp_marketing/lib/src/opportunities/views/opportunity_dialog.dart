@@ -95,21 +95,19 @@ class OpportunityDialogState extends State<OpportunityDialog> {
               const Text("????");
           }
         },
-        child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Dialog(
-                key: const Key('OpportunityDialog'),
-                insetPadding: const EdgeInsets.all(10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: popUp(
-                    context: context,
-                    title:
-                        "Opportunity #${widget.opportunity.opportunityId.isEmpty ? " New" : widget.opportunity.opportunityId}",
-                    width: columns.toDouble() * 400,
-                    height: 1 / columns.toDouble() * 1000,
-                    child: _opportunityForm()))));
+        child: Dialog(
+            key: const Key('OpportunityDialog'),
+            insetPadding: const EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: popUp(
+                context: context,
+                title:
+                    "Opportunity #${widget.opportunity.opportunityId.isEmpty ? " New" : widget.opportunity.opportunityId}",
+                width: columns.toDouble() * 400,
+                height: 1 / columns.toDouble() * 1000,
+                child: _opportunityForm())));
   }
 
   Widget _opportunityForm() {

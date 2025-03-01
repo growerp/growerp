@@ -97,6 +97,7 @@ class CompanyFormState extends State<CompanyDialog> {
   late bool isPhone;
   final ScrollController _scrollController = ScrollController();
   late CompanyBloc companyBloc;
+  late double top, left;
 
   @override
   void initState() {
@@ -139,6 +140,8 @@ class CompanyFormState extends State<CompanyDialog> {
 
     user = authenticate.user!;
     isAdmin = authenticate.user!.userGroup == UserGroup.admin;
+    top = -100;
+    left = 250;
   }
 
   @override
@@ -192,7 +195,7 @@ class CompanyFormState extends State<CompanyDialog> {
                 title:
                     "$_selectedRole Company #${company.partyId == null ? 'New' : company.pseudoId}",
                 width: isPhone ? 400 : 1000,
-                height: isPhone ? 600 : 750,
+                height: isPhone ? 700 : 750,
                 child: listChild()))
         : listChild();
   }
@@ -618,12 +621,10 @@ class CompanyFormState extends State<CompanyDialog> {
       column.add(Padding(padding: const EdgeInsets.all(5), child: widgets[i]));
     }
 
-    return Scaffold(
-        key: Key('CompanyDialog${company.role?.value ?? Role.unknown}'),
-        backgroundColor: Colors.transparent,
-        floatingActionButton:
-            ImageButtons(_scrollController, _onImageButtonPressed),
-        body: BlocConsumer<CompanyBloc, CompanyState>(
+    return Stack(
+      key: Key('CompanyDialog${company.role?.value ?? Role.unknown}'),
+      children: [
+        BlocConsumer<CompanyBloc, CompanyState>(
             listenWhen: (previous, current) =>
                 previous.status == CompanyStatus.loading,
             listener: (context, state) {
@@ -657,7 +658,22 @@ class CompanyFormState extends State<CompanyDialog> {
                     employeeChips: employeeChips);
               }
               return const LoadingIndicator();
-            }));
+            }),
+        Positioned(
+          left: left,
+          top: top,
+          child: GestureDetector(
+            onPanUpdate: (details) {
+              setState(() {
+                left += details.delta.dx;
+                top += details.delta.dy;
+              });
+            },
+            child: ImageButtons(_scrollController, _onImageButtonPressed),
+          ),
+        ),
+      ],
+    );
   }
 }
 

@@ -45,40 +45,38 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () => Navigator.of(context).pop(),
-        child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: GestureDetector(
-                onTap: () {},
-                child: Dialog(
-                    key: const Key('TimeEntryDialog'),
-                    insetPadding: const EdgeInsets.all(10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: BlocListener<TaskBloc, TaskState>(
-                        listener: (context, state) async {
-                          switch (state.status) {
-                            case TaskBlocStatus.success:
-                              HelperFunctions.showMessage(
-                                  context,
-                                  '${widget.timeEntry.timeEntryId == null ? "Add" : "Update"} successfull',
-                                  Colors.green);
-                              Navigator.of(context).pop();
-                              break;
-                            case TaskBlocStatus.failure:
-                              HelperFunctions.showMessage(context,
-                                  'Error: ${state.message}', Colors.red);
-                              break;
-                            default:
-                              const Text("????");
-                          }
-                        },
-                        child: popUp(
-                            context: context,
-                            child: _showForm(),
-                            title: 'Enter Time Entries',
-                            height: 400,
-                            width: 400))))));
+        child: GestureDetector(
+            onTap: () {},
+            child: Dialog(
+                key: const Key('TimeEntryDialog'),
+                insetPadding: const EdgeInsets.all(10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: BlocListener<TaskBloc, TaskState>(
+                    listener: (context, state) async {
+                      switch (state.status) {
+                        case TaskBlocStatus.success:
+                          HelperFunctions.showMessage(
+                              context,
+                              '${widget.timeEntry.timeEntryId == null ? "Add" : "Update"} successfull',
+                              Colors.green);
+                          Navigator.of(context).pop();
+                          break;
+                        case TaskBlocStatus.failure:
+                          HelperFunctions.showMessage(
+                              context, 'Error: ${state.message}', Colors.red);
+                          break;
+                        default:
+                          const Text("????");
+                      }
+                    },
+                    child: popUp(
+                        context: context,
+                        child: _showForm(),
+                        title: 'Enter Time Entries',
+                        height: 400,
+                        width: 400)))));
   }
 
   Widget _showForm() {

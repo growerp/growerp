@@ -45,7 +45,7 @@ class CategoryTest {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
         await CommonTest.doNewSearch(tester, searchString: category.categoryId);
-        expect(CommonTest.getTextField('header').split('#')[1],
+        expect(CommonTest.getTextField('topHeader').split('#')[1],
             category.categoryId);
       }
       await CommonTest.checkWidgetKey(tester, 'CategoryDialog');
@@ -81,7 +81,7 @@ class CategoryTest {
           CommonTest.getTextFormField('name'), equals(category.categoryName));
       expect(CommonTest.getTextFormField('description'),
           equals(category.description));
-      var id = CommonTest.getTextField('header').split('#')[1];
+      var id = CommonTest.getTextField('topHeader').split('#')[1];
       newCategories.add(category.copyWith(categoryId: id));
       await CommonTest.tapByKey(tester, 'cancel');
     }

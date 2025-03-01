@@ -117,42 +117,40 @@ class PaymentDialogState extends State<PaymentDialog> {
               ? Role.customer
               : Role.supplier)));
     _accountBloc = context.read<GlAccountBloc>()
-      ..add(const GlAccountFetch(limit: 0));
+      ..add(const GlAccountFetch(limit: 3));
     _authBloc = context.read<AuthBloc>();
   }
 
   @override
   Widget build(BuildContext context) {
     isPhone = isAPhone(context);
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Dialog(
-            insetPadding: const EdgeInsets.all(10), // required for wider dialog
-            key: Key("PaymentDialog${finDoc.sales ? 'Sales' : 'Purchase'}"),
-            child: SingleChildScrollView(
-                key: const Key('listView2'),
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                child: popUp(
-                    context: context,
-                    height: 720,
-                    width: 800,
-                    title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
-                        "Payment #${finDoc.pseudoId ?? 'New'}",
-                    child: BlocConsumer<FinDocBloc, FinDocState>(
-                      listener: (context, state) {
-                        if (state.status == FinDocStatus.success) {
-                          Navigator.of(context).pop();
-                        }
-                        if (state.status == FinDocStatus.failure) {
-                          HelperFunctions.showMessage(
-                              context, '${state.message}', Colors.red);
-                        }
-                      },
-                      builder: (context, state) {
-                        return paymentForm(state, paymentDialogFormKey);
-                      },
-                    )))));
+    return Dialog(
+        insetPadding: const EdgeInsets.all(10), // required for wider dialog
+        key: Key("PaymentDialog${finDoc.sales ? 'Sales' : 'Purchase'}"),
+        child: SingleChildScrollView(
+            key: const Key('listView2'),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: popUp(
+                context: context,
+                height: 650,
+                width: 800,
+                title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
+                    "Payment #${finDoc.pseudoId ?? 'New'}",
+                child: BlocConsumer<FinDocBloc, FinDocState>(
+                  listener: (context, state) {
+                    if (state.status == FinDocStatus.success) {
+                      Navigator.of(context).pop();
+                    }
+                    if (state.status == FinDocStatus.failure) {
+                      HelperFunctions.showMessage(
+                          context, '${state.message}', Colors.red);
+                    }
+                  },
+                  builder: (context, state) {
+                    return SingleChildScrollView(
+                        child: paymentForm(state, paymentDialogFormKey));
+                  },
+                ))));
   }
 
   DataTable _createGatewayTable() {
@@ -342,212 +340,186 @@ class PaymentDialogState extends State<PaymentDialog> {
               ),
               if (widget.finDoc.id() != null)
                 RelatedFinDocs(finDoc: widget.finDoc, context: context),
-              Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-                      child: InputDecorator(
-                        decoration: InputDecoration(
-                          labelText: 'PaymentMethods',
-                          enabled: !readOnly,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                child: IgnorePointer(
+                  ignoring: readOnly,
+                  child: DropdownButtonFormField<PaymentType>(
+                    decoration: InputDecoration(
+                      labelText: 'Payment Type',
+                      enabled: !readOnly,
+                    ),
+                    key: const Key('paymentType'),
+                    value: _selectedPaymentType,
+                    validator: (value) =>
+                        value == null && _selectedGlAccount == null
+                            ? 'Enter a item type for posting?'
+                            : null,
+                    items: state.paymentTypes.map((item) {
+                      return DropdownMenuItem<PaymentType>(
+                          value: item,
+                          child: Text(
+                              "${item.paymentTypeName} ${item.accountCode} "
+                              "Apply:${item.isApplied ? 'Y' : 'N'}\n"
+                              "${item.accountName}",
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2));
+                    }).toList(),
+                    onChanged: (newValue) => _selectedPaymentType = newValue,
+                    isExpanded: true,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              BlocBuilder<GlAccountBloc, GlAccountState>(
+                  builder: (context, state) {
+                switch (state.status) {
+                  case GlAccountStatus.failure:
+                    return const FatalErrorForm(
+                        message: 'server connection problem');
+                  case GlAccountStatus.success:
+                    return DropdownSearch<GlAccount>(
+                      enabled: !readOnly,
+                      selectedItem: _selectedGlAccount,
+                      popupProps: PopupProps.menu(
+                        isFilterOnline: true,
+                        showSelectedItems: true,
+                        showSearchBox: true,
+                        searchFieldProps: const TextFieldProps(
+                          autofocus: true,
+                          decoration: InputDecoration(labelText: 'Gl Account'),
                         ),
-                        child: Column(
-                          children: [
-                            if ((finDoc.sales == true &&
-                                    _selectedCompanyUser
-                                            ?.paymentMethod?.ccDescription !=
-                                        null) ||
-                                (finDoc.sales == false &&
-                                    _authBloc.state.authenticate?.company
-                                            ?.paymentMethod?.ccDescription !=
-                                        null))
-                              Row(children: [
-                                Checkbox(
-                                    key: const Key('creditCard'),
-                                    checkColor: Colors.white,
-                                    fillColor: WidgetStateProperty.resolveWith(
-                                        getColor),
-                                    value: _paymentInstrument ==
-                                        PaymentInstrument.creditcard,
-                                    onChanged: (bool? value) {
-                                      !readOnly
-                                          ? setState(() {
-                                              if (value == true) {
-                                                _paymentInstrument =
-                                                    PaymentInstrument
-                                                        .creditcard;
-                                              }
-                                            })
-                                          : null;
-                                    }),
-                                Expanded(
-                                    child: Text(
-                                        "Credit Card ${finDoc.sales == false ? _authBloc.state.authenticate?.company?.paymentMethod?.ccDescription : _selectedCompanyUser?.paymentMethod?.ccDescription}")),
-                              ]),
-                            Row(children: [
-                              Checkbox(
-                                  key: const Key('cash'),
-                                  checkColor: Colors.white,
-                                  fillColor:
-                                      WidgetStateProperty.resolveWith(getColor),
-                                  value: _paymentInstrument ==
-                                      PaymentInstrument.cash,
-                                  onChanged: (bool? value) {
-                                    !readOnly
-                                        ? setState(() {
-                                            if (value == true) {
-                                              _paymentInstrument =
-                                                  PaymentInstrument.cash;
-                                            }
-                                          })
-                                        : null;
-                                  }),
-                              const Text(
-                                "Cash",
-                              ),
-                            ]),
-                            Row(children: [
-                              Checkbox(
-                                  key: const Key('check'),
-                                  checkColor: Colors.white,
-                                  fillColor:
-                                      WidgetStateProperty.resolveWith(getColor),
-                                  value: _paymentInstrument ==
-                                      PaymentInstrument.check,
-                                  onChanged: (bool? value) {
-                                    !readOnly
-                                        ? setState(() {
-                                            if (value == true) {
-                                              _paymentInstrument =
-                                                  PaymentInstrument.check;
-                                            }
-                                          })
-                                        : null;
-                                  }),
-                              const Text(
-                                "Check",
-                              ),
-                            ]),
-                            Row(children: [
-                              Checkbox(
-                                  key: const Key('bank'),
-                                  checkColor: Colors.white,
-                                  fillColor:
-                                      WidgetStateProperty.resolveWith(getColor),
-                                  value: _paymentInstrument ==
-                                      PaymentInstrument.bank,
-                                  onChanged: (bool? value) {
-                                    !readOnly
-                                        ? setState(() {
-                                            if (value == true) {
-                                              _paymentInstrument =
-                                                  PaymentInstrument.bank;
-                                            }
-                                          })
-                                        : null;
-                                  }),
-                              Text(
-                                "Bank ${finDoc.otherCompany?.paymentMethod?.creditCardNumber ?? ''}",
-                              ),
-                            ]),
-                          ],
+                        menuProps: MenuProps(
+                            borderRadius: BorderRadius.circular(20.0)),
+                        title: popUp(
+                          context: context,
+                          title: 'Select GL Account',
+                          height: 50,
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-                          child: IgnorePointer(
-                            ignoring: readOnly,
-                            child: DropdownButtonFormField<PaymentType>(
-                              decoration: InputDecoration(
-                                labelText: 'Payment Type',
-                                enabled: !readOnly,
-                              ),
-                              key: const Key('paymentType'),
-                              value: _selectedPaymentType,
-                              validator: (value) =>
-                                  value == null && _selectedGlAccount == null
-                                      ? 'Enter a item type for posting?'
-                                      : null,
-                              items: state.paymentTypes.map((item) {
-                                return DropdownMenuItem<PaymentType>(
-                                    value: item,
-                                    child: Text(
-                                        '${item.paymentTypeName}\n ${item.accountCode} ${item.accountName}',
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 2));
-                              }).toList(),
-                              onChanged: (newValue) =>
-                                  _selectedPaymentType = newValue,
-                              isExpanded: true,
-                            ),
-                          ),
-                        ),
-                        BlocBuilder<GlAccountBloc, GlAccountState>(
-                            builder: (context, state) {
-                          switch (state.status) {
-                            case GlAccountStatus.failure:
-                              return const FatalErrorForm(
-                                  message: 'server connection problem');
-                            case GlAccountStatus.success:
-                              return DropdownSearch<GlAccount>(
-                                enabled: !readOnly,
-                                selectedItem: _selectedGlAccount,
-                                popupProps: PopupProps.menu(
-                                  isFilterOnline: true,
-                                  showSelectedItems: true,
-                                  showSearchBox: true,
-                                  searchFieldProps: const TextFieldProps(
-                                    autofocus: true,
-                                    decoration: InputDecoration(
-                                        labelText: 'Gl Account'),
-                                  ),
-                                  menuProps: MenuProps(
-                                      borderRadius:
-                                          BorderRadius.circular(20.0)),
-                                  title: popUp(
-                                    context: context,
-                                    title: 'Select GL Account',
-                                    height: 50,
-                                  ),
-                                ),
-                                dropdownDecoratorProps:
-                                    const DropDownDecoratorProps(
-                                        dropdownSearchDecoration:
-                                            InputDecoration(
-                                                labelText: 'GL Account')),
-                                key: const Key('glAccount'),
-                                itemAsString: (GlAccount? u) =>
-                                    " ${u?.accountCode ?? ''} ${u?.accountName ?? ''} ",
-                                asyncItems: (String filter) async {
-                                  _accountBloc.add(GlAccountFetch(
-                                      searchString: filter, limit: 3));
-                                  return Future.delayed(
-                                      const Duration(milliseconds: 100), () {
-                                    return Future.value(
-                                        _accountBloc.state.glAccounts);
-                                  });
-                                },
-                                compareFn: (item, sItem) =>
-                                    item.accountCode == sItem.accountCode,
-                                onChanged: (GlAccount? newValue) {
-                                  _selectedGlAccount = newValue!;
-                                },
-                              );
-                            default:
-                              return const Center(child: LoadingIndicator());
-                          }
-                        }),
-                      ],
-                    ),
-                  ),
-                ],
+                      dropdownDecoratorProps: const DropDownDecoratorProps(
+                          dropdownSearchDecoration:
+                              InputDecoration(labelText: 'GL Account')),
+                      key: const Key('glAccount'),
+                      itemAsString: (GlAccount? u) =>
+                          " ${u?.accountCode ?? ''} ${u?.accountName ?? ''} ",
+                      asyncItems: (String filter) async {
+                        _accountBloc.add(
+                            GlAccountFetch(searchString: filter, limit: 3));
+                        return Future.delayed(const Duration(milliseconds: 100),
+                            () {
+                          return Future.value(_accountBloc.state.glAccounts);
+                        });
+                      },
+                      compareFn: (item, sItem) =>
+                          item.accountCode == sItem.accountCode,
+                      onChanged: (GlAccount? newValue) {
+                        _selectedGlAccount = newValue!;
+                      },
+                    );
+                  default:
+                    return const Center(child: LoadingIndicator());
+                }
+              }),
+              const SizedBox(height: 10),
+              InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Payment Methods',
+                  enabled: !readOnly,
+                ),
+                child: Column(
+                  children: [
+                    Row(children: [
+                      Checkbox(
+                          key: const Key('creditCard'),
+                          checkColor: Colors.white,
+                          fillColor: WidgetStateProperty.resolveWith(getColor),
+                          value: _paymentInstrument ==
+                              PaymentInstrument.creditcard,
+                          onChanged: (bool? value) {
+                            !readOnly
+                                ? setState(() {
+                                    if (value == true) {
+                                      _paymentInstrument =
+                                          PaymentInstrument.creditcard;
+                                    }
+                                  })
+                                : null;
+                          }),
+                      Expanded(
+                          child: Text(((finDoc.sales == true &&
+                                      _selectedCompanyUser
+                                              ?.paymentMethod?.ccDescription !=
+                                          null) ||
+                                  (finDoc.sales == false &&
+                                      _authBloc.state.authenticate?.company
+                                              ?.paymentMethod?.ccDescription !=
+                                          null))
+                              ? "Credit Card ${finDoc.sales == false ? _authBloc.state.authenticate?.company?.paymentMethod?.ccDescription : _selectedCompanyUser?.paymentMethod?.ccDescription}"
+                              : 'Credit Card'))
+                    ]),
+                    Row(children: [
+                      Checkbox(
+                          key: const Key('cash'),
+                          checkColor: Colors.white,
+                          fillColor: WidgetStateProperty.resolveWith(getColor),
+                          value: _paymentInstrument == PaymentInstrument.cash,
+                          onChanged: (bool? value) {
+                            !readOnly
+                                ? setState(() {
+                                    if (value == true) {
+                                      _paymentInstrument =
+                                          PaymentInstrument.cash;
+                                    }
+                                  })
+                                : null;
+                          }),
+                      const Text(
+                        "Cash",
+                      ),
+                    ]),
+                    Row(children: [
+                      Checkbox(
+                          key: const Key('check'),
+                          checkColor: Colors.white,
+                          fillColor: WidgetStateProperty.resolveWith(getColor),
+                          value: _paymentInstrument == PaymentInstrument.check,
+                          onChanged: (bool? value) {
+                            !readOnly
+                                ? setState(() {
+                                    if (value == true) {
+                                      _paymentInstrument =
+                                          PaymentInstrument.check;
+                                    }
+                                  })
+                                : null;
+                          }),
+                      const Text(
+                        "Check",
+                      ),
+                    ]),
+                    Row(children: [
+                      Checkbox(
+                          key: const Key('bank'),
+                          checkColor: Colors.white,
+                          fillColor: WidgetStateProperty.resolveWith(getColor),
+                          value: _paymentInstrument == PaymentInstrument.bank,
+                          onChanged: (bool? value) {
+                            !readOnly
+                                ? setState(() {
+                                    if (value == true) {
+                                      _paymentInstrument =
+                                          PaymentInstrument.bank;
+                                    }
+                                  })
+                                : null;
+                          }),
+                      Text(
+                        "Bank ${finDoc.otherCompany?.paymentMethod?.creditCardNumber ?? ''}",
+                      ),
+                    ]),
+                  ],
+                ),
               ),
               const SizedBox(height: 10),
               if (!readOnly)
@@ -556,7 +528,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                     OutlinedButton(
                         key: const Key('cancelFinDoc'),
                         child: const Text(
-                          'Cancel\nPayment',
+                          'Cancel',
                           softWrap: false,
                         ),
                         onPressed: () {
@@ -565,28 +537,33 @@ class PaymentDialogState extends State<PaymentDialog> {
                           )));
                         }),
                     const SizedBox(width: 20),
-                    OutlinedButton(
-                        key: const Key('update'),
-                        child: Text(
-                            '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
-                        onPressed: () {
-                          if (paymentDialogFormKey.currentState!.validate()) {
-                            _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
-                              otherCompany: _selectedCompanyUser?.getCompany(),
-                              otherUser: _selectedCompanyUser?.getUser(),
-                              grandTotal: Decimal.parse(_amountController.text),
-                              pseudoId: _pseudoIdController.text,
-                              status: _updatedStatus,
-                              paymentInstrument: _paymentInstrument,
-                              items: [
-                                FinDocItem(
-                                  paymentType: _selectedPaymentType,
-                                  glAccount: _selectedGlAccount,
-                                )
-                              ],
-                            )));
-                          }
-                        }),
+                    Expanded(
+                      child: OutlinedButton(
+                          key: const Key('update'),
+                          child: Text(
+                              '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
+                          onPressed: () {
+                            if (paymentDialogFormKey.currentState!.validate()) {
+                              _finDocBloc
+                                  .add(FinDocUpdate(finDocUpdated.copyWith(
+                                otherCompany:
+                                    _selectedCompanyUser?.getCompany(),
+                                otherUser: _selectedCompanyUser?.getUser(),
+                                grandTotal:
+                                    Decimal.parse(_amountController.text),
+                                pseudoId: _pseudoIdController.text,
+                                status: _updatedStatus,
+                                paymentInstrument: _paymentInstrument,
+                                items: [
+                                  FinDocItem(
+                                    paymentType: _selectedPaymentType,
+                                    glAccount: _selectedGlAccount,
+                                  )
+                                ],
+                              )));
+                            }
+                          }),
+                    ),
                   ],
                 ),
               const SizedBox(height: 20),

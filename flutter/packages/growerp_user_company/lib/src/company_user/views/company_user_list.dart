@@ -47,6 +47,7 @@ class CompanyUserListState extends State<CompanyUserList> {
               .instance.platformDispatcher.views.first.physicalSize.height /
           35)
       .toInt();
+  late double top, left;
 
   @override
   void initState() {
@@ -72,6 +73,8 @@ class CompanyUserListState extends State<CompanyUserList> {
         _companyUserBloc = context.read<CompanyUserBloc>()
           ..add(CompanyUserFetch(limit: limit));
     }
+    top = 380;
+    left = 320;
   }
 
   @override
@@ -83,7 +86,7 @@ class CompanyUserListState extends State<CompanyUserList> {
           return const Center(
               heightFactor: 20,
               child: Text("no companies/users found",
-                  textAlign: TextAlign.center));
+                  style: TextStyle(fontSize: 20.0)));
         }
         // get table data formatted for tableView
         var (
@@ -171,79 +174,95 @@ class CompanyUserListState extends State<CompanyUserList> {
             state.status == CompanyUserStatus.success) {
           companiesUsers = state.companiesUsers;
           hasReachedMax = state.hasReachedMax;
-          return Scaffold(
-              floatingActionButton: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  FloatingActionButton(
-                      key: const Key("search"),
-                      heroTag: "companUserBtn1",
-                      onPressed: () async {
-                        // find findoc id to show
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return const SearchCompanyUserList();
-                            }).then((value) async => value == null
-                            ? const SizedBox.shrink()
-                            : await showDialog(
+          return Stack(
+            children: [
+              tableView(),
+              Positioned(
+                left: left,
+                top: top,
+                child: GestureDetector(
+                  onPanUpdate: (details) {
+                    setState(() {
+                      left += details.delta.dx;
+                      top += details.delta.dy;
+                    });
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FloatingActionButton(
+                          key: const Key("search"),
+                          heroTag: "companUserBtn1",
+                          onPressed: () async {
+                            // find findoc id to show
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return const SearchCompanyUserList();
+                                }).then((value) async => value == null
+                                ? const SizedBox.shrink()
+                                : await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return BlocProvider.value(
+                                          value: _companyUserBloc,
+                                          child: value.type == PartyType.company
+                                              ? ShowCompanyDialog(
+                                                  value.getCompany()!)
+                                              : ShowUserDialog(
+                                                  value.getUser()!));
+                                    }));
+                          },
+                          child: const Icon(Icons.search)),
+                      const SizedBox(height: 10),
+                      FloatingActionButton(
+                          key: const Key("addNewCompany"),
+                          heroTag: "companUserBtn2",
+                          onPressed: () async {
+                            await showDialog(
                                 barrierDismissible: true,
                                 context: context,
                                 builder: (BuildContext context) {
                                   return BlocProvider.value(
                                       value: _companyUserBloc,
-                                      child: value.type == PartyType.company
-                                          ? ShowCompanyDialog(
-                                              value.getCompany()!)
-                                          : ShowUserDialog(value.getUser()!));
-                                }));
-                      },
-                      child: const Icon(Icons.search)),
-                  const SizedBox(height: 10),
-                  FloatingActionButton(
-                      key: const Key("addNewCompany"),
-                      heroTag: "companUserBtn2",
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _companyUserBloc,
-                                  child: CompanyDialog(Company(
-                                    partyId: '_NEW_',
-                                    role: widget.role,
-                                  )));
-                            });
-                      },
-                      tooltip: 'Add New',
-                      child: const Column(
-                        children: [Icon(Icons.add), Text('Org')],
-                      )),
-                  const SizedBox(height: 10),
-                  FloatingActionButton(
-                      key: const Key("addNewUser"),
-                      heroTag: "companUserBtn3",
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _companyUserBloc,
-                                  child: UserDialog(User(
-                                    role: widget.role,
-                                  )));
-                            });
-                      },
-                      tooltip: 'Add New',
-                      child: const Column(
-                        children: [Icon(Icons.add), Text('Person')],
-                      )),
-                ],
+                                      child: CompanyDialog(Company(
+                                        partyId: '_NEW_',
+                                        role: widget.role,
+                                      )));
+                                });
+                          },
+                          tooltip: 'Add New',
+                          child: const Column(
+                            children: [Icon(Icons.add), Text('Org')],
+                          )),
+                      const SizedBox(height: 10),
+                      FloatingActionButton(
+                          key: const Key("addNewUser"),
+                          heroTag: "companUserBtn3",
+                          onPressed: () async {
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                      value: _companyUserBloc,
+                                      child: UserDialog(User(
+                                        role: widget.role,
+                                      )));
+                                });
+                          },
+                          tooltip: 'Add New',
+                          child: const Column(
+                            children: [Icon(Icons.add), Text('Person')],
+                          )),
+                    ],
+                  ),
+                ),
               ),
-              body: tableView());
+            ],
+          );
         }
         return const LoadingIndicator();
       }

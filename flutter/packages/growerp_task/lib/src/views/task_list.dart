@@ -157,29 +157,45 @@ class TaskListState extends State<TaskList> {
         }
         if (state.status == TaskBlocStatus.success) {
           hasReachedMax = state.hasReachedMax;
-          return Scaffold(
-              floatingActionButton: FloatingActionButton(
-                  key: const Key("addNew"),
-                  onPressed: () async {
-                    await showDialog(
-                        barrierDismissible: true,
-                        context: context,
-                        builder: (BuildContext context) {
-                          return BlocProvider.value(
-                              value: _taskBloc,
-                              child: widget.taskType == TaskType.workflow
-                                  ? const WorkflowDialog(null)
-                                  : TaskDialog(
-                                      Task(taskType: widget.taskType)));
-                        });
-                  },
-                  tooltip: widget.taskType == TaskType.workflow
-                      ? 'Start new workflow'
-                      : 'Add New Task',
-                  child: Icon(widget.taskType == TaskType.workflow
-                      ? Icons.start
-                      : Icons.add)),
-              body: showForm(state));
+          double top = 0;
+          double left = 250;
+          return Stack(
+            children: [
+              showForm(state),
+              Positioned(
+                left: left,
+                top: top,
+                child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        left += details.delta.dx;
+                        top += details.delta.dy;
+                      });
+                    },
+                    child: FloatingActionButton(
+                        key: const Key("addNew"),
+                        onPressed: () async {
+                          await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BlocProvider.value(
+                                    value: _taskBloc,
+                                    child: widget.taskType == TaskType.workflow
+                                        ? const WorkflowDialog(null)
+                                        : TaskDialog(
+                                            Task(taskType: widget.taskType)));
+                              });
+                        },
+                        tooltip: widget.taskType == TaskType.workflow
+                            ? 'Start new workflow'
+                            : 'Add New Task',
+                        child: Icon(widget.taskType == TaskType.workflow
+                            ? Icons.start
+                            : Icons.add))),
+              ),
+            ],
+          );
         }
         return const LoadingIndicator();
       }

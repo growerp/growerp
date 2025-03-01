@@ -759,7 +759,7 @@ List<FinDoc> purchasePayments = [
     otherCompany: supplierCompanies[2],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("77.77"),
-    items: [FinDocItem(paymentType: PaymentType(accountCode: '2160'))],
+    items: [FinDocItem(paymentType: PaymentType(accountCode: '21600'))],
   ),
   FinDoc(
     sales: false,

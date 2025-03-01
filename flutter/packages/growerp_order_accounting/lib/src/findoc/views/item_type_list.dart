@@ -32,6 +32,7 @@ class ItemTypeListState extends State<ItemTypeList> {
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
   late bool showAll;
+  late double top, left;
 
   @override
   void initState() {
@@ -42,6 +43,8 @@ class ItemTypeListState extends State<ItemTypeList> {
     finDocBloc.add(const FinDocGetItemTypes());
     glAccountBloc = context.read<GlAccountBloc>();
     glAccountBloc.add(const GlAccountFetch(limit: 3));
+    top = 600;
+    left = 280;
   }
 
   @override
@@ -73,20 +76,9 @@ class ItemTypeListState extends State<ItemTypeList> {
                   if (item.accountCode != '') newList.add(item);
                 }
               }
-              return Scaffold(
-                  floatingActionButton: FloatingActionButton.extended(
-                      heroTag: 'showAll',
-                      key: const Key("switchShow"),
-                      onPressed: () {
-                        setState(() {
-                          showAll = !showAll;
-                        });
-                      },
-                      tooltip: 'Show all/used',
-                      label: showAll
-                          ? const Text('All')
-                          : const Text('only used')),
-                  body: Column(children: [
+              return Stack(
+                children: [
+                  Column(children: [
                     const ItemTypeListHeader(),
                     Expanded(
                         child: RefreshIndicator(
@@ -109,7 +101,33 @@ class ItemTypeListState extends State<ItemTypeList> {
                                   return ItemTypeListItem(
                                       itemType: newList[index], index: index);
                                 })))
-                  ]));
+                  ]),
+                  Positioned(
+                    left: left,
+                    top: top,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          left += details.delta.dx;
+                          top += details.delta.dy;
+                        });
+                      },
+                      child: FloatingActionButton.extended(
+                          heroTag: 'showAll',
+                          key: const Key("switchShow"),
+                          onPressed: () {
+                            setState(() {
+                              showAll = !showAll;
+                            });
+                          },
+                          tooltip: 'Show all/used',
+                          label: showAll
+                              ? const Text('All')
+                              : const Text('only used')),
+                    ),
+                  ),
+                ],
+              );
             default:
               return const Center(child: LoadingIndicator());
           }

@@ -40,12 +40,15 @@ class LedgerJournalList extends StatefulWidget {
 class LedgerJournalsState extends State<LedgerJournalList> {
   final ScrollController _scrollController = ScrollController();
   late LedgerJournalBloc _ledgerJournalBloc;
+  late double top, left;
 
   @override
   void initState() {
     super.initState();
     _ledgerJournalBloc = context.read<LedgerJournalBloc>();
     _scrollController.addListener(_onScroll);
+    top = 500;
+    left = 320;
   }
 
   @override
@@ -66,20 +69,9 @@ class LedgerJournalsState extends State<LedgerJournalList> {
                 child:
                     Text('failed to fetch ledgerJournals: ${state.message}'));
           case LedgerJournalStatus.success:
-            return Scaffold(
-                floatingActionButton: FloatingActionButton(
-                    key: const Key("addNew"),
-                    onPressed: () async {
-                      await showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) => BlocProvider.value(
-                              value: _ledgerJournalBloc,
-                              child: LedgerJournalDialog(LedgerJournal())));
-                    },
-                    tooltip: 'Add New',
-                    child: const Icon(Icons.add)),
-                body: Column(children: [
+            return Stack(
+              children: [
+                Column(children: [
                   const LedgerJournalListHeader(),
                   Expanded(
                       child: RefreshIndicator(
@@ -115,7 +107,35 @@ class LedgerJournalsState extends State<LedgerJournalList> {
                                                 state.ledgerJournals[index],
                                             index: index));
                               })))
-                ]));
+                ]),
+                Positioned(
+                  left: left,
+                  top: top,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        left += details.delta.dx;
+                        top += details.delta.dy;
+                      });
+                    },
+                    child: FloatingActionButton(
+                        key: const Key("addNew"),
+                        onPressed: () async {
+                          await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  BlocProvider.value(
+                                      value: _ledgerJournalBloc,
+                                      child: LedgerJournalDialog(
+                                          LedgerJournal())));
+                        },
+                        tooltip: 'Add New',
+                        child: const Icon(Icons.add)),
+                  ),
+                ),
+              ],
+            );
           default:
             return const Center(child: LoadingIndicator());
         }

@@ -46,12 +46,15 @@ class OpportunitiesState extends State<OpportunityList> {
   final _horizontalScrollController = ScrollController();
   late OpportunityBloc _opportunityBloc;
   late List<Opportunity> opportunities;
+  late double top, left;
 
   @override
   void initState() {
     super.initState();
     _opportunityBloc = context.read<OpportunityBloc>();
     _scrollController.addListener(_onScroll);
+    top = 400;
+    left = 320;
   }
 
   @override
@@ -81,7 +84,7 @@ class OpportunitiesState extends State<OpportunityList> {
                   return const Center(
                       heightFactor: 20,
                       child: Text("no opportunities found",
-                          textAlign: TextAlign.center));
+                          style: TextStyle(fontSize: 20.0)));
                 }
                 // get table data formatted for tableView
                 var (
@@ -147,57 +150,71 @@ class OpportunitiesState extends State<OpportunityList> {
                   pinnedRowCount: 1,
                 );
               }
-
-              return Scaffold(
-                  floatingActionButton: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      FloatingActionButton(
-                          key: const Key("search"),
-                          heroTag: "btn1",
-                          onPressed: () async {
-                            // find findoc id to show
-                            await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  // search separate from finDocBloc
-                                  return BlocProvider.value(
-                                      value: _opportunityBloc,
-                                      child: const SearchOpportunityList());
-                                }).then((value) async => value != null &&
-                                    context.mounted
-                                ?
-                                // show detail page
+              return Stack(
+                children: [
+                  tableView(),
+                  Positioned(
+                    left: left,
+                    top: top,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          left += details.delta.dx;
+                          top += details.delta.dy;
+                        });
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          FloatingActionButton(
+                              key: const Key("search"),
+                              heroTag: "btn1",
+                              onPressed: () async {
+                                // find findoc id to show
                                 await showDialog(
                                     barrierDismissible: true,
                                     context: context,
                                     builder: (BuildContext context) {
+                                      // search separate from finDocBloc
                                       return BlocProvider.value(
                                           value: _opportunityBloc,
-                                          child: OpportunityDialog(value));
-                                    })
-                                : const SizedBox.shrink());
-                          },
-                          child: const Icon(Icons.search)),
-                      const SizedBox(height: 10),
-                      FloatingActionButton(
-                          key: const Key("addNew"),
-                          onPressed: () async {
-                            await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) =>
-                                    BlocProvider.value(
-                                        value: _opportunityBloc,
-                                        child:
-                                            OpportunityDialog(Opportunity())));
-                          },
-                          tooltip: 'Add New',
-                          child: const Icon(Icons.add)),
-                    ],
+                                          child: const SearchOpportunityList());
+                                    }).then((value) async => value != null &&
+                                        context.mounted
+                                    ?
+                                    // show detail page
+                                    await showDialog(
+                                        barrierDismissible: true,
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return BlocProvider.value(
+                                              value: _opportunityBloc,
+                                              child: OpportunityDialog(value));
+                                        })
+                                    : const SizedBox.shrink());
+                              },
+                              child: const Icon(Icons.search)),
+                          const SizedBox(height: 10),
+                          FloatingActionButton(
+                              key: const Key("addNew"),
+                              onPressed: () async {
+                                await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        BlocProvider.value(
+                                            value: _opportunityBloc,
+                                            child: OpportunityDialog(
+                                                Opportunity())));
+                              },
+                              tooltip: 'Add New',
+                              child: const Icon(Icons.add)),
+                        ],
+                      ),
+                    ),
                   ),
-                  body: tableView());
+                ],
+              );
             default:
               return const Center(child: LoadingIndicator());
           }

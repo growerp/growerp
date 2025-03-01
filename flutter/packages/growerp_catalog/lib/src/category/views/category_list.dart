@@ -35,6 +35,7 @@ class CategoriesListState extends State<CategoryList> {
   late CategoryBloc _categoryBloc;
   late bool started;
   late List<Category> categories;
+  late double top, left;
 
   @override
   void initState() {
@@ -43,6 +44,68 @@ class CategoriesListState extends State<CategoryList> {
     _scrollController.addListener(_onScroll);
     _categoryBloc = context.read<CategoryBloc>();
     _categoryBloc.add(const CategoryFetch());
+    top = 400;
+    left = 320;
+  }
+
+  Widget tableView() {
+    if (categories.isEmpty) {
+      return const Center(
+          child: Text("No categories yet, add one with '+'",
+              style: TextStyle(fontSize: 20.0)));
+    }
+    var (
+      List<List<TableViewCell>> tableViewCells,
+      List<double> fieldWidths,
+      double? rowHeight
+    ) = get2dTableData<Category>(getCategoryTableData,
+        bloc: _categoryBloc,
+        classificationId: 'AppAdmin',
+        context: context,
+        items: categories);
+    return TableView.builder(
+      diagonalDragBehavior: DiagonalDragBehavior.free,
+      verticalDetails:
+          ScrollableDetails.vertical(controller: _scrollController),
+      horizontalDetails:
+          ScrollableDetails.horizontal(controller: _horizontalController),
+      cellBuilder: (context, vicinity) =>
+          tableViewCells[vicinity.row][vicinity.column],
+      columnBuilder: (index) => index >= tableViewCells[0].length
+          ? null
+          : TableSpan(
+              padding: categoryPadding,
+              backgroundDecoration: getCategoryBackGround(context, index),
+              extent: FixedTableSpanExtent(fieldWidths[index]),
+            ),
+      pinnedColumnCount: 1,
+      rowBuilder: (index) => index >= tableViewCells.length
+          ? null
+          : TableSpan(
+              padding: categoryPadding,
+              backgroundDecoration: getCategoryBackGround(context, index),
+              extent: FixedTableSpanExtent(rowHeight!),
+              recognizerFactories: <Type, GestureRecognizerFactory>{
+                  TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<
+                          TapGestureRecognizer>(
+                      () => TapGestureRecognizer(),
+                      (TapGestureRecognizer t) => t.onTap = () => showDialog(
+                          barrierDismissible: true,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return index > categories.length
+                                ? const BottomLoader()
+                                : Dismissible(
+                                    key: const Key('locationItem'),
+                                    direction: DismissDirection.startToEnd,
+                                    child: BlocProvider.value(
+                                        value: _categoryBloc,
+                                        child: CategoryDialog(
+                                            categories[index - 1])));
+                          }))
+                }),
+      pinnedRowCount: 1,
+    );
   }
 
   @override
@@ -68,146 +131,86 @@ class CategoriesListState extends State<CategoryList> {
                   child: Text('failed to fetch categories: ${state.message}'));
             case CategoryStatus.success:
               categories = state.categories;
-
-              Widget tableView() {
-                if (categories.isEmpty) {
-                  return const Center(
-                      heightFactor: 20,
-                      child: Text("no categories found",
-                          textAlign: TextAlign.center));
-                }
-                // get table data formatted for tableView
-                var (
-                  List<List<TableViewCell>> tableViewCells,
-                  List<double> fieldWidths,
-                  double? rowHeight
-                ) = get2dTableData<Category>(getCategoryTableData,
-                    bloc: _categoryBloc,
-                    classificationId: 'AppAdmin',
-                    context: context,
-                    items: categories);
-                return TableView.builder(
-                  diagonalDragBehavior: DiagonalDragBehavior.free,
-                  verticalDetails:
-                      ScrollableDetails.vertical(controller: _scrollController),
-                  horizontalDetails: ScrollableDetails.horizontal(
-                      controller: _horizontalController),
-                  cellBuilder: (context, vicinity) =>
-                      tableViewCells[vicinity.row][vicinity.column],
-                  columnBuilder: (index) => index >= tableViewCells[0].length
-                      ? null
-                      : TableSpan(
-                          padding: categoryPadding,
-                          backgroundDecoration:
-                              getCategoryBackGround(context, index),
-                          extent: FixedTableSpanExtent(fieldWidths[index]),
-                        ),
-                  pinnedColumnCount: 1,
-                  rowBuilder: (index) => index >= tableViewCells.length
-                      ? null
-                      : TableSpan(
-                          padding: categoryPadding,
-                          backgroundDecoration:
-                              getCategoryBackGround(context, index),
-                          extent: FixedTableSpanExtent(rowHeight!),
-                          recognizerFactories: <Type, GestureRecognizerFactory>{
-                              TapGestureRecognizer:
-                                  GestureRecognizerFactoryWithHandlers<
-                                          TapGestureRecognizer>(
-                                      () => TapGestureRecognizer(),
-                                      (TapGestureRecognizer t) =>
-                                          t.onTap = () => showDialog(
-                                              barrierDismissible: true,
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return index >
-                                                        state.categories.length
-                                                    ? const BottomLoader()
-                                                    : Dismissible(
-                                                        key: const Key(
-                                                            'locationItem'),
-                                                        direction:
-                                                            DismissDirection
-                                                                .startToEnd,
-                                                        child: BlocProvider.value(
-                                                            value:
-                                                                _categoryBloc,
-                                                            child: CategoryDialog(
-                                                                categories[
-                                                                    index -
-                                                                        1])));
-                                              }))
-                            }),
-                  pinnedRowCount: 1,
-                );
-              }
-
-              return Scaffold(
-                  floatingActionButton: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        FloatingActionButton(
-                            key: const Key("search"),
-                            heroTag: "btn1",
-                            onPressed: () async {
-                              // find findoc id to show
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    // search separate from finDocBloc
-                                    return BlocProvider.value(
-                                        value: context
-                                            .read<DataFetchBloc<Locations>>(),
-                                        child: const SearchCategoryList());
-                                  }).then((value) async => value != null &&
-                                      context.mounted
-                                  ?
-                                  // show detail page
-                                  await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return BlocProvider.value(
+              return Stack(children: [
+                tableView(),
+                Positioned(
+                  left: left,
+                  top: top,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        left += details.delta.dx;
+                        top += details.delta.dy;
+                      });
+                    },
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          FloatingActionButton(
+                              key: const Key("search"),
+                              heroTag: "btn1",
+                              onPressed: () async {
+                                // find findoc id to show
+                                await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      // search separate from finDocBloc
+                                      return BlocProvider.value(
+                                          value: context
+                                              .read<DataFetchBloc<Locations>>(),
+                                          child: const SearchCategoryList());
+                                    }).then((value) async => value != null &&
+                                        context.mounted
+                                    ?
+                                    // show detail page
+                                    await showDialog(
+                                        barrierDismissible: true,
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return BlocProvider.value(
+                                              value: _categoryBloc,
+                                              child: CategoryDialog(value));
+                                        })
+                                    : const SizedBox.shrink());
+                              },
+                              child: const Icon(Icons.search)),
+                          const SizedBox(height: 10),
+                          FloatingActionButton(
+                              heroTag: 'catFiles',
+                              key: const Key("upDownload"),
+                              onPressed: () async {
+                                await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        BlocProvider.value(
                                             value: _categoryBloc,
-                                            child: CategoryDialog(value));
-                                      })
-                                  : const SizedBox.shrink());
-                            },
-                            child: const Icon(Icons.search)),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                            heroTag: 'catFiles',
-                            key: const Key("upDownload"),
-                            onPressed: () async {
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      BlocProvider.value(
+                                            child:
+                                                const CategoryFilesDialog()));
+                              },
+                              tooltip: 'category up/download',
+                              child: const Icon(Icons.file_copy)),
+                          const SizedBox(height: 10),
+                          FloatingActionButton(
+                              heroTag: 'catNew',
+                              key: const Key("addNew"),
+                              onPressed: () async {
+                                await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return BlocProvider.value(
                                           value: _categoryBloc,
-                                          child: const CategoryFilesDialog()));
-                            },
-                            tooltip: 'category up/download',
-                            child: const Icon(Icons.file_copy)),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                            heroTag: 'catNew',
-                            key: const Key("addNew"),
-                            onPressed: () async {
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return BlocProvider.value(
-                                        value: _categoryBloc,
-                                        child: CategoryDialog(Category()));
-                                  });
-                            },
-                            tooltip: 'Add New',
-                            child: const Icon(Icons.add)),
-                      ]),
-                  body: tableView());
+                                          child: CategoryDialog(Category()));
+                                    });
+                              },
+                              tooltip: 'Add New',
+                              child: const Icon(Icons.add)),
+                        ]),
+                  ),
+                ),
+              ]);
             default:
               return const Center(child: LoadingIndicator());
           }

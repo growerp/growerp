@@ -123,6 +123,8 @@ class WebsiteContentState extends State<WebsiteContent> {
 //                            ? _showMdTextForm(isPhone)
 //                            : _showHtmlTextForm(isPhone)));
               } else {
+                double top = 0;
+                double left = 250;
                 return Dialog(
                   key: const Key('WebsiteContentImage'),
                   insetPadding: const EdgeInsets.all(20),
@@ -134,11 +136,25 @@ class WebsiteContentState extends State<WebsiteContent> {
                       width: isPhone ? 350 : 800,
                       height: 500,
                       title: 'Image information ${widget.content.title}',
-                      child: Scaffold(
-                          backgroundColor: Colors.transparent,
-                          floatingActionButton: ImageButtons(
-                              _scrollController, _onImageButtonPressed),
-                          body: imageChild(isPhone))),
+                      child: Stack(
+                        children: [
+                          imageChild(isPhone),
+                          Positioned(
+                            left: left,
+                            top: top,
+                            child: GestureDetector(
+                              onPanUpdate: (details) {
+                                setState(() {
+                                  left += details.delta.dx;
+                                  top += details.delta.dy;
+                                });
+                              },
+                              child: ImageButtons(
+                                  _scrollController, _onImageButtonPressed),
+                            ),
+                          ),
+                        ],
+                      )),
                 );
               }
             default:

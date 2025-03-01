@@ -21,9 +21,6 @@ import 'package:flutter/foundation.dart' as foundation;
 
 import '../blocs/category_bloc.dart';
 
-final GlobalKey<ScaffoldMessengerState> categoryFilesDialogKey =
-    GlobalKey<ScaffoldMessengerState>();
-
 class CategoryFilesDialog extends StatefulWidget {
   const CategoryFilesDialog({super.key});
 
@@ -53,43 +50,38 @@ class _FilesHeaderState extends State<CategoryFilesDialog> {
       }
     }, builder: (context, state) {
       return Stack(children: [
-        popUpDialog(
-            scaffoldkey: categoryFilesDialogKey,
-            context: context,
-            title: "Category Up/Download",
-            children: [
-              const SizedBox(height: 40),
-              const Text("Download first to obtain the format"),
-              const SizedBox(height: 10),
-              OutlinedButton(
-                  key: const Key('upload'),
-                  child: const Text('Upload CSV file'),
-                  onPressed: () async {
-                    FilePickerResult? result = await FilePicker.platform
-                        .pickFiles(
-                            allowedExtensions: ['csv'], type: FileType.custom);
-                    if (result != null) {
-                      String fileString = '';
-                      if (foundation.kIsWeb) {
-                        foundation.Uint8List bytes = result.files.first.bytes!;
-                        fileString = String.fromCharCodes(bytes);
-                      } else {
-                        File file = File(result.files.single.path!);
-                        fileString = await file.readAsString();
-                      }
-                      _categoryBloc.add(CategoryUpload(fileString));
-                    }
-                  }),
-              const SizedBox(height: 20),
-              OutlinedButton(
-                  key: const Key('download'),
-                  child: const Text('Download via email'),
-                  onPressed: () {
-                    _categoryBloc.add(CategoryDownload());
-                  }),
-              const SizedBox(height: 20),
-              const Text("A data file will be send by email"),
-            ]),
+        popUpDialog(context: context, title: "Category Up/Download", children: [
+          const SizedBox(height: 40),
+          const Text("Download first to obtain the format"),
+          const SizedBox(height: 10),
+          OutlinedButton(
+              key: const Key('upload'),
+              child: const Text('Upload CSV file'),
+              onPressed: () async {
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                    allowedExtensions: ['csv'], type: FileType.custom);
+                if (result != null) {
+                  String fileString = '';
+                  if (foundation.kIsWeb) {
+                    foundation.Uint8List bytes = result.files.first.bytes!;
+                    fileString = String.fromCharCodes(bytes);
+                  } else {
+                    File file = File(result.files.single.path!);
+                    fileString = await file.readAsString();
+                  }
+                  _categoryBloc.add(CategoryUpload(fileString));
+                }
+              }),
+          const SizedBox(height: 20),
+          OutlinedButton(
+              key: const Key('download'),
+              child: const Text('Download via email'),
+              onPressed: () {
+                _categoryBloc.add(CategoryDownload());
+              }),
+          const SizedBox(height: 20),
+          const Text("A data file will be send by email"),
+        ]),
         if (state.status == CategoryStatus.loading) const LoadingIndicator(),
       ]);
     });

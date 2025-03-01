@@ -155,134 +155,133 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
               "amount": liability + equity + income
             },
           ];
-          return Scaffold(
-              body: RefreshIndicator(
-                  onRefresh: (() async => context.read<LedgerBloc>().add(
-                      LedgerFetch(ReportType.sheet,
-                          periodName: _selectedPeriod.periodName))),
-                  child: ListView(children: <Widget>[
-                    const SizedBox(height: 10),
-                    Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                      SizedBox(
-                        width: 150,
-                        child: DropdownSearch<TimePeriod>(
-                          key: const Key('periodDropDown'),
-                          selectedItem: _selectedPeriod,
-                          popupProps: PopupProps.menu(
-                            isFilterOnline: true,
-                            showSearchBox: true,
-                            searchFieldProps: TextFieldProps(
-                              autofocus: true,
-                              decoration: const InputDecoration(
-                                  labelText: 'Time period'),
-                              controller: _periodSearchBoxController,
-                            ),
-                            menuProps: MenuProps(
-                                borderRadius: BorderRadius.circular(20.0)),
-                            title: popUp(
-                              context: context,
-                              title: 'Select period',
-                              height: 50,
-                            ),
-                          ),
-                          dropdownDecoratorProps: const DropDownDecoratorProps(
-                            dropdownSearchDecoration: InputDecoration(
-                              labelText: 'Time period',
-                            ),
-                          ),
-                          itemAsString: (TimePeriod? u) =>
-                              " ${u!.periodName}", // invisible char for test
-                          onChanged: (TimePeriod? newValue) {
-                            setState(() => _selectedPeriod = newValue!);
-                            _ledgerBloc.add(LedgerFetch(ReportType.sheet,
-                                periodName: newValue!.periodName));
-                          },
-                          items: state.timePeriods,
-                          validator: (value) =>
-                              value == null ? 'field required' : null,
+          return RefreshIndicator(
+              onRefresh: (() async => context.read<LedgerBloc>().add(
+                  LedgerFetch(ReportType.sheet,
+                      periodName: _selectedPeriod.periodName))),
+              child: ListView(children: <Widget>[
+                const SizedBox(height: 10),
+                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  SizedBox(
+                    width: 150,
+                    child: DropdownSearch<TimePeriod>(
+                      key: const Key('periodDropDown'),
+                      selectedItem: _selectedPeriod,
+                      popupProps: PopupProps.menu(
+                        isFilterOnline: true,
+                        showSearchBox: true,
+                        searchFieldProps: TextFieldProps(
+                          autofocus: true,
+                          decoration:
+                              const InputDecoration(labelText: 'Time period'),
+                          controller: _periodSearchBoxController,
+                        ),
+                        menuProps: MenuProps(
+                            borderRadius: BorderRadius.circular(20.0)),
+                        title: popUp(
+                          context: context,
+                          title: 'Select period',
+                          height: 50,
                         ),
                       ),
-                      if (_selectedPeriod.periodType != 'Y')
-                        OutlinedButton(
-                            child: const Text('Y'),
-                            onPressed: () => _ledgerBloc.add(LedgerFetch(
-                                ReportType.sheet,
-                                periodName: _selectedPeriod.periodName
-                                    .substring(0, 5)))),
-                      if (_selectedPeriod.periodType != 'Q')
-                        OutlinedButton(
-                            child: const Text('Q'),
-                            onPressed: () {
-                              String currentQuarter = formatter
-                                  .format(DateTime.now().month / 4 + 1);
-                              _ledgerBloc.add(LedgerFetch(ReportType.sheet,
-                                  periodName:
-                                      '${_selectedPeriod.periodName.substring(0, 5)}'
-                                      'q$currentQuarter'));
-                            }),
-                      if (_selectedPeriod.periodType != 'M')
-                        OutlinedButton(
-                            child: const Text('M'),
-                            onPressed: () => _ledgerBloc.add(LedgerFetch(
-                                ReportType.sheet,
-                                periodName:
-                                    '${_selectedPeriod.periodName.substring(0, 5)}'
-                                    'm${formatter.format(DateTime.now().month)}'))),
-                      if (!expanded)
-                        OutlinedButton(
-                          child: const Text('Exp.'),
-                          onPressed: () => setState(() {
-                            expanded = !expanded;
-                            _controller!.expandAll();
-                          }),
+                      dropdownDecoratorProps: const DropDownDecoratorProps(
+                        dropdownSearchDecoration: InputDecoration(
+                          labelText: 'Time period',
                         ),
-                      if (expanded)
-                        OutlinedButton(
-                          child: const Text('Col.'),
-                          onPressed: () => setState(() {
-                            expanded = !expanded;
-                            _controller!.collapseAll();
-                          }),
-                        ),
-                    ]),
-                    const SizedBox(height: 10),
-                    Row(children: [
-                      const SizedBox(width: 20),
-                      SizedBox(
-                          width: isPhone ? 220 : 410,
-                          child: const Text('Gl Account ID  GL Account Name')),
-                      const SizedBox(
-                          width: 100,
-                          child: Text('Posted', textAlign: TextAlign.right)),
-                    ]),
-                    const Divider(),
-                    TreeView(
-                        treeController: _controller,
-                        nodes: _nodes as List<TreeNode>,
-                        indent: 10),
-                    const Divider(),
-                    Padding(
-                      padding: const EdgeInsets.all(30.0),
-                      child: Table(
-                          columnWidths: const <int, TableColumnWidth>{
-                            0: FixedColumnWidth(250),
-                            1: FixedColumnWidth(100)
-                          },
-                          defaultVerticalAlignment:
-                              TableCellVerticalAlignment.middle,
-                          children: <TableRow>[
-                            for (var item in totals)
-                              TableRow(children: <Widget>[
-                                TableCell(child: Text(item["text"])),
-                                TableCell(
-                                    child: Text(
-                                        Constant.numberFormat.format(
-                                            DecimalIntl(item["amount"])),
-                                        textAlign: TextAlign.right)),
-                              ])
-                          ]),
-                    )
-                  ])));
+                      ),
+                      itemAsString: (TimePeriod? u) =>
+                          " ${u!.periodName}", // invisible char for test
+                      onChanged: (TimePeriod? newValue) {
+                        setState(() => _selectedPeriod = newValue!);
+                        _ledgerBloc.add(LedgerFetch(ReportType.sheet,
+                            periodName: newValue!.periodName));
+                      },
+                      items: state.timePeriods,
+                      validator: (value) =>
+                          value == null ? 'field required' : null,
+                    ),
+                  ),
+                  if (_selectedPeriod.periodType != 'Y')
+                    OutlinedButton(
+                        child: const Text('Y'),
+                        onPressed: () => _ledgerBloc.add(LedgerFetch(
+                            ReportType.sheet,
+                            periodName:
+                                _selectedPeriod.periodName.substring(0, 5)))),
+                  if (_selectedPeriod.periodType != 'Q')
+                    OutlinedButton(
+                        child: const Text('Q'),
+                        onPressed: () {
+                          String currentQuarter =
+                              formatter.format(DateTime.now().month / 4 + 1);
+                          _ledgerBloc.add(LedgerFetch(ReportType.sheet,
+                              periodName:
+                                  '${_selectedPeriod.periodName.substring(0, 5)}'
+                                  'q$currentQuarter'));
+                        }),
+                  if (_selectedPeriod.periodType != 'M')
+                    OutlinedButton(
+                        child: const Text('M'),
+                        onPressed: () => _ledgerBloc.add(LedgerFetch(
+                            ReportType.sheet,
+                            periodName:
+                                '${_selectedPeriod.periodName.substring(0, 5)}'
+                                'm${formatter.format(DateTime.now().month)}'))),
+                  if (!expanded)
+                    OutlinedButton(
+                      child: const Text('Exp.'),
+                      onPressed: () => setState(() {
+                        expanded = !expanded;
+                        _controller!.expandAll();
+                      }),
+                    ),
+                  if (expanded)
+                    OutlinedButton(
+                      child: const Text('Col.'),
+                      onPressed: () => setState(() {
+                        expanded = !expanded;
+                        _controller!.collapseAll();
+                      }),
+                    ),
+                ]),
+                const SizedBox(height: 10),
+                Row(children: [
+                  const SizedBox(width: 20),
+                  SizedBox(
+                      width: isPhone ? 220 : 410,
+                      child: const Text('Gl Account ID  GL Account Name')),
+                  const SizedBox(
+                      width: 100,
+                      child: Text('Posted', textAlign: TextAlign.right)),
+                ]),
+                const Divider(),
+                TreeView(
+                    treeController: _controller,
+                    nodes: _nodes as List<TreeNode>,
+                    indent: 10),
+                const Divider(),
+                Padding(
+                  padding: const EdgeInsets.all(30.0),
+                  child: Table(
+                      columnWidths: const <int, TableColumnWidth>{
+                        0: FixedColumnWidth(250),
+                        1: FixedColumnWidth(100)
+                      },
+                      defaultVerticalAlignment:
+                          TableCellVerticalAlignment.middle,
+                      children: <TableRow>[
+                        for (var item in totals)
+                          TableRow(children: <Widget>[
+                            TableCell(child: Text(item["text"])),
+                            TableCell(
+                                child: Text(
+                                    Constant.numberFormat
+                                        .format(DecimalIntl(item["amount"])),
+                                    textAlign: TextAlign.right)),
+                          ])
+                      ]),
+                )
+              ]));
         case LedgerStatus.failure:
           return const FatalErrorForm(message: 'failed to get balance sheet');
         default:

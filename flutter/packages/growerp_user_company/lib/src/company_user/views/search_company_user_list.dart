@@ -47,7 +47,7 @@ class SearchCompanyUserState extends State<SearchCompanyUserList> {
       if (state.status == DataFetchStatus.failure ||
           state.status == DataFetchStatus.success) {
         companiesUsers = (state.data as CompaniesUsers).companiesUsers;
-        return CompanyUserScaffold(
+        return CompanyUserSearchDialog(
             companyUserBloc: _companyUserBloc,
             widget: widget,
             companiesUsers: companiesUsers);
@@ -58,8 +58,8 @@ class SearchCompanyUserState extends State<SearchCompanyUserList> {
   }
 }
 
-class CompanyUserScaffold extends StatelessWidget {
-  const CompanyUserScaffold({
+class CompanyUserSearchDialog extends StatelessWidget {
+  const CompanyUserSearchDialog({
     super.key,
     required DataFetchBloc companyUserBloc,
     required this.widget,
@@ -73,70 +73,67 @@ class CompanyUserScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ScrollController scrollController = ScrollController();
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Dialog(
-            key: const Key('SearchDialog'),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: popUp(
-                context: context,
-                title: 'Company/User Search ',
-                height: 500,
-                width: 350,
-                child: Column(children: [
-                  TextFormField(
-                      key: const Key('searchField'),
-                      textInputAction: TextInputAction.search,
-                      autofocus: true,
-                      decoration:
-                          const InputDecoration(labelText: "Search input"),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please enter a search value?';
+    return Dialog(
+        key: const Key('SearchDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: popUp(
+            context: context,
+            title: 'Company/User Search ',
+            height: 500,
+            width: 350,
+            child: Column(children: [
+              TextFormField(
+                  key: const Key('searchField'),
+                  textInputAction: TextInputAction.search,
+                  autofocus: true,
+                  decoration: const InputDecoration(labelText: "Search input"),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter a search value?';
+                    }
+                    return null;
+                  },
+                  onFieldSubmitted: (value) => _companyUserBloc.add(
+                      GetDataEvent(() => context
+                          .read<RestClient>()
+                          .getCompanyUser(limit: 5, searchString: value)))),
+              const SizedBox(height: 20),
+              const Text('Search results'),
+              Expanded(
+                  child: ListView.builder(
+                      key: const Key('listView'),
+                      shrinkWrap: true,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: companiesUsers.length + 2,
+                      controller: scrollController,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (index == 0) {
+                          return Visibility(
+                              visible: companiesUsers.isEmpty,
+                              child: const Center(
+                                  heightFactor: 20,
+                                  child: Text('No search items found (yet)',
+                                      key: Key('empty'),
+                                      textAlign: TextAlign.center)));
                         }
-                        return null;
-                      },
-                      onFieldSubmitted: (value) => _companyUserBloc.add(
-                          GetDataEvent(() => context
-                              .read<RestClient>()
-                              .getCompanyUser(limit: 5, searchString: value)))),
-                  const SizedBox(height: 20),
-                  const Text('Search results'),
-                  Expanded(
-                      child: ListView.builder(
-                          key: const Key('listView'),
-                          shrinkWrap: true,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: companiesUsers.length + 2,
-                          controller: scrollController,
-                          itemBuilder: (BuildContext context, int index) {
-                            if (index == 0) {
-                              return Visibility(
-                                  visible: companiesUsers.isEmpty,
-                                  child: const Center(
-                                      heightFactor: 20,
-                                      child: Text('No search items found (yet)',
-                                          key: Key('empty'),
-                                          textAlign: TextAlign.center)));
-                            }
-                            index--;
-                            return index >= companiesUsers.length
-                                ? const Text('')
-                                : Dismissible(
-                                    key: const Key('searchItem'),
-                                    direction: DismissDirection.startToEnd,
-                                    child: ListTile(
-                                      title: Text(
-                                          "ID: ${companiesUsers[index].pseudoId}\n"
-                                          "Name: ${companiesUsers[index].name}",
-                                          key: Key("searchResult$index")),
-                                      onTap: () => Navigator.of(context)
-                                          .pop(companiesUsers[index]),
-                                    ));
-                          }))
-                ]))));
+                        index--;
+                        return index >= companiesUsers.length
+                            ? const Text('')
+                            : Dismissible(
+                                key: const Key('searchItem'),
+                                direction: DismissDirection.startToEnd,
+                                child: ListTile(
+                                  title: Text(
+                                      "ID: ${companiesUsers[index].pseudoId}\n"
+                                      "Name: ${companiesUsers[index].name}",
+                                      key: Key("searchResult$index")),
+                                  onTap: () => Navigator.of(context)
+                                      .pop(companiesUsers[index]),
+                                ));
+                      }))
+            ])));
   }
 }

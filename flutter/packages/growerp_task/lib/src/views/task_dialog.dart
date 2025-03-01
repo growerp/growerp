@@ -52,39 +52,37 @@ class TaskDialogState extends State<TaskDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Dialog(
-            key: const Key('TaskDialog'),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: BlocListener<TaskBloc, TaskState>(
-                listener: (context, state) async {
-                  switch (state.status) {
-                    case TaskBlocStatus.success:
-                      HelperFunctions.showMessage(
-                          context,
-                          '${widget.task.taskId.isEmpty ? "Add" : "Update"} successfull',
-                          Colors.green);
-                      Navigator.of(context).pop();
-                      break;
-                    case TaskBlocStatus.failure:
-                      HelperFunctions.showMessage(
-                          context, 'Error: ${state.message}', Colors.red);
-                      break;
-                    default:
-                      const Text("????");
-                  }
-                },
-                child: popUp(
-                  context: context,
-                  title: '${widget.task.taskType} Information',
-                  height: 400,
-                  width: 400,
-                  child: _showForm(isPhone(context)),
-                ))));
+    return Dialog(
+        key: const Key('TaskDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: BlocListener<TaskBloc, TaskState>(
+            listener: (context, state) async {
+              switch (state.status) {
+                case TaskBlocStatus.success:
+                  HelperFunctions.showMessage(
+                      context,
+                      '${widget.task.taskId.isEmpty ? "Add" : "Update"} successfull',
+                      Colors.green);
+                  Navigator.of(context).pop();
+                  break;
+                case TaskBlocStatus.failure:
+                  HelperFunctions.showMessage(
+                      context, 'Error: ${state.message}', Colors.red);
+                  break;
+                default:
+                  const Text("????");
+              }
+            },
+            child: popUp(
+              context: context,
+              title: '${widget.task.taskType} Information',
+              height: 400,
+              width: 400,
+              child: _showForm(isPhone(context)),
+            )));
   }
 
   Widget _showForm(isPhone) {

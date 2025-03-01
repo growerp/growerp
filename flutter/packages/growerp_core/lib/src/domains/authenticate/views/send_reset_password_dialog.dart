@@ -51,39 +51,37 @@ class _SendResetPasswordDialogState extends State<SendResetPasswordDialog> {
       if (state.status == AuthStatus.loading) {
         return const LoadingIndicator();
       } else {
-        return Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Dialog(
-                insetPadding: const EdgeInsets.all(10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: popUp(
-                    height: 300,
-                    context: context,
-                    title: "Send new Password by email",
-                    child: Form(
-                      key: _formKeyResetPassword,
-                      child: SingleChildScrollView(
-                          key: const Key('listView'),
-                          child: Column(children: [
-                            const SizedBox(height: 20),
-                            TextFormField(
-                              controller: _usernameController,
-                              autofocus: true,
-                              decoration:
-                                  const InputDecoration(labelText: 'Email:'),
-                            ),
-                            const SizedBox(height: 20),
-                            OutlinedButton(
-                              child: const Text('Ok'),
-                              onPressed: () {
-                                _authBloc.add(AuthResetPassword(
-                                    username: _usernameController.text));
-                              },
-                            ),
-                          ])),
-                    ))));
+        return Dialog(
+            insetPadding: const EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: popUp(
+                height: 300,
+                context: context,
+                title: "Send new Password by email",
+                child: Form(
+                  key: _formKeyResetPassword,
+                  child: SingleChildScrollView(
+                      key: const Key('listView'),
+                      child: Column(children: [
+                        const SizedBox(height: 20),
+                        TextFormField(
+                          controller: _usernameController,
+                          autofocus: true,
+                          decoration:
+                              const InputDecoration(labelText: 'Email:'),
+                        ),
+                        const SizedBox(height: 20),
+                        OutlinedButton(
+                          child: const Text('Ok'),
+                          onPressed: () {
+                            _authBloc.add(AuthResetPassword(
+                                username: _usernameController.text));
+                          },
+                        ),
+                      ])),
+                )));
       }
     });
   }

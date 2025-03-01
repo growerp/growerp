@@ -56,20 +56,18 @@ class WorkflowEditorContextMenuState extends State<WorkflowEditorContextMenu> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Dialog(
-            key: const Key('TaskDialog'),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: popUp(
-                context: context,
-                title: widget.element.text,
-                height: 400,
-                width: 280,
-                child: _showForm())));
+    return Dialog(
+        key: const Key('TaskDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: popUp(
+            context: context,
+            title: widget.element.text,
+            height: 400,
+            width: 280,
+            child: _showForm()));
   }
 
   Widget _showForm() {

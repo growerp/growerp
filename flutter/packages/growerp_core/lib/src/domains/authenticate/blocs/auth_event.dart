@@ -68,6 +68,4 @@ class AuthChangePassword extends AuthEvent {
 class AuthLoggedOut extends AuthEvent {
   final Authenticate? authenticate;
   const AuthLoggedOut({this.authenticate});
-  @override
-  String toString() => 'loggedOut with: ${authenticate?.user?.loginName}';
 }

@@ -68,6 +68,8 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
       }
       if (state.status == ChatRoomStatus.success) {
         chatRooms = state.chatRooms;
+        double top = 400;
+        double left = 250;
         return Dialog(
             key: const Key('ChatRoomListDialog'),
             insetPadding: const EdgeInsets.only(left: 20, right: 20),
@@ -77,23 +79,37 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
             child: popUp(
               context: context,
               title: ('Chat users and groups'),
-              height: classificationId == 'AppAdmin' ? 750 : 600,
+              height: classificationId == 'AppAdmin' ? 550 : 600,
               width: isPhone ? 450 : 800,
-              child: Scaffold(
-                  floatingActionButton: FloatingActionButton(
-                      key: const Key("addNew"),
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return ChatRoomDialog(ChatRoom());
-                            });
+              child: Stack(
+                children: [
+                  roomList(state),
+                  Positioned(
+                    left: left,
+                    top: top,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          left += details.delta.dx;
+                          top += details.delta.dy;
+                        });
                       },
-                      tooltip: 'Add New',
-                      child: const Icon(Icons.add)),
-                  backgroundColor: Colors.transparent,
-                  body: roomList(state)),
+                      child: FloatingActionButton(
+                          key: const Key("addNew"),
+                          onPressed: () async {
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return ChatRoomDialog(ChatRoom());
+                                });
+                          },
+                          tooltip: 'Add New',
+                          child: const Icon(Icons.add)),
+                    ),
+                  ),
+                ],
+              ),
             ));
       }
       return const Center(child: LoadingIndicator());

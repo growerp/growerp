@@ -203,7 +203,7 @@ class CommonTest {
     expect(getTextField('appBarAvatarText'), equals(test.company!.name![0]));
     expect(getTextField('appBarCompanyName'), equals(test.company!.name));
     // company
-    expect(getTextField('dbCompanyTitle'), equals("Company"));
+    expect(getTextField('dbCompanyTitle'), equals("Organization"));
     expect(getTextField('dbCompanySubTitle0'), equals(test.company!.name));
     //  expect(getTextField('dbCompanySubTitle1'),
     //      equals("Email: ${test.company!.email}"));
@@ -429,7 +429,7 @@ class CommonTest {
       WidgetTester tester, String key, String value,
       {int seconds = 1}) async {
     expect(find.byKey(Key(key)), findsOneWidget,
-        reason: "could not find text: $value in drop down list");
+        reason: "could not find dropdown key: $key");
     await tester.tap(find.byKey(Key(key)), warnIfMissed: false);
     await tester.pumpAndSettle(Duration(seconds: seconds));
     if (value.isEmpty) {

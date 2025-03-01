@@ -61,19 +61,17 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
       if (state.status == AuthStatus.loading) {
         return const LoadingIndicator();
       } else {
-        return Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Dialog(
-                insetPadding: const EdgeInsets.all(10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: popUp(
-                  context: context,
-                  title: "Registration",
-                  height: isPhone ? 350 : 300,
-                  child: _registerForm(_authBloc.state.authenticate!),
-                )));
+        return Dialog(
+            insetPadding: const EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: popUp(
+              context: context,
+              title: "Registration",
+              height: isPhone ? 350 : 300,
+              child: _registerForm(_authBloc.state.authenticate!),
+            ));
       }
     });
   }

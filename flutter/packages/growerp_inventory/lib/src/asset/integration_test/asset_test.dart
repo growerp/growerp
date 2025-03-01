@@ -50,7 +50,6 @@ class AssetTest {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
         await CommonTest.doNewSearch(tester, searchString: asset.assetId);
-        await CommonTest.tapByKey(tester, 'name0');
         expect(
             CommonTest.getTextField('topHeader').split('#')[1], asset.assetId);
       }

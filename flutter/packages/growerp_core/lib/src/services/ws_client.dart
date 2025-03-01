@@ -25,7 +25,7 @@ import 'dart:io' show Platform;
 
 class WsClient {
   late WebSocketChannel channel;
-  late String chatUrl;
+  late String wsUrl;
   late StreamController streamController;
 
   var logger = Logger(
@@ -38,24 +38,24 @@ class WsClient {
 
   WsClient(String path) {
     if (kReleaseMode) {
-      chatUrl = GlobalConfiguration().get("chatUrl");
+      wsUrl = GlobalConfiguration().get("chatUrl");
     } else {
-      chatUrl = GlobalConfiguration().get("chatUrlDebug");
-      if (chatUrl.isEmpty) {
+      wsUrl = GlobalConfiguration().get("chatUrlDebug");
+      if (wsUrl.isEmpty) {
         if (kIsWeb || Platform.isIOS || Platform.isLinux) {
-          chatUrl = 'ws://localhost:8080/$path';
+          wsUrl = 'ws://localhost:8080/$path';
         } else if (Platform.isAndroid) {
-          chatUrl = 'ws://10.0.2.2:8080/$path';
+          wsUrl = 'ws://10.0.2.2:8080/$path';
         }
       }
     }
-    logger.i('Using base websocket backend url: $chatUrl');
+    logger.i('Using base websocket backend url: $wsUrl');
   }
 
   connect(String apiKey, String userId) async {
-    logger.i("WS connect $chatUrl");
+    logger.i("WS connect $wsUrl");
     channel = WebSocketChannel.connect(
-        Uri.parse("$chatUrl?apiKey=$apiKey&userId=$userId"));
+        Uri.parse("$wsUrl?apiKey=$apiKey&userId=$userId"));
 
     //await channel.ready;
 
@@ -79,7 +79,7 @@ class WsClient {
   }
 
   close() {
-    channel.sink.close(status.goingAway);
+    channel.sink.close(status.normalClosure);
     streamController.close();
   }
 }

@@ -69,69 +69,11 @@ class GlAccountsState extends State<GlAccountList> {
           return Center(
               child: Text('failed to fetch glAccounts: ${state.message}'));
         case GlAccountStatus.success:
-          return Scaffold(
-              floatingActionButton:
-                  Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                FloatingActionButton(
-                    heroTag: 'productFiles',
-                    key: const Key("upDownload"),
-                    onPressed: () async {
-                      await showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return BlocProvider.value(
-                                value: _glAccountBloc,
-                                child: const GlAccountFilesDialog());
-                          });
-                    },
-                    tooltip: 'products up/download',
-                    child: const Icon(Icons.file_copy)),
-                const SizedBox(height: 10),
-                FloatingActionButton(
-                    heroTag: "trialBalance",
-                    key: const Key("tb"),
-                    onPressed: () {
-                      bool refresh = false;
-                      if (trialBalance == false) {
-                        trialBalance = true;
-                        limit = 999;
-                      } else {
-                        trialBalance = false;
-                        refresh = true;
-                        limit = 20;
-                      }
-                      _glAccountBloc.add(GlAccountFetch(
-                          trialBalance: trialBalance,
-                          limit: limit,
-                          refresh: refresh));
-                    },
-                    tooltip: 'Trial Balance',
-                    child: Text(
-                      "TB",
-                      style: trialBalance
-                          ? const TextStyle(
-                              decoration: TextDecoration.lineThrough)
-                          : null,
-                    )),
-                const SizedBox(height: 10),
-                FloatingActionButton(
-                    heroTag: "addNew",
-                    key: const Key("addNew"),
-                    onPressed: () async {
-                      await showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return BlocProvider.value(
-                                value: _glAccountBloc,
-                                child: GlAccountDialog(GlAccount()));
-                          });
-                    },
-                    tooltip: CoreLocalizations.of(context)!.addNew,
-                    child: const Icon(Icons.add))
-              ]),
-              body: Column(children: [
+          double top = 400;
+          double left = 320;
+          return Stack(
+            children: [
+              Column(children: [
                 const GlAccountListHeader(),
                 Expanded(
                     child: RefreshIndicator(
@@ -169,7 +111,83 @@ class GlAccountsState extends State<GlAccountList> {
                                           glAccount: state.glAccounts[index],
                                           index: index));
                             })))
-              ]));
+              ]),
+              Positioned(
+                left: left,
+                top: top,
+                child: GestureDetector(
+                  onPanUpdate: (details) {
+                    setState(() {
+                      left += details.delta.dx;
+                      top += details.delta.dy;
+                    });
+                  },
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FloatingActionButton(
+                            heroTag: 'productFiles',
+                            key: const Key("upDownload"),
+                            onPressed: () async {
+                              await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                        value: _glAccountBloc,
+                                        child: const GlAccountFilesDialog());
+                                  });
+                            },
+                            tooltip: 'products up/download',
+                            child: const Icon(Icons.file_copy)),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
+                            heroTag: "trialBalance",
+                            key: const Key("tb"),
+                            onPressed: () {
+                              bool refresh = false;
+                              if (trialBalance == false) {
+                                trialBalance = true;
+                                limit = 999;
+                              } else {
+                                trialBalance = false;
+                                refresh = true;
+                                limit = 20;
+                              }
+                              _glAccountBloc.add(GlAccountFetch(
+                                  trialBalance: trialBalance,
+                                  limit: limit,
+                                  refresh: refresh));
+                            },
+                            tooltip: 'Trial Balance',
+                            child: Text(
+                              "TB",
+                              style: trialBalance
+                                  ? const TextStyle(
+                                      decoration: TextDecoration.lineThrough)
+                                  : null,
+                            )),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
+                            heroTag: "addNew",
+                            key: const Key("addNew"),
+                            onPressed: () async {
+                              await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                        value: _glAccountBloc,
+                                        child: GlAccountDialog(GlAccount()));
+                                  });
+                            },
+                            tooltip: CoreLocalizations.of(context)!.addNew,
+                            child: const Icon(Icons.add))
+                      ]),
+                ),
+              ),
+            ],
+          );
         default:
           return const Center(child: LoadingIndicator());
       }

@@ -95,7 +95,7 @@ class WebsiteFormState extends State<WebsiteForm> {
           _updatedContent = List.of(websiteState.website!.websiteContent);
           _selectedCategories =
               List.of(websiteState.website!.productCategories);
-          return Scaffold(body: Center(child: _showForm(websiteState)));
+          return _showForm(websiteState);
         case WebsiteStatus.failure:
           return const Center(child: Text("error happened"));
         default:

@@ -28,9 +28,6 @@ import 'package:growerp_models/growerp_models.dart';
 import '../../category/blocs/category_bloc.dart';
 import '../product.dart';
 
-final GlobalKey<ScaffoldMessengerState> productDialogKey =
-    GlobalKey<ScaffoldMessengerState>();
-
 class ProductDialog extends StatefulWidget {
   final Product product;
   const ProductDialog(this.product, {super.key});
@@ -60,6 +57,7 @@ class ProductDialogState extends State<ProductDialog> {
   final ScrollController _scrollController = ScrollController();
   late String currencyId;
   late String currencySymbol;
+  late double top, left;
 
   @override
   void initState() {
@@ -95,6 +93,8 @@ class ProductDialogState extends State<ProductDialog> {
     _selectedTypeId = widget.product.productTypeId;
     useWarehouse = widget.product.useWarehouse;
     _productDialogFormKey = GlobalKey<FormState>();
+    top = -100;
+    left = 250;
   }
 
   @override
@@ -142,11 +142,8 @@ class ProductDialogState extends State<ProductDialog> {
       switch (state.status) {
         case ProductStatus.success:
           Navigator.of(context).pop();
-          break;
         case ProductStatus.failure:
-          productDialogKey.currentState!
-              .showSnackBar(snackBar(context, Colors.red, state.message ?? ''));
-          break;
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
         default:
       }
     }, builder: (context, productState) {
@@ -452,35 +449,43 @@ class ProductDialogState extends State<ProductDialog> {
           padding: const EdgeInsets.only(bottom: 10), child: widgets[i]));
     }
 
-    return ScaffoldMessenger(
-      key: productDialogKey,
-      child: Scaffold(
-          backgroundColor: Colors.transparent,
-          floatingActionButton:
-              ImageButtons(_scrollController, _onImageButtonPressed),
-          body: Form(
-              key: _productDialogFormKey,
-              child: SingleChildScrollView(
-                  key: const Key('listView'),
-                  controller: _scrollController,
-                  child: Column(children: <Widget>[
-                    CircleAvatar(
-                        radius: 60,
-                        child: _imageFile != null
-                            ? foundation.kIsWeb
-                                ? Image.network(_imageFile!.path, scale: 0.3)
-                                : Image.file(File(_imageFile!.path), scale: 0.3)
-                            : widget.product.image != null
-                                ? Image.memory(widget.product.image!,
-                                    scale: 0.3)
-                                : Text(
-                                    widget.product.productName
-                                            ?.substring(0, 1) ??
-                                        '',
-                                    style: const TextStyle(fontSize: 30))),
-                    const SizedBox(height: 10),
-                    Column(children: (rows.isEmpty ? column : rows)),
-                  ])))),
+    return Stack(
+      children: [
+        Form(
+            key: _productDialogFormKey,
+            child: SingleChildScrollView(
+                key: const Key('listView'),
+                controller: _scrollController,
+                child: Column(children: <Widget>[
+                  CircleAvatar(
+                      radius: 60,
+                      child: _imageFile != null
+                          ? foundation.kIsWeb
+                              ? Image.network(_imageFile!.path, scale: 0.3)
+                              : Image.file(File(_imageFile!.path), scale: 0.3)
+                          : widget.product.image != null
+                              ? Image.memory(widget.product.image!, scale: 0.3)
+                              : Text(
+                                  widget.product.productName?.substring(0, 1) ??
+                                      '',
+                                  style: const TextStyle(fontSize: 30))),
+                  const SizedBox(height: 10),
+                  Column(children: (rows.isEmpty ? column : rows)),
+                ]))),
+        Positioned(
+          left: left,
+          top: top,
+          child: GestureDetector(
+            onPanUpdate: (details) {
+              setState(() {
+                left += details.delta.dx;
+                top += details.delta.dy;
+              });
+            },
+            child: ImageButtons(_scrollController, _onImageButtonPressed),
+          ),
+        ),
+      ],
     );
   }
 }

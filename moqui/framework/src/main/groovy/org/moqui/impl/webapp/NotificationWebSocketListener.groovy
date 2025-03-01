@@ -75,6 +75,7 @@ class NotificationWebSocketListener implements NotificationMessageListener {
             for (NotificationEndpoint endpoint in registeredEndPoints.values()) {
                 if (endpoint.session != null && endpoint.session.isOpen() &&
                         (endpoint.subscribedTopics.contains("ALL") || endpoint.subscribedTopics.contains(nm.topic))) {
+                    logger.info("====sending message to userId: $userId messsage: $messageWrapperJson")   
                     endpoint.session.asyncRemote.sendText(messageWrapperJson)
                     nm.markSent(userId)
                 }

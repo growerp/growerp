@@ -30,10 +30,8 @@ class _ChangeIpFormState extends State<ChangeIpForm> {
   @override
   Widget build(BuildContext context) {
     String ip = '', companyPartyId = '', chat = '';
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Center(
-          child: AlertDialog(
+    return Center(
+      child: AlertDialog(
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(20.0))),
         title: const Text(
@@ -112,7 +110,7 @@ class _ChangeIpFormState extends State<ChangeIpForm> {
                     ],
                   ),
                 ]))),
-      )),
+      ),
     );
   }
 }

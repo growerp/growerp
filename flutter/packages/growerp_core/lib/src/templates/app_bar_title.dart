@@ -46,9 +46,9 @@ Widget appBarTitle(BuildContext context, String title, bool isPhone) {
         style: const TextStyle(fontSize: 15),
         key: const Key('appBarTitle'),
       ),
-      //  Text(auth?.company?.name ?? '??',
-      //      key: const Key('appBarCompanyName'),
-      //      style: const TextStyle(fontSize: 10)),
+      Text(auth?.company?.name ?? '??',
+          key: const Key('appBarCompanyName'),
+          style: const TextStyle(fontSize: 10)),
     ]),
   ]);
 }

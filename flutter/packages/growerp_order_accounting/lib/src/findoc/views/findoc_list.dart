@@ -71,6 +71,7 @@ class FinDocListState extends State<FinDocList> {
   List<FinDoc> searchFinDocs = [];
   late bool my;
   late AuthBloc _authBloc;
+  late double top, left;
 
   @override
   void initState() {
@@ -108,6 +109,8 @@ class FinDocListState extends State<FinDocList> {
       default:
     }
     _finDocBloc.add(FinDocFetch(limit: 15, my: my));
+    top = widget.journalId != null ? 250 : 400;
+    left = widget.journalId != null ? 280 : 320;
   }
 
   @override
@@ -124,7 +127,7 @@ class FinDocListState extends State<FinDocList> {
                     : "no (${widget.docType == FinDocType.transaction ? 'unposted' : 'open'})"
                         "${widget.docType == FinDocType.shipment ? "${widget.sales ? 'outgoing' : 'incoming'} " : "${widget.docType == FinDocType.transaction || widget.docType == FinDocType.request ? '' : widget.sales ? 'sales' : 'purchase'} "}"
                         "${entityName}s found!",
-                textAlign: TextAlign.center));
+                style: const TextStyle(fontSize: 20.0)));
       }
       // get table data formatted for tableView
       var (
@@ -229,87 +232,104 @@ class FinDocListState extends State<FinDocList> {
                   .toList();
             }
 
-            return Scaffold(
-                floatingActionButton: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-                        child: FloatingActionButton(
-                            key: const Key("search"),
-                            heroTag: "btn1",
-                            onPressed: () async {
-                              // find findoc id to show
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    // search separate from finDocBloc
-                                    return BlocProvider.value(
-                                        value: context
-                                            .read<DataFetchBloc<FinDocs>>(),
-                                        child: SearchFinDocList(
-                                            docType: widget.docType,
-                                            sales: widget.sales));
-                                  }).then((value) async => value != null
-                                  ?
-                                  // show detail page
+            return Stack(
+              children: [
+                finDocsPage(state.finDocs.length),
+                Positioned(
+                  left: left,
+                  top: top,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        left += details.delta.dx;
+                        top += details.delta.dy;
+                      });
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                            child: FloatingActionButton(
+                                key: const Key("search"),
+                                heroTag: "btn1",
+                                onPressed: () async {
+                                  // find findoc id to show
                                   await showDialog(
                                       barrierDismissible: true,
                                       context: context,
                                       builder: (BuildContext context) {
+                                        // search separate from finDocBloc
                                         return BlocProvider.value(
+                                            value: context
+                                                .read<DataFetchBloc<FinDocs>>(),
+                                            child: SearchFinDocList(
+                                                docType: widget.docType,
+                                                sales: widget.sales));
+                                      }).then((value) async => value != null
+                                      ?
+                                      // show detail page
+                                      await showDialog(
+                                          barrierDismissible: true,
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return BlocProvider.value(
+                                                value: _finDocBloc,
+                                                child: SelectFinDocDialog(
+                                                    finDoc: value));
+                                          })
+                                      : const SizedBox.shrink());
+                                },
+                                child: const Icon(Icons.search))),
+                        if (widget.docType != FinDocType.shipment)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                            child: FloatingActionButton(
+                                key: const Key("addNew"),
+                                heroTag: "btn2",
+                                onPressed: () async => showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        BlocProvider.value(
                                             value: _finDocBloc,
-                                            child: SelectFinDocDialog(
-                                                finDoc: value));
-                                      })
-                                  : const SizedBox.shrink());
-                            },
-                            child: const Icon(Icons.search))),
-                    if (widget.docType != FinDocType.shipment)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-                        child: FloatingActionButton(
-                            key: const Key("addNew"),
-                            heroTag: "btn2",
-                            onPressed: () async => showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) =>
-                                    BlocProvider.value(
-                                        value: _finDocBloc,
-                                        child: widget.docType ==
-                                                FinDocType.payment
-                                            ? PaymentDialog(
-                                                finDoc: FinDoc(
-                                                    sales: widget.sales,
-                                                    docType: widget.docType))
-                                            : widget.docType ==
-                                                    FinDocType.request
-                                                ? RequestDialog(
+                                            child: widget.docType ==
+                                                    FinDocType.payment
+                                                ? PaymentDialog(
                                                     finDoc: FinDoc(
                                                         sales: widget.sales,
                                                         docType:
                                                             widget.docType))
-                                                : FinDocDialog(FinDoc(
-                                                    sales: widget.sales,
-                                                    docType: widget.docType)))),
-                            tooltip: 'Add New',
-                            child: const Icon(Icons.add)),
-                      ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-                      child: FloatingActionButton(
-                          key: const Key("refresh"),
-                          heroTag: "btn3",
-                          onPressed: () async =>
-                              _finDocBloc.add(const FinDocFetch(refresh: true)),
-                          tooltip: 'refresh',
-                          child: const Icon(Icons.refresh)),
-                    )
-                  ],
+                                                : widget.docType ==
+                                                        FinDocType.request
+                                                    ? RequestDialog(
+                                                        finDoc: FinDoc(
+                                                            sales: widget.sales,
+                                                            docType:
+                                                                widget.docType))
+                                                    : FinDocDialog(FinDoc(
+                                                        sales: widget.sales,
+                                                        docType:
+                                                            widget.docType)))),
+                                tooltip: 'Add New',
+                                child: const Icon(Icons.add)),
+                          ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                          child: FloatingActionButton(
+                              key: const Key("refresh"),
+                              heroTag: "btn3",
+                              onPressed: () async => _finDocBloc
+                                  .add(const FinDocFetch(refresh: true)),
+                              tooltip: 'refresh',
+                              child: const Icon(Icons.refresh)),
+                        )
+                      ],
+                    ),
+                  ),
                 ),
-                body: finDocsPage(state.finDocs.length));
+              ],
+            );
           default:
             return const Center(child: LoadingIndicator());
         }

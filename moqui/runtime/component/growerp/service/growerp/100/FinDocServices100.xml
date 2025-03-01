@@ -1621,12 +1621,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <return error="true"
                     message="Other Company or User required! company: ${finDoc.otherCompany} user: ${finDoc.otherUser} " />
             </if>
-            <if condition="finDoc.otherCompany">
-                <set field="otherPartyId" from="finDoc.otherCompany.partyId" />
-                <else-if condition="finDoc.otherUser">
-                    <set field="otherPartyId" from="finDoc.otherUser.partyId" />
-                </else-if>
-            </if>
+            <set field="otherPartyId"
+                from="finDoc.otherCompany?.partyId ?: finDoc.otherUser.partyId" />
             <service-call name="growerp.100.FinDocServices100.convert#StatusId" out-map="context"
                 in-map="[sales: finDoc?.sales, docType: finDoc.docType, statusId: finDoc.statusId]" />
             <set field="finDoc.statusId" from="convertedStatusId" />
@@ -1828,11 +1824,13 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="invoice.sales == false">                <!-- inside this payment object this field is NOT
                 a string -->
                 <set field="toPartyId" from="companyPartyId" />
-                <set field="fromPartyId" from="invoice.otherCompany.partyId" />
+                <set field="fromPartyId"
+                    from="invoice.otherCompany?.partyId ?: payment.otherUser.partyId" />
                 <set field="contactRole" value="Vendor" />
                 <else>
-                    <set field="fromPartyId" from="companyPartyId" />
-                    <set field="toPartyId" from="invoice.otherCompany.partyId" />
+                    <set field="fromPartyId" from="companyPartyId " />
+                    <set field="toPartyId"
+                        from="invoice.otherCompany?.partyId ?: payment.otherUser.partyId" />
                     <set field="contactRole" value="Customer" />
                 </else>
             </if>
@@ -1884,10 +1882,12 @@ along with this software (see the LICENSE.md file). If not, see
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="shipment.sales == false">
                 <set field="toPartyId" from="companyPartyId" />
-                <set field="fromPartyId" from="shipment.otherCompany.partyId" />
+                <set field="fromPartyId"
+                    from="shipment.otherCompany?.partyId ?: payment.otherUser.partyId" />
                 <else>
                     <set field="fromPartyId" from="companyPartyId" />
-                    <set field="toPartyId" from="shipment.otherCompany.partyId" />
+                    <set field="toPartyId"
+                        from="shipment.otherCompany?.partyId ?: payment.otherUser.partyId" />
                     <entity-find entity-name="mantle.facility.Facility" list="facilities">
                         <econdition field-name="ownerPartyId" from="companyPartyId" />
                     </entity-find>
@@ -1929,7 +1929,8 @@ along with this software (see the LICENSE.md file). If not, see
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="payment.sales == true">
                 <then>                    <!-- incoming sales payment -->
-                    <set field="fromPartyId" from="payment.otherCompany.partyId" />
+                    <set field="fromPartyId"
+                        from="payment.otherCompany?.partyId ?: payment.otherUser.partyId" />
                     <set field="toPartyId" from="companyPartyId" />
                     <set field="contactRole" value="CustomerContactPerson" />
                     <if
@@ -1949,9 +1950,10 @@ along with this software (see the LICENSE.md file). If not, see
                             from="System.getProperty('paymentGatewayConfigId')" />
                     </if>
                 </then>
-                <else>                    <!-- outgoing purchase payment -->
+                <else><!-- outgoing purchase payment -->
                     <set field="fromPartyId" from="companyPartyId" />
-                    <set field="toPartyId" from="payment.otherCompany.partyId" />
+                    <set field="toPartyId"
+                        from="payment.otherCompany?.partyId ?: payment.otherUser.partyId" />
                     <set field="contactRole" value="VendorContactPerson" />
                     <if condition="payment.paymentInstrument == 'CreditCard'">
                         <entity-find entity-name="mantle.account.method.PaymentMethod" limit="1"
@@ -2384,12 +2386,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                         in-map="[sales: sales, docType: 'requestType', statusId: finDoc.requestType]"
                         out-map="requestType" />
-                    <if condition="finDoc.otherCompany">
-                        <set field="otherPartyId" from="finDoc.otherCompany.partyId" />
-                        <else-if condition="finDoc.otherUser">
-                            <set field="otherPartyId" from="finDoc.otherUser.partyId" />
-                        </else-if>
-                    </if>
+                    <set field="otherPartyId"
+                        from="finDoc.otherCompany?.partyId ?: finDoc.otherUser.partyId" />
                     <service-call name="update#mantle.request.Request"
                         in-map="[   requestId: finDoc.requestId,
                                     pseudoId: finDoc.pseudoId,
@@ -2650,8 +2648,10 @@ along with this software (see the LICENSE.md file). If not, see
                         <entity-update value-field="parts[0]" />
                     </if>
                     <if
-                        condition="order.sales == false &amp;&amp; parts[0].vendorPartyId != order.otherCompany.partyId">
-                        <set field="parts[0].vendorPartyId" from="order.otherCompany.partyId" />
+                        condition="order.sales == false &amp;&amp; 
+                            parts[0].vendorPartyId != (order.otherCompany?.partyId ?: order.otherUser.partyId)">
+                        <set field="parts[0].vendorPartyId"
+                            from="order.otherCompany?.partyId ?: order.otherUser.partyId" />
                         <entity-update value-field="parts[0]" />
                     </if>
                     <!-- contact person (add if missing)-->
@@ -2913,11 +2913,11 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="invoice.sales">
                 <then>
                     <set field="invoiceHeader.toPartyId"
-                        from="invoice.otherCompany? invoice.otherCompany.partyId: invoice.otherUser.partyId" />
+                        from="invoice.otherCompany?partyId ?: invoice.otherUser.partyId" />
                 </then>
                 <else>
                     <set field="invoiceHeader.fromPartyId"
-                        from="invoice.otherCompany? invoice.otherCompany.partyId: invoice.otherUser.partyId" />
+                        from="invoice.otherCompany?.partyId ?: invoice.otherUser.partyId" />
                 </else>
             </if>
             <entity-update value-field="invoiceHeader" />
@@ -2995,11 +2995,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="payment.sales">
                         <then>
                             <set field="paymentOld.fromPartyId"
-                                from="payment.otherCompany? payment.otherCompany.partyId: payment.otherUser.partyId" />
+                                from="payment.otherCompany?.partyId ?: payment.otherUser.partyId" />
                         </then>
                         <else>
                             <set field="paymentOld.toPartyId"
-                                from="payment.otherCompany? payment.otherCompany.partyId: payment.otherUser.partyId" />
+                                from="payment.otherCompany?.partyId ?: payment.otherUser.partyId" />
                         </else>
                     </if>
                     <set field="amount" from="payment.grandTotal" type="BigDecimal" />

@@ -54,7 +54,7 @@ class SearchOpportunityState extends State<SearchOpportunityList> {
       }
       return Stack(
         children: [
-          OpportunityScaffold(
+          OpportunitySearchDialog(
               opportunityBloc: _opportunityBloc,
               widget: widget,
               opportunities: opportunities),
@@ -66,8 +66,8 @@ class SearchOpportunityState extends State<SearchOpportunityList> {
   }
 }
 
-class OpportunityScaffold extends StatelessWidget {
-  const OpportunityScaffold({
+class OpportunitySearchDialog extends StatelessWidget {
+  const OpportunitySearchDialog({
     super.key,
     required OpportunityBloc opportunityBloc,
     required this.widget,
@@ -81,68 +81,65 @@ class OpportunityScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ScrollController scrollController = ScrollController();
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Dialog(
-            key: const Key('SearchDialog'),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: popUp(
-                context: context,
-                title: 'Opportunity Search ',
-                height: 500,
-                width: 350,
-                child: Column(children: [
-                  TextFormField(
-                      key: const Key('searchField'),
-                      textInputAction: TextInputAction.search,
-                      autofocus: true,
-                      decoration:
-                          const InputDecoration(labelText: "Search input"),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please enter a search value?';
+    return Dialog(
+        key: const Key('SearchDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: popUp(
+            context: context,
+            title: 'Opportunity Search ',
+            height: 500,
+            width: 350,
+            child: Column(children: [
+              TextFormField(
+                  key: const Key('searchField'),
+                  textInputAction: TextInputAction.search,
+                  autofocus: true,
+                  decoration: const InputDecoration(labelText: "Search input"),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter a search value?';
+                    }
+                    return null;
+                  },
+                  onFieldSubmitted: (value) => _opportunityBloc
+                      .add(OpportunityFetch(limit: 5, searchString: value))),
+              const SizedBox(height: 20),
+              const Text('Search results'),
+              Expanded(
+                  child: ListView.builder(
+                      key: const Key('listView'),
+                      shrinkWrap: true,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: opportunities.length + 2,
+                      controller: scrollController,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (index == 0) {
+                          return Visibility(
+                              visible: opportunities.isEmpty,
+                              child: const Center(
+                                  heightFactor: 20,
+                                  child: Text('No search items found (yet)',
+                                      key: Key('empty'),
+                                      textAlign: TextAlign.center)));
                         }
-                        return null;
-                      },
-                      onFieldSubmitted: (value) => _opportunityBloc.add(
-                          OpportunityFetch(limit: 5, searchString: value))),
-                  const SizedBox(height: 20),
-                  const Text('Search results'),
-                  Expanded(
-                      child: ListView.builder(
-                          key: const Key('listView'),
-                          shrinkWrap: true,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: opportunities.length + 2,
-                          controller: scrollController,
-                          itemBuilder: (BuildContext context, int index) {
-                            if (index == 0) {
-                              return Visibility(
-                                  visible: opportunities.isEmpty,
-                                  child: const Center(
-                                      heightFactor: 20,
-                                      child: Text('No search items found (yet)',
-                                          key: Key('empty'),
-                                          textAlign: TextAlign.center)));
-                            }
-                            index--;
-                            return index >= opportunities.length
-                                ? const Text('')
-                                : Dismissible(
-                                    key: const Key('searchItem'),
-                                    direction: DismissDirection.startToEnd,
-                                    child: ListTile(
-                                      title: Text(
-                                          "ID: ${opportunities[index].pseudoId}\n"
-                                          "Name: ${opportunities[index].opportunityName}",
-                                          key: Key("searchResult$index")),
-                                      onTap: () => Navigator.of(context)
-                                          .pop(opportunities[index]),
-                                    ));
-                          }))
-                ]))));
+                        index--;
+                        return index >= opportunities.length
+                            ? const Text('')
+                            : Dismissible(
+                                key: const Key('searchItem'),
+                                direction: DismissDirection.startToEnd,
+                                child: ListTile(
+                                  title: Text(
+                                      "ID: ${opportunities[index].pseudoId}\n"
+                                      "Name: ${opportunities[index].opportunityName}",
+                                      key: Key("searchResult$index")),
+                                  onTap: () => Navigator.of(context)
+                                      .pop(opportunities[index]),
+                                ));
+                      }))
+            ])));
   }
 }

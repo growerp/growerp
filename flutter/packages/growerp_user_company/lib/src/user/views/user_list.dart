@@ -163,63 +163,81 @@ class UserListState extends State<UserList> {
           isLoading = false;
           users = state.users;
           hasReachedMax = state.hasReachedMax;
-          return Scaffold(
-              floatingActionButton: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  FloatingActionButton(
-                      key: const Key("search"),
-                      heroTag: "userBtn1",
-                      onPressed: () async {
-                        // find findoc id to show
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              // search separate from finDocBloc
-                              return BlocProvider.value(
-                                  value: context.read<DataFetchBloc<Users>>(),
-                                  child: const SearchUserList());
-                            }).then((value) async => value != null
-                            ?
-                            // show detail page
+          double top = 450;
+          double left = 320;
+          return Stack(
+            children: [
+              tableView(),
+              Positioned(
+                left: left,
+                top: top,
+                child: GestureDetector(
+                  onPanUpdate: (details) {
+                    setState(() {
+                      left += details.delta.dx;
+                      top += details.delta.dy;
+                    });
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FloatingActionButton(
+                          key: const Key("search"),
+                          heroTag: "userBtn1",
+                          onPressed: () async {
+                            // find findoc id to show
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  // search separate from finDocBloc
+                                  return BlocProvider.value(
+                                      value:
+                                          context.read<DataFetchBloc<Users>>(),
+                                      child: const SearchUserList());
+                                }).then((value) async => value != null
+                                ?
+                                // show detail page
+                                await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return BlocProvider.value(
+                                          value: _userBloc,
+                                          child: UserDialog(value));
+                                    })
+                                : const SizedBox.shrink());
+                          },
+                          child: const Icon(Icons.search)),
+                      const SizedBox(height: 10),
+                      FloatingActionButton(
+                          key: const Key("addNewUser"),
+                          heroTag: "userBtn2",
+                          onPressed: () async {
                             await showDialog(
                                 barrierDismissible: true,
                                 context: context,
                                 builder: (BuildContext context) {
                                   return BlocProvider.value(
                                       value: _userBloc,
-                                      child: UserDialog(value));
-                                })
-                            : const SizedBox.shrink());
-                      },
-                      child: const Icon(Icons.search)),
-                  const SizedBox(height: 10),
-                  FloatingActionButton(
-                      key: const Key("addNewUser"),
-                      heroTag: "userBtn2",
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _userBloc,
-                                  child: UserDialog(User(
-                                      role: widget.role,
-                                      company: widget.role == Role.company
-                                          ? _authBloc
-                                              .state.authenticate!.company
-                                          : Company(
-                                              role: widget.role,
-                                            ))));
-                            });
-                      },
-                      tooltip: 'Add New',
-                      child: const Icon(Icons.add)),
-                ],
+                                      child: UserDialog(User(
+                                          role: widget.role,
+                                          company: widget.role == Role.company
+                                              ? _authBloc
+                                                  .state.authenticate!.company
+                                              : Company(
+                                                  role: widget.role,
+                                                ))));
+                                });
+                          },
+                          tooltip: 'Add New',
+                          child: const Icon(Icons.add)),
+                    ],
+                  ),
+                ),
               ),
-              body: tableView());
+            ],
+          );
         }
         isLoading = true;
         return const LoadingIndicator();

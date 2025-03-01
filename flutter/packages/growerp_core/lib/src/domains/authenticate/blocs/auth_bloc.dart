@@ -188,6 +188,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
       await restClient.logout();
+      notification.close();
+      chat.close();
       emit(state.copyWith(
           authenticate: state.authenticate!.copyWith(apiKey: null),
           status: AuthStatus.unAuthenticated,
