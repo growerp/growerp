@@ -46,6 +46,7 @@ class CategoryDialogState extends State<CategoryDialog> {
   late CategoryBloc _categoryBloc;
   final ImagePicker _picker = ImagePicker();
   final ScrollController _scrollController = ScrollController();
+  late double top, left;
 
   @override
   void initState() {
@@ -56,6 +57,8 @@ class CategoryDialogState extends State<CategoryDialog> {
     _descrController.text = widget.category.description;
     _selectedProducts = List.of(widget.category.products);
     _categoryBloc = context.read<CategoryBloc>();
+    top = -080;
+    left = 250;
   }
 
   @override
@@ -133,7 +136,7 @@ class CategoryDialogState extends State<CategoryDialog> {
                   context: context,
                   child: listChild(productState),
                   title:
-                      'Category ${widget.category.categoryId.isEmpty ? 'New' : widget.category.pseudoId}',
+                      'Category #${widget.category.categoryId.isEmpty ? 'New' : widget.category.pseudoId}',
                   height: 650,
                   width: 350));
         }
@@ -221,24 +224,14 @@ class CategoryDialogState extends State<CategoryDialog> {
         }
       },
     ));
-
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        floatingActionButton:
-            ImageButtons(_scrollController, _onImageButtonPressed),
-        body: SingleChildScrollView(
+    return Stack(
+      children: [
+        SingleChildScrollView(
             controller: _scrollController,
             key: const Key('listView'),
             child: Form(
                 key: _categoryDialogFormKey,
                 child: Column(children: [
-                  Center(
-                      child: Text(
-                    'Category #${widget.category.pseudoId.isEmpty ? " New" : widget.category.pseudoId}',
-                    style: const TextStyle(
-                        fontSize: 10, fontWeight: FontWeight.bold),
-                    key: const Key('header'),
-                  )),
                   const SizedBox(height: 30),
                   CircleAvatar(
                       radius: 60,
@@ -311,6 +304,21 @@ class CategoryDialogState extends State<CategoryDialog> {
                                   _imageFile?.path))));
                         }
                       }),
-                ]))));
+                ]))),
+        Positioned(
+          left: left,
+          top: top,
+          child: GestureDetector(
+            onPanUpdate: (details) {
+              setState(() {
+                left += details.delta.dx;
+                top += details.delta.dy;
+              });
+            },
+            child: ImageButtons(_scrollController, _onImageButtonPressed),
+          ),
+        ),
+      ],
+    );
   }
 }

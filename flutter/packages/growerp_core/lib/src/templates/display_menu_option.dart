@@ -185,7 +185,7 @@ class MenuOptionState extends State<DisplayMenuOption>
     isPhone = isAPhone(context);
     actions = List.of(widget.actions);
     List<String> unReadRooms =
-        authBloc.state.authenticate!.stats!.notReadChatRooms;
+        authBloc.state.authenticate!.stats?.notReadChatRooms ?? [];
     actions.insert(
         0,
         IconButton(

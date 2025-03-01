@@ -154,60 +154,77 @@ class CompanyListState extends State<CompanyList> {
           isLoading = false;
           companies = state.companies;
           hasReachedMax = state.hasReachedMax;
-          return Scaffold(
-              floatingActionButton: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  FloatingActionButton(
-                      key: const Key("search"),
-                      heroTag: "companybtn1",
-                      onPressed: () async {
-                        // find findoc id to show
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              // search separate from finDocBloc
-                              return BlocProvider.value(
-                                  value:
-                                      context.read<DataFetchBloc<Companies>>(),
-                                  child: const SearchCompanyList());
-                            }).then((value) async => value != null
-                            ?
-                            // show detail page
+          double top = 450;
+          double left = 300;
+          return Stack(
+            children: [
+              tableView(),
+              Positioned(
+                left: left,
+                top: top,
+                child: GestureDetector(
+                  onPanUpdate: (details) {
+                    setState(() {
+                      left += details.delta.dx;
+                      top += details.delta.dy;
+                    });
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FloatingActionButton(
+                          key: const Key("search"),
+                          heroTag: "companybtn1",
+                          onPressed: () async {
+                            // find findoc id to show
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  // search separate from finDocBloc
+                                  return BlocProvider.value(
+                                      value: context
+                                          .read<DataFetchBloc<Companies>>(),
+                                      child: const SearchCompanyList());
+                                }).then((value) async => value != null
+                                ?
+                                // show detail page
+                                await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return BlocProvider.value(
+                                          value: _companyBloc,
+                                          child: CompanyDialog(value));
+                                    })
+                                : const SizedBox.shrink());
+                          },
+                          child: const Icon(Icons.search)),
+                      const SizedBox(height: 10),
+                      FloatingActionButton(
+                          key: const Key("addNewCompany"),
+                          heroTag: "companybtn2",
+                          onPressed: () async {
                             await showDialog(
                                 barrierDismissible: true,
                                 context: context,
                                 builder: (BuildContext context) {
                                   return BlocProvider.value(
                                       value: _companyBloc,
-                                      child: CompanyDialog(value));
-                                })
-                            : const SizedBox.shrink());
-                      },
-                      child: const Icon(Icons.search)),
-                  const SizedBox(height: 10),
-                  FloatingActionButton(
-                      key: const Key("addNewCompany"),
-                      heroTag: "companybtn2",
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _companyBloc,
-                                  child: CompanyDialog(Company(
-                                    partyId: '_NEW_',
-                                    role: widget.role,
-                                  )));
-                            });
-                      },
-                      tooltip: 'Add New',
-                      child: const Icon(Icons.add)),
-                ],
+                                      child: CompanyDialog(Company(
+                                        partyId: '_NEW_',
+                                        role: widget.role,
+                                      )));
+                                });
+                          },
+                          tooltip: 'Add New',
+                          child: const Icon(Icons.add)),
+                    ],
+                  ),
+                ),
               ),
-              body: tableView());
+            ],
+          );
         }
         isLoading = true;
         return const LoadingIndicator();

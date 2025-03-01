@@ -118,39 +118,36 @@ class RequestDialogState extends State<RequestDialog> {
   @override
   Widget build(BuildContext context) {
     isPhone = isAPhone(context);
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Dialog(
-            insetPadding: const EdgeInsets.all(10), // need for width
-            key: const Key("RequestDialog"),
-            child: SingleChildScrollView(
-                key: const Key('listView2'),
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                child: popUp(
-                    context: context,
-                    height: 650,
-                    title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
-                        "Request #${finDoc.pseudoId ?? 'New'}",
-                    child: BlocConsumer<FinDocBloc, FinDocState>(
-                      listenWhen: (previous, current) =>
-                          previous.status == FinDocStatus.loading,
-                      listener: (context, state) {
-                        if (state.status == FinDocStatus.success) {
-                          Navigator.of(context).pop();
-                        }
-                        if (state.status == FinDocStatus.failure) {
-                          HelperFunctions.showMessage(
-                              context, '${state.message}', Colors.red);
-                        }
-                      },
-                      builder: (context, state) {
-                        return classificationId == 'AppHealth'
-                            ? healthRequestForm(
-                                state, requestDialogFormKey, isPhone, user)
-                            : requestForm(state, requestDialogFormKey);
-                      },
-                    )))));
+    return Dialog(
+        insetPadding: const EdgeInsets.all(10), // need for width
+        key: const Key("RequestDialog"),
+        child: SingleChildScrollView(
+            key: const Key('listView2'),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: popUp(
+                context: context,
+                height: 650,
+                title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
+                    "Request #${finDoc.pseudoId ?? 'New'}",
+                child: BlocConsumer<FinDocBloc, FinDocState>(
+                  listenWhen: (previous, current) =>
+                      previous.status == FinDocStatus.loading,
+                  listener: (context, state) {
+                    if (state.status == FinDocStatus.success) {
+                      Navigator.of(context).pop();
+                    }
+                    if (state.status == FinDocStatus.failure) {
+                      HelperFunctions.showMessage(
+                          context, '${state.message}', Colors.red);
+                    }
+                  },
+                  builder: (context, state) {
+                    return classificationId == 'AppHealth'
+                        ? healthRequestForm(
+                            state, requestDialogFormKey, isPhone, user)
+                        : requestForm(state, requestDialogFormKey);
+                  },
+                ))));
   }
 
   Widget healthRequestForm(FinDocState state,

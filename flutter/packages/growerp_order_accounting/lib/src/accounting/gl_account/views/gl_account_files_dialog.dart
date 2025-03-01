@@ -21,9 +21,6 @@ import 'package:flutter/foundation.dart' as foundation;
 
 import '../gl_account.dart';
 
-final GlobalKey<ScaffoldMessengerState> glAccountFilesDialogKey =
-    GlobalKey<ScaffoldMessengerState>();
-
 class GlAccountFilesDialog extends StatefulWidget {
   const GlAccountFilesDialog({super.key});
 
@@ -44,18 +41,15 @@ class _FilesHeaderState extends State<GlAccountFilesDialog> {
     return BlocConsumer<GlAccountBloc, GlAccountState>(
         listener: (context, state) async {
       if (state.status == GlAccountStatus.failure) {
-        glAccountFilesDialogKey.currentState!
-            .showSnackBar(snackBar(context, Colors.red, state.message ?? ''));
+        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
       }
       if (state.status == GlAccountStatus.success) {
-        glAccountFilesDialogKey.currentState!
-            .showSnackBar(snackBar(context, Colors.green, state.message ?? ''));
+        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
         Navigator.of(context).pop();
       }
     }, builder: (context, state) {
       return Stack(children: [
         popUpDialog(
-            scaffoldkey: glAccountFilesDialogKey,
             context: context,
             title: "GlAccount Up/Download",
             children: [

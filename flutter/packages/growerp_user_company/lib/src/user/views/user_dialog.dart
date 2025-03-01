@@ -161,6 +161,8 @@ class UserDialogState extends State<UserDialogStateFull> {
     } else {
       title = _selectedRole.name;
     }
+    double top = -100;
+    double left = 250;
     return Dialog(
       key: Key('UserDialog${_selectedRole.name}'),
       insetPadding: const EdgeInsets.all(10),
@@ -169,11 +171,9 @@ class UserDialogState extends State<UserDialogStateFull> {
           title: "$title #${widget.user.pseudoId ?? ' new'}",
           width: isPhone ? 400 : 1000,
           height: isPhone ? 700 : 700,
-          child: Scaffold(
-              backgroundColor: Colors.transparent,
-              floatingActionButton:
-                  ImageButtons(_scrollController, _onImageButtonPressed),
-              body: BlocConsumer<UserBloc, UserState>(
+          child: Stack(
+            children: [
+              BlocConsumer<UserBloc, UserState>(
                   listenWhen: (previous, current) =>
                       previous.status == UserStatus.loading,
                   listener: (context, state) {
@@ -191,7 +191,22 @@ class UserDialogState extends State<UserDialogStateFull> {
                       return const LoadingIndicator();
                     }
                     return listChild();
-                  }))),
+                  }),
+              Positioned(
+                left: left,
+                top: top,
+                child: GestureDetector(
+                  onPanUpdate: (details) {
+                    setState(() {
+                      left += details.delta.dx;
+                      top += details.delta.dy;
+                    });
+                  },
+                  child: ImageButtons(_scrollController, _onImageButtonPressed),
+                ),
+              ),
+            ],
+          )),
     );
   }
 

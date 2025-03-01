@@ -74,16 +74,14 @@ class LoginDialogState extends State<LoginDialog> {
     }, builder: (context, state) {
       if (state.status == AuthStatus.loading) return const LoadingIndicator();
       var furtherAction = state.authenticate!.apiKey;
-      return Scaffold(
-          backgroundColor: Colors.transparent,
-          body: Dialog(
-              insetPadding: const EdgeInsets.all(10),
-              child: furtherAction == 'moreInfo'
-                  ? moreInfoForm(state.authenticate!)
-                  : furtherAction == 'passwordChange'
-                      ? changePasswordForm(
-                          _usernameController.text, _passwordController.text)
-                      : loginForm()));
+      return Dialog(
+          insetPadding: const EdgeInsets.all(10),
+          child: furtherAction == 'moreInfo'
+              ? moreInfoForm(state.authenticate!)
+              : furtherAction == 'passwordChange'
+                  ? changePasswordForm(
+                      _usernameController.text, _passwordController.text)
+                  : loginForm());
     });
   }
 

@@ -40,6 +40,7 @@ class TimePeriodListState extends State<TimePeriodList> {
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
   late String periodType;
+  late double top, left;
 
   @override
   void initState() {
@@ -48,6 +49,8 @@ class TimePeriodListState extends State<TimePeriodList> {
     entityName = classificationId == 'AppHotel' ? 'Room' : 'TimePeriod';
     _ledgerBloc = context.read<LedgerBloc>();
     _ledgerBloc.add(LedgerTimePeriods(periodType: periodType));
+    top = 600;
+    left = 320;
   }
 
   @override
@@ -71,26 +74,9 @@ class TimePeriodListState extends State<TimePeriodList> {
               return Center(
                   child: Text('failed to fetch timePeriods: ${state.message}'));
             case LedgerStatus.success:
-              return Scaffold(
-                  floatingActionButton: FloatingActionButton.extended(
-                      heroTag: "timePeriodNew",
-                      key: const Key("changePeriod"),
-                      onPressed: () async {
-                        setState(() {
-                          if (periodType == 'Y') {
-                            periodType = 'Q';
-                          } else if (periodType == 'Q') {
-                            periodType = 'M';
-                          } else if (periodType == 'M') {
-                            periodType = 'Y';
-                          }
-                        });
-                        _ledgerBloc
-                            .add(LedgerTimePeriods(periodType: periodType));
-                      },
-                      tooltip: 'Change period type(Y/Q/M)',
-                      label: const Text('Y/Q/M')),
-                  body: Column(children: [
+              return Stack(
+                children: [
+                  Column(children: [
                     const TimePeriodListHeader(),
                     Expanded(
                         child: RefreshIndicator(
@@ -118,7 +104,39 @@ class TimePeriodListState extends State<TimePeriodList> {
                                         index: index);
                                   }
                                 })))
-                  ]));
+                  ]),
+                  Positioned(
+                    left: left,
+                    top: top,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          left += details.delta.dx;
+                          top += details.delta.dy;
+                        });
+                      },
+                      child: FloatingActionButton.extended(
+                          heroTag: "timePeriodNew",
+                          key: const Key("changePeriod"),
+                          onPressed: () async {
+                            setState(() {
+                              if (periodType == 'Y') {
+                                periodType = 'Q';
+                              } else if (periodType == 'Q') {
+                                periodType = 'M';
+                              } else if (periodType == 'M') {
+                                periodType = 'Y';
+                              }
+                            });
+                            _ledgerBloc
+                                .add(LedgerTimePeriods(periodType: periodType));
+                          },
+                          tooltip: 'Change period type(Y/Q/M)',
+                          label: const Text('Y/Q/M')),
+                    ),
+                  ),
+                ],
+              );
             default:
               return const Center(child: LoadingIndicator());
           }

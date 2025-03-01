@@ -152,6 +152,7 @@ class TopApp extends StatelessWidget {
                             case AuthStatus.initial:
                             case AuthStatus.loading:
                               return Scaffold(
+                                  // scaffold need for messages
                                   backgroundColor: Colors.transparent,
                                   body: Container());
                             case AuthStatus.changeIp:

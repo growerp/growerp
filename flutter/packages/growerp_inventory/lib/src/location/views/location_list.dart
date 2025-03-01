@@ -36,12 +36,15 @@ class LocationListState extends State<LocationList> {
   late Authenticate authenticate;
   late int limit;
   String? searchString;
+  late double top, left;
 
   @override
   void initState() {
     super.initState();
     _locationBloc = context.read<LocationBloc>()..add(const LocationFetch());
     _scrollController.addListener(_onScroll);
+    top = 450;
+    left = 320;
   }
 
   @override
@@ -61,7 +64,7 @@ class LocationListState extends State<LocationList> {
                 return const Center(
                     heightFactor: 20,
                     child: Text("no locations found",
-                        textAlign: TextAlign.center));
+                        style: TextStyle(fontSize: 20.0)));
               }
               // get table data formatted for tableView
               var (
@@ -125,57 +128,71 @@ class LocationListState extends State<LocationList> {
               );
             }
 
-            return Scaffold(
-              floatingActionButton: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  FloatingActionButton(
-                      key: const Key("search"),
-                      heroTag: "btn1",
-                      onPressed: () async {
-                        // find findoc id to show
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              // search separate from finDocBloc
-                              return BlocProvider.value(
-                                  value:
-                                      context.read<DataFetchBloc<Locations>>(),
-                                  child: const SearchLocationList());
-                            }).then((value) async => value != null &&
-                                context.mounted
-                            ?
-                            // show detail page
-                            await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return BlocProvider.value(
-                                      value: _locationBloc,
-                                      child: LocationDialog(value));
-                                })
-                            : const SizedBox.shrink());
-                      },
-                      child: const Icon(Icons.search)),
-                  const SizedBox(height: 10),
-                  FloatingActionButton(
-                      key: const Key("addNew"),
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _locationBloc,
-                                  child: LocationDialog(Location()));
-                            });
-                      },
-                      tooltip: 'Add New',
-                      child: const Icon(Icons.add)),
-                ],
-              ),
-              body: tableView(),
+            return Stack(
+              children: [
+                tableView(),
+                Positioned(
+                  left: left,
+                  top: top,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        left += details.delta.dx;
+                        top += details.delta.dy;
+                      });
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FloatingActionButton(
+                            key: const Key("search"),
+                            heroTag: "btn1",
+                            onPressed: () async {
+                              // find findoc id to show
+                              await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    // search separate from finDocBloc
+                                    return BlocProvider.value(
+                                        value: context
+                                            .read<DataFetchBloc<Locations>>(),
+                                        child: const SearchLocationList());
+                                  }).then((value) async => value != null &&
+                                      context.mounted
+                                  ?
+                                  // show detail page
+                                  await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return BlocProvider.value(
+                                            value: _locationBloc,
+                                            child: LocationDialog(value));
+                                      })
+                                  : const SizedBox.shrink());
+                            },
+                            child: const Icon(Icons.search)),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
+                            key: const Key("addNew"),
+                            onPressed: () async {
+                              await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                        value: _locationBloc,
+                                        child: LocationDialog(Location()));
+                                  });
+                            },
+                            tooltip: 'Add New',
+                            child: const Icon(Icons.add)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             );
           default:
             return const Center(child: LoadingIndicator());

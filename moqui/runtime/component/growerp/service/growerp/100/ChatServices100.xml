@@ -79,7 +79,6 @@ along with this software (see the LICENSE.md file). If not, see
                     </if>
                     <script>chatRooms.add(room.chatRoomName ?: roomName)</script>
                 </iterate>
-                <log message="======unread rooms: $chatRooms" />
                 <return />
             </if>
             <if condition="filter">

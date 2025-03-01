@@ -75,8 +75,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
           switch (state.status) {
             case LedgerStatus.success:
               _selectedPeriod = state.ledgerReport!.period!;
-              return Scaffold(
-                  body: Column(
+              return Column(
                 children: [
                   Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                     SizedBox(
@@ -183,7 +182,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                         )),
                   ),
                 ],
-              ));
+              );
             case LedgerStatus.failure:
               return const FatalErrorForm(
                   message: 'failed to get Balance Summary');

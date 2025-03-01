@@ -51,39 +51,36 @@ class LocationDialogState extends State<LocationDialog> {
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Dialog(
-            key: const Key('LocationDialog'),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: BlocListener<LocationBloc, LocationState>(
-                listener: (context, state) async {
-                  switch (state.status) {
-                    case LocationStatus.success:
-                      HelperFunctions.showMessage(
-                          context,
-                          '${location.locationId == null ? "Add" : "Update"} successfull',
-                          Colors.green);
-                      Navigator.of(context).pop();
-                      break;
-                    case LocationStatus.failure:
-                      HelperFunctions.showMessage(
-                          context, 'Error: ${state.message}', Colors.red);
-                      break;
-                    default:
-                      const Text("????");
-                  }
-                },
-                child: popUp(
-                    context: context,
-                    child: _showForm(isPhone),
-                    title:
-                        'Location Information #${location.pseudoId ?? "New"}',
-                    height: 400,
-                    width: 400))));
+    return Dialog(
+        key: const Key('LocationDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: BlocListener<LocationBloc, LocationState>(
+            listener: (context, state) async {
+              switch (state.status) {
+                case LocationStatus.success:
+                  HelperFunctions.showMessage(
+                      context,
+                      '${location.locationId == null ? "Add" : "Update"} successfull',
+                      Colors.green);
+                  Navigator.of(context).pop();
+                  break;
+                case LocationStatus.failure:
+                  HelperFunctions.showMessage(
+                      context, 'Error: ${state.message}', Colors.red);
+                  break;
+                default:
+                  const Text("????");
+              }
+            },
+            child: popUp(
+                context: context,
+                child: _showForm(isPhone),
+                title: 'Location Information #${location.pseudoId ?? "New"}',
+                height: 400,
+                width: 400)));
   }
 
   Widget _showForm(isPhone) {

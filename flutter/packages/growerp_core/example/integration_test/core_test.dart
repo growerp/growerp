@@ -37,5 +37,6 @@ void main() {
 
     await CommonTest.createCompanyAndAdmin(tester);
     await CommonTest.checkCompanyAndAdmin(tester);
+    await CommonTest.logout(tester);
   });
 }

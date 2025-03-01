@@ -216,39 +216,34 @@ class MyFinDocState extends State<FinDocPage> {
       }
     }
 
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Dialog(
-            key:
-                Key("FinDocDialog${finDoc.sales == true ? 'Sales' : 'Purchase'}"
-                    "${finDoc.docType}"),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            insetPadding: const EdgeInsets.all(10),
-            child: SingleChildScrollView(
-                key: const Key('listView'),
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                child: popUp(
-                  title:
-                      "${finDoc.sales ? 'Sales' : 'Purchase'} ${finDoc.docType} "
-                      "#${finDoc.pseudoId ?? ' new'}",
-                  height: 650,
-                  width: screenWidth,
-                  context: context,
-                  child: Builder(builder: (BuildContext context) {
-                    if (finDoc.sales) {
-                      return BlocConsumer<SalesCartBloc, CartState>(
-                          listener: blocConsumerListener,
-                          builder: blocConsumerBuilder);
-                    }
-                    // purchase from here
-                    return BlocConsumer<PurchaseCartBloc, CartState>(
-                        listener: blocConsumerListener,
-                        builder: blocConsumerBuilder);
-                  }),
-                ))));
+    return Dialog(
+        key: Key("FinDocDialog${finDoc.sales == true ? 'Sales' : 'Purchase'}"
+            "${finDoc.docType}"),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        insetPadding: const EdgeInsets.all(10),
+        child: SingleChildScrollView(
+            key: const Key('listView'),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: popUp(
+              title: "${finDoc.sales ? 'Sales' : 'Purchase'} ${finDoc.docType} "
+                  "#${finDoc.pseudoId ?? ' new'}",
+              height: 650,
+              width: screenWidth,
+              context: context,
+              child: Builder(builder: (BuildContext context) {
+                if (finDoc.sales) {
+                  return BlocConsumer<SalesCartBloc, CartState>(
+                      listener: blocConsumerListener,
+                      builder: blocConsumerBuilder);
+                }
+                // purchase from here
+                return BlocConsumer<PurchaseCartBloc, CartState>(
+                    listener: blocConsumerListener,
+                    builder: blocConsumerBuilder);
+              }),
+            )));
   }
 
   /// list the widgets list either in a single column for phone

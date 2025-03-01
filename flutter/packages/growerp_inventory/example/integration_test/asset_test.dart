@@ -24,7 +24,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:inventory_example/main.dart';
 
 void main() {
-  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
@@ -32,25 +32,20 @@ void main() {
   });
 
   testWidgets('''GrowERP asset test''', (tester) async {
-    try {
-      RestClient restClient = RestClient(await buildDioClient());
-      await CommonTest.startTestApp(tester, generateRoute, menuOptions,
-          InventoryLocalizations.localizationsDelegates,
-          restClient: restClient,
-          blocProviders: getInventoryBlocProviders(restClient, "AppAdmin"),
-          title: "Asset test",
-          clear: true); // use data from previous run, ifnone same as true
-      await CommonTest.createCompanyAndAdmin(tester, testData: {
-        "products": products.sublist(0, 3) // will create category too
-      });
-      await AssetTest.selectAsset(tester);
-      await AssetTest.addAssets(tester, assets);
-      await AssetTest.updateAssets(tester);
-      await AssetTest.deleteAssets(tester);
-    } catch (error) {
-      await CommonTest.takeScreenShot(
-          binding: binding, tester: tester, screenShotName: "Asset_Error");
-      rethrow;
-    }
+    RestClient restClient = RestClient(await buildDioClient());
+    await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+        InventoryLocalizations.localizationsDelegates,
+        restClient: restClient,
+        blocProviders: getInventoryBlocProviders(restClient, "AppAdmin"),
+        title: "Asset test",
+        clear: true); // use data from previous run, ifnone same as true
+    await CommonTest.createCompanyAndAdmin(tester, testData: {
+      "products": products.sublist(0, 3) // will create category too
+    });
+    await AssetTest.selectAsset(tester);
+    await AssetTest.addAssets(tester, assets);
+    await AssetTest.updateAssets(tester);
+    await AssetTest.deleteAssets(tester);
+    await CommonTest.logout(tester);
   });
 }

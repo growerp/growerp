@@ -177,30 +177,11 @@ class _GanttFormState extends State<GanttForm> {
                 ganttFromDate = nowDate;
                 break;
             }
-            return Scaffold(
-              floatingActionButton: FloatingActionButton(
-                  key: const Key("addNew"),
-                  onPressed: () async {
-                    await showDialog(
-                        barrierDismissible: true,
-                        context: context,
-                        builder: (BuildContext context) {
-                          return BlocProvider.value(
-                            value: _productBloc,
-                            child: BlocProvider.value(
-                                value: _finDocBloc,
-                                child: ReservationDialog(
-                                    finDoc: FinDoc(
-                                        sales: true,
-                                        docType: FinDocType.order,
-                                        items: []))),
-                          );
-                        });
-                  },
-                  tooltip: 'Add New',
-                  child: const Icon(Icons.add)),
-              body: Column(
-                children: <Widget>[
+            double top = 0;
+            double left = 250;
+            return Stack(
+              children: [
+                Column(children: <Widget>[
                   const SizedBox(height: 10),
                   ganttButtons(),
                   const SizedBox(height: 5),
@@ -219,8 +200,41 @@ class _GanttFormState extends State<GanttForm> {
                       rightHandSideColBackgroundColor: scheme.surface,
                     ),
                   )
-                ],
-              ),
+                ]),
+                Positioned(
+                  left: left,
+                  top: top,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        left += details.delta.dx;
+                        top += details.delta.dy;
+                      });
+                    },
+                    child: FloatingActionButton(
+                        key: const Key("addNew"),
+                        onPressed: () async {
+                          await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BlocProvider.value(
+                                  value: _productBloc,
+                                  child: BlocProvider.value(
+                                      value: _finDocBloc,
+                                      child: ReservationDialog(
+                                          finDoc: FinDoc(
+                                              sales: true,
+                                              docType: FinDocType.order,
+                                              items: []))),
+                                );
+                              });
+                        },
+                        tooltip: 'Add New',
+                        child: const Icon(Icons.add)),
+                  ),
+                ),
+              ],
             );
           }
           return const Center(child: LoadingIndicator());

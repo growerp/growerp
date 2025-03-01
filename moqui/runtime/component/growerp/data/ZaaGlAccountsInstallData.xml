@@ -3713,6 +3713,9 @@ along with this software (see the LICENSE.md file). If not, see
         paymentInstrumentEnumId="PiFinancialAccount" isPayable="E" />
     <mantle.ledger.config.PaymentInstrumentGlAccount glAccountId="11110"
         organizationPartyId="DefaultSettings"
+        paymentInstrumentEnumId="PiWireTransfer" isPayable="E" />
+    <mantle.ledger.config.PaymentInstrumentGlAccount glAccountId="11110"
+        organizationPartyId="DefaultSettings"
         paymentInstrumentEnumId="PiPersonalCheck" isPayable="E" />
     <mantle.ledger.config.PaymentInstrumentGlAccount glAccountId="11110"
         organizationPartyId="DefaultSettings"

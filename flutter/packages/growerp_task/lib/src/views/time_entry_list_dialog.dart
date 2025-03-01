@@ -53,24 +53,11 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
   }
 
   Widget _showList(isPhone) {
-    return Scaffold(
-        floatingActionButton: FloatingActionButton(
-            key: const Key("addNew"),
-            onPressed: () async {
-              await showDialog(
-                  barrierDismissible: true,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return BlocProvider.value(
-                        value: taskBloc,
-                        child:
-                            TimeEntryDialog(TimeEntry(taskId: widget.taskId)));
-                  });
-            },
-            tooltip: 'Add New',
-            child: const Icon(Icons.add)),
-        backgroundColor: Colors.transparent,
-        body: GestureDetector(
+    double top = 0;
+    double left = 250;
+    return Stack(
+      children: [
+        GestureDetector(
             onTap: () {},
             child: Center(
                 child: BlocListener<TaskBloc, TaskState>(
@@ -112,6 +99,35 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
                       timeEntry: widget.timeEntries[index]);
                 },
               );
-            })))));
+            })))),
+        Positioned(
+          left: left,
+          top: top,
+          child: GestureDetector(
+            onPanUpdate: (details) {
+              setState(() {
+                left += details.delta.dx;
+                top += details.delta.dy;
+              });
+            },
+            child: FloatingActionButton(
+                key: const Key("addNew"),
+                onPressed: () async {
+                  await showDialog(
+                      barrierDismissible: true,
+                      context: context,
+                      builder: (BuildContext context) {
+                        return BlocProvider.value(
+                            value: taskBloc,
+                            child: TimeEntryDialog(
+                                TimeEntry(taskId: widget.taskId)));
+                      });
+                },
+                tooltip: 'Add New',
+                child: const Icon(Icons.add)),
+          ),
+        ),
+      ],
+    );
   }
 }

@@ -89,6 +89,7 @@ class UserDialogState extends State<UserDialog> {
   final ScrollController _scrollController = ScrollController();
   late User currentUser;
   late bool isAdmin;
+  late double top, left;
 
   @override
   void initState() {
@@ -118,6 +119,8 @@ class UserDialogState extends State<UserDialog> {
     currentUser = _authBloc.state.authenticate!.user!;
     isAdmin = context.read<AuthBloc>().state.authenticate!.user!.userGroup ==
         UserGroup.admin;
+    top = -100;
+    left = 280;
   }
 
   @override
@@ -167,11 +170,9 @@ class UserDialogState extends State<UserDialog> {
           title: "Person #${widget.user.pseudoId ?? ' new'}",
           width: isPhone ? 400 : 1000,
           height: isPhone ? 700 : 700,
-          child: Scaffold(
-              backgroundColor: Colors.transparent,
-              floatingActionButton:
-                  ImageButtons(_scrollController, _onImageButtonPressed),
-              body: BlocConsumer<CompanyUserBloc, CompanyUserState>(
+          child: Stack(
+            children: [
+              BlocConsumer<CompanyUserBloc, CompanyUserState>(
                   listener: (context, state) {
                 if (state.status == CompanyUserStatus.failure) {
                   HelperFunctions.showMessage(
@@ -186,7 +187,22 @@ class UserDialogState extends State<UserDialog> {
                   return listChild();
                 }
                 return const LoadingIndicator();
-              }))),
+              }),
+              Positioned(
+                left: left,
+                top: top,
+                child: GestureDetector(
+                  onPanUpdate: (details) {
+                    setState(() {
+                      left += details.delta.dx;
+                      top += details.delta.dy;
+                    });
+                  },
+                  child: ImageButtons(_scrollController, _onImageButtonPressed),
+                ),
+              ),
+            ],
+          )),
     );
   }
 

@@ -428,20 +428,18 @@ along with this software (see the LICENSE.md file). If not, see
                 <else>
                     <if condition="payment">
                         <log
-                            message="=== could not find payment method: ${payment.paymentMethodId} in PaymentMethod" />
+                            message="=== payment: ${payment.paymentId} could not find payment method: ${payment.paymentMethodId} in PaymentMethod" />
                     </if>
                     <if condition="!creditCardTypeGlAccountList">
                         <log
-                            message="=== could not find credit card type: $creditCardTypeEnumId in CreditCardTypeGlAccount" />
+                            message="=== payment: ${payment.paymentId} could not find credit card type: $creditCardTypeEnumId in CreditCardTypeGlAccount" />
                     </if>
                     <if condition="!paymentInstrumentGlAccountList">
                         <log
-                            message="=== org: $organizationPartyId payment: ${payment?.fromPartyId}" />
-                        <log
-                            message="=== could not find pay instr id: $paymentInstrumentEnumId payable: $payable org: in PaymentInstrumentGlAccount orgs: $orgPartyIdList" />
+                            message="=== payment: ${payment.paymentId} could not find pay instr id: $paymentInstrumentEnumId payable: $isPayable org: in PaymentInstrumentGlAccount orgs: $orgPartyIdList" />
                     </if>
                     <log
-                        message="====Could not find payment method gl account: $creditCardTypeEnumId org: $organizationPartyId  paymentid: $paymentId" />
+                        message="=== Could not find payment method gl account: $creditCardTypeEnumId org: $organizationPartyId  paymentid: ${payment:paymentId}" />
                 </else>
             </if>
         </actions>

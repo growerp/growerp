@@ -56,7 +56,7 @@ class SearchFinDocState extends State<SearchFinDocList> {
       }
       return Stack(
         children: [
-          FinDocScaffold(
+          FinDocSearchDialog(
               finDocBloc: _finDocBloc, widget: widget, finDocs: finDocs),
           if (state.status == DataFetchStatus.loading) const LoadingIndicator(),
         ],
@@ -65,8 +65,8 @@ class SearchFinDocState extends State<SearchFinDocList> {
   }
 }
 
-class FinDocScaffold extends StatelessWidget {
-  const FinDocScaffold({
+class FinDocSearchDialog extends StatelessWidget {
+  const FinDocSearchDialog({
     super.key,
     required DataFetchBloc finDocBloc,
     required this.widget,
@@ -80,88 +80,85 @@ class FinDocScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ScrollController scrollController = ScrollController();
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Dialog(
-            key: const Key('SearchDialog'),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: popUp(
-                context: context,
-                title: '${widget.docType} Search ',
-                height: 500,
-                width: 350,
-                child: Column(children: [
-                  TextFormField(
-                      key: const Key('searchField'),
-                      textInputAction: TextInputAction.search,
-                      autofocus: true,
-                      decoration:
-                          const InputDecoration(labelText: "Search input"),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please enter a search value?';
+    return Dialog(
+        key: const Key('SearchDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: popUp(
+            context: context,
+            title: '${widget.docType} Search ',
+            height: 500,
+            width: 350,
+            child: Column(children: [
+              TextFormField(
+                  key: const Key('searchField'),
+                  textInputAction: TextInputAction.search,
+                  autofocus: true,
+                  decoration: const InputDecoration(labelText: "Search input"),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter a search value?';
+                    }
+                    return null;
+                  },
+                  onFieldSubmitted: (value) {
+                    _finDocBloc.add(GetDataEvent(() => context
+                        .read<RestClient>()
+                        .getFinDoc(
+                            docType: widget.docType,
+                            sales: widget.sales,
+                            limit: 5,
+                            searchString: value)));
+                    Future.delayed(const Duration(milliseconds: 150));
+                  }),
+              const SizedBox(height: 20),
+              const Text('Search results'),
+              Expanded(
+                  child: ListView.builder(
+                      key: const Key('listView'),
+                      shrinkWrap: true,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: finDocs.length + 2,
+                      controller: scrollController,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (index == 0) {
+                          return Visibility(
+                              visible: finDocs.isEmpty,
+                              child: const Center(
+                                  heightFactor: 20,
+                                  child: Text('No search items found (yet)',
+                                      key: Key('empty'),
+                                      textAlign: TextAlign.center)));
                         }
-                        return null;
-                      },
-                      onFieldSubmitted: (value) {
-                        _finDocBloc.add(GetDataEvent(() => context
-                            .read<RestClient>()
-                            .getFinDoc(
-                                docType: widget.docType,
-                                sales: widget.sales,
-                                limit: 5,
-                                searchString: value)));
-                        Future.delayed(const Duration(milliseconds: 150));
-                      }),
-                  const SizedBox(height: 20),
-                  const Text('Search results'),
-                  Expanded(
-                      child: ListView.builder(
-                          key: const Key('listView'),
-                          shrinkWrap: true,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: finDocs.length + 2,
-                          controller: scrollController,
-                          itemBuilder: (BuildContext context, int index) {
-                            if (index == 0) {
-                              return Visibility(
-                                  visible: finDocs.isEmpty,
-                                  child: const Center(
-                                      heightFactor: 20,
-                                      child: Text('No search items found (yet)',
-                                          key: Key('empty'),
-                                          textAlign: TextAlign.center)));
-                            }
-                            index--;
-                            if (index >= finDocs.length) {
-                              return const Text(' ');
-                            } else {
-                              var party = toCompanyUser(
-                                  finDocs[index].otherCompany ??
-                                      finDocs[index].otherUser);
-                              return Dismissible(
-                                  key: const Key('searchItem'),
-                                  direction: DismissDirection.startToEnd,
-                                  child: ListTile(
-                                    title: Text(
-                                        "ID: ${finDocs[index].pseudoId}  "
-                                        "Date: ${finDocs[index].creationDate?.dateOnly()}",
-                                        key: Key("searchResult$index")),
-                                    subtitle: Column(children: [
-                                      if (finDocs[index].docSubType != null)
-                                        Text(finDocs[index].docSubType!),
-                                      if (party != null)
-                                        Text(
-                                            "${party.type}: ${party.name ?? '??'} "),
-                                    ]),
-                                    onTap: () => Navigator.of(context)
-                                        .pop(finDocs[index]),
-                                  ));
-                            }
-                          }))
-                ]))));
+                        index--;
+                        if (index >= finDocs.length) {
+                          return const Text(' ');
+                        } else {
+                          var party = toCompanyUser(
+                              finDocs[index].otherCompany ??
+                                  finDocs[index].otherUser);
+                          return Dismissible(
+                              key: const Key('searchItem'),
+                              direction: DismissDirection.startToEnd,
+                              child: ListTile(
+                                title: Text(
+                                    "ID: ${finDocs[index].pseudoId}  "
+                                    "Date: ${finDocs[index].creationDate?.dateOnly()}",
+                                    key: Key("searchResult$index")),
+                                subtitle: Column(children: [
+                                  if (finDocs[index].docSubType != null)
+                                    Text(finDocs[index].docSubType!),
+                                  if (party != null)
+                                    Text(
+                                        "${party.type}: ${party.name ?? '??'} "),
+                                ]),
+                                onTap: () =>
+                                    Navigator.of(context).pop(finDocs[index]),
+                              ));
+                        }
+                      }))
+            ])));
   }
 }

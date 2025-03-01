@@ -53,7 +53,7 @@ class SearchAssetState extends State<SearchAssetList> {
       }
       return Stack(
         children: [
-          AssetScaffold(
+          AssetSearchDialog(
               finDocBloc: _assetBloc, widget: widget, locations: locations),
           if (state.status == DataFetchStatus.loading) const LoadingIndicator(),
         ],
@@ -62,8 +62,8 @@ class SearchAssetState extends State<SearchAssetList> {
   }
 }
 
-class AssetScaffold extends StatelessWidget {
-  const AssetScaffold({
+class AssetSearchDialog extends StatelessWidget {
+  const AssetSearchDialog({
     super.key,
     required DataFetchBloc finDocBloc,
     required this.widget,
@@ -77,70 +77,67 @@ class AssetScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ScrollController scrollController = ScrollController();
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Dialog(
-            key: const Key('SearchDialog'),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: popUp(
-                context: context,
-                title: 'Asset Search ',
-                height: 500,
-                width: 350,
-                child: Column(children: [
-                  TextFormField(
-                      key: const Key('searchField'),
-                      textInputAction: TextInputAction.search,
-                      autofocus: true,
-                      decoration:
-                          const InputDecoration(labelText: "Search input"),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please enter a search value?';
+    return Dialog(
+        key: const Key('SearchDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: popUp(
+            context: context,
+            title: 'Asset Search ',
+            height: 500,
+            width: 350,
+            child: Column(children: [
+              TextFormField(
+                  key: const Key('searchField'),
+                  textInputAction: TextInputAction.search,
+                  autofocus: true,
+                  decoration: const InputDecoration(labelText: "Search input"),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter a search value?';
+                    }
+                    return null;
+                  },
+                  onFieldSubmitted: (value) => _assetBloc.add(GetDataEvent(() =>
+                      context
+                          .read<RestClient>()
+                          .getAsset(limit: 5, searchString: value)))),
+              const SizedBox(height: 20),
+              const Text('Search results'),
+              Expanded(
+                  child: ListView.builder(
+                      key: const Key('listView'),
+                      shrinkWrap: true,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: locations.length + 2,
+                      controller: scrollController,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (index == 0) {
+                          return Visibility(
+                              visible: locations.isEmpty,
+                              child: const Center(
+                                  heightFactor: 20,
+                                  child: Text('No search items found (yet)',
+                                      key: Key('empty'),
+                                      textAlign: TextAlign.center)));
                         }
-                        return null;
-                      },
-                      onFieldSubmitted: (value) => _assetBloc.add(GetDataEvent(
-                          () => context
-                              .read<RestClient>()
-                              .getAsset(limit: 5, searchString: value)))),
-                  const SizedBox(height: 20),
-                  const Text('Search results'),
-                  Expanded(
-                      child: ListView.builder(
-                          key: const Key('listView'),
-                          shrinkWrap: true,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: locations.length + 2,
-                          controller: scrollController,
-                          itemBuilder: (BuildContext context, int index) {
-                            if (index == 0) {
-                              return Visibility(
-                                  visible: locations.isEmpty,
-                                  child: const Center(
-                                      heightFactor: 20,
-                                      child: Text('No search items found (yet)',
-                                          key: Key('empty'),
-                                          textAlign: TextAlign.center)));
-                            }
-                            index--;
-                            return index >= locations.length
-                                ? const Text('')
-                                : Dismissible(
-                                    key: const Key('searchItem'),
-                                    direction: DismissDirection.startToEnd,
-                                    child: ListTile(
-                                      title: Text(
-                                          "ID: ${locations[index].pseudoId}\n"
-                                          "Name: ${locations[index].assetName}",
-                                          key: Key("searchResult$index")),
-                                      onTap: () => Navigator.of(context)
-                                          .pop(locations[index]),
-                                    ));
-                          }))
-                ]))));
+                        index--;
+                        return index >= locations.length
+                            ? const Text('')
+                            : Dismissible(
+                                key: const Key('searchItem'),
+                                direction: DismissDirection.startToEnd,
+                                child: ListTile(
+                                  title: Text(
+                                      "ID: ${locations[index].pseudoId}\n"
+                                      "Name: ${locations[index].assetName}",
+                                      key: Key("searchResult$index")),
+                                  onTap: () => Navigator.of(context)
+                                      .pop(locations[index]),
+                                ));
+                      }))
+            ])));
   }
 }

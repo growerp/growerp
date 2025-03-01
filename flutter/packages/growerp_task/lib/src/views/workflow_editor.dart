@@ -69,13 +69,11 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
       return newTasks;
     }
 
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        floatingActionButton: FloatingActionButton(
-            onPressed: dashboard.recenter,
-            child: const Icon(Icons.center_focus_strong)),
-        body: Center(
-            child: popUp(
+    double top = 0;
+    double left = 250;
+    return Stack(
+      children: [
+        popUp(
           context: context,
           title: widget.workflow.taskName,
           padding: 0,
@@ -172,6 +170,23 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
               },
             ),
           ),
-        )));
+        ),
+        Positioned(
+          left: left,
+          top: top,
+          child: GestureDetector(
+            onPanUpdate: (details) {
+              setState(() {
+                left += details.delta.dx;
+                top += details.delta.dy;
+              });
+            },
+            child: FloatingActionButton(
+                onPressed: dashboard.recenter,
+                child: const Icon(Icons.center_focus_strong)),
+          ),
+        ),
+      ],
+    );
   }
 }

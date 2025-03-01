@@ -26,12 +26,11 @@ class FatalErrorForm extends StatelessWidget {
       this.buttonText = 'Restart'});
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
+    return Center(
+      child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
             SizedBox(
               width: 300,
               height: 200,
@@ -43,7 +42,7 @@ class FatalErrorForm extends StatelessWidget {
             OutlinedButton(
                 child: Text(buttonText),
                 onPressed: () => Navigator.pushNamed(context, '/')),
-          ])),
+          ]),
     );
   }
 }

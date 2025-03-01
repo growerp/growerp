@@ -62,21 +62,19 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
               const Text("????");
           }
         },
-        child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Dialog(
-                key: const Key('LedgerJournalDialog'),
-                insetPadding: const EdgeInsets.all(10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: popUp(
-                    context: context,
-                    title:
-                        "LedgerJournal #${widget.ledgerJournal.journalId.isEmpty ? " New" : widget.ledgerJournal.journalId}",
-                    width: columns.toDouble() * 400,
-                    height: 1 / columns.toDouble() * 1200,
-                    child: _ledgerJournalForm()))));
+        child: Dialog(
+            key: const Key('LedgerJournalDialog'),
+            insetPadding: const EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: popUp(
+                context: context,
+                title:
+                    "LedgerJournal #${widget.ledgerJournal.journalId.isEmpty ? " New" : widget.ledgerJournal.journalId}",
+                width: columns.toDouble() * 400,
+                height: 1 / columns.toDouble() * 1200,
+                child: _ledgerJournalForm())));
   }
 
   Widget _ledgerJournalForm() {

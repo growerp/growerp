@@ -18,7 +18,6 @@ import '../../domains.dart';
 Widget popUpDialog({
   required BuildContext context,
   required List<Widget> children,
-  required Key scaffoldkey,
   String title = '',
   double height = 400,
   double width = 400,
@@ -50,11 +49,8 @@ Widget popUpDialog({
                               fontWeight: FontWeight.bold)))),
               Expanded(
                   child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Scaffold(
-                    backgroundColor: Colors.transparent,
-                    body: Center(child: Column(children: children))),
-              ))
+                      padding: const EdgeInsets.all(20),
+                      child: Column(children: children))),
             ])),
         const Positioned(top: 10, right: 10, child: DialogCloseButton())
       ]));

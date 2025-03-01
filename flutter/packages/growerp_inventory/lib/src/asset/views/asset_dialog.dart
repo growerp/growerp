@@ -112,25 +112,22 @@ class AssetDialogState extends State<AssetDialog> {
     }, builder: (context, state) {
       switch (state.status) {
         case AssetStatus.success:
-          return Scaffold(
-              backgroundColor: Colors.transparent,
-              body: Dialog(
-                  key: const Key('AssetDialog'),
-                  insetPadding: const EdgeInsets.all(10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: popUp(
-                      context: context,
-                      title: (classificationId == 'AppHotel'
-                              ? "Room #"
-                              : "Asset #") +
+          return Dialog(
+              key: const Key('AssetDialog'),
+              insetPadding: const EdgeInsets.all(10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: popUp(
+                  context: context,
+                  title:
+                      (classificationId == 'AppHotel' ? "Room #" : "Asset #") +
                           (widget.asset.pseudoId.isEmpty
                               ? "New"
                               : widget.asset.pseudoId),
-                      height: 450,
-                      width: 350,
-                      child: _showForm(isPhone))));
+                  height: 450,
+                  width: 350,
+                  child: _showForm(isPhone)));
         case AssetStatus.failure:
           return const FatalErrorForm(message: 'Asset load problem');
         default:

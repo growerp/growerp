@@ -57,5 +57,6 @@ void main() {
     await PaymentTest.checkPaymentsComplete(tester);
     await TransactionTest.selectTransactions(tester);
     await TransactionTest.checkTransactionsComplete(tester);
+    await CommonTest.logout(tester);
   });
 }

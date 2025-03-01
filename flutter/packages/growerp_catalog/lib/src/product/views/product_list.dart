@@ -36,7 +36,7 @@ class ProductListState extends State<ProductList> {
   late String entityName;
   late bool started;
   late int limit;
-
+  late double top, left;
   @override
   void initState() {
     super.initState();
@@ -45,6 +45,8 @@ class ProductListState extends State<ProductList> {
     _productBloc = context.read<ProductBloc>()..add(const ProductFetch());
     classificationId = context.read<String>();
     entityName = classificationId == 'AppHotel' ? 'Room Type' : 'Product';
+    top = 400;
+    left = 300;
   }
 
   @override
@@ -54,9 +56,8 @@ class ProductListState extends State<ProductList> {
     Widget tableView() {
       if (products.isEmpty) {
         return Center(
-            heightFactor: 20,
-            child:
-                Text("no ${entityName}s found", textAlign: TextAlign.center));
+            child: Text("No ${entityName}s found, add one with '+'",
+                style: const TextStyle(fontSize: 20.0)));
       }
       // get table data formatted for tableView
       var (
@@ -134,73 +135,88 @@ class ProductListState extends State<ProductList> {
                   child: Text('failed to fetch product: ${state.message}'));
             case ProductStatus.success:
               products = state.products;
-              return Scaffold(
-                  floatingActionButton: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        FloatingActionButton(
-                            key: const Key("search"),
-                            heroTag: "btn1",
-                            onPressed: () async {
-                              // find findoc id to show
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    // search separate from finDocBloc
-                                    return BlocProvider.value(
-                                        value: context
-                                            .read<DataFetchBloc<Locations>>(),
-                                        child: const SearchProductList());
-                                  }).then((value) async => value != null &&
-                                      context.mounted
-                                  ?
-                                  // show detail page
+              return Stack(
+                children: [
+                  tableView(),
+                  Positioned(
+                    left: left,
+                    top: top,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          left += details.delta.dx;
+                          top += details.delta.dy;
+                        });
+                      },
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            FloatingActionButton(
+                                key: const Key("search"),
+                                heroTag: "btn1",
+                                onPressed: () async {
+                                  // find findoc id to show
+                                  await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        // search separate from finDocBloc
+                                        return BlocProvider.value(
+                                            value: context.read<
+                                                DataFetchBloc<Locations>>(),
+                                            child: const SearchProductList());
+                                      }).then((value) async => value != null &&
+                                          context.mounted
+                                      ?
+                                      // show detail page
+                                      await showDialog(
+                                          barrierDismissible: true,
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return BlocProvider.value(
+                                                value: _productBloc,
+                                                child: ProductDialog(value));
+                                          })
+                                      : const SizedBox.shrink());
+                                },
+                                child: const Icon(Icons.search)),
+                            const SizedBox(height: 10),
+                            FloatingActionButton(
+                                heroTag: 'productFiles',
+                                key: const Key("upDownload"),
+                                onPressed: () async {
                                   await showDialog(
                                       barrierDismissible: true,
                                       context: context,
                                       builder: (BuildContext context) {
                                         return BlocProvider.value(
                                             value: _productBloc,
-                                            child: ProductDialog(value));
-                                      })
-                                  : const SizedBox.shrink());
-                            },
-                            child: const Icon(Icons.search)),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                            heroTag: 'productFiles',
-                            key: const Key("upDownload"),
-                            onPressed: () async {
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return BlocProvider.value(
-                                        value: _productBloc,
-                                        child: const ProductFilesDialog());
-                                  });
-                            },
-                            tooltip: 'products up/download',
-                            child: const Icon(Icons.file_copy)),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                            heroTag: 'productNew',
-                            key: const Key("addNew"),
-                            onPressed: () async {
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return BlocProvider.value(
-                                        value: _productBloc,
-                                        child: ProductDialog(Product()));
-                                  });
-                            },
-                            tooltip: CoreLocalizations.of(context)!.addNew,
-                            child: const Icon(Icons.add))
-                      ]),
-                  body: tableView());
+                                            child: const ProductFilesDialog());
+                                      });
+                                },
+                                tooltip: 'products up/download',
+                                child: const Icon(Icons.file_copy)),
+                            const SizedBox(height: 10),
+                            FloatingActionButton(
+                                heroTag: 'productNew',
+                                key: const Key("addNew"),
+                                onPressed: () async {
+                                  await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return BlocProvider.value(
+                                            value: _productBloc,
+                                            child: ProductDialog(Product()));
+                                      });
+                                },
+                                tooltip: CoreLocalizations.of(context)!.addNew,
+                                child: const Icon(Icons.add))
+                          ]),
+                    ),
+                  ),
+                ],
+              );
             default:
               return const Center(child: LoadingIndicator());
           }

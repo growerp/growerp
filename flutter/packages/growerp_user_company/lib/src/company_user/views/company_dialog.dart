@@ -102,6 +102,7 @@ class CompanyFormState extends State<CompanyDialog> {
   late bool isPhone;
   final ScrollController _scrollController = ScrollController();
   late CompanyUserBloc companyUserBloc;
+  late double top, left;
 
   @override
   void initState() {
@@ -139,6 +140,8 @@ class CompanyFormState extends State<CompanyDialog> {
 
     user = authenticate.user!;
     isAdmin = authenticate.user!.userGroup == UserGroup.admin;
+    top = -90;
+    left = 280;
   }
 
   @override
@@ -619,12 +622,10 @@ class CompanyFormState extends State<CompanyDialog> {
       column.add(Padding(padding: const EdgeInsets.all(5), child: widgets[i]));
     }
 
-    return Scaffold(
-        key: Key('CompanyDialog${company.role?.value ?? Role.unknown}'),
-        backgroundColor: Colors.transparent,
-        floatingActionButton:
-            ImageButtons(_scrollController, _onImageButtonPressed),
-        body: BlocConsumer<CompanyUserBloc, CompanyUserState>(
+    return Stack(
+      key: Key('CompanyDialog${company.role?.value ?? Role.unknown}'),
+      children: [
+        BlocConsumer<CompanyUserBloc, CompanyUserState>(
             listener: (context, state) {
           if (state.status == CompanyUserStatus.failure) {
             HelperFunctions.showMessage(context, state.message, Colors.red);
@@ -650,7 +651,22 @@ class CompanyFormState extends State<CompanyDialog> {
                 employeeChips: employeeChips);
           }
           return const LoadingIndicator();
-        }));
+        }),
+        Positioned(
+          left: left,
+          top: top,
+          child: GestureDetector(
+            onPanUpdate: (details) {
+              setState(() {
+                left += details.delta.dx;
+                top += details.delta.dy;
+              });
+            },
+            child: ImageButtons(_scrollController, _onImageButtonPressed),
+          ),
+        ),
+      ],
+    );
   }
 }
 
