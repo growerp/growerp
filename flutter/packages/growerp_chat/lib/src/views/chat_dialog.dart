@@ -34,7 +34,9 @@ class ChatState extends State<ChatDialog> {
     _scrollController.addListener(_onScroll);
     _chatMessageBloc = context.read<ChatMessageBloc>()
       ..add(ChatMessageFetch(
-          chatRoomId: widget.chatRoom.chatRoomId, limit: limit));
+          chatRoomId: widget.chatRoom.chatRoomId,
+          chatRoomName: widget.chatRoom.chatRoomName!,
+          limit: limit));
     Timer(
       const Duration(seconds: 1),
       () => _scrollController.jumpTo(0.0),
@@ -159,6 +161,7 @@ class ChatState extends State<ChatDialog> {
     if (currentScroll > 0 && maxScroll - currentScroll <= _scrollThreshold) {
       _chatMessageBloc.add(ChatMessageFetch(
           chatRoomId: widget.chatRoom.chatRoomId,
+          chatRoomName: widget.chatRoom.chatRoomName!,
           limit: limit,
           searchString: searchString ?? ''));
     }

@@ -19,7 +19,7 @@ along with this software (see the LICENSE.md file). If not, see
         enumTypeId="UserGroupType" />
     <moqui.security.UserGroup userGroupId="GROWERP_M_SYSTEM" description="System Admin"
         groupTypeEnumId="GROWERPMOBILE" />
-    <moqui.security.UserGroupMember userGroupId="GROWERP_M_SYSTEM" userId="EX_JOHN_DOE"
+    <moqui.security.UserGroupMember userGroupId="GROWERP_M_SYSTEM" userId="SystemSupport"
         fromDate="1265184000000" />
     <moqui.security.UserGroup userGroupId="GROWERP_M_ADMIN" description="Admin"
         groupTypeEnumId="GROWERPMOBILE">

@@ -404,7 +404,9 @@ class CommonTest {
 
   static Future<void> enterText(
       WidgetTester tester, String key, String value) async {
-    await tester.tap(find.byKey(Key(key)), warnIfMissed: false);
+    expect(find.byKey(Key(key)), findsOneWidget,
+        reason: "Could not find key: $key");
+    await tester.tap(find.byKey(Key(key)));
     await tester.pump();
     await tester.enterText(find.byKey(Key(key)), value);
     await tester.pump();

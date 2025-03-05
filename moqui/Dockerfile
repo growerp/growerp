@@ -15,8 +15,8 @@ RUN apt-get update && \
 #RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /root/growerp
 # build from the moqui directory instead of repository for debugging
 COPY . /root/growerp/moqui
-# delete debug user
-RUN rm /root/growerp/moqui/runtime/component/growerp/data/0-GrowerpDebug.xml
+# delete debug user now replaced with system support
+# RUN rm /root/growerp/moqui/runtime/component/growerp/data/0-GrowerpDebug.xml
 RUN git clone --depth 1 https://$PAT@github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
 # antwebsystems website TODO: need to be removed
 WORKDIR /root/growerp/moqui

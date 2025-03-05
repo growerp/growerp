@@ -125,30 +125,34 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="st">
                 <set field="stats"
                     from="[
-                admins: st.admins,
-                employees: st.employees,
-                suppliers: st.suppliers,
-                leads: st.leads,
-                customers: st.customers,
-                openSlsOrders: st.openSlsOrders,
-                openPurOrders: st.openPurOrders,
-                opportunities: st.opportunities,
-                myOpportunities: myOpportunities,
-                categories: st.categories,
-                products: st.products,
-                assets: st.assets,
-                salesInvoicesNotPaidCount:  st.salesInvoicesNotPaidCount,
-                salesInvoicesNotPaidAmount: st.salesInvoicesNotPaidAmount?.toString(),
-                purchInvoicesNotPaidCount:  st.purchInvoicesNotPaidCount,
-                purchInvoicesNotPaidAmount: st.purchInvoicesNotPaidAmount?.toString(),
-                allTasks: st.allTasks,
-                notInvoicedHours: st.notInvoicedHours,
-                outgoingShipments: st.outgoingShipments,
-                incomngShipments: st.incomingShipments,
-                whLocations: st.whLocations,
-                requests: st.requests,
-                notReadChatRooms: chatRooms,
-                ]" />
+                        admins: st.admins,
+                        employees: st.employees,
+                        suppliers: st.suppliers,
+                        leads: st.leads,
+                        customers: st.customers,
+                        openSlsOrders: st.openSlsOrders,
+                        openPurOrders: st.openPurOrders,
+                        opportunities: st.opportunities,
+                        myOpportunities: myOpportunities,
+                        categories: st.categories,
+                        products: st.products,
+                        assets: st.assets,
+                        salesInvoicesNotPaidCount:  st.salesInvoicesNotPaidCount,
+                        salesInvoicesNotPaidAmount: st.salesInvoicesNotPaidAmount?.toString(),
+                        purchInvoicesNotPaidCount:  st.purchInvoicesNotPaidCount,
+                        purchInvoicesNotPaidAmount: st.purchInvoicesNotPaidAmount?.toString(),
+                        allTasks: st.allTasks,
+                        notInvoicedHours: st.notInvoicedHours,
+                        outgoingShipments: st.outgoingShipments,
+                        incomngShipments: st.incomingShipments,
+                        whLocations: st.whLocations,
+                        requests: st.requests,
+                        notReadChatRooms: chatRooms,
+                    ]" />
+                <else>
+                    <set field="stats"
+                        from="[notReadChatRooms: chatRooms]" />
+                </else>
             </if>
         </actions>
     </service>
@@ -427,7 +431,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </parameter>
                 <parameter name="apiKey" />
                 <parameter name="sessionToken" />
-                <parameter name="statistics" type="Map">
+                <parameter name="stats" type="Map">
                     <parameter name="admins" />
                     <parameter name="employees" />
                     <parameter name="suppliers" />
@@ -450,6 +454,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="incomngShipments" />
                     <parameter name="whLocations" />
                     <parameter name="requests" />
+                    <parameter name="notReadChatRooms" />
                 </parameter>
             </parameter>
         </out-parameters>
@@ -654,6 +659,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="incomngShipments" />
                     <parameter name="whLocations" />
                     <parameter name="requests" />
+                    <parameter name="notReadChatRooms" />
                 </parameter>
             </parameter>
         </out-parameters>
@@ -788,7 +794,6 @@ along with this software (see the LICENSE.md file). If not, see
                                         companyPartyId: partyId, classificationId: classificationId]" />
                                 <!-- demo data -->
                                 <if condition="demoData">
-                                    <log message="calling demo data with classif: $classificationId" />
                                     <service-call
                                         name="growerp.100.PartyServices100.load#DemoData"
                                         include-user-login="true"
@@ -1015,6 +1020,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="incomngShipments" />
                     <parameter name="whLocations" />
                     <parameter name="requests" />
+                    <parameter name="notReadChatRooms" />
                 </parameter>
             </parameter>
         </out-parameters>
