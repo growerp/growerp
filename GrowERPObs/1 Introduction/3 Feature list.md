@@ -35,21 +35,11 @@ The features currently implemented in the system are listed below. For a roadmap
 
 # Technical feature list
 
-The system is consisting out of three parts, the frontend built in the flutter framework, the back-end using the Moqui framework and a chat server based on Java. Build and installation instructions are the related README files.
-
+The system is consisting out of two parts, the frontend built with the flutter framework, the back-end using the Moqui framework with a chat server based on Java. Build and installation instructions are the related README files.
 ## Flutter GrowERP Front-end
-* All applications and packages are a [single repository](https://github.com/growerp/growerp).
-
+All applications and packages: https://github.com/growerp/growerp/tree/master/flutter/packages
 ## Moqui Backend
-cloned versions, with small modifications in the 'growerp' branch (when exist)
-* Framework: https://github.com/growerp/moqui-framework
-* Tools: https://github.com/growerp/moqui-runtime
-* Services: https://github.com/growerp/mantle-usl
-* Datamodel: https://github.com/growerp/mantle-udm
-* GrowERP: https://github.com/growerp/growerp-moqui
-* Website: https://github.com/growerp/PopRestStore
-* PDF: https://github.com/moqui/moqui-fop
+framework and componets: https://github.com/growerp/growerp/tree/master/moqui	
 
-## WsServer
-* https://github.com/growerp/growerp-chat
+
 

@@ -21,11 +21,13 @@ abstract class ChatMessageEvent extends Equatable {
 
 class ChatMessageFetch extends ChatMessageEvent {
   final String chatRoomId;
+  final String chatRoomName;
   final bool refresh;
   final int limit;
   final String searchString;
   ChatMessageFetch(
       {required this.chatRoomId,
+      required this.chatRoomName,
       this.refresh = false,
       this.limit = 20,
       this.searchString = ''});

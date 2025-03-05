@@ -38,9 +38,9 @@ class UserListState extends State<UserList> {
   List<User> users = const <User>[];
   bool showSearchField = false;
   String searchString = '';
-  bool isLoading = false;
   bool hasReachedMax = false;
   late bool isPhone;
+  late double top, left;
 
   @override
   void initState() {
@@ -67,6 +67,8 @@ class UserListState extends State<UserList> {
       default:
         _userBloc = (context.read<UserBloc>())..add(const UserFetch());
     }
+    top = 450;
+    left = 320;
   }
 
   @override
@@ -76,12 +78,12 @@ class UserListState extends State<UserList> {
       Widget tableView() {
         if (users.isEmpty) {
           return Center(
-              heightFactor: 20,
-              child: Text(
-                  context.read<String>() == 'AppHealth'
-                      ? 'No clients found'
-                      : 'no ${widget.role?.name ?? ''} users found',
-                  textAlign: TextAlign.center));
+            child: Text(
+                context.read<String>() == 'AppHealth'
+                    ? 'No clients found'
+                    : 'no ${widget.role?.name ?? ''} users found',
+                style: const TextStyle(fontSize: 20.0)),
+          );
         }
         // get table data formatted for tableView
         var (
@@ -160,11 +162,8 @@ class UserListState extends State<UserList> {
               message: "Could not load ${widget.role.toString()}s!");
         }
         if (state.status == UserStatus.success) {
-          isLoading = false;
           users = state.users;
           hasReachedMax = state.hasReachedMax;
-          double top = 450;
-          double left = 320;
           return Stack(
             children: [
               tableView(),
@@ -179,7 +178,6 @@ class UserListState extends State<UserList> {
                     });
                   },
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       FloatingActionButton(
                           key: const Key("search"),
@@ -239,7 +237,6 @@ class UserListState extends State<UserList> {
             ],
           );
         }
-        isLoading = true;
         return const LoadingIndicator();
       }
 

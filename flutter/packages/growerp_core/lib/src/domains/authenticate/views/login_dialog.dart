@@ -73,7 +73,7 @@ class LoginDialogState extends State<LoginDialog> {
       }
     }, builder: (context, state) {
       if (state.status == AuthStatus.loading) return const LoadingIndicator();
-      var furtherAction = state.authenticate!.apiKey;
+      var furtherAction = state.authenticate?.apiKey;
       return Dialog(
           insetPadding: const EdgeInsets.all(10),
           child: furtherAction == 'moreInfo'

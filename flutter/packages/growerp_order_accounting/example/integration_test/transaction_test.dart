@@ -48,5 +48,6 @@ void main() {
         tester, transactions.sublist(2, 4));
     await TransactionTest.postTransactions(tester);
     await TransactionTest.checkTransactionsComplete(tester);
+    await CommonTest.logout(tester);
   });
 }

@@ -71,9 +71,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
       }
       ChatMessages compResult = await restClient.getChatMessages(
           chatRoomId: event.chatRoomId, searchString: event.searchString);
-      authBloc.add(AuthUpdateLocal(
-          delNotReadChatRoom:
-              compResult.chatMessages[0].chatRoom!.chatRoomName));
+      authBloc.add(AuthUpdateLocal(delNotReadChatRoom: event.chatRoomName));
 
       return emit(state.copyWith(
         status: ChatMessageStatus.success,

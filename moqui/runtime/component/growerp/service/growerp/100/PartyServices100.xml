@@ -1666,8 +1666,31 @@ along with this software (see the LICENSE.md file). If not, see
                 <service-call name="create#mantle.party.PartyClassificationAppl"
                     in-map="[partyId: userPartyId, partyClassificationId: user.appsUsed[0]]" />
             </if>
+            <!-- system support chat room -->
+            <if condition="userAccount">
+                <service-call name="create#growerp.general.ChatRoom"
+                    in-map="[isPrivate: 'Y', isActive: 'Y',
+                        ownerPartyId: ownerPartyId]"
+                    out-map="context" />
+                <service-call name="create#growerp.general.ChatRoomMember"
+                    in-map="[chatRoomId: chatRoomId,
+                                userId: userAccount.userId,
+                                isActive: 'Y',
+                                hasRead: 'N']" />
+                <service-call name="create#growerp.general.ChatRoomMember"
+                    in-map="[chatRoomId: chatRoomId,
+                                userId: 'SYSTEM_SUPPORT',
+                                isActive: 'N',
+                                hasRead: 'Y']" />
+                <service-call name="create#growerp.general.ChatMessage"
+                    in-map="[chatRoomId: chatRoomId,
+                            content: 'Welcome to GrowERP, if you need support, enter here in the chat your request, when we are not present, we will reply within 24 Hrs',
+                            userId: 'SystemSupport']" />
+            </if>
+
             <service-call name="growerp.100.PartyServices100.get#User"
-                in-map="[ownerPartyId: ownerPartyId, userPartyId: userPartyId]" out-map="userInfo" />
+                in-map="[ownerPartyId: ownerPartyId, userPartyId: userPartyId]"
+                out-map="userInfo" />
             <set field="user" from="userInfo.users?[0]" />
         </actions>
     </service>

@@ -1622,7 +1622,7 @@ along with this software (see the LICENSE.md file). If not, see
                     message="Other Company or User required! company: ${finDoc.otherCompany} user: ${finDoc.otherUser} " />
             </if>
             <set field="otherPartyId"
-                from="finDoc.otherCompany?.partyId ?: finDoc.otherUser.partyId" />
+                from="finDoc.otherCompany?.partyId ?: finDoc.otherUser?.partyId" />
             <service-call name="growerp.100.FinDocServices100.convert#StatusId" out-map="context"
                 in-map="[sales: finDoc?.sales, docType: finDoc.docType, statusId: finDoc.statusId]" />
             <set field="finDoc.statusId" from="convertedStatusId" />
@@ -2387,7 +2387,7 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="[sales: sales, docType: 'requestType', statusId: finDoc.requestType]"
                         out-map="requestType" />
                     <set field="otherPartyId"
-                        from="finDoc.otherCompany?.partyId ?: finDoc.otherUser.partyId" />
+                        from="finDoc.otherCompany?.partyId ?: finDoc.otherUser?.partyId" />
                     <service-call name="update#mantle.request.Request"
                         in-map="[   requestId: finDoc.requestId,
                                     pseudoId: finDoc.pseudoId,

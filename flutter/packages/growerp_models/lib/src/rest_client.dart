@@ -54,6 +54,7 @@ abstract class RestClient {
   });
 
   @GET("rest/s1/growerp/100/Companies")
+  @Extra({'noApiKey': true})
   Future<Companies> getCompanies({
     @Query('mainCompanies') bool? mainCompanies,
     @Query('searchString') String? searchString,

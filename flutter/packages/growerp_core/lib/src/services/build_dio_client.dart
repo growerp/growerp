@@ -1,12 +1,9 @@
 import 'dart:io' show Platform;
 import 'package:dio/dio.dart';
-import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:flutter/foundation.dart';
 import 'package:global_configuration/global_configuration.dart';
-//import 'package:dio_cache_interceptor_hive_store/dio_cache_interceptor_hive_store.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:hive/hive.dart';
-//import 'package:path_provider/path_provider.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 /// https://kamaravichow.medium.com/caching-with-dio-hive-in-flutter-e630ac5fc777
@@ -48,7 +45,6 @@ Future<Dio> buildDioClient(
 
   var box = await Hive.openBox('growerp');
   dio.interceptors.add(KeyInterceptor(box));
-  // https://pub.dev/packages/dio_cache_interceptor
   dio.interceptors.add(PrettyDioLogger(
       requestHeader: true,
       requestBody: true,
@@ -57,50 +53,10 @@ Future<Dio> buildDioClient(
       error: true,
       compact: true,
       maxWidth: 133));
-/*
-  var cacheDir = await getTemporaryDirectory();
-  var cacheStore = HiveCacheStore(
-    cacheDir.path,
-    hiveBoxName: "growerpCache",
-  );
-
-  var customCacheOptions = CacheOptions(
-    store: cacheStore,
-    policy: CachePolicy.forceCache,
-    priority: CachePriority.high,
-    maxStale: const Duration(minutes: 5),
-    hitCacheOnErrorExcept: [401, 404],
-    keyBuilder: (request) {
-      return request.uri.toString();
-    },
-    allowPostMethod: false,
-  );
-*/
-//  dio.interceptors.add(KeyDioCacheInterceptor(options: customCacheOptions));
 
   logger.i("accessing backend at ${dio.options.baseUrl}");
 
   return dio;
-}
-
-class KeyDioCacheInterceptor extends DioCacheInterceptor {
-  KeyDioCacheInterceptor({CacheOptions? customCacheOptions})
-      : super(options: customCacheOptions ?? defaultCacheOptions);
-
-  static get defaultCacheOptions => null;
-
-  @override
-  void onRequest(
-      RequestOptions options, RequestInterceptorHandler handler) async {
-    @override
-    CacheOptions cacheOptions =
-        (CacheOptions.fromExtra(options) ?? options) as CacheOptions;
-
-    if (options.extra['noCache'] == true) {
-      cacheOptions = cacheOptions.copyWith(policy: CachePolicy.noCache);
-    }
-    return super.onRequest(options, handler);
-  }
 }
 
 class KeyInterceptor extends Interceptor {

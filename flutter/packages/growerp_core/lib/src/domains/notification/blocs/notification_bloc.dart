@@ -74,7 +74,6 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     NotificationReceive event,
     Emitter<NotificationState> emit,
   ) async {
-    print("###receiving notification: ${event.notification}");
     emit(state.copyWith(status: NotificationStatus.loading));
     emit(state.copyWith(
       notifications: [event.notification],

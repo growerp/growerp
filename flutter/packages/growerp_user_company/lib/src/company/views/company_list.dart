@@ -42,6 +42,7 @@ class CompanyListState extends State<CompanyList> {
   bool isLoading = false;
   bool hasReachedMax = false;
   late bool isPhone;
+  late double top, left;
 
   @override
   void initState() {
@@ -63,6 +64,8 @@ class CompanyListState extends State<CompanyList> {
       default:
         _companyBloc = context.read<CompanyBloc>()..add(const CompanyFetch());
     }
+    top = 450;
+    left = 300;
   }
 
   @override
@@ -73,7 +76,8 @@ class CompanyListState extends State<CompanyList> {
         if (companies.isEmpty) {
           return const Center(
               heightFactor: 20,
-              child: Text("no companies found", textAlign: TextAlign.center));
+              child:
+                  Text("no companies found", style: TextStyle(fontSize: 20.0)));
         }
         // get table data formatted for tableView
         var (
@@ -154,8 +158,6 @@ class CompanyListState extends State<CompanyList> {
           isLoading = false;
           companies = state.companies;
           hasReachedMax = state.hasReachedMax;
-          double top = 450;
-          double left = 300;
           return Stack(
             children: [
               tableView(),

@@ -198,7 +198,9 @@ class ChatRoomsEchoState extends State<ChatRooms> {
                 // receive chat message (caused chatroom added on the list)
                 _chatMessageBloc = context.read<ChatMessageBloc>()
                   ..add(ChatMessageFetch(
-                      chatRoomId: chatRooms[0].chatRoomId, limit: limit));
+                      chatRoomName: chatRooms[0].chatRoomName!,
+                      chatRoomId: chatRooms[0].chatRoomId,
+                      limit: limit));
                 return BlocBuilder<ChatMessageBloc, ChatMessageState>(
                     builder: (context, state) {
                   if (state.status == ChatMessageStatus.success) {

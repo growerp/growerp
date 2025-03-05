@@ -17,18 +17,15 @@ along with this software (see the LICENSE.md file). If not, see
 
         <!-- ========== Test Admin User ========== -->
         <!-- password=moqui -->
-        <moqui.security.UserAccount userId="EX_JOHN_DOE" username="john.doe" userFullName="John Doe"
+        <moqui.security.UserAccount
+                userId="SYSTEM_SUPPORT" username="SystemSupport" userFullName="System Support"
                 currentPassword="16ac58bbfa332c1c55bd98b53e60720bfa90d394" passwordHashType="SHA"
-                passwordHint="framework name, lowercase" currencyUomId="USD" locale="en_US"
-                timeZone="US/Central"
-                emailAddress="john.doe@growerp.com" />
-        <moqui.security.UserGroupMember userGroupId="ADMIN" userId="EX_JOHN_DOE"
+                passwordHint="backend name, lowercase" currencyUomId="THB" locale="en_TH"
+                timeZone="ICT"
+                emailAddress="support@growerp.com" />
+        <moqui.security.UserGroupMember userGroupId="ADMIN" userId="SYSTEM_SUPPORT"
                 fromDate="1265184000000" />
-        <moqui.security.UserPermission userPermissionId="ExamplePerm"
-                description="Example Permission" />
-        <moqui.security.UserGroupPermission userGroupId="ADMIN" userPermissionId="ExamplePerm"
-                fromDate="1265184000000" thruDate="" />
-        <moqui.security.UserLoginHistory userId="EX_JOHN_DOE" fromDate="1265184000000"
+        <moqui.security.UserLoginHistory userId="SYSTEM_SUPPORT" fromDate="1265184000000"
                 successfulLogin="Y" />
 
         <!-- ========== Artifact Tarpit Example ========== -->
