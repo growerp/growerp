@@ -109,7 +109,7 @@ class FinDocListState extends State<FinDocList> {
       default:
     }
     _finDocBloc.add(FinDocFetch(limit: 15, my: my));
-    top = widget.journalId != null ? 250 : 400;
+    top = widget.journalId != null ? 250 : 350;
     left = widget.journalId != null ? 280 : 320;
   }
 
