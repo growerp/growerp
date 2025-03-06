@@ -351,6 +351,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <if condition="finDocId || pseudoId">
                     <entity-find entity-name="growerp.order.RequestAndParty" list="items">
+                        <econdition field-name="requestOwnerPartyId" from="companyPartyId" />
                         <econdition field-name="requestId" from="finDocId" ignore-if-empty="true" />
                         <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
                         <econdition field-name="requesterPartyId" from="requesterPartyId"
@@ -368,6 +369,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                         <entity-find offset="start" limit="limit"
                             entity-name="growerp.order.RequestAndParty" list="items">
+                            <econdition field-name="requestOwnerPartyId" from="companyPartyId" />
                             <econdition field-name="requesterPartyId" from="requesterPartyId"
                                 ignore-if-empty="true" />
                             <econditions combine="or">
@@ -1664,7 +1666,8 @@ along with this software (see the LICENSE.md file). If not, see
                                     requestOwnerPartyId: companyUserPartyId ?: userpartyId,
                                     statusId: convertedStatusId,
                                     filedByPartyId: otherPartyId,
-                                    requestDate: nowDate,                                   
+                                    requestDate: nowDate,
+                                    requestOwnerPartyId: companyPartyId
                                 ]"
                         out-map="context" />
                     <service-call name="growerp.100.PartyServices100.get#CompanyUser"

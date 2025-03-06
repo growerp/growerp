@@ -824,6 +824,7 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="contactMechId" />
         </member-entity>
         <alias name="requestId" entity-alias="REQ" />
+        <alias name="requestOwnerPartyId" entity-alias="REQ" />
         <alias name="pseudoId" field="requestPseudoId" entity-alias="REQ" />
         <alias name="requestType" field="requestTypeEnumId" entity-alias="REQ" />
         <alias name="requesterPartyId" field="requestOwnerPartyId" entity-alias="REQ" />

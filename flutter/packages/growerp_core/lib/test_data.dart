@@ -1457,6 +1457,7 @@ List<FinDoc> requests = [
       description: "this is the fifth request",
       items: []),
   FinDoc(
+      docType: FinDocType.request,
       otherUser: customers[3],
       requestType: RequestType.consultation,
       description: "this is the sixth request",

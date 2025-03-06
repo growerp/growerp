@@ -2201,7 +2201,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="role" from="null" />
             </if>
             <if condition="search">
-                <set field="searchString" value="%$search%" />
+                <!-- to be able to search for lastname, firstName -->
+                <set field="searchString" value="%${search.split(' ')[0].replace(',','')}%" />
             </if>
             <!-- adjust role -->
             <if condition="role == 'Customer'">
@@ -2217,6 +2218,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="role == 'Company'">
                 <set field="role" value="OrgInternal" />
             </if>
+            <log message="=======looking for search: $search" />
             <entity-find offset="start" limit="limit" list="items"
                 entity-name="growerp.party.OwnerCompanyUser">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
@@ -2229,6 +2231,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="firstName" from="searchString" ignore-case="true"
                         operator="like" ignore-if-empty="true" />
                     <econdition field-name="lastName" from="searchString" ignore-case="true"
+                        operator="like" ignore-if-empty="true" />
+                    <econdition field-name="userFullName" from="searchString" ignore-case="true"
                         operator="like" ignore-if-empty="true" />
                     <econdition field-name="pseudoId" from="searchString" ignore-case="true"
                         operator="like" ignore-if-empty="true" />

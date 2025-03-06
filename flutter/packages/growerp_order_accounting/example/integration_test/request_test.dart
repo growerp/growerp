@@ -44,12 +44,13 @@ void main() {
 
     await CommonTest.createCompanyAndAdmin(tester, testData: {
       "users": customers,
-      "companies": supplierCompanies + customerCompanies
+      "companies": supplierCompanies,
     });
     await RequestTest.selectRequests(tester);
     await RequestTest.addRequests(tester, requests.sublist(0, 3));
     await RequestTest.updateRequests(tester, requests.sublist(3, 6));
     await RequestTest.completeRequests(tester);
     await RequestTest.checkRequestsComplete(tester);
+    await CommonTest.logout(tester);
   });
 }
