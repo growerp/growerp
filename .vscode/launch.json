@@ -36,10 +36,41 @@
             ]
         },
         {
+            "name": "Support Web (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/support",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "chrome",
+                "--web-port",
+                "55555"
+            ]
+        },
+        {
+            "name": "Support linux (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/support",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "linux"
+            ]
+        },
+        {
+            "name": "Support mobile (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/support",
+            "program": "lib/main.dart"
+        },
+        {
             "name": "Admin Web (lib/main.dart)",
             "type": "dart",
             "request": "launch",
-            "cwd": "flutter/packages/admin",
+            "cwd": "flutter/packages/support",
             "program": "lib/main.dart",
             "args": [
                 "-d",

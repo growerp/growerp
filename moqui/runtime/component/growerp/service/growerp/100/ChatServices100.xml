@@ -60,24 +60,39 @@ along with this software (see the LICENSE.md file). If not, see
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="hasRead != null">
                 <!-- get just the unread rooms names for statistics-->
-                <entity-find entity-name="growerp.general.ChatRoomsAndMembers" list="rooms"
-                    for-update="true">
-                    <econdition field-name="userId" from="ec.user.userAccount.userId" />
-                    <econdition field-name="hasRead" value="N" />
-                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                </entity-find>
+                <if condition="ec.user.userAccount.userId == 'SYSTEM_SUPPORT'">
+                    <entity-find entity-name="growerp.general.ChatRoomsAndMembers" list="rooms">
+                        <econdition field-name="isPrivate" value="Y" />
+                        <econdition field-name="isActive" value="Y" />
+                        <econdition field-name="hasRead" value="N" />
+                        <econdition field-name="userId" value="SYSTEM_SUPPORT" />
+                    </entity-find>
+                    <else>
+                        <entity-find entity-name="growerp.general.ChatRoomsAndMembers" list="rooms"
+                            for-update="true">
+                            <econdition field-name="userId" from="ec.user.userAccount.userId" />
+                            <econdition field-name="hasRead" value="N" />
+                            <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                        </entity-find>
+                    </else>
+                </if>
                 <set field="chatRooms" from="[]" />
                 <iterate entry="room" list="rooms">
                     <!-- get full name of other member in a private chat -->
                     <set field="currentUserId" from="ec.user.userAccount.userId" />
                     <if condition="room.isPrivate == 'Y'">
                         <entity-find entity-name="growerp.general.ChatRoomsAndMembers" list="others">
-                            <econdition field-name="ownerPartyId" from="ownerPartyId" />
                             <econdition field-name="chatRoomId" from="room.chatRoomId" />
                             <econdition field-name="userId" operator="not-equals"
                                 from="ec.user.userAccount.userId" />
                         </entity-find>
-                        <set field="roomName" from="others[0].fullName" />
+                        <if condition="ec.user.userAccount.userId == 'SYSTEM_SUPPORT'">
+                            <set field="roomName"
+                                value="${others[0].ownerPartyId} ${others[0].fullName}" />
+                            <else>
+                                <set field="roomName" from="others[0].fullName" />
+                            </else>
+                        </if>
                     </if>
                     <script>chatRooms.add(room.chatRoomName ?: roomName)</script>
                 </iterate>
@@ -89,31 +104,64 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="isPrivate">
                 <set field="isPriv" value="N" />
             </if>
-            <entity-find entity-name="growerp.general.ChatRoomsAndMembers" list="rooms">
-                <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                <econdition field-name="chatRoomId" from="chatRoomId" ignore-if-empty="true" />
-                <econdition field-name="isPrivate" from="isPriv" ignore-if-empty="true" />
-                <econdition field-name="chatRoomName" from="filter" ignore-if-empty="true" />
-                <econdition field-name="isActive" value="Y" />
-                <econdition field-name="userId" from="ec.user.userAccount.userId" />
-            </entity-find>
+            <if condition="ec.user.userAccount.userId == 'SYSTEM_SUPPORT'">
+                <entity-find entity-name="growerp.general.ChatRoomsAndMembers" list="rooms">
+                    <econdition field-name="isPrivate" value="Y" />
+                    <econditions combine="or">
+                        <econdition field-name="isActive" value="Y" />
+                        <econdition field-name="hasRead" value="N" />
+                    </econditions>
+                    <econdition field-name="userId" value="SYSTEM_SUPPORT" />
+                </entity-find>
+                <else>
+                    <entity-find entity-name="growerp.general.ChatRoomsAndMembers" list="rooms">
+                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                        <econdition field-name="chatRoomId" from="chatRoomId" ignore-if-empty="true" />
+                        <econdition field-name="isPrivate" from="isPriv" ignore-if-empty="true" />
+                        <econdition field-name="chatRoomName" from="filter" ignore-if-empty="true" />
+                        <econdition field-name="isActive" value="Y" />
+                        <econdition field-name="userId" from="ec.user.userAccount.userId" />
+                    </entity-find>
+                </else>
+            </if>
             <set field="chatRooms" from="[]" />
             <iterate list="rooms" entry="room">
                 <if condition="room.isPrivate == 'Y'">
                     <!-- get roomName from other private member-->
                     <entity-find entity-name="growerp.general.ChatRoomsAndMembers" list="others">
-                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
                         <econdition field-name="chatRoomId" from="room.chatRoomId" />
                         <econdition field-name="userId" operator="not-equals"
                             from="ec.user.userAccount.userId" />
                     </entity-find>
-                    <set field="roomName" from="others[0].fullName" />
+                    <if condition="ec.user.userAccount.userId == 'SYSTEM_SUPPORT'">
+                        <set field="roomName"
+                            value="${others[0].ownerPartyId} ${others[0].fullName}" />
+                        <else>
+                            <set field="roomName" from="others[0].fullName" />
+                        </else>
+                    </if>
                 </if>
+                <!-- get members -->
+                <entity-find entity-name="growerp.general.ChatRoomMember" list="memberList">
+                    <econdition field-name="chatRoomId" from="room.chatRoomId" />
+                </entity-find>
+                <set field="members" from="[]" />
+                <iterate list="memberList" entry="member">
+                    <set field="member"
+                        from="[user: [userId: member.userId],
+                        hasRead: member.hasRead == 'Y' ? true : false,
+                        isActive: member.isActive == 'Y' ? true : false]" />
+                    <script>members.add(member)</script>
+                    <if condition="member.userId == ec.user.userAccount.userId">
+                        <set field="hasRead" from="member.hasRead" />
+                    </if>
+                </iterate>
                 <set field="roomOut"
                     from="[
                         chatRoomId: room.chatRoomId, chatRoomName: room.chatRoomName ?: roomName,
-                        hasRead: room.hasRead == 'Y' ? true : false,
-                        isPrivate: room.isPrivate == 'Y' ? true : false]" />
+                        hasRead: hasRead == 'Y' ? true : false,
+                        isPrivate: room.isPrivate == 'Y' ? true : false,
+                        members: members]" />
                 <script>chatRooms.add(roomOut)</script>
             </iterate>
         </actions>
@@ -396,16 +444,21 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <log message="===get message roomId: $chatRoomId" />
+            <if condition="chatRoomId == null &amp;&amp; chatMessageId == null">
+                <return error="true"
+                    message="Either chatRoomId or ChatMessageId is required to get chat message(s)" />
+            </if>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="ec.user.userAccount.userId == 'System_Support'">
+                <set field="ownerPartyId" from="null" />
+            </if>
             <entity-find entity-name="growerp.general.ChatRoomAndMessages"
                 list="messages" offset="start" limit="limit">
                 <econdition field-name="chatRoomId" from="chatRoomId"
                     ignore-if-empty="true" />
                 <econdition field-name="chatMessageId" from="chatMessageId"
                     ignore-if-empty="true" />
-                <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <order-by field-name="-lastUpdatedStamp" />
             </entity-find>
             <set field="chatMessages" from="[]" />
@@ -425,7 +478,9 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- if reading room, set as read -->
             <if condition="chatRoomId">
                 <service-call name="update#growerp.general.ChatRoomMember"
-                    in-map="[chatRoomId: chatRoomId, userId: ec.user.userAccount.userId, hasRead: 'Y']" />
+                    in-map="[chatRoomId: chatRoomId,
+                            userId: ec.user.userAccount.userId,
+                            hasRead: 'Y']" />
             </if>
         </actions>
     </service>
@@ -456,7 +511,7 @@ along with this software (see the LICENSE.md file). If not, see
                     fromUserId : ec.user.userAccount.userId,
                     content: chatMessage.content]"
                 out-map="context" />
-            <!-- update all members of related rooms to unread -->
+            <!-- update all members of related rooms to unread and room active -->
             <entity-find entity-name="growerp.general.ChatRoomMember"
                 list="roomMembers">
                 <econdition field-name="chatRoomId" from="chatMessage.chatRoom.chatRoomId" />
@@ -464,10 +519,12 @@ along with this software (see the LICENSE.md file). If not, see
             <iterate
                 list="roomMembers" entry="member">
                 <if
-                    condition="ec.user.userAccount.userId != member.userId &amp;&amp; member.hasRead != 'N'">
+                    condition="ec.user.userAccount.userId != member.userId &amp;&amp;member.hasRead != 'N'">
                     <service-call name="update#growerp.general.ChatRoomMember"
                         in-map="[chatRoomId: member.chatRoomId,
-                                    userId: member.userId, hasRead: 'N']" />
+                                    userId: member.userId, 
+                                        hasRead: 'N',
+                                        isActive: 'Y']" />
                 </if>
             </iterate>
             <service-call name="growerp.100.ChatServices100.get#ChatMessage"

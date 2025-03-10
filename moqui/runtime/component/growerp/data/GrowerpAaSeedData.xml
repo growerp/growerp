@@ -63,6 +63,9 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- allocate companies to application -->
     <moqui.basic.Enumeration description="Mobile App Name used by company" enumId="PcltMobileApp"
         enumTypeId="PartyClassificationType" />
+    <mantle.party.PartyClassification partyClassificationId="AppSupport"
+        classificationTypeEnumId="PcltMobileApp"
+        description="System support app to management registered companies" />
     <mantle.party.PartyClassification partyClassificationId="AppAdmin"
         classificationTypeEnumId="PcltMobileApp"
         description="Admin app to maintain backoffice data, products, categories, orders" />

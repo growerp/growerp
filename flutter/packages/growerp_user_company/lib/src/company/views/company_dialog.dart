@@ -97,7 +97,8 @@ class CompanyFormState extends State<CompanyDialog> {
   late bool isPhone;
   final ScrollController _scrollController = ScrollController();
   late CompanyBloc companyBloc;
-  late double top, left;
+  late double top;
+  double? left;
 
   @override
   void initState() {
@@ -141,7 +142,6 @@ class CompanyFormState extends State<CompanyDialog> {
     user = authenticate.user!;
     isAdmin = authenticate.user!.userGroup == UserGroup.admin;
     top = -100;
-    left = 250;
   }
 
   @override
@@ -183,6 +183,7 @@ class CompanyFormState extends State<CompanyDialog> {
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    left = left ?? (isPhone ? 250 : 600);
     return widget.dialog == true
         ? Dialog(
             key: Key('CompanyDialog${company.role?.name ?? Role.unknown}'),
@@ -665,7 +666,9 @@ class CompanyFormState extends State<CompanyDialog> {
           child: GestureDetector(
             onPanUpdate: (details) {
               setState(() {
-                left += details.delta.dx;
+                if (left != null) {
+                  left = left! + details.delta.dx;
+                }
                 top += details.delta.dy;
               });
             },

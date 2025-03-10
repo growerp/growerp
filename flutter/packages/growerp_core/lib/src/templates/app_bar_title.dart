@@ -35,7 +35,7 @@ Widget appBarTitle(BuildContext context, String title, bool isPhone) {
               : Text(
                   auth?.company?.name != null && auth?.company?.name! != ''
                       ? auth!.company!.name!.substring(0, 1)
-                      : '?',
+                      : '',
                   key: const Key('appBarAvatarText'),
                 )),
     ),
@@ -46,7 +46,7 @@ Widget appBarTitle(BuildContext context, String title, bool isPhone) {
         style: const TextStyle(fontSize: 15),
         key: const Key('appBarTitle'),
       ),
-      Text(auth?.company?.name ?? '??',
+      Text(auth?.company?.name ?? '',
           key: const Key('appBarCompanyName'),
           style: const TextStyle(fontSize: 10)),
     ]),

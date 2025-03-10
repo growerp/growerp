@@ -183,47 +183,54 @@ class MenuOptionState extends State<DisplayMenuOption>
   Widget build(BuildContext context) {
     currentRoute = ModalRoute.of(context)?.settings.name ?? '';
     isPhone = isAPhone(context);
-    actions = List.of(widget.actions);
-    List<String> unReadRooms =
-        authBloc.state.authenticate!.stats?.notReadChatRooms ?? [];
-    actions.insert(
-        0,
-        IconButton(
-          key: const Key('chatButton'), // causes a duplicate key?
-          icon: Badge(
-              label: unReadRooms.isNotEmpty
-                  ? Text(unReadRooms.length.toString())
-                  : null,
-              backgroundColor: Colors.red,
-              child: const Icon(Icons.chat)),
-          padding: EdgeInsets.zero,
-          tooltip: unReadRooms.isEmpty ? 'Chat' : unReadRooms.toString(),
-          onPressed: () async => {
-            await showDialog(
-              barrierDismissible: true,
-              context: context,
-              builder: (BuildContext context) {
-                return const ChatRoomListDialog();
+    return BlocBuilder<ChatRoomBloc, ChatRoomState>(builder: (context, state) {
+      if (state.status == ChatRoomStatus.success) {
+        actions = List.of(widget.actions);
+        List<ChatRoom> unReadRooms = context
+            .read<ChatRoomBloc>()
+            .state
+            .chatRooms
+            .where((element) => element.hasRead == false)
+            .toList();
+        actions.insert(
+            0,
+            IconButton(
+              key: const Key('chatButton'), // causes a duplicate key?
+              icon: Badge(
+                  label: unReadRooms.isNotEmpty
+                      ? Text(unReadRooms.length.toString())
+                      : null,
+                  backgroundColor: Colors.red,
+                  child: const Icon(Icons.chat)),
+              padding: EdgeInsets.zero,
+              tooltip: unReadRooms.isEmpty ? 'Chat' : unReadRooms.toString(),
+              onPressed: () async => {
+                await showDialog(
+                  barrierDismissible: true,
+                  context: context,
+                  builder: (BuildContext context) {
+                    return const ChatRoomListDialog();
+                  },
+                )
               },
-            )
-          },
-        ));
-    if (currentRoute != '/' && widget.workflow == null) {
-      actions.add(IconButton(
-          key: const Key('homeButton'),
-          icon: const Icon(Icons.home),
-          tooltip: 'Go Home',
-          onPressed: () {
-            if (currentRoute.startsWith('/acct')) {
-              Navigator.pushNamed(context, '/accounting');
-            } else {
-              Navigator.pushNamed(context, '/');
-            }
-          }));
-    }
+            ));
 
-    Widget workflowBar = SizedBox(
-        child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+        if (currentRoute != '/' && widget.workflow == null) {
+          actions.add(IconButton(
+              key: const Key('homeButton'),
+              icon: const Icon(Icons.home),
+              tooltip: 'Go Home',
+              onPressed: () {
+                if (currentRoute.startsWith('/acct')) {
+                  Navigator.pushNamed(context, '/accounting');
+                } else {
+                  Navigator.pushNamed(context, '/');
+                }
+              }));
+        }
+
+        Widget workflowBar = SizedBox(
+            child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
 /*          OutlinedButton(
             child: const Text('Previous'),
             onPressed: () {
@@ -231,12 +238,12 @@ class MenuOptionState extends State<DisplayMenuOption>
             },
           ),
 */
-      OutlinedButton(
-        child: const Text('Cancel'),
-        onPressed: () {
-          taskBloc.add(TaskWorkflowCancel(widget.workflow!.taskId));
-        },
-      ),
+          OutlinedButton(
+            child: const Text('Cancel'),
+            onPressed: () {
+              taskBloc.add(TaskWorkflowCancel(widget.workflow!.taskId));
+            },
+          ),
 /*          OutlinedButton(
             child: const Text('Suspend'),
             onPressed: () {
@@ -244,124 +251,133 @@ class MenuOptionState extends State<DisplayMenuOption>
             },
           ),
 */
-      const SizedBox(width: 10),
-      OutlinedButton(
-        child: const Text('Next'),
-        onPressed: () {
-          taskBloc.add(TaskWorkflowNext(widget.workflow!.taskId));
-        },
-      ),
-    ]));
+          const SizedBox(width: 10),
+          OutlinedButton(
+            child: const Text('Next'),
+            onPressed: () {
+              taskBloc.add(TaskWorkflowNext(widget.workflow!.taskId));
+            },
+          ),
+        ]));
 
-    Widget simplePage(bool isPhone) {
-      displayMOFormKey =
-          child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-      // debugPrint("==2-simple= current form key: $displayMOFormKey");
+        Widget simplePage(bool isPhone) {
+          displayMOFormKey =
+              child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
+          // debugPrint("==2-simple= current form key: $displayMOFormKey");
 
-      List<Widget> simpleChildren = [Expanded(child: child!)];
-      if (widget.workflow != null) {
-        simpleChildren.insert(0, workflowBar);
-      }
+          List<Widget> simpleChildren = [Expanded(child: child!)];
+          if (widget.workflow != null) {
+            simpleChildren.insert(0, workflowBar);
+          }
 
-      return Scaffold(
-          key: Key(currentRoute),
-          appBar: AppBar(
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              key: Key(displayMOFormKey),
-              automaticallyImplyLeading: isPhone,
-              leading: leadAction,
-              title: appBarTitle(context, title, isPhone),
-              actions: actions),
-          drawer: myDrawer(context, isPhone, menuList),
-          floatingActionButton: floatingActionButton,
-          body: child!);
-    }
+          return Scaffold(
+              key: Key(currentRoute),
+              appBar: AppBar(
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primaryContainer,
+                  key: Key(displayMOFormKey),
+                  automaticallyImplyLeading: isPhone,
+                  leading: leadAction,
+                  title: appBarTitle(context, title, isPhone),
+                  actions: actions),
+              drawer: myDrawer(context, isPhone, menuList),
+              floatingActionButton: floatingActionButton,
+              body: child!);
+        }
 
-    Widget tabPage(bool isPhone) {
-      displayMOFormKey =
-          tabList[tabIndex].toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-      Color tabSelectedBackground = Theme.of(context).colorScheme.onSecondary;
-      //debugPrint("==3-tab= current form key: $displayMOFormKey");
-      List<Widget> tabChildren = [
-        Expanded(
-            child: isPhone
-                ? Center(key: Key(displayMOFormKey), child: tabList[tabIndex])
-                : TabBarView(
-                    physics: const NeverScrollableScrollPhysics(),
-                    key: Key(displayMOFormKey),
-                    controller: _controller,
-                    children: tabList,
-                  ))
-      ];
-      if (widget.workflow != null) {
-        tabChildren.insert(0, workflowBar);
-      }
+        Widget tabPage(bool isPhone) {
+          displayMOFormKey = tabList[tabIndex]
+              .toString()
+              .replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
+          Color tabSelectedBackground =
+              Theme.of(context).colorScheme.onSecondary;
+          //debugPrint("==3-tab= current form key: $displayMOFormKey");
+          List<Widget> tabChildren = [
+            Expanded(
+                child: isPhone
+                    ? Center(
+                        key: Key(displayMOFormKey), child: tabList[tabIndex])
+                    : TabBarView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        key: Key(displayMOFormKey),
+                        controller: _controller,
+                        children: tabList,
+                      ))
+          ];
+          if (widget.workflow != null) {
+            tabChildren.insert(0, workflowBar);
+          }
 
-      return Scaffold(
-          key: Key(currentRoute),
-          appBar: AppBar(
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              automaticallyImplyLeading: isPhone,
-              bottom: isPhone
-                  ? null
-                  : TabBar(
-                      controller: _controller,
-                      labelPadding: const EdgeInsets.all(5.0),
-                      indicatorSize: TabBarIndicatorSize.label,
-                      indicator: BoxDecoration(
-                        color: tabSelectedBackground,
-                        borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10)),
-                      ),
-                      tabs: tabText,
-                    ),
-              title: appBarTitle(
-                  context,
-                  '$title ${isPhone ? '\n' : ', '}${tabItems[tabIndex].label}',
-                  isPhone),
-              actions: actions),
-          drawer: myDrawer(context, isPhone, menuList),
-          floatingActionButton: floatingActionButtonList[tabIndex],
-          bottomNavigationBar: isPhone
-              ? BottomNavigationBar(
-                  type: BottomNavigationBarType.fixed,
-                  items: bottomItems,
-                  currentIndex: tabIndex,
-                  selectedItemColor: Colors.amber[800],
-                  onTap: (index) {
-                    setState(() {
-                      tabIndex = index;
-                    });
-                  })
-              : null,
-          body: Column(children: tabChildren));
-    }
+          return Scaffold(
+              key: Key(currentRoute),
+              appBar: AppBar(
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primaryContainer,
+                  automaticallyImplyLeading: isPhone,
+                  bottom: isPhone
+                      ? null
+                      : TabBar(
+                          controller: _controller,
+                          labelPadding: const EdgeInsets.all(5.0),
+                          indicatorSize: TabBarIndicatorSize.label,
+                          indicator: BoxDecoration(
+                            color: tabSelectedBackground,
+                            borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                topRight: Radius.circular(10)),
+                          ),
+                          tabs: tabText,
+                        ),
+                  title: appBarTitle(
+                      context,
+                      '$title ${isPhone ? '\n' : ', '}${tabItems[tabIndex].label}',
+                      isPhone),
+                  actions: actions),
+              drawer: myDrawer(context, isPhone, menuList),
+              floatingActionButton: floatingActionButtonList[tabIndex],
+              bottomNavigationBar: isPhone
+                  ? BottomNavigationBar(
+                      type: BottomNavigationBarType.fixed,
+                      items: bottomItems,
+                      currentIndex: tabIndex,
+                      selectedItemColor: Colors.amber[800],
+                      onTap: (index) {
+                        setState(() {
+                          tabIndex = index;
+                        });
+                      })
+                  : null,
+              body: Column(children: tabChildren));
+        }
 
-    if (tabItems.isEmpty) {
-      // show simple page
-      if (isPhone) {
-        return simplePage(isPhone);
+        if (tabItems.isEmpty) {
+          // show simple page
+          if (isPhone) {
+            return simplePage(isPhone);
+          } else {
+            return myNavigationRail(
+              context,
+              simplePage(isPhone),
+              menuIndex,
+              menuList,
+            );
+          }
+        } else {
+          // show tabbar page
+          if (isPhone) {
+            return tabPage(isPhone);
+          } else {
+            return myNavigationRail(
+              context,
+              tabPage(isPhone),
+              menuIndex,
+              menuList,
+            );
+          }
+        }
       } else {
-        return myNavigationRail(
-          context,
-          simplePage(isPhone),
-          menuIndex,
-          menuList,
-        );
+        return const Center(child: LoadingIndicator());
       }
-    } else {
-      // show tabbar page
-      if (isPhone) {
-        return tabPage(isPhone);
-      } else {
-        return myNavigationRail(
-          context,
-          tabPage(isPhone),
-          menuIndex,
-          menuList,
-        );
-      }
-    }
+    });
   }
 }

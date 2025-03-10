@@ -16,6 +16,7 @@
 // https://medium.com/@ra9r/overcoming-the-limitations-of-dart-enum-8866df8a1c47
 
 enum UserGroup {
+  system('GROWERP_M_SYSTEM'),
   employee('GROWERP_M_EMPLOYEE'),
   admin('GROWERP_M_ADMIN'),
   other('GROWERP_M_OTHER');
@@ -33,6 +34,9 @@ enum UserGroup {
     return byValue[value];
   }
 
+  static List<UserGroup> getValues() => UserGroup.values
+      .where((userGroup) => userGroup != UserGroup.system)
+      .toList();
   @override
   String toString() {
     return value;

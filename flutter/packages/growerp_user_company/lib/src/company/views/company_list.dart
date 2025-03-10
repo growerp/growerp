@@ -24,8 +24,9 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import '../../../growerp_user_company.dart';
 
 class CompanyList extends StatefulWidget {
-  const CompanyList({required this.role, super.key});
+  const CompanyList({required this.role, this.mainOnly = false, super.key});
   final Role? role;
+  final bool mainOnly;
 
   @override
   CompanyListState createState() => CompanyListState();
@@ -48,21 +49,26 @@ class CompanyListState extends State<CompanyList> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    switch (widget.role) {
-      case Role.supplier:
-        _companyBloc = context.read<CompanySupplierBloc>() as CompanyBloc
-          ..add(const CompanyFetch());
-        break;
-      case Role.customer:
-        _companyBloc = context.read<CompanyCustomerBloc>() as CompanyBloc
-          ..add(const CompanyFetch());
-        break;
-      case Role.lead:
-        _companyBloc = context.read<CompanyLeadBloc>() as CompanyBloc
-          ..add(const CompanyFetch());
-        break;
-      default:
-        _companyBloc = context.read<CompanyBloc>()..add(const CompanyFetch());
+    if (widget.mainOnly) {
+      _companyBloc = context.read<CompanyBloc>()
+        ..add(CompanyFetch(mainOnly: widget.mainOnly));
+    } else {
+      switch (widget.role) {
+        case Role.supplier:
+          _companyBloc = context.read<CompanySupplierBloc>() as CompanyBloc
+            ..add(const CompanyFetch());
+          break;
+        case Role.customer:
+          _companyBloc = context.read<CompanyCustomerBloc>() as CompanyBloc
+            ..add(const CompanyFetch());
+          break;
+        case Role.lead:
+          _companyBloc = context.read<CompanyLeadBloc>() as CompanyBloc
+            ..add(const CompanyFetch());
+          break;
+        default:
+          _companyBloc = context.read<CompanyBloc>()..add(const CompanyFetch());
+      }
     }
     top = 450;
     left = 300;
@@ -221,6 +227,16 @@ class CompanyListState extends State<CompanyList> {
                           },
                           tooltip: 'Add New',
                           child: const Icon(Icons.add)),
+                      const SizedBox(height: 10),
+                      if (widget.mainOnly)
+                        FloatingActionButton(
+                            key: const Key("refresh"),
+                            heroTag: "companybtn3",
+                            onPressed: () async => _companyBloc.add(
+                                CompanyFetch(
+                                    refresh: true, mainOnly: widget.mainOnly)),
+                            tooltip: 'refresh',
+                            child: const Icon(Icons.refresh)),
                     ],
                   ),
                 ),
@@ -232,19 +248,24 @@ class CompanyListState extends State<CompanyList> {
         return const LoadingIndicator();
       }
 
-      switch (widget.role) {
-        case Role.lead:
-          return BlocConsumer<CompanyLeadBloc, CompanyState>(
-              listener: blocListener, builder: blocBuilder);
-        case Role.customer:
-          return BlocConsumer<CompanyCustomerBloc, CompanyState>(
-              listener: blocListener, builder: blocBuilder);
-        case Role.supplier:
-          return BlocConsumer<CompanySupplierBloc, CompanyState>(
-              listener: blocListener, builder: blocBuilder);
-        default:
-          return BlocConsumer<CompanyBloc, CompanyState>(
-              listener: blocListener, builder: blocBuilder);
+      if (widget.mainOnly) {
+        return BlocConsumer<CompanyBloc, CompanyState>(
+            listener: blocListener, builder: blocBuilder);
+      } else {
+        switch (widget.role) {
+          case Role.lead:
+            return BlocConsumer<CompanyLeadBloc, CompanyState>(
+                listener: blocListener, builder: blocBuilder);
+          case Role.customer:
+            return BlocConsumer<CompanyCustomerBloc, CompanyState>(
+                listener: blocListener, builder: blocBuilder);
+          case Role.supplier:
+            return BlocConsumer<CompanySupplierBloc, CompanyState>(
+                listener: blocListener, builder: blocBuilder);
+          default:
+            return BlocConsumer<CompanyBloc, CompanyState>(
+                listener: blocListener, builder: blocBuilder);
+        }
       }
     });
   }

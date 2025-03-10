@@ -24,6 +24,8 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
     Company item, int index,
     {dynamic extra}) {
   bool isPhone = isAPhone(context);
+  Authenticate auth = context.read<AuthBloc>().state.authenticate!;
+  String userId = auth.user!.userId!;
   List<TableRowContent> rowContent = [];
 
   if (isPhone) {
@@ -43,7 +45,9 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
   rowContent.add(TableRowContent(
     name: 'Id',
     width: isPhone ? 14 : 7,
-    value: Text(item.pseudoId ?? '', key: Key('id$index')),
+    value: Text(
+        userId == 'SYSTEM_SUPPORT' ? item.partyId ?? '' : item.pseudoId ?? '',
+        key: Key('id$index')),
   ));
 
   if (isPhone) {

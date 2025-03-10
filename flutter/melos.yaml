@@ -28,6 +28,7 @@ packages:
   - packages/hotel
   - packages/freelance
   - packages/health
+  - packages/support
 
 command:
   bootstrap:

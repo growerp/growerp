@@ -71,8 +71,9 @@ class ChatEndpoint extends MoquiAbstractEndpoint {
             return
         }
         List chatRooms = (List) result.chatRooms
+        logger.info("====chatrooms; $chatRooms =======")
         List members = (List) chatRooms[0]["members"]
-        List userIds = (List) members["member"]["userId"]
+        List userIds = (List) members["user"]["userId"]
 
         chatEndpoints.forEach(endpoint -> {
             var toUserId = users.get(endpoint.session.getId())
@@ -98,7 +99,7 @@ class ChatEndpoint extends MoquiAbstractEndpoint {
         chatEndpoints.remove(this);
         Map message = [
             "fromUserId": users.get(session.getId()),
-            "content": "Disconnected!"];
+            "content": "Disconnected: ${closeReason}"];
         broadcast(JsonOutput.toJson(message));
         super.onClose(session, closeReason)
     }

@@ -33,9 +33,10 @@ class ChatRoom with _$ChatRoom {
     String? lastMessage,
     @Default(true) bool isPrivate,
 
-    ///temporary filled field to show value of current user
-    ///actual field in chatRoom member
-    @Default(false) bool hasRead,
+    /// if all messages were read
+    @Default(true) bool hasRead,
+
+    /// list of members in the chat room
     @Default([]) List<ChatRoomMember> members,
   }) = _ChatRoom;
 
@@ -43,31 +44,31 @@ class ChatRoom with _$ChatRoom {
       _$ChatRoomFromJson(json["chatRoom"] ?? json);
 
   int getMemberIndex(String userId) {
-    return members.indexWhere((element) => element.member?.userId == userId);
+    return members.indexWhere((element) => element.user?.userId == userId);
   }
 
   String? getToUserId(String currentUserId) {
     ChatRoomMember chatRoomMember = members.firstWhere(
-        (element) => element.member?.userId != currentUserId,
+        (element) => element.user?.userId != currentUserId,
         orElse: () => ChatRoomMember());
-    return chatRoomMember.member?.userId;
+    return chatRoomMember.user?.userId;
   }
 
   String? getFromUserId(String currentUserId) {
-    ChatRoomMember chatRoomMember = members
-        .firstWhere((element) => element.member?.userId == currentUserId);
-    return chatRoomMember.member?.userId;
+    ChatRoomMember chatRoomMember =
+        members.firstWhere((element) => element.user?.userId == currentUserId);
+    return chatRoomMember.user?.userId;
   }
 
   ChatRoomMember? getFromMember(String currentUserId) {
     return members
-        .firstWhere((element) => element.member?.userId == currentUserId);
+        .firstWhere((element) => element.user?.userId == currentUserId);
   }
 
   int getUserIndex(User user) {
     late int index;
     for (index = 0; index < members.length; index++) {
-      if (members[index].member?.userId == user.userId) break;
+      if (members[index].user?.userId == user.userId) break;
     }
     return index == members.length ? -1 : index;
   }

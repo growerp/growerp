@@ -46,6 +46,7 @@ abstract class RestClient {
   Future<String> resetPassword({@Field() required String username});
 
   @POST("rest/s1/growerp/100/Password")
+  @Extra({'noApiKey': true})
   Future<Authenticate> updatePassword({
     @Field() required String username,
     @Field() required String oldPassword,

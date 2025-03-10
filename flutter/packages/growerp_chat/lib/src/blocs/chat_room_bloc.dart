@@ -41,11 +41,32 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
 
   ChatRoomBloc(this.restClient, this.chatClient, this.authBloc)
       : super(const ChatRoomState()) {
+    on<ChatRoomUpdateLocal>(_onChatRoomUpdateLocal);
     on<ChatRoomFetch>(_onChatRoomFetch,
         transformer: chatRoomDroppable(const Duration(milliseconds: 100)));
     on<ChatRoomUpdate>(_onChatRoomUpdate);
     on<ChatRoomDelete>(_onChatRoomDelete);
     on<ChatRoomReceiveWsChatMessage>(_onChatRoomReceiveWsChatMessage);
+  }
+
+  void _onChatRoomUpdateLocal(
+    ChatRoomUpdateLocal event,
+    Emitter<ChatRoomState> emit,
+  ) {
+    emit(state.copyWith(status: ChatRoomStatus.loading));
+    var chatRooms = List.of(state.chatRooms);
+    int index = chatRooms.indexWhere((element) =>
+        element.chatRoomId ==
+        (event.addNotReadChatRoomId ?? event.delNotReadChatRoomId));
+    if (index != -1) {
+      if (event.addNotReadChatRoomId != null) {
+        chatRooms[index] = chatRooms[index].copyWith(hasRead: false);
+      } else if (event.delNotReadChatRoomId != null) {
+        chatRooms[index] = chatRooms[index].copyWith(hasRead: true);
+      }
+    }
+    return emit(
+        state.copyWith(status: ChatRoomStatus.success, chatRooms: chatRooms));
   }
 
   Future<void> _onChatRoomFetch(
@@ -130,7 +151,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
             // not found so create new
             // add logged user to members
             members.add(ChatRoomMember(
-                member: authBloc.state.authenticate?.user,
+                user: authBloc.state.authenticate?.user,
                 hasRead: true,
                 isActive: true));
             ChatRoom compResult = await restClient.createChatRoom(
@@ -142,7 +163,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
           // add new multiperson room
           List<ChatRoomMember> members = List.of(event.chatRoom.members);
           members.add(ChatRoomMember(
-              member: authBloc.state.authenticate?.user,
+              user: authBloc.state.authenticate?.user,
               hasRead: true,
               isActive: true));
           ChatRoom compResult = await restClient.createChatRoom(
@@ -253,13 +274,15 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
   ) async {
     try {
       List<ChatRoom> chatRooms = List.from(state.chatRooms);
-      // check if room exist for message, when not add
+      // check if room exist for message, when not, get new unread active list
       if (!state.chatRooms.any((element) =>
           element.chatRoomId == event.chatMessage.chatRoom!.chatRoomId)) {
-        ChatRooms roomResult = await restClient.getChatRooms(
-            chatRoomId: event.chatMessage.chatRoom!.chatRoomId);
-        chatRooms.add(roomResult.chatRooms[0]);
+        ChatRooms roomResult = await restClient.getChatRooms();
+        chatRooms = roomResult.chatRooms;
       }
+      // set badge om roomlist
+      add(ChatRoomUpdateLocal(
+          addNotReadChatRoomId: event.chatMessage.chatRoom!.chatRoomId));
       return emit(state.copyWith(chatRooms: chatRooms));
     } on DioException catch (e) {
       emit(state.copyWith(

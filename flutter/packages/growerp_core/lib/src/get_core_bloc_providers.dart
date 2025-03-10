@@ -15,19 +15,20 @@ List<BlocProvider> getCoreBlocProviders(
 ) {
   AuthBloc authBloc = AuthBloc(
       chatClient, notificationClient, restClient, classificationId, company);
+  ChatRoomBloc chatRoomBloc = ChatRoomBloc(restClient, chatClient, authBloc);
   List<BlocProvider<StateStreamableSource<Object?>>> blocProviders = [
     BlocProvider<AuthBloc>(create: (context) => authBloc..add(AuthLoad())),
+    BlocProvider<ChatRoomBloc>(
+        create: (context) => chatRoomBloc..add(const ChatRoomFetch())),
     BlocProvider<ThemeBloc>(
         create: (context) => ThemeBloc()..add(ThemeSwitch())),
-    BlocProvider<ChatRoomBloc>(
-        create: (context) => ChatRoomBloc(restClient, chatClient, authBloc)
-          ..add(ChatRoomFetch())),
     BlocProvider<NotificationBloc>(
         create: (context) =>
             NotificationBloc(restClient, notificationClient, authBloc)
               ..add(const NotificationFetch())),
     BlocProvider<ChatMessageBloc>(
-        create: (context) => ChatMessageBloc(restClient, chatClient, authBloc)),
+        create: (context) =>
+            ChatMessageBloc(restClient, chatClient, authBloc, chatRoomBloc)),
     BlocProvider<TaskToDoBloc>(
         create: (context) => TaskBloc(restClient, TaskType.todo, null)),
     BlocProvider<TaskWorkflowBloc>(

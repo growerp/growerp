@@ -78,6 +78,8 @@ class UserDialogState extends State<UserDialogStateFull> {
   late User currentUser;
   late bool isAdmin;
   late String _classificationId;
+  late double top;
+  double? left;
 
   @override
   void initState() {
@@ -98,7 +100,7 @@ class UserDialogState extends State<UserDialogStateFull> {
     _selectedRole =
         widget.user.role ?? widget.user.company!.role ?? Role.unknown;
     _selectedUserGroup = widget.user.userGroup ?? UserGroup.employee;
-    localUserGroups = UserGroup.values;
+    localUserGroups = UserGroup.getValues();
     updatedUser = widget.user;
     _userBloc = context.read<UserBloc>();
     _authBloc = context.read<AuthBloc>();
@@ -111,6 +113,7 @@ class UserDialogState extends State<UserDialogStateFull> {
           isForDropDown: true));
     isAdmin = context.read<AuthBloc>().state.authenticate!.user!.userGroup ==
         UserGroup.admin;
+    top = -100;
   }
 
   @override
@@ -152,6 +155,7 @@ class UserDialogState extends State<UserDialogStateFull> {
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    left = left ?? (isPhone ? 250 : 600);
     String title = '';
     if (_selectedRole == Role.company) {
       title = widget.user.userGroup != null &&
@@ -161,8 +165,6 @@ class UserDialogState extends State<UserDialogStateFull> {
     } else {
       title = _selectedRole.name;
     }
-    double top = -100;
-    double left = 250;
     return Dialog(
       key: Key('UserDialog${_selectedRole.name}'),
       insetPadding: const EdgeInsets.all(10),
@@ -198,7 +200,9 @@ class UserDialogState extends State<UserDialogStateFull> {
                 child: GestureDetector(
                   onPanUpdate: (details) {
                     setState(() {
-                      left += details.delta.dx;
+                      if (left != null) {
+                        left = left! + details.delta.dx;
+                      }
                       top += details.delta.dy;
                     });
                   },

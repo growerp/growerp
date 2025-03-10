@@ -38,6 +38,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
   String searchString = '';
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
+  late double top, left;
 
   @override
   void initState() {
@@ -47,11 +48,13 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
     _chatRoomBloc = context.read<ChatRoomBloc>();
     search = false;
     limit = 20;
+    top = 400;
   }
 
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    left = isPhone ? 250 : 700;
     limit = (MediaQuery.of(context).size.height / 35).round();
     return BlocConsumer<ChatRoomBloc, ChatRoomState>(
         listener: (context, state) {
@@ -68,8 +71,6 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
       }
       if (state.status == ChatRoomStatus.success) {
         chatRooms = state.chatRooms;
-        double top = 400;
-        double left = 250;
         return Dialog(
             key: const Key('ChatRoomListDialog'),
             insetPadding: const EdgeInsets.only(left: 20, right: 20),
@@ -117,36 +118,30 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
   }
 
   Widget roomList(state) {
-    return RefreshIndicator(
-        onRefresh: (() async =>
-            _chatRoomBloc.add(ChatRoomFetch(refresh: true, limit: limit))),
-        child: ListView.builder(
-          key: const Key('listView'),
-          physics: const AlwaysScrollableScrollPhysics(),
-          itemCount: state.hasReachedMax && chatRooms.isNotEmpty
-              ? chatRooms.length + 1
-              : chatRooms.length + 2,
-          controller: _scrollController,
-          itemBuilder: (BuildContext context, int index) {
-            if (index == 0) return listHeader(context);
-            if (index == 1 && chatRooms.isEmpty) {
-              return Center(
-                  heightFactor: 20,
-                  child: Text("no ${entityName}s found!",
-                      key: const Key('empty'), textAlign: TextAlign.center));
-            }
-            index--;
-            return index >= chatRooms.length
-                ? const BottomLoader()
-                : Dismissible(
-                    key: const Key('chatRoomItem'),
-                    direction: DismissDirection.startToEnd,
-                    child: ListDetail(
-                        index: index,
-                        chatRooms: chatRooms,
-                        chatRoomBloc: _chatRoomBloc));
-          },
-        ));
+    return ListView.builder(
+      key: const Key('listView'),
+      physics: const AlwaysScrollableScrollPhysics(),
+      itemCount: state.hasReachedMax && chatRooms.isNotEmpty
+          ? chatRooms.length + 1
+          : chatRooms.length + 2,
+      controller: _scrollController,
+      itemBuilder: (BuildContext context, int index) {
+        if (index == 0) return listHeader(context);
+        if (index == 1 && chatRooms.isEmpty) {
+          return Center(
+              heightFactor: 20,
+              child: Text("no ${entityName}s found!",
+                  key: const Key('empty'), textAlign: TextAlign.center));
+        }
+        index--;
+        return index >= chatRooms.length
+            ? const BottomLoader()
+            : Dismissible(
+                key: const Key('chatRoomItem'),
+                direction: DismissDirection.startToEnd,
+                child: ListDetail(chatRoom: chatRooms[index], index: index));
+      },
+    );
   }
 
   ListTile listHeader(BuildContext context) {
@@ -197,8 +192,8 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                       child: Text("Name", textAlign: TextAlign.center)),
                   if (!ResponsiveBreakpoints.of(context).isMobile)
                     const Text("Status", textAlign: TextAlign.center),
-                  const Text("Publ.", textAlign: TextAlign.center),
-                  const Text("Mem.", textAlign: TextAlign.center),
+                  const Text("Pvt.", textAlign: TextAlign.center),
+                  const Text("#Mem.", textAlign: TextAlign.center),
                   const Text("    ", textAlign: TextAlign.center),
                 ]),
                 const Divider(),
@@ -223,39 +218,33 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
 }
 
 class ListDetail extends StatelessWidget {
-  const ListDetail({
-    super.key,
-    required this.chatRooms,
-    required ChatRoomBloc chatRoomBloc,
-    required this.index,
-  });
+  const ListDetail({super.key, required this.chatRoom, required this.index});
 
-  final List<ChatRoom> chatRooms;
+  final ChatRoom chatRoom;
   final int index;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-        leading: CircleAvatar(
-          child: Text(chatRooms[index].chatRoomName != null
-              ? chatRooms[index].chatRoomName![0]
-              : "?"),
+        leading: Badge(
+          label: chatRoom.hasRead ? null : const Text('!'),
+          child: CircleAvatar(
+            child: Text(chatRoom.chatRoomName != null
+                ? chatRoom.chatRoomName![0]
+                : "?"),
+          ),
         ),
         title: Row(
           children: <Widget>[
             Expanded(
                 key: Key('chatRoomName$index'),
-                child: Text(chatRooms[index].chatRoomName ?? '??')),
+                child: Text(chatRoom.chatRoomName ?? '??')),
             if (!ResponsiveBreakpoints.of(context).isMobile)
-              Text(
-                  chatRooms[index].hasRead
-                      ? 'All messages read'
-                      : 'unread messages',
-                  key: Key('hasRead$index')),
-            Text(chatRooms[index].isPrivate != true ? 'N   ' : 'Y   ',
+              Text(chatRoom.hasRead ? 'All messages read' : 'unread messages',
+                  key: Key('unRead$index')),
+            Text(chatRoom.isPrivate != true ? ' N   ' : 'Y   ',
                 key: Key('isPrivate$index')),
-            Text("${chatRooms[index].members.length}",
-                key: Key('nbrMembers$index')),
+            Text("${chatRoom.members.length}", key: Key('nbrMembers$index')),
           ],
         ),
         onTap: () async {
@@ -263,14 +252,14 @@ class ListDetail extends StatelessWidget {
               barrierDismissible: true,
               context: context,
               builder: (BuildContext context) {
-                return ChatDialog(chatRooms[index]);
+                return ChatDialog(chatRoom);
               });
         },
         trailing: IconButton(
           key: Key('delete$index'),
           icon: const Icon(Icons.close),
           onPressed: () {
-            context.read<ChatRoomBloc>().add(ChatRoomDelete(chatRooms[index]));
+            context.read<ChatRoomBloc>().add(ChatRoomDelete(chatRoom));
           },
         ));
   }
