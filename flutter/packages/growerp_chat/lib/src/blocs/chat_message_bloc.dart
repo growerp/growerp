@@ -22,6 +22,8 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:growerp_core/growerp_core.dart';
 
+import 'chat_room_bloc.dart';
+
 part 'chat_message_event.dart';
 part 'chat_message_state.dart';
 
@@ -34,7 +36,8 @@ EventTransformer<E> chatMessageDroppable<E>(Duration duration) {
 }
 
 class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
-  ChatMessageBloc(this.restClient, this.chatClient, this.authBloc)
+  ChatMessageBloc(
+      this.restClient, this.chatClient, this.authBloc, this.chatRoomBloc)
       : super(const ChatMessageState()) {
     on<ChatMessageFetch>(_onChatMessageFetch,
         transformer: chatMessageDroppable(const Duration(milliseconds: 100)));
@@ -45,6 +48,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
   final RestClient restClient;
   final WsClient chatClient;
   final AuthBloc authBloc;
+  final ChatRoomBloc chatRoomBloc;
   int start = 0;
 
   Future<void> _onChatMessageFetch(
@@ -71,8 +75,11 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
       }
       ChatMessages compResult = await restClient.getChatMessages(
           chatRoomId: event.chatRoomId, searchString: event.searchString);
-      authBloc.add(AuthUpdateLocal(delNotReadChatRoom: event.chatRoomName));
-
+      // reset badges
+      chatRoomBloc
+          .add(ChatRoomUpdateLocal(addNotReadChatRoomId: event.chatRoomId));
+      chatRoomBloc
+          .add(ChatRoomUpdateLocal(delNotReadChatRoomId: event.chatRoomId));
       return emit(state.copyWith(
         status: ChatMessageStatus.success,
         chatMessages: start == 0
@@ -101,12 +108,8 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
           fromUserId: event.chatMessage.fromUserId,
           content: event.chatMessage.content,
         ));
-    String chatRoomName = event.chatMessage.chatRoom!.chatRoomName!;
-    // rename the name of the chatroom for private rooms
-    if (event.chatMessage.chatRoom!.isPrivate) {
-      chatRoomName = event.chatMessage.fromUserFullName!;
-    }
-    authBloc.add(AuthUpdateLocal(addNotReadChatRoom: chatRoomName));
+    chatRoomBloc.add(ChatRoomUpdateLocal(
+        addNotReadChatRoomId: event.chatMessage.chatRoom!.chatRoomId));
     emit(state.copyWith(chatMessages: chatMessages));
   }
 

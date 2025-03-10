@@ -2231,37 +2231,6 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="fullName" field="userFullName" entity-alias="ACCOUNT" />
     </view-entity>
 
-    <view-entity entity-name="ChatRoomsAndFromToMembers" package="growerp.general">
-        <member-entity entity-alias="CR" entity-name="growerp.general.ChatRoom" />
-        <member-entity entity-alias="CMEM1" entity-name="growerp.general.ChatRoomMember"
-            join-from-alias="CR">
-            <key-map field-name="chatRoomId" />
-        </member-entity>
-        <member-entity entity-alias="ACCOUNT1" entity-name="moqui.security.UserAccount"
-            join-from-alias="CMEM1">
-            <key-map field-name="userId" />
-        </member-entity>
-        <member-entity entity-alias="CMEM2" entity-name="growerp.general.ChatRoomMember"
-            join-from-alias="CR">
-            <key-map field-name="chatRoomId" />
-        </member-entity>
-        <member-entity entity-alias="ACCOUNT2" entity-name="moqui.security.UserAccount"
-            join-from-alias="CMEM2">
-            <key-map field-name="userId" />
-        </member-entity>
-        <alias-all entity-alias="CR" />
-        <alias name="isActive1" field="isActive" entity-alias="CMEM1" />
-        <alias name="hasRead1" field="hasRead" entity-alias="CMEM1" />
-        <alias name="userId1" field="userId" entity-alias="ACCOUNT1" />
-        <alias name="partyId1" field="partyId" entity-alias="ACCOUNT1" />
-        <alias name="userFullName1" field="userFullName" entity-alias="ACCOUNT1" />
-        <alias name="isActive2" field="isActive" entity-alias="CMEM2" />
-        <alias name="hasRead2" field="hasRead" entity-alias="CMEM2" />
-        <alias name="userId2" field="userId" entity-alias="ACCOUNT2" />
-        <alias name="partyId2" field="partyId" entity-alias="ACCOUNT2" />
-        <alias name="userFullName2" field="userFullName" entity-alias="ACCOUNT2" />
-    </view-entity>
-
     <view-entity entity-name="ChatRoomAndMessages" package="growerp.general">
         <member-entity entity-alias="CR" entity-name="growerp.general.ChatRoom" />
         <member-entity entity-alias="CMSGS" entity-name="growerp.general.ChatMessage"

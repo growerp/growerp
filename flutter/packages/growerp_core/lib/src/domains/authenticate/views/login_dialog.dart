@@ -46,18 +46,25 @@ class LoginDialogState extends State<LoginDialog> {
   late AuthBloc _authBloc;
   late Currency _currencySelected;
   late bool _demoData;
+  late String _classification;
 
   @override
   void initState() {
     super.initState();
     _authBloc = context.read<AuthBloc>();
+    _classification = context.read<String>();
     authenticate = _authBloc.state.authenticate!;
     _usernameController.text = authenticate.user?.loginName ??
-        (kReleaseMode ? '' : 'test@example.com');
+        (kReleaseMode
+            ? ''
+            : _classification == 'AppSupport'
+                ? 'SystemSupport'
+                : 'test@example.com');
     _currencySelected = currencies[1];
     _demoData = kReleaseMode ? false : true;
     if (!kReleaseMode) {
-      _passwordController.text = 'qqqqqq9!';
+      _passwordController.text =
+          _classification == 'AppSupport' ? 'moqui' : 'qqqqqq9!';
       _companyController.text = 'Main Company';
     }
     _obscureText = true;

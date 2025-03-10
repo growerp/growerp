@@ -87,13 +87,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="partyTypeEnumId" value="PtyOrganization" />
                 <econdition field-name="roleTypeId" value="OrgInternal" />
             </entity-find>
-            <if condition="companyList">
-                <set field="companyPartyId" from="companyList[0].partyId" />
-                <else>
-                    <log level="warn"
-                        message="No Main company for user: $userPartyId and owner: $ownerPartyId, in the middle of registration?" />
-                </else>
-            </if>
+            <set field="companyPartyId" from="companyList[0]?.partyId" />
         </actions>
     </service>
 
@@ -120,8 +114,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="accountPartyId"
                     from="ec.user.userAccount.partyId" />
             </entity-find-count>
-            <service-call name="growerp.100.ChatServices100.get#ChatRoom"
-                in-map="[hasRead: false]" out-map="context" />
             <if condition="st">
                 <set field="stats"
                     from="[
@@ -147,7 +139,6 @@ along with this software (see the LICENSE.md file). If not, see
                         incomngShipments: st.incomingShipments,
                         whLocations: st.whLocations,
                         requests: st.requests,
-                        notReadChatRooms: chatRooms,
                     ]" />
                 <else>
                     <set field="stats"

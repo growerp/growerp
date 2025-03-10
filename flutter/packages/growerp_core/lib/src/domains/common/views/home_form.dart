@@ -120,8 +120,6 @@ class HomeFormState extends State<HomeForm> {
               ])));
         case AuthStatus.failure:
         case AuthStatus.unAuthenticated:
-          String title =
-              "Register ${company == null ? 'a new company & admin' : 'New user for ${company?.name}'}";
           ThemeMode? themeMode = context.read<ThemeBloc>().state.themeMode;
           return Column(children: [
             Expanded(
@@ -132,7 +130,7 @@ class HomeFormState extends State<HomeForm> {
                         key: const Key('HomeFormUnAuth'),
                         title: appBarTitle(
                           context,
-                          title,
+                          'Welcome to The GrowERP Business System',
                           isPhone,
                         )),
                     body: Center(
@@ -167,22 +165,24 @@ class HomeFormState extends State<HomeForm> {
                                   });
                             }),
                         const Expanded(child: SizedBox(height: 20)),
-                        Align(
-                            alignment: Alignment.bottomCenter,
-                            child: OutlinedButton(
-                                key: const Key('newUserButton'),
-                                child: Text(title),
-                                onPressed: () {
-                                  showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return BlocProvider.value(
-                                            value: _authBloc,
-                                            child:
-                                                const RegisterUserDialog(true));
-                                      });
-                                })),
+                        if (classificationId != 'AppSupport')
+                          Align(
+                              alignment: Alignment.bottomCenter,
+                              child: OutlinedButton(
+                                  key: const Key('newUserButton'),
+                                  child: const Text(
+                                      'Register new Company and Administrator'),
+                                  onPressed: () {
+                                    showDialog(
+                                        barrierDismissible: true,
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return BlocProvider.value(
+                                              value: _authBloc,
+                                              child: const RegisterUserDialog(
+                                                  true));
+                                        });
+                                  })),
                         const SizedBox(height: 50)
                       ]),
                     ))),

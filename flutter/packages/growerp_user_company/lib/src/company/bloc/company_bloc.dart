@@ -67,14 +67,20 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
     }
     try {
       emit(state.copyWith(status: CompanyStatus.loading));
-      Companies compResult = await restClient.getCompany(
-          role: role,
-          companyPartyId: event.companyPartyId,
-          ownerPartyId: event.ownerPartyId,
-          searchString: event.searchString,
-          isForDropDown: event.isForDropDown,
-          start: start,
-          limit: event.limit);
+      late Companies compResult;
+      if (event.mainOnly) {
+        compResult =
+            await restClient.getCompanies(start: start, limit: event.limit);
+      } else {
+        compResult = await restClient.getCompany(
+            role: role,
+            companyPartyId: event.companyPartyId,
+            ownerPartyId: event.ownerPartyId,
+            searchString: event.searchString,
+            isForDropDown: event.isForDropDown,
+            start: start,
+            limit: event.limit);
+      }
       emit(state.copyWith(
         status: CompanyStatus.success,
         companies: current..addAll(compResult.companies),

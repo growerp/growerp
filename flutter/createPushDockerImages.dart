@@ -16,6 +16,7 @@ void main() async {
     'freelance',
     'health',
     'hotel',
+    'support',
     'growerp-moqui'
   ];
 

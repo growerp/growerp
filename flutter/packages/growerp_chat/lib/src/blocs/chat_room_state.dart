@@ -14,7 +14,7 @@
 
 part of 'chat_room_bloc.dart';
 
-enum ChatRoomStatus { initial, success, failure }
+enum ChatRoomStatus { initial, loading, success, failure }
 
 class ChatRoomState extends Equatable {
   const ChatRoomState({

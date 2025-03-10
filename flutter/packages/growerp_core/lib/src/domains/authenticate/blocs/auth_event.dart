@@ -22,18 +22,6 @@ abstract class AuthEvent extends Equatable {
 
 class AuthLoad extends AuthEvent {}
 
-class AuthUpdateLocal extends AuthEvent {
-  final Authenticate? authenticate;
-  final String? addNotReadChatRoom;
-  final String? delNotReadChatRoom;
-  const AuthUpdateLocal(
-      {this.authenticate, this.addNotReadChatRoom, this.delNotReadChatRoom});
-
-  @override
-  String toString() =>
-      "AuthUpdateLocal: add local add room: $addNotReadChatRoom del: $delNotReadChatRoom";
-}
-
 class AuthRegister extends AuthEvent {
   final User user;
   const AuthRegister(this.user);

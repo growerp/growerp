@@ -1684,8 +1684,8 @@ along with this software (see the LICENSE.md file). If not, see
                                 hasRead: 'Y']" />
                 <service-call name="create#growerp.general.ChatMessage"
                     in-map="[chatRoomId: chatRoomId,
-                            content: 'Welcome to GrowERP, if you need support, enter here in the chat your request, when we are not present, we will reply within 24 Hrs',
-                            userId: 'SystemSupport']" />
+                            content: 'Welcome to GrowERP, if you need support, enter here in the chat your request, we will reply within 24 Hrs',
+                            fromUserId: 'SYSTEM_SUPPORT']" />
             </if>
 
             <service-call name="growerp.100.PartyServices100.get#User"

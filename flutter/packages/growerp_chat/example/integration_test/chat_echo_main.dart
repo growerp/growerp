@@ -69,11 +69,14 @@ class ChatApp extends StatelessWidget {
           BlocProvider<ChatRoomBloc>(
             create: (context) => ChatRoomBloc(context.read<RestClient>(),
                 chatClient, context.read<AuthBloc>())
-              ..add(ChatRoomFetch()),
+              ..add(const ChatRoomFetch()),
           ),
           BlocProvider<ChatMessageBloc>(
-            create: (context) => ChatMessageBloc(context.read<RestClient>(),
-                chatClient, context.read<AuthBloc>()),
+            create: (context) => ChatMessageBloc(
+                context.read<RestClient>(),
+                chatClient,
+                context.read<AuthBloc>(),
+                context.read<ChatRoomBloc>()),
             lazy: false,
           ),
         ],
@@ -217,7 +220,7 @@ class ChatRoomsEchoState extends State<ChatRooms> {
                         ChatRoomDelete(chatRooms[0]),
                       );
                       _chatRoomBloc.add(
-                        ChatRoomFetch(refresh: true),
+                        const ChatRoomFetch(refresh: true),
                       );
                       chatRooms = [];
                     }

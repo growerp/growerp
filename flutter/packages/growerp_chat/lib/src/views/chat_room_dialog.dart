@@ -152,7 +152,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
                                   isPrivate: true,
                                   members: [
                                 ChatRoomMember(
-                                    member: _selectedUser!, isActive: true)
+                                    user: _selectedUser!, isActive: true)
                               ])));
                     }
                   }),

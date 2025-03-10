@@ -55,6 +55,5 @@ class AuthState extends Equatable {
       "$status { owner: ${authenticate?.ownerPartyId} company: ${authenticate?.company?.name} "
       "user: ${authenticate?.user?.lastName ?? '?'} "
       //    "ApiKey: ${authenticate?.apiKey?.substring(0, 10)}...."
-      " not read chatrooms: ${authenticate?.stats?.notReadChatRooms ?? ''}"
       " message: $message";
 }

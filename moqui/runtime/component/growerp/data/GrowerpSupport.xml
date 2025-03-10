@@ -15,18 +15,25 @@ along with this software (see the LICENSE.md file). If not, see
 <entity-facade-xml type="install">
         <!-- NOTE 1265184000000 = 2010-02-03 00:00:00 US/Pacific -->
 
-        <!-- ========== Test Admin User ========== -->
-        <!-- password=moqui -->
+        <!-- ========== Support System User ========== -->
+        <!-- password=qqqqqq9! -->
+        <mantle.party.Party partyId="SYSTEM_SUPPORT" partyTypeEnumId="PtyPerson" />
+        <mantle.party.Person partyId="SYSTEM_SUPPORT" firstName="System" lastName="Support" />
         <moqui.security.UserAccount
-                userId="SYSTEM_SUPPORT" username="SystemSupport" userFullName="System Support"
-                currentPassword="16ac58bbfa332c1c55bd98b53e60720bfa90d394" passwordHashType="SHA"
-                passwordHint="backend name, lowercase" currencyUomId="THB" locale="en_TH"
-                timeZone="ICT"
-                emailAddress="support@growerp.com" />
+                userId="SYSTEM_SUPPORT" username="SystemSupport"
+                userFullName="System Support"
+                currentPassword="16ac58bbfa332c1c55bd98b53e60720bfa90d394"
+                passwordHashType="SHA" passwordHint="framework name, lowercase"
+                currencyUomId="THB" locale="en_TH"
+                timeZone="ICT" partyId="SYSTEM_SUPPORT" emailAddress="support@growerp.com" />
+        <moqui.security.UserGroupMember userGroupId="GROWERP_M_SYSTEM" userId="SYSTEM_SUPPORT"
+                fromDate="1265184000000" />
         <moqui.security.UserGroupMember userGroupId="ADMIN" userId="SYSTEM_SUPPORT"
                 fromDate="1265184000000" />
         <moqui.security.UserLoginHistory userId="SYSTEM_SUPPORT" fromDate="1265184000000"
                 successfulLogin="Y" />
+        <mantle.party.PartyClassificationAppl partyId="SYSTEM_SUPPORT"
+                partyClassificationId="AppSupport" />
 
         <!-- ========== Artifact Tarpit Example ========== -->
         <moqui.security.ArtifactGroup artifactGroupId="ALL_SCREENS" description="All Screens" />

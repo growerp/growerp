@@ -21,19 +21,22 @@ abstract class CompanyEvent extends Equatable {
 }
 
 class CompanyFetch extends CompanyEvent {
-  const CompanyFetch(
-      {this.refresh = false,
-      this.searchString = '',
-      this.companyPartyId = '',
-      this.limit = 20,
-      this.isForDropDown = false,
-      this.ownerPartyId = ''});
+  const CompanyFetch({
+    this.refresh = false,
+    this.searchString = '',
+    this.companyPartyId = '',
+    this.limit = 20,
+    this.isForDropDown = false,
+    this.ownerPartyId = '',
+    this.mainOnly = false,
+  });
   final bool refresh;
   final String companyPartyId;
   final String ownerPartyId;
   final String searchString;
   final int limit;
   final bool isForDropDown;
+  final bool mainOnly;
   @override
   List<Object> get props => [refresh, searchString, limit, companyPartyId];
   @override

@@ -43,8 +43,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(this.chat, this.notification, this.restClient, this.classificationId,
       this.company)
       : super(const AuthState()) {
+//    on<AuthUpdateLocal>(_onAuthUpdateLocal);
     on<AuthLoad>(_onAuthLoad);
-    on<AuthUpdateLocal>(_onAuthUpdateLocal);
     on<AuthRegister>(_onAuthRegister,
         transformer: authDroppable(const Duration(milliseconds: 100)));
     on<AuthLoggedOut>(_onAuthLoggedOut,
@@ -60,36 +60,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final WsClient notification;
   final String classificationId;
   final Company? company;
-
-  void _onAuthUpdateLocal(
-    AuthUpdateLocal event,
-    Emitter<AuthState> emit,
-  ) {
-    if (state.status != AuthStatus.authenticated) return;
-    emit(state.copyWith(status: AuthStatus.loading));
-//    return emit(state.copyWith(status: AuthStatus.authenticated));
-    var stats = state.authenticate!.stats;
-    var notReadChatRooms = List.of(state.authenticate!.stats!.notReadChatRooms);
-    if (event.addNotReadChatRoom != null) {
-      notReadChatRooms.add(event.addNotReadChatRoom!);
-      return emit(state.copyWith(
-          status: AuthStatus.authenticated,
-          authenticate: state.authenticate?.copyWith(
-              stats: stats!.copyWith(notReadChatRooms: notReadChatRooms))));
-    } else if (event.delNotReadChatRoom != null) {
-      if (notReadChatRooms.isEmpty) {
-        return emit(state.copyWith(status: AuthStatus.authenticated));
-      }
-      notReadChatRooms.removeWhere((el) => el == event.delNotReadChatRoom);
-      return emit(state.copyWith(
-          status: AuthStatus.authenticated,
-          authenticate: state.authenticate?.copyWith(
-              stats: stats!.copyWith(notReadChatRooms: notReadChatRooms))));
-    } else if (event.authenticate != null) {
-      return emit(state.copyWith(authenticate: event.authenticate));
-    }
-    return emit(state.copyWith(status: AuthStatus.authenticated));
-  }
 
   Future<void> _onAuthLoad(
     AuthLoad event,
@@ -112,13 +82,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (localAuthenticate != null &&
           localAuthenticate.apiKey != null &&
           localAuthenticate.company?.partyId != null) {
-        // check if company still valid
-        Companies? companies = await restClient.getCompanies(
-            limit: 1, searchString: localAuthenticate.company!.partyId!);
-        if (companies.companies.isEmpty) {
-          return emit(state.copyWith(
-              status: AuthStatus.unAuthenticated,
-              authenticate: defaultAuthenticate));
+        // check if company still valid, not for user support
+        if (localAuthenticate.company!.partyId != 'DefaultSettings') {
+          Companies? companies = await restClient.getCompanies(
+              limit: 1, searchString: localAuthenticate.company!.partyId!);
+          if (companies.companies.isEmpty) {
+            return emit(state.copyWith(
+                status: AuthStatus.unAuthenticated,
+                authenticate: defaultAuthenticate));
+          }
         }
         // test apiKey and get Authenticate
         Authenticate authResult = await restClient.getAuthenticate(

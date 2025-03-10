@@ -22,7 +22,7 @@ part 'chat_room_member_model.g.dart';
 class ChatRoomMember with _$ChatRoomMember {
   ChatRoomMember._();
   factory ChatRoomMember({
-    User? member,
+    User? user,
     bool? hasRead,
     bool? isActive,
   }) = _ChatRoomMember;
@@ -31,7 +31,6 @@ class ChatRoomMember with _$ChatRoomMember {
       _$ChatRoomMemberFromJson(json);
 
   @override
-  String toString() =>
-      'ChatRoom Member: ${member?.firstName} ${member?.lastName} '
-      'userId: ${member?.userId} partyId: ${member?.partyId}';
+  String toString() => 'ChatRoom Member: ${user?.firstName} ${user?.lastName} '
+      'userId: ${user?.userId} partyId: ${user?.partyId}';
 }
