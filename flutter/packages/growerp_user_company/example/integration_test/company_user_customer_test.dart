@@ -35,23 +35,29 @@ void main() {
         tester, 'companiesUsers', 'CompanyUserListCustomer', '2');
   }
 
-  testWidgets('''GrowERP company/user customer test''', (tester) async {
+  testWidgets('''GrowERP company/user test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         UserCompanyLocalizations.localizationsDelegates,
-        title: "customer company/user test",
+        title: "Company/User test",
         restClient: restClient,
         blocProviders: getUserCompanyBlocProviders(restClient, 'AppAdmin'),
         clear: true);
     await CommonTest.createCompanyAndAdmin(tester);
-    await selectCustomers(tester); // create
-    await UserTest.addCustomers(tester, customers.sublist(0, 1));
-    await CompanyTest.enterCompanyData(tester, customerCompanies.sublist(0, 2));
+
     await selectCustomers(tester);
-    await CompanyTest.checkCompany(tester);
-    await selectCustomers(tester); // update
-    await CompanyTest.enterCompanyData(tester, customerCompanies.sublist(2, 4));
-    await selectCustomers(tester); // update
-    await UserTest.updateCustomers(tester, customers.sublist(1, 2));
+    await CompanyUserTest.addUsers(
+        tester, Role.customer, customers.sublist(0, 2));
+    await CompanyUserTest.addCompanies(
+        tester, Role.customer, customerCompanies.sublist(0, 2));
+    await selectCustomers(tester);
+    await CompanyUserTest.checkCompaniesUsers(tester, Role.customer);
+    await CompanyUserTest.updateUsers(
+        tester, Role.customer, customers.sublist(2, 4));
+    await CompanyUserTest.updateCompanies(
+        tester, Role.customer, customerCompanies.sublist(2, 4));
+    await selectCustomers(tester);
+    await CompanyUserTest.checkCompaniesUsers(tester, Role.customer);
+    await CommonTest.logout(tester);
   }, skip: false);
 }

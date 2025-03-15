@@ -108,7 +108,7 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
 
     <service verb="get" noun="Companies">
-        <description>Get a list of companies registered in the system</description>
+        <description>Get a list of main/initial companies registered in the system</description>
         <in-parameters>
             <parameter name="mainCompanies" type="Boolean" default="true" />
             <parameter name="start" type="Integer" default-value="0" />
@@ -278,7 +278,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
                         <set field="companyRole" from="role" />
                     </else-if>
-                    <else-if condition="role != 'Company'">
+                    <else-if condition="role != 'Company' &amp;&amp; role != 'Unknown'">
                         <set field="companyRole" from="role" />
                     </else-if>
                 </if>
@@ -286,7 +286,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- get records -->
             <entity-find offset="start" limit="limit" list="items"
                 entity-name="growerp.party.OwnerCompanyDetailAndEmployee">
-                <econdition field-name="ownerPartyId" ignore-if-empty="true" />
+                <econdition field-name="ownerPartyId" />
                 <econdition field-name="companyPartyId" ignore-if-empty="true" />
                 <econditions combine="or">
                     <econdition field-name="companyPseudoId" ignore-case="true"
@@ -2218,7 +2218,6 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="role == 'Company'">
                 <set field="role" value="OrgInternal" />
             </if>
-            <log message="=======looking for search: $search" />
             <entity-find offset="start" limit="limit" list="items"
                 entity-name="growerp.party.OwnerCompanyUser">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />

@@ -83,7 +83,7 @@ class RestApi {
                     if (name == null || name.equals(rootNode.attribute("name"))) {
                         ResourceNode rn = new ResourceNode(rootNode, null, ecfi)
                         rootResourceCache.put(rn.name, rn)
-                        logger.info("Loaded REST API from ${rr.getFileName()} (${rn.childPaths} paths, ${rn.childMethods} methods)")
+                        // logger.info("Loaded REST API from ${rr.getFileName()} (${rn.childPaths} paths, ${rn.childMethods} methods)")
                         // logger.info(rn.toString())
                     }
                 }
@@ -91,7 +91,7 @@ class RestApi {
                 logger.warn("Can't load REST APIs from component at [${serviceDirRr.location}] because it doesn't support exists/directory/etc")
             }
         }
-        logger.info("Loaded REST API files, ${rootResourceCache.size()} roots, in ${System.currentTimeMillis() - startTime}ms")
+        //logger.info("Loaded REST API files, ${rootResourceCache.size()} roots, in ${System.currentTimeMillis() - startTime}ms")
     }
 
     /** Used in tools dashboard screen */

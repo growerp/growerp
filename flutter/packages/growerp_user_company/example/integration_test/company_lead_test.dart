@@ -52,5 +52,6 @@ Future<void> main() async {
     await CompanyTest.enterCompanyData(tester, leadCompanies.sublist(3, 6));
     await selectLeads(tester);
     await CompanyTest.checkCompany(tester);
+    await CommonTest.logout(tester);
   }, skip: false);
 }

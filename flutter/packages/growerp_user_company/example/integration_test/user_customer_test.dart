@@ -47,5 +47,6 @@ void main() {
     await UserTest.addCustomers(tester, customers.sublist(0, 1));
     await UserTest.updateCustomers(tester, customers.sublist(1, 2));
     await UserTest.deleteCustomers(tester);
+    await CommonTest.logout(tester);
   });
 }

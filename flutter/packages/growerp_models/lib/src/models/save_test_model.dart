@@ -27,6 +27,8 @@ class SaveTest with _$SaveTest {
     User? admin,
     DateTime? nowDate,
     @Default([]) List<Company> companies,
+    @Default([]) List<CompanyUser> companiesUsers,
+    @Default([]) List<User> users,
     @Default([]) List<User> administrators,
     @Default([]) List<User> employees,
     @Default([]) List<User> leads,
