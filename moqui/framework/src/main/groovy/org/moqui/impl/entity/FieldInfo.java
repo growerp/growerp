@@ -77,7 +77,7 @@ public class FieldInfo {
             MNode nameReplaceNode = nameReplaceNodes.get(i);
             if (colNameToUse.equalsIgnoreCase(nameReplaceNode.attribute("original"))) {
                 String replaceName = nameReplaceNode.attribute("replace");
-                logger.info("Replacing column name " + colNameToUse + " with replace name " + replaceName + " for entity " + entityName);
+                // logger.info("Replacing column name " + colNameToUse + " with replace name " + replaceName + " for entity " + entityName);
                 colNameToUse = replaceName;
             }
         }

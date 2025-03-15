@@ -44,5 +44,6 @@ void main() {
     await CompanyTest.enterCompanyData(tester, [company]); // modify
     await CommonTest.selectMainCompany(tester);
     await CompanyTest.checkCompany(tester);
+    await CommonTest.logout(tester);
   });
 }

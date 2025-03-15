@@ -1,5 +1,5 @@
-# GrowERP Flutter ERP Admin App.
+# GrowERP Flutter ERP Support App.
 
-This is the admin app, showing the capabilities of the growerp application.
+This is the support adminitaring and chat support to registered userd
 
 check the readme at  https://github.com/growerp/growerp for more information.

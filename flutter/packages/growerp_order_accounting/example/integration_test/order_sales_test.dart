@@ -74,5 +74,6 @@ void main() {
     await InventoryTest.checkInventory(tester);
     await TransactionTest.selectTransactions(tester);
     await TransactionTest.checkTransactionsComplete(tester);
+    await CommonTest.logout(tester);
   });
 }

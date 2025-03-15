@@ -14,6 +14,7 @@
 
 import 'dart:async';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
@@ -116,14 +117,15 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
         if (event.company?.partyId != null) {
           // update company
           compResult = await restClient.updateCompany(company: event.company!);
-          if (companiesUsers.isNotEmpty) {
-            int index = companiesUsers.indexWhere(
-                (element) => element.partyId == event.company!.partyId);
-            companiesUsers[index] = CompanyUser.tryParse(compResult)!;
+          int index = companiesUsers.indexWhere(
+              (element) => element.partyId == event.company!.partyId);
+          if (index == -1) {
+            debugPrint(
+                "===could not find partyId; ${event.company!.partyId} in list: $companiesUsers");
           } else {
-            companiesUsers.add(CompanyUser.tryParse(compResult)!);
+            companiesUsers[index] = CompanyUser.tryParse(compResult)!;
+            message = 'Company ${compResult.name} updated...';
           }
-          message = 'Company ${compResult.name} updated...';
         } else {
           // add company
           compResult = await restClient.createCompany(company: event.company!);

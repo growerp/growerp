@@ -84,6 +84,7 @@ class CompanyTest {
       }
       // if required add address and payment
       if (c.address != null) {
+        await CommonTest.drag(tester);
         await updateAddress(tester, c.address!);
       } else {
         if (CommonTest.getTextField('addressLabel') !=
@@ -92,6 +93,7 @@ class CompanyTest {
         }
       }
       if (c.paymentMethod != null) {
+        await CommonTest.drag(tester);
         await updatePaymentMethod(tester, c.paymentMethod!);
       } else {
         if (!CommonTest.getTextField('paymentMethodLabel')
@@ -99,7 +101,7 @@ class CompanyTest {
           await CommonTest.tapByKey(tester, 'deletePaymentMethod');
         }
       }
-      await CommonTest.dragNew(tester, key: 'paymentMethodLabel');
+      await CommonTest.drag(tester);
       // add/update company record
       await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
       if (clist.length > 1 && c.pseudoId == null) {

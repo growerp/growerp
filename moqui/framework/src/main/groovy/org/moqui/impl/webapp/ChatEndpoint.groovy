@@ -94,13 +94,13 @@ class ChatEndpoint extends MoquiAbstractEndpoint {
 
     @Override
     void onClose(Session session, CloseReason closeReason) throws IOException, EncodeException {
-        logger.info("closing websocket for user:" + session.getId());
-        users.remove(session.getId());
-        chatEndpoints.remove(this);
+        logger.info("closing websocket for user: ${users.get(session.getId())} ${session.getId()} reason: ${closeReason}");
         Map message = [
             "fromUserId": users.get(session.getId()),
             "content": "Disconnected: ${closeReason}"];
         broadcast(JsonOutput.toJson(message));
+        users.remove(session.getId());
+        chatEndpoints.remove(this);
         super.onClose(session, closeReason)
     }
 

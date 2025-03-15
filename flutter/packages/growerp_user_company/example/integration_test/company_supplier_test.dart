@@ -52,5 +52,6 @@ void main() {
     await CompanyTest.enterCompanyData(tester, supplierCompanies.sublist(2, 4));
     await selectSuppliers(tester);
     await CompanyTest.checkCompany(tester);
+    await CommonTest.logout(tester);
   });
 }

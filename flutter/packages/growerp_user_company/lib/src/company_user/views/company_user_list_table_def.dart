@@ -28,7 +28,7 @@ TableData getCompanyUserTableData(Bloc bloc, String classificationId,
   if (isPhone) {
     rowContent.add(TableRowContent(
       name: 'ShortId',
-      width: 10,
+      width: 12,
       value: CircleAvatar(
         child: item.image != null
             ? Image.memory(item.image!)
@@ -41,7 +41,7 @@ TableData getCompanyUserTableData(Bloc bloc, String classificationId,
 
   rowContent.add(TableRowContent(
     name: 'Id',
-    width: isPhone ? 14 : 7,
+    width: isPhone ? 13 : 7,
     value: Text(item.pseudoId ?? '', key: Key('id$index')),
   ));
 
@@ -59,7 +59,7 @@ TableData getCompanyUserTableData(Bloc bloc, String classificationId,
 
   if (isPhone) {
     rowContent.add(TableRowContent(
-      name: const Text('Company Name\nEmail'),
+      name: const Text('Company/Person Name\nEmail'),
       width: 55,
       value: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
