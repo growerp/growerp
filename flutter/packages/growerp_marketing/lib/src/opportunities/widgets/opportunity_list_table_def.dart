@@ -111,7 +111,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             }
           })));
 
-  return TableData(rowHeight: isPhone ? 40 : 30, rowContent: rowContent);
+  return TableData(rowHeight: isPhone ? 40 : 40, rowContent: rowContent);
 }
 
 // general settings

@@ -32,7 +32,8 @@ class PaymentTypeListState extends State<PaymentTypeList> {
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
   late bool showAll;
-  late double top, left;
+  double? top;
+  double? left;
 
   @override
   void initState() {
@@ -43,12 +44,14 @@ class PaymentTypeListState extends State<PaymentTypeList> {
     finDocBloc.add(const FinDocGetPaymentTypes());
     glAccountBloc = context.read<GlAccountBloc>();
     glAccountBloc.add(const GlAccountFetch(limit: 3));
-    top = 600;
-    left = 280;
   }
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
+    top = top ?? (isAPhone(context) ? 500 : height - 200);
+    left = left ?? (isAPhone(context) ? 280 : width - 300);
     return BlocConsumer<FinDocBloc, FinDocState>(
         listenWhen: (previous, current) =>
             previous.status == FinDocStatus.loading,
@@ -104,8 +107,8 @@ class PaymentTypeListState extends State<PaymentTypeList> {
                     child: GestureDetector(
                         onPanUpdate: (details) {
                           setState(() {
-                            left += details.delta.dx;
-                            top += details.delta.dy;
+                            left = left! + details.delta.dx;
+                            top = top! + details.delta.dy;
                           });
                         },
                         child: FloatingActionButton.extended(

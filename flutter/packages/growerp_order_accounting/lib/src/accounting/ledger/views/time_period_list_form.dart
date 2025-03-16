@@ -40,7 +40,8 @@ class TimePeriodListState extends State<TimePeriodList> {
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
   late String periodType;
-  late double top, left;
+  double? top;
+  double? left;
 
   @override
   void initState() {
@@ -49,12 +50,14 @@ class TimePeriodListState extends State<TimePeriodList> {
     entityName = classificationId == 'AppHotel' ? 'Room' : 'TimePeriod';
     _ledgerBloc = context.read<LedgerBloc>();
     _ledgerBloc.add(LedgerTimePeriods(periodType: periodType));
-    top = 600;
-    left = 320;
   }
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
+    top = top ?? (isAPhone(context) ? 500 : height - 200);
+    left = left ?? (isAPhone(context) ? 300 : width - 250);
     return BlocConsumer<LedgerBloc, LedgerState>(
         listenWhen: (previous, current) =>
             previous.status == LedgerStatus.loading,
@@ -111,8 +114,8 @@ class TimePeriodListState extends State<TimePeriodList> {
                     child: GestureDetector(
                       onPanUpdate: (details) {
                         setState(() {
-                          left += details.delta.dx;
-                          top += details.delta.dy;
+                          left = left! + details.delta.dx;
+                          top = top! + details.delta.dy;
                         });
                       },
                       child: FloatingActionButton.extended(

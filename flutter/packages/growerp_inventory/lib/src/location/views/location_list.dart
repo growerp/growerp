@@ -36,7 +36,8 @@ class LocationListState extends State<LocationList> {
   late Authenticate authenticate;
   late int limit;
   String? searchString;
-  late double top, left;
+  late double top;
+  double? left;
 
   @override
   void initState() {
@@ -44,11 +45,12 @@ class LocationListState extends State<LocationList> {
     _locationBloc = context.read<LocationBloc>()..add(const LocationFetch());
     _scrollController.addListener(_onScroll);
     top = 450;
-    left = 320;
   }
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    left = left ?? (isAPhone(context) ? 320 : width - 200);
     limit = (MediaQuery.of(context).size.height / 100).round();
     return BlocBuilder<LocationBloc, LocationState>(
       builder: (context, state) {
@@ -137,7 +139,7 @@ class LocationListState extends State<LocationList> {
                   child: GestureDetector(
                     onPanUpdate: (details) {
                       setState(() {
-                        left += details.delta.dx;
+                        left = left! + details.delta.dx;
                         top += details.delta.dy;
                       });
                     },

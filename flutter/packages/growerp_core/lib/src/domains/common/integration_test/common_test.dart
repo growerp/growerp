@@ -421,7 +421,9 @@ class CommonTest {
     if (check) {
       await tapByType(tester, Checkbox);
     } else {
-      await tester.tap(find.textContaining(value).last, warnIfMissed: false);
+      expect(find.textContaining(value).last, findsOneWidget,
+          reason: "could not find text in dropdown: $value");
+      await tester.tap(find.textContaining(value).last);
     }
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }

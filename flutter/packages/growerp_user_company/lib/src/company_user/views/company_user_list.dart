@@ -47,7 +47,8 @@ class CompanyUserListState extends State<CompanyUserList> {
               .instance.platformDispatcher.views.first.physicalSize.height /
           35)
       .toInt();
-  late double top, left;
+  late double top;
+  double? left;
 
   @override
   void initState() {
@@ -74,11 +75,12 @@ class CompanyUserListState extends State<CompanyUserList> {
           ..add(CompanyUserFetch(limit: limit));
     }
     top = 380;
-    left = 320;
   }
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    left = left ?? (isAPhone(context) ? 320 : width - 250);
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return Builder(builder: (BuildContext context) {
       Widget tableView() {
@@ -183,7 +185,7 @@ class CompanyUserListState extends State<CompanyUserList> {
                 child: GestureDetector(
                   onPanUpdate: (details) {
                     setState(() {
-                      left += details.delta.dx;
+                      left = left! + details.delta.dx;
                       top += details.delta.dy;
                     });
                   },

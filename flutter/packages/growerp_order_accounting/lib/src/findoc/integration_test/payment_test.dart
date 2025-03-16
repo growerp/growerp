@@ -107,7 +107,6 @@ class PaymentTest {
       newPayments
           .add(payment.copyWith(paymentId: CommonTest.getTextField('id0')));
     }
-    await CommonTest.closeSearch(tester);
     return newPayments;
   }
 

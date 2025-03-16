@@ -182,7 +182,7 @@ class CompanyFormState extends State<CompanyDialog> {
 
   @override
   Widget build(BuildContext context) {
-    isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    isPhone = isAPhone(context);
     left = left ?? (isPhone ? 250 : 600);
     return widget.dialog == true
         ? Dialog(

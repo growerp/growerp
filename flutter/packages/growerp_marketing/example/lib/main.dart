@@ -60,7 +60,7 @@ List<MenuOption> menuOptions = [
     title: 'Marketing',
     route: '/crm',
     userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const OpportunityListForm(),
+    child: const OpportunityList(),
   ),
 ];
 

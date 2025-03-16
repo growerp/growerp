@@ -34,6 +34,7 @@ Future<Dio> buildDioClient(
                         : 'http://localhost:8080/')
     ..options.connectTimeout = const Duration(seconds: 5)
     ..options.receiveTimeout = timeout
+    ..options.headers['Cache-Control'] = 'no-cache'
     ..httpClientAdapter;
 
   //dio.options.headers['Content-Type'] = 'application/json; charset=UTF-8';

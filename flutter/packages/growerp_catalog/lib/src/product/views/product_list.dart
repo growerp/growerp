@@ -36,7 +36,9 @@ class ProductListState extends State<ProductList> {
   late String entityName;
   late bool started;
   late int limit;
-  late double top, left;
+  late double top;
+  double? left;
+
   @override
   void initState() {
     super.initState();
@@ -46,12 +48,13 @@ class ProductListState extends State<ProductList> {
     classificationId = context.read<String>();
     entityName = classificationId == 'AppHotel' ? 'Room Type' : 'Product';
     top = 400;
-    left = 300;
   }
 
   @override
   Widget build(BuildContext context) {
     limit = (MediaQuery.of(context).size.height / 100).round();
+    double width = MediaQuery.of(context).size.width;
+    left = left ?? (isAPhone(context) ? 300 : width - 200);
 
     Widget tableView() {
       if (products.isEmpty) {
@@ -144,7 +147,7 @@ class ProductListState extends State<ProductList> {
                     child: GestureDetector(
                       onPanUpdate: (details) {
                         setState(() {
-                          left += details.delta.dx;
+                          left = left! + details.delta.dx;
                           top += details.delta.dy;
                         });
                       },

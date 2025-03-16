@@ -35,7 +35,8 @@ class CategoriesListState extends State<CategoryList> {
   late CategoryBloc _categoryBloc;
   late bool started;
   late List<Category> categories;
-  late double top, left;
+  late double top;
+  double? left;
 
   @override
   void initState() {
@@ -45,7 +46,6 @@ class CategoriesListState extends State<CategoryList> {
     _categoryBloc = context.read<CategoryBloc>();
     _categoryBloc.add(const CategoryFetch());
     top = 400;
-    left = 320;
   }
 
   Widget tableView() {
@@ -110,6 +110,8 @@ class CategoriesListState extends State<CategoryList> {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    left = left ?? (isAPhone(context) ? 320 : width - 200);
     return BlocConsumer<CategoryBloc, CategoryState>(
         listenWhen: (previous, current) =>
             previous.status == CategoryStatus.loading,
@@ -139,7 +141,7 @@ class CategoriesListState extends State<CategoryList> {
                   child: GestureDetector(
                     onPanUpdate: (details) {
                       setState(() {
-                        left += details.delta.dx;
+                        left = left! + details.delta.dx;
                         top += details.delta.dy;
                       });
                     },
