@@ -21,7 +21,7 @@ import 'persist_marketing_test.dart';
 
 class OpportunityTest {
   static Future<void> selectOpportunities(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbCrm', 'OpportunityListForm');
+    await CommonTest.selectOption(tester, 'dbCrm', 'OpportunityList');
   }
 
   static Future<void> addOpportunities(

@@ -915,7 +915,7 @@ class EntityFacadeImpl implements EntityFacade {
             ed.setHasReverseRelationships()
         }
 
-        if (logger.infoEnabled && relationshipsCreated > 0) logger.info("Created ${relationshipsCreated} automatic reverse relationships")
+        // if (logger.infoEnabled && relationshipsCreated > 0) logger.info("Created ${relationshipsCreated} automatic reverse relationships")
     }
 
     // used in tools screen

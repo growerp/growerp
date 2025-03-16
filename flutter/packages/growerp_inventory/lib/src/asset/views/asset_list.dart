@@ -31,7 +31,8 @@ class AssetListState extends State<AssetList> {
   late AssetBloc _assetBloc;
   late String classificationId;
   late String entityName;
-  late double top, left;
+  late double top;
+  double? left;
 
   @override
   void initState() {
@@ -42,11 +43,12 @@ class AssetListState extends State<AssetList> {
     _assetBloc = context.read<AssetBloc>();
     _assetBloc.add(const AssetFetch());
     top = 450;
-    left = 320;
   }
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    left = left ?? (isAPhone(context) ? 320 : width - 200);
     return BlocConsumer<AssetBloc, AssetState>(
         listenWhen: (previous, current) =>
             previous.status == AssetStatus.loading,
@@ -143,7 +145,7 @@ class AssetListState extends State<AssetList> {
                     child: GestureDetector(
                         onPanUpdate: (details) {
                           setState(() {
-                            left += details.delta.dx;
+                            left = left! + details.delta.dx;
                             top += details.delta.dy;
                           });
                         },

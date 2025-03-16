@@ -2201,8 +2201,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="role" from="null" />
             </if>
             <if condition="search">
-                <!-- to be able to search for lastname, firstName -->
-                <set field="searchString" value="%${search.split(' ')[0].replace(',','')}%" />
+                <set field="searchString" value="%$search%" />
             </if>
             <!-- adjust role -->
             <if condition="role == 'Customer'">

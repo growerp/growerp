@@ -71,7 +71,7 @@ List<MenuOption> menuOptions = [
     userGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
-        form: const OpportunityListForm(),
+        form: const OpportunityList(),
         label: 'My Opportunities',
         icon: const Icon(Icons.home),
       ),

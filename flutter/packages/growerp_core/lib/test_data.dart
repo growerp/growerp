@@ -223,7 +223,7 @@ List<Company> supplierCompanies = [
     name: 'supplier company 1',
     role: Role.supplier,
     address: Address(
-        address1: 'beach Boulevar',
+        address1: 'beach Boulevar2',
         address2: 'suite 2',
         postalCode: '30071',
         city: 'Trang',

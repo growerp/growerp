@@ -268,7 +268,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                                             ? Role.customer
                                             : Role.supplier)));
                                 return Future.delayed(
-                                    const Duration(milliseconds: 150), () {
+                                    const Duration(milliseconds: 250), () {
                                   return Future<List<CompanyUser>>.value(
                                       (_companyUserBloc.state.data
                                               as CompaniesUsers)
