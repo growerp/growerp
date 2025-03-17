@@ -40,8 +40,8 @@ class AssetListState extends State<AssetList> {
     classificationId = context.read<String>();
     entityName = classificationId == 'AppHotel' ? 'Room' : 'Asset';
     _scrollController.addListener(_onScroll);
-    _assetBloc = context.read<AssetBloc>();
-    _assetBloc.add(const AssetFetch());
+    _assetBloc = context.read<AssetBloc>()
+      ..add(const AssetFetch(refresh: true));
     top = 450;
   }
 

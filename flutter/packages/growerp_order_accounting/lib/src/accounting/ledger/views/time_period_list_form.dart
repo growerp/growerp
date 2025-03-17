@@ -48,8 +48,8 @@ class TimePeriodListState extends State<TimePeriodList> {
     super.initState();
     periodType = 'Y';
     entityName = classificationId == 'AppHotel' ? 'Room' : 'TimePeriod';
-    _ledgerBloc = context.read<LedgerBloc>();
-    _ledgerBloc.add(LedgerTimePeriods(periodType: periodType));
+    _ledgerBloc = context.read<LedgerBloc>()
+      ..add(LedgerTimePeriods(periodType: periodType));
   }
 
   @override

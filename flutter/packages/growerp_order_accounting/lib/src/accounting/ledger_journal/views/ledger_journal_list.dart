@@ -19,17 +19,6 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../../accounting.dart';
 
-class LedgerJournalListForm extends StatelessWidget {
-  const LedgerJournalListForm({super.key});
-
-  @override
-  Widget build(BuildContext context) => BlocProvider(
-      create: (BuildContext context) =>
-          LedgerJournalBloc(context.read<RestClient>())
-            ..add(const LedgerJournalFetch()),
-      child: const LedgerJournalList());
-}
-
 class LedgerJournalList extends StatefulWidget {
   const LedgerJournalList({super.key});
 
@@ -45,7 +34,8 @@ class LedgerJournalsState extends State<LedgerJournalList> {
   @override
   void initState() {
     super.initState();
-    _ledgerJournalBloc = context.read<LedgerJournalBloc>();
+    _ledgerJournalBloc = context.read<LedgerJournalBloc>()
+      ..add(const LedgerJournalFetch(refresh: true));
     _scrollController.addListener(_onScroll);
     top = 500;
     left = 320;

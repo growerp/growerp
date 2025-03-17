@@ -67,7 +67,8 @@ class CompanyListState extends State<CompanyList> {
             ..add(const CompanyFetch());
           break;
         default:
-          _companyBloc = context.read<CompanyBloc>()..add(const CompanyFetch());
+          _companyBloc = context.read<CompanyBloc>()
+            ..add(const CompanyFetch(refresh: true));
       }
     }
     top = 450;

@@ -45,7 +45,8 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
     super.initState();
     entityName = classificationId == 'AppHotel' ? 'Room' : 'ChatRoom';
     _scrollController.addListener(_onScroll);
-    _chatRoomBloc = context.read<ChatRoomBloc>();
+    _chatRoomBloc = context.read<ChatRoomBloc>()
+      ..add(const ChatRoomFetch(refresh: true));
     search = false;
     limit = 20;
     top = 400;

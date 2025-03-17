@@ -129,7 +129,7 @@ List<MenuOption> acctMenuOptions = [
           icon: const Icon(Icons.view_list),
         ),
         TabItem(
-          form: const LedgerJournalListForm(key: Key("LedgerJournal")),
+          form: const LedgerJournalList(key: Key("LedgerJournal")),
           label: "Ledger Journals",
           icon: const Icon(Icons.checklist),
         ),

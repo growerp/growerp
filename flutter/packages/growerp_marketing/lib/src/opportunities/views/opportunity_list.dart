@@ -42,7 +42,7 @@ class OpportunitiesState extends State<OpportunityList> {
   void initState() {
     super.initState();
     _opportunityBloc = context.read<OpportunityBloc>()
-      ..add(const OpportunityFetch(limit: 15));
+      ..add(const OpportunityFetch(refresh: true, limit: 15));
     _scrollController.addListener(_onScroll);
     top = 450;
   }

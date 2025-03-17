@@ -90,9 +90,9 @@ class TaskListState extends State<TaskList> {
       default:
     }
     if (widget.taskType == TaskType.workflowTemplate) {
-      _taskBloc.add(const TaskFetch(my: false));
+      _taskBloc.add(const TaskFetch(refresh: true, my: false));
     } else {
-      _taskBloc.add(const TaskFetch());
+      _taskBloc.add(const TaskFetch(refresh: true));
     }
   }
 

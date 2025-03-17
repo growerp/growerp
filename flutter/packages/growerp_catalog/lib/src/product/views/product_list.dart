@@ -44,7 +44,8 @@ class ProductListState extends State<ProductList> {
     super.initState();
     started = false;
     _scrollController.addListener(_onScroll);
-    _productBloc = context.read<ProductBloc>()..add(const ProductFetch());
+    _productBloc = context.read<ProductBloc>()
+      ..add(const ProductFetch(refresh: true));
     classificationId = context.read<String>();
     entityName = classificationId == 'AppHotel' ? 'Room Type' : 'Product';
     top = 400;
