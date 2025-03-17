@@ -43,8 +43,8 @@ class CategoriesListState extends State<CategoryList> {
     super.initState();
     started = false;
     _scrollController.addListener(_onScroll);
-    _categoryBloc = context.read<CategoryBloc>();
-    _categoryBloc.add(const CategoryFetch());
+    _categoryBloc = context.read<CategoryBloc>()
+      ..add(const CategoryFetch(refresh: true));
     top = 400;
   }
 

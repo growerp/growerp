@@ -20,7 +20,7 @@ class LedgerJournalTest {
   static Future<void> selectLedgerJournal(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
     await CommonTest.selectOption(
-        tester, 'acctLedger', 'LedgerJournalListFormLedgerJournal', '4');
+        tester, 'acctLedger', 'LedgerJournalListLedgerJournal', '4');
   }
 
   static Future<void> addLedgerJournals(

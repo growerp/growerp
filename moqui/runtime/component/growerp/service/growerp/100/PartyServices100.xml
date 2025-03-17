@@ -2202,6 +2202,9 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <if condition="search">
                 <set field="searchString" value="%$search%" />
+                <set field="firstName" value="%${search.split()?[0]}%" />
+                <set field="lastName"
+                    value="%${search.split().size() > 1? search.split()?[1] : null}%" />
             </if>
             <!-- adjust role -->
             <if condition="role == 'Customer'">
@@ -2228,7 +2231,11 @@ along with this software (see the LICENSE.md file). If not, see
                         operator="like" ignore-if-empty="true" />
                     <econdition field-name="firstName" from="searchString" ignore-case="true"
                         operator="like" ignore-if-empty="true" />
+                    <econdition field-name="firstName" from="firstName" ignore-case="true"
+                        operator="like" ignore-if-empty="true" />
                     <econdition field-name="lastName" from="searchString" ignore-case="true"
+                        operator="like" ignore-if-empty="true" />
+                    <econdition field-name="lastName" from="lastName" ignore-case="true"
                         operator="like" ignore-if-empty="true" />
                     <econdition field-name="userFullName" from="searchString" ignore-case="true"
                         operator="like" ignore-if-empty="true" />
@@ -2252,7 +2259,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="name" value="${item.companyName}" />
                     <else>
                         <set field="type" value="user" />
-                        <set field="name" value="${item.lastName}, ${item.firstName}" />
+                        <set field="name" value="${item.firstName} ${item.lastName}" />
+                        <set field="name" from="item.userFullName ?: name" />
                     </else>
                 </if>
                 <!-- payment method -->

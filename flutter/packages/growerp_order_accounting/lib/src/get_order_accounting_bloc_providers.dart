@@ -42,6 +42,8 @@ List<BlocProvider> getOrderAccountingBlocProviders(
     BlocProvider<RequestBloc>(
         create: (context) =>
             FinDocBloc(restClient, true, FinDocType.request, classificationId)),
+    BlocProvider<LedgerJournalBloc>(
+        create: (context) => LedgerJournalBloc(restClient)),
   ];
   return blocProviders;
 }

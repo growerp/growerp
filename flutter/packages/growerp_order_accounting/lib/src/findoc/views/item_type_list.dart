@@ -40,10 +40,9 @@ class ItemTypeListState extends State<ItemTypeList> {
     super.initState();
     showAll = false;
     entityName = classificationId == 'AppHotel' ? 'Room' : 'ItemType';
-    finDocBloc = context.read<FinDocBloc>();
-    finDocBloc.add(const FinDocGetItemTypes());
-    glAccountBloc = context.read<GlAccountBloc>();
-    glAccountBloc.add(const GlAccountFetch(limit: 3));
+    finDocBloc = context.read<FinDocBloc>()..add(const FinDocGetItemTypes());
+    glAccountBloc = context.read<GlAccountBloc>()
+      ..add(const GlAccountFetch(refresh: true, limit: 3));
   }
 
   @override

@@ -56,24 +56,21 @@ class CompanyUserListState extends State<CompanyUserList> {
     _scrollController.addListener(_onScroll);
     switch (widget.role) {
       case Role.supplier:
-        _companyUserBloc = context.read<CompanyUserSupplierBloc>()
-            as CompanyUserBloc
-          ..add(CompanyUserFetch(limit: limit));
+        _companyUserBloc =
+            context.read<CompanyUserSupplierBloc>() as CompanyUserBloc;
         break;
       case Role.customer:
-        _companyUserBloc = context.read<CompanyUserCustomerBloc>()
-            as CompanyUserBloc
-          ..add(CompanyUserFetch(limit: limit));
+        _companyUserBloc =
+            context.read<CompanyUserCustomerBloc>() as CompanyUserBloc;
         break;
       case Role.lead:
-        _companyUserBloc = context.read<CompanyUserLeadBloc>()
-            as CompanyUserBloc
-          ..add(CompanyUserFetch(limit: limit));
+        _companyUserBloc =
+            context.read<CompanyUserLeadBloc>() as CompanyUserBloc;
         break;
       default:
-        _companyUserBloc = context.read<CompanyUserBloc>()
-          ..add(CompanyUserFetch(limit: limit));
+        _companyUserBloc = context.read<CompanyUserBloc>();
     }
+    _companyUserBloc.add(CompanyUserFetch(refresh: true, limit: limit));
     top = 380;
   }
 

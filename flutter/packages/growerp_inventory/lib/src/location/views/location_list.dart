@@ -42,7 +42,8 @@ class LocationListState extends State<LocationList> {
   @override
   void initState() {
     super.initState();
-    _locationBloc = context.read<LocationBloc>()..add(const LocationFetch());
+    _locationBloc = context.read<LocationBloc>()
+      ..add(const LocationFetch(refresh: true));
     _scrollController.addListener(_onScroll);
     top = 450;
   }

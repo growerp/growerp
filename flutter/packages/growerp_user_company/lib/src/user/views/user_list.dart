@@ -50,22 +50,23 @@ class UserListState extends State<UserList> {
     switch (widget.role) {
       case Role.company:
         _userBloc = (context.read<EmployeeBloc>() as UserBloc)
-          ..add(const UserFetch());
+          ..add(const UserFetch(refresh: true));
         break;
       case Role.supplier:
         _userBloc = (context.read<SupplierBloc>() as UserBloc)
-          ..add(const UserFetch());
+          ..add(const UserFetch(refresh: true));
         break;
       case Role.customer:
         _userBloc = (context.read<CustomerBloc>() as UserBloc)
-          ..add(const UserFetch());
+          ..add(const UserFetch(refresh: true));
         break;
       case Role.lead:
         (_userBloc = context.read<LeadBloc>() as UserBloc)
-            .add(const UserFetch());
+            .add(const UserFetch(refresh: true));
         break;
       default:
-        _userBloc = (context.read<UserBloc>())..add(const UserFetch());
+        _userBloc = (context.read<UserBloc>())
+          ..add(const UserFetch(refresh: true));
     }
     top = 450;
     left = 320;

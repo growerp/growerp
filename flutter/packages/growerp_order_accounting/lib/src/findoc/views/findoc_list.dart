@@ -109,14 +109,19 @@ class FinDocListState extends State<FinDocList> {
         _finDocBloc = context.read<RequestBloc>() as FinDocBloc;
       default:
     }
-    _finDocBloc.add(FinDocFetch(limit: 15, my: my));
+    _finDocBloc.add(FinDocFetch(refresh: true, limit: 15, my: my));
     top = widget.journalId != null ? 250 : 350;
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    left = left ?? (isAPhone(context) ? 320 : width - 250);
+    left = left ??
+        (isAPhone(context)
+            ? widget.journalId != null
+                ? 280
+                : 320
+            : width - 250);
     limit = (MediaQuery.of(context).size.height / 100).round();
     isPhone = isAPhone(context);
     Widget finDocsPage(int length) {

@@ -40,10 +40,9 @@ class PaymentTypeListState extends State<PaymentTypeList> {
     super.initState();
     showAll = false;
     entityName = classificationId == 'AppHotel' ? 'Room' : 'PaymentType';
-    finDocBloc = context.read<FinDocBloc>();
-    finDocBloc.add(const FinDocGetPaymentTypes());
-    glAccountBloc = context.read<GlAccountBloc>();
-    glAccountBloc.add(const GlAccountFetch(limit: 3));
+    finDocBloc = context.read<FinDocBloc>()..add(const FinDocGetPaymentTypes());
+    glAccountBloc = context.read<GlAccountBloc>()
+      ..add(const GlAccountFetch(refresh: true, limit: 3));
   }
 
   @override

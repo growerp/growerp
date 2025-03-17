@@ -74,7 +74,7 @@ class CompanyUser with _$CompanyUser {
               type: PartyType.user,
               partyId: obj.partyId,
               pseudoId: obj.pseudoId,
-              name: '${obj.lastName}, ${obj.firstName}',
+              name: '${obj.firstName} ${obj.lastName}',
               email: obj.email,
               address: obj.address);
         } else {
@@ -118,7 +118,7 @@ CompanyUser? toCompanyUser(dynamic object) {
             type: PartyType.user,
             partyId: object.partyId,
             pseudoId: object.pseudoId,
-            name: "${object.lastName}, ${object.firstName}",
+            name: "${object.firstName} ${object.lastName}",
             role: object.role,
             email: object.email,
             telephoneNr: object.telephoneNr);

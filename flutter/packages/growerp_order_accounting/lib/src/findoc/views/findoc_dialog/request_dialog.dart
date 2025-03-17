@@ -597,35 +597,35 @@ class RequestDialogState extends State<RequestDialog> {
               const SizedBox(height: 10),
               Row(
                 children: [
+                  OutlinedButton(
+                      key: const Key('cancelFinDoc'),
+                      child: const Text('Cancel Request'),
+                      onPressed: () {
+                        _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
+                          status: FinDocStatusVal.cancelled,
+                        )));
+                      }),
+                  const SizedBox(width: 20),
                   Expanded(
                     child: OutlinedButton(
-                        key: const Key('cancelFinDoc'),
-                        child: const Text('Cancel Request'),
+                        key: const Key('update'),
+                        child: Text(
+                            '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
                         onPressed: () {
-                          _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
-                            status: FinDocStatusVal.cancelled,
-                          )));
+                          if (requestDialogFormKey.currentState!.validate()) {
+                            _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
+                              requestId: widget.finDoc.requestId,
+                              requestType: _selectedRequestType,
+                              otherCompany: _selectedCompanyUser!.getCompany(),
+                              otherUser: _selectedCompanyUser!.getUser(),
+                              pseudoId: _pseudoIdController.text,
+                              description: _descriptionController.text,
+                              status: _updatedStatus,
+                              items: [],
+                            )));
+                          }
                         }),
                   ),
-                  const SizedBox(width: 20),
-                  OutlinedButton(
-                      key: const Key('update'),
-                      child: Text(
-                          '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
-                      onPressed: () {
-                        if (requestDialogFormKey.currentState!.validate()) {
-                          _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
-                            requestId: widget.finDoc.requestId,
-                            requestType: _selectedRequestType,
-                            otherCompany: _selectedCompanyUser!.getCompany(),
-                            otherUser: _selectedCompanyUser!.getUser(),
-                            pseudoId: _pseudoIdController.text,
-                            description: _descriptionController.text,
-                            status: _updatedStatus,
-                            items: [],
-                          )));
-                        }
-                      }),
                 ],
               )
             ])));
