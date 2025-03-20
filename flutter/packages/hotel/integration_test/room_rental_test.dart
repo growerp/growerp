@@ -111,7 +111,7 @@ Future<void> createRoomReservation(
   for (FinDoc finDoc in finDocs) {
     await CommonTest.tapByKey(tester, 'addNew');
     await CommonTest.tapByKey(tester, 'customer');
-    await CommonTest.tapByText(tester, finDoc.otherUser!.company?.name! ?? '');
+    await CommonTest.tapByText(tester, finDoc.otherUser!.lastName!);
     await CommonTest.tapByKey(tester, 'product', seconds: CommonTest.waitTime);
     await CommonTest.tapByText(tester, finDoc.items[0].description!);
     await CommonTest.tapByKey(tester, 'setDate');

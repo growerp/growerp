@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/test_data.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:intl/intl.dart';
 import 'package:hotel/router.dart' as router;
@@ -53,7 +54,7 @@ void main() {
     await CommonTest.startTestApp(
       clear: true,
       restClient: restClient,
-      title: 'Hotel reservation Test',
+      title: 'Hotel check in Test',
       tester,
       router.generateRoute,
       menuOptions,
@@ -79,6 +80,7 @@ void main() {
     await CommonTest.tapByText(tester, FinDocStatusVal.approved.hotel);
     await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     await CommonTest.waitForSnackbarToGo(tester);
+    await CommonTest.logout(tester);
   }, skip: false);
 
   testWidgets("Test checkout >>>>>", (WidgetTester tester) async {
@@ -109,6 +111,7 @@ void main() {
     await CommonTest.tapByText(tester, FinDocStatusVal.completed.hotel);
     await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     await CommonTest.waitForSnackbarToGo(tester);
+    await CommonTest.logout(tester);
   }, skip: false);
 
   testWidgets("Test empty checkin and checkout >>>>>",
@@ -130,5 +133,9 @@ void main() {
     expect(find.byKey(const Key('id0')), findsNothing);
     await selectCheckOut(tester);
     expect(find.byKey(const Key('id0')), findsNothing);
+    await selectReservations(tester);
+    await OrderTest.checkOrderCompleted(tester,
+        classificationId: classificationId);
+    await CommonTest.logout(tester);
   }, skip: false);
 }

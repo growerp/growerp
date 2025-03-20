@@ -81,7 +81,7 @@ class AssetListState extends State<AssetList> {
                   double? rowHeight
                 ) = get2dTableData<Asset>(getTableData,
                     bloc: _assetBloc,
-                    classificationId: 'AppAdmin',
+                    classificationId: classificationId,
                     context: context,
                     items: state.assets);
                 return TableView.builder(

@@ -96,7 +96,7 @@ List<MenuOption> acctMenuOptions = [
           icon: const Icon(Icons.account_tree),
         ),
         TabItem(
-          form: const GlAccountListForm(),
+          form: const GlAccountList(),
           label: "Ledger Accnt",
           icon: const Icon(Icons.format_list_bulleted),
         ),

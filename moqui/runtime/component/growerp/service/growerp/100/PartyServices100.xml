@@ -3178,31 +3178,11 @@ along with this software (see the LICENSE.md file). If not, see
                                     productTypeId: el.productTypeId,
                                     assetClassId: el.assetClassId,
                                     productName: el.productName + (classificationId != 'AppHotel'? counter : ''),
-                                    description: el.description],
+                                    description: el.description,
+                                    price: el.price],
                                 classificationId: classificationId,
                             ]"
                             out-map="context" />
-                        <set field="productId" from="product.productId" />
-                        <service-call
-                            name="create#mantle.product.category.ProductCategoryMember"
-                            in-map="[productId: productId, productCategoryId: productCategoryId, fromDate: fromDate]" />
-                        <service-call name="create#mantle.product.ProductPrice"
-                            in-map="[productId: productId, priceTypeEnumId: 'PptList',
-                            priceUomId: currencyId, price: el.price,
-                            fromDate: ec.user.nowTimestamp,
-                            pricePurposeEnumId: 'PppPurchase']" />
-                        <service-call name="create#ProductContent"
-                            in-map="[
-                            productId: productId,
-                            productContentTypeEnumId: 'PcntImageSmall',
-                            contentLocation: 'dbresource://GrowERP/images/' +
-                                el.image + 'Small.png']" />
-                        <service-call name="create#ProductContent"
-                            in-map="[
-                            productId: productId,
-                            productContentTypeEnumId: 'PcntImageMedium',
-                            contentLocation: 'dbresource://GrowERP/images/' +
-                                el.image + 'Medium.png']" />
                     </iterate>
 
                     <!-- assets -->

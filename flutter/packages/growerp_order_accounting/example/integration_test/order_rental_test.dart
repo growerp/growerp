@@ -41,8 +41,8 @@ void main() {
         blocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "assets": [assets[2]], // will create product and category too
-      "companies": [customerCompanies[0]],
+      "assets": assets, // will create product and category too
+      "companies": customerCompanies,
     });
     await OrderTest.selectSalesOrders(tester);
     await OrderTest.createRentalSalesOrder(tester, rentalSalesOrders);
@@ -51,10 +51,11 @@ void main() {
     await OrderTest.approveOrders(tester);
     await PaymentTest.selectSalesPayments(tester);
     await OrderTest.approveOrderPayments(tester);
+    await OrderTest.completeOrderPayments(tester);
     await OrderTest.checkOrderPaymentsComplete(tester);
     await CommonTest.gotoMainMenu(tester);
     await OrderTest.selectSalesOrders(tester);
-    await OrderTest.completeOrders(tester);
+//    await OrderTest.completeOrders(tester);
     await OrderTest.checkOrdersComplete(tester);
   });
 }

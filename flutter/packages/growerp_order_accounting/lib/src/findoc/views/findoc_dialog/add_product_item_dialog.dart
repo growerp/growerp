@@ -69,7 +69,7 @@ Future addProductItemDialog(BuildContext context) async {
                             child: Form(
                                 key: addProductFormKey,
                                 child: SingleChildScrollView(
-                                    key: const Key('listView3'),
+                                    key: const Key('listView'),
                                     child: Column(children: <Widget>[
                                       BlocBuilder<DataFetchBloc<Products>,
                                               DataFetchState>(

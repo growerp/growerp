@@ -142,11 +142,13 @@ class AssetDialogState extends State<AssetDialog> {
       child: Form(
           key: _assetDialogformKey,
           child: Column(children: <Widget>[
+            const SizedBox(height: 10),
             TextFormField(
               key: const Key('pseudoId'),
               decoration: const InputDecoration(labelText: 'Id'),
               controller: _pseudoIdController,
             ),
+            const SizedBox(height: 10),
             TextFormField(
               key: const Key('name'),
               decoration: InputDecoration(
@@ -159,6 +161,7 @@ class AssetDialogState extends State<AssetDialog> {
                 return null;
               },
             ),
+            const SizedBox(height: 10),
             if (classificationId != 'AppHotel')
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -219,6 +222,7 @@ class AssetDialogState extends State<AssetDialog> {
                   ),
                 ],
               ),
+            const SizedBox(height: 10),
             BlocBuilder<DataFetchBloc<Products>, DataFetchState>(
                 builder: (context, state) {
               switch (state.status) {
@@ -285,6 +289,7 @@ class AssetDialogState extends State<AssetDialog> {
                   return const Center(child: LoadingIndicator());
               }
             }),
+            const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.end,

@@ -128,7 +128,7 @@ class PaymentDialogState extends State<PaymentDialog> {
         insetPadding: const EdgeInsets.all(10), // required for wider dialog
         key: Key("PaymentDialog${finDoc.sales ? 'Sales' : 'Purchase'}"),
         child: SingleChildScrollView(
-            key: const Key('listView2'),
+            key: const Key('listView'),
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: popUp(
                 context: context,

@@ -40,6 +40,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="productName" />
                     <parameter name="description" />
                     <parameter name="price" />
+                    <parameter name="listPrice" />
                     <parameter name="categories" type="List">
                         <parameter name="category" type="Map">
                             <parameter name="categoryId" />
@@ -154,10 +155,11 @@ along with this software (see the LICENSE.md file). If not, see
                                 <econdition field-name="ownerPartyId" from="companyPartyId" />
                                 <econdition field-name="statusId" operator="not-equals"
                                     value="AstDeactivated" />
-                                <!--econdition
-                                field-name="classEnumId" from="product.assetClassEnumId"
-                                ignore-if-empty="true"/>
-                                <econdition field-name="assetTypeEnumId" from="product.assetTypeEnumId" ignore-if-empty="true"/-->
+                                <econdition
+                                    field-name="classEnumId" from="product.assetClassEnumId"
+                                    ignore-if-empty="true" />
+                                <econdition field-name="assetTypeEnumId"
+                                    from="product.assetTypeEnumId" ignore-if-empty="true" />
                             </entity-find>
                             <set field="assetCount"
                                 from="assetCountList ? (int) assetCountList[0].totalAssets : null" />
@@ -406,7 +408,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="product" type="Map">
+            <parameter name="product" type="Map" required="true">
                 <parameter name="productId" />
                 <parameter name="pseudoId" />
                 <parameter name="productTypeId" />
@@ -427,10 +429,6 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <if condition="!product.productId">
-                <return error="true" message="ProductId required" />
-            </if>
-            <!-- for update no owner needed in single company use -->
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <entity-find list="prods" entity-name="mantle.product.Product" for-update="true"
@@ -463,6 +461,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <entity-update value-field="oldProduct" />
             </if>
             <!-- prices -->
+            <set field="nowDate" from="ec.user.nowTimestamp" />
             <entity-find-one value-field="pref"
                 entity-name="mantle.ledger.config.PartyAcctgPreference">
                 <field-map field-name="organizationPartyId" from="companyPartyId" />
@@ -473,60 +472,58 @@ along with this software (see the LICENSE.md file). If not, see
                         priceUomId: pref.baseCurrencyUomId,
                         price: product.price,
                         quantityUomId: 'OTH_ea',
-                        fromDate: ec.user.nowTimestamp,
+                        fromDate: nowDate,
                         pricePurposeEnumId: 'PppPurchase']" />
-            <entity-find entity-name="growerp.mobile.product.ProductAndPrices"
-                list="productPrices">
+
+            <!-- current price -->
+            <entity-find entity-name="mantle.product.ProductPrice"
+                list="productPrices" for-update="true">
                 <econdition field-name="productId" from="product.productId" />
-                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="priceTypeEnumId" value="PptCurrent" />
+                <date-filter />
             </entity-find>
-            <if condition="productPrices &amp;&amp; productPrices[0].price != product.price">
-                <!-- existing current price -->
-                <entity-find-one value-field="productPrice"
-                    entity-name="mantle.product.ProductPrice" for-update="true">
-                    <field-map field-name="productPriceId"
-                        from="productPrices[0].productPriceId" />
-                </entity-find-one>
-                <set field="productPrice.thruDate" from="ec.user.nowTimestamp" />
-                <entity-update value-field="productPrice" />
-                <service-call name="create#mantle.product.ProductPrice"
-                    in-map=" productPrice + [ productPriceId: null,
-                                                price: product.price,
-                                                thruDate: null]" />
+            <if
+                condition="(!productPrices &amp;&amp; product.price) 
+                    || (!productPrices[0].price != product.price)">
+                <set field="productPrice" from="productPrices[0]" />
+                <service-call name="create#mantle.product.ProductPrice" in-map="priceMap" />
+                <service-call name="update#mantle.product.ProductPrice"
+                    in-map="[productPriceId: productPrices[0].productPriceId,
+                                thruDate: nowDate]" />
             </if>
-            <if condition="!productPrices &amp;&amp; product.price">
+            <!-- list price -->
+            <entity-find entity-name="mantle.product.ProductPrice"
+                list="productPrices" for-update="true">
+                <econdition field-name="productId" from="product.productId" />
+                <econdition field-name="priceTypeEnumId" value="PptList" />
+                <date-filter />
+            </entity-find>
+            <if
+                condition="(!productPrices &amp;&amp; product.listPrice) 
+                    || (!productPrices[0].price != product.price)">
                 <service-call name="create#mantle.product.ProductPrice"
-                    in-map="priceMap" />
+                    in-map="priceMap + [priceTypeEnumId: 'PptList',price: product.listPrice]" />
+                <service-call name="update#mantle.product.ProductPrice"
+                    in-map="[productPriceId: productPrices[0].productPriceId,
+                                thruDate: nowDate]" />
             </if>
-            <if condition="productPrices &amp;&amp; productPrices[0].listPrice != product.listPrice">
-                <!-- existing list price -->
-                <entity-find-one value-field="listProductPrice"
-                    entity-name="mantle.product.ProductPrice" for-update="true">
-                    <field-map field-name="productPriceId"
-                        from="productPrices[0].listProductPriceId" />
-                </entity-find-one>
-                <set field="listProductPrice.thruDate" from="ec.user.nowTimestamp" />
-                <entity-update value-field="listProductPrice" />
-                <service-call name="create#mantle.product.ProductPrice"
-                    in-map=" listProductPrice + [ productPriceId: null, 
-                                                price: product.listPrice,
-                                                thruDate: null]" />
-            </if>
-            <if condition="!productPrices &amp;&amp; product.listPrice">
-                <service-call name="create#mantle.product.ProductPrice"
-                    in-map="priceMap + [priceTypeEnumId: 'PptList',
-                                    price: product.listPrice,
-                                    ]" />
-            </if>
+
             <!-- get root catg -->
             <entity-find entity-name="mantle.product.category.ProductCategory" list="catgs">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <econdition field-name="productCategoryTypeEnumId" value="PctRoot" />
             </entity-find>
             <!-- related categories  delete all and add all with root category -->
-            <entity-delete-by-condition entity-name="mantle.product.category.ProductCategoryMember">
+            <entity-find entity-name="mantle.product.category.ProductCategoryMember"
+                list="categories">
                 <econdition field-name="productId" from="product.productId" />
-            </entity-delete-by-condition>
+            </entity-find>
+            <iterate list="categories" entry="category">
+                <service-call name="delete#mantle.product.category.ProductCategoryMember"
+                    in-map="[   productId: category.productId,
+                                productCategoryId: category.productCategoryId,
+                                fromDate: category.fromDate]" />
+            </iterate>
             <if condition="product.categories">
                 <script>product.categories.add([categoryId: catgs[0].productCategoryId])</script>
                 <else>

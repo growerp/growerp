@@ -715,7 +715,7 @@ class MyFinDocState extends State<FinDocPage> {
         rowContent.add(TableRowContent(
             width: 10,
             name: 'Date',
-            value: Text(item.rentalFromDate.toString(),
+            value: Text(item.rentalFromDate.dateOnly(),
                 textAlign: TextAlign.right, key: Key('fromDate$index'))));
       }
       if (!isPhone) {

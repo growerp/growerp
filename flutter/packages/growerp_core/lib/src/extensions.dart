@@ -57,9 +57,10 @@ extension DateOnlyCompare on DateTime {
   }
 }
 
-extension DateOnly on DateTime {
+extension DateOnly on DateTime? {
   String dateOnly() {
-    return "$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
+    if (this == null) return '';
+    return "${this?.year}-${this?.month.toString().padLeft(2, '0')}-${this?.day.toString().padLeft(2, '0')}";
   }
 }
 

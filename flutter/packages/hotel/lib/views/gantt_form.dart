@@ -50,6 +50,8 @@ class _GanttFormState extends State<GanttForm> {
   late int chartInDays;
   late int chartColumns; // total columns on chart
   late int columnsOnScreen; // periods
+  late double top;
+  double? left;
 
   @override
   void initState() {
@@ -61,11 +63,14 @@ class _GanttFormState extends State<GanttForm> {
     _productBloc = context.read<ProductBloc>()
       ..add(const ProductRentalOccupancy());
     super.initState();
+    top = 500;
   }
 
   @override
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
+    left = left ?? (isAPhone(context) ? 320 : screenWidth - 200);
+
     scheme = Theme.of(context).colorScheme;
     return BlocBuilder<AssetBloc, AssetState>(builder: (context, assetState) {
       return BlocBuilder<FinDocBloc, FinDocState>(
@@ -177,8 +182,6 @@ class _GanttFormState extends State<GanttForm> {
                 ganttFromDate = nowDate;
                 break;
             }
-            double top = 0;
-            double left = 250;
             return Stack(
               children: [
                 Column(children: <Widget>[
@@ -207,7 +210,7 @@ class _GanttFormState extends State<GanttForm> {
                   child: GestureDetector(
                     onPanUpdate: (details) {
                       setState(() {
-                        left += details.delta.dx;
+                        left = left! + details.delta.dx;
                         top += details.delta.dy;
                       });
                     },
@@ -398,8 +401,8 @@ class _GanttFormState extends State<GanttForm> {
       /*  debugPrint(
           "==${reservation.shipmentId}==room: ${reservation.items[0].asset?.assetName} "
           "orderId: ${reservation.orderId} "
-          "fr:${reservation.items[0].rentalFromDate?.dateOnly()} "
-          "to: ${reservation.items[0].rentalThruDate?.dateOnly()}");
+          "fr:${reservation.items[0].rentalFromDate.dateOnly()} "
+          "to: ${reservation.items[0].rentalThruDate.dateOnly()}");
     */ // occupation by product
       if (reservation.items[0].description != null &&
           // all dates concatenated in description
@@ -442,8 +445,8 @@ class _GanttFormState extends State<GanttForm> {
                   .inDays >=
               0) {
         // show occupation by room(asset) ==================================
-        //roomReservations.sort((b, a) => (a.items[0].rentalFromDate!.dateOnly())
-        //    .compareTo(b.items[0].rentalFromDate!.dateOnly()));
+        //roomReservations.sort((b, a) => (a.items[0].rentalFromDate.dateOnly())
+        //    .compareTo(b.items[0].rentalFromDate.dateOnly()));
         DateTime from = reservation.items[0].rentalFromDate!;
         DateTime thru = reservation.items[0].rentalThruDate!;
         // started before today only borderradius on the right
