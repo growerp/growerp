@@ -19,16 +19,6 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../../accounting.dart';
 
-class GlAccountListForm extends StatelessWidget {
-  const GlAccountListForm({super.key});
-
-  @override
-  Widget build(BuildContext context) => BlocProvider(
-      create: (BuildContext context) =>
-          GlAccountBloc(context.read<RestClient>()),
-      child: const GlAccountList());
-}
-
 class GlAccountList extends StatefulWidget {
   const GlAccountList({super.key});
 
@@ -49,7 +39,7 @@ class GlAccountsState extends State<GlAccountList> {
     limit = 20;
     _scrollController.addListener(_onScroll);
     _glAccountBloc = context.read<GlAccountBloc>()
-      ..add(GlAccountFetch(limit: limit));
+      ..add(GlAccountFetch(refresh: true, limit: limit));
   }
 
   @override

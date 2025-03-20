@@ -75,12 +75,12 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
               Text(
                 classificationId == 'AppHotel'
                     ? (item.items[0].rentalFromDate != null
-                        ? '${item.items[0].rentalFromDate?.dateOnly()}'
+                        ? item.items[0].rentalFromDate.dateOnly()
                         : '??')
                     : item.placedDate != null
                         ? '${item.placedDate?.dateOnly()}'
                         : item.creationDate != null
-                            ? '${item.creationDate?.dateOnly()}'
+                            ? item.creationDate.dateOnly()
                             : '??',
                 key: const Key('date'),
               ),
@@ -131,12 +131,12 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
       value: Text(
         classificationId == 'AppHotel'
             ? (item.items[0].rentalFromDate != null
-                ? '${item.items[0].rentalFromDate?.dateOnly()}'
+                ? item.items[0].rentalFromDate.dateOnly()
                 : '??')
             : item.placedDate != null
-                ? '${item.placedDate?.dateOnly()}'
+                ? item.placedDate.dateOnly()
                 : item.creationDate != null
-                    ? '${item.creationDate?.dateOnly()}'
+                    ? item.creationDate.dateOnly()
                     : '??',
         key: const Key('date'),
       ),

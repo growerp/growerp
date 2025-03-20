@@ -24,8 +24,7 @@ class GlAccountTest {
 
   static Future<void> selectLedgerAccounts(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
-    await CommonTest.selectOption(
-        tester, 'acctLedger', 'GlAccountListForm', '2');
+    await CommonTest.selectOption(tester, 'acctLedger', 'GlAccountList', '2');
   }
 
   static Future<void> addGlAccounts(
@@ -101,7 +100,7 @@ class GlAccountTest {
         await CommonTest.enterText(
             tester, 'postedBalance', glAccount.postedBalance.toString());
       }
-      await CommonTest.drag(tester);
+      await CommonTest.dragNew(tester);
       await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
       await CommonTest.waitForSnackbarToGo(tester);
     }

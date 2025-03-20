@@ -937,7 +937,7 @@ List<FinDoc> rentalSalesOrders = [
       sales: true,
       docType: FinDocType.order,
       description: 'The first rental sales order',
-      otherCompany: customerCompanies[0],
+      otherCompany: customerCompanies[1],
       items: [
         FinDocItem(
           description: products[2].productName,

@@ -163,9 +163,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       notification.close();
       chat.close();
       emit(state.copyWith(
-          authenticate: state.authenticate!.copyWith(apiKey: null),
-          status: AuthStatus.unAuthenticated,
-          message: "Logged off"));
+          status: AuthStatus.unAuthenticated, message: "Logged off"));
       PersistFunctions.persistAuthenticate(state.authenticate!);
     } on DioException catch (e) {
       emit(state.copyWith(

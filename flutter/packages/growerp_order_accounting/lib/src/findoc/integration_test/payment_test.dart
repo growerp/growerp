@@ -83,7 +83,7 @@ class PaymentTest {
           payment.sales ? 'customer' : 'supplier', payment.otherCompany!.name!);
       await CommonTest.enterText(tester, 'amount',
           payment.grandTotal!.toString()); // required because keyboard come up
-      await CommonTest.drag(tester, listViewName: 'listView2');
+      await CommonTest.drag(tester);
       switch (payment.paymentInstrument) {
         case PaymentInstrument.bank:
           await CommonTest.tapByKey(tester, 'bank');

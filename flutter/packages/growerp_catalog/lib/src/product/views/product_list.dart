@@ -70,7 +70,7 @@ class ProductListState extends State<ProductList> {
         double? rowHeight
       ) = get2dTableData<Product>(getTableData,
           bloc: _productBloc,
-          classificationId: 'AppAdmin',
+          classificationId: classificationId,
           context: context,
           items: products);
       return TableView.builder(

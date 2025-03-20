@@ -46,33 +46,65 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
   }
   if (!isPhone(context)) {
     rowContent.add(TableRowContent(
-        name: 'AssetId',
-        width: 10,
+        name: classificationId == 'AppHotel' ? 'Room Nr' : 'AssetId',
+        width: 5,
         value: Text(item.pseudoId, key: Key('id$index'))));
   }
-  rowContent.add(TableRowContent(
-      name: 'Product Name',
-      width: isPhone(context) ? 40 : 30,
-      value: Text(item.product?.productName ?? '', key: Key('name$index'))));
-  rowContent.add(TableRowContent(
-    name: const Text(
-      'Qty.',
-      textAlign: TextAlign.right,
-    ),
-    width: isPhone(context) ? 15 : 10,
-    value: Text(
-      item.quantityOnHand.toString(),
-      key: Key('qoh$index'),
-      textAlign: TextAlign.right,
-    ),
-  ));
-  if (!isPhone(context)) {
+
+  if (classificationId == 'AppHotel') {
+    rowContent.add(TableRowContent(
+        name: const Text('Room name'),
+        width: isPhone(context) ? 50 : 25,
+        value: Text(item.assetName ?? '')));
+  }
+
+  if (!isPhone(context) && classificationId == 'AppHotel') {
+    rowContent.add(TableRowContent(
+        name: classificationId == 'AppHotel' ? 'Room Type' : 'Product Name',
+        width: isPhone(context) ? 35 : 20,
+        value: Text(item.product?.productName ?? '', key: Key('name$index'))));
+  }
+  if (classificationId != 'AppHotel') {
+    rowContent.add(TableRowContent(
+      name: const Text(
+        'Qty.',
+        textAlign: TextAlign.right,
+      ),
+      width: isPhone(context) ? 15 : 10,
+      value: Text(
+        item.quantityOnHand.toString(),
+        key: Key('qoh$index'),
+        textAlign: TextAlign.right,
+      ),
+    ));
+  }
+  if (!isPhone(context) && classificationId == 'AppHotel') {
+    rowContent.add(TableRowContent(
+        name: const Text(
+          'List Price',
+          textAlign: TextAlign.right,
+        ),
+        width: 10,
+        value: Text(item.product!.listPrice.currency(currencyId: currencyId),
+            textAlign: TextAlign.right)));
+  }
+  if (!isPhone(context) && classificationId == 'AppHotel') {
+    rowContent.add(TableRowContent(
+        name: const Text(
+          'Price',
+          textAlign: TextAlign.right,
+        ),
+        width: 10,
+        value: Text(item.product!.price.currency(currencyId: currencyId),
+            textAlign: TextAlign.right)));
+  }
+  if (!isPhone(context) && classificationId != 'AppHotel') {
     rowContent.add(TableRowContent(
         name: const Text('Cost'),
         width: 10,
         value: Text(item.acquireCost.currency(currencyId: currencyId))));
   }
-  if (!isPhone(context)) {
+  if (!isPhone(context) && classificationId != 'AppHotel') {
     rowContent.add(TableRowContent(
         name: const Text('Loc Id'),
         width: 10,

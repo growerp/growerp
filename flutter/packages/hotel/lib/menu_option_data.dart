@@ -72,12 +72,12 @@ List<MenuOption> menuOptions = [
     tabItems: [
       TabItem(
         form: const AssetList(),
-        label: "Names",
+        label: "Rooms",
         icon: const Icon(Icons.home),
       ),
       TabItem(
         form: const ProductList(),
-        label: "Types",
+        label: "Room Types",
         icon: const Icon(Icons.home),
       ),
     ],

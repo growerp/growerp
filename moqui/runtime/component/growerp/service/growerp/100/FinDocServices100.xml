@@ -326,8 +326,8 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="finDocs" from="[]" />
             <set field="finDocItems" from="[]" />
             <set field="finDocIds" from="[]" />
-            <set field="weekOldDate"
-                from="Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().atZone(java.time.ZoneId.systemDefault()).plusDays(-7).toLocalDateTime())" />
+            <set field="dayOldDate"
+                from="Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().atZone(java.time.ZoneId.systemDefault()).plusDays(-1).toLocalDateTime())" />
 
             <if condition="sales == true">
                 <set field="vendorPartyId" from="companyPartyId" />
@@ -365,7 +365,7 @@ along with this software (see the LICENSE.md file). If not, see
                             condition="open == true &amp;&amp; !finDocId
                             &amp;&amp; !pseudoId &amp;&amp; !search">
                             <set field="statusList" from="openStatusList" />
-                            <set field="fromDate" from="weekOldDate" />
+                            <set field="fromDate" from="dayOldDate" />
                         </if>
                         <entity-find offset="start" limit="limit"
                             entity-name="growerp.order.RequestAndParty" list="items">
@@ -496,10 +496,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <else>
                         <!-- multiple documents -->
                         <set field="statusList" from="['OrderOpen','OrderPlaced','OrderApproved']" />
-                        <!--
-                                        OrderCompleted OrderCancelled' -->
-                        <if condition="open == true &amp;&amp; !finDocId &amp;&amp; !search">
-                            <set field="fromDate" from="weekOldDate" />
+                        <!--    OrderCompleted OrderCancelled' -->
+                        <if condition="open &amp;&amp; !finDocId &amp;&amp; !search">
+                            <set field="fromDate" from="dayOldDate" />
                             <set field="status" from="statusList" />
                         </if>
                         <entity-find offset="start" limit="limit" list="items"
@@ -508,12 +507,12 @@ along with this software (see the LICENSE.md file). If not, see
                                 ignore-if-empty="true" />
                             <econdition field-name="customerPartyId" from="customerPartyId"
                                 ignore-if-empty="true" />
-                            <!-- econditions combine="or">
+                            <econditions combine="or">
                                 <econdition field-name="statusId" operator="in" from="status"
                                     ignore-if-empty="true" />
-                                <econdition field-name="placedDate" operator="greater"
+                                <econdition field-name="lastUpdatedStamp" operator="greater"
                                     from="fromDate" ignore-if-empty="true" />
-                            </econditions-->
+                            </econditions>
                         </entity-find>
                     </else>
                 </if>
@@ -622,26 +621,16 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="lastItem" from="item" />
                 </iterate>
                 <!-- get items -->
+                <set field="finDocItems" from="[]" />
                 <entity-find list="items" entity-name="growerp.order.OrderItemsAndReservation">
                     <econdition field-name="orderId" operator="in" from="finDocIds" />
                     <order-by field-name="orderId,orderItemSeqId" />
                 </entity-find>
                 <iterate list="items" entry="item">
-                    <!-- add items to a single finDoc-->
-                    <if condition="lastOrderId &amp;&amp; item.orderId != lastOrderId">
-                        <iterate entry="finDoc" list="finDocs">
-                            <if condition="finDoc.orderId == lastOrderId">
-                                <set field="finDoc.items" from="finDocItems" />
-                                <break />
-                            </if>
-                        </iterate>
-                        <set field="finDocItems" from="[]" />
-                    </if>
                     <!-- convert ProductTypeId -->
                     <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                         in-map="[docType: 'product', statusId: item.productTypeId]"
                         out-map="productType" />
-
                     <set field="finDocItem"
                         from="[
                             finDocId: item.orderId,
@@ -662,16 +651,20 @@ along with this software (see the LICENSE.md file). If not, see
                                 ? ec.l10n.format(item.rentalThruDate,'yyyy-MM-dd') : null,
                             ]" />
                     <script>finDocItems.add(finDocItem)</script>
-                    <set field="lastOrderId" from="item.orderId" />
+                    <!-- check if last line or next line for next order -->
+                    <if
+                        condition="!item_has_next || 
+                            item.orderId !=  items[item_index+1].orderId">
+                        <!-- add items to a single finDoc-->
+                        <iterate entry="finDoc" list="finDocs">
+                            <if condition="finDoc.orderId == item.orderId">
+                                <set field="finDoc.items" from="finDocItems" />
+                                <break />
+                            </if>
+                        </iterate>
+                        <set field="finDocItems" from="[]" />
+                    </if>
                 </iterate>
-                <if condition="lastOrderId">
-                    <iterate entry="finDoc" list="finDocs">
-                        <if condition="finDoc.orderId == lastOrderId">
-                            <set field="finDoc.items" from="finDocItems" />
-                            <break />
-                        </if>
-                    </iterate>
-                </if>
             </if>
             <!-- invoice -->
             <if condition="docType == 'invoice'">
@@ -748,7 +741,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <else>
                                 <if condition="open == true">
                                     <set field="statusList" from="openStatusList" />
-                                    <set field="fromDate" from="weekOldDate" />
+                                    <set field="fromDate" from="dayOldDate" />
                                 </if>
                                 <!-- just a list to scroll get Id's-->
                                 <entity-find offset="start" limit="limit"
@@ -911,7 +904,7 @@ along with this software (see the LICENSE.md file). If not, see
                             condition="open == true &amp;&amp; !finDocId
                             &amp;&amp; !pseudoId &amp;&amp; !search">
                             <set field="statusList" from="openStatusList" />
-                            <set field="fromDate" from="weekOldDate" />
+                            <set field="fromDate" from="dayOldDate" />
                         </if>
                         <entity-find offset="start" limit="limit"
                             entity-name="growerp.order.PaymentAndInfo" list="items">
@@ -1114,7 +1107,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <else>
                         <if condition="open == true &amp;&amp; !finDocId &amp;&amp; !search">
                             <set field="status" from="openStatusList" />
-                            <set field="fromDate" from="weekOldDate" />
+                            <set field="fromDate" from="dayOldDate" />
                         </if>
                         <entity-find offset="start" limit="limit" list="items"
                             entity-name="growerp.warehouse.ShipmentAndPartiesAndWarehouse">
@@ -1267,7 +1260,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="isPosted == false">
                         <set field="isPosted" value="N" />
                     </if>
-                    <set field="weekOldDate" from="null" />
+                    <set field="dayOldDate" from="null" />
                 </if>
                 <if condition="journalId?.endsWith('Error')">
                     <set field="isPosted" value="'N'" />
@@ -1315,7 +1308,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     from="isPosted"
                                     ignore-if-empty="true" />
                                 <econdition field-name="transactionDate" operator="greater"
-                                    from="weekOldDate" ignore-if-empty="true" />
+                                    from="dayOldDate" ignore-if-empty="true" />
                             </econditions-->
                             <econdition field-name="transactionDate" operator="less-equals"
                                 from="tsDate" ignore-if-empty="true" />
@@ -2054,10 +2047,12 @@ along with this software (see the LICENSE.md file). If not, see
                                             unitAmount: item.price]"
                         out-map="context" />
                     <else-if condition="item.itemType.itemTypeId == 'ItemRental'">
-                        <service-call name="mantle.order.OrderServices.add#OrderProductQuantity"
-                            in-map="context + [ itemTypeId: item.itemType.itemTypeId,
+                        <service-call name="mantle.order.OrderServices.create#OrderItem"
+                            in-map="context + [ itemTypeEnumId: item.itemType.itemTypeId,
                                             productId: item.product.productId,
+                                            itemDescription: item.description,
                                             quantity: item.quantity,
+                                            requireInventory: false,
                                             unitAmount: item.price]"
                             out-map="context" />
                         <service-call name="create#growerp.product.AssetRental"
@@ -2692,10 +2687,6 @@ along with this software (see the LICENSE.md file). If not, see
                                          orderPartSeqId: orderPartSeqId,
                                          orderItems: order.items]" />
                 </if>
-                <else>
-                    <return error="true"
-                        message="Order $orderId status: ${items[0].statusId} does not allow updates!" />
-                </else>
             </if>
             <!-- handle status changes -->
             <if condition="order.statusId &amp;&amp; order.statusId != items[0].statusId">
@@ -2916,7 +2907,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="invoice.sales">
                 <then>
                     <set field="invoiceHeader.toPartyId"
-                        from="invoice.otherCompany?partyId ?: invoice.otherUser.partyId" />
+                        from="invoice.otherCompany?.partyId ?: invoice.otherUser.partyId" />
                 </then>
                 <else>
                     <set field="invoiceHeader.fromPartyId"

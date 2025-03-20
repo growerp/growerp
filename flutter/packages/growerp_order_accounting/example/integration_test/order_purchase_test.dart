@@ -61,6 +61,7 @@ void main() {
     await OrderTest.approveOrders(tester);
     await PaymentTest.selectPurchasePayments(tester);
     await OrderTest.approveOrderPayments(tester);
+    await OrderTest.completeOrderPayments(tester);
     await OrderTest.checkOrderPaymentsComplete(tester);
     await InvoiceTest.selectPurchaseInvoices(tester);
     await OrderTest.checkOrderInvoicesComplete(tester);

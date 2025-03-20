@@ -145,7 +145,7 @@ class FinDocSearchDialog extends StatelessWidget {
                               child: ListTile(
                                 title: Text(
                                     "ID: ${finDocs[index].pseudoId}  "
-                                    "Date: ${finDocs[index].creationDate?.dateOnly()}",
+                                    "Date: ${finDocs[index].creationDate.dateOnly()}",
                                     key: Key("searchResult$index")),
                                 subtitle: Column(children: [
                                   if (finDocs[index].docSubType != null)

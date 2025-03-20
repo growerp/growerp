@@ -158,10 +158,9 @@ class OrderTest {
     for (FinDoc order in orders) {
       await CommonTest.doNewSearch(tester, searchString: order.orderId!);
       expect(
-          CommonTest.getTextField('status0'),
-          equals(classificationId == 'AppHotel'
-              ? FinDocStatusVal.completed.hotel
-              : FinDocStatusVal.completed.name));
+          CommonTest.getDropdown('statusDropDown',
+              classificationId: classificationId),
+          equals(FinDocStatusVal.completed.hotel));
     }
   }
 

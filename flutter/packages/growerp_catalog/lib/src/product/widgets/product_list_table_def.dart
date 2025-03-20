@@ -58,28 +58,27 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
       value: Text("${item.productName}", key: Key('name$index'))));
 
   rowContent.add(TableRowContent(
-      name: 'Price',
+      name: const Text('Price', textAlign: TextAlign.right),
       width: 15,
       value: Text(item.price.currency(currencyId: currencyId),
-          key: Key('price$index'), textAlign: TextAlign.center)));
+          key: Key('price$index'), textAlign: TextAlign.right)));
 
-  if (classificationId != 'AppHotel') {
-    if (!isPhone) {
-      rowContent.add(TableRowContent(
-          name: 'Category',
-          width: 15,
-          value: Text(
-              "${item.categories.isEmpty ? '0' : item.categories.length > 1 ? item.categories.length : item.categories[0].categoryName}",
-              key: Key('categoryName$index'),
-              textAlign: TextAlign.center)));
-    }
-  }
-  if (!isPhone && classificationId == 'AppHotel') {
+  if (!isPhone) {
     rowContent.add(TableRowContent(
-        name: '#Units',
+        name: const Text('List Price', textAlign: TextAlign.right),
         width: 15,
-        value: Text(item.assetCount != null ? item.assetCount.toString() : '0',
-            key: Key('assetCount$index'), textAlign: TextAlign.center)));
+        value: Text(item.listPrice.currency(currencyId: currencyId),
+            key: Key('listPrice$index'), textAlign: TextAlign.right)));
+  }
+
+  if (!isPhone && classificationId != 'AppHotel') {
+    rowContent.add(TableRowContent(
+        name: 'Category',
+        width: 15,
+        value: Text(
+            "${item.categories.isEmpty ? '0' : item.categories.length > 1 ? item.categories.length : item.categories[0].categoryName}",
+            key: Key('categoryName$index'),
+            textAlign: TextAlign.center)));
   }
 
   if (!isPhone) {

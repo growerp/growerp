@@ -128,7 +128,7 @@ class FinDocTest {
         await CommonTest.enterText(tester, 'itemPrice', item.price.toString());
         await CommonTest.enterText(
             tester, 'itemQuantity', item.quantity.toString());
-        await CommonTest.drag(tester, listViewName: 'listView3');
+        await CommonTest.drag(tester);
         await CommonTest.tapByKey(tester, 'ok');
         // item added at the top, get productid
         newItems.add(item.copyWith(
@@ -191,7 +191,7 @@ class FinDocTest {
             item.description!);
         if (rental) {
           expect(CommonTest.getTextField('fromDate$index'),
-              contains(item.rentalFromDate?.dateOnly()));
+              contains(item.rentalFromDate.dateOnly()));
         } else {
           if (!CommonTest.isPhone()) {
             expect(CommonTest.getTextField('itemPrice$index'),
@@ -346,6 +346,7 @@ class FinDocTest {
         await CommonTest.tapByKey(tester, 'statusDropDown');
         await CommonTest.tapByText(tester,
             classificationId == 'AppHotel' ? status.hotel : status.name);
+        await CommonTest.drag(tester);
         await CommonTest.tapByKey(tester, 'update',
             seconds: CommonTest.waitTime);
         await CommonTest.waitForSnackbarToGo(tester);

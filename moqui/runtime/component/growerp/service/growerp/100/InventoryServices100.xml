@@ -304,7 +304,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="product" type="Map">
                         <parameter name="productId" />
                         <parameter name="pseudoId" />
-                        <parameter name="productName" />
+                        <parameter name="price" />
+                        <parameter name="listPrice" />
                     </parameter>
                     <parameter name="location" type="Map">
                         <parameter name="locationId" />
@@ -351,6 +352,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="productName" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
                 </econditions>
+                <date-filter from-field-name="priceFromDate" thru-field-name="priceThruDate" />
+                <date-filter from-field-name="listPriceFromDate" thru-field-name="listPriceThruDate" />
                 <order-by field-name="assetName" />
             </entity-find>
             <set field="assets" from="[]" />
@@ -388,7 +391,9 @@ along with this software (see the LICENSE.md file). If not, see
                     receivedDate: item.receivedDate ? ec.l10n.format(item.receivedDate,'yyyy-MM-dd')  : null,
                     expectedEndOfLifeDate: item.expectedEndOfLife ? ec.l10n.format(item.expectedEndOfLife,'yyyy-MM-dd')  : null,
                     product: [productId: item.productId, pseudoId: item.productPseudoId,
-                                productName: item.productName],
+                                productName: item.productName, 
+                                price: item.price.toString(),
+                                listPrice: item.listPrice ? item.listPrice.toString() : null],
                     location: [locationId: item.locationId, pseudoId: item.locationPseudoId, locationName: item.locationName],
                     ]" />
                 <script>assets.add(assetOut)</script>
