@@ -4,8 +4,7 @@ import 'package:dcli/dcli.dart';
 import '../src.dart';
 
 install(String growerpPath, String branch) {
-  logger
-      .i('installing GrowERP: chat,backend and starting the flutter admin app');
+  logger.i('installing GrowERP: backend and starting the flutter admin app');
   if (exists(growerpPath)) {
     if (!exists('$growerpPath/flutter')) {
       logger.e("$growerpPath directory exist but is not a GrowERP repository!");
