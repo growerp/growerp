@@ -1,3 +1,6 @@
+## 1.8.1
+Error when installed version modified
+
 ## 1.8.0
 removed chat server, now included in backend
 

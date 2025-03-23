@@ -16,11 +16,17 @@ install(String growerpPath, String branch) {
     'git status'.start(
         workingDirectory: growerpPath,
         progress: Progress((line) => lines += line));
+    bool doPop = false;
     if (!lines.contains('working tree clean')) {
-      run('git stash', workingDirectory: growerpPath);
+      'git stash'.start(
+          workingDirectory: growerpPath,
+          progress: Progress((line) => lines += line));
+      if (!lines.contains('No local changes')) {
+        doPop = true;
+      }
     }
     run('git pull', workingDirectory: growerpPath);
-    if (!lines.contains('working tree clean')) {
+    if (doPop) {
       run('git stash pop', workingDirectory: growerpPath);
     }
   } else {
@@ -29,6 +35,7 @@ install(String growerpPath, String branch) {
   }
   logger.i('Start backend in separate window...');
   if (!exists('$growerpPath/moqui/moqui.war')) {
+    logger.i('first compile backend and initially load data...');
     run('./gradlew build', workingDirectory: '$growerpPath/moqui');
     run('java -jar moqui.war load types=seed,seed-initial,install',
         workingDirectory: '$growerpPath/moqui');

@@ -1,5 +1,5 @@
 name: growerp
-version: 1.8.0
+version: 1.8.1
 description: GrowERP installation and tools such as import and export.
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp/tree/master/flutter/packages/growerp
