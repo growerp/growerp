@@ -27,8 +27,10 @@ Documentation available at https://www.growerp.com
 # Install GrowERP locally
 
 ## What is needed? 
-    Java JDK 11:    https://www.oracle.com/th/java/technologies/javase/jdk11-archive-downloads.html  
-    Flutter:        https://flutter.dev/  
+    Java JDK 11:    https://www.oracle.com/th/java/technologies/javase/jdk11-archive-downloads.html
+    Java JDK 17:    Flutter now need gradle V8 up, which needs v17
+                    Make java 11 the default and tell flutter to use 17 with: flutter config --jdk-dir /usr/lib/jvm/java-17-openjdk-amd64  
+    Flutter:        https://flutter.dev/  currently 3.29.2
     Chrome:         https://www.google.com/chrome/  
     Git:            https://git-scm.com/downloads  
     Android studio: https://developer.android.com/studio  
