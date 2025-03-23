@@ -28,6 +28,11 @@ install(String growerpPath, String branch) {
         workingDirectory: HOME);
   }
   logger.i('Start backend in separate window...');
+  if (!exists('$growerpPath/moqui/moqui.war')) {
+    run('./gradlew build', workingDirectory: '$growerpPath/moqui');
+    run('java -jar moqui.war load types=seed,seed-initial,install',
+        workingDirectory: '$growerpPath/moqui');
+  }
   run('gnome-terminal -- bash -c "cd $growerpPath/moqui && java -jar moqui.war"');
   if (!exists("$growerpPath/flutter/packages/admin/pubspec_overrides.yaml")) {
     logger.i('activate melos package to build frontend...');
