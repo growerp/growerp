@@ -1,3 +1,6 @@
+## 1.8.0
+removed chat server, now included in backend
+
 ## 1.6.2
 * minor fixes
 
