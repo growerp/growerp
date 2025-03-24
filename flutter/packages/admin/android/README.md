@@ -106,3 +106,7 @@ fastlane supply \
 (upload just binary)
     fastlane upload
 
+## set up fastlane first time:
+in the android dir:
+    fastlane supply init
+
