@@ -6,7 +6,14 @@ homepage: https://www.growerp.com
 environment:
   sdk: ">=3.2.6 <4.0.0"
   flutter: ">=1.17.0"
-
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
+  
 dependencies:
   flutter:
     sdk: flutter
