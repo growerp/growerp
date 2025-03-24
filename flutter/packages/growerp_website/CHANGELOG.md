@@ -1,3 +1,6 @@
+## 1.8.0
+* Various changes see https://github.com/growerp/growerp/releases
+
 ## 1.6.0
 * various upgrades
 

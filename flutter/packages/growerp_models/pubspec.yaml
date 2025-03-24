@@ -1,8 +1,15 @@
 name: growerp_models
-version: 1.6.2
+version: 1.8.0
 description: GrowERP models and Moqui backend REST interface
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
 
 environment:
   sdk: ">=3.2.6 <4.0.0"
