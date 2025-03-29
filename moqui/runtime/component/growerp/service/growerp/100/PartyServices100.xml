@@ -1411,6 +1411,17 @@ along with this software (see the LICENSE.md file). If not, see
                         <description>Percentage used for sales tax</description>
                     </parameter>
                     <parameter name="telephoneNr" />
+                    <parameter name="address" type="Map">
+                        <parameter name="addressId" />
+                        <parameter name="address1" />
+                        <parameter name="address2" />
+                        <parameter name="city" />
+                        <parameter name="postalCode" />
+                        <parameter name="province" />
+                        <parameter name="provinceId" />
+                        <parameter name="country" />
+                        <parameter name="countryId" />
+                    </parameter>
                 </parameter>
                 <parameter name="appsUsed" type="List" />
             </parameter>
@@ -2962,20 +2973,27 @@ along with this software (see the LICENSE.md file). If not, see
                 from="[
                 [ firstName: 'James-a', lastName: 'Smith', emailAddress: 'james@example.com',
                     locale: 'EN', username: '@@james', userGroupId: 'GROWERP_M_ADMIN' ,
-                    image: 'demoFaces/1_m.jpg', role: 'OrgInternal'],
+                    image: 'demoFaces/1_m.jpg', role: 'OrgInternal',
+                    address: [address1: 'history lane 1',postalCode: '12345',
+                            city: 'Bangkok', country: 'Thailand']],
                 [ firstName: 'John-e', lastName: 'Williams', emailAddress: 'john@example.com',
                     locale: 'EN', username: '@@john', userGroupId: 'GROWERP_M_EMPLOYEE',
-                    image: 'demoFaces/2_m.jpg' ,role: 'OrgInternal'],
+                    image: 'demoFaces/2_m.jpg' ,role: 'OrgInternal',
+                    address: [address1: 'history lane 2',postalCode: '12345',
+                            city: 'Bangkok', country: 'Netherlands']],
                 [ firstName: 'Robert-c', lastName: 'Johnson', emailAddress: 'robert@example.com',
                     locale: 'EN', username: '@@robert', role: 'Customer',
-                    image: 'demoFaces/3_m.jpg', companyName: 'Trust Fund-c'],
+                    image: 'demoFaces/3_m.jpg', companyName: 'Trust Fund-c',
+                    address: [address1: 'history lane 1',postalCode: '12345',
+                            city: 'Bangkok', country: 'Thailand']],
                 [ firstName: 'Michael-l', lastName: 'Brown',
                     locale: 'EN', username: '@@michael', role: 'Lead',
                     image: 'demoFaces/4_m.jpg', companyName: 'Academic Advantage-l'],
                 [ firstName: 'William-s', lastName: 'Jones',
                     locale: 'EN', username: '@@william', role: 'Supplier',
-                    image: 'demoFaces/5_m.jpg', companyName: 'Gables Tutoring And Test Prep-s'],
-
+                    image: 'demoFaces/5_m.jpg', companyName: 'Gables Tutoring And Test Prep-s',
+                    address: [address1: 'history lane 5',postalCode: '12345',
+                            city: 'Bangkok', country: 'Belgium']],
                 [ firstName: 'David-a', lastName: 'Miller', emailAddress: 'david@example.com',
                     locale: 'EN', image: 'demoFaces/6_m.jpg', role: 'OrgInternal'],
                 [ firstName: 'Mary-e', lastName: 'Davis', emailAddress: 'Mary@example.com',
@@ -3084,7 +3102,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <!-- create product -->
                     <entity-find entity-name="mantle.product.Product" list="products">
                         <econdition field-name="ownerPartyId" value="_NA_" />
-                        <econdition field-name="productTypeEnumId" value="PtAsset" />
                     </entity-find>
                     <iterate list="products" entry="product">
                         <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
@@ -3244,7 +3261,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="dbEmployees" from="[]" />
                 <iterate list="users" entry="us">
                     <if condition="us.companyName">
-                        <set field="company" from="[name: us.companyName, role: us.role]" />
+                        <set field="company"
+                            from="[name: us.companyName, role: us.role, address: us.address]" />
                     </if>
                     <set field="userIn"
                         from="[
@@ -3257,6 +3275,7 @@ along with this software (see the LICENSE.md file). If not, see
                             userGroupId: us.userGroupId ? us.userGroupId : null,
                             role: us.role,
                             company: company ,
+                            address: us.address,
                             appsUsed: [classificationId],
                         ]" />
                     <service-call name="growerp.100.PartyServices100.create#User"
@@ -3317,6 +3336,8 @@ along with this software (see the LICENSE.md file). If not, see
                     [ quantity: 2, price: 20.1, orderName: 'first generated order', productName: 'Baseball'],
                     [ quantity: 4, price: 29.11, orderName: 'first generated order', productName: '32GB'],
                     [ quantity: 3, price: 12.1, orderName: 'second generated order', productName: 'Coffee'],
+                    [ quantity: 1, price: 0.00, orderName: 'third generated order service',
+                        productName: 'GrowERP demo movie', itemType: 'ItemServiceProduct'],
                     ]" />
                 <!-- set time at mid day noon -->
                 <set field="nowDate" from="ec.user.nowTimestamp" />
@@ -3379,7 +3400,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="index" type="Integer" value="0" />
 
                 <iterate list="ordersIn" entry="order">
-
                     <entity-find entity-name="growerp.mobile.product.ProductAndCategoryAndPrices"
                         list="products" limit="1">
                         <econdition field-name="ownerPartyId" from="ownerPartyId" />
@@ -3398,15 +3418,16 @@ along with this software (see the LICENSE.md file). If not, see
                                     rentalFromDate: order.rentalFromDate.toString(),
                                     rentalThruDate: order.rentalThruDate.toString(),
                                 ]" />
-
                                 <script>items.add(item)</script>
                             </while>
                         </then>
                         <else>
+                            <set field="itemTypeId"
+                                from="order.itemType ?: 'ItemProduct'" />
                             <set field="item"
                                 from="[
                                     product: [productId: products[0].productId],
-                                    itemType: [itemTypeId: 'ItemProduct'],
+                                    itemType: [itemTypeId: itemTypeId],
                                     description: order.productName,
                                     unitAmount: order.price ?: products[0].price,
                                     quantity: order.quantity,

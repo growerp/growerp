@@ -80,6 +80,8 @@ Run:
 flutter run
 ```
 for hotel go to the flutter/packages/hotel directory and submit 'flutter run' command
+login to the backend: 
+    http://localhost:8080/vapps user: SystemSupport password: moqui
 
 ## Use GrowERP locally with docker
 In the docker directory there is a README.md to run the complete system with docker images locally.

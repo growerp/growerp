@@ -1922,6 +1922,9 @@ class EntityFacadeImpl implements EntityFacade {
         }
         return dbSequenceLock
     }
+    String getNextSeqId(String seqName) {
+        return dbSequencedIdPrimary(seqName, 0L, 50L)
+    }
     protected String dbSequencedIdPrimary(String seqName, long staggerMax, long bankSize) {
 
         // TODO: find some way to get this running non-synchronized for performance reasons (right now if not

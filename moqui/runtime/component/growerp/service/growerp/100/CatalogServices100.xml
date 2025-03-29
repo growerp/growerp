@@ -208,14 +208,10 @@ along with this software (see the LICENSE.md file). If not, see
                                     description: product.description?:'',
                                     useWarehouse: product.requireInventory == 'Y' ? true : false,
                                     assetCount: assetCount ? assetCount : null,
-                                    image: imageFile]" />
-                            <if condition="product.price">
-                                <set field="productOut.price" from="product.price.toString()" />
-                            </if>
-                            <if condition="product.listPrice">
-                                <set field="productOut.listPrice"
-                                    from="product.listPrice.toString()" />
-                            </if>
+                                    image: imageFile,
+                                    price: product.price ? product.price.toString() : '0.00',
+                                    listPrice: product.listPrice ? product.listPrice.toString() : '0.00',
+                                ]" />
                         </else>
                     </if>
                 </if>
@@ -308,10 +304,9 @@ along with this software (see the LICENSE.md file). If not, see
                 salesIntroductionDate: ec.user.nowTimestamp,
                 ownerPartyId: ownerPartyId,
                 productTypeEnumId: prodConvert.convertedStatusId,
-                assetTypeEnumId: 'AstTpInventory',
+                assetTypeEnumId: prodConvert.convertedStatusId != 'PtService'? 'AstTpInventory' : null,
                 requireInventory: product.useWarehouse == true ? 'Y' : 'N',
-                assetClassEnumId: convertedStatusId ? 
-                    convertedStatusId : 'AsClsInventoryFin']"
+                assetClassEnumId: prodConvert.convertedStatusId != 'PtService'? 'AsClsInventoryFin' : null]"
                 out-map="context" />
             <!-- product price and currency -->
             <entity-find-one value-field="pref"
@@ -483,13 +478,16 @@ along with this software (see the LICENSE.md file). If not, see
                 <date-filter />
             </entity-find>
             <if
-                condition="(!productPrices &amp;&amp; product.price) 
-                    || (!productPrices[0].price != product.price)">
+                condition="(!productPrices &amp;&amp; product.price &amp;&amp; !new BigDecimal(product.price).ZERO) 
+                    || (productPrices[0]?.price != product?.price)">
                 <set field="productPrice" from="productPrices[0]" />
                 <service-call name="create#mantle.product.ProductPrice" in-map="priceMap" />
-                <service-call name="update#mantle.product.ProductPrice"
-                    in-map="[productPriceId: productPrices[0].productPriceId,
+                <!-- delete old record -->
+                <if condition="productPrices">
+                    <service-call name="update#mantle.product.ProductPrice"
+                        in-map="[productPriceId: productPrices[0].productPriceId,
                                 thruDate: nowDate]" />
+                </if>
             </if>
             <!-- list price -->
             <entity-find entity-name="mantle.product.ProductPrice"
@@ -499,13 +497,16 @@ along with this software (see the LICENSE.md file). If not, see
                 <date-filter />
             </entity-find>
             <if
-                condition="(!productPrices &amp;&amp; product.listPrice) 
-                    || (!productPrices[0].price != product.price)">
+                condition="(!productPrices &amp;&amp; product.listPrice &amp;&amp; !new BigDecimal(product.listPrice).ZERO) 
+                    || (productPrices[0]?.price != product?.price)">
                 <service-call name="create#mantle.product.ProductPrice"
                     in-map="priceMap + [priceTypeEnumId: 'PptList',price: product.listPrice]" />
-                <service-call name="update#mantle.product.ProductPrice"
-                    in-map="[productPriceId: productPrices[0].productPriceId,
+                <!-- delete old record -->
+                <if condition="productPrices">
+                    <service-call name="update#mantle.product.ProductPrice"
+                        in-map="[productPriceId: productPrices[0].productPriceId,
                                 thruDate: nowDate]" />
+                </if>
             </if>
 
             <!-- get root catg -->
