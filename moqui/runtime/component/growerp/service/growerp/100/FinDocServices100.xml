@@ -611,7 +611,7 @@ along with this software (see the LICENSE.md file). If not, see
                             docType: docType,
                             otherUser: userOut,
                             otherCompany: company,
-                            grandTotal: item.grandTotal ? item.grandTotal.toString(): null,
+                            grandTotal: item.grandTotal ? item.grandTotal.toString(): '0.00',
                             items: finDocItems,
                             ]" />
                     <script>
@@ -643,7 +643,7 @@ along with this software (see the LICENSE.md file). If not, see
                                         itemTypeName: item.itemTypeName],
                             description: item.description,
                             quantity: item.quantity.toString(),
-                            price: item.unitAmount.toString(),
+                            price: item.unitAmount ? item.unitAmount.toString() : '0.00',
                             asset: [assetId: item.assetId, assetName: item.assetName],
                             rentalFromDate: item.rentalFromDate
                                 ?  ec.l10n.format(item.rentalFromDate,'yyyy-MM-dd')  : null,
@@ -2071,7 +2071,7 @@ along with this software (see the LICENSE.md file). If not, see
                                             itemDescription: item.description,
                                             quantity: item.quantity,
                                             unitAmount: item.price,
-                                            overrideGlAccountId: item.glAccount.glAccountId]"
+                                            overrideGlAccountId: item.glAccount?.glAccountId]"
                             out-map="itemcreate" />
                     </else>
                 </if>
@@ -2755,8 +2755,6 @@ along with this software (see the LICENSE.md file). If not, see
                             carrierAndShipmentMethod: '_NA_:ShMthPickUp']" />
                             <!-- carrierPartyId:shipmentMethodEnumId -->
                         </if>
-                        <service-call name="mantle.order.OrderServices.approve#Order"
-                            in-map="[orderId: order.orderId]" />
                         <!-- for websales do not create invoice aand payment is already created
                                 approved-->
                         <entity-find entity-name="mantle.account.payment.Payment" list="payments">
@@ -2770,30 +2768,35 @@ along with this software (see the LICENSE.md file). If not, see
                                     <set field="invStatusId" value="InvoiceReceived" />
                                 </else>
                             </if>
-                            <service-call in-map="context + [statusId: invStatusId]"
+                            <service-call
+                                in-map="[orderId: order.orderId, orderPartSeqId: '01']"
                                 out-map="context"
                                 name="mantle.account.InvoiceServices.create#EntireOrderPartInvoice" />
-                            <entity-find-one entity-name="mantle.account.invoice.Invoice"
-                                value-field="updInvoice" for-update="true" />
-                            <if condition="updInvoice">
-                                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                                    in-map="[ownerPartyId: ownerPartyId, seqName: 'invoice']"
-                                    out-map="context" />
-                                <set field="updInvoice.pseudoId" from="seqNum" />
-                                <entity-update value-field="updInvoice" />
-                            </if>
-                            <!-- create payment -->
-                            <set field="effectiveDate" from="ec.user.nowTimestamp" />
                             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                                in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']"
+                                in-map="[ownerPartyId: ownerPartyId, seqName: 'invoice']"
                                 out-map="context" />
-                            <service-call
-                                name="mantle.account.PaymentServices.create#InvoicePayment"
-                                in-map="[invoiceId: invoiceId, effectiveDate:effectiveDate,
+                            <service-call name="update#mantle.account.invoice.Invoice"
+                                in-map="[invoiceId: invoiceId,
+                                        pseudoId: seqNum,
+                                        statusId: invStatusId]" />
+                            <!-- create payment when invoice total > 0-->
+                            <entity-find-one entity-name="mantle.account.invoice.Invoice"
+                                value-field="invoice" />
+                            <if condition="invoice.invoiceTotal > 0">
+                                <set field="effectiveDate" from="ec.user.nowTimestamp" />
+                                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                                    in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']"
+                                    out-map="context" />
+                                <service-call
+                                    name="mantle.account.PaymentServices.create#InvoicePayment"
+                                    in-map="[invoiceId: invoiceId, effectiveDate:effectiveDate,
                                 statusId: 'PmntPromised', orderId: order.orderId,
                                 pseudoId: seqNum]"
-                                out-map="context" />
+                                    out-map="context" />
+                            </if>
                         </if>
+                        <service-call name="mantle.order.OrderServices.approve#Order"
+                            in-map="[orderId: order.orderId]" />
                         <!-- create shipment -->
                         <entity-find entity-name="mantle.facility.Facility" list="facilities"
                             limit="1">

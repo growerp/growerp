@@ -109,4 +109,4 @@ fastlane supply \
 ## set up fastlane first time:
 in the android dir:
     fastlane supply init
-
+and the system will prompt you for required data
