@@ -2650,6 +2650,18 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="option + [productStoreId: productStoreId]" />
             </iterate>
 
+            <!-- store gateway -->
+            <entity-find entity-name="mantle.product.store.ProductStorePaymentGateway"
+                list="gateways">
+                <econdition field-name="productStoreId" value="POPC_DEFAULT" />
+            </entity-find>
+            <iterate list="gateways" entry="gateway">
+                <service-call name="create#mantle.product.store.ProductStorePaymentGateway"
+                    in-map="[productStoreId: productStoreId,
+                        paymentInstrumentEnumId: gateway.paymentInstrumentEnumId,
+                        paymentGatewayConfigId: gateway.paymentGatewayConfigId]" />
+            </iterate>
+
             <!-- disable autoapprove sales orders for now because not generating shipping note -->
             <!--entity-delete-by-condition
             entity-name="moqui.service.job.ServiceJob">

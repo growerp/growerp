@@ -58,12 +58,11 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         value: Text(item.assetName ?? '')));
   }
 
-  if (!isPhone(context) && classificationId == 'AppHotel') {
-    rowContent.add(TableRowContent(
-        name: classificationId == 'AppHotel' ? 'Room Type' : 'Product Name',
-        width: isPhone(context) ? 35 : 20,
-        value: Text(item.product?.productName ?? '', key: Key('name$index'))));
-  }
+  rowContent.add(TableRowContent(
+      name: classificationId == 'AppHotel' ? 'Room Type' : 'Product Name',
+      width: isPhone(context) ? 35 : 20,
+      value: Text(item.product?.productName ?? '', key: Key('name$index'))));
+
   if (classificationId != 'AppHotel') {
     rowContent.add(TableRowContent(
       name: const Text(

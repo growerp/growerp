@@ -524,14 +524,6 @@ along with this software (see the LICENSE.md file). If not, see
                         <field-map field-name="productStoreId" from="orderHeader.productStoreId"/>
                         <field-map field-name="paymentInstrumentEnumId" from="paymentInstrumentEnumId"/>
                     </entity-find-one>
-                    <if condition="productStorePaymentGateway == null">
-                        <!-- when not found, use the test popc default -->
-                        <entity-find-one entity-name="mantle.product.store.ProductStorePaymentGateway"
-                        	    value-field="productStorePaymentGateway" cache="true">
-                        	<field-map field-name="productStoreId" value="POPC_DEFAULT"/>
-                            <field-map field-name="paymentInstrumentEnumId" from="payment.paymentInstrumentEnumId"/>
-                        </entity-find-one>
-                    </if>
                     <set field="paymentGatewayConfigId" from="productStorePaymentGateway?.paymentGatewayConfigId"/>
                 </if>
                 <if condition="orderPartSeqId &amp;&amp; !amount">

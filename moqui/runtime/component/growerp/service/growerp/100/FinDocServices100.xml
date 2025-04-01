@@ -2805,7 +2805,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <service-call
                             name="mantle.shipment.ShipmentServices.create#OrderPartShipment"
                             in-map="[orderId: order.orderId, facilityId: facilities[0].facilityId,
-                                orderPartSeqId: orderPartSeqId]"
+                                orderPartSeqId: '01']"
                             out-map="context" />
                         <if condition="shipmentId != null">
                             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"

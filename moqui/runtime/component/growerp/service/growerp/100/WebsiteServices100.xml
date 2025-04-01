@@ -431,38 +431,46 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                     </if>
                     <!-- stripe api key -->
-                    <set field="paymentGatewayConfigId" value="STRIPE" />
-                    <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="old" />
                     <if condition="website.stripeApiKey">
+                        <set field="paymentGatewayConfigId" value="STRIPE" />
+                        <!-- update/add key -->
+                        <entity-find-one entity-name="Stripe.PaymentGatewayStripe"
+                            value-field="stripeKey">
+                            <field-map field-name="paymentGatewayConfigId"
+                                from="paymentGatewayConfigId" />
+                            <field-map field-name="ownerPartyId" from="ownerPartyId" />
+                        </entity-find-one>
                         <if condition="website.stripeApiKey == ' '">
-                            <!-- delete -->
-                            <if condition="old">
-                                <service-call name="delete#Stripe.PaymentGatewayStripe"
-                                    in-map="[paymentGatewayConfigId: paymentGatewayConfigId,
-                                            ownerPartyId: ownerPartyId]" />
+                            <then>
+                                <!-- delete and back to default -->
                                 <service-call
-                                    name="delete#mantle.product.store.ProductStorePaymentGateway"
+                                    name="update#mantle.product.store.ProductStorePaymentGateway"
                                     in-map="[productStoreId: stores[0].productStoreId,
-                                            paymentInstrumentEnumId: 'PiCreditCard']" />
-                            </if>
+                                            paymentInstrumentEnumId: 'PiCreditCard',
+                                            paymentGatewayConfigId: 'TEST_APPROVE']" />
+                                <if condition="stripeKey">
+                                    <service-call name="delete#Stripe.PaymentGatewayStripe"
+                                        in-map="[paymentGatewayConfigId: paymentGatewayConfigId,
+                                            ownerPartyId: ownerPartyId]" />
+                                </if>
+                            </then>
                             <else>
-                                <if condition="old">
-                                    <!-- update -->
+                                <!-- update set to stripe add/mofify key-->
+                                <service-call
+                                    name="update#mantle.product.store.ProductStorePaymentGateway"
+                                    in-map="[productStoreId: stores[0].productStoreId,
+                                            paymentInstrumentEnumId: 'PiCreditCard',
+                                            paymentGatewayConfigId: 'STRIPE']" />
+                                <if condition="stripeKey">
                                     <service-call name="update#Stripe.PaymentGatewayStripe"
                                         in-map="[paymentGatewayConfigId: paymentGatewayConfigId,
                                             ownerPartyId: ownerPartyId,
                                             secretKey: website.stripeApiKey]" />
                                     <else>
-                                        <!-- create -->
                                         <service-call name="create#Stripe.PaymentGatewayStripe"
                                             in-map="[paymentGatewayConfigId: paymentGatewayConfigId,
                                             ownerPartyId: ownerPartyId,
                                             secretKey: website.stripeApiKey]" />
-                                        <service-call
-                                            name="create#mantle.product.store.ProductStorePaymentGateway"
-                                            in-map="[productStoreId: stores[0].productStoreId,
-                                            paymentInstrumentEnumId: 'PiCreditCard',
-                                            paymentGatewayConfigId: paymentGatewayConfigId]" />
                                     </else>
                                 </if>
                             </else>

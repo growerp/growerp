@@ -181,6 +181,11 @@ function saveCurrentTestData(testData) {
             if (error) console.log(error);
         });
 }
+function deleteCurrentTestData() {
+    const fs = require("fs");
+    if (fs.existsSync("./current_test_data.json"))
+        fs.unlinkSync("./current_test_data.json");
+}
 
 async function enterTextByKey(driver, key, value) {
     let fieldName = await driver.findElement(By.id(key));
@@ -214,6 +219,7 @@ module.exports = {
     // low
     getCurrentTestData,
     saveCurrentTestData,
+    deleteCurrentTestData,
     enterTextByKey,
     tapByKey,
     tapByLink,

@@ -709,8 +709,8 @@ class WebsiteFormState extends State<WebsiteForm> {
                   child: TextFormField(
                       key: const Key('stripeApi'),
                       controller: _stripeApiKeyController,
-                      decoration:
-                          const InputDecoration(labelText: 'Stripe Api key')),
+                      decoration: const InputDecoration(
+                          labelText: 'Stripe Api key, space to delete')),
                 ),
                 const SizedBox(width: 10),
                 OutlinedButton(

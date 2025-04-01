@@ -61,5 +61,6 @@ void main() {
           binding: binding, tester: tester, screenShotName: "Website_Error");
       rethrow;
     }
+    await CommonTest.logout(tester);
   });
 }
