@@ -418,7 +418,9 @@ class ProductDialogState extends State<ProductDialog> {
                               : int.parse(_assetsController.text),
                           categories: _selectedCategories,
                           productTypeId: _selectedTypeId,
-                          useWarehouse: useWarehouse,
+                          useWarehouse: _selectedTypeId == 'Service'
+                              ? false
+                              : useWarehouse,
                           image: image)));
                     }
                   }

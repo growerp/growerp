@@ -112,7 +112,7 @@
                             </select>
                         </#if>
                         <#if product.productTypeEnumId == 'PtService'>
-                            <input type="text" name="quantity" id="quantity" value="1">
+                            <input type="text" name="quantity" id="quantity" value="1" class="form-control top">
                         </#if>
                     </div>
                     <#if isVirtual>

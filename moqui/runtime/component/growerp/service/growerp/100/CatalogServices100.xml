@@ -305,7 +305,7 @@ along with this software (see the LICENSE.md file). If not, see
                 ownerPartyId: ownerPartyId,
                 productTypeEnumId: prodConvert.convertedStatusId,
                 assetTypeEnumId: prodConvert.convertedStatusId != 'PtService'? 'AstTpInventory' : null,
-                requireInventory: product.useWarehouse == true ? 'Y' : 'N',
+                requireInventory: prodConvert.convertedStatusId == 'PtService'? 'N' : product.useWarehouse == true ? 'Y' : 'N',
                 assetClassEnumId: prodConvert.convertedStatusId != 'PtService'? 'AsClsInventoryFin' : null]"
                 out-map="context" />
             <!-- product price and currency -->
