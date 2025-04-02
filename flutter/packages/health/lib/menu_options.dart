@@ -82,7 +82,7 @@ List<MenuOption> menuOptions = [
     title: 'Website',
     route: '/website',
     userGroups: [UserGroup.admin, UserGroup.employee],
-        child: const WebsiteForm(),
+        child: const WebsiteDialog(),
   ),
 */
 ];

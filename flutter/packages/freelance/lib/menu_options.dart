@@ -129,7 +129,7 @@ List<MenuOption> menuOptions = [
       title: "Website",
       route: '/website',
       userGroups: [UserGroup.admin, UserGroup.employee],
-      child: const WebsiteForm()),
+      child: const WebsiteDialog()),
   MenuOption(
       image: "packages/growerp_core/images/accountingGrey.png",
       selectedImage: "packages/growerp_core/images/accounting.png",
