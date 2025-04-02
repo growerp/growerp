@@ -28,13 +28,13 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../../../growerp_website.dart';
 
-class WebsiteForm extends StatefulWidget {
-  const WebsiteForm({super.key});
+class WebsiteDialog extends StatefulWidget {
+  const WebsiteDialog({super.key});
   @override
-  WebsiteFormState createState() => WebsiteFormState();
+  WebsiteDialogState createState() => WebsiteDialogState();
 }
 
-class WebsiteFormState extends State<WebsiteForm> {
+class WebsiteDialogState extends State<WebsiteDialog> {
   late WebsiteBloc _websiteBloc;
   late DataFetchBloc<Products> _productBloc;
   late DataFetchBloc<Categories> _categoryBloc;

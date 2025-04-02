@@ -21,7 +21,7 @@ import 'package:growerp_models/growerp_models.dart';
 class WebsiteTest {
   // used in the admin app
   static Future<void> selectWebsite(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'tapCompany', 'WebsiteForm', '1');
+    await CommonTest.selectOption(tester, 'tapCompany', 'WebsiteDialog', '1');
   }
 
   static Future<void> updateHost(tester) async {
