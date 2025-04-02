@@ -267,15 +267,16 @@ class ReservationDialogState extends State<ReservationDialog> {
                           itemAsString: (Product? u) =>
                               " ${u!.productName}[${u.pseudoId}]",
                           asyncItems: (String filter) {
-                            _productBloc.add(GetDataEvent(() => context
-                                .read<RestClient>()
-                                .getProduct(
-                                    searchString: filter,
-                                    limit: 3,
-                                    isForDropDown: true,
-                                    assetClassId: classificationId == 'AppHotel'
-                                        ? 'Hotel Room'
-                                        : '')));
+                            _productBloc.add(GetDataEvent(
+                                () => context.read<RestClient>().getProduct(
+                                      searchString: filter,
+                                      limit: 3,
+                                      isForDropDown: true,
+//                                      assetClassId:
+//                                          classificationId == 'AppHotel'
+//                                              ? 'Hotel Room'
+//                                              : '',
+                                    )));
                             return Future.delayed(
                                 const Duration(milliseconds: 150), () {
                               return Future.value(

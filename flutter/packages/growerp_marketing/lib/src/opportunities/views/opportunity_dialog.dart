@@ -104,7 +104,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
             child: popUp(
                 context: context,
                 title:
-                    "Opportunity #${widget.opportunity.opportunityId.isEmpty ? " New" : widget.opportunity.opportunityId}",
+                    "Opportunity #${widget.opportunity.pseudoId.isEmpty ? " New" : widget.opportunity.pseudoId}",
                 width: columns.toDouble() * 400,
                 height: 1 / columns.toDouble() * 1000,
                 child: _opportunityForm())));
