@@ -156,15 +156,15 @@ Future addRentalItemDialog(BuildContext context,
                                                     () => context
                                                         .read<RestClient>()
                                                         .getProduct(
-                                                            searchString:
-                                                                filter,
-                                                            limit: 3,
-                                                            isForDropDown: true,
-                                                            assetClassId:
-                                                                classificationId ==
-                                                                        'AppHotel'
-                                                                    ? 'Hotel Room'
-                                                                    : '')));
+                                                          searchString: filter,
+                                                          limit: 3,
+                                                          isForDropDown: true,
+//                                                          assetClassId:
+//                                                              classificationId ==
+//                                                                      'AppHotel'
+//                                                                  ? 'Hotel Room'
+//                                                                  : '',
+                                                        )));
                                                 return Future.delayed(
                                                     const Duration(
                                                         milliseconds: 150), () {

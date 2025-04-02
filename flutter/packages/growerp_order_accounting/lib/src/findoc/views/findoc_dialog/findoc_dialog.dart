@@ -544,7 +544,7 @@ class MyFinDocState extends State<FinDocPage> {
       if (widget.finDoc.docType == FinDocType.order)
         OutlinedButton(
             key: const Key('itemRental'),
-            child: const Text('Asset Rental'),
+            child: const Text('Add Rental'),
             onPressed: () async {
               final dynamic finDocItem =
                   await addRentalItemDialog(context, _productBloc, _finDocBloc);
