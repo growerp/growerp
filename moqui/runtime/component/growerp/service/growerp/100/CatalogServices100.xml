@@ -141,7 +141,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="categories" from="[]" />
                 </if>
                 <if condition="!lastItem || lastItem.productId != product.productId">
-                    <!-- assets for hotel not using moqui inventory -->
                     <if condition="classificationId == 'AppHotel'">
                         <entity-find-count entity-name="mantle.product.asset.Asset"
                             count-field="assetCount">

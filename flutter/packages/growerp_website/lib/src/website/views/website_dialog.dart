@@ -521,11 +521,12 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                     " ${u!.productName}[${u.pseudoId}]",
                 asyncItems: (String filter) {
                   _productBloc.add(GetDataEvent(() => restClient.getProduct(
-                      searchString: filter,
-                      limit: 3,
-                      isForDropDown: true,
-                      assetClassId:
-                          classificationId == 'AppHotel' ? 'Hotel Room' : '')));
+                        searchString: filter,
+                        limit: 3,
+                        isForDropDown: true,
+//                        assetClassId:
+//                            classificationId == 'AppHotel' ? 'Hotel Room' : '',
+                      )));
                   return Future.delayed(const Duration(milliseconds: 250), () {
                     return Future.value(
                         (_productBloc.state.data as Products).products);

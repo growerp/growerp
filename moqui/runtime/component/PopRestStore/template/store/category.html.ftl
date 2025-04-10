@@ -10,19 +10,19 @@
                     <ul class="deals-ul">
                         <#if (storeInfo.categoryByType.PsctSearch.productCategoryId)??>
                             <li><a <#if storeInfo.categoryByType.PsctSearch.productCategoryId == categoryId>class="category-select"</#if> href="/category/${storeInfo.categoryByType.PsctSearch.productCategoryId}">
-                                <i class="fas fa-th"></i> All</a></li>
+                                <i class="fas fa-th" id="all"></i> All</a></li>
                         </#if>
                         <#if (storeInfo.categoryByType.PsctPromotions.productCategoryId)??>
                             <li><a <#if storeInfo.categoryByType.PsctPromotions.productCategoryId == categoryId>class="category-select"</#if> href="/category/${storeInfo.categoryByType.PsctPromotions.productCategoryId}">
-                                <i class="fa fa-fire" aria-hidden="true"></i> Deals</a></li>
+                                <i class="fa fa-fire" id="deals" aria-hidden="true"></i> Deals</a></li>
                         </#if>
                         <#if (storeInfo.categoryByType.PsctNewProducts.productCategoryId)??>
                             <li><a <#if storeInfo.categoryByType.PsctNewProducts.productCategoryId == categoryId>class="category-select"</#if> href="/category/${storeInfo.categoryByType.PsctNewProducts.productCategoryId}">
-                                <i class="fas fa-tag"></i> New</a></li>
+                                <i class="fas fa-tag" id="new"></i> New</a></li>
                         </#if>
                         <#if (storeInfo.categoryByType.PsctFeatured.productCategoryId)??>
                             <li><a <#if storeInfo.categoryByType.PsctFeatured.productCategoryId == categoryId>class="category-select"</#if> href="/category/${storeInfo.categoryByType.PsctFeatured.productCategoryId}">
-                                <i class="fas fa-bullhorn"></i> Best Sellers</a></li>
+                                <i class="fas fa-bullhorn" id="featured"></i> Best Sellers</a></li>
                         </#if>
                     </ul>
                     <hr width="180px" style="margin-left: -15px !important;">

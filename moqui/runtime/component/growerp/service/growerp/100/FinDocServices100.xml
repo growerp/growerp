@@ -2565,20 +2565,20 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="assetId" from="asset.assetId" />
                     <econdition field-name="ownerPartyId" from="companyPartyId" />
                     <econditions combine="or">
-                        <econditions combine="and">                            <!--order
+                        <econditions combine="and"><!--order
                             fromdate within -->
                             <econdition field-name="rentalFromDate" operator="less-equals"
                                 from="fromDate" />
                             <econdition field-name="rentalThruDate" operator="greater-equals"
                                 from="fromDate" />
                         </econditions>
-                        <econditions combine="and">                            <!-- order thruDate within -->
+                        <econditions combine="and"><!-- order thruDate within -->
                             <econdition field-name="rentalFromDate" operator="less-equals"
                                 from="thruDate" />
                             <econdition field-name="rentalThruDate" operator="greater-equals"
                                 from="thruDate" />
                         </econditions>
-                        <econditions combine="and">                            <!-- both outside -->
+                        <econditions combine="and"><!-- both outside -->
                             <econdition field-name="rentalFromDate" operator="greater-equals"
                                 from="fromDate" />
                             <econdition field-name="rentalThruDate" operator="less-equals"

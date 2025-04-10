@@ -55,14 +55,13 @@ class _GanttFormState extends State<GanttForm> {
 
   @override
   void initState() {
+    super.initState();
     columnPeriod = Period.day;
-    _finDocBloc = context.read<FinDocBloc>();
-    _finDocBloc.add(const FinDocFetch());
-    _assetBloc = context.read<AssetBloc>();
-    _assetBloc.add(const AssetFetch(assetClassId: 'Hotel Room'));
+    _finDocBloc = context.read<FinDocBloc>()..add(const FinDocFetch());
+    _assetBloc = context.read<AssetBloc>()
+      ..add(const AssetFetch(refresh: true));
     _productBloc = context.read<ProductBloc>()
       ..add(const ProductRentalOccupancy());
-    super.initState();
     top = 500;
   }
 

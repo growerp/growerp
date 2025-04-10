@@ -46,7 +46,7 @@
             </div>
         </div>
         <div class="col col-lg-4 col-sm-8 col-8">
-            <img id="product-image-large" class="product-img-select" 
+            <img id="product-image-large" class="product-img-select"> 
                 <#if imgDetail>data-toggle="modal" data-target="#modal2"</#if>>
         </div>
         <div class="col col-lg-4 col-sm-12 col-12">
@@ -99,8 +99,8 @@
                         <input type="hidden" value="${product.productId}" name="productId" id="productId" />
                         <input type="hidden" value="${product.priceUomId}" name="currencyUomId" />
                         <input type="hidden" value="${ec.web.sessionToken}" name="moquiSessionToken"/>
-                        <span class="product-description">Quantity</span>
                         <#if product.productTypeEnumId == 'PtAsset'>
+                            <span class="product-description">Quantity</span>
                             <select class="form-control text-gdark" name="quantity" id="quantity">
                                 <#if productQuantity.productQuantity??>
                                     <#list 1..productQuantity.productQuantity as x>
@@ -112,6 +112,13 @@
                             </select>
                         </#if>
                         <#if product.productTypeEnumId == 'PtService'>
+                            <span class="product-description">Quantity</span>
+                            <input type="text" name="quantity" id="quantity" value="1" class="form-control top">
+                        </#if>
+                        <#if product.productTypeEnumId == 'PtFixedAssetUse'>
+                            <span class="product-description">Start Date </span>
+                            <input type="date" name="fromDate" id="fromDate" value="fromDate" />
+                            <span class="product-description">Number of days</span>
                             <input type="text" name="quantity" id="quantity" value="1" class="form-control top">
                         </#if>
                     </div>

@@ -1,8 +1,10 @@
 {
-  "name": "website_testing",
+  "name": "all_website_testing",
   "version": "1.0.0",
   "scripts": {
-    "test": "mocha test/*.spec.js --timeout 60000 "
+    "test": "mocha test/*.spec.js --timeout 60000 ",
+    "testHotel": "mocha test/hotel.spec.js --timeout 60000 ",
+    "testAdmin": "mocha test/admin.spec.js --timeout 60000 "
   },
   "author": "The Selenium project",
   "license": "Apache-2.0",
