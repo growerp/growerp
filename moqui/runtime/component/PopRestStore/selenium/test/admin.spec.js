@@ -26,8 +26,10 @@ describe('Admin website order process', function () {
   let vars;
   let email = "testxxx@example.com";
   let currentTestData;
+  let config;
   before(function () {
     vars = require('../test_data.json');
+    config = require('./stripeKey.js');
   })
   beforeEach(async function () {
     currentTestData = getCurrentTestData();
@@ -54,7 +56,6 @@ describe('Admin website order process', function () {
         assert.notEqual(auth, null, "create new company error");
 
         // insert stripeKey
-        var config = require('./stripeKey.js');
         await setPaymentApiKey(auth.apiKey, config.stripeKey);
         const fs = require("fs");
 
@@ -139,7 +140,7 @@ describe('Admin website order process', function () {
         var payment = await getPayment(currentTestData.auth.apiKey, currentTestData.order.paymentId);
         currentTestData["payment"] = payment;
         //console.log(payment);
-        if (payment.grandTotal != 0)
+        if (config.stripeKey != '' && payment.grandTotal != 0)
           assert.equal(payment.gatewayResponses.filter(el =>
             el.paymentOperation == "Capture" && el.resultSuccess == true).length, 1,
             "no succesfull gateway capture found");

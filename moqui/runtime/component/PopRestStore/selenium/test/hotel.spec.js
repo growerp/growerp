@@ -26,8 +26,10 @@ describe('Hotel website order process', function () {
   let vars;
   let email = "testxxx@example.com";
   let currentTestData;
+  let config;
   before(function () {
     vars = require('../test_data.json');
+    config = require('./stripeKey.js');
   })
   beforeEach(async function () {
     currentTestData = getCurrentTestData();
@@ -53,7 +55,6 @@ describe('Hotel website order process', function () {
       assert.notEqual(auth, null, "create new company error");
 
       // insert stripeKey
-      var config = require('./stripeKey.js');
       await setPaymentApiKey(auth.apiKey, config.stripeKey);
       const fs = require("fs");
 
@@ -63,11 +64,15 @@ describe('Hotel website order process', function () {
   it('create order', async function () {
 
     if (currentTestData.orderId == null) {
+      const currentDate = new Date();
       driver = await new Builder().forBrowser('firefox').build()
       assert.notEqual(email, null, "Could not find free email!");
       await driver.get('http://' + currentTestData.auth.company.hostName)
-      await driver.manage().window().setRect({ width: 1230, height: 861 })
-      await driver.findElement(By.css("#recipeCarousel .carousel-item:nth-child(1) > .d-block:nth-child(" + "1" + ") .figure-img")).click()
+      await driver.manage().window().setRect({ width: 1409, height: 943 })
+      await driver.findElement(By.css(".active > .d-block:nth-child(1) .figure-img")).click()
+      await driver.findElement(By.id("fromDate")).click()
+      currentDate.setDate(currentDate.getDate() + 1);
+      await driver.findElement(By.id("fromDate")).sendKeys(currentDate.toISOString().slice(0, 10));
       await driver.findElement(By.id("cartAdd")).click()
       await tapByKey(driver, "cartAdd");
       await tapByKey(driver, "cart-quantity");
@@ -138,7 +143,7 @@ describe('Hotel website order process', function () {
       var payment = await getPayment(currentTestData.auth.apiKey, currentTestData.order.paymentId);
       currentTestData["payment"] = payment;
       //console.log(payment);
-      if (payment.grandTotal != 0)
+      if (config.stripeKey != '' && payment.grandTotal != 0)
         assert.equal(payment.gatewayResponses.filter(el =>
           el.paymentOperation == "Capture" && el.resultSuccess == true).length, 1,
           "no succesfull gateway capture found");
