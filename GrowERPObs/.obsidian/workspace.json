@@ -68,7 +68,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "api",
+                "query": "API",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -89,7 +89,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -192,7 +193,7 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "1af288ce7015b4ff",
+  "active": "5eaef352ace2aa85",
   "lastOpenFiles": [
     "3 Technical documentation/3 Moqui Backend.md",
     "3 Technical documentation/2 Flutter frontend & development.md",

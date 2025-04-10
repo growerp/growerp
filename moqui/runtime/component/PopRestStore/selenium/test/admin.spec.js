@@ -20,7 +20,7 @@ const { enterTextByKey,
 
 let wait = 1000;
 
-describe('basic website order process', function () {
+describe('Admin website order process', function () {
   this.timeout(600000000)
   let driver;
   let vars;
@@ -35,10 +35,10 @@ describe('basic website order process', function () {
 
   for (product of [1, 2]) {
     deleteCurrentTestData();
-    it('create new company & website', async function () {
+    it('Admin new company & website', async function () {
 
       if (currentTestData.auth == null) {
-        // not yet tested....
+        // this test not yet run....
         var newEmail = await getFreeEmail(email);
         assert.notEqual(email, null, "Could not find free email!");
 
@@ -48,7 +48,8 @@ describe('basic website order process', function () {
           vars.admin.lastName,
           newEmail,
           vars.company.name,
-          vars.company.currencyId);
+          vars.company.currencyId,
+          'AppAdmin');
         // console.log(auth);
         assert.notEqual(auth, null, "create new company error");
 

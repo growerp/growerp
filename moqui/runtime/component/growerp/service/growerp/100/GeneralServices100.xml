@@ -533,7 +533,9 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
 
     <service verb="login" noun="User" authenticate="anonymous-all">
-        <description>service to return an apikey and user information if user/password ok, when not check for a reset password</description>
+        <description>service to return an apikey and user information
+            if user/password ok, when not check for a reset password
+            if extra company info requested create main company</description>
         <in-parameters>
             <parameter name="username" required="true">
                 <description>any name, can also be the entered email address</description>
@@ -690,7 +692,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- check if any classification attached for this user -->
             <!-- if none, if admin ask for more info for company setup -->
-            <!-- if not admin, ask for company to but related with owner-->
+            <!-- if not admin, ask for company and relate with owner-->
             <entity-find entity-name="mantle.party.PartyClassificationAndAppl" limit="1"
                 list="partyClassifications">
                 <econdition field-name="partyId" from="userAccount.partyId" />

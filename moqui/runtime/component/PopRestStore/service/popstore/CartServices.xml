@@ -268,8 +268,10 @@ General Order Placement and eCommerce Usage
             <parameter name="quantity" type="BigDecimal" default="1.0" />
             <parameter name="currencyUomId" />
             <parameter name="productStoreId" />
+            <parameter name="fromDate" />
         </in-parameters>
         <actions>
+            <log message="=====start! add product with quantity: $quantity Date: $fromDate" />
             <!-- NOTE: use the web session for attributes such as cartOrderId for security; this
             won't work in a stateless mode or outside a web session -->
             <set field="carrierPartyId" from="'_NA_'" />
@@ -280,11 +282,31 @@ General Order Placement and eCommerce Usage
             <set field="orderId" from="cartOrderId" />
             <set field="defaultOrderParameters" from="[salesChannelEnumId:'ScWeb']" />
             <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="store" />
+            <set field="order" from="[]" />
+            <if condition="fromDate">
+                <!-- create thruDate -->
+                <script>
+                    def cal = ec.user.nowCalendar
+                    cal.set(fromDate.substring(0, 4).toInteger(),
+                            fromDate.substring(5, 7).toInteger() - 1,
+                            fromDate.substring(8, 10).toInteger())
+                    cal.add(Calendar.DATE, quantity.intValue())
+                    def thruDate = new Timestamp(cal.getTimeInMillis())
+                </script>
+                <service-call name="growerp.100.FinDocServices100.get#AssetsAvailableForProduct"
+                    in-map="[productId: productId, fromDate: fromDate, thruDate: thruDate]"
+                    out-map="context" />
+                <if condition="!availableAssetIds">
+                    <return message="No available assets for product $productId" public="true"
+                        type="warning" />
+                </if>
+            </if>
             <service-call name="mantle.order.OrderServices.add#OrderProductQuantity"
                 in-map="context + defaultOrderParameters + 
                         [customerPartyId: companyPartyId ?: customerPartyId,
                         productStoreId: productStoreId,
-                        vendorPartyId: store.organizationPartyId]"
+                        vendorPartyId: store.organizationPartyId,
+                        startDate: startDate]"
                 out-map="addOut" />
             <!-- add pseudoId to order -->
             <if condition="!orderId">
@@ -298,6 +320,19 @@ General Order Placement and eCommerce Usage
                     in-map="[orderId: addOut.orderId, pseudoId: seqNum]" />
             </if>
             <set field="sessionAttributes.cartOrderId" from="addOut.orderId" />
+            <!-- extra processing for rentals -->
+            <if condition="fromDate">
+                <log
+                    message="=====add product with rental q: $quantity from: $fromDate thru: $thruDate" />
+                <service-call name="create#growerp.product.AssetRental"
+                    in-map="[   productId: productId,
+                                assetId: availableAssetIds[0],
+                                orderId: orderId,
+                                orderItemSeqId: '01',
+                                rentalFromDate: fromDate,
+                                rentalThruDate: thruDate.toString().substring(0, 10),
+                            ]" />
+            </if>
             <service-call name="popstore.CartServices.get#CartInfo" out-map="context" />
         </actions>
     </service>

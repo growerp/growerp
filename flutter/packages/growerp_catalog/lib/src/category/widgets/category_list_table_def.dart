@@ -62,7 +62,7 @@ TableData getCategoryTableData(Bloc bloc, String classificationId,
         },
       )));
 
-  return TableData(rowHeight: isPhone ? 30 : 20, rowContent: rowContent);
+  return TableData(rowHeight: isPhone ? 38 : 20, rowContent: rowContent);
 }
 
 // general settings
