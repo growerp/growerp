@@ -207,7 +207,7 @@ along with this software (see the LICENSE.md file). If not, see
         ownerPartyId="_NA_" requireInventory="N">
         <prices productPriceId="DEMO_GROWERP_MOVIE_L" pricePurposeEnumId="PppPurchase"
             priceTypeEnumId="PptList" fromDate="1265184000000"
-            minQuantity="1" price="10" priceUomId="USD" />
+            minQuantity="1" price="0" priceUomId="USD" />
         <prices productPriceId="DEMO_GROWERP_MOVIE_C" pricePurposeEnumId="PppPurchase"
             priceTypeEnumId="PptCurrent" fromDate="1265184000000"
             minQuantity="1" price="0" priceUomId="USD" />
