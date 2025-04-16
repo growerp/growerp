@@ -19,7 +19,15 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="import" noun="ItemTypes">
         <description> Import ItemTypes</description>
         <in-parameters>
-            <parameter name="itemTypes" required="true" type="List" />
+            <parameter name="itemTypes" required="true" type="List">
+                <parameter name="itemType" type="Map">
+                    <parameter name="itemTypeId" />
+                    <parameter name="direction" />
+                    <parameter name="itemTypeName" />
+                    <parameter name="accountCode" />
+                    <parameter name="accountName" />
+                </parameter>
+            </parameter>
         </in-parameters>
         <actions>
             <script>System.out.println(">>>>importing ${itemTypes?.size()} item types")</script>
@@ -60,7 +68,16 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="import" noun="PaymentTypes">
         <description> Import PaymentTypes</description>
         <in-parameters>
-            <parameter name="paymentTypes" required="true" type="List" />
+            <parameter name="paymentTypes" required="true" type="List">
+                <parameter name="paymentType" type="Map">
+                    <parameter name="paymentTypeId" />
+                    <parameter name="isPayable" type="Boolean" />
+                    <parameter name="isApplied" type="Boolean" />
+                    <parameter name="paymentTypeName" />
+                    <parameter name="accountCode" />
+                    <parameter name="accountName" />
+                </parameter>
+            </parameter>
         </in-parameters>
         <actions>
             <script>System.out.println(">>>>importing ${paymentTypes?.size()} paymentTypes")</script>
@@ -112,7 +129,18 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="import" noun="GlAccounts">
         <description> Import GlAccounts</description>
         <in-parameters>
-            <parameter name="glAccounts" required="true" type="List" />
+            <parameter name="glAccounts" type="List" required="true">
+                <parameter name="glAccount" type="Map">
+                    <parameter name="glAccountId" />
+                    <parameter name="accountCode" />
+                    <parameter name="accountName" />
+                    <parameter name="level" />
+                    <parameter name="beginningBalance" />
+                    <parameter name="postedDebits" />
+                    <parameter name="postedCredits" />
+                    <parameter name="postedBalance" />
+                </parameter>
+            </parameter>
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
@@ -224,7 +252,26 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="import" noun="Companies">
         <in-parameters>
-            <parameter name="companies" required="true" type="List" />
+            <parameter name="companies" type="List">
+                <parameter name="company" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="name" />
+                    <parameter name="email" />
+                    <parameter name="role" />
+                    <parameter name="email" />
+                    <parameter name="currency" type="Map">
+                        <parameter name="currencyId" />
+                        <parameter name="description" />
+                    </parameter>
+                    <parameter name="vatPerc">
+                        <description>Percentage used for VAT if applicable</description>
+                    </parameter>
+                    <parameter name="salesPerc">
+                        <description>Percentage used for sales tax</description>
+                    </parameter>
+                </parameter>
+            </parameter>
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
@@ -319,7 +366,50 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="import" noun="Users">
         <in-parameters>
-            <parameter name="users" required="true" type="List" />
+            <parameter name="users" type="List" required="true">
+                <parameter name="user" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="email" />
+                    <parameter name="role" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
+                    <parameter name="loginDisabled" type="Boolean" />
+                    <parameter name="loginName" />
+                    <parameter name="userGroupId" />
+                    <parameter name="groupDescription" />
+                    <parameter name="language" />
+                    <parameter name="address" type="Map">
+                        <parameter name="addressId" />
+                        <parameter name="address1" />
+                        <parameter name="address2" />
+                        <parameter name="city" />
+                        <parameter name="postalCode" />
+                        <parameter name="province" />
+                        <parameter name="provinceId" />
+                        <parameter name="country" />
+                        <parameter name="countryId" />
+                    </parameter>
+                    <parameter name="paymentMethod" type="Map">
+                        <parameter name="ccPaymentMethodId" />
+                        <parameter name="ccDescription" />
+                    </parameter>
+                    <parameter name="company" type="Map">
+                        <parameter name="partyId" />
+                        <parameter name="pseudoId" />
+                        <parameter name="name" />
+                        <parameter name="email" />
+                        <parameter name="role" />
+                    </parameter>
+                    <parameter name="image" />
+                    <parameter name="userId" />
+                    <parameter name="locale" />
+                    <parameter name="telephoneNr" />
+                    <parameter name="appsUsed" type="List">
+                        <parameter name="partyClassificationId" />
+                    </parameter>
+                </parameter>
+            </parameter>
         </in-parameters>
         <actions>
             <script>System.out.println(">>>>importing ${users?.size()} users")</script>
@@ -337,7 +427,27 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="import" noun="Products">
         <in-parameters>
-            <parameter name="products" required="true" type="List" />
+            <parameter name="products" required="true" type="List">
+                <parameter name="product" required="true" type="Map">
+                    <parameter name="pseudoId" />
+                    <parameter name="productTypeId" />
+                    <parameter name="assetClassId" />
+                    <parameter name="productName" />
+                    <parameter name="description" />
+                    <parameter name="price" />
+                    <parameter name="listPrice" />
+                    <parameter name="categories" type="List">
+                        <parameter name="category" type="Map">
+                            <parameter name="categoryId" />
+                            <parameter name="categoryName" />
+                            <parameter name="description" />
+                            <parameter name="image" />
+                        </parameter>
+                    </parameter>
+                    <parameter name="useWarehouse" type="Boolean" />
+                    <parameter name="image" />
+                </parameter>
+            </parameter>
             <parameter name="classificationId" required="true" />
         </in-parameters>
         <actions>
@@ -378,7 +488,14 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="import" noun="Categories">
         <in-parameters>
-            <parameter name="categories" required="true" type="List" />
+            <parameter name="categories" required="true" type="List">
+                <parameter name="category" type="Map" required="true">
+                    <parameter name="pseudoId" />
+                    <parameter name="categoryName" />
+                    <parameter name="description" />
+                    <parameter name="image" />
+                </parameter>
+            </parameter>
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
@@ -396,7 +513,44 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="import" noun="Assets">
         <in-parameters>
-            <parameter name="assets" required="true" type="List" />
+            <parameter name="assets" required="true" type="List">
+                <parameter name="classificationId" required="true" />
+                <parameter name="asset" type="Map" required="true">
+                    <parameter name="pseudoId" />
+                    <parameter name="statusId" />
+                    <parameter name="assetTypeId" />
+                    <parameter name="assetClassId" />
+                    <parameter name="assetName" />
+                    <parameter name="quantityOnHand" />
+                    <parameter name="availableToPromise" />
+                    <parameter name="acquireCost" />
+                    <parameter name="receivedDate" />
+                    <parameter name="expectedEndOfLifeDate" />
+                    <parameter name="product" type="Map">
+                        <parameter name="productId" />
+                        <parameter name="productTypeId" />
+                        <parameter name="assetClassId" />
+                        <parameter name="productName" />
+                        <parameter name="description" />
+                        <parameter name="price" />
+                        <parameter name="listPrice" />
+                        <parameter name="categories" type="List">
+                            <parameter name="category" type="Map">
+                                <parameter name="categoryId" />
+                                <parameter name="categoryName" />
+                                <parameter name="description" />
+                                <parameter name="image" />
+                            </parameter>
+                        </parameter>
+                        <parameter name="useWarehouse" type="Boolean" />
+                        <parameter name="image" />
+                    </parameter>
+                    <parameter name="location" type="Map">
+                        <parameter name="locationId" />
+                        <parameter name="locationName" />
+                    </parameter>
+                </parameter>
+            </parameter>
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
@@ -414,7 +568,33 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="import" noun="FinDocs">
         <in-parameters>
-            <parameter name="finDocs" required="true" type="List" />
+            <parameter name="finDocs" required="true" type="List">
+                <parameter name="finDoc" type="Map" required="true">
+                    <parameter name="docType" />
+                    <parameter name="sales" type="Boolean" />
+                    <parameter name="pseudoId" />
+                    <parameter name="reference" />
+                    <parameter name="statusId" />
+                    <parameter name="paymentInstrument" />
+                    <parameter name="description" />
+                    <parameter name="otherUser" type="Map">
+                        <parameter name="partyId" />
+                    </parameter>
+                    <parameter name="otherCompany" type="Map">
+                        <parameter name="partyId" />
+                        <parameter name="paymentMethod" type="Map">
+                            <parameter name="ccPaymentMethodId" />
+                        </parameter>
+                    </parameter>
+                    <parameter name="grandTotal" />
+                    <parameter name="classificationId" />
+                    <parameter name="isPosted" type="Boolean" />
+                    <parameter name="journal">
+                        <parameter name="journalId" />
+                    </parameter>
+                    <parameter name="requestType" />
+                </parameter>
+            </parameter>
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
@@ -697,7 +877,40 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="import" noun="FinDocItems" transaction-timeout="3600">
         <in-parameters>
-            <parameter name="finDocItems" required="true" type="List" />
+            <parameter name="finDocItems" required="true" type="List">
+                <parameter name="items" type="List">
+                    <parameter name="pseudoId" />
+                    <parameter name="finDocType" />
+                    <parameter name="itemSeqId" />
+                    <parameter name="itemType" type="Map">
+                        <parameter name="itemTypeId" />
+                        <parameter name="itemTypeName" />
+                    </parameter>
+                    <parameter name="paymentType" type="Map">
+                        <parameter name="paymentTypeId" />
+                        <parameter name="paymentTypeName" />
+                    </parameter>
+                    <parameter name="productId" />
+                    <parameter name="pseudoProductId" />
+                    <parameter name="description" />
+                    <parameter name="quantity" />
+                    <parameter name="price" />
+                    <parameter name="isDebit" type="Boolean" />
+                    <parameter name="glAccount">
+                        <parameter name="glAccountId" />
+                    </parameter>
+                    <parameter name="asset" type="Map">
+                        <parameter name="assetId" />
+                        <parameter name="assetName" />
+                        <parameter name="location" type="Map">
+                            <parameter name="locationId" />
+                            <parameter name="locationName" />
+                        </parameter>
+                    </parameter>
+                    <parameter name="rentalFromDate" />
+                    <parameter name="rentalThruDate" />
+                </parameter>
+            </parameter>
             <parameter name="classificationId" required="true" />
         </in-parameters>
         <actions>
@@ -1697,10 +1910,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="websiteCategory" type="Map">
                         <parameter name="categoryId" />
                         <parameter name="categoryName" />
-                        <parameter name="products" type="List" />
-                        <parameter name="product" type="Map">
-                            <parameter name="productId" />
-                            <parameter name="productName" />
+                        <parameter name="products" type="List">
+                            <parameter name="product" type="Map">
+                                <parameter name="productId" />
+                                <parameter name="productName" />
+                            </parameter>
                         </parameter>
                     </parameter>
                 </parameter>

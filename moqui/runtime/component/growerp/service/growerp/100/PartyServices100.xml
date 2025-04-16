@@ -1144,7 +1144,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="userId" />
                     <parameter name="locale" />
                     <parameter name="telephoneNr" />
-                    <parameter name="appsUsed" type="List" />
+                    <parameter name="appsUsed" type="List">
+                        <parameter name="partyClassificationId" />
+                    </parameter>
                 </parameter>
             </parameter>
             <parameter name="personToCompanyId" /><!-- used in update user for reassign of company -->
@@ -1423,7 +1425,9 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="countryId" />
                     </parameter>
                 </parameter>
-                <parameter name="appsUsed" type="List" />
+                <parameter name="appsUsed" type="List">
+                    <parameter name="partyClassificationId" />
+                </parameter>
             </parameter>
             <parameter name="password"
                 default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
@@ -1470,7 +1474,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="userId" />
                 <parameter name="locale" />
                 <parameter name="telephoneNr" />
-                <parameter name="appsUsed" type="List" />
+                <parameter name="appsUsed" type="List">
+                    <parameter name="partyClassificationId" />
+                </parameter>
             </parameter>
             <parameter name="password" />
             <parameter name="login" type="Boolean" default-value="false" />
@@ -1752,7 +1758,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="email" />
                     <parameter name="role" />
                 </parameter>
-                <parameter name="appsUsed" type="List" />
+                <parameter name="appsUsed" type="List">
+                    <parameter name="partyClassificationId" />
+                </parameter>
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -1793,7 +1801,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="email" />
                     <parameter name="role" />
                 </parameter>
-                <parameter name="appsUsed" type="List" />
+                <parameter name="appsUsed" type="List">
+                    <parameter name="partyClassificationId" />
+                </parameter>
             </parameter>
         </out-parameters>
         <actions>
@@ -2098,7 +2108,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="email" />
                     <parameter name="role" />
                 </parameter>
-                <parameter name="appsUsed" type="List" />
+                <parameter name="appsUsed" type="List">
+                    <parameter name="partyClassificationId" />
+                </parameter>
             </parameter>
         </out-parameters>
         <actions>
