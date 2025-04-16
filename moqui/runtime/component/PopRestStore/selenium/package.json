@@ -12,8 +12,9 @@
     "assert": "2.1.0",
     "axios": "^1.8.4",
     "chai": "^5.1.2",
+    "geckodriver": "^5.0.0",
     "json-stringify-safe": "^5.0.1",
-    "selenium-webdriver": "4.27.0"
+    "selenium-webdriver": "^4.31.0"
   },
   "devDependencies": {
     "mocha": "^11.1.0"

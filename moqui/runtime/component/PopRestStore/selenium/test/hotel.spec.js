@@ -1,4 +1,4 @@
-const { Builder, By, Key, until } = require('selenium-webdriver');
+const { Builder, Browser, By, Key, until } = require('selenium-webdriver');
 const assert = require('assert');
 const { enterTextByKey,
   tapByKey,
@@ -65,7 +65,7 @@ describe('Hotel website order process', function () {
 
     if (currentTestData.orderId == null) {
       const currentDate = new Date();
-      driver = await new Builder().forBrowser('firefox').build()
+      driver = await new Builder().forBrowser(Browser.FIREFOX).build()
       assert.notEqual(email, null, "Could not find free email!");
       await driver.get('http://' + currentTestData.auth.company.hostName)
       await driver.manage().window().setRect({ width: 1409, height: 943 })

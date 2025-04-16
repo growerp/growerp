@@ -33,10 +33,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="websiteCategory" type="Map">
                         <parameter name="categoryId" />
                         <parameter name="categoryName" />
-                        <parameter name="products" type="List" />
-                        <parameter name="product" type="Map">
-                            <parameter name="productId" />
-                            <parameter name="productName" />
+                        <parameter name="products" type="List">
+                            <parameter name="product" type="Map">
+                                <parameter name="productId" />
+                                <parameter name="productName" />
+                            </parameter>
                         </parameter>
                     </parameter>
                 </parameter>
@@ -224,10 +225,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="websiteCategory" type="Map">
                         <parameter name="categoryId" />
                         <parameter name="categoryName" />
-                        <parameter name="products" type="List" />
-                        <parameter name="product" type="Map">
-                            <parameter name="productId" />
-                            <parameter name="productName" />
+                        <parameter name="products" type="List">
+                            <parameter name="product" type="Map">
+                                <parameter name="productId" />
+                                <parameter name="productName" />
+                            </parameter>
                         </parameter>
                     </parameter>
                 </parameter>
@@ -259,10 +261,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="websiteCategory" type="Map">
                         <parameter name="categoryId" />
                         <parameter name="categoryName" />
-                        <parameter name="products" type="List" />
-                        <parameter name="product" type="Map">
-                            <parameter name="productId" />
-                            <parameter name="productName" />
+                        <parameter name="products" type="List">
+                            <parameter name="product" type="Map">
+                                <parameter name="productId" />
+                                <parameter name="productName" />
+                            </parameter>
                         </parameter>
                     </parameter>
                 </parameter>
@@ -744,10 +747,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="websiteCategory" type="Map">
                         <parameter name="categoryId" />
                         <parameter name="categoryName" />
-                        <parameter name="products" type="List" />
-                        <parameter name="product" type="Map">
-                            <parameter name="productId" />
-                            <parameter name="productName" />
+                        <parameter name="products" type="List">
+                            <parameter name="product" type="Map">
+                                <parameter name="productId" />
+                                <parameter name="productName" />
+                            </parameter>
                         </parameter>
                     </parameter>
                 </parameter>

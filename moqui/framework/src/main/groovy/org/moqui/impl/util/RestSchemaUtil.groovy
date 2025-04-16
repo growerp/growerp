@@ -392,13 +392,13 @@ class RestSchemaUtil {
         }
         Map listResponses = ["200":[description:'Success', schema:[type:"array", items:['$ref':"#/definitions/${refDefName}".toString()]]]] as Map<String, Object>
         listResponses.putAll(responses)
-        entityResourceMap.put("get", [summary:("Get ${ed.getFullEntityName()}".toString()), description:entityDescription,
+        entityResourceMap.put("get", [operationId: ed.getFullEntityName().toString().replaceAll(" ",""), summary:("Get ${ed.getFullEntityName()}".toString()), description:entityDescription,
                 parameters:listParameters, security:[[basicAuth:[]]], responses:listResponses])
 
         // post - create
         Map createResponses = ["200":[description:'Success', schema:['$ref':"#/definitions/${refDefNamePk}".toString()]]] as Map<String, Object>
         createResponses.putAll(responses)
-        entityResourceMap.put("post", [summary:("Create ${ed.getFullEntityName()}".toString()), description:entityDescription,
+        entityResourceMap.put("post", [operationId: ed.getFullEntityName().toString().replaceAll(" ",""), summary:("Create ${ed.getFullEntityName()}".toString()), description:entityDescription,
                 parameters:[name:'body', in:'body', required:true, schema:['$ref':"#/definitions/${refDefName}".toString()]],
                 security:[[basicAuth:[]]], responses:createResponses])
 
@@ -419,21 +419,21 @@ class RestSchemaUtil {
         // under id: get - one
         Map oneResponses = ["200":[name:'body', in:'body', required:false, schema:['$ref':"#/definitions/${refDefName}".toString()]]] as Map<String, Object>
         oneResponses.putAll(responses)
-        entityIdResourceMap.put("get", [summary:("Create ${ed.getFullEntityName()}".toString()),
+        entityIdResourceMap.put("get", [operationId: ed.getFullEntityName().toString().replaceAll(" ",""), summary:("Create ${ed.getFullEntityName()}".toString()),
                 description:entityDescription, security:[[basicAuth:[]], [api_key:[]]], parameters:parameters, responses:oneResponses])
 
         // under id: patch - update
         List<Map> updateParameters = new LinkedList<Map>(parameters)
         updateParameters.add([name:'body', in:'body', required:false, schema:['$ref':"#/definitions/${refDefName}".toString()]])
-        entityIdResourceMap.put("patch", [summary:("Update ${ed.getFullEntityName()}".toString()),
+        entityIdResourceMap.put("patch", [operationId: ed.getFullEntityName().toString().replaceAll(" ",""), summary:("Update ${ed.getFullEntityName()}".toString()),
                 description:entityDescription, security:[[basicAuth:[]], [api_key:[]]], parameters:updateParameters, responses:responses])
 
         // under id: put - store
-        entityIdResourceMap.put("put", [summary:("Create or Update ${ed.getFullEntityName()}".toString()),
+        entityIdResourceMap.put("put", [operationId: ed.getFullEntityName().toString().replaceAll(" ",""), summary:("Create or Update ${ed.getFullEntityName()}".toString()),
                 description:entityDescription, security:[[basicAuth:[]], [api_key:[]]], parameters:updateParameters, responses:responses])
 
         // under id: delete - delete
-        entityIdResourceMap.put("delete", [summary:("Delete ${ed.getFullEntityName()}".toString()),
+        entityIdResourceMap.put("delete", [operationId: ed.getFullEntityName().toString().replaceAll(" ",""), summary:("Delete ${ed.getFullEntityName()}".toString()),
                 description:entityDescription, security:[[basicAuth:[]], [api_key:[]]], parameters:parameters, responses:responses])
 
         // add a definition for entity fields

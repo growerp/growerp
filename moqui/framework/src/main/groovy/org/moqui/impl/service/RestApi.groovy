@@ -302,7 +302,8 @@ class RestApi {
 
             Map curMap = new LinkedHashMap<String, Object>()
             if (swaggerMap.tags && pathNode.fullPathList.size() > 1) curMap.put("tags", [pathNode.fullPathList[1]])
-            curMap.putAll([summary:(serviceNode.attribute("displayName") ?: "${sd.verb} ${sd.noun}".toString()),
+            curMap.putAll([operationId: "${sd.verb}${sd.noun}".toString(),
+                           summary:(serviceNode.attribute("displayName") ?: "${sd.verb} ${sd.noun}".toString()),
                            description:serviceNode.first("description")?.text,
                            security:[[basicAuth:[]], [api_key:[]]], parameters:parameters, responses:responses])
             resourceMap.put(method, curMap)
