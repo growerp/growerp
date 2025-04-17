@@ -13,20 +13,6 @@
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <!--div class="navbar-collapse collapse">
-                <form id="form-search" class="search-input" action="#">
-                    <input type="text" placeholder="Search..." name="search" id="search" value="${(searchParameter!'')?html}">
-                    <button class="search-button" type="submit">
-                        <i class="fa fa-search"></i>
-                    </button>
-                </form>
-                <!--ul class="navbar-nav ml-auto">
-                    <div class="text-secondary">
-                        <span class="navbar-pop-title">Interesting for you?</span>
-                        <span class="text-center navbar-pop-subtitle">Quality 100% Guaranted</span>
-                    </div>
-                </ul-->
-            </div-->
         </div>
         <div id="nav_collapse1" class="container navbar-collapse collapse">
             <ul class="navbar-nav">

@@ -2812,15 +2812,14 @@ along with this software (see the LICENSE.md file). If not, see
                                 in-map="[ownerPartyId: ownerPartyId, seqName: 'shipment']"
                                 out-map="context" />
                             <!-- shipment created with status created -> ShipScheduled better then
-                        approved -> ShipPacked because when approved, you have to show the 
-                        receive or send screen shipment -->
+                                approved -> ShipPacked because when approved, you have to show the 
+                                receive or send screen shipment -->
                             <service-call name="update#mantle.shipment.Shipment" out-map="context"
                                 in-map="[shipmentId: shipmentId,
                                     statusId: 'ShipScheduled',
                                     pseudoId: seqNum]" />
                             <else><!-- no shipable items so complete order already here not with
-                                rental
-                            though-->
+                                    rental though-->
                                 <entity-find entity-name="growerp.product.AssetRental"
                                     list="rentals">
                                     <econdition field-name="orderId" from="order.orderId" />
@@ -2829,6 +2828,11 @@ along with this software (see the LICENSE.md file). If not, see
                                     <service-call name="mantle.order.OrderServices.complete#Order"
                                         in-map="[orderId: order.orderId]" />
                                 </if>
+                                <!-- capture payment here because no shipments -->
+                                <service-call
+                                    name="mantle.account.PaymentServices.capture#SinglePayment"
+                                    out-map="captOut"
+                                    in-map="[paymentId:payments[0].paymentId]" />
                             </else>
                         </if>
                         <if condition="!payments">

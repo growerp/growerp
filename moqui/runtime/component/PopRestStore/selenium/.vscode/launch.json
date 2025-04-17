@@ -6,14 +6,6 @@
     "configurations": [
         {
             "type": "node-terminal",
-            "name": "allTest",
-            "request": "launch",
-            "command": "npm run test",
-            "localRoot": "moqui/runtime/component/PopRestStore/selenium",
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "node-terminal",
             "name": "hotelTest",
             "request": "launch",
             "command": "npm run testHotel",
@@ -22,9 +14,25 @@
         },
         {
             "type": "node-terminal",
-            "name": "adminTest",
+            "name": "adminTest1",
             "request": "launch",
-            "command": "npm run testAdmin",
+            "command": "npm run testAdmin1",
+            "localRoot": "moqui/runtime/component/PopRestStore/selenium",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node-terminal",
+            "name": "adminTest2",
+            "request": "launch",
+            "command": "npm run testAdmin2",
+            "localRoot": "moqui/runtime/component/PopRestStore/selenium",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node-terminal",
+            "name": "adminTest3",
+            "request": "launch",
+            "command": "npm run testAdmin3",
             "localRoot": "moqui/runtime/component/PopRestStore/selenium",
             "cwd": "${workspaceFolder}"
         }

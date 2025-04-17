@@ -14,3 +14,8 @@ if you get the message:  InvalidArgumentError: binary is not a Firefox executabl
     make sure you have executed: npm install selenium-webdriver
 
 
+to run all tests:
+    npm run  testHotel && \
+    npm run testAdmin1 && \
+    npm run testAdmin2 && \
+    npm run testAdmin3 

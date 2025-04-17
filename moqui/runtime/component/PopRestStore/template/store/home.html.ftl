@@ -47,7 +47,7 @@
                                                         <img width="90%" class="figure-img img-fluid" src="/content/productImage/${product.smallImageInfo.productContentId}" >
                                                     </#if>
                                                 </#if>
-                                                <figcaption class="text-left title-product-text figure-caption">
+                                                <figcaption class="text-left title-product-text figure-caption" id="${product.productName}">
                                                     ${product.productName}
                                                 </figcaption>
                                                 <figcaption class="text-left figure-caption">

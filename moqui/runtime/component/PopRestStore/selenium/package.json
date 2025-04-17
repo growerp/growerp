@@ -2,9 +2,10 @@
   "name": "all_website_testing",
   "version": "1.0.0",
   "scripts": {
-    "test": "mocha test/*.spec.js --timeout 60000 ",
     "testHotel": "mocha test/hotel.spec.js --timeout 60000 ",
-    "testAdmin": "mocha test/admin.spec.js --timeout 60000 "
+    "testAdmin1": "mocha test/admin.spec.js --timeout 60000 --product='GrowERP demo movie'",
+    "testAdmin2": "mocha test/admin.spec.js --timeout 60000 --product='Hoodie'",
+    "testAdmin3": "mocha test/admin.spec.js --timeout 60000 --product='GrowERP training movie'"
   },
   "author": "The Selenium project",
   "license": "Apache-2.0",
