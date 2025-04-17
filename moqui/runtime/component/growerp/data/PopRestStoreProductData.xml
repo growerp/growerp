@@ -234,6 +234,40 @@ along with this software (see the LICENSE.md file). If not, see
         <fileData><![CDATA[PHA+NTAlIGNvdHRvbiAvIDUwJSBQb2x5ZXN0ZXI8L3A+DQo8cD5JbXBvcnRlZDwvcD4NCjxwPlppcHBlciBjbG9zdXJlPC9wPg0KPHA+TWFjaGluZSB3YXNoPC9wPg0KPHA+WmlwLXVwIGhvb2RlZCBzd2VhdHNoaXJ0IGluIDcuOC1vdW5jZSBmbGVlY2UgbWFkZSB3aXRoIHVwIHRvIDUlIHBvbHllc3RlciBjcmVhdGVkIGZyb20gcmVjeWNsZWQgcGxhc3RpYy48L3A+DQo8cD5QaWxsLXJlc2lzdGFudCBmYWJyaWMgd2l0aCBoaWdoLXN0aXRjaCBkZW5zaXR5IGZvciBkdXJhYmlsaXR5LiA8L3A+DQo8cD5SaWJiZWQgd2Fpc3RiYW5kIGFuZCBjdWZmcywgc3BsaXQga2FuZ2Fyb28gcG9ja2V0LjwvcD4=]]></fileData>
     </moqui.resource.DbResourceFile>
 
+    <!-- GrowERP Training movie -->
+    <mantle.product.Product productId="GROWERP_TRAINING" productTypeEnumId="PtService"
+        chargeShipping="N" returnable="N" productName="GrowERP training movie" description=""
+        ownerPartyId="_NA_" requireInventory="N">
+        <prices productPriceId="TRAINING_GROWERP_MOVIE_L" pricePurposeEnumId="PppPurchase"
+            priceTypeEnumId="PptList" fromDate="1265184000000"
+            minQuantity="1" price="8" priceUomId="USD" />
+        <prices productPriceId="TRAINING_GROWERP_MOVIE_C" pricePurposeEnumId="PppPurchase"
+            priceTypeEnumId="PptCurrent" fromDate="1265184000000"
+            minQuantity="1" price="10" priceUomId="USD" />
+        <categories productCategoryId="PopcAllProducts" fromDate="1265184000000" />
+        <categories productCategoryId="PopcDeals" fromDate="1265184000000" sequenceNum="4" />
+        <categories productCategoryId="PopcFeatured" fromDate="1265184000000" sequenceNum="5" />
+        <categories productCategoryId="SERVICES" fromDate="1265184000000" sequenceNum="1" />
+
+        <contents productContentId="TRAINING_MOVIE_DL"
+            productContentTypeEnumId="PcntDescriptionLong"
+            locale="en_US"
+            contentLocation="dbresource://mantle/content/product/DEMO_MOVIE/description.html" />
+        <contents productContentId="TRAINING_MOVIE_ILF" productContentTypeEnumId="PcntImageSmall"
+            locale="" sequenceNum="1" description="Front"
+            contentLocation="dbresource://mantle/content/product/DEMO_MOVIE/img_movieFront.jpg" />
+    </mantle.product.Product>
+    <dbResources resourceId="MCNT_PROD_DEMO_MOVIE" filename="DEMO_MOVIE" isFile="N"
+        parentResourceId="MCNT_PRODUCT" />
+    <dbResources resourceId="DEMO_MOVIE_ILF" filename="img_movieFront.jpg" isFile="Y"
+        parentResourceId="MCNT_PROD_DEMO_MOVIE" />
+    <dbResources resourceId="DEMO_MOVIE_DL" filename="description.html" isFile="Y"
+        parentResourceId="MCNT_PROD_DEMO_MOVIE" />
+    <moqui.resource.DbResourceFile resourceId="DEMO_MOVIE_DL" rootVersionName="01"
+        mimeType="text/html" versionName="01">
+        <fileData><![CDATA[PHA+NTAlIGNvdHRvbiAvIDUwJSBQb2x5ZXN0ZXI8L3A+DQo8cD5JbXBvcnRlZDwvcD4NCjxwPlppcHBlciBjbG9zdXJlPC9wPg0KPHA+TWFjaGluZSB3YXNoPC9wPg0KPHA+WmlwLXVwIGhvb2RlZCBzd2VhdHNoaXJ0IGluIDcuOC1vdW5jZSBmbGVlY2UgbWFkZSB3aXRoIHVwIHRvIDUlIHBvbHllc3RlciBjcmVhdGVkIGZyb20gcmVjeWNsZWQgcGxhc3RpYy48L3A+DQo8cD5QaWxsLXJlc2lzdGFudCBmYWJyaWMgd2l0aCBoaWdoLXN0aXRjaCBkZW5zaXR5IGZvciBkdXJhYmlsaXR5LiA8L3A+DQo8cD5SaWJiZWQgd2Fpc3RiYW5kIGFuZCBjdWZmcywgc3BsaXQga2FuZ2Fyb28gcG9ja2V0LjwvcD4=]]></fileData>
+    </moqui.resource.DbResourceFile>
+
     <!-- Hoodie -->
     <mantle.product.Product productId="DEMO_HOOD" productTypeEnumId="PtAsset"
         assetTypeEnumId="AstTpInventory" assetClassEnumId="AsClsInventoryFin"

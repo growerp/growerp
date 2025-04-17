@@ -5,6 +5,14 @@
 #
 set -x
 clear
+## run selenium tests
+cd ~/growerp/moqui/runtime/component/PopRestStore/selenium && \
+    npm run  testHotel && \
+    npm run testAdmin1 && \
+    npm run testAdmin2 && \
+    npm run testAdmin3 && \
+    cd -
+
 docker compose -f docker-compose.test.yml down
 docker image rm flutter-sut:latest -f
 docker image rm flutter-moqui:latest -f
@@ -20,4 +28,5 @@ cp ~/growerp /tmp -r && cd growerp
 #fi
 cd flutter
 docker compose -f docker-compose-test.yml up
+
 
