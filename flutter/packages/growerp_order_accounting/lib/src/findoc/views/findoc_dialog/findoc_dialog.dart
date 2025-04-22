@@ -16,6 +16,7 @@ import 'package:decimal/decimal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/test_data.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -665,7 +666,7 @@ class MyFinDocState extends State<FinDocPage> {
           .company!
           .currency!
           .currencyId!;
-      var itemType = item.itemType != null
+      var itemType = item.itemType != null && itemTypes.isNotEmpty
           ? state.itemTypes
               .firstWhere((e) => e.itemTypeId == item.itemType!.itemTypeId)
           : ItemType();

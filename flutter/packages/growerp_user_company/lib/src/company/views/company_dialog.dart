@@ -109,7 +109,7 @@ class CompanyFormState extends State<CompanyDialog> {
     authenticate = context.read<AuthBloc>().state.authenticate!;
     _selectedRole = widget.company.role!;
     employees = List.of(company.employees);
-    if (company.currency != null) {
+    if (company.currency != null && currencies.isNotEmpty) {
       _selectedCurrency = currencies.firstWhere(
           (element) => element.currencyId == company.currency?.currencyId);
     }

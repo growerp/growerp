@@ -31,6 +31,8 @@ class GlAccountsState extends State<GlAccountList> {
   late GlAccountBloc _glAccountBloc;
   late bool trialBalance;
   late int limit;
+  late double top;
+  double? left;
 
   @override
   void initState() {
@@ -40,10 +42,13 @@ class GlAccountsState extends State<GlAccountList> {
     _scrollController.addListener(_onScroll);
     _glAccountBloc = context.read<GlAccountBloc>()
       ..add(GlAccountFetch(refresh: true, limit: limit));
+    top = 400;
   }
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    left = left ?? (isAPhone(context) ? 320 : width - 500);
     limit = (MediaQuery.of(context).size.height / 100).round();
     return BlocConsumer<GlAccountBloc, GlAccountState>(
         listener: (context, state) {
@@ -59,8 +64,6 @@ class GlAccountsState extends State<GlAccountList> {
           return Center(
               child: Text('failed to fetch glAccounts: ${state.message}'));
         case GlAccountStatus.success:
-          double top = 400;
-          double left = 320;
           return Stack(
             children: [
               Column(children: [
@@ -108,7 +111,7 @@ class GlAccountsState extends State<GlAccountList> {
                 child: GestureDetector(
                   onPanUpdate: (details) {
                     setState(() {
-                      left += details.delta.dx;
+                      left = left! + details.delta.dx;
                       top += details.delta.dy;
                     });
                   },

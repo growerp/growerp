@@ -13,6 +13,7 @@ More detailed information at the [GitHub blog](https://github.blog/developer-ski
 
 
 Start your commit message with:
+    chore:  - other changes
     docs:   - A documentation change.
     feat:   - A new feature.
     fix:    - A bug fix.

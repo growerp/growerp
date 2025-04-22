@@ -120,7 +120,7 @@ class CompanyFormState extends State<CompanyDialog> {
     }
 
     employees = List.of(company.employees);
-    if (company.currency != null) {
+    if (company.currency != null && currencies.isNotEmpty) {
       _selectedCurrency = currencies.firstWhere(
           (element) => element.currencyId == company.currency?.currencyId);
     }
