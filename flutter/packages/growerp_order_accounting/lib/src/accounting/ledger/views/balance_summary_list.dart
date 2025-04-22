@@ -13,7 +13,6 @@
  */
 // ignore_for_file: depend_on_referenced_packages
 
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -33,8 +32,6 @@ class BalanceSummaryList extends StatefulWidget {
 class BalanceSummaryListState extends State<BalanceSummaryList> {
   final _itemScrollController = ItemScrollController();
   final _itemPositionsListener = ItemPositionsListener.create();
-  final TextEditingController _periodSearchBoxController =
-      TextEditingController();
   NumberFormat formatter = NumberFormat("00");
   late bool search;
   late LedgerBloc _ledgerBloc;
@@ -77,109 +74,297 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
               _selectedPeriod = state.ledgerReport!.period!;
               return Column(
                 children: [
-                  Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                    SizedBox(
-                      width: 150,
-                      child: DropdownSearch<TimePeriod>(
-                        key: const Key('periodDropDown'),
-                        selectedItem: _selectedPeriod,
-                        popupProps: PopupProps.menu(
-                          isFilterOnline: true,
-                          showSearchBox: true,
-                          searchFieldProps: TextFieldProps(
-                            autofocus: true,
-                            decoration:
-                                const InputDecoration(labelText: 'Time period'),
-                            controller: _periodSearchBoxController,
-                          ),
-                          menuProps: MenuProps(
-                              borderRadius: BorderRadius.circular(20.0)),
-                          title: popUp(
-                            context: context,
-                            title: 'Select period',
-                            height: 50,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.arrow_back),
+                              tooltip: 'Previous Year',
+                              onPressed: () {
+                                // Extract the year from the period name
+                                String currentPeriodName =
+                                    _selectedPeriod.periodName;
+                                String yearStr = '';
+                                int year = 0;
+
+                                if (currentPeriodName.startsWith('Y')) {
+                                  // Format: Y2025
+                                  yearStr = currentPeriodName.substring(1);
+                                  year = int.tryParse(yearStr) ??
+                                      DateTime.now().year;
+                                } else if (currentPeriodName.contains('q')) {
+                                  // Format: Y2025q1
+                                  yearStr = currentPeriodName.substring(1, 5);
+                                  year = int.tryParse(yearStr) ??
+                                      DateTime.now().year;
+                                } else if (currentPeriodName.contains('m')) {
+                                  // Format: Y2025m01
+                                  yearStr = currentPeriodName.substring(1, 5);
+                                  year = int.tryParse(yearStr) ??
+                                      DateTime.now().year;
+                                }
+
+                                // Go to previous year
+                                int previousYear = year - 1;
+
+                                // Check if the previous year exists in available periods
+                                bool yearExists = _checkYearExists(
+                                    previousYear, state.timePeriods);
+
+                                if (!yearExists) {
+                                  // Show message if year doesn't exist
+                                  HelperFunctions.showMessage(
+                                    context,
+                                    'Data for year $previousYear is not available',
+                                    Colors.orange,
+                                  );
+                                  return;
+                                }
+
+                                // Determine the new period name based on current period type
+                                String newPeriodName = '';
+                                if (_selectedPeriod.periodType == 'Y') {
+                                  newPeriodName = 'Y$previousYear';
+                                } else if (_selectedPeriod.periodType == 'Q') {
+                                  // Extract quarter number
+                                  int quarterIndex =
+                                      currentPeriodName.indexOf('q');
+                                  String quarter = currentPeriodName
+                                      .substring(quarterIndex + 1);
+                                  newPeriodName =
+                                      'Y$previousYear${'q$quarter'}';
+                                } else if (_selectedPeriod.periodType == 'M') {
+                                  // Extract month number
+                                  int monthIndex =
+                                      currentPeriodName.indexOf('m');
+                                  String month = currentPeriodName
+                                      .substring(monthIndex + 1);
+                                  newPeriodName = 'Y$previousYear${'m$month'}';
+                                }
+
+                                // Fetch data for the previous year
+                                _ledgerBloc.add(LedgerFetch(
+                                  ReportType.summary,
+                                  periodName: newPeriodName,
+                                ));
+                              },
+                            ),
+                            Text(
+                              'Year: ${_getYearFromPeriod(_selectedPeriod.periodName)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.arrow_forward),
+                              tooltip: 'Next Year',
+                              onPressed: () {
+                                // Extract the year from the period name
+                                String currentPeriodName =
+                                    _selectedPeriod.periodName;
+                                String yearStr = '';
+                                int year = 0;
+
+                                if (currentPeriodName.startsWith('Y')) {
+                                  // Format: Y2025
+                                  yearStr = currentPeriodName.substring(1);
+                                  year = int.tryParse(yearStr) ??
+                                      DateTime.now().year;
+                                } else if (currentPeriodName.contains('q')) {
+                                  // Format: Y2025q1
+                                  yearStr = currentPeriodName.substring(1, 5);
+                                  year = int.tryParse(yearStr) ??
+                                      DateTime.now().year;
+                                } else if (currentPeriodName.contains('m')) {
+                                  // Format: Y2025m01
+                                  yearStr = currentPeriodName.substring(1, 5);
+                                  year = int.tryParse(yearStr) ??
+                                      DateTime.now().year;
+                                }
+
+                                // Go to next year (but don't exceed current year)
+                                int nextYear = year + 1;
+                                int currentYear = DateTime.now().year;
+                                if (nextYear > currentYear) {
+                                  nextYear = currentYear;
+                                }
+
+                                // Check if the next year exists in available periods
+                                bool yearExists = _checkYearExists(
+                                    nextYear, state.timePeriods);
+
+                                if (!yearExists) {
+                                  // Show message if year doesn't exist
+                                  HelperFunctions.showMessage(
+                                    context,
+                                    'Data for year $nextYear is not available',
+                                    Colors.orange,
+                                  );
+                                  return;
+                                }
+
+                                // Determine the new period name based on current period type
+                                String newPeriodName = '';
+                                if (_selectedPeriod.periodType == 'Y') {
+                                  newPeriodName = 'Y$nextYear';
+                                } else if (_selectedPeriod.periodType == 'Q') {
+                                  // Extract quarter number
+                                  int quarterIndex =
+                                      currentPeriodName.indexOf('q');
+                                  String quarter = currentPeriodName
+                                      .substring(quarterIndex + 1);
+                                  newPeriodName = 'Y$nextYear${'q$quarter'}';
+                                } else if (_selectedPeriod.periodType == 'M') {
+                                  // Extract month number
+                                  int monthIndex =
+                                      currentPeriodName.indexOf('m');
+                                  String month = currentPeriodName
+                                      .substring(monthIndex + 1);
+                                  newPeriodName = 'Y$nextYear${'m$month'}';
+                                }
+
+                                // Fetch data for the next year
+                                _ledgerBloc.add(LedgerFetch(
+                                  ReportType.summary,
+                                  periodName: newPeriodName,
+                                ));
+                              },
+                            ),
+                          ],
+                        ),
+                        Text(
+                          'Period: ${_selectedPeriod.periodName}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
                           ),
                         ),
-                        dropdownDecoratorProps: const DropDownDecoratorProps(
-                          dropdownSearchDecoration: InputDecoration(
-                            labelText: 'Time period',
-                          ),
-                        ),
-                        itemAsString: (TimePeriod? u) =>
-                            " ${u!.periodName}", // invisible char for test
-                        onChanged: (TimePeriod? newValue) {
-                          setState(() => _selectedPeriod = newValue!);
-                          _ledgerBloc.add(LedgerFetch(ReportType.summary,
-                              periodName: newValue!.periodName));
-                        },
-                        items: state.timePeriods,
-                        validator: (value) =>
-                            value == null ? 'field required' : null,
-                      ),
+                      ],
                     ),
-                    if (_selectedPeriod.periodType != 'Y')
-                      OutlinedButton(
-                          child: const Text('Y'),
-                          onPressed: () => _ledgerBloc.add(LedgerFetch(
-                              ReportType.summary,
-                              periodName:
-                                  _selectedPeriod.periodName.substring(0, 5)))),
-                    if (_selectedPeriod.periodType != 'Q')
-                      OutlinedButton(
-                          child: const Text('Q'),
-                          onPressed: () {
-                            String currentQuarter =
-                                formatter.format(DateTime.now().month / 4 + 1);
-                            _ledgerBloc.add(LedgerFetch(ReportType.summary,
-                                periodName:
-                                    '${_selectedPeriod.periodName.substring(0, 5)}'
-                                    'q$currentQuarter'));
-                          }),
-                    if (_selectedPeriod.periodType != 'M')
-                      OutlinedButton(
-                          child: const Text('M'),
-                          onPressed: () => _ledgerBloc.add(LedgerFetch(
-                              ReportType.summary,
-                              periodName:
-                                  '${_selectedPeriod.periodName.substring(0, 5)}'
-                                  'm${formatter.format(DateTime.now().month)}'))),
-                  ]),
+                  ),
                   BalanceSummaryListHeader(_itemScrollController,
                       state.ledgerReport!, isPhone(context)),
                   Expanded(
-                    child: RefreshIndicator(
-                        onRefresh: (() async => _ledgerBloc.add(LedgerFetch(
-                            ReportType.summary,
-                            periodName: _selectedPeriod.periodName))),
-                        child: ScrollablePositionedList.builder(
-                          key: const Key('listView'),
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: state.ledgerReport!.glAccounts.length + 1,
-                          itemScrollController: _itemScrollController,
-                          itemPositionsListener: _itemPositionsListener,
-                          itemBuilder: (BuildContext context, int index) {
-                            if (index == 0) {
-                              return Column(children: [
-                                Visibility(
-                                    visible:
-                                        state.ledgerReport!.glAccounts.isEmpty,
-                                    child: Center(
-                                        heightFactor: 20,
-                                        child: Text(
-                                            started
-                                                ? 'No balanceSummary.accountList found'
-                                                : '',
-                                            key: const Key('empty'),
-                                            textAlign: TextAlign.center)))
-                              ]);
-                            }
-                            index--;
-                            return BalanceSummaryListItem(
-                                glAccount:
-                                    state.ledgerReport!.glAccounts[index],
-                                index: index);
-                          },
-                        )),
+                    child: Stack(
+                      children: [
+                        RefreshIndicator(
+                            onRefresh: (() async => _ledgerBloc.add(LedgerFetch(
+                                ReportType.summary,
+                                periodName: _selectedPeriod.periodName))),
+                            child: ScrollablePositionedList.builder(
+                              key: const Key('listView'),
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              itemCount:
+                                  state.ledgerReport!.glAccounts.length + 1,
+                              itemScrollController: _itemScrollController,
+                              itemPositionsListener: _itemPositionsListener,
+                              itemBuilder: (BuildContext context, int index) {
+                                if (index == 0) {
+                                  return Column(children: [
+                                    Visibility(
+                                        visible: state
+                                            .ledgerReport!.glAccounts.isEmpty,
+                                        child: Center(
+                                            heightFactor: 20,
+                                            child: Text(
+                                                started
+                                                    ? 'No balanceSummary.accountList found'
+                                                    : '',
+                                                key: const Key('empty'),
+                                                textAlign: TextAlign.center)))
+                                  ]);
+                                }
+                                index--;
+                                return BalanceSummaryListItem(
+                                    glAccount:
+                                        state.ledgerReport!.glAccounts[index],
+                                    index: index);
+                              },
+                            )),
+                        Positioned(
+                          bottom: 16,
+                          right: 16,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Only show buttons for period types that are not currently selected
+                              // Year button
+                              if (_selectedPeriod.periodType != 'Y')
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: FloatingActionButton(
+                                    heroTag: 'yearButton',
+                                    mini: true,
+                                    backgroundColor: Colors.blue,
+                                    child: const Text(
+                                      'Y',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    onPressed: () => _ledgerBloc.add(
+                                        LedgerFetch(ReportType.summary,
+                                            periodName: _selectedPeriod
+                                                .periodName
+                                                .substring(0, 5))),
+                                  ),
+                                ),
+                              // Quarter button
+                              if (_selectedPeriod.periodType != 'Q')
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: FloatingActionButton(
+                                    heroTag: 'quarterButton',
+                                    mini: true,
+                                    backgroundColor: Colors.green,
+                                    child: const Text(
+                                      'Q',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      String currentQuarter = formatter
+                                          .format(DateTime.now().month / 4 + 1);
+                                      _ledgerBloc.add(LedgerFetch(
+                                          ReportType.summary,
+                                          periodName:
+                                              '${_selectedPeriod.periodName.substring(0, 5)}'
+                                              'q$currentQuarter'));
+                                    },
+                                  ),
+                                ),
+                              // Month button
+                              if (_selectedPeriod.periodType != 'M')
+                                FloatingActionButton(
+                                  heroTag: 'monthButton',
+                                  mini: true,
+                                  backgroundColor: Colors.orange,
+                                  child: const Text(
+                                    'M',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  onPressed: () => _ledgerBloc.add(LedgerFetch(
+                                      ReportType.summary,
+                                      periodName:
+                                          '${_selectedPeriod.periodName.substring(0, 5)}'
+                                          'm${formatter.format(DateTime.now().month)}')),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               );
@@ -190,5 +375,33 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
               return const LoadingIndicator();
           }
         });
+  }
+
+  // Helper method to extract year from period name
+  String _getYearFromPeriod(String periodName) {
+    if (periodName.startsWith('Y')) {
+      if (periodName.contains('q') || periodName.contains('m')) {
+        // Format: Y2025q1 or Y2025m01
+        return periodName.substring(1, 5);
+      } else {
+        // Format: Y2025
+        return periodName.substring(1);
+      }
+    }
+    return DateTime.now().year.toString();
+  }
+
+  // Helper method to check if a year exists in the available time periods
+  bool _checkYearExists(int year, List<TimePeriod> timePeriods) {
+    String yearStr = year.toString();
+
+    // Check if any period starts with the year we're looking for
+    for (TimePeriod period in timePeriods) {
+      if (period.periodName.startsWith('Y$yearStr')) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

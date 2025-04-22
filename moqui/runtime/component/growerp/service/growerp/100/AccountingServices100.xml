@@ -587,6 +587,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <log message="====requested period: $periodName" />
             <set field="typeConvert"
                 from="['q':'FiscalQuarter','m':'FiscalMonth',
                     'FiscalYear': 'Y','FiscalQuarter':'Q','FiscalMonth':'M']"
@@ -601,24 +602,23 @@ along with this software (see the LICENSE.md file). If not, see
                 <return error="true"
                     message="Revenue/Expense sheet, period: $periodName not found for company $companyPartyId" />
             </if>
-
+            <log message="====selected period ${timePeriods[0]}" />
             <script>
                 datasets = [
-                        [classGroupEnumId:'EngGlcNetRevenue'],
-                        [label:'Cost of Sales', classes:['COST_OF_SALES'], stack:'Expense'],
-                        [label:'Sales Expense', classes:['SALES_EXPENSE'], stack:'Expense'],
-                        [label:'Gen/Admin Expense', classes:['GEN_ADMIN_EXPENSE'], stack:'Expense'],
-                        [label:'Other Expense', classes:['CONTRIBUTIONS', 'NON_CASH_EXPENSE'], stack:'Expense'],
-                        [classGroupEnumId:'EngGlcNetOpIncome', type:'line', fill:false]
+                [classGroupEnumId:'EngGlcNetRevenue'],
+                [label:'Cost of Sales', classes:['COST_OF_SALES'], stack:'Expense'],
+                [label:'Sales Expense', classes:['SALES_EXPENSE'], stack:'Expense'],
+                [label:'Gen/Admin Expense', classes:['GEN_ADMIN_EXPENSE'], stack:'Expense'],
+                [label:'Other Expense', classes:['CONTRIBUTIONS', 'NON_CASH_EXPENSE'],
+                stack:'Expense'],
+                [classGroupEnumId:'EngGlcNetOpIncome', type:'line', fill:false]
                 ]
             </script>
-            <set field="thruDate"
-                from='java.sql.Timestamp.valueOf("${periodName.substring(1,5)}-12-31 23:59:59.0")' />
             <service-call name="mantle.party.TimeServices.find#PartyTimePeriodGroups"
                 out-map="periodsOut"
                 in-map="[partyId:companyPartyId,
                         timePeriodTypeId: typeConvert[periodName.substring(0,1)],
-                        thruDate:thruDate,
+                        thruDate: timePeriods[0].thruDate,
                         groups:(periods?:13)]" />
             <if condition="periodsOut.timePeriodGroups">
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummary"
