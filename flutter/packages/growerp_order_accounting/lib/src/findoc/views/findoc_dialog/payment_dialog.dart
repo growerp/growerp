@@ -190,7 +190,7 @@ class PaymentDialogState extends State<PaymentDialog> {
 
   Widget paymentForm(
       FinDocState state, GlobalKey<FormState> paymentDialogFormKey) {
-    if (_selectedPaymentType != null) {
+    if (_selectedPaymentType != null && state.paymentTypes.isNotEmpty) {
       _selectedPaymentType = state.paymentTypes.firstWhere(
           (el) => _selectedPaymentType!.paymentTypeId == el.paymentTypeId);
     }

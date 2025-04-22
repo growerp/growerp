@@ -1817,16 +1817,16 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if condition="invoice.sales == false">                <!-- inside this payment object this field is NOT
-                a string -->
+            <if condition="invoice.sales == false">
+                <!-- inside this payment object this field is NOT a string -->
                 <set field="toPartyId" from="companyPartyId" />
                 <set field="fromPartyId"
-                    from="invoice.otherCompany?.partyId ?: payment.otherUser.partyId" />
+                    from="invoice.otherCompany?.partyId ?: invoice.otherUser.partyId" />
                 <set field="contactRole" value="Vendor" />
                 <else>
                     <set field="fromPartyId" from="companyPartyId " />
                     <set field="toPartyId"
-                        from="invoice.otherCompany?.partyId ?: payment.otherUser.partyId" />
+                        from="invoice.otherCompany?.partyId ?: invoice.otherUser.partyId" />
                     <set field="contactRole" value="Customer" />
                 </else>
             </if>
@@ -1879,11 +1879,11 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="shipment.sales == false">
                 <set field="toPartyId" from="companyPartyId" />
                 <set field="fromPartyId"
-                    from="shipment.otherCompany?.partyId ?: payment.otherUser.partyId" />
+                    from="shipment.otherCompany?.partyId ?: shipment.otherUser.partyId" />
                 <else>
                     <set field="fromPartyId" from="companyPartyId" />
                     <set field="toPartyId"
-                        from="shipment.otherCompany?.partyId ?: payment.otherUser.partyId" />
+                        from="shipment.otherCompany?.partyId ?: shipment.otherUser.partyId" />
                     <entity-find entity-name="mantle.facility.Facility" list="facilities">
                         <econdition field-name="ownerPartyId" from="companyPartyId" />
                     </entity-find>

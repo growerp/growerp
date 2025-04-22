@@ -2236,6 +2236,7 @@ along with this software (see the LICENSE.md file). If not, see
                     }
 
                     for (Map.Entry<String, ArrayList<Map>> byIdEntry in transSummariesByGlAccountId) {
+                    //    ec.logger.info("========entry: ${byIdEntry.key} value: ${byIdEntry.value.amount}")
                         ArrayList<Map> transSummaryList = (ArrayList<Map>) byIdEntry.value
                         String glAccountId = (String) byIdEntry.key
                         glAccountIdsWithTrans.add(glAccountId)
@@ -2293,13 +2294,16 @@ along with this software (see the LICENSE.md file). If not, see
                         glAccountOrgTimePeriod.put("balanceLastUpdated", nowTimestamp)
                         glAccountOrgTimePeriod.update()
                         gaotpUpdated++
+                    //    ec.logger.info("=====original2: ${origGlAccountOrgTimePeriod?.postedDebits} ${origGlAccountOrgTimePeriod?.postedCredits}  ${origGlAccountOrgTimePeriod?.postedDebitsNoClosing} ${origGlAccountOrgTimePeriod?.postedCreditsNoClosing} ")
+                    //    ec.logger.info("=====new: $postedDebits $postedCredits $postedDebitsNoClosing $postedCreditsNoClosing")
+                    //    ec.logger.info("=====end: ${endingBalance} lastUpdate: ${balanceLastUpdated?.string()}")
 
-                        if (foundRecord && (origGlAccountOrgTimePeriod.postedDebits != postedDebits ||
-                                origGlAccountOrgTimePeriod.postedCredits != postedCredits ||
-                                origGlAccountOrgTimePeriod.postedDebitsNoClosing != postedDebitsNoClosing ||
-                                origGlAccountOrgTimePeriod.postedCreditsNoClosing != postedCreditsNoClosing)) {
-                            ec.logger.info("In recalculate GLAOS updated account ${glAccountId} period ${timePeriodId} debit? ${isDebit} with wrong posted amounts; beginningBalance=${glAccountOrgTimePeriod.beginningBalance}, postedDebits was ${origGlAccountOrgTimePeriod.postedDebits} is ${glAccountOrgTimePeriod.postedDebits}, postedCredits was ${origGlAccountOrgTimePeriod.postedCredits} is ${glAccountOrgTimePeriod.postedCredits}, postedDebitsNoClosing was ${origGlAccountOrgTimePeriod.postedDebitsNoClosing} is ${glAccountOrgTimePeriod.postedDebitsNoClosing}, postedCreditsNoClosing was ${origGlAccountOrgTimePeriod.postedCreditsNoClosing} is ${glAccountOrgTimePeriod.postedCreditsNoClosing}, endingBalance was ${origGlAccountOrgTimePeriod.endingBalance} is ${glAccountOrgTimePeriod.endingBalance}")
-                        }
+                    //    if (foundRecord && (origGlAccountOrgTimePeriod.postedDebits != postedDebits ||
+                    //            origGlAccountOrgTimePeriod.postedCredits != postedCredits ||
+                    //            origGlAccountOrgTimePeriod.postedDebitsNoClosing != postedDebitsNoClosing ||
+                    //            origGlAccountOrgTimePeriod.postedCreditsNoClosing != postedCreditsNoClosing)) {
+                    //        ec.logger.info("In recalculate GLAOS updated account ${glAccountId} period ${timePeriodId} debit? ${isDebit} with wrong posted amounts; beginningBalance=${glAccountOrgTimePeriod.beginningBalance}, postedDebits was ${origGlAccountOrgTimePeriod.postedDebits} is ${glAccountOrgTimePeriod.postedDebits}, postedCredits was ${origGlAccountOrgTimePeriod.postedCredits} is ${glAccountOrgTimePeriod.postedCredits}, postedDebitsNoClosing was ${origGlAccountOrgTimePeriod.postedDebitsNoClosing} is ${glAccountOrgTimePeriod.postedDebitsNoClosing}, postedCreditsNoClosing was ${origGlAccountOrgTimePeriod.postedCreditsNoClosing} is ${glAccountOrgTimePeriod.postedCreditsNoClosing}, endingBalance was ${origGlAccountOrgTimePeriod.endingBalance} is ${glAccountOrgTimePeriod.endingBalance}")
+                    //    }
 
                         // update balances for all existing subsequent periods
                         Map lastGlAccountOrgTimePeriod = glAccountOrgTimePeriod
