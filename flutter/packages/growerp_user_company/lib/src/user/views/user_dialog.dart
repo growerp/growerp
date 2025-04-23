@@ -78,8 +78,8 @@ class UserDialogState extends State<UserDialogStateFull> {
   late User currentUser;
   late bool isAdmin;
   late String _classificationId;
-  late double top;
-  double? left;
+  late double bottom;
+  double? right;
 
   @override
   void initState() {
@@ -113,7 +113,7 @@ class UserDialogState extends State<UserDialogStateFull> {
           isForDropDown: true));
     isAdmin = context.read<AuthBloc>().state.authenticate!.user!.userGroup ==
         UserGroup.admin;
-    top = -100;
+    bottom = 50;
   }
 
   @override
@@ -155,7 +155,7 @@ class UserDialogState extends State<UserDialogStateFull> {
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    left = left ?? (isPhone ? 250 : 600);
+    right = right ?? (isPhone ? 20 : 50);
     String title = '';
     if (_selectedRole == Role.company) {
       title = widget.user.userGroup != null &&
@@ -195,15 +195,15 @@ class UserDialogState extends State<UserDialogStateFull> {
                     return listChild();
                   }),
               Positioned(
-                left: left,
-                top: top,
+                right: right,
+                bottom: bottom,
                 child: GestureDetector(
                   onPanUpdate: (details) {
                     setState(() {
-                      if (left != null) {
-                        left = left! + details.delta.dx;
+                      if (right != null) {
+                        right = right! - details.delta.dx;
                       }
-                      top += details.delta.dy;
+                      bottom -= details.delta.dy;
                     });
                   },
                   child: ImageButtons(_scrollController, _onImageButtonPressed),

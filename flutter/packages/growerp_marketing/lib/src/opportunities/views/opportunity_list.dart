@@ -35,8 +35,8 @@ class OpportunitiesState extends State<OpportunityList> {
   final _horizontalScrollController = ScrollController();
   late OpportunityBloc _opportunityBloc;
   late List<Opportunity> opportunities;
-  late double top;
-  double? left;
+  late double bottom;
+  double? right;
 
   @override
   void initState() {
@@ -44,13 +44,12 @@ class OpportunitiesState extends State<OpportunityList> {
     _opportunityBloc = context.read<OpportunityBloc>()
       ..add(const OpportunityFetch(refresh: true, limit: 15));
     _scrollController.addListener(_onScroll);
-    top = 450;
+    bottom = 50;
   }
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    left = left ?? (isAPhone(context) ? 320 : width - 200);
+    right = right ?? (isAPhone(context) ? 20 : 50);
     return BlocConsumer<OpportunityBloc, OpportunityState>(
       listener: (context, state) {
         if (state.status == OpportunityStatus.failure) {
@@ -144,13 +143,13 @@ class OpportunitiesState extends State<OpportunityList> {
               children: [
                 tableView(),
                 Positioned(
-                  left: left,
-                  top: top,
+                  right: right,
+                  bottom: bottom,
                   child: GestureDetector(
                     onPanUpdate: (details) {
                       setState(() {
-                        left = left! + details.delta.dx;
-                        top = top + details.delta.dy;
+                        right = right! - details.delta.dx;
+                        bottom -= details.delta.dy;
                       });
                     },
                     child: Column(

@@ -43,8 +43,8 @@ class CompanyListState extends State<CompanyList> {
   bool isLoading = false;
   bool hasReachedMax = false;
   late bool isPhone;
-  late double top;
-  double? left;
+  late double bottom;
+  double? right;
 
   @override
   void initState() {
@@ -72,14 +72,13 @@ class CompanyListState extends State<CompanyList> {
             ..add(const CompanyFetch(refresh: true));
       }
     }
-    top = 450;
+    bottom = 50;
   }
 
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    double width = MediaQuery.of(context).size.width;
-    left = left ?? (isAPhone(context) ? 320 : width - 200);
+    right = right ?? (isAPhone(context) ? 20 : 50);
     return Builder(builder: (BuildContext context) {
       Widget tableView() {
         if (companies.isEmpty) {
@@ -171,13 +170,13 @@ class CompanyListState extends State<CompanyList> {
             children: [
               tableView(),
               Positioned(
-                left: left,
-                top: top,
+                right: right,
+                bottom: bottom,
                 child: GestureDetector(
                   onPanUpdate: (details) {
                     setState(() {
-                      left = left! + details.delta.dx;
-                      top += details.delta.dy;
+                      right = right! - details.delta.dx;
+                      bottom -= details.delta.dy;
                     });
                   },
                   child: Column(

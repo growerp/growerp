@@ -71,8 +71,8 @@ class FinDocListState extends State<FinDocList> {
   List<FinDoc> searchFinDocs = [];
   late bool my;
   late AuthBloc _authBloc;
-  late double top;
-  double? left;
+  late double bottom;
+  double? right;
 
   @override
   void initState() {
@@ -110,18 +110,12 @@ class FinDocListState extends State<FinDocList> {
       default:
     }
     _finDocBloc.add(FinDocFetch(refresh: true, limit: 15, my: my));
-    top = widget.journalId != null ? 250 : 350;
+    bottom = 50;
   }
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    left = left ??
-        (isAPhone(context)
-            ? widget.journalId != null
-                ? 280
-                : 320
-            : width - 250);
+    right = right ?? (isAPhone(context) ? 20 : 50);
     limit = (MediaQuery.of(context).size.height / 100).round();
     isPhone = isAPhone(context);
     Widget finDocsPage(int length) {
@@ -243,13 +237,13 @@ class FinDocListState extends State<FinDocList> {
               children: [
                 finDocsPage(state.finDocs.length),
                 Positioned(
-                  left: left,
-                  top: top,
+                  right: right,
+                  bottom: bottom,
                   child: GestureDetector(
                     onPanUpdate: (details) {
                       setState(() {
-                        left = left! + details.delta.dx;
-                        top += details.delta.dy;
+                        right = right! - details.delta.dx;
+                        bottom -= details.delta.dy;
                       });
                     },
                     child: Column(

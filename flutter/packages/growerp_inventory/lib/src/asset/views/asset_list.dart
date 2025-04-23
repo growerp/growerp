@@ -31,8 +31,8 @@ class AssetListState extends State<AssetList> {
   late AssetBloc _assetBloc;
   late String classificationId;
   late String entityName;
-  late double top;
-  double? left;
+  late double bottom;
+  double? right;
 
   @override
   void initState() {
@@ -42,13 +42,12 @@ class AssetListState extends State<AssetList> {
     _scrollController.addListener(_onScroll);
     _assetBloc = context.read<AssetBloc>()
       ..add(const AssetFetch(refresh: true));
-    top = 450;
+    bottom = 50;
   }
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    left = left ?? (isAPhone(context) ? 320 : width - 200);
+    right = right ?? (isAPhone(context) ? 20 : 50);
     return BlocConsumer<AssetBloc, AssetState>(
         listenWhen: (previous, current) =>
             previous.status == AssetStatus.loading,
@@ -140,13 +139,13 @@ class AssetListState extends State<AssetList> {
                 children: [
                   tableView(),
                   Positioned(
-                    left: left,
-                    top: top,
+                    right: right,
+                    bottom: bottom,
                     child: GestureDetector(
                         onPanUpdate: (details) {
                           setState(() {
-                            left = left! + details.delta.dx;
-                            top += details.delta.dy;
+                            right = right! - details.delta.dx;
+                            bottom -= details.delta.dy;
                           });
                         },
                         child: Column(
