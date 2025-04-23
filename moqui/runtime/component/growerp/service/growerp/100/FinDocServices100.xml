@@ -1050,9 +1050,9 @@ along with this software (see the LICENSE.md file). If not, see
                     </iterate>
                     <set field="glAccount"
                         from="[
-                            glAccountId: overrideGlAccountId,
-                            accountCode: overrideGlAccountCode,
-                            accountName: overrideGlAccountName,
+                            glAccountId: item.overrideGlAccountId,
+                            accountCode: item.overrideAccountCode,
+                            accountName: item.overrideAccountName,
                         ]" />
                     <set field="paymentType"
                         from="[
