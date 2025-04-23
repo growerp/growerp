@@ -587,7 +587,6 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <log message="====requested period: $periodName" />
             <set field="typeConvert"
                 from="['q':'FiscalQuarter','m':'FiscalMonth',
                     'FiscalYear': 'Y','FiscalQuarter':'Q','FiscalMonth':'M']"
@@ -602,7 +601,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <return error="true"
                     message="Revenue/Expense sheet, period: $periodName not found for company $companyPartyId" />
             </if>
-            <log message="====selected period ${timePeriods[0]}" />
             <script>
                 datasets = [
                 [classGroupEnumId:'EngGlcNetRevenue'],
