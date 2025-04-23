@@ -97,8 +97,8 @@ class CompanyFormState extends State<CompanyDialog> {
   late bool isPhone;
   final ScrollController _scrollController = ScrollController();
   late CompanyBloc companyBloc;
-  late double top;
-  double? left;
+  late double bottom;
+  double? right;
 
   @override
   void initState() {
@@ -141,7 +141,7 @@ class CompanyFormState extends State<CompanyDialog> {
 
     user = authenticate.user!;
     isAdmin = authenticate.user!.userGroup == UserGroup.admin;
-    top = -100;
+    bottom = 50;
   }
 
   @override
@@ -183,7 +183,7 @@ class CompanyFormState extends State<CompanyDialog> {
   @override
   Widget build(BuildContext context) {
     isPhone = isAPhone(context);
-    left = left ?? (isPhone ? 250 : 600);
+    right = right ?? (isPhone ? 20 : 50);
     return widget.dialog == true
         ? Dialog(
             key: Key('CompanyDialog${company.role?.name ?? Role.unknown}'),
@@ -661,15 +661,15 @@ class CompanyFormState extends State<CompanyDialog> {
               return const LoadingIndicator();
             }),
         Positioned(
-          left: left,
-          top: top,
+          right: right,
+          bottom: bottom,
           child: GestureDetector(
             onPanUpdate: (details) {
               setState(() {
-                if (left != null) {
-                  left = left! + details.delta.dx;
+                if (right != null) {
+                  right = right! - details.delta.dx;
                 }
-                top += details.delta.dy;
+                bottom -= details.delta.dy;
               });
             },
             child: ImageButtons(_scrollController, _onImageButtonPressed),

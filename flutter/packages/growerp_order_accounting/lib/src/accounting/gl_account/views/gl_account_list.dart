@@ -31,8 +31,8 @@ class GlAccountsState extends State<GlAccountList> {
   late GlAccountBloc _glAccountBloc;
   late bool trialBalance;
   late int limit;
-  late double top;
-  double? left;
+  late double bottom;
+  double? right;
 
   @override
   void initState() {
@@ -42,13 +42,12 @@ class GlAccountsState extends State<GlAccountList> {
     _scrollController.addListener(_onScroll);
     _glAccountBloc = context.read<GlAccountBloc>()
       ..add(GlAccountFetch(refresh: true, limit: limit));
-    top = 400;
+    bottom = 50;
   }
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    left = left ?? (isAPhone(context) ? 320 : width - 500);
+    right = right ?? (isAPhone(context) ? 20 : 50);
     limit = (MediaQuery.of(context).size.height / 100).round();
     return BlocConsumer<GlAccountBloc, GlAccountState>(
         listener: (context, state) {
@@ -106,13 +105,13 @@ class GlAccountsState extends State<GlAccountList> {
                             })))
               ]),
               Positioned(
-                left: left,
-                top: top,
+                right: right,
+                bottom: bottom,
                 child: GestureDetector(
                   onPanUpdate: (details) {
                     setState(() {
-                      left = left! + details.delta.dx;
-                      top += details.delta.dy;
+                      right = right! - details.delta.dx;
+                      bottom -= details.delta.dy;
                     });
                   },
                   child: Column(

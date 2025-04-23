@@ -50,8 +50,8 @@ class _GanttFormState extends State<GanttForm> {
   late int chartInDays;
   late int chartColumns; // total columns on chart
   late int columnsOnScreen; // periods
-  late double top;
-  double? left;
+  late double bottom;
+  double? right;
 
   @override
   void initState() {
@@ -62,13 +62,13 @@ class _GanttFormState extends State<GanttForm> {
       ..add(const AssetFetch(refresh: true));
     _productBloc = context.read<ProductBloc>()
       ..add(const ProductRentalOccupancy());
-    top = 500;
+    bottom = 50;
   }
 
   @override
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
-    left = left ?? (isAPhone(context) ? 320 : screenWidth - 200);
+    right = right ?? (isAPhone(context) ? 20 : 50);
 
     scheme = Theme.of(context).colorScheme;
     return BlocBuilder<AssetBloc, AssetState>(builder: (context, assetState) {
@@ -204,13 +204,13 @@ class _GanttFormState extends State<GanttForm> {
                   )
                 ]),
                 Positioned(
-                  left: left,
-                  top: top,
+                  right: right,
+                  bottom: bottom,
                   child: GestureDetector(
                     onPanUpdate: (details) {
                       setState(() {
-                        left = left! + details.delta.dx;
-                        top += details.delta.dy;
+                        right = right! - details.delta.dx;
+                        bottom -= details.delta.dy;
                       });
                     },
                     child: FloatingActionButton(
