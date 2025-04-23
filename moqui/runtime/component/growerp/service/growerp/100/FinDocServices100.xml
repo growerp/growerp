@@ -2782,7 +2782,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <!-- create payment when invoice total > 0-->
                             <entity-find-one entity-name="mantle.account.invoice.Invoice"
                                 value-field="invoice" />
-                            <if condition="invoice.invoiceTotal > 0">
+                            <if condition="invoice.invoiceTotal &gt; 0">
                                 <set field="effectiveDate" from="ec.user.nowTimestamp" />
                                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                                     in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']"
@@ -2829,10 +2829,16 @@ along with this software (see the LICENSE.md file). If not, see
                                         in-map="[orderId: order.orderId]" />
                                 </if>
                                 <!-- capture payment here because no shipments -->
+                                <entity-find entity-name="mantle.account.payment.Payment"
+                                    list="payments">
+                                    <econdition field-name="orderId" from="order.orderId" />
+                                </entity-find>
+                                <!-- get paymentId either from website,
+                                    or created here with create#InvoicePayment -->
                                 <service-call
                                     name="mantle.account.PaymentServices.capture#SinglePayment"
                                     out-map="captOut"
-                                    in-map="[paymentId:payments[0].paymentId]" />
+                                    in-map="[paymentId: payments?[0].paymentId ?: paymentId]" />
                             </else>
                         </if>
                         <if condition="!payments">
