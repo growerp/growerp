@@ -34,7 +34,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
   if (isPhone(context)) {
     rowContent.add(TableRowContent(
         name: 'ShortId',
-        width: isPhone(context) ? 15 : 10,
+        width: isPhone(context) ? 15 : 15,
         value: CircleAvatar(
           minRadius: 20,
           backgroundColor: Theme.of(context).colorScheme.secondary,

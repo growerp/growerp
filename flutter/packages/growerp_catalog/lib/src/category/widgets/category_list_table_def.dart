@@ -25,21 +25,8 @@ TableData getCategoryTableData(Bloc bloc, String classificationId,
     {dynamic extra}) {
   List<TableRowContent> rowContent = [];
   bool isPhone = isAPhone(context);
-
   rowContent.add(TableRowContent(
-      name: '',
-      width: 10,
-      value: CircleAvatar(
-        key: const Key('categoryItem'),
-        child: item.image != null
-            ? Image.memory(
-                item.image!,
-                height: 100,
-              )
-            : Text(item.categoryName.isEmpty ? '?' : item.categoryName[0]),
-      )));
-  rowContent.add(TableRowContent(
-      name: 'Id', width: 15, value: Text(item.pseudoId, key: Key("id$index"))));
+      name: 'Id', width: 10, value: Text(item.pseudoId, key: Key("id$index"))));
   rowContent.add(TableRowContent(
       name: 'Name',
       width: 35,
