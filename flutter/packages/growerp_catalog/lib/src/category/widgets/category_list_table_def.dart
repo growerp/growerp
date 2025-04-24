@@ -26,10 +26,10 @@ TableData getCategoryTableData(Bloc bloc, String classificationId,
   List<TableRowContent> rowContent = [];
   bool isPhone = isAPhone(context);
   rowContent.add(TableRowContent(
-      name: 'Id', width: 10, value: Text(item.pseudoId, key: Key("id$index"))));
+      name: 'Id', width: 15, value: Text(item.pseudoId, key: Key("id$index"))));
   rowContent.add(TableRowContent(
       name: 'Name',
-      width: 35,
+      width: 50,
       value: Text(item.categoryName, key: Key("name$index"))));
   rowContent.add(TableRowContent(
       name: '#Prd',
@@ -37,6 +37,15 @@ TableData getCategoryTableData(Bloc bloc, String classificationId,
       value: Text("${item.nbrOfProducts}",
           key: Key("products$index"), textAlign: TextAlign.center)));
 
+  rowContent.add(TableRowContent(
+    // just for testing needs key
+    name: 'ShortId',
+    width: 0,
+    value: const Text(
+      '',
+      key: Key('categoryItem'),
+    ),
+  ));
   rowContent.add(TableRowContent(
       name: '',
       width: 10,
