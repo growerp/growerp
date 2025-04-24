@@ -96,7 +96,7 @@ class CategoriesListState extends State<CategoryList> {
                             return index > categories.length
                                 ? const BottomLoader()
                                 : Dismissible(
-                                    key: const Key('locationItem'),
+                                    key: const Key('dummy'),
                                     direction: DismissDirection.startToEnd,
                                     child: BlocProvider.value(
                                         value: _categoryBloc,

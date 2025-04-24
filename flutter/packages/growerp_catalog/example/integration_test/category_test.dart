@@ -23,7 +23,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 void main() {
-  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
@@ -31,23 +31,18 @@ void main() {
   });
 
   testWidgets('''GrowERP category test''', (tester) async {
-    try {
-      RestClient restClient = RestClient(await buildDioClient());
-      await CommonTest.startTestApp(tester, generateRoute, menuOptions,
-          CatalogLocalizations.localizationsDelegates,
-          restClient: restClient,
-          blocProviders: getCatalogBlocProviders(restClient, 'AppAdmin'),
-          title: "Category test",
-          clear: true); // use data from previous run, ifnone same as true
-      await CommonTest.createCompanyAndAdmin(tester);
-      await CategoryTest.selectCategories(tester);
-      await CategoryTest.addCategories(tester, categories);
-      await CategoryTest.updateCategories(tester);
-      await CategoryTest.deleteLastCategory(tester);
-    } catch (error) {
-      await CommonTest.takeScreenShot(
-          binding: binding, tester: tester, screenShotName: "Category_Error");
-      rethrow;
-    }
+    RestClient restClient = RestClient(await buildDioClient());
+    await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+        CatalogLocalizations.localizationsDelegates,
+        restClient: restClient,
+        blocProviders: getCatalogBlocProviders(restClient, 'AppAdmin'),
+        title: "Category test",
+        clear: true); // use data from previous run, ifnone same as true
+    await CommonTest.createCompanyAndAdmin(tester);
+    await CategoryTest.selectCategories(tester);
+    await CategoryTest.addCategories(tester, categories);
+    await CategoryTest.updateCategories(tester);
+    await CategoryTest.deleteLastCategory(tester);
+    await CommonTest.logout(tester);
   });
 }
