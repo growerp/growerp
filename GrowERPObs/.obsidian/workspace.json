@@ -34,9 +34,21 @@
               "icon": "lucide-file",
               "title": "3 Moqui Backend"
             }
+          },
+          {
+            "id": "a25c69956e240099",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.8.10"
+              },
+              "icon": "lucide-book-up",
+              "title": "Release Notes 1.8.10"
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -192,7 +204,7 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "1af288ce7015b4ff",
+  "active": "a25c69956e240099",
   "lastOpenFiles": [
     "3 Technical documentation/1 Technical Introduction.md",
     "1 Introduction/2 GrowERP Introduction.md",
