@@ -39,12 +39,14 @@
             "id": "a25c69956e240099",
             "type": "leaf",
             "state": {
-              "type": "release-notes",
+              "type": "markdown",
               "state": {
-                "currentVersion": "1.8.10"
+                "file": "GrowERP documentation.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-book-up",
-              "title": "Release Notes 1.8.10"
+              "icon": "lucide-file",
+              "title": "GrowERP documentation"
             }
           }
         ],
@@ -206,13 +208,15 @@
   },
   "active": "a25c69956e240099",
   "lastOpenFiles": [
+    "End User Introduction.md",
+    "4 Applications/1 Introduction/1 Dynamic menu system.md",
+    "4 Applications/1 Introduction",
     "3 Technical documentation/1 Technical Introduction.md",
     "1 Introduction/2 GrowERP Introduction.md",
     "1 Introduction/1 Overview.md",
     "3 Technical documentation/3 Moqui Backend.md",
     "3 Technical documentation/2 Flutter frontend & development.md",
     "1 Introduction/4 Getting started.md",
-    "End User Introduction.md",
     "1 Introduction/3 Feature list.md",
     "3 Technical documentation/4 Chat Server.md",
     "1 Introduction/5 Road Map.md",
@@ -223,7 +227,7 @@
     "2 End User documentation/1 Introduction/3 General business flow.md",
     "3 Technical documentation/7 Integration tests.md",
     "4 Applications/4 workflow/Workflow data organization.md",
-    "4 Applications/3 Freelance/1 Introduction.md",
+    "4 Applications/4 Freelance/1 Introduction.md",
     "4 Applications/4 workflow",
     "4 Applications/4 Workflow.md",
     "2 End User documentation/7 Accounting/7 Item Type.md",
@@ -233,16 +237,13 @@
     "2 End User documentation/7 Accounting/8 Account type reference.md",
     "media/growerp-overview.jpg",
     "3 Technical documentation/8 Deployment.md",
-    "2 End User documentation/1 Introduction/1 Overview.md",
-    "GrowERP documentation.md",
     "2 End User documentation/9 Authentication & users",
     "2 End User documentation/5 Order management",
     "2 End User documentation/6 inventory management",
     "2 End User documentation/2 Website",
     "2 End User documentation/1 Introduction",
     "2 End User documentation/7 Accounting",
-    "4 Applications/3 Freelance",
-    "4 Applications/1 Admin",
-    "4 Applications/2 Hotel"
+    "4 Applications/4 Freelance",
+    "4 Applications/2 Admin"
   ]
 }
