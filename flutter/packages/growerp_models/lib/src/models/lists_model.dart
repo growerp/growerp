@@ -67,6 +67,17 @@ class Assets with _$Assets {
 }
 
 @freezed
+class Applications with _$Applications {
+  factory Applications({
+    @Default([]) List<Application> applications,
+  }) = _Applications;
+  Applications._();
+
+  factory Applications.fromJson(Map<String, dynamic> json) =>
+      _$ApplicationsFromJson(json);
+}
+
+@freezed
 class Users with _$Users {
   factory Users({
     @Default([]) List<User> users,

@@ -24,6 +24,8 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'router.dart' as router;
 import 'package:package_info_plus/package_info_plus.dart';
+
+import 'src/application/application.dart';
 //webactivate  import 'package:web/web.dart' as web;
 
 Future main() async {
@@ -84,5 +86,8 @@ List<LocalizationsDelegate> delegates = [
 List<BlocProvider> getAdminBlocProviders(restClient, classificationId) {
   return [
     ...getUserCompanyBlocProviders(restClient, classificationId),
+    BlocProvider<ApplicationBloc>(
+      create: (context) => ApplicationBloc(restClient),
+    ),
   ];
 }

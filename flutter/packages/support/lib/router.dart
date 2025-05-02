@@ -16,8 +16,9 @@ import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/foundation.dart' as debug;
 import 'package:flutter/material.dart';
-import 'package:growerp_user_company/growerp_user_company.dart';
-import 'package:growerp_models/growerp_models.dart';
+
+import 'menu_options.dart';
+import 'src/application/application.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (debug.kDebugMode) {
@@ -29,9 +30,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
+          settings: settings, builder: (context) => const ApplicationList());
+    case '/applications':
+      return MaterialPageRoute(
           settings: settings,
           builder: (context) =>
-              CompanyList(role: (settings.arguments as CompanyUser).role));
+              DisplayMenuOption(menuList: menuOptions, menuIndex: 1));
     default:
       return coreRoute(settings);
   }

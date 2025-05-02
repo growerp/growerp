@@ -49,7 +49,7 @@ class WsClient {
         }
       }
     }
-    logger.i('Using base websocket backend url: $wsUrl');
+    logger.i('Using base websocket backend url: $wsUrl with path: $path');
   }
 
   connect(String apiKey, String userId) async {

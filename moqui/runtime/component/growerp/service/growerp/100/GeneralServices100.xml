@@ -15,6 +15,127 @@ along with this software (see the LICENSE.md file). If not, see
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
+    <service verb="get" noun="BackendUrl">
+        <description>Get the backend url (list) for a given applicationId and version</description>
+        <in-parameters>
+            <parameter name="companyPartyId" default-value="_NA_" />
+            <parameter name="applicationId" /><!-- app name -->
+            <parameter name="version" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="backendUrl" />
+            <parameter name="applications" type="List">
+                <parameter name="application" type="Map">
+                    <parameter name="applicationId" />
+                    <parameter name="version" />
+                    <parameter name="backendUrl" />
+                    <parameter name="companyPartyId" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <log message="===${applicationId} ${version}===" />
+            <if condition="classificationId &amp;&amp; version">
+                <set field="settingValue" value="${applicationId}#${version}#%" />
+            </if>
+            <entity-find entity-name="mantle.party.PartySetting" list="urls">
+                <econdition field-name="partyId" from="companyPartyId" />
+                <econdition field-name="partySettingTypeId" value="GrowerpBackendUrl" />
+                <econdition field-name="settingValue" from="settingValue" ignore-if-empty="true"
+                    operator="like" />
+            </entity-find>
+            <log message="=====urls:=${urls}===" />
+            <if condition="applicationId &amp;&amp; version">
+                <if condition="urls">
+                    <set field="backendUrl" from="urls[0].settingValue.split('#')[2]" />
+                    <else>
+                        <log level="error"
+                            message="Could not find backend url for ${classificationId}${version}" />
+                    </else>
+                </if>
+                <else>
+                    <set field="applications" from="[]" />
+                    <iterate entry="url" list="urls">
+                        <if condition="url.settingValue?.contains('#')">
+                            <set field="application"
+                                from="[
+                                backendUrl: url.settingValue.split('#')[2],
+                                applicationId: url.settingValue.split('#')[0],
+                                version: url.settingValue.split('#')[1],
+                                companyPartyId: url.partyId]" />
+                            <script>applications.add(application)</script>
+                        </if>
+                    </iterate>
+                </else>
+            </if>
+            <log message="======backendurl:=${backendUrl}===" />
+        </actions>
+    </service>
+
+    <service verb="add" noun="Application">
+        <description>Get the backend url (list) for a given applicationId and version</description>
+        <in-parameters>
+            <parameter name="application" required="true" type="Map">
+                <parameter name="applicationId" />
+                <parameter name="version" />
+                <parameter name="backendUrl" />
+                <parameter name="companyPartyId" default-value="_NA_" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="application" type="Map">
+                <parameter name="applicationId" />
+                <parameter name="version" />
+                <parameter name="backendUrl" />
+                <parameter name="companyPartyId" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call
+                name="growerp.100.GeneralServices100.delete#Application"
+                in-map="[application: application]" />
+            <set field="settingValue"
+                value="${application.applicationId}#${application.version}#${application.backendUrl}" />
+            <service-call name="create#mantle.party.PartySetting"
+                in-map="[partyId: application.companyPartyId,
+                partySettingTypeId: 'GrowerpBackendUrl',
+                settingValue: settingValue]"
+                out-map="context" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="Application">
+        <description>Get the backend url (list) for a given applicationId and version</description>
+        <in-parameters>
+            <parameter name="application" required="true" type="Map">
+                <parameter name="applicationId" />
+                <parameter name="version" />
+                <parameter name="backendUrl" />
+                <parameter name="companyPartyId" default-value="_NA_" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="application">
+                <parameter name="applicationId" />
+                <parameter name="version" />
+                <parameter name="backendUrl" />
+                <parameter name="companyPartyId" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.party.PartySetting" list="urls">
+                <econdition field-name="partyId" from="application.companyPartyId" />
+                <econdition field-name="partySettingTypeId" value="GrowerpBackendUrl" />
+                <econdition field-name="settingValue"
+                    value="${application.applicationId}#${application.version}#%"
+                    operator="like" />
+            </entity-find>
+            <if condition="urls">
+                <entity-delete value-field="urls[0]" />
+            </if>
+        </actions>
+    </service>
+
     <service verb="getNext" noun="PseudoId">
         <in-parameters>
             <parameter name="ownerPartyId" required="true" />

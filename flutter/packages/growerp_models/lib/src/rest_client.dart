@@ -67,6 +67,16 @@ abstract class RestClient {
   Future<Authenticate> getAuthenticate(
       {@Query('classificationId') required String classificationId});
 
+  // backend application url override
+  @GET("rest/s1/growerp/100/Application")
+  Future<Applications> getApplication();
+
+  @POST("rest/s1/growerp/100/Application")
+  Future<Application> createApplication(@Field() Application application);
+
+  @DELETE("rest/s1/growerp/100/Application")
+  Future<Application> deleteApplication(@Field() Application application);
+
   // company
   @GET("rest/s1/growerp/100/CompanyFromHost")
   @Extra({'noApiKey': true})
