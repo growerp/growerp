@@ -14,6 +14,10 @@ along with this software (see the LICENSE.md file). If not, see
 -->
 <entity-facade-xml type="seed">
     <!-- owner party type -->
+
+    <mantle.party.PartySettingType partySettingTypeId="GrowerpBackendUrl"
+        description="GrowERP backend url" />
+
     <moqui.basic.Enumeration description="Owner" enumId="PtyOwner" enumTypeId="PartyType" />
 
     <moqui.basic.Enumeration enumCode="product_store_id_from_hostname"

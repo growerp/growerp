@@ -16,6 +16,8 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import 'src/application/application.dart';
+
 List<MenuOption> menuOptions = [
   MenuOption(
     image: 'packages/growerp_core/images/dashBoardGrey.png',
@@ -27,5 +29,13 @@ List<MenuOption> menuOptions = [
       mainOnly: true,
       role: Role.unknown,
     ),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/productsGrey.png',
+    selectedImage: 'packages/growerp_core/images/products.png',
+    title: 'Applications',
+    route: '/applications',
+    userGroups: [UserGroup.system],
+    child: const ApplicationList(),
   ),
 ];

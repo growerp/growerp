@@ -12,6 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -25,7 +27,6 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'menu_options.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'router.dart' as router;
@@ -44,25 +45,37 @@ Future main() async {
   GlobalConfiguration().updateValue('version', packageInfo.version);
   GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
-  // can change backend url by pressing long the title on the home screen.
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String ip = prefs.getString('ip') ?? '';
-  String chat = prefs.getString('chat') ?? '';
-  String singleCompany = prefs.getString('companyPartyId') ?? '';
-  if (ip.isNotEmpty) {
-    late http.Response response;
-    try {
-      response = await http.get(Uri.parse('${ip}rest/s1/growerp/Ping'));
-      if (response.statusCode == 200) {
-        GlobalConfiguration().updateValue('databaseUrl', ip);
-        GlobalConfiguration().updateValue('chatUrl', chat);
-        GlobalConfiguration().updateValue('singleCompany', singleCompany);
-        debugPrint(
-            '=== New ip: $ip , chat: $chat company: $singleCompany Updated!');
-      }
-    } catch (error) {
-      debugPrint('===$ip does not respond...not updating databaseUrl: $error');
+  // check if there is override for the production(now test) backend url
+  late http.Response response;
+  try {
+    late String backendBaseUrl, backendUrl, databaseUrl, chatUrl, secure;
+    if (kDebugMode) {
+      backendBaseUrl = 'http://localhost:8080';
+      databaseUrl = 'databaseUrlDebug';
+      chatUrl = 'chatUrlDebug';
+      secure = '';
+    } else {
+      // now at 'org' = test but when in production should be 'com'
+      backendBaseUrl = 'https://backend.growerp.org';
+      databaseUrl = 'databaseUrl';
+      chatUrl = 'chatUrl';
+      secure = 's';
     }
+    backendUrl = '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version='
+        '${packageInfo.version}&applicationId=App${packageInfo.appName}';
+    response = await http.get(Uri.parse(backendUrl));
+
+    String? appBackendUrl = jsonDecode(response.body)['backendUrl'];
+    debugPrint(
+        "===get backend url: $appBackendUrl resp: ${response.statusCode}");
+    if (response.statusCode == 200 && appBackendUrl != null) {
+      GlobalConfiguration().updateValue(databaseUrl,
+          "http$secure://${jsonDecode(response.body)['backendUrl']}");
+      GlobalConfiguration().updateValue(
+          chatUrl, "ws$secure://${jsonDecode(response.body)['backendUrl']}");
+    }
+  } catch (error) {
+    debugPrint('===get backend url does not respond...could not find: $error');
   }
 
   await Hive.initFlutter();
@@ -81,8 +94,6 @@ Future main() async {
     //webactivate  hostName = web.window.location.hostname;
     // ignore: unnecessary_null_comparison
     if (hostName != null) {
-      // ignore: avoid_print
-      print("=====hostname: $hostName");
       try {
         company = await restClient.getCompanyFromHost(hostName);
       } on DioException catch (e) {
@@ -92,7 +103,6 @@ Future main() async {
     }
   }
 
-  //company = Company(partyId: '100002', name: 'hallo hallo');
   runApp(TopApp(
     restClient: restClient,
     classificationId: classificationId,

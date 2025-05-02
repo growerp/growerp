@@ -25,6 +25,7 @@ export 'country_model.dart';
 export 'stats_model.dart';
 export 'save_test_model.dart';
 export 'asset_model.dart';
+export 'application_model.dart';
 export 'time_entry_model.dart';
 export 'chat_message_model.dart';
 export 'chat_room_model.dart';

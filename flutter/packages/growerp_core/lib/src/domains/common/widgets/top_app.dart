@@ -155,8 +155,6 @@ class TopApp extends StatelessWidget {
                                   // scaffold need for messages
                                   backgroundColor: Colors.transparent,
                                   body: Container());
-                            case AuthStatus.changeIp:
-                              return const ChangeIpForm();
                             default:
                               return HomeForm(
                                   menuOptions: menuOptions, title: title);

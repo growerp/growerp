@@ -27,6 +27,11 @@ dependencies:
   flutter_bloc: ^8.1.4
   dio: ^5.4.3
   http: ^1.1.2
+  two_dimensional_scrollables: ^0.3.4
+  bloc_concurrency: ^0.2.5
+  equatable: ^2.0.7
+  stream_transform: ^2.1.1
+  
 
 dev_dependencies:
   flutter_test:
