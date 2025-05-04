@@ -23,7 +23,6 @@ class Application with _$Application {
     @Default("") String applicationId,
     String? version, // room, table etc
     String? backendUrl, // include room number/name
-    String? companyPartyId,
   }) = _Application;
   Application._();
 
@@ -33,6 +32,5 @@ class Application with _$Application {
   @override
   String toString() => 'Application: $applicationId '
       'Version: $version '
-      'BackendUrl: $backendUrl '
-      'CompanyPartyId: $companyPartyId';
+      'BackendUrl: $backendUrl ';
 }

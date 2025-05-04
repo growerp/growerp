@@ -87,6 +87,7 @@ class ApplicationDialogState extends State<ApplicationDialog> {
             child: Column(children: [
               const SizedBox(height: 30),
               TextFormField(
+                enabled: false,
                 key: const Key('Id'),
                 decoration: const InputDecoration(labelText: 'Application Id'),
                 controller: _idController,
