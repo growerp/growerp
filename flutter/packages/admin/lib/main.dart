@@ -45,6 +45,8 @@ Future main() async {
   GlobalConfiguration().updateValue('version', packageInfo.version);
   GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
+  String classificationId = GlobalConfiguration().get("classificationId");
+
   // check if there is override for the production(now test) backend url
   late http.Response response;
   try {
@@ -62,7 +64,7 @@ Future main() async {
       secure = 's';
     }
     backendUrl = '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version='
-        '${packageInfo.version}&applicationId=App${packageInfo.appName}';
+        '${packageInfo.version}&applicationId=$classificationId}';
     response = await http.get(Uri.parse(backendUrl));
 
     String? appBackendUrl = jsonDecode(response.body)['backendUrl'];
@@ -86,7 +88,6 @@ Future main() async {
   RestClient restClient = RestClient(await buildDioClient());
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
-  String classificationId = GlobalConfiguration().get("classificationId");
 
   Company? company;
   if (kIsWeb) {

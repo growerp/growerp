@@ -18,7 +18,6 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="get" noun="BackendUrl">
         <description>Get the backend url (list) for a given applicationId and version</description>
         <in-parameters>
-            <parameter name="companyPartyId" default-value="_NA_" />
             <parameter name="applicationId" /><!-- app name -->
             <parameter name="version" />
         </in-parameters>
@@ -34,41 +33,44 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <log message="===${applicationId} ${version}===" />
-            <if condition="classificationId &amp;&amp; version">
-                <set field="settingValue" value="${applicationId}#${version}#%" />
+            <if condition="application?.applicationId &amp;&amp; application?.version">
+                <set field="standardCode" value="${version}#%" />
+                <set field="applicationId" from="application.applicationId" />
             </if>
-            <entity-find entity-name="mantle.party.PartySetting" list="urls">
-                <econdition field-name="partyId" from="companyPartyId" />
-                <econdition field-name="partySettingTypeId" value="GrowerpBackendUrl" />
-                <econdition field-name="settingValue" from="settingValue" ignore-if-empty="true"
+            <entity-find entity-name="mantle.party.PartyClassification" list="urls">
+                <econdition field-name="partyClassificationId" from="applicationId"
+                    ignore-if-empty="true" />
+                <econdition field-name="classificationTypeEnumId" value="PcltMobileApp" />
+                <econdition field-name="standardCode" from="standardCode" ignore-if-empty="true"
                     operator="like" />
             </entity-find>
-            <log message="=====urls:=${urls}===" />
             <if condition="applicationId &amp;&amp; version">
                 <if condition="urls">
-                    <set field="backendUrl" from="urls[0].settingValue.split('#')[2]" />
+                    <set field="backendUrl" from="urls[0].standardCode.split('#')[1]" />
                     <else>
                         <log level="error"
-                            message="Could not find backend url for ${classificationId}${version}" />
+                            message="Could not find backend url for ${application.applicationId} ${version}" />
                     </else>
                 </if>
                 <else>
                     <set field="applications" from="[]" />
                     <iterate entry="url" list="urls">
-                        <if condition="url.settingValue?.contains('#')">
+                        <if condition="url.standardCode?.contains('#')">
                             <set field="application"
                                 from="[
-                                backendUrl: url.settingValue.split('#')[2],
-                                applicationId: url.settingValue.split('#')[0],
-                                version: url.settingValue.split('#')[1],
-                                companyPartyId: url.partyId]" />
-                            <script>applications.add(application)</script>
+                                applicationId: url.partyClassificationId.substring(3),
+                                version: url.standardCode.split('#')[0],
+                                backendUrl: url.standardCode.split('#')[1]]" />
+                            <else>
+                                <set field="application"
+                                    from="[
+                                    applicationId: url.partyClassificationId.substring(3)]" />
+                            </else>
                         </if>
+                        <script>applications.add(application)</script>
                     </iterate>
                 </else>
             </if>
-            <log message="======backendurl:=${backendUrl}===" />
         </actions>
     </service>
 
@@ -79,7 +81,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="applicationId" />
                 <parameter name="version" />
                 <parameter name="backendUrl" />
-                <parameter name="companyPartyId" default-value="_NA_" />
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -87,20 +88,25 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="applicationId" />
                 <parameter name="version" />
                 <parameter name="backendUrl" />
-                <parameter name="companyPartyId" />
             </parameter>
         </out-parameters>
         <actions>
-            <service-call
-                name="growerp.100.GeneralServices100.delete#Application"
-                in-map="[application: application]" />
-            <set field="settingValue"
-                value="${application.applicationId}#${application.version}#${application.backendUrl}" />
-            <service-call name="create#mantle.party.PartySetting"
-                in-map="[partyId: application.companyPartyId,
-                partySettingTypeId: 'GrowerpBackendUrl',
-                settingValue: settingValue]"
-                out-map="context" />
+            <set field="standardCode" value="${version}#%" />
+            <entity-find entity-name="mantle.party.PartyClassification" list="urls"
+                for-update="true">
+                <econdition field-name="partyClassificationId"
+                    from="'App' + application.applicationId" />
+                <econdition field-name="classificationTypeEnumId" value="PcltMobileApp" />
+            </entity-find>
+            <if condition="urls">
+                <set field="urls[0].standardCode"
+                    value="${application.version}#${application.backendUrl}" />
+                <entity-update value-field="urls[0]" />
+                <else>
+                    <log level="error"
+                        message="Could not find backend url for ${application.applicationId}" />
+                </else>
+            </if>
         </actions>
     </service>
 
@@ -111,7 +117,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="applicationId" />
                 <parameter name="version" />
                 <parameter name="backendUrl" />
-                <parameter name="companyPartyId" default-value="_NA_" />
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -119,19 +124,18 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="applicationId" />
                 <parameter name="version" />
                 <parameter name="backendUrl" />
-                <parameter name="companyPartyId" />
             </parameter>
         </out-parameters>
         <actions>
-            <entity-find entity-name="mantle.party.PartySetting" list="urls">
-                <econdition field-name="partyId" from="application.companyPartyId" />
-                <econdition field-name="partySettingTypeId" value="GrowerpBackendUrl" />
-                <econdition field-name="settingValue"
-                    value="${application.applicationId}#${application.version}#%"
-                    operator="like" />
+            <entity-find entity-name="mantle.party.PartyClassification" list="urls"
+                for-update="true">
+                <econdition field-name="partyClassificationId"
+                    from="'App' + application.applicationId" />
+                <econdition field-name="classificationTypeEnumId" value="PcltMobileApp" />
             </entity-find>
             <if condition="urls">
-                <entity-delete value-field="urls[0]" />
+                <set field="urls[0].standardCode" value="null" />
+                <entity-update value-field="urls[0]" />
             </if>
         </actions>
     </service>

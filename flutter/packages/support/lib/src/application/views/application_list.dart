@@ -133,71 +133,7 @@ class ApplicationsListState extends State<ApplicationList> {
                       Text('failed to fetch applications: ${state.message}'));
             case ApplicationStatus.success:
               applications = state.applications;
-              return Stack(children: [
-                tableView(),
-                Positioned(
-                  right: right,
-                  bottom: bottom,
-                  child: GestureDetector(
-                    onPanUpdate: (details) {
-                      setState(() {
-                        right = right! - details.delta.dx;
-                        bottom -= details.delta.dy;
-                      });
-                    },
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          FloatingActionButton(
-                              key: const Key("search"),
-                              heroTag: "btn1",
-                              onPressed: () async {
-                                // find application id to show
-                                await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      // search separate from applicationBloc
-                                      return BlocProvider.value(
-                                          value: context
-                                              .read<DataFetchBloc<Locations>>(),
-                                          child: const SearchApplicationList());
-                                    }).then((value) async => value != null &&
-                                        context.mounted
-                                    ?
-                                    // show detail page
-                                    await showDialog(
-                                        barrierDismissible: true,
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return BlocProvider.value(
-                                              value: _applicationBloc,
-                                              child: ApplicationDialog(value));
-                                        })
-                                    : const SizedBox.shrink());
-                              },
-                              child: const Icon(Icons.search)),
-                          const SizedBox(height: 10),
-                          FloatingActionButton(
-                              heroTag: 'appNew',
-                              key: const Key("addNew"),
-                              onPressed: () async {
-                                await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return BlocProvider.value(
-                                          value: _applicationBloc,
-                                          child:
-                                              ApplicationDialog(Application()));
-                                    });
-                              },
-                              tooltip: 'Add New',
-                              child: const Icon(Icons.add)),
-                        ]),
-                  ),
-                ),
-              ]);
+              return tableView();
             default:
               return const Center(child: LoadingIndicator());
           }

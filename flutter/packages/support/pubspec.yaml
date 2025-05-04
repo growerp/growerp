@@ -31,6 +31,7 @@ dependencies:
   bloc_concurrency: ^0.2.5
   equatable: ^2.0.7
   stream_transform: ^2.1.1
+  dropdown_search: ^5.0.6
   
 
 dev_dependencies:
