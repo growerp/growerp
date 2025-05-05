@@ -48,37 +48,7 @@ Future main() async {
   String classificationId = GlobalConfiguration().get("classificationId");
 
   // check if there is override for the production(now test) backend url
-  late http.Response response;
-  try {
-    late String backendBaseUrl, backendUrl, databaseUrl, chatUrl, secure;
-    if (kDebugMode) {
-      backendBaseUrl = 'http://localhost:8080';
-      databaseUrl = 'databaseUrlDebug';
-      chatUrl = 'chatUrlDebug';
-      secure = '';
-    } else {
-      // now at 'org' = test but when in production should be 'com'
-      backendBaseUrl = 'https://backend.growerp.org';
-      databaseUrl = 'databaseUrl';
-      chatUrl = 'chatUrl';
-      secure = 's';
-    }
-    backendUrl = '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version='
-        '${packageInfo.version}&applicationId=$classificationId';
-    response = await http.get(Uri.parse(backendUrl));
-
-    String? appBackendUrl = jsonDecode(response.body)['backendUrl'];
-    debugPrint(
-        "===get backend url: $appBackendUrl resp: ${response.statusCode}");
-    if (response.statusCode == 200 && appBackendUrl != null) {
-      GlobalConfiguration().updateValue(databaseUrl,
-          "http$secure://${jsonDecode(response.body)['backendUrl']}");
-      GlobalConfiguration().updateValue(
-          chatUrl, "ws$secure://${jsonDecode(response.body)['backendUrl']}");
-    }
-  } catch (error) {
-    debugPrint('===get backend url does not respond...could not find: $error');
-  }
+  await getBackendUrlOverride(classificationId, packageInfo.version);
 
   await Hive.initFlutter();
 

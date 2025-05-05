@@ -39,13 +39,16 @@ Future main() async {
   GlobalConfiguration().updateValue('version', packageInfo.version);
   GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
+  String classificationId = GlobalConfiguration().get("classificationId");
+  // check if there is override for the production(now test) backend url
+  await getBackendUrlOverride(classificationId, packageInfo.version);
+
   await Hive.initFlutter();
 
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
-  String classificationId = GlobalConfiguration().get("classificationId");
 
   Company? company;
   if (kIsWeb) {

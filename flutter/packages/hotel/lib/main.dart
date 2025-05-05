@@ -45,6 +45,10 @@ Future main() async {
   GlobalConfiguration().updateValue('version', packageInfo.version);
   GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
+  String classificationId = GlobalConfiguration().get("classificationId");
+  // check if there is override for the production(now test) backend url
+  await getBackendUrlOverride(classificationId, packageInfo.version);
+
   String ip = prefs.getString('ip') ?? '';
   String chat = prefs.getString('chat') ?? '';
   String singleCompany = prefs.getString('companyPartyId') ?? '';
@@ -74,7 +78,6 @@ Future main() async {
   RestClient restClient = RestClient(await buildDioClient());
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
-  String classificationId = GlobalConfiguration().get("classificationId");
 
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(

@@ -153,8 +153,6 @@
             "args": [
                 "-d",
                 "chrome",
-                "--web-renderer",
-                "auto",
                 "--web-port",
                 "55555"
             ]
@@ -175,8 +173,6 @@
             "args": [
                 "-d",
                 "chrome",
-                "--web-renderer",
-                "auto",
                 "--web-port",
                 "55555"
             ]
