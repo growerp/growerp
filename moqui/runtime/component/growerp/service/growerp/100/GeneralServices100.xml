@@ -33,23 +33,45 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <if condition="application?.applicationId &amp;&amp; application?.version">
-                <set field="standardCode" value="${version}#%" />
-                <set field="applicationId" from="application.applicationId" />
-            </if>
             <entity-find entity-name="mantle.party.PartyClassification" list="urls">
                 <econdition field-name="partyClassificationId" from="applicationId"
                     ignore-if-empty="true" />
                 <econdition field-name="classificationTypeEnumId" value="PcltMobileApp" />
-                <econdition field-name="standardCode" from="standardCode" ignore-if-empty="true"
-                    operator="like" />
             </entity-find>
             <if condition="applicationId &amp;&amp; version">
-                <if condition="urls">
-                    <set field="backendUrl" from="urls[0].standardCode.split('#')[1]" />
+                <if condition="urls &amp;&amp; urls[0].standardCode?.contains('#')">
+                    <set field="versionDb" from="urls[0].standardCode.split('#')[0]" />
+                    <set field="majorVersion" from="versionDb.split('\\.')[0]" type="Integer" />
+                    <set field="minorVersion" from="versionDb.split('\\.')[1]" type="Integer" />
+                    <set field="patchVersion" from="versionDb.split('\\.')[2]" type="Integer" />
+                    <set field="majorVersionIn" from="version.split('\\.')[0]"
+                        type="Integer" />
+                    <set field="minorVersionIn" from="version.split('\\.')[1]"
+                        type="Integer" />
+                    <set field="patchVersionIn" from="version.split('\\.')[2]"
+                        type="Integer" />
+                    <set field="less" from="false" type="Boolean" />
+                    <if condition="majorVersion &lt; majorVersionIn ">
+                        <set field="less" from="true" />
+                        <else>
+                            <if condition="minorVersion &lt; minorVersionIn">
+                                <set field="less" from="true" />
+                                <else>
+                                    <if condition="patchVersion &lt;= patchVersionIn">
+                                        <set field="less" from="true" />
+                                    </if>
+                                </else>
+                            </if>
+                        </else>
+                    </if>
+                    <if condition="less">
+                        <set field="backendUrl"
+                            from="urls[0].standardCode.split('#')[1]" />
+                        <log message="====sending backend url: $backendUrl" />
+                    </if>
                     <else>
-                        <log level="error"
-                            message="Could not find backend url for ${application.applicationId} ${version}" />
+                        <log level="info"
+                            message="Could not find override backend url for $applicationId $version" />
                     </else>
                 </if>
                 <else>

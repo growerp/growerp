@@ -64,7 +64,7 @@ Future main() async {
       secure = 's';
     }
     backendUrl = '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version='
-        '${packageInfo.version}&applicationId=$classificationId}';
+        '${packageInfo.version}&applicationId=$classificationId';
     response = await http.get(Uri.parse(backendUrl));
 
     String? appBackendUrl = jsonDecode(response.body)['backendUrl'];
