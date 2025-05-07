@@ -632,7 +632,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <iterate list="rowsList" entry="row">
                     <set field="csvCells" from="[]" />
                     <iterate list="row" entry="cell">
-                        <script>csvCells.add(cell.toString())</script>
+                        <script>csvCells.add(cell.toString().replaceAll('-',''))</script>
                     </iterate>
                     <script>csvRows.add(csvCells)</script>
                 </iterate>

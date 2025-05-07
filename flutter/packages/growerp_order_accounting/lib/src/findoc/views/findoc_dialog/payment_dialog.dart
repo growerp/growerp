@@ -360,7 +360,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                           value: item,
                           child: Text(
                               "${item.paymentTypeName} ${item.accountCode} "
-                              "Apply:${item.isApplied ? 'Y' : 'N'}\n"
+                              "Apply: ${item.isApplied ? 'Y' : 'N'} ${isPhone ? '\n' : ''}"
                               "${item.accountName}",
                               overflow: TextOverflow.ellipsis,
                               maxLines: 2));

@@ -57,6 +57,8 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
   var liability = Decimal.parse('0');
   var income = Decimal.parse('0');
   late TimePeriod _selectedPeriod;
+  late double bottom;
+  double? right;
 
   @override
   void initState() {
@@ -70,11 +72,13 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
     level = 0;
     expanded = false;
     _controller!.expandNode(const Key('ASSETS'));
+    bottom = 50;
   }
 
   @override
   Widget build(BuildContext context) {
     final isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    right = right ?? (isPhone ? 20 : 50);
     //convert balanceSheetDetail list into TreeNodes
     Iterable<TreeNode> convert(List<GlAccount> glAccounts) {
       // convert single leaf/balanceSheetDetail
@@ -394,80 +398,86 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                 ]),
               ),
               Positioned(
-                bottom: 16,
-                right: 16,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Only show buttons for period types that are not currently selected
-                    // Year button
-                    if (_selectedPeriod.periodType != 'Y')
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: FloatingActionButton(
-                          heroTag: 'yearButton',
-                          mini: true,
-                          backgroundColor: Colors.blue,
-                          child: const Text(
-                            'Y',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                  right: right,
+                  bottom: bottom,
+                  child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          right = right! - details.delta.dx;
+                          bottom -= details.delta.dy;
+                        });
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Only show buttons for period types that are not currently selected
+                          // Year button
+                          if (_selectedPeriod.periodType != 'Y')
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: FloatingActionButton(
+                                heroTag: 'yearButton',
+                                mini: true,
+                                backgroundColor: Colors.blue,
+                                child: const Text(
+                                  'Y',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                onPressed: () => _ledgerBloc.add(LedgerFetch(
+                                    ReportType.sheet,
+                                    periodName: _selectedPeriod.periodName
+                                        .substring(0, 5))),
+                              ),
                             ),
-                          ),
-                          onPressed: () => _ledgerBloc.add(LedgerFetch(
-                              ReportType.sheet,
-                              periodName:
-                                  _selectedPeriod.periodName.substring(0, 5))),
-                        ),
-                      ),
-                    // Quarter button
-                    if (_selectedPeriod.periodType != 'Q')
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: FloatingActionButton(
-                          heroTag: 'quarterButton',
-                          mini: true,
-                          backgroundColor: Colors.green,
-                          child: const Text(
-                            'Q',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                          // Quarter button
+                          if (_selectedPeriod.periodType != 'Q')
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: FloatingActionButton(
+                                heroTag: 'quarterButton',
+                                mini: true,
+                                backgroundColor: Colors.green,
+                                child: const Text(
+                                  'Q',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  String currentQuarter = formatter
+                                      .format(DateTime.now().month / 4 + 1);
+                                  _ledgerBloc.add(LedgerFetch(ReportType.sheet,
+                                      periodName:
+                                          '${_selectedPeriod.periodName.substring(0, 5)}'
+                                          'q$currentQuarter'));
+                                },
+                              ),
                             ),
-                          ),
-                          onPressed: () {
-                            String currentQuarter =
-                                formatter.format(DateTime.now().month / 4 + 1);
-                            _ledgerBloc.add(LedgerFetch(ReportType.sheet,
-                                periodName:
-                                    '${_selectedPeriod.periodName.substring(0, 5)}'
-                                    'q$currentQuarter'));
-                          },
-                        ),
-                      ),
-                    // Month button
-                    if (_selectedPeriod.periodType != 'M')
-                      FloatingActionButton(
-                        heroTag: 'monthButton',
-                        mini: true,
-                        backgroundColor: Colors.orange,
-                        child: const Text(
-                          'M',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        onPressed: () => _ledgerBloc.add(LedgerFetch(
-                            ReportType.sheet,
-                            periodName:
-                                '${_selectedPeriod.periodName.substring(0, 5)}'
-                                'm${formatter.format(DateTime.now().month)}')),
-                      ),
-                  ],
-                ),
-              ),
+                          // Month button
+                          if (_selectedPeriod.periodType != 'M')
+                            FloatingActionButton(
+                              heroTag: 'monthButton',
+                              mini: true,
+                              backgroundColor: Colors.orange,
+                              child: const Text(
+                                'M',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              onPressed: () => _ledgerBloc.add(LedgerFetch(
+                                  ReportType.sheet,
+                                  periodName:
+                                      '${_selectedPeriod.periodName.substring(0, 5)}'
+                                      'm${formatter.format(DateTime.now().month)}')),
+                            ),
+                        ],
+                      )))
             ],
           );
         case LedgerStatus.failure:

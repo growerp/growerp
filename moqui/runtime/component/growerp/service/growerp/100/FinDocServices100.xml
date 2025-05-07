@@ -1716,6 +1716,7 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
                 in-map="[finDocId: finDocId, docType: finDoc.docType, sales: finDoc.sales]" />
             <set field="finDoc" from="finDocs[0]" />
+            <log message="====finDoc created: $finDoc" />
         </actions>
     </service>
 
@@ -1921,6 +1922,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="paymentId" />
         </out-parameters>
         <actions>
+            <log message="====creating payment: $payment" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="payment.sales == true">

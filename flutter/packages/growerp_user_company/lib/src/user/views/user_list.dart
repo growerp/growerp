@@ -16,6 +16,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -39,8 +40,8 @@ class UserListState extends State<UserList> {
   bool showSearchField = false;
   String searchString = '';
   bool hasReachedMax = false;
-  late bool isPhone;
-  late double top, left;
+  late double bottom;
+  double? right;
 
   @override
   void initState() {
@@ -68,13 +69,13 @@ class UserListState extends State<UserList> {
         _userBloc = (context.read<UserBloc>())
           ..add(const UserFetch(refresh: true));
     }
-    top = 450;
-    left = 320;
+    bottom = 50;
   }
 
   @override
   Widget build(BuildContext context) {
-    isPhone = isAPhone(context);
+    final isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    right = right ?? (isPhone ? 20 : 50);
     return Builder(builder: (BuildContext context) {
       Widget tableView() {
         if (users.isEmpty) {
@@ -169,13 +170,13 @@ class UserListState extends State<UserList> {
             children: [
               tableView(),
               Positioned(
-                left: left,
-                top: top,
+                right: right,
+                bottom: bottom,
                 child: GestureDetector(
                   onPanUpdate: (details) {
                     setState(() {
-                      left += details.delta.dx;
-                      top += details.delta.dy;
+                      right = right! - details.delta.dx;
+                      bottom -= details.delta.dy;
                     });
                   },
                   child: Column(
