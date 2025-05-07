@@ -1,5 +1,16 @@
 # Upload a new version to the appstore:
 
+
+## flutter method upload:
+
+1. set production url in assets/appsettings.json
+2. in the app directory: flutter build ipa
+3. get Transporter MacOs application
+4. drop build/ios/ipa/*.ipa on to the Transporter
+
+
+
+## general
 start emulators from command line:
 flutter emulators --launch pixel
 
