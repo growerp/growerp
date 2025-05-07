@@ -8,7 +8,7 @@
     "backend": "moqui",
     "_________________comment__release to be used with docker locally ": "https://rest.example.com",
     "databaseUrl": "https://backend.growerp.local",
-    "chatUrl": "wss://backend.growerp.local",
+    "chatUrl": "wss://backend.growerp.com",
     "databaseUrlDebug": "",
     "chatUrlDebug": "",
     "____________": "show debug banner on top right ",
