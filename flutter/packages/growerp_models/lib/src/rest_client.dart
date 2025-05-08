@@ -554,9 +554,9 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/ImportExport/glAccounts")
   Future<String> importGlAccounts(@Field() List<GlAccount> glAccounts);
 
-  @GET("rest/s1/growerp/100/exportGlAccounts")
+  @GET("rest/s1/growerp/100/ImportExport")
   Future<String> exportGlAccounts(
-      {@Query('entityName') String entityName = 'glAccount'});
+      {@Query('entityName') String entityName = 'GlAccount'});
 
   @POST("rest/s1/growerp/100/ImportExport/companies")
   Future<void> importCompanies(@Field() List<Company> companies);

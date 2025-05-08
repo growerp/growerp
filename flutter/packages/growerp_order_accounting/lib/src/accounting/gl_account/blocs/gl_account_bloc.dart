@@ -153,21 +153,22 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
       final result = fast_csv.parse(event.file);
       // import csv into glAccounts
       for (final row in result) {
-        if (row == result.first) continue;
+        if (row == result.first || row[0] == "        ") continue;
         glAccounts.add(GlAccount(
             accountCode: row[0],
             accountName: row[1],
+            isDebit: row[2] == 'true' ? true : false,
             accountClass:
-                row[2] != '' ? AccountClass(description: row[2]) : null,
-            accountType: row[3] != '' ? AccountType(description: row[3]) : null,
-            postedBalance: row[4] != '' ? Decimal.parse(row[4]) : null));
+                row[3] != '' ? AccountClass(description: row[3]) : null,
+            accountType: row[4] != '' ? AccountType(description: row[4]) : null,
+            postedBalance: row[5].isNotEmpty ? Decimal.parse(row[5]) : null));
       }
 
-      String compResult = await restClient.importGlAccounts(glAccounts);
+      await restClient.importGlAccounts(glAccounts);
       return emit(state.copyWith(
           status: GlAccountStatus.success,
           glAccounts: state.glAccounts,
-          message: compResult));
+          message: "Gl account upload ended successfully"));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: GlAccountStatus.failure,
