@@ -1804,9 +1804,6 @@ along with this software (see the LICENSE.md file). If not, see
         <description>
             Get ledger Gl Accounts information into a CSV file attachement
         </description>
-        <in-parameters>
-            <parameter name="classificationId" />
-        </in-parameters>
         <out-parameters>
             <parameter name="fileText" />
         </out-parameters>
@@ -1814,7 +1811,6 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="growerp.100.AccountingServices100.get#GlAccount"
                 in-map="[limit: 999]"
                 out-map="context" />
-            <set field="fileText" value="" />
             <script><![CDATA[
                 import org.apache.commons.csv.CSVPrinter
                 import org.apache.commons.csv.CSVFormat
@@ -1823,7 +1819,7 @@ along with this software (see the LICENSE.md file). If not, see
                 StringBuilder outSb = new StringBuilder()
                 CSVPrinter printer = CSVFormat.DEFAULT.withHeader(
                     "id", "name", "isDebit", "class", "type","postedBalance").print(outSb)
-                for (Map item in glAccountList) {
+                for (Map item in glAccounts) {
                     printer.printRecord(item.accountCode,
                                         item.accountName,
                                         item.isDebit,
@@ -1841,7 +1837,7 @@ along with this software (see the LICENSE.md file). If not, see
         <description> Export general entities</description>
         <in-parameters>
             <parameter name="entityName" required="true" />
-            <parameter name="classificationId" required="true" />
+            <parameter name="classificationId" /><!-- not needed for gl accounts-->
         </in-parameters>
         <actions>
             <set field="emailAddress" from="ec.user.userAccount.emailAddress" />
@@ -1853,20 +1849,26 @@ along with this software (see the LICENSE.md file). If not, see
                         toAddresses: emailAddress, bodyParameters: bodyParameters]"
                     out-map="context" />
                 <message public="true" type="success">A Categories CSV file was sent by email to ${userAccount.emailAddress}.</message>
-            </if>
-            <if condition="entityName == 'Product'">
-                <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true"
-                    in-map="[emailTemplateId: 'GrowerpExportProducts',
+                <else-if condition="entityName == 'Product'">
+                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
+                        async="true"
+                        in-map="[emailTemplateId: 'GrowerpExportProducts',
                         toAddresses: emailAddress, bodyParameters: bodyParameters]"
-                    out-map="context" />
-                <message public="true" type="success">A Products CSV file was sent by email to ${userAccount.emailAddress}.</message>
-            </if>
-            <if condition="entityName == 'GlAccount'">
-                <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true"
-                    in-map="[emailTemplateId: 'GrowerpExportGlAccounts',
+                        out-map="context" />
+                    <message public="true" type="success">A Products CSV file was sent by email to ${userAccount.emailAddress}.</message>
+                </else-if>
+                <else-if condition="entityName == 'GlAccount'">
+                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
+                        async="true"
+                        in-map="[emailTemplateId: 'GrowerpExportGlAccounts',
                         toAddresses: emailAddress, bodyParameters: bodyParameters]"
-                    out-map="context" />
-                <message public="true" type="success">A GlAccount CSV file was sent by email to ${userAccount.emailAddress}.</message>
+                        out-map="context" />
+                    <message public="true" type="success">A GlAccount CSV file was sent by email to ${userAccount.emailAddress}.</message>
+                </else-if>
+                <else>
+                    <return error="true"
+                        message="Entity name [${entityName}] not supported for export." />
+                </else>
             </if>
         </actions>
     </service>

@@ -20,7 +20,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <html><body>
                 Please find attached the Ledger Gl Accounts CSV file you requested.
                 <br/><br/>
-                Regards, <br/> The Growerp-${classification} Team!
+                Regards, <br/> The Growerp Team!
                 </body></html>
             ]]></text></render-mode>
     </widgets>

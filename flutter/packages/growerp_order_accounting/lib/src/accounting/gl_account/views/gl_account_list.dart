@@ -118,7 +118,7 @@ class GlAccountsState extends State<GlAccountList> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         FloatingActionButton(
-                            heroTag: 'productFiles',
+                            heroTag: 'glAccountFiles',
                             key: const Key("upDownload"),
                             onPressed: () async {
                               await showDialog(
@@ -130,7 +130,7 @@ class GlAccountsState extends State<GlAccountList> {
                                         child: const GlAccountFilesDialog());
                                   });
                             },
-                            tooltip: 'products up/download',
+                            tooltip: 'GL Accounts up/download',
                             child: const Icon(Icons.file_copy)),
                         const SizedBox(height: 10),
                         FloatingActionButton(
