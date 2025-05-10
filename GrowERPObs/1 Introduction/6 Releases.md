@@ -1,5 +1,18 @@
 # Releases
 
+# Completed Essential functionality version 1.8.21
+
+1. Removed separated chat server now part of Moqui backend
+2. Backend notification via Websocket now notifies status background jobs
+3. First Badge indicator on chat, other indicators to follow
+4. Added system support app with general help function in the chat
+5. Person and companies in combined selection list
+6. You can use your own Stripe key on the HTML website
+7. Upgraded generated website and added selenium test
+8. Extended reporting with revenue/expense graphic
+9. initial camel implementation using Quarkus with REST interface to the moqui backend
+10. various refactoring; removed not required scaffolds, chat in own package
+
 ## Conversion Framework release October 24 2024 (v1.6.0 for Flutter 3.24.3)
 #### General
 1. Created a data conversion framework: a 2 step process to import existing data from comma delimited (CSV) or spreadsheet (ODS/XSLS) files.
