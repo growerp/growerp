@@ -25,16 +25,15 @@ import 'package:http/http.dart' as http;
 Future<void> getBackendUrlOverride(
     String classificationId, String version) async {
   late http.Response response;
+  late String backendBaseUrl, backendUrl, databaseUrl, chatUrl, secure;
   try {
-    late String backendBaseUrl, backendUrl, databaseUrl, chatUrl, secure;
     if (kDebugMode) {
       backendBaseUrl = 'http://localhost:8080';
       databaseUrl = 'databaseUrlDebug';
       chatUrl = 'chatUrlDebug';
       secure = '';
     } else {
-      // now at 'org' = test but when in production should be 'com'
-      backendBaseUrl = 'https://backend.growerp.org';
+      backendBaseUrl = 'https://backend.growerp.com';
       databaseUrl = 'databaseUrl';
       chatUrl = 'chatUrl';
       secure = 's';
@@ -53,6 +52,6 @@ Future<void> getBackendUrlOverride(
           chatUrl, "ws$secure://${jsonDecode(response.body)['backendUrl']}");
     }
   } catch (error) {
-    debugPrint('===get backend url does not respond...could not find: $error');
+    debugPrint('===get backend url: $backendUrl could not find: $error');
   }
 }
