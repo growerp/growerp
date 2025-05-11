@@ -285,11 +285,13 @@ class UserDialogState extends State<UserDialogStateFull> {
                       return DropdownMenuItem<Role>(
                           value: item, child: Text(item.value));
                     }).toList(),
-                    onChanged: (Role? newValue) {
-                      setState(() {
-                        _selectedRole = newValue!;
-                      });
-                    },
+                    onChanged: _selectedRole != Role.unknown
+                        ? null
+                        : (Role? newValue) {
+                            setState(() {
+                              _selectedRole = newValue!;
+                            });
+                          },
                     isExpanded: true,
                   ),
                 ),
