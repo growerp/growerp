@@ -1668,7 +1668,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <field-map field-name="emailTemplateId" value="WELCOME" />
                         <field-map field-name="toAddresses" from="user.email" />
                         <field-map field-name="bodyParameters"
-                            from="[classification: classificationId.substring(3),
+                            from="[classification: classificationId? classificationId.substring(3) : '',
                                 newPassword:password, firstName: user.firstName,
                                 lastName: user.lastName]" />
                     </service-call>
