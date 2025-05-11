@@ -88,7 +88,8 @@ class HomeFormState extends State<HomeForm> {
                   HelperFunctions.showTopMessage(context, messages);
                 }
               },
-              child: Column(children: [
+              child: Scaffold(
+                  body: Column(children: [
                 Expanded(
                     child: DisplayMenuOption(
                         menuList: widget.menuOptions,
@@ -116,7 +117,7 @@ class HomeFormState extends State<HomeForm> {
                       key: const Key('moquiSessionToken'),
                       style: const TextStyle(fontSize: 0)),
                 appInfo
-              ]));
+              ])));
         case AuthStatus.failure:
         case AuthStatus.unAuthenticated:
           ThemeMode? themeMode = context.read<ThemeBloc>().state.themeMode;
