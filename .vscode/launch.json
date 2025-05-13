@@ -70,7 +70,7 @@
             "name": "Admin Web (lib/main.dart)",
             "type": "dart",
             "request": "launch",
-            "cwd": "flutter/packages/support",
+            "cwd": "flutter/packages/admin",
             "program": "lib/main.dart",
             "args": [
                 "-d",
@@ -125,19 +125,6 @@
             "program": "lib/main.dart"
         },
         {
-            "name": "Test Web",
-            "type": "dart",
-            "request": "launch",
-            "cwd": "flutter/packages/test",
-            "program": "lib/main.dart",
-            "args": [
-                "-d",
-                "chrome",
-                "--web-port",
-                "55555"
-            ]
-        },
-        {
             "name": "Freelance mobile (lib/main.dart)",
             "type": "dart",
             "request": "launch",
@@ -175,17 +162,6 @@
                 "chrome",
                 "--web-port",
                 "55555"
-            ]
-        },
-        {
-            "name": "Workflow chrome (lib/main.dart)",
-            "type": "dart",
-            "request": "launch",
-            "cwd": "flutter/packages/workflow",
-            "program": "lib/main.dart",
-            "args": [
-                "-d",
-                "chrome"
             ]
         },
         {

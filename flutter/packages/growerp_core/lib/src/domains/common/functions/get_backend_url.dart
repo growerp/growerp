@@ -43,8 +43,7 @@ Future<void> getBackendUrlOverride(
     response = await http.get(Uri.parse(backendUrl));
 
     String? appBackendUrl = jsonDecode(response.body)['backendUrl'];
-    debugPrint(
-        "===get backend url: $appBackendUrl resp: ${response.statusCode}");
+    debugPrint("===get backend url: $backendUrl resp: ${response.statusCode}");
     if (response.statusCode == 200 && appBackendUrl != null) {
       GlobalConfiguration().updateValue(databaseUrl,
           "http$secure://${jsonDecode(response.body)['backendUrl']}");
