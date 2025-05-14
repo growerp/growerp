@@ -17,6 +17,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -100,7 +101,8 @@ class TopApp extends StatelessWidget {
                           PointerDeviceKind.touch,
                         },
                       ),
-                      debugShowCheckedModeBanner: false,
+                      debugShowCheckedModeBanner:
+                          GlobalConfiguration().get("test"),
                       localizationsDelegates: localizationsDelegates,
                       builder: (context, child) => ResponsiveBreakpoints
                               .builder(child: child!, breakpoints: [
