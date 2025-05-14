@@ -101,8 +101,7 @@ class TopApp extends StatelessWidget {
                           PointerDeviceKind.touch,
                         },
                       ),
-                      debugShowCheckedModeBanner:
-                          GlobalConfiguration().get("test"),
+                      debugShowCheckedModeBanner: false,
                       localizationsDelegates: localizationsDelegates,
                       builder: (context, child) => ResponsiveBreakpoints
                               .builder(child: child!, breakpoints: [
@@ -158,8 +157,16 @@ class TopApp extends StatelessWidget {
                                   backgroundColor: Colors.transparent,
                                   body: Container());
                             default:
-                              return HomeForm(
-                                  menuOptions: menuOptions, title: title);
+                              return GlobalConfiguration().get("test")
+                                  ? Banner(
+                                      message: "test",
+                                      color: Colors.red,
+                                      location: BannerLocation.topStart,
+                                      child: HomeForm(
+                                          menuOptions: menuOptions,
+                                          title: title))
+                                  : HomeForm(
+                                      menuOptions: menuOptions, title: title);
                           }
                         },
                       )));
