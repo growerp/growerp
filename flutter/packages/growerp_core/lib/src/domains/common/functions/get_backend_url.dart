@@ -49,6 +49,7 @@ Future<void> getBackendUrlOverride(
           "http$secure://${jsonDecode(response.body)['backendUrl']}");
       GlobalConfiguration().updateValue(
           chatUrl, "ws$secure://${jsonDecode(response.body)['backendUrl']}");
+      GlobalConfiguration().updateValue("test", true);
     }
   } catch (error) {
     debugPrint('===get backend url: $backendUrl could not find: $error');
