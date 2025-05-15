@@ -51,23 +51,24 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="patchVersionIn" from="version.split('\\.')[2]"
                         type="Integer" />
                     <set field="less" from="false" type="Boolean" />
-                    <if condition="majorVersion &lt; majorVersionIn ">
+                    <if condition="majorVersionIn &lt; majorVersion ">
                         <set field="less" from="true" />
                         <else>
-                            <if condition="minorVersion &lt; minorVersionIn">
+                            <if condition="minorVersionIn &lt; minorVersion">
                                 <set field="less" from="true" />
                                 <else>
-                                    <if condition="patchVersion &lt;= patchVersionIn">
+                                    <if condition="patchVersionIn &lt;= patchVersion">
                                         <set field="less" from="true" />
                                     </if>
                                 </else>
                             </if>
                         </else>
                     </if>
-                    <if condition="less">
+                    <!-- if incoming version equal or greater (new test version)
+                        then use override url in db-->
+                    <if condition="less == false">
                         <set field="backendUrl"
                             from="urls[0].standardCode.split('#')[1]" />
-                        <log message="====sending backend url: $backendUrl" />
                     </if>
                     <else>
                         <log level="info"
@@ -93,6 +94,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </iterate>
                 </else>
             </if>
+            <log message="====sending backend url: $backendUrl" />
         </actions>
     </service>
 
