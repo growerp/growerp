@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Not Just ERP - Weekly Insights</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100">
+  <div class="container mx-auto px-4 py-10 flex flex-col items-center">
+    <div class="logo-section mb-8">
+      <img src="https://i.imgur.com/your-image-url.png" alt="Not Just ERP Logo" class="h-24">
+      <h1 class="text-3xl font-bold text-blue-600 mt-4 text-center">Not Just ERP</h1>
+    </div>
+
+    <div class="headline-section text-center mb-6">
+      <h2 class="text-2xl font-semibold text-gray-800">Beyond the Basics: Your Weekly Dose of ERP Insights</h2>
+      <p class="text-lg text-gray-600 mt-2">Get practical advice, industry trends, and expert perspectives delivered
+        straight to your inbox.</p>
+    </div>
+
+    <div class="sign-up-section bg-white rounded-lg shadow-md p-8 mb-8 w-full max-w-md">
+      <h3 class="text-xl font-semibold text-green-500 mb-4">Subscribe to Our Weekly Newsletter</h3>
+      <form class="flex flex-col space-y-4">
+        <input type="email" placeholder="Enter your email address"
+          class="border border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent">
+        <button type="submit"
+          class="bg-indigo-500 text-white py-3 px-6 rounded-full hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75">
+          Yes, I Want In!
+        </button>
+      </form>
+      <p class="text-gray-500 text-sm mt-4 text-center">We respect your privacy. You can unsubscribe at any time.</p>
+    </div>
+
+    <div class="what-to-expect-section w-full max-w-2xl mb-8">
+      <h4 class="text-lg font-semibold text-blue-500 mb-3">Here's what you can expect:</h4>
+      <ul class="list-disc list-inside space-y-2 text-gray-700">
+        <li>Actionable tips to optimize your ERP system.</li>
+        <li>Analysis of the latest industry trends and technologies.</li>
+        <li>Expert interviews and case studies.</li>
+        <li>Announcements about upcoming webinars and events.</li>
+        <li>Exclusive content not available anywhere else.</li>
+      </ul>
+    </div>
+
+    <div class="call-to-action-section text-center mb-12">
+      <h5 class="text-md text-gray-600 mb-2">Ready to take your ERP knowledge to the next level?</h5>
+      <button onclick="window.location.href='#sign-up-section'"
+        class="bg-green-500 text-white py-3 px-6 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75">
+        Subscribe Now
+      </button>
+    </div>
+
+    <footer class="text-center text-gray-500 text-sm mt-4">
+      <p>© 2024 Not Just ERP. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <script>
+    // Smooth scrolling for the button
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>
