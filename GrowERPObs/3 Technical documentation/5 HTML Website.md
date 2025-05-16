@@ -1,22 +1,110 @@
-# HTML Website
+# PopRestStore Component Documentation
 
-The html website from the standard Moqui is used, however with major changes to make it multicompany. All changes are in the growerp branch while the master branch is a clone of the Moqui repository.
+## Overview
 
-# POP REST Store - eCommerce REST API and Web App
+PopRestStore is a REST API for eCommerce and an in-browser eCommerce application built with Vue.js. It provides a complete online store solution with both server-rendered and client-rendered components. The component has been modified from its original version to work with the GrowERP administrator frontend, which can be used to manage the website.
 
-Component cloned from the [original repository](https://github.com/moqui/PopRestStore) with major changes as listed below 
+## Architecture
 
-A big thanks for the original developers!
+PopRestStore follows a modern web application architecture with:
 
-Major changes:
+1. **Backend**: Moqui Framework services that provide REST APIs
+2. **Frontend**: Vue.js-based single-page application for user-specific pages
+3. **Server-rendered pages**: For catalog browsing and content pages to ensure search engine compatibility
 
-1. multi organizational companies
-2. support different currencies ([needs mantle-usl change](https://github.com/moqui/mantle-usl/pull/188))
-3. various fault fixes
-4. customers have related company
-5. orders on company partyId, customer person on orderparty entity
-6. uses a Growerp API call
-7. removed store from the url added store dependent subdomain name using the productStoreId.
-8. Can change the website colors from the growerp admin app
+## Key Features
 
-[![license](https://camo.githubusercontent.com/b8b67a74b25cc3f9256a99543445930a65ca6d03ad3037f193f24263f15a152b/687474703a2f2f696d672e736869656c64732e696f2f62616467652f6c6963656e73652d434330253230312e30253230556e6976657273616c2d626c75652e737667)](https://github.com/moqui/PopRestStore/blob/master/LICENSE.md) [![release](https://camo.githubusercontent.com/0e74b5aac60e4557498712ae9edca6e79a9f42aadaffef68d93232a580899d71/687474703a2f2f696d672e736869656c64732e696f2f6769746875622f72656c656173652f6d6f7175692f506f705265737453746f72652e737667)](https://github.com/moqui/PopRestStore/releases) [![commits since release](https://camo.githubusercontent.com/cb9d197181e2e59d921f48d5b5b0a9f903b6410d39700ec16dc5a63f0f8826d1/687474703a2f2f696d672e736869656c64732e696f2f6769746875622f636f6d6d6974732d73696e63652f6d6f7175692f506f705265737453746f72652f76312e302e302e737667)](https://github.com/moqui/PopRestStore/commits/master)
+### Store Configuration
+
+- **Multi-store support**: Can be configured for multiple stores with different settings
+- **Multi-organizational companies**: Supports multiple organizations
+- **Multi-currency support**: Handles different currencies for international sales
+- **Customizable templates**: All server and client rendered templates can be overridden
+- **Customizable styling**: Website colors can be changed from the GrowERP admin app
+
+### Customer Management
+
+- **User registration and authentication**: Supports account creation, login, and password management
+- **Customer profiles**: Stores customer information and preferences
+- **Address management**: Allows customers to manage multiple shipping addresses
+- **Payment method management**: Supports saving and managing credit card information
+
+### Product Catalog
+
+- **Category browsing**: Hierarchical product categories
+- **Product search**: Full-text search capabilities
+- **Product details**: Comprehensive product information including images, descriptions, and pricing
+- **Product variants**: Support for products with multiple variants (sizes, colors, etc.)
+- **Product reviews**: Customer reviews and ratings
+
+### Shopping Cart and Checkout
+
+- **Cart management**: Add, update, remove items
+- **Shipping options**: Multiple shipping methods
+- **Payment processing**: Credit card processing
+- **Order confirmation**: Complete order flow with confirmation
+- **Promotional codes**: Support for discount codes
+
+### Order Management
+
+- **Order history**: Customers can view their order history
+- **Order details**: Detailed information about each order
+- **Order status tracking**: Real-time status updates
+
+## Technical Components
+
+### REST API Services
+
+The component provides a comprehensive REST API for eCommerce operations, organized into the following categories:
+
+1. **Store Services**: Store information, geo data, locales, and time zones
+2. **Product Services**: Product information, categories, variants, reviews, and search
+3. **Cart Services**: Cart management, shipping options, and order placement
+4. **Customer Services**: User authentication, profile management, and order history
+
+### Frontend Components
+
+The frontend is built with Vue.js and organized into several key components:
+
+1. **Navigation**: Header, footer, and menu components
+2. **Product Display**: Product listings, details, and images
+3. **Shopping Cart**: Cart management and checkout process
+4. **Account Management**: User profile, addresses, and payment methods
+5. **Order History**: Order listings and details
+
+### Data Flow
+
+1. The application starts by loading store configuration from the server
+2. User interactions trigger API calls to the backend services
+3. The frontend components update based on the API responses
+4. Server-rendered pages are used for catalog browsing and content
+5. Client-rendered pages are used for user-specific functionality
+
+## Integration with GrowERP
+
+The PopRestStore component is designed to work with the GrowERP administrator frontend, which provides:
+
+1. **Product management**: Add, update, and remove products
+2. **Category management**: Organize products into categories
+3. **Order processing**: Process and fulfill orders
+4. **Customer management**: View and manage customer information
+5. **Website customization**: Change website colors and content
+
+## Customization Options
+
+The component can be customized in several ways:
+
+1. **Templates**: Override server and client rendered templates
+2. **Styling**: Customize CSS styles
+3. **Configuration**: Adjust store settings
+4. **Content**: Manage store content through the GrowERP admin app
+
+## Technical Requirements
+
+- **Moqui Framework**: The component is built on the Moqui Framework
+- **Dependencies**: Requires moqui-fop, mantle-udm, mantle-usl, and growerp components
+- **Browser Support**: Modern web browsers with JavaScript enabled
+
+## Conclusion
+
+PopRestStore provides a complete eCommerce solution with a REST API and in-browser application. It's designed to be customizable and extensible, making it suitable for a wide range of eCommerce needs. The integration with GrowERP provides powerful administration capabilities, making it a comprehensive solution for online stores.
