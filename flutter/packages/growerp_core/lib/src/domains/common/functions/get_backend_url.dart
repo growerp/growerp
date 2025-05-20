@@ -13,6 +13,7 @@
  */
 
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:http/http.dart' as http;
@@ -28,7 +29,16 @@ Future<void> getBackendUrlOverride(
   late String backendBaseUrl, backendUrl, databaseUrl, chatUrl, secure;
   try {
     if (kDebugMode) {
-      backendBaseUrl = 'http://localhost:8080';
+      bool android = false;
+      try {
+        if (Platform.isAndroid) {
+          android = true;
+        }
+        // ignore: empty_catches
+      } catch (e) {}
+
+      backendBaseUrl =
+          android == true ? 'http://10.0.2.2:8080' : 'http://localhost:8080';
       databaseUrl = 'databaseUrlDebug';
       chatUrl = 'chatUrlDebug';
       secure = '';
@@ -41,9 +51,7 @@ Future<void> getBackendUrlOverride(
     backendUrl = '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version='
         '$version&applicationId=$classificationId';
     response = await http.get(Uri.parse(backendUrl));
-
     String? appBackendUrl = jsonDecode(response.body)['backendUrl'];
-    debugPrint("===get backend url: $backendUrl resp: ${response.statusCode}");
     if (response.statusCode == 200 && appBackendUrl != null) {
       GlobalConfiguration().updateValue(databaseUrl,
           "http$secure://${jsonDecode(response.body)['backendUrl']}");
@@ -52,6 +60,6 @@ Future<void> getBackendUrlOverride(
       GlobalConfiguration().updateValue("test", true);
     }
   } catch (error) {
-    debugPrint('===get backend url: $backendUrl could not find: $error');
+    debugPrint('===get backend url: $backendUrl error: $error');
   }
 }
