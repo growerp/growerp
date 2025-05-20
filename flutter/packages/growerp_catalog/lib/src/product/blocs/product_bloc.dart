@@ -55,9 +55,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     ProductFetch event,
     Emitter<ProductState> emit,
   ) async {
-//    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
-//    return;
-//    }
     List<Product> current = [];
     if (state.status == ProductStatus.initial ||
         event.refresh ||

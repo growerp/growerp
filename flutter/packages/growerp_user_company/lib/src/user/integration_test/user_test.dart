@@ -154,6 +154,12 @@ class UserTest {
             user.copyWith(email: user.email!.replaceFirst('XXX', '${seq++}'));
       }
       await CommonTest.enterText(tester, 'userEmail', user.email ?? '');
+
+      if (user.url != null) {
+        user = user.copyWith(url: user.url!.replaceFirst('XXX', '${seq++}'));
+      }
+      await CommonTest.enterText(tester, 'userUrl', user.url ?? '');
+
       await CommonTest.enterText(
           tester, 'userTelephoneNr', user.telephoneNr ?? '');
 
@@ -190,8 +196,14 @@ class UserTest {
               company: user.company!.copyWith(
                   email: user.company!.email!.replaceFirst('XXX', '${seq++}')));
         }
+        if (user.company?.url != null) {
+          user = user.copyWith(
+              company: user.company!.copyWith(
+                  url: user.company!.url!.replaceFirst('XXX', '${seq++}')));
+        }
         await CommonTest.dragUntil(tester, key: 'email');
         await CommonTest.enterText(tester, 'email', user.company?.email ?? '');
+        await CommonTest.enterText(tester, 'url', user.company?.url ?? '');
         await CommonTest.tapByKey(tester, 'update',
             seconds: CommonTest.waitTime);
       }
@@ -229,6 +241,7 @@ class UserTest {
       expect(CommonTest.getTextFormField('lastName'), equals(user.lastName!));
       expect(
           CommonTest.getTextFormField('userEmail'), equals(user.email ?? ''));
+      expect(CommonTest.getTextFormField('userUrl'), equals(user.url ?? ''));
       expect(CommonTest.getTextFormField('userTelephoneNr'),
           equals(user.telephoneNr ?? ''));
 
@@ -263,6 +276,8 @@ class UserTest {
             equals(user.company!.telephoneNr ?? ''));
         expect(CommonTest.getTextFormField('email'),
             equals(user.company!.email ?? ''));
+        expect(CommonTest.getTextFormField('url'),
+            equals(user.company!.url ?? ''));
         await CommonTest.tapByKey(tester, 'cancel');
       }
       newUsers.add(user.copyWith(pseudoId: id));

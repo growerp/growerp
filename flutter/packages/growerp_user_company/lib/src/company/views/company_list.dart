@@ -148,9 +148,6 @@ class CompanyListState extends State<CompanyList> {
       }
 
       blocListener(context, state) {
-        if (state.status == CompanyStatus.failure) {
-          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-        }
         if (state.status == CompanyStatus.success) {
           HelperFunctions.showMessage(
               context, '${state.message}', Colors.green);

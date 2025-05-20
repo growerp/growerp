@@ -49,8 +49,7 @@ class CompanyState extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [status, hasReachedMax, message, companies, hasReachedMax];
+  List<Object?> get props => [status, hasReachedMax, message, companies];
 
   @override
   String toString() => '$status { #companies: ${companies.length}, '

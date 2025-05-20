@@ -2,7 +2,6 @@
 <moqui-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/moqui-conf-2.1.xsd">
 
-
     <webapp-list>
         <webapp name="webroot">
             <!-- Notification Message Endpoint -->

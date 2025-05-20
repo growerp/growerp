@@ -186,12 +186,14 @@ List<Company> leadCompanies = [
     name: 'Lead company 1',
     role: Role.lead,
     email: 'emailXXX@example.org',
+    url: 'https://nXXX.example.org',
     telephoneNr: '6666666666666',
   ),
   Company(
     name: 'Lead company 2',
     role: Role.lead,
     email: 'emailXXX@example.org',
+    url: 'https://nXXX.example.org',
     telephoneNr: '77777777777777',
   ),
   Company(
@@ -230,6 +232,7 @@ List<Company> supplierCompanies = [
         province: 'California',
         country: countries[3].name),
     email: 'emailXXX@example.org',
+    url: 'https://nXXX.example.org',
     telephoneNr: '99999999999999',
   ),
   Company(
@@ -317,6 +320,7 @@ List<Company> customerCompanies = [
         expireMonth: '4',
         expireYear: '2029'),
     email: 'emailXXX@example.org',
+    url: 'https://nXXX.example.org',
     telephoneNr: '12121212121212',
   )
 ];
@@ -328,6 +332,7 @@ List<User> leads = [
     role: Role.lead,
     company: leadCompanies[0],
     email: 'emailXXX@example.org',
+    url: 'https://nXXX.example.org',
     telephoneNr: '6666666666666',
   ),
   User(
@@ -336,6 +341,7 @@ List<User> leads = [
     role: Role.lead,
     company: leadCompanies[1],
     email: 'emailXXX@example.org',
+    url: 'https://nXXX.example.org',
     telephoneNr: '77777777777777',
   ),
   User(
@@ -366,6 +372,7 @@ List<User> leads = [
     role: Role.lead,
     company: leadCompanies[5],
     email: 'emailXXX@example.org',
+    url: 'https://nXXX.example.org',
     telephoneNr: '11111111111111',
   ),
 ];
@@ -377,6 +384,7 @@ List<User> suppliers = [
     role: Role.supplier,
     company: supplierCompanies[0],
     email: 'emailXXX@example.org',
+    url: 'https://nXXX.example.org',
     telephoneNr: '99999999999999',
   ),
   User(
@@ -393,6 +401,7 @@ List<User> suppliers = [
     role: Role.supplier,
     company: supplierCompanies[2],
     email: 'emailXXX@example.org',
+    url: 'https://nXXX.example.org',
     telephoneNr: '99999999999999',
   ),
   User(
@@ -410,6 +419,7 @@ List<User> customers = [
     lastName: 'lastName1',
     role: Role.customer,
     email: 'emailXXX@example.org',
+    url: 'https://nXXX.example.org',
     telephoneNr: '111111111111',
     paymentMethod: PaymentMethod(
         ccDescription: 'Master Card**********4444 11/2032',
@@ -431,6 +441,7 @@ List<User> customers = [
     role: Role.customer,
     company: customerCompanies[2],
     email: 'emailXXX@example.org',
+    url: 'https://nXXX.example.org',
     telephoneNr: '12121212121212',
   ),
   User(

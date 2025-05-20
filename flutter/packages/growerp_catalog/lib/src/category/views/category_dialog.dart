@@ -46,7 +46,8 @@ class CategoryDialogState extends State<CategoryDialog> {
   late CategoryBloc _categoryBloc;
   final ImagePicker _picker = ImagePicker();
   final ScrollController _scrollController = ScrollController();
-  late double top, left;
+  late double top;
+  double? right;
 
   @override
   void initState() {
@@ -57,8 +58,8 @@ class CategoryDialogState extends State<CategoryDialog> {
     _descrController.text = widget.category.description;
     _selectedProducts = List.of(widget.category.products);
     _categoryBloc = context.read<CategoryBloc>();
-    top = -080;
-    left = 250;
+    top = -100;
+    right = 20;
   }
 
   @override
@@ -306,13 +307,13 @@ class CategoryDialogState extends State<CategoryDialog> {
                       }),
                 ]))),
         Positioned(
-          left: left,
+          right: right,
           top: top,
           child: GestureDetector(
             onPanUpdate: (details) {
               setState(() {
-                left += details.delta.dx;
                 top += details.delta.dy;
+                right = right! - details.delta.dx;
               });
             },
             child: ImageButtons(_scrollController, _onImageButtonPressed),

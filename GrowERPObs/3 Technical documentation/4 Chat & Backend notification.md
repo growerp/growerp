@@ -24,3 +24,57 @@ Finally the chat message dialog will show the data send by the message bloc
 and will refresh the screen when data is added by the bloc.
 
 This concludes the chat implementation in the back-end. Next week we will show you how you can use the Moqui notification services not just for sending messages but also for updating the order list screen automatically when orders come in.
+
+## Websocket interface
+The system uses WebSockets for real-time communication between the Flutter client and the Moqui backend. The Flutter client uses the `WsClient` class to manage the WebSocket connection, while the Moqui backend uses `NotificationEndpoint` and `NotificationWebSocketListener` to handle notifications. Chat messages are sent as JSON objects.
+
+__Message Formats:__
+
+- __Chat Messages:__ Chat messages are sent as JSON objects with the following structure:
+
+```json
+{
+  "chatMessage": {
+    "chatRoom": {
+      // ChatRoom object (structure not defined here)
+    },
+    "fromUserId": "user123",
+    "fromUserFullName": "John Doe",
+    "chatMessageId": "msg456",
+    "content": "Hello!",
+    "creationDate": "2024-01-01T12:00:00Z"
+  }
+}
+```
+
+- __Notifications:__ The `NotificationEndpoint` uses `subscribe:` and `unsubscribe:` prefixes followed by a comma-separated list of topics. The actual notification messages are sent as JSON in the `messageWrapperJson` field without a prefix.
+
+__Key Functions and Classes:__
+
+__Flutter:__
+
+- __`WsClient` class:__
+
+  - `connect(String apiKey, String userId)`: Establishes the WebSocket connection.
+  - `send(Object message)`: Sends messages to the server, encoding `ChatMessage` objects to JSON.
+  - `stream()`: Returns a stream of messages received from the server.
+  - `close()`: Closes the connection.
+
+__Moqui:__
+
+- __`NotificationEndpoint` class:__
+
+  - `onOpen(Session session, EndpointConfig config)`: Registers the endpoint with the `NotificationWebSocketListener`.
+  - `onMessage(String message)`: Handles subscription and unsubscription messages based on prefixes.
+  - `onClose(Session session, CloseReason closeReason)`: Deregisters the endpoint.
+
+- __`NotificationWebSocketListener` class:__
+
+  - `registerEndpoint(NotificationEndpoint endpoint)`: Registers an endpoint.
+  - `deregisterEndpoint(NotificationEndpoint endpoint)`: Deregisters an endpoint.
+  - `onMessage(NotificationMessage nm)`: Sends notification messages to subscribed endpoints.
+
+__Authentication and Authorization:__
+
+- __Authentication:__ The Flutter client sends the `apiKey` and `userId` as query parameters when establishing the WebSocket connection. The Moqui backend then uses the `apiKey` to authenticate the user by making a REST call to `/rest/s1/growerp/100/Authenticate?classificationId=token`.
+- __Authorization:__ The `NotificationEndpoint` uses a topic-based subscription mechanism to authorize which notifications a user receives. The client sends `subscribe:` and `unsubscribe:` messages to manage their subscriptions. The `NotificationWebSocketListener` then only sends messages to endpoints that are subscribed to the relevant topic.

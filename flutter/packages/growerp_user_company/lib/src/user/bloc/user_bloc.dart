@@ -51,9 +51,6 @@ class UserBloc extends Bloc<UserEvent, UserState>
     UserFetch event,
     Emitter<UserState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString == '') {
-      return;
-    }
     if (state.status == UserStatus.initial ||
         event.refresh ||
         event.searchString != '') {
@@ -124,9 +121,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
       }
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: UserStatus.failure,
-          users: [],
-          message: await getDioError(e)));
+          status: UserStatus.failure, message: await getDioError(e)));
     }
   }
 

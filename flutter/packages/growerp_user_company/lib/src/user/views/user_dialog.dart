@@ -32,17 +32,16 @@ class UserDialog extends StatelessWidget {
   const UserDialog(this.user, {super.key});
   @override
   Widget build(BuildContext context) {
-    if (user.company == null) return UserDialogStateFull(user);
     return BlocProvider<CompanyBloc>(
         create: (context) =>
             CompanyBloc(context.read<RestClient>(), user.company!.role),
-        child: UserDialogStateFull(user));
+        child: UserDialogStateFull(user: user));
   }
 }
 
 class UserDialogStateFull extends StatefulWidget {
   final User user;
-  const UserDialogStateFull(this.user, {super.key});
+  const UserDialogStateFull({Key? key, required this.user}) : super(key: key);
   @override
   UserDialogState createState() => UserDialogState();
 }
@@ -55,10 +54,10 @@ class UserDialogState extends State<UserDialogStateFull> {
   final _loginNameController = TextEditingController();
   final _telephoneController = TextEditingController();
   final _emailController = TextEditingController();
+  final _urlController = TextEditingController();
   final _companyController = TextEditingController();
   final _companySearchBoxController = TextEditingController();
 
-  bool loading = false;
   late List<UserGroup> localUserGroups;
   late UserGroup _selectedUserGroup;
   late Role _selectedRole;
@@ -79,6 +78,7 @@ class UserDialogState extends State<UserDialogStateFull> {
   late bool isAdmin;
   late String _classificationId;
   late double bottom;
+  late double top;
   double? right;
 
   @override
@@ -93,6 +93,7 @@ class UserDialogState extends State<UserDialogStateFull> {
       _loginNameController.text = widget.user.loginName ?? '';
       _telephoneController.text = widget.user.telephoneNr ?? '';
       _emailController.text = widget.user.email ?? '';
+      _urlController.text = widget.user.url ?? '';
       _isLoginDisabled = widget.user.loginDisabled ?? false;
       _hasLogin = widget.user.userId != null;
     }
@@ -113,7 +114,7 @@ class UserDialogState extends State<UserDialogStateFull> {
           isForDropDown: true));
     isAdmin = context.read<AuthBloc>().state.authenticate!.user!.userGroup ==
         UserGroup.admin;
-    bottom = 50;
+    top = -100;
   }
 
   @override
@@ -155,7 +156,7 @@ class UserDialogState extends State<UserDialogStateFull> {
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    right = right ?? (isPhone ? 20 : 50);
+    right = right ?? (isPhone ? 20 : 150);
     String title = '';
     if (_selectedRole == Role.company) {
       title = widget.user.userGroup != null &&
@@ -166,52 +167,51 @@ class UserDialogState extends State<UserDialogStateFull> {
       title = _selectedRole.name;
     }
     return Dialog(
-      key: Key('UserDialog${_selectedRole.name}'),
-      insetPadding: const EdgeInsets.all(10),
-      child: popUp(
-          context: context,
-          title: "$title #${widget.user.pseudoId ?? ' new'}",
-          width: isPhone ? 400 : 1000,
-          height: isPhone ? 700 : 700,
-          child: Stack(
-            children: [
-              BlocConsumer<UserBloc, UserState>(
-                  listenWhen: (previous, current) =>
-                      previous.status == UserStatus.loading,
-                  listener: (context, state) {
-                    if (state.status == UserStatus.failure) {
-                      loading = false;
-                      HelperFunctions.showMessage(
-                          context, state.message, Colors.red);
-                    }
-                    if (state.status == UserStatus.success) {
-                      Navigator.of(context).pop(state.users[0]);
-                    }
-                  },
-                  builder: (context, state) {
-                    if (state.status == UserStatus.loading) {
-                      return const LoadingIndicator();
-                    }
-                    return listChild();
-                  }),
-              Positioned(
-                right: right,
-                bottom: bottom,
-                child: GestureDetector(
-                  onPanUpdate: (details) {
-                    setState(() {
-                      if (right != null) {
-                        right = right! - details.delta.dx;
+        key: const Key('UserDialog\${_selectedRole.name}'),
+        insetPadding: const EdgeInsets.all(10),
+        child: ScaffoldMessenger(
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: popUp(
+                context: context,
+                title: "$title #${widget.user.pseudoId ?? ' new'}",
+                width: isPhone ? 400 : 1000,
+                height: isPhone ? 700 : 700,
+                child: Stack(
+                  children: [
+                    BlocConsumer<UserBloc, UserState>(
+                        listener: (context, state) {
+                      if (state.status == UserStatus.failure) {
+                        HelperFunctions.showMessage(
+                            context, state.message, Colors.red);
                       }
-                      bottom -= details.delta.dy;
-                    });
-                  },
-                  child: ImageButtons(_scrollController, _onImageButtonPressed),
-                ),
-              ),
-            ],
-          )),
-    );
+                      if (state.status == UserStatus.success) {
+                        Navigator.of(context).pop(state.users[0]);
+                      }
+                    }, builder: (context, state) {
+                      if (state.status == UserStatus.loading) {
+                        return const LoadingIndicator();
+                      }
+                      return listChild();
+                    }),
+                    Positioned(
+                      right: right,
+                      top: top,
+                      child: GestureDetector(
+                        onPanUpdate: (details) {
+                          setState(() {
+                            top += details.delta.dy;
+                            right = right! - details.delta.dx;
+                          });
+                        },
+                        child: ImageButtons(
+                            _scrollController, _onImageButtonPressed),
+                      ),
+                    ),
+                  ],
+                )),
+          ),
+        ));
   }
 
   Widget listChild() {
@@ -341,6 +341,14 @@ class UserDialogState extends State<UserDialogStateFull> {
                       }
                       return null;
                     },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextFormField(
+                    key: const Key('userUrl'),
+                    decoration: const InputDecoration(labelText: 'Web address'),
+                    controller: _urlController,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -705,6 +713,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                       firstName: _firstNameController.text,
                       lastName: _lastNameController.text,
                       email: _emailController.text,
+                      url: _urlController.text,
                       loginName: _loginNameController.text,
                       telephoneNr: _telephoneController.text,
                       address: updatedUser.address,

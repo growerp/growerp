@@ -141,7 +141,8 @@ class UserListState extends State<UserList> {
                                                 child: BlocProvider.value(
                                                     value: _userBloc,
                                                     child: UserDialogStateFull(
-                                                        users[index - 1])));
+                                                        user:
+                                                            users[index - 1])));
                                       }))
                     }),
           pinnedRowCount: 1,
@@ -149,9 +150,6 @@ class UserListState extends State<UserList> {
       }
 
       blocListener(context, state) {
-        if (state.status == UserStatus.failure) {
-          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-        }
         if (state.status == UserStatus.success) {
           HelperFunctions.showMessage(
               context, '${state.message}', Colors.green);

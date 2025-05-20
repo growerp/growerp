@@ -41,12 +41,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "3 Technical documentation/7 Integration tests.md",
+                "file": "3 Technical documentation/4 Chat & Backend notification.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "7 Integration tests"
+              "title": "4 Chat & Backend notification"
             }
           }
         ],
@@ -208,12 +208,12 @@
   },
   "active": "4f78e8f1d8a2cb6d",
   "lastOpenFiles": [
+    "3 Technical documentation/7 Integration tests.md",
     "3 Technical documentation/6 Stripe.md",
     "3 Technical documentation/9 GrowERP Flutter Application and plugins.md",
     "3 Technical documentation/8 Deployment.md",
     "3 Technical documentation/5 HTML Website.md",
-    "3 Technical documentation/4 Chat Server.md",
-    "3 Technical documentation/7 Integration tests.md",
+    "3 Technical documentation/4 Chat & Backend notification.md",
     "3 Technical documentation/3 Moqui Backend.md",
     "3 Technical documentation/2 Flutter frontend & development.md",
     "3 Technical documentation/1 Technical Introduction.md",

@@ -78,6 +78,12 @@ class CompanyTest {
         c = c.copyWith(email: c.email!.replaceFirst('XXX', '${seq++}'));
       }
       await CommonTest.enterText(tester, 'email', c.email ?? '');
+
+      if (c.url != null && c.url!.isNotEmpty) {
+        c = c.copyWith(url: c.url!.replaceFirst('XXX', '${seq++}'));
+      }
+      await CommonTest.enterText(tester, 'url', c.url ?? '');
+
       if (c.role == Role.company) {
         await CommonTest.enterText(tester, 'vatPerc', c.vatPerc.toString());
         await CommonTest.enterText(tester, 'salesPerc', c.salesPerc.toString());
@@ -128,6 +134,7 @@ class CompanyTest {
       }
       expect(CommonTest.getTextFormField('companyName'), equals(c.name!));
       expect(CommonTest.getTextFormField('email'), equals(c.email ?? ''));
+      expect(CommonTest.getTextFormField('url'), equals(c.url ?? ''));
       if (c.role != Role.company) {
         // main company role one cannot change
         expect(CommonTest.getDropdown('role'),

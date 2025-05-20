@@ -48,9 +48,6 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
     AssetFetch event,
     Emitter<AssetState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
-      return;
-    }
     try {
       emit(state.copyWith(status: AssetStatus.loading));
       Assets compResult = await restClient.getAsset(

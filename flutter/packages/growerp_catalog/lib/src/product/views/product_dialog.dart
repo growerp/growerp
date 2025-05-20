@@ -57,7 +57,8 @@ class ProductDialogState extends State<ProductDialog> {
   final ScrollController _scrollController = ScrollController();
   late String currencyId;
   late String currencySymbol;
-  late double top, left;
+  late double top;
+  double? right;
 
   @override
   void initState() {
@@ -94,7 +95,6 @@ class ProductDialogState extends State<ProductDialog> {
     useWarehouse = widget.product.useWarehouse;
     _productDialogFormKey = GlobalKey<FormState>();
     top = -100;
-    left = 250;
   }
 
   @override
@@ -136,6 +136,7 @@ class ProductDialogState extends State<ProductDialog> {
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    right = right ?? (isPhone ? 20 : 150);
     if (classificationId == 'AppHotel') _selectedTypeId = 'Rental';
     return BlocConsumer<ProductBloc, ProductState>(
         listener: (context, state) async {
@@ -475,13 +476,13 @@ class ProductDialogState extends State<ProductDialog> {
                   Column(children: (rows.isEmpty ? column : rows)),
                 ]))),
         Positioned(
-          left: left,
+          right: right,
           top: top,
           child: GestureDetector(
             onPanUpdate: (details) {
               setState(() {
-                left += details.delta.dx;
                 top += details.delta.dy;
+                right = right! - details.delta.dx;
               });
             },
             child: ImageButtons(_scrollController, _onImageButtonPressed),
