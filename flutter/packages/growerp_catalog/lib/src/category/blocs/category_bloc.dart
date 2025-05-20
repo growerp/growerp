@@ -52,9 +52,6 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     CategoryFetch event,
     Emitter<CategoryState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString == '') {
-      return;
-    }
     List<Category> current = [];
     if (state.status == CategoryStatus.initial ||
         event.refresh ||

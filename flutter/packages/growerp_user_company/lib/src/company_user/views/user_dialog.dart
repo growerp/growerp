@@ -68,6 +68,7 @@ class UserDialogState extends State<UserDialog> {
   final _loginNameController = TextEditingController();
   final _telephoneController = TextEditingController();
   final _emailController = TextEditingController();
+  final _urlController = TextEditingController();
   final _companyController = TextEditingController();
   final _companySearchBoxController = TextEditingController();
 
@@ -102,6 +103,7 @@ class UserDialogState extends State<UserDialog> {
       _loginNameController.text = widget.user.loginName ?? '';
       _telephoneController.text = widget.user.telephoneNr ?? '';
       _emailController.text = widget.user.email ?? '';
+      _urlController.text = widget.user.url ?? '';
       _isLoginDisabled = widget.user.loginDisabled ?? false;
       _hasLogin = widget.user.userId != null;
     }
@@ -163,47 +165,51 @@ class UserDialogState extends State<UserDialog> {
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return Dialog(
-      key: Key('UserDialog${_selectedRole.name}'),
-      insetPadding: const EdgeInsets.all(10),
-      child: popUp(
-          context: context,
-          title: "Person #${widget.user.pseudoId ?? ' new'}",
-          width: isPhone ? 400 : 1000,
-          height: isPhone ? 700 : 700,
-          child: Stack(
-            children: [
-              BlocConsumer<CompanyUserBloc, CompanyUserState>(
-                  listener: (context, state) {
-                if (state.status == CompanyUserStatus.failure) {
-                  HelperFunctions.showMessage(
-                      context, state.message, Colors.red);
-                }
-                if (state.status == CompanyUserStatus.success) {
-                  Navigator.of(context).pop();
-                }
-              }, builder: (context, state) {
-                if (state.status == CompanyUserStatus.success ||
-                    state.status == CompanyUserStatus.failure) {
-                  return listChild();
-                }
-                return const LoadingIndicator();
-              }),
-              Positioned(
-                left: left,
-                top: top,
-                child: GestureDetector(
-                  onPanUpdate: (details) {
-                    setState(() {
-                      left += details.delta.dx;
-                      top += details.delta.dy;
-                    });
-                  },
-                  child: ImageButtons(_scrollController, _onImageButtonPressed),
-                ),
-              ),
-            ],
-          )),
-    );
+        key: Key('UserDialog${_selectedRole.name}'),
+        insetPadding: const EdgeInsets.all(10),
+        child: ScaffoldMessenger(
+            child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: popUp(
+              context: context,
+              title: "Person #${widget.user.pseudoId ?? ' new'}",
+              width: isPhone ? 400 : 1000,
+              height: isPhone ? 700 : 700,
+              child: Stack(
+                children: [
+                  BlocConsumer<CompanyUserBloc, CompanyUserState>(
+                      listener: (context, state) {
+                    if (state.status == CompanyUserStatus.failure) {
+                      HelperFunctions.showMessage(
+                          context, state.message, Colors.red);
+                    }
+                    if (state.status == CompanyUserStatus.success) {
+                      Navigator.of(context).pop();
+                    }
+                  }, builder: (context, state) {
+                    if (state.status == CompanyUserStatus.success ||
+                        state.status == CompanyUserStatus.failure) {
+                      return listChild();
+                    }
+                    return const LoadingIndicator();
+                  }),
+                  Positioned(
+                    left: left,
+                    top: top,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          left += details.delta.dx;
+                          top += details.delta.dy;
+                        });
+                      },
+                      child: ImageButtons(
+                          _scrollController, _onImageButtonPressed),
+                    ),
+                  ),
+                ],
+              )),
+        )));
   }
 
   Widget listChild() {
@@ -277,11 +283,13 @@ class UserDialogState extends State<UserDialog> {
                       return DropdownMenuItem<Role>(
                           value: item, child: Text(item.value));
                     }).toList(),
-                    onChanged: (Role? newValue) {
-                      setState(() {
-                        _selectedRole = newValue!;
-                      });
-                    },
+                    onChanged: _selectedRole != Role.unknown
+                        ? null
+                        : (Role? newValue) {
+                            setState(() {
+                              _selectedRole = newValue!;
+                            });
+                          },
                     isExpanded: true,
                   ),
                 ),
@@ -331,6 +339,14 @@ class UserDialogState extends State<UserDialog> {
                       }
                       return null;
                     },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextFormField(
+                    key: const Key('userUrl'),
+                    decoration: const InputDecoration(labelText: 'Web address'),
+                    controller: _urlController,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -695,6 +711,7 @@ class UserDialogState extends State<UserDialog> {
                       firstName: _firstNameController.text,
                       lastName: _lastNameController.text,
                       email: _emailController.text,
+                      url: _urlController.text,
                       loginName: _loginNameController.text,
                       telephoneNr: _telephoneController.text,
                       address: updatedUser.address,

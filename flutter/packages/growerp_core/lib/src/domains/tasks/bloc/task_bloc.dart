@@ -76,9 +76,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
     TaskFetch event,
     Emitter<TaskState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString == '') {
-      return;
-    }
     if (state.status == TaskBlocStatus.initial ||
         event.refresh ||
         event.searchString != '') {

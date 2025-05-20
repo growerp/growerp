@@ -123,7 +123,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="name" />
                     <parameter name="email" />
                     <parameter name="role" />
-                    <parameter name="email" />
                     <parameter name="currency" type="Map">
                         <parameter name="currencyId" />
                         <parameter name="description" />
@@ -207,8 +206,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="pseudoId" />
                     <parameter name="name" />
                     <parameter name="email" />
+                    <parameter name="url" />
                     <parameter name="role" />
-                    <parameter name="email" />
                     <parameter name="currency" type="Map">
                         <parameter name="currencyId" />
                         <parameter name="description" />
@@ -238,6 +237,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </parameter>
                     <parameter name="telephoneNr" />
                     <parameter name="email" />
+                    <parameter name="url" />
                     <parameter name="employees" type="List">
                         <parameter name="employee" type="Map">
                             <parameter name="partyId" />
@@ -424,6 +424,7 @@ along with this software (see the LICENSE.md file). If not, see
                                             &amp;&amp; item.customerStatusId == 'CUSTOMER_ASSIGNED'
                                             ? 'Lead': item.companyRole,
                                     email: item.companyEmail ?:'',
+                                    url: item.webAddress,
                                     currency: currency,
                                     image: imageFile,
                                     address: address,
@@ -474,6 +475,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="name" required="true" />
                 <parameter name="role" required="true" />
                 <parameter name="email" />
+                <parameter name="url" />
                 <parameter name="currency" type="Map">
                     <parameter name="currencyId" />
                 </parameter>
@@ -514,6 +516,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="pseudoId" />
                 <parameter name="name" />
                 <parameter name="email" />
+                <parameter name="url" />
                 <parameter name="role" />
                 <parameter name="currency" type="Map">
                     <parameter name="currencyId" />
@@ -608,6 +611,14 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[emailAddress: company.email,
                             partyId: partyId,
                             contactMechPurposeId:'EmailPrimary']" />
+            </if>
+
+            <!-- company webAddress -->
+            <if condition="company.url">
+                <service-call name="mantle.party.ContactServices.create#WebAddress"
+                    in-map="[webAddress: company.url,
+                            partyId: partyId,
+                            contactMechPurposeId:'WebUrlPrimary']" />
             </if>
 
             <!-- address -->
@@ -708,6 +719,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="name" />
                 <parameter name="role" required="true" />
                 <parameter name="email" />
+                <parameter name="url" />
                 <parameter name="currency" type="Map">
                     <parameter name="currencyId" />
                 </parameter>
@@ -748,6 +760,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="pseudoId" />
                 <parameter name="name" />
                 <parameter name="email" />
+                <parameter name="url" />
                 <parameter name="role" />
                 <parameter name="currency" type="Map">
                     <parameter name="currencyId" />
@@ -852,6 +865,25 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="mantle.party.ContactServices.create#EmailAddress"
                         in-map="[partyId: oldValue.companies[0].partyId, 
                         contactMechPurposeId: 'EmailPrimary', emailAddress: company.email]" />
+                </if>
+            </if>
+            <!-- update url -->
+            <if condition="company.url != oldValue.companies[0]?.url">
+                <entity-find entity-name="mantle.party.contact.PartyContactMech"
+                    for-update="true" list="partyContactMechs">
+                    <econdition field-name="partyId" from="oldValue.companies[0].partyId" />
+                    <econdition field-name="contactMechPurposeId" value="WebUrlPrimary" />
+                    <date-filter />
+                </entity-find>
+                <!-- deactivate all duplicate mail addresses -->
+                <iterate list="partyContactMechs" entry="contMech">
+                    <set field="contMech.thruDate" from="ec.user.nowTimestamp" />
+                    <entity-update value-field="contMech" />
+                </iterate>
+                <if condition="company.url">
+                    <service-call name="mantle.party.ContactServices.create#WebAddress"
+                        in-map="[partyId: oldValue.companies[0].partyId, 
+                        contactMechPurposeId: 'WebUrlPrimary', webAddress: company.url]" />
                 </if>
             </if>
             <!-- update currency -->
@@ -1110,6 +1142,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="partyId" />
                     <parameter name="pseudoId" />
                     <parameter name="email" />
+                    <parameter name="url" />
                     <parameter name="role" />
                     <parameter name="firstName" />
                     <parameter name="lastName" />
@@ -1329,6 +1362,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 pseudoId: userInfo?.userPseudoId,
                                 role: userInfo.companyRole ?: userInfo.role,
                                 email: userInfo?.emailAddress ?: userInfo.emailAddressCm,
+                                url: userInfo.webAddress,
                                 emailContactMechId: userInfo.emailContactMechId,
                                 firstName: userInfo?.firstName,
                                 lastName: userInfo?.lastName,
@@ -1366,6 +1400,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="partyId" />
                 <parameter name="pseudoId" />
                 <parameter name="email" />
+                <parameter name="url" />
                 <parameter name="role" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
@@ -1402,6 +1437,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="name" />
                     <parameter name="role" />
                     <parameter name="email" />
+                    <parameter name="url" />
                     <parameter name="currency" type="Map">
                         <parameter name="currencyId" />
                     </parameter>
@@ -1440,6 +1476,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="partyId" />
                 <parameter name="pseudoId" />
                 <parameter name="email" />
+                <parameter name="url" />
                 <parameter name="role" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
@@ -1654,6 +1691,14 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[emailAddress:user.email, partyId:userPartyId,
                              contactMechPurposeId:'EmailPrimary']" />
             </if>
+            <!-- webAddress -->
+            <if condition="user.url">
+                <service-call name="mantle.party.ContactServices.create#WebAddress"
+                    in-map="[webAddress: user.url,
+                            partyId: userPartyId,
+                            contactMechPurposeId:'WebUrlPrimary']" />
+            </if>
+
             <!-- send email to new user with password -->
             <if condition="user.loginName">
                 <entity-find-one entity-name="moqui.basic.email.EmailServer"
@@ -1720,6 +1765,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="user" type="Map" required="true">
                 <parameter name="partyId" required="true" />
                 <parameter name="email" />
+                <parameter name="url" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
                 <parameter name="role" />
@@ -1767,6 +1813,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="user" type="Map">
                 <parameter name="partyId" />
                 <parameter name="email" />
+                <parameter name="url" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
                 <parameter name="role" />
@@ -1889,6 +1936,25 @@ along with this software (see the LICENSE.md file). If not, see
                             in-map="[partyId: user.partyId, emailAddress: user.email,
                                 contactPurposeId: 'EmailPrimary']" />
                     </else>
+                </if>
+            </if>
+            <!-- update url -->
+            <if condition="user.url != oldValue.user?.url">
+                <entity-find entity-name="mantle.party.contact.PartyContactMech"
+                    for-update="true" list="partyContactMechs">
+                    <econdition field-name="partyId" from="oldValue.user.partyId" />
+                    <econdition field-name="contactMechPurposeId" value="WebUrlPrimary" />
+                    <date-filter />
+                </entity-find>
+                <!-- deactivate all duplicate mail addresses -->
+                <iterate list="partyContactMechs" entry="contMech">
+                    <set field="contMech.thruDate" from="ec.user.nowTimestamp" />
+                    <entity-update value-field="contMech" />
+                </iterate>
+                <if condition="user.url">
+                    <service-call name="mantle.party.ContactServices.create#WebAddress"
+                        in-map="[partyId: oldValue.user.partyId, 
+                        contactMechPurposeId: 'WebUrlPrimary', webAddress: user.url]" />
                 </if>
             </if>
             <!-- update security group -->
@@ -2072,6 +2138,44 @@ along with this software (see the LICENSE.md file). If not, see
                     </else>
                 </if>
             </if>
+            <!-- update email -->
+            <if condition="user.email || user.email != oldValue.user.email">
+                <entity-find entity-name="mantle.party.contact.PartyContactMech"
+                    for-update="true" list="partyContactMechs">
+                    <econdition field-name="partyId" from="user.partyId" />
+                    <econdition field-name="contactMechPurposeId" value="EmailPrimary" />
+                    <date-filter />
+                </entity-find>
+                <!-- deactivate all duplicate urlmail addresses -->
+                <iterate list="partyContactMechs" entry="contMech">
+                    <set field="contMech.thruDate" from="ec.user.nowTimestamp" />
+                    <entity-update value-field="contMech" />
+                </iterate>
+                <if condition="user.email">
+                    <service-call name="mantle.party.ContactServices.create#EmailAddress"
+                        in-map="[partyId: user.partyId, 
+                        contactMechPurposeId: 'EmailPrimary', emailAddress: user.email]" />
+                </if>
+            </if>
+            <!-- update url -->
+            <if condition="user.url || user.url != oldValue.user.url">
+                <entity-find entity-name="mantle.party.contact.PartyContactMech"
+                    for-update="true" list="partyContactMechs">
+                    <econdition field-name="partyId" from="user.partyId" />
+                    <econdition field-name="contactMechPurposeId" value="WebUrlPrimary" />
+                    <date-filter />
+                </entity-find>
+                <!-- deactivate all duplicate urlmail addresses -->
+                <iterate list="partyContactMechs" entry="contMech">
+                    <set field="contMech.thruDate" from="ec.user.nowTimestamp" />
+                    <entity-update value-field="contMech" />
+                </iterate>
+                <if condition="user.url">
+                    <service-call name="mantle.party.ContactServices.create#WebAddress"
+                        in-map="[partyId: user.partyId, 
+                        contactMechPurposeId: 'WebUrlPrimary', webAddress: user.url]" />
+                </if>
+            </if>
             <!-- return updated user -->
             <service-call name="growerp.100.PartyServices100.get#User"
                 in-map="[userPartyId: user.partyId]" out-map="userInfo" />
@@ -2091,6 +2195,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="user" type="Map">
                 <parameter name="partyId" />
                 <parameter name="email" />
+                <parameter name="url" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
                 <parameter name="loginDisabled" type="Boolean" />
@@ -2197,6 +2302,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="role" />
                 <parameter name="partyType" />
                 <parameter name="email" />
+                <parameter name="url" />
                 <parameter name="name" />
                 <parameter name="telephoneNr" />
                 <parameter name="address" type="Map">
@@ -2303,6 +2409,7 @@ along with this software (see the LICENSE.md file). If not, see
                         role: item.role,
                         name: name,
                         email: item.email,
+                        url: item.webAddress,
                         paymentMethod: paymentMethod,
                     ])</script>
                 <set field="lastPartyId" from="item.partyId" />
@@ -2485,6 +2592,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="user" type="Map">
                     <parameter name="partyId" />
                     <parameter name="email" />
+                    <parameter name="url" />
                     <parameter name="loginName" />
                 </parameter>
             </parameter>

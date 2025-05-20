@@ -88,72 +88,91 @@ class HomeFormState extends State<HomeForm> {
                   HelperFunctions.showTopMessage(context, messages);
                 }
               },
-              child: Scaffold(
-                  body: Column(children: [
-                Expanded(
-                    child: DisplayMenuOption(
-                        menuList: widget.menuOptions,
-                        menuIndex: 0,
-                        actions: <Widget>[
-                      if (state.authenticate?.apiKey != null &&
-                          widget.menuOptions[0].route == '/')
-                        IconButton(
-                            key: const Key('logoutButton'),
-                            padding: EdgeInsets.zero,
-                            icon: const Icon(Icons.do_not_disturb,
-                                key: Key('HomeFormAuth')),
-                            tooltip: 'Logout',
-                            onPressed: () => {
-                                  _authBloc.add(const AuthLoggedOut()),
-                                }),
-                    ])),
-                // hidden text be able to load demo data for testing
-                if (kDebugMode)
-                  Text(state.authenticate?.apiKey ?? '',
-                      key: const Key('apiKey'),
-                      style: const TextStyle(fontSize: 0)),
-                if (kDebugMode)
-                  Text(state.authenticate?.moquiSessionToken ?? '',
-                      key: const Key('moquiSessionToken'),
-                      style: const TextStyle(fontSize: 0)),
-                appInfo
-              ])));
+              child: ScaffoldMessenger(
+                child: Scaffold(
+                    body: Column(children: [
+                  Expanded(
+                      child: DisplayMenuOption(
+                          menuList: widget.menuOptions,
+                          menuIndex: 0,
+                          actions: <Widget>[
+                        if (state.authenticate?.apiKey != null &&
+                            widget.menuOptions[0].route == '/')
+                          IconButton(
+                              key: const Key('logoutButton'),
+                              padding: EdgeInsets.zero,
+                              icon: const Icon(Icons.do_not_disturb,
+                                  key: Key('HomeFormAuth')),
+                              tooltip: 'Logout',
+                              onPressed: () => {
+                                    _authBloc.add(const AuthLoggedOut()),
+                                  }),
+                      ])),
+                  // hidden text be able to load demo data for testing
+                  if (kDebugMode)
+                    Text(state.authenticate?.apiKey ?? '',
+                        key: const Key('apiKey'),
+                        style: const TextStyle(fontSize: 0)),
+                  if (kDebugMode)
+                    Text(state.authenticate?.moquiSessionToken ?? '',
+                        key: const Key('moquiSessionToken'),
+                        style: const TextStyle(fontSize: 0)),
+                  appInfo
+                ])),
+              ));
         case AuthStatus.failure:
         case AuthStatus.unAuthenticated:
           ThemeMode? themeMode = context.read<ThemeBloc>().state.themeMode;
           return Column(children: [
             Expanded(
-                child: Scaffold(
-                    appBar: AppBar(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.primaryContainer,
-                        key: const Key('HomeFormUnAuth'),
-                        title: appBarTitle(
-                          context,
-                          'Welcome to The GrowERP Business System',
-                          isPhone,
-                        )),
-                    body: Center(
-                      child: Column(children: <Widget>[
-                        const SizedBox(height: 100),
-                        company != null && company!.image != null
-                            ? Image.memory(company!.image!,
-                                height: 100, width: 100)
-                            : Image(
-                                image: AssetImage(themeMode == ThemeMode.light
-                                    ? 'packages/growerp_core/images/growerp100.png'
-                                    : 'packages/growerp_core/images/growerpDark100.png'),
-                                height: 80,
-                                width: 80),
-                        const SizedBox(height: 20),
-                        Text(company == null ? widget.title : company!.name!,
-                            style: TextStyle(
-                                fontSize: isPhone ? 15 : 25,
-                                fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 20),
+                child: ScaffoldMessenger(
+              child: Scaffold(
+                  appBar: AppBar(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.primaryContainer,
+                      key: const Key('HomeFormUnAuth'),
+                      title: appBarTitle(
+                        context,
+                        'Welcome to The GrowERP Business System',
+                        isPhone,
+                      )),
+                  body: Center(
+                    child: Column(children: <Widget>[
+                      const SizedBox(height: 100),
+                      company != null && company!.image != null
+                          ? Image.memory(company!.image!,
+                              height: 100, width: 100)
+                          : Image(
+                              image: AssetImage(themeMode == ThemeMode.light
+                                  ? 'packages/growerp_core/images/growerp100.png'
+                                  : 'packages/growerp_core/images/growerpDark100.png'),
+                              height: 80,
+                              width: 80),
+                      const SizedBox(height: 20),
+                      Text(company == null ? widget.title : company!.name!,
+                          style: TextStyle(
+                              fontSize: isPhone ? 15 : 25,
+                              fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 20),
+                      OutlinedButton(
+                          key: const Key('loginButton'),
+                          child: const Text('Login'),
+                          onPressed: () {
+                            showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                      value: _authBloc,
+                                      child: const LoginDialog());
+                                });
+                          }),
+                      const Expanded(child: SizedBox(height: 20)),
+                      if (classificationId != 'AppSupport')
                         OutlinedButton(
-                            key: const Key('loginButton'),
-                            child: const Text('Login'),
+                            key: const Key('newUserButton'),
+                            child: const Text(
+                                'Register new Company and Administrator'),
                             onPressed: () {
                               showDialog(
                                   barrierDismissible: true,
@@ -161,29 +180,13 @@ class HomeFormState extends State<HomeForm> {
                                   builder: (BuildContext context) {
                                     return BlocProvider.value(
                                         value: _authBloc,
-                                        child: const LoginDialog());
+                                        child: const RegisterUserDialog(true));
                                   });
                             }),
-                        const Expanded(child: SizedBox(height: 20)),
-                        if (classificationId != 'AppSupport')
-                          OutlinedButton(
-                              key: const Key('newUserButton'),
-                              child: const Text(
-                                  'Register new Company and Administrator'),
-                              onPressed: () {
-                                showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return BlocProvider.value(
-                                          value: _authBloc,
-                                          child:
-                                              const RegisterUserDialog(true));
-                                    });
-                              }),
-                        const SizedBox(height: 50)
-                      ]),
-                    ))),
+                      const SizedBox(height: 50)
+                    ]),
+                  )),
+            )),
             Align(alignment: Alignment.bottomCenter, child: appInfo),
           ]);
         default:

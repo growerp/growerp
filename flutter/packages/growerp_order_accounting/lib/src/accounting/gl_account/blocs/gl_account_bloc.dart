@@ -37,9 +37,6 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
     GlAccountFetch event,
     Emitter<GlAccountState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
-      return;
-    }
     late List<GlAccount> current;
     if (state.status == GlAccountStatus.initial ||
         event.refresh ||

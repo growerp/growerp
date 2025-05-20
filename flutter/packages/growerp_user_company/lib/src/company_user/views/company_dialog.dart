@@ -24,9 +24,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import '../../common/common.dart';
-import '../company_user.dart';
-import 'user_dialog.dart';
+import '../../../growerp_user_company.dart';
 
 /// a class to start the <CompanyDialog> from anywhere
 /// 1. a null [Company] input will show the current main company information
@@ -39,34 +37,31 @@ class ShowCompanyDialog extends StatelessWidget {
   final Company company;
   final bool dialog; // displayed as dialog or full screen
   const ShowCompanyDialog(this.company, {super.key, this.dialog = true});
+
   @override
   Widget build(BuildContext context) {
-    late String? companyPartyId;
-    if (company.partyId == null && company.partyId != '_NEW_') {
-      // display (main) company
-      AuthBloc authBloc = context.read<AuthBloc>();
-      companyPartyId = authBloc.state.authenticate!.company!.partyId!;
-    } else {
-      companyPartyId = company.partyId;
-    }
-    context
-        .read<DataFetchBloc<Companies>>()
-        .add(GetDataEvent(() => context.read<RestClient>().getCompany(
-              companyPartyId: companyPartyId,
-              limit: 1,
-            )));
-    return BlocBuilder<DataFetchBloc<Companies>, DataFetchState>(
-        builder: (context, state) {
-      if (state.status == DataFetchStatus.success ||
-          state.status == DataFetchStatus.failure) {
-        if ((state.data as Companies).companies.isEmpty) {
-          //print("not found: company: ${company.name}[${company.pseudoId}]");
-          return const SizedBox.shrink();
+    final companyBloc = context.read<CompanyBloc>();
+    if (company.partyId != null && company.partyId != '_NEW_') {
+      companyBloc.add(CompanyFetch(companyPartyId: company.partyId!, limit: 1));
+      return BlocBuilder<CompanyBloc, CompanyState>(builder: (context, state) {
+        if (state.status == CompanyStatus.success ||
+            state.status == CompanyStatus.failure) {
+          return CompanyDialog(state.companies[0], dialog: dialog);
         }
-        return CompanyDialog((state.data as Companies).companies[0]);
-      }
-      return const LoadingIndicator();
-    });
+        return const LoadingIndicator();
+      });
+    }
+    if (company.partyId == null) {
+      AuthBloc authBloc = context.read<AuthBloc>();
+      return CompanyDialog(
+        authBloc.state.authenticate!.company!,
+        dialog: dialog,
+      );
+    }
+    return CompanyDialog(
+      company,
+      dialog: dialog,
+    );
   }
 }
 
@@ -88,6 +83,7 @@ class CompanyFormState extends State<CompanyDialog> {
   final _nameController = TextEditingController();
   final _telephoneController = TextEditingController();
   final _emailController = TextEditingController();
+  final _urlController = TextEditingController();
   final _vatPercController = TextEditingController();
   final _salesPercController = TextEditingController();
   final _hostNameController = TextEditingController();
@@ -102,7 +98,8 @@ class CompanyFormState extends State<CompanyDialog> {
   late bool isPhone;
   final ScrollController _scrollController = ScrollController();
   late CompanyUserBloc companyUserBloc;
-  late double top, left;
+  late double top;
+  double? right;
 
   @override
   void initState() {
@@ -111,7 +108,7 @@ class CompanyFormState extends State<CompanyDialog> {
     companyUserBloc = context.read<CompanyUserBloc>();
     _companyDialogFormKey = GlobalKey<FormState>();
     authenticate = context.read<AuthBloc>().state.authenticate!;
-    _selectedRole = widget.company.role!;
+    _selectedRole = widget.company.role ?? Role.unknown;
     switch (widget.company.partyId) {
       case null:
         company = authenticate.company!;
@@ -126,8 +123,9 @@ class CompanyFormState extends State<CompanyDialog> {
     }
     _idController.text = company.pseudoId ?? '';
     _nameController.text = company.name ?? '';
-    _selectedRole = company.role ?? widget.company.role!;
+    _selectedRole = company.role ?? Role.unknown;
     _emailController.text = company.email ?? '';
+    _urlController.text = company.url ?? '';
     _backendController.text = company.secondaryBackend ?? '';
     _hostNameController.text = company.hostName ?? '';
     _vatPercController.text =
@@ -140,8 +138,7 @@ class CompanyFormState extends State<CompanyDialog> {
 
     user = authenticate.user!;
     isAdmin = authenticate.user!.userGroup == UserGroup.admin;
-    top = -90;
-    left = 280;
+    top = widget.dialog == true ? -40 : -90;
   }
 
   @override
@@ -183,21 +180,61 @@ class CompanyFormState extends State<CompanyDialog> {
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    return widget.dialog == true
-        ? Dialog(
-            key: Key('CompanyDialog${company.role?.name ?? Role.unknown}'),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: popUp(
-                context: context,
-                title:
-                    "Organization #${company.partyId == null ? 'New' : company.pseudoId}",
-                width: isPhone ? 400 : 1000,
-                height: isPhone ? 600 : 750,
-                child: listChild()))
-        : listChild();
+    right = right ?? (isPhone ? 20 : 150);
+    return Dialog(
+        key: Key('CompanyDialog${company.role?.name ?? Role.unknown}'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: ScaffoldMessenger(
+            child: Scaffold(
+                backgroundColor: Colors.transparent,
+                body: BlocConsumer<CompanyBloc, CompanyState>(
+                    listener: (context, state) {
+                  if (state.status == CompanyStatus.failure) {
+                    HelperFunctions.showMessage(
+                        context, state.message, Colors.red);
+                  }
+                  if (state.status == CompanyStatus.success) {
+                    if (widget.dialog == true && _nameController.text != '') {
+                      Navigator.of(context).pop(state.companies[0]);
+                    }
+                    HelperFunctions.showMessage(
+                        context, state.message, Colors.green);
+                  }
+                }, builder: (context, state) {
+                  if (state.status == CompanyStatus.loading) {
+                    return const LoadingIndicator();
+                  }
+                  return Stack(
+                    children: [
+                      widget.dialog == true
+                          ? popUp(
+                              context: context,
+                              title:
+                                  "$_selectedRole Company #${company.partyId == null ? 'New' : company.pseudoId}",
+                              width: isPhone ? 400 : 1000,
+                              height: isPhone ? 700 : 750,
+                              child: listChild())
+                          : listChild(),
+                      Positioned(
+                        right: right,
+                        top: top,
+                        child: GestureDetector(
+                          onPanUpdate: (details) {
+                            setState(() {
+                              top += details.delta.dy;
+                              right = right! - details.delta.dx;
+                            });
+                          },
+                          child: ImageButtons(
+                              _scrollController, _onImageButtonPressed),
+                        ),
+                      ),
+                    ],
+                  );
+                }))));
   }
 
   Widget listChild() {
@@ -325,11 +362,13 @@ class CompanyFormState extends State<CompanyDialog> {
                   return DropdownMenuItem<Role>(
                       value: item, child: Text(item.value));
                 }).toList(),
-                onChanged: (Role? newValue) {
-                  setState(() {
-                    _selectedRole = newValue!;
-                  });
-                },
+                onChanged: _selectedRole != Role.unknown
+                    ? null
+                    : (Role? newValue) {
+                        setState(() {
+                          _selectedRole = newValue!;
+                        });
+                      },
                 isExpanded: true,
               ),
             ),
@@ -380,7 +419,7 @@ class CompanyFormState extends State<CompanyDialog> {
       TextFormField(
         readOnly: !isAdmin,
         key: const Key('email'),
-        decoration: const InputDecoration(labelText: 'Company Email address'),
+        decoration: const InputDecoration(labelText: 'Email address'),
         controller: _emailController,
         validator: (value) {
           if (value != null &&
@@ -391,6 +430,12 @@ class CompanyFormState extends State<CompanyDialog> {
           }
           return null;
         },
+      ),
+      TextFormField(
+        readOnly: !isAdmin,
+        key: const Key('url'),
+        decoration: const InputDecoration(labelText: 'Web  address'),
+        controller: _urlController,
       ),
       if (company.role == Role.company)
         Row(children: [
@@ -565,6 +610,7 @@ class CompanyFormState extends State<CompanyDialog> {
                                 partyId: company.partyId,
                                 pseudoId: _idController.text,
                                 email: _emailController.text,
+                                url: _urlController.text,
                                 name: _nameController.text,
                                 role: _selectedRole,
                                 telephoneNr: _telephoneController.text,
@@ -622,51 +668,16 @@ class CompanyFormState extends State<CompanyDialog> {
       column.add(Padding(padding: const EdgeInsets.all(5), child: widgets[i]));
     }
 
-    return Stack(
-      key: Key('CompanyDialog${company.role?.value ?? Role.unknown}'),
-      children: [
-        BlocConsumer<CompanyUserBloc, CompanyUserState>(
-            listener: (context, state) {
-          if (state.status == CompanyUserStatus.failure) {
-            HelperFunctions.showMessage(context, state.message, Colors.red);
-          }
-          if (state.status == CompanyUserStatus.success) {
-            if (widget.dialog == true && _nameController.text != '') {
-              Navigator.of(context).pop(state.companiesUsers[0]);
-            }
-            HelperFunctions.showMessage(context, state.message, Colors.green);
-          }
-        }, builder: (context, state) {
-          if (state.status == CompanyUserStatus.failure ||
-              state.status == CompanyUserStatus.success) {
-            return CompanyForm(
-                companyDialogFormKey: _companyDialogFormKey,
-                scrollController: _scrollController,
-                company: company,
-                imageFile: _imageFile,
-                rows: rows,
-                column: column,
-                updateButton: updateButton,
-                widget: widget,
-                employeeChips: employeeChips);
-          }
-          return const LoadingIndicator();
-        }),
-        Positioned(
-          left: left,
-          top: top,
-          child: GestureDetector(
-            onPanUpdate: (details) {
-              setState(() {
-                left += details.delta.dx;
-                top += details.delta.dy;
-              });
-            },
-            child: ImageButtons(_scrollController, _onImageButtonPressed),
-          ),
-        ),
-      ],
-    );
+    return CompanyForm(
+        companyDialogFormKey: _companyDialogFormKey,
+        scrollController: _scrollController,
+        company: company,
+        imageFile: _imageFile,
+        rows: rows,
+        column: column,
+        updateButton: updateButton,
+        widget: widget,
+        employeeChips: employeeChips);
   }
 }
 

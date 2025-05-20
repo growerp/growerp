@@ -53,12 +53,21 @@ class WsClient {
   }
 
   connect(String apiKey, String userId) async {
-    logger.i("WS connect $wsUrl");
-    channel = WebSocketChannel.connect(
-        Uri.parse("$wsUrl?apiKey=$apiKey&userId=$userId"));
+    try {
+      logger.i("WS connect $wsUrl");
+      channel = WebSocketChannel.connect(
+          Uri.parse("$wsUrl?apiKey=$apiKey&userId=$userId"));
 
-    //await channel.ready;
-
+      //await channel.ready;
+    } catch (error) {
+      if (error is WebSocketChannelException) {
+        if (error.inner != null) {
+          final err = error.inner as dynamic;
+          logger.e('Websocket inner error: ${err.message.toString()}');
+        }
+        logger.e('Websocket error: ${error.message}');
+      }
+    }
     streamController = StreamController.broadcast()..addStream(channel.stream);
   }
 

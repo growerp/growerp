@@ -73,9 +73,6 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     ChatRoomFetch event,
     Emitter<ChatRoomState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString == '') {
-      return;
-    }
     if (state.status == ChatRoomStatus.initial ||
         event.refresh ||
         event.searchString != '') {

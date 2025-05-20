@@ -32,6 +32,7 @@ class CompanyUser with _$CompanyUser {
     @Uint8ListConverter() Uint8List? image,
     String? name, // either first/last name or company name
     String? email,
+    String? url,
     String? telephoneNr,
     Address? address,
     PaymentMethod? paymentMethod,
@@ -48,6 +49,11 @@ class CompanyUser with _$CompanyUser {
           partyId: partyId,
           pseudoId: pseudoId,
           name: name,
+          email: email,
+          url: url,
+          telephoneNr: telephoneNr,
+          image: image,
+          paymentMethod: paymentMethod,
           address: address,
           role: role)
       : null;
@@ -61,7 +67,12 @@ class CompanyUser with _$CompanyUser {
           role: role,
           firstName: names != null && names.length > 1 ? names[1] : '',
           lastName: names != null ? names[0] : '',
-          address: address);
+          address: address,
+          email: email,
+          url: url,
+          telephoneNr: telephoneNr,
+          image: image,
+          paymentMethod: paymentMethod);
     }
     return null;
   }
@@ -76,6 +87,10 @@ class CompanyUser with _$CompanyUser {
               pseudoId: obj.pseudoId,
               name: '${obj.firstName} ${obj.lastName}',
               email: obj.email,
+              url: obj.url,
+              telephoneNr: obj.telephoneNr,
+              image: obj.image,
+              paymentMethod: obj.paymentMethod,
               address: obj.address);
         } else {
           return CompanyUser(
@@ -84,6 +99,10 @@ class CompanyUser with _$CompanyUser {
               pseudoId: obj.company?.pseudoId,
               name: obj.company?.name,
               email: obj.company?.email,
+              url: obj.company?.url,
+              telephoneNr: obj.company?.telephoneNr,
+              image: obj.company?.image,
+              paymentMethod: obj.company?.paymentMethod,
               address: obj.company?.address);
         }
       case Company _:
@@ -93,6 +112,10 @@ class CompanyUser with _$CompanyUser {
             pseudoId: obj.pseudoId,
             name: obj.name,
             email: obj.email,
+            url: obj.url,
+            telephoneNr: obj.telephoneNr,
+            image: obj.image,
+            paymentMethod: obj.paymentMethod,
             address: obj.address);
       default:
         return null;
@@ -110,6 +133,10 @@ CompanyUser? toCompanyUser(dynamic object) {
           name: object.name,
           role: object.role,
           email: object.email,
+          url: object.url,
+          image: object.image,
+          paymentMethod: object.paymentMethod,
+          address: object.address,
           telephoneNr: object.telephoneNr);
     case User():
       if (object.company == null) {
@@ -121,6 +148,10 @@ CompanyUser? toCompanyUser(dynamic object) {
             name: "${object.firstName} ${object.lastName}",
             role: object.role,
             email: object.email,
+            url: object.url,
+            image: object.image,
+            paymentMethod: object.paymentMethod,
+            address: object.address,
             telephoneNr: object.telephoneNr);
       }
       // if related company return that
@@ -131,6 +162,10 @@ CompanyUser? toCompanyUser(dynamic object) {
           name: object.company?.name,
           role: object.company?.role,
           email: object.company?.email,
+          url: object.company?.url,
+          image: object.company?.image,
+          paymentMethod: object.company?.paymentMethod,
+          address: object.company?.address,
           telephoneNr: object.company?.telephoneNr);
     default:
       return null;

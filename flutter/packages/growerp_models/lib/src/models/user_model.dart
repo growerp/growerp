@@ -42,6 +42,9 @@ class User with _$User {
     /// email address of this person
     String? email,
 
+    /// website address of this person
+    String? url,
+
     /// postal address and payment method
     Address? address,
     PaymentMethod? paymentMethod,

@@ -54,9 +54,6 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
     CompanyUserFetch event,
     Emitter<CompanyUserState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
-      return;
-    }
     List<CompanyUser> current = [];
     if (state.status == CompanyUserStatus.initial ||
         event.refresh ||

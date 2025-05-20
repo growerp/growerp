@@ -46,9 +46,6 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
     OpportunityFetch event,
     Emitter<OpportunityState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString == '') {
-      return;
-    }
     if (state.status == OpportunityStatus.initial ||
         event.refresh ||
         event.searchString != '') {

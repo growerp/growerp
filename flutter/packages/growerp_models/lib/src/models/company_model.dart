@@ -35,6 +35,7 @@ class Company with _$Company {
     @RoleConverter() Role? role,
     String? name,
     String? email,
+    String? url,
     String? telephoneNr,
     Currency? currency,
     @Uint8ListConverter() Uint8List? image,

@@ -55,9 +55,6 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     ChatMessageFetch event,
     Emitter<ChatMessageState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
-      return;
-    }
     if (state.status == ChatMessageStatus.initial) {
       final myStream = chatClient.stream();
       // ignore: unused_local_variable

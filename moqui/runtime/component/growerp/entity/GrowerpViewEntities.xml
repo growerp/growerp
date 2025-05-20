@@ -1164,6 +1164,19 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="PCMEMAIL" join-optional="true">
             <key-map field-name="contactMechId" />
         </member-entity>
+        <!-- URL -->
+        <member-entity entity-alias="PCMURL" entity-name="mantle.party.contact.PartyContactMech"
+            join-from-alias="PERSON" join-optional="true">
+            <key-map field-name="partyId" />
+            <entity-condition>
+                <econdition field-name="urlPurposeId" value="WebUrlPrimary" />
+                <date-filter from-field-name="urlFromDate" thru-field-name="urlThruDate" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="CMURL" entity-name="mantle.party.contact.ContactMech"
+            join-from-alias="PCMURL" join-optional="true">
+            <key-map field-name="contactMechId" />
+        </member-entity>
         <!-- User telephone -->
         <member-entity entity-alias="COMPPCMTEL" entity-name="mantle.party.contact.PartyContactMech"
             join-from-alias="PERSON" join-optional="true">
@@ -1268,6 +1281,11 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="emailPurposeId" field="contactMechPurposeId" entity-alias="PCMEMAIL" />
         <alias name="emailAddressCm" field="infoString" entity-alias="CM" />
         <alias name="emailContactMechId" field="contactMechId" entity-alias="CM" />
+        <!-- URL -->
+        <alias name="urlFromDate" field="fromDate" entity-alias="PCMURL" />
+        <alias name="urlThruDate" field="thruDate" entity-alias="PCMURL" />
+        <alias name="urlPurposeId" field="contactMechPurposeId" entity-alias="PCMURL" />
+        <alias name="webAddress" field="infoString" entity-alias="CMURL" />
         <!-- user telephone -->
         <alias name="userTelFromDate" field="fromDate" entity-alias="COMPPCMTEL" />
         <alias name="userTelThruDate" field="thruDate" entity-alias="COMPPCMTEL" />
@@ -1404,6 +1422,19 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="COMPPCMEMAIL" join-optional="true">
             <key-map field-name="contactMechId" />
         </member-entity>
+        <!-- Company URL -->
+        <member-entity entity-alias="PCMURL" entity-name="mantle.party.contact.PartyContactMech"
+            join-from-alias="ORGCOMPANY" join-optional="true">
+            <key-map field-name="partyId" />
+            <entity-condition>
+                <econdition field-name="urlPurposeId" value="WebUrlPrimary" />
+                <date-filter from-field-name="urlFromDate" thru-field-name="urlThruDate" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="CMURL" entity-name="mantle.party.contact.ContactMech"
+            join-from-alias="PCMURL" join-optional="true">
+            <key-map field-name="contactMechId" />
+        </member-entity>
         <!-- Company telephone -->
         <member-entity entity-alias="COMPPCMTEL" entity-name="mantle.party.contact.PartyContactMech"
             join-from-alias="ORGCOMPANY" join-optional="true">
@@ -1496,6 +1527,11 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="companyEmailPurposeId" field="contactMechPurposeId" entity-alias="COMPPCMEMAIL" />
         <alias name="companyEmail" field="infoString" entity-alias="COMPCMEMAIL" />
         <alias name="companyEmailContactMechId" field="contactMechId" entity-alias="COMPCMEMAIL" />
+        <!-- URL -->
+        <alias name="urlFromDate" field="fromDate" entity-alias="PCMURL" />
+        <alias name="urlThruDate" field="thruDate" entity-alias="PCMURL" />
+        <alias name="urlPurposeId" field="contactMechPurposeId" entity-alias="PCMURL" />
+        <alias name="webAddress" field="infoString" entity-alias="CMURL" />
         <!-- company telephone -->
         <alias name="companyTelFromDate" field="fromDate" entity-alias="COMPPCMTEL" />
         <alias name="companyTelThruDate" field="thruDate" entity-alias="COMPPCMTEL" />
@@ -1642,6 +1678,19 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="EMAIL" join-optional="true">
             <key-map field-name="contactMechId" />
         </member-entity>
+        <!-- URL -->
+        <member-entity entity-alias="PCMURL" entity-name="mantle.party.contact.PartyContactMech"
+            join-from-alias="PARTY" join-optional="true">
+            <key-map field-name="partyId" />
+            <entity-condition>
+                <econdition field-name="urlPurposeId" value="WebUrlPrimary" />
+                <date-filter from-field-name="urlFromDate" thru-field-name="urlThruDate" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="CMURL" entity-name="mantle.party.contact.ContactMech"
+            join-from-alias="PCMURL" join-optional="true">
+            <key-map field-name="contactMechId" />
+        </member-entity>
         <!-- telephone -->
         <member-entity entity-alias="TEL" entity-name="mantle.party.contact.PartyContactMech"
             join-from-alias="PARTY" join-optional="true">
@@ -1697,6 +1746,12 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="emailPurposeId" field="contactMechPurposeId" entity-alias="EMAIL" />
         <alias name="email" field="infoString" entity-alias="PCMEMAIL" />
         <alias name="emailContactMechId" field="contactMechId" entity-alias="PCMEMAIL" />
+        <alias name="webAddress" field="infoString" entity-alias="CMURL" />
+        <!-- URL -->
+        <alias name="urlFromDate" field="fromDate" entity-alias="PCMURL" />
+        <alias name="urlThruDate" field="thruDate" entity-alias="PCMURL" />
+        <alias name="urlPurposeId" field="contactMechPurposeId" entity-alias="PCMURL" />
+        <alias name="webAddress" field="infoString" entity-alias="CMURL" />
         <!-- company/user telephone -->
         <alias name="telFromDate" field="fromDate" entity-alias="TEL" />
         <alias name="telThruDate" field="thruDate" entity-alias="TEL" />

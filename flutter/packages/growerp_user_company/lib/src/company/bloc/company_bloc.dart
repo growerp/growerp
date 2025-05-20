@@ -52,9 +52,6 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
     CompanyFetch event,
     Emitter<CompanyState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
-      return;
-    }
     List<Company> current = [];
     if (state.status == CompanyStatus.initial ||
         event.refresh ||
@@ -89,9 +86,7 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: CompanyStatus.failure,
-          companies: [],
-          message: await getDioError(e)));
+          status: CompanyStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -132,10 +127,8 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
             message: 'Company ${event.company.name} added'));
       }
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: CompanyStatus.failure,
-          companies: [],
-          message: await getDioError(e)));
+      return emit(state.copyWith(
+          status: CompanyStatus.failure, message: await getDioError(e)));
     }
   }
 
