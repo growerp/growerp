@@ -132,7 +132,7 @@ class UserTest {
     // copy id's to new list
     Role currentRole = npUsers[0].company?.role ?? Role.unknown;
     if (oldUsers.isNotEmpty) {
-      for (int x = 0; x < oldUsers.length; x++) {
+      for (int x = 0; x < npUsers.length; x++) {
         npUsers[x] = npUsers[x].copyWith(pseudoId: oldUsers[x].pseudoId);
       }
     }
@@ -184,9 +184,21 @@ class UserTest {
       }
 
       // company info fixed for employees
-      if (currentRole != Role.company && user.company?.partyId != null) {
-        await CommonTest.dragUntil(tester, key: 'newCompany');
-        await CommonTest.tapByKey(tester, 'newCompany');
+      if (currentRole != Role.company) {
+        if (user.company?.name == null) {
+          // remove existing company
+          if (await CommonTest.doesExistKey(tester, 'removeCompany')) {
+            await CommonTest.tapByKey(tester, 'removeCompany');
+          }
+        } else {
+          // name not null so create or update
+          if (await CommonTest.doesExistKey(tester, 'newCompany')) {
+            await CommonTest.tapByKey(tester, 'newCompany');
+          } else {
+            await CommonTest.tapByKey(tester, 'editCompany');
+          }
+        }
+
         await CommonTest.enterText(
             tester, 'companyName', user.company!.name!); // required!
         await CommonTest.enterText(
@@ -204,6 +216,7 @@ class UserTest {
         await CommonTest.dragUntil(tester, key: 'email');
         await CommonTest.enterText(tester, 'email', user.company?.email ?? '');
         await CommonTest.enterText(tester, 'url', user.company?.url ?? '');
+        await CommonTest.dragUntil(tester, key: 'update');
         await CommonTest.tapByKey(tester, 'update',
             seconds: CommonTest.waitTime);
       }
@@ -265,7 +278,17 @@ class UserTest {
         await CompanyTest.checkPaymentMethod(tester, user.paymentMethod!);
       }
 
-      if (currentRole != Role.company && user.company?.partyId != null) {
+      // check if no company present
+      if (user.company?.name == null) {
+        expect(
+            await CommonTest.doesExistKey(tester, 'newCompany'), equals(true));
+      }
+
+      if (currentRole != Role.company && user.company?.name != null) {
+        expect(
+            await CommonTest.doesExistKey(tester, 'editCompany'), equals(true),
+            reason:
+                'Company ${user.company!.name} not found on user ${user.firstName} ${user.lastName}');
         await CommonTest.dragUntil(tester, key: 'editCompany');
         await CommonTest.tapByKey(tester, 'editCompany');
         expect(CommonTest.getTextFormField('companyName'),
@@ -319,9 +342,7 @@ class UserTest {
 
   static Future<void> deleteLeads(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
-    int count = test.leads.length;
-    if (count != leads.length) return;
-    await deleteUser(tester, count);
+    await deleteUser(tester, test.leads.length);
     PersistFunctions.persistTest(
         test.copyWith(leads: test.leads.sublist(0, test.leads.length - 1)));
   }
@@ -345,11 +366,12 @@ class UserTest {
   }
 
   static Future<void> deleteUser(WidgetTester tester, int count) async {
-    expect(find.byKey(const Key('userItem')),
+    expect(find.byKey(const Key('userItem'), skipOffstage: false),
         findsNWidgets(count)); // initial admin
     await CommonTest.tapByKey(tester, 'delete${count - 1}',
         seconds: CommonTest.waitTime);
-    expect(find.byKey(const Key('userItem')), findsNWidgets(count - 1));
+    expect(find.byKey(const Key('userItem'), skipOffstage: false),
+        findsNWidgets(count - 1));
   }
 
   static Future<void> updateAdministrators(

@@ -392,7 +392,8 @@ class CommonTest {
     bool found = false;
     await tester.pumpAndSettle();
     do {
-      await tester.drag(find.byKey(Key(listViewName)), const Offset(0, -200));
+      await tester.drag(
+          find.byKey(Key(listViewName)).last, const Offset(0, -200));
       await tester.pumpAndSettle(const Duration(milliseconds: 50));
       found = tester.any(find.byKey(Key(key)));
     } while (times++ < 10 && found == false);
@@ -481,7 +482,7 @@ class CommonTest {
 
   /// get the content of a text field identified by a key
   static String getTextField(String key) {
-    Text tf = find.byKey(Key(key)).evaluate().single.widget as Text;
+    Text tf = find.byKey(Key(key)).last.evaluate().single.widget as Text;
     return tf.data!;
   }
 

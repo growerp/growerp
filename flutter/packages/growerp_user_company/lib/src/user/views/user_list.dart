@@ -135,7 +135,7 @@ class UserListState extends State<UserList> {
                                         return index > users.length
                                             ? const BottomLoader()
                                             : Dismissible(
-                                                key: const Key('locationItem'),
+                                                key: const Key('xxxxxx'),
                                                 direction:
                                                     DismissDirection.startToEnd,
                                                 child: BlocProvider.value(
@@ -218,14 +218,16 @@ class UserListState extends State<UserList> {
                                 builder: (BuildContext context) {
                                   return BlocProvider.value(
                                       value: _userBloc,
-                                      child: UserDialog(User(
-                                          role: widget.role,
-                                          company: widget.role == Role.company
-                                              ? _authBloc
-                                                  .state.authenticate!.company
-                                              : Company(
-                                                  role: widget.role,
-                                                ))));
+                                      child: UserDialogStateFull(
+                                          user: User(
+                                              role: widget.role,
+                                              company:
+                                                  widget.role == Role.company
+                                                      ? _authBloc.state
+                                                          .authenticate!.company
+                                                      : Company(
+                                                          role: widget.role,
+                                                        ))));
                                 });
                           },
                           tooltip: 'Add New',

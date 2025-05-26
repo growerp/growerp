@@ -127,7 +127,7 @@ class TaskListState extends State<TaskList> {
                 return index >= state.tasks.length
                     ? const BottomLoader()
                     : Dismissible(
-                        key: const Key('userItem'),
+                        key: const Key('taskItem'),
                         direction: DismissDirection.startToEnd,
                         child: BlocProvider.value(
                           value: _taskBloc,

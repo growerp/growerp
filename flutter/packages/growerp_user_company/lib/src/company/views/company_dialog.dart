@@ -44,17 +44,10 @@ class ShowCompanyDialog extends StatelessWidget {
       return BlocBuilder<CompanyBloc, CompanyState>(builder: (context, state) {
         if (state.status == CompanyStatus.success ||
             state.status == CompanyStatus.failure) {
-          return CompanyDialog(state.companies[0], dialog: dialog);
+          return CompanyDialog(state.company ?? company, dialog: dialog);
         }
         return const LoadingIndicator();
       });
-    }
-    if (company.partyId == null) {
-      AuthBloc authBloc = context.read<AuthBloc>();
-      return CompanyDialog(
-        authBloc.state.authenticate!.company!,
-        dialog: dialog,
-      );
     }
     return CompanyDialog(
       company,
@@ -185,70 +178,69 @@ class CompanyFormState extends State<CompanyDialog> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        child: ScaffoldMessenger(
-            child: Scaffold(
-                backgroundColor: Colors.transparent,
-                body: BlocConsumer<CompanyBloc, CompanyState>(
-                    listener: (context, state) {
-                  if (state.status == CompanyStatus.failure) {
-                    HelperFunctions.showMessage(
-                        context, state.message, Colors.red);
-                  }
-                  if (state.status == CompanyStatus.success) {
-                    if (widget.dialog == true && _nameController.text != '') {
-                      Navigator.of(context).pop(state.companies[0]);
-                    }
-                    HelperFunctions.showMessage(
-                        context, state.message, Colors.green);
-                  }
-                }, builder: (context, state) {
-                  if (state.status == CompanyStatus.loading) {
-                    return const LoadingIndicator();
-                  }
-                  return Stack(
-                    children: [
-                      widget.dialog == true
-                          ? popUp(
-                              context: context,
-                              title:
-                                  "$_selectedRole Company #${company.partyId == null ? 'New' : company.pseudoId}",
-                              width: isPhone ? 400 : 1000,
-                              height: isPhone ? 700 : 750,
-                              child: listChild())
-                          : listChild(),
-                      Positioned(
-                        right: right,
-                        top: top,
-                        child: GestureDetector(
-                          onPanUpdate: (details) {
-                            setState(() {
-                              top += details.delta.dy;
-                              right = right! - details.delta.dx;
-                            });
-                          },
-                          child: ImageButtons(
-                              _scrollController, onImageButtonPressed),
-                        ),
-                      ),
-                    ],
-                  );
-                }))));
+        child: Stack(
+          children: [
+            widget.dialog == true
+                ? popUp(
+                    context: context,
+                    title:
+                        "$_selectedRole Company #${company.partyId == null ? 'New' : company.pseudoId}",
+                    width: isPhone ? 400 : 900,
+                    height: isPhone ? 700 : 750,
+                    child: listChild())
+                : listChild(),
+            Positioned(
+              right: right,
+              top: top,
+              child: GestureDetector(
+                onPanUpdate: (details) {
+                  setState(() {
+                    top += details.delta.dy;
+                    right = right! - details.delta.dx;
+                  });
+                },
+                child: ImageButtons(_scrollController, onImageButtonPressed),
+              ),
+            ),
+          ],
+        ));
   }
 
   Widget listChild() {
-    return !kIsWeb && defaultTargetPlatform == TargetPlatform.android
-        ? FutureBuilder<void>(
-            future: retrieveLostData(),
-            builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-              if (snapshot.hasError) {
-                return Text(
-                  'Pick image error: ${snapshot.error}}',
-                  textAlign: TextAlign.center,
-                );
+    return ScaffoldMessenger(
+        child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: BlocConsumer<CompanyBloc, CompanyState>(
+                listener: (context, state) {
+              if (state.status == CompanyStatus.failure) {
+                HelperFunctions.showMessage(context, state.message, Colors.red);
               }
-              return showForm();
-            })
-        : showForm();
+              if (state.status == CompanyStatus.success) {
+                if (widget.dialog == true && _nameController.text != '') {
+                  Navigator.of(context).pop(company);
+                }
+                HelperFunctions.showMessage(
+                    context, state.message, Colors.green);
+              }
+            }, builder: (context, state) {
+              if (state.status == CompanyStatus.loading) {
+                return const LoadingIndicator();
+              }
+              return !kIsWeb && defaultTargetPlatform == TargetPlatform.android
+                  ? FutureBuilder<void>(
+                      future: retrieveLostData(),
+                      builder:
+                          (BuildContext context, AsyncSnapshot<void> snapshot) {
+                        if (snapshot.hasError) {
+                          return Text(
+                            'Pick image error: ${snapshot.error}}',
+                            textAlign: TextAlign.center,
+                          );
+                        }
+                        return showForm();
+                      })
+                  : showForm();
+            })));
   }
 
   Text? getRetrieveErrorWidget() {

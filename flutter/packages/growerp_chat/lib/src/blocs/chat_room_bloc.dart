@@ -273,7 +273,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
       List<ChatRoom> chatRooms = List.from(state.chatRooms);
       // check if room exist for message, when not, get new unread active list
       if (!state.chatRooms.any((element) =>
-          element.chatRoomId == event.chatMessage.chatRoom!.chatRoomId)) {
+          element.chatRoomId == event.chatMessage.chatRoom?.chatRoomId)) {
         ChatRooms roomResult = await restClient.getChatRooms();
         chatRooms = roomResult.chatRooms;
       }

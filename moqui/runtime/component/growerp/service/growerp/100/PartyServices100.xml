@@ -2236,11 +2236,13 @@ along with this software (see the LICENSE.md file). If not, see
                 list="accounts" for-update="true">
                 <econdition field-name="partyId" />
             </entity-find>
-            <entity-update
-                value-field="(accounts[0] + 
+            <if condition="accounts">
+                <entity-update
+                    value-field="(accounts[0] + 
                     [disabled: 'Y',
                     username: partyId + '-' + accounts[0].username,
                     emailAddress: partyId + '-' + accounts[0].emailAddress])" />
+            </if>
             <service-call name="growerp.100.PartyServices100.get#User"
                 in-map="[userPartyId: userPartyId]" out-map="loggedInParty" />
             <if condition="loggedInParty.users">
