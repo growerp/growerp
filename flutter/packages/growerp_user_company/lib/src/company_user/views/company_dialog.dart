@@ -40,13 +40,22 @@ class ShowCompanyDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final companyBloc = context.read<CompanyBloc>();
     if (company.partyId != null && company.partyId != '_NEW_') {
-      companyBloc.add(CompanyFetch(companyPartyId: company.partyId!, limit: 1));
-      return BlocBuilder<CompanyBloc, CompanyState>(builder: (context, state) {
-        if (state.status == CompanyStatus.success ||
-            state.status == CompanyStatus.failure) {
-          return CompanyDialog(state.companies[0], dialog: dialog);
+      DataFetchBloc companyBloc = context.read<DataFetchBloc<Companies>>()
+        ..add(GetDataEvent(() => context.read<RestClient>().getCompany(
+              companyPartyId: company.partyId,
+              limit: 1,
+            )));
+      return BlocBuilder<DataFetchBloc<Companies>, DataFetchState>(
+          builder: (context, state) {
+        if (state.status == DataFetchStatus.success ||
+            state.status == DataFetchStatus.failure) {
+          if ((companyBloc.state.data as Companies).companies.isEmpty) {
+            return FatalErrorForm(
+                message: 'Company ${company.partyId} not found');
+          }
+          return CompanyDialog(
+              (companyBloc.state.data as Companies).companies[0]);
         }
         return const LoadingIndicator();
       });
@@ -187,70 +196,69 @@ class CompanyFormState extends State<CompanyDialog> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        child: ScaffoldMessenger(
-            child: Scaffold(
-                backgroundColor: Colors.transparent,
-                body: BlocConsumer<CompanyBloc, CompanyState>(
-                    listener: (context, state) {
-                  if (state.status == CompanyStatus.failure) {
-                    HelperFunctions.showMessage(
-                        context, state.message, Colors.red);
-                  }
-                  if (state.status == CompanyStatus.success) {
-                    if (widget.dialog == true && _nameController.text != '') {
-                      Navigator.of(context).pop(state.companies[0]);
-                    }
-                    HelperFunctions.showMessage(
-                        context, state.message, Colors.green);
-                  }
-                }, builder: (context, state) {
-                  if (state.status == CompanyStatus.loading) {
-                    return const LoadingIndicator();
-                  }
-                  return Stack(
-                    children: [
-                      widget.dialog == true
-                          ? popUp(
-                              context: context,
-                              title:
-                                  "$_selectedRole Company #${company.partyId == null ? 'New' : company.pseudoId}",
-                              width: isPhone ? 400 : 1000,
-                              height: isPhone ? 700 : 750,
-                              child: listChild())
-                          : listChild(),
-                      Positioned(
-                        right: right,
-                        top: top,
-                        child: GestureDetector(
-                          onPanUpdate: (details) {
-                            setState(() {
-                              top += details.delta.dy;
-                              right = right! - details.delta.dx;
-                            });
-                          },
-                          child: ImageButtons(
-                              _scrollController, _onImageButtonPressed),
-                        ),
-                      ),
-                    ],
-                  );
-                }))));
+        child: Stack(
+          children: [
+            widget.dialog == true
+                ? popUp(
+                    context: context,
+                    title:
+                        "$_selectedRole Company #${company.partyId == null ? 'New' : company.pseudoId}",
+                    width: isPhone ? 400 : 1000,
+                    height: isPhone ? 700 : 750,
+                    child: listChild())
+                : listChild(),
+            Positioned(
+              right: right,
+              top: top,
+              child: GestureDetector(
+                onPanUpdate: (details) {
+                  setState(() {
+                    top += details.delta.dy;
+                    right = right! - details.delta.dx;
+                  });
+                },
+                child: ImageButtons(_scrollController, _onImageButtonPressed),
+              ),
+            ),
+          ],
+        ));
   }
 
   Widget listChild() {
-    return !kIsWeb && defaultTargetPlatform == TargetPlatform.android
-        ? FutureBuilder<void>(
-            future: retrieveLostData(),
-            builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-              if (snapshot.hasError) {
-                return Text(
-                  'Pick image error: ${snapshot.error}}',
-                  textAlign: TextAlign.center,
-                );
+    return ScaffoldMessenger(
+        child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: BlocConsumer<CompanyUserBloc, CompanyUserState>(
+                listener: (context, state) {
+              if (state.status == CompanyUserStatus.failure) {
+                HelperFunctions.showMessage(context, state.message, Colors.red);
               }
-              return _showForm();
-            })
-        : _showForm();
+              if (state.status == CompanyUserStatus.success) {
+                if (widget.dialog == true && _nameController.text != '') {
+                  Navigator.of(context).pop(state.company);
+                }
+                HelperFunctions.showMessage(
+                    context, state.message, Colors.green);
+              }
+            }, builder: (context, state) {
+              if (state.status == CompanyUserStatus.loading) {
+                return const LoadingIndicator();
+              }
+              return !kIsWeb && defaultTargetPlatform == TargetPlatform.android
+                  ? FutureBuilder<void>(
+                      future: retrieveLostData(),
+                      builder:
+                          (BuildContext context, AsyncSnapshot<void> snapshot) {
+                        if (snapshot.hasError) {
+                          return Text(
+                            'Pick image error: ${snapshot.error}}',
+                            textAlign: TextAlign.center,
+                          );
+                        }
+                        return _showForm();
+                      })
+                  : _showForm();
+            })));
   }
 
   Text? _getRetrieveErrorWidget() {

@@ -49,9 +49,7 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
   int start = 0;
 
   Future<void> _onCompanyFetch(
-    CompanyFetch event,
-    Emitter<CompanyState> emit,
-  ) async {
+      CompanyFetch event, Emitter<CompanyState> emit) async {
     List<Company> current = [];
     if (state.status == CompanyStatus.initial ||
         event.refresh ||
@@ -66,8 +64,9 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
       emit(state.copyWith(status: CompanyStatus.loading));
       late Companies compResult;
       if (event.mainOnly) {
-        compResult =
-            await restClient.getCompanies(start: start, limit: event.limit);
+        compResult = await restClient.getCompanies(
+            start: event.companyPartyId == null ? start : 0,
+            limit: event.limit);
       } else {
         compResult = await restClient.getCompany(
             role: role,
@@ -75,12 +74,19 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
             ownerPartyId: event.ownerPartyId,
             searchString: event.searchString,
             isForDropDown: event.isForDropDown,
-            start: start,
+            start: event.companyPartyId == null ? start : 0,
             limit: event.limit);
       }
       emit(state.copyWith(
         status: CompanyStatus.success,
-        companies: current..addAll(compResult.companies),
+        companies: event.companyPartyId == null
+            ? (current..addAll(compResult.companies))
+            : current,
+        company: event.companyPartyId != null
+            ? compResult.companies.isNotEmpty
+                ? compResult.companies[0]
+                : null
+            : state.company,
         hasReachedMax: compResult.companies.length < event.limit,
         searchString: event.searchString,
       ));

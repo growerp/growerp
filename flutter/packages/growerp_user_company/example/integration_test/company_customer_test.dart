@@ -32,7 +32,7 @@ void main() {
 
   Future<void> selectCustomers(WidgetTester tester) async {
     await CommonTest.selectOption(
-        tester, 'dbCompanies', 'CompanyListCustomer', '2');
+        tester, '/companies', 'CompanyListCustomer', '2');
   }
 
   testWidgets('''GrowERP company customer test''', (tester) async {

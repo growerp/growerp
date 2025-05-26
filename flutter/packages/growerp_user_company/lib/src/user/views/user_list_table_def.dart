@@ -33,6 +33,7 @@ TableData getUserListTableData(Bloc bloc, String classificationId,
             ? Image.memory(item.image!)
             : Text(
                 item.pseudoId == null ? '' : item.pseudoId!.lastChar(3),
+                key: const Key('userItem'),
               ),
       ),
     ));

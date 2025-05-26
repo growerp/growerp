@@ -24,21 +24,21 @@ class CompanyFetch extends CompanyEvent {
   const CompanyFetch({
     this.refresh = false,
     this.searchString = '',
-    this.companyPartyId = '',
+    this.companyPartyId,
     this.limit = 20,
     this.isForDropDown = false,
     this.ownerPartyId = '',
     this.mainOnly = false,
   });
   final bool refresh;
-  final String companyPartyId;
+  final String? companyPartyId;
   final String ownerPartyId;
   final String searchString;
   final int limit;
   final bool isForDropDown;
   final bool mainOnly;
   @override
-  List<Object> get props => [refresh, searchString, limit, companyPartyId];
+  List<Object> get props => [refresh, searchString, limit];
   @override
   String toString() =>
       "companyPartyId: $companyPartyId, limit: $limit, owner: $ownerPartyId, isforDropDown: $isForDropDown";

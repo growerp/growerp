@@ -84,7 +84,8 @@ TableData getCompanyUserTableData(Bloc bloc, String classificationId,
     rowContent.add(TableRowContent(
       name: 'Role',
       width: 8,
-      value: Text(item.role!.value, key: Key('role$index')),
+      value: Text(item.role != null ? item.role!.value : Role.unknown.value,
+          key: Key('role$index')),
     ));
   }
 

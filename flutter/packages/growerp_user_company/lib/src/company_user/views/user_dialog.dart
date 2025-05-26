@@ -167,49 +167,49 @@ class UserDialogState extends State<UserDialog> {
     return Dialog(
         key: Key('UserDialog${_selectedRole.name}'),
         insetPadding: const EdgeInsets.all(10),
-        child: ScaffoldMessenger(
-            child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: popUp(
-              context: context,
-              title: "Person #${widget.user.pseudoId ?? ' new'}",
-              width: isPhone ? 400 : 1000,
-              height: isPhone ? 700 : 700,
-              child: Stack(
-                children: [
-                  BlocConsumer<CompanyUserBloc, CompanyUserState>(
-                      listener: (context, state) {
-                    if (state.status == CompanyUserStatus.failure) {
-                      HelperFunctions.showMessage(
-                          context, state.message, Colors.red);
-                    }
-                    if (state.status == CompanyUserStatus.success) {
-                      Navigator.of(context).pop();
-                    }
-                  }, builder: (context, state) {
-                    if (state.status == CompanyUserStatus.success ||
-                        state.status == CompanyUserStatus.failure) {
-                      return listChild();
-                    }
-                    return const LoadingIndicator();
-                  }),
-                  Positioned(
-                    left: left,
-                    top: top,
-                    child: GestureDetector(
-                      onPanUpdate: (details) {
-                        setState(() {
-                          left += details.delta.dx;
-                          top += details.delta.dy;
-                        });
-                      },
-                      child: ImageButtons(
-                          _scrollController, _onImageButtonPressed),
-                    ),
-                  ),
-                ],
-              )),
-        )));
+        child: popUp(
+            context: context,
+            title: "Person #${widget.user.pseudoId ?? ' new'}",
+            width: isPhone ? 400 : 1000,
+            height: isPhone ? 700 : 700,
+            child: ScaffoldMessenger(
+              child: Scaffold(
+                  backgroundColor: Colors.transparent,
+                  body: Stack(
+                    children: [
+                      BlocConsumer<CompanyUserBloc, CompanyUserState>(
+                          listener: (context, state) {
+                        if (state.status == CompanyUserStatus.failure) {
+                          HelperFunctions.showMessage(
+                              context, state.message, Colors.red);
+                        }
+                        if (state.status == CompanyUserStatus.success) {
+                          Navigator.of(context).pop();
+                        }
+                      }, builder: (context, state) {
+                        if (state.status == CompanyUserStatus.success ||
+                            state.status == CompanyUserStatus.failure) {
+                          return listChild();
+                        }
+                        return const LoadingIndicator();
+                      }),
+                      Positioned(
+                        left: left,
+                        top: top,
+                        child: GestureDetector(
+                          onPanUpdate: (details) {
+                            setState(() {
+                              left += details.delta.dx;
+                              top += details.delta.dy;
+                            });
+                          },
+                          child: ImageButtons(
+                              _scrollController, _onImageButtonPressed),
+                        ),
+                      ),
+                    ],
+                  )),
+            )));
   }
 
   Widget listChild() {
@@ -573,7 +573,19 @@ class UserDialogState extends State<UserDialog> {
                           });
                         }
                       },
-                      child: const Text('Update Company'),
+                      child: const Text('Update'),
+                    )),
+                  const SizedBox(width: 10),
+                  if (_selectedCompany.name != null)
+                    Expanded(
+                        child: OutlinedButton(
+                      key: const Key('removeCompany'),
+                      onPressed: () async {
+                        setState(() {
+                          _selectedCompany = Company();
+                        });
+                      },
+                      child: const Text('Remove'),
                     )),
                   const SizedBox(width: 10),
                   Expanded(
@@ -594,7 +606,7 @@ class UserDialogState extends State<UserDialog> {
                         });
                       }
                     },
-                    child: const Text('New Company'),
+                    child: const Text('Add New'),
                   )),
                 ],
               ),

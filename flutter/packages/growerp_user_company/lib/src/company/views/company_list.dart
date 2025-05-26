@@ -134,7 +134,7 @@ class CompanyListState extends State<CompanyList> {
                                         return index > companies.length
                                             ? const BottomLoader()
                                             : Dismissible(
-                                                key: const Key('locationItem'),
+                                                key: const Key('companyItem'),
                                                 direction:
                                                     DismissDirection.startToEnd,
                                                 child: BlocProvider.value(

@@ -25,17 +25,34 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import '../../../growerp_user_company.dart';
+import '../../common/address_dialog.dart';
+import '../../common/payment_method_dialog.dart';
+import '../../company/views/company_dialog.dart';
+import '../../company/bloc/company_bloc.dart';
+import '../bloc/user_bloc.dart';
 
 class UserDialog extends StatelessWidget {
   final User user;
   const UserDialog(this.user, {super.key});
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<CompanyBloc>(
-        create: (context) =>
-            CompanyBloc(context.read<RestClient>(), user.company!.role),
-        child: UserDialogStateFull(user: user));
+    DataFetchBloc userBloc = context.read<DataFetchBloc<Users>>()
+      ..add(GetDataEvent(() => context.read<RestClient>().getUser(
+            partyId: user.partyId,
+            limit: 1,
+          )));
+    return BlocBuilder<DataFetchBloc<Users>, DataFetchState>(
+        builder: (context, state) {
+      if (state.status == DataFetchStatus.success ||
+          state.status == DataFetchStatus.failure) {
+        if ((userBloc.state.data as Users).users.isEmpty) {
+          return FatalErrorForm(message: 'User ${user.partyId} not found');
+        }
+        return UserDialogStateFull(
+            user: (userBloc.state.data as Users).users[0]);
+      }
+      return const LoadingIndicator();
+    });
   }
 }
 
@@ -167,17 +184,18 @@ class UserDialogState extends State<UserDialogStateFull> {
       title = _selectedRole.name;
     }
     return Dialog(
-        key: const Key('UserDialog\${_selectedRole.name}'),
+        key: Key('UserDialog${_selectedRole.name}'),
         insetPadding: const EdgeInsets.all(10),
-        child: ScaffoldMessenger(
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: popUp(
-                context: context,
-                title: "$title #${widget.user.pseudoId ?? ' new'}",
-                width: isPhone ? 400 : 1000,
-                height: isPhone ? 700 : 700,
-                child: Stack(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: popUp(
+          context: context,
+          title: "$title #${widget.user.pseudoId ?? ' new'}",
+          width: isPhone ? 400 : 800,
+          height: isPhone ? 700 : 700,
+          child: ScaffoldMessenger(
+            child: Scaffold(
+                backgroundColor: Colors.transparent,
+                body: Stack(
                   children: [
                     BlocConsumer<UserBloc, UserState>(
                         listener: (context, state) {
@@ -575,9 +593,21 @@ class UserDialogState extends State<UserDialogStateFull> {
                           });
                         }
                       },
-                      child: const Text('Update Company'),
+                      child: const Text('Update'),
                     )),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 5),
+                  if (_selectedCompany.name != null)
+                    Expanded(
+                        child: OutlinedButton(
+                      key: const Key('removeCompany'),
+                      onPressed: () async {
+                        setState(() {
+                          _selectedCompany = Company();
+                        });
+                      },
+                      child: const Text('Remove'),
+                    )),
+                  const SizedBox(width: 5),
                   Expanded(
                       child: OutlinedButton(
                     key: const Key('newCompany'),
@@ -596,7 +626,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                         });
                       }
                     },
-                    child: const Text('New Company'),
+                    child: const Text('Add new'),
                   )),
                 ],
               ),
