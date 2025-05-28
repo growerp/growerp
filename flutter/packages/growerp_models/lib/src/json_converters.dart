@@ -157,7 +157,7 @@ class PartyTypeConverter implements JsonConverter<PartyType?, String?> {
   @override
   PartyType? fromJson(String? json) {
     if (json == null) return null;
-    return PartyType.getByValue(json);
+    return PartyType.tryParse(json);
   }
 
   @override

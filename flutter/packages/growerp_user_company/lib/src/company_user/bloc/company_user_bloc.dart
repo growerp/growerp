@@ -14,6 +14,7 @@
 
 import 'dart:async';
 import 'package:dio/dio.dart';
+import 'package:fast_csv/fast_csv.dart' as fast_csv;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
@@ -44,6 +45,8 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
         transformer: companyUserDroppable(const Duration(milliseconds: 100)));
     on<CompanyUserUpdate>(_onCompanyUserUpdate);
     on<CompanyUserDelete>(_onCompanyUserDelete);
+    on<CompanyUserUpload>(_onCompanyUserUpload);
+    on<CompanyUserDownload>(_onCompanyUserDownload);
   }
 
   final RestClient restClient;
@@ -95,9 +98,7 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: CompanyUserStatus.failure,
-          companiesUsers: [],
-          message: await getDioError(e)));
+          status: CompanyUserStatus.failure, message: await getDioError(e)));
     }
   }
 
@@ -162,6 +163,61 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
             companiesUsers: companiesUsers,
             message: message));
       }
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: CompanyUserStatus.failure,
+          companiesUsers: [],
+          message: await getDioError(e)));
+    }
+  }
+
+  Future<void> _onCompanyUserUpload(
+    CompanyUserUpload event,
+    Emitter<CompanyUserState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: CompanyUserStatus.filesLoading));
+      List<CompanyUser> companyUsers = [];
+      final result = fast_csv.parse(event.file);
+      int line = 0;
+      // import csv into companyUsers
+      for (final row in result) {
+        if (line++ < 2 || row.length < 12) continue;
+        companyUsers.add(CompanyUser(
+          pseudoId: row[0],
+          type: PartyType.tryParse(row[1]),
+          name: row[2],
+          role: Role.tryParse(row[3]),
+          email: row[4],
+          url: row[5],
+          telephoneNr: row[6],
+          address: Address(address1: row[7]),
+          company: Company(pseudoId: row[13], name: row[14]),
+        ));
+      }
+      await restClient.importCompanyUsers(companyUsers);
+      return emit(state.copyWith(
+          status: CompanyUserStatus.success,
+          companiesUsers: state.companiesUsers,
+          message: "Companies/Users upload ended successfully"));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: CompanyUserStatus.failure, message: await getDioError(e)));
+    }
+  }
+
+  Future<void> _onCompanyUserDownload(
+    CompanyUserDownload event,
+    Emitter<CompanyUserState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: CompanyUserStatus.filesLoading));
+      await restClient.exportScreenCompanyUsers();
+      emit(state.copyWith(
+          status: CompanyUserStatus.success,
+          companiesUsers: state.companiesUsers,
+          message:
+              "The request is scheduled and the email will be sent shortly"));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: CompanyUserStatus.failure,

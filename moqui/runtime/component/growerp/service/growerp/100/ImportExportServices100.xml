@@ -425,6 +425,171 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="import" noun="CompanyUsers">
+        <in-parameters>
+            <parameter name="companyUsers" type="List" required="true">
+                <parameter name="pseudoId" />
+                <parameter name="partyType" />
+                <parameter name="role" />
+                <parameter name="email" />
+                <parameter name="url" />
+                <parameter name="name" />
+                <parameter name="telephoneNr" />
+                <parameter name="address" type="Map">
+                    <parameter name="address1" />
+                    <parameter name="address2" />
+                    <parameter name="city" />
+                    <parameter name="postalCode" />
+                    <parameter name="province" />
+                    <parameter name="provinceId" />
+                    <parameter name="country" />
+                    <parameter name="countryId" />
+                </parameter>
+                <parameter name="paymentMethod">
+                    <parameter name="ccPaymentMethodId" />
+                    <parameter name="ccDescription" />
+                </parameter>
+                <parameter name="company" type="Map">
+                    <parameter name="name" />
+                    <parameter name="pseudoId" />
+                </parameter>
+            </parameter>
+        </in-parameters>
+        <actions>
+            <script>System.out.println(">>>>importing ${companysUsers?.size()} company/users")</script>
+            <set field="imported" type="Integer" value="0" />
+            <iterate list="companyUsers" entry="companyUser">
+                <log message="===processing: ${companyUser}" />
+                <!-- validate -->
+                <if condition="!['Company','User'].contains(companyUser.type)">
+                    <return error="true"
+                        message="Invalid type value: ${companyUser.type} valid: 'Company','User'" />
+                </if>
+                <if
+                    condition="!['OrgInternal','Customer','Lead','Supplier'].contains(companyUser.role)">
+                    <return error="true"
+                        message="Invalid role value: ${companyUser.role} valid: 'Customer','Lead','Supplier'" />
+                </if>
+
+
+                <!-- check if company exist for either company or company within user -->
+                <if
+                    condition="(companyUser.company?.id != null || 
+                                                companyUser.company?.name != null) || 
+                                                companyUser.type == 'Company'">
+                    <if condition="companyUser.type == 'Company'">
+                        <set field="pseudoId" from="companyUser.id" />
+                        <set field="name" from="companyUser.name" />
+                        <else>
+                            <set field="pseudoId" from="companyUser.company?.id" />
+                            <set field="name" from="companyUser.company?.name" />
+                        </else>
+                    </if>
+                    <entity-find entity-name="growerp.party.OwnerCompany"
+                        list="companies" limit="1">
+                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                        <econdition field-name="pseudoId"
+                            from="pseudoId"
+                            ignore-if-empty="true" />
+                        <econdition field-name="name"
+                            from="name"
+                            ignore-if-empty="true" />
+                    </entity-find>
+                </if>
+
+                <if condition="companyUser.type == 'User'">
+                    <then>
+                        <!-- for a user check if related company exists using id/name, -->
+                        <if
+                            condition="companyUser.company?.id != null || 
+                                                companyUser.company?.name != null">
+                            <if condition="companies">
+                                <set field="company"
+                                    from="[partyId: companies[0].partyId, name: companies[0].name]" />
+                            </if>
+                        </if>
+                        <if condition="companyUser.name">
+                            <if condition="!companyUser.name.contains(',')">
+                                <if condition="companyUser.name.contains(' ')">
+                                    <set field="companyUser.name"
+                                        from="companyUser.name.replace(' ',',')" />
+                                </if>
+                            </if>
+                            <set field="companyUser.name"
+                                from="companyUser.name.replace(' ','')" />
+                            <if condition="companyUser.name.split(',').size() &gt; 1">
+                                <set field="firstName" from="companyUser.name.split(',')[0]" />
+                                <set field="lastName" from="companyUser.name.split(',')[1]" />
+                            </if>
+                        </if>
+                        <set field="user"
+                            from="[
+                                        firstName: firstName,
+                                        lastName: lastName,
+                                        role: companyUser.role,
+                                        email: companyUser.email,
+                                        url: companyUser.url,
+                                        telephoneNr: companyUser.telephoneNumber,
+                                        address1: companyUser.address1,
+                                        address2: companyUser.address2,
+                                        postalCode: companyUser.postalCode,
+                                        city: companyUser.city,
+                                        province: companyUser.province,
+                                        country: companyUser.country,
+                                        countryId: companyUser.countryId,
+                                        company: company]" />
+                        <service-call name="growerp.100.PartyServices100.create#User"
+                            out-map="result"
+                            in-map="[user: user, classificationId: classificationId]" />
+                    </then>
+
+                    <else-if condition="companyUser.type == 'Company'">
+                        <!-- result if company exist -->
+                        <set field="company"
+                            from="[
+                                        name: companyUser.name,
+                                        role: companyUser.role,
+                                        email: companyUser.email,
+                                        url: companyUser.url,
+                                        telephoneNr: companyUser.telephoneNumber,
+                                        address1: companyUser.address1,
+                                        address2: companyUser.address2,
+                                        postalCode: companyUser.postalCode,
+                                        city: companyUser.city,
+                                        province: companyUser.province,
+                                        country: companyUser.country,
+                                        countryId: companyUser.countryId,
+                                        ]" />
+                        <if condition="!companies">
+                            <service-call
+                                name="growerp.100.PartyServices100.create#Company"
+                                out-map="result"
+                                in-map="[company: company, classificationId: classificationId]" />
+                            <else>
+                                <set field="company"
+                                    from="company + [partyId: companies[0].partyId,
+                                                            pseudoId: companies[0].pseudoId]" />
+                                <service-call
+                                    name="growerp.100.PartyServices100.update#Company"
+                                    out-map="result"
+                                    in-map="[company: company, classificationId: classificationId]" />
+                            </else>
+                        </if>
+                    </else-if>
+
+                    <else>
+                        <log level="error" message="Unknown party type: ${companyUser.type}" />
+                    </else>
+                </if>
+                <set field="imported" from="imported + 1" />
+            </iterate>
+
+            <if condition="!ec.message.hasError()">
+                <script>System.out.println(">>>${imported} companies/users imported")</script>
+            </if>
+        </actions>
+    </service>
+
     <service verb="import" noun="Products">
         <in-parameters>
             <parameter name="products" required="true" type="List">
@@ -1800,6 +1965,50 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="get" noun="ExportCompanyUsers">
+        <description>
+            Get Company/Users information into a CSV file attachement
+        </description>
+        <out-parameters>
+            <parameter name="fileText" />
+        </out-parameters>
+        <actions>
+            <script>logger.warn("getting companiesUsers")</script>
+            <service-call name="growerp.100.PartyServices100.get#CompanyUser"
+                in-map="[export: true, limit: 9999]"
+                out-map="context" />
+            <set field="fileText" value="" />
+            <script><![CDATA[
+                import org.apache.commons.csv.CSVPrinter
+                import org.apache.commons.csv.CSVFormat
+                import org.apache.commons.csv.CSVRecord
+                import org.apache.commons.csv.QuoteMode
+                StringBuilder outSb = new StringBuilder()
+                CSVPrinter printer = CSVFormat.DEFAULT.withHeader(
+                    "Id", "type", "name", "role", "email", "URL", "telephone number",  "address1", "address2", "postalCode", "city", "province/state", "country", "countryId", "companyId", "companyName").print(outSb)
+                for (Map item in companiesUsers) {
+                    printer.printRecord(item.pseudoId,
+                                        item.partyType,
+                                        item.name,
+                                        item.role,
+                                        item.email,
+                                        item.url,
+                                        item.telephoneNumber,
+                                        item.address?.address1,
+                                        item.address?.address2,
+                                        item.address?.postalCode,
+                                        item.address?.city,
+                                        item.address?.province,
+                                        item.address?.country,
+                                        item.address?.countryId,
+                                        item.company?.pseudoId,
+                                        item.company?.name,
+                                        )}
+                fileText = outSb.toString()
+            ]]></script>
+        </actions>
+    </service>
+
     <service verb="get" noun="ExportGlAccounts">
         <description>
             Get ledger Gl Accounts information into a CSV file attachement
@@ -1864,6 +2073,14 @@ along with this software (see the LICENSE.md file). If not, see
                         toAddresses: emailAddress, bodyParameters: bodyParameters]"
                         out-map="context" />
                     <message public="true" type="success">A GlAccount CSV file was sent by email to ${userAccount.emailAddress}.</message>
+                </else-if>
+                <else-if condition="entityName == 'CompanyUser'">
+                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
+                        async="true"
+                        in-map="[emailTemplateId: 'GrowerpExportCompanyUsers',
+                        toAddresses: emailAddress, bodyParameters: bodyParameters]"
+                        out-map="context" />
+                    <message public="true" type="success">A Company/User CSV file was sent by email to ${userAccount.emailAddress}.</message>
                 </else-if>
                 <else>
                     <return error="true"

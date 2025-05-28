@@ -14,7 +14,8 @@
 
 enum PartyType {
   company('Company'),
-  user('User');
+  user('User'),
+  unknown('');
 
   final String value;
   const PartyType(this.value);
@@ -27,6 +28,17 @@ enum PartyType {
       }
     }
     return byValue[value];
+  }
+
+  static PartyType tryParse(String val) {
+    switch (val.toLowerCase()) {
+      case 'company':
+        return company;
+      case 'user':
+        return user;
+      default:
+        return unknown; // default to user if not recognized
+    }
   }
 
   @override

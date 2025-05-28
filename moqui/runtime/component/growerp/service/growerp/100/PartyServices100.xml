@@ -2295,6 +2295,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="limit" type="Integer" default-value="20" />
             <parameter name="search" default="null" />
             <parameter name="partyId" />
+            <parameter name="export" type="Boolean" default-value="false" />
         </in-parameters>
         <out-parameters>
             <parameter name="companiesUsers" type="List">
@@ -2302,7 +2303,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="pseudoId" />
                 <parameter name="partyType" />
                 <parameter name="role" />
-                <parameter name="partyType" />
                 <parameter name="email" />
                 <parameter name="url" />
                 <parameter name="name" />
@@ -2321,6 +2321,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="paymentMethod">
                     <parameter name="ccPaymentMethodId" />
                     <parameter name="ccDescription" />
+                </parameter>
+                <parameter name="company" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="name" />
+                    <parameter name="pseudoId" />
                 </parameter>
             </parameter>
         </out-parameters>
@@ -2358,6 +2363,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="role" ignore-if-empty="true" />
                 <econdition field-name="customerStatusId" ignore-if-empty="true" or-null="true" />
                 <econditions combine="or">
+                    <econdition field-name="toPartyId" operator="is-null" ignore="export" />
                     <econdition field-name="companyName" from="searchString" ignore-case="true"
                         operator="like" ignore-if-empty="true" />
                     <econdition field-name="firstName" from="searchString" ignore-case="true"
@@ -2377,7 +2383,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </econditions>
                 <order-by field-name="name" />
             </entity-find>
-
             <set field="companiesUsers" from="[]" />
             <iterate list="items" entry="item">
                 <!-- remove duplicates -->
@@ -2386,14 +2391,23 @@ along with this software (see the LICENSE.md file). If not, see
                     <continue />
                 </if>
                 <if condition="item.partyType == 'PtyOrganization'">
-                    <set field="type" value="company" />
+                    <set field="type" value="Company" />
                     <set field="name" value="${item.companyName}" />
                     <else>
-                        <set field="type" value="user" />
+                        <set field="type" value="User" />
                         <set field="name" value="${item.firstName} ${item.lastName}" />
                         <set field="name" from="item.userFullName ?: name" />
                     </else>
                 </if>
+                <log message="type: ${item.partyType} type: $type" />
+                <!-- address -->
+                <set field="address" from="null" />
+                <set field="address"
+                    from="[addressId: item.postalContactMechId,
+                    address1: item.address1, address2: item.address2,
+                    city: item.city, postalCode: item.postalCode,
+                    province: item.stateProvince, provinceId: item.stateProvinceGeoId,
+                    country: item.countryName, countryId: item.countryId]" />
                 <!-- payment method -->
                 <set field="paymentMethod" from="null" />
                 <if condition="item.paymentMethodId">
@@ -2402,17 +2416,33 @@ along with this software (see the LICENSE.md file). If not, see
                         value="${item.cardType}**********${item.cardNumber.substring(nrLength-4,nrLength)} ${item.expireDate}" />
                     <set field="paymentMethod"
                         from="[ ccPaymentMethodId: item.paymentMethodId,
-                                                    ccDescription: ccDescription]" />
+                                    ccDescription: ccDescription]" />
                 </if>
+                <set field="personCompany" from="null" />
+                <if condition="item.personCompanyPartyId">
+                    <set field="personCompany"
+                        from="[name: item.personCompanyName, pseudoId: item.personCompanyPseudoId]" />
+                </if>
+                <if condition="item.telCountryCode || item.telAreaCode || item.telContactNumber">
+                    <set field="telephoneNr"
+                        value="${item.telCountryCode ?: ''} ${item.telAreaCode ?: ''} ${item.telContactNumber ?: ''}" />
+                    <else>
+                        <set field="telephoneNr" from="null" />
+                    </else>
+                </if>
+
                 <script>companiesUsers.add([
+                        pseudoId: item.pseudoId,
                         type: type,
                         partyId: item.partyId,
-                        pseudoId: item.pseudoId,
                         role: item.role,
                         name: name,
                         email: item.email,
                         url: item.webAddress,
+                        telephoneNr: telephoneNr,
                         paymentMethod: paymentMethod,
+                        address: address,
+                        company: personCompany,
                     ])</script>
                 <set field="lastPartyId" from="item.partyId" />
             </iterate>
