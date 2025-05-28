@@ -58,3 +58,12 @@ class CompanyUserDelete extends CompanyUserEvent {
   @override
   String toString() => "Update Company/User: $company $user";
 }
+
+/// initiate a download of products by email.
+class CompanyUserDownload extends CompanyUserEvent {}
+
+/// start a [CompanyUser] import
+class CompanyUserUpload extends CompanyUserEvent {
+  const CompanyUserUpload(this.file);
+  final String file;
+}

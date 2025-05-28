@@ -1544,6 +1544,8 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="personToCompanyId" field="partyRelationshipId" entity-alias="PERSONTOCOMPANY" />
         <alias name="personFromDate" field="fromDate" entity-alias="PERSONTOCOMPANY" />
         <alias name="personThruDate" field="thruDate" entity-alias="PERSONTOCOMPANY" />
+        <!-- toPartyId isNull for users with no company for export need all-->
+        <alias name="toPartyId" entity-alias="PERSONTOCOMPANY" />
         <alias name="personDisabled" field="disabled" entity-alias="PTYPERSON" />
         <alias name="personPseudoId" field="pseudoId" entity-alias="PTYPERSON" />
         <alias name="personPartyId" field="partyId" entity-alias="PERSON" />
@@ -1604,10 +1606,18 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="PERSON" join-optional="true">
             <key-map field-name="partyId" related="fromPartyId" />
             <entity-condition>
-                <econdition field-name="toPartyId" operator="is-null" />
                 <date-filter from-field-name="userFromDate" thru-field-name="userThruDate" />
             </entity-condition>
         </member-entity>
+        <member-entity entity-alias="PERSONCOMPANYPARTY" entity-name="mantle.party.Party"
+            join-from-alias="PERSONTOCOMPANY" join-optional="true">
+            <key-map field-name="toPartyId" related="partyId" />
+        </member-entity>
+        <member-entity entity-alias="PERSONCOMPANY" entity-name="mantle.party.Organization"
+            join-from-alias="PERSONCOMPANYPARTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <!-- company -->
         <member-entity entity-alias="ORGCOMPANY" entity-name="mantle.party.Organization"
             join-from-alias="ORGCOMPANYPARTY" join-optional="true">
             <key-map field-name="partyId" />
@@ -1774,7 +1784,11 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="userFullName" entity-alias="ACCT" />
         <alias name="emailAddress" entity-alias="ACCT" />
         <alias name="locale" entity-alias="ACCT" />
+        <alias name="personCompanyName" field="organizationName" entity-alias="PERSONCOMPANY" />
+        <alias name="personCompanyPartyId" field="partyId" entity-alias="PERSONCOMPANY" />
+        <alias name="personCompanyPseudoId" field="pseudoId" entity-alias="PERSONCOMPANYPARTY" />
         <!-- check for user related company with dates-->
+        <alias name="toPartyId" entity-alias="PERSONTOCOMPANY" />
         <alias name="userFromDate" field="fromDate" entity-alias="PERSONTOCOMPANY" />
         <alias name="userThruDate" field="thruDate" entity-alias="PERSONTOCOMPANY" />
     </view-entity>

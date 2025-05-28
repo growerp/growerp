@@ -14,7 +14,7 @@
 
 part of 'company_user_bloc.dart';
 
-enum CompanyUserStatus { initial, loading, success, failure }
+enum CompanyUserStatus { initial, loading, filesLoading, success, failure }
 
 class CompanyUserState extends Equatable {
   const CompanyUserState({

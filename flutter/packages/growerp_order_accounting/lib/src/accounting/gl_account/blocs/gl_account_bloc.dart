@@ -168,9 +168,7 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
           message: "Gl account upload ended successfully"));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: GlAccountStatus.failure,
-          glAccounts: [],
-          message: await getDioError(e)));
+          status: GlAccountStatus.failure, message: await getDioError(e)));
     }
   }
 

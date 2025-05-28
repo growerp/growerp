@@ -252,6 +252,22 @@ class CompanyUserListState extends State<CompanyUserList> {
                           child: const Column(
                             children: [Icon(Icons.add), Text('Person')],
                           )),
+                      const SizedBox(height: 10),
+                      FloatingActionButton(
+                          heroTag: 'companyUserFiles',
+                          key: const Key("upDownload"),
+                          onPressed: () async {
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                      value: _companyUserBloc,
+                                      child: const CompanyUserFilesDialog());
+                                });
+                          },
+                          tooltip: 'companies/users up/download',
+                          child: const Icon(Icons.file_copy)),
                     ],
                   ),
                 ),

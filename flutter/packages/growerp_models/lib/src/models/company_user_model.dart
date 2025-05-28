@@ -36,6 +36,7 @@ class CompanyUser with _$CompanyUser {
     String? telephoneNr,
     Address? address,
     PaymentMethod? paymentMethod,
+    Company? company, // related company if type == user
   }) = _CompanyUser;
 
   factory CompanyUser.fromJson(Map<String, dynamic> json) =>
@@ -72,7 +73,8 @@ class CompanyUser with _$CompanyUser {
           url: url,
           telephoneNr: telephoneNr,
           image: image,
-          paymentMethod: paymentMethod);
+          paymentMethod: paymentMethod,
+          company: company);
     }
     return null;
   }
@@ -152,6 +154,7 @@ CompanyUser? toCompanyUser(dynamic object) {
             image: object.image,
             paymentMethod: object.paymentMethod,
             address: object.address,
+            company: object.company,
             telephoneNr: object.telephoneNr);
       }
       // if related company return that

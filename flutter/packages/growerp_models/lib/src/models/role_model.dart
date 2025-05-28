@@ -32,6 +32,21 @@ enum Role {
     return byValue[value];
   }
 
+  static Role tryParse(String val) {
+    switch (val.toLowerCase()) {
+      case 'supplier':
+        return supplier;
+      case 'customer':
+        return customer;
+      case 'lead':
+        return lead;
+      case 'orginternal':
+        return company;
+      default:
+        return unknown;
+    }
+  }
+
   @override
   String toString() {
     return value;

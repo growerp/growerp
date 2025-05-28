@@ -109,12 +109,19 @@ abstract class RestClient {
   // party to replace company and user
   @GET("rest/s1/growerp/100/CompanyUser")
   Future<CompaniesUsers> getCompanyUser({
-    @Query('role') Role? role,
+    @Query('downrole') Role? role,
     @Query('start') int? start,
     @Query('limit') int? limit,
     @Query('search') String? searchString,
     @Query('partyId') String? partyId,
   });
+
+  @POST("rest/s1/growerp/100/ImportExport/companyUsers")
+  Future<String> importCompanyUsers(@Field() List<CompanyUser> companyUsers);
+
+  @GET("rest/s1/growerp/100/ImportExport")
+  Future<String> exportScreenCompanyUsers(
+      {@Query('entityName') String entityName = 'CompanyUser'});
 
   // user
   @GET("rest/s1/growerp/100/User")
