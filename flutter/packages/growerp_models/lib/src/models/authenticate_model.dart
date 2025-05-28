@@ -23,7 +23,7 @@ class Authenticate with _$Authenticate {
   Authenticate._();
   factory Authenticate({
     final String? apiKey, // api or actions as changePassword, moreinfo
-    required String classificationId, // appname
+    String? classificationId, // appname
     String? moquiSessionToken,
     String? ownerPartyId,
     CompanyUser? companyUser,
@@ -33,7 +33,7 @@ class Authenticate with _$Authenticate {
   }) = _Authenticate;
 
   factory Authenticate.fromJson(Map<String, dynamic> json) =>
-      _$AuthenticateFromJson(json['authenticate']);
+      _$AuthenticateFromJson(json['authenticate'] ?? json);
 
   @override
   String toString() => "CompName: ${company!.name}, Usr: ${user!.lastName}";

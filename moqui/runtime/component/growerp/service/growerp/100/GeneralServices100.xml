@@ -832,8 +832,7 @@ along with this software (see the LICENSE.md file). If not, see
                          'Y'.equals(userAccount.passwordBase64)).doCredentialsMatch(token, info)">
                         <set field="passwordChange" value="true" />
                         <else>
-                            <return message="Password incorrect for user ${username}" public="true"
-                                type="danger" />
+                            <return error="true" message="Password incorrect for user ${username}" />
                         </else>
 
                     </if>
