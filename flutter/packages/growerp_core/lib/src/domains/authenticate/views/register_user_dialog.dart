@@ -53,27 +53,36 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-      if (state.status == AuthStatus.unAuthenticated) {
-        Navigator.pop(context);
-      }
-    }, builder: (context, state) {
-      if (state.status == AuthStatus.loading) {
-        return const LoadingIndicator();
-      } else {
-        return Dialog(
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: popUp(
-              context: context,
-              title: "Registration",
-              height: isPhone ? 350 : 300,
-              child: _registerForm(_authBloc.state.authenticate!),
-            ));
-      }
-    });
+    return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
+          switch (state.status) {
+            case AuthStatus.failure:
+              HelperFunctions.showMessage(
+                  context, '${state.message}', Colors.red);
+            case AuthStatus.unAuthenticated:
+              Navigator.of(context).pop();
+              break;
+            default:
+              HelperFunctions.showMessage(context, state.message, Colors.green);
+          }
+        }, builder: (context, state) {
+          if (state.status == AuthStatus.loading) {
+            return const LoadingIndicator();
+          } else {
+            return Dialog(
+                insetPadding: const EdgeInsets.all(10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: popUp(
+                  context: context,
+                  title: "Registration",
+                  height: isPhone ? 350 : 300,
+                  child: _registerForm(_authBloc.state.authenticate!),
+                ));
+          }
+        }));
   }
 
   Widget _registerForm(Authenticate authenticate) {

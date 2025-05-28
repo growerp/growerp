@@ -74,22 +74,35 @@ class LoginDialogState extends State<LoginDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-      if (state.status == AuthStatus.authenticated) {
-        Navigator.of(context).pop();
-      }
-    }, builder: (context, state) {
-      if (state.status == AuthStatus.loading) return const LoadingIndicator();
-      var furtherAction = state.authenticate?.apiKey;
-      return Dialog(
-          insetPadding: const EdgeInsets.all(10),
-          child: furtherAction == 'moreInfo'
-              ? moreInfoForm(state.authenticate!)
-              : furtherAction == 'passwordChange'
-                  ? changePasswordForm(
-                      _usernameController.text, _passwordController.text)
-                  : loginForm());
-    });
+    return ScaffoldMessenger(
+        child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
+              switch (state.status) {
+                case AuthStatus.failure:
+                  HelperFunctions.showMessage(
+                      context, '${state.message}', Colors.red);
+                case AuthStatus.authenticated:
+                  Navigator.of(context).pop();
+                  break;
+                default:
+                  HelperFunctions.showMessage(
+                      context, state.message, Colors.green);
+              }
+            }, builder: (context, state) {
+              if (state.status == AuthStatus.loading) {
+                return const LoadingIndicator();
+              }
+              var furtherAction = state.authenticate?.apiKey;
+              return Dialog(
+                  insetPadding: const EdgeInsets.all(10),
+                  child: furtherAction == 'moreInfo'
+                      ? moreInfoForm(state.authenticate!)
+                      : furtherAction == 'passwordChange'
+                          ? changePasswordForm(_usernameController.text,
+                              _passwordController.text)
+                          : loginForm());
+            })));
   }
 
   Widget changePasswordForm(String username, String oldPassword) {
