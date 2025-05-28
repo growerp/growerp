@@ -163,15 +163,13 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
               image: const Base64Decoder().convert(row[2])));
         }
       }
-      String compResult = await restClient.importScreenCategories(
-          categories: categories, classificationId: classificationId);
+      await restClient.importCategories(categories);
 
-      emit(state.copyWith(status: CategoryStatus.success, message: compResult));
+      emit(state.copyWith(
+          status: CategoryStatus.success, message: 'Categories imported'));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: CategoryStatus.failure,
-          categories: [],
-          message: await getDioError(e)));
+          status: CategoryStatus.failure, message: await getDioError(e)));
     }
   }
 
