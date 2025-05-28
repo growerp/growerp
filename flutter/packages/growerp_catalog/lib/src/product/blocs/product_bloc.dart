@@ -172,22 +172,19 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           listPrice: Decimal.parse(row[5]),
           price: Decimal.parse(row[6]),
           useWarehouse: row[7] == 'true' ? true : false,
-          assetCount: int.parse(row[8]),
+          assetCount: row[8] != '' ? int.parse(row[8]) : 0,
           categories: categories,
         ));
       }
 
-      String compResult = await restClient.importScreenProducts(
-          products: products, classificationId: classificationId);
+      await restClient.importProducts(products, classificationId);
       emit(state.copyWith(
           status: ProductStatus.success,
           products: state.products,
-          message: compResult));
+          message: 'Products imported.'));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: ProductStatus.failure,
-          products: [],
-          message: await getDioError(e)));
+          status: ProductStatus.failure, message: await getDioError(e)));
     }
   }
 

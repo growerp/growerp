@@ -12,14 +12,15 @@ You should have received a copy of the CC0 Public Domain Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd">
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd">
     <widgets>
         <render-mode>
             <text type="html"><![CDATA[
                 <html><body>
                 Please find attached the Products CSV file you requested.
                 <br/><br/>
-                Regards, <br/> The Growerp-${classification} Team!
+                Regards, <br/> The Growerp Team!
                 </body></html>
             ]]></text></render-mode>
     </widgets>
