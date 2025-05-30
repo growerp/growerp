@@ -24,13 +24,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await GlobalConfiguration().loadFromAsset('app_settings');
-  await Hive.initFlutter();
 
   Bloc.observer = AppBlocObserver();
   runApp(ChatApp(

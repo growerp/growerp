@@ -17,7 +17,6 @@ import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'menu_options.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -42,8 +41,6 @@ Future main() async {
   String classificationId = GlobalConfiguration().get("classificationId");
   // check if there is override for the production(now test) backend url
   await getBackendUrlOverride(classificationId, packageInfo.version);
-
-  await Hive.initFlutter();
 
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());

@@ -537,7 +537,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                           dropdownDecoratorProps: const DropDownDecoratorProps(
                               dropdownSearchDecoration: InputDecoration(
                                   labelText: 'Company name[id]')),
-                          itemAsString: (Company? u) => u?.partyId == null
+                          itemAsString: (Company? u) => u?.pseudoId == null
                               ? ''
                               : " ${u!.name}[${u.pseudoId ?? ''}]",
                           asyncItems: (String filter) {

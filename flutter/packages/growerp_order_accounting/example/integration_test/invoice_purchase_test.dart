@@ -21,7 +21,6 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:order_accounting_example/main.dart' as router;
 import 'package:order_accounting_example/main.dart';
 import 'package:growerp_core/test_data.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 void main() {
@@ -29,7 +28,6 @@ void main() {
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
-    await Hive.initFlutter();
   });
 
   testWidgets('''GrowERP Invoice Purchase test''', (tester) async {

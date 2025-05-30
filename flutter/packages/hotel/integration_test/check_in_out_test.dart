@@ -23,7 +23,6 @@ import 'package:intl/intl.dart';
 import 'package:hotel/router.dart' as router;
 import 'package:hotel/menu_option_data.dart';
 import 'package:hotel/main.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import 'room_rental_test.dart';
@@ -46,7 +45,6 @@ void main() {
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
-    await Hive.initFlutter();
   });
 
   testWidgets("Test checkin >>>>>", (WidgetTester tester) async {

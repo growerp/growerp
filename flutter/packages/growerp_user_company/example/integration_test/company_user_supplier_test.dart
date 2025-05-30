@@ -19,7 +19,6 @@ import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 void main() {
@@ -27,7 +26,6 @@ void main() {
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
-    await Hive.initFlutter();
   });
 
   Future<void> selectSuppliers(WidgetTester tester) async {
