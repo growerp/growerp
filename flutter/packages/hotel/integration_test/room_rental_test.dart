@@ -24,7 +24,6 @@ import 'package:intl/intl.dart';
 import 'package:hotel/router.dart' as router;
 import 'package:hotel/main.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 Future<void> selectRoomTypes(WidgetTester tester) async {
   await CommonTest.selectOption(tester, '/rooms', 'ProductList', '2');
@@ -63,7 +62,6 @@ void main() {
 */
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
-    await Hive.initFlutter();
   });
 
   testWidgets("test room reservation", (WidgetTester tester) async {

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<String> getDioError(e) async {
   DioException exception =
@@ -37,8 +37,8 @@ Future<String> getDioError(e) async {
 
   // remove key from db when not valid
   if (returnMessage == 'Login key not valid ') {
-    var box = await Hive.openBox('growerp');
-    box.delete('apiKey');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('apiKey');
     returnMessage = 'Login key expired, please login again';
   }
   return returnMessage;

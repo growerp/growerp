@@ -3,8 +3,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:hive/hive.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// https://kamaravichow.medium.com/caching-with-dio-hive-in-flutter-e630ac5fc777
 Future<Dio> buildDioClient(
@@ -43,8 +43,10 @@ Future<Dio> buildDioClient(
   //}
   dio.options.responseType = ResponseType.plain;
 
-  var box = await Hive.openBox('growerp');
-  dio.interceptors.add(KeyInterceptor(box));
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  dio.interceptors.add(KeyInterceptor(prefs));
+
   dio.interceptors.add(PrettyDioLogger(
       requestHeader: true,
       requestBody: true,
@@ -60,19 +62,18 @@ Future<Dio> buildDioClient(
 }
 
 class KeyInterceptor extends Interceptor {
-  KeyInterceptor(this._box);
+  KeyInterceptor(this.prefs);
 
-  final Box? _box;
-
+  final SharedPreferences prefs;
   @override
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
     if (options.extra['noApiKey'] == null) {
-      options.headers['api_key'] = await _box?.get('apiKey');
+      options.headers['api_key'] = prefs.getString('apiKey');
 
       if (options.method != 'GET') {
         options.headers['moquiSessionToken'] =
-            await _box?.get('moquiSessionToken');
+            prefs.getStringList('moquiSessionToken');
       }
     }
     return super.onRequest(options, handler);
@@ -80,7 +81,8 @@ class KeyInterceptor extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) async {
-    await _box?.put('moquiSessionToken', response.headers['moquiSessionToken']);
+    await prefs.setStringList(
+        'moquiSessionToken', response.headers['moquiSessionToken'] ?? []);
 
     //  response.headers.removeAll('set-cookie');
 

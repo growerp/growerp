@@ -16,7 +16,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 T getJsonObject<T>(
     String result, T Function(Map<String, dynamic> json) fromJson) {
@@ -29,52 +29,62 @@ String createJsonObject<T>(
 }
 
 class PersistFunctions {
+  static Future<void> persistKeyValue(String key, String value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value);
+  }
+
+  static Future<void> removeKey(String key) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove(key);
+  }
+
   static Future<void> persistAuthenticate(
     Authenticate authenticate,
   ) async {
     try {
-      var box = await Hive.openBox('growerp');
-      await box.delete('authenticate');
-      await box.put('authenticate', jsonEncode(authenticate.toJson()));
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('authenticate', jsonEncode(authenticate.toJson()));
+
       if (authenticate.apiKey == null || authenticate.apiKey == '') {
-        await box.delete('apiKey');
+        await prefs.remove('apiKey');
       }
     } catch (e) {
-      debugPrint("????????persist????????? box error: $e");
+      debugPrint("????????persist????????? error: $e");
     }
   }
 
   static Future<Authenticate?> getAuthenticate() async {
     // ignore informaton with a bad format
     try {
-      var box = await Hive.openBox('growerp');
-      String? result = box.get('authenticate');
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? result = prefs.getString('authenticate');
       if (result != null) {
         return Authenticate.fromJson({'authenticate': jsonDecode(result)});
       }
       return null;
     } catch (e) {
-      debugPrint("????????get????????? box error: $e");
+      debugPrint("????????get????????? error: $e");
       return null;
     }
   }
 
   static Future<void> removeAuthenticate() async {
-    var box = await Hive.openBox('growerp');
-    await box.delete('authenticate');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('authenticate');
   }
 
   static Future<void> persistFinDoc(FinDoc finDoc) async {
-    var box = await Hive.openBox('growerp');
-    await box.put('${finDoc.sales.toString}${finDoc.docType}',
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('${finDoc.sales.toString}${finDoc.docType}',
         finDoc.toJson().toString());
   }
 
   static Future<FinDoc?> getFinDoc(bool sales, FinDocType finDocType) async {
-    var box = await Hive.openBox('growerp');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     // ignore informaton with a bad format
     try {
-      String? result = box.get('${sales.toString}$finDocType');
+      final String? result = prefs.getString('${sales.toString}$finDocType');
       if (result != null) {
         return getJsonObject<FinDoc>(result, (json) => FinDoc.fromJson(json));
       }
@@ -85,21 +95,20 @@ class PersistFunctions {
   }
 
   static Future<void> removeFinDoc(FinDoc finDoc) async {
-    var box = await Hive.openBox('growerp');
-    await box.delete('${finDoc.sales.toString}${finDoc.docType}');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('${finDoc.sales.toString}${finDoc.docType}');
   }
 
   static const String _testName = "savetest";
   static Future<void> persistTest(SaveTest test, {bool backup = false}) async {
-    var box = await Hive.openBox('growerp');
-    await box.put(_testName, jsonEncode(test.toJson()));
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_testName, jsonEncode(test.toJson()));
   }
 
   static Future<SaveTest> getTest({bool backup = false}) async {
-    var box = await Hive.openBox('growerp');
-    // ignore informaton with a bad format
     try {
-      String? result = box.get(_testName);
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? result = prefs.getString(_testName);
       if (result != null) {
         return getJsonObject<SaveTest>(
             result, (json) => SaveTest.fromJson(json));
@@ -111,7 +120,7 @@ class PersistFunctions {
   }
 
   static Future<void> removeTest() async {
-    var box = await Hive.openBox('growerp');
-    await box.delete(_testName);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_testName);
   }
 }

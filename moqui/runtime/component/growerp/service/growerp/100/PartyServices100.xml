@@ -2343,6 +2343,7 @@ along with this software (see the LICENSE.md file). If not, see
                     value="%${search.split().size() > 1? search.split()?[1] : null}%" />
             </if>
             <!-- adjust role -->
+            <log message="===requested role: $role" />
             <if condition="role == 'Customer'">
                 <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
             </if>
@@ -2362,8 +2363,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="partyId" from="partyId" ignore-if-empty="true" />
                 <econdition field-name="role" ignore-if-empty="true" />
                 <econdition field-name="customerStatusId" ignore-if-empty="true" or-null="true" />
+                <econdition field-name="toPartyId" operator="is-null" ignore="export" />
                 <econditions combine="or">
-                    <econdition field-name="toPartyId" operator="is-null" ignore="export" />
                     <econdition field-name="companyName" from="searchString" ignore-case="true"
                         operator="like" ignore-if-empty="true" />
                     <econdition field-name="firstName" from="searchString" ignore-case="true"
@@ -2399,7 +2400,6 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="name" from="item.userFullName ?: name" />
                     </else>
                 </if>
-                <log message="type: ${item.partyType} type: $type" />
                 <!-- address -->
                 <set field="address" from="null" />
                 <set field="address"
@@ -2431,11 +2431,20 @@ along with this software (see the LICENSE.md file). If not, see
                     </else>
                 </if>
 
+                <!-- role adjustment -->
+                <if
+                    condition="item.role == 'Customer' &amp;&amp; item.customerStatusId == 'CUSTOMER_ASSIGNED'">
+                    <set field="role" value="Lead" />
+                    <else>
+                        <set field="role" from="item.role" />
+                    </else>
+                </if>
+
                 <script>companiesUsers.add([
                         pseudoId: item.pseudoId,
                         type: type,
                         partyId: item.partyId,
-                        role: item.role,
+                        role: role,
                         name: name,
                         email: item.email,
                         url: item.webAddress,

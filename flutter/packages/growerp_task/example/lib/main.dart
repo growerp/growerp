@@ -17,7 +17,6 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_task/growerp_task.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'menu_options.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -58,8 +57,6 @@ Future main() async {
       debugPrint('===$ip does not respond...not updating databaseUrl: $error');
     }
   }
-
-  await Hive.initFlutter();
 
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(

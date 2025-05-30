@@ -90,7 +90,8 @@ class UserDialogState extends State<UserDialog> {
   final ScrollController _scrollController = ScrollController();
   late User currentUser;
   late bool isAdmin;
-  late double top, left;
+  late double top;
+  double? right;
 
   @override
   void initState() {
@@ -122,7 +123,6 @@ class UserDialogState extends State<UserDialog> {
     isAdmin = context.read<AuthBloc>().state.authenticate!.user!.userGroup ==
         UserGroup.admin;
     top = -100;
-    left = 280;
   }
 
   @override
@@ -164,6 +164,7 @@ class UserDialogState extends State<UserDialog> {
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    right = right ?? (isPhone ? 20 : 150);
     return Dialog(
         key: Key('UserDialog${_selectedRole.name}'),
         insetPadding: const EdgeInsets.all(10),
@@ -194,13 +195,13 @@ class UserDialogState extends State<UserDialog> {
                         return const LoadingIndicator();
                       }),
                       Positioned(
-                        left: left,
+                        right: right,
                         top: top,
                         child: GestureDetector(
                           onPanUpdate: (details) {
                             setState(() {
-                              left += details.delta.dx;
                               top += details.delta.dy;
+                              right = right! - details.delta.dx;
                             });
                           },
                           child: ImageButtons(

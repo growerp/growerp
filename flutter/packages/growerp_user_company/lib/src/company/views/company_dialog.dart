@@ -595,37 +595,38 @@ class CompanyFormState extends State<CompanyDialog> {
                   key: const Key('update'),
                   onPressed: isAdmin
                       ? () async {
+                          Uint8List? convImage;
                           if (_companyDialogFormKey.currentState!.validate()) {
-                            Company updatedCompany = Company(
-                                partyId: company.partyId,
-                                pseudoId: _idController.text,
-                                email: _emailController.text,
-                                url: _urlController.text,
-                                name: _nameController.text,
-                                role: _selectedRole,
-                                telephoneNr: _telephoneController.text,
-                                currency: _selectedCurrency,
-                                address: company.address,
-                                paymentMethod: company.paymentMethod,
-                                vatPerc: Decimal.parse(
-                                    _vatPercController.text.isEmpty
-                                        ? '0'
-                                        : _vatPercController.text),
-                                salesPerc: Decimal.parse(
-                                    _salesPercController.text.isEmpty
-                                        ? '0'
-                                        : _salesPercController.text),
-                                hostName: _hostNameController.text,
-                                secondaryBackend: _backendController.text,
-                                image: await HelperFunctions.getResizedImage(
-                                    _imageFile?.path));
-                            if (!mounted) return;
                             if (_imageFile?.path != null &&
-                                updatedCompany.image == null) {
+                                company.image == null) {
                               HelperFunctions.showMessage(
                                   context, "Image upload error!", Colors.red);
+                              convImage = await HelperFunctions.getResizedImage(
+                                  _imageFile?.path);
                             } else {
-                              companyBloc.add(CompanyUpdate(updatedCompany));
+                              company = Company(
+                                  partyId: company.partyId,
+                                  pseudoId: _idController.text,
+                                  email: _emailController.text,
+                                  url: _urlController.text,
+                                  name: _nameController.text,
+                                  role: _selectedRole,
+                                  telephoneNr: _telephoneController.text,
+                                  currency: _selectedCurrency,
+                                  address: company.address,
+                                  paymentMethod: company.paymentMethod,
+                                  vatPerc: Decimal.parse(
+                                      _vatPercController.text.isEmpty
+                                          ? '0'
+                                          : _vatPercController.text),
+                                  salesPerc: Decimal.parse(
+                                      _salesPercController.text.isEmpty
+                                          ? '0'
+                                          : _salesPercController.text),
+                                  hostName: _hostNameController.text,
+                                  secondaryBackend: _backendController.text,
+                                  image: convImage);
+                              companyBloc.add(CompanyUpdate(company));
                             }
                           }
                         }

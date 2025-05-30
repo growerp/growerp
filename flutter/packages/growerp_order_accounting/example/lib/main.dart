@@ -21,12 +21,10 @@ import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'acct_menu_option_data.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
-  await Hive.initFlutter();
   RestClient restClient = RestClient(await buildDioClient());
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');

@@ -19,7 +19,6 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/test_data.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:inventory_example/main.dart';
 
@@ -28,7 +27,6 @@ void main() {
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
-    await Hive.initFlutter();
   });
 
   testWidgets('''GrowERP asset test''', (tester) async {

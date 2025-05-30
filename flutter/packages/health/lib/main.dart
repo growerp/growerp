@@ -21,7 +21,6 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_website/growerp_website.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'menu_options.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -64,7 +63,6 @@ Future main() async {
     }
   }
 
-  await Hive.initFlutter();
   Map<String, Widget> screens = orderAccountingScreens;
 
   Bloc.observer = AppBlocObserver();

@@ -20,12 +20,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
-  await Hive.initFlutter();
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
   WsClient chatClient = WsClient('chat');

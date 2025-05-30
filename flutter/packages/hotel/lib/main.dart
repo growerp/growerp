@@ -21,7 +21,6 @@ import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
@@ -73,7 +72,6 @@ Future main() async {
   Bloc.observer = AppBlocObserver();
   debugPrint("=== current date: ${CustomizableDateTime.current}");
 
-  await Hive.initFlutter();
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
   WsClient chatClient = WsClient('chat');

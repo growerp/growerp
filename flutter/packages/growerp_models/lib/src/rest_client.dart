@@ -109,7 +109,7 @@ abstract class RestClient {
   // party to replace company and user
   @GET("rest/s1/growerp/100/CompanyUser")
   Future<CompaniesUsers> getCompanyUser({
-    @Query('downrole') Role? role,
+    @Query('role') Role? role,
     @Query('start') int? start,
     @Query('limit') int? limit,
     @Query('search') String? searchString,

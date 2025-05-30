@@ -22,7 +22,6 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'menu_options.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -46,8 +45,6 @@ Future main() async {
 
   // check if there is override for the production(now test) backend url
   await getBackendUrlOverride(classificationId, packageInfo.version);
-
-  await Hive.initFlutter();
 
   Map<String, Widget> screens = orderAccountingScreens;
 

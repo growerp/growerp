@@ -21,7 +21,6 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -66,8 +65,6 @@ Future main() async {
       print('===$ip does not respond...not updating databaseUrl: $error');
     }
   }
-
-  await Hive.initFlutter();
 
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());

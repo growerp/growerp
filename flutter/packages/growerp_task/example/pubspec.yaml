@@ -24,7 +24,6 @@ dependencies:
   intl: ^0.19.0
   shared_preferences: ^2.3.2
   package_info_plus: ^8.0.2
-  hive: ^2.2.3
   hive_flutter: ^1.1.0
   flutter_flow_chart: ^2.2.0
   star_menu: ^4.0.1

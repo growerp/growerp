@@ -20,7 +20,6 @@ import 'package:website_example/main.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_core/test_data.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 void main() {
@@ -28,7 +27,6 @@ void main() {
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
-    await Hive.initFlutter();
   });
 
   Future<void> selectWebsite(WidgetTester tester) async {

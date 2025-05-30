@@ -18,7 +18,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:hive/hive.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 
@@ -114,8 +113,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             authenticate: defaultAuthenticate));
       }
     } on DioException catch (e) {
-      var box = await Hive.openBox('growerp');
-      await box.clear();
       await PersistFunctions.persistAuthenticate(defaultAuthenticate);
       emit(state.copyWith(
           status: AuthStatus.failure,
@@ -202,8 +199,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
         }
 
-        var box = await Hive.openBox('growerp');
-        box.put('apiKey', authenticate.apiKey);
+        PersistFunctions.persistKeyValue('apiKey', authenticate.apiKey ?? '');
       } else {
         // either login in process or failed....
         emit(state.copyWith(
@@ -260,8 +256,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           authenticate: result,
           message:
               'password successfully changed for user: ${event.username}'));
-      var box = await Hive.openBox('growerp');
-      box.put('apiKey', result.apiKey);
+      PersistFunctions.persistKeyValue('apiKey', result.apiKey ?? '');
       PersistFunctions.persistAuthenticate(
           state.authenticate!.copyWith(apiKey: result.apiKey));
     } on DioException catch (e) {
