@@ -279,7 +279,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
       }
       // set badge om roomlist
       add(ChatRoomUpdateLocal(
-          addNotReadChatRoomId: event.chatMessage.chatRoom!.chatRoomId));
+          addNotReadChatRoomId: event.chatMessage.chatRoom?.chatRoomId));
       return emit(state.copyWith(chatRooms: chatRooms));
     } on DioException catch (e) {
       emit(state.copyWith(

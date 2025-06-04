@@ -38,13 +38,22 @@ class ShowCompanyDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final companyBloc = context.read<CompanyBloc>();
     if (company.partyId != null && company.partyId != '_NEW_') {
-      companyBloc.add(CompanyFetch(companyPartyId: company.partyId!, limit: 1));
-      return BlocBuilder<CompanyBloc, CompanyState>(builder: (context, state) {
-        if (state.status == CompanyStatus.success ||
-            state.status == CompanyStatus.failure) {
-          return CompanyDialog(state.company ?? company, dialog: dialog);
+      DataFetchBloc companyBloc = context.read<DataFetchBloc<Companies>>()
+        ..add(GetDataEvent(() => context.read<RestClient>().getCompany(
+              companyPartyId: company.partyId,
+              limit: 1,
+            )));
+      return BlocBuilder<DataFetchBloc<Companies>, DataFetchState>(
+          builder: (context, state) {
+        if (state.status == DataFetchStatus.success ||
+            state.status == DataFetchStatus.failure) {
+          if ((companyBloc.state.data as Companies).companies.isEmpty) {
+            return FatalErrorForm(
+                message: 'Company ${company.partyId} not found');
+          }
+          return CompanyDialog(
+              (companyBloc.state.data as Companies).companies[0]);
         }
         return const LoadingIndicator();
       });
@@ -217,7 +226,7 @@ class CompanyFormState extends State<CompanyDialog> {
               }
               if (state.status == CompanyStatus.success) {
                 if (widget.dialog == true && _nameController.text != '') {
-                  Navigator.of(context).pop(company);
+                  Navigator.of(context).pop(companyBloc.state.companies[0]);
                 }
                 HelperFunctions.showMessage(
                     context, state.message, Colors.green);
@@ -268,7 +277,7 @@ class CompanyFormState extends State<CompanyDialog> {
     employees.asMap().forEach((index, employee) {
       employeeChips.add(InputChip(
         label: Text(
-          "${employee.firstName} ${employee.lastName}",
+          "${employee.firstName} ${employee.lastName}[${employee.pseudoId}]",
           key: Key(index.toString()),
         ),
         deleteIcon: const Icon(
@@ -280,7 +289,9 @@ class CompanyFormState extends State<CompanyDialog> {
               barrierDismissible: true,
               context: context,
               builder: (BuildContext context) {
-                return UserDialog(employee.copyWith(company: company));
+                return UserDialog(
+                  employee.copyWith(company: company),
+                );
               });
           if (result != null) {
             setState(() {
@@ -307,7 +318,7 @@ class CompanyFormState extends State<CompanyDialog> {
 */
       ));
     });
-    employeeChips.add(IconButton(
+/*    employeeChips.add(IconButton(
         key: const Key('addEmployee'),
         iconSize: 30,
         icon: const Icon(Icons.add_circle),
@@ -326,7 +337,7 @@ class CompanyFormState extends State<CompanyDialog> {
             });
           }
         }));
-
+*/
     List<Widget> widgets = [
       Row(
         children: [

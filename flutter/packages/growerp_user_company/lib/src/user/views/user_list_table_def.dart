@@ -41,9 +41,10 @@ TableData getUserListTableData(Bloc bloc, String classificationId,
         name: const Text('ID\nName\nEmail', textAlign: TextAlign.start),
         width: 40,
         value: Column(
+          key: Key('item$index'),
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(item.pseudoId ?? ''),
+            Text(item.pseudoId ?? '', key: Key('id$index')),
             Text(
                 ("${item.firstName ?? ''} ${item.lastName ?? ''}").truncate(18),
                 key: Key('name$index')),

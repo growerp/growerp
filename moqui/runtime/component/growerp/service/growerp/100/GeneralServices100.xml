@@ -884,15 +884,6 @@ along with this software (see the LICENSE.md file). If not, see
                                         ownerPartyId: ownerPartyId,
                                         roleTypeId: 'OrgInternal',
                                         disabled: 'N']" />
-                                <!-- company to owner relationship obsolete: should use
-                                    ownerPartyId in entity Party-->
-                                <service-call name="create#mantle.party.PartyRelationship"
-                                    in-map="[fromPartyId: partyId, 
-                                    fromRoleTypeId: 'OrgInternal',
-                                    relationshipTypeEnumId: 'PrtOrgRollup',
-                                    fromDate: ec.user.nowTimestamp,
-                                    toPartyId: ownerPartyId,
-                                    toRoleTypeId: 'Owner']" />
                                 <!-- employee to company relationship-->
                                 <service-call name="create#mantle.party.PartyRelationship"
                                     in-map="[

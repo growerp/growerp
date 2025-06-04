@@ -14,44 +14,61 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 class CompanyTest {
   static Future<void> checkCompany(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
-    if (test.company == null) return;
-    await checkCompanyFields(tester, test.company!);
+    test = test.copyWith(companies: [company]);
+    await PersistFunctions.persistTest(test);
+    await checkCompanies(tester);
   }
 
   static Future<void> selectCompany(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbCompanies', 'CompanyForm', '1');
   }
 
+  static Future<void> addCompanies(WidgetTester tester, List<Company> companies,
+      {bool check = true}) async {
+    SaveTest test = await PersistFunctions.getTest();
+    await PersistFunctions.persistTest(test.copyWith(companies: companies));
+    await enterCompanyData(tester);
+  }
+
+  static Future<void> updateCompanies(
+      WidgetTester tester, List<Company> newCompanies) async {
+    SaveTest old = await PersistFunctions.getTest();
+    // copy pseudo id to new data
+    for (int x = 0; x < newCompanies.length; x++) {
+      newCompanies[x] =
+          newCompanies[x].copyWith(pseudoId: old.companies[x].pseudoId);
+      List<User> newEmployees = [];
+      for (int y = 0; y < newCompanies[x].employees.length; y++) {
+        User newEmployee = newCompanies[x]
+            .employees[y]
+            .copyWith(pseudoId: old.companies[x].employees[y].pseudoId);
+        newEmployees.add(newEmployee);
+      }
+      newCompanies[x] = newCompanies[x].copyWith(employees: newEmployees);
+    }
+    await PersistFunctions.persistTest(old.copyWith(companies: newCompanies));
+    await enterCompanyData(tester);
+  }
+
   /// enter company data in company dialog screen.
   /// when the list only contains a single item it is
   /// assumed the detail screen is already shown and need not be created/opened
-  static Future<void> enterCompanyData(
-      WidgetTester tester, List<Company> inputList) async {
+  static Future<void> enterCompanyData(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
 
-    if (inputList.length == 1) {
+    if (test.companies.length == 1) {
       // if single company: main company test
       test = test.copyWith(companies: [test.company!]);
     }
-    // if already done return
-    if (test.companies.isNotEmpty &&
-        test.companies[0].name == inputList[0].name) {
-      return;
-    }
 
     // create new list with pseudoId from last list from test if not empty
-    List<Company> clist = List.of(inputList);
-    if (test.companies.isNotEmpty) {
-      for (int x = 0; x < test.companies.length; x++) {
-        clist[x] = clist[x].copyWith(pseudoId: test.companies[x].pseudoId);
-      }
-    }
-
+    List<Company> clist = List.of(test.companies);
     int seq = test.sequence;
     List<Company> newCompanies = [];
     for (Company c in clist) {
@@ -110,8 +127,10 @@ class CompanyTest {
       await CommonTest.drag(tester);
       // add/update company record
       await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
+      // get generated pseudoId's
       if (clist.length > 1 && c.pseudoId == null) {
-        await CommonTest.doNewSearch(tester, searchString: c.name!);
+        // new entry is at the top of the list, get allocated ID
+        await CommonTest.tapByKey(tester, 'item0');
         var id = CommonTest.getTextField('topHeader').split('#')[1];
         c = c.copyWith(pseudoId: id);
         await CommonTest.tapByKey(tester, 'cancel');
@@ -120,11 +139,9 @@ class CompanyTest {
     }
     await PersistFunctions.persistTest(
         test.copyWith(companies: newCompanies, sequence: seq));
-    await CommonTest.gotoMainMenu(tester);
   }
 
-  static Future<void> checkCompanyFields(
-      WidgetTester tester, Company company) async {
+  static Future<void> checkCompanies(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
 
     for (Company c in test.companies) {
@@ -233,11 +250,11 @@ class CompanyTest {
         contains(paymentMethod.expireYear!));
   }
 
-  static Future<void> deleteCompany(WidgetTester tester) async {
+  Future<void> deleteCompany(WidgetTester tester) async {
 //    SaveTest test = await PersistFunctions.getTest();
   }
 
-  static Future<void> employeeCompany(WidgetTester tester) async {
+  Future<void> employeeCompany(WidgetTester tester) async {
 //    SaveTest test = await PersistFunctions.getTest();
   }
 }

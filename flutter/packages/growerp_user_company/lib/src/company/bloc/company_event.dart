@@ -24,14 +24,14 @@ class CompanyFetch extends CompanyEvent {
   const CompanyFetch({
     this.refresh = false,
     this.searchString = '',
-    this.companyPartyId,
+    this.companyPartyId = '',
     this.limit = 20,
     this.isForDropDown = false,
     this.ownerPartyId = '',
     this.mainOnly = false,
   });
   final bool refresh;
-  final String? companyPartyId;
+  final String companyPartyId;
   final String ownerPartyId;
   final String searchString;
   final int limit;

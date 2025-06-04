@@ -98,7 +98,8 @@ class UserBloc extends Bloc<UserEvent, UserState>
         if (users.isNotEmpty) {
           int index = users
               .indexWhere((element) => element.partyId == event.user.partyId);
-          users[index] = compResult;
+          users.removeAt(index);
+          users.insert(0, compResult);
         } else {
           users.add(compResult);
         }

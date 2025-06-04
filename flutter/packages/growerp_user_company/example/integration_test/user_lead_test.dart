@@ -42,9 +42,11 @@ void main() {
         clear: true);
     await CommonTest.createCompanyAndAdmin(tester);
     await selectLeads(tester);
-    await UserTest.addLeads(tester, leads.sublist(0, 3));
-    await UserTest.updateLeads(tester, leads.sublist(3, 6));
-    await UserTest.deleteLeads(tester);
+    await UserTest.addUsers(tester, leads.sublist(0, 3));
+    await UserTest.checkUsers(tester);
+    await UserTest.updateUsers(tester, leads.sublist(3, 6));
+    await UserTest.checkUsers(tester);
+    await UserTest.deleteUsers(tester);
     await CommonTest.logout(tester);
   });
 }

@@ -46,17 +46,12 @@ void main() {
     await CommonTest.createCompanyAndAdmin(tester);
 
     await selectLeads(tester);
-    await CompanyUserTest.addUsers(tester, Role.lead, leads.sublist(0, 2));
-    await CompanyUserTest.addCompanies(
-        tester, Role.lead, leadCompanies.sublist(0, 2));
-    await selectLeads(tester);
-    await CompanyUserTest.checkCompaniesUsers(tester, Role.lead);
-    await CompanyUserTest.updateUsers(tester, Role.lead, leads.sublist(2, 4));
-    await CompanyUserTest.updateCompanies(
-        tester, Role.lead, leadCompanies.sublist(2, 4));
-    await selectLeads(tester);
-    await CompanyUserTest.checkCompaniesUsers(tester, Role.lead);
-
+    await CompanyUserTest.addUsers(tester, leads.sublist(0, 3));
+    await CompanyTest.addCompanies(tester, leadCompanies.sublist(0, 2));
+    await CompanyUserTest.checkCompaniesUsers(tester);
+    await CompanyUserTest.updateUsers(tester, leads);
+    await CompanyUserTest.updateCompanies(tester, leadCompanies);
+    await CompanyUserTest.checkCompaniesUsers(tester);
     await CommonTest.logout(tester);
   }, skip: false);
 }

@@ -43,13 +43,10 @@ Future<void> main() async {
         clear: true);
     await CommonTest.createCompanyAndAdmin(tester);
     await selectLeads(tester);
-    await CompanyTest.enterCompanyData(tester, leadCompanies.sublist(0, 3));
-    await selectLeads(tester);
-    await CompanyTest.checkCompany(tester);
-    await selectLeads(tester);
-    await CompanyTest.enterCompanyData(tester, leadCompanies.sublist(3, 6));
-    await selectLeads(tester);
-    await CompanyTest.checkCompany(tester);
+    await CompanyTest.addCompanies(tester, leadCompanies.sublist(0, 3));
+    await CompanyTest.checkCompanies(tester);
+    await CompanyTest.updateCompanies(tester, leadCompanies.sublist(3, 6));
+    await CompanyTest.checkCompanies(tester);
     await CommonTest.logout(tester);
   }, skip: false);
 }

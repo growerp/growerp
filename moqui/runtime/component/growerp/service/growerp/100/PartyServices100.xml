@@ -579,7 +579,6 @@ along with this software (see the LICENSE.md file). If not, see
                     out-map="context" />
                 <set field="company.pseudoId" from="seqNum" />
             </if>
-
             <service-call
                 name="mantle.party.PartyServices.create#Organization"
                 out-map="context"
@@ -589,15 +588,6 @@ along with this software (see the LICENSE.md file). If not, see
                         roleTypeId: company.role,
                         customerStatusId: customerStatusId,
                         disabled: 'N']" />
-            <!-- company to owner relationship obsolete: should use ownerPartyId in entity Party-->
-            <service-call name="create#mantle.party.PartyRelationship"
-                in-map="[fromPartyId: partyId, 
-                    fromRoleTypeId: company.role,
-                    relationshipTypeEnumId: 'PrtOrgRollup',
-                    fromDate: ec.user.nowTimestamp,
-                    toPartyId: ownerPartyId,
-                    toRoleTypeId: 'Owner']" />
-
             <!-- currency -->
             <if condition="company.currency">
                 <service-call name="create#mantle.ledger.config.PartyAcctgPreference"
@@ -1321,12 +1311,22 @@ along with this software (see the LICENSE.md file). If not, see
                             name: userInfo.companyName,
                             ]" />
                         <else>
+                            <!-- role adjustment -->
+                            <if
+                                condition="userInfo.companyRole == 'Customer' &amp;&amp;
+                                    userInfo.companyCustomerStatusId == 'CUSTOMER_ASSIGNED'">
+                                <set field="role" value="Lead" />
+                                <else>
+                                    <set field="role" from="userInfo.companyRole" />
+                                </else>
+                            </if>
+
                             <set field="company"
                                 from="[
                                 partyId: userInfo.companyPartyId,
                                 pseudoId: userInfo.companyPseudoId,
                                 name: userInfo.companyName,
-                                role: userInfo.companyRole,
+                                role: role,
                                 ]" />
                         </else>
                     </if>
@@ -1356,11 +1356,21 @@ along with this software (see the LICENSE.md file). If not, see
                             userId: userInfo?.userId,
                             ]" />
                     <else>
+                        <!-- role adjustment -->
+                        <if
+                            condition="userInfo.role == 'Customer' &amp;&amp;
+                                    userInfo.customerStatusId == 'CUSTOMER_ASSIGNED'">
+                            <set field="role" value="Lead" />
+                            <else>
+                                <set field="role" from="userInfo.role" />
+                            </else>
+                        </if>
+
                         <set field="userOut"
                             from="[
                                 partyId: userInfo?.userPartyId,
                                 pseudoId: userInfo?.userPseudoId,
-                                role: userInfo.companyRole ?: userInfo.role,
+                                role: role,
                                 email: userInfo?.emailAddress ?: userInfo.emailAddressCm,
                                 url: userInfo.webAddress,
                                 emailContactMechId: userInfo.emailContactMechId,
@@ -1552,7 +1562,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- create account with or without login-->
             <!-- create#Account will always create a login even if username == null-->
             <set field="inMap"
-                from="[ roleTypeId: user.company?.role ?: user.role,
+                from="[ roleTypeId: user.role,
                     pseudoId: user.pseudoId,  loginAfterCreate: login,
                     firstName: user.firstName, lastName: user.lastName,
                     emailAddress: user.email,
@@ -1569,7 +1579,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="create#mantle.party.Person"
                         in-map="inMap + [partyId: userPartyId]" />
                     <service-call name="create#mantle.party.PartyRole"
-                        in-map="[partyId:userPartyId, roleTypeId: user.company?.role ?: user.role]" />
+                        in-map="[partyId:userPartyId, roleTypeId: user.role]" />
                 </else>
             </if>
             <if condition="customerStatusId">
@@ -2343,7 +2353,6 @@ along with this software (see the LICENSE.md file). If not, see
                     value="%${search.split().size() > 1? search.split()?[1] : null}%" />
             </if>
             <!-- adjust role -->
-            <log message="===requested role: $role" />
             <if condition="role == 'Customer'">
                 <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
             </if>
@@ -2381,16 +2390,31 @@ along with this software (see the LICENSE.md file). If not, see
                         operator="like" ignore-if-empty="true" />
                     <econdition field-name="email" from="searchString" ignore-case="true"
                         operator="like" ignore-if-empty="true" />
+                    <econdition field-name="personCompanyPseudoId" from="searchString"
+                        ignore-case="true"
+                        operator="like" ignore-if-empty="true" />
+                    <econdition field-name="personCompanyName" from="searchString"
+                        ignore-case="true"
+                        operator="like" ignore-if-empty="true" />
                 </econditions>
                 <order-by field-name="name" />
             </entity-find>
             <set field="companiesUsers" from="[]" />
+            <set field="employees" from="[]" />
             <iterate list="items" entry="item">
-                <!-- remove duplicates -->
-                <if
-                    condition="item.partyId == lastPartyId">
-                    <continue />
+                <!-- collect employees from companies -->
+                <if condition="item.employeePartyId">
+                    <script>employees.add([
+                        partyId: item.employeePartyId, pseudoId: item.employeePseudoId,
+                        firstName: item.employeeFirstName, lastName: item.employeeLastName 
+                        ])</script>
                 </if>
+
+                <!-- remove duplicates -->
+                <!--if
+                condition="item.partyId == lastPartyId">
+                    <continue />
+                </if-->
                 <if condition="item.partyType == 'PtyOrganization'">
                     <set field="type" value="Company" />
                     <set field="name" value="${item.companyName}" />
@@ -2400,14 +2424,37 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="name" from="item.userFullName ?: name" />
                     </else>
                 </if>
+                <!-- role adjustment -->
+                <if
+                    condition="item.role == 'Customer' &amp;&amp; item.customerStatusId == 'CUSTOMER_ASSIGNED'">
+                    <set field="role" value="Lead" />
+                    <else>
+                        <set field="role" from="item.role" />
+                    </else>
+                </if>
+                <set field="companyUser"
+                    from="[
+                    pseudoId: item.pseudoId, type: type, partyId: item.partyId, role: role, name: name,
+                    email: item.email, url: item.webAddress]" />
+
                 <!-- address -->
-                <set field="address" from="null" />
-                <set field="address"
-                    from="[addressId: item.postalContactMechId,
-                    address1: item.address1, address2: item.address2,
-                    city: item.city, postalCode: item.postalCode,
-                    province: item.stateProvince, provinceId: item.stateProvinceGeoId,
-                    country: item.countryName, countryId: item.countryId]" />
+                <set
+                    field="address" from="null" />
+                <if condition="item.postalContactMechId">
+                    <set field="address"
+                        from="[addressId: item.postalContactMechId,
+                            address1: item.address1, address2: item.address2,
+                            city: item.city, postalCode: item.postalCode,
+                            province: item.stateProvince, provinceId: item.stateProvinceGeoId,
+                            country: item.countryName, countryId: item.countryId]" />
+                    <set field="companyUser.address" from="address" />
+                </if>
+                <!-- employees -->
+                <set field="employees" from="[]" />
+                <if condition="employees != []">
+                    <set field="companyUser.employees" from="employees" />
+                </if>
+
                 <!-- payment method -->
                 <set field="paymentMethod" from="null" />
                 <if condition="item.paymentMethodId">
@@ -2417,43 +2464,29 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="paymentMethod"
                         from="[ ccPaymentMethodId: item.paymentMethodId,
                                     ccDescription: ccDescription]" />
+                    <set field="companyUser.paymentMethod" from="paymentMethod" />
                 </if>
+                <!-- company of the user (normally this is not shown, but the company is.-->
                 <set field="personCompany" from="null" />
                 <if condition="item.personCompanyPartyId">
-                    <set field="personCompany"
-                        from="[name: item.personCompanyName, pseudoId: item.personCompanyPseudoId]" />
+                    <set field="companyUser.company"
+                        from="[ name: item.personCompanyName,
+                                pseudoId: item.personCompanyPseudoId,
+                                partyId: item.personCompanyPartyId]" />
                 </if>
-                <if condition="item.telCountryCode || item.telAreaCode || item.telContactNumber">
+
+                <!-- telephone -->
+                <set field="telephoneNr" from="null" />
+                <if
+                    condition="item.telCountryCode || item.telAreaCode || item.telContactNumber">
                     <set field="telephoneNr"
                         value="${item.telCountryCode ?: ''} ${item.telAreaCode ?: ''} ${item.telContactNumber ?: ''}" />
-                    <else>
-                        <set field="telephoneNr" from="null" />
-                    </else>
+                    <set field="companyUser.telephoneNr" from="telephoneNr" />
                 </if>
 
-                <!-- role adjustment -->
-                <if
-                    condition="item.role == 'Customer' &amp;&amp; item.customerStatusId == 'CUSTOMER_ASSIGNED'">
-                    <set field="role" value="Lead" />
-                    <else>
-                        <set field="role" from="item.role" />
-                    </else>
-                </if>
-
-                <script>companiesUsers.add([
-                        pseudoId: item.pseudoId,
-                        type: type,
-                        partyId: item.partyId,
-                        role: role,
-                        name: name,
-                        email: item.email,
-                        url: item.webAddress,
-                        telephoneNr: telephoneNr,
-                        paymentMethod: paymentMethod,
-                        address: address,
-                        company: personCompany,
-                    ])</script>
-                <set field="lastPartyId" from="item.partyId" />
+                <script>companiesUsers.add(companyUser)</script>
+                <set
+                    field="lastPartyId" from="item.partyId" />
             </iterate>
         </actions>
     </service>

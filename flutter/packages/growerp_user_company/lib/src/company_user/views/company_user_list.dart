@@ -158,9 +158,17 @@ class CompanyUserListState extends State<CompanyUserList> {
       }
 
       blocListener(context, state) {
+        if (state.status == CompanyUserStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
         if (state.status == CompanyUserStatus.success) {
           HelperFunctions.showMessage(
-              context, '${state.message}', Colors.green);
+              context,
+              '${state.message}',
+              state.message != null && state.message.contains('However')
+                  ? Colors.yellow
+                  : Colors.green,
+              seconds: 5);
         }
       }
 
@@ -189,7 +197,6 @@ class CompanyUserListState extends State<CompanyUserList> {
                           key: const Key("search"),
                           heroTag: "companUserBtn1",
                           onPressed: () async {
-                            // find findoc id to show
                             await showDialog(
                                 barrierDismissible: true,
                                 context: context,
@@ -222,10 +229,12 @@ class CompanyUserListState extends State<CompanyUserList> {
                                 builder: (BuildContext context) {
                                   return BlocProvider.value(
                                       value: _companyUserBloc,
-                                      child: CompanyDialog(Company(
-                                        partyId: '_NEW_',
-                                        role: widget.role,
-                                      )));
+                                      child: CompanyDialog(
+                                        Company(
+                                            partyId: '_NEW_',
+                                            role: widget.role),
+                                        dialog: true,
+                                      ));
                                 });
                           },
                           tooltip: 'Add New',
@@ -243,9 +252,8 @@ class CompanyUserListState extends State<CompanyUserList> {
                                 builder: (BuildContext context) {
                                   return BlocProvider.value(
                                       value: _companyUserBloc,
-                                      child: UserDialog(User(
-                                        role: widget.role,
-                                      )));
+                                      child:
+                                          UserDialog(User(role: widget.role)));
                                 });
                           },
                           tooltip: 'Add New',

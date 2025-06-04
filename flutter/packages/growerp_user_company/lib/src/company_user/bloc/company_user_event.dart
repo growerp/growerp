@@ -28,13 +28,15 @@ class CompanyUserFetch extends CompanyUserEvent {
       this.type,
       this.hasReachedMax = false,
       this.limit = 20,
-      this.ownerPartyId = ''});
+      this.ownerPartyId = '',
+      this.isForDropDown = false});
   final bool refresh;
   final String? partyId;
   final PartyType? type;
   final String ownerPartyId;
   final String searchString;
   final bool hasReachedMax;
+  final bool isForDropDown;
   final int limit;
   @override
   List<Object> get props => [refresh, searchString, limit];
@@ -44,11 +46,10 @@ class CompanyUserFetch extends CompanyUserEvent {
 }
 
 class CompanyUserUpdate extends CompanyUserEvent {
-  final Company? company;
-  final User? user;
-  const CompanyUserUpdate({this.company, this.user});
+  final CompanyUser? companyUser;
+  const CompanyUserUpdate(this.companyUser);
   @override
-  String toString() => "UpdateCompanyUser: $company $user";
+  String toString() => "UpdateCompanyUser: $companyUser";
 }
 
 class CompanyUserDelete extends CompanyUserEvent {
