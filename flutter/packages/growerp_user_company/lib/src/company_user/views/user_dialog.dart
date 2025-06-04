@@ -26,7 +26,8 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../common/common.dart';
-import '../company_user.dart';
+import '../../company/bloc/company_bloc.dart';
+import '../bloc/company_user_bloc.dart';
 import 'company_dialog.dart';
 
 class ShowUserDialog extends StatelessWidget {
@@ -82,7 +83,7 @@ class UserDialogState extends State<UserDialog> {
   late User updatedUser;
   final ImagePicker _picker = ImagePicker();
   late CompanyUserBloc _companyUserBloc;
-  late DataFetchBloc<Companies> _companyBloc;
+  late CompanyBloc _companyBloc;
   late AuthBloc _authBloc;
   bool _isLoginDisabled = false;
   late bool isPhone;
@@ -109,16 +110,17 @@ class UserDialogState extends State<UserDialog> {
       _hasLogin = widget.user.userId != null;
     }
     _selectedCompany = widget.user.company ?? Company();
-    _selectedRole =
-        widget.user.role ?? widget.user.company?.role ?? Role.unknown;
+    _selectedRole = widget.user.role ?? Role.unknown;
     _selectedUserGroup = widget.user.userGroup ?? UserGroup.employee;
     localUserGroups = UserGroup.values;
     updatedUser = widget.user;
     _authBloc = context.read<AuthBloc>();
+    _companyBloc = context.read<CompanyBloc>()
+      ..add(CompanyFetch(
+          ownerPartyId: _authBloc.state.authenticate!.ownerPartyId!,
+          limit: 3,
+          isForDropDown: true));
     _companyUserBloc = context.read<CompanyUserBloc>();
-    _companyBloc = context.read<DataFetchBloc<Companies>>()
-      ..add(
-          GetDataEvent<Companies>(() => Future<Companies>.value(Companies())));
     currentUser = _authBloc.state.authenticate!.user!;
     isAdmin = context.read<AuthBloc>().state.authenticate!.user!.userGroup ==
         UserGroup.admin;
@@ -484,13 +486,13 @@ class UserDialogState extends State<UserDialog> {
             child: Column(children: [
               Row(children: [
                 Expanded(
-                  child: BlocBuilder<CompanyUserBloc, CompanyUserState>(
+                  child: BlocBuilder<CompanyBloc, CompanyState>(
                       builder: (context, state) {
                     switch (state.status) {
-                      case CompanyUserStatus.failure:
+                      case CompanyStatus.failure:
                         return const FatalErrorForm(
                             message: 'server connection problem');
-                      case CompanyUserStatus.success:
+                      case CompanyStatus.success:
                         return DropdownSearch<Company>(
                           key: const Key('userCompanyName'),
                           selectedItem: _selectedCompany.name == null
@@ -518,20 +520,20 @@ class UserDialogState extends State<UserDialog> {
                           dropdownDecoratorProps: const DropDownDecoratorProps(
                               dropdownSearchDecoration: InputDecoration(
                                   labelText: 'Company name[id]')),
-                          itemAsString: (Company? u) => u?.partyId == null
+                          itemAsString: (Company? u) => u?.pseudoId == null
                               ? ''
                               : " ${u!.name}[${u.pseudoId ?? ''}]",
                           asyncItems: (String filter) {
-                            _companyBloc.add(GetDataEvent(
-                                () => context.read<RestClient>().getCompanies(
-                                      searchString: filter,
-                                      limit: 3,
-                                    )));
+                            _companyBloc.add(CompanyFetch(
+                              ownerPartyId:
+                                  _authBloc.state.authenticate!.ownerPartyId!,
+                              searchString: filter,
+                              limit: 3,
+                              isForDropDown: true,
+                            ));
                             return Future.delayed(
-                                const Duration(milliseconds: 150), () {
-                              return Future<List<Company>>.value(
-                                  (_companyBloc.state.data as Companies)
-                                      .companies);
+                                const Duration(milliseconds: 100), () {
+                              return Future.value(_companyBloc.state.companies);
                             });
                           },
                           compareFn: (item, sItem) =>
@@ -576,7 +578,7 @@ class UserDialogState extends State<UserDialog> {
                       },
                       child: const Text('Update'),
                     )),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 5),
                   if (_selectedCompany.name != null)
                     Expanded(
                         child: OutlinedButton(
@@ -588,7 +590,7 @@ class UserDialogState extends State<UserDialog> {
                       },
                       child: const Text('Remove'),
                     )),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 5),
                   Expanded(
                       child: OutlinedButton(
                     key: const Key('newCompany'),
@@ -598,7 +600,9 @@ class UserDialogState extends State<UserDialog> {
                           context: context,
                           builder: (BuildContext context) {
                             return ShowCompanyDialog(
-                                Company(partyId: '_NEW_', role: _selectedRole));
+                              Company(partyId: '_NEW_', role: _selectedRole),
+                              dialog: true,
+                            );
                           });
                       if (result is Company) {
                         setState(() {
@@ -607,7 +611,9 @@ class UserDialogState extends State<UserDialog> {
                         });
                       }
                     },
-                    child: const Text('Add New'),
+                    child: Text(_selectedCompany.name != null
+                        ? 'Add new'
+                        : 'Add new related compamy'),
                   )),
                 ],
               ),
@@ -720,6 +726,7 @@ class UserDialogState extends State<UserDialog> {
               onPressed: () async {
                 if (_userDialogFormKey.currentState!.validate()) {
                   updatedUser = updatedUser.copyWith(
+                      role: _selectedRole,
                       pseudoId: _idController.text,
                       firstName: _firstNameController.text,
                       lastName: _lastNameController.text,
@@ -731,11 +738,12 @@ class UserDialogState extends State<UserDialog> {
                       paymentMethod: updatedUser.paymentMethod,
                       loginDisabled: _isLoginDisabled,
                       userGroup: _selectedUserGroup,
-                      role: _selectedRole,
 //                      language: Localizations.localeOf(context)
 //                          .languageCode
 //                          .toString(),
-                      company: _selectedCompany.copyWith(role: _selectedRole),
+                      company: _selectedCompany.name != null
+                          ? _selectedCompany.copyWith(role: _selectedRole)
+                          : null,
                       image: await HelperFunctions.getResizedImage(
                           _imageFile?.path));
                   if (!mounted) return;
@@ -743,7 +751,8 @@ class UserDialogState extends State<UserDialog> {
                     HelperFunctions.showMessage(
                         context, "Image upload error!", Colors.red);
                   } else {
-                    _companyUserBloc.add(CompanyUserUpdate(user: updatedUser));
+                    _companyUserBloc.add(
+                        CompanyUserUpdate(CompanyUser.tryParse(updatedUser)));
                   }
                 }
               }))

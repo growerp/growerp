@@ -75,50 +75,37 @@ class HomeFormState extends State<HomeForm> {
               .contains(state.authenticate!.moquiSessionToken)) {
             return const LoginDialog();
           }
-          return BlocListener<NotificationBloc, NotificationState>(
-              listener: (context, notiFicationState) {
-                if (notiFicationState.status == NotificationStatus.success &&
-                    notiFicationState.notifications.isNotEmpty) {
-                  String messages = '';
-                  for (final (index, note)
-                      in notiFicationState.notifications.indexed) {
-                    messages +=
-                        "${note.message!["message"]}${index < notiFicationState.notifications.length - 1 ? '\n' : ''}";
-                  }
-                  HelperFunctions.showTopMessage(context, messages);
-                }
-              },
-              child: Column(
-                children: [
-                  Expanded(
-                      child: DisplayMenuOption(
-                          menuList: widget.menuOptions,
-                          menuIndex: 0,
-                          actions: <Widget>[
-                        if (state.authenticate?.apiKey != null &&
-                            widget.menuOptions[0].route == '/')
-                          IconButton(
-                              key: const Key('logoutButton'),
-                              padding: EdgeInsets.zero,
-                              icon: const Icon(Icons.do_not_disturb,
-                                  key: Key('HomeFormAuth')),
-                              tooltip: 'Logout',
-                              onPressed: () => {
-                                    _authBloc.add(const AuthLoggedOut()),
-                                  }),
-                      ])),
-                  // hidden text be able to load demo data for testing
-                  if (kDebugMode)
-                    Text(state.authenticate?.apiKey ?? '',
-                        key: const Key('apiKey'),
-                        style: const TextStyle(fontSize: 0)),
-                  if (kDebugMode)
-                    Text(state.authenticate?.moquiSessionToken ?? '',
-                        key: const Key('moquiSessionToken'),
-                        style: const TextStyle(fontSize: 0)),
-                  appInfo
-                ],
-              ));
+          return Column(
+            children: [
+              Expanded(
+                  child: DisplayMenuOption(
+                      menuList: widget.menuOptions,
+                      menuIndex: 0,
+                      actions: <Widget>[
+                    if (state.authenticate?.apiKey != null &&
+                        widget.menuOptions[0].route == '/')
+                      IconButton(
+                          key: const Key('logoutButton'),
+                          padding: EdgeInsets.zero,
+                          icon: const Icon(Icons.do_not_disturb,
+                              key: Key('HomeFormAuth')),
+                          tooltip: 'Logout',
+                          onPressed: () => {
+                                _authBloc.add(const AuthLoggedOut()),
+                              }),
+                  ])),
+              // hidden text be able to load demo data for testing
+              if (kDebugMode)
+                Text(state.authenticate?.apiKey ?? '',
+                    key: const Key('apiKey'),
+                    style: const TextStyle(fontSize: 0)),
+              if (kDebugMode)
+                Text(state.authenticate?.moquiSessionToken ?? '',
+                    key: const Key('moquiSessionToken'),
+                    style: const TextStyle(fontSize: 0)),
+              appInfo
+            ],
+          );
         case AuthStatus.failure:
         case AuthStatus.unAuthenticated:
           ThemeMode? themeMode = context.read<ThemeBloc>().state.themeMode;

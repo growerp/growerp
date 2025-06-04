@@ -39,7 +39,7 @@ void main() {
     await CommonTest.createCompanyAndAdmin(tester);
     await CommonTest.selectMainCompany(tester);
     await CompanyTest.checkCompany(tester);
-    await CompanyTest.enterCompanyData(tester, [company]); // modify
+    await CompanyTest.addCompanies(tester, [company]); // modify
     await CommonTest.selectMainCompany(tester);
     await CompanyTest.checkCompany(tester);
     await CommonTest.logout(tester);

@@ -64,9 +64,8 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
       emit(state.copyWith(status: CompanyStatus.loading));
       late Companies compResult;
       if (event.mainOnly) {
-        compResult = await restClient.getCompanies(
-            start: event.companyPartyId == null ? start : 0,
-            limit: event.limit);
+        compResult =
+            await restClient.getCompanies(start: start, limit: event.limit);
       } else {
         compResult = await restClient.getCompany(
             role: role,
@@ -74,22 +73,15 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
             ownerPartyId: event.ownerPartyId,
             searchString: event.searchString,
             isForDropDown: event.isForDropDown,
-            start: event.companyPartyId == null ? start : 0,
+            start: start,
             limit: event.limit);
+        emit(state.copyWith(
+          status: CompanyStatus.success,
+          companies: current..addAll(compResult.companies),
+          hasReachedMax: compResult.companies.length < event.limit,
+          searchString: event.searchString,
+        ));
       }
-      emit(state.copyWith(
-        status: CompanyStatus.success,
-        companies: event.companyPartyId == null
-            ? (current..addAll(compResult.companies))
-            : current,
-        company: event.companyPartyId != null
-            ? compResult.companies.isNotEmpty
-                ? compResult.companies[0]
-                : null
-            : state.company,
-        hasReachedMax: compResult.companies.length < event.limit,
-        searchString: event.searchString,
-      ));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: CompanyStatus.failure, message: await getDioError(e)));
@@ -109,7 +101,8 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
         if (companies.isNotEmpty) {
           int index = companies.indexWhere(
               (element) => element.partyId == event.company.partyId);
-          companies[index] = compResult;
+          companies.removeAt(index);
+          companies.insert(0, compResult);
         } else {
           companies.add(compResult);
         }

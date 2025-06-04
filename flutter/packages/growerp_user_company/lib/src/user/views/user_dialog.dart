@@ -115,8 +115,7 @@ class UserDialogState extends State<UserDialogStateFull> {
       _hasLogin = widget.user.userId != null;
     }
     _selectedCompany = widget.user.company ?? Company(role: Role.unknown);
-    _selectedRole =
-        widget.user.role ?? widget.user.company!.role ?? Role.unknown;
+    _selectedRole = widget.user.role ?? Role.unknown;
     _selectedUserGroup = widget.user.userGroup ?? UserGroup.employee;
     localUserGroups = UserGroup.getValues();
     updatedUser = widget.user;
@@ -617,7 +616,9 @@ class UserDialogState extends State<UserDialogStateFull> {
                           context: context,
                           builder: (BuildContext context) {
                             return ShowCompanyDialog(
-                                Company(partyId: '_NEW_', role: _selectedRole));
+                              Company(partyId: '_NEW_', role: _selectedRole),
+                              dialog: true,
+                            );
                           });
                       if (result is Company) {
                         setState(() {
@@ -626,7 +627,9 @@ class UserDialogState extends State<UserDialogStateFull> {
                         });
                       }
                     },
-                    child: const Text('Add new'),
+                    child: Text(_selectedCompany.name != null
+                        ? 'Add new'
+                        : 'Add new related compamy'),
                   )),
                 ],
               ),

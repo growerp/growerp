@@ -37,6 +37,7 @@ class CompanyUser with _$CompanyUser {
     Address? address,
     PaymentMethod? paymentMethod,
     Company? company, // related company if type == user
+    List<User>? employees,
   }) = _CompanyUser;
 
   factory CompanyUser.fromJson(Map<String, dynamic> json) =>
@@ -47,6 +48,7 @@ class CompanyUser with _$CompanyUser {
 
   Company? getCompany() => type == PartyType.company
       ? Company(
+          role: role,
           partyId: partyId,
           pseudoId: pseudoId,
           name: name,
@@ -56,18 +58,24 @@ class CompanyUser with _$CompanyUser {
           image: image,
           paymentMethod: paymentMethod,
           address: address,
-          role: role)
+          employees: employees ?? [])
       : null;
 
   User? getUser() {
     if (type == PartyType.user) {
-      final names = name?.split(', ');
+      List<String> names = [];
+      for (final sep in [', ', ' ,', ' , ', ',', ' ']) {
+        int index = name!.indexOf(sep);
+        if (index == -1) continue;
+        names.add(name!.substring(0, index));
+        names.add(name!.substring(index + sep.length));
+      }
       return User(
           partyId: partyId,
           pseudoId: pseudoId,
           role: role,
-          firstName: names != null && names.length > 1 ? names[1] : '',
-          lastName: names != null ? names[0] : '',
+          firstName: names[0],
+          lastName: names[1],
           address: address,
           email: email,
           url: url,
@@ -82,34 +90,24 @@ class CompanyUser with _$CompanyUser {
   static CompanyUser? tryParse(dynamic obj) {
     switch (obj) {
       case User _:
-        if (obj.company == null) {
-          return CompanyUser(
-              type: PartyType.user,
-              partyId: obj.partyId,
-              pseudoId: obj.pseudoId,
-              name: '${obj.firstName} ${obj.lastName}',
-              email: obj.email,
-              url: obj.url,
-              telephoneNr: obj.telephoneNr,
-              image: obj.image,
-              paymentMethod: obj.paymentMethod,
-              address: obj.address);
-        } else {
-          return CompanyUser(
-              type: PartyType.company,
-              partyId: obj.company?.partyId,
-              pseudoId: obj.company?.pseudoId,
-              name: obj.company?.name,
-              email: obj.company?.email,
-              url: obj.company?.url,
-              telephoneNr: obj.company?.telephoneNr,
-              image: obj.company?.image,
-              paymentMethod: obj.company?.paymentMethod,
-              address: obj.company?.address);
-        }
+        return CompanyUser(
+          type: PartyType.user,
+          role: obj.role,
+          partyId: obj.partyId,
+          pseudoId: obj.pseudoId,
+          name: '${obj.firstName} ${obj.lastName}',
+          email: obj.email,
+          url: obj.url,
+          telephoneNr: obj.telephoneNr,
+          image: obj.image,
+          paymentMethod: obj.paymentMethod,
+          address: obj.address,
+          company: obj.company,
+        );
       case Company _:
         return CompanyUser(
             type: PartyType.company,
+            role: obj.role,
             partyId: obj.partyId,
             pseudoId: obj.pseudoId,
             name: obj.name,
@@ -118,7 +116,8 @@ class CompanyUser with _$CompanyUser {
             telephoneNr: obj.telephoneNr,
             image: obj.image,
             paymentMethod: obj.paymentMethod,
-            address: obj.address);
+            address: obj.address,
+            employees: obj.employees);
       default:
         return null;
     }
@@ -139,7 +138,8 @@ CompanyUser? toCompanyUser(dynamic object) {
           image: object.image,
           paymentMethod: object.paymentMethod,
           address: object.address,
-          telephoneNr: object.telephoneNr);
+          telephoneNr: object.telephoneNr,
+          employees: object.employees);
     case User():
       if (object.company == null) {
         // return only user when no company
@@ -154,8 +154,8 @@ CompanyUser? toCompanyUser(dynamic object) {
             image: object.image,
             paymentMethod: object.paymentMethod,
             address: object.address,
-            company: object.company,
-            telephoneNr: object.telephoneNr);
+            telephoneNr: object.telephoneNr,
+            company: object.company);
       }
       // if related company return that
       return CompanyUser(
@@ -169,7 +169,8 @@ CompanyUser? toCompanyUser(dynamic object) {
           image: object.company?.image,
           paymentMethod: object.company?.paymentMethod,
           address: object.company?.address,
-          telephoneNr: object.company?.telephoneNr);
+          telephoneNr: object.company?.telephoneNr,
+          employees: object.company?.employees ?? []);
     default:
       return null;
   }

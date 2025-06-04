@@ -270,19 +270,33 @@ class MenuOptionState extends State<DisplayMenuOption>
             simpleChildren.insert(0, workflowBar);
           }
 
-          return Scaffold(
-              key: Key(currentRoute),
-              appBar: AppBar(
-                  backgroundColor:
-                      Theme.of(context).colorScheme.primaryContainer,
-                  key: Key(displayMOFormKey),
-                  automaticallyImplyLeading: isPhone,
-                  leading: leadAction,
-                  title: appBarTitle(context, title, isPhone),
-                  actions: actions),
-              drawer: myDrawer(context, isPhone, menuList),
-              floatingActionButton: floatingActionButton,
-              body: child!);
+          return ScaffoldMessenger(
+              child: Scaffold(
+            key: Key(currentRoute),
+            appBar: AppBar(
+                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                key: Key(displayMOFormKey),
+                automaticallyImplyLeading: isPhone,
+                leading: leadAction,
+                title: appBarTitle(context, title, isPhone),
+                actions: actions),
+            drawer: myDrawer(context, isPhone, menuList),
+            floatingActionButton: floatingActionButton,
+            body: BlocListener<NotificationBloc, NotificationState>(
+                listener: (context, notiFicationState) {
+                  if (notiFicationState.status == NotificationStatus.success &&
+                      notiFicationState.notifications.isNotEmpty) {
+                    String messages = '';
+                    for (final (index, note)
+                        in notiFicationState.notifications.indexed) {
+                      messages +=
+                          "${note.message!["message"]}${index < notiFicationState.notifications.length - 1 ? '\n' : ''}";
+                    }
+                    HelperFunctions.showTopMessage(context, messages);
+                  }
+                },
+                child: child!),
+          ));
         }
 
         Widget tabPage(bool isPhone) {

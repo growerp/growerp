@@ -130,6 +130,12 @@ class CompanyUserSearchDialog extends StatelessWidget {
                                       "ID: ${companiesUsers[index].pseudoId}\n"
                                       "Name: ${companiesUsers[index].name}",
                                       key: Key("searchResult$index")),
+                                  subtitle: companiesUsers[index].company !=
+                                          null
+                                      ? Text("Organization representative:\n"
+                                          "${companiesUsers[index].company!.pseudoId}\n"
+                                          "${companiesUsers[index].company!.name}")
+                                      : const Text(""),
                                   onTap: () => Navigator.of(context)
                                       .pop(companiesUsers[index]),
                                 ));

@@ -20,76 +20,75 @@ import '../../company/integration_test/company_test.dart';
 import '../../user/integration_test/user_test.dart';
 
 class CompanyUserTest {
-  static Future<void> addUsers(
-      WidgetTester tester, Role role, List<User> inputList) async {
-    SaveTest test = await PersistFunctions.getTest(backup: false);
-    await PersistFunctions.persistTest(test.copyWith(
-        leads: role == Role.lead
-            ? await UserTest.enterUserData(tester, [], inputList, test.sequence)
-            : test.leads,
-        suppliers: role == Role.supplier
-            ? await UserTest.enterUserData(tester, [], inputList, test.sequence)
-            : test.suppliers,
-        customers: role == Role.customer
-            ? await UserTest.enterUserData(tester, [], inputList, test.sequence)
-            : test.customers,
-        sequence: test.sequence + 10));
-  }
+  static Future<void> addUsers(WidgetTester tester, List<User> newUsers) async {
+    await UserTest.addUsers(tester, newUsers, companyUser: true);
 
-  static Future<void> addCompanies(
-      WidgetTester tester, Role role, List<Company> inputList) async {
-    await CompanyTest.enterCompanyData(tester, inputList);
+    // users with a company will now show in the list
+    // as a company with an employee
+    // remove them from the userlist and add them to the company list
+    SaveTest test = await PersistFunctions.getTest(backup: false);
+    List<User> users = List.of(test.users);
+    List<Company> companies = List.of(test.companies);
+    int adjust = 0;
+    for (int index = 0; index < test.users.length; index++) {
+      if (test.users[index].company?.name != null) {
+        companies.add(test.users[index].company!);
+        users.removeAt(index - adjust++);
+      }
+    }
+    test = test.copyWith(companies: companies, users: users);
+    await PersistFunctions.persistTest(test);
   }
 
   static Future<void> updateUsers(
-      WidgetTester tester, Role role, List<User> newInputList) async {
+      WidgetTester tester, List<User> newUsers) async {
     SaveTest test = await PersistFunctions.getTest(backup: false);
-    List<User> inputList;
-    switch (role) {
-      case Role.lead:
-        inputList = test.leads;
-      case Role.customer:
-        inputList = test.customers;
-      case Role.supplier:
-        inputList = test.suppliers;
-      default:
-        inputList = [];
+
+    expect(newUsers.length, greaterThanOrEqualTo(test.users.length),
+        reason:
+            'Number of Users to update (${newUsers.length}) should be at least the number of current users(${test.users.length})');
+    int start = newUsers.length - test.users.length;
+    await UserTest.updateUsers(
+        tester,
+        newUsers.sublist(
+          start,
+          start + test.users.length,
+        ),
+        companyUser: true);
+
+    // users with a company will now show in the list
+    // as a company with an employee
+    // remove them from the userlist and add them to the company list
+    test = await PersistFunctions.getTest(backup: false);
+    List<User> users = List.of(test.users);
+    List<Company> companies = List.of(test.companies);
+    int adjust = 0;
+    for (int index = 0; index < test.users.length; index++) {
+      if (test.users[index].company?.name != null) {
+        companies.add(test.users[index].company!);
+        users.removeAt(index - adjust++);
+      }
     }
-    await PersistFunctions.persistTest(test.copyWith(
-        leads: role == Role.lead
-            ? await UserTest.enterUserData(tester, [], inputList, test.sequence)
-            : test.leads,
-        suppliers: role == Role.supplier
-            ? await UserTest.enterUserData(tester, [], inputList, test.sequence)
-            : test.suppliers,
-        customers: role == Role.customer
-            ? await UserTest.enterUserData(tester, [], inputList, test.sequence)
-            : test.customers,
-        sequence: test.sequence + 10));
+    test = test.copyWith(companies: companies, users: users);
+    await PersistFunctions.persistTest(test);
   }
 
   static Future<void> updateCompanies(
-      WidgetTester tester, Role role, List<Company> inputList) async {
-    await CompanyTest.enterCompanyData(tester, inputList);
+      WidgetTester tester, List<Company> newCompanies) async {
+    SaveTest test = await PersistFunctions.getTest(backup: false);
+
+    expect(newCompanies.length, greaterThanOrEqualTo(test.companies.length),
+        reason:
+            'Number of Companies to update (${newCompanies.length}) should be at least the number of current companies(${test.companies.length}) ');
+    int start = newCompanies.length - test.companies.length;
+    await CompanyTest.updateCompanies(
+        tester, newCompanies.sublist(start, start + test.companies.length));
   }
 
   static Future<void> checkCompaniesUsers(
     WidgetTester tester,
-    Role role,
   ) async {
-    await CompanyTest.checkCompanyFields(tester, Company());
-    SaveTest test = await PersistFunctions.getTest(backup: false);
-    List<User> inputList;
-    switch (role) {
-      case Role.lead:
-        inputList = test.leads;
-      case Role.customer:
-        inputList = test.customers;
-      case Role.supplier:
-        inputList = test.suppliers;
-      default:
-        inputList = [];
-    }
-    await UserTest.checkUser(tester, inputList);
+    await UserTest.checkUsers(tester);
+    await CompanyTest.checkCompanies(tester);
   }
 }

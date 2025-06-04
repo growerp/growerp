@@ -43,13 +43,10 @@ void main() {
         clear: true);
     await CommonTest.createCompanyAndAdmin(tester);
     await selectSuppliers(tester);
-    await CompanyTest.enterCompanyData(tester, supplierCompanies.sublist(0, 2));
-    await selectSuppliers(tester);
-    await CompanyTest.checkCompany(tester);
-    await selectSuppliers(tester);
-    await CompanyTest.enterCompanyData(tester, supplierCompanies.sublist(2, 4));
-    await selectSuppliers(tester);
-    await CompanyTest.checkCompany(tester);
+    await CompanyTest.addCompanies(tester, supplierCompanies.sublist(0, 2));
+    await CompanyTest.checkCompanies(tester);
+    await CompanyTest.updateCompanies(tester, supplierCompanies.sublist(2, 4));
+    await CompanyTest.checkCompanies(tester);
     await CommonTest.logout(tester);
   });
 }

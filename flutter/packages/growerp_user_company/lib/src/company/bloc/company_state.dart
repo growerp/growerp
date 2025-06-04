@@ -20,7 +20,6 @@ class CompanyState extends Equatable {
   const CompanyState({
     this.status = CompanyStatus.initial,
     this.companies = const <Company>[],
-    this.company,
     this.message,
     this.hasReachedMax = false,
     this.searchString = '',
@@ -29,7 +28,6 @@ class CompanyState extends Equatable {
   final CompanyStatus status;
   final String? message;
   final List<Company> companies;
-  final Company? company;
   final bool hasReachedMax;
   final String searchString;
 
@@ -37,7 +35,6 @@ class CompanyState extends Equatable {
     CompanyStatus? status,
     String? message,
     List<Company>? companies,
-    Company? company,
     bool error = false,
     bool? hasReachedMax,
     String? searchString,
@@ -45,7 +42,6 @@ class CompanyState extends Equatable {
     return CompanyState(
       status: status ?? this.status,
       companies: companies ?? this.companies,
-      company: company ?? this.company,
       message: message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,
@@ -53,7 +49,8 @@ class CompanyState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [status, hasReachedMax, message, companies];
+  List<Object?> get props =>
+      [status, hasReachedMax, message, companies, hasReachedMax];
 
   @override
   String toString() => '$status { #companies: ${companies.length}, '

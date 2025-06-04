@@ -15,7 +15,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../../growerp_user_company.dart';
@@ -48,96 +47,50 @@ class UserTest {
     await CommonTest.selectOption(tester, option, formName, tabNumber);
   }
 
-  static Future<void> addAdministrators(
-      WidgetTester tester, List<User> administrators,
-      {bool check = true}) async {
-    SaveTest test = await PersistFunctions.getTest(backup: false);
-    if (test.administrators.isEmpty) {
-      await PersistFunctions.persistTest(test.copyWith(
-          administrators:
-              await enterUserData(tester, [], administrators, test.sequence),
-          sequence: test.sequence + 10));
-    }
-    if (check) {
-      test = await PersistFunctions.getTest(backup: false);
-      await PersistFunctions.persistTest(test.copyWith(
-          administrators: await checkUser(tester, test.administrators)));
-    }
+  static Future<void> addUsers(WidgetTester tester, List<User> users,
+      {bool check = true, bool companyUser = false}) async {
+    SaveTest test = await PersistFunctions.getTest();
+    await PersistFunctions.persistTest(test.copyWith(users: users));
+    await enterUserData(tester, companyUser: companyUser);
   }
 
-  static Future<void> addEmployees(WidgetTester tester, List<User> employees,
-      {bool check = true}) async {
-    SaveTest test = await PersistFunctions.getTest(backup: false);
-    if (test.employees.isEmpty) {
-      await PersistFunctions.persistTest(test.copyWith(
-          employees: await enterUserData(tester, [], employees, test.sequence),
-          sequence: test.sequence + 10));
-    }
-    if (check) {
-      test = await PersistFunctions.getTest(backup: false);
-      await PersistFunctions.persistTest(
-          test.copyWith(employees: await checkUser(tester, test.employees)));
-    }
-  }
-
-  static Future<void> addLeads(WidgetTester tester, List<User> leads,
-      {bool check = true}) async {
-    SaveTest test = await PersistFunctions.getTest(backup: false);
-    if (test.leads.isEmpty) {
-      await PersistFunctions.persistTest(test.copyWith(
-          leads: await enterUserData(tester, [], leads, test.sequence),
-          sequence: test.sequence + 10));
-    }
-    if (check) {
-      test = await PersistFunctions.getTest(backup: false);
-      await PersistFunctions.persistTest(
-          test.copyWith(leads: await checkUser(tester, test.leads)));
-    }
-  }
-
-  static Future<void> addCustomers(WidgetTester tester, List<User> customers,
-      {bool check = true}) async {
-    SaveTest test = await PersistFunctions.getTest(backup: false);
-    if (test.customers.isEmpty) {
-      expect(find.byKey(const Key('userItem')), findsNWidgets(0));
-      await PersistFunctions.persistTest(test.copyWith(
-          customers: await enterUserData(tester, [], customers, test.sequence),
-          sequence: test.sequence + 10));
-    }
-    if (check) {
-      test = await PersistFunctions.getTest(backup: false);
-      await PersistFunctions.persistTest(
-          test.copyWith(customers: await checkUser(tester, test.customers)));
-    }
-  }
-
-  static Future<void> addSuppliers(WidgetTester tester, List<User> suppliers,
-      {bool check = true}) async {
-    SaveTest test = await PersistFunctions.getTest(backup: false);
-    if (test.suppliers.isEmpty) {
-      expect(find.byKey(const Key('userItem')), findsNWidgets(0));
-      await PersistFunctions.persistTest(test.copyWith(
-          suppliers: await enterUserData(tester, [], suppliers, test.sequence),
-          sequence: test.sequence + 10));
-    }
-    if (check) {
-      test = await PersistFunctions.getTest(backup: false);
-      await PersistFunctions.persistTest(
-          test.copyWith(suppliers: await checkUser(tester, test.suppliers)));
-    }
-  }
-
-  static Future<List<User>> enterUserData(WidgetTester tester,
-      List<User> oldUsers, List<User> npUsers, int seq) async {
-    // copy id's to new list
-    Role currentRole = npUsers[0].company?.role ?? Role.unknown;
-    if (oldUsers.isNotEmpty) {
-      for (int x = 0; x < npUsers.length; x++) {
-        npUsers[x] = npUsers[x].copyWith(pseudoId: oldUsers[x].pseudoId);
+  static Future<void> updateUsers(WidgetTester tester, List<User> newUsers,
+      {bool companyUser = false}) async {
+    SaveTest old = await PersistFunctions.getTest();
+    // copy pseudo id to new data
+    for (int x = 0; x < newUsers.length; x++) {
+      newUsers[x] = newUsers[x].copyWith(pseudoId: old.users[x].pseudoId);
+      if (newUsers[x].company != null) {
+        Company newCompany = newUsers[x]
+            .company!
+            .copyWith(pseudoId: old.users[x].company?.pseudoId);
+        newUsers[x] = newUsers[x].copyWith(company: newCompany);
       }
     }
+    await PersistFunctions.persistTest(old.copyWith(users: newUsers));
+    await enterUserData(tester, companyUser: companyUser);
+  }
+
+  static Future<void> deleteUsers(WidgetTester tester) async {
+    SaveTest test = await PersistFunctions.getTest();
+    int count = test.users.length;
+    expect(find.byKey(const Key('userItem'), skipOffstage: false),
+        findsNWidgets(count));
+    await CommonTest.tapByKey(tester, 'delete${count - 1}',
+        seconds: CommonTest.waitTime);
+    expect(find.byKey(const Key('userItem'), skipOffstage: false),
+        findsNWidgets(count - 1));
+    PersistFunctions.persistTest(
+        test.copyWith(users: test.users.sublist(0, count - 1)));
+  }
+
+  static Future<void> enterUserData(WidgetTester tester,
+      // if called from companyUser list
+      {bool companyUser = false}) async {
+    SaveTest test = await PersistFunctions.getTest();
+    int seq = test.sequence;
     List<User> newUsers = [];
-    for (User user in npUsers) {
+    for (User user in test.users) {
       if (user.pseudoId == null) {
         await CommonTest.tapByKey(tester, 'addNewUser');
       } else {
@@ -183,42 +136,46 @@ class UserTest {
         }
       }
 
-      // company info fixed for employees
-      if (currentRole != Role.company) {
+      // company info fixed for employees will not show for update
+      bool companyAssigned = false;
+      if (user.role != Role.company) {
         if (user.company?.name == null) {
           // remove existing company
           if (await CommonTest.doesExistKey(tester, 'removeCompany')) {
             await CommonTest.tapByKey(tester, 'removeCompany');
           }
         } else {
-          // name not null so create or update
+          // check company buttons if company assigned
           if (await CommonTest.doesExistKey(tester, 'newCompany')) {
             await CommonTest.tapByKey(tester, 'newCompany');
+            companyAssigned = true;
           } else {
             await CommonTest.tapByKey(tester, 'editCompany');
+            expect(CommonTest.getTextField('topHeader').split('#')[1],
+                user.company!.pseudoId);
           }
+          await CommonTest.enterText(
+              tester, 'companyName', user.company!.name!); // required!
+          await CommonTest.enterText(
+              tester, 'telephoneNr', user.company!.telephoneNr ?? '');
+          if (user.company?.email != null) {
+            user = user.copyWith(
+                company: user.company!.copyWith(
+                    email:
+                        user.company!.email!.replaceFirst('XXX', '${seq++}')));
+          }
+          if (user.company?.url != null) {
+            user = user.copyWith(
+                company: user.company!.copyWith(
+                    url: user.company!.url!.replaceFirst('XXX', '${seq++}')));
+          }
+          await CommonTest.dragUntil(tester, key: 'email');
+          await CommonTest.enterText(
+              tester, 'email', user.company?.email ?? '');
+          await CommonTest.enterText(tester, 'url', user.company?.url ?? '');
+          await CommonTest.dragUntil(tester, key: 'update');
+          await CommonTest.tapByKey(tester, 'update');
         }
-
-        await CommonTest.enterText(
-            tester, 'companyName', user.company!.name!); // required!
-        await CommonTest.enterText(
-            tester, 'telephoneNr', user.company!.telephoneNr ?? '');
-        if (user.company?.email != null) {
-          user = user.copyWith(
-              company: user.company!.copyWith(
-                  email: user.company!.email!.replaceFirst('XXX', '${seq++}')));
-        }
-        if (user.company?.url != null) {
-          user = user.copyWith(
-              company: user.company!.copyWith(
-                  url: user.company!.url!.replaceFirst('XXX', '${seq++}')));
-        }
-        await CommonTest.dragUntil(tester, key: 'email');
-        await CommonTest.enterText(tester, 'email', user.company?.email ?? '');
-        await CommonTest.enterText(tester, 'url', user.company?.url ?? '');
-        await CommonTest.dragUntil(tester, key: 'update');
-        await CommonTest.tapByKey(tester, 'update',
-            seconds: CommonTest.waitTime);
       }
 
       await CommonTest.dragUntil(tester, key: 'loginName');
@@ -236,19 +193,70 @@ class UserTest {
       await CommonTest.dragUntil(tester, key: 'updateUser');
       await CommonTest.tapByKey(tester, 'updateUser');
       await CommonTest.waitForSnackbarToGo(tester);
+
+      // get new user pseudoId when adding
+      if (user.pseudoId == null || companyAssigned) {
+        // new entry is at the top of the list, get allocated ID
+        await CommonTest.tapByKey(tester, 'item0');
+        var id = CommonTest.getTextField('topHeader').split('#')[1];
+        // if this test is called from company_usertest.dart
+        // companyUser = true
+        // and the user has a company, the company dialog shown instead.
+        // and the user and employee are switched
+        if (companyAssigned) {
+          if (companyUser) {
+            expect(
+                await CommonTest.doesExistKey(
+                    tester, 'CompanyDialog${user.company!.role!.name}'),
+                true);
+            // company pseudoId
+            user = user.copyWith(company: user.company!.copyWith(pseudoId: id));
+            var employeeId = CommonTest.getTextField('employee0').split('[')[1];
+            // employee pseudoId
+            employeeId = employeeId.split(']')[0];
+            user = user.copyWith(pseudoId: employeeId);
+          } else {
+            expect(
+                await CommonTest.doesExistKey(
+                    tester, 'UserDialog${user.role!.name}'),
+                true,
+                reason: "key: UserDialog${user.role!.name} not found");
+            var companyPseudoId =
+                CommonTest.getDropdownSearch('userCompanyName').split('[')[1];
+            companyPseudoId = companyPseudoId.split(']')[0];
+            user = user.copyWith(
+                company: user.company!.copyWith(pseudoId: companyPseudoId));
+          }
+        }
+        if (user.pseudoId == null) {
+          if (companyAssigned && companyUser) {
+            expect(
+                await CommonTest.doesExistKey(
+                    tester, 'CompanyDialog${user.company!.role!.name}'),
+                true);
+          } else {
+            expect(
+                await CommonTest.doesExistKey(
+                    tester, 'UserDialog${user.role!.name}'),
+                true,
+                reason: "key: UserDialog${user.role!.name} not found");
+          }
+          // user pseudoId
+          user = user.copyWith(pseudoId: id);
+        }
+        await CommonTest.tapByKey(tester, 'cancel');
+      }
       newUsers.add(user);
     }
-    return (newUsers);
+    await PersistFunctions.persistTest(
+        test.copyWith(users: newUsers, sequence: seq));
   }
 
-  static Future<List<User>> checkUser(
-      WidgetTester tester, List<User> users) async {
-    Role currentRole = users[0].role ?? Role.unknown;
-    List<User> newUsers = [];
-    for (User user in users) {
+  static Future<void> checkUsers(WidgetTester tester) async {
+    SaveTest test = await PersistFunctions.getTest(backup: false);
+    for (User user in test.users) {
       await CommonTest.doNewSearch(tester, searchString: user.firstName!);
       // check detail
-      var id = CommonTest.getTextField('topHeader').split('#')[1];
       expect(find.byKey(Key('UserDialog${user.role!.name}')), findsOneWidget);
       expect(CommonTest.getTextFormField('firstName'), equals(user.firstName!));
       expect(CommonTest.getTextFormField('lastName'), equals(user.lastName!));
@@ -278,32 +286,33 @@ class UserTest {
         await CompanyTest.checkPaymentMethod(tester, user.paymentMethod!);
       }
 
-      // check if no company present
-      if (user.company?.name == null) {
-        expect(
-            await CommonTest.doesExistKey(tester, 'newCompany'), equals(true));
+      if (user.role != Role.company) {
+        // employees not show company
+        if (user.company?.name == null) {
+          expect(await CommonTest.doesExistKey(tester, 'newCompany'),
+              equals(true));
+        } else {
+          expect(await CommonTest.doesExistKey(tester, 'editCompany'),
+              equals(true),
+              reason:
+                  'Company ${user.company!.name} not found on user ${user.firstName} ${user.lastName}');
+          await CommonTest.dragUntil(tester, key: 'editCompany');
+          expect(CommonTest.getDropdownSearch('userCompanyName'),
+              contains(user.company!.name));
+          await CommonTest.tapByKey(tester, 'editCompany');
+          expect(CommonTest.getTextFormField('companyName'),
+              equals(user.company!.name!)); // required!
+          expect(CommonTest.getDropdown('role'),
+              equals(user.company!.role.toString()));
+          expect(CommonTest.getTextFormField('telephoneNr'),
+              equals(user.company!.telephoneNr ?? ''));
+          expect(CommonTest.getTextFormField('email'),
+              equals(user.company!.email ?? ''));
+          expect(CommonTest.getTextFormField('url'),
+              equals(user.company!.url ?? ''));
+          await CommonTest.tapByKey(tester, 'cancel');
+        }
       }
-
-      if (currentRole != Role.company && user.company?.name != null) {
-        expect(
-            await CommonTest.doesExistKey(tester, 'editCompany'), equals(true),
-            reason:
-                'Company ${user.company!.name} not found on user ${user.firstName} ${user.lastName}');
-        await CommonTest.dragUntil(tester, key: 'editCompany');
-        await CommonTest.tapByKey(tester, 'editCompany');
-        expect(CommonTest.getTextFormField('companyName'),
-            equals(user.company!.name!)); // required!
-        expect(CommonTest.getDropdown('role'),
-            equals(user.company!.role.toString()));
-        expect(CommonTest.getTextFormField('telephoneNr'),
-            equals(user.company!.telephoneNr ?? ''));
-        expect(CommonTest.getTextFormField('email'),
-            equals(user.company!.email ?? ''));
-        expect(CommonTest.getTextFormField('url'),
-            equals(user.company!.url ?? ''));
-        await CommonTest.tapByKey(tester, 'cancel');
-      }
-      newUsers.add(user.copyWith(pseudoId: id));
       await CommonTest.dragUntil(tester, key: 'loginName');
       // login, check only when login name present, cannot delete userlogin
       if (user.loginName != null && user.loginName!.isNotEmpty) {
@@ -318,142 +327,5 @@ class UserTest {
       }
       await CommonTest.tapByKey(tester, 'cancel');
     }
-    return newUsers;
-  }
-
-  static Future<void> deleteAdministrators(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    int count = test.administrators.length;
-    if (count != administrators.length) return;
-    await deleteUser(tester, count + 1);
-    PersistFunctions.persistTest(test.copyWith(
-        administrators:
-            test.administrators.sublist(0, test.administrators.length - 1)));
-  }
-
-  static Future<void> deleteEmployees(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    int count = test.employees.length;
-    if (count != employees.length) return;
-    await deleteUser(tester, count);
-    PersistFunctions.persistTest(test.copyWith(
-        employees: test.employees.sublist(0, test.employees.length - 1)));
-  }
-
-  static Future<void> deleteLeads(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    await deleteUser(tester, test.leads.length);
-    PersistFunctions.persistTest(
-        test.copyWith(leads: test.leads.sublist(0, test.leads.length - 1)));
-  }
-
-  static Future<void> deleteCustomers(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    int count = test.customers.length;
-    if (count != customers.length) return;
-    await deleteUser(tester, count);
-    PersistFunctions.persistTest(test.copyWith(
-        customers: test.customers.sublist(0, test.customers.length - 1)));
-  }
-
-  static Future<void> deleteSuppliers(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    int count = test.suppliers.length;
-    if (count != suppliers.length) return;
-    await deleteUser(tester, count);
-    PersistFunctions.persistTest(test.copyWith(
-        suppliers: test.suppliers.sublist(0, test.suppliers.length - 1)));
-  }
-
-  static Future<void> deleteUser(WidgetTester tester, int count) async {
-    expect(find.byKey(const Key('userItem'), skipOffstage: false),
-        findsNWidgets(count)); // initial admin
-    await CommonTest.tapByKey(tester, 'delete${count - 1}',
-        seconds: CommonTest.waitTime);
-    expect(find.byKey(const Key('userItem'), skipOffstage: false),
-        findsNWidgets(count - 1));
-  }
-
-  static Future<void> updateAdministrators(
-      WidgetTester tester, List<User> administrators) async {
-    SaveTest test = await PersistFunctions.getTest();
-    // check if already modified then skip
-    late SaveTest newTest;
-    if (test.administrators[0].firstName != administrators[0].firstName) {
-      newTest = test.copyWith(
-          administrators: await enterUserData(
-              tester, test.administrators, administrators, test.sequence),
-          sequence: test.sequence + 10);
-      await PersistFunctions.persistTest(newTest);
-    } else {
-      newTest = test;
-    }
-    await checkUser(tester, newTest.administrators);
-  }
-
-  static Future<void> updateEmployees(
-      WidgetTester tester, List<User> employees) async {
-    SaveTest test = await PersistFunctions.getTest();
-    // check if already modified then skip
-    late SaveTest newTest;
-    if (test.employees[0].firstName != employees[0].firstName) {
-      newTest = test.copyWith(
-          employees: await enterUserData(
-              tester, test.employees, employees, test.sequence),
-          sequence: test.sequence + 10);
-      await PersistFunctions.persistTest(newTest);
-    } else {
-      newTest = test;
-    }
-    await checkUser(tester, newTest.employees);
-  }
-
-  static Future<void> updateCustomers(
-      WidgetTester tester, List<User> customers) async {
-    SaveTest test = await PersistFunctions.getTest();
-    // check if already modified then skip
-    late SaveTest newTest;
-    if (test.customers[0].firstName != customers[0].firstName) {
-      newTest = test.copyWith(
-          customers: await enterUserData(
-              tester, test.customers, customers, test.sequence),
-          sequence: test.sequence + 10);
-      await PersistFunctions.persistTest(newTest);
-    } else {
-      newTest = test;
-    }
-    await checkUser(tester, newTest.customers);
-  }
-
-  static Future<void> updateSuppliers(
-      WidgetTester tester, List<User> suppliers) async {
-    SaveTest test = await PersistFunctions.getTest();
-    // check if already modified then skip
-    late SaveTest newTest;
-    if (test.suppliers[0].firstName != suppliers[0].firstName) {
-      newTest = test.copyWith(
-          suppliers: await enterUserData(
-              tester, test.suppliers, suppliers, test.sequence),
-          sequence: test.sequence + 10);
-      await PersistFunctions.persistTest(newTest);
-    } else {
-      newTest = test;
-    }
-    await checkUser(tester, newTest.suppliers);
-  }
-
-  static Future<void> updateLeads(WidgetTester tester, List<User> leads) async {
-    SaveTest test = await PersistFunctions.getTest();
-    // check if already modified then skip
-    late SaveTest newTest;
-    if (test.leads[0].firstName != leads[0].firstName) {
-      newTest = test.copyWith(
-          leads: await enterUserData(tester, test.leads, leads, test.sequence),
-          sequence: test.sequence + 10);
-      await PersistFunctions.persistTest(newTest);
-    } else {
-      newTest = test;
-    }
-    await checkUser(tester, newTest.leads);
   }
 }
