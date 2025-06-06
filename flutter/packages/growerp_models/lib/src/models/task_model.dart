@@ -25,8 +25,7 @@ class Task extends Equatable with _$Task {
   Task._();
   factory Task({
     @Default("") String taskId,
-    @Default(TaskType.unkwown)
-    TaskType taskType, // todo, workflow, workflowTask
+    @Default(TaskType.unkwown) TaskType taskType, // todo, event
     @Default("") String parentTaskId,
     TaskStatus? statusId,
     @Default("") String taskName,
@@ -39,13 +38,6 @@ class Task extends Equatable with _$Task {
     DateTime? endDate,
     Decimal? unInvoicedHours,
     @Default([]) List<TimeEntry> timeEntries,
-    // from workflow editor
-    @Default("") String jsonImage,
-    @Default([]) List<Task> workflowTasks, // workflowTasks / links
-    Task? taskTemplate,
-    // workflow task link to the view
-    String? routing,
-    String? flowElementId,
   }) = _Task;
 
   factory Task.fromJson(Map<String, dynamic> json) =>
@@ -56,6 +48,5 @@ class Task extends Equatable with _$Task {
 
   @override
   String toString() =>
-      'Task $taskName [$taskId] #subtasks ${workflowTasks.length} '
-      '#timeEntries: ${timeEntries.length}';
+      'Task $taskName [$taskId] #timeEntries: ${timeEntries.length}';
 }

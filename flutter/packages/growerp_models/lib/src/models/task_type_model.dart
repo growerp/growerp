@@ -14,11 +14,7 @@
 
 enum TaskType {
   todo('To Do'),
-  workflow('Workflow'),
-  workflowTask('WorkflowTask'),
-  workflowTemplate('Workflow Template'),
-  workflowTemplateTask('Workflow Template Task'),
-  workflowTaskTemplate('Workflow Task Template'),
+  event('Event'),
   unkwown('UnKnown');
 
   const TaskType(this._name);
@@ -28,16 +24,8 @@ enum TaskType {
     switch (val) {
       case 'To Do':
         return todo;
-      case 'Workflow':
-        return workflow;
-      case 'Workflow Task':
-        return workflowTask;
-      case 'Workflow Template':
-        return workflowTemplate;
-      case 'Workflow Template Task':
-        return workflowTemplateTask;
-      case 'Workflow Task Template':
-        return workflowTaskTemplate;
+      case 'Event':
+        return event;
     }
     return unkwown;
   }

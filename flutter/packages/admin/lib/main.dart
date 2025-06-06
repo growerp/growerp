@@ -22,10 +22,11 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'menu_options.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'menu_options.dart';
 import 'router.dart' as router;
 import 'package:package_info_plus/package_info_plus.dart';
 //webactivate  import 'package:web/web.dart' as web;
@@ -45,8 +46,6 @@ Future main() async {
 
   // check if there is override for the production(now test) backend url
   await getBackendUrlOverride(classificationId, packageInfo.version);
-
-  Map<String, Widget> screens = orderAccountingScreens;
 
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
@@ -78,7 +77,6 @@ Future main() async {
     menuOptions: menuOptions,
     extraDelegates: delegates,
     extraBlocProviders: getAdminBlocProviders(restClient, classificationId),
-    screens: screens,
     company: company,
   ));
 }

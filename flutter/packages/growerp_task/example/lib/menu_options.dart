@@ -14,43 +14,9 @@
 
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_task/growerp_task.dart';
-import 'views/workflow_db_form.dart' as local;
 import 'package:growerp_models/growerp_models.dart';
 
 List<MenuOption> menuOptions = [
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Main',
-    route: '/',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const local.WorkflowDbForm(),
-  ),
-  MenuOption(
-    image: "packages/growerp_core/images/workflow.png",
-    selectedImage: "packages/growerp_core/images/workflow.png",
-    title: "Workflows",
-    route: '/workflows',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const TaskList(TaskType.workflow),
-  ),
-  MenuOption(
-    image: "packages/growerp_core/images/workflow.png",
-    selectedImage: "packages/growerp_core/images/workflow.png",
-    title: "Workflow Templates",
-    route: '/workflowTemplates',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const TaskList(TaskType.workflowTemplate),
-  ),
-/*  MenuOption(
-    image: "packages/growerp_core/images/workflow.png",
-    selectedImage: "packages/growerp_core/images/workflow.png",
-    title: "Workflow Task Templates",
-    route: '/workflowTaskTemplates',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const TaskList(TaskType.workflowTaskTemplate),
-  ),
-*/
   MenuOption(
     image: "packages/growerp_core/images/tasksGrey.png",
     selectedImage: "packages/growerp_core/images/tasks.png",

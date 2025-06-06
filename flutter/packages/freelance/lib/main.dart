@@ -21,14 +21,13 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_task/growerp_task.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'menu_options.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'router.dart' as router;
-import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 
 Future main() async {
@@ -45,26 +44,6 @@ Future main() async {
   String classificationId = GlobalConfiguration().get("classificationId");
   // check if there is override for the production(now test) backend url
   await getBackendUrlOverride(classificationId, packageInfo.version);
-
-  // can change backend url by pressing long the title on the home screen.
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String ip = prefs.getString('ip') ?? '';
-  String chat = prefs.getString('chat') ?? '';
-  String singleCompany = prefs.getString('companyPartyId') ?? '';
-  if (ip.isNotEmpty) {
-    late http.Response response;
-    try {
-      response = await http.get(Uri.parse('${ip}rest/s1/growerp/Ping'));
-      if (response.statusCode == 200) {
-        GlobalConfiguration().updateValue('databaseUrl', ip);
-        GlobalConfiguration().updateValue('chatUrl', chat);
-        GlobalConfiguration().updateValue('singleCompany', singleCompany);
-        print('=== New ip: $ip , chat: $chat company: $singleCompany Updated!');
-      }
-    } catch (error) {
-      print('===$ip does not respond...not updating databaseUrl: $error');
-    }
-  }
 
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
@@ -91,6 +70,7 @@ Future main() async {
     ],
     extraBlocProviders: [
       ...getUserCompanyBlocProviders(restClient, classificationId),
+      ...getTaskBlocProviders(restClient, classificationId),
       ...getCatalogBlocProviders(restClient, classificationId),
       ...getOrderAccountingBlocProviders(restClient, classificationId),
       ...getMarketingBlocProviders(restClient),

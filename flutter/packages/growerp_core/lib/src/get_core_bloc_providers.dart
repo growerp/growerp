@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_chat/growerp_chat.dart';
@@ -10,7 +9,6 @@ List<BlocProvider> getCoreBlocProviders(
   WsClient chatClient,
   WsClient notificationClient,
   String classificationId,
-  Map<String, Widget> screens,
   Company? company,
 ) {
   AuthBloc authBloc = AuthBloc(
@@ -29,13 +27,6 @@ List<BlocProvider> getCoreBlocProviders(
     BlocProvider<ChatMessageBloc>(
         create: (context) =>
             ChatMessageBloc(restClient, chatClient, authBloc, chatRoomBloc)),
-    BlocProvider<TaskToDoBloc>(
-        create: (context) => TaskBloc(restClient, TaskType.todo, null)),
-    BlocProvider<TaskWorkflowBloc>(
-        create: (context) => TaskBloc(restClient, TaskType.workflow, null)),
-    BlocProvider<TaskWorkflowTemplateBloc>(
-        create: (context) =>
-            TaskBloc(restClient, TaskType.workflowTemplate, screens)),
     BlocProvider<DataFetchBloc<FinDocs>>(
         create: (context) => DataFetchBloc<FinDocs>()),
     BlocProvider<DataFetchBloc<Products>>(

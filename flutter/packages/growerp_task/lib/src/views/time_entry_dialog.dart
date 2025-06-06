@@ -18,6 +18,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../bloc/task_bloc.dart';
+
 class TimeEntryDialog extends StatefulWidget {
   final TimeEntry timeEntry;
   const TimeEntryDialog(this.timeEntry, {super.key});

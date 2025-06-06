@@ -63,8 +63,6 @@ Future main() async {
     }
   }
 
-  Map<String, Widget> screens = orderAccountingScreens;
-
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
   WsClient chatClient = WsClient('chat');
@@ -98,7 +96,6 @@ Future main() async {
     menuOptions: menuOptions,
     extraDelegates: delegates,
     extraBlocProviders: getAdminBlocProviders(restClient, classificationId),
-    screens: screens,
     company: company,
   ));
 }

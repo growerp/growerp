@@ -114,14 +114,15 @@ class HomeFormState extends State<HomeForm> {
                 child: ScaffoldMessenger(
               child: Scaffold(
                   appBar: AppBar(
-                      backgroundColor:
-                          Theme.of(context).colorScheme.primaryContainer,
-                      key: const Key('HomeFormUnAuth'),
-                      title: appBarTitle(
-                        context,
-                        'Welcome to The GrowERP Business System',
-                        isPhone,
-                      )),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.primaryContainer,
+                    key: const Key('HomeFormUnAuth'),
+                    title: const Center(
+                        child: Text(
+                      'Welcome to The GrowERP Business System',
+                      style: TextStyle(fontSize: 15),
+                    )),
+                  ),
                   body: Center(
                     child: Column(children: <Widget>[
                       const SizedBox(height: 100),
