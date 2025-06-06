@@ -24,7 +24,6 @@ class DisplayMenuOption extends StatefulWidget {
   final int? tabIndex; // tab selected, if none create new
   final TabItem? tabItem; // create new tab if tabIndex null
   final List<Widget> actions; // actions at the appBar
-  final Task? workflow;
   const DisplayMenuOption({
     super.key,
     required this.menuList,
@@ -32,7 +31,6 @@ class DisplayMenuOption extends StatefulWidget {
     this.tabIndex,
     this.tabItem,
     this.actions = const [],
-    this.workflow,
   });
 
   @override
@@ -56,7 +54,6 @@ class MenuOptionState extends State<DisplayMenuOption>
   late String displayMOFormKey;
   late String currentRoute = '';
   late bool isPhone;
-  late TaskBloc taskBloc;
   late AuthBloc authBloc;
   List<MenuOption> menuList = [];
   int menuIndex = 0;
@@ -106,9 +103,6 @@ class MenuOptionState extends State<DisplayMenuOption>
     }
 
     MenuOption menuOption = menuList[menuIndex];
-    if (widget.workflow != null) {
-      taskBloc = context.read<TaskBloc>();
-    }
     tabItems = menuOption.tabItems ?? [];
     title = menuOption.title;
     child = menuOption.child;
@@ -215,7 +209,7 @@ class MenuOptionState extends State<DisplayMenuOption>
               },
             ));
 
-        if (currentRoute != '/' && widget.workflow == null) {
+        if (currentRoute != '/') {
           actions.add(IconButton(
               key: const Key('homeButton'),
               icon: const Icon(Icons.home),
@@ -229,46 +223,10 @@ class MenuOptionState extends State<DisplayMenuOption>
               }));
         }
 
-        Widget workflowBar = SizedBox(
-            child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-/*          OutlinedButton(
-            child: const Text('Previous'),
-            onPressed: () {
-              taskBloc.add(TaskWorkflowPrevious(widget.workflow!.taskId));
-            },
-          ),
-*/
-          OutlinedButton(
-            child: const Text('Cancel'),
-            onPressed: () {
-              taskBloc.add(TaskWorkflowCancel(widget.workflow!.taskId));
-            },
-          ),
-/*          OutlinedButton(
-            child: const Text('Suspend'),
-            onPressed: () {
-              taskBloc.add(TaskWorkflowSuspend(widget.workflow!.taskId));
-            },
-          ),
-*/
-          const SizedBox(width: 10),
-          OutlinedButton(
-            child: const Text('Next'),
-            onPressed: () {
-              taskBloc.add(TaskWorkflowNext(widget.workflow!.taskId));
-            },
-          ),
-        ]));
-
         Widget simplePage(bool isPhone) {
           displayMOFormKey =
               child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
           // debugPrint("==2-simple= current form key: $displayMOFormKey");
-
-          List<Widget> simpleChildren = [Expanded(child: child!)];
-          if (widget.workflow != null) {
-            simpleChildren.insert(0, workflowBar);
-          }
 
           return ScaffoldMessenger(
               child: Scaffold(
@@ -318,9 +276,6 @@ class MenuOptionState extends State<DisplayMenuOption>
                         children: tabList,
                       ))
           ];
-          if (widget.workflow != null) {
-            tabChildren.insert(0, workflowBar);
-          }
 
           return Scaffold(
               key: Key(currentRoute),

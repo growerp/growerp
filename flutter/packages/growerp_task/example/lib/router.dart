@@ -14,7 +14,6 @@
 
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
-import 'package:growerp_task/growerp_task.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'menu_options.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -32,30 +31,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
                 menuIndex: 0,
                 tabIndex: 0,
               ));
-    case '/editWorkflow':
-      return MaterialPageRoute(
-          builder: (context) =>
-              WorkflowEditorDialog(settings.arguments as Task));
-    case '/workflowRunner':
-      return MaterialPageRoute(
-          settings: settings,
-          builder: (context) =>
-              WorkflowRunner(workflow: settings.arguments as Task));
-    case '/workflows':
-      return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 1, tabIndex: 0));
-    case '/workflowTemplates':
-      return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 2, tabIndex: 0));
-    case '/workflowTaskTemplates':
-      return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 3, tabIndex: 0));
     case '/toDo':
       return MaterialPageRoute(
           settings: settings,

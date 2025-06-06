@@ -19,44 +19,6 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../../growerp_task.dart';
 
-/*
-class TaskListForm extends StatelessWidget {
-  final TaskType taskType;
-  const TaskList(this.taskType, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    RestClient restClient = context.read<RestClient>();
-    switch (taskType) {
-      case TaskType.todo:
-        return BlocProvider<TaskToDoBloc>(
-          create: (context) => TaskBloc(restClient, taskType, {}),
-          child: TaskList(taskType),
-        );
-      case TaskType.workflow:
-        return BlocProvider<TaskWorkflowBloc>(
-          create: (context) => TaskBloc(restClient, taskType, {}),
-          child: TaskList(taskType),
-        );
-      case TaskType.workflowTemplate:
-        return BlocProvider<TaskWorkflowTemplateBloc>(
-          create: (context) => TaskBloc(restClient, taskType, {}),
-          child: TaskList(taskType),
-        );
-      case TaskType.workflowTaskTemplate:
-        return BlocProvider<TaskWorkflowTaskTemplateBloc>(
-          create: (context) => TaskBloc(restClient, taskType, {}),
-          child: TaskList(taskType),
-        );
-      default:
-        return BlocProvider<TaskBloc>(
-          create: (context) => TaskBloc(restClient, taskType, {}),
-          child: TaskList(taskType),
-        );
-    }
-  }
-}
-*/
 class TaskList extends StatefulWidget {
   final TaskType taskType;
   const TaskList(this.taskType, {super.key});
@@ -76,24 +38,10 @@ class TaskListState extends State<TaskList> {
     _scrollController.addListener(_onScroll);
     switch (widget.taskType) {
       case TaskType.todo:
-        _taskBloc = context.read<TaskToDoBloc>() as TaskBloc;
-        break;
-      case TaskType.workflow:
-        _taskBloc = context.read<TaskWorkflowBloc>() as TaskBloc;
-        break;
-      case TaskType.workflowTemplate:
-        _taskBloc = context.read<TaskWorkflowTemplateBloc>() as TaskBloc;
-        break;
-      case TaskType.workflowTaskTemplate:
-        _taskBloc = context.read<TaskWorkflowTaskTemplateBloc>() as TaskBloc;
-        break;
+        _taskBloc = context.read<TaskBloc>();
       default:
     }
-    if (widget.taskType == TaskType.workflowTemplate) {
-      _taskBloc.add(const TaskFetch(refresh: true, my: false));
-    } else {
-      _taskBloc.add(const TaskFetch(refresh: true));
-    }
+    _taskBloc.add(const TaskFetch(refresh: true, taskType: TaskType.todo));
   }
 
   @override
@@ -157,61 +105,14 @@ class TaskListState extends State<TaskList> {
         }
         if (state.status == TaskBlocStatus.success) {
           hasReachedMax = state.hasReachedMax;
-          double top = 0;
-          double left = 250;
-          return Stack(
-            children: [
-              showForm(state),
-              Positioned(
-                left: left,
-                top: top,
-                child: GestureDetector(
-                    onPanUpdate: (details) {
-                      setState(() {
-                        left += details.delta.dx;
-                        top += details.delta.dy;
-                      });
-                    },
-                    child: FloatingActionButton(
-                        key: const Key("addNew"),
-                        onPressed: () async {
-                          await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                    value: _taskBloc,
-                                    child: widget.taskType == TaskType.workflow
-                                        ? const WorkflowDialog(null)
-                                        : TaskDialog(
-                                            Task(taskType: widget.taskType)));
-                              });
-                        },
-                        tooltip: widget.taskType == TaskType.workflow
-                            ? 'Start new workflow'
-                            : 'Add New Task',
-                        child: Icon(widget.taskType == TaskType.workflow
-                            ? Icons.start
-                            : Icons.add))),
-              ),
-            ],
-          );
+          return showForm(state);
         }
         return const LoadingIndicator();
       }
 
       switch (widget.taskType) {
         case TaskType.todo:
-          return BlocConsumer<TaskToDoBloc, TaskState>(
-              listener: blocListener, builder: blocBuilder);
-        case TaskType.workflow:
-          return BlocConsumer<TaskWorkflowBloc, TaskState>(
-              listener: blocListener, builder: blocBuilder);
-        case TaskType.workflowTemplate:
-          return BlocConsumer<TaskWorkflowTemplateBloc, TaskState>(
-              listener: blocListener, builder: blocBuilder);
-        case TaskType.workflowTaskTemplate:
-          return BlocConsumer<TaskWorkflowTaskTemplateBloc, TaskState>(
+          return BlocConsumer<TaskBloc, TaskState>(
               listener: blocListener, builder: blocBuilder);
         default:
           return BlocConsumer<TaskBloc, TaskState>(

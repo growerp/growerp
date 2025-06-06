@@ -28,6 +28,7 @@ class TaskFetch extends TaskEvent {
     this.refresh = false,
     this.isForDropDown = false,
     this.taskId = '',
+    this.taskType = TaskType.unkwown,
   });
   final bool my;
   final String searchString;
@@ -35,6 +36,7 @@ class TaskFetch extends TaskEvent {
   final int limit;
   final bool isForDropDown;
   final String taskId;
+  final TaskType taskType;
   @override
   List<Object> get props => [searchString, refresh, taskId, isForDropDown];
 }
@@ -52,44 +54,4 @@ class TaskTimeEntryUpdate extends TaskEvent {
 class TaskTimeEntryDelete extends TaskEvent {
   const TaskTimeEntryDelete(this.timeEntry);
   final TimeEntry timeEntry;
-}
-
-class TaskWorkflowNext extends TaskEvent {
-  const TaskWorkflowNext(this.workflowId);
-  final String workflowId;
-}
-
-class TaskWorkflowPrevious extends TaskEvent {
-  const TaskWorkflowPrevious(this.workflowId);
-  final String workflowId;
-}
-
-class TaskWorkflowCancel extends TaskEvent {
-  const TaskWorkflowCancel(this.workflowId);
-  final String workflowId;
-}
-
-class TaskWorkflowSuspend extends TaskEvent {
-  const TaskWorkflowSuspend(this.workflowId);
-  final String workflowId;
-}
-
-class TaskSetReturnString extends TaskEvent {
-  const TaskSetReturnString(this.returnString);
-  final String returnString;
-}
-
-class TaskGetUserWorkflows extends TaskEvent {
-  const TaskGetUserWorkflows(this.taskType);
-  final TaskType taskType;
-}
-
-class TaskCreateUserWorkflow extends TaskEvent {
-  const TaskCreateUserWorkflow(this.workflowId);
-  final String workflowId;
-}
-
-class TaskDeleteUserWorkflow extends TaskEvent {
-  const TaskDeleteUserWorkflow(this.workflowId);
-  final String workflowId;
 }

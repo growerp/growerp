@@ -24,9 +24,7 @@ Widget appBarTitle(BuildContext context, String title, bool isPhone) {
     InkWell(
       key: const Key('tapCompany'),
       onTap: () {
-        if (auth?.apiKey != null) {
-          Navigator.pushNamed(context, '/company', arguments: auth?.company);
-        }
+        Navigator.pushNamed(context, '/company', arguments: auth?.company);
       },
       child: CircleAvatar(
           radius: 15,

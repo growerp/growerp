@@ -38,13 +38,11 @@ class TopApp extends StatelessWidget {
     required this.menuOptions,
     this.extraDelegates = const [],
     this.extraBlocProviders = const [],
-    this.screens = const {},
     this.company,
   });
 
   final RestClient restClient;
   final String classificationId;
-  final Map<String, Widget> screens; // string to widget translation
   final Company? company;
 
   final WsClient chatClient;
@@ -71,13 +69,12 @@ class TopApp extends StatelessWidget {
           RepositoryProvider(create: (context) => chatClient),
           RepositoryProvider(create: (context) => notificationClient),
           RepositoryProvider(create: (context) => classificationId),
-          RepositoryProvider(create: (context) => screens),
           RepositoryProvider(create: (context) => company),
         ],
         child: MultiBlocProvider(
             providers: [
               ...getCoreBlocProviders(restClient, chatClient,
-                  notificationClient, classificationId, screens, company),
+                  notificationClient, classificationId, company),
               ...extraBlocProviders
             ],
             child:

@@ -18,7 +18,6 @@ import 'package:flutter/foundation.dart' as debug;
 import 'package:flutter/material.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'package:growerp_task/growerp_task.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'acct_menu_options.dart';
 import 'menu_options.dart';
@@ -115,11 +114,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 5, tabIndex: 0));
-    case '/workflowRunner':
-      return MaterialPageRoute(
-          settings: settings,
-          builder: (context) =>
-              WorkflowRunner(workflow: settings.arguments as Task));
     default:
       return coreRoute(settings);
   }

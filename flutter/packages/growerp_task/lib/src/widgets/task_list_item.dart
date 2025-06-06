@@ -36,10 +36,6 @@ class TaskListItem extends StatelessWidget {
         title: Row(
           children: <Widget>[
             Expanded(child: Text(task.taskName, key: Key('name$index'))),
-            if (task.taskType != TaskType.workflowTemplate &&
-                task.taskType != TaskType.workflowTaskTemplate)
-              Expanded(
-                  child: Text("${task.statusId}", key: Key('status$index'))),
             if (!isPhone(context))
               Expanded(
                   child: Text(task.description,
@@ -55,8 +51,6 @@ class TaskListItem extends StatelessWidget {
               Expanded(
                   child: Text("${task.rate}",
                       key: Key('rate$index'), textAlign: TextAlign.center)),
-            if (task.taskType == TaskType.workflowTaskTemplate)
-              Expanded(child: Text(task.routing ?? '')),
           ],
         ),
         onTap: () async {
@@ -65,10 +59,7 @@ class TaskListItem extends StatelessWidget {
               context: context,
               builder: (BuildContext context) {
                 return BlocProvider.value(
-                    value: taskBloc,
-                    child: task.taskType == TaskType.workflow
-                        ? WorkflowDialog(task)
-                        : TaskDialog(task));
+                    value: taskBloc, child: TaskDialog(task));
               });
         },
         trailing: IconButton(

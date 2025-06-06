@@ -17,6 +17,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../bloc/task_bloc.dart';
+
 class TaskListHeader extends StatefulWidget {
   final TaskType taskType;
   const TaskListHeader(this.taskType, {super.key});
@@ -62,9 +64,6 @@ class _TaskListHeaderState extends State<TaskListHeader> {
             : Column(children: [
                 Row(children: <Widget>[
                   const Expanded(child: Text("Name")),
-                  if (widget.taskType != TaskType.workflowTemplate &&
-                      widget.taskType != TaskType.workflowTaskTemplate)
-                    const Expanded(child: Text("Status")),
                   if (!isPhone(context))
                     const Expanded(child: Text("description")),
                   if (widget.taskType == TaskType.todo) const Text("Hours"),
@@ -72,8 +71,6 @@ class _TaskListHeaderState extends State<TaskListHeader> {
                     const Expanded(
                         child:
                             Text("From/To Party", textAlign: TextAlign.center)),
-                  if (widget.taskType == TaskType.workflowTaskTemplate)
-                    const Expanded(child: Text("Routing")),
                 ]),
                 const Divider(),
               ]),
