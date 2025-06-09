@@ -88,8 +88,6 @@ along with this software (see the LICENSE.md file). If not, see
         classificationTypeEnumId="PcltMobileApp" description="App for Realtor/property management" />
     <mantle.party.PartyClassification partyClassificationId="AppFreelance"
         classificationTypeEnumId="PcltMobileApp" description="App for a freelancer" />
-    <mantle.party.PartyClassification partyClassificationId="AppWorkflow"
-        classificationTypeEnumId="PcltMobileApp" description="Workflow application" />
     <mantle.party.PartyClassification partyClassificationId="AppHealth"
         classificationTypeEnumId="PcltMobileApp" description="Health/hospital/clinic application" />
 
@@ -139,7 +137,12 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.basic.Enumeration description="Fixed Asset Use" enumId="PtFixedAssetUse"
         enumTypeId="ProductType" />
 
-    <!-- additional roles -->
+    <!-- additional todo roles -->
+    <mantle.party.RoleType description="Originator" roleTypeId="Originator" />
+    <mantle.party.RoleType description="Assignee" roleTypeId="Assignee" />
+    <mantle.party.RoleType description="Third Party" roleTypeId="ThirdParty" />
+
+
     <!-- ordertaker is also stored in the field enteredByPartyId in orderheader -->
     <mantle.party.RoleType description="Added more after initial entry of the order"
         roleTypeId="OrderTakeMore" /><!--  when entered as an update -->

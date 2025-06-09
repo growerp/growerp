@@ -230,43 +230,32 @@ along with this software (see the LICENSE.md file). If not, see
         <!-- project/tasks -->
         <resource name="Project"><!-- get project tree-->
             <method type="get">
-                <service name="growerp.100.TaskServices100.get#ProjectTree" />
+                <service name="growerp.100.ActivityServices100.get#ProjectTree" />
             </method>
         </resource>
-        <resource name="Task"><!-- get tasks info -->
+        <resource name="Activity"><!-- get activity info -->
             <method type="get">
-                <service name="growerp.100.TaskServices100.get#Task" />
+                <service name="growerp.100.ActivityServices100.get#Activity" />
             </method>
             <method type="post">
-                <service name="growerp.100.TaskServices100.create#Task" />
+                <service name="growerp.100.ActivityServices100.create#Activity" />
             </method>
             <method type="patch">
-                <service name="growerp.100.TaskServices100.update#Task" />
-            </method>
-        </resource>
-        <resource name="UserWorkflow">
-            <method type="get">
-                <service name="growerp.100.TaskServices100.get#UserWorkflows" />
-            </method>
-            <method type="post">
-                <service name="growerp.100.TaskServices100.create#UserWorkflow" />
-            </method>
-            <method type="delete">
-                <service name="growerp.100.TaskServices100.delete#UserWorkflow" />
+                <service name="growerp.100.ActivityServices100.update#Activity" />
             </method>
         </resource>
         <resource name="TimeEntry"><!-- task time entry -->
             <method type="get">
-                <service name="growerp.100.TaskServices100.get#TimeEntry" />
+                <service name="growerp.100.ActivityServices100.get#TimeEntry" />
             </method>
             <method type="post">
-                <service name="growerp.100.TaskServices100.create#TimeEntry" />
+                <service name="growerp.100.ActivityServices100.create#TimeEntry" />
             </method>
             <method type="patch">
-                <service name="growerp.100.TaskServices100.update#TimeEntry" />
+                <service name="growerp.100.ActivityServices100.update#TimeEntry" />
             </method>
             <method type="delete">
-                <service name="growerp.100.TaskServices100.delete#TimeEntry" />
+                <service name="growerp.100.ActivityServices100.delete#TimeEntry" />
             </method>
         </resource>
         <!-- rental -->

@@ -135,14 +135,17 @@ class TopApp extends StatelessWidget {
                       navigatorObservers: [AppNavObserver()],
                       home: BlocConsumer<AuthBloc, AuthState>(
                         listener: (context, state) {
-                          switch (state.status) {
-                            case AuthStatus.failure:
-                              HelperFunctions.showMessage(
-                                  context, '${state.message}', Colors.red);
-                              break;
-                            default:
-                              HelperFunctions.showMessage(
-                                  context, state.message, Colors.green);
+                          if (state.status != AuthStatus.initial &&
+                              state.status != AuthStatus.loading) {
+                            switch (state.status) {
+                              case AuthStatus.failure:
+                                HelperFunctions.showMessage(
+                                    context, '${state.message}', Colors.red);
+                                break;
+                              default:
+                                HelperFunctions.showMessage(
+                                    context, state.message, Colors.green);
+                            }
                           }
                         },
                         builder: (context, state) {

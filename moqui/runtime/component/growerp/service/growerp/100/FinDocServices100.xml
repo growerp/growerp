@@ -25,9 +25,9 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="convertedStatusId" />
         </out-parameters>
         <actions>
-            <!-- task status -->
-            <if condition="docType == 'task'">
-                <set field="taskStatusValues"
+            <!-- activity status -->
+            <if condition="docType == 'activity'">
+                <set field="activityStatusValues"
                     from="[
                 'WeApproved': 'approved',
                 'WeCancelled': 'cancelled',
@@ -44,7 +44,7 @@ along with this software (see the LICENSE.md file). If not, see
                 'progress': 'WeInProgress',
                 'onHold': 'WeOnHold'
                 ]" />
-                <set field="convertedStatusId" from="taskStatusValues[statusId]" />
+                <set field="convertedStatusId" from="activityStatusValues[statusId]" />
             </if>
             <!-- Product status and classEnumId translation -->
             <if condition="docType == 'product'">

@@ -21,7 +21,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'package:growerp_task/growerp_task.dart';
+import 'package:growerp_activity/growerp_activity.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'menu_options.dart';
@@ -70,7 +70,7 @@ Future main() async {
     ],
     extraBlocProviders: [
       ...getUserCompanyBlocProviders(restClient, classificationId),
-      ...getTaskBlocProviders(restClient, classificationId),
+      ...getActivityBlocProviders(restClient, classificationId),
       ...getCatalogBlocProviders(restClient, classificationId),
       ...getOrderAccountingBlocProviders(restClient, classificationId),
       ...getMarketingBlocProviders(restClient),

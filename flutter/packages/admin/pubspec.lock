@@ -659,9 +659,10 @@ packages:
   growerp_task:
     dependency: "direct main"
     description:
-      path: "../growerp_task"
-      relative: true
-    source: path
+      name: growerp_task
+      sha256: "286dd54a1732738e98406a6e23839ed8c52a6738b5b7830288b7d9e107614c3e"
+      url: "https://pub.dev"
+    source: hosted
     version: "1.8.0"
   growerp_user_company:
     dependency: "direct main"

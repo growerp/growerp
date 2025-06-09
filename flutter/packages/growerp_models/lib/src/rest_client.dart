@@ -493,11 +493,11 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/Notification")
   Future<Notifications> getNotifications({@Query('limit') int? limit});
 
-  // tasks
-  @GET("rest/s1/growerp/100/Task")
-  Future<Tasks> getTask({
-    @Query('taskId') String? taskId,
-    @Query('taskType') TaskType? taskType,
+  // activities
+  @GET("rest/s1/growerp/100/Activity")
+  Future<Activities> getActivity({
+    @Query('activityId') String? activityId,
+    @Query('activityType') ActivityType? activityType,
     @Query('start') int? start,
     @Query('limit') int? limit,
     @Query('open') bool? open,
@@ -506,30 +506,14 @@ abstract class RestClient {
     @Query('search') String? searchString,
   });
 
-  @POST("rest/s1/growerp/100/Task")
-  Future<Task> createTask({
-    @Field() required Task task,
+  @POST("rest/s1/growerp/100/Activity")
+  Future<Activity> createActivity({
+    @Field() required Activity activity,
   });
 
-  @PATCH("rest/s1/growerp/100/Task")
-  Future<Task> updateTask({
-    @Field() required Task task,
-  });
-
-  // user workflow
-  @GET("rest/s1/growerp/100/UserWorkflow")
-  Future<Tasks> getUserWorkflow({
-    @Query('taskType') TaskType? taskType,
-  });
-
-  @POST("rest/s1/growerp/100/UserWorkflow")
-  Future<Tasks> createUserWorkflow({
-    @Field() required String workflowId,
-  });
-
-  @DELETE("rest/s1/growerp/100/UserWorkflow")
-  Future<Task> deleteUserWorkflow({
-    @Field() required String workflowId,
+  @PATCH("rest/s1/growerp/100/Activity")
+  Future<Activity> updateActivity({
+    @Field() required Activity activity,
   });
 
   // time entry

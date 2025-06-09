@@ -1,0 +1,813 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domaicrn Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <service verb="get" noun="ProjectTree">
+        <out-parameters>
+            <parameter name="workEffortList" type="List">
+                <parameter name="workEffort" type="Map">
+                    <parameter name="id" />
+                    <parameter name="activityName" />
+                    <parameter name="dependents" type="List">
+                        <parameter name="dependent" type="Map">
+                            <parameter name="workEffort" type="Map">
+                                <parameter name="id" />
+                                <parameter name="activityName" />
+                            </parameter>
+                        </parameter>
+                    </parameter>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find offset="start" limit="limit" list="entries"
+                entity-name="mantle.work.time.TimeEntryAndWorkEffort">
+                <econdition field-name="workTypeEnumId" value="WetTask" />
+                <econdition field-name="ownerPartyId" ignore-if-empty="true" />
+                <econdition field-name="statusId" operator="in"
+                    from="['WeApproved','WePlanning','WeInProgress']" />
+            </entity-find>
+            <set field="activityList" from="[]" />
+            <script>
+                def getTaskTree(workEffort, dept) {
+                    def workEffort = [:];
+                    workEffort.l = dept;
+                    workEffort.id = workEffort.workEffortId;
+                    workEffort.name = workEffortId.workEffortName;
+                    workEffort.rollUp = new BigDecimal(workEffortId.actualWorkTime?:"0");
+                    def dependents = workEffortIds.findAll { 
+                        workEffort.workEffortId == it.parentworkEffortId
+                    }
+                    workEffort.children = [];
+                    dependents.each {
+                        def workEffortSave = getTaskTree(it, dept + 1)
+                        workEffort.rollUp = workEffort.rollUp.add(workEffortSave.rollUp); 
+                        workEffort.children.add(workEffortSave)
+                    }
+                    return workEffort;
+                }
+
+                def projects = workEffortIds.findAll {
+                    it.parentWorkEffortId == null }
+                projects.each {
+                    workEffortList.add(getTaskTree(it, 1));
+                }
+            </script>
+        </actions>
+    </service>
+
+    <service verb="get" noun="Activity">
+        <description> get a single or multiple activities</description>
+        <in-parameters>
+            <parameter name="activityId" />
+            <parameter name="pseudoId" />
+            <!-- Event, toDo, etc ignored when activityId-->
+            <parameter name="activityType" />
+            <!-- my activity only? (true/false) -->
+            <parameter name="my" default-value="true" type="Boolean" />
+            <!-- open activities only? (true/false)-->
+            <parameter name="open" default-value="true" type="Boolean" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="20" type="Integer" />
+            <parameter name="isForDropDown" type="Boolean" />
+            <parameter name="search" default="null" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="activities" type="List">
+                <parameter name="activity" type="Map">
+                    <parameter name="activityId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="activityType" />
+                    <parameter name="parentActivityId" />
+                    <parameter name="activityName" />
+                    <parameter name="statusId" />
+                    <parameter name="description" />
+                    <parameter name="actualStartDate" />
+                    <parameter name="actualEndDate" />
+                    <parameter name="estimatedStartDate" />
+                    <parameter name="estimatedEndDate" />
+                    <parameter name="unInvoicedHours" />
+                    <parameter name="employee" type="Map">
+                        <parameter name="partyId" />
+                        <parameter name="pseudoId" />
+                        <parameter name="email" />
+                        <parameter name="firstName" />
+                        <parameter name="lastName" />
+                    </parameter>
+                    <parameter name="assignee" type="Map">
+                        <parameter name="partyId" />
+                        <parameter name="pseudoId" />
+                        <parameter name="email" />
+                        <parameter name="firstName" />
+                        <parameter name="lastName" />
+                    </parameter>
+                    <parameter name="thirdParty" type="Map">
+                        <parameter name="partyId" />
+                        <parameter name="pseudoId" />
+                        <parameter name="email" />
+                        <parameter name="role" />
+                        <parameter name="firstName" />
+                        <parameter name="lastName" />
+                        <parameter name="company">
+                            <parameter name="partyId" />
+                            <parameter name="pseudoId" />
+                            <parameter name="name" />
+                            <parameter name="email" />
+                            <parameter name="role" />
+                            <parameter name="email" />
+                        </parameter>
+                        <parameter name="timeEntries" type="List">
+                            <parameter name="timeEntry" type="Map">
+                                <parameter name="timeEntryId" />
+                                <parameter name="activityId" />
+                                <parameter name="partyId" />
+                                <parameter name="hours" />
+                                <parameter name="date" />
+                                <parameter name="comments" />
+                            </parameter>
+                        </parameter>
+                    </parameter>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+            <if condition="!activityId &amp;&amp; (!activityType || activityType == '')">
+                <return error="true"
+                    message="Getting a list of activities, requires an activity type" />
+            </if>
+
+            <if condition="search != null">
+                <set field="searchString" value="%${search}%" />
+            </if>
+            <!-- only check status for a list -->
+            <if
+                condition="open == true &amp;&amp; !activityId &amp;&amp; !search">
+                <set field="openStatusList"
+                    from="['WeApproved','WeInPlanning','WeInProgress']" />
+            </if>
+            <if condition="my == true">
+                <set field="employeePartyId" from="userPartyId" />
+            </if>
+
+            <set field="activities" from="[]" />
+            <!-- translate frontend activity type with backend-->
+            <set field="typeConvert"
+                from="[
+                    todo: 'WetTask', WetTask: 'todo']"
+                type="NewMap" />
+            <set field="workEffortType" from="typeConvert[activityType]" />
+
+            <if condition="pseudoId || activityId">
+                <!-- single activity -->
+                <entity-find list="entries"
+                    entity-name="growerp.workEffort.WorkEffortSubWorkEffortLinksAndParties">
+                    <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
+                    <econdition field-name="workEffortId" from="activityId" ignore-if-empty="true" />
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                </entity-find>
+                <if condition="!entries">
+                    <return error="true"
+                        message="activity $activityId for owner: $ownerPartyId not found" />
+                </if>
+                <else>
+                    <!-- by type -->
+                    <entity-find offset="start" limit="limit" list="entries"
+                        entity-name="growerp.workEffort.WorkEffortSubWorkEffortLinksAndParties">
+                        <econdition field-name="workEffortTypeEnumId" from="workEffortType" />
+                        <econdition field-name="assPartyId" from="employeePartyId"
+                            ignore-if-empty="true" />
+                        <econdition field-name="ownerPartyId" />
+                        <econdition field-name="statusId" operator="in"
+                            from="openStatusList" ignore-if-empty="true" />
+                        <econditions combine="or">
+                            <econdition field-name="pseudoId" ignore-case="true"
+                                operator="like" from="searchString" ignore-if-empty="true" />
+                            <econdition field-name="workEffortName" ignore-case="true"
+                                operator="like" from="searchString" ignore-if-empty="true" />
+                            <econdition field-name="description" ignore-case="true"
+                                operator="like" from="searchString" ignore-if-empty="true" />
+                        </econditions>
+                    </entity-find>
+                </else>
+            </if>
+            <if condition="isForDropDown">
+                <then>
+                    <iterate entry="entry" list="entries">
+                        <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                            in-map="[docType: 'activity', statusId: entry.statusId]"
+                            out-map="context" />
+                        <set field="workEffortOut"
+                            from="[
+                                activityId: entry.workEffortId,
+                                pseudoId: entry.pseudoId,
+                                activityType: typeConvert[entry.workEffortTypeEnumId],
+                                activityName: entry.workEffortName,
+                                statusId: convertedStatusId,
+                            ]" />
+                        <script>activities.add(workEffortOut)</script>
+                    </iterate>
+                </then>
+                <else>
+                    <iterate entry="entry" list="entries">
+                        <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                            in-map="[docType: 'activity', statusId: entry.statusId]"
+                            out-map="context" />
+                        <entity-find entity-name="mantle.work.time.TimeEntry" list="timeEntries">
+                            <econdition field-name="workEffortId" from="entry.workEffortId" />
+                            <econdition field-name="invoiceId" operator="is-null" />
+                            <order-by field-name="fromDate" />
+                        </entity-find>
+                        <set field="teOutList" from="[]" />
+                        <set field="unInvoicedHours" value="0" type="Integer" />
+                        <iterate list="timeEntries" entry="te">
+                            <set field="teOut"
+                                from="[
+                                timeEntryId: te.timeEntryId,
+                                activityId: te.workEffortId,
+                                partyId: te.partyId,
+                                hours: te.hours?.toString(),
+                                date: te.fromDate ? ec.l10n.format(te.fromDate,'yyyy-MM-dd') : null,
+                                comments: te.comments
+                            ]" />
+                            <set
+                                field="unInvoicedHours" from="unInvoicedHours + te.hours" />
+                            <script>teOutList.add(teOut)</script>
+                            <set
+                                field="originator"
+                                from="[
+                                partyId: entry.orgPartyId,
+                                pseudoId: entry.orgPseudoId,
+                                role: entry.orgRole,
+                                firstName: entry.orgFirstName,
+                                lastName: entry.orgLastName,
+                                email: entry.orgEmail,
+                                company: [
+                                    partyId: entry.orgCompanyPartyId,
+                                    pseudoId: entry.orgCompanyPseudoId,
+                                    name: entry.orgCompanyName,
+                                ]]" />
+                            <set
+                                field="assignee"
+                                from="[
+                                partyId: entry.assPartyId,
+                                pseudoId: entry.assPseudoId,
+                                role: entry.assRole,
+                                firstName: entry.assFirstName,
+                                lastName: entry.assLastName,
+                                email: entry.assEmail,
+                                company: [
+                                    partyId: entry.assCompanyPartyId,
+                                    pseudoId: entry.assCompanyPseudoId,
+                                    name: entry.assCompanyName,
+                                ]]" />
+                            <set
+                                field="thirdParty"
+                                from="[
+                                partyId: entry.tpPartyId,
+                                pseudoId: entry.tpPseudoId,
+                                role: entry.tpRole,
+                                firstName: entry.tpFirstName,
+                                lastName: entry.tpLastName,
+                                email: entry.tpEmail,
+                                company: [
+                                    partyId: entry.tpCompanyPartyId,
+                                    pseudoId: entry.tpCompanyPseudoId,
+                                    name: entry.tpCompanyName,
+                                ]]" />
+                        </iterate>
+                        <if condition="isForDropDown">
+                            <set field="workEffortOut"
+                                from="[
+                                    activityId: entry.workEffortId,
+                                    activityType: typeConvert[entry.workEffortTypeEnumId],
+                                    parentActivityId: entry.parentWorkEffortId,
+                                    activityName: entry.workEffortName,
+                                    statusId: convertedStatusId,
+                                ]" />
+                            <else>
+                                <set field="workEffortOut"
+                                    from="[
+                                        activityId: entry.workEffortId,
+                                        pseudoId: entry.pseudoId,
+                                        activityType: typeConvert[entry.workEffortTypeEnumId],
+                                        parentActivityId: entry.parentWorkEffortId,
+                                        activityName: entry.workEffortName,
+                                        statusId: convertedStatusId,
+                                        description: entry.description,
+                                        estStartDate: entry.estimatedStartDate?
+                                            ec.l10n.format(entry.estimatedStartDate,'yyyy-MM-dd') : null,
+                                        estEndDate: entry.estimatedCompletionDate?
+                                            ec.l10n.format(entry.estimatedCompletionDate,'yyyy-MM-dd')  : null,
+                                        actualStartDate: entry.actualStartDate?
+                                            ec.l10n.format(entry.actualStartDate,'yyyy-MM-dd') : null,
+                                        actualEndDate: entry.actualCompletionDate?
+                                            ec.l10n.format(entry.actualCompletionDate,'yyyy-MM-dd')  : null,
+                                        unInvoicedHours: unInvoicedHours.toString(),
+                                        originator: originator,
+                                        assignee: assignee,
+                                        thirdParty: thirdParty,
+                                        timeEntries: teOutList,
+                                        ]" />
+                            </else>
+
+                        </if>
+                        <script>activities.add(workEffortOut)</script>
+                    </iterate>
+                </else>
+                <else>
+                    <return error="true"
+                        message="Activity type $workEffortType($activityType) not supported" />
+                </else>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Activity">
+        <description> Create a activity </description>
+        <in-parameters>
+            <parameter name="activity" type="Map" required="true">
+                <parameter name="pseudoId" />
+                <parameter name="activityType" />
+                <parameter name="parentActivityId" />
+                <parameter name="activityName" />
+                <parameter name="statusId" />
+                <parameter name="description" />
+                <parameter name="estimatedStartDate" />
+                <parameter name="estimatedEndDate" />
+                <parameter name="unInvoicedHours" />
+                <parameter name="originator" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="email" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
+                </parameter>
+                <parameter name="assignee" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="email" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
+                </parameter>
+                <parameter name="thirdParty" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="email" />
+                    <parameter name="role" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
+                    <parameter name="company">
+                        <parameter name="partyId" />
+                        <parameter name="pseudoId" />
+                        <parameter name="name" />
+                        <parameter name="email" />
+                        <parameter name="role" />
+                        <parameter name="email" />
+                    </parameter>
+                </parameter>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="activity" type="Map">
+                <parameter name="activityId" />
+                <parameter name="pseudoId" />
+                <parameter name="activityType" />
+                <parameter name="parentActivityId" />
+                <parameter name="activityName" />
+                <parameter name="statusId" />
+                <parameter name="description" />
+                <parameter name="actualStartDate" />
+                <parameter name="actualEndDate" />
+                <parameter name="estimatedStartDate" />
+                <parameter name="estimatedEndDate" />
+                <parameter name="unInvoicedHours" />
+                <parameter name="originator" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="email" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
+                </parameter>
+                <parameter name="assignee" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="email" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
+                </parameter>
+                <parameter name="thirdParty" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="email" />
+                    <parameter name="role" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
+                    <parameter name="company">
+                        <parameter name="partyId" />
+                        <parameter name="pseudoId" />
+                        <parameter name="name" />
+                        <parameter name="email" />
+                        <parameter name="role" />
+                        <parameter name="email" />
+                    </parameter>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+            <set field="typeConvert"
+                from="[
+                        todo: 'WetTask']"
+                type="NewMap" />
+            <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                in-map="[docType: 'activity', statusId: activity.statusId]" out-map="context" />
+            <set field="statusId" from="convertedStatusId" />
+            <if condition="!activity.pseudoId || activity.pseudoId == ''">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'activity.activityType']"
+                    out-map="context" />
+                <set field="activity.pseudoId" from="seqNum" />
+            </if>
+            <service-call name="create#mantle.work.effort.WorkEffort"
+                in-map="[
+                    workEffortPseudoId: activity.pseudoId,
+                    parentWorkEffortId: activity.parentActivityId,
+                    workEffortTypeEnumId: typeConvert[activity.activityType],
+                    workEffortName: activity.activityName,
+                    statusId: statusId,
+                    description: activity.description,
+                    ownerPartyId: ownerPartyId,
+                    actualStartDate: activity.startDate ?
+                        activity.startDate.substring(0,18) : null,
+                    actualCompletionDate: activity.endDate ?
+                        activity.endDate.substring(0,18) : null,
+                    routing: activity.routing,
+                 ]"
+                out-map="context" />
+            <!-- originator -->
+            <service-call name="create#mantle.work.effort.WorkEffortParty"
+                in-map="[
+                    workEffortId: workEffortId,
+                    partyId: activity.originator?.partyId ?: ec.user.userAccount.partyId,
+                    roleTypeId: 'Originator',
+                    statusId: 'WeptAssigned'
+                ]" />
+            <!-- assignee -->
+            <service-call name="create#mantle.work.effort.WorkEffortParty"
+                in-map="[
+                    workEffortId: workEffortId,
+                    partyId: activity.assignee?.partyId ?: ec.user.userAccount.partyId,
+                    roleTypeId: 'Assignee',
+                    statusId: 'WeptAssigned'
+                ]" />
+            <if condition="activity.thirdParty">
+                <service-call name="create#mantle.work.effort.WorkEffortParty"
+                    in-map="[
+                    workEffortId: workEffortId,
+                    partyId: activity.thirdParty.partyId,
+                    roleTypeId: activity.thirdParty.role,
+                    statusId: 'WeptAssigned'
+                ]" />
+            </if>
+            <service-call name="growerp.100.ActivityServices100.get#Activity"
+                in-map="[activityId: workEffortId]" out-map="context" />
+            <set field="activity" from="activities[0]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="Activity">
+        <description> Update a activity within a project</description>
+        <in-parameters>
+            <parameter name="activity" type="Map" required="true">
+                <parameter name="activityId" />
+                <parameter name="pseudoId" />
+                <parameter name="activityType" />
+                <parameter name="parentActivityId" />
+                <parameter name="activityName" />
+                <parameter name="statusId" />
+                <parameter name="description" />
+                <parameter name="estimatedStartDate" />
+                <parameter name="estimatedEndDate" />
+                <parameter name="unInvoicedHours" />
+                <parameter name="flowElementId" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="activity" type="Map">
+                <parameter name="activityId" />
+                <parameter name="pseudoId" />
+                <parameter name="activityType" />
+                <parameter name="parentActivityId" />
+                <parameter name="activityName" />
+                <parameter name="statusId" />
+                <parameter name="description" />
+                <parameter name="actualStartDate" />
+                <parameter name="actualEndDate" />
+                <parameter name="estimatedStartDate" />
+                <parameter name="estimatedEndDate" />
+                <parameter name="unInvoicedHours" />
+                <parameter name="employee" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="email" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
+                </parameter>
+                <parameter name="assignee" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="email" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
+                </parameter>
+                <parameter name="thirdParty" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="email" />
+                    <parameter name="role" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
+                    <parameter name="company">
+                        <parameter name="partyId" />
+                        <parameter name="pseudoId" />
+                        <parameter name="name" />
+                        <parameter name="email" />
+                        <parameter name="role" />
+                        <parameter name="email" />
+                    </parameter>
+                    <parameter name="timeEntries" type="List">
+                        <parameter name="timeEntry" type="Map">
+                            <parameter name="timeEntryId" />
+                            <parameter name="activityId" />
+                            <parameter name="partyId" />
+                            <parameter name="hours" />
+                            <parameter name="date" />
+                            <parameter name="comments" />
+                        </parameter>
+                    </parameter>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.ActivityServices100.get#Activity"
+                in-map="[activityId: activity.activityId]" out-map="oldActivity" />
+            <!-- owner checked here -->
+            <if condition="!oldActivity">
+                <return error="true" message="Activity ${activity.activityId} not found" />
+            </if>
+            <set field="typeConvert"
+                from="[
+                       todo: 'WetTask']"
+                type="NewMap" />
+
+            <!-- create pseudoId when not provided -->
+            <if condition="!activity.pseudoId || activity.pseudoId == ''">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'activity.activityType']"
+                    out-map="context" />
+                <set field="activity.pseudoId" from="seqNum" />
+            </if>
+
+
+            <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                in-map="[docType: 'activity', statusId: activity.statusId]" out-map="context" />
+            <if
+                condition="
+                    activity.activityName &amp;&amp; oldActivity.activityName != activity.activityName ||
+                    activity.description &amp;&amp; oldActivity.description != activity.description ||
+                    activity.statusId &amp;&amp; oldActivity.statusId != activity.statusId">
+                <set field="statusId" from="convertedStatusId" />
+                <service-call name="update#mantle.work.effort.WorkEffort"
+                    in-map="[
+                        workEffortId: activity.activityId,
+                        workEffortPseudoId: activity.pseudoId,
+                        parentWorkEffortId: activity.parentActivityId,
+                        workEffortTypeEnumId: typeConvert[activity.activityType],
+                        workEffortName: activity.activityName,
+                        statusId: statusId,
+                        description: activity.description,
+                        actualStartDate: activity.estimatedStartDate ?
+                            activity.estimatedStartDate.substring(0,18) : null,
+                        actualCompletionDate: activity.estimatedEndDate ?
+                            activity.estimatedEndDate.substring(0,18) : null
+                    ]" />
+            </if>
+            <!-- assignee-->
+            <if
+                condition="activity.assignee != activity.assignee">
+                <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="assignees">
+                    <econdition field-name="workEffortId" from="activity.activityId" />
+                    <econdition field-name="roleTypeId" value="Assignee" />
+                </entity-find>
+                <if condition="assignees">
+                    <set field="assignees[0].thruDate" from="ec.user.nowTimestamp" />
+                    <entity-update value-field="assignees[0]" />
+                </if>
+                <if condition="activity.assignee?.partyId">
+                    <service-call name="create#mantle.work.effort.WorkEffortParty"
+                        in-map="[
+                            workEffortId: activity.activityId,
+                            partyId: activity.assignee.partyId,
+                            roleTypeId: activity.assignee.role,
+                            statusId: 'WeptAssigned'
+                        ]" />
+                </if>
+            </if>
+            <!-- thirdparty-->
+            <if
+                condition="activity.thirdParty != activity.thirdParty">
+                <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="thirdParties">
+                    <econdition field-name="workEffortId" from="activity.activityId" />
+                    <econdition field-name="roleTypeId" value="ThirdParty" />
+                </entity-find>
+                <if condition="thirdParties">
+                    <set field="thirdParties[0].thruDate" from="ec.user.nowTimestamp" />
+                    <entity-update value-field="thirdParties[0]" />
+                </if>
+                <if condition="activity.thirdParty?.partyId">
+                    <service-call name="create#mantle.work.effort.WorkEffortParty"
+                        in-map="[
+                            workEffortId: activity.activityId,
+                            partyId: activity.thirdParty.partyId,
+                            roleTypeId: activity.thirdParty.role,
+                            statusId: 'WeptAssigned'
+                        ]" />
+                </if>
+            </if>
+            <service-call name="growerp.100.ActivityServices100.get#Activity"
+                in-map="[activityId: activity.activityId]" out-map="context" />
+            <set field="activity" from="activities[0]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="TimeEntry">
+        <description>get hours worked just used internally, no owner check here</description>
+        <in-parameters>
+            <parameter name="timeEntryId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="timeEntry" type="Map">
+                <parameter name="timeEntryId" />
+                <parameter name="activityId" />
+                <parameter name="partyId" />
+                <parameter name="hours" />
+                <parameter name="comments" />
+                <parameter name="date" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.work.time.TimeEntry" value-field="te" />
+            <set field="timeEntry"
+                from="[
+                timeEntryId: te.timeEntryId,
+                activityId: te.workEffortId,
+                partyId: te.partyId,
+                hours: te.hours?.toString(),
+                comments: te.comments,
+                date: te.fromDate ? ec.l10n.format(te.fromDate,'yyyy-MM-dd') : null
+            ]" />
+        </actions>
+    </service>
+
+    <service verb="create" noun="TimeEntry">
+        <description>enter hours worked</description>
+        <in-parameters>
+            <parameter name="timeEntry" type="Map" required="true">
+                <parameter name="activityId" />
+                <parameter name="partyId" />
+                <parameter name="hours" />
+                <parameter name="comments" />
+                <parameter name="date" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="timeEntry" type="Map">
+                <parameter name="timeEntryId" />
+                <parameter name="activityId" />
+                <parameter name="partyId" />
+                <parameter name="hours" />
+                <parameter name="comments" />
+                <parameter name="date" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="mantle.work.effort.WorkEffort" list="workEfforts" limit="1">
+                <econdition field-name="workEffortId" from="timeEntry.activityId" />
+                <econdition field-name="ownerPartyId" ignore-if-empty="true" />
+            </entity-find>
+            <set field="workEffort" from="workEfforts[0]" />
+            <if condition="!workEffort">
+                <return error="true" message="Activity not found: ${timeEntry.activityId}" />
+            </if>
+            <service-call name="create#mantle.work.time.TimeEntry"
+                in-map="[
+                timeEntryId: timeEntry.timeEntryId,
+                workEffortId: timeEntry.activityId,
+                partyId: ec.user.userAccount.partyId,
+                hours: timeEntry.hours,
+                comments: timeEntry.comments,
+                fromDate: timeEntry.date ? timeEntry.date?.substring(0,18) : ec.user.nowTimestamp
+            ]"
+                out-map="context" />
+            <!-- set to inprogress -->
+            <if condition="workEffort.statusId == 'WeInPlanning'">
+                <service-call name="update#mantle.work.effort.WorkEffort"
+                    in-map="[
+                    workEffortId: workEffort.workEffortId,
+                    statusId: 'WeInProgress'
+                ]" />
+            </if>
+            <service-call name="growerp.100.ActivityServices100.get#TimeEntry"
+                in-map="[timeEntryId: timeEntryId]" out-map="context" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="TimeEntry">
+        <description>enter hours worked</description>
+        <in-parameters>
+            <parameter name="timeEntry" type="Map" required="true">
+                <parameter name="timeEntryId" />
+                <parameter name="activityId" />
+                <parameter name="partyId" />
+                <parameter name="hours" />
+                <parameter name="comments" />
+                <parameter name="date" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="timeEntry" type="Map">
+                <parameter name="timeEntryId" />
+                <parameter name="activityId" />
+                <parameter name="partyId" />
+                <parameter name="hours" />
+                <parameter name="comments" />
+                <parameter name="date" />
+            </parameter>
+        </out-parameters>
+        <actions />
+    </service>
+
+    <service verb="delete" noun="TimeEntry">
+        <description>remove not yet billed hours</description>
+        <in-parameters>
+            <parameter name="timeEntry" type="Map" required="true">
+                <parameter name="activityId" />
+                <parameter name="timeEntryId" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="timeEntry" type="Map">
+                <parameter name="timeEntryId" />
+                <parameter name="activityId" />
+                <parameter name="partyId" />
+                <parameter name="hours" />
+                <parameter name="comments" />
+                <parameter name="date" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="mantle.work.effort.WorkEffort" list="workEfforts" limit="1">
+                <econdition field-name="workEffortId" from="timeEntry.activityId" />
+                <econdition field-name="ownerPartyId" ignore-if-empty="true" />
+            </entity-find>
+            <if condition="!workEfforts">
+                <return error="true" message="Activity not found: ${timeEntry.activityId}" />
+            </if>
+            <entity-find-one entity-name="mantle.work.time.TimeEntry" value-field="teOld">
+                <field-map field-name="timeEntryId" from="timeEntry.timeEntryId" />
+            </entity-find-one>
+            <if condition="teOld &amp;&amp; teOld.invoiceId">
+                <return error="true" message="Cannot delete time entry: already invoiced" />
+            </if>
+            <service-call name="growerp.100.ActivityServices100.get#TimeEntry"
+                in-map="[timeEntryId: timeEntry.timeEntryId]" out-map="context" />
+            <entity-delete value-field="teOld" />
+        </actions>
+    </service>
+</services>

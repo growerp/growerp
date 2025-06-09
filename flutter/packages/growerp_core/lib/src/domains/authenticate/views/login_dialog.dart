@@ -344,8 +344,9 @@ class LoginDialogState extends State<LoginDialog> {
                           child: const Text('Login'),
                           onPressed: () {
                             if (_loginFormKey.currentState!.validate()) {
-                              _authBloc.add(AuthLogin(_usernameController.text,
-                                  _passwordController.text));
+                              _authBloc.add(AuthLogin(
+                                  _usernameController.text.trim(),
+                                  _passwordController.text.trim()));
                             }
                           }))
                 ]),

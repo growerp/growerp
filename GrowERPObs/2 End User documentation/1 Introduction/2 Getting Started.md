@@ -54,6 +54,6 @@ Now make your product available for internet sale: register, create the product 
 
 #### When you get orders?
 
-* They will appear in the [[2 End User documentation/5 Order management/1 Introduction]] where you can accept and approve them, then go the [[inventory section]] to create a package label with a destination postal address, then approve the shipment, which completes the sale.
+* They will appear in the [[2 End User documentation/3 Order management/1 Introduction]] where you can accept and approve them, then go the [[inventory section]] to create a package label with a destination postal address, then approve the shipment, which completes the sale.
 
 * [[7 Accounting]]has been running in the background which has created a payment, invoice and updated your ledger for your accounting records.

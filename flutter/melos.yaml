@@ -20,8 +20,8 @@ packages:
   - packages/growerp_order_accounting/example
   - packages/growerp_website
   - packages/growerp_website/example
-  - packages/growerp_task
-  - packages/growerp_task/example
+  - packages/growerp_activity
+  - packages/growerp_activity/example
   - packages/growerp
   - packages/admin
   - packages/website

@@ -167,6 +167,22 @@ class PartyTypeConverter implements JsonConverter<PartyType?, String?> {
   }
 }
 
+class ActivityTypeConverter implements JsonConverter<ActivityType?, String?> {
+  const ActivityTypeConverter();
+
+  @override
+  ActivityType? fromJson(String? json) {
+    if (json == null) return null;
+    return ActivityType.tryParse(json);
+  }
+
+  @override
+  String? toJson(ActivityType? object) {
+    if (object == null) return null;
+    return object.name;
+  }
+}
+
 class CreditCardTypeConverter
     implements JsonConverter<CreditCardType?, String?> {
   const CreditCardTypeConverter();

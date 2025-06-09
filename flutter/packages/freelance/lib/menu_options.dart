@@ -15,10 +15,10 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_activity/growerp_activity.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'package:growerp_task/growerp_task.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'views/forms.dart' as local;
@@ -36,11 +36,11 @@ List<MenuOption> menuOptions = [
   ),
   MenuOption(
       image: "packages/growerp_core/images/tasksGrey.png",
-      selectedImage: "packages/growerp_core/images/tasks.png",
+      selectedImage: "packages/growerp_core/images/activities.png",
       title: "Tasks",
       route: '/tasks',
       userGroups: [UserGroup.admin, UserGroup.employee],
-      child: const TaskList(TaskType.todo)),
+      child: const ActivityList(ActivityType.todo)),
   MenuOption(
     image: "packages/growerp_core/images/crmGrey.png",
     selectedImage: "packages/growerp_core/images/crm.png",
@@ -125,7 +125,7 @@ List<MenuOption> menuOptions = [
   ),
   MenuOption(
       image: "packages/growerp_core/images/tasksGrey.png",
-      selectedImage: "packages/growerp_core/images/tasks.png",
+      selectedImage: "packages/growerp_core/images/activities.png",
       title: "Website",
       route: '/website',
       userGroups: [UserGroup.admin, UserGroup.employee],

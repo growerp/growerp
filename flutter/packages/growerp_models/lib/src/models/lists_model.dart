@@ -242,13 +242,14 @@ class Notifications with _$Notifications {
 }
 
 @freezed
-class Tasks with _$Tasks {
-  factory Tasks({
-    @Default([]) List<Task> tasks,
-  }) = _Tasks;
-  Tasks._();
+class Activities with _$Activities {
+  factory Activities({
+    @Default([]) List<Activity> activities,
+  }) = _Activities;
+  Activities._();
 
-  factory Tasks.fromJson(Map<String, dynamic> json) => _$TasksFromJson(json);
+  factory Activities.fromJson(Map<String, dynamic> json) =>
+      _$ActivitiesFromJson(json);
 }
 
 @freezed
