@@ -94,7 +94,9 @@ class ActivityBloc extends Bloc<ActivityEvent, ActivityState> {
         int index = activities.indexWhere(
             (element) => element.activityId == event.activity.activityId);
         if (index != -1) activities.removeAt(index);
-        activities.insert(0, compResult);
+        if (compResult.statusId != ActivityStatus.closed) {
+          activities.insert(0, compResult);
+        }
         return emit(state.copyWith(
             status: ActivityBlocStatus.success,
             activities: activities,

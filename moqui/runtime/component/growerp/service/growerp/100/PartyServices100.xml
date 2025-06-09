@@ -3581,7 +3581,6 @@ along with this software (see the LICENSE.md file). If not, see
                                 assignee: [partyId: userPartyId],
                                 statusId: 'planning',
                     ]" />
-                    <log message="=====1=owner: $ownerPartyId" />
                     <service-call name="growerp.100.ActivityServices100.createActivity"
                         in-map="[activity: activityIn]" out-map="context" />
                     <!-- time entry -->
