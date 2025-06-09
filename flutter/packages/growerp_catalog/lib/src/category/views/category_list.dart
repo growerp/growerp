@@ -156,7 +156,7 @@ class CategoriesListState extends State<CategoryList> {
                                     barrierDismissible: true,
                                     context: context,
                                     builder: (BuildContext context) {
-                                      // search separate from finDocBloc
+                                      // search separate
                                       return BlocProvider.value(
                                           value: context
                                               .read<DataFetchBloc<Locations>>(),

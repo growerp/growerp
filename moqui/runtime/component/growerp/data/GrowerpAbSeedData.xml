@@ -14,22 +14,6 @@ along with this software (see the LICENSE.md file). If not, see
 -->
 <entity-facade-xml type="seed">
 
-    <!-- workeffort types for workflow -->
-    <moqui.basic.Enumeration description="Workflow" enumId="WetWorkflow" enumTypeId="WorkEffortType" />
-    <moqui.basic.Enumeration description="Workflow Task" enumId="WetWorkflowTask"
-        enumTypeId="WorkEffortType" />
-    <moqui.basic.Enumeration description="Workflow Template" enumId="WetWorkflowTemplate"
-        enumTypeId="WorkEffortType" />
-    <moqui.basic.Enumeration description="Workflow Template Task" enumId="WetWorkflowTemplateTask"
-        enumTypeId="WorkEffortType" />
-    <moqui.basic.Enumeration description="Workflow Task Template" enumId="WetWorkflowTaskTemplate"
-        enumTypeId="WorkEffortType" />
-    <!-- workflow assoc -->
-    <moqui.basic.Enumeration description="Workflow task Link" enumId="WeatWorkflowTaskLink"
-        enumTypeId="WorkEffortAssocType" />
-    <moqui.basic.Enumeration description="Workflow Task template" enumId="WeatWorkflowTaskTemplate"
-        enumTypeId="WorkEffortAssocType" />
-
     <!-- request type -->
     <moqui.basic.Enumeration enumId="RqtConsulation" description="Consultation"
         enumTypeId="RequestType" />

@@ -27,6 +27,8 @@ List<BlocProvider> getCoreBlocProviders(
     BlocProvider<ChatMessageBloc>(
         create: (context) =>
             ChatMessageBloc(restClient, chatClient, authBloc, chatRoomBloc)),
+    BlocProvider<DataFetchBloc<Activities>>(
+        create: (context) => DataFetchBloc<Activities>()),
     BlocProvider<DataFetchBloc<FinDocs>>(
         create: (context) => DataFetchBloc<FinDocs>()),
     BlocProvider<DataFetchBloc<Products>>(

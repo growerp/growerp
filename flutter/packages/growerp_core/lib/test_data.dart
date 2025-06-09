@@ -455,18 +455,18 @@ List<User> customers = [
   ),
 ];
 
-List<Task> tasks = [
-  Task(
-    taskName: 'task1',
-    statusId: TaskStatus.progress,
-    description: 'This is the description of the task1',
+List<Activity> activities = [
+  Activity(
+    activityName: 'activity1',
+    statusId: ActivityStatus.progress,
+    description: 'This is the description of the activity1',
     rate: Decimal.parse('22'),
     timeEntries: const [],
   ),
-  Task(
-    taskName: 'task2',
-    statusId: TaskStatus.progress,
-    description: 'This is the description of the task2',
+  Activity(
+    activityName: 'activity2',
+    statusId: ActivityStatus.progress,
+    description: 'This is the description of the activity2',
     rate: Decimal.parse('23'),
     timeEntries: const [],
   )

@@ -20,7 +20,7 @@ dependencies:
   growerp_catalog: ^1.8.0
   growerp_order_accounting: ^1.8.0
   growerp_user_company: ^1.8.0
-  growerp_task: ^1.8.0
+  growerp_activity: ^1.8.0
   universal_io: ^2.2.2
   global_configuration: ^2.0.0
   responsive_framework: ^1.4.0
@@ -99,8 +99,8 @@ flutter:
     - packages/growerp_core/images/export.png
     - packages/growerp_core/images/growerp.jpg
     - packages/growerp_core/images/growerpDark.jpg
-    - packages/growerp_core/images/tasks.png
-    - packages/growerp_core/images/tasksGrey.png
+    - packages/growerp_core/images/activities.png
+    - packages/growerp_core/images/activitiesGrey.png
     - packages/growerp_core/images/growerp100.png
     - packages/growerp_core/images/growerpDark100.png
     - packages/growerp_core/images/myInfo.png

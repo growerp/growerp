@@ -1,0 +1,335 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
+import 'package:dropdown_search/dropdown_search.dart';
+import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:responsive_framework/responsive_framework.dart';
+
+import '../../growerp_activity.dart';
+
+class ActivityDialog extends StatefulWidget {
+  final Activity activity;
+  const ActivityDialog(this.activity, {super.key});
+  @override
+  ActivityDialogState createState() => ActivityDialogState();
+}
+
+class ActivityDialogState extends State<ActivityDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _pseudoIdController = TextEditingController();
+  final TextEditingController _assigneeSearchBoxController =
+      TextEditingController();
+  late ActivityBloc _activityBloc;
+  late AuthBloc _authBloc;
+  late DataFetchBloc<Users> _assigneeBloc;
+  late DataFetchBlocOther<Users> _thirdPartyBloc;
+  late ActivityStatus _updatedStatus;
+  late final User _originator = _authBloc.state.authenticate!.user!;
+  late User _selectedAssignee;
+  late User? _selectedThirdParty;
+
+  @override
+  void initState() {
+    super.initState();
+    _pseudoIdController.text = widget.activity.pseudoId;
+    _nameController.text = widget.activity.activityName;
+    _descriptionController.text = widget.activity.description;
+    _activityBloc = context.read<ActivityBloc>();
+    _authBloc = context.read<AuthBloc>();
+    _updatedStatus = widget.activity.statusId ?? ActivityStatus.planning;
+    _selectedAssignee = widget.activity.assignee ?? _originator;
+    _selectedThirdParty = widget.activity.thirdparty;
+    _assigneeBloc = context.read<DataFetchBloc<Users>>()
+      ..add(GetDataEvent(() =>
+          context.read<RestClient>().getUser(limit: 3, role: Role.company)));
+    _thirdPartyBloc = context.read<DataFetchBlocOther<Users>>()
+      ..add(GetDataEvent(() =>
+          context.read<RestClient>().getUser(limit: 3, role: Role.unknown)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    return BlocConsumer<ActivityBloc, ActivityState>(
+        listener: (context, state) {
+      switch (state.status) {
+        case ActivityBlocStatus.success:
+          Navigator.of(context).pop();
+          break;
+        case ActivityBlocStatus.failure:
+          HelperFunctions.showMessage(
+              context, 'Error: ${state.message}', Colors.red);
+          break;
+        default:
+          const Text("????");
+      }
+    }, builder: (context, state) {
+      switch (state.status) {
+        case ActivityBlocStatus.success:
+          return Dialog(
+              key: const Key('ActivityDialog'),
+              insetPadding: const EdgeInsets.all(10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: popUp(
+                  context: context,
+                  title:
+                      '${widget.activity.activityType} #${widget.activity.pseudoId.isEmpty ? 'New' : widget.activity.pseudoId}',
+                  height: 500,
+                  width: 350,
+                  child: _showForm(isPhone)));
+        case ActivityBlocStatus.failure:
+          return FatalErrorForm(
+              message: '${widget.activity.activityType} load problem');
+        default:
+          return const Center(child: LoadingIndicator());
+      }
+    });
+  }
+
+  Widget _showForm(isPhone) {
+    return Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+            key: const Key('listView'),
+            child:
+                Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      key: const Key('pseudoId'),
+                      decoration: const InputDecoration(labelText: 'Id'),
+                      controller: _pseudoIdController,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DropdownButtonFormField<ActivityStatus>(
+                      key: const Key('statusDropDown'),
+                      decoration: const InputDecoration(labelText: 'Status'),
+                      value: _updatedStatus,
+                      validator: (value) =>
+                          value == null ? 'field required' : null,
+                      items:
+                          ActivityStatus.validActivityStatusList(_updatedStatus)
+                              .map((label) => DropdownMenuItem<ActivityStatus>(
+                                    value: label,
+                                    child: Text(label.status),
+                                  ))
+                              .toList(),
+                      onChanged: (ActivityStatus? newValue) {
+                        setState(() {
+                          _updatedStatus = newValue!;
+                        });
+                      },
+                      isExpanded: true,
+                    ),
+                  ),
+                ],
+              ),
+              TextFormField(
+                key: const Key('name'),
+                decoration: InputDecoration(
+                    labelText: '${widget.activity.activityType} Name'),
+                controller: _nameController,
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please enter a ${widget.activity.activityType} name?';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                key: const Key('description'),
+                maxLines: 3,
+                decoration: const InputDecoration(labelText: 'Description'),
+                controller: _descriptionController,
+              ),
+              const SizedBox(height: 10),
+              BlocBuilder<DataFetchBloc<Users>, DataFetchState>(
+                builder: (context, state) {
+                  switch (state.status) {
+                    case DataFetchStatus.failure:
+                      return const FatalErrorForm(
+                          message: 'server connection problem');
+                    case DataFetchStatus.loading:
+                      return const LoadingIndicator();
+                    case DataFetchStatus.success:
+                      return DropdownSearch<User>(
+                          selectedItem: _selectedAssignee,
+                          popupProps: PopupProps.menu(
+                            isFilterOnline: true,
+                            showSearchBox: true,
+                            searchFieldProps: TextFieldProps(
+                              autofocus: true,
+                              decoration: const InputDecoration(
+                                  labelText: "employee,name"),
+                              controller: _assigneeSearchBoxController,
+                            ),
+                            menuProps: MenuProps(
+                                borderRadius: BorderRadius.circular(20.0)),
+                            title: popUp(
+                              context: context,
+                              title: 'Select employee',
+                              height: 50,
+                            ),
+                          ),
+                          dropdownDecoratorProps: const DropDownDecoratorProps(
+                              dropdownSearchDecoration: InputDecoration(
+                                  labelText: 'Assignee Employee')),
+                          key: const Key('assignee'),
+                          itemAsString: (User? u) =>
+                              " ${u?.firstName} ${u?.lastName} "
+                              "${u?.company!.name}",
+                          asyncItems: (String filter) {
+                            _assigneeBloc.add(GetDataEvent(() => context
+                                .read<RestClient>()
+                                .getUser(
+                                    searchString: filter,
+                                    limit: 3,
+                                    isForDropDown: true,
+                                    role: Role.company)));
+                            return Future.delayed(
+                                const Duration(milliseconds: 150), () {
+                              return Future.value(
+                                  (_assigneeBloc.state.data as Users).users);
+                            });
+                          },
+                          compareFn: (item, sItem) =>
+                              item.partyId == sItem.partyId,
+                          onChanged: (User? newValue) {
+                            setState(() {
+                              _selectedAssignee = newValue ?? _originator;
+                            });
+                          });
+                    default:
+                      return const Center(child: LoadingIndicator());
+                  }
+                },
+              ),
+              const SizedBox(height: 10),
+              BlocBuilder<DataFetchBloc<Users>, DataFetchState>(
+                builder: (context, state) {
+                  switch (state.status) {
+                    case DataFetchStatus.failure:
+                      return const FatalErrorForm(
+                          message: 'server connection problem');
+                    case DataFetchStatus.loading:
+                      return const LoadingIndicator();
+                    case DataFetchStatus.success:
+                      return DropdownSearch<User>(
+                          selectedItem: _selectedThirdParty,
+                          popupProps: PopupProps.menu(
+                            isFilterOnline: true,
+                            showSearchBox: true,
+                            searchFieldProps: TextFieldProps(
+                              autofocus: true,
+                              decoration: const InputDecoration(
+                                  labelText: "third party,name"),
+                              controller: _assigneeSearchBoxController,
+                            ),
+                            menuProps: MenuProps(
+                                borderRadius: BorderRadius.circular(20.0)),
+                            title: popUp(
+                              context: context,
+                              title: 'Select third party',
+                              height: 50,
+                            ),
+                          ),
+                          dropdownDecoratorProps: const DropDownDecoratorProps(
+                              dropdownSearchDecoration:
+                                  InputDecoration(labelText: 'ThirdParty')),
+                          key: const Key('thirdParty'),
+                          itemAsString: (User? u) =>
+                              " ${u?.firstName} ${u?.lastName} "
+                              "${u?.company!.name}",
+                          asyncItems: (String filter) {
+                            _thirdPartyBloc.add(GetDataEvent(() => context
+                                .read<RestClient>()
+                                .getUser(
+                                    searchString: filter,
+                                    limit: 3,
+                                    isForDropDown: true,
+                                    role: Role.unknown)));
+                            return Future.delayed(
+                                const Duration(milliseconds: 150), () {
+                              return Future.value(
+                                  (_thirdPartyBloc.state.data as Users).users);
+                            });
+                          },
+                          compareFn: (item, sItem) =>
+                              item.partyId == sItem.partyId,
+                          onChanged: (User? newValue) {
+                            setState(() {
+                              _selectedThirdParty = newValue;
+                            });
+                          });
+                    default:
+                      return const Center(child: LoadingIndicator());
+                  }
+                },
+              ),
+              const SizedBox(height: 10),
+              Row(children: [
+                if (widget.activity.activityId.isNotEmpty &&
+                    widget.activity.activityType == ActivityType.todo)
+                  OutlinedButton(
+                      key: const Key('TimeEntries'),
+                      child: const Text('TimeEntries'),
+                      onPressed: () async {
+                        await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return BlocProvider.value(
+                                  value: _activityBloc,
+                                  child: TimeEntryListDialog(
+                                      widget.activity.activityId,
+                                      widget.activity.timeEntries));
+                            });
+                      }),
+                const SizedBox(width: 10),
+                Expanded(
+                    child: OutlinedButton(
+                        key: const Key('update'),
+                        child: Text(widget.activity.activityId.isEmpty
+                            ? 'Create'
+                            : 'Update'),
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            _activityBloc.add(ActivityUpdate(
+                              widget.activity.copyWith(
+                                activityId: widget.activity.activityId,
+                                pseudoId: _pseudoIdController.text,
+                                activityName: _nameController.text,
+                                description: _descriptionController.text,
+                                statusId: _updatedStatus,
+                                assignee: _selectedAssignee,
+                                thirdparty: _selectedThirdParty,
+                              ),
+                            ));
+                          }
+                        })),
+              ]),
+            ])));
+  }
+}

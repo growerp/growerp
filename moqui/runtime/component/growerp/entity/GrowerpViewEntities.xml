@@ -2338,54 +2338,237 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="lastUpdatedStamp" entity-alias="CMSGS" />
     </view-entity>
 
-    <!-- task views -->
-    <view-entity entity-name="TaskSubTasksLinksAndParties" package="growerp.task">
-        <member-entity entity-alias="WE" entity-name="mantle.work.effort.WorkEffort" />
-        <member-entity entity-alias="WEP" entity-name="mantle.work.effort.WorkEffortParty"
+    <!-- activity views -->
+    <view-entity entity-name="WorkEffortSubWorkEffortLinksAndParties" package="growerp.workEffort">
+        <!-- owner -->
+        <member-entity entity-alias="PTY_OWNER" entity-name="mantle.party.Party">
+            <entity-condition>
+                <econdition field-name="partyTypeEnumId" value="PtyOwner" />
+                <econdition field-name="disabled" operator="not-equals" value="Y"
+                    or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <!-- owner to workeffort -->
+        <member-entity entity-alias="WE" entity-name="mantle.work.effort.WorkEffort"
+            join-from-alias="PTY_OWNER">
+            <key-map field-name="partyId" related="ownerPartyId" />
+        </member-entity>
+        <!-- workEffort to orginator -->
+        <member-entity entity-alias="ORG_WEP" entity-name="mantle.work.effort.WorkEffortParty"
             join-from-alias="WE" join-optional="true">
             <key-map field-name="workEffortId" />
             <entity-condition>
-                <econdition field-name="roleTypeId" value="Owner" />
+                <econdition field-name="roleTypeId" value="Originator" />
             </entity-condition>
         </member-entity>
-        <member-entity entity-alias="VWEP" entity-name="mantle.work.effort.WorkEffortParty"
+        <member-entity entity-alias="ORG_PARTY" entity-name="mantle.party.Party"
+            join-from-alias="ORG_WEP" join-optional="true">
+            <key-map field-name="partyId" />
+            <entity-condition>
+                <econdition field-name="disabled" operator="equals" value="N" or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="ORG_PERSON" entity-name="mantle.party.Person"
+            join-from-alias="ORG_PARTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="ORG_ROLE" entity-name="mantle.party.PartyRole"
+            join-from-alias="ORG_PERSON" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="ORG_PCM" entity-name="mantle.party.contact.PartyContactMech"
+            join-from-alias="ORG_PERSON" join-optional="true">
+            <key-map field-name="partyId" />
+            <entity-condition>
+                <econdition field-name="contactMechPurposeId" operator="equals" value="EmailPrimary" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="ORG_CM" entity-name="mantle.party.contact.ContactMech"
+            join-from-alias="ORG_PCM" join-optional="true">
+            <key-map field-name="contactMechId" />
+            <entity-condition>
+                <econdition field-name="contactMechTypeEnumId" operator="equals"
+                    value="CmtEmailAddress" />
+            </entity-condition>
+        </member-entity>
+        <!-- to orginator company -->
+        <member-entity entity-alias="ORG_PERSONTOCOMPANY"
+            entity-name="mantle.party.PartyRelationship"
+            join-from-alias="ORG_PERSON" join-optional="true">
+            <key-map field-name="partyId" related="fromPartyId" />
+        </member-entity>
+        <member-entity entity-alias="ORG_COMPANYPARTY" entity-name="mantle.party.Party"
+            join-from-alias="ORG_PERSONTOCOMPANY" join-optional="true">
+            <key-map field-name="toPartyId" related="partyId" />
+            <entity-condition>
+                <econdition field-name="disabled" operator="not-equals" value="Y"
+                    or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="ORG_COMPANY" entity-name="mantle.party.Organization"
+            join-from-alias="ORG_COMPANYPARTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <!-- workEffort to assignee -->
+        <member-entity entity-alias="ASS_WEP" entity-name="mantle.work.effort.WorkEffortParty"
             join-from-alias="WE" join-optional="true">
             <key-map field-name="workEffortId" />
             <entity-condition>
-                <econdition field-name="roleTypeId" value="Vendor" />
+                <econdition field-name="roleTypeId" value="Assignee" />
             </entity-condition>
         </member-entity>
-        <member-entity entity-alias="CWEP" entity-name="mantle.work.effort.WorkEffortParty"
+        <member-entity entity-alias="ASS_PARTY" entity-name="mantle.party.Party"
+            join-from-alias="ASS_WEP" join-optional="true">
+            <key-map field-name="partyId" />
+            <entity-condition>
+                <econdition field-name="disabled" operator="equals" value="N" or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="ASS_PERSON" entity-name="mantle.party.Person"
+            join-from-alias="ASS_PARTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="ASS_ROLE" entity-name="mantle.party.PartyRole"
+            join-from-alias="ASS_PERSON" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="ASS_PCM" entity-name="mantle.party.contact.PartyContactMech"
+            join-from-alias="ASS_PERSON" join-optional="true">
+            <key-map field-name="partyId" />
+            <entity-condition>
+                <econdition field-name="contactMechPurposeId" operator="equals" value="EmailPrimary" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="ASS_CM" entity-name="mantle.party.contact.ContactMech"
+            join-from-alias="ASS_PCM" join-optional="true">
+            <key-map field-name="contactMechId" />
+            <entity-condition>
+                <econdition field-name="contactMechTypeEnumId" operator="equals"
+                    value="CmtEmailAddress" />
+            </entity-condition>
+        </member-entity>
+        <!-- to assignee company -->
+        <member-entity entity-alias="ASS_PERSONTOCOMPANY"
+            entity-name="mantle.party.PartyRelationship"
+            join-from-alias="ASS_PERSON" join-optional="true">
+            <key-map field-name="partyId" related="fromPartyId" />
+        </member-entity>
+        <member-entity entity-alias="ASS_COMPANYPARTY" entity-name="mantle.party.Party"
+            join-from-alias="ASS_PERSONTOCOMPANY" join-optional="true">
+            <key-map field-name="toPartyId" related="partyId" />
+            <entity-condition>
+                <econdition field-name="disabled" operator="not-equals" value="Y"
+                    or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="ASS_COMPANY" entity-name="mantle.party.Organization"
+            join-from-alias="ASS_COMPANYPARTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <!-- workEffort to thirdparty -->
+        <member-entity entity-alias="TP_WEP" entity-name="mantle.work.effort.WorkEffortParty"
             join-from-alias="WE" join-optional="true">
             <key-map field-name="workEffortId" />
             <entity-condition>
-                <econdition field-name="roleTypeId" value="Customer" />
+                <econdition field-name="roleTypeId" value="ThirdParty" />
             </entity-condition>
         </member-entity>
-        <!--member-entity
-        entity-alias="TE" entity-name="mantle.work.time.TimeEntry"
-        join-from-alias="WE">
-        <key-map field-name="workEffortId"/></member-entity-->
+        <member-entity entity-alias="TP_PARTY" entity-name="mantle.party.Party"
+            join-from-alias="TP_WEP" join-optional="true">
+            <key-map field-name="partyId" />
+            <entity-condition>
+                <econdition field-name="disabled" operator="equals" value="N" or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="TP_PERSON" entity-name="mantle.party.Person"
+            join-from-alias="TP_PARTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="TP_ROLE" entity-name="mantle.party.PartyRole"
+            join-from-alias="TP_PERSON" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="TP_PCM" entity-name="mantle.party.contact.PartyContactMech"
+            join-from-alias="TP_PERSON" join-optional="true">
+            <key-map field-name="partyId" />
+            <entity-condition>
+                <econdition field-name="contactMechPurposeId" operator="equals" value="EmailPrimary" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="TP_CM" entity-name="mantle.party.contact.ContactMech"
+            join-from-alias="TP_PCM" join-optional="true">
+            <key-map field-name="contactMechId" />
+            <entity-condition>
+                <econdition field-name="contactMechTypeEnumId" operator="equals"
+                    value="CmtEmailAddress" />
+            </entity-condition>
+        </member-entity>
+        <!-- to thirdparty company -->
+        <member-entity entity-alias="TP_PERSONTOCOMPANY"
+            entity-name="mantle.party.PartyRelationship"
+            join-from-alias="TP_PERSON" join-optional="true">
+            <key-map field-name="partyId" related="fromPartyId" />
+        </member-entity>
+        <member-entity entity-alias="TP_COMPANYPARTY" entity-name="mantle.party.Party"
+            join-from-alias="TP_PERSONTOCOMPANY" join-optional="true">
+            <key-map field-name="toPartyId" related="partyId" />
+            <entity-condition>
+                <econdition field-name="disabled" operator="not-equals" value="Y"
+                    or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="TP_COMPANY" entity-name="mantle.party.Organization"
+            join-from-alias="TP_COMPANYPARTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <alias name="ownerPartyId" field="partyId" entity-alias="PTY_OWNER" />
         <alias name="workEffortId" entity-alias="WE" />
+        <alias name="pseudoId" field="workEffortPseudoId" entity-alias="WE" />
         <alias name="parentWorkEffortId" entity-alias="WE" />
         <alias name="workEffortName" entity-alias="WE" />
         <alias name="description" entity-alias="WE" />
-        <alias name="ownerPartyId" entity-alias="WE" />
         <alias name="statusId" entity-alias="WE" />
         <alias name="actualStartDate" entity-alias="WE" />
         <alias name="actualCompletionDate" entity-alias="WE" />
+        <alias name="estimatedStartDate" entity-alias="WE" />
+        <alias name="estimatedCompletionDate" entity-alias="WE" />
         <alias name="workEffortTypeEnumId" entity-alias="WE" />
-        <alias name="routing" entity-alias="WE" />
-        <alias name="flowElementId" entity-alias="WE" />
-        <alias name="employeePartyId" field="partyId" entity-alias="WEP" />
-        <alias name="vendorPartyId" field="partyId" entity-alias="VWEP" />
-        <alias name="customerPartyId" field="partyId" entity-alias="CWEP" />
-        <!--alias
-        name="timeEntryId" entity-alias="TE"/>
-    <alias name="partyId" entity-alias="TE"/>
-    <alias name="hours" entity-alias="TE"/>
-    <alias name="fromDate" entity-alias="TE"/>
-    <alias name="invoiceId" entity-alias="TE"/-->
+        <!-- originator -->
+        <alias name="orgPartyId" field="partyId" entity-alias="ORG_WEP" />
+        <alias name="orgPseudoId" field="pseudoId" entity-alias="ORG_PARTY" />
+        <alias name="orgFirstName" field="firstName" entity-alias="ORG_PERSON" />
+        <alias name="orgLastName" field="lastName" entity-alias="ORG_PERSON" />
+        <alias name="orgEmail" field="infoString" entity-alias="ORG_CM" />
+        <alias name="orgRole" field="roleTypeId" entity-alias="ORG_ROLE" />
+        <alias name="orgCustomerStatusId" field="customerStatusId"
+            entity-alias="ORG_PARTY" />
+        <alias name="orgCompanyPartyId" field="partyId" entity-alias="ORG_COMPANYPARTY" />
+        <alias name="orgCompanyPseudoId" field="pseudoId" entity-alias="ORG_COMPANYPARTY" />
+        <alias name="orgCompanyName" field="organizationName" entity-alias="ORG_COMPANY" />
+        <!-- assignee -->
+        <alias name="assPartyId" field="partyId" entity-alias="ASS_WEP" />
+        <alias name="assPseudoId" field="pseudoId" entity-alias="ASS_PARTY" />
+        <alias name="assFirstName" field="firstName" entity-alias="ASS_PERSON" />
+        <alias name="assLastName" field="lastName" entity-alias="ASS_PERSON" />
+        <alias name="assEmail" field="infoString" entity-alias="ASS_CM" />
+        <alias name="assRole" field="roleTypeId" entity-alias="ASS_ROLE" />
+        <alias name="assCustomerStatusId" field="customerStatusId"
+            entity-alias="ASS_PARTY" />
+        <alias name="assCompanyPartyId" field="partyId" entity-alias="ASS_COMPANYPARTY" />
+        <alias name="assCompanyPseudoId" field="pseudoId" entity-alias="ASS_COMPANYPARTY" />
+        <alias name="assCompanyName" field="organizationName" entity-alias="ASS_COMPANY" />
+        <!-- thirdParty -->
+        <alias name="tpPartyId" field="partyId" entity-alias="TP_WEP" />
+        <alias name="tpPseudoId" field="pseudoId" entity-alias="TP_PARTY" />
+        <alias name="tpFirstName" field="firstName" entity-alias="TP_PERSON" />
+        <alias name="tpLastName" field="lastName" entity-alias="TP_PERSON" />
+        <alias name="tpEmail" field="infoString" entity-alias="TP_CM" />
+        <alias name="tpRole" field="roleTypeId" entity-alias="TP_ROLE" />
+        <alias name="tpCustomerStatusId" field="customerStatusId"
+            entity-alias="TP_PARTY" />
+        <alias name="tpCompanyPartyId" field="partyId" entity-alias="TP_COMPANYPARTY" />
+        <alias name="tpCompanyPseudoId" field="pseudoId" entity-alias="TP_COMPANYPARTY" />
+        <alias name="tpCompanyName" field="organizationName" entity-alias="TP_COMPANY" />
     </view-entity>
 
     <view-entity entity-name="WorkEffortAndParty" package="growerp.party">

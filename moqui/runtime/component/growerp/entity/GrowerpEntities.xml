@@ -65,6 +65,14 @@ along with this software (see the LICENSE.md file). If not, see
         </index>
     </extend-entity>
 
+    <extend-entity entity-name="WorkEffort" package="mantle.work.effort"
+        sequence-primary-prefix="we">
+        <field name="workEffortPseudoId" type="id" />
+        <index name="WORKEFFORT_PSEUDOID" unique="false">
+            <index-field name="workEffortPseudoId" />
+        </index>
+    </extend-entity>
+
     <extend-entity entity-name="SalesOpportunity" package="mantle.sales.opportunity">
         <field name="pseudoId" type="id" />
         <field name="ownerPartyId" type="id">

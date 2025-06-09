@@ -639,6 +639,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  growerp_activity:
+    dependency: "direct main"
+    description:
+      path: "../growerp_activity"
+      relative: true
+    source: path
+    version: "1.8.0"
   growerp_catalog:
     dependency: "direct main"
     description:
@@ -685,13 +692,6 @@ packages:
     dependency: "direct main"
     description:
       path: "../growerp_order_accounting"
-      relative: true
-    source: path
-    version: "1.8.0"
-  growerp_task:
-    dependency: "direct main"
-    description:
-      path: "../growerp_task"
       relative: true
     source: path
     version: "1.8.0"

@@ -34,7 +34,7 @@ class TimeEntry with _$TimeEntry {
   TimeEntry._();
   factory TimeEntry({
     String? timeEntryId,
-    String? taskId,
+    String? activityId,
     String? partyId,
     Decimal? hours,
     String? comments,

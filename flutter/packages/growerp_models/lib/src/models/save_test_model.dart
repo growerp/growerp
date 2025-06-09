@@ -30,7 +30,7 @@ class SaveTest with _$SaveTest {
     @Default([]) List<CompanyUser> companiesUsers,
     @Default([]) List<User> users,
     @Default([]) List<Location> locations,
-    @Default([]) List<Task> tasks,
+    @Default([]) List<Activity> activities,
     @Default([]) List<FinDoc> orders,
     @Default([]) List<FinDoc> payments,
     @Default([]) List<FinDoc> invoices,
