@@ -71,6 +71,51 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+
+    <service verb="create" noun="Event">
+        <in-parameters>
+            <parameter name="partyId" />
+            <parameter name="userGroupId" />
+            <parameter name="opportunityId" />
+            <parameter name="name" />
+            <parameter name="description" />
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+            <service-call name="create#mantle.work.effort.WorkEffort" out-map="context"
+                in-map="[workEffortTypeEnumId: 'WetEvent',
+                workEffortName: name, description: description,
+                ownerPartyId: ownerPartyId, actualStartDate: ec.user.nowTimestamp,
+                visibilityEnumId: userGroupId, 
+                ]" />
+
+            <if condition="opportunityId">
+                <entity-find-one entity-name="mantle.sales.opportunity.SalesOpportunity"
+                    value-field="opportunity" />
+                <if condition="!partyId">
+                    <set field="partyId" from="opportunity?.partyId" />
+                </if>
+                <!-- work effort to opportunity-->
+                <service-call name="create#mantle.sales.opportunity.SalesOpportunityWorkEffort"
+                    in-map="[salesOpportunityId: opportunity.salesOpportunityId,
+                            workEffortId: workEffortId]" />
+            </if>
+
+            <if condition="partyId">
+                <service-call name="create#mantle.work.effort.WorkEffortParty"
+                    in-map="[
+                    workEffortId: workEffortId,
+                    partyId: partyId,
+                    roleTypeId: 'ThirdParty',
+                    statusId: 'WeptAssigned'
+                ]" />
+            </if>
+
+        </actions>
+    </service>
+
     <service verb="get" noun="Activity">
         <description> get a single or multiple activities</description>
         <in-parameters>
@@ -157,89 +202,154 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="search != null">
                 <set field="searchString" value="%${search}%" />
             </if>
-            <!-- only check status for a list -->
-            <if
-                condition="open == true &amp;&amp; !activityId &amp;&amp; !search">
-                <set field="openStatusList"
-                    from="['WeApproved','WeInPlanning','WeInProgress']" />
-            </if>
-            <if condition="my == true">
-                <set field="employeePartyId" from="userPartyId" />
-            </if>
 
-            <set field="activities" from="[]" />
             <!-- translate frontend activity type with backend-->
             <set field="typeConvert"
-                from="[
-                    todo: 'WetTask', WetTask: 'todo']"
+                from="[ event: 'WetEvent',WetEvent: 'event',
+                                todo: 'WetTask', WetTask: 'todo']"
                 type="NewMap" />
-            <set field="workEffortType" from="typeConvert[activityType]" />
 
-            <if condition="pseudoId || activityId">
-                <!-- single activity -->
-                <entity-find list="entries"
-                    entity-name="growerp.workEffort.WorkEffortSubWorkEffortLinksAndParties">
-                    <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
-                    <econdition field-name="workEffortId" from="activityId" ignore-if-empty="true" />
-                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                </entity-find>
-                <if condition="!entries">
-                    <return error="true"
-                        message="activity $activityId for owner: $ownerPartyId not found" />
-                </if>
-                <else>
-                    <!-- by type -->
-                    <entity-find offset="start" limit="limit" list="entries"
-                        entity-name="growerp.workEffort.WorkEffortSubWorkEffortLinksAndParties">
-                        <econdition field-name="workEffortTypeEnumId" from="workEffortType" />
-                        <econdition field-name="assPartyId" from="employeePartyId"
-                            ignore-if-empty="true" />
-                        <econdition field-name="ownerPartyId" />
-                        <econdition field-name="statusId" operator="in"
-                            from="openStatusList" ignore-if-empty="true" />
-                        <econditions combine="or">
-                            <econdition field-name="pseudoId" ignore-case="true"
-                                operator="like" from="searchString" ignore-if-empty="true" />
-                            <econdition field-name="workEffortName" ignore-case="true"
-                                operator="like" from="searchString" ignore-if-empty="true" />
-                            <econdition field-name="description" ignore-case="true"
-                                operator="like" from="searchString" ignore-if-empty="true" />
-                        </econditions>
-                    </entity-find>
-                </else>
-            </if>
-            <if condition="isForDropDown">
+
+            <set field="activities" from="[]" />
+            <if condition="activityType == 'event'">
                 <then>
-                    <iterate entry="entry" list="entries">
-                        <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                            in-map="[docType: 'activity', statusId: entry.statusId]"
-                            out-map="context" />
-                        <set field="workEffortOut"
+                    <!-- get usergroups -->
+                    <entity-find entity-name="moqui.security.UserGroupMember" list="groups">
+                        <econdition field-name="userId" from="ec.user.userAccount.userId" />
+                        <select-field field-name="userGroupId" />
+                    </entity-find>
+                    <set field="userGroups" from="[]" />
+                    <if condition="groups.userGroupId.contains('GROWERP_M_OTHER')">
+                        <then>
+                            <set field="userGroups" from="['GROWERP_M_EMPLOYEE']" />
+                        </then>
+                        <else-if condition="groups.userGroupId.contains('GROWERP_M_EMPLOYEE')">
+                            <set field="userGroups"
+                                from="['GROWERP_M_EMPLOYEE','GROWERP_M_OTHER']" />
+                        </else-if>
+                        <else-if condition="groups.userGroupId.contains('GROWERP_M_ADMIN')">
+                            <set field="userGroups"
+                                from="['GROWERP_M_ADMIN','GROWERP_M_EMPLOYEE','GROWERP_M_OTHER']" />
+                        </else-if>
+                        <else-if condition="groups.userGroupId.contains('GROWERP_M_SYSTEM')">
+                            <set field="userGroups"
+                                from="['GROWERP_M_SYSTEM']" />
+                        </else-if>
+                    </if>
+
+                    <entity-find list="eventList"
+                        entity-name="growerp.workEffort.WorkEffortOpportunityAndParty">
+                        <econdition field-name="workEffortTypeEnumId" value="WetEvent" />
+                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                        <econdition field-name="userGroupId" operator="in" from="userGroups" />
+                    </entity-find>
+                    <iterate list="eventList" entry="event">
+                        <set field="thirdparty"
                             from="[
+                                partyId: event.partyId,
+                                pseudoId: event.pseudoId,
+                                firstName: event.firstName,
+                                lastName: event.lastName,
+                                company: [partyid: event.companyPartyId,
+                                        pseudoId: event.companyPartyId,
+                                        name: event.companyName,
+                                        ]]" />
+                        <set field="eventOut"
+                            from="[
+                                activityId: event.workEffortId,
+                                activityType: typeConvert[event.workEffortTypeEnumId],
+                                pseudoId: event.pseudoId,
+                                usergroup: event.userGroupId,
+                                opportunityId: event.opportunityId,
+                                activityName: event.workEffortName,
+                                description: event.description,
+                                eventDate: event.actualStartDate ? ec.l10n.format(event.actualStartDate,'yyyy-MM-dd') : null,
+                                thirdParty: thirdparty,
+                            ]" />
+                        <script>activities.add(eventOut)</script>
+                    </iterate>
+                </then>
+                <else-if condition="activityType == 'todo' || activityId">
+
+                    <!-- only check status for a list -->
+                    <if
+                        condition="open == true &amp;&amp; !activityId &amp;&amp; !search &amp;&amp; activityType != 'event'">
+                        <set field="openStatusList"
+                            from="['WeApproved','WeInPlanning','WeInProgress']" />
+                    </if>
+
+                    <set field="activities" from="[]" />
+                    <set field="workEffortType" from="typeConvert[activityType]" />
+
+                    <if condition="pseudoId || activityId">
+                        <!-- single activity -->
+                        <entity-find list="entries"
+                            entity-name="growerp.workEffort.WorkEffortSubWorkEffortLinksAndParties">
+                            <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
+                            <econdition field-name="workEffortId" from="activityId"
+                                ignore-if-empty="true" />
+                            <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                        </entity-find>
+                        <if condition="!entries">
+                            <return error="true"
+                                message="activity $activityId for owner: $ownerPartyId not found" />
+                        </if>
+                        <else>
+                            <log message="===looking for type: $workEffortType p: $employeePartyId " />
+                            <!-- by type -->
+                            <entity-find offset="start" limit="limit" list="entries"
+                                entity-name="growerp.workEffort.WorkEffortSubWorkEffortLinksAndParties">
+                                <econdition field-name="workEffortTypeEnumId" from="workEffortType" />
+                                <econdition field-name="ownerPartyId" />
+                                <!--econdition
+                        field-name="assPartyId" from="userPartyId"
+                            ignore-if-empty="true" /-->
+                                <econdition field-name="statusId" operator="in"
+                                    from="openStatusList" ignore-if-empty="true" />
+                                <econditions combine="or">
+                                    <econdition field-name="pseudoId" ignore-case="true"
+                                        operator="like" from="searchString" ignore-if-empty="true" />
+                                    <econdition field-name="workEffortName" ignore-case="true"
+                                        operator="like" from="searchString" ignore-if-empty="true" />
+                                    <econdition field-name="description" ignore-case="true"
+                                        operator="like" from="searchString" ignore-if-empty="true" />
+                                </econditions>
+                            </entity-find>
+                        </else>
+                    </if>
+                    <if condition="isForDropDown">
+                        <then>
+                            <iterate entry="entry" list="entries">
+                                <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                                    in-map="[docType: 'activity', statusId: entry.statusId]"
+                                    out-map="context" />
+                                <set field="workEffortOut"
+                                    from="[
                                 activityId: entry.workEffortId,
                                 pseudoId: entry.pseudoId,
                                 activityType: typeConvert[entry.workEffortTypeEnumId],
                                 activityName: entry.workEffortName,
                                 statusId: convertedStatusId,
                             ]" />
-                        <script>activities.add(workEffortOut)</script>
-                    </iterate>
-                </then>
-                <else>
-                    <iterate entry="entry" list="entries">
-                        <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                            in-map="[docType: 'activity', statusId: entry.statusId]"
-                            out-map="context" />
-                        <entity-find entity-name="mantle.work.time.TimeEntry" list="timeEntries">
-                            <econdition field-name="workEffortId" from="entry.workEffortId" />
-                            <econdition field-name="invoiceId" operator="is-null" />
-                            <order-by field-name="fromDate" />
-                        </entity-find>
-                        <set field="teOutList" from="[]" />
-                        <set field="unInvoicedHours" value="0" type="Integer" />
-                        <iterate list="timeEntries" entry="te">
-                            <set field="teOut"
-                                from="[
+                                <script>activities.add(workEffortOut)</script>
+                            </iterate>
+                        </then>
+                        <else>
+                            <iterate entry="entry" list="entries">
+                                <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                                    in-map="[docType: 'activity', statusId: entry.statusId]"
+                                    out-map="context" />
+                                <entity-find entity-name="mantle.work.time.TimeEntry"
+                                    list="timeEntries">
+                                    <econdition field-name="workEffortId" from="entry.workEffortId" />
+                                    <econdition field-name="invoiceId" operator="is-null" />
+                                    <order-by field-name="fromDate" />
+                                </entity-find>
+                                <set field="teOutList" from="[]" />
+                                <set field="unInvoicedHours" value="0" type="Integer" />
+                                <iterate list="timeEntries" entry="te">
+                                    <set field="teOut"
+                                        from="[
                                 timeEntryId: te.timeEntryId,
                                 activityId: te.workEffortId,
                                 partyId: te.partyId,
@@ -247,12 +357,12 @@ along with this software (see the LICENSE.md file). If not, see
                                 date: te.fromDate ? ec.l10n.format(te.fromDate,'yyyy-MM-dd') : null,
                                 comments: te.comments
                             ]" />
-                            <set
-                                field="unInvoicedHours" from="unInvoicedHours + te.hours" />
-                            <script>teOutList.add(teOut)</script>
-                            <set
-                                field="originator"
-                                from="[
+                                    <set
+                                        field="unInvoicedHours" from="unInvoicedHours + te.hours" />
+                                    <script>teOutList.add(teOut)</script>
+                                    <set
+                                        field="originator"
+                                        from="[
                                 partyId: entry.orgPartyId,
                                 pseudoId: entry.orgPseudoId,
                                 role: entry.orgRole,
@@ -264,9 +374,9 @@ along with this software (see the LICENSE.md file). If not, see
                                     pseudoId: entry.orgCompanyPseudoId,
                                     name: entry.orgCompanyName,
                                 ]]" />
-                            <set
-                                field="assignee"
-                                from="[
+                                    <set
+                                        field="assignee"
+                                        from="[
                                 partyId: entry.assPartyId,
                                 pseudoId: entry.assPseudoId,
                                 role: entry.assRole,
@@ -278,9 +388,9 @@ along with this software (see the LICENSE.md file). If not, see
                                     pseudoId: entry.assCompanyPseudoId,
                                     name: entry.assCompanyName,
                                 ]]" />
-                            <set
-                                field="thirdParty"
-                                from="[
+                                    <set
+                                        field="thirdParty"
+                                        from="[
                                 partyId: entry.tpPartyId,
                                 pseudoId: entry.tpPseudoId,
                                 role: entry.tpRole,
@@ -292,19 +402,19 @@ along with this software (see the LICENSE.md file). If not, see
                                     pseudoId: entry.tpCompanyPseudoId,
                                     name: entry.tpCompanyName,
                                 ]]" />
-                        </iterate>
-                        <if condition="isForDropDown">
-                            <set field="workEffortOut"
-                                from="[
+                                </iterate>
+                                <if condition="isForDropDown">
+                                    <set field="workEffortOut"
+                                        from="[
                                     activityId: entry.workEffortId,
                                     activityType: typeConvert[entry.workEffortTypeEnumId],
                                     parentActivityId: entry.parentWorkEffortId,
                                     activityName: entry.workEffortName,
                                     statusId: convertedStatusId,
                                 ]" />
-                            <else>
-                                <set field="workEffortOut"
-                                    from="[
+                                    <else>
+                                        <set field="workEffortOut"
+                                            from="[
                                         activityId: entry.workEffortId,
                                         pseudoId: entry.pseudoId,
                                         activityType: typeConvert[entry.workEffortTypeEnumId],
@@ -326,15 +436,21 @@ along with this software (see the LICENSE.md file). If not, see
                                         thirdParty: thirdParty,
                                         timeEntries: teOutList,
                                         ]" />
-                            </else>
+                                    </else>
 
-                        </if>
-                        <script>activities.add(workEffortOut)</script>
-                    </iterate>
-                </else>
+                                </if>
+                                <script>activities.add(workEffortOut)</script>
+                            </iterate>
+                        </else>
+                        <else>
+                            <return error="true"
+                                message="Activity type $workEffortType($activityType) not supported" />
+                        </else>
+                    </if>
+                </else-if>
                 <else>
                     <return error="true"
-                        message="Activity type $workEffortType($activityType) not supported" />
+                        message="Activity type $activityType not supported, only event and todo supported" />
                 </else>
             </if>
         </actions>

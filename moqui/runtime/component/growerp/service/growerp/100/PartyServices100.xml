@@ -2724,6 +2724,10 @@ along with this software (see the LICENSE.md file). If not, see
                             ownerPartyId: ownerPartyId, login: false,
                             classificationId: classificationId]"
                         out-map="context" />
+                    <!-- create event -->
+                    <service-call name="growerp.100.ActivityServices100.create#Event"
+                        in-map="[partyId: user.partyId, userGroupId: 'GROWERP_M_SYSTEM',
+                                name: 'New admin &amp; root user']" />
                 </then>
                 <else-if condition="companyPartyId">
                     <!-- new user registration of a user within an existing owner-->
