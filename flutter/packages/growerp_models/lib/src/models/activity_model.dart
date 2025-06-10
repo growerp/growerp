@@ -27,6 +27,7 @@ class Activity extends Equatable with _$Activity {
     @Default("") String activityId,
     @Default("") String pseudoId,
     ActivityType? activityType, // todo, event
+    UserGroup? userGroup,
     @Default("") String parentActivityId,
     ActivityStatus? statusId,
     @Default("") String activityName,
@@ -34,7 +35,7 @@ class Activity extends Equatable with _$Activity {
     Opportunity? opportunity,
     User? originator,
     User? assignee,
-    User? thirdparty,
+    User? thirdParty,
     Decimal? rate,
     DateTime? actualStartDate,
     DateTime? actualEndDate,

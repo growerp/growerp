@@ -20,7 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 class ActivityTest {
   static Future<void> selectActivities(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, '/', 'ActivityList');
+    await CommonTest.selectOption(tester, '/todos', 'ActivityList');
   }
 
   static Future<void> addActivities(

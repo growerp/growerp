@@ -26,12 +26,6 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
   List<TableRowContent> rowContent = [];
   bool isPhone = isAPhone(context);
   rowContent.add(TableRowContent(
-      // testing purposes
-      name: '',
-      width: 0,
-      value: const Text('', key: Key('activityItem'))));
-
-  rowContent.add(TableRowContent(
       name: 'Id',
       width: isPhone ? 15 : 8,
       value: Text(item.pseudoId, key: Key('id$index'))));
@@ -41,11 +35,23 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
       width: isPhone ? 35 : 20,
       value: Text(item.activityName, key: Key('name$index'))));
 
-  rowContent.add(TableRowContent(
-      name: const Text('Assignee', textAlign: TextAlign.left),
-      width: 30,
-      value: Text("${item.originator?.firstName} ${item.originator?.lastName}",
-          key: Key('orgName$index'))));
+  if (item.activityType == ActivityType.todo) {
+    rowContent.add(TableRowContent(
+        name: const Text('Assignee', textAlign: TextAlign.left),
+        width: 30,
+        value: Text(
+            "${item.originator?.firstName} ${item.originator?.lastName}",
+            key: Key('assignee$index'))));
+  }
+
+  if (item.activityType == ActivityType.event) {
+    rowContent.add(TableRowContent(
+        name: const Text('Third Party', textAlign: TextAlign.left),
+        width: 30,
+        value: Text(
+            "${item.thirdParty?.firstName} ${item.thirdParty?.lastName}",
+            key: Key('thirdParty$index'))));
+  }
 
   rowContent.add(TableRowContent(
       name: '',
@@ -59,6 +65,11 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
               ActivityUpdate(item.copyWith(statusId: ActivityStatus.closed)));
         },
       )));
+  rowContent.add(TableRowContent(
+      // testing purposes
+      name: '',
+      width: 0,
+      value: const Text('', key: Key('activityItem'))));
 
   return TableData(rowHeight: isPhone ? 40 : 20, rowContent: rowContent);
 }

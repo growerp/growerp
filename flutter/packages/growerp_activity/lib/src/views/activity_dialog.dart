@@ -54,7 +54,7 @@ class ActivityDialogState extends State<ActivityDialog> {
     _authBloc = context.read<AuthBloc>();
     _updatedStatus = widget.activity.statusId ?? ActivityStatus.planning;
     _selectedAssignee = widget.activity.assignee ?? _originator;
-    _selectedThirdParty = widget.activity.thirdparty;
+    _selectedThirdParty = widget.activity.thirdParty;
     _assigneeBloc = context.read<DataFetchBloc<Users>>()
       ..add(GetDataEvent(() =>
           context.read<RestClient>().getUser(limit: 3, role: Role.company)));
@@ -324,7 +324,7 @@ class ActivityDialogState extends State<ActivityDialog> {
                                 description: _descriptionController.text,
                                 statusId: _updatedStatus,
                                 assignee: _selectedAssignee,
-                                thirdparty: _selectedThirdParty,
+                                thirdParty: _selectedThirdParty,
                               ),
                             ));
                           }

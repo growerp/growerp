@@ -44,6 +44,8 @@ class Stats with _$Stats {
     @Default(0) int outgoingShipments,
     @Default(0) int whLocations,
     @Default(0) int requests,
+    @Default(0) int todoActivities,
+    @Default(0) int eventActivities,
   }) = _Stats;
 
   factory Stats.fromJson(Map<String, dynamic> json) => _$StatsFromJson(json);
