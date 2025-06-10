@@ -15,6 +15,100 @@ along with this software (see the LICENSE.md file). If not, see
 <entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-2.1.xsd">
 
+    <!-- events -->
+    <view-entity entity-name="WorkEffortOpportunityAndParty" package="growerp.workEffort">
+        <!-- owner -->
+        <member-entity entity-alias="PTY_OWNER" entity-name="mantle.party.Party">
+            <entity-condition>
+                <econdition field-name="partyTypeEnumId" value="PtyOwner" />
+                <econdition field-name="disabled" operator="not-equals" value="Y"
+                    or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <!-- owner to workeffort -->
+        <member-entity entity-alias="WE" entity-name="mantle.work.effort.WorkEffort"
+            join-from-alias="PTY_OWNER">
+            <key-map field-name="partyId" related="ownerPartyId" />
+            <entity-condition>
+                <econdition field-name="workEffortTypeEnumId" value="WetEvent" />
+            </entity-condition>
+        </member-entity>
+        <!-- workEffort to opportunity -->
+        <member-entity entity-alias="WE_OPPOR"
+            entity-name="mantle.sales.opportunity.SalesOpportunityWorkEffort"
+            join-from-alias="WE" join-optional="true">
+            <key-map field-name="workEffortId" />
+        </member-entity>
+        <member-entity entity-alias="OPPOR" entity-name="mantle.sales.opportunity.SalesOpportunity"
+            join-from-alias="WE_OPPOR" join-optional="true">
+            <key-map field-name="salesOpportunityId" />
+        </member-entity>
+        <!-- workEffort to thirdparty -->
+        <member-entity entity-alias="TP_WEP" entity-name="mantle.work.effort.WorkEffortParty"
+            join-from-alias="WE" join-optional="true">
+            <key-map field-name="workEffortId" />
+            <entity-condition>
+                <econdition field-name="roleTypeId" value="ThirdParty" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="TP_PARTY" entity-name="mantle.party.Party"
+            join-from-alias="TP_WEP" join-optional="true">
+            <key-map field-name="partyId" />
+            <entity-condition>
+                <econdition field-name="disabled" operator="equals" value="N" or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="TP_PERSON" entity-name="mantle.party.Person"
+            join-from-alias="TP_PARTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <!-- to thirdparty company -->
+        <member-entity entity-alias="TP_PERSONTOCOMPANY"
+            entity-name="mantle.party.PartyRelationship"
+            join-from-alias="TP_PERSON" join-optional="true">
+            <key-map field-name="partyId" related="fromPartyId" />
+        </member-entity>
+        <member-entity entity-alias="TP_COMPANYPARTY" entity-name="mantle.party.Party"
+            join-from-alias="TP_PERSONTOCOMPANY" join-optional="true">
+            <key-map field-name="toPartyId" related="partyId" />
+            <entity-condition>
+                <econdition field-name="disabled" operator="not-equals" value="Y"
+                    or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="TP_COMPANY" entity-name="mantle.party.Organization"
+            join-from-alias="TP_COMPANYPARTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <alias name="ownerPartyId" field="partyId" entity-alias="PTY_OWNER" />
+        <alias name="workEffortId" entity-alias="WE" />
+        <alias name="pseudoId" field="workEffortPseudoId" entity-alias="WE" />
+        <alias name="parentWorkEffortId" entity-alias="WE" />
+        <alias name="workEffortName" entity-alias="WE" />
+        <alias name="description" entity-alias="WE" />
+        <alias name="statusId" entity-alias="WE" />
+        <alias name="actualStartDate" entity-alias="WE" />
+        <alias name="actualCompletionDate" entity-alias="WE" />
+        <alias name="estimatedStartDate" entity-alias="WE" />
+        <alias name="estimatedCompletionDate" entity-alias="WE" />
+        <alias name="workEffortTypeEnumId" entity-alias="WE" />
+        <alias name="userGroupId" field="visibilityEnumId" entity-alias="WE" />
+        <!-- opportunity -->
+        <alias name="opportunityId" field="salesOpportunityId" entity-alias="OPPOR" />
+        <alias name="opportunityPseudoId" field="pseudoId" entity-alias="OPPOR" />
+        <alias name="opportunityName" entity-alias="OPPOR" />
+        <alias name="stageId" field="opportunityStageId" entity-alias="OPPOR" />
+        <alias name="nextStep" entity-alias="OPPOR" />
+        <!-- thirdParty -->
+        <alias name="partyId" entity-alias="TP_WEP" />
+        <alias name="pseudoId" entity-alias="TP_PARTY" />
+        <alias name="firstName" entity-alias="TP_PERSON" />
+        <alias name="lastName" entity-alias="TP_PERSON" />
+        <alias name="companyPartyId" field="partyId" entity-alias="TP_COMPANYPARTY" />
+        <alias name="companyPseudoId" field="pseudoId" entity-alias="TP_COMPANYPARTY" />
+        <alias name="companyName" field="organizationName" entity-alias="TP_COMPANY" />
+    </view-entity>
+
 
     <!-- order headers -->
     <view-entity entity-name="OrderHeaderPartAndParties" package="growerp.order">

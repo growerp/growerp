@@ -923,6 +923,10 @@ along with this software (see the LICENSE.md file). If not, see
                                                         classificationId: classificationId,
                                                         userPartyId: userAccount.partyId]" />
                                 </if>
+                                <!-- create event -->
+                                <service-call name="growerp.100.ActivityServices100.create#Event"
+                                    in-map='[partyId: userAccount.partyId, userGroupId: "GROWERP_M_ADMIN",
+                                    name: "$companyName created"]' />
                             </then>
                             <else><!-- customer/supplier user with optional company-->
                                 <if condition="companyName">

@@ -70,18 +70,18 @@ List<MenuOption> menuOptions = [
       ),
       TabItem(
         form: const CompanyList(
-          key: Key('Customer'),
-          role: Role.customer,
-        ),
-        label: 'Customers',
-        icon: const Icon(Icons.home),
-      ),
-      TabItem(
-        form: const CompanyList(
           key: Key('Lead'),
           role: Role.lead,
         ),
         label: 'Leads',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const CompanyList(
+          key: Key('Customer'),
+          role: Role.customer,
+        ),
+        label: 'Customers',
         icon: const Icon(Icons.home),
       ),
       TabItem(

@@ -232,6 +232,22 @@ class UserListState extends State<UserList> {
                           },
                           tooltip: 'Add New',
                           child: const Icon(Icons.add)),
+                      const SizedBox(height: 10),
+                      FloatingActionButton(
+                          heroTag: 'companyUserFiles',
+                          key: const Key("upDownload"),
+                          onPressed: () async {
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                      value: _userBloc,
+                                      child: const CompanyUserFilesDialog());
+                                });
+                          },
+                          tooltip: 'companies/users up/download',
+                          child: const Icon(Icons.file_copy)),
                     ],
                   ),
                 ),

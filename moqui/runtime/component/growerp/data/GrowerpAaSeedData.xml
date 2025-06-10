@@ -142,6 +142,16 @@ along with this software (see the LICENSE.md file). If not, see
     <mantle.party.RoleType description="Assignee" roleTypeId="Assignee" />
     <mantle.party.RoleType description="Third Party" roleTypeId="ThirdParty" />
 
+    <!-- additional event visibility limitations, same as growerp groupid's-->
+    <moqui.basic.Enumeration description="All Users" enumId="GROWERP_M_SYSTEM"
+        enumTypeId="WorkEffortVisibility" />
+    <moqui.basic.Enumeration description="All Users" enumId="GROWERP_M_ADMIN"
+        enumTypeId="WorkEffortVisibility" />
+    <moqui.basic.Enumeration description="All Users" enumId="GROWERP_M_EMPLOYEE"
+        enumTypeId="WorkEffortVisibility" />
+    <moqui.basic.Enumeration description="All Users" enumId="GROWERP_M_OTHER"
+        enumTypeId="WorkEffortVisibility" />
+
 
     <!-- ordertaker is also stored in the field enteredByPartyId in orderheader -->
     <mantle.party.RoleType description="Added more after initial entry of the order"
