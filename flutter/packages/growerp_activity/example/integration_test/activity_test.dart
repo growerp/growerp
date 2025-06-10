@@ -12,7 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:growerp_activity_example/menu_options.dart';
+import 'package:growerp_activity_example/main.dart';
 import 'package:growerp_activity_example/router.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';

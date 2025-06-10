@@ -15,8 +15,9 @@
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
-import 'menu_options.dart';
 import 'package:growerp_models/growerp_models.dart';
+
+import 'main.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   debugPrint('>>>Root NavigateTo { ${settings.name} '
@@ -31,11 +32,16 @@ Route<dynamic> generateRoute(RouteSettings settings) {
                 menuIndex: 0,
                 tabIndex: 0,
               ));
-    case '/toDo':
+    case '/todos':
       return MaterialPageRoute(
           settings: settings,
           builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 3, tabIndex: 0));
+              menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+    case '/events':
+      return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => DisplayMenuOption(
+              menuList: menuOptions, menuIndex: 2, tabIndex: 0));
     case '/company':
       return MaterialPageRoute(
           settings: settings,

@@ -42,8 +42,8 @@ class ActivityListState extends State<ActivityList> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _activityBloc = context.read<ActivityBloc>();
-    _activityBloc.add(
-        const ActivityFetch(refresh: true, activityType: ActivityType.todo));
+    _activityBloc
+        .add(ActivityFetch(refresh: true, activityType: widget.activityType));
     bottom = 50;
   }
 

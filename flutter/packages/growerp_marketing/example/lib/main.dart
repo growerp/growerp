@@ -34,7 +34,7 @@ Future main() async {
     classificationId: 'AppAdmin',
     chatClient: chatClient,
     notificationClient: notificationClient,
-    title: 'GrowERP.',
+    title: 'GrowERP Marketing',
     router: generateRoute,
     menuOptions: menuOptions,
     extraDelegates: const [MarketingLocalizations.delegate],
@@ -100,8 +100,7 @@ class MainMenuForm extends StatelessWidget {
         Authenticate authenticate = state.authenticate!;
         return DashBoardForm(dashboardItems: [
           makeDashboardItem('dbCrm', context, menuOptions[1], [
-            "All Opportunities: ${authenticate.stats?.opportunities ?? 0}",
-            "My Opportunities: ${authenticate.stats?.myOpportunities ?? 0}",
+            "Opportunities: ${authenticate.stats?.opportunities ?? 0}",
           ]),
         ]);
       }

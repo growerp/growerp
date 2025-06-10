@@ -21,7 +21,6 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import 'menu_options.dart';
 import 'router.dart' as router;
 
 Future main() async {
@@ -51,6 +50,58 @@ Future main() async {
     extraDelegates: extraDelegates,
     extraBlocProviders: getExampleBlocProviders(restClient, classificationId),
   ));
+}
+
+// Menu definition
+List<MenuOption> menuOptions = [
+  MenuOption(
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    title: 'Main',
+    route: '/',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const MainMenuForm(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/crmGrey.png',
+    selectedImage: 'packages/growerp_core/images/crm.png',
+    title: 'To Do',
+    route: '/todos',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const ActivityList(ActivityType.todo),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/crmGrey.png',
+    selectedImage: 'packages/growerp_core/images/crm.png',
+    title: 'Events',
+    route: '/events',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const ActivityList(ActivityType.event),
+  ),
+];
+
+// main menu
+class MainMenuForm extends StatelessWidget {
+  const MainMenuForm({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+      if (state.status == AuthStatus.authenticated) {
+        Authenticate authenticate = state.authenticate!;
+        return DashBoardForm(dashboardItems: [
+          makeDashboardItem('dbTodo', context, menuOptions[1], [
+            "To Do: ${authenticate.stats?.todoActivities ?? 0}",
+          ]),
+          makeDashboardItem('dbEvent', context, menuOptions[2], [
+            "Events: ${authenticate.stats?.eventActivities ?? 0}",
+          ]),
+        ]);
+      }
+
+      return const LoadingIndicator();
+    });
+  }
 }
 
 List<LocalizationsDelegate<dynamic>> extraDelegates = const [
