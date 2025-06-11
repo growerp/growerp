@@ -15,6 +15,7 @@ dependencies:
   growerp_catalog: ^1.8.0
   growerp_order_accounting: ^1.8.0
   growerp_user_company: ^1.8.0
+  growerp_activity: ^1.8.0
   growerp_task: ^1.8.0
   growerp_core: ^1.8.0
   growerp_models: ^1.8.0
@@ -33,6 +34,7 @@ dependencies:
   dio: ^5.4.3
   http: ^1.1.2
   fl_chart: ^0.69.0
+  get_it: ^8.0.3
 
 dev_dependencies:
   flutter_test:

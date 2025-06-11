@@ -82,7 +82,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.question_answer),
       ),
       TabItem(
-        form: const CompanyUserList(
+        form: const UserList(
           key: Key('Lead'),
           role: Role.lead,
         ),
