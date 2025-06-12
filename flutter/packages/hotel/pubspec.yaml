@@ -11,14 +11,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_core: ^1.8.0
-  growerp_marketing: ^1.8.0
-  growerp_website: ^1.8.0
-  growerp_inventory: ^1.8.0
-  growerp_catalog: ^1.8.0
-  growerp_order_accounting: ^1.8.0
-  growerp_user_company: ^1.8.0
-  growerp_activity: ^1.8.0
+  growerp_core: ^1.9.0
+  growerp_marketing: ^1.9.0
+  growerp_website: ^1.9.0
+  growerp_inventory: ^1.9.0
+  growerp_catalog: ^1.9.0
+  growerp_order_accounting: ^1.9.0
+  growerp_user_company: ^1.9.0
+  growerp_activity: ^1.8.1
   package_info_plus: ^8.0.2
   horizontal_data_table: ^4.3.1
   flutter_localizations:
