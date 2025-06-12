@@ -12,7 +12,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  growerp_core: ^1.6.0
+  growerp_core: ^1.9.0
   flutter_test:
     sdk: flutter
   integration_test:

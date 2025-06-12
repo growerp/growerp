@@ -1,6 +1,6 @@
 name: growerp_activity
 description: "Activity, task and event management for the GrowERP project."
-version: 1.8.0
+version: 1.8.1
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 environment:
@@ -17,8 +17,8 @@ platforms:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_core: ^1.8.0
-  growerp_models: ^1.8.0
+  growerp_core: ^1.9.0
+  growerp_models: ^1.9.0
   flutter_localizations:
     sdk: flutter
   intl: ^0.19.0

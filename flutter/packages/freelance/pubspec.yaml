@@ -12,15 +12,15 @@ dependencies:
   flutter_bloc: ^8.1.4
   flutter_localizations:
     sdk: flutter
-  growerp_core: ^1.8.0
-  growerp_models: ^1.8.0
-  growerp_marketing: ^1.8.0
-  growerp_website: ^1.8.0
-  growerp_inventory: ^1.8.0
-  growerp_catalog: ^1.8.0
-  growerp_order_accounting: ^1.8.0
-  growerp_user_company: ^1.8.0
-  growerp_activity: ^1.8.0
+  growerp_core: ^1.9.0
+  growerp_models: ^1.9.0
+  growerp_marketing: ^1.9.0
+  growerp_website: ^1.9.0
+  growerp_inventory: ^1.9.0
+  growerp_catalog: ^1.9.0
+  growerp_order_accounting: ^1.9.0
+  growerp_user_company: ^1.9.0
+  growerp_activity: ^1.8.1
   universal_io: ^2.2.2
   global_configuration: ^2.0.0
   responsive_framework: ^1.4.0

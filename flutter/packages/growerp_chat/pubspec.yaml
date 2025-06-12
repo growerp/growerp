@@ -1,6 +1,6 @@
 name: growerp_chat
 description: "Internal chat within the growerp system."
-version: 1.8.0
+version: 1.9.0
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 environment:
@@ -10,8 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_core: ^1.8.0
-  growerp_models: ^1.8.0
+  growerp_core: ^1.9.0
+  growerp_models: ^1.9.0
   flutter_localizations:
     sdk: flutter
   intl: ^0.19.0

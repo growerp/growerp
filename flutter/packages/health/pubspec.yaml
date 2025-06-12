@@ -9,13 +9,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_marketing: ^1.8.0
-  growerp_website: ^1.8.0
-  growerp_order_accounting: ^1.8.0
-  growerp_user_company: ^1.8.0
-  growerp_activity: ^1.8.0
-  growerp_core: ^1.8.0
-  growerp_models: ^1.8.0
+  growerp_marketing: ^1.9.0
+  growerp_website: ^1.9.0
+  growerp_order_accounting: ^1.9.0
+  growerp_user_company: ^1.9.0
+  growerp_activity: ^1.8.1
+  growerp_core: ^1.9.0
+  growerp_models: ^1.9.0
   decimal: ^2.1.0
   flutter_bloc: ^8.1.4
   flutter_localizations:
