@@ -23,7 +23,9 @@ import '../../growerp_activity.dart';
 
 class ActivityList extends StatefulWidget {
   final ActivityType activityType;
-  const ActivityList(this.activityType, {super.key});
+  final CompanyUser? companyUser;
+
+  const ActivityList(this.activityType, {this.companyUser, super.key});
 
   @override
   ActivityListState createState() => ActivityListState();
@@ -42,8 +44,10 @@ class ActivityListState extends State<ActivityList> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _activityBloc = context.read<ActivityBloc>();
-    _activityBloc
-        .add(ActivityFetch(refresh: true, activityType: widget.activityType));
+    _activityBloc.add(ActivityFetch(
+        refresh: true,
+        activityType: widget.activityType,
+        companyUser: widget.companyUser));
     bottom = 50;
   }
 
@@ -105,7 +109,7 @@ class ActivityListState extends State<ActivityList> {
                                       child: BlocProvider.value(
                                           value: _activityBloc,
                                           child: ActivityDialog(
-                                              activities[index - 1])));
+                                              activities[index - 1], null)));
                             }))
                   }),
         pinnedRowCount: 1,
@@ -168,14 +172,14 @@ class ActivityListState extends State<ActivityList> {
                                 builder: (BuildContext context) {
                                   return BlocProvider.value(
                                       value: _activityBloc,
-                                      child: ActivityDialog(value));
+                                      child: ActivityDialog(value, null));
                                 })
                             : const SizedBox.shrink());
                       },
                       child: const Icon(Icons.search)),
                   const SizedBox(height: 10),
                   FloatingActionButton(
-                      heroTag: 'productNew',
+                      heroTag: 'activityNew',
                       key: const Key("addNew"),
                       onPressed: () async {
                         await showDialog(
@@ -184,8 +188,10 @@ class ActivityListState extends State<ActivityList> {
                             builder: (BuildContext context) {
                               return BlocProvider.value(
                                   value: _activityBloc,
-                                  child: ActivityDialog(Activity(
-                                      activityType: widget.activityType)));
+                                  child: ActivityDialog(
+                                      Activity(
+                                          activityType: widget.activityType),
+                                      widget.companyUser));
                             });
                       },
                       tooltip: CoreLocalizations.of(context)!.addNew,

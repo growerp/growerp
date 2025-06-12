@@ -38,14 +38,15 @@ A customer user has a single login for all owner websites and will be linked to 
 ### other entities
 Other entities like products, categories etc use the 'ownerPartyId' field to separate between owners. It contains from now on the 
 
-## Flutter Module organization
-## 3 layer screen approach
+## Flutter Package organization
 
 1. The application
-	1. Menu structure
-	2. User access
-	3. routing
-2. The core screen system
+	1. Admin
+	2. Freelance
+	3. Hotel
+	4. Health
+	5. support
+2. The core package
 	1. template layout
 		1. appBar
 		2. navigation rail/left menu selection
@@ -54,17 +55,22 @@ Other entities like products, categories etc use the 'ownerPartyId' field to sep
 	2. screen definitions
 	3. registration/login
 	4. multi company
-	5. employee/admin
-	6. supplier/customer/lead
-	7. companies
-	8. tasks
-3. The package plugins
+	5. Notification
+3. Other core packages
+	1. Model
+		1. definitions
+		2. REST client
+	2. Chat
+	3. GrowERP terminal functions
+	4. Activity
+		1. Events
+		2. to do (tasks)
+4. The functional packages
 	1. Marketing
 	2. Sales/purchase Order/ Accounting
 	3. users/companies
 	4. Website
 	5. Catalog
 	6. Inventory
-	7. Chat
 
 The main principle of presenting screens is to show the screen by calling the template with the parameter of the screen name. A screen can be single widget of a screen with tabs which are shown by the template.

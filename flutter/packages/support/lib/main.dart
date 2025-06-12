@@ -23,6 +23,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'router.dart' as router;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:growerp_activity/growerp_activity.dart';
 
 import 'src/application/application.dart';
 //webactivate  import 'package:web/web.dart' as web;
@@ -74,18 +75,20 @@ Future main() async {
     router: router.generateRoute,
     menuOptions: menuOptions,
     extraDelegates: delegates,
-    extraBlocProviders: getAdminBlocProviders(restClient, classificationId),
+    extraBlocProviders: getSupportBlocProviders(restClient, classificationId),
     company: company,
   ));
 }
 
 List<LocalizationsDelegate> delegates = [
   UserCompanyLocalizations.delegate,
+  ActivityLocalizations.delegate,
 ];
 
-List<BlocProvider> getAdminBlocProviders(restClient, classificationId) {
+List<BlocProvider> getSupportBlocProviders(restClient, classificationId) {
   return [
     ...getUserCompanyBlocProviders(restClient, classificationId),
+    ...getSupportBlocProviders(restClient, classificationId),
     BlocProvider<ApplicationBloc>(
       create: (context) => ApplicationBloc(restClient),
     ),

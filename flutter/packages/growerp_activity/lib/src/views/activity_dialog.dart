@@ -23,7 +23,8 @@ import '../../growerp_activity.dart';
 
 class ActivityDialog extends StatefulWidget {
   final Activity activity;
-  const ActivityDialog(this.activity, {super.key});
+  final CompanyUser? companyUser;
+  const ActivityDialog(this.activity, this.companyUser, {super.key});
   @override
   ActivityDialogState createState() => ActivityDialogState();
 }
@@ -121,28 +122,29 @@ class ActivityDialogState extends State<ActivityDialog> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Expanded(
-                    child: DropdownButtonFormField<ActivityStatus>(
-                      key: const Key('statusDropDown'),
-                      decoration: const InputDecoration(labelText: 'Status'),
-                      value: _updatedStatus,
-                      validator: (value) =>
-                          value == null ? 'field required' : null,
-                      items:
-                          ActivityStatus.validActivityStatusList(_updatedStatus)
-                              .map((label) => DropdownMenuItem<ActivityStatus>(
-                                    value: label,
-                                    child: Text(label.status),
-                                  ))
-                              .toList(),
-                      onChanged: (ActivityStatus? newValue) {
-                        setState(() {
-                          _updatedStatus = newValue!;
-                        });
-                      },
-                      isExpanded: true,
+                  if (widget.activity.activityType == ActivityType.todo)
+                    Expanded(
+                      child: DropdownButtonFormField<ActivityStatus>(
+                        key: const Key('statusDropDown'),
+                        decoration: const InputDecoration(labelText: 'Status'),
+                        value: _updatedStatus,
+                        validator: (value) =>
+                            value == null ? 'field required' : null,
+                        items: ActivityStatus.validActivityStatusList(
+                                _updatedStatus)
+                            .map((label) => DropdownMenuItem<ActivityStatus>(
+                                  value: label,
+                                  child: Text(label.status),
+                                ))
+                            .toList(),
+                        onChanged: (ActivityStatus? newValue) {
+                          setState(() {
+                            _updatedStatus = newValue!;
+                          });
+                        },
+                        isExpanded: true,
+                      ),
                     ),
-                  ),
                 ],
               ),
               TextFormField(
@@ -164,130 +166,141 @@ class ActivityDialogState extends State<ActivityDialog> {
                 decoration: const InputDecoration(labelText: 'Description'),
                 controller: _descriptionController,
               ),
-              const SizedBox(height: 10),
-              BlocBuilder<DataFetchBloc<Users>, DataFetchState>(
-                builder: (context, state) {
-                  switch (state.status) {
-                    case DataFetchStatus.failure:
-                      return const FatalErrorForm(
-                          message: 'server connection problem');
-                    case DataFetchStatus.loading:
-                      return const LoadingIndicator();
-                    case DataFetchStatus.success:
-                      return DropdownSearch<User>(
-                          selectedItem: _selectedAssignee,
-                          popupProps: PopupProps.menu(
-                            isFilterOnline: true,
-                            showSearchBox: true,
-                            searchFieldProps: TextFieldProps(
-                              autofocus: true,
-                              decoration: const InputDecoration(
-                                  labelText: "employee,name"),
-                              controller: _assigneeSearchBoxController,
+              if (widget.activity.activityType == ActivityType.todo)
+                const SizedBox(height: 10),
+              if (widget.activity.activityType == ActivityType.todo)
+                BlocBuilder<DataFetchBloc<Users>, DataFetchState>(
+                  builder: (context, state) {
+                    switch (state.status) {
+                      case DataFetchStatus.failure:
+                        return const FatalErrorForm(
+                            message: 'server connection problem');
+                      case DataFetchStatus.loading:
+                        return const LoadingIndicator();
+                      case DataFetchStatus.success:
+                        return DropdownSearch<User>(
+                            selectedItem: _selectedAssignee,
+                            popupProps: PopupProps.menu(
+                              isFilterOnline: true,
+                              showSearchBox: true,
+                              searchFieldProps: TextFieldProps(
+                                autofocus: true,
+                                decoration: const InputDecoration(
+                                    labelText: "employee,name"),
+                                controller: _assigneeSearchBoxController,
+                              ),
+                              menuProps: MenuProps(
+                                  borderRadius: BorderRadius.circular(20.0)),
+                              title: popUp(
+                                context: context,
+                                title: 'Select employee',
+                                height: 50,
+                              ),
                             ),
-                            menuProps: MenuProps(
-                                borderRadius: BorderRadius.circular(20.0)),
-                            title: popUp(
-                              context: context,
-                              title: 'Select employee',
-                              height: 50,
+                            dropdownDecoratorProps:
+                                const DropDownDecoratorProps(
+                                    dropdownSearchDecoration: InputDecoration(
+                                        labelText: 'Assignee Employee')),
+                            key: const Key('assignee'),
+                            itemAsString: (User? u) =>
+                                " ${u?.firstName} ${u?.lastName} "
+                                "${u?.company!.name}",
+                            asyncItems: (String filter) {
+                              _assigneeBloc.add(GetDataEvent(() => context
+                                  .read<RestClient>()
+                                  .getUser(
+                                      searchString: filter,
+                                      limit: 3,
+                                      isForDropDown: true,
+                                      role: Role.company)));
+                              return Future.delayed(
+                                  const Duration(milliseconds: 150), () {
+                                return Future.value(
+                                    (_assigneeBloc.state.data as Users).users);
+                              });
+                            },
+                            compareFn: (item, sItem) =>
+                                item.partyId == sItem.partyId,
+                            onChanged: (User? newValue) {
+                              setState(() {
+                                _selectedAssignee = newValue ?? _originator;
+                              });
+                            });
+                      default:
+                        return const Center(child: LoadingIndicator());
+                    }
+                  },
+                ),
+              if (widget.activity.activityType == ActivityType.todo ||
+                  (widget.activity.activityType == ActivityType.event &&
+                      widget.companyUser == null))
+                const SizedBox(height: 10),
+              if (widget.activity.activityType == ActivityType.todo ||
+                  (widget.activity.activityType == ActivityType.event &&
+                      widget.companyUser == null))
+                BlocBuilder<DataFetchBloc<Users>, DataFetchState>(
+                  builder: (context, state) {
+                    switch (state.status) {
+                      case DataFetchStatus.failure:
+                        return const FatalErrorForm(
+                            message: 'server connection problem');
+                      case DataFetchStatus.loading:
+                        return const LoadingIndicator();
+                      case DataFetchStatus.success:
+                        return DropdownSearch<User>(
+                            selectedItem: _selectedThirdParty,
+                            popupProps: PopupProps.menu(
+                              isFilterOnline: true,
+                              showSearchBox: true,
+                              searchFieldProps: TextFieldProps(
+                                autofocus: true,
+                                decoration: const InputDecoration(
+                                    labelText: "third party,name"),
+                                controller: _assigneeSearchBoxController,
+                              ),
+                              menuProps: MenuProps(
+                                  borderRadius: BorderRadius.circular(20.0)),
+                              title: popUp(
+                                context: context,
+                                title: 'Select third party',
+                                height: 50,
+                              ),
                             ),
-                          ),
-                          dropdownDecoratorProps: const DropDownDecoratorProps(
-                              dropdownSearchDecoration: InputDecoration(
-                                  labelText: 'Assignee Employee')),
-                          key: const Key('assignee'),
-                          itemAsString: (User? u) =>
-                              " ${u?.firstName} ${u?.lastName} "
-                              "${u?.company!.name}",
-                          asyncItems: (String filter) {
-                            _assigneeBloc.add(GetDataEvent(() => context
-                                .read<RestClient>()
-                                .getUser(
-                                    searchString: filter,
-                                    limit: 3,
-                                    isForDropDown: true,
-                                    role: Role.company)));
-                            return Future.delayed(
-                                const Duration(milliseconds: 150), () {
-                              return Future.value(
-                                  (_assigneeBloc.state.data as Users).users);
+                            dropdownDecoratorProps:
+                                const DropDownDecoratorProps(
+                                    dropdownSearchDecoration: InputDecoration(
+                                        labelText: 'ThirdParty')),
+                            key: const Key('thirdParty'),
+                            itemAsString: (User? u) =>
+                                " ${u?.firstName} ${u?.lastName} "
+                                "${u?.company!.name}",
+                            asyncItems: (String filter) {
+                              _thirdPartyBloc.add(GetDataEvent(() => context
+                                  .read<RestClient>()
+                                  .getUser(
+                                      searchString: filter,
+                                      limit: 3,
+                                      isForDropDown: true,
+                                      role: Role.unknown)));
+                              return Future.delayed(
+                                  const Duration(milliseconds: 150), () {
+                                return Future.value(
+                                    (_thirdPartyBloc.state.data as Users)
+                                        .users);
+                              });
+                            },
+                            compareFn: (item, sItem) =>
+                                item.partyId == sItem.partyId,
+                            onChanged: (User? newValue) {
+                              setState(() {
+                                _selectedThirdParty = newValue;
+                              });
                             });
-                          },
-                          compareFn: (item, sItem) =>
-                              item.partyId == sItem.partyId,
-                          onChanged: (User? newValue) {
-                            setState(() {
-                              _selectedAssignee = newValue ?? _originator;
-                            });
-                          });
-                    default:
-                      return const Center(child: LoadingIndicator());
-                  }
-                },
-              ),
-              const SizedBox(height: 10),
-              BlocBuilder<DataFetchBloc<Users>, DataFetchState>(
-                builder: (context, state) {
-                  switch (state.status) {
-                    case DataFetchStatus.failure:
-                      return const FatalErrorForm(
-                          message: 'server connection problem');
-                    case DataFetchStatus.loading:
-                      return const LoadingIndicator();
-                    case DataFetchStatus.success:
-                      return DropdownSearch<User>(
-                          selectedItem: _selectedThirdParty,
-                          popupProps: PopupProps.menu(
-                            isFilterOnline: true,
-                            showSearchBox: true,
-                            searchFieldProps: TextFieldProps(
-                              autofocus: true,
-                              decoration: const InputDecoration(
-                                  labelText: "third party,name"),
-                              controller: _assigneeSearchBoxController,
-                            ),
-                            menuProps: MenuProps(
-                                borderRadius: BorderRadius.circular(20.0)),
-                            title: popUp(
-                              context: context,
-                              title: 'Select third party',
-                              height: 50,
-                            ),
-                          ),
-                          dropdownDecoratorProps: const DropDownDecoratorProps(
-                              dropdownSearchDecoration:
-                                  InputDecoration(labelText: 'ThirdParty')),
-                          key: const Key('thirdParty'),
-                          itemAsString: (User? u) =>
-                              " ${u?.firstName} ${u?.lastName} "
-                              "${u?.company!.name}",
-                          asyncItems: (String filter) {
-                            _thirdPartyBloc.add(GetDataEvent(() => context
-                                .read<RestClient>()
-                                .getUser(
-                                    searchString: filter,
-                                    limit: 3,
-                                    isForDropDown: true,
-                                    role: Role.unknown)));
-                            return Future.delayed(
-                                const Duration(milliseconds: 150), () {
-                              return Future.value(
-                                  (_thirdPartyBloc.state.data as Users).users);
-                            });
-                          },
-                          compareFn: (item, sItem) =>
-                              item.partyId == sItem.partyId,
-                          onChanged: (User? newValue) {
-                            setState(() {
-                              _selectedThirdParty = newValue;
-                            });
-                          });
-                    default:
-                      return const Center(child: LoadingIndicator());
-                  }
-                },
-              ),
+                      default:
+                        return const Center(child: LoadingIndicator());
+                    }
+                  },
+                ),
               const SizedBox(height: 10),
               Row(children: [
                 if (widget.activity.activityId.isNotEmpty &&
@@ -315,6 +328,11 @@ class ActivityDialogState extends State<ActivityDialog> {
                             ? 'Create'
                             : 'Update'),
                         onPressed: () async {
+                          if (widget.companyUser != null &&
+                              widget.activity.activityType ==
+                                  ActivityType.event) {
+                            _selectedThirdParty = widget.companyUser!.getUser();
+                          }
                           if (_formKey.currentState!.validate()) {
                             _activityBloc.add(ActivityUpdate(
                               widget.activity.copyWith(

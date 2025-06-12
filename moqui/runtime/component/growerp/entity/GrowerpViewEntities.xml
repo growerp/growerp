@@ -17,6 +17,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <!-- events -->
     <view-entity entity-name="WorkEffortOpportunityAndParty" package="growerp.workEffort">
+        <description>view to retrieve events</description>
         <!-- owner -->
         <member-entity entity-alias="PTY_OWNER" entity-name="mantle.party.Party">
             <entity-condition>
@@ -82,7 +83,7 @@ along with this software (see the LICENSE.md file). If not, see
         </member-entity>
         <alias name="ownerPartyId" field="partyId" entity-alias="PTY_OWNER" />
         <alias name="workEffortId" entity-alias="WE" />
-        <alias name="pseudoId" field="workEffortPseudoId" entity-alias="WE" />
+        <alias name="workEffortPseudoId" entity-alias="WE" />
         <alias name="parentWorkEffortId" entity-alias="WE" />
         <alias name="workEffortName" entity-alias="WE" />
         <alias name="description" entity-alias="WE" />
@@ -100,7 +101,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="stageId" field="opportunityStageId" entity-alias="OPPOR" />
         <alias name="nextStep" entity-alias="OPPOR" />
         <!-- thirdParty -->
-        <alias name="partyId" entity-alias="TP_WEP" />
+        <alias name="partyId" entity-alias="TP_PARTY" />
         <alias name="pseudoId" entity-alias="TP_PARTY" />
         <alias name="firstName" entity-alias="TP_PERSON" />
         <alias name="lastName" entity-alias="TP_PERSON" />

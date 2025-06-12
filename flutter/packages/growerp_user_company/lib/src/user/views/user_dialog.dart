@@ -24,6 +24,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_activity/growerp_activity.dart';
 
 import '../../common/address_dialog.dart';
 import '../../common/payment_method_dialog.dart';
@@ -221,8 +222,30 @@ class UserDialogState extends State<UserDialogStateFull> {
                             right = right! - details.delta.dx;
                           });
                         },
-                        child: ImageButtons(
-                            _scrollController, _onImageButtonPressed),
+                        child: Column(
+                          children: [
+                            ImageButtons(
+                                _scrollController, _onImageButtonPressed),
+                            const SizedBox(height: 400),
+                            FloatingActionButton(
+                              onPressed: () async => await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return Dialog(
+                                        child: popUp(
+                                            context: context,
+                                            title: ('User events'),
+                                            child: ActivityList(
+                                              ActivityType.event,
+                                              companyUser: CompanyUser.tryParse(
+                                                  widget.user),
+                                            )));
+                                  }),
+                              child: const Icon(Icons.event_available),
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ],

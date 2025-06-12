@@ -18,6 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_activity/growerp_activity.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,9 +38,15 @@ Future main() async {
     router: generateRoute,
     menuOptions: menuOptions,
     extraDelegates: const [UserCompanyLocalizations.delegate],
-    extraBlocProviders:
-        getUserCompanyBlocProviders(restClient, classificationId),
+    extraBlocProviders: getExampleBlocProviders(restClient, classificationId),
   ));
+}
+
+List<BlocProvider> getExampleBlocProviders(restClient, classificationId) {
+  return [
+    ...getActivityBlocProviders(restClient, classificationId),
+    ...getUserCompanyBlocProviders(restClient, classificationId),
+  ];
 }
 
 // Menu definition

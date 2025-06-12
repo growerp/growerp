@@ -131,6 +131,8 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="limit" default-value="20" type="Integer" />
             <parameter name="isForDropDown" type="Boolean" />
             <parameter name="search" default="null" />
+            <parameter name="companyPseudoId" />
+            <parameter name="userPseudoId" />
         </in-parameters>
         <out-parameters>
             <parameter name="activities" type="List">
@@ -209,39 +211,46 @@ along with this software (see the LICENSE.md file). If not, see
                                 todo: 'WetTask', WetTask: 'todo']"
                 type="NewMap" />
 
-
             <set field="activities" from="[]" />
             <if condition="activityType == 'event'">
                 <then>
-                    <!-- get usergroups -->
-                    <entity-find entity-name="moqui.security.UserGroupMember" list="groups">
-                        <econdition field-name="userId" from="ec.user.userAccount.userId" />
-                        <select-field field-name="userGroupId" />
-                    </entity-find>
-                    <set field="userGroups" from="[]" />
-                    <if condition="groups.userGroupId.contains('GROWERP_M_OTHER')">
-                        <then>
-                            <set field="userGroups" from="['GROWERP_M_EMPLOYEE']" />
-                        </then>
-                        <else-if condition="groups.userGroupId.contains('GROWERP_M_EMPLOYEE')">
-                            <set field="userGroups"
-                                from="['GROWERP_M_EMPLOYEE','GROWERP_M_OTHER']" />
-                        </else-if>
-                        <else-if condition="groups.userGroupId.contains('GROWERP_M_ADMIN')">
-                            <set field="userGroups"
-                                from="['GROWERP_M_ADMIN','GROWERP_M_EMPLOYEE','GROWERP_M_OTHER']" />
-                        </else-if>
-                        <else-if condition="groups.userGroupId.contains('GROWERP_M_SYSTEM')">
-                            <set field="userGroups"
-                                from="['GROWERP_M_SYSTEM']" />
-                        </else-if>
+                    <if condition="!userPseudoId &amp;&amp; !companyPseudoId">
+                        <!-- get usergroups -->
+                        <entity-find entity-name="moqui.security.UserGroupMember" list="groups">
+                            <econdition field-name="userId" from="ec.user.userAccount.userId" />
+                            <select-field field-name="userGroupId" />
+                        </entity-find>
+                        <set field="userGroups" from="[]" />
+                        <if condition="groups.userGroupId.contains('GROWERP_M_OTHER')">
+                            <then>
+                                <set field="userGroups" from="['GROWERP_M_EMPLOYEE']" />
+                            </then>
+                            <else-if condition="groups.userGroupId.contains('GROWERP_M_EMPLOYEE')">
+                                <set field="userGroups"
+                                    from="['GROWERP_M_EMPLOYEE','GROWERP_M_OTHER']" />
+                            </else-if>
+                            <else-if condition="groups.userGroupId.contains('GROWERP_M_ADMIN')">
+                                <set field="userGroups"
+                                    from="['GROWERP_M_ADMIN','GROWERP_M_EMPLOYEE','GROWERP_M_OTHER']" />
+                            </else-if>
+                            <else-if condition="groups.userGroupId.contains('GROWERP_M_SYSTEM')">
+                                <set field="userGroups"
+                                    from="['GROWERP_M_SYSTEM']" />
+                            </else-if>
+                        </if>
                     </if>
-
                     <entity-find list="eventList"
                         entity-name="growerp.workEffort.WorkEffortOpportunityAndParty">
                         <econdition field-name="workEffortTypeEnumId" value="WetEvent" />
-                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                        <econdition field-name="ownerPartyId" from="ownerPartyId"
+                            ignore-if-empty="true" />
                         <econdition field-name="userGroupId" operator="in" from="userGroups" />
+                        <econditions combine="or">
+                            <econdition field-name="pseudoId" from="userPseudoId"
+                                ignore-if-empty="true" />
+                            <econdition field-name="companyPseudoId" from="companyPseudoId"
+                                ignore-if-empty="true" />
+                        </econditions>
                     </entity-find>
                     <iterate list="eventList" entry="event">
                         <set field="thirdparty"
@@ -295,7 +304,6 @@ along with this software (see the LICENSE.md file). If not, see
                                 message="activity $activityId for owner: $ownerPartyId not found" />
                         </if>
                         <else>
-                            <log message="===looking for type: $workEffortType p: $employeePartyId " />
                             <!-- by type -->
                             <entity-find offset="start" limit="limit" list="entries"
                                 entity-name="growerp.workEffort.WorkEffortSubWorkEffortLinksAndParties">
@@ -552,12 +560,14 @@ along with this software (see the LICENSE.md file). If not, see
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
             <set field="typeConvert"
-                from="[
+                from="[ event: 'WetEvent',
                         todo: 'WetTask']"
                 type="NewMap" />
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                 in-map="[docType: 'activity', statusId: activity.statusId]" out-map="context" />
             <set field="statusId" from="convertedStatusId" />
+
+            <!-- create pseudoId if required -->
             <if condition="!activity.pseudoId || activity.pseudoId == ''">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                     in-map="[ownerPartyId: ownerPartyId, seqName: 'activity.activityType']"
@@ -601,7 +611,7 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[
                     workEffortId: workEffortId,
                     partyId: activity.thirdParty.partyId,
-                    roleTypeId: activity.thirdParty.role,
+                    roleTypeId: 'ThirdParty',
                     statusId: 'WeptAssigned'
                 ]" />
             </if>
@@ -694,8 +704,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <return error="true" message="Activity ${activity.activityId} not found" />
             </if>
             <set field="typeConvert"
-                from="[
-                       todo: 'WetTask']"
+                from="[event: 'WetEvent', todo: 'WetTask']"
                 type="NewMap" />
 
             <!-- create pseudoId when not provided -->
@@ -746,7 +755,7 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="[
                             workEffortId: activity.activityId,
                             partyId: activity.assignee.partyId,
-                            roleTypeId: activity.assignee.role,
+                            roleTypeId: 'Assignee',
                             statusId: 'WeptAssigned'
                         ]" />
                 </if>
@@ -767,7 +776,7 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="[
                             workEffortId: activity.activityId,
                             partyId: activity.thirdParty.partyId,
-                            roleTypeId: activity.thirdParty.role,
+                            roleTypeId: 'ThirdParty',
                             statusId: 'WeptAssigned'
                         ]" />
                 </if>

@@ -504,6 +504,8 @@ abstract class RestClient {
     @Query('my') bool? my,
     @Query('isForDropDown') bool? isForDropDown,
     @Query('search') String? searchString,
+    @Query('companyPseudoId') String? companyPseudoId,
+    @Query('userPseudoId') String? userPseudoId,
   });
 
   @POST("rest/s1/growerp/100/Activity")

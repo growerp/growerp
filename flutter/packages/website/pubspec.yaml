@@ -1,6 +1,7 @@
 name: website
 description: The Growerp.org website.
 version: 0.0.0+1
+publish_to: none
 
 environment:
   sdk: '>=3.2.6 <4.0.0'
