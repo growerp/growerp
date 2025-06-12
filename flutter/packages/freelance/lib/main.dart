@@ -67,6 +67,7 @@ Future main() async {
       WebsiteLocalizations.delegate,
       MarketingLocalizations.delegate,
       InventoryLocalizations.delegate,
+      ActivityLocalizations.delegate,
     ],
     extraBlocProviders: [
       ...getUserCompanyBlocProviders(restClient, classificationId),
@@ -75,6 +76,7 @@ Future main() async {
       ...getOrderAccountingBlocProviders(restClient, classificationId),
       ...getMarketingBlocProviders(restClient),
       ...getWebsiteBlocProviders(restClient),
+      ...getActivityBlocProviders(restClient, classificationId),
     ],
   ));
 }

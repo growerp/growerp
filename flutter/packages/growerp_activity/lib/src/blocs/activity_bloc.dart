@@ -64,7 +64,9 @@ class ActivityBloc extends Bloc<ActivityEvent, ActivityState> {
           searchString: event.searchString,
           limit: event.limit,
           activityId: event.activityId,
-          isForDropDown: event.isForDropDown);
+          isForDropDown: event.isForDropDown,
+          companyPseudoId: event.companyUser?.getCompany()?.pseudoId,
+          userPseudoId: event.companyUser?.getUser()?.pseudoId);
       return emit(state.copyWith(
         status: ActivityBlocStatus.success,
         activities: start == 0

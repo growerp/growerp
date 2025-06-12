@@ -29,6 +29,7 @@ class ActivityFetch extends ActivityEvent {
     this.isForDropDown = false,
     this.activityId = '',
     this.activityType = ActivityType.unkwown,
+    this.companyUser,
   });
   final bool my;
   final String searchString;
@@ -37,6 +38,7 @@ class ActivityFetch extends ActivityEvent {
   final bool isForDropDown;
   final String activityId;
   final ActivityType activityType;
+  final CompanyUser? companyUser;
   @override
   List<Object> get props => [searchString, refresh, activityId, isForDropDown];
 }

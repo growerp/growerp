@@ -21,6 +21,8 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_website/growerp_website.dart';
+import 'package:growerp_activity/growerp_activity.dart';
+
 import 'menu_options.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -104,12 +106,14 @@ List<LocalizationsDelegate> delegates = [
   UserCompanyLocalizations.delegate,
   OrderAccountingLocalizations.delegate,
   WebsiteLocalizations.delegate,
+  ActivityLocalizations.delegate,
 ];
 
 List<BlocProvider> getAdminBlocProviders(restClient, classificationId) {
   return [
     ...getUserCompanyBlocProviders(restClient, classificationId),
     ...getOrderAccountingBlocProviders(restClient, classificationId),
+    ...getActivityBlocProviders(restClient, classificationId),
     ...getMarketingBlocProviders(restClient),
     ...getWebsiteBlocProviders(restClient),
   ];
