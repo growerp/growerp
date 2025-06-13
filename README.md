@@ -3,7 +3,7 @@
 GrowERP is an open source multi platform ERP application you can use right now!
 
 <span style="color:red">
-Currently using flutter 3.29.3 later not working yet because of package conflicts: intl and dart_console
+Currently using flutter latest stable version
 </span>.
 
 ## PRODUCTION version:

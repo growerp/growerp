@@ -24,7 +24,7 @@ dependencies:
   growerp_models: ^1.9.0
   growerp_activity: ^1.8.1
   decimal: ^2.1.0
-  intl: ^0.19.0
+  intl: ^0.20.2
   global_configuration: ^2.0.0
   equatable: ^2.0.5
   flutter_bloc: ^8.1.4
@@ -67,6 +67,8 @@ dev_dependencies:
   json_serializable: ^6.7.1
 flutter:
   uses-material-design: true
+  generate: true
+
   assets:
     - packages/growerp_core/images/about.png
     - packages/growerp_core/images/aboutGrey.png

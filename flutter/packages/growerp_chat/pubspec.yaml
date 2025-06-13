@@ -14,7 +14,7 @@ dependencies:
   growerp_models: ^1.9.0
   flutter_localizations:
     sdk: flutter
-  intl: ^0.19.0
+  intl: ^0.20.2
   flutter_bloc: ^8.1.4
   equatable: ^2.0.5
   responsive_framework: ^1.4.0
@@ -35,6 +35,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
+
   assets:
     - packages/growerp_core/images/about.png
     - packages/growerp_core/images/aboutGrey.png
