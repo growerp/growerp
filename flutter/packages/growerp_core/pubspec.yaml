@@ -67,6 +67,8 @@ dependencies:
     sdk: flutter
 
 dev_dependencies:
+  bloc_test: ^9.0.0
+  mockito: ^5.0.0
   flutter_driver:
     sdk: flutter
   json_serializable: ^6.7.1
