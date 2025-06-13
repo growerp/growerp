@@ -1,0 +1,17 @@
+{
+  "@@locale": "en",
+  "addNew": "Add new",
+  "andAtLeastOne": "and at least one ",
+  "create": "Create",
+  "customer": "Customer",
+  "invoice": "Invoice",
+  "itemIsRequired": "item is required",
+  "loginWithExistingUserName": "Login with Existing user name",
+  "order": "Order",
+  "payment": "Payment",
+  "shipment": "Shipment",
+  "supplier": "Supplier",
+  "transaction": "Transaction",
+  "unknown": "Unknown",
+  "update": "update"
+}

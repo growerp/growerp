@@ -30,7 +30,7 @@ dependencies:
   bloc_concurrency: ^0.2.0
   package_info_plus: ^8.0.2
   shared_preferences: ^2.3.2
-  intl: ^0.19.0
+  intl: ^0.20.2
   hive_flutter: ^1.1.0
   fl_chart: ^0.69.0
 
@@ -54,6 +54,8 @@ flutter_icons:
 
 flutter:
   uses-material-design: true
+  generate: true
+
   # from https://www.flaticon.com/
   assets:
     - assets/cfg/

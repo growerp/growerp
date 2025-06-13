@@ -2,7 +2,7 @@
 
 remove pubspec overrides with melos clean
 
-- first growerp_models
+- first growerp_models, chat, activities
 - then growerp and core package : update version of models
 - then other packages: upgrade version of models and core 
 - last: admin,freelance, hotel : upgrade versions of all packages

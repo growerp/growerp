@@ -24,7 +24,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   universal_io: ^2.2.2
-  intl: ^0.19.0
+  intl: ^0.20.2
   fl_chart: ^0.69.0
 
 dev_dependencies:
@@ -44,6 +44,8 @@ flutter_icons:
 
 flutter:
   uses-material-design: true
+  generate: true
+
   assets:
     - assets/cfg/
     - packages/growerp_core/images/growerp100.png
