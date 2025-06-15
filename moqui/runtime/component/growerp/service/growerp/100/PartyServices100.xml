@@ -1994,9 +1994,11 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- related company changes if any -->
             <if condition="user.company?.partyId != oldValue.user.company?.partyId">
                 <!-- delete  old relationship -->
-                <entity-delete-by-condition entity-name="mantle.party.PartyRelationship">
-                    <econdition field-name="fromPartyId" from="oldValue.user.partyId" />
-                </entity-delete-by-condition>
+                <if condition="oldValue.user.company?.partyId">
+                    <entity-delete-by-condition entity-name="mantle.party.PartyRelationship">
+                        <econdition field-name="fromPartyId" from="oldValue.user.partyId" />
+                    </entity-delete-by-condition>
+                </if>
                 <!-- create new relationship -->
                 <if condition="user.company.partyId">
                     <service-call name="create#mantle.party.PartyRelationship"
@@ -2262,7 +2264,7 @@ along with this software (see the LICENSE.md file). If not, see
                 if company needs deleting and deletes his own userlogin
                 then can delete company too -->
             <if
-                condition="loggedInParty.user.userGroupId == 'GROWERP_M_ADMIN' 
+                condition="loggedInParty.user?.userGroupId == 'GROWERP_M_ADMIN' 
                     &amp;&amp; deleteCompanyToo == true
                     &amp;&amp; partyId == userPartyId">
                 <service-call name="update#mantle.party.Party"

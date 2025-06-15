@@ -23,7 +23,7 @@ along with this software (see the LICENSE.md file). If not, see
     </extend-entity-->
 
     <extend-entity entity-name="UserAccount" package="moqui.security">
-        <field name="currentPassword" type="id" enable-audit-log="true" />
+        <field name="currentPassword" type="text-medium" enable-audit-log="true" />
     </extend-entity>
 
     <extend-entity entity-name="GlAccount" package="mantle.ledger.account"

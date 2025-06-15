@@ -38,10 +38,9 @@ void main() {
         clear: true);
     await CommonTest.createCompanyAndAdmin(tester);
     await CommonTest.selectMainCompany(tester);
-    await CompanyTest.checkCompany(tester);
     await CompanyTest.addCompanies(tester, [company]); // modify
     await CommonTest.selectMainCompany(tester);
-    await CompanyTest.checkCompany(tester);
+    await CompanyTest.checkCompanies(tester);
     await CommonTest.logout(tester);
   });
 }

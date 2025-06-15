@@ -65,6 +65,7 @@ dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
+  growerp_activity: ^1.8.1
 
 dev_dependencies:
   flutter_driver:

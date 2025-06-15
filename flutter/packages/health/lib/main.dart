@@ -112,8 +112,6 @@ List<LocalizationsDelegate> delegates = [
 List<BlocProvider> getAdminBlocProviders(restClient, classificationId) {
   return [
     ...getUserCompanyBlocProviders(restClient, classificationId),
-    ...getOrderAccountingBlocProviders(restClient, classificationId),
-    ...getActivityBlocProviders(restClient, classificationId),
     ...getMarketingBlocProviders(restClient),
     ...getWebsiteBlocProviders(restClient),
   ];

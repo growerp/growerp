@@ -112,6 +112,5 @@ List<BlocProvider> getHotelBlocProviders(restClient, classificationId) {
     ...getOrderAccountingBlocProviders(restClient, classificationId),
     ...getMarketingBlocProviders(restClient),
     ...getWebsiteBlocProviders(restClient),
-    ...getActivityBlocProviders(restClient, classificationId),
   ];
 }

@@ -74,6 +74,10 @@ class UserTest {
   static Future<void> deleteUsers(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     int count = test.users.length;
+    // employees have an extra initial admin
+    if (test.users.last.role == Role.company) {
+      count++;
+    }
     expect(find.byKey(const Key('userItem'), skipOffstage: false),
         findsNWidgets(count));
     await CommonTest.tapByKey(tester, 'delete${count - 1}',
@@ -81,7 +85,7 @@ class UserTest {
     expect(find.byKey(const Key('userItem'), skipOffstage: false),
         findsNWidgets(count - 1));
     PersistFunctions.persistTest(
-        test.copyWith(users: test.users.sublist(0, count - 1)));
+        test.copyWith(users: test.users.sublist(0, count - 2)));
   }
 
   static Future<void> enterUserData(WidgetTester tester,

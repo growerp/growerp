@@ -91,6 +91,7 @@ class CompanyUser with _$CompanyUser {
   }
 
   User? getUser() {
+    User user = User();
     if (type == PartyType.user) {
       List<String> names = [];
       for (final sep in [', ', ' ,', ' , ', ',', ' ']) {
@@ -112,31 +113,36 @@ class CompanyUser with _$CompanyUser {
           image: image,
           paymentMethod: paymentMethod,
           company: company);
+    } else {
+      if (employees != null && employees!.isNotEmpty) {
+        user = User(
+          role: employees?.first.role,
+          partyId: employees?.first.partyId,
+          pseudoId: employees?.first.pseudoId,
+          firstName: employees?.first.firstName,
+          lastName: employees?.first.lastName,
+          address: employees?.first.address,
+          email: employees?.first.email,
+          url: employees?.first.url,
+          telephoneNr: employees?.first.telephoneNr,
+          image: employees?.first.image,
+          paymentMethod: employees?.first.paymentMethod,
+        );
+      }
+      return user.copyWith(
+          company: Company(
+        role: role,
+        partyId: partyId,
+        pseudoId: pseudoId,
+        name: name,
+        email: email,
+        url: url,
+        telephoneNr: telephoneNr,
+        image: image,
+        paymentMethod: paymentMethod,
+        address: address,
+      ));
     }
-    return User(
-        role: employees?.first.role,
-        partyId: employees?.first.partyId,
-        pseudoId: employees?.first.pseudoId,
-        firstName: employees?.first.firstName,
-        lastName: employees?.first.lastName,
-        address: employees?.first.address,
-        email: employees?.first.email,
-        url: employees?.first.url,
-        telephoneNr: employees?.first.telephoneNr,
-        image: employees?.first.image,
-        paymentMethod: employees?.first.paymentMethod,
-        company: Company(
-          role: role,
-          partyId: partyId,
-          pseudoId: pseudoId,
-          name: name,
-          email: email,
-          url: url,
-          telephoneNr: telephoneNr,
-          image: image,
-          paymentMethod: paymentMethod,
-          address: address,
-        ));
   }
 
   static CompanyUser? tryParse(dynamic obj) {

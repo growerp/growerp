@@ -33,11 +33,11 @@ void main() {
         tester, 'companiesUsers', 'CompanyUserListSupplier', '3');
   }
 
-  testWidgets('''GrowERP company/user test''', (tester) async {
+  testWidgets('''GrowERP company/user Supplier test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         UserCompanyLocalizations.localizationsDelegates,
-        title: "Company/User test",
+        title: "Company/User Supplier test",
         restClient: restClient,
         blocProviders: getUserCompanyBlocProviders(restClient, 'AppAdmin'),
         clear: true);

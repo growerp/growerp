@@ -14,17 +14,9 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 class CompanyTest {
-  static Future<void> checkCompany(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    test = test.copyWith(companies: [company]);
-    await PersistFunctions.persistTest(test);
-    await checkCompanies(tester);
-  }
-
   static Future<void> selectCompany(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbCompanies', 'CompanyForm', '1');
   }
@@ -61,11 +53,6 @@ class CompanyTest {
   /// assumed the detail screen is already shown and need not be created/opened
   static Future<void> enterCompanyData(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
-
-    if (test.companies.length == 1) {
-      // if single company: main company test
-      test = test.copyWith(companies: [test.company!]);
-    }
 
     // create new list with pseudoId from last list from test if not empty
     List<Company> clist = List.of(test.companies);

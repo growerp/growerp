@@ -35,22 +35,47 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
       width: isPhone ? 35 : 20,
       value: Text(item.activityName, key: Key('name$index'))));
 
-  if (item.activityType == ActivityType.todo) {
+  if (!isPhone && item.activityType == ActivityType.todo) {
     rowContent.add(TableRowContent(
         name: const Text('Assignee', textAlign: TextAlign.left),
-        width: 30,
+        width: 10,
         value: Text(
             "${item.originator?.firstName} ${item.originator?.lastName}",
             key: Key('assignee$index'))));
   }
 
-  if (item.activityType == ActivityType.event) {
+  if (!isPhone) {
     rowContent.add(TableRowContent(
         name: const Text('Third Party', textAlign: TextAlign.left),
-        width: 30,
+        width: 10,
         value: Text(
             "${item.thirdParty?.firstName} ${item.thirdParty?.lastName}",
             key: Key('thirdParty$index'))));
+  }
+
+  if (item.activityType == ActivityType.todo) {
+    rowContent.add(TableRowContent(
+        name: const Text('Status', textAlign: TextAlign.left),
+        width: 15,
+        value: Text("${item.statusId}", key: Key('status$index'))));
+  }
+
+  if (item.activityType == ActivityType.todo) {
+    rowContent.add(TableRowContent(
+        name: const Text('Est.from Date', textAlign: TextAlign.left),
+        width: 15,
+        value: Text(
+            "${item.estimatedStartDate != null ? item.estimatedStartDate?.toLocal().toIso8601String().substring(0, 10) : ''}",
+            key: Key('estFromDate$index'))));
+  }
+
+  if (!isPhone) {
+    rowContent.add(TableRowContent(
+        name: const Text('Act From Date', textAlign: TextAlign.left),
+        width: 10,
+        value: Text(
+            "${item.actualStartDate != null ? item.actualStartDate?.toLocal().toIso8601String().substring(0, 10) : ''}",
+            key: Key('fromDate$index'))));
   }
 
   rowContent.add(TableRowContent(

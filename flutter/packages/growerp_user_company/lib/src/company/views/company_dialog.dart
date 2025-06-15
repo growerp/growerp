@@ -98,17 +98,27 @@ class CompanyFormState extends State<CompanyDialog> {
   late bool isPhone;
   final ScrollController _scrollController = ScrollController();
   late CompanyBloc companyBloc;
+  late AuthBloc authBloc;
   late double top;
   double? right;
 
   @override
   void initState() {
     super.initState();
-    company = widget.company;
     companyBloc = context.read<CompanyBloc>();
     _companyDialogFormKey = GlobalKey<FormState>();
-    authenticate = context.read<AuthBloc>().state.authenticate!;
-    _selectedRole = widget.company.role ?? Role.unknown;
+    authBloc = context.read<AuthBloc>();
+    authenticate = authBloc.state.authenticate!;
+    switch (widget.company.partyId) {
+      case null:
+        // main company
+        company = authenticate.company!;
+      case '_NEW_':
+        company = widget.company.copyWith(partyId: null);
+      default:
+        company = widget.company;
+    }
+    _selectedRole = company.role ?? Role.unknown;
     employees = List.of(company.employees);
     if (company.currency != null && currencies.isNotEmpty) {
       _selectedCurrency = currencies.firstWhere(
@@ -117,14 +127,6 @@ class CompanyFormState extends State<CompanyDialog> {
     _idController.text = company.pseudoId ?? '';
     _nameController.text = company.name ?? '';
     _selectedRole = company.role ?? widget.company.role ?? Role.unknown;
-    switch (widget.company.partyId) {
-      case null:
-        company = authenticate.company!;
-      case '_NEW_':
-        company = widget.company.copyWith(partyId: null);
-        break;
-      default:
-    }
     _emailController.text = company.email ?? '';
     _urlController.text = company.url ?? '';
     _backendController.text = company.secondaryBackend ?? '';
@@ -638,6 +640,12 @@ class CompanyFormState extends State<CompanyDialog> {
                                   secondaryBackend: _backendController.text,
                                   image: convImage);
                               companyBloc.add(CompanyUpdate(company));
+                              authBloc.add(AuthLoad());
+                              // get new copy of main company
+                              if (company.partyId ==
+                                  authBloc.company?.partyId) {
+                                company = authenticate.company!;
+                              }
                             }
                           }
                         }
