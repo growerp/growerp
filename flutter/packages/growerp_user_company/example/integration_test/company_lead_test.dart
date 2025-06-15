@@ -30,7 +30,7 @@ Future<void> main() async {
 
   Future<void> selectLeads(WidgetTester tester) async {
     await CommonTest.selectOption(
-        tester, 'dbCompanies', 'CompanyListLead', '3');
+        tester, 'dbCompanies', 'CompanyListLead', '2');
   }
 
   testWidgets('''GrowERP company lead test''', (tester) async {

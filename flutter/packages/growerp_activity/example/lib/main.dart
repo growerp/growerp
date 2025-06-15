@@ -110,7 +110,6 @@ List<LocalizationsDelegate<dynamic>> extraDelegates = const [
 
 List<BlocProvider> getExampleBlocProviders(restClient, classificationId) {
   return [
-    ...getActivityBlocProviders(restClient, classificationId),
     ...getUserCompanyBlocProviders(restClient, classificationId),
   ];
 }

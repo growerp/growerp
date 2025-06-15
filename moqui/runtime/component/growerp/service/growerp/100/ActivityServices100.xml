@@ -430,9 +430,9 @@ along with this software (see the LICENSE.md file). If not, see
                                         activityName: entry.workEffortName,
                                         statusId: convertedStatusId,
                                         description: entry.description,
-                                        estStartDate: entry.estimatedStartDate?
+                                        estimatedStartDate: entry.estimatedStartDate?
                                             ec.l10n.format(entry.estimatedStartDate,'yyyy-MM-dd') : null,
-                                        estEndDate: entry.estimatedCompletionDate?
+                                        estimatedEndDate: entry.estimatedCompletionDate?
                                             ec.l10n.format(entry.estimatedCompletionDate,'yyyy-MM-dd')  : null,
                                         actualStartDate: entry.actualStartDate?
                                             ec.l10n.format(entry.actualStartDate,'yyyy-MM-dd') : null,

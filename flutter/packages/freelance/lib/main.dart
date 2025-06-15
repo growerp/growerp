@@ -71,12 +71,10 @@ Future main() async {
     ],
     extraBlocProviders: [
       ...getUserCompanyBlocProviders(restClient, classificationId),
-      ...getActivityBlocProviders(restClient, classificationId),
       ...getCatalogBlocProviders(restClient, classificationId),
       ...getOrderAccountingBlocProviders(restClient, classificationId),
       ...getMarketingBlocProviders(restClient),
       ...getWebsiteBlocProviders(restClient),
-      ...getActivityBlocProviders(restClient, classificationId),
     ],
   ));
 }

@@ -14,6 +14,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:growerp_activity/growerp_activity.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:universal_io/io.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -24,6 +25,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:flutter/rendering.dart';
 
 import '../../common/common.dart';
 import '../../company/bloc/company_bloc.dart';
@@ -93,6 +95,7 @@ class UserDialogState extends State<UserDialog> {
   late bool isAdmin;
   late double top;
   double? right;
+  late bool isVisible;
 
   @override
   void initState() {
@@ -125,6 +128,28 @@ class UserDialogState extends State<UserDialog> {
     isAdmin = context.read<AuthBloc>().state.authenticate!.user!.userGroup ==
         UserGroup.admin;
     top = -100;
+
+    isVisible = true;
+    _scrollController.addListener(() {
+      if (isVisible != false &&
+          _scrollController.position.userScrollDirection ==
+              ScrollDirection.reverse) {
+        if (mounted) {
+          setState(() {
+            isVisible = false;
+          });
+        }
+      }
+      if (isVisible != true &&
+          _scrollController.position.userScrollDirection ==
+              ScrollDirection.forward) {
+        if (mounted) {
+          setState(() {
+            isVisible = true;
+          });
+        }
+      }
+    });
   }
 
   @override
@@ -206,8 +231,35 @@ class UserDialogState extends State<UserDialog> {
                               right = right! - details.delta.dx;
                             });
                           },
-                          child: ImageButtons(
-                              _scrollController, _onImageButtonPressed),
+                          child: Column(
+                            children: [
+                              ImageButtons(
+                                  _scrollController, _onImageButtonPressed),
+                              SizedBox(height: isPhone ? 310 : 250),
+                              Visibility(
+                                visible: isVisible,
+                                child: FloatingActionButton(
+                                  key: const Key("events"),
+                                  onPressed: () async => await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return Dialog(
+                                            child: popUp(
+                                                context: context,
+                                                title: ('User events'),
+                                                child: ActivityList(
+                                                  ActivityType.event,
+                                                  companyUser:
+                                                      CompanyUser.tryParse(
+                                                          widget.user),
+                                                )));
+                                      }),
+                                  child: const Icon(Icons.event_available),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ],

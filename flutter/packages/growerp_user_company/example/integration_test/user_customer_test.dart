@@ -42,8 +42,8 @@ void main() {
         clear: true);
     await CommonTest.createCompanyAndAdmin(tester);
     await selectCustomers(tester);
-    await UserTest.addUsers(tester, customers.sublist(0, 1));
-    await UserTest.updateUsers(tester, customers.sublist(1, 2));
+    await UserTest.addUsers(tester, customers.sublist(0, 2));
+    await UserTest.updateUsers(tester, customers.sublist(2, 4));
     await UserTest.deleteUsers(tester);
     await CommonTest.logout(tester);
   });

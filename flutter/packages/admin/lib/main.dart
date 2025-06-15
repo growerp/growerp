@@ -101,6 +101,5 @@ List<BlocProvider> getAdminBlocProviders(restClient, classificationId) {
     ...getOrderAccountingBlocProviders(restClient, classificationId),
     ...getMarketingBlocProviders(restClient),
     ...getWebsiteBlocProviders(restClient),
-    ...getActivityBlocProviders(restClient, classificationId),
   ];
 }

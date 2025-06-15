@@ -44,10 +44,12 @@ class ActivityDialogState extends State<ActivityDialog> {
   late final User _originator = _authBloc.state.authenticate!.user!;
   late User _selectedAssignee;
   late User? _selectedThirdParty;
+  late DateTime _selectedDate;
 
   @override
   void initState() {
     super.initState();
+    _selectedDate = CustomizableDateTime.current;
     _pseudoIdController.text = widget.activity.pseudoId;
     _nameController.text = widget.activity.activityName;
     _descriptionController.text = widget.activity.description;
@@ -93,7 +95,7 @@ class ActivityDialogState extends State<ActivityDialog> {
                   context: context,
                   title:
                       '${widget.activity.activityType} #${widget.activity.pseudoId.isEmpty ? 'New' : widget.activity.pseudoId}',
-                  height: 500,
+                  height: isPhone ? 650 : 550,
                   width: 350,
                   child: _showForm(isPhone)));
         case ActivityBlocStatus.failure:
@@ -106,6 +108,24 @@ class ActivityDialogState extends State<ActivityDialog> {
   }
 
   Widget _showForm(isPhone) {
+    Future<void> selectDate(BuildContext context) async {
+      final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: CustomizableDateTime.current,
+        firstDate: CustomizableDateTime.current,
+        lastDate: CustomizableDateTime.current.add(const Duration(days: 356)),
+        builder: (BuildContext context, Widget? child) {
+          return Theme(
+              data: ThemeData(primarySwatch: Colors.green), child: child!);
+        },
+      );
+      if (picked != null && picked != _selectedDate) {
+        setState(() {
+          _selectedDate = picked;
+        });
+      }
+    }
+
     return Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -301,6 +321,28 @@ class ActivityDialogState extends State<ActivityDialog> {
                     }
                   },
                 ),
+              const SizedBox(height: 20),
+              InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Estimated start date',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                  ),
+                ),
+                child: Row(children: [
+                  Expanded(
+                      child: Center(
+                          child: Text(
+                    "${_selectedDate.toLocal()}".split(' ')[0],
+                    key: const Key('date'),
+                  ))),
+                  OutlinedButton(
+                    key: const Key('setDate'),
+                    onPressed: () => selectDate(context),
+                    child: const Text(' Update'),
+                  ),
+                ]),
+              ),
               const SizedBox(height: 10),
               Row(children: [
                 if (widget.activity.activityId.isNotEmpty &&

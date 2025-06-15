@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:growerp_activity/growerp_activity.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
@@ -71,15 +72,14 @@ List<MenuOption> menuOptions = [
     userGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
-        form: const OpportunityList(),
-        label: 'My Opportunities',
-        icon: const Icon(Icons.home),
+        form: const ActivityList(ActivityType.todo),
+        label: 'My To Do, tasks',
+        icon: const Icon(Icons.task),
       ),
       TabItem(
-        form: const FinDocList(
-            key: Key('Request'), sales: false, docType: FinDocType.request),
-        label: 'Requests',
-        icon: const Icon(Icons.question_answer),
+        form: const OpportunityList(),
+        label: 'Opportunities',
+        icon: const Icon(Icons.home),
       ),
       TabItem(
         form: const UserList(
@@ -96,6 +96,12 @@ List<MenuOption> menuOptions = [
         ),
         label: 'Customers',
         icon: const Icon(Icons.school),
+      ),
+      TabItem(
+        form: const FinDocList(
+            key: Key('Request'), sales: false, docType: FinDocType.request),
+        label: 'Requests',
+        icon: const Icon(Icons.question_answer),
       ),
     ],
   ),

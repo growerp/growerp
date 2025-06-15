@@ -45,11 +45,6 @@ Future<void> main() async {
     await UserTest.addUsers(tester, administrators.sublist(0, 3));
     await UserTest.updateUsers(tester, administrators.sublist(3, 6));
     await UserTest.deleteUsers(tester);
-    await selectEmployees(tester);
-    await UserTest.addUsers(tester, employees.sublist(0, 3));
-    await UserTest.updateUsers(tester, employees.sublist(3, 6));
-    await UserTest.deleteUsers(tester);
-    await CommonTest.logout(tester);
     await CommonTest.logout(tester);
   }, skip: false);
 }

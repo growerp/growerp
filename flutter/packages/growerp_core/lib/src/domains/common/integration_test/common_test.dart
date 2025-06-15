@@ -270,7 +270,7 @@ class CommonTest {
 
   static Future<void> selectMainCompany(WidgetTester tester) async {
     await tapByKey(tester, 'tapCompany');
-    await checkWidgetKey(tester, 'CompanyDialogOrgInternal');
+    await checkWidgetKey(tester, 'CompanyDialogcompany');
   }
 
   static Future<void> doNewSearch(WidgetTester tester,

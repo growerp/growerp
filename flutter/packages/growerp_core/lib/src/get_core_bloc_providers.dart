@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_chat/growerp_chat.dart';
+import 'package:growerp_activity/growerp_activity.dart';
 
 import '../growerp_core.dart';
 
@@ -17,7 +18,9 @@ List<BlocProvider> getCoreBlocProviders(
   List<BlocProvider<StateStreamableSource<Object?>>> blocProviders = [
     BlocProvider<AuthBloc>(create: (context) => authBloc..add(AuthLoad())),
     BlocProvider<ChatRoomBloc>(
-        create: (context) => chatRoomBloc..add(const ChatRoomFetch())),
+        create: (context) => ChatRoomBloc(restClient, chatClient, authBloc)
+          ..add(const ChatRoomFetch())),
+    BlocProvider<ActivityBloc>(create: (context) => ActivityBloc(restClient)),
     BlocProvider<ThemeBloc>(
         create: (context) => ThemeBloc()..add(ThemeSwitch())),
     BlocProvider<NotificationBloc>(

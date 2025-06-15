@@ -44,19 +44,19 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
       value: Text(item.pseudoId, key: Key('id$index'))));
   rowContent.add(TableRowContent(
       name: 'name',
-      width: isPhone ? 29 : 25,
+      width: isPhone ? 29 : 15,
       value: Text("${item.opportunityName}", key: Key('name$index'))));
   if (!isPhone) {
     rowContent.add(TableRowContent(
-        name: 'Est. Amount',
-        width: 15,
+        name: 'Amount',
+        width: 5,
         value: Text(item.estAmount.toString(),
             key: Key('estAmount$index'), textAlign: TextAlign.center)));
   }
   if (!isPhone) {
     rowContent.add(TableRowContent(
-        name: 'Est.Probability',
-        width: 15,
+        name: 'Probability',
+        width: 5,
         value: Text(item.estProbability.toString(),
             key: Key('estProbability$index'), textAlign: TextAlign.center)));
   }
@@ -67,7 +67,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         value: Text(
           (item.leadUser != null
               ? "${item.leadUser!.firstName} "
-                  "${item.leadUser!.lastName}, "
+                  "${item.leadUser!.lastName},\n "
                   "${item.leadUser!.company!.name}"
               : ""),
           key: Key('lead$index'),
@@ -76,7 +76,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
   if (!isPhone) {
     rowContent.add(TableRowContent(
         name: 'Lead Email',
-        width: 15,
+        width: 10,
         value: Text(
           item.leadUser != null ? item.leadUser!.email ?? '' : "",
           key: Key('leadEmail$index'),
@@ -85,17 +85,17 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
   if (!isPhone) {
     rowContent.add(TableRowContent(
         name: 'Stage',
-        width: 15,
+        width: 8,
         value: Text("${item.stageId}",
             key: Key('stageId$index'), textAlign: TextAlign.center)));
   }
   rowContent.add(TableRowContent(
       name: 'next Step',
-      width: 15,
+      width: 8,
       value: Text(item.nextStep != null ? "${item.nextStep}" : "",
           key: Key('nextStep$index'), textAlign: TextAlign.center)));
   rowContent.add(TableRowContent(
-      width: isPhone ? 15 : 15,
+      width: isPhone ? 5 : 5,
       name: ' ',
       value: IconButton(
           visualDensity: VisualDensity.compact,

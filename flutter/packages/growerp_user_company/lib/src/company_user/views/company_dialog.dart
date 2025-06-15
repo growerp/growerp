@@ -111,12 +111,17 @@ class CompanyFormState extends State<CompanyDialog> {
     company = widget.company;
     companyUserBloc = context.read<CompanyUserBloc>();
     _companyDialogFormKey = GlobalKey<FormState>();
-    authenticate = context.read<AuthBloc>().state.authenticate!;
+    AuthBloc authBloc = context.read<AuthBloc>();
+    authenticate = authBloc.state.authenticate!;
     switch (widget.company.partyId) {
       case null:
+        // main company
+        authBloc.add(AuthLoad());
         company = authenticate.company!;
       case '_NEW_':
         company = widget.company.copyWith(partyId: null);
+      default:
+        company = widget.company;
     }
 
     employees = List.of(company.employees);
@@ -184,6 +189,8 @@ class CompanyFormState extends State<CompanyDialog> {
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
     right = right ?? (isPhone ? 20 : 150);
+    print(
+        "=========company/user dialog key: CompanyDialog${company.role?.name ?? Role.unknown}");
     return Dialog(
         key: Key('CompanyDialog${company.role?.name ?? Role.unknown}'),
         insetPadding: const EdgeInsets.all(10),

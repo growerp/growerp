@@ -25,6 +25,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_activity/growerp_activity.dart';
+import 'package:flutter/rendering.dart';
 
 import '../../common/address_dialog.dart';
 import '../../common/payment_method_dialog.dart';
@@ -98,6 +99,7 @@ class UserDialogState extends State<UserDialogStateFull> {
   late double bottom;
   late double top;
   double? right;
+  late bool isVisible;
 
   @override
   void initState() {
@@ -132,6 +134,28 @@ class UserDialogState extends State<UserDialogStateFull> {
     isAdmin = context.read<AuthBloc>().state.authenticate!.user!.userGroup ==
         UserGroup.admin;
     top = -100;
+
+    isVisible = true;
+    _scrollController.addListener(() {
+      if (isVisible != false &&
+          _scrollController.position.userScrollDirection ==
+              ScrollDirection.reverse) {
+        if (mounted) {
+          setState(() {
+            isVisible = false;
+          });
+        }
+      }
+      if (isVisible != true &&
+          _scrollController.position.userScrollDirection ==
+              ScrollDirection.forward) {
+        if (mounted) {
+          setState(() {
+            isVisible = true;
+          });
+        }
+      }
+    });
   }
 
   @override
@@ -173,7 +197,7 @@ class UserDialogState extends State<UserDialogStateFull> {
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    right = right ?? (isPhone ? 20 : 150);
+    right = right ?? (isPhone ? 20 : 40);
     String title = '';
     if (_selectedRole == Role.company) {
       title = widget.user.userGroup != null &&
@@ -191,7 +215,7 @@ class UserDialogState extends State<UserDialogStateFull> {
           context: context,
           title: "$title #${widget.user.pseudoId ?? ' new'}",
           width: isPhone ? 400 : 800,
-          height: isPhone ? 700 : 700,
+          height: isPhone ? 700 : 600,
           child: ScaffoldMessenger(
             child: Scaffold(
                 backgroundColor: Colors.transparent,
@@ -226,23 +250,28 @@ class UserDialogState extends State<UserDialogStateFull> {
                           children: [
                             ImageButtons(
                                 _scrollController, _onImageButtonPressed),
-                            const SizedBox(height: 400),
-                            FloatingActionButton(
-                              onPressed: () async => await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return Dialog(
-                                        child: popUp(
-                                            context: context,
-                                            title: ('User events'),
-                                            child: ActivityList(
-                                              ActivityType.event,
-                                              companyUser: CompanyUser.tryParse(
-                                                  widget.user),
-                                            )));
-                                  }),
-                              child: const Icon(Icons.event_available),
+                            SizedBox(height: isPhone ? 350 : 250),
+                            Visibility(
+                              visible: isVisible,
+                              child: FloatingActionButton(
+                                key: const Key("events"),
+                                onPressed: () async => await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return Dialog(
+                                          child: popUp(
+                                              context: context,
+                                              title: ('User events'),
+                                              child: ActivityList(
+                                                ActivityType.event,
+                                                companyUser:
+                                                    CompanyUser.tryParse(
+                                                        widget.user),
+                                              )));
+                                    }),
+                                child: const Icon(Icons.event_available),
+                              ),
                             )
                           ],
                         ),
@@ -406,9 +435,11 @@ class UserDialogState extends State<UserDialogStateFull> {
         ),
       ),
       InputDecorator(
-          decoration: const InputDecoration(
-            labelText: 'Postal Address',
-          ),
+          decoration: InputDecoration(
+              labelText: 'Postal Address',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
           child: Row(children: [
             Expanded(
                 child: InkWell(
@@ -458,9 +489,11 @@ class UserDialogState extends State<UserDialogStateFull> {
                     ]))),
           ])),
       InputDecorator(
-          decoration: const InputDecoration(
-            labelText: 'Payment method',
-          ),
+          decoration: InputDecoration(
+              labelText: 'Payment method',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
           child: Row(children: [
             Expanded(
                 child: InkWell(
@@ -521,7 +554,10 @@ class UserDialogState extends State<UserDialogStateFull> {
         InputDecorator(
             decoration: InputDecoration(
                 labelText: "${_selectedCompany.role?.value ?? Role.unknown}"
-                    " Company information"),
+                    " Company information",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                )),
             child: Column(children: [
               Row(children: [
                 Expanded(
@@ -810,7 +846,7 @@ class UserDialogState extends State<UserDialogStateFull> {
     if (!ResponsiveBreakpoints.of(context).isMobile) {
       rows.add(const SizedBox(height: 20));
       rows.add(SizedBox(
-          height: 400,
+          height: 300,
           child: MasonryGridView.count(
             itemCount: widgets.length,
             crossAxisCount: 2,
