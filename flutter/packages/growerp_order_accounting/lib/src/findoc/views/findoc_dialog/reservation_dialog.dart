@@ -86,28 +86,22 @@ class ReservationDialogState extends State<ReservationDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<FinDocBloc, FinDocState>(
+    return BlocConsumer<FinDocBloc, FinDocState>(
         listenWhen: (previous, current) =>
             previous.status == FinDocStatus.loading,
-        listener: (context, finDocState) async {
-          switch (finDocState.status) {
-            case FinDocStatus.success:
-              HelperFunctions.showMessage(
-                  context,
-                  '${widget.finDoc.idIsNull() ? "Add" : "Update"} successfull',
-                  Colors.green);
-              Navigator.of(context).pop();
-              break;
-            case FinDocStatus.failure:
-              HelperFunctions.showMessage(
-                  context, 'Error: ${finDocState.message}', Colors.red);
-              break;
-            default:
-              const Text("????");
+        listener: (context, finDocState) {
+          if (finDocState.status == FinDocStatus.success) {
+            Navigator.of(context).pop();
           }
         },
-        child:
-            SizedBox(height: 600, width: 400, child: _addRentalItemDialog()));
+        builder: (context, finDocState) {
+          if (finDocState.status == FinDocStatus.loading) {
+            return const LoadingIndicator();
+          } else {
+            return SizedBox(
+                height: 600, width: 400, child: _addRentalItemDialog());
+          }
+        });
   }
 
   bool whichDayOk(DateTime day) {
