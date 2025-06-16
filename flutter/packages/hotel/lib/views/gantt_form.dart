@@ -72,8 +72,18 @@ class _GanttFormState extends State<GanttForm> {
 
     scheme = Theme.of(context).colorScheme;
     return BlocBuilder<AssetBloc, AssetState>(builder: (context, assetState) {
-      return BlocBuilder<FinDocBloc, FinDocState>(
-          builder: (context, finDocState) {
+      return BlocConsumer<FinDocBloc, FinDocState>(
+          listener: (context, finDocState) {
+        switch (finDocState.status) {
+          case FinDocStatus.success:
+            HelperFunctions.showMessage(
+                context, '${"Update"} successfull', Colors.green);
+          case FinDocStatus.failure:
+            HelperFunctions.showMessage(
+                context, 'Error: ${finDocState.message}', Colors.red);
+          default:
+        }
+      }, builder: (context, finDocState) {
         return BlocBuilder<ProductBloc, ProductState>(
             builder: (context, productState) {
           if (finDocState.status == FinDocStatus.success &&
