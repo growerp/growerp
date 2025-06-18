@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../user.dart';
 
@@ -38,7 +39,7 @@ TableData getUserListTableData(Bloc bloc, String classificationId,
       ),
     ));
     rowContent.add(TableRowContent(
-        name: const Text('ID\nName\nEmail', textAlign: TextAlign.start),
+        name: const Text('ID\nName\nEmail/Url', textAlign: TextAlign.start),
         width: 40,
         value: Column(
           key: Key('item$index'),
@@ -48,10 +49,21 @@ TableData getUserListTableData(Bloc bloc, String classificationId,
             Text(
                 ("${item.firstName ?? ''} ${item.lastName ?? ''}").truncate(18),
                 key: Key('name$index')),
-            Text(
-              item.email != null ? item.email.truncate(18) : ' ',
-              key: Key('email$index'),
-            ),
+            if (item.email == null && item.url != null)
+              GestureDetector(
+                onTap: () async => await launchUrl(Uri.parse(item.url!)),
+                child: const Text('-- tap for url --',
+                    style: TextStyle(decoration: TextDecoration.underline)),
+              ),
+            if (item.email != null && item.url == null)
+              GestureDetector(
+                onTap: () async =>
+                    await launchUrl(Uri.parse('mailto:${item.email}')),
+                child: Text('-- tap to email --',
+                    style:
+                        const TextStyle(decoration: TextDecoration.underline),
+                    key: Key('email$index')),
+              ),
           ],
         )));
   } else {
@@ -71,17 +83,36 @@ TableData getUserListTableData(Bloc bloc, String classificationId,
         )));
     rowContent.add(TableRowContent(
         name: 'Email',
-        width: 15,
-        value: Text(
-          item.email ?? ' ',
-          textAlign: TextAlign.left,
-          key: Key('email$index'),
-        )));
+        width: 18,
+        value: item.email != null
+            ? GestureDetector(
+                onTap: () async =>
+                    await launchUrl(Uri.parse('mailto:${item.email}')),
+                child: Text(item.email!,
+                    style:
+                        const TextStyle(decoration: TextDecoration.underline),
+                    textAlign: TextAlign.left,
+                    key: Key('email$index')))
+            : Text(
+                item.email ?? ' ',
+                textAlign: TextAlign.left,
+                key: Key('email$index'),
+              )));
     rowContent.add(TableRowContent(
-        name: 'Login Name',
-        width: 15,
-        value: Text((!item.loginDisabled! ? item.loginName ?? ' ' : ' '),
-            key: Key('username$index'))));
+        name: 'Url',
+        width: 18,
+        value: item.url != null
+            ? GestureDetector(
+                onTap: () async => await launchUrl(Uri.parse(item.url!)),
+                child: Text(item.url!,
+                    style:
+                        const TextStyle(decoration: TextDecoration.underline),
+                    textAlign: TextAlign.left,
+                    key: Key('url$index')))
+            : Text(
+                '',
+                key: Key('url$index'),
+              )));
   }
   // specific roles
   if (extra as Role != Role.unknown) {
