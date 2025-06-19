@@ -500,6 +500,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <if condition="open &amp;&amp; !finDocId &amp;&amp; !search">
                             <set field="fromDate" from="dayOldDate" />
                             <set field="status" from="statusList" />
+                            <set field="delStatus" value="OrderCancelled" />
                         </if>
                         <entity-find offset="start" limit="limit" list="items"
                             entity-name="growerp.order.OrderHeaderPartAndParties">
@@ -513,6 +514,9 @@ along with this software (see the LICENSE.md file). If not, see
                                 <econdition field-name="lastUpdatedStamp" operator="greater"
                                     from="fromDate" ignore-if-empty="true" />
                             </econditions>
+                            <!-- never display cancelled order when not search or single -->
+                            <econdition field-name="statusId" operator="not-equals" from="delStatus"
+                                ignore-if-empty="true" />
                         </entity-find>
                     </else>
                 </if>
@@ -1758,6 +1762,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find entity-name="mantle.facility.Facility" list="facilities">
                 <econdition field-name="ownerPartyId" from="companyPartyId" />
             </entity-find>
+            <!-- initially always open, when requested next step see below -->
             <if condition="order.sales == true">
                 <entity-find entity-name="mantle.party.contact.PartyContactMech"
                     list="postalContactMechs">
@@ -1767,7 +1772,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <service-call name="mantle.order.OrderServices.create#Order"
                     in-map="[productStoreId: productStoreId,
                             pseudoId: order.pseudoId,
-                            statusId: order.statusId,
+                            statusId: 'OrderOpen',
                             facilityId: facilities[0].facilityId,
                             vendorPartyId: vendorPartyId,
                             customerPartyId: customerPartyId,
@@ -1778,7 +1783,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="mantle.order.OrderServices.create#Order"
                         in-map="[   
                                 facilityId: facilities[0].facilityId,
-                                statusId: order.statusId,
+                                statusId: 'OrderOpen',
                                 pseudoId: order.pseudoId,
                                 vendorPartyId: vendorPartyId,
                                 customerPartyId: customerPartyId,
@@ -2055,13 +2060,19 @@ along with this software (see the LICENSE.md file). If not, see
                                             requireInventory: false,
                                             unitAmount: item.price]"
                             out-map="context" />
+                        <!-- settime for all dates otherwise ma5tching will fail in
+                        AssetsAvailableForProduct-->
+                        <set field="rentalFromDate"
+                            from="ec.l10n.parseTimestamp(item.rentalFromDate.substring(0,10) + ' 15:00:00.000', 'yyyy-MM-dd HH:mm:ss.SSS')" />
+                        <set field="rentalThruDate"
+                            from="ec.l10n.parseTimestamp(item.rentalThruDate.substring(0,10) + ' 12:00:00.000', 'yyyy-MM-dd HH:mm:ss.SSS')" />
                         <service-call name="create#growerp.product.AssetRental"
                             in-map="[   productId: item.product.productId,
                                     assetId: item.assetId,
                                     orderId: orderId,
                                     orderItemSeqId: orderItemSeqId,
-                                    rentalFromDate: item.rentalFromDate.substring(0,19),
-                                    rentalThruDate: item.rentalThruDate.substring(0,19),
+                                    rentalFromDate: rentalFromDate,
+                                    rentalThruDate: rentalThruDate,
                                 ]" />
                     </else-if>
                     <else>
@@ -2563,10 +2574,9 @@ along with this software (see the LICENSE.md file). If not, see
                     count-field="nbrUsed" cache="false">
                     <econdition field-name="productId" from="productId" />
                     <econdition field-name="assetId" from="asset.assetId" />
-                    <econdition field-name="ownerPartyId" from="companyPartyId" />
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
                     <econditions combine="or">
-                        <econditions combine="and"><!--order
-                            fromdate within -->
+                        <econditions combine="and"><!-- order fromdate within -->
                             <econdition field-name="rentalFromDate" operator="less-equals"
                                 from="fromDate" />
                             <econdition field-name="rentalThruDate" operator="greater-equals"
@@ -2875,6 +2885,10 @@ along with this software (see the LICENSE.md file). If not, see
                     <else-if condition="order.statusId == 'OrderCancelled'">
                         <service-call name="mantle.order.OrderServices.cancel#Order"
                             in-map="context" />
+                        <!-- if rental order delete asset rental records-->
+                        <entity-delete-by-condition entity-name="growerp.product.AssetRental">
+                            <econdition field-name="orderId" from="order.orderId" />
+                        </entity-delete-by-condition>
                     </else-if>
                 </if>
             </if>

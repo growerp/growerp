@@ -89,14 +89,6 @@ class _GanttFormState extends State<GanttForm> {
           if (finDocState.status == FinDocStatus.success &&
               productState.status == ProductStatus.success &&
               assetState.status == AssetStatus.success) {
-            if (assetState.assets.isEmpty) {
-              return Column(children: [
-                const SizedBox(height: 10),
-                ganttButtons(),
-                const SizedBox(height: 200),
-                const Center(child: Text("No Rooms found!")),
-              ]);
-            }
             itemCount = 0;
             reservations = [];
             assets = assetState.assets;
@@ -191,12 +183,10 @@ class _GanttFormState extends State<GanttForm> {
                 ganttFromDate = nowDate;
                 break;
             }
+
             return Stack(
               children: [
                 Column(children: <Widget>[
-                  const SizedBox(height: 10),
-                  ganttButtons(),
-                  const SizedBox(height: 5),
                   Expanded(
                     child: HorizontalDataTable(
                       leftHandSideColumnWidth: 80,
@@ -223,29 +213,89 @@ class _GanttFormState extends State<GanttForm> {
                         bottom -= details.delta.dy;
                       });
                     },
-                    child: FloatingActionButton(
-                        key: const Key("addNew"),
-                        onPressed: () async {
-                          await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                  value: _productBloc,
-                                  child: BlocProvider.value(
-                                      value: _finDocBloc,
-                                      child: ReservationDialog(
-                                          finDoc: FinDoc(
-                                              sales: true,
-                                              docType: FinDocType.order,
-                                              items: []))),
-                                );
-                              });
-                        },
-                        tooltip: 'Add New',
-                        child: const Icon(Icons.add)),
+                    child: Column(
+                      children: [
+                        if (columnPeriod != Period.day &&
+                            assetState.assets.isNotEmpty)
+                          FloatingActionButton(
+                              heroTag: 'day',
+                              key: const Key("day"),
+                              onPressed: () =>
+                                  setState(() => columnPeriod = Period.day),
+                              tooltip: 'Chart by Day',
+                              child: const Text('Day')),
+                        const SizedBox(height: 5),
+                        if (columnPeriod != Period.week &&
+                            assetState.assets.isNotEmpty)
+                          FloatingActionButton(
+                              heroTag: 'week',
+                              key: const Key("week"),
+                              onPressed: () =>
+                                  setState(() => columnPeriod = Period.week),
+                              tooltip: 'Chart by Week',
+                              child: const Text('Week')),
+                        const SizedBox(height: 5),
+                        if (columnPeriod != Period.month &&
+                            assetState.assets.isNotEmpty)
+                          FloatingActionButton(
+                              heroTag: 'month',
+                              key: const Key("month"),
+                              onPressed: () =>
+                                  setState(() => columnPeriod = Period.month),
+                              tooltip: 'Chart by Month',
+                              child: const Text('Month')),
+                        const SizedBox(height: 5),
+                        FloatingActionButton(
+                            heroTag: 'refresh',
+                            key: const Key("refresh"),
+                            onPressed: () {
+                              _finDocBloc.add(const FinDocFetch(refresh: true));
+                              _assetBloc.add(const AssetFetch(refresh: true));
+                              _productBloc.add(const ProductRentalOccupancy());
+                              setState(() {});
+                              return;
+                            },
+                            tooltip: 'Chart by day',
+                            child: const Icon(Icons.refresh)),
+                        const SizedBox(height: 5),
+                        if (assetState.assets.isNotEmpty)
+                          FloatingActionButton(
+                              heroTag: 'addnew',
+                              key: const Key("addNew"),
+                              onPressed: () async {
+                                await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return BlocProvider.value(
+                                        value: _productBloc,
+                                        child: BlocProvider.value(
+                                            value: _finDocBloc,
+                                            child: ReservationDialog(
+                                                finDoc: FinDoc(
+                                                    sales: true,
+                                                    docType: FinDocType.order,
+                                                    items: []))),
+                                      );
+                                    });
+                              },
+                              tooltip: 'Add New',
+                              child: const Icon(Icons.add)),
+                      ],
+                    ),
                   ),
                 ),
+                if (assetState.assets.isEmpty)
+                  const Column(children: [
+                    SizedBox(height: 10),
+                    SizedBox(height: 200),
+                    Center(
+                        child: Text(
+                            "No Rooms found,\n goto to the room section to add:\n"
+                            "1. room types\n"
+                            "2. actual rooms related to room types",
+                            style: TextStyle(fontSize: 20.0))),
+                  ]),
               ],
             );
           }
@@ -253,44 +303,6 @@ class _GanttFormState extends State<GanttForm> {
         });
       });
     });
-  }
-
-  SizedBox ganttButtons() {
-    return SizedBox(
-      height: 18,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          OutlinedButton(
-            onPressed: () => setState(() => columnPeriod = Period.day),
-            child: const Text('Day'),
-          ),
-          const SizedBox(width: 10),
-          OutlinedButton(
-            onPressed: () => setState(() => columnPeriod = Period.week),
-            child: const Text('Week'),
-          ),
-          const SizedBox(width: 10),
-          OutlinedButton(
-            onPressed: () => setState(() => columnPeriod = Period.month),
-            child: const Text('Month'),
-          ),
-          const SizedBox(width: 10),
-          OutlinedButton(
-            key: const Key('refresh'),
-            onPressed: () {
-              _finDocBloc.add(const FinDocFetch(refresh: true));
-              _assetBloc.add(const AssetFetch(refresh: true));
-              _productBloc.add(const ProductRentalOccupancy());
-              setState(() {});
-              return;
-            },
-            child: const Text('Refresh'),
-          ),
-          const SizedBox(width: 10),
-        ],
-      ),
-    );
   }
 
   Widget buildGrid() {
@@ -506,7 +518,7 @@ class _GanttFormState extends State<GanttForm> {
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Text(
-                      "${reservation.orderId} "
+                      "${reservation.pseudoId} "
                       " ${reservation.otherCompany?.name ?? ''}"
                       " ${reservation.otherUser?.firstName ?? ''}"
                       " ${reservation.otherUser?.lastName ?? ''}",

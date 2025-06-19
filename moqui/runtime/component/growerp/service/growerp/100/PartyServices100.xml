@@ -3541,7 +3541,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </if>
                     <set field="finDoc"
                         from="[
-                            statusId: 'FinDocPrep',
+                            statusId: 'FinDocCreated',
                             docType: 'order',
                             sales: true,
                             currencyUomId: aPref.baseCurrencyUomId,
@@ -3552,12 +3552,6 @@ along with this software (see the LICENSE.md file). If not, see
                         name="growerp.100.FinDocServices100.create#FinDoc"
                         in-map="[finDoc: finDoc, classificationId: classificationId]"
                         out-map="context" />
-                    <service-call
-                        in-map="[finDoc: [orderId: finDoc.orderId,
-                                    docType: 'order',
-                                    sales: true,
-                                    statusId:'FinDocCreated']]"
-                        name="growerp.100.FinDocServices100.update#FinDoc" />
                     <set field="index" from="index + 1" />
                 </iterate>
 
