@@ -69,9 +69,12 @@ class AssetListState extends State<AssetList> {
             case AssetStatus.success:
               Widget tableView() {
                 if (state.assets.isEmpty) {
-                  return const Center(
-                      child: Text("no assets found",
-                          style: TextStyle(fontSize: 20.0)));
+                  return Center(
+                      child: Text(
+                          context.read<String>() == 'AppHotel'
+                              ? "No Rooms found, add one"
+                              : 'No Assets found, add one',
+                          style: const TextStyle(fontSize: 20.0)));
                 }
                 // get table data formatted for tableView
                 var (

@@ -58,12 +58,14 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
           Row(
             children: [
               const Text('Status'),
-              const SizedBox(width: 10),
+              const SizedBox(width: 5),
               if (item.docType != FinDocType.shipment &&
                   item.docType != FinDocType.request)
                 const Text('Total'),
-              const SizedBox(width: 10),
+              const SizedBox(width: 5),
               const Text('#Items'),
+              const SizedBox(width: 5),
+              Text(classificationId == 'AppHotel' ? '#Room' : ''),
             ],
           ),
         ]),
@@ -101,14 +103,17 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
                           ? item.status!.hotel
                           : item.status!.name,
                   key: Key("status$index")),
-              const SizedBox(width: 10),
+              const SizedBox(width: 5),
               if (item.docType != FinDocType.shipment &&
                   item.docType != FinDocType.request)
                 Text(item.grandTotal.currency(currencyId: currencyId),
                     key: Key("grandTotal$index")),
-              if (item.docType != FinDocType.shipment)
-                const SizedBox(width: 10),
+              if (item.docType != FinDocType.shipment) const SizedBox(width: 5),
               Text(item.items.length.toString(), key: Key("itemsLength$index")),
+              const SizedBox(width: 10),
+              Text(classificationId == 'AppHotel' && item.items[0].asset != null
+                  ? item.items[0].asset!.assetName ?? '??'
+                  : '')
             ],
           ),
         ])));

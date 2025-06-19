@@ -548,6 +548,7 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[assetId: assetId, quantityOnHandDiff: asset.quantityOnHand,
                             availableToPromiseDiff: asset.quantityOnHand,
                                 effdateDate: ec.user.nowTimestamp,
+                                hasQuantity: 'Y',
                                 productId: asset.product.productId]" />
             <service-call name="growerp.100.InventoryServices100.get#Assets"
                 in-map="[assetId: assetId]" out-map="context" />

@@ -90,6 +90,10 @@ class ReservationDialogState extends State<ReservationDialog> {
         listenWhen: (previous, current) =>
             previous.status == FinDocStatus.loading,
         listener: (context, finDocState) {
+          if (finDocState.status == FinDocStatus.failure) {
+            HelperFunctions.showMessage(
+                context, '${finDocState.message}', Colors.red);
+          }
           if (finDocState.status == FinDocStatus.success) {
             Navigator.of(context).pop();
           }
@@ -147,7 +151,7 @@ class ReservationDialogState extends State<ReservationDialog> {
         ),
         child: popUp(
             context: context,
-            height: 750,
+            height: 600,
             width: 400,
             title: widget.finDoc.orderId == null
                 ? (classificationId == 'AppHotel'
@@ -156,7 +160,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                 : (classificationId == 'AppHotel'
                         ? "Reservation #"
                         : "Order #") +
-                    widget.finDoc.orderId!,
+                    widget.finDoc.pseudoId!,
             child: Form(
                 key: _formKey,
                 child: ListView(key: const Key('listView'), children: <Widget>[
@@ -369,10 +373,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                                     otherUser: _selectedCompanyUser?.getUser(),
                                     otherCompany:
                                         _selectedCompanyUser?.getCompany(),
-                                    status: widget.finDoc.docType ==
-                                            FinDocType.order
-                                        ? FinDocStatusVal.created
-                                        : FinDocStatusVal.inPreparation);
+                                    status: FinDocStatusVal.created);
                                 FinDocItem newItem = FinDocItem(
                                     product: _selectedProduct,
                                     itemType:
