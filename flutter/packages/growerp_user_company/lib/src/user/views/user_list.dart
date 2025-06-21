@@ -259,7 +259,6 @@ class UserListState extends State<UserList> {
             ],
           );
         }
-        return const LoadingIndicator();
       }
 
       switch (widget.role) {

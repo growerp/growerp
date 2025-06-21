@@ -8,9 +8,10 @@ work. -->
             <subscreens-item name="m" menu-title="GrowERP Ecommerce" menu-include="false"
                     location="component://PopRestStore/screen/store.xml" no-sub-path="true"/>
         </screen>
-        <screen location="component://webroot/screen/webroot.xml" default-subscreen="h">
+        <!--screen
+        location="component://webroot/screen/webroot.xml" default-subscreen="h">
             <subscreens-item name="h" menu-title="GrowERP Ecommerce" menu-include="false"
                     location="component://PopRestStore/screen/html.xml" no-sub-path="true"/>
-        </screen>
+        </screen-->
     </screen-facade>
 </moqui-conf>
