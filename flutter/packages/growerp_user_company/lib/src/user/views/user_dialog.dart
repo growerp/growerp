@@ -779,18 +779,22 @@ class UserDialogState extends State<UserDialogStateFull> {
             key: const Key('deleteUser'),
             child: const Text('Delete User'),
             onPressed: () async {
-              var result =
-                  await confirmDeleteUserComp(context, widget.user.userGroup!);
-              if (result != null) {
-                if (!mounted) return;
-                // delete company too?
-                if (widget.user.partyId == currentUser.partyId!) {
-                  _userBloc.add(UserDelete(widget.user.copyWith(image: null)));
-                  Navigator.of(context).pop(updatedUser);
-                  context.read<AuthBloc>().add(const AuthLoggedOut());
-                } else {
-                  _userBloc.add(UserDelete(widget.user.copyWith(image: null)));
+              if (widget.user.partyId != null &&
+                  currentUser.partyId == widget.user.partyId) {
+                var result =
+                    await confirmDeleteUserComp(context, widget.user.userGroup);
+                if (result != null) {
+                  if (!mounted) return;
+                  // delete company too?
+                  if (widget.user.partyId == currentUser.partyId!) {
+                    _userBloc
+                        .add(UserDelete(widget.user.copyWith(image: null)));
+                    Navigator.of(context).pop(updatedUser);
+                    context.read<AuthBloc>().add(const AuthLoggedOut());
+                  }
                 }
+              } else {
+                _userBloc.add(UserDelete(widget.user.copyWith(image: null)));
               }
             }),
       const SizedBox(width: 10),

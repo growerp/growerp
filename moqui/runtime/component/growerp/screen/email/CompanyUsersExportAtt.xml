@@ -22,6 +22,6 @@ along with this software (see the LICENSE.md file). If not, see
             out-map="context"/>
     </actions>
     <widgets>
-        <render-mode><text type="text"><![CDATA[ ${fileText} ]]></text></render-mode>
+        <render-mode><text type="text"><![CDATA[${fileText}]]></text></render-mode>
     </widgets>
 </screen>

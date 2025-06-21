@@ -20,7 +20,7 @@ import '../../domains.dart';
 /// dialog returns true when company delete, false when not,
 /// null when cancelled
 ///
-confirmDeleteUserComp(BuildContext context, UserGroup userGroup) {
+confirmDeleteUserComp(BuildContext context, UserGroup? userGroup) {
   List<Widget> actions = [
     const Text("Please note you will be blocked using the system."
         "\nThis cannot be undone!"),
