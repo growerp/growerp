@@ -42,6 +42,7 @@ class UserListState extends State<UserList> {
   bool hasReachedMax = false;
   late double bottom;
   double? right;
+  double currentScroll = 0;
 
   @override
   void initState() {
@@ -160,9 +161,12 @@ class UserListState extends State<UserList> {
         if (state.status == UserStatus.failure) {
           return FatalErrorForm(
               message: "Could not load ${widget.role.toString()}s!");
-        }
-        if (state.status == UserStatus.success) {
+        } else {
           users = state.users;
+          Future.delayed(const Duration(milliseconds: 10), () {
+            WidgetsBinding.instance.addPostFrameCallback(
+                (_) => _scrollController.jumpTo(currentScroll));
+          });
           hasReachedMax = state.hasReachedMax;
           return Stack(
             children: [
@@ -286,16 +290,11 @@ class UserListState extends State<UserList> {
 
   void _onScroll() {
     final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
+    currentScroll = _scrollController.position.pixels;
     if (!hasReachedMax &&
         currentScroll > 0 &&
         maxScroll - currentScroll <= _scrollThreshold) {
       _userBloc.add(UserFetch(searchString: searchString));
-
-      Future.delayed(const Duration(milliseconds: 100), () {
-        WidgetsBinding.instance.addPostFrameCallback(
-            (_) => _scrollController.jumpTo(currentScroll));
-      });
     }
   }
 }
