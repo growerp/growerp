@@ -33,7 +33,7 @@ class UserList extends StatefulWidget {
 class UserListState extends State<UserList> {
   final _scrollController = ScrollController();
   final _horizontalController = ScrollController();
-  final double _scrollThreshold = 200.0;
+  final double _scrollThreshold = 100.0;
   late UserBloc _userBloc;
   late AuthBloc _authBloc;
   List<User> users = const <User>[];
@@ -287,8 +287,15 @@ class UserListState extends State<UserList> {
   void _onScroll() {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
-    if (currentScroll > 0 && maxScroll - currentScroll <= _scrollThreshold) {
+    if (!hasReachedMax &&
+        currentScroll > 0 &&
+        maxScroll - currentScroll <= _scrollThreshold) {
       _userBloc.add(UserFetch(searchString: searchString));
+
+      Future.delayed(const Duration(milliseconds: 100), () {
+        WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _scrollController.jumpTo(currentScroll));
+      });
     }
   }
 }

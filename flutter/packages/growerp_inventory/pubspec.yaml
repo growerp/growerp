@@ -31,7 +31,7 @@ dependencies:
   image_picker: ^1.0.4
   responsive_framework: ^1.4.0
   dropdown_search: ^5.0.6
-  printing: ^5.11.1
+  printing: ^5.14.2
   pdf: ^3.10.8
   about: ^2.1.1
   shared_preferences: ^2.3.2

@@ -459,7 +459,10 @@ along with this software (see the LICENSE.md file). If not, see
             <script>System.out.println(">>>>importing ${companysUsers?.size()} company/users")</script>
             <set field="imported" type="Integer" value="0" />
             <iterate list="companyUsers" entry="companyUser">
-                <log message="===processing: ${companyUser}" />
+                <if condition="companyUser.toString().replaceAll(' ','').isEmpty()">
+                    <continue />
+                </if>
+                <log message="====processing ${companyUser}" />
                 <!-- validate -->
                 <if condition="!['Company','User'].contains(companyUser.type)">
                     <return error="true"
@@ -1973,11 +1976,9 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="fileText" />
         </out-parameters>
         <actions>
-            <script>logger.warn("getting companiesUsers")</script>
             <service-call name="growerp.100.PartyServices100.get#CompanyUser"
                 in-map="[export: true, limit: 9999]"
                 out-map="context" />
-            <set field="fileText" value="" />
             <script><![CDATA[
                 import org.apache.commons.csv.CSVPrinter
                 import org.apache.commons.csv.CSVFormat
@@ -1988,7 +1989,7 @@ along with this software (see the LICENSE.md file). If not, see
                     "Id", "type", "name", "role", "email", "URL", "telephone number",  "address1", "address2", "postalCode", "city", "province/state", "country", "countryId", "companyId", "companyName").print(outSb)
                 for (Map item in companiesUsers) {
                     printer.printRecord(item.pseudoId,
-                                        item.partyType,
+                                        item.type,
                                         item.name,
                                         item.role,
                                         item.email,
