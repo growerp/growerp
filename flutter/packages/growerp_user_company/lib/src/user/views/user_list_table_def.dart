@@ -51,15 +51,16 @@ TableData getUserListTableData(Bloc bloc, String classificationId,
                 key: Key('name$index')),
             if (item.email == null && item.url != null)
               GestureDetector(
-                onTap: () async => await launchUrl(Uri.parse(item.url!)),
-                child: const Text('-- tap for url --',
-                    style: TextStyle(decoration: TextDecoration.underline)),
+                onTap: () async => await launchUrl(Uri.parse("${item.url}")),
+                child: Text(item.url.truncate(15),
+                    style:
+                        const TextStyle(decoration: TextDecoration.underline)),
               ),
             if (item.email != null && item.url == null)
               GestureDetector(
                 onTap: () async =>
                     await launchUrl(Uri.parse('mailto:${item.email}')),
-                child: Text('-- tap to email --',
+                child: Text(item.email.truncate(15),
                     style:
                         const TextStyle(decoration: TextDecoration.underline),
                     key: Key('email$index')),

@@ -212,75 +212,76 @@ class UserDialogState extends State<UserDialogStateFull> {
         insetPadding: const EdgeInsets.all(10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: popUp(
-          context: context,
-          title: "$title #${widget.user.pseudoId ?? ' new'}",
-          width: isPhone ? 400 : 800,
-          height: isPhone ? 700 : 600,
-          child: ScaffoldMessenger(
-            child: Scaffold(
-                backgroundColor: Colors.transparent,
-                body: Stack(
-                  children: [
-                    BlocConsumer<UserBloc, UserState>(
-                        listener: (context, state) {
-                      if (state.status == UserStatus.failure) {
-                        HelperFunctions.showMessage(
-                            context, state.message, Colors.red);
-                      }
-                      if (state.status == UserStatus.success) {
-                        Navigator.of(context).pop(state.users[0]);
-                      }
-                    }, builder: (context, state) {
-                      if (state.status == UserStatus.loading) {
-                        return const LoadingIndicator();
-                      }
-                      return listChild();
-                    }),
-                    Positioned(
-                      right: right,
-                      top: top,
-                      child: GestureDetector(
-                        onPanUpdate: (details) {
-                          setState(() {
-                            top += details.delta.dy;
-                            right = right! - details.delta.dx;
-                          });
-                        },
-                        child: Column(
-                          children: [
-                            ImageButtons(
-                                _scrollController, _onImageButtonPressed),
-                            SizedBox(height: isPhone ? 350 : 250),
-                            Visibility(
-                              visible: isVisible,
-                              child: FloatingActionButton(
-                                key: const Key("events"),
-                                onPressed: () async => await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return Dialog(
-                                          child: popUp(
-                                              context: context,
-                                              title: ('User events'),
-                                              child: ActivityList(
-                                                ActivityType.event,
-                                                companyUser:
-                                                    CompanyUser.tryParse(
-                                                        widget.user),
-                                              )));
-                                    }),
-                                child: const Icon(Icons.event_available),
-                              ),
-                            )
-                          ],
+            context: context,
+            title: "$title #${widget.user.pseudoId ?? ' new'}",
+            width: isPhone ? 400 : 800,
+            height: isPhone ? 700 : 600,
+            child: ScaffoldMessenger(
+              child: Scaffold(
+                  backgroundColor: Colors.transparent,
+                  body: Stack(
+                    children: [
+                      BlocConsumer<UserBloc, UserState>(
+                          listener: (context, state) {
+                        if (state.status == UserStatus.failure) {
+                          HelperFunctions.showMessage(
+                              context, state.message, Colors.red);
+                        }
+                        if (state.status == UserStatus.success) {
+                          Navigator.of(context).pop(state.users.isNotEmpty
+                              ? state.users.first
+                              : null);
+                        }
+                      }, builder: (context, state) {
+                        if (state.status == UserStatus.loading) {
+                          return const LoadingIndicator();
+                        }
+                        return listChild();
+                      }),
+                      Positioned(
+                        right: right,
+                        top: top,
+                        child: GestureDetector(
+                          onPanUpdate: (details) {
+                            setState(() {
+                              top += details.delta.dy;
+                              right = right! - details.delta.dx;
+                            });
+                          },
+                          child: Column(
+                            children: [
+                              ImageButtons(
+                                  _scrollController, _onImageButtonPressed),
+                              SizedBox(height: isPhone ? 350 : 250),
+                              Visibility(
+                                visible: isVisible,
+                                child: FloatingActionButton(
+                                  key: const Key("events"),
+                                  onPressed: () async => await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return Dialog(
+                                            child: popUp(
+                                                context: context,
+                                                title: ('User events'),
+                                                child: ActivityList(
+                                                  ActivityType.event,
+                                                  companyUser:
+                                                      CompanyUser.tryParse(
+                                                          widget.user),
+                                                )));
+                                      }),
+                                  child: const Icon(Icons.event_available),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                )),
-          ),
-        ));
+                    ],
+                  )),
+            )));
   }
 
   Widget listChild() {
@@ -831,8 +832,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                   } else {
                     _userBloc.add(UserUpdate(updatedUser));
                     // if logged-in user update authBloc
-                    if (_authBloc.state.authenticate!.user!.partyId ==
-                        updatedUser.partyId) {
+                    if (currentUser.partyId == updatedUser.partyId) {
                       _authBloc.add(AuthLoad());
                     }
                   }

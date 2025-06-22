@@ -457,12 +457,13 @@ along with this software (see the LICENSE.md file). If not, see
         </in-parameters>
         <actions>
             <script>System.out.println(">>>>importing ${companysUsers?.size()} company/users")</script>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
             <set field="imported" type="Integer" value="0" />
             <iterate list="companyUsers" entry="companyUser">
                 <if condition="companyUser.toString().replaceAll(' ','').isEmpty()">
                     <continue />
                 </if>
-                <log message="====processing ${companyUser}" />
                 <!-- validate -->
                 <if condition="!['Company','User'].contains(companyUser.type)">
                     <return error="true"
@@ -474,17 +475,15 @@ along with this software (see the LICENSE.md file). If not, see
                         message="Invalid role value: ${companyUser.role} valid: 'Customer','Lead','Supplier'" />
                 </if>
 
-
                 <!-- check if company exist for either company or company within user -->
                 <if
-                    condition="(companyUser.company?.id != null || 
-                                                companyUser.company?.name != null) || 
-                                                companyUser.type == 'Company'">
+                    condition="(companyUser.type == 'Company' &amp;&amp; companyUser.pseudoId != null) || 
+                                                companyUser.company?.pseudoId != null">
                     <if condition="companyUser.type == 'Company'">
-                        <set field="pseudoId" from="companyUser.id" />
+                        <set field="pseudoId" from="companyUser.pseudoId" />
                         <set field="name" from="companyUser.name" />
                         <else>
-                            <set field="pseudoId" from="companyUser.company?.id" />
+                            <set field="pseudoId" from="companyUser.company?.pseudoId" />
                             <set field="name" from="companyUser.company?.name" />
                         </else>
                     </if>
@@ -502,15 +501,11 @@ along with this software (see the LICENSE.md file). If not, see
 
                 <if condition="companyUser.type == 'User'">
                     <then>
-                        <!-- for a user check if related company exists using id/name, -->
-                        <if
-                            condition="companyUser.company?.id != null || 
-                                                companyUser.company?.name != null">
-                            <if condition="companies">
-                                <set field="company"
-                                    from="[partyId: companies[0].partyId, name: companies[0].name]" />
-                            </if>
+                        <if condition="companies">
+                            <set field="companyUser.company"
+                                from="companyUser.company + [partyId: companies[0].partyId]" />
                         </if>
+                        <!-- process first/last name -->
                         <if condition="companyUser.name">
                             <if condition="!companyUser.name.contains(',')">
                                 <if condition="companyUser.name.contains(' ')">
@@ -526,56 +521,27 @@ along with this software (see the LICENSE.md file). If not, see
                             </if>
                         </if>
                         <set field="user"
-                            from="[
+                            from="companyUser + [
                                         firstName: firstName,
                                         lastName: lastName,
-                                        role: companyUser.role,
-                                        email: companyUser.email,
-                                        url: companyUser.url,
-                                        telephoneNr: companyUser.telephoneNumber,
-                                        address1: companyUser.address1,
-                                        address2: companyUser.address2,
-                                        postalCode: companyUser.postalCode,
-                                        city: companyUser.city,
-                                        province: companyUser.province,
-                                        country: companyUser.country,
-                                        countryId: companyUser.countryId,
-                                        company: company]" />
+                                        company: company,
+                                    ]" />
                         <service-call name="growerp.100.PartyServices100.create#User"
                             out-map="result"
                             in-map="[user: user, classificationId: classificationId]" />
                     </then>
 
                     <else-if condition="companyUser.type == 'Company'">
-                        <!-- result if company exist -->
-                        <set field="company"
-                            from="[
-                                        name: companyUser.name,
-                                        role: companyUser.role,
-                                        email: companyUser.email,
-                                        url: companyUser.url,
-                                        telephoneNr: companyUser.telephoneNumber,
-                                        address1: companyUser.address1,
-                                        address2: companyUser.address2,
-                                        postalCode: companyUser.postalCode,
-                                        city: companyUser.city,
-                                        province: companyUser.province,
-                                        country: companyUser.country,
-                                        countryId: companyUser.countryId,
-                                        ]" />
                         <if condition="!companies">
                             <service-call
                                 name="growerp.100.PartyServices100.create#Company"
                                 out-map="result"
-                                in-map="[company: company, classificationId: classificationId]" />
+                                in-map="[company: companyUser, classificationId: classificationId]" />
                             <else>
-                                <set field="company"
-                                    from="company + [partyId: companies[0].partyId,
-                                                            pseudoId: companies[0].pseudoId]" />
                                 <service-call
                                     name="growerp.100.PartyServices100.update#Company"
                                     out-map="result"
-                                    in-map="[company: company, classificationId: classificationId]" />
+                                    in-map="[company: companyUser, classificationId: classificationId]" />
                             </else>
                         </if>
                     </else-if>

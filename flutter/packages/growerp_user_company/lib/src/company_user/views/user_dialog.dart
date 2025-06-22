@@ -192,14 +192,23 @@ class UserDialogState extends State<UserDialog> {
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
     right = right ?? (isPhone ? 20 : 150);
+    String title = '';
+    if (_selectedRole == Role.company) {
+      title = widget.user.userGroup != null &&
+              widget.user.userGroup == UserGroup.admin
+          ? 'Admininistrator'
+          : 'Employee';
+    } else {
+      title = _selectedRole.name;
+    }
     return Dialog(
         key: Key('UserDialog${_selectedRole.name}'),
         insetPadding: const EdgeInsets.all(10),
         child: popUp(
             context: context,
-            title: "Person #${widget.user.pseudoId ?? ' new'}",
-            width: isPhone ? 400 : 1000,
-            height: isPhone ? 700 : 700,
+            title: "$title #${widget.user.pseudoId ?? ' new'}",
+            width: isPhone ? 400 : 800,
+            height: isPhone ? 700 : 600,
             child: ScaffoldMessenger(
               child: Scaffold(
                   backgroundColor: Colors.transparent,
@@ -212,14 +221,16 @@ class UserDialogState extends State<UserDialog> {
                               context, state.message, Colors.red);
                         }
                         if (state.status == CompanyUserStatus.success) {
-                          Navigator.of(context).pop();
+                          Navigator.of(context).pop(
+                              state.companiesUsers.isNotEmpty
+                                  ? state.companiesUsers.first
+                                  : null);
                         }
                       }, builder: (context, state) {
-                        if (state.status == CompanyUserStatus.success ||
-                            state.status == CompanyUserStatus.failure) {
-                          return listChild();
+                        if (state.status == CompanyUserStatus.loading) {
+                          return const LoadingIndicator();
                         }
-                        return const LoadingIndicator();
+                        return listChild();
                       }),
                       Positioned(
                         right: right,
@@ -419,9 +430,11 @@ class UserDialogState extends State<UserDialog> {
         ),
       ),
       InputDecorator(
-          decoration: const InputDecoration(
-            labelText: 'Postal Address',
-          ),
+          decoration: InputDecoration(
+              labelText: 'Postal Address',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
           child: Row(children: [
             Expanded(
                 child: InkWell(
@@ -471,9 +484,11 @@ class UserDialogState extends State<UserDialog> {
                     ]))),
           ])),
       InputDecorator(
-          decoration: const InputDecoration(
-            labelText: 'Payment method',
-          ),
+          decoration: InputDecoration(
+              labelText: 'Payment method',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
           child: Row(children: [
             Expanded(
                 child: InkWell(
@@ -534,7 +549,10 @@ class UserDialogState extends State<UserDialog> {
         InputDecorator(
             decoration: InputDecoration(
                 labelText: "${_selectedCompany.role?.value ?? Role.unknown}"
-                    " Related Company information"),
+                    " Related Company information",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                )),
             child: Column(children: [
               Row(children: [
                 Expanded(
@@ -756,18 +774,22 @@ class UserDialogState extends State<UserDialog> {
             key: const Key('deleteUser'),
             child: const Text('Delete User'),
             onPressed: () async {
-              var result =
-                  await confirmDeleteUserComp(context, widget.user.userGroup!);
-              if (result != null) {
-                if (!mounted) return;
-                // delete company too?
-                if (widget.user.partyId == currentUser.partyId!) {
-                  _companyUserBloc.add(CompanyUserDelete(user: widget.user));
-                  Navigator.of(context).pop(updatedUser);
-                  context.read<AuthBloc>().add(const AuthLoggedOut());
-                } else {
-                  _companyUserBloc.add(CompanyUserDelete(user: widget.user));
+              if (widget.user.partyId != null &&
+                  currentUser.partyId == widget.user.partyId) {
+                var result = await confirmDeleteUserComp(
+                    context, widget.user.userGroup!);
+                if (result != null) {
+                  if (!mounted) return;
+                  // delete company too?
+                  if (widget.user.partyId == currentUser.partyId!) {
+                    _companyUserBloc.add(CompanyUserDelete(user: widget.user));
+                    Navigator.of(context).pop(updatedUser);
+                    context.read<AuthBloc>().add(const AuthLoggedOut());
+                  }
                 }
+              } else {
+                _companyUserBloc.add(
+                    CompanyUserDelete(user: widget.user.copyWith(image: null)));
               }
             }),
       const SizedBox(width: 10),
@@ -805,6 +827,10 @@ class UserDialogState extends State<UserDialog> {
                   } else {
                     _companyUserBloc.add(
                         CompanyUserUpdate(CompanyUser.tryParse(updatedUser)));
+                    // if logged-in user update authBloc
+                    if (currentUser.partyId == updatedUser.partyId) {
+                      _authBloc.add(AuthLoad());
+                    }
                   }
                 }
               }))
@@ -820,7 +846,7 @@ class UserDialogState extends State<UserDialog> {
     if (!ResponsiveBreakpoints.of(context).isMobile) {
       rows.add(const SizedBox(height: 20));
       rows.add(SizedBox(
-          height: 400,
+          height: 300,
           child: MasonryGridView.count(
             itemCount: widgets.length,
             crossAxisCount: 2,

@@ -131,6 +131,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
     Emitter<UserState> emit,
   ) async {
     try {
+      emit(state.copyWith(status: UserStatus.loading));
       List<User> users = List.from(state.users);
       await restClient.deleteUser(
           partyId: event.user.partyId!, deleteCompanyToo: false);
@@ -144,9 +145,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
           message: 'User ${event.user.firstName} is deleted now..'));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: UserStatus.failure,
-          users: [],
-          message: await getDioError(e)));
+          status: UserStatus.failure, message: await getDioError(e)));
     }
   }
 }

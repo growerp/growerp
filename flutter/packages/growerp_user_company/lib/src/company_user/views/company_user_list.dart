@@ -37,6 +37,7 @@ class CompanyUserList extends StatefulWidget {
 class CompanyUserListState extends State<CompanyUserList> {
   final _scrollController = ScrollController();
   final _horizontalController = ScrollController();
+  final double _scrollThreshold = 100.0;
   late CompanyUserBloc _companyUserBloc;
   List<CompanyUser> companiesUsers = const <CompanyUser>[];
   bool showSearchField = false;
@@ -49,6 +50,7 @@ class CompanyUserListState extends State<CompanyUserList> {
       .toInt();
   late double bottom;
   double? right;
+  double currentScroll = 0;
 
   @override
   void initState() {
@@ -56,21 +58,21 @@ class CompanyUserListState extends State<CompanyUserList> {
     _scrollController.addListener(_onScroll);
     switch (widget.role) {
       case Role.supplier:
-        _companyUserBloc =
-            context.read<CompanyUserSupplierBloc>() as CompanyUserBloc;
-        break;
+        _companyUserBloc = context.read<CompanyUserSupplierBloc>()
+            as CompanyUserBloc
+          ..add(const CompanyUserFetch());
       case Role.customer:
-        _companyUserBloc =
-            context.read<CompanyUserCustomerBloc>() as CompanyUserBloc;
-        break;
+        _companyUserBloc = context.read<CompanyUserCustomerBloc>()
+            as CompanyUserBloc
+          ..add(const CompanyUserFetch());
       case Role.lead:
-        _companyUserBloc =
-            context.read<CompanyUserLeadBloc>() as CompanyUserBloc;
-        break;
+        _companyUserBloc = context.read<CompanyUserLeadBloc>()
+            as CompanyUserBloc
+          ..add(const CompanyUserFetch());
       default:
-        _companyUserBloc = context.read<CompanyUserBloc>();
+        _companyUserBloc = context.read<CompanyUserBloc>()
+          ..add(const CompanyUserFetch(refresh: true));
     }
-    _companyUserBloc.add(CompanyUserFetch(refresh: true, limit: limit));
     bottom = 50;
   }
 
@@ -173,9 +175,21 @@ class CompanyUserListState extends State<CompanyUserList> {
       }
 
       blocBuilder(context, state) {
-        if (state.status == CompanyUserStatus.failure ||
-            state.status == CompanyUserStatus.success) {
+        if (state.status == CompanyUserStatus.failure) {
+          return FatalErrorForm(
+              message: "Could not load ${widget.role.toString()}s!");
+        } else {
           companiesUsers = state.companiesUsers;
+          // Only jump to scroll position if the list is not empty and controller is attached
+          if (companiesUsers.isNotEmpty) {
+            Future.delayed(const Duration(milliseconds: 100), () {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (_scrollController.hasClients) {
+                  _scrollController.jumpTo(currentScroll);
+                }
+              });
+            });
+          }
           hasReachedMax = state.hasReachedMax;
           return Stack(
             children: [
@@ -283,7 +297,6 @@ class CompanyUserListState extends State<CompanyUserList> {
             ],
           );
         }
-        return const LoadingIndicator();
       }
 
       switch (widget.role) {
@@ -305,22 +318,20 @@ class CompanyUserListState extends State<CompanyUserList> {
 
   @override
   void dispose() {
-    _scrollController
-      ..removeListener(_onScroll)
-      ..dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
-    if (_isBottom) {
-      _companyUserBloc.add(CompanyUserFetch(limit: limit));
-    }
-  }
+    // Check if the controller is attached before accessing position properties
+    if (!_scrollController.hasClients) return;
 
-  bool get _isBottom {
-    if (!_scrollController.hasClients) return false;
     final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.offset;
-    return currentScroll >= (maxScroll * 0.9);
+    currentScroll = _scrollController.position.pixels;
+    if (!hasReachedMax &&
+        currentScroll > 0 &&
+        maxScroll - currentScroll <= _scrollThreshold) {
+      _companyUserBloc.add(CompanyUserFetch(searchString: searchString));
+    }
   }
 }

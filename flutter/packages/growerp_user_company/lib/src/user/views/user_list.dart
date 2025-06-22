@@ -151,6 +151,9 @@ class UserListState extends State<UserList> {
       }
 
       blocListener(context, state) {
+        if (state.status == UserStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
         if (state.status == UserStatus.success) {
           HelperFunctions.showMessage(
               context, '${state.message}', Colors.green);
@@ -163,10 +166,12 @@ class UserListState extends State<UserList> {
               message: "Could not load ${widget.role.toString()}s!");
         } else {
           users = state.users;
-          Future.delayed(const Duration(milliseconds: 10), () {
-            WidgetsBinding.instance.addPostFrameCallback(
-                (_) => _scrollController.jumpTo(currentScroll));
-          });
+          if (users.isNotEmpty) {
+            Future.delayed(const Duration(milliseconds: 100), () {
+              WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => _scrollController.jumpTo(currentScroll));
+            });
+          }
           hasReachedMax = state.hasReachedMax;
           return Stack(
             children: [
@@ -288,6 +293,9 @@ class UserListState extends State<UserList> {
   }
 
   void _onScroll() {
+    // Check if the controller is attached before accessing position properties
+    if (!_scrollController.hasClients) return;
+
     final maxScroll = _scrollController.position.maxScrollExtent;
     currentScroll = _scrollController.position.pixels;
     if (!hasReachedMax &&

@@ -59,6 +59,10 @@ class _CompanyUserFilesDialogState extends State<CompanyUserFilesDialog> {
                         fileString = await file.readAsString();
                       }
                       companyUserBloc.add(CompanyUserUpload(fileString));
+                      Future.delayed(const Duration(milliseconds: 1000), () {
+                        companyUserBloc
+                            .add(const CompanyUserFetch(refresh: true));
+                      });
                     }
                   }),
               const SizedBox(height: 20),

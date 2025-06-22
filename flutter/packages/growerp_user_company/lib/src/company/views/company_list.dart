@@ -40,11 +40,11 @@ class CompanyListState extends State<CompanyList> {
   List<Company> companies = const <Company>[];
   bool showSearchField = false;
   String searchString = '';
-  bool isLoading = false;
   bool hasReachedMax = false;
   late bool isPhone;
   late double bottom;
   double? right;
+  double currentScroll = 0;
 
   @override
   void initState() {
@@ -158,11 +158,15 @@ class CompanyListState extends State<CompanyList> {
         if (state.status == CompanyStatus.failure) {
           return FatalErrorForm(
               message: "Could not load ${widget.role.toString()}s!");
-        }
-        if (state.status == CompanyStatus.success) {
-          isLoading = false;
+        } else {
           companies = state.companies;
           hasReachedMax = state.hasReachedMax;
+          if (companies.isNotEmpty) {
+            Future.delayed(const Duration(milliseconds: 100), () {
+              WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => _scrollController.jumpTo(currentScroll));
+            });
+          }
           return Stack(
             children: [
               tableView(),
@@ -243,8 +247,6 @@ class CompanyListState extends State<CompanyList> {
             ],
           );
         }
-        isLoading = true;
-        return const LoadingIndicator();
       }
 
       if (widget.mainOnly) {
@@ -276,9 +278,13 @@ class CompanyListState extends State<CompanyList> {
   }
 
   void _onScroll() {
+    // Check if the controller is attached before accessing position properties
+    if (!_scrollController.hasClients) return;
     final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
-    if (currentScroll > 0 && maxScroll - currentScroll <= _scrollThreshold) {
+    currentScroll = _scrollController.position.pixels;
+    if (!hasReachedMax &&
+        currentScroll > 0 &&
+        maxScroll - currentScroll <= _scrollThreshold) {
       _companyBloc.add(CompanyFetch(searchString: searchString));
     }
   }

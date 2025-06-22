@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+//======================please not a similar
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
@@ -233,7 +234,14 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
           email: row[4],
           url: row[5],
           telephoneNr: row[6],
-          address: Address(address1: row[7]),
+          address: Address(
+              address1: row[7],
+              address2: row[8],
+              postalCode: row[09],
+              city: row[10],
+              province: row[11],
+              country: row[12],
+              countryId: row[13]),
           company: Company(pseudoId: row[13], name: row[14]),
         ));
       }
@@ -271,5 +279,23 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
   Future<void> _onCompanyUserDelete(
     CompanyUserDelete event,
     Emitter<CompanyUserState> emit,
-  ) async {}
+  ) async {
+    try {
+      emit(state.copyWith(status: CompanyUserStatus.loading));
+      List<CompanyUser> companiesUsers = List.from(state.companiesUsers);
+      await restClient.deleteUser(
+          partyId: event.user!.partyId!, deleteCompanyToo: false);
+      int index = companiesUsers
+          .indexWhere((element) => element.partyId == event.user!.partyId);
+      companiesUsers.removeAt(index);
+      return emit(state.copyWith(
+          searchString: '',
+          status: CompanyUserStatus.success,
+          companiesUsers: companiesUsers,
+          message: 'User ${event.user!.firstName} is deleted now..'));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: CompanyUserStatus.failure, message: await getDioError(e)));
+    }
+  }
 }
