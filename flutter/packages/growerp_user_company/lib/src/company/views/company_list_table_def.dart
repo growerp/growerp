@@ -54,9 +54,9 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         key: Key('item$index'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("${item.name ?? ''} ",
+          Text(item.name.truncate(20),
               textAlign: TextAlign.start, key: Key('name$index')),
-          Text(item.email ?? '', key: const Key("companyEmail")),
+          Text(item.email.truncate(20), key: const Key("companyEmail")),
         ],
       ),
     ));
@@ -118,5 +118,5 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
     ),
   ));
 
-  return TableData(rowHeight: isPhone ? 50 : 20, rowContent: rowContent);
+  return TableData(rowHeight: isPhone ? 45 : 20, rowContent: rowContent);
 }
