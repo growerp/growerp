@@ -118,11 +118,46 @@
             ]
         },
         {
-            "name": "Test mobile",
+            "name": "Flutter Integration Test - User Employee",
             "type": "dart",
             "request": "launch",
-            "cwd": "flutter/packages/test",
-            "program": "lib/main.dart"
+            "cwd": "flutter/packages/growerp_user_company/example",
+            "program": "integration_test/user_employee_test.dart",
+            "args": [
+                "--device-id",
+                "emulator"
+            ],
+            "env": {
+                "FLUTTER_TEST": "true"
+            }
+        },
+        {
+            "name": "Flutter Integration Test - User Employee (Mobile)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/growerp_user_company/example",
+            "program": "integration_test/user_employee_test.dart",
+            "args": [
+                "--device-id",
+                "flutter-tester"
+            ],
+            "env": {
+                "FLUTTER_TEST": "true"
+            }
+        },
+        {
+            "name": "Flutter Integration Test - All Tests",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/growerp_user_company/example",
+            "program": "integration_test",
+            "args": [
+                "--device-id",
+                "chrome"
+            ],
+            "env": {
+                "FLUTTER_TEST": "true"
+            }
         },
         {
             "name": "Freelance mobile (lib/main.dart)",
