@@ -30,6 +30,13 @@ Documentation available at https://www.growerp.com
 
 # Install GrowERP locally
 
+<a href="https://studio.firebase.google.com/import?url=https%3A%2F%2Fgithub.com%2Fgrowerp%2Fgrowerp">
+  <img
+    height="32"
+    alt="Open in Firebase Studio"
+    src="https://cdn.firebasestudio.dev/btn/open_blue_32.svg">
+</a>
+
 ## What is needed? 
     Java JDK 11:    https://www.oracle.com/th/java/technologies/javase/jdk11-archive-downloads.html
     Java JDK 17:    Flutter now need gradle V8 up, which needs Java v17
