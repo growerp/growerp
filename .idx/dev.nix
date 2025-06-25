@@ -29,13 +29,16 @@
       # Runs when a workspace is first created with this `dev.nix` file
       onCreate = {          # Runs when a workspace is first created with this \`dev.nix\` file
           shellScript = ''
+            sleep 10 # wait for flutter to load
             cd flutter
             dart pub global activate melos
             melos clean
             melos bootsrap
             melos build
             melos l10n
-            cd moqui
+            cd ../moqui
+            export JAVA_HOME=$JDK11
+            ./gradlew build
             $JDK11/bin/java -jar moqui.war load types=seed,seed-initial,install no-run-es
           '';
           };
