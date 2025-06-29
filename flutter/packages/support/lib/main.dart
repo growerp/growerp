@@ -88,7 +88,6 @@ List<LocalizationsDelegate> delegates = [
 List<BlocProvider> getSupportBlocProviders(restClient, classificationId) {
   return [
     ...getUserCompanyBlocProviders(restClient, classificationId),
-    ...getSupportBlocProviders(restClient, classificationId),
     BlocProvider<ApplicationBloc>(
       create: (context) => ApplicationBloc(restClient),
     ),

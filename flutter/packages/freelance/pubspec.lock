@@ -562,18 +562,16 @@ packages:
   growerp_activity:
     dependency: "direct main"
     description:
-      name: growerp_activity
-      sha256: "8b3cb157bf6812ce97b2ddabc6986eb1641969883db7d19dadcb81031a3042f9"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../growerp_activity"
+      relative: true
+    source: path
     version: "1.8.1"
   growerp_catalog:
     dependency: "direct main"
     description:
-      name: growerp_catalog
-      sha256: e0f6a031151e2470dddbaa1023e8b322f2b220c727004fb5c25f9a4312fd5e36
-      url: "https://pub.dev"
-    source: hosted
+      path: "../growerp_catalog"
+      relative: true
+    source: path
     version: "1.9.0"
   growerp_chat:
     dependency: "direct overridden"

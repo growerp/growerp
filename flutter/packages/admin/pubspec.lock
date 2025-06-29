@@ -545,10 +545,9 @@ packages:
   growerp_catalog:
     dependency: "direct main"
     description:
-      name: growerp_catalog
-      sha256: e0f6a031151e2470dddbaa1023e8b322f2b220c727004fb5c25f9a4312fd5e36
-      url: "https://pub.dev"
-    source: hosted
+      path: "../growerp_catalog"
+      relative: true
+    source: path
     version: "1.9.0"
   growerp_chat:
     dependency: "direct overridden"
