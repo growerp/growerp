@@ -1,0 +1,24 @@
+version: "3"
+services:
+  selenium-hub:
+    image: selenium/hub:3.141.59-20210929
+    container_name: selenium-hub
+    ports:
+      - "4444:4444"
+  chrome:
+    image: selenium/node-chrome:3.141.59-20210929
+    depends_on:
+      - selenium-hub
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+  test:
+    build: .
+    depends_on:
+      - chrome
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+    volumes:
+      - .:/usr/src/app
+    command: npm test

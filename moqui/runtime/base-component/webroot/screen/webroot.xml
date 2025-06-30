@@ -25,7 +25,7 @@ along with this software (see the LICENSE.md file). If not, see
     </always-actions>
     <transition name="status">
         <actions>
-            <set field="allowed_ips" from="System.getProperty('webapp_status_ips')? System.getProperty('webapp_status_ips').replaceAll('\\s', '').split(',')+['127.0.0.1']: ['127.0.0.1']"/>
+            <set field="allowed_ips" from="System.getProperty('webapp_status_ips')? System.getProperty('webapp_status_ips').replaceAll('\s', '').split(',')+['127.0.0.1']: ['127.0.0.1']"/>
             <if condition="ec.user.getClientIp() in allowed_ips"><then>
                 <script>ec.web.sendJsonResponse(ec.factory.getStatusMap())</script>
             </then><else>
@@ -51,8 +51,10 @@ along with this software (see the LICENSE.md file). If not, see
         <actions><script><![CDATA[
             List disallowList = ['apps', 'vapps', 'qapps', 'rest', 'rpc', 'status', 'menuData']
             def outWriter = new StringWriter()
-            outWriter.append("user-agent: *\n")
-            for (disPath in disallowList) outWriter.append("disallow: /${disPath}\n")
+            outWriter.append("user-agent: *
+")
+            for (disPath in disallowList) outWriter.append("disallow: /${disPath}
+")
             ec.web.sendTextResponse(outWriter.toString())
         ]]></script>
         </actions>
@@ -73,6 +75,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <subscreens default-item="qapps">
         <subscreens-item name="toolstatic" location="component://tools/screen/toolstatic.xml" menu-include="false"/>
+        <subscreens-item name="stripe_payment" location="component://mantle-stripe/screen/payment.html" menu-include="false"/>
         <!-- add UNDECORATED (or self-decorating) app roots here -->
     </subscreens>
     <widgets>

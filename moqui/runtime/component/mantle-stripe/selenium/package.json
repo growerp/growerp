@@ -1,0 +1,16 @@
+{
+  "name": "mantle-stripe-tests",
+  "version": "1.0.0",
+  "description": "Selenium tests for mantle-stripe",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/payment.spec.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chromedriver": "^138.0.0",
+    "selenium-webdriver": "^4.0.0",
+    "webdriver-manager": "^12.1.9"
+  }
+}

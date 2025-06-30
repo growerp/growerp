@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="create" noun="StripePayment">
+        <description>Create a Stripe Payment Intent</description>
+        <in-parameters>
+            <parameter name="amount" type="BigDecimal" required="true"/>
+            <parameter name="currency" type="String" required="true"/>
+            <parameter name="description" type="String"/>
+            <parameter name="stripeToken" type="String" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="clientSecret" type="String"/>
+        </out-parameters>
+        <actions>
+            <service-call name="com.stripe.PaymentIntentServices.create#PaymentIntent" in-map="[
+                'apiKey': ec.user.getPreference('StripeApiKey'),
+                'amount': amount * 100,
+                'currency': currency,
+                'description': description,
+                'payment_method_data': [
+                    'type': 'card',
+                    'card': ['token': stripeToken]
+                ],
+                'confirm': true
+            ]" out-map="paymentIntent"/>
+
+            <if condition="paymentIntent.status == 'succeeded'">
+                <return message="Payment succeeded"/>
+            <else>
+                <return error="true" message="Payment failed: ${paymentIntent.last_payment_error?.message}"/>
+            </if>
+
+            <set field="clientSecret" from="paymentIntent.client_secret"/>
+        </actions>
+    </service>
+</services>
