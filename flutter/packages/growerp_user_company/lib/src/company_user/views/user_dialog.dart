@@ -80,6 +80,7 @@ class UserDialogState extends State<UserDialog> {
   late Role _selectedRole;
   Company _selectedCompany = Company();
   XFile? _imageFile;
+  Uint8List? _image;
   dynamic _pickImageError;
   String? _retrieveDataError;
   late User updatedUser;
@@ -93,6 +94,7 @@ class UserDialogState extends State<UserDialog> {
   final ScrollController _scrollController = ScrollController();
   late User currentUser;
   late bool isAdmin;
+  late String _classificationId;
   late double top;
   double? right;
   late bool isVisible;
@@ -118,6 +120,7 @@ class UserDialogState extends State<UserDialog> {
     localUserGroups = UserGroup.values;
     updatedUser = widget.user;
     _authBloc = context.read<AuthBloc>();
+    _classificationId = context.read<String>();
     _companyBloc = context.read<CompanyBloc>()
       ..add(CompanyFetch(
           ownerPartyId: _authBloc.state.authenticate!.ownerPartyId!,
@@ -164,6 +167,7 @@ class UserDialogState extends State<UserDialog> {
       final pickedFile = await _picker.pickImage(
         source: source,
       );
+      _image = await HelperFunctions.getResizedImage(pickedFile?.path);
       setState(() {
         _imageFile = pickedFile;
       });
@@ -201,6 +205,7 @@ class UserDialogState extends State<UserDialog> {
     } else {
       title = _selectedRole.name;
     }
+
     return Dialog(
         key: Key('UserDialog${_selectedRole.name}'),
         insetPadding: const EdgeInsets.all(10),
@@ -242,35 +247,74 @@ class UserDialogState extends State<UserDialog> {
                               right = right! - details.delta.dx;
                             });
                           },
-                          child: Column(
-                            children: [
-                              ImageButtons(
-                                  _scrollController, _onImageButtonPressed),
-                              SizedBox(height: isPhone ? 310 : 250),
-                              Visibility(
-                                visible: isVisible,
-                                child: FloatingActionButton(
-                                  key: const Key("events"),
-                                  onPressed: () async => await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return Dialog(
-                                            child: popUp(
-                                                context: context,
-                                                title: ('User events'),
-                                                child: ActivityList(
-                                                  ActivityType.event,
-                                                  companyUser:
-                                                      CompanyUser.tryParse(
-                                                          widget.user),
-                                                )));
-                                      }),
-                                  child: const Icon(Icons.event_available),
-                                ),
-                              )
-                            ],
-                          ),
+                          child: Visibility(
+                              visible: isVisible,
+                              child: Column(
+                                children: [
+                                  ImageButtons(
+                                      _scrollController, _onImageButtonPressed),
+                                  SizedBox(height: isPhone ? 310 : 250),
+                                  FloatingActionButton(
+                                    key: const Key("events"),
+                                    onPressed: () async => await showDialog(
+                                        barrierDismissible: true,
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return Dialog(
+                                              child: popUp(
+                                                  context: context,
+                                                  title: ('User events'),
+                                                  child: ActivityList(
+                                                    ActivityType.event,
+                                                    companyUser:
+                                                        CompanyUser.tryParse(
+                                                            widget.user),
+                                                  )));
+                                        }),
+                                    child: const Icon(Icons.event_available),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  FloatingActionButton(
+                                      key: const Key("updateFloat"),
+                                      onPressed: () {
+                                        updatedUser = updatedUser.copyWith(
+                                            pseudoId: _idController.text,
+                                            firstName:
+                                                _firstNameController.text,
+                                            lastName: _lastNameController.text,
+                                            email: _emailController.text,
+                                            url: _urlController.text,
+                                            loginName:
+                                                _loginNameController.text,
+                                            telephoneNr:
+                                                _telephoneController.text,
+                                            address: updatedUser.address,
+                                            paymentMethod:
+                                                updatedUser.paymentMethod,
+                                            loginDisabled: _isLoginDisabled,
+                                            userGroup: _selectedUserGroup,
+                                            role: _selectedRole,
+                                            appsUsed: [_classificationId],
+//                      language: Localizations.localeOf(context)
+//                          .languageCode
+//                          .toString(),
+                                            company: _selectedCompany.copyWith(
+                                                role: _selectedRole),
+                                            image: _image);
+
+                                        _companyUserBloc.add(CompanyUserUpdate(
+                                            CompanyUser.tryParse(updatedUser)));
+                                        // if logged-in user update authBloc
+                                        if (currentUser.partyId ==
+                                            updatedUser.partyId) {
+                                          _authBloc.add(AuthLoad());
+                                        }
+                                      },
+                                      child: Icon(widget.user.partyId != null
+                                          ? Icons.update_sharp
+                                          : Icons.add_sharp)),
+                                ],
+                              )),
                         ),
                       ),
                     ],
@@ -800,7 +844,6 @@ class UserDialogState extends State<UserDialog> {
               onPressed: () async {
                 if (_userDialogFormKey.currentState!.validate()) {
                   updatedUser = updatedUser.copyWith(
-                      role: _selectedRole,
                       pseudoId: _idController.text,
                       firstName: _firstNameController.text,
                       lastName: _lastNameController.text,
@@ -812,25 +855,19 @@ class UserDialogState extends State<UserDialog> {
                       paymentMethod: updatedUser.paymentMethod,
                       loginDisabled: _isLoginDisabled,
                       userGroup: _selectedUserGroup,
+                      role: _selectedRole,
+                      appsUsed: [_classificationId],
 //                      language: Localizations.localeOf(context)
 //                          .languageCode
 //                          .toString(),
-                      company: _selectedCompany.name != null
-                          ? _selectedCompany.copyWith(role: _selectedRole)
-                          : null,
-                      image: await HelperFunctions.getResizedImage(
-                          _imageFile?.path));
-                  if (!mounted) return;
-                  if (_imageFile?.path != null && updatedUser.image == null) {
-                    HelperFunctions.showMessage(
-                        context, "Image upload error!", Colors.red);
-                  } else {
-                    _companyUserBloc.add(
-                        CompanyUserUpdate(CompanyUser.tryParse(updatedUser)));
-                    // if logged-in user update authBloc
-                    if (currentUser.partyId == updatedUser.partyId) {
-                      _authBloc.add(AuthLoad());
-                    }
+                      company: _selectedCompany.copyWith(role: _selectedRole),
+                      image: _image);
+
+                  _companyUserBloc.add(
+                      CompanyUserUpdate(CompanyUser.tryParse(updatedUser)));
+                  // if logged-in user update authBloc
+                  if (currentUser.partyId == updatedUser.partyId) {
+                    _authBloc.add(AuthLoad());
                   }
                 }
               }))

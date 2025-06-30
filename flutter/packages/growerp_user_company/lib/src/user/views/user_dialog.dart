@@ -82,6 +82,7 @@ class UserDialogState extends State<UserDialogStateFull> {
   late Role _selectedRole;
   Company _selectedCompany = Company();
   XFile? _imageFile;
+  Uint8List? _image;
   dynamic _pickImageError;
   String? _retrieveDataError;
   late User updatedUser;
@@ -170,6 +171,7 @@ class UserDialogState extends State<UserDialogStateFull> {
       final pickedFile = await _picker.pickImage(
         source: source,
       );
+      _image = await HelperFunctions.getResizedImage(pickedFile?.path);
       setState(() {
         _imageFile = pickedFile;
       });
@@ -207,6 +209,7 @@ class UserDialogState extends State<UserDialogStateFull> {
     } else {
       title = _selectedRole.name;
     }
+
     return Dialog(
         key: Key('UserDialog${_selectedRole.name}'),
         insetPadding: const EdgeInsets.all(10),
@@ -252,7 +255,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                             children: [
                               ImageButtons(
                                   _scrollController, _onImageButtonPressed),
-                              SizedBox(height: isPhone ? 350 : 250),
+                              SizedBox(height: isPhone ? 310 : 250),
                               Visibility(
                                 visible: isVisible,
                                 child: FloatingActionButton(
@@ -274,7 +277,43 @@ class UserDialogState extends State<UserDialogStateFull> {
                                       }),
                                   child: const Icon(Icons.event_available),
                                 ),
-                              )
+                              ),
+                              const SizedBox(height: 10),
+                              FloatingActionButton(
+                                  key: const Key("updateFloat"),
+                                  onPressed: () {
+                                    updatedUser = updatedUser.copyWith(
+                                        pseudoId: _idController.text,
+                                        firstName: _firstNameController.text,
+                                        lastName: _lastNameController.text,
+                                        email: _emailController.text,
+                                        url: _urlController.text,
+                                        loginName: _loginNameController.text,
+                                        telephoneNr: _telephoneController.text,
+                                        address: updatedUser.address,
+                                        paymentMethod:
+                                            updatedUser.paymentMethod,
+                                        loginDisabled: _isLoginDisabled,
+                                        userGroup: _selectedUserGroup,
+                                        role: _selectedRole,
+                                        appsUsed: [_classificationId],
+//                      language: Localizations.localeOf(context)
+//                          .languageCode
+//                          .toString(),
+                                        company: _selectedCompany.copyWith(
+                                            role: _selectedRole),
+                                        image: _image);
+
+                                    _userBloc.add(UserUpdate(updatedUser));
+                                    // if logged-in user update authBloc
+                                    if (currentUser.partyId ==
+                                        updatedUser.partyId) {
+                                      _authBloc.add(AuthLoad());
+                                    }
+                                  },
+                                  child: Icon(widget.user.partyId != null
+                                      ? Icons.update_sharp
+                                      : Icons.add_sharp)),
                             ],
                           ),
                         ),
@@ -823,18 +862,12 @@ class UserDialogState extends State<UserDialogStateFull> {
 //                          .languageCode
 //                          .toString(),
                       company: _selectedCompany.copyWith(role: _selectedRole),
-                      image: await HelperFunctions.getResizedImage(
-                          _imageFile?.path));
-                  if (!mounted) return;
-                  if (_imageFile?.path != null && updatedUser.image == null) {
-                    HelperFunctions.showMessage(
-                        context, "Image upload error!", Colors.red);
-                  } else {
-                    _userBloc.add(UserUpdate(updatedUser));
-                    // if logged-in user update authBloc
-                    if (currentUser.partyId == updatedUser.partyId) {
-                      _authBloc.add(AuthLoad());
-                    }
+                      image: _image);
+
+                  _userBloc.add(UserUpdate(updatedUser));
+                  // if logged-in user update authBloc
+                  if (currentUser.partyId == updatedUser.partyId) {
+                    _authBloc.add(AuthLoad());
                   }
                 }
               }))
