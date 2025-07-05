@@ -123,7 +123,7 @@ GrowERP uses a modular architecture that promotes reusability and extensibility:
 
 - **Java JDK 11** - [Download](https://www.oracle.com/th/java/technologies/javase/jdk11-archive-downloads.html)
 - **Java JDK 17** - [Download](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html) (for Gradle 8+)
-- **Flutter 3.29.2** - [Install](https://flutter.dev/)
+- **Flutter stable** - [Install](https://flutter.dev/)
 - **Chrome Browser** - [Download](https://www.google.com/chrome/)
 - **Git** - [Download](https://git-scm.com/downloads)
 - **Android Studio** - [Download](https://developer.android.com/studio) (optional)

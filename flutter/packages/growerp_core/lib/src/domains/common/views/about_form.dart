@@ -15,19 +15,18 @@
 import 'package:about/about.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_core/src/domains/common/functions/screen_size.dart';
 
-class AboutForm extends StatelessWidget {
+import '../widgets/widgets.dart';
+
+class AboutForm extends StatefulWidget {
   const AboutForm({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const AboutFormHeader();
-  }
+  State<AboutForm> createState() => _AboutFormState();
 }
 
-class AboutFormHeader extends StatelessWidget {
-  const AboutFormHeader({super.key});
-
+class _AboutFormState extends State<AboutForm> {
   @override
   Widget build(BuildContext context) {
     String version = GlobalConfiguration().get("version") ?? '';
@@ -37,57 +36,63 @@ class AboutFormHeader extends StatelessWidget {
     String appName = GlobalConfiguration().get("appName") ?? '';
     var year = DateTime.now().year;
 
-    return AboutPage(
-        dialog: false,
-        title: Text('About GrowERP and this $appName app'),
-        applicationVersion: 'Version $version, build #$build',
-        applicationName: packageName,
-        applicationDescription: Center(child: Text(databaseUrl)),
-        applicationIcon: Image.asset(
-          'packages/growerp_core/images/growerp.png',
-          height: 100,
-          width: 200,
-        ),
-        applicationLegalese: '© GrowERP, $year',
-        children: const <Widget>[
-          Center(
-              child: SizedBox(
-                  width: 300,
-                  child: Form(
-                      child: Column(
-                    children: <Widget>[
-/*                      MarkdownPageListTile(
-                        filename: 'README.md',
-                        title: Text('View Readme'),
-                        icon: Icon(Icons.all_inclusive),
-                      ),
-                      MarkdownPageListTile(
-                        filename: 'CHANGELOG.md',
-                        title: Text('View Changelog'),
-                        icon: Icon(Icons.view_list),
-                      ),
-                      MarkdownPageListTile(
-                        filename: 'LICENSE.md',
-                        title: Text('View License'),
-                        icon: Icon(Icons.description),
-                      ),
-                      MarkdownPageListTile(
-                        filename: 'CONTRIBUTING.md',
-                        title: Text('Contributing'),
-                        icon: Icon(Icons.share),
-                      ),
-                      MarkdownPageListTile(
-                        filename: 'CODE_OF_CONDUCT.md',
-                        title: Text('Privacy, Code of conduct'),
-                        icon: Icon(Icons.sentiment_satisfied),
-                      ),
-*/
-                      LicensesPageListTile(
-                        title: Text('Open source Licenses'),
-                        icon: Icon(Icons.favorite),
-                      ),
-                    ],
-                  ))))
-        ]);
+    return Dialog(
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: popUp(
+            context: context,
+            title: "About GrowERP",
+            width: isAPhone(context) ? 400 : 800,
+            height: isPhone(context) ? 700 : 600,
+            child: AboutPage(
+                dialog: false,
+                title: Text('About GrowERP and this $appName app'),
+                applicationVersion: 'Version $version, build #$build',
+                applicationName: packageName,
+                applicationDescription: Center(child: Text(databaseUrl)),
+                applicationIcon: Image.asset(
+                  'packages/growerp_core/images/growerp.png',
+                  height: 100,
+                  width: 200,
+                ),
+                applicationLegalese: '© GrowERP, $year',
+                children: const <Widget>[
+                  Center(
+                      child: SizedBox(
+                          width: 300,
+                          child: Form(
+                              child: Column(
+                            children: <Widget>[
+                              MarkdownPageListTile(
+                                filename:
+                                    '../../../../../../../../../../README.md',
+                                title: Text('View Readme'),
+                                icon: Icon(Icons.all_inclusive),
+                              ),
+                              MarkdownPageListTile(
+                                filename:
+                                    '../../../../../../../../../../LICENSE',
+                                title: Text('View License'),
+                                icon: Icon(Icons.description),
+                              ),
+                              MarkdownPageListTile(
+                                filename:
+                                    '../../../../../../../../../../CONTRIBUTING.md',
+                                title: Text('Contributing'),
+                                icon: Icon(Icons.share),
+                              ),
+                              MarkdownPageListTile(
+                                filename:
+                                    '../../../../../../../../../../CODE_OF_CONDUCT.md',
+                                title: Text('Privacy, Code of conduct'),
+                                icon: Icon(Icons.sentiment_satisfied),
+                              ),
+                              LicensesPageListTile(
+                                title: Text('Open source Licenses'),
+                                icon: Icon(Icons.favorite),
+                              ),
+                            ],
+                          ))))
+                ])));
   }
 }
