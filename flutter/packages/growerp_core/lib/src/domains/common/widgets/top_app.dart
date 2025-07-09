@@ -155,7 +155,9 @@ class TopApp extends StatelessWidget {
                               return Scaffold(
                                   // scaffold need for messages
                                   backgroundColor: Colors.transparent,
-                                  body: Container());
+                                  body: Builder(builder: (context) {
+                                    return const LoadingIndicator();
+                                  }));
                             default:
                               return GlobalConfiguration().get("test")
                                   ? Banner(

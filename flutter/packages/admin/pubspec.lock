@@ -411,6 +411,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.1"
+  flutter_form_builder:
+    dependency: transitive
+    description:
+      name: flutter_form_builder
+      sha256: db01493da4ef0f9ca1b2367fd1653569e933052eb06d6fbd944be97c76764fb8
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.1.0"
   flutter_highlight:
     dependency: transitive
     description:
@@ -474,6 +482,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  form_builder_validators:
+    dependency: transitive
+    description:
+      name: form_builder_validators
+      sha256: "1b03c74d1db740890e6af803b43e5ebe56f8fa1ff5609cbf744e8d980dc5f8c6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "11.2.0"
   freezed:
     dependency: transitive
     description:
@@ -1536,5 +1552,5 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: ">=3.7.0 <4.0.0"
-  flutter: ">=3.29.0"
+  dart: ">=3.8.0 <4.0.0"
+  flutter: ">=3.32.0"

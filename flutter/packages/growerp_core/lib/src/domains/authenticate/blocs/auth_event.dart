@@ -33,12 +33,25 @@ class AuthLogin extends AuthEvent {
   final String username;
   final String password;
   // for registration continuation
-  final bool extraInfo;
   final String? companyName;
   final Currency? currency;
+  final String? creditCardNumber;
+  final String? nameOnCard;
+  final String? cVC;
+  final String? plan; // diyPlan, smallPlan, fullPlan
+  final String? expireMonth;
+  final String? expireYear;
   final bool? demoData;
   const AuthLogin(this.username, this.password,
-      {this.extraInfo = false, this.companyName, this.currency, this.demoData});
+      {this.companyName,
+      this.currency,
+      this.demoData,
+      this.creditCardNumber,
+      this.nameOnCard,
+      this.cVC,
+      this.plan,
+      this.expireMonth,
+      this.expireYear});
 }
 
 class AuthResetPassword extends AuthEvent {

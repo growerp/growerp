@@ -1608,7 +1608,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <if condition="user.company.name">
                             <!-- create company -->
                             <service-call name="growerp.100.PartyServices100.create#Company"
-                                in-map="[company: user.company, ownerPartyId: ownerPartyId]"
+                                in-map="[company: user.company, ownerPartyId: ownerPartyId,
+                                    role: user.company.role]"
                                 out-map="context" />
                             <set field="userCompanyPartyId" from="company.partyId" />
                         </if>
@@ -2646,20 +2647,23 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
 
     <service verb="register" noun="User" authenticate="anonymous-all">
-        <description>Register a new user on the system, when 
-                    no existin main company is provided will 
+        <description>Register a new user on the system externally, when 
+                    no existing main company and admin is provided will 
                     -- also create a root owner party
                     -- and give the role of administrator
-                    -- send password and logout.
+                    -- always send password and logout.
                 when this user logs in, company info is requested </description>
         <in-parameters>
             <parameter name="classificationId" />
             <parameter name="firstName" required="true" />
             <parameter name="lastName" required="true" />
             <parameter name="email" required="true" />
-            <parameter name="companyPartyId" /><!-- if empty create new owner-->
+            <parameter name="companyPartyId" /><!-- if empty create new owner when admin -->
             <parameter name="newPassword"
                 default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
+            <!-- if userGroup == admin group, root company will be created,   
+                when not, owner (main) company partyId should already exist -->
+            <parameter name="userGroupId" />
         </in-parameters>
         <out-parameters>
             <parameter name="authenticate" type="Map">
@@ -2670,6 +2674,13 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="email" />
                     <parameter name="url" />
                     <parameter name="loginName" />
+                    <parameter name="userGroup" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
+                    <parameter name="userGroupId" />
+                    <parameter name="company" type="Map">
+                        <parameter name="partyId" />
+                    </parameter>
                 </parameter>
             </parameter>
         </out-parameters>
@@ -2701,7 +2712,8 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!classification">
                 <return message="Not a valid classificationId: ${classificationId}" />
             </if>
-            <if condition="!companyPartyId">
+            <log message="===cp: $companyPartyId ug: $userGroupId" />
+            <if condition="!companyPartyId &amp;&amp; userGroupId == 'GROWERP_M_ADMIN'">
                 <then>
                     <!-- create root party -->
                     <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
@@ -2711,20 +2723,21 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="[partyTypeEnumId: 'PtyOwner', pseudoId: seqNum, disabled: 'N']"
                         out-map="owner" />
                     <set field="ownerPartyId" from="owner.partyId" />
-                    <!-- create user -->
+                    <!-- create user / temp main company -->
                     <set field="user"
-                        from="[
-                        userGroupId: 'GROWERP_M_ADMIN',
-                        role: 'OrgInternal',
-                        email: email,
-                        firstName: firstName,
-                        lastName: lastName,
-                        loginName: email,
-                        ]" />
+                        from="[ userGroupId: 'GROWERP_M_ADMIN',
+                                role: 'OrgInternal',
+                                email: email,
+                                firstName: firstName,
+                                lastName: lastName,
+                                loginName: email,
+                                company: [name: 'main Organization',
+                                          role: 'OrgInternal',
+                                          email: email]]" />
                     <service-call name="growerp.100.PartyServices100.create#User"
-                        in-map="[user: user, password: newPassword,
-                            ownerPartyId: ownerPartyId, login: false,
-                            classificationId: classificationId]"
+                        in-map="[user: user, 
+                                password: newPassword, ownerPartyId: ownerPartyId,
+                                classificationId: classificationId]"
                         out-map="context" />
                     <!-- create event -->
                     <service-call name="growerp.100.ActivityServices100.create#Event"
@@ -2734,10 +2747,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <else-if condition="companyPartyId">
                     <!-- new user registration of a user within an existing owner-->
                     <!-- createUser -->
+                    <set field="company" from="[partyId: companyPartyId]" />
                     <service-call name="growerp.100.PartyServices100.create#User"
                         in-map="[user: [firstName: firstName, lastName: lastName,
                         email: email, role: 'Customer', userGroupId: 'GROWERP_M_OTHER',
-                        loginName: email], password: newPassword, ownerPartyId: ownerPartyId,
+                        loginName: email, company:company], password: newPassword, ownerPartyId: ownerPartyId,
                         classificationId: classificationId]"
                         out-map="context" />
                 </else-if>
@@ -2749,7 +2763,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <set field="authenticate"
                 from="[ ownerPartyId: ownerPartyId,
-                        user: [partyId: user.partyId, loginName: email, email: email],
+                        user: user,                       
                         classificationId: classificationId,
                     ]" />
         </actions>

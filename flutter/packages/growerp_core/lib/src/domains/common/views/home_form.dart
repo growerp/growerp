@@ -68,13 +68,16 @@ class HomeFormState extends State<HomeForm> {
                     style: TextStyle(color: Colors.grey, fontSize: 10),
                   )));
 
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+    return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
+      switch (state.status) {
+        case AuthStatus.failure:
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        default:
+          HelperFunctions.showMessage(context, state.message, Colors.green);
+      }
+    }, builder: (context, state) {
       switch (state.status) {
         case AuthStatus.authenticated:
-          if (['moreInfo', 'passwordChange']
-              .contains(state.authenticate!.moquiSessionToken)) {
-            return const LoginDialog();
-          }
           return Column(
             children: [
               Expanded(

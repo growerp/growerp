@@ -109,11 +109,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.PartyServices100.check#Company" />
             </method>
         </resource>
-        <resource name="Register" require-authentication="anonymous-all">
-            <method type="post">
-                <service name="growerp.100.PartyServices100.register#User" />
-            </method>
-        </resource>
         <resource name="Companies" require-authentication="anonymous-all">
             <method type="get">
                 <service name="growerp.100.PartyServices100.get#Companies" />

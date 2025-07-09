@@ -133,6 +133,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         companyPartyId: event.user.company?.partyId,
         firstName: event.user.firstName!,
         lastName: event.user.lastName!,
+        userGroup: event.user.userGroup!,
         // when debug mode password is always qqqqqq9!
         newPassword: kReleaseMode ? null : 'qqqqqq9!',
       );
@@ -178,14 +179,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Authenticate authenticate = await restClient.login(
         username: event.username,
         password: event.password,
-        extraInfo: event.extraInfo,
         companyName: event.companyName,
         currencyId: event.currency?.currencyId,
         demoData: event.demoData,
+        creditCardNumber: event.creditCardNumber,
+        nameOnCard: event.nameOnCard,
+        expireMonth: event.expireMonth,
+        expireYear: event.expireYear,
+        cVC: event.cVC,
+        plan: event.plan,
         classificationId: classificationId,
       );
       if (authenticate.apiKey != null &&
-          !['moreInfo', 'passwordChange'].contains(authenticate.apiKey)) {
+          !['moreInfo', 'passwordChange', 'payment']
+              .contains(authenticate.apiKey)) {
         // apiKey found so save and authenticated
         emit(state.copyWith(
             status: AuthStatus.authenticated,
@@ -201,14 +208,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         PersistFunctions.persistKeyValue('apiKey', authenticate.apiKey ?? '');
       } else {
-        // either login in process or failed....
+        // login in process
         emit(state.copyWith(
-            status: AuthStatus.unAuthenticated,
-            authenticate: authenticate,
-            message:
-                ['moreInfo', 'passwordChange'].contains(authenticate.apiKey)
-                    ? null
-                    : 'Login did not work...'));
+          status: AuthStatus.unAuthenticated,
+          authenticate: authenticate,
+        ));
       }
     } on DioException catch (e) {
       emit(state.copyWith(

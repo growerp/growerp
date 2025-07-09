@@ -52,13 +52,13 @@ Future<bool> login(RestClient client, String username, String password,
       username: username, password: password, classificationId: 'AppAdmin');
   // login again to provide more info and get apikey
   authenticate = await client.login(
-      username: username,
-      password: password,
-      classificationId: 'AppAdmin',
-      companyName: companyName,
-      currencyId: currencyId,
-      demoData: false,
-      extraInfo: true);
+    username: username,
+    password: password,
+    classificationId: 'AppAdmin',
+    companyName: companyName,
+    currencyId: currencyId,
+    demoData: false,
+  );
   // save key
   box.put('apiKey', authenticate.apiKey);
   await box.put('authenticate', jsonEncode(authenticate.toJson()));

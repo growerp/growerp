@@ -21,8 +21,9 @@ abstract class RestClient {
     @Field() required String firstName,
     @Field() required String lastName,
     @Field() required String email,
-    @Field() String? companyPartyId,
+    @Field() String? companyPartyId, // required for other than admin
     @Field() String? newPassword,
+    @Field('userGroupId') UserGroup? userGroup, // if admin also company
   });
 
   @POST("rest/s1/growerp/100/Login")
@@ -31,7 +32,12 @@ abstract class RestClient {
   Future<Authenticate> login({
     @Field() required String username,
     @Field() required String password,
-    @Field() bool? extraInfo,
+    @Field() String? creditCardNumber,
+    @Field() String? nameOnCard,
+    @Field() String? expireMonth,
+    @Field() String? expireYear,
+    @Field() String? cVC,
+    @Field() String? plan,
     @Field() String? companyName,
     @Field() String? currencyId,
     @Field() bool? demoData,
