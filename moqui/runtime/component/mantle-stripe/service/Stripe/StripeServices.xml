@@ -12,111 +12,156 @@ You should have received a copy of the CC0 Public Domain Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
     <service verb="get" noun="PaymentGatewayConfig">
         <in-parameters>
-            <parameter name="paymentMethod" type="EntityValue"/>
-            <parameter name="paymentGatewayConfigId"/>
+            <parameter name="paymentMethod" type="EntityValue" />
+            <parameter name="paymentGatewayConfigId" />
         </in-parameters>
-        <out-parameters><parameter name="paymentGatewayConfigId"/></out-parameters>
+        <out-parameters>
+            <parameter name="paymentGatewayConfigId" />
+        </out-parameters>
         <actions>
-            <if condition="!paymentGatewayConfigId"><set field="paymentGatewayConfigId" from="paymentMethod?.paymentGatewayConfigId"/></if>
+            <if condition="!paymentGatewayConfigId">
+                <set field="paymentGatewayConfigId" from="paymentMethod?.paymentGatewayConfigId" />
+            </if>
             <if condition="!paymentGatewayConfigId &amp;&amp; paymentMethod?.ownerPartyId">
-                <set field="ownerParty" from="paymentMethod.ownerParty"/>
+                <set field="ownerParty" from="paymentMethod.ownerParty" />
                 <if condition="ownerParty?.ownerPartyId">
-                    <service-call name="mantle.party.PartyServices.get#PartySettingValue" out-map="ptySettingOut"
-                                  in-map="[partyId:ownerParty.ownerPartyId, partySettingTypeId:'VaultPaymentGatewayConfigId']"/>
-                    <set field="paymentGatewayConfigId" from="ptySettingOut?.settingValue"/>
+                    <service-call name="mantle.party.PartyServices.get#PartySettingValue"
+                        out-map="ptySettingOut"
+                        in-map="[partyId:ownerParty.ownerPartyId, partySettingTypeId:'VaultPaymentGatewayConfigId']" />
+                    <set field="paymentGatewayConfigId" from="ptySettingOut?.settingValue" />
                 </if>
             </if>
             <if condition="!paymentGatewayConfigId">
-                <set field="paymentGatewayConfigId" from="ec.user.getPreference('StripePaymentGatewayConfigId')"/></if>
+                <set field="paymentGatewayConfigId"
+                    from="ec.user.getPreference('StripePaymentGatewayConfigId')" />
+            </if>
         </actions>
     </service>
     <service verb="store" noun="CustomerPaymentMethod" authenticate="anonymous-all">
         <in-parameters>
-            <parameter name="paymentMethodId" required="true"/>
-            <parameter name="validateSecurityCode"/>
-            <parameter name="paymentId"/>
-            <parameter name="paymentGatewayConfigId"><description>If not specified gets from PaymentMethod or PayTraceVaultPaymentGatewayConfigId user preference</description></parameter>
+            <parameter name="paymentMethodId" required="true" />
+            <parameter name="validateSecurityCode" />
+            <parameter name="paymentId" />
+            <parameter name="paymentGatewayConfigId">
+                <description>If not specified gets from PaymentMethod or PayTraceVaultPaymentGatewayConfigId user preference</description>
+            </parameter>
         </in-parameters>
 
         <actions>
-            <entity-find-one entity-name="mantle.account.method.CreditCard" value-field="creditCard"/>
-            <if condition="creditCard == null"><return/></if>
-
-            <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="paymentMethod" for-update="true"/>
-
-            <service-call name="Stripe.StripeServices.get#PaymentGatewayConfig" in-map="context" out-map="context"/>
-            <if condition="!paymentGatewayConfigId"><log level="warn" message="In store#CustomerPaymentMethod no paymentGatewayConfigId specified or StripePaymentGatewayConfigId user preference found"/><return/></if>
-            <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="pgs"/>
-            <if condition="pgs == null">
-                <!-- this will happen regularly when PaymentMethod.paymentGatewayConfigId is for another gateway -->
-                <log message="Not saving payment method ${paymentMethodId} with Stripe, no PaymentGatewayStripe found with ID ${paymentGatewayConfigId}"/>
-                <return/>
+            <entity-find-one entity-name="mantle.account.method.CreditCard" value-field="creditCard" />
+            <if condition="creditCard == null">
+                <return />
             </if>
 
-            <set field="secretKey" from="pgs.secretKey"/>
-            <set field="party" from="paymentMethod.'Owner#mantle.party.Party'"/>
+            <entity-find-one entity-name="mantle.account.method.PaymentMethod"
+                value-field="paymentMethod" for-update="true" />
+
+            <service-call name="Stripe.StripeServices.get#PaymentGatewayConfig" in-map="context"
+                out-map="context" />
+            <if condition="!paymentGatewayConfigId">
+                <log level="warn"
+                    message="In store#CustomerPaymentMethod no paymentGatewayConfigId specified or StripePaymentGatewayConfigId user preference found" />
+                <return />
+            </if>
+            <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="pgs" />
+            <if condition="pgs == null">
+                <!-- this will happen regularly when PaymentMethod.paymentGatewayConfigId is for
+                another gateway -->
+                <log
+                    message="Not saving payment method ${paymentMethodId} with Stripe, no PaymentGatewayStripe found with ID ${paymentGatewayConfigId}" />
+                <return />
+            </if>
+
+            <set field="secretKey" from="pgs.secretKey" />
+            <set field="party" from="paymentMethod.'Owner#mantle.party.Party'" />
 
             <!-- get billing contact info, use for any not set on PaymentMethod -->
-            <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="billingContactInfo"
-                          in-map="[
+            <service-call name="mantle.party.ContactServices.get#PartyContactInfo"
+                out-map="billingContactInfo"
+                in-map="[
                           partyId:paymentMethod.ownerPartyId,
                           postalContactMechPurposeId:'PostalBilling',
                           telecomContactMechPurposeId:'PhoneBilling',
-                          emailContactMechPurposeId:'EmailBilling']"/>
+                          emailContactMechPurposeId:'EmailBilling']" />
 
-            <set field="postalAddress" from="paymentMethod.postalAddress"/>
+            <set field="postalAddress" from="paymentMethod.postalAddress" />
             <if condition="postalAddress == null">
-                <set field="postalAddress" from="billingContactInfo.postalAddress"/>
-                <set field="stateProvinceGeo" from="billingContactInfo.postalAddressStateGeo"/>
+                <set field="postalAddress" from="billingContactInfo.postalAddress" />
+                <set field="stateProvinceGeo" from="billingContactInfo.postalAddressStateGeo" />
             </if>
-<!--            <if condition="postalAddress == null"><return message="In store#CustomerPaymentMethod no address associated with credit card ${paymentMethodId}, not saving Stripe record."/></if> &lt;!&ndash; TODO: Stripe doesn't require a postal address. should I still require it?. For now, No. &ndash;&gt;-->
-            <set field="stateProvinceGeo" from="stateProvinceGeo != null ? stateProvinceGeo : postalAddress?.stateProvinceGeo"/>
+            <!--            <if condition="postalAddress == null"><return message="In
+            store#CustomerPaymentMethod no address associated with credit card ${paymentMethodId},
+            not saving Stripe record."/></if> &lt;!&ndash; TODO: Stripe doesn't require a postal
+            address. should I still require it?. For now, No. &ndash;&gt;-->
+            <set field="stateProvinceGeo"
+                from="stateProvinceGeo != null ? stateProvinceGeo : postalAddress?.stateProvinceGeo" />
 
-            <set field="telecomNumber" from="paymentMethod.telecomNumber"/>
-            <if condition="telecomNumber == null"><set field="telecomNumber" from="billingContactInfo.telecomNumber"/></if>
-            <set field="phone" from="(telecomNumber?.countryCode ? (telecomNumber.countryCode + '-') : '') + (telecomNumber?.areaCode ? (telecomNumber.areaCode + '-') : '') + telecomNumber?.contactNumber"/>
-            <set field="emailContactMech" from="paymentMethod.'Email#mantle.party.contact.ContactMech'"/>
-            <if condition="emailContactMech == null"><set field="emailContactMech" from="billingContactInfo.emailContactMech"/></if>
+            <set field="telecomNumber" from="paymentMethod.telecomNumber" />
+            <if condition="telecomNumber == null">
+                <set field="telecomNumber" from="billingContactInfo.telecomNumber" />
+            </if>
+            <set field="phone"
+                from="(telecomNumber?.countryCode ? (telecomNumber.countryCode + '-') : '') + (telecomNumber?.areaCode ? (telecomNumber.areaCode + '-') : '') + telecomNumber?.contactNumber" />
+            <set field="emailContactMech"
+                from="paymentMethod.'Email#mantle.party.contact.ContactMech'" />
+            <if condition="emailContactMech == null">
+                <set field="emailContactMech" from="billingContactInfo.emailContactMech" />
+            </if>
 
             <!-- credit card data -->
-            <set field="expireMonth" from="creditCard.expireDate ? creditCard.expireDate.substring(0, creditCard.expireDate.indexOf('/')) : null"/>
-            <set field="expireYear" from="creditCard.expireDate ? creditCard.expireDate.substring(creditCard.expireDate.indexOf('/')+1) : null"/>
-            <set field="expireDateFormatted" value="${expireYear}-${expireMonth}"/>
-            <set field="cardNumber" from="creditCard.cardNumber"/>
+            <set field="expireMonth"
+                from="creditCard.expireDate ? creditCard.expireDate.substring(0, creditCard.expireDate.indexOf('/')) : null" />
+            <set field="expireYear"
+                from="creditCard.expireDate ? creditCard.expireDate.substring(creditCard.expireDate.indexOf('/')+1) : null" />
+            <set field="expireDateFormatted" value="${expireYear}-${expireMonth}" />
+            <set field="cardNumber" from="creditCard.cardNumber" />
 
-            <set field="creditCardInfo" from="[
+            <set field="creditCardInfo"
+                from="[
                             number:cardNumber,
                             exp_month:expireMonth,
                             exp_year:expireYear,
-                            cvc:creditCard.cardSecurityCode]"/>
+                            cvc:creditCard.cardSecurityCode]" />
 
-            <set field="customerInfo" from="[
+            <set field="customerInfo"
+                from="[
                             name:paymentMethodId,
                             address:[
                                 line1:postalAddress?.address1,
                                 line2:postalAddress?.address2,
                                 city:postalAddress?.city,
                                 state:postalAddress?.stateProvinceGeoId ? postalAddress?.stateProvinceGeoId.substring(postalAddress?.stateProvinceGeoId.indexOf('_')+1) : stateProvinceGeo,
-                                country:postalAddress?.countryGeoId]]"/>
-            <if condition="emailContactMech"><set field="email" from="emailContactMech.infoString"/></if>
-            <if condition="phone"><set field="customerInfo.phone" from="phone"/></if>
+                                country:postalAddress?.countryGeoId]]" />
+            <if condition="emailContactMech">
+                <set field="email" from="emailContactMech.infoString" />
+            </if>
+            <if condition="phone">
+                <set field="customerInfo.phone" from="phone" />
+            </if>
 
             <if condition="paymentMethod.gatewayCimId">
                 <then>
-                    <set field="customerId" from="paymentMethod.gatewayCimId"/>
-                    <service-call name="Stripe.StripeServices.send#UpdateCustomerRequest" in-map="context" out-map="context"/>
+                    <set field="customerId" from="paymentMethod.gatewayCimId" />
+                    <service-call name="Stripe.StripeServices.send#UpdateCustomerRequest"
+                        in-map="context" out-map="context" />
                 </then>
-                <else><service-call name="Stripe.StripeServices.send#StoreCustomerRequest" in-map="context" out-map="context"/></else>
+                <else>
+                    <service-call name="Stripe.StripeServices.send#StoreCustomerRequest"
+                        in-map="context" out-map="context" />
+                </else>
             </if>
 
-            <set field="customerId" from="responseMap.customer?.id"/>
-            <set field="errorInfo" from="responseMap.errorInfo"/>
+            <set field="customerId" from="responseMap.customer?.id" />
+            <set field="errorInfo" from="responseMap.errorInfo" />
 
             <if condition="errorInfo.exception">
-                <service-call name="create#mantle.account.method.PaymentGatewayResponse" out-map="context" in-map="[
+                <service-call name="create#mantle.account.method.PaymentGatewayResponse"
+                    out-map="context"
+                    in-map="[
                             paymentGatewayConfigId:paymentGatewayConfigId,
                             paymentOperationEnumId:'PgoStoreCim',
                             paymentMethodId:paymentMethodId,
@@ -126,14 +171,18 @@ along with this software (see the LICENSE.md file). If not, see
                             reasonCode:errorInfo.reasonCode,
                             reasonMessage:errorInfo.reasonMessage.length() > 255 ? errorInfo.reasonMessage.substring(0,251) + &quot;...&quot; : errorInfo.reasonMessage,
                             resultSuccess:'N',
-                            resultError:'Y']"/>
-                <log level="error" message="Could not save payment method ${paymentMethodId}, exception in CustomerServices.sendStoreRequest(): ${errorInfo.exception.toString()}"/>
-                <return/>
+                            resultError:'Y']" />
+                <log level="error"
+                    message="Could not save payment method ${paymentMethodId}, exception in CustomerServices.sendStoreRequest(): ${errorInfo.exception.toString()}" />
+                <return />
             </if>
 
-            <log level="info" message="store#CustomerPaymentMethod for PaymentMethodId: ${paymentMethodId}... success!\n"/>
+            <log level="info"
+                message="store#CustomerPaymentMethod for PaymentMethodId: ${paymentMethodId}... success!\n" />
 
-            <service-call name="create#mantle.account.method.PaymentGatewayResponse" out-map="context" in-map="[
+            <service-call name="create#mantle.account.method.PaymentGatewayResponse"
+                out-map="context"
+                in-map="[
                             paymentGatewayConfigId:paymentGatewayConfigId,
                             paymentOperationEnumId:'PgoStoreCim',
                             paymentMethodId:paymentMethodId,
@@ -142,49 +191,67 @@ along with this software (see the LICENSE.md file). If not, see
                             resultSuccess:'Y',
                             resultError:'N',
                             resultBadCardNumber:'N',
-                            referenceNum: customerId]"/>
+                            referenceNum: customerId]" />
 
             <!-- if the card used is not already associated with Stripe, associate it with Stripe -->
             <if condition="!paymentMethod.gatewayCimId">
-                <set field="paymentMethod.gatewayCimId" from="customerId"/>
-                <set field="paymentMethod.paymentGatewayConfigId" from="paymentGatewayConfigId"/>
-                <entity-update value-field="paymentMethod"/>
+                <set field="paymentMethod.gatewayCimId" from="customerId" />
+                <set field="paymentMethod.paymentGatewayConfigId" from="paymentGatewayConfigId" />
+                <entity-update value-field="paymentMethod" />
             </if>
 
-            <!-- clear out creditCard.cardNumber and creditCard.cardSecurityCode --> <!-- TODO is this necessary? Not doing this for now. -->
-<!--            <set field="creditCard.cardSecurityCode" from="null"/>-->
-<!--            <set field="creditCard.cardNumber"-->
-<!--                 from="'*'.padRight(creditCard.cardNumber.length() - 4, '*') + creditCard.cardNumber.substring(creditCard.cardNumber.length() - 4, creditCard.cardNumber.length())"/>-->
-<!--            <entity-update value-field="creditCard"/>-->
+            <!-- clear out creditCard.cardNumber and creditCard.cardSecurityCode --> <!-- TODO is this
+            necessary? Not doing this for now. -->
+            <!--            <set field="creditCard.cardSecurityCode" from="null"/>-->
+            <!--            <set field="creditCard.cardNumber"-->
+            <!--                 from="'*'.padRight(creditCard.cardNumber.length() - 4, '*') +
+            creditCard.cardNumber.substring(creditCard.cardNumber.length() - 4,
+            creditCard.cardNumber.length())"/>-->
+            <!--            <entity-update value-field="creditCard"/>-->
         </actions>
     </service>
     <service verb="delete" noun="CustomerPaymentMethod">
-        <in-parameters><parameter name="paymentMethodId"/></in-parameters>
+        <in-parameters>
+            <parameter name="paymentMethodId" />
+        </in-parameters>
         <actions>
-            <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="paymentMethod" for-update="true"/>
+            <entity-find-one entity-name="mantle.account.method.PaymentMethod"
+                value-field="paymentMethod" for-update="true" />
 
-            <service-call name="Stripe.StripeServices.get#PaymentGatewayConfig" in-map="context" out-map="context"/>
-            <if condition="!paymentGatewayConfigId"><log level="warn" message="In delete#CustomerPaymentMethod no paymentGatewayConfigId specified or StripePaymentGatewayConfigId user preference found"/><return/></if>
-
-            <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="pgs"/>
-            <if condition="pgs == null">
-                <!-- this will happen regularly when PaymentMethod.paymentGatewayConfigId is for another gateway -->
-                <log message="Not deleting payment method ${paymentMethodId} from Stripe, no PaymentGatewayStripe found with ID ${paymentGatewayConfigId}"/>
-                <return error="true" message="No PaymentGatewayStripe found with ID ${paymentGatewayConfigId}"/>
+            <service-call name="Stripe.StripeServices.get#PaymentGatewayConfig" in-map="context"
+                out-map="context" />
+            <if condition="!paymentGatewayConfigId">
+                <log level="warn"
+                    message="In delete#CustomerPaymentMethod no paymentGatewayConfigId specified or StripePaymentGatewayConfigId user preference found" />
+                <return />
             </if>
 
-            <set field="party" from="paymentMethod.'Owner#mantle.party.Party'"/>
+            <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="pgs" />
+            <if condition="pgs == null">
+                <!-- this will happen regularly when PaymentMethod.paymentGatewayConfigId is for
+                another gateway -->
+                <log
+                    message="Not deleting payment method ${paymentMethodId} from Stripe, no PaymentGatewayStripe found with ID ${paymentGatewayConfigId}" />
+                <return error="true"
+                    message="No PaymentGatewayStripe found with ID ${paymentGatewayConfigId}" />
+            </if>
+
+            <set field="party" from="paymentMethod.'Owner#mantle.party.Party'" />
 
             <if condition="paymentMethod.gatewayCimId">
-                <set field="secretKey" from="pgs.secretKey"/>
-                <set field="customerId" from="paymentMethod.gatewayCimId"/>
+                <set field="secretKey" from="pgs.secretKey" />
+                <set field="customerId" from="paymentMethod.gatewayCimId" />
 
-                <service-call name="Stripe.StripeServices.send#DeleteCustomerRequest" in-map="context" out-map="context"/>
-                <set field="errorInfo" from="responseMap.errorInfo"/>
+                <service-call name="Stripe.StripeServices.send#DeleteCustomerRequest"
+                    in-map="context" out-map="context" />
+                <set field="errorInfo" from="responseMap.errorInfo" />
 
                 <if condition="errorInfo.exception">
-                    <log level="warn" message="Error deleting Stripe CIM info for PaymentMethod [${paymentMethodId}]: ${errorInfo.responseMessage}"/>
-                    <service-call name="create#mantle.account.method.PaymentGatewayResponse" out-map="context" in-map="[
+                    <log level="warn"
+                        message="Error deleting Stripe CIM info for PaymentMethod [${paymentMethodId}]: ${errorInfo.responseMessage}" />
+                    <service-call name="create#mantle.account.method.PaymentGatewayResponse"
+                        out-map="context"
+                        in-map="[
                             paymentGatewayConfigId:paymentGatewayConfigId,
                             paymentOperationEnumId:'PgoStoreCim',
                             paymentMethodId:paymentMethodId,
@@ -193,46 +260,59 @@ along with this software (see the LICENSE.md file). If not, see
                             reasonCode:errorInfo.reasonCode,
                             reasonMessage:errorInfo.reasonMessage,
                             resultSuccess:'N',
-                            resultError:'Y']"/>
-                    <return message="Could not delete CIM payment method ${paymentMethodId}, message: ${reasonMessage}"/>
+                            resultError:'Y']" />
+                    <return
+                        message="Could not delete CIM payment method ${paymentMethodId}, message: ${reasonMessage}" />
                 </if>
 
-                <service-call name="create#mantle.account.method.PaymentGatewayResponse" out-map="context" in-map="[
+                <service-call name="create#mantle.account.method.PaymentGatewayResponse"
+                    out-map="context"
+                    in-map="[
                             paymentGatewayConfigId:paymentGatewayConfigId,
                             paymentOperationEnumId:'PgoStoreCim',
                             paymentMethodId:paymentMethodId,
                             transactionDate:ec.user.nowTimestamp,
                             resultSuccess:'Y',
-                            resultError:'N']"/>
+                            resultError:'N']" />
 
-                <set field="paymentMethod.gatewayCimId" from="null"/>
-                <entity-update value-field="paymentMethod"/>
+                <set field="paymentMethod.gatewayCimId" from="null" />
+                <entity-update value-field="paymentMethod" />
             </if>
         </actions>
     </service>
 
-    <service verb="send" noun="StoreCustomerRequest" type="java" location="com.stripe.CustomerServices" method="sendStoreRequest">
+    <service verb="send" noun="StoreCustomerRequest" type="java"
+        location="com.stripe.CustomerServices" method="sendStoreRequest">
         <in-parameters>
-            <parameter name="secretKey" required="true"/>
-            <parameter name="creditCardInfo" type="Map" required="true"/>
-            <parameter name="customerInfo" type="Map"/>
+            <parameter name="secretKey" required="true" />
+            <parameter name="creditCardInfo" type="Map" required="true" />
+            <parameter name="customerInfo" type="Map" />
         </in-parameters>
-        <out-parameters><parameter name="responseMap" type="Map"/></out-parameters>
+        <out-parameters>
+            <parameter name="responseMap" type="Map" />
+        </out-parameters>
     </service>
-    <service verb="send" noun="UpdateCustomerRequest" type="java" location="com.stripe.CustomerServices" method="sendUpdateRequest">
+    <service verb="send" noun="UpdateCustomerRequest" type="java"
+        location="com.stripe.CustomerServices" method="sendUpdateRequest">
         <in-parameters>
-            <parameter name="secretKey" required="true"/>
-            <parameter name="customerId" required="true"/>
-            <parameter name="creditCardInfo" type="Map" required="true"/>
-            <parameter name="customerInfo" type="Map"/>
+            <parameter name="secretKey" required="true" />
+            <parameter name="customerId" required="true" />
+            <parameter name="creditCardInfo" type="Map" required="true" />
+            <parameter name="customerInfo" type="Map" />
         </in-parameters>
-        <out-parameters><parameter name="responseMap" type="Map"/></out-parameters>
+        <out-parameters>
+            <parameter name="responseMap" type="Map" />
+        </out-parameters>
     </service>
-    <service verb="send" noun="DeleteCustomerRequest" type="java" location="com.stripe.CustomerServices" method="sendDeleteRequest">
+    <service verb="send" noun="DeleteCustomerRequest" type="java"
+        location="com.stripe.CustomerServices" method="sendDeleteRequest">
         <in-parameters>
-            <parameter name="secretKey" required="true"/>
-            <parameter name="customerId" required="true"/>
+            <parameter name="secretKey" required="true" />
+            <parameter name="customerId" required="true" />
         </in-parameters>
-        <out-parameters><parameter name="responseMap" type="Map"/></out-parameters>
+        <out-parameters>
+            <parameter name="responseMap" type="Map" />
+        </out-parameters>
     </service>
+
 </services>

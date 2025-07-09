@@ -158,6 +158,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                         firstName: _firstNameController.text,
                         lastName: _lastNameController.text,
                         email: _emailController.text,
+                        userGroup: widget.admin ? UserGroup.admin : null,
                       )));
                     }
                   }),

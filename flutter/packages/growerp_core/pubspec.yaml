@@ -66,6 +66,8 @@ dependencies:
   integration_test:
     sdk: flutter
   growerp_activity: ^1.8.1
+  flutter_form_builder: ^10.1.0
+  form_builder_validators: ^11.2.0
 
 dev_dependencies:
   flutter_driver:

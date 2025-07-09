@@ -1066,7 +1066,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="finDocOut"
                         from="[
                         orderId: item.orderId,
-                        paymentInstrument: item.paymentInstrumentId.substring(2),
+                        paymentInstrument: item.paymentInstrumentId ? item.paymentInstrumentId.substring(2) : '',
                         paymentId: item.paymentId,
                         pseudoId: item.pseudoId ?: '',
                         transactionId: item.transactionId,

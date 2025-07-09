@@ -26,11 +26,13 @@ class PaymentMethod with _$PaymentMethod {
   factory PaymentMethod({
     String? ccPaymentMethodId,
     String? ccDescription,
+    String? ccNameOnCard,
     String? creditCardNumber,
     String? checkNumber,
     @CreditCardTypeConverter() CreditCardType? creditCardType,
     String? expireMonth,
     String? expireYear,
+    String? cVC,
   }) = _PaymentMethod;
 
   factory PaymentMethod.fromJson(Map<String, dynamic> json) =>

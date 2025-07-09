@@ -1,4 +1,4 @@
-### Core Features
+## Core Features
 
 - **Open Source:** GrowERP is a fully open-source ERP system, allowing for complete customization and community-driven development.
 
@@ -30,7 +30,7 @@
 
 - **Generated Business Website:** GrowERP automatically generates a professional, customer-facing website based on the data within the ERP system.  
 
-### Core Modules (Admin Application)
+## Core Modules (Admin Application)
 
 - **Dashboard:** A centralized and customizable dashboard provides a real-time overview of key business metrics and operations.
 	- **User and Company Management:**
@@ -72,7 +72,7 @@
 - **Website Management:**
 	- Content Management: Manage the content of the automatically generated business website. 
 
-### Hotel Application Modules
+## Hotel Application Modules
 
 - **Dashboard:** A specialized dashboard designed for the unique needs of hotel operations, providing a quick overview of key metrics.
 - **Room Management:**
