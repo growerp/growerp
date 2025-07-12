@@ -98,6 +98,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                       },
                       child: FloatingActionButton(
                           key: const Key("addNew"),
+                          heroTag: "chatRoomAdd",
                           onPressed: () async {
                             await showDialog(
                                 barrierDismissible: true,

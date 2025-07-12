@@ -115,6 +115,7 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
             },
             child: FloatingActionButton(
                 key: const Key("addNew"),
+                heroTag: "timeEntryAdd",
                 onPressed: () async {
                   await showDialog(
                       barrierDismissible: true,

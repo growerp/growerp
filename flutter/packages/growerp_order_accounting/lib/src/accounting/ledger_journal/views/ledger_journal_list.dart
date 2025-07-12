@@ -111,6 +111,7 @@ class LedgerJournalsState extends State<LedgerJournalList> {
                   },
                   child: FloatingActionButton(
                       key: const Key("addNew"),
+                      heroTag: "ledgerJournalAdd",
                       onPressed: () async {
                         await showDialog(
                             barrierDismissible: true,
