@@ -132,6 +132,7 @@ class MenuOptionState extends State<DisplayMenuOption>
       if (tabItems[i].floatButtonRoute != null) {
         floatingActionButtonList[i] = FloatingActionButton(
             key: const Key("addNew"),
+            heroTag: "floatBtn_route_$i",
             onPressed: () async {
               await Navigator.pushReplacementNamed(
                   context, tabItems[tabIndex].floatButtonRoute!,
@@ -143,6 +144,7 @@ class MenuOptionState extends State<DisplayMenuOption>
       if (tabItems[i].floatButtonForm != null) {
         floatingActionButtonList[i] = FloatingActionButton(
             key: const Key("addNew"),
+            heroTag: "floatBtn_form_$i",
             onPressed: () async {
               await showDialog(
                   barrierDismissible: true,

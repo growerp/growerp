@@ -178,6 +178,7 @@ class LocationListState extends State<LocationList> {
                         const SizedBox(height: 10),
                         FloatingActionButton(
                             key: const Key("addNew"),
+                            heroTag: "btn2",
                             onPressed: () async {
                               await showDialog(
                                   barrierDismissible: true,

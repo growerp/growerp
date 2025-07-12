@@ -260,6 +260,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                                 visible: isVisible,
                                 child: FloatingActionButton(
                                   key: const Key("events"),
+                                  heroTag: "userEvents",
                                   onPressed: () async => await showDialog(
                                       barrierDismissible: true,
                                       context: context,
@@ -281,6 +282,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                               const SizedBox(height: 10),
                               FloatingActionButton(
                                   key: const Key("updateFloat"),
+                                  heroTag: "userUpdate",
                                   onPressed: () {
                                     updatedUser = updatedUser.copyWith(
                                         pseudoId: _idController.text,
