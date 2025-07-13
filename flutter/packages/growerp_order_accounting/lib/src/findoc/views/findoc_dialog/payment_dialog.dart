@@ -192,7 +192,8 @@ class PaymentDialogState extends State<PaymentDialog> {
       FinDocState state, GlobalKey<FormState> paymentDialogFormKey) {
     if (_selectedPaymentType != null && state.paymentTypes.isNotEmpty) {
       _selectedPaymentType = state.paymentTypes.firstWhere(
-          (el) => _selectedPaymentType!.paymentTypeId == el.paymentTypeId);
+          (el) => _selectedPaymentType!.paymentTypeId == el.paymentTypeId,
+          orElse: () => state.paymentTypes.first);
     }
     Color getColor(Set<WidgetState> states) {
       const Set<WidgetState> interactiveStates = <WidgetState>{

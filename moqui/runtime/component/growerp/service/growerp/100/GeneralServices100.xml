@@ -697,6 +697,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="companyName" />
             <parameter name="currencyId" />
             <parameter name="creditCardNumber" />
+            <parameter name="creditCardType" />
             <parameter name="nameOnCard" />
             <parameter name="expireMonth" />
             <parameter name="expireYear" />
@@ -800,6 +801,15 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <set field="companyPartyId" from="mainCompanies[0]?.partyId" />
 
+            <!-- find GrowERP supplier party locally -->
+            <entity-find entity-name="mantle.party.PartyDetail" list="companies">
+                <econdition field-name="organizationName" value="GrowERP" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+            </entity-find>
+            <if condition="companies">
+                <set field="growerpPartyId" from="companies[0].partyId" />
+            </if>
+
             <!-- set basic return data -->
             <set field="authenticate"
                 from="[user: [partyId: userAccount.partyId,
@@ -872,6 +882,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 paymentMethodTypeEnumId: 'PmtCreditCard',
                                 ownerPartyId: userAccount.partyId,
                                 cardNumber: creditCardNumber,
+                                creditCardTypeEnumId: 'Cct' + creditCardType,
                                 expireDate: expireDate,
                                 firstNameOnAccount: nameOnCard,
                                 lastNameOnAccount: '',
@@ -884,22 +895,15 @@ along with this software (see the LICENSE.md file). If not, see
                     </else>
                 </if>
                 <!-- create growerp as supplier if required -->
-                <entity-find entity-name="mantle.party.PartyDetail" list="companies">
-                    <econdition field-name="organizationName" value="GrowERP" />
-                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                </entity-find>
-                <if condition="companies">
-                    <set field="growerpPartyId" from="companies[0].partyId" />
-                    <else>
-                        <set field="growerpCompany"
-                            from="[name: 'GrowERP', role: 'Supplier',
+                <if condition="!growerpPartyId">
+                    <set field="growerpCompany"
+                        from="[name: 'GrowERP', role: 'Supplier',
                             email: 'support@growerp.com']" />
-                        <service-call
-                            name="growerp.100.PartyServices100.create#Company"
-                            in-map=" [company: growerpCompany,ownerPartyId: ownerPartyId]"
-                            out-map="companyInfo" />
-                        <set field="growerpPartyId" from="companyInfo.company.partyId" />
-                    </else>
+                    <service-call
+                        name="growerp.100.PartyServices100.create#Company"
+                        in-map=" [company: growerpCompany,ownerPartyId: ownerPartyId]"
+                        out-map="companyInfo" />
+                    <set field="growerpPartyId" from="companyInfo.company.partyId" />
                 </if>
                 <!-- create payment if required -->
                 <set field="memo"
@@ -907,17 +911,16 @@ along with this software (see the LICENSE.md file). If not, see
                 <entity-find entity-name="mantle.account.payment.Payment" list="payments">
                     <econdition field-name="fromPartyId" from="companyPartyId" />
                     <econdition field-name="toPartyId" from="growerpPartyId" />
-                    <econdition field-name="memo" from="memo" />
+                    <econdition field-name="statusId" value="PmntAuthorized" />
                     <!-- TODO: check status?? -->
                 </entity-find>
-                <if condition="false"><!-- not used in test-->
+                <if condition="!payments">
                     <!-- decode plan to amount, get later from product 100000-->
                     <set field="planAmount"
                         from="[diyPlan: '50.00',
                         smallPlan: '499.00', fullPlan: '999.00']" />
                     <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                         in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']" out-map="context" />
-                    <set field="finDoc.pseudoId" from="seqNum" />
                     <service-call name="create#mantle.account.payment.Payment"
                         in-map="[
                             pseudoId: seqNum,
@@ -925,6 +928,8 @@ along with this software (see the LICENSE.md file). If not, see
                             paymentMethodId: paymentMethodId,
                             amount: planAmount[plan],
                             amountUomId: 'USD',
+                            paymentInstrumentEnumId: 'PiCreditCard',
+                            effectiveDate: ec.user.nowTimestamp,
                             paymentTypeEnumId: 'PmtCreditCard',
                             fromPartyId: companyPartyId,
                             toPartyId: growerpPartyId,
@@ -932,26 +937,32 @@ along with this software (see the LICENSE.md file). If not, see
                             ]"
                         out-map="paymentInfo" />
                     <set field="paymentId" from="paymentInfo.paymentId" />
+                    <!-- authorizeAndCapture Payment -->
+                    <service-call name="Stripe.StripePaymentServices.authorizeAndCapture#Payment"
+                        in-map="[paymentId: paymentId, paymentGatewayConfigId: 'STRIPE']" />
                     <else>
-                        <set field="paymentId"
-                            from="payments[0].paymentId" />
+                        <set field="paymentId" from="payments[0].paymentId" />
                     </else>
                 </if>
-                <!-- authorizeAndCapture Payment -->
-                <service-call name="Stripe.StripePaymentServices.authorizeAndCapture#Payment"
-                    in-map="[paymentId: paymentId,paymentGatewayConfigId: 'STRIPE']" />
             </if>
 
-            <!-- check payment for now just check presence of cc on party -->
-            <entity-find-one entity-name="mantle.account.method.PaymentMethod"
-                value-field="paymentMethod">
-                <field-map field-name="ownerPartyId" from=" userAccount.partyId" />
+            <!-- check if authorized payment with status authorized exist 
+                    not for growerp == 100000 itself and stripe activated -->
+            <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="stripeKey">
+                <field-map field-name="paymentGatewayConfigId" value="STRIPE" />
+                <field-map field-name="ownerPartyId" value="100000" />
             </entity-find-one>
-            <!-- growerp == 100000 no charge -->
-            <if condition="paymentMethod == null &amp;&amp; ownerPartyId != '100000'">
-                <set field="authenticate"
-                    from="authenticate + [apiKey: 'payment']" />
-                <return />
+            <if condition="ownerPartyId != '100000' &amp;&amp; stripeKey">
+                <entity-find entity-name="mantle.account.payment.Payment" list="payments">
+                    <econdition field-name="fromPartyId" from="companyPartyId" />
+                    <econdition field-name="toPartyId" from="growerpPartyId" />
+                    <econdition field-name="statusId" value="PmntAuthorized" />
+                    <!-- TODO: better checking for payment here, now just first payment -->
+                </entity-find>
+                <if condition="!payments">
+                    <set field="authenticate" from="authenticate + [apiKey: 'payment']" />
+                    <return />
+                </if>
             </if>
 
             <!-- check if any classification attached for this user -->

@@ -2712,7 +2712,6 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!classification">
                 <return message="Not a valid classificationId: ${classificationId}" />
             </if>
-            <log message="===cp: $companyPartyId ug: $userGroupId" />
             <if condition="!companyPartyId &amp;&amp; userGroupId == 'GROWERP_M_ADMIN'">
                 <then>
                     <!-- create root party -->

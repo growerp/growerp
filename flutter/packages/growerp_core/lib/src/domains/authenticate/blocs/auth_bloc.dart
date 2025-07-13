@@ -20,6 +20,7 @@ import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:credit_card_type_detector/credit_card_type_detector.dart';
 
 import '../../../services/ws_client.dart';
 import '../../common/functions/functions.dart';
@@ -174,6 +175,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     try {
+      String? creditCardType;
+      if (event.creditCardNumber != null) {
+        var cardType = detectCCType(event.creditCardNumber!);
+        var cardType1 = cardType[0].prettyType;
+        creditCardType = cardType1.toString().split('.').last.toString();
+      }
+
       emit(state.copyWith(status: AuthStatus.loading));
       PersistFunctions.removeAuthenticate();
       Authenticate authenticate = await restClient.login(
@@ -183,6 +191,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         currencyId: event.currency?.currencyId,
         demoData: event.demoData,
         creditCardNumber: event.creditCardNumber,
+        creditCardType: creditCardType,
         nameOnCard: event.nameOnCard,
         expireMonth: event.expireMonth,
         expireYear: event.expireYear,
