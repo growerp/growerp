@@ -33,6 +33,7 @@ abstract class RestClient {
     @Field() required String username,
     @Field() required String password,
     @Field() String? creditCardNumber,
+    @Field() String? creditCardType,
     @Field() String? nameOnCard,
     @Field() String? expireMonth,
     @Field() String? expireYear,
