@@ -172,7 +172,7 @@ along with this software (see the LICENSE.md file). If not, see
                             reasonMessage:errorInfo.reasonMessage.length() > 255 ? errorInfo.reasonMessage.substring(0,251) + &quot;...&quot; : errorInfo.reasonMessage,
                             resultSuccess:'N',
                             resultError:'Y']" />
-                <log level="error"
+                <return error="true"
                     message="Could not save payment method ${paymentMethodId}, exception in CustomerServices.sendStoreRequest(): ${errorInfo.exception.toString()}" />
                 <return />
             </if>
