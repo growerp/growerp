@@ -177,10 +177,9 @@ var storeInfo = ${storeInfoJson};
     <widgets>
         <section name="website" condition="productStoreId != null &amp;&amp; productStoreId != 'POPC_DEFAULT'">
             <widgets>
-                <render-mode><text type="html" location="${template_server_root}"/></render-mode>
+                <render-mode><text type="html" location="${template_server_root}"></text></render-mode>
             </widgets>
             <fail-widgets>
-                <label text="$productStoreId"/>
                 <label text="${ec.web.sendError(404, 'Not a valid website url', null)}"/>
             </fail-widgets>
         </section>

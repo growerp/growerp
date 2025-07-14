@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    standalone="true" require-authentication="anonymous-view">
+
+    <always-actions>
+        <service-call name="popstore.StoreServices.get#ProductStoreIdFromHostName" in-map="[
+            requestHostName: (ec.web.getHostName(false) == '10.0.2.2' ? 'localhost' : ec.web.getHostName(false))]" out-map="productStoreIdContext"/>
+        <set field="productStoreId" value="${productStoreIdContext.productStoreId ?: 'POPC_DEFAULT'}"/>
+
+        <service-call name="popstore.StoreServices.get#StoreInfo" in-map="[productStoreId:productStoreId]" out-map="storeInfo"/>
+        <set field="productStore" from="storeInfo.productStore"/>
+        <set field="wikiSpaceId" from="productStore?.wikiSpaceId"/>
+
+        <if condition="ec.user.userAccount">
+            <entity-find-one entity-name="mantle.party.PartyDetail" value-field="partyDetail">
+                <field-map field-name="partyId" from="ec.user.userAccount.partyId"/>
+            </entity-find-one>
+        </if>
+    </always-actions>
+
+    <actions></actions>
+
+    <widgets>
+        <!-- top path name is defined in MoquiConf.xml -->
+        <section name="website" condition="productStoreId != null &amp;&amp; productStoreId != 'POPC_DEFAULT'">
+            <widgets>
+                <!--label
+                text="Welcome ${partyDetail?.firstName?:''} ${partyDetail?.lastName?:''} to
+                ${productStore?.storeName ?: 'GrowERP Ecommerce'}"/-->
+                <render-mode>
+                    <text type="html" location="component://PopRestStore/websites/${productStoreId}.html"></text>
+                </render-mode>
+            </widgets>
+            <fail-widgets>
+                <label text="$productStoreId"/>
+                <label text="${ec.web.sendError(404, 'Not a valid Growerp website url', null)}"/>
+            </fail-widgets>
+        </section>
+    </widgets>
+    
+</screen>
