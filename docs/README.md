@@ -29,6 +29,9 @@ This directory contains comprehensive documentation for extending GrowERP throug
    - Moqui Data Model (mantle-udm component)
    - REST Interface (e.g., https://test.growerp.org/rest/service.swagger/growerp)
 
+4. **[Stripe Payment processing](./docs/Stripe_Payment_Processing_Documentation.md)**
+
+
 ## Quick Start
 
 ### For Frontend Developers
