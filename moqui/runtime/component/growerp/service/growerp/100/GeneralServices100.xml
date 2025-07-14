@@ -295,6 +295,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="partyTypeEnumId" value="PtyOwner" />
                 <econdition field-name="companyRole" value="OrgInternal" />
                 <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true" />
+                <econdition field-name="ownerDisabled" value="N" />
             </entity-find>
             <iterate list="parties" entry="party">
                 <set field="companyPartyId" from="party.companyPartyId" />
@@ -787,12 +788,15 @@ along with this software (see the LICENSE.md file). If not, see
                 value-field="person">
                 <field-map field-name="partyId" from="userAccount.partyId" />
             </entity-find-one>
-            <!-- get ownerPartyId -->
+            <!-- get ownerPartyId from user -->
             <entity-find-one entity-name="mantle.party.Party"
                 value-field="userParty">
                 <field-map field-name="partyId" from="userAccount.partyId" />
             </entity-find-one>
             <set field="ownerPartyId" from="userParty.ownerPartyId" />
+            <!-- activate owner -->
+            <service-call name="update#mantle.party.Party"
+                in-map="[partyId: ownerPartyId, disabled: 'N']" />
             <!-- find main company -->
             <entity-find entity-name="mantle.party.PartyDetailAndRole" list="mainCompanies">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
@@ -939,7 +943,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="paymentId" from="paymentInfo.paymentId" />
                     <!-- authorizeAndCapture Payment -->
                     <service-call name="Stripe.StripePaymentServices.authorizeAndCapture#Payment"
-                        in-map="[paymentId: paymentId, paymentGatewayConfigId: 'STRIPE']" />
+                        in-map="[paymentId: paymentId, paymentGatewayConfigId: 'GROWERP']" />
                     <else>
                         <set field="paymentId" from="payments[0].paymentId" />
                     </else>

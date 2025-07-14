@@ -6,6 +6,8 @@
 	- Web: Accessible from any modern web browser.
 	- Android: Available on the Google Play Store.
 	- iOS: Available on the Apple App Store.
+	- Linux native application
+	- Windows native application
 
 - **Multi-Tenancy:**
 	- SAAS: Supports multi-company, multi-currency, and multi-language setups for Software as a Service (SAAS) installations.
