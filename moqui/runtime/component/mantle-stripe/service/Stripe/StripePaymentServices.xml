@@ -139,7 +139,7 @@ along with this software (see the LICENSE.md file). If not, see
             </then><else>
                 <service-call name="Stripe.StripePaymentServices.save#StripeResponse" in-map="context" out-map="context"/>
                 <if condition="responseMap.errorInfo.exception">
-                    <then><log level="error" message="Unable to authorize+capture payment. Exception in TransactionServices.sendAuthorizeRequest(): ${responseMap.errorInfo.exception.toString()}"/></then>
+                    <then><return error="true" message="Unable to authorize+capture payment. Exception in TransactionServices.sendAuthorizeRequest(): ${responseMap.errorInfo.exception.toString()}"/></then>
                     <else><log level="info" message="Successfully completed authorization+capture of charge: ${responseMap.charge.id}"/></else>
                 </if>
             </else></if>
@@ -225,18 +225,18 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters><parameter name="paymentGatewayConfigId" required="true"/></in-parameters>
         <out-parameters><parameter name="stripeGatewayInfoMap" type="Map"/></out-parameters>
         <actions>
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="pgs"/>
-            <if condition="pgs">
-                <set field="stripeGatewayInfoMap" from="[secretKey:pgs.secretKey]"/>
+            <if condition="paymentGatewayConfigId == 'GROWERP'">
+                <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="pgs">
+                    <field-map field-name="paymentGatewayConfigId" value="STRIPE"/>
+                    <field-map field-name="ownerPartyId" value="100000"/>
+                </entity-find-one>
                 <else>
-                    <!-- use growerp Stripe key for subscriptions -->
-                    <set field="ownerPartyId" value="100000"/>
+                    <service-call out-map="context"
+                        name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
                     <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="pgs"/>
-                    <set field="stripeGatewayInfoMap" from="[secretKey:pgs?.secretKey]"/>
                 </else>
             </if>
+            <set field="stripeGatewayInfoMap" from="[secretKey:pgs?.secretKey]"/>
         </actions>
     </service>
     <service verb="get" noun="PaymentGatewayInfo">

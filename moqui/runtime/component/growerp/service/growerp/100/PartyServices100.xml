@@ -2718,8 +2718,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                         in-map="[ownerPartyId: 'system', seqName: 'party']"
                         out-map="context" />
+                    <!-- set to disable first, when logged in will be activated -->
                     <service-call name="create#mantle.party.Party"
-                        in-map="[partyTypeEnumId: 'PtyOwner', pseudoId: seqNum, disabled: 'N']"
+                        in-map="[partyTypeEnumId: 'PtyOwner', pseudoId: seqNum, disabled: 'Y']"
                         out-map="owner" />
                     <set field="ownerPartyId" from="owner.partyId" />
                     <!-- create user / temp main company -->
