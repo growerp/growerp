@@ -24,6 +24,11 @@ This directory contains comprehensive documentation for extending GrowERP throug
    - Data management and security
    - Testing and deployment strategies
 
+4. **[Data model basic Guide](./basic_explanation_of_the_frontend_REST_Backend_data_models.md)**
+   - Flutter Data Model (growerp_models package)
+   - Moqui Data Model (mantle-udm component)
+   - REST Interface (e.g., https://test.growerp.org/rest/service.swagger/growerp)
+
 ## Quick Start
 
 ### For Frontend Developers
