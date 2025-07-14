@@ -80,24 +80,27 @@ class LoginDialogState extends State<LoginDialog> {
             }, buildWhen: (previous, current) {
               // Rebuild the UI only when the (apikey=furtherAction) changes
               return previous.authenticate?.apiKey !=
-                  current.authenticate?.apiKey;
+                      current.authenticate?.apiKey ||
+                  current.status == AuthStatus.loading ||
+                  current.status == AuthStatus.failure;
             }, builder: (context, state) {
-              if (state.status == AuthStatus.loading) {
-                return const LoadingIndicator();
-              }
               furtherAction = state.authenticate?.apiKey;
               user = state.authenticate!.user;
               moquiSessionToken = state.authenticate!.moquiSessionToken;
 
-              return Dialog(
-                  insetPadding: const EdgeInsets.all(10),
-                  child: furtherAction == 'moreInfo'
-                      ? moreInfoForm()
-                      : furtherAction == 'payment'
-                          ? paymentForm()
-                          : furtherAction == 'passwordChange'
-                              ? changePasswordForm('', '')
-                              : loginForm());
+              return Stack(children: [
+                Dialog(
+                    insetPadding: const EdgeInsets.all(10),
+                    child: furtherAction == 'moreInfo'
+                        ? moreInfoForm()
+                        : furtherAction == 'payment'
+                            ? paymentForm()
+                            : furtherAction == 'passwordChange'
+                                ? changePasswordForm('', '')
+                                : loginForm()),
+                if (state.status == AuthStatus.loading)
+                  const Center(child: LoadingIndicator()),
+              ]);
             })));
   }
 
