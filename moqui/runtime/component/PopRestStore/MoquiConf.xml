@@ -4,14 +4,15 @@ work. -->
 <moqui-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/moqui-conf-2.1.xsd">
     <screen-facade>
+        <!-- because no-sub-path this is the root url.-->
         <screen location="component://webroot/screen/webroot.xml" default-subscreen="m">
             <subscreens-item name="m" menu-title="GrowERP Ecommerce" menu-include="false"
                     location="component://PopRestStore/screen/store.xml" no-sub-path="true"/>
         </screen>
-        <!--screen
-        location="component://webroot/screen/webroot.xml" default-subscreen="h">
-            <subscreens-item name="h" menu-title="GrowERP Ecommerce" menu-include="false"
-                    location="component://PopRestStore/screen/html.xml" no-sub-path="true"/>
-        </screen-->
+        <!-- single page for the url /website -->
+        <screen location="component://webroot/screen/webroot.xml">
+            <!-- website is the path -->
+            <subscreens-item name="website" location="component://PopRestStore/screen/website.xml" />
+        </screen>
     </screen-facade>
 </moqui-conf>
