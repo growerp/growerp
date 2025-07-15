@@ -2,6 +2,10 @@
 <moqui-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/moqui-conf-2.1.xsd">
 
+    <!-- can be overridden in the docker-compose.yml env setting: paymentGatewayConfigId: 'STRIPE' -->
+    <default-property name="paymentGatewayConfigId" value="TEST_APPROVE" /><!-- STRIPE -->
+
+
     <webapp-list>
         <webapp name="webroot">
             <!-- Notification Message Endpoint -->

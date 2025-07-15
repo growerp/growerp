@@ -148,6 +148,9 @@ class HomeFormState extends State<HomeForm> {
                           key: const Key('loginButton'),
                           child: const Text('Login'),
                           onPressed: () {
+                            // start with login again....even login process interupted
+                            _authBloc.add(AuthUpdateLocal(
+                                state.authenticate!.copyWith(apiKey: '')));
                             showDialog(
                                 barrierDismissible: true,
                                 context: context,

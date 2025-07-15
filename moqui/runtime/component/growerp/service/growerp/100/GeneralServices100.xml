@@ -194,7 +194,9 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <if condition="!userPartyId">
                 <if condition="!ec.user?.userAccount">
-                    <return message="No user Provided and not logged in" />
+                    <log level="warn"
+                        message="No userPartyId provided and not logged in, cannot get user related company and owner" />
+                    <return />
                 </if>
                 <set field="userPartyId" from="ec.user?.userAccount?.partyId" />
             </if>
@@ -957,14 +959,49 @@ along with this software (see the LICENSE.md file). If not, see
                 <field-map field-name="ownerPartyId" value="100000" />
             </entity-find-one>
             <if condition="ownerPartyId != '100000' &amp;&amp; stripeKey">
+                <!-- get last payment for this company and growerp not older than one month -->
                 <entity-find entity-name="mantle.account.payment.Payment" list="payments">
                     <econdition field-name="fromPartyId" from="companyPartyId" />
                     <econdition field-name="toPartyId" from="growerpPartyId" />
                     <econdition field-name="statusId" value="PmntAuthorized" />
-                    <!-- TODO: better checking for payment here, now just first payment -->
+                    <order-by field-name="-paymentId" />
                 </entity-find>
-                <if condition="!payments">
-                    <set field="authenticate" from="authenticate + [apiKey: 'payment']" />
+                <if condition="payments">
+                    <entity-find entity-name="mantle.account.method.PaymentGatewayResponse"
+                        list="resps">
+                        <econdition field-name="paymentId" from="payments[0].paymentId" />
+                        <econdition field-name="paymentOperationEnumId" value="PgoAuthAndCapture" />
+                        <econdition field-name="resultSuccess" value="Y" />
+                    </entity-find>
+                    <entity-find entity-name="mantle.account.method.PaymentMethod" list="pms">
+                        <econdition field-name="ownerPartyId" from="companyPartyId" />
+                    </entity-find>
+                    <if condition="pms">
+                        <set field="paymentMethod" from="[
+
+                            ]" />
+                    </if>
+                </if>
+                <if condition="!payments || !resps"><!-- first login -->
+                    <set field="authenticate" from="authenticate + [apiKey: 'paymentFirst']" />
+                    <return />
+                </if>
+                <!-- pay expired -->
+                <set field="minusOneMonth"
+                    from="java.sql.Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().minusMonths(1))" />
+                <if condition="minusOneMonth &gt; resps[0].transactionDate">
+                    <if
+                        condition="!creditCardNumber  &amp;&amp; creditCardNumber != 'payWithinWeek'">
+                        <set field="authenticate" from="authenticate + [apiKey: 'paymentExpired']" />
+                        <return />
+                    </if>
+                </if>
+                <!-- pay expired 6 weeks-->
+                <set field="minusSixWeeks"
+                    from="java.sql.Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().minusWeeks(6))" />
+                <if condition="minusSixWeeks &gt; resps[0].transactionDate">
+                    <set field="authenticate"
+                        from="authenticate + [apiKey: 'paymentExpiredFinal']" />
                     <return />
                 </if>
             </if>
