@@ -133,44 +133,46 @@ class TopApp extends StatelessWidget {
                       ),
                       onGenerateRoute: router,
                       navigatorObservers: [AppNavObserver()],
-                      home: BlocConsumer<AuthBloc, AuthState>(
-                        listener: (context, state) {
-                          if (state.status != AuthStatus.initial &&
-                              state.status != AuthStatus.loading) {
-                            switch (state.status) {
-                              case AuthStatus.failure:
-                                HelperFunctions.showMessage(
-                                    context, '${state.message}', Colors.red);
-                                break;
-                              default:
-                                HelperFunctions.showMessage(
-                                    context, state.message, Colors.green);
+                      home: Scaffold(
+                        body: BlocConsumer<AuthBloc, AuthState>(
+                          listener: (context, state) {
+                            if (state.status != AuthStatus.initial &&
+                                state.status != AuthStatus.loading) {
+                              switch (state.status) {
+                                case AuthStatus.failure:
+                                  HelperFunctions.showMessage(
+                                      context, '${state.message}', Colors.red);
+                                  break;
+                                default:
+                                  HelperFunctions.showMessage(
+                                      context, state.message, Colors.green);
+                              }
                             }
-                          }
-                        },
-                        builder: (context, state) {
-                          switch (state.status) {
-                            case AuthStatus.initial:
-                            case AuthStatus.loading:
-                              return Scaffold(
-                                  // scaffold need for messages
-                                  backgroundColor: Colors.transparent,
-                                  body: Builder(builder: (context) {
-                                    return const LoadingIndicator();
-                                  }));
-                            default:
-                              return GlobalConfiguration().get("test")
-                                  ? Banner(
-                                      message: "test",
-                                      color: Colors.red,
-                                      location: BannerLocation.topStart,
-                                      child: HomeForm(
-                                          menuOptions: menuOptions,
-                                          title: title))
-                                  : HomeForm(
-                                      menuOptions: menuOptions, title: title);
-                          }
-                        },
+                          },
+                          builder: (context, state) {
+                            switch (state.status) {
+                              case AuthStatus.initial:
+                              case AuthStatus.loading:
+                                return Scaffold(
+                                    // scaffold need for messages
+                                    backgroundColor: Colors.transparent,
+                                    body: Builder(builder: (context) {
+                                      return const LoadingIndicator();
+                                    }));
+                              default:
+                                return GlobalConfiguration().get("test")
+                                    ? Banner(
+                                        message: "test",
+                                        color: Colors.red,
+                                        location: BannerLocation.topStart,
+                                        child: HomeForm(
+                                            menuOptions: menuOptions,
+                                            title: title))
+                                    : HomeForm(
+                                        menuOptions: menuOptions, title: title);
+                            }
+                          },
+                        ),
                       )));
             })));
   }

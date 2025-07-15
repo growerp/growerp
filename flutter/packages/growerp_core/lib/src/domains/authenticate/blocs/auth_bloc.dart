@@ -43,7 +43,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(this.chat, this.notification, this.restClient, this.classificationId,
       this.company)
       : super(const AuthState()) {
-//    on<AuthUpdateLocal>(_onAuthUpdateLocal);
+    on<AuthUpdateLocal>(_onAuthUpdateLocal);
     on<AuthLoad>(_onAuthLoad);
     on<AuthRegister>(_onAuthRegister,
         transformer: authDroppable(const Duration(milliseconds: 100)));
@@ -60,6 +60,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final WsClient notification;
   final String classificationId;
   final Company? company;
+
+  void _onAuthUpdateLocal(
+    AuthUpdateLocal event,
+    Emitter<AuthState> emit,
+  ) {
+    emit(state.copyWith(authenticate: event.authenticate));
+  }
 
   Future<void> _onAuthLoad(
     AuthLoad event,
@@ -178,8 +185,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       String? creditCardType;
       if (event.creditCardNumber != null) {
         var cardType = detectCCType(event.creditCardNumber!);
-        var cardType1 = cardType[0].prettyType;
-        creditCardType = cardType1.toString().split('.').last.toString();
+        if (cardType.isNotEmpty) {
+          var cardType1 = cardType[0].prettyType;
+          creditCardType = cardType1.toString().split('.').last.toString();
+        }
       }
 
       emit(state.copyWith(status: AuthStatus.loading));
@@ -200,8 +209,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         classificationId: classificationId,
       );
       if (authenticate.apiKey != null &&
-          !['moreInfo', 'passwordChange', 'payment']
-              .contains(authenticate.apiKey)) {
+          ![
+            'moreInfo',
+            'passwordChange',
+            'paymentFirst',
+            'paymentExpired',
+            'paymentExpiredFinal'
+          ].contains(authenticate.apiKey)) {
         // apiKey found so save and authenticated
         emit(state.copyWith(
             status: AuthStatus.authenticated,

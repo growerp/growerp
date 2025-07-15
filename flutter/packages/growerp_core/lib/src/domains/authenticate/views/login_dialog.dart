@@ -47,6 +47,8 @@ class LoginDialogState extends State<LoginDialog> {
   late User? user;
   late String? moquiSessionToken; // in login process used for password
   String? furtherAction;
+  late String username;
+  late String password;
 
   @override
   void initState() {
@@ -90,14 +92,16 @@ class LoginDialogState extends State<LoginDialog> {
 
               return Stack(children: [
                 Dialog(
-                    insetPadding: const EdgeInsets.all(10),
-                    child: furtherAction == 'moreInfo'
-                        ? moreInfoForm()
-                        : furtherAction == 'payment'
-                            ? paymentForm()
-                            : furtherAction == 'passwordChange'
-                                ? changePasswordForm('', '')
-                                : loginForm()),
+                  insetPadding: const EdgeInsets.all(10),
+                  child: switch (furtherAction) {
+                    'moreInfo' => moreInfoForm(),
+                    'paymentFirst' => paymentForm(paymentFirst: true),
+                    'paymentExpired' => paymentForm(expired: true),
+                    'paymentExpiredFinal' => paymentForm(finalExpired: true),
+                    'passwordChange' => changePasswordForm(username, password),
+                    _ => loginForm(),
+                  },
+                ),
                 if (state.status == AuthStatus.loading)
                   const Center(child: LoadingIndicator()),
               ]);
@@ -203,7 +207,6 @@ class LoginDialogState extends State<LoginDialog> {
 
   Widget moreInfoForm() {
     String defaultCompanyName = kReleaseMode ? '' : 'Main Company';
-
     return popUp(
         height: user?.userGroup == UserGroup.admin ? 450 : 350,
         context: context,
@@ -381,7 +384,10 @@ class LoginDialogState extends State<LoginDialog> {
                             if (_loginFormKey.currentState!.saveAndValidate()) {
                               final formData =
                                   _loginFormKey.currentState!.value;
-
+                              username =
+                                  formData['username']?.toString().trim() ?? '';
+                              password =
+                                  formData['password']?.toString().trim() ?? '';
                               _authBloc.add(AuthLogin(
                                   formData['username']?.toString().trim() ?? '',
                                   formData['password']?.toString().trim() ??
@@ -409,7 +415,13 @@ class LoginDialogState extends State<LoginDialog> {
             )));
   }
 
-  Widget paymentForm() {
+  Widget paymentForm(
+      {paymentFirst = false, expired = false, finalExpired = false}) {
+    String testCreditCardNumber = kReleaseMode ? '' : '4012888888881881';
+    String testExpiryDate = kReleaseMode ? '' : '11/33';
+    String testCvv = kReleaseMode ? '' : '123';
+    String testNameOnCart = 'Test Customer';
+
     return popUp(
         height: isPhone(context) ? 700 : 700,
         width: 400,
@@ -420,17 +432,27 @@ class LoginDialogState extends State<LoginDialog> {
           child: FormBuilder(
             autovalidateMode: AutovalidateMode.onUnfocus,
             key: builderFormKey,
+            initialValue: {
+              'cardNumber': testCreditCardNumber,
+              'expiryDate': testExpiryDate,
+              'cardHolderName': testNameOnCart,
+              'cvvCode': testCvv,
+            },
             child: SingleChildScrollView(
               child: Column(children: <Widget>[
-                const Center(
-                  child: Text(
-                    'Just testing?\ntry free system at https://admin.growerp.org',
-                    style: TextStyle(fontSize: 16, color: Colors.yellow),
+                if (paymentFirst)
+                  const Center(
+                    child: Text(
+                      kReleaseMode
+                          ? 'Just testing?\ntry free system at https://admin.growerp.org'
+                          : 'This is an always approved CC',
+                      style: TextStyle(fontSize: 16, color: Colors.yellow),
+                    ),
                   ),
-                ),
                 const SizedBox(height: 10),
                 FormBuilderCheckboxGroup(
                   key: const Key('plan'),
+                  initialValue: const ['diyPlan'],
                   name: 'plan',
                   options: const [
                     FormBuilderFieldOption(
@@ -503,7 +525,7 @@ class LoginDialogState extends State<LoginDialog> {
                             child: FormBuilderTextField(
                                 name: 'cvvCode',
                                 decoration: const InputDecoration(
-                                  labelText: 'CVC Code',
+                                  labelText: 'CVV Code',
                                   hintText: 'XXX',
                                 ),
                                 validator:
@@ -518,42 +540,65 @@ class LoginDialogState extends State<LoginDialog> {
                           )),
                       const SizedBox(height: 20),
                       Center(
-                        child: OutlinedButton(
-                            key: const Key('pay'),
-                            child: const Text('Pay'),
-                            onPressed: () {
-                              if (builderFormKey.currentState!
-                                  .saveAndValidate()) {
-                                final formData =
-                                    builderFormKey.currentState!.value;
+                        child: Row(
+                          children: [
+                            if (expired)
+                              OutlinedButton(
+                                  key: const Key('payWeek'),
+                                  child: const Text('Pay within one week'),
+                                  onPressed: () {
+                                    context.read<AuthBloc>().add(AuthLogin(
+                                        user!.loginName!,
+                                        moquiSessionToken!, // returned password
+                                        creditCardNumber: 'payWithinWeek'));
+                                  }),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: OutlinedButton(
+                                  key: const Key('pay'),
+                                  child: const Text('Pay'),
+                                  onPressed: () {
+                                    if (builderFormKey.currentState!
+                                        .saveAndValidate()) {
+                                      final formData =
+                                          builderFormKey.currentState!.value;
 
-                                final selectedPlan = formData['plan'] as List?;
-                                final expiryDateValue =
-                                    formData['expiryDate']?.toString() ?? '';
-                                final expiryParts = expiryDateValue.split('/');
+                                      final selectedPlan =
+                                          formData['plan'] as List?;
+                                      final expiryDateValue =
+                                          formData['expiryDate']?.toString() ??
+                                              '';
+                                      final expiryParts =
+                                          expiryDateValue.split('/');
 
-                                context.read<AuthBloc>().add(AuthLogin(
-                                    user!.loginName!,
-                                    moquiSessionToken!, // returned password
-                                    creditCardNumber: formData['cardNumber']
-                                            ?.toString()
-                                            .replaceAll(' ', '') ??
-                                        '',
-                                    nameOnCard: formData['cardHolderName']
-                                            ?.toString() ??
-                                        '',
-                                    cVC: formData['cvvCode']?.toString() ?? '',
-                                    plan: selectedPlan?.isNotEmpty == true
-                                        ? selectedPlan![0]
-                                        : '',
-                                    expireMonth: expiryParts.isNotEmpty
-                                        ? expiryParts[0]
-                                        : '',
-                                    expireYear: expiryParts.length > 1
-                                        ? expiryParts[1]
-                                        : ''));
-                              }
-                            }),
+                                      context.read<AuthBloc>().add(AuthLogin(
+                                          user!.loginName!,
+                                          moquiSessionToken!, // returned password
+                                          creditCardNumber:
+                                              formData['cardNumber']
+                                                      ?.toString()
+                                                      .replaceAll(' ', '') ??
+                                                  '',
+                                          nameOnCard: formData['cardHolderName']
+                                                  ?.toString() ??
+                                              '',
+                                          cVC:
+                                              formData['cvvCode']?.toString() ??
+                                                  '',
+                                          plan: selectedPlan?.isNotEmpty == true
+                                              ? selectedPlan![0]
+                                              : '',
+                                          expireMonth: expiryParts.isNotEmpty
+                                              ? expiryParts[0]
+                                              : '',
+                                          expireYear: expiryParts.length > 1
+                                              ? expiryParts[1]
+                                              : ''));
+                                    }
+                                  }),
+                            ),
+                          ],
+                        ),
                       )
                     ],
                   ),
