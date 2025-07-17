@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    standalone="true" require-authentication="anonymous-view">
+
+    <always-actions>
+        <service-call name="popstore.StoreServices.get#ProductStoreIdFromHostName" in-map="[
+            requestHostName: (ec.web.getHostName(false) == '10.0.2.2' ? 'localhost' : ec.web.getHostName(false))]" out-map="productStoreIdContext"/>
+        <set field="productStoreId" value="${productStoreIdContext.productStoreId ?: 'POPC_DEFAULT'}"/>
+
+        <service-call name="popstore.StoreServices.get#StoreInfo" in-map="[productStoreId:productStoreId]" out-map="storeInfo"/>
+        <set field="productStore" from="storeInfo.productStore"/>
+        <set field="wikiSpaceId" from="productStore?.wikiSpaceId"/>
+
+        <if condition="ec.user.userAccount">
+            <entity-find-one entity-name="mantle.party.PartyDetail" value-field="partyDetail">
+                <field-map field-name="partyId" from="ec.user.userAccount.partyId"/>
+            </entity-find-one>
+        </if>
+    </always-actions>
+
+    <transition name="payOnePage"  require-session-token="false">
+            <service-call name="growerp.100.AccountingServices100.checkOut#OnePage"
+                in-map="[
+                    productStoreId: productStoreId,
+                    email: ec.web.parameters.email,
+                    firstName: ec.web.parameters.firstName,
+                    lastName: ec.web.parameters.lastName,
+                    companyName: ec.web.parameters.companyName,
+                    currencyId: ec.web.parameters.currencyId,
+                    creditCardNumber: ec.web.parameters.creditCardNumber,
+                    creditCardType: ec.web.parameters.creditCardType,
+                    nameOnCard: ec.web.parameters.nameOnCard,
+                    expireMonth: ec.web.parameters.expireMonth,
+                    expireYear: ec.web.parameters.expireYear,
+                    cVC: ec.web.parameters.cVC,
+                    country: ec.web.parameters.country,
+                    couponCode: ec.web.parameters.couponCode,
+                    amount: ec.web.parameters.amount
+                    ]"
+                out-map="checkoutResult"/>
+
+                <default-response url="." save-current-screen="true"
+                    parameter-map="[result: checkoutResult.result,
+                        resultMessage: checkoutResult.resultMessage]"/>
+                <error-response url="." save-current-screen="true" 
+                    parameter-map="[result: false,
+                        resultMessage: 'Backend problem, please try later']"/>
+        </transition>
+
+    <widgets>
+        <!-- top path name is defined in MoquiConf.xml -->
+        <section name="checkoutOnePage" condition="productStoreId != null &amp;&amp; productStoreId != 'POPC_DEFAULT'">
+            <actions>
+                    <set field="firstName" value="Jan" />
+                    <set field="lastName" value="Jansen" />
+                    <set field="email" value="test@example.com" />
+                    <set field="couponCode" value="BLACKFRIDAY" />
+                    <set field="creditCardNumber" value="4012888888881881" />
+                    <set field="creditCardType" value="Visa" />
+                    <set field="nameOnCard" value="John Doe" />
+                    <set field="expireMonth" value="12" />
+                    <set field="expireYear" value="25" />
+                    <set field="cVC" value="123" />
+                    <set field="country" value="Thailand" />
+            </actions>
+
+            <widgets>
+                <render-mode>
+                    <text type="html" location="component://PopRestStore/screen/checkoutOnePage.ftl"></text>
+                </render-mode>
+            </widgets>
+            <fail-widgets>
+                <label text="$productStoreId"/>
+                <label text="${ec.web.sendError(404, 'Not a valid Growerp website url', null)}"/>
+            </fail-widgets>
+        </section>
+    </widgets>
+    <fail-widgets>
+        <label text="==========================error================="/>
+    </fail-widgets>
+</screen>

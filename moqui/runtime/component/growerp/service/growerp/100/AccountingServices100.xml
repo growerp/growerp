@@ -1654,4 +1654,129 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="checkOut" noun="OnePage" authenticate="anonymous-all">
+        <description>service to pay an amount on a single html page to a growerp tenant</description>
+        <in-parameters>
+            <parameter name="productStoreId" required="true">
+                <description>productStoreId of receiving company to send the payment to</description>
+            </parameter>
+            <parameter name="email" required="true" />
+            <parameter name="firstName" />
+            <parameter name="lastName" />
+            <parameter name="companyName" />
+            <parameter name="currencyId" />
+            <parameter name="creditCardNumber" />
+            <parameter name="creditCardType" />
+            <parameter name="nameOnCard" />
+            <parameter name="expireMonth" />
+            <parameter name="expireYear" />
+            <parameter name="cVC" />
+            <parameter name="country" />
+            <parameter name="couponCode" />
+            <parameter name="amount" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="result" type="Boolean" default-value="false" />
+            <parameter name="resultMessage" default-value="Payment failed" />
+        </out-parameters>
+        <actions>
+            <!-- get productStore and company -->
+            <entity-find-one entity-name="mantle.product.store.ProductStore"
+                value-field="productStore" />
+            <set field="companyPartyId" from="productStore.organizationPartyId" />
+            <!-- get company owner-->
+            <entity-find-one entity-name="mantle.party.Party" value-field="party">
+                <field-map field-name="partyId" from="companyPartyId" />
+            </entity-find-one>
+            <set field="ownerPartyId" from="party.ownerPartyId" />
+            <!-- find person from email -->
+            <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany" list="partyIds">
+                <econditions combine="or">
+                    <econdition field-name="emailAddress" from="email" />
+                    <econdition field-name="emailAddressCm" from="email" />
+                </econditions>
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+            </entity-find>
+            <if condition="partyIds">
+                <set field="userPartyId" from="partyIds[0].userPartyId" />
+                <!-- if not found create person in owner as customer with email-->
+                <else>
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'party']"
+                        out-map="context" />
+                    <service-call name="create#mantle.party.Party"
+                        in-map="[pseudoId: seqNum, partyTypeEnumId:'PtyPerson',ownerPartyId: ownerPartyId]"
+                        out-map="newPartyOut" />
+                    <set field="userPartyId" from="newPartyOut.partyId" />
+                    <service-call name="create#mantle.party.Person"
+                        in-map="[
+                            firstName: firstName,
+                            lastName: lastName,
+                            partyId: userPartyId]" />
+                    <service-call name="create#mantle.party.PartyRole"
+                        in-map="[partyId:userPartyId, roleTypeId: 'Customer']" />
+                    <!-- create email -->
+                    <service-call name="mantle.party.ContactServices.create#EmailAddress"
+                        in-map="[emailAddress: email, partyId: userPartyId,
+                             contactMechPurposeId:'EmailPrimary']" />
+                </else>
+            </if>
+            <!-- process payment with credit card -->
+            <!-- check if payment method exists -->
+            <entity-find entity-name="mantle.account.method.PaymentMethod" list="pms">
+                <econdition field-name="ownerPartyId" from="userPartyId" />
+            </entity-find>
+            <if condition="pms">
+                <set field="paymentMethodId" from="pms[0].paymentMethodId" />
+                <else>
+                    <!-- save creditcard in user record -->
+                    <set field="expireDate"
+                        value="${expireMonth}/20${expireYear}" />
+                    <set field="inMap"
+                        from="[
+                                paymentMethodTypeEnumId: 'PmtCreditCard',
+                                ownerPartyId: userPartyId,
+                                cardNumber: creditCardNumber,
+                                creditCardTypeEnumId: 'Cct' + creditCardType,
+                                expireDate: expireDate,
+                                firstNameOnAccount: nameOnCard,
+                                lastNameOnAccount: '',
+                                paymentGatewayConfigId: System.getProperty('paymentGatewayConfigId'),
+                                ]" />
+                    <service-call
+                        name="mantle.account.PaymentMethodServices.create#CreditCard"
+                        in-map="inMap" out-map="userPayment" />
+                    <set field="paymentMethodId" from="userPayment.paymentMethodId" />
+                </else>
+            </if>
+            <!-- create payment -->
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']" out-map="context" />
+            <service-call name="create#mantle.account.payment.Payment"
+                in-map="[   statusId: 'PmntPromised',
+                            pseudoId: seqNum,
+                            paymentType: 'PtPrePayment',
+                            paymentMethodId: paymentMethodId,
+                            amount: amount,
+                            amountUomId: 'USD',
+                            paymentInstrumentEnumId: 'PiCreditCard',
+                            effectiveDate: ec.user.nowTimestamp,
+                            paymentTypeEnumId: 'PmtCreditCard',
+                            fromPartyId: userPartyId,
+                            toPartyId: companyPartyId,
+                            memo: memo,
+                            ]"
+                out-map="paymentInfo" />
+            <set field="paymentId" from="paymentInfo.paymentId" />
+            <!-- authorizeAndCapture Payment -->
+            <if condition="System.getProperty('paymentGatewayConfigId') == 'STRIPE'">
+                <service-call name="Stripe.StripePaymentServices.authorizeAndCapture#Payment"
+                    in-map="[paymentId: paymentId, 
+                    paymentGatewayConfigId: System.getProperty('paymentGatewayConfigId')]" />
+            </if>
+            <set field="result" value="true" />
+            <set field="resultMessage" value="Payment successful, thank you!" />
+        </actions>
+    </service>
+
 </services>

@@ -59,7 +59,9 @@ along with this software (see the LICENSE.md file). If not, see
 
             <entity-find-one entity-name="mantle.account.method.PaymentMethod"
                 value-field="paymentMethod" for-update="true" />
-
+            <!-- get owner -->
+            <service-call in-map="[userPartyId: paymentMethod.ownerPartyId]" out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="Stripe.StripeServices.get#PaymentGatewayConfig" in-map="context"
                 out-map="context" />
             <if condition="!paymentGatewayConfigId">
@@ -71,7 +73,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="pgs == null">
                 <!-- this will happen regularly when PaymentMethod.paymentGatewayConfigId is for
                 another gateway -->
-                <log
+                <log level="warn"
                     message="Not saving payment method ${paymentMethodId} with Stripe, no PaymentGatewayStripe found with ID ${paymentGatewayConfigId}" />
                 <return />
             </if>
@@ -172,7 +174,7 @@ along with this software (see the LICENSE.md file). If not, see
                             reasonMessage:errorInfo.reasonMessage.length() > 255 ? errorInfo.reasonMessage.substring(0,251) + &quot;...&quot; : errorInfo.reasonMessage,
                             resultSuccess:'N',
                             resultError:'Y']" />
-                <return error="true"
+                <log level="warn"
                     message="Could not save payment method ${paymentMethodId}, exception in CustomerServices.sendStoreRequest(): ${errorInfo.exception.toString()}" />
                 <return />
             </if>
@@ -226,14 +228,15 @@ along with this software (see the LICENSE.md file). If not, see
                 <return />
             </if>
 
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="pgs" />
             <if condition="pgs == null">
                 <!-- this will happen regularly when PaymentMethod.paymentGatewayConfigId is for
                 another gateway -->
-                <log
+                <log level="warn"
                     message="Not deleting payment method ${paymentMethodId} from Stripe, no PaymentGatewayStripe found with ID ${paymentGatewayConfigId}" />
-                <return error="true"
-                    message="No PaymentGatewayStripe found with ID ${paymentGatewayConfigId}" />
+                <return />
             </if>
 
             <set field="party" from="paymentMethod.'Owner#mantle.party.Party'" />
