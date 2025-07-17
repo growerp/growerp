@@ -199,8 +199,10 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <set field="website.measurementId" from="measurementIds[0]?.settingValue" />
             <!-- check if apikey is set -->
-            <set field="paymentGatewayConfigId" value="STRIPE" />
-            <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="paymentGateway" />
+            <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="paymentGateway">
+                <field-map field-name="paymentGatewayConfigId" value="STRIPE" />
+                <field-map field-name="ownerPartyId" />
+            </entity-find-one>
             <set field="website.stripeApiKey" from="paymentGateway?.secretKey" />
         </actions>
     </service>

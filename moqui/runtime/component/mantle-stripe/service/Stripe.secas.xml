@@ -25,7 +25,9 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="paymentMethod?.paymentGatewayConfigId"><then>
                 <!-- set paymentGatewayConfigId for call to service -->
                 <set field="paymentGatewayConfigId" from="paymentMethod.paymentGatewayConfigId"/>
-                <!-- if gateway on PaymentMethod not a match return now -->
+                <!-- get owner -->
+                <service-call in-map="[userPartyId: paymentMethod.ownerPartyId]" out-map="context"
+                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
                 <entity-find-one entity-name="mantle.account.method.PaymentGatewayConfig" value-field="paymentGatewayConfig"/>
                 <if condition="paymentGatewayConfig?.paymentGatewayTypeEnumId != 'PgtStripe'"><return/></if>
             </then><else>
@@ -41,6 +43,9 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- if no gateway on PaymentMethod return now -->
             <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="paymentMethod"/>
             <if condition="!paymentMethod?.paymentGatewayConfigId"><return/></if>
+            <!-- get owner -->
+            <service-call in-map="[userPartyId: paymentMethod.ownerPartyId]" out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="paymentGatewayConfigId" from="paymentMethod.paymentGatewayConfigId"/>
             <!-- if gateway on PaymentMethod not a match return now -->
             <entity-find-one entity-name="mantle.account.method.PaymentGatewayConfig" value-field="paymentGatewayConfig"/>
@@ -54,6 +59,9 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- if no gateway on PaymentMethod return now -->
             <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="paymentMethod"/>
             <if condition="!paymentMethod?.paymentGatewayConfigId"><return/></if>
+            <!-- get owner -->
+            <service-call in-map="[userPartyId: paymentMethod.ownerPartyId]" out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="paymentGatewayConfigId" from="paymentMethod.paymentGatewayConfigId"/>
             <!-- if gateway on PaymentMethod not a match return now -->
             <entity-find-one entity-name="mantle.account.method.PaymentGatewayConfig" value-field="paymentGatewayConfig"/>

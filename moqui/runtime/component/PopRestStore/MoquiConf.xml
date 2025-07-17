@@ -14,5 +14,10 @@ work. -->
             <!-- website is the path -->
             <subscreens-item name="website" location="component://PopRestStore/screen/website.xml" />
         </screen>
+        <!-- single page for the url /website -->
+        <screen location="component://webroot/screen/webroot.xml">
+            <!-- website is the path -->
+            <subscreens-item name="checkoutOnePage" location="component://PopRestStore/screen/checkoutOnePage.xml" />
+        </screen>
     </screen-facade>
 </moqui-conf>
