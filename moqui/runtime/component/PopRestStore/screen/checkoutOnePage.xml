@@ -33,63 +33,31 @@ along with this software (see the LICENSE.md file). If not, see
     </always-actions>
 
     <transition name="payOnePage"  require-session-token="false">
-            <service-call name="growerp.100.AccountingServices100.checkOut#OnePage"
-                in-map="[
-                    productStoreId: productStoreId,
-                    email: ec.web.parameters.email,
-                    firstName: ec.web.parameters.firstName,
-                    lastName: ec.web.parameters.lastName,
-                    companyName: ec.web.parameters.companyName,
-                    currencyId: ec.web.parameters.currencyId,
-                    creditCardNumber: ec.web.parameters.creditCardNumber,
-                    creditCardType: ec.web.parameters.creditCardType,
-                    nameOnCard: ec.web.parameters.nameOnCard,
-                    expireMonth: ec.web.parameters.expireMonth,
-                    expireYear: ec.web.parameters.expireYear,
-                    cVC: ec.web.parameters.cVC,
-                    country: ec.web.parameters.country,
-                    couponCode: ec.web.parameters.couponCode,
-                    amount: ec.web.parameters.amount
-                    ]"
-                out-map="checkoutResult"/>
+        <service-call name="growerp.100.AccountingServices100.checkOut#OnePage" out-map="checkoutResult"/>
+        <default-response url="." save-parameters="true"
+            parameter-map="[result: checkoutResult.result,
+                resultMessage: checkoutResult.resultMessage,
+                amount: checkoutResult.amount]"/>
+        <error-response url="." save-parameters="true" 
+            parameter-map="[result: false,
+                resultMessage: 'Backend problem, please try later']"/>
+    </transition>
 
-                <default-response url="." save-current-screen="true"
-                    parameter-map="[result: checkoutResult.result,
-                        resultMessage: checkoutResult.resultMessage]"/>
-                <error-response url="." save-current-screen="true" 
-                    parameter-map="[result: false,
-                        resultMessage: 'Backend problem, please try later']"/>
-        </transition>
-
+    <actions>
+        <log message="====$productStoreId  $resultMessage $checkoutResult"/>
+    </actions>
     <widgets>
         <!-- top path name is defined in MoquiConf.xml -->
         <section name="checkoutOnePage" condition="productStoreId != null &amp;&amp; productStoreId != 'POPC_DEFAULT'">
-            <actions>
-                    <set field="firstName" value="Jan" />
-                    <set field="lastName" value="Jansen" />
-                    <set field="email" value="test@example.com" />
-                    <set field="couponCode" value="BLACKFRIDAY" />
-                    <set field="creditCardNumber" value="4012888888881881" />
-                    <set field="creditCardType" value="Visa" />
-                    <set field="nameOnCard" value="John Doe" />
-                    <set field="expireMonth" value="12" />
-                    <set field="expireYear" value="25" />
-                    <set field="cVC" value="123" />
-                    <set field="country" value="Thailand" />
-            </actions>
-
             <widgets>
                 <render-mode>
                     <text type="html" location="component://PopRestStore/screen/checkoutOnePage.ftl"></text>
                 </render-mode>
             </widgets>
             <fail-widgets>
-                <label text="$productStoreId"/>
-                <label text="${ec.web.sendError(404, 'Not a valid Growerp website url', null)}"/>
+                <label text="$productStoreId $amount" />
+                <label text="==========================error================="/>
             </fail-widgets>
         </section>
     </widgets>
-    <fail-widgets>
-        <label text="==========================error================="/>
-    </fail-widgets>
 </screen>

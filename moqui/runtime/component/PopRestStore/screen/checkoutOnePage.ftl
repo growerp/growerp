@@ -175,35 +175,91 @@
             </p>
           </#if>
         </#if>
-        <form id="checkoutForm" method="post" action="/checkoutOnePage/payOnePage">
+        <p id="ccError" style="display:none; color:red; font-weight:bold; margin-bottom:10px;"></p>
+        <form id="checkoutForm" method="post" action="/checkoutOnePage/payOnePage" onsubmit="return validateCreditCard();">
+    <script>
+    function getCardType(number) {
+        number = number.replace(/\D/g, '');
+        if (/^4[0-9]{12}(?:[0-9]{3})?$/.test(number)) return 'Visa';
+        if (/^5[1-5][0-9]{14}$/.test(number)) return 'MasterCard';
+        if (/^3[47][0-9]{13}$/.test(number)) return 'Amex';
+        if (/^6(?:011|5[0-9]{2})[0-9]{12}$/.test(number)) return 'Discover';
+        return '';
+    }
+
+    function updateCardType() {
+        var ccInput = document.getElementById('card-number');
+        var ccTypeInput = document.getElementById('creditCardType');
+        var type = getCardType(ccInput.value);
+        ccTypeInput.value = type;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var ccInput = document.getElementById('card-number');
+        ccInput.addEventListener('input', updateCardType);
+        updateCardType();
+    });
+
+    function luhnCheck(cardNumber) {
+        var sum = 0;
+        var shouldDouble = false;
+        for (var i = cardNumber.length - 1; i >= 0; i--) {
+            var digit = parseInt(cardNumber.charAt(i));
+            if (isNaN(digit)) return false;
+            if (shouldDouble) {
+                digit *= 2;
+                if (digit > 9) digit -= 9;
+            }
+            sum += digit;
+            shouldDouble = !shouldDouble;
+        }
+        return (sum % 10) === 0;
+    }
+
+    function validateCreditCard() {
+        var ccInput = document.getElementById('card-number');
+        var ccError = document.getElementById('ccError');
+        var ccValue = ccInput.value.replace(/\s+/g, '');
+        var ccTypeInput = document.getElementById('creditCardType');
+        var type = getCardType(ccValue);
+        ccTypeInput.value = type;
+        if (!luhnCheck(ccValue)) {
+            ccError.textContent = 'Invalid credit card number.';
+            ccError.style.display = 'block';
+            ccInput.focus();
+            return false;
+        } else {
+            ccError.style.display = 'none';
+            return true;
+        }
+    }
+    </script>
             <section>
                 <h2>Contact</h2>
                 <div class="form-row">
                     <div class="form-group">
-                        <input type="text" id="first-name" name="firstName" placeholder="First Name" required value="${firstName}">
+                        <input type="text" id="first-name" name="firstName" placeholder="First Name" required value="${firstName!}">
                     </div>
                     <div class="form-group">
-                        <input type="text" id="last-name" name="lastName" placeholder="Last Name" required value="${lastName}">
+                        <input type="text" id="last-name" name="lastName" placeholder="Last Name" required value="${lastName!}">
                     </div>
                 </div>
                 <div class="form-group">
-                    <input type="email" id="email" name="email" placeholder="Email Address" required value="${email}">
+                    <input type="email" id="email" name="email" placeholder="Email Address" required value="${email!}">
                 </div>
             </section>
 
-            <section>
+            <!--section>
                 <h2>Coupon Code</h2>
                 <div class="coupon-section">
-                    <input type="text" id="coupon-code" name="couponCode" value="${couponCode}" placeholder="Enter coupon code" required>
-                    <button class="remove-btn">Remove</button>
+                    <input type="text" id="coupon-code" name="couponCode" value="${couponCode!}" placeholder="Enter coupon code" required>
                 </div>
-                <p class="coupon-status">Coupon applied successfully to your Order.</p>
-            </section>
+            </section-->
 
             <section>
                 <h2>Payment Methods</h2>
                 <div class="payment-methods">
-                    <div class="payment-options">
+                    <#--div class="payment-options">
                         <div class="payment-option">
                             <input type="radio" id="card" name="paymentMethod" value="card" checked>
                             <label for="card">Card & More</label>
@@ -212,13 +268,13 @@
                             <input type="radio" id="paypal" name="paymentMethod" value="paypal">
                             <label for="paypal">PayPal</label>
                         </div>
-                    </div>
+                    </div-->
                     <div class="card-details">
-                        <p class="secure-checkout">🔒 Secure, 1-click checkout with Link ✓</p>
+                        <#--p class="secure-checkout">🔒 Secure, 1-click checkout with Link ✓</p-->
                         <div class="form-group">
                             <label for="card-number">Card number</label>
                             <div class="card-number-group">
-                                <input type="text" id="card-number" name="creditCardNumber" placeholder="" required value="${creditCardNumber}">
+                                <input type="text" id="card-number" name="creditCardNumber" placeholder="" required value="${creditCardNumber!}">
                                 <div class="card-icons">
                                    <img src="https://img.icons8.com/color/48/visa.png" alt="Visa">
                                    <img src="https://img.icons8.com/color/48/mastercard.png" alt="Mastercard">
@@ -228,54 +284,53 @@
                         </div>
                         <div class="form-group">
                             <label for="name-on-card">Name on Card</label>
-                            <input type="text" id="name-on-card" name="nameOnCard" placeholder="Full Name" required value="${nameOnCard}">
+                            <input type="text" id="name-on-card" name="nameOnCard" placeholder="Full Name" required value="${nameOnCard!}">
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="expiry-month">Expiration month</label>
-                                <input type="text" id="expiry-month" name="expireMonth" placeholder="MM" required value="${expireMonth}">
+                                <input type="text" id="expiry-month" name="expireMonth" placeholder="MM" required value="${expireMonth!}">
                             </div>
                             <div class="form-group">
                                 <label for="expiry-year">Expiration year</label>
-                                <input type="text" id="expiry-year" name="expireYear" placeholder="YY" required value="${expireYear}">
+                                <input type="text" id="expiry-year" name="expireYear" placeholder="YY" required value="${expireYear!}">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="cvc">Security code</label>
-                            <input type="text" id="cvc" name="cVC" placeholder="CVC" required value="${cVC}">
+                            <input type="text" id="cvc" name="cVC" placeholder="CVC" required value="${cVC!}">
                         </div>
-                        <div class="form-group">
+                        <#--div class="form-group">
                             <label for="country">Country</label>
                             <select id="country" name="country">
                                 <option value="thailand" selected>Thailand</option>
                                 <option value="usa">United States</option>
                                 <option value="uk">United Kingdom</option>
                             </select>
-                        </div>
+                        </div-->
                     </div>
                 </div>
             </section>
 
             <section class="order-summary">
                 <h2>Order Summary</h2>
-                <div class="summary-item">
+                <#--div class="summary-item">
                     <span>Subtotal:</span>
                     <span>$150.00</span>
                 </div>
                 <div class="summary-item">
                     <span>Discounts:</span>
                     <span>-$53.00</span>
-                </div>
+                </div-->
                 <div class="summary-item total">
                     <span>TOTAL:</span>
-                    <span>$97.00</span>
+                    <span>$${amount!}</span>
                 </div>
             </section>
 
-            <input type="hidden" id="amount" name="amount" value="97.00">
             <input type="hidden" id="currencyId" name="currencyId" value="USD">
-            <input type="hidden" id="companyName" name="companyName" value="GrowERP">
-            <input type="hidden" id="creditCardType" name="creditCardType" value="Visa">
+            <input type="hidden" id="creditCardType" name="creditCardType" value="${creditCardType!}">
+            <input type="hidden" id="amount" name="amount" value="${amount!}">
             <button class="place-order-btn">Place Order Now</button>
         </form>
     </div>
