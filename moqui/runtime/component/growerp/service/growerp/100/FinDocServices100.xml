@@ -1079,7 +1079,7 @@ along with this software (see the LICENSE.md file). If not, see
                         docType: docType,
                         otherUser: userOut?.partyId ? userOut : null,
                         otherCompany: company?.partyId ? company : null,
-                        grandTotal: item.amount ? item.amount.toString() : 0,
+                        grandTotal: item.amount ? item.amount.toString() : '0.00',
                         items: [[paymentType: paymentType, glAccount: glAccount]],
                         gatewayResponses: gatewayResponses
                         ]" />
