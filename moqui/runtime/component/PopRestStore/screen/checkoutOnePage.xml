@@ -33,14 +33,14 @@ along with this software (see the LICENSE.md file). If not, see
     </always-actions>
 
     <transition name="payOnePage"  require-session-token="false">
-        <service-call name="growerp.100.AccountingServices100.checkOut#OnePage" out-map="checkoutResult"/>
+        <service-call name="growerp.100.AccountingServices100.checkOut#OnePage"/>
         <default-response url="." save-parameters="true"
-            parameter-map="[result: checkoutResult.result,
-                resultMessage: checkoutResult.resultMessage,
-                amount: checkoutResult.amount]"/>
-        <error-response url="." save-parameters="true" 
+            parameter-map="[result: result,
+                resultMessage: resultMessage,
+                amount: amount]"/>
+        <error-response url="." save-parameters="true"
             parameter-map="[result: false,
-                resultMessage: 'Backend problem, please try later']"/>
+                resultMessage: ec.message.hasError()? ec.message.getErrorsString() :errorMessage ?: resultMessage ?: 'Backend problem, please try later']"/>
     </transition>
 
     <actions>
