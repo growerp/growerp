@@ -83,7 +83,8 @@ class PaymentTest {
           payment.sales ? 'customer' : 'supplier', payment.otherCompany!.name!);
       await CommonTest.enterText(tester, 'amount',
           payment.grandTotal!.toString()); // required because keyboard come up
-      await CommonTest.drag(tester);
+      await CommonTest.enterDropDown(
+          tester, 'paymentType', payment.items[0].paymentType!.accountCode);
       switch (payment.paymentInstrument) {
         case PaymentInstrument.bank:
           await CommonTest.tapByKey(tester, 'bank');
@@ -99,9 +100,6 @@ class PaymentTest {
           break;
         default:
       }
-      await CommonTest.enterDropDown(
-          tester, 'paymentType', payment.items[0].paymentType!.accountCode);
-//      await CommonTest.drag(tester, listViewName: 'listView2', seconds: 2);
       await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
       await CommonTest.waitForSnackbarToGo(tester);
       newPayments

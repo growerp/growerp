@@ -23,15 +23,21 @@ import 'package:growerp_models/growerp_models.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  setUp(() async {
+  setUpAll(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  testWidgets('''GrowERP Core test''', (tester) async {
-    RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, generateRoute, menuOptions,
-        CoreLocalizations.localizationsDelegates,
-        restClient: restClient, clear: true, title: "Core Test");
+  testWidgets('GrowERP Core integration test', (WidgetTester tester) async {
+    final restClient = RestClient(await buildDioClient());
+    await CommonTest.startTestApp(
+      tester,
+      generateRoute,
+      menuOptions,
+      CoreLocalizations.localizationsDelegates,
+      restClient: restClient,
+      clear: true,
+      title: "Core Test",
+    );
 
     await CommonTest.createCompanyAndAdmin(tester);
     await CommonTest.checkCompanyAndAdmin(tester);

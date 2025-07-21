@@ -785,52 +785,6 @@ along with this software (see the LICENSE.md file). If not, see
                     message="cannot find username: ${username}" public="true" />
             </if>
 
-            <!-- get person information -->
-            <entity-find-one entity-name="mantle.party.Person"
-                value-field="person">
-                <field-map field-name="partyId" from="userAccount.partyId" />
-            </entity-find-one>
-            <!-- get ownerPartyId from user -->
-            <entity-find-one entity-name="mantle.party.Party"
-                value-field="userParty">
-                <field-map field-name="partyId" from="userAccount.partyId" />
-            </entity-find-one>
-            <set field="ownerPartyId" from="userParty.ownerPartyId" />
-            <!-- activate owner -->
-            <service-call name="update#mantle.party.Party"
-                in-map="[partyId: ownerPartyId, disabled: 'N']" />
-            <!-- find main company -->
-            <entity-find entity-name="mantle.party.PartyDetailAndRole" list="mainCompanies">
-                <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                <econdition field-name="roleTypeId" value="OrgInternal" />
-                <econdition field-name="partyTypeEnumId" value="PtyOrganization" />
-            </entity-find>
-            <set field="companyPartyId" from="mainCompanies[0]?.partyId" />
-
-            <!-- find GrowERP supplier party locally -->
-            <entity-find entity-name="mantle.party.PartyDetail" list="companies">
-                <econdition field-name="organizationName" value="GrowERP" />
-                <econdition field-name="ownerPartyId" from="ownerPartyId" />
-            </entity-find>
-            <if condition="companies">
-                <set field="growerpPartyId" from="companies[0].partyId" />
-            </if>
-
-            <!-- set basic return data -->
-            <set field="authenticate"
-                from="[user: [partyId: userAccount.partyId,
-                            pseudoId: userParty.pseudoId,
-                            firstName: person.firstName,
-                            lastName: person.lastName,
-                            loginName: username],
-                        ownerPartyId: ownerPartyId,
-                        moquiSessionToken: password,
-                        classificationId: classificationId,
-                        company:[partyId: companyPartyId,
-                            name: companyName,
-                            role: 'OrgInternal']
-                    ]" />
-
             <!-- check password -->
             <set field="oldPassword" from="password" />
             <script>
@@ -869,142 +823,49 @@ along with this software (see the LICENSE.md file). If not, see
                     </if>
                 </if>
             </if>
-            <!-- process payment with credit card -->
-            <if
-                condition="creditCardNumber &amp;&amp; nameOnCard &amp;&amp; expireMonth &amp;&amp; expireYear &amp;&amp; cVC &amp;&amp; plan">
-                <!-- check if payment method exists -->
-                <entity-find entity-name="mantle.account.method.PaymentMethod" list="pms">
-                    <econdition field-name="ownerPartyId" from="userAccount.partyId" />
-                </entity-find>
-                <if condition="pms">
-                    <set field="paymentMethodId" from="pms[0].paymentMethodId" />
-                    <else>
-                        <!-- save creditcard in user record -->
-                        <set field="expireDate"
-                            value="${expireMonth}/20${expireYear}" />
 
-                        <set field="inMap"
-                            from="[
-                                paymentMethodTypeEnumId: 'PmtCreditCard',
-                                ownerPartyId: userAccount.partyId,
-                                cardNumber: creditCardNumber,
-                                creditCardTypeEnumId: 'Cct' + creditCardType,
-                                expireDate: expireDate,
-                                firstNameOnAccount: nameOnCard,
-                                lastNameOnAccount: '',
-                                paymentGatewayConfigId: System.getProperty('paymentGatewayConfigId'),
-                                ]" />
-                        <service-call
-                            name="mantle.account.PaymentMethodServices.create#CreditCard"
-                            in-map="inMap" out-map="userPayment" />
-                        <set field="paymentMethodId" from="userPayment.paymentMethodId" />
-                    </else>
-                </if>
-                <!-- create growerp as supplier if required -->
-                <if condition="!growerpPartyId">
-                    <set field="growerpCompany"
-                        from="[name: 'GrowERP', role: 'Supplier',
-                            email: 'support@growerp.com']" />
-                    <service-call
-                        name="growerp.100.PartyServices100.create#Company"
-                        in-map=" [company: growerpCompany,ownerPartyId: ownerPartyId]"
-                        out-map="companyInfo" />
-                    <set field="growerpPartyId" from="companyInfo.company.partyId" />
-                </if>
-                <!-- create payment if required -->
-                <set field="memo"
-                    value="GrowERP payment for company partyId ${companyPartyId} monthly plan: ${plan}" />
-                <entity-find entity-name="mantle.account.payment.Payment" list="payments">
-                    <econdition field-name="fromPartyId" from="companyPartyId" />
-                    <econdition field-name="toPartyId" from="growerpPartyId" />
-                    <econdition field-name="statusId" value="PmntAuthorized" />
-                    <!-- TODO: check status?? -->
-                </entity-find>
-                <if condition="!payments">
-                    <!-- decode plan to amount, get later from product 100000-->
-                    <set field="planAmount"
-                        from="[diyPlan: '50.00',
-                        smallPlan: '499.00', fullPlan: '999.00']" />
-                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']" out-map="context" />
-                    <service-call name="create#mantle.account.payment.Payment"
-                        in-map="[
-                            pseudoId: seqNum,
-                            paymentType: 'PtPrePayment',
-                            paymentMethodId: paymentMethodId,
-                            amount: planAmount[plan],
-                            amountUomId: 'USD',
-                            paymentInstrumentEnumId: 'PiCreditCard',
-                            effectiveDate: ec.user.nowTimestamp,
-                            paymentTypeEnumId: 'PmtCreditCard',
-                            fromPartyId: companyPartyId,
-                            toPartyId: growerpPartyId,
-                            memo: memo,
-                            ]"
-                        out-map="paymentInfo" />
-                    <set field="paymentId" from="paymentInfo.paymentId" />
-                    <!-- authorizeAndCapture Payment -->
-                    <service-call name="Stripe.StripePaymentServices.authorizeAndCapture#Payment"
-                        in-map="[paymentId: paymentId, paymentGatewayConfigId: 'GROWERP']" />
-                    <else>
-                        <set field="paymentId" from="payments[0].paymentId" />
-                    </else>
-                </if>
+            <!-- login directly with AppSupport-->
+            <if condition="classificationId == 'AppSupport'">
+                <script>ec.user.loginUser(username, password)</script>
+                <service-call name="growerp.100.GeneralServices100.get#Authenticate"
+                    in-map="classificationId: classificationId"
+                    out-map="context" />
+                <return />
             </if>
 
-            <!-- check if authorized payment with status authorized exist 
-                    not for growerp == 100000 itself and stripe activated -->
-            <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="stripeKey">
-                <field-map field-name="paymentGatewayConfigId" value="STRIPE" />
-                <field-map field-name="ownerPartyId" value="100000" />
+            <!-- get person information -->
+            <entity-find-one entity-name="mantle.party.Person"
+                value-field="person">
+                <field-map field-name="partyId" from="userAccount.partyId" />
             </entity-find-one>
-            <if condition="ownerPartyId != '100000' &amp;&amp; stripeKey">
-                <!-- get last payment for this company and growerp not older than one month -->
-                <entity-find entity-name="mantle.account.payment.Payment" list="payments">
-                    <econdition field-name="fromPartyId" from="companyPartyId" />
-                    <econdition field-name="toPartyId" from="growerpPartyId" />
-                    <econdition field-name="statusId" value="PmntAuthorized" />
-                    <order-by field-name="-paymentId" />
-                </entity-find>
-                <if condition="payments">
-                    <entity-find entity-name="mantle.account.method.PaymentGatewayResponse"
-                        list="resps">
-                        <econdition field-name="paymentId" from="payments[0].paymentId" />
-                        <econdition field-name="paymentOperationEnumId" value="PgoAuthAndCapture" />
-                        <econdition field-name="resultSuccess" value="Y" />
-                    </entity-find>
-                    <entity-find entity-name="mantle.account.method.PaymentMethod" list="pms">
-                        <econdition field-name="ownerPartyId" from="companyPartyId" />
-                    </entity-find>
-                    <if condition="pms">
-                        <set field="paymentMethod" from="[
-
-                            ]" />
-                    </if>
-                </if>
-                <if condition="!payments || !resps"><!-- first login -->
-                    <set field="authenticate" from="authenticate + [apiKey: 'paymentFirst']" />
-                    <return />
-                </if>
-                <!-- pay expired -->
-                <set field="minusOneMonth"
-                    from="java.sql.Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().minusMonths(1))" />
-                <if condition="minusOneMonth &gt; resps[0].transactionDate">
-                    <if
-                        condition="!creditCardNumber  &amp;&amp; creditCardNumber != 'payWithinWeek'">
-                        <set field="authenticate" from="authenticate + [apiKey: 'paymentExpired']" />
-                        <return />
-                    </if>
-                </if>
-                <!-- pay expired 6 weeks-->
-                <set field="minusSixWeeks"
-                    from="java.sql.Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().minusWeeks(6))" />
-                <if condition="minusSixWeeks &gt; resps[0].transactionDate">
-                    <set field="authenticate"
-                        from="authenticate + [apiKey: 'paymentExpiredFinal']" />
-                    <return />
-                </if>
-            </if>
+            <!-- get ownerPartyId from user -->
+            <entity-find-one entity-name="mantle.party.Party"
+                value-field="userParty">
+                <field-map field-name="partyId" from="userAccount.partyId" />
+            </entity-find-one>
+            <set field="ownerPartyId" from="userParty.ownerPartyId" />
+            <!-- find main company -->
+            <entity-find entity-name="growerp.party.OwnerAndCompany" list="mainCompanies">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="companyRole" value="OrgInternal" />
+            </entity-find>
+            <set field="companyPartyId" from="mainCompanies[0].companyPartyId" />
+            <set field="companyName" from="companyName ?:mainCompanies[0].companyName" />
+            <!-- set basic return data -->
+            <set field="authenticate"
+                from="[user: [partyId: userAccount.partyId,
+                            pseudoId: userParty.pseudoId,
+                            firstName: person.firstName,
+                            lastName: person.lastName,
+                            loginName: username,
+                            email: username],
+                        ownerPartyId: ownerPartyId,
+                        moquiSessionToken: password,
+                        classificationId: classificationId,
+                        company:[partyId: companyPartyId,
+                            name: companyName,
+                            role: 'OrgInternal']
+                    ]" />
 
             <!-- check if any classification attached for this user -->
             <!-- if none, if admin ask for more info for company setup -->
@@ -1022,36 +883,195 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="userGroupId" value="GROWERP_M_ADMIN" />
                 </entity-find>
                 <if condition="adminAccess">
-                    <then><!-- new company and admin -->
-                        <if condition="!companyName || !currencyId"><!-- mandatory info -->
-                            <set field="authenticate"
-                                from="authenticate + [ownerPartyId: ownerPartyId,
-                                    user: [partyId: userAccount.partyId, loginName: email,
-                                            userGroupId: 'GROWERP_M_ADMIN',
-                                            role: 'OrgIntrnal',
-                                            firstName: person.firstName, lastName: person.lastName,
-                                            email: email, loginName: username],
-                                    apiKey: 'moreInfo']" />
-                            <return error="false"
-                                message="==========This user needs to supply more info, log in again" />
+                    <then><!-- update company and admin from party registration-->
+                        <if condition="companyName &amp;&amp; currencyId">
+                            <!-- update main company name currency: temporary -->
+                            <service-call name="update#mantle.party.Organization"
+                                out-map="context"
+                                in-map="[partyId: companyPartyId,
+                                        organizationName: companyName,
+                                        officeSiteName: currencyId]" />
+                            <!-- activate owner -->
+                            <service-call name="update#mantle.party.Party"
+                                in-map="[partyId: ownerPartyId, disabled: 'N']" />
                         </if>
-                        <!-- update main company name -->
-                        <service-call name="update#mantle.party.Organization"
-                            out-map="context"
-                            in-map="[partyId: companyPartyId, organizationName: companyName]" />
+                        <!-- check owner activated, when not, request more info -->
+                        <entity-find-one
+                            entity-name="mantle.party.Party" value-field="ownerParty">
+                            <field-map field-name="partyId" from="ownerPartyId" />
+                        </entity-find-one>
+                        <if condition="ownerParty.disabled == 'Y'">
+                            <!-- if disabled request company and other info -->
+                            <set field="authenticate.user"
+                                from="authenticate.user + [
+                                    userGroupId: 'GROWERP_M_ADMIN', role: 'OrgInternal']" />
+                            <set field="authenticate"
+                                from="authenticate + [apiKey: 'moreInfo']" />
+                            <return />
+                        </if>
+                        <!-- process payment with credit card -->
+                        <if
+                            condition="creditCardNumber &amp;&amp; nameOnCard &amp;&amp; expireMonth &amp;&amp; expireYear &amp;&amp; cVC &amp;&amp; plan">
+                            <!-- save creditcard in user record -->
+                            <set field="expireDate" value="${expireMonth}/20${expireYear}" />
+                            <set field="ccInMap"
+                                from="[
+                                paymentMethodTypeEnumId: 'PmtCreditCard',
+                                ownerPartyId: companyPartyId,
+                                cardNumber: creditCardNumber,
+                                creditCardTypeEnumId: 'Cct' + creditCardType,
+                                expireDate: expireDate,
+                                firstNameOnAccount: nameOnCard,
+                                lastNameOnAccount: '',
+                                paymentGatewayConfigId: System.getProperty('paymentGatewayConfigId'),
+                                ]" />
+                            <service-call
+                                name="mantle.account.PaymentMethodServices.create#CreditCard"
+                                in-map="ccInMap" out-map="userPayment" />
+                            <set field="paymentMethodId" from="userPayment.paymentMethodId" />
+                            <!-- create growerp as supplier -->
+                            <set field="growerpCompany"
+                                from="[name: 'GrowERP', role: 'Supplier',
+                                   email: 'support@growerp.com']" />
+                            <service-call
+                                name="growerp.100.PartyServices100.create#Company"
+                                in-map=" [company: growerpCompany,ownerPartyId: ownerPartyId]"
+                                out-map="companyInfo" />
+                            <set field="growerpPartyId" from="companyInfo.company.partyId" />
+                            <!-- decode plan to amount, get later from product 100000-->
+                            <set field="planAmount"
+                                from="[diyPlan: '50.00',
+                                       smallPlan: '499.00', fullPlan: '999.00']" />
+                            <!-- create payment-->
+                            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                                in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']"
+                                out-map="context" />
+                            <set field="paymentInMap"
+                                from="[
+                                    pseudoId: seqNum,
+                                    statusId: 'PmntProposed',
+                                    paymentType: 'PtPrePayment',
+                                    paymentMethodId: paymentMethodId,
+                                    amount: planAmount[plan],
+                                    amountUomId: 'USD',
+                                    paymentInstrumentEnumId: 'PiCreditCard',
+                                    effectiveDate: ec.user.nowTimestamp,
+                                    paymentTypeEnumId: 'PmtCreditCard',
+                                    fromPartyId: companyPartyId,
+                                    toPartyId: growerpPartyId,
+                                    memo: memo,
+                                ]" />
+                            <service-call name="create#mantle.account.payment.Payment"
+                                in-map="paymentInMap" out-map="paymentInfo" />
+                            <set field="paymentId" from="paymentInfo.paymentId" />
+                            <!-- get payment gateway config -->
+                            <entity-find-one
+                                entity-name="mantle.account.method.PaymentGatewayConfig"
+                                value-field="paymentGatewayConfig">
+                                <field-map field-name="paymentGatewayConfigId"
+                                    from="System.getProperty('paymentGatewayConfigId')" />
+                            </entity-find-one>
+                            <if condition="!paymentGatewayConfig">
+                                <return error="true"
+                                    message="Payment gateway not configured, please contact support." />
+                            </if>
+                            <!-- authorize Payment -->
+                            <service-call name="${paymentGatewayConfig.authorizeServiceName}"
+                                in-map="[paymentId: paymentId,
+                                    paymentGatewayConfigId: paymentGatewayConfig.paymentGatewayConfigId]"
+                                out-map="context" />
+                            <!-- GrowERP account processing: get GrowERP companyId-->
+                            <entity-find entity-name="growerp.party.OwnerAndCompany"
+                                list="growerpMainCompanies">
+                                <econdition field-name="ownerPartyId" value="100000" />
+                                <econdition field-name="companyRole" value="OrgInternal" />
+                            </entity-find>
+                            <set field="growerpMainCompanyPartyId"
+                                from="growerpMainCompanies[0].companyPartyId" />
+                            <!-- create in growerp account-->
+                            <set field="growerpCustomerCompany"
+                                from="[name: companyName, role: 'Customer', email: username]" />
+                            <service-call
+                                name="growerp.100.PartyServices100.create#Company"
+                                in-map=" [company: growerpCustomerCompany,ownerPartyId: '100000']"
+                                out-map="companyInfo" />
+                            <set field="growerpCustomerPartyId" from="companyInfo.company.partyId" />
+                            <!-- create payment method and credit card-->
+                            <set field="growerpCcInMap"
+                                from="ccInMap + [ownerPartyId: growerpCustomerPartyId]" />
+                            <service-call
+                                name="mantle.account.PaymentMethodServices.create#CreditCard"
+                                in-map="growerpCcInMap" out-map="growerpCcInMap" />
+                            <set field="growerpPaymentMethodId" from="userPayment.paymentMethodId" />
+                            <!-- payment + gateway response id -> refno -->
+                            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                                in-map="[ownerPartyId: '100000', seqName: 'payment']"
+                                out-map="context" />
+                            <set field="growerpPaymentInMap"
+                                from="paymentInMap + [pseudoId: seqNum,
+                                    fromPartyId: growerpCustomerPartyId,
+                                    toPartyId: growerpMainCompanyPartyId,
+                                    paymentMethodId: growerpPaymentMethodId,
+                                    paymentRefNum: paymentGatewayResponseId]" />
+                            <service-call name="create#mantle.account.payment.Payment"
+                                in-map="growerpPaymentInMap" out-map="paymentInfo" />
+                            <set field="paymentId" from="paymentInfo.paymentId" />
+                        </if>
 
+                        <!-- prompt for capture of payment if not first tenant != GrowERP-->
+                        <if condition="ownerPartyId != '100000'">
+                            <!-- get authorized capturepayment(when STRIPE) for this company -->
+                            <entity-find entity-name="mantle.account.payment.Payment"
+                                list="payments" limit="1">
+                                <econdition field-name="fromPartyId" from="companyPartyId" />
+                                <econdition field-name="toPartyId" from="growerpPartyId" />
+                                <!-- econdition field-name="statusId" value="PmntAuthorized" /-->
+                                <order-by field-name="-paymentId" />
+                            </entity-find>
+                            <!-- test check for payments -->
+                            <if condition="!payments">
+                                <set field="authenticate"
+                                    from="authenticate + [apiKey: 'paymentFirst']" />
+                                <return />
+                            </if>
+                            <!-- check when STRIPE -->
+                            <if
+                                condition="System.getProperty('paymentGatewayConfigId') == 'STRIPE'">
+                                <entity-find
+                                    entity-name="mantle.account.method.PaymentGatewayResponse"
+                                    list="resps">
+                                    <econdition field-name="paymentId" from="payments[0].paymentId" />
+                                    <econdition field-name="paymentOperationEnumId"
+                                        value="PgoCapture" />
+                                    <econdition field-name="resultSuccess" value="Y" />
+                                </entity-find>
+                                <if condition="!resps">
+                                    <!-- no capture response from gateway -->
+                                    <set field="authenticate"
+                                        from="authenticate + [apiKey: 'paymentFirst']" />
+                                    <return />
+                                </if>
+                            </if>
+                        </if>
+                        <!-- get temp location currency and remove -->
+                        <entity-find-one entity-name="mantle.party.Organization"
+                            value-field="org" for-update="true">
+                            <field-map field-name="partyId" from="companyPartyId" />
+                        </entity-find-one>
                         <!-- initialize accounting with defaults, login first-->
                         <script>ec.user.loginUser(username, password)</script>
                         <service-call
                             name="growerp.100.AccountingServices100.init#PartyAccountingConfiguration"
                             in-map="[sourcePartyId: 'DefaultSettings',
                                         organizationPartyId: companyPartyId,
-                                        baseCurrencyUomId: currencyId]" />
+                                        baseCurrencyUomId: org.officeSiteName]" />
+                        <set field="org.officeSiteName" from="null" />
+                        <entity-update value-field="org" />
                         <!-- the organizational setup -->
                         <service-call
                             name="growerp.100.PartyServices100.setup#MainOrganization"
                             in-map="[ownerPartyId: ownerPartyId, userPartyId: userAccount.partyId,
-                                    hostName: ec.web.getHostName(false),
+                                    hostName: ec.web.getHostName(false), currencyId: currencyId,
                                     companyPartyId: companyPartyId, classificationId: classificationId]" />
                         <!-- specific App setups for new company and first admin-->
                         <service-call
@@ -1070,7 +1090,8 @@ along with this software (see the LICENSE.md file). If not, see
                                                         userPartyId: userAccount.partyId]" />
                         </if>
                         <!-- create event -->
-                        <service-call name="growerp.100.ActivityServices100.create#Event"
+                        <service-call
+                            name="growerp.100.ActivityServices100.create#Event"
                             in-map='[partyId: userAccount.partyId, userGroupId: "GROWERP_M_ADMIN",
                                     name: "$companyName created"]' />
                     </then>

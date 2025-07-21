@@ -2891,6 +2891,18 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="uomTypeEnumId" value="UT_CURRENCY_MEASURE" />
             </entity-condition>
         </member-entity>
+        <member-entity entity-alias="PCMEMAIL" entity-name="mantle.party.contact.PartyContactMech"
+            join-from-alias="ORGCOMPANYPARTY" join-optional="true">
+            <key-map field-name="partyId" />
+            <entity-condition>
+                <econdition field-name="emailPurposeId" value="EmailPrimary" />
+                <date-filter from-field-name="fromDate" thru-field-name="thruDate" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="CMEMAIL" entity-name="mantle.party.contact.ContactMech"
+            join-from-alias="PCMEMAIL" join-optional="true">
+            <key-map field-name="contactMechId" />
+        </member-entity>
         <!-- ==== fields ====-->
         <!-- Owner -->
         <alias name="ownerPartyId" field="partyId" entity-alias="PTYOWNER" />
@@ -2909,6 +2921,8 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="baseCurrencyUomId" entity-alias="PP" />
         <alias name="curDescription" field="description" entity-alias="CURTYPE" />
         <alias name="customerStatusId" entity-alias="ORGCOMPANYPARTY" />
+        <alias name="emailPurposeId" field="contactMechPurposeId" entity-alias="PCMEMAIL" />
+        <alias name="email" field="infoString" entity-alias="CMEMAIL" />
     </view-entity>
 
     <view-entity entity-name="AssetProductAndLocation" package="growerp.product.asset">

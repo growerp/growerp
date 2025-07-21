@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -421,6 +422,7 @@ class LoginDialogState extends State<LoginDialog> {
     String testExpiryDate = kReleaseMode ? '' : '11/33';
     String testCvv = kReleaseMode ? '' : '123';
     String testNameOnCart = 'Test Customer';
+    PaymentMethod? paymentMethod = authenticate.user?.paymentMethod;
 
     return popUp(
         height: isPhone(context) ? 700 : 700,
@@ -439,14 +441,23 @@ class LoginDialogState extends State<LoginDialog> {
               'cvvCode': testCvv,
             },
             child: SingleChildScrollView(
+              key: const Key('paymentForm'),
               child: Column(children: <Widget>[
-                if (paymentFirst)
-                  const Center(
+                if (paymentMethod != null)
+                  Center(
                     child: Text(
-                      kReleaseMode
-                          ? 'Just testing?\ntry free system at https://admin.growerp.org'
-                          : 'This is an always approved CC',
-                      style: TextStyle(fontSize: 16, color: Colors.yellow),
+                      'Your current payment method:\n${paymentMethod.ccDescription}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                if (paymentFirst)
+                  Center(
+                    child: Text(
+                      kReleaseMode && GlobalConfiguration().get("test") == false
+                          ? 'You have a trial period for 2 weeks,\nWe will only charge if you not cancel\nbefore that time'
+                          : 'This is a Test system\nso this credit Card will always be approved',
+                      style:
+                          const TextStyle(fontSize: 16, color: Colors.yellow),
                     ),
                   ),
                 const SizedBox(height: 10),

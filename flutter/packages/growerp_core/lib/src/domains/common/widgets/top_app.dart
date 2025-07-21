@@ -13,6 +13,7 @@
  */
 
 import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -160,7 +161,9 @@ class TopApp extends StatelessWidget {
                                       return const LoadingIndicator();
                                     }));
                               default:
-                                return GlobalConfiguration().get("test")
+                                return !kReleaseMode &&
+                                        GlobalConfiguration().get("test") ==
+                                            true
                                     ? Banner(
                                         message: "test",
                                         color: Colors.red,
