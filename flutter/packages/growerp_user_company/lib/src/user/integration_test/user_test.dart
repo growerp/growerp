@@ -145,12 +145,12 @@ class UserTest {
       if (user.role != Role.company) {
         if (user.company?.name == null) {
           // remove existing company
-          if (await CommonTest.doesExistKey(tester, 'removeCompany')) {
+          if (CommonTest.doesExistKey(tester, 'removeCompany')) {
             await CommonTest.tapByKey(tester, 'removeCompany');
           }
         } else {
           // check company buttons if company assigned
-          if (await CommonTest.doesExistKey(tester, 'newCompany')) {
+          if (CommonTest.doesExistKey(tester, 'newCompany')) {
             await CommonTest.tapByKey(tester, 'newCompany');
             companyAssigned = true;
           } else {
@@ -210,7 +210,7 @@ class UserTest {
         if (companyAssigned) {
           if (companyUser) {
             expect(
-                await CommonTest.doesExistKey(
+                CommonTest.doesExistKey(
                     tester, 'CompanyDialog${user.company!.role!.name}'),
                 true);
             // company pseudoId
@@ -221,8 +221,7 @@ class UserTest {
             user = user.copyWith(pseudoId: employeeId);
           } else {
             expect(
-                await CommonTest.doesExistKey(
-                    tester, 'UserDialog${user.role!.name}'),
+                CommonTest.doesExistKey(tester, 'UserDialog${user.role!.name}'),
                 true,
                 reason: "key: UserDialog${user.role!.name} not found");
             var companyPseudoId =
@@ -235,13 +234,12 @@ class UserTest {
         if (user.pseudoId == null) {
           if (companyAssigned && companyUser) {
             expect(
-                await CommonTest.doesExistKey(
+                CommonTest.doesExistKey(
                     tester, 'CompanyDialog${user.company!.role!.name}'),
                 true);
           } else {
             expect(
-                await CommonTest.doesExistKey(
-                    tester, 'UserDialog${user.role!.name}'),
+                CommonTest.doesExistKey(tester, 'UserDialog${user.role!.name}'),
                 true,
                 reason: "key: UserDialog${user.role!.name} not found");
           }
@@ -293,11 +291,9 @@ class UserTest {
       if (user.role != Role.company) {
         // employees not show company
         if (user.company?.name == null) {
-          expect(await CommonTest.doesExistKey(tester, 'newCompany'),
-              equals(true));
+          expect(CommonTest.doesExistKey(tester, 'newCompany'), equals(true));
         } else {
-          expect(await CommonTest.doesExistKey(tester, 'editCompany'),
-              equals(true),
+          expect(CommonTest.doesExistKey(tester, 'editCompany'), equals(true),
               reason:
                   'Company ${user.company!.name} not found on user ${user.firstName} ${user.lastName}');
           await CommonTest.dragUntil(tester, key: 'editCompany');

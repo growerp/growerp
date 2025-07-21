@@ -566,6 +566,9 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!ownerPartyId">
                 <set field="ownerPartyId" from="relComp.ownerPartyId" />
             </if>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Creating a company needs an ownerPartyId" />
+            </if>
             <if condition="company.role == 'Lead'">
                 <set field="company.role" value="Customer" />
                 <set field="customerStatusId" value="CUSTOMER_ASSIGNED" />
@@ -877,6 +880,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
             </if>
             <!-- update currency -->
+            <log
+                message="Updating currency for company ${company.partyId} from ${oldValue.companies[0].currency?.currencyId} to ${company.currency?.currencyId}" />
             <if
                 condition="oldValue.companies[0].currency?.currencyId != company.currency?.currencyId">
                 <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"

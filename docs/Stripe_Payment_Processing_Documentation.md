@@ -38,6 +38,15 @@ The GrowERP Stripe integration consists of several key components:
                         │ (PaymentGateway) │
                         └──────────────────┘
 ```
+## gateway configuration
+
+The PaymentGatewayConfiguration defines the settings required to integrate GrowERP with external payment gateways such as Stripe. This configuration includes credentials (e.g., API keys), endpoint URLs, supported payment methods, and gateway-specific parameters necessary for secure transaction processing. Proper configuration ensures that payment operations comply with gateway requirements and that sensitive data is handled securely.
+
+### Login Service Processing
+
+The login service in `moqui/runtime/component/growerp/service/growerp/100/GeneralServices100.xml` manages user authentication for GrowERP. It validates user credentials, creates sessions, and enforces security policies. Upon successful login, the service initializes user context, permissions, and logs authentication events. It also handles payment validation and triggers payment screens if required, ensuring only authorized users access protected resources and supporting robust error handling and audit logging.
+
+Depending on the PaymentGatewayConfig entity test modus is activated with the configs started with 'TEST' or the STRIPE config with a vali stripe key installed.
 
 ## Stripe Configuration
 

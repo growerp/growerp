@@ -36,5 +36,5 @@ class Authenticate with _$Authenticate {
       _$AuthenticateFromJson(json['authenticate'] ?? json);
 
   @override
-  String toString() => "CompName: ${company!.name}, Usr: ${user?.lastName}";
+  String toString() => "CompName: ${company?.name}, Usr: ${user?.lastName}";
 }

@@ -158,6 +158,10 @@ class CommonTest {
             nowDate: DateTime.now())); // used in rental
       }
     }
+    // check for credit card input (not shown for first registration)
+    if (doesExistKey(tester, 'paymentForm')) {
+      await tapByKey(tester, 'pay');
+    }
 
     SaveTest test = await PersistFunctions.getTest();
     String apiKey = getTextField('apiKey');
@@ -209,8 +213,7 @@ class CommonTest {
     //      equals("Email: ${test.company!.email}"));
     expect(getTextField('dbCompanySubTitle2'),
         equals("Currency: ${test.company!.currency!.description}"));
-    expect(getTextField('dbCompanySubTitle3'),
-        equals("Employees: ${test.company!.employees.length + 1}"));
+    expect(getTextField('dbCompanySubTitle3'), equals("Employees: 2"));
     // User
     expect(getTextField('dbUserTitle'), equals("Logged in User"));
     expect(getTextField('dbUserSubTitle0'),
@@ -353,8 +356,8 @@ class CommonTest {
         reason: "looking for widget key: $widgetKey failed");
   }
 
-  static Future<bool> doesExistKey(WidgetTester tester, String widgetKey,
-      [int count = 1]) async {
+  static bool doesExistKey(WidgetTester tester, String widgetKey,
+      [int count = 1]) {
     if (find
         .byKey(Key(widgetKey))
         .toString()

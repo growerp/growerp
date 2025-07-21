@@ -9,6 +9,7 @@ import com.stripe.model.PaymentIntent
 import com.stripe.param.PaymentIntentListParams
 import java.time.LocalDate
 import java.time.ZoneOffset // Import the class directly
+import com.stripe.model.Balance
 
 import org.moqui.context.ExecutionContext
 
@@ -23,6 +24,28 @@ class TransactionServices {
         if (!tokenResponse.token) return ['responseMap':tokenResponse] // passing the error info back up to caller
 
         transactionInfo.source = tokenResponse.token.id
+
+        // Optionally add customer info if provided
+        def customerInfo = ec.context.customerInfo // expects a Map with keys: id, email, name, phone
+        if (customerInfo) {
+            if (customerInfo.id) transactionInfo.customer = customerInfo.id
+            if (customerInfo.email) transactionInfo.receipt_email = customerInfo.email
+            // Add name and phone as metadata if present
+            if (!transactionInfo.metadata) transactionInfo.metadata = [:]
+            if (customerInfo.name) transactionInfo.metadata['customer_name'] = customerInfo.name
+            if (customerInfo.phone) transactionInfo.metadata['customer_phone'] = customerInfo.phone
+        }
+
+        // Optionally add line items as metadata if provided
+        def lineItems = ec.context.lineItems // expects a List<Map> with keys: description, amount, productNumber
+        if (lineItems && lineItems instanceof List && !lineItems.isEmpty()) {
+            if (!transactionInfo.metadata) transactionInfo.metadata = [:]
+            lineItems.eachWithIndex { item, idx ->
+                transactionInfo.metadata["lineItem_${idx+1}_description"] = item.description ?: ''
+                transactionInfo.metadata["lineItem_${idx+1}_amount"] = item.amount ?: ''
+                if (item.productNumber) transactionInfo.metadata["lineItem_${idx+1}_productNumber"] = item.productNumber
+            }
+        }
 
         def responseMap = [:]
 
@@ -49,14 +72,29 @@ class TransactionServices {
         def amount = ec.context.amount as BigDecimal
         amount = (amount * 100).longValue()
 
+        // Optional: line items array, each item is a map with description, amount, and optional product number
+        def lineItems = ec.context.lineItems // expects a List<Map> with keys: description, amount, productNumber
+
         Stripe.apiKey = secretKey
 
         def responseMap = [:]
 
         try {
             def charge = Charge.retrieve(chargeId)
-            if (amount != null) charge.capture(['amount':amount])
-            else charge.capture()
+            def captureParams = ['amount': amount]
+
+            // If line items are provided, add them to the captureParams as metadata
+            if (lineItems && lineItems instanceof List && !lineItems.isEmpty()) {
+                def metadata = [:]
+                lineItems.eachWithIndex { item, idx ->
+                    metadata["lineItem_${idx+1}_description"] = item.description ?: ''
+                    metadata["lineItem_${idx+1}_amount"] = item.amount ?: ''
+                    if (item.productNumber) metadata["lineItem_${idx+1}_productNumber"] = item.productNumber
+                }
+                captureParams['metadata'] = metadata
+            }
+
+            charge.capture(captureParams)
 
             responseMap.charge = charge
             responseMap.errorInfo = ['responseCode':'1'] // '1' = success
@@ -98,62 +136,81 @@ class TransactionServices {
         return ['responseMap':responseMap]
     }
 
-        static Map getIncomingPayments (ExecutionContext ec) {
+    static Map getStripePayments (ExecutionContext ec) {
         def secretKey = ec.context.secretKey
         def startDate = ec.context.startDate
-        def tokenResponse = TokenServices.generateToken(ec).responseMap
-        if (!tokenResponse.token) return ['responseMap':tokenResponse] // passing the error info back up to caller
 
         // 1. Configure your Stripe API Key
-        // IMPORTANT: Replace "sk_test_..." with your actual Stripe secret key.
-        // It's best practice to load this from an environment variable or a config file.
         Stripe.apiKey = secretKey
 
-        // 2. Define the date after which you want to retrieve payments
-        // This will fetch payments created on or after January 1, 2024
-        println "Fetching payments created on or after: ${startDate}"
+        try {
+            println "Attempting to retrieve Stripe account balance..."
+            Balance balance = Balance.retrieve()
+            println "Successfully retrieved balance. Available: ${balance.getAvailable().get(0).getAmount() / 100.0} ${balance.getAvailable().get(0).getCurrency()}"
+        } catch (StripeException e) {
+            println "Error retrieving balance: ${e.getMessage()}"
+            println "Please verify your Stripe secret key."
+            return ['responseMap':[:]]
+        }
 
-        // 3. Convert the date to a Unix timestamp (in seconds)
-        // The Stripe API uses Unix timestamps for date-based filtering.
-        def startTimestamp = startDate.atStartOfDay(ZoneOffset.UTC).toEpochSecond()
+        // 2. Define the date after which you want to retrieve payments
+        def parsedDate = LocalDate.parse(startDate.substring(0,10))
+        println "Searching for payments on or after: ${parsedDate}"
+        def startTimestamp = parsedDate.atStartOfDay(ZoneOffset.UTC).toEpochSecond()
 
         def responseMap = [:]
 
         try {
-            // 4. Build the parameter map for the API call
-            // We use 'created[gte]' which means "created greater than or equal to" the timestamp.
-            def params = PaymentIntentListParams.builder()
-                .setCreated(
-                    PaymentIntentListParams.Created.builder()
-                        .setGte(startTimestamp)
-                        .build()
-                )
-                // You can add other filters here, e.g., limiting the number of results per page.
-                .setLimit(100L) // Fetch up to 100 payments per API call
-                .build()
+            // 3. Build the parameter map for the API call
+            def params = [
+                'created': ['gte': startTimestamp],
+                'limit': 100
+            ]
 
             println "\n--- Found Payments ---"
             int paymentCount = 0
 
-            // 5. Retrieve the PaymentIntents and iterate through them
-            // The .autoPagingIterable() method handles pagination for you automatically.
-            // It will make subsequent API calls as needed to fetch all matching payments.
-            for (PaymentIntent paymentIntent : PaymentIntent.list(params).autoPagingIterable()) {
-                // We are only interested in successful payments.
-                if ("succeeded".equals(paymentIntent.getStatus())) {
+            // 4. Retrieve the Charges and iterate through them
+            for (Charge charge : Charge.list(params).autoPagingIterable()) {
+                if ("succeeded".equals(charge.getStatus())) {
                     paymentCount++
-                    // 6. Process each payment
-                    // Convert amount from cents to a displayable format (e.g., dollars)
-                    def amount = paymentIntent.getAmount() / 100.0
-                    // Convert the creation timestamp back to a human-readable date
-                    def createdDate = new Date(paymentIntent.getCreated() * 1000)
+                    // 5. Process each payment
+                    def amount = charge.getAmount() / 100.0
+                    def createdDate = new Date(charge.getCreated() * 1000)
 
                     println "------------------------"
-                    println "Payment ID:    ${paymentIntent.getId()}"
-                    println "Status:        ${paymentIntent.getStatus()}"
-                    println "Amount:        ${String.format('%.2f', amount)} ${paymentIntent.getCurrency().toUpperCase()}"
+                    println "Payment ID:    ${charge.getId()}"
+                    println "Status:        ${charge.getStatus()}"
+                    println "Amount:        ${String.format('%.2f', amount)} ${charge.getCurrency().toUpperCase()}"
                     println "Created Date:  ${createdDate.toGMTString()}"
-                    println "Description:   ${paymentIntent.getDescription() ?: 'N/A'}"
+                    println "Description:   ${charge.getDescription() ?: 'N/A'}"
+
+                    // Retrieve and print line items (metadata)
+                    def metadata = charge.getMetadata()
+                    if (metadata && !metadata.isEmpty()) {
+                        println "Line Items:"
+                        metadata.each { k, v ->
+                            if (k.startsWith('lineItem_')) println "  ${k}: ${v}"
+                        }
+                    } else {
+                        println "No line items for this charge."
+                    }
+
+                    // Retrieve and print related customer information
+                    try {
+                        def customerId = charge.getCustomer()
+                        if (customerId) {
+                            def customer = com.stripe.model.Customer.retrieve(customerId)
+                            println "Customer ID:   ${customer.getId()}"
+                            println "Customer Email: ${customer.getEmail() ?: 'N/A'}"
+                            println "Customer Name:  ${customer.getName() ?: 'N/A'}"
+                            println "Customer Phone: ${customer.getPhone() ?: 'N/A'}"
+                        } else {
+                            println "No customer information for this charge."
+                        }
+                    } catch (Exception e) {
+                        println "Error retrieving customer info: ${e.getMessage()}"
+                    }
                 }
             }
 
