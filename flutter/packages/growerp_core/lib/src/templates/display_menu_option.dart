@@ -12,8 +12,10 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_chat/growerp_chat.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../../growerp_core.dart';
@@ -321,34 +323,47 @@ class MenuOptionState extends State<DisplayMenuOption>
               body: Column(children: tabChildren));
         }
 
-        if (tabItems.isEmpty) {
-          // show simple page
-          if (isPhone) {
-            return simplePage(isPhone);
-          } else {
-            return myNavigationRail(
-              context,
-              simplePage(isPhone),
-              menuIndex,
-              menuList,
-            );
-          }
+        if (!kReleaseMode || GlobalConfiguration().get("test") == true) {
+          return Banner(
+              message: "test",
+              color: Colors.red,
+              location: BannerLocation.topStart,
+              child: showPage(simplePage, context, tabPage));
         } else {
-          // show tabbar page
-          if (isPhone) {
-            return tabPage(isPhone);
-          } else {
-            return myNavigationRail(
-              context,
-              tabPage(isPhone),
-              menuIndex,
-              menuList,
-            );
-          }
+          return showPage(simplePage, context, tabPage);
         }
       } else {
         return const Center(child: LoadingIndicator());
       }
     });
+  }
+
+  Widget showPage(Widget Function(bool isPhone) simplePage,
+      BuildContext context, Widget Function(bool isPhone) tabPage) {
+    if (tabItems.isEmpty) {
+      // show simple page
+      if (isPhone) {
+        return simplePage(isPhone);
+      } else {
+        return myNavigationRail(
+          context,
+          simplePage(isPhone),
+          menuIndex,
+          menuList,
+        );
+      }
+    } else {
+      // show tabbar page
+      if (isPhone) {
+        return tabPage(isPhone);
+      } else {
+        return myNavigationRail(
+          context,
+          tabPage(isPhone),
+          menuIndex,
+          menuList,
+        );
+      }
+    }
   }
 }
