@@ -161,7 +161,7 @@ class TopApp extends StatelessWidget {
                                       return const LoadingIndicator();
                                     }));
                               default:
-                                return !kReleaseMode &&
+                                return !kReleaseMode ||
                                         GlobalConfiguration().get("test") ==
                                             true
                                     ? Banner(

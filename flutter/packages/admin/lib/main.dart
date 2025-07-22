@@ -46,6 +46,7 @@ Future main() async {
   String classificationId = GlobalConfiguration().get("classificationId");
 
   // check if there is override for the production backend url
+  // if there is a overide we are in test mode: see the banner in the app
   await getBackendUrlOverride(classificationId, packageInfo.version);
 
   Bloc.observer = AppBlocObserver();
