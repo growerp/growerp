@@ -253,7 +253,7 @@ class UserDialogState extends State<UserDialog> {
                                 children: [
                                   ImageButtons(
                                       _scrollController, _onImageButtonPressed),
-                                  SizedBox(height: isPhone ? 310 : 220),
+                                  SizedBox(height: isPhone ? 330 : 280),
                                   FloatingActionButton(
                                     key: const Key("events"),
                                     tooltip: 'Show user events',
@@ -276,49 +276,53 @@ class UserDialogState extends State<UserDialog> {
                                   ),
                                   const SizedBox(height: 10),
                                   if (isPhone)
-                                    FloatingActionButton(
-                                        key: const Key("updateFloat"),
-                                        onPressed: () {
-                                          updatedUser = updatedUser.copyWith(
-                                              pseudoId: _idController.text,
-                                              firstName:
-                                                  _firstNameController.text,
-                                              lastName:
-                                                  _lastNameController.text,
-                                              email: _emailController.text,
-                                              url: _urlController.text,
-                                              loginName:
-                                                  _loginNameController.text,
-                                              telephoneNr:
-                                                  _telephoneController.text,
-                                              address: updatedUser.address,
-                                              paymentMethod:
-                                                  updatedUser.paymentMethod,
-                                              loginDisabled: _isLoginDisabled,
-                                              userGroup: _selectedUserGroup,
-                                              role: _selectedRole,
-                                              appsUsed: [_classificationId],
+                                    Visibility(
+                                      visible: isVisible,
+                                      child: FloatingActionButton(
+                                          key: const Key("updateFloat"),
+                                          onPressed: () {
+                                            updatedUser = updatedUser.copyWith(
+                                                pseudoId: _idController.text,
+                                                firstName:
+                                                    _firstNameController.text,
+                                                lastName:
+                                                    _lastNameController.text,
+                                                email: _emailController.text,
+                                                url: _urlController.text,
+                                                loginName:
+                                                    _loginNameController.text,
+                                                telephoneNr:
+                                                    _telephoneController.text,
+                                                address: updatedUser.address,
+                                                paymentMethod:
+                                                    updatedUser.paymentMethod,
+                                                loginDisabled: _isLoginDisabled,
+                                                userGroup: _selectedUserGroup,
+                                                role: _selectedRole,
+                                                appsUsed: [_classificationId],
 //                      language: Localizations.localeOf(context)
 //                          .languageCode
 //                          .toString(),
-                                              company:
-                                                  _selectedCompany.copyWith(
-                                                      role: _selectedRole),
-                                              image: _image);
+                                                company:
+                                                    _selectedCompany.copyWith(
+                                                        role: _selectedRole),
+                                                image: _image);
 
-                                          _companyUserBloc.add(
-                                              CompanyUserUpdate(
-                                                  CompanyUser.tryParse(
-                                                      updatedUser)));
-                                          // if logged-in user update authBloc
-                                          if (currentUser.partyId ==
-                                              updatedUser.partyId) {
-                                            _authBloc.add(AuthLoad());
-                                          }
-                                        },
-                                        child: Icon(widget.user.partyId != null
-                                            ? Icons.update_sharp
-                                            : Icons.add_sharp)),
+                                            _companyUserBloc.add(
+                                                CompanyUserUpdate(
+                                                    CompanyUser.tryParse(
+                                                        updatedUser)));
+                                            // if logged-in user update authBloc
+                                            if (currentUser.partyId ==
+                                                updatedUser.partyId) {
+                                              _authBloc.add(AuthLoad());
+                                            }
+                                          },
+                                          child: Icon(
+                                              widget.user.partyId != null
+                                                  ? Icons.update_sharp
+                                                  : Icons.add_sharp)),
+                                    )
                                 ],
                               )),
                         ),

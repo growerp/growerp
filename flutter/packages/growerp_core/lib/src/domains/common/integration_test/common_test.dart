@@ -213,7 +213,7 @@ class CommonTest {
     //      equals("Email: ${test.company!.email}"));
     expect(getTextField('dbCompanySubTitle2'),
         equals("Currency: ${test.company!.currency!.description}"));
-    expect(getTextField('dbCompanySubTitle3'), equals("Employees: 2"));
+    expect(getTextField('dbCompanySubTitle3'), equals("Employees: 1"));
     // User
     expect(getTextField('dbUserTitle'), equals("Logged in User"));
     expect(getTextField('dbUserSubTitle0'),

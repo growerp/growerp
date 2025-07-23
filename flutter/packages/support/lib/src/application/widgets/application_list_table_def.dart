@@ -27,7 +27,7 @@ TableData getApplicationTableData(Bloc bloc, String classificationId,
   bool isPhone = isAPhone(context);
   rowContent.add(TableRowContent(
       name: 'Id',
-      width: 13,
+      width: isPhone ? 18 : 10,
       value: Text(item.applicationId, key: Key("id$index"))));
   rowContent.add(TableRowContent(
       name: 'Version',
