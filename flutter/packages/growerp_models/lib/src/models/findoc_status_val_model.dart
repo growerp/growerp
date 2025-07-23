@@ -75,7 +75,7 @@ enum FinDocStatusVal {
     currentStatus ??= created;
     switch (currentStatus) {
       case inPreparation:
-        return [inPreparation, created, cancelled];
+        return [inPreparation, created, approved, cancelled];
       case created:
         return [created, approved, cancelled];
       case approved:
