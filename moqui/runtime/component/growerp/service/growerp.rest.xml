@@ -161,6 +161,20 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.CatalogServices100.delete#ProductCategory" />
             </method>
         </resource>
+        <resource name="Subscription">
+            <method type="get">
+                <service name="growerp.100.SubscriptionServices100.get#Subscription" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.SubscriptionServices100.create#Subscription" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.SubscriptionServices100.update#Subscription" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.SubscriptionServices100.delete#Subscription" />
+            </method>
+        </resource>
         <!-- products -->
         <resource name="Products" require-authentication="anonymous-all">
             <!-- separate from Product for security reasons -->

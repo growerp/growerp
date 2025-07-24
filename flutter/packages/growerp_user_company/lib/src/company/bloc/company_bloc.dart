@@ -75,13 +75,13 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
             isForDropDown: event.isForDropDown,
             start: start,
             limit: event.limit);
-        emit(state.copyWith(
-          status: CompanyStatus.success,
-          companies: current..addAll(compResult.companies),
-          hasReachedMax: compResult.companies.length < event.limit,
-          searchString: event.searchString,
-        ));
       }
+      emit(state.copyWith(
+        status: CompanyStatus.success,
+        companies: current..addAll(compResult.companies),
+        hasReachedMax: compResult.companies.length < event.limit,
+        searchString: event.searchString,
+      ));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: CompanyStatus.failure, message: await getDioError(e)));

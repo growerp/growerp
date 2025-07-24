@@ -2142,6 +2142,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="priceThruDate" field="thruDate" entity-alias="PRICE" />
         <alias name="categoryId" field="productCategoryId" entity-alias="CATG" />
         <alias name="categoryName" entity-alias="CATG" />
+        <alias name="sequenceNum" entity-alias="MEM" />
         <alias name="fromDate" entity-alias="MEM" />
         <alias name="thruDate" entity-alias="MEM" />
     </view-entity>

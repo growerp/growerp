@@ -44,7 +44,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
       value: Text(item.pseudoId, key: Key('id$index'))));
   rowContent.add(TableRowContent(
       name: 'name',
-      width: isPhone ? 29 : 15,
+      width: isPhone ? 35 : 15,
       value: Text("${item.opportunityName}", key: Key('name$index'))));
   if (!isPhone) {
     rowContent.add(TableRowContent(
@@ -91,7 +91,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
   }
   rowContent.add(TableRowContent(
       name: 'next Step',
-      width: 8,
+      width: 17,
       value: Text(item.nextStep != null ? "${item.nextStep}" : "",
           key: Key('nextStep$index'), textAlign: TextAlign.center)));
   rowContent.add(TableRowContent(

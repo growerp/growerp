@@ -876,6 +876,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="classificationTypeEnumId" value="PcltMobileApp" />
                 <econdition field-name="partyClassificationId" from="classificationId" />
             </entity-find>
+            <log
+                message=" ===result: ${partyClassifications?.size()}=======check for class userAccount: ${userAccount.partyId} ownerPartyId: ${ownerPartyId} companyPartyId: ${companyPartyId} classificationId: ${classificationId}" />
             <if condition="!partyClassifications"><!-- more setup needed -->
                 <!-- usergroup to see if admin (company name required) or not -->
                 <entity-find entity-name="moqui.security.UserGroupMember" list="adminAccess">
@@ -938,10 +940,18 @@ along with this software (see the LICENSE.md file). If not, see
                                 in-map=" [company: growerpCompany,ownerPartyId: ownerPartyId]"
                                 out-map="companyInfo" />
                             <set field="growerpPartyId" from="companyInfo.company.partyId" />
-                            <!-- decode plan to amount, get later from product 100000-->
-                            <set field="planAmount"
-                                from="[diyPlan: '50.00',
-                                       smallPlan: '499.00', fullPlan: '999.00']" />
+                            <entity-find entity-name="growerp.mobile.product.ProductAndPrices"
+                                list="productPrices">
+                                <econdition field-name="productId" from="plan" />
+                                <econdition field-name="ownerPartyId" value="GROWERP" />
+                                <econdition field-name="priceTypeEnumId" value="PptCurrent" />
+                                <date-filter from-field-name="priceFromDate"
+                                    thru-field-name="priceThruDate" />
+                            </entity-find>
+                            <if condition="!productPrices">
+                                <return error="true"
+                                    message="Product plan ${plan} not found, please contact support." />
+                            </if>
                             <!-- create payment-->
                             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                                 in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']"
@@ -952,7 +962,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     statusId: 'PmntProposed',
                                     paymentType: 'PtPrePayment',
                                     paymentMethodId: paymentMethodId,
-                                    amount: planAmount[plan],
+                                    amount: productPrices[0].price,
                                     amountUomId: 'USD',
                                     paymentInstrumentEnumId: 'PiCreditCard',
                                     effectiveDate: ec.user.nowTimestamp,
@@ -983,7 +993,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <!-- GrowERP account processing: get GrowERP companyId-->
                             <entity-find entity-name="growerp.party.OwnerAndCompany"
                                 list="growerpMainCompanies">
-                                <econdition field-name="ownerPartyId" value="100000" />
+                                <econdition field-name="ownerPartyId" value="GROWERP" />
                                 <econdition field-name="companyRole" value="OrgInternal" />
                             </entity-find>
                             <set field="growerpMainCompanyPartyId"
@@ -993,19 +1003,21 @@ along with this software (see the LICENSE.md file). If not, see
                                 from="[name: companyName, role: 'Customer', email: username]" />
                             <service-call
                                 name="growerp.100.PartyServices100.create#Company"
-                                in-map=" [company: growerpCustomerCompany,ownerPartyId: '100000']"
+                                in-map=" [company: growerpCustomerCompany,ownerPartyId: 'GROWERP']"
                                 out-map="companyInfo" />
                             <set field="growerpCustomerPartyId" from="companyInfo.company.partyId" />
                             <!-- create payment method and credit card-->
                             <set field="growerpCcInMap"
-                                from="ccInMap + [ownerPartyId: growerpCustomerPartyId]" />
+                                from="ccInMap + [
+                                    ownerPartyId: growerpCustomerPartyId,
+                                    cardSecurityCode: cVC]" />
                             <service-call
                                 name="mantle.account.PaymentMethodServices.create#CreditCard"
                                 in-map="growerpCcInMap" out-map="growerpCcInMap" />
                             <set field="growerpPaymentMethodId" from="userPayment.paymentMethodId" />
                             <!-- payment + gateway response id -> refno -->
                             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                                in-map="[ownerPartyId: '100000', seqName: 'payment']"
+                                in-map="[ownerPartyId: 'GROWERP', seqName: 'payment']"
                                 out-map="context" />
                             <set field="growerpPaymentInMap"
                                 from="paymentInMap + [pseudoId: seqNum,
@@ -1016,11 +1028,19 @@ along with this software (see the LICENSE.md file). If not, see
                             <service-call name="create#mantle.account.payment.Payment"
                                 in-map="growerpPaymentInMap" out-map="paymentInfo" />
                             <set field="paymentId" from="paymentInfo.paymentId" />
+                            <set field="datePlus"
+                                from="java.sql.Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().minusWeeks(2))" />
+                            <service-call
+                                name="growerp.100.SubscriptionServices100.create#Subscription"
+                                in-map="[subscriberPartyId: growerpCustomerPartyId,
+                                    fromDate: datePlus, productId: productPrices[0].productId,
+                                    ownerPartyId: 'GROWERP']" />
                         </if>
 
                         <!-- prompt for capture of payment if not first tenant != GrowERP-->
-                        <if condition="ownerPartyId != '100000'">
-                            <!-- get authorized capturepayment(when STRIPE) for this company -->
+                        <if condition="ownerPartyId != 'GROWERP'">
+                            <log
+                                message="Checking for payment capture from: ${companyPartyId} to: ${growerpPartyId}" />
                             <entity-find entity-name="mantle.account.payment.Payment"
                                 list="payments" limit="1">
                                 <econdition field-name="fromPartyId" from="companyPartyId" />
@@ -1028,6 +1048,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <!-- econdition field-name="statusId" value="PmntAuthorized" /-->
                                 <order-by field-name="-paymentId" />
                             </entity-find>
+                            <log message="Found payments: ${payments?.size()}" />
                             <!-- test check for payments -->
                             <if condition="!payments">
                                 <set field="authenticate"

@@ -130,6 +130,11 @@ List<MenuOption> menuOptions = [
           label: 'Categories',
           icon: const Icon(Icons.business),
         ),
+        TabItem(
+          form: const SubscriptionList(),
+          label: 'Subscriptions',
+          icon: const Icon(Icons.subscriptions),
+        ),
       ]),
   MenuOption(
     image: 'packages/growerp_core/images/orderGrey.png',

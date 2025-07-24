@@ -57,6 +57,17 @@ class Products with _$Products {
 }
 
 @freezed
+class Subscriptions with _$Subscriptions {
+  factory Subscriptions({
+    @Default([]) List<Subscription> subscriptions,
+  }) = _Subscriptions;
+  Subscriptions._();
+
+  factory Subscriptions.fromJson(Map<String, dynamic> json) =>
+      _$SubscriptionsFromJson(json);
+}
+
+@freezed
 class Assets with _$Assets {
   factory Assets({
     @Default([]) List<Asset> assets,

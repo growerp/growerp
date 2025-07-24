@@ -25,26 +25,39 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
     {dynamic extra}) {
   bool isPhone = isAPhone(context);
   List<TableRowContent> rowContent = [];
+  var classificationId = context.read<String>();
 
   if (isPhone) {
     rowContent.add(TableRowContent(
       name: 'ShortId',
-      width: 10,
+      width: 12,
       value: CircleAvatar(
         child: item.image != null
             ? Image.memory(item.image!)
             : Text(
-                item.pseudoId == null ? '' : item.pseudoId!.lastChar(3),
+                classificationId == 'AppSupport'
+                    ? item.partyId!.lastChar(3)
+                    : item.pseudoId == null
+                        ? ''
+                        : item.pseudoId!.lastChar(3),
               ),
       ),
     ));
   }
 
-  rowContent.add(TableRowContent(
-    name: 'Id',
-    width: isPhone ? 14 : 7,
-    value: Text(item.pseudoId ?? '', key: Key('id$index')),
-  ));
+  if (classificationId == 'AppSupport') {
+    rowContent.add(TableRowContent(
+      name: 'PartyId',
+      width: isPhone ? 14 : 7,
+      value: Text(item.partyId ?? '', key: Key('id$index')),
+    ));
+  } else {
+    rowContent.add(TableRowContent(
+      name: 'Id',
+      width: isPhone ? 14 : 7,
+      value: Text(item.pseudoId ?? '', key: Key('id$index')),
+    ));
+  }
 
   if (isPhone) {
     rowContent.add(TableRowContent(

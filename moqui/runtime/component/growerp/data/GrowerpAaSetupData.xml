@@ -15,11 +15,61 @@ along with this software (see the LICENSE.md file). If not, see
 <entity-facade-xml type="seed-initial">
 
     <!-- Service Job: Recalculate GL Account Org Summaries - once per hour by default -->
-    <moqui.service.job.ServiceJob jobName="recalculate_growerp_statistics" description="Recalculate the growerp dashboard statistics"
-            serviceName="growerp.100.GeneralServices100.get#Statistics" cronExpression="0 0 * * * ?" paused="N"
-            transactionTimeout="1800"/>
+    <moqui.service.job.ServiceJob jobName="recalculate_growerp_statistics"
+        description="Recalculate the growerp dashboard statistics"
+        serviceName="growerp.100.GeneralServices100.get#Statistics" cronExpression="0 0 * * * ?"
+        paused="N"
+        transactionTimeout="1800" />
 
     <!-- format time period name -->
     <moqui.basic.LocalizedMessage locale="default" original="TimePeriodBaseNameTemplate"
-        localized="Y${fromLocalDate.getYear()}${timePeriodType?.lengthUomId!='TF_yr'?(timePeriodType.description.split('(?=[A-Z])')[1][0].toLowerCase())+(periodNum as String).padLeft(2,'0'):''}"/>
+        localized="Y${fromLocalDate.getYear()}${timePeriodType?.lengthUomId!='TF_yr'?(timePeriodType.description.split('(?=[A-Z])')[1][0].toLowerCase())+(periodNum as String).padLeft(2,'0'):''}" />
+
+    <!-- growerp initial products -->
+    <mantle.party.Party partyId="GROWERP" partyTypeEnumId="PtyOwner" disabled="Y" />
+    <mantle.product.category.ProductCategory productCategoryId="GROWERP_SERVICES"
+        ownerPartyId="GROWERP" productCategoryTypeEnumId="PctCatalog"
+        categoryName="GrowERP Services" description="" />
+
+    <!-- GrowERP Plans -->
+    <mantle.product.Product productId="GROWERP_DIY_PLAN" productTypeEnumId="PtService"
+        chargeShipping="N" returnable="N" productName="GrowERP do it yourself plan"
+        description="DIY Plan $50 per month|Full functionality, unlimited users!|support charged extra $75/hr"
+        ownerPartyId="GROWERP" requireInventory="N">
+        <prices productPriceId="GROWERP_DIYPLAN_L" pricePurposeEnumId="PppPurchase"
+            priceTypeEnumId="PptList" fromDate="1265184000000"
+            minQuantity="1" price="75" priceUomId="USD" />
+        <prices productPriceId="GROWERP_DIYPLAN_C" pricePurposeEnumId="PppPurchase"
+            priceTypeEnumId="PptCurrent" fromDate="1265184000000"
+            minQuantity="1" price="50" priceUomId="USD" />
+        <categories productCategoryId="GROWERP_SERVICES" fromDate="1265184000000" sequenceNum="1" />
+    </mantle.product.Product>
+
+    <mantle.product.Product productId="GROWERP_SMALL_PLAN" productTypeEnumId="PtService"
+        chargeShipping="N" returnable="N" productName="GrowERP small Company plan"
+        description="Small Company Plan $499 per month|Full functionality, unlimited users|including support for 20hrs/month"
+        ownerPartyId="GROWERP" requireInventory="N">
+        <prices productPriceId="GROWERP_SMALL_PLAN_L" pricePurposeEnumId="PppPurchase"
+            priceTypeEnumId="PptList" fromDate="1265184000000"
+            minQuantity="1" price="799" priceUomId="USD" />
+        <prices productPriceId="GROWERP_SMALL_PLAN_C" pricePurposeEnumId="PppPurchase"
+            priceTypeEnumId="PptCurrent" fromDate="1265184000000"
+            minQuantity="1" price="499" priceUomId="USD" />
+        <categories productCategoryId="GROWERP_SERVICES" fromDate="1265184000000" sequenceNum="2" />
+    </mantle.product.Product>
+
+    <mantle.product.Product productId="GROWERP_FULL_PLAN" productTypeEnumId="PtService"
+        chargeShipping="N" returnable="N" productName="GrowERP full company plan"
+        description="Full Company Plan $999 per month|Full functionality, unlimited users|including support for 40hrs/month"
+        ownerPartyId="GROWERP" requireInventory="N">
+        <prices productPriceId="GROWERP_FULL_PLAN_L" pricePurposeEnumId="PppPurchase"
+            priceTypeEnumId="PptList" fromDate="1265184000000"
+            minQuantity="1" price="1299" priceUomId="USD" />
+        <prices productPriceId="GROWERP_FULL_PLAN_C" pricePurposeEnumId="PppPurchase"
+            priceTypeEnumId="PptCurrent" fromDate="1265184000000"
+            minQuantity="1" price="999" priceUomId="USD" />
+        <categories productCategoryId="GROWERP_SERVICES" fromDate="1265184000000" sequenceNum="3" />
+    </mantle.product.Product>
+
+
 </entity-facade-xml>

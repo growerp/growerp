@@ -10,6 +10,9 @@ List<BlocProvider> getCatalogBlocProviders(
         create: (context) => ProductBloc(restClient, classificationId)),
     BlocProvider<CategoryBloc>(
         create: (context) => CategoryBloc(restClient, classificationId)),
+    BlocProvider<SubscriptionBloc>(
+      create: (context) => SubscriptionBloc(restClient),
+    ),
   ];
   return blocProviders;
 }

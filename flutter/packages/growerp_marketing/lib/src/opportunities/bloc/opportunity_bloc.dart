@@ -79,9 +79,7 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
       }
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: OpportunityStatus.failure,
-          opportunities: [],
-          message: await getDioError(e)));
+          status: OpportunityStatus.failure, message: await getDioError(e)));
     }
   }
 

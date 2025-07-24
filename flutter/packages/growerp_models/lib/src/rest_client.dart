@@ -243,6 +243,7 @@ abstract class RestClient {
     @Query('start') int? start,
     @Query('limit') int? limit,
     @Query('companyPartyId') String? companyPartyId,
+    @Query('ownerPartyId') String? ownerPartyId,
     @Query('isForDropDown') bool? isForDropDown,
     @Query('search') String? searchString,
     @Query('classificationId') String? classificationId,
@@ -594,7 +595,6 @@ abstract class RestClient {
     @Query('limit') int? limit,
     @Query('opportunityId') String? opportunityId,
     @Query('search') String? searchString,
-    @Query('my') bool? my,
   });
 
   @POST("rest/s1/growerp/100/Opportunity")
@@ -608,4 +608,25 @@ abstract class RestClient {
   @DELETE("rest/s1/growerp/100/Opportunity")
   Future<Opportunity> deleteOpportunity(
       {@Field() required Opportunity opportunity});
+
+  // subscriptions
+  @GET("rest/s1/growerp/100/Subscription")
+  Future<Subscriptions> getSubscription({
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('subscriptionId') String? subscriptionId,
+    @Query('search') String? searchString,
+  });
+
+  @POST("rest/s1/growerp/100/Subscription")
+  Future<Subscription> createSubscription(
+      {@Field() required Subscription subscription});
+
+  @PATCH("rest/s1/growerp/100/Subscription")
+  Future<Subscription> updateSubscription(
+      {@Field() required Subscription subscription});
+
+  @DELETE("rest/s1/growerp/100/Subscription")
+  Future<void> deleteSubscription(
+      {@Field() required Subscription subscription});
 }

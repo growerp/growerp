@@ -15,7 +15,6 @@
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_models/growerp_models.dart';
-
 import 'src/application/application.dart';
 
 List<MenuOption> menuOptions = [
