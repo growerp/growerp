@@ -51,6 +51,8 @@ flutter:
 
   assets:
     - assets/cfg/
+    - packages/growerp_core/images/subscription.png
+    - packages/growerp_core/images/subscriptionGrey.png
     - packages/growerp_core/images/select.png
     - packages/growerp_core/images/selectGrey.png
     - packages/growerp_core/images/aboutGrey.png

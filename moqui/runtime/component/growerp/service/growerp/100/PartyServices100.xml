@@ -2719,15 +2719,23 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <if condition="!companyPartyId &amp;&amp; userGroupId == 'GROWERP_M_ADMIN'">
                 <then>
+                    <!--  check if new system -->
+                    <entity-find entity-name="moqui.entity.SequenceValueItem"
+                        list="systemExist" limit="1">
+                        <econdition field-name="seqName" value="GROWERP-party" />
+                    </entity-find>
                     <!-- create root party -->
-                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[ownerPartyId: 'system', seqName: 'party']"
-                        out-map="context" />
-                    <!-- set to disable first, when logged in will be activated -->
-                    <service-call name="create#mantle.party.Party"
-                        in-map="[partyTypeEnumId: 'PtyOwner', pseudoId: seqNum, disabled: 'Y']"
-                        out-map="owner" />
-                    <set field="ownerPartyId" from="owner.partyId" />
+                    <if condition="systemExist">
+                        <!-- set to disable first, when logged in will be activated -->
+                        <service-call name="create#mantle.party.Party"
+                            in-map="[partyTypeEnumId: 'PtyOwner', disabled: 'Y']"
+                            out-map="owner" />
+                        <set field="ownerPartyId" from="owner.partyId" />
+                        <else>
+                            <!-- party already created in growerp setup data-->
+                            <set field="ownerPartyId" value="GROWERP" />
+                        </else>
+                    </if>
                     <!-- create user / temp main company -->
                     <set field="user"
                         from="[ userGroupId: 'GROWERP_M_ADMIN',

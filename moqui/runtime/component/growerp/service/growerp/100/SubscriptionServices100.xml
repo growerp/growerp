@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+    <service verb="get" noun="Subscription">
+        <in-parameters>
+            <parameter name="partyId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="subscriptions" type="List">
+                <parameter name="subscriptionId" />
+                <parameter name="subscriptionTypeId" />
+                <parameter name="partyId" />
+                <parameter name="roleTypeId" />
+                <parameter name="productId" />
+                <parameter name="orderId" />
+                <parameter name="fromDate" />
+                <parameter name="thruDate" />
+                <parameter name="statusId" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.product.subscription.Subscription" list="subscriptions" />
+            <iterate list="subscriptions" entry="item">
+                <set field="item.fromDate" from="ec.l10n.format(item.fromDate,'yyyy-MM-dd')" />
+                <set field="item.thruDate" from="ec.l10n.format(item.thruDate,'yyyy-MM-dd')" />
+            </iterate>
+
+        </actions>
+    </service>
+
+    <service verb="create" noun="Subscription">
+        <in-parameters>
+            <parameter name="subscriberPartyId" required="true" />
+            <parameter name="fromDate" />
+            <parameter name="productId" />
+            <parameter name="ownerPartyId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="subscriptionId" />
+        </out-parameters>
+        <actions>
+            <service-call name="create#mantle.product.subscription.Subscription"
+                in-map="[
+                    fromDate: fromDate ?: ec.user.nowTimestamp,
+                    ownerPartyId: ownerPartyId,
+                    productId: productId,
+                    subscriptionTypeId: 'StProduct',
+                    subscriberPartyId: subscriberPartyId,
+                    ]"
+                out-map="context" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="Subscription">
+        <in-parameters>
+            <parameter name="subscriptionId" required="true" />
+            <parameter name="subscriptionTypeId" />
+            <parameter name="partyId" />
+            <parameter name="roleTypeId" />
+            <parameter name="productId" />
+            <parameter name="orderId" />
+            <parameter name="fromDate" />
+            <parameter name="thruDate" />
+            <parameter name="statusId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="subscriptionId" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.subscription.Subscription"
+                value-field="lookupEntity" />
+            <if condition="lookupEntity == null">
+                <return error="true" message="Subscription with ID ${subscriptionId} not found." />
+            </if>
+            <set-service-fields service-name="growerp.SubscriptionServices.update#Subscription"
+                map="context" to-map="lookupEntity" />
+            <update-record value-field="lookupEntity" />
+            <set field="subscriptionId" from="lookupEntity.subscriptionId" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="Subscription">
+        <in-parameters>
+            <parameter name="subscriptionId" required="true" />
+        </in-parameters>
+        <out-parameters />
+        <actions>
+            <entity-find-one entity-name="mantle.product.subscription.Subscription"
+                value-field="lookupEntity" />
+            <if condition="lookupEntity == null">
+                <return error="true" message="Subscription with ID ${subscriptionId} not found." />
+            </if>
+            <delete-record value-field="lookupEntity" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="SubscriptionStatus">
+        <in-parameters>
+            <parameter name="subscriptionId" required="true" />
+            <parameter name="statusId" required="true" />
+            <parameter name="origStatusId" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.subscription.Subscription"
+                value-field="subscription" />
+            <if condition="subscription == null">
+                <return error="true" message="Subscription with ID ${subscriptionId} not found." />
+            </if>
+            <if condition="subscription.statusId != origStatusId">
+                <return error="true"
+                    message="Subscription status has changed since last view, refresh and try again." />
+            </if>
+            <set field="subscription.statusId" from="statusId" />
+            <update-record value-field="subscription" />
+        </actions>
+    </service>
+</services>

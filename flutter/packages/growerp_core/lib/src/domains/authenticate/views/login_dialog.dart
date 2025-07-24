@@ -50,6 +50,7 @@ class LoginDialogState extends State<LoginDialog> {
   String? furtherAction;
   late String username;
   late String password;
+  late DataFetchBloc productBloc;
 
   @override
   void initState() {
@@ -62,6 +63,10 @@ class LoginDialogState extends State<LoginDialog> {
     _obscureText = true;
     _obscureText3 = true;
     _obscureText4 = true;
+    productBloc = context.read<DataFetchBloc<Products>>()
+      ..add(GetDataEvent(() => context
+          .read<RestClient>()
+          .getProduct(ownerPartyId: 'GROWERP', limit: 3)));
   }
 
   @override
@@ -423,6 +428,8 @@ class LoginDialogState extends State<LoginDialog> {
     String testCvv = kReleaseMode ? '' : '123';
     String testNameOnCart = 'Test Customer';
     PaymentMethod? paymentMethod = authenticate.user?.paymentMethod;
+    Products productsList = productBloc.state.data as Products;
+    List<Product> products = productsList.products;
 
     return popUp(
         height: isPhone(context) ? 700 : 700,
@@ -463,21 +470,27 @@ class LoginDialogState extends State<LoginDialog> {
                 const SizedBox(height: 10),
                 FormBuilderCheckboxGroup(
                   key: const Key('plan'),
-                  initialValue: const ['diyPlan'],
+                  initialValue: const ['GROWERP_SMALL_PLAN'],
                   name: 'plan',
-                  options: const [
+                  options: [
                     FormBuilderFieldOption(
-                        value: 'diyPlan',
-                        child: Text(
-                            'DIY Plan \$50 per month\nFull functionality, unlimited users\nsupport charged extra \$75/hr')),
+                        value: 'GROWERP_DIY_PLAN',
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: products[0]
+                              .description!
+                              .split('|')
+                              .map((line) => Text(line))
+                              .toList(),
+                        )),
                     FormBuilderFieldOption(
-                        value: 'smallPlan',
+                        value: 'GROWERP_SMALL_PLAN',
                         child: Text(
-                            'Small Company Plan \$499 per month\nFull functionality, unlimited users\nincluding support for 20hrs/month')),
+                            products[1].description!.replaceAll('\n', '\n'))),
                     FormBuilderFieldOption(
-                        value: 'fullPlan',
+                        value: 'GROWERP_FULL_PLAN',
                         child: Text(
-                            'Full Company Plan \$999 per month\nFull functionality, unlimited users\nincluding support for 40hrs/month')),
+                            products[2].description!.replaceAll('\n', '\n'))),
                   ],
                   decoration: const InputDecoration(
                     labelText: 'Payment Plan',
@@ -567,7 +580,8 @@ class LoginDialogState extends State<LoginDialog> {
                             Expanded(
                               child: OutlinedButton(
                                   key: const Key('pay'),
-                                  child: const Text('Pay'),
+                                  child: const Text(
+                                      'Register and charge in 2 weeks'),
                                   onPressed: () {
                                     if (builderFormKey.currentState!
                                         .saveAndValidate()) {

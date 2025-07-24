@@ -54,6 +54,20 @@ along with this software (see the LICENSE.md file). If not, see
         </index>
     </extend-entity>
 
+    <extend-entity entity-name="Subscription" package="mantle.product.subscription"
+        sequence-primary-prefix="sub">
+        <field name="pseudoId" type="id" /><!-- if pseudoId get conflicts with existing views -->
+        <field name="ownerPartyId" type="id">
+            <description>The company owner, to separate companies.</description>
+        </field>
+        <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
+            <key-map field-name="ownerPartyId" />
+        </relationship>
+        <index name="SUBSCRIPTION_PSEUDOID" unique="false">
+            <index-field name="pseudoId" />
+        </index>
+    </extend-entity>
+
     <extend-entity entity-name="Payment" package="mantle.account.payment"
         sequence-primary-prefix="pay">
         <field name="pseudoId" type="id" />
