@@ -42,7 +42,7 @@ class ShowUserDialog extends StatelessWidget {
             partyId: user.partyId,
             limit: 1,
           )));
-    return BlocBuilder<DataFetchBloc<Users>, DataFetchState>(
+    return BlocBuilder<DataFetchBloc<Users>, DataFetchState<Users>>(
         builder: (context, state) {
       if (state.status == DataFetchStatus.success ||
           state.status == DataFetchStatus.failure) {

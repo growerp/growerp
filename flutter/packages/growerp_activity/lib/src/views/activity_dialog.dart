@@ -189,7 +189,7 @@ class ActivityDialogState extends State<ActivityDialog> {
               if (widget.activity.activityType == ActivityType.todo)
                 const SizedBox(height: 10),
               if (widget.activity.activityType == ActivityType.todo)
-                BlocBuilder<DataFetchBloc<Users>, DataFetchState>(
+                BlocBuilder<DataFetchBloc<Users>, DataFetchState<Users>>(
                   builder: (context, state) {
                     switch (state.status) {
                       case DataFetchStatus.failure:
@@ -258,7 +258,7 @@ class ActivityDialogState extends State<ActivityDialog> {
               if (widget.activity.activityType == ActivityType.todo ||
                   (widget.activity.activityType == ActivityType.event &&
                       widget.companyUser == null))
-                BlocBuilder<DataFetchBloc<Users>, DataFetchState>(
+                BlocBuilder<DataFetchBloc<Users>, DataFetchState<Users>>(
                   builder: (context, state) {
                     switch (state.status) {
                       case DataFetchStatus.failure:

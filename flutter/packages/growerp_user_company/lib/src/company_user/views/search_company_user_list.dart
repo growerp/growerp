@@ -38,7 +38,7 @@ class SearchCompanyUserState extends State<SearchCompanyUserList> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<DataFetchBloc<CompaniesUsers>, DataFetchState>(
+    return BlocConsumer<DataFetchBloc<CompaniesUsers>, DataFetchState<CompaniesUsers>>(
         listener: (context, state) {
       if (state.status == DataFetchStatus.failure) {
         HelperFunctions.showMessage(context, '${state.message}', Colors.red);

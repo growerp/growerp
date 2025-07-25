@@ -475,7 +475,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
               )),
           child: Wrap(runSpacing: 10, spacing: 10, children: imageButtons)),
       for (Category category in state.website!.websiteCategories)
-        BlocBuilder<DataFetchBloc<Products>, DataFetchState>(
+        BlocBuilder<DataFetchBloc<Products>, DataFetchState<Products>>(
             builder: (context, productState) {
           switch (productState.status) {
             case DataFetchStatus.failure:
@@ -548,7 +548,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
               return const Center(child: LoadingIndicator());
           }
         }),
-      BlocBuilder<DataFetchBloc<Categories>, DataFetchState>(
+      BlocBuilder<DataFetchBloc<Categories>, DataFetchState<Categories>>(
           builder: (context, categoryState) {
         switch (categoryState.status) {
           case DataFetchStatus.failure:

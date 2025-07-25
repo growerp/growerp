@@ -38,7 +38,7 @@ class SearchLocationState extends State<SearchLocationList> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<DataFetchBloc<Locations>, DataFetchState>(
+    return BlocConsumer<DataFetchBloc<Locations>, DataFetchState<Locations>>(
         listener: (context, state) {
       if (state.status == DataFetchStatus.failure) {
         HelperFunctions.showMessage(context, '${state.message}', Colors.red);

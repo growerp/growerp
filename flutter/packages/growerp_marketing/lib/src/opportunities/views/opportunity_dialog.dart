@@ -235,7 +235,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
           }
         },
       ),
-      BlocBuilder<DataFetchBloc<Users>, DataFetchState>(
+      BlocBuilder<DataFetchBloc<Users>, DataFetchState<Users>>(
         builder: (context, state) {
           switch (state.status) {
             case DataFetchStatus.failure:

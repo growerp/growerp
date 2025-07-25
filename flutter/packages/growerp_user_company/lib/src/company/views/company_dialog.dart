@@ -44,7 +44,7 @@ class ShowCompanyDialog extends StatelessWidget {
               companyPartyId: company.partyId,
               limit: 1,
             )));
-      return BlocBuilder<DataFetchBloc<Companies>, DataFetchState>(
+      return BlocBuilder<DataFetchBloc<Companies>, DataFetchState<Companies>>(
           builder: (context, state) {
         if (state.status == DataFetchStatus.success ||
             state.status == DataFetchStatus.failure) {

@@ -13,6 +13,7 @@
  */
 
 // ignore_for_file: depend_on_referenced_packages
+import 'package:admin/views/plan_selection_form.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
@@ -178,6 +179,11 @@ List<MenuOption> acctMenuOptions = [
         form: const PaymentTypeList(),
         label: "Paymt Types",
         icon: const Icon(Icons.list),
+      ),
+      TabItem(
+        form: PlanSelectionForm(),
+        label: "Plan Selection",
+        icon: const Icon(Icons.subscriptions),
       ),
     ],
     userGroups: [UserGroup.admin, UserGroup.employee],

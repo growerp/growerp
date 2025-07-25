@@ -54,14 +54,18 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if condition="!ownerPartyId">
-                <!-- if not provided and not logged in use the one which was first created -->
-                <entity-find entity-name="mantle.party.Organization" list="parties" limit="1">
-                    <order-by field-name="partyId" />
-                </entity-find>
-                <set field="ownerPartyId" from="parties[0].partyId" />
+            <!-- if requested alsways show products of GROWERP -->
+            <if condition="ownerPartyId != 'GROWERP'">
+                <set field="ownerPartyId" from="ec.user.userAccount.partyId" />
+                <service-call out-map="context"
+                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+                <if condition="!ownerPartyId">
+                    <!-- if not provided and not logged in use the one which was first created -->
+                    <entity-find entity-name="mantle.party.Organization" list="parties" limit="1">
+                        <order-by field-name="partyId" />
+                    </entity-find>
+                    <set field="ownerPartyId" from="parties[0].partyId" />
+                </if>
             </if>
             <if condition="categoryId == '###first one###'">
                 <!-- for ecommerce startup we only need products in the first alphabetical category
