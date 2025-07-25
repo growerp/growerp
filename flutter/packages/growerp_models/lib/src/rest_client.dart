@@ -615,6 +615,8 @@ abstract class RestClient {
     @Query('start') int? start,
     @Query('limit') int? limit,
     @Query('subscriptionId') String? subscriptionId,
+    @Query('growerp')
+    bool? growerp, // if true, only owner GROWERP subscriptions
     @Query('search') String? searchString,
   });
 

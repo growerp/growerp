@@ -172,7 +172,7 @@ class RequestDialogState extends State<RequestDialog> {
               const SizedBox(height: 10),
               if (finDoc.requestId != null &&
                   finDoc.otherUser?.partyId != user.partyId)
-                BlocBuilder<DataFetchBloc<CompaniesUsers>, DataFetchState>(
+                BlocBuilder<DataFetchBloc<CompaniesUsers>, DataFetchState<CompaniesUsers>>(
                     builder: (context, state) {
                   switch (state.status) {
                     case DataFetchStatus.success:
@@ -510,7 +510,7 @@ class RequestDialogState extends State<RequestDialog> {
               widget.finDoc.id() == null
                   ? const SizedBox(height: 20)
                   : RelatedFinDocs(finDoc: widget.finDoc, context: context),
-              BlocBuilder<DataFetchBloc<CompaniesUsers>, DataFetchState>(
+              BlocBuilder<DataFetchBloc<CompaniesUsers>, DataFetchState<CompaniesUsers>>(
                   builder: (context, state) {
                 switch (state.status) {
                   case DataFetchStatus.success:

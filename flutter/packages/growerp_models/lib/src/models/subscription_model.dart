@@ -19,32 +19,30 @@ import 'package:growerp_models/growerp_models.dart';
 part 'subscription_model.freezed.dart';
 part 'subscription_model.g.dart';
 
+/// Represents a subscription in the GrowERP system.
 @freezed
 class Subscription with _$Subscription {
   Subscription._();
   factory Subscription({
-    String? subscriptionId,
-    String? subscriptionTypeEnumId,
-    String? subscriptionResourceId,
-    String? subscriberPartyId,
-    String? deliverToContactMechId,
-    String? orderId,
-    String? orderItemSeqId,
-    String? productId,
-    String? externalSubscriptionId,
-    String? resourceInstanceId,
-    String? description,
-    @DateTimeConverter() DateTime? fromDate,
-    @DateTimeConverter() DateTime? thruDate,
-    @DateTimeConverter() DateTime? purchaseFromDate,
-    @DateTimeConverter() DateTime? purchaseThruDate,
-    Decimal? availableTime,
-    String? availableTimeUomId,
-    Decimal? useTime,
-    String? useTimeUomId,
-    Decimal? useCountLimit,
+    String? subscriptionId, // Unique systemwide identifier for the subscription
+    String?
+        pseudoId, // Unique identifier for the subscription, used for this owner
+    String? subscriberPartyId, // Party that is subscribing
+    String? orderId, // Order that created this subscription
+    String? orderItemSeqId, // Order item that created this subscription
+    String? productId, // Product/plan associated with this subscription
+    String? description, //
+    @DateTimeConverter() DateTime? fromDate, // Start date of the subscription
+    @DateTimeConverter() DateTime? thruDate, // End date of the subscription
+    @DateTimeConverter() DateTime? purchaseFromDate, // Purchase start date
+    @DateTimeConverter() DateTime? purchaseThruDate, // Purchase end date
+    Decimal? availableTime, // Total time available for this subscription
+    String? availableTimeUomId, // UOM for available time
+    Decimal? useTime, // Time used from the subscription
+    String? useTimeUomId, // UOM for used time
   }) = _Subscription;
 
+  /// Converts a JSON map to a Subscription object.
   factory Subscription.fromJson(Map<String, dynamic> json) =>
       _$SubscriptionFromJson(json['subscription'] ?? json);
 }

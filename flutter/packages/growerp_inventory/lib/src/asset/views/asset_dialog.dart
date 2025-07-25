@@ -223,7 +223,7 @@ class AssetDialogState extends State<AssetDialog> {
                 ],
               ),
             const SizedBox(height: 10),
-            BlocBuilder<DataFetchBloc<Products>, DataFetchState>(
+            BlocBuilder<DataFetchBloc<Products>, DataFetchState<Products>>(
                 builder: (context, state) {
               switch (state.status) {
                 case DataFetchStatus.failure:
@@ -318,7 +318,7 @@ class AssetDialogState extends State<AssetDialog> {
                 if (classificationId != 'AppHotel')
                   Expanded(
                     child:
-                        BlocBuilder<DataFetchBloc<Locations>, DataFetchState>(
+                        BlocBuilder<DataFetchBloc<Locations>, DataFetchState<Locations>>(
                             builder: (context, state) {
                       switch (state.status) {
                         case DataFetchStatus.failure:

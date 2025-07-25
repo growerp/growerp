@@ -8,7 +8,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 part 'data_fetch_state.dart';
 part 'data_fetch_event.dart';
 
-mixin DataFetchBlocOther<T> on Bloc<DataFetchBlocEvent, DataFetchState> {}
+mixin DataFetchBlocOther<T> on Bloc<DataFetchBlocEvent, DataFetchState<T>> {}
 
 EventTransformer<E> dataEventDroppable<E>(Duration duration) {
   return (events, mapper) {
@@ -16,12 +16,12 @@ EventTransformer<E> dataEventDroppable<E>(Duration duration) {
   };
 }
 
-class DataFetchBloc<T> extends Bloc<DataFetchBlocEvent, DataFetchState>
+class DataFetchBloc<T> extends Bloc<DataFetchBlocEvent, DataFetchState<T>>
     with DataFetchBlocOther<T> {
-  DataFetchBloc() : super(const DataFetchState()) {
+  DataFetchBloc() : super(DataFetchState<T>()) {
     Future<void> onGetDataEvent<X>(
       GetDataEvent event,
-      Emitter<DataFetchState> emit,
+      Emitter<DataFetchState<T>> emit,
     ) async {
       try {
         emit(state.copyWith(status: DataFetchStatus.loading));

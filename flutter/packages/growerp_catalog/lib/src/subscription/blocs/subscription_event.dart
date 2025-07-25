@@ -22,11 +22,12 @@ abstract class SubscriptionEvent {
 class SubscriptionFetch extends SubscriptionEvent {
   const SubscriptionFetch(
       {this.searchString = '', this.refresh = false, this.limit});
-  final String searchString;
-  final bool refresh;
-  final int? limit;
+  final String searchString; // Search string to filter subscriptions
+  final bool growerp = false; // Set to true if this is a GrowERP subscription
+  final bool refresh; // Whether to refresh the data
+  final int? limit; // Optional limit for the number of subscriptions to fetch
   @override
-  List<Object> get props => [searchString, refresh];
+  List<Object> get props => [searchString, refresh, growerp];
 }
 
 class SubscriptionUpdate extends SubscriptionEvent {

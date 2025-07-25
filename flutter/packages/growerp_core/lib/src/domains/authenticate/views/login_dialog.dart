@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
@@ -64,9 +65,8 @@ class LoginDialogState extends State<LoginDialog> {
     _obscureText3 = true;
     _obscureText4 = true;
     productBloc = context.read<DataFetchBloc<Products>>()
-      ..add(GetDataEvent(() => context
-          .read<RestClient>()
-          .getProduct(ownerPartyId: 'GROWERP', limit: 3)));
+      ..add(GetDataEvent(() =>
+          context.read<RestClient>().getProduct(ownerPartyId: 'GROWERP')));
   }
 
   @override
@@ -429,7 +429,9 @@ class LoginDialogState extends State<LoginDialog> {
     String testNameOnCart = 'Test Customer';
     PaymentMethod? paymentMethod = authenticate.user?.paymentMethod;
     Products productsList = productBloc.state.data as Products;
-    List<Product> products = productsList.products;
+    List<Product> products = List.from(productsList.products)
+      ..sort((a, b) => ((a.price ?? Decimal.zero).toDouble())
+          .compareTo((b.price ?? Decimal.zero).toDouble()));
 
     return popUp(
         height: isPhone(context) ? 700 : 700,
@@ -473,24 +475,25 @@ class LoginDialogState extends State<LoginDialog> {
                   initialValue: const ['GROWERP_SMALL_PLAN'],
                   name: 'plan',
                   options: [
-                    FormBuilderFieldOption(
-                        value: 'GROWERP_DIY_PLAN',
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: products[0]
-                              .description!
-                              .split('|')
-                              .map((line) => Text(line))
-                              .toList(),
-                        )),
-                    FormBuilderFieldOption(
-                        value: 'GROWERP_SMALL_PLAN',
-                        child: Text(
-                            products[1].description!.replaceAll('\n', '\n'))),
-                    FormBuilderFieldOption(
-                        value: 'GROWERP_FULL_PLAN',
-                        child: Text(
-                            products[2].description!.replaceAll('\n', '\n'))),
+                    for (Product product in products)
+                      FormBuilderFieldOption(
+                          value: product.productId,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: product.description!
+                                .split('|')
+                                .asMap()
+                                .entries
+                                .map((entry) => entry.key == 0
+                                    ? Text(
+                                        '\n+${entry.value}',
+                                        style: const TextStyle(
+                                            fontStyle: FontStyle.italic,
+                                            fontWeight: FontWeight.bold),
+                                      )
+                                    : Text(entry.value))
+                                .toList(),
+                          )),
                   ],
                   decoration: const InputDecoration(
                     labelText: 'Payment Plan',

@@ -266,7 +266,7 @@ class MyFinDocState extends State<FinDocPage> {
             ),
           ),
           const SizedBox(width: 10),
-          BlocBuilder<DataFetchBloc<CompaniesUsers>, DataFetchState>(
+          BlocBuilder<DataFetchBloc<CompaniesUsers>, DataFetchState<CompaniesUsers>>(
               builder: (context, state) {
             switch (state.status) {
               case DataFetchStatus.failure:

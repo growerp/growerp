@@ -41,7 +41,7 @@ class SearchFinDocState extends State<SearchFinDocList> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<DataFetchBloc<FinDocs>, DataFetchState>(
+    return BlocConsumer<DataFetchBloc<FinDocs>, DataFetchState<FinDocs>>(
         listener: (context, state) {
       if (state.status == DataFetchStatus.failure) {
         HelperFunctions.showMessage(context, '${state.message}', Colors.red);

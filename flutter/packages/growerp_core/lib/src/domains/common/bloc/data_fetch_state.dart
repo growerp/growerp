@@ -13,12 +13,12 @@ class DataFetchState<T> extends Equatable {
   final Object data;
   final String? message;
 
-  DataFetchState copyWith({
+  DataFetchState<T> copyWith({
     DataFetchStatus? status,
     Object? data,
     String? message,
   }) {
-    return DataFetchState(
+    return DataFetchState<T>(
       status: status ?? this.status,
       data: data ?? this.data,
       message: message,

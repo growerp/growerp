@@ -45,9 +45,7 @@ confirmDialog(BuildContext context, String title, String content) {
           child: Center(
             child: Column(children: [
               const SizedBox(height: 20),
-              Text(content,
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(content),
               const SizedBox(height: 20),
               Row(children: [
                 cancelButton,

@@ -164,7 +164,7 @@ class ReservationDialogState extends State<ReservationDialog> {
             child: Form(
                 key: _formKey,
                 child: ListView(key: const Key('listView'), children: <Widget>[
-                  BlocBuilder<DataFetchBloc<CompaniesUsers>, DataFetchState>(
+                  BlocBuilder<DataFetchBloc<CompaniesUsers>, DataFetchState<CompaniesUsers>>(
                       builder: (context, state) {
                     switch (state.status) {
                       case DataFetchStatus.loading:
@@ -226,7 +226,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                     }
                   }),
                   const SizedBox(height: 20),
-                  BlocBuilder<DataFetchBloc<Products>, DataFetchState>(
+                  BlocBuilder<DataFetchBloc<Products>, DataFetchState<Products>>(
                       builder: (context, state) {
                     switch (state.status) {
                       case DataFetchStatus.failure:
