@@ -472,7 +472,7 @@ class LoginDialogState extends State<LoginDialog> {
                 const SizedBox(height: 10),
                 FormBuilderCheckboxGroup(
                   key: const Key('plan'),
-                  initialValue: const ['GROWERP_SMALL_PLAN'],
+                  initialValue: [products[1].productId],
                   name: 'plan',
                   options: [
                     for (Product product in products)
