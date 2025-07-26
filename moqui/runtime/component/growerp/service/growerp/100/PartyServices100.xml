@@ -2719,14 +2719,13 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <if condition="!companyPartyId &amp;&amp; userGroupId == 'GROWERP_M_ADMIN'">
                 <then>
-                    <!--  check if new system -->
+                    <!--  check if new system; if yes: create GrowERP root-->
                     <entity-find entity-name="moqui.entity.SequenceValueItem"
                         list="systemExist" limit="1">
                         <econdition field-name="seqName" value="GROWERP-party" />
                     </entity-find>
-                    <!-- create root party -->
                     <if condition="systemExist">
-                        <!-- set to disable first, when logged in will be activated -->
+                        <!-- create root to disable first, when logged in will be activated -->
                         <service-call name="create#mantle.party.Party"
                             in-map="[partyTypeEnumId: 'PtyOwner', disabled: 'Y']"
                             out-map="owner" />
@@ -2768,6 +2767,9 @@ along with this software (see the LICENSE.md file). If not, see
                         classificationId: classificationId]"
                         out-map="context" />
                 </else-if>
+                <else>
+                    <return />
+                </else>
             </if>
             <!-- add to mailing list -->
             <service-call name="growerp.100.BirdSendServices100.registerAdd#UserToGroup"
@@ -3146,9 +3148,9 @@ along with this software (see the LICENSE.md file). If not, see
                         out-map="context" />
                     <service-call name="create#mantle.product.category.ProductCategory"
                         in-map="[categoryName: 'rooms', pseudoId: seqNum,
-                        description: 'Dummy category to connect the room types',
-                        productCategoryTypeEnumId: 'PctCatalog',
-                        ownerPartyId: ownerPartyId]"
+                            description: 'Dummy category to connect the room types',
+                            productCategoryTypeEnumId: 'PctCatalog',
+                            ownerPartyId: ownerPartyId]"
                         out-map="context" />
                     <service-call
                         name="create#mantle.product.category.ProductCategoryRollup"

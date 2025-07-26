@@ -181,7 +181,7 @@ List<MenuOption> acctMenuOptions = [
         icon: const Icon(Icons.list),
       ),
       TabItem(
-        form: PlanSelectionForm(),
+        form: const PlanSelectionForm(),
         label: "Plan Selection",
         icon: const Icon(Icons.subscriptions),
       ),

@@ -876,8 +876,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="classificationTypeEnumId" value="PcltMobileApp" />
                 <econdition field-name="partyClassificationId" from="classificationId" />
             </entity-find>
-            <log
-                message=" ===result: ${partyClassifications?.size()}=======check for class userAccount: ${userAccount.partyId} ownerPartyId: ${ownerPartyId} companyPartyId: ${companyPartyId} classificationId: ${classificationId}" />
             <if condition="!partyClassifications"><!-- more setup needed -->
                 <!-- usergroup to see if admin (company name required) or not -->
                 <entity-find entity-name="moqui.security.UserGroupMember" list="adminAccess">
@@ -1099,16 +1097,55 @@ along with this software (see the LICENSE.md file). If not, see
                             name="growerp.100.PartyServices100.setup#SpecificApp"
                             in-map="[ownerPartyId: ownerPartyId, userPartyId: userAccount.partyId,
                                         companyPartyId: companyPartyId, classificationId: classificationId]" />
-                        <!-- demo data -->
-                        <if condition="demoData">
+                        <!-- growerp initial plans -->
+                        <if condition="ownerPartyId == 'GROWERP'">
+                            <set field="category"
+                                from="[categoryId: 'GROWERP_SERVICES',
+                                categoryName: 'GrowERP Services']" />
+                            <set field="products"
+                                from="[
+                                [
+                                    productId: 'GROWERP_DIY_PLAN',
+                                    productName: 'GrowERP do it yourself plan',
+                                    description: 'DIY Plan $49 per month|Full functionality, unlimited users!|support charged extra $75/hr',
+                                    price: 49.00,
+                                    categories: [category]
+                                ],
+                                [
+                                    productId: 'GROWERP_SMALL_PLAN',
+                                    productName: 'GrowERP small Company plan',
+                                    description: 'Small Company Plan $499 per month|Full functionality, unlimited users|including support for 20hrs/month',
+                                    price: 499.00,
+                                    categories: [category]
+                                ],
+                                [
+                                    productId: 'GROWERP_FULL_PLAN',
+                                    productName: 'GrowERP full company plan',
+                                    description: 'Full Company Plan $999 per month|Full functionality, unlimited users|including support for 40hrs/month',
+                                    price: 999.00,
+                                    categories: [category]
+                                ]
+                            ]" />
                             <service-call
-                                name="growerp.100.PartyServices100.load#DemoData"
-                                include-user-login="true"
-                                in-map="[ownerPartyId: ownerPartyId,
-                                                        companyPartyId: companyPartyId,
-                                                        currencyId: currencyId,
-                                                        classificationId: classificationId,
-                                                        userPartyId: userAccount.partyId]" />
+                                name="growerp.100.CatalogServices100.create#ProductCategory"
+                                in-map="[category: category]" />
+                            <iterate list="products" entry="product">
+                                <service-call name="growerp.100.CatalogServices100.create#Product"
+                                    in-map="[classificationId: 'AppAdmin',product: product]" />
+                            </iterate>
+                            <else>
+                                <!-- demo data not for growerp itself-->
+                                <if condition="demoData">
+                                    <service-call
+                                        name="growerp.100.PartyServices100.load#DemoData"
+                                        include-user-login="true"
+                                        in-map="[ownerPartyId: ownerPartyId,
+                                        companyPartyId: companyPartyId,
+                                        currencyId: currencyId,
+                                        classificationId: classificationId,
+                                        userPartyId: userAccount.partyId]" />
+                                </if>
+                            </else>
                         </if>
                         <!-- create event -->
                         <service-call
