@@ -29,8 +29,8 @@ part 'product_model.g.dart';
 
 @freezed
 class Product extends Equatable with _$Product {
-  Product._();
-  factory Product({
+  const Product._();
+  const factory Product({
     @Default("") String productId,
     @Default("") String pseudoId,
     String? productTypeId, // good, service, rental)
@@ -39,6 +39,8 @@ class Product extends Equatable with _$Product {
     String? description,
     Decimal? listPrice,
     Decimal? price,
+    Decimal? amount, // quantity included like duration, length, weight
+    String? unitOfMeasure, // like hour, day, month, year, piece
     @Default([]) List<Category> categories,
     @Default(false) bool useWarehouse,
     int? assetCount,

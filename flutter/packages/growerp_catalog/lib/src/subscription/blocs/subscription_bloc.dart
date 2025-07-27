@@ -30,6 +30,7 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
 
       final subscriptions = await restClient.getSubscription(
         searchString: event.searchString,
+        growerp: event.growerp,
         limit: event.limit ?? 20,
         start: start,
       );

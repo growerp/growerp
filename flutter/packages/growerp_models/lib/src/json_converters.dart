@@ -49,42 +49,6 @@ class DateTimeConverter implements JsonConverter<DateTime?, String?> {
   }
 }
 
-/*
-class TimeConverter implements JsonConverter<TimeOfDay?, String?> {
-  const TimeConverter();
-
-  @override
-  TimeOfDay? fromJson(String? json) {
-    if (json == null) return null;
-    return TimeOfDay(
-        hour: int.parse(json.substring(0, 2)),
-        minute: int.parse(json.substring(3, 5)));
-  }
-
-  @override
-  String? toJson(TimeOfDay? object) {
-    if (object == null) return null;
-    return object.toString();
-  }
-}
-*/
-/*
-class FinDocTypeConverter implements JsonConverter<FinDocType?, String?> {
-  const FinDocTypeConverter();
-
-  @override
-  FinDocType? fromJson(String? json) {
-    if (json == null) return null;
-    return FinDocType.tryParse(json);
-  }
-
-  @override
-  String? toJson(FinDocType? object) {
-    if (object == null) return null;
-    return object.toString();
-  }
-}
-*/
 class PaymentInstrumentConverter
     implements JsonConverter<PaymentInstrument?, String?> {
   const PaymentInstrumentConverter();

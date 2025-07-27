@@ -41,6 +41,8 @@ dependencies:
   universal_io: ^2.2.2
   two_dimensional_scrollables: ^0.3.1
   dio: ^5.4.3
+  flutter_form_builder: ^10.1.0
+  form_builder_validators: ^11.2.0
   flutter_test:
     sdk: flutter
   integration_test:
