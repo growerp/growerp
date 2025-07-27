@@ -4,42 +4,61 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<String> getDioError(e) async {
-  DioException exception =
-      DioException(response: e.response, requestOptions: e.requestOptions);
-  late String expression;
-  switch (exception.type) {
-    case DioExceptionType.connectionError:
-      expression = "Connection error:";
-    case DioExceptionType.badResponse:
-      expression = "Bad response:";
-    case DioExceptionType.badCertificate:
-      expression = "Bad certificate:";
-    case DioExceptionType.receiveTimeout:
-      expression = "Receive timeout:";
-    case DioExceptionType.connectionTimeout:
-      expression = "Connection timeout:";
-    case DioExceptionType.sendTimeout:
-      expression = "Send timeout:";
-    case DioExceptionType.cancel:
-      expression = "Request cancelled:";
-    case DioExceptionType.unknown:
-      expression = "Exception unknown:  ${exception.error}";
-  }
   String returnMessage = '';
-  if (exception.type != DioExceptionType.unknown) {
-    returnMessage += "$expression: ${exception.message}";
+  if (e is DioException) {
+    late String expression;
+    switch (e.type) {
+      case DioExceptionType.connectionError:
+        expression = "Connection error:";
+      case DioExceptionType.badResponse:
+        expression = "Bad response:";
+      case DioExceptionType.badCertificate:
+        expression = "Bad certificate:";
+      case DioExceptionType.receiveTimeout:
+        expression = "Receive timeout:";
+      case DioExceptionType.connectionTimeout:
+        expression = "Connection timeout:";
+      case DioExceptionType.sendTimeout:
+        expression = "Send timeout:";
+      case DioExceptionType.cancel:
+        expression = "Request cancelled:";
+      case DioExceptionType.unknown:
+        expression = "Exception unknown:  ${e.error}";
+    }
+    if (e.type != DioExceptionType.unknown) {
+      returnMessage += "$expression ${e.message}";
+    } else {
+      returnMessage += expression;
+    }
+    if (e.response != null) {
+      try {
+        // Try to decode as JSON, but handle if not a JSON string
+        final dynamic decoded = e.response is String
+            ? json.decode(e.response as String)
+            : e.response;
+        if (decoded is Map<String, dynamic>) {
+          returnMessage +=
+              " ${decoded['errors'] ?? ''}[${decoded['errorCode'] ?? ''}]";
+        } else {
+          returnMessage += ' ${e.response.toString()}';
+        }
+      } catch (_) {
+        returnMessage += ' ${e.response.toString()}';
+      }
+    }
+  } else if (e is FormatException) {
+    returnMessage = 'FormatException: ${e.message}';
+  } else {
+    returnMessage = e.toString();
   }
-  if (e.response != null) {
-    Map<String, dynamic> response = json.decode(e.response.toString());
-    returnMessage += "${response['errors']}[${response['errorCode']}]";
-  }
-  if (returnMessage.isEmpty) returnMessage = "Server Connection error";
+
+  if (returnMessage.trim().isEmpty) returnMessage = "Server Connection error";
 
   // remove key from db when not valid
-  if (returnMessage == 'Login key not valid ') {
+  if (returnMessage.trim() == 'Login key not valid') {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('apiKey');
     returnMessage = 'Login key expired, please login again';
   }
-  return returnMessage;
+  return returnMessage.trim();
 }

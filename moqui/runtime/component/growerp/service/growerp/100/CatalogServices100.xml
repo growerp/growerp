@@ -54,7 +54,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <!-- if requested alsways show products of GROWERP -->
+            <!-- if requested always show products of GROWERP -->
             <if condition="ownerPartyId != 'GROWERP'">
                 <set field="ownerPartyId" from="ec.user.userAccount.partyId" />
                 <service-call out-map="context"
@@ -133,8 +133,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="productCategoryTypeEnumId" value="PctRoot" />
             </entity-find>
             <if condition="!catgs">
-                <return error="true"
+                <log level="warn"
                     message="Internal data error; mandatory root category not found for owner $ownerPartyId" />
+                <return />
             </if>
             <iterate entry="product" list="productList">
                 <if condition="lastItem &amp;&amp; lastItem.productId != product.productId">

@@ -31,10 +31,9 @@ class _PlanSelectionFormState extends State<PlanSelectionForm> {
   final builderFormKey = GlobalKey<FormBuilderState>();
 
   late DataFetchBloc<Products> productBloc;
-  late DataFetchBloc<Subscriptions> getSubscriptionBloc;
   late SubscriptionBloc subscriptionBloc;
-  late Subscription subscription;
   late String selectedPlan;
+  late Subscription subscription;
 
   @override
   void initState() {
@@ -42,10 +41,8 @@ class _PlanSelectionFormState extends State<PlanSelectionForm> {
     productBloc = context.read<DataFetchBloc<Products>>()
       ..add(GetDataEvent(() =>
           context.read<RestClient>().getProduct(ownerPartyId: 'GROWERP')));
-    getSubscriptionBloc = context.read<DataFetchBloc<Subscriptions>>()
-      ..add(GetDataEvent(
-          () => context.read<RestClient>().getSubscription(growerp: true)));
-    subscriptionBloc = context.read<SubscriptionBloc>();
+    subscriptionBloc = context.read<SubscriptionBloc>()
+      ..add(const SubscriptionFetch(growerp: true));
   }
 
   @override
@@ -65,15 +62,17 @@ class _PlanSelectionFormState extends State<PlanSelectionForm> {
         } else if ((state.data as Products).products.isEmpty) {
           return const Center(child: Text('No plans available'));
         }
+        // get products and sort by price
         Products productsList = state.data as Products;
         List<Product> products = List.from(productsList.products)
           ..sort((a, b) => ((a.price ?? Decimal.zero).toDouble())
               .compareTo((b.price ?? Decimal.zero).toDouble()));
-        subscription = (context.read<DataFetchBloc<Subscriptions>>().state.data
-                as Subscriptions)
-            .subscriptions
-            .first;
-        selectedPlan = subscription.productId!;
+        // get current subscription
+        if (subscriptionBloc.state.subscriptions.isEmpty) {
+          return const Center(child: Text('No subscription found'));
+        }
+        subscription = (subscriptionBloc.state.subscriptions).first;
+        selectedPlan = subscription.product!.productId;
         return Center(
           child: SizedBox(
             width: 400,
@@ -127,7 +126,8 @@ class _PlanSelectionFormState extends State<PlanSelectionForm> {
                               if (value == null || value.isEmpty) {
                                 // If nothing is selected, revert to the current plan
                                 builderFormKey.currentState?.fields['plan']
-                                    ?.didChange([subscription.productId!]);
+                                    ?.didChange(
+                                        [subscription.product!.productId]);
                                 return;
                               }
                               final lastSelected = value.last;
@@ -140,7 +140,8 @@ class _PlanSelectionFormState extends State<PlanSelectionForm> {
                                 selectedPlan = value.first;
                               }
 
-                              if (selectedPlan != subscription.productId) {
+                              if (selectedPlan !=
+                                  subscription.product!.productId) {
                                 var product = products.firstWhere(
                                     (p) => p.productId == selectedPlan,
                                     orElse: () => products.first);
@@ -155,7 +156,8 @@ class _PlanSelectionFormState extends State<PlanSelectionForm> {
                                 } else {
                                   // Revert to the current plan if the user cancels
                                   builderFormKey.currentState?.fields['plan']
-                                      ?.didChange([subscription.productId!]);
+                                      ?.didChange(
+                                          [subscription.product!.productId]);
                                   selectedPlan = lastSelected;
                                 }
                               }

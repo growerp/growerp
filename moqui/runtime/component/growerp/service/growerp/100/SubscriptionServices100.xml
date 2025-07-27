@@ -3,7 +3,10 @@
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
     <service verb="get" noun="Subscription">
         <in-parameters>
-            <parameter name="partyId" />
+            <parameter name="growerp" type="Boolean" default-value="false" />
+            <parameter name="externalId" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="20" type="Integer" />
         </in-parameters>
         <out-parameters>
             <parameter name="subscriptions" type="List">
@@ -15,37 +18,108 @@
                 <parameter name="orderId" />
                 <parameter name="fromDate" />
                 <parameter name="thruDate" />
-                <parameter name="statusId" />
+                <parameter name="purchaseFromDate" />
+                <parameter name="purchaseThruDate" />
+                <parameter name="statusId" /><!-- generated from other fields -->
             </parameter>
         </out-parameters>
         <actions>
-            <entity-find entity-name="mantle.product.subscription.Subscription" list="subscriptions" />
-            <iterate list="subscriptions" entry="item">
-                <set field="item.fromDate" from="ec.l10n.format(item.fromDate,'yyyy-MM-dd')" />
-                <set field="item.thruDate" from="ec.l10n.format(item.thruDate,'yyyy-MM-dd')" />
+            <service-call out-map="parties"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- other tenants can read their own subscriptions -->
+            <if condition="growerp == true">
+                <set field="ownerPartyId" value="GROWERP" />
+                <set field="externalId" from="parties.ownerPartyId" />
+                <else><!-- get all subscribers of owner -->
+                    <set field="ownerPartyId" from="parties.ownerPartyId" />
+                </else>
+            </if>
+            <log
+                message="====loooking for growerp: $growerp extId: $externalId ownerId: $ownerPartyId " />
+            <entity-find entity-name="growerp.catalog.SubscriptionAndPartyProduct"
+                list="subscriptionList">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="externalId" from="externalId"
+                    ignore-if-empty="true" />
+            </entity-find>
+            <log
+                message="======found: ${subscriptionList?.size()} subscriptions for ownerPartyId: $ownerPartyId, externalId: $externalId" />
+            <set field="subscriptions" from="[]" />
+            <iterate list="subscriptionList" entry="item">
+                <script>
+                    subscriptions.add([
+                        subscriptionId: item.subscriptionId,
+                        pseudoId: item.pseudoId,
+                        subscriber: [
+                            partyId: item.subscriberPartyId,
+                            pseudoId: item.partyPseudoId,
+                            name: item.companyName ?: "${item.firstName} ${item.lastName}",
+                            email: item.email
+                            ],
+                        orderId: item.orderId,
+                        orderItemSeqId: item.orderItemSeqId,
+                        product: [
+                            productId: item.productId,
+                            pseudoId: item.productPseudoId,
+                            productName: item.productName,
+                            amount: item.amount,
+                            ],
+                        fromDate: item.fromDate ? ec.l10n.format(item.fromDate,'yyyy-MM-dd') : null,
+                        thruDate: item.thruDate ? ec.l10n.format(item.thruDate,'yyyy-MM-dd') : null,
+                        purchaseFromDate: item.purchaseFromDate ? ec.l10n.format(item.purchaseFromDate,'yyyy-MM-dd') : null,
+                        purchaseThruDate: item.purchaseThruDate ? ec.l10n.format(item.purchaseThruDate,'yyyy-MM-dd') : null,
+                    ])
+                </script>
             </iterate>
-
         </actions>
     </service>
 
     <service verb="create" noun="Subscription">
         <in-parameters>
-            <parameter name="subscriberPartyId" required="true" />
-            <parameter name="fromDate" />
-            <parameter name="productId" />
-            <parameter name="ownerPartyId" />
+            <parameter name="subscription" type="Map" required="true">
+                <parameter name="subscriber" type="Map">
+                    <parameter name="partyId" required="true" />
+                </parameter>
+                <parameter name="fromDate" />
+                <parameter name="thruDate" />
+                <parameter name="product" type="Map">
+                    <parameter name="productId" required="true" />
+                </parameter>
+                <parameter name="ownerPartyId" />
+                <parameter name="externalId" />
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="subscriptionId" />
         </out-parameters>
         <actions>
+            <service-call out-map="parties"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- other tenants can create subscription -->
+            <if condition="subscription.ownerPartyId == 'GROWERP'">
+                <set field="ownerPartyId" value="GROWERP" />
+                <set field="externalId" from="parties.ownerPartyId" />
+                <else><!-- ignore incoming ownerPartyId -->
+                    <set field="ownerPartyId" from="parties.ownerPartyId" />
+                </else>
+            </if>
+            <!-- generate pseudoId -->
+            <if condition="!subscription.pseudoId || subscription.pseudoId == ''">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'subscription']"
+                    out-map="context" />
+                <set field="subscription.pseudoId" from="seqNum" />
+            </if>
+            <!-- create subscription -->
             <service-call name="create#mantle.product.subscription.Subscription"
                 in-map="[
+                    pseudoId: subscription.pseudoId,
                     fromDate: fromDate ?: ec.user.nowTimestamp,
                     ownerPartyId: ownerPartyId,
-                    productId: productId,
+                    productId: subscription.product.productId,
                     subscriptionTypeId: 'StProduct',
-                    subscriberPartyId: subscriberPartyId,
+                    subscriberPartyId: subscription.subscriber.partyId,
+                    externalSubscriptionId: subscription.externalId,
                     ]"
                 out-map="context" />
         </actions>
@@ -53,15 +127,19 @@
 
     <service verb="update" noun="Subscription">
         <in-parameters>
-            <parameter name="subscriptionId" required="true" />
-            <parameter name="subscriptionTypeId" />
-            <parameter name="partyId" />
-            <parameter name="roleTypeId" />
-            <parameter name="productId" />
-            <parameter name="orderId" />
-            <parameter name="fromDate" />
-            <parameter name="thruDate" />
-            <parameter name="statusId" />
+            <parameter name="subscription" type="Map" required="true">
+                <parameter name="subscriptionId" required="true" />
+                <parameter name="subscriber" type="Map">
+                    <parameter name="partyId" required="true" />
+                </parameter>
+                <parameter name="fromDate" />
+                <parameter name="thruDate" />
+                <parameter name="product" type="Map">
+                    <parameter name="productId" required="true" />
+                </parameter>
+                <parameter name="ownerPartyId" />
+                <parameter name="externalId" />
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="subscriptionId" />

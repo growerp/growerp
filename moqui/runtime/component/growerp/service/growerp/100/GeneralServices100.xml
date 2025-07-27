@@ -1028,11 +1028,15 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="paymentId" from="paymentInfo.paymentId" />
                             <set field="datePlus"
                                 from="java.sql.Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().minusWeeks(2))" />
+                            <!-- subscription -->
                             <service-call
                                 name="growerp.100.SubscriptionServices100.create#Subscription"
-                                in-map="[subscriberPartyId: growerpCustomerPartyId,
-                                    fromDate: datePlus, productId: productPrices[0].productId,
-                                    ownerPartyId: 'GROWERP']" />
+                                in-map="[subscription: [
+                                    subscriber: [partyId: growerpCustomerPartyId],
+                                    externalId: ownerPartyId,
+                                    fromDate: datePlus,
+                                    product: [productId: productPrices[0].productId],
+                                    ownerPartyId: 'GROWERP']]" />
                         </if>
 
                         <!-- prompt for capture of payment if not first tenant != GrowERP-->

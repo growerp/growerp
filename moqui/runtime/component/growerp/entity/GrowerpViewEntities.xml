@@ -3005,4 +3005,97 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="transactionDate" entity-alias="RESP" />
     </view-entity>
 
+    <view-entity entity-name="SubscriptionAndPartyProduct" package="growerp.catalog">
+        <member-entity entity-alias="SUBS"
+            entity-name="mantle.product.subscription.Subscription" />
+        <member-entity entity-alias="PARTY" entity-name="mantle.party.Party"
+            join-from-alias="SUBS">
+            <key-map field-name="subscriberPartyId" related="partyId" />
+            <entity-condition>
+                <econdition field-name="disabled" operator="not-equals" value="Y"
+                    or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <!-- company -->
+        <member-entity entity-alias="COMPANY" entity-name="mantle.party.Organization"
+            join-from-alias="PARTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="PP" entity-name="mantle.ledger.config.PartyAcctgPreference"
+            join-from-alias="COMPANY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <!-- person-->
+        <member-entity entity-alias="PERSON" entity-name="mantle.party.Person"
+            join-from-alias="PARTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <!-- currency -->
+        <member-entity entity-alias="CURRENCY" entity-name="moqui.basic.Uom"
+            join-from-alias="PP" join-optional="true">
+            <key-map field-name="baseCurrencyUomId" related="abbreviation" />
+            <entity-condition>
+                <econdition field-name="uomTypeEnumId" value="UT_CURRENCY_MEASURE" />
+            </entity-condition>
+        </member-entity>
+        <!-- Email address -->
+        <member-entity entity-alias="EMAIL"
+            entity-name="mantle.party.contact.PartyContactMech"
+            join-from-alias="PARTY" join-optional="true">
+            <key-map field-name="partyId" />
+            <entity-condition>
+                <econdition field-name="emailPurposeId" value="EmailPrimary" />
+                <date-filter from-field-name="emailFromDate"
+                    thru-field-name="emailThruDate" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="PCMEMAIL" entity-name="mantle.party.contact.ContactMech"
+            join-from-alias="EMAIL" join-optional="true">
+            <key-map field-name="contactMechId" />
+        </member-entity>
+        <!-- product -->
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product"
+            join-from-alias="SUBS" join-optional="true">
+            <key-map field-name="productId" />
+        </member-entity>
+        <!-- order -->
+        <member-entity entity-alias="ORD" entity-name="mantle.order.OrderHeader"
+            join-from-alias="SUBS" join-optional="true">
+            <key-map field-name="orderId" />
+        </member-entity>
+        <member-entity entity-alias="ORDITEM" entity-name="mantle.order.OrderItem"
+            join-from-alias="SUBS" join-optional="true">
+            <key-map field-name="orderItemSeqId" />
+        </member-entity>
+        <alias name="ownerPartyId" entity-alias="SUBS" />
+        <alias name="subscriptionId" entity-alias="SUBS" />
+        <alias name="pseudoId" entity-alias="SUBS" />
+        <alias name="externalId" field="externalSubscriptionId" entity-alias="SUBS" />
+        <alias name="fromDate" entity-alias="SUBS" />
+        <alias name="thruDate" entity-alias="SUBS" />
+        <alias name="purchaseFromDate" entity-alias="SUBS" />
+        <alias name="purchaseThruDate" entity-alias="SUBS" />
+        <alias name="availableTime" entity-alias="SUBS" />
+        <alias name="availableTimeUomId" entity-alias="SUBS" />
+        <alias name="useTime" entity-alias="SUBS" />
+        <alias name="useTimeUomId" entity-alias="SUBS" />
+        <alias name="subscriberPartyId" entity-alias="SUBS" />
+        <alias name="partyPseudoId" field="pseudoId" entity-alias="PARTY" />
+        <alias name="companyName" field="organizationName" entity-alias="COMPANY" />
+        <alias name="firstName" entity-alias="PERSON" />
+        <alias name="lastName" entity-alias="PERSON" />
+        <alias name="emailFromDate" field="fromDate" entity-alias="EMAIL" />
+        <alias name="emailThruDate" field="thruDate" entity-alias="EMAIL" />
+        <alias name="emailPurposeId" field="contactMechPurposeId" entity-alias="EMAIL" />
+        <alias name="email" field="infoString" entity-alias="PCMEMAIL" />
+        <alias name="emailContactMechId" field="contactMechId" entity-alias="PCMEMAIL" />
+        <alias name="productId" entity-alias="PROD" />
+        <alias name="productPseudoId" field="pseudoId" entity-alias="PROD" />
+        <alias name="productName" entity-alias="PROD" />
+        <alias name="amount" field="amountFixed" entity-alias="PROD" />
+        <alias name="amountUomId" entity-alias="PROD" />
+        <alias name="orderId" entity-alias="ORD" />
+        <alias name="orderItemSeqId" entity-alias="ORDITEM" />
+    </view-entity>
+
 </entities>

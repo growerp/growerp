@@ -26,28 +26,28 @@ TableData getSubscriptionTableData(Bloc bloc, String classificationId,
   rowContent.add(TableRowContent(
       name: 'Id',
       width: isPhone ? 15 : 8,
-      value: Text(item.subscriptionId ?? '', key: Key('id$index'))));
-
-  rowContent.add(TableRowContent(
-      name: 'Description',
-      width: isPhone ? 35 : 20,
-      value: Text(item.description ?? "", key: Key('description$index'))));
+      value: Text(item.pseudoId ?? '', key: Key('id$index'))));
 
   rowContent.add(TableRowContent(
       name: 'Subscriber',
       width: isPhone ? 35 : 20,
-      value: Text(item.subscriberPartyId ?? "", key: Key('subscriber$index'))));
+      value: Text(item.subscriber!.name ?? "", key: Key('subscriber$index'))));
+
+  rowContent.add(TableRowContent(
+      name: 'Email',
+      width: isPhone ? 35 : 20,
+      value: Text(item.subscriber!.email ?? "", key: Key('email$index'))));
 
   rowContent.add(TableRowContent(
       name: 'From Date',
       width: 15,
-      value: Text(item.fromDate != null ? item.fromDate.toString() : '',
+      value: Text(item.fromDate != null ? item.fromDate.dateOnly() : '',
           key: Key('fromDate$index'), textAlign: TextAlign.right)));
 
   rowContent.add(TableRowContent(
       name: 'Thru Date',
       width: 15,
-      value: Text(item.thruDate != null ? item.thruDate.toString() : '',
+      value: Text(item.thruDate != null ? item.thruDate.dateOnly() : '',
           key: Key('thruDate$index'), textAlign: TextAlign.right)));
 
   rowContent.add(TableRowContent(

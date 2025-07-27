@@ -423,10 +423,12 @@ class LoginDialogState extends State<LoginDialog> {
 
   Widget paymentForm(
       {paymentFirst = false, expired = false, finalExpired = false}) {
-    String testCreditCardNumber = kReleaseMode ? '' : '4012888888881881';
-    String testExpiryDate = kReleaseMode ? '' : '11/33';
-    String testCvv = kReleaseMode ? '' : '123';
-    String testNameOnCart = 'Test Customer';
+    bool test = GlobalConfiguration().get("test");
+    String testCreditCardNumber =
+        kReleaseMode && !test ? '' : '4012888888881881';
+    String testExpiryDate = kReleaseMode && !test ? '' : '11/33';
+    String testCvv = kReleaseMode && !test ? '' : '123';
+    String testNameOnCart = kReleaseMode && !test ? '' : 'Test Customer';
     PaymentMethod? paymentMethod = authenticate.user?.paymentMethod;
     Products productsList = productBloc.state.data as Products;
     List<Product> products = List.from(productsList.products)

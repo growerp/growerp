@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -25,21 +24,19 @@ class Subscription with _$Subscription {
   Subscription._();
   factory Subscription({
     String? subscriptionId, // Unique systemwide identifier for the subscription
-    String?
-        pseudoId, // Unique identifier for the subscription, used for this owner
-    String? subscriberPartyId, // Party that is subscribing
+    String? pseudoId, // Unique owner identifier for the subscription
+    CompanyUser? subscriber, // Party that is subscribing
     String? orderId, // Order that created this subscription
     String? orderItemSeqId, // Order item that created this subscription
-    String? productId, // Product/plan associated with this subscription
+    Product? product, // Product/plan associated with this subscription
     String? description, //
-    @DateTimeConverter() DateTime? fromDate, // Start date of the subscription
-    @DateTimeConverter() DateTime? thruDate, // End date of the subscription
-    @DateTimeConverter() DateTime? purchaseFromDate, // Purchase start date
-    @DateTimeConverter() DateTime? purchaseThruDate, // Purchase end date
-    Decimal? availableTime, // Total time available for this subscription
-    String? availableTimeUomId, // UOM for available time
-    Decimal? useTime, // Time used from the subscription
-    String? useTimeUomId, // UOM for used time
+    DateTime? fromDate, // Start date of the subscription
+    DateTime? thruDate, // End date of the subscription
+    DateTime? purchaseFromDate, // Purchase start date
+    DateTime? purchaseThruDate, // Purchase end date
+    Duration? availableTime, // Total time available for this subscription
+    Duration? useTime, // Time used or period time for renew
+    Duration? trialPeriod, // Trial period duration
   }) = _Subscription;
 
   /// Converts a JSON map to a Subscription object.
