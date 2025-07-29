@@ -623,24 +623,44 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <service verb="get" noun="CurrencyList" authenticate="anonymous-all">
+    <service verb="get" noun="UomList" authenticate="anonymous-all">
         <description>
-            Get currency list for registration.
+            Get units of measure list for registration.
         </description>
+        <in-parameters>
+            <parameter name="uomTypes" type="List"><!-- optional, if empty all UOMs are returned -->
+                <description>UOM type, e.g. UT_CURRENCY_MEASURE,
+                        UT_TIME_FREQ_MEASURE, UT_WEIGHT_MEASURE,
+                        UT_VOLUME_MEASURE, UT_LENGTH_MEASURE
+                        OTH_ea: each</description>
+            </parameter>
+        </in-parameters>
         <out-parameters>
-            <parameter name="currencyList" type="List">
-                <parameter name="description" />
+            <parameter name="uoms" type="List">
+                <parameter name="uomId" />
+                <parameter name="uomTypeId" />
+                <parameter name="typeDescription" />
                 <parameter name="abbreviation" />
+                <parameter name="description" />
             </parameter>
         </out-parameters>
         <actions>
-            <entity-find entity-name="moqui.basic.Uom" list="allCurrencyList">
-                <econdition field-name="uomTypeEnumId" value="UT_CURRENCY_MEASURE" />
+            <log message="get UOM list for types: $uomTypes" level="warn" />
+            <entity-find entity-name="moqui.basic.UomAndType" list="allUom">
+                <econdition field-name="uomTypeEnumId" operator="in" from="uomTypes"
+                    ignore-if-empty="true" />
                 <order-by field-name="description" />
             </entity-find>
-            <set field="currencyList" from="[]" />
-            <iterate entry="currency" list="allCurrencyList">
-                <script>currencyList.add("${currency.description} [${currency.abbreviation}]")</script>
+            <set field="uoms" from="[]" />
+            <iterate entry="uom" list="allUom">
+                <script>uoms.add([
+                        uomId: uom.uomId,
+                        uomTypeId: uom.uomTypeEnumId,
+                        typeDescription: uom.typeDescription,
+                        abbreviation: uom.abbreviation,
+                        description: uom.description,
+                        ])
+                </script>
             </iterate>
         </actions>
     </service>
@@ -650,7 +670,7 @@ along with this software (see the LICENSE.md file). If not, see
             Get country list for registration.
         </description>
         <out-parameters>
-            <parameter name="countryList" type="List">
+            <parameter name="countries" type="List">
                 <parameter name="geoId" />
                 <parameter name="geoName" />
             </parameter>
@@ -660,9 +680,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="geoTypeEnumId" value="GEOT_COUNTRY" />
                 <order-by field-name="description" />
             </entity-find>
-            <set field="countryList" from="[]" />
+            <set field="countries" from="[]" />
             <iterate entry="country" list="allCountryList">
-                <script>countryList.add("${country.geoName} [${country.geoId}]")</script>
+                <script>countries.add("${country.geoName} [${country.geoId}]")</script>
             </iterate>
         </actions>
     </service>

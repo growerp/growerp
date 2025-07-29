@@ -32,5 +32,5 @@ class TimePeriod with _$TimePeriod {
   }) = _TimePeriod;
 
   factory TimePeriod.fromJson(Map<String, dynamic> json) =>
-      _$TimePeriodFromJson(json);
+      _$TimePeriodFromJson(json['timePeriod'] ?? json);
 }

@@ -43,7 +43,11 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
                   item.image!,
                   height: 100,
                 )
-              : Text(item.productName![0]),
+              : Text(
+                  item.productName != null && item.productName!.isNotEmpty
+                      ? item.productName![0]
+                      : '?',
+                  style: const TextStyle(fontSize: 20)),
         )));
   }
 
@@ -54,26 +58,26 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
 
   rowContent.add(TableRowContent(
       name: 'Name',
-      width: isPhone ? 35 : 20,
+      width: isPhone ? 35 : 35,
       value: Text("${item.productName}", key: Key('name$index'))));
 
   rowContent.add(TableRowContent(
       name: const Text('Price', textAlign: TextAlign.right),
-      width: 15,
+      width: isPhone ? 15 : 5,
       value: Text(item.price.currency(currencyId: currencyId),
           key: Key('price$index'), textAlign: TextAlign.right)));
 
   if (!isPhone) {
     rowContent.add(TableRowContent(
         name: const Text('List Price', textAlign: TextAlign.right),
-        width: 15,
+        width: isPhone ? 15 : 5,
         value: Text(item.listPrice.currency(currencyId: currencyId),
             key: Key('listPrice$index'), textAlign: TextAlign.right)));
   }
 
   if (!isPhone && classificationId != 'AppHotel') {
     rowContent.add(TableRowContent(
-        name: 'Category',
+        name: const Text('Category', textAlign: TextAlign.center),
         width: 15,
         value: Text(
             "${item.categories.isEmpty ? '0' : item.categories.length > 1 ? item.categories.length : item.categories[0].categoryName}",
@@ -86,14 +90,14 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         name: classificationId != 'AppHotel'
             ? "Nbr Of Assets"
             : "Number of Units",
-        width: 15,
+        width: 10,
         value: Text(item.assetCount != null ? item.assetCount.toString() : '0',
             key: Key('assetCount$index'), textAlign: TextAlign.center)));
   }
 
   rowContent.add(TableRowContent(
       name: '',
-      width: 10,
+      width: isPhone ? 10 : 5,
       value: IconButton(
         key: Key('delete$index'),
         padding: EdgeInsets.zero,

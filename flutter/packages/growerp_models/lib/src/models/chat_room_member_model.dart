@@ -28,7 +28,7 @@ class ChatRoomMember with _$ChatRoomMember {
   }) = _ChatRoomMember;
 
   factory ChatRoomMember.fromJson(Map<String, dynamic> json) =>
-      _$ChatRoomMemberFromJson(json);
+      _$ChatRoomMemberFromJson(json['chatRoomMember'] ?? json);
 
   @override
   String toString() => 'ChatRoom Member: ${user?.firstName} ${user?.lastName} '

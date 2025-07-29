@@ -422,14 +422,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-  flutter_credit_card:
-    dependency: transitive
-    description:
-      name: flutter_credit_card
-      sha256: a31154e62667e6e1f089ea357941e9285e4b42b9cb699392e55c978e19f864a0
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.1.0"
   flutter_driver:
     dependency: "direct dev"
     description: flutter
@@ -522,6 +514,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  form_builder_validators:
+    dependency: transitive
+    description:
+      name: form_builder_validators
+      sha256: "1b03c74d1db740890e6af803b43e5ebe56f8fa1ff5609cbf744e8d980dc5f8c6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "11.2.0"
   freezed:
     dependency: transitive
     description:

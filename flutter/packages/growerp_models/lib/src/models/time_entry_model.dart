@@ -42,5 +42,5 @@ class TimeEntry with _$TimeEntry {
   }) = _TimeEntry;
 
   factory TimeEntry.fromJson(Map<String, dynamic> json) =>
-      _$TimeEntryFromJson(json);
+      _$TimeEntryFromJson(json['timeEntry'] ?? json);
 }

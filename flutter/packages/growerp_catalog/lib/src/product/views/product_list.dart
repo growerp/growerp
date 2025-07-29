@@ -210,7 +210,8 @@ class ProductListState extends State<ProductList> {
                                       builder: (BuildContext context) {
                                         return BlocProvider.value(
                                             value: _productBloc,
-                                            child: ProductDialog(Product()));
+                                            child:
+                                                const ProductDialog(Product()));
                                       });
                                 },
                                 tooltip: CoreLocalizations.of(context)!.addNew,

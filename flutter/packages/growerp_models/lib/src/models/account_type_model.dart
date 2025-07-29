@@ -26,5 +26,5 @@ class AccountType with _$AccountType {
   }) = _AccountType;
 
   factory AccountType.fromJson(Map<String, dynamic> json) =>
-      _$AccountTypeFromJson(json);
+      _$AccountTypeFromJson(json['accountType'] ?? json);
 }

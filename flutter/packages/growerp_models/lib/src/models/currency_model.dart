@@ -25,7 +25,7 @@ class Currency with _$Currency {
     String? description,
   }) = _Currency;
   factory Currency.fromJson(Map<String, dynamic> json) =>
-      _$CurrencyFromJson(json);
+      _$CurrencyFromJson(json['currency'] ?? json);
 }
 
 List<Currency> currencies = [

@@ -13,11 +13,12 @@
  */
 
 // ignore_for_file: depend_on_referenced_packages
-import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
+import 'package:catalog_example/main.dart' as router;
 import 'package:catalog_example/main.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -29,22 +30,29 @@ void main() {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  String title = 'GrowERP product test';
-
-  testWidgets(title, (tester) async {
+  testWidgets('''Subscription integration test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, generateRoute, menuOptions,
-        CatalogLocalizations.localizationsDelegates,
-        restClient: restClient,
-        blocProviders: getCatalogBlocProviders(restClient, 'AppAdmin'),
-        title: title,
-        clear: true); // use data from previous run, ifnone same as true
-    await CommonTest.createCompanyAndAdmin(tester,
-        testData: {"categories": categories.sublist(0, 2)});
-    await ProductTest.selectProducts(tester);
-    await ProductTest.addProducts(tester, products.sublist(0, 2));
-    await ProductTest.updateProducts(tester, products.sublist(2, 4));
-    await ProductTest.deleteLastProduct(tester);
-    await CommonTest.logout(tester);
+    await CommonTest.startTestApp(
+      tester,
+      router.generateRoute,
+      menuOptions,
+      CatalogLocalizations.localizationsDelegates,
+      title: 'Subscription integration test',
+      restClient: restClient,
+      blocProviders: getCatalogBlocProviders(restClient, 'AppAdmin'),
+      clear: true,
+    );
+
+    // delete all subscriptions
+    await CommonTest.createCompanyAndAdmin(tester, testData: {
+      "subscriptions": <Subscription>[],
+    });
+
+    await SubscriptionTest.selectSubscriptions(tester);
+    await SubscriptionTest.addSubscriptions(
+        tester, subscriptions.sublist(0, 2));
+    await SubscriptionTest.updateSubscriptions(
+        tester, subscriptions.sublist(2, 4));
+    await SubscriptionTest.deleteLastSubscription(tester);
   });
 }

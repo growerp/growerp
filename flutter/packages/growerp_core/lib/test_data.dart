@@ -524,6 +524,8 @@ List<Product> products = [
     productTypeId: productTypes[0], // must be zero: shippable good
     description: 'This is a dummy description of first product',
     useWarehouse: true,
+    amount: Decimal.parse('1.00'),
+    uom: Uom(typeDescription: 'Weight', description: 'Kilogram'),
     assetClassId: "AsClsInventoryFin",
   ),
   Product(
@@ -535,6 +537,8 @@ List<Product> products = [
     productTypeId: productTypes[0], // must be zero: shippable good
     description: 'This is a dummy description of second product',
     useWarehouse: true,
+    amount: Decimal.parse('1.00'),
+    uom: Uom(typeDescription: 'Length', description: 'Centimeter'),
     assetClassId: "AsClsInventoryFin",
   ),
   Product(
@@ -546,6 +550,8 @@ List<Product> products = [
     productTypeId: productTypes[2],
     description: 'This is a dummy description of third product',
     useWarehouse: false,
+    amount: Decimal.parse('1.00'),
+    uom: Uom(typeDescription: 'Time/Frequency', description: 'Day'),
     assetClassId: "AsClsInventoryFin",
   ),
   Product(
@@ -556,6 +562,8 @@ List<Product> products = [
     categories: [categories[1]],
     productTypeId: productTypes[1],
     description: 'This is the fourth product to be deleted',
+    amount: Decimal.parse('1.00'),
+    uom: Uom(typeDescription: 'Weight', description: 'Kilogram'),
     useWarehouse: false,
     assetClassId: "AsClsInventoryFin",
   ),
@@ -1471,4 +1479,42 @@ List<FinDoc> requests = [
       requestType: RequestType.consultation,
       description: "this is the sixth request",
       items: []),
+];
+
+List<Subscription> subscriptions = [
+  Subscription(
+    pseudoId: 'SUB001',
+    description: 'Test Subscription 1',
+    thruDate: DateTime(2025, 12, 31),
+  ),
+  Subscription(
+    pseudoId: 'SUB002',
+    description: 'Test Subscription 2',
+    fromDate: DateTime(2025, 2, 1),
+    thruDate: DateTime(2025, 11, 30),
+  ),
+  Subscription(
+    pseudoId: 'SUB003',
+    description: 'Test Subscription 3',
+    fromDate: DateTime(2025, 3, 1),
+    thruDate: DateTime(2025, 10, 31),
+  ),
+  Subscription(
+    pseudoId: 'SUB004',
+    description: 'Test Subscription 4',
+    fromDate: DateTime(2025, 4, 1),
+    thruDate: DateTime(2025, 9, 30),
+  ),
+  Subscription(
+    pseudoId: 'SUB005',
+    description: 'Test Subscription 5',
+    fromDate: DateTime(2025, 5, 1),
+    thruDate: DateTime(2025, 8, 31),
+  ),
+  Subscription(
+    pseudoId: 'SUB006',
+    description: 'Test Subscription 6',
+    fromDate: DateTime(2025, 6, 1),
+    thruDate: DateTime(2025, 7, 31),
+  ),
 ];

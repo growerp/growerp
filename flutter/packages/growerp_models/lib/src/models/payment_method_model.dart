@@ -36,5 +36,5 @@ class PaymentMethod with _$PaymentMethod {
   }) = _PaymentMethod;
 
   factory PaymentMethod.fromJson(Map<String, dynamic> json) =>
-      _$PaymentMethodFromJson(json);
+      _$PaymentMethodFromJson(json['paymentMethod'] ?? json);
 }

@@ -24,6 +24,27 @@ part 'lists_model.g.dart';
 part 'lists_model.freezed.dart';
 
 @freezed
+class Countries with _$Countries {
+  factory Countries({
+    @Default([]) List<Country> countries,
+  }) = _Countries;
+  Countries._();
+
+  factory Countries.fromJson(Map<String, dynamic> json) =>
+      _$CountriesFromJson(json);
+}
+
+@freezed
+class Uoms with _$Uoms {
+  factory Uoms({
+    @Default([]) List<Uom> uoms,
+  }) = _Uoms;
+  Uoms._();
+
+  factory Uoms.fromJson(Map<String, dynamic> json) => _$UomsFromJson(json);
+}
+
+@freezed
 class GlAccounts with _$GlAccounts {
   factory GlAccounts({
     @Default([]) List<GlAccount> glAccounts,

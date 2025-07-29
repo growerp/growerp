@@ -78,11 +78,27 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/Application")
   Future<Applications> getApplication();
 
+  // applications
   @POST("rest/s1/growerp/100/Application")
   Future<Application> createApplication(@Field() Application application);
 
   @DELETE("rest/s1/growerp/100/Application")
   Future<Application> deleteApplication(@Field() Application application);
+
+  // countries not used
+  @GET("rest/s1/growerp/100/Countries")
+  @Extra({'noApiKey': true})
+  Future<Countries> getCountries(
+    @Query('id') String? id,
+    @Query('name') String? name,
+  );
+
+  // unit of measure
+  @GET("rest/s1/growerp/100/Uoms")
+  @Extra({'noApiKey': true})
+  Future<Uoms> getUom(
+    @Query('uomTypes') List<String>? uomTypes,
+  );
 
   // company
   @GET("rest/s1/growerp/100/CompanyFromHost")

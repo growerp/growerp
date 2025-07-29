@@ -45,6 +45,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<ProductUpload>(_onProductUpload);
     on<ProductDownload>(_onProductDownload);
     on<ProductRentalOccupancy>(_onProductRentalOccupancy);
+    on<ProductUom>(_onProductUom);
   }
 
   final RestClient restClient;
@@ -61,6 +62,14 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         event.searchString.isNotEmpty) {
       start = 0;
       current = [];
+      add(const ProductUom([
+        'UT_WEIGHT_MEASURE',
+        'UT_VOLUME_DRY_MEAS',
+        'UT_VOLUME_LIQ_MEAS',
+        'UT_TIME_FREQ_MEASURE',
+        'UT_LENGTH_MEASURE',
+        'UT_OTHER_MEASURE',
+      ]));
     } else {
       start = state.products.length;
       current = List.of(state.products);
@@ -151,7 +160,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     Emitter<ProductState> emit,
   ) async {
     try {
-      emit(state.copyWith(status: ProductStatus.filesLoading));
+      emit(state.copyWith(status: ProductStatus.loading));
       List<Product> products = [];
       final result = fast_csv.parse(event.file);
       int line = 0;
@@ -193,7 +202,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     Emitter<ProductState> emit,
   ) async {
     try {
-      emit(state.copyWith(status: ProductStatus.filesLoading));
+      emit(state.copyWith(status: ProductStatus.loading));
       await restClient.exportScreenProducts(classificationId: classificationId);
       emit(state.copyWith(
           status: ProductStatus.success,
@@ -229,6 +238,23 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           productFullDates: result.products,
         ));
       }
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: ProductStatus.failure,
+          products: [],
+          message: await getDioError(e)));
+    }
+  }
+
+  Future<void> _onProductUom(
+    ProductUom event,
+    Emitter<ProductState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: ProductStatus.loading));
+      Uoms uoms = await restClient.getUom(event.uomTypes);
+      List<Uom> uomList = uoms.uoms;
+      emit(state.copyWith(status: ProductStatus.success, uoms: uomList));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: ProductStatus.failure,
