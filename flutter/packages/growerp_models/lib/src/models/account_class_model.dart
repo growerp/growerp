@@ -31,5 +31,5 @@ class AccountClass with _$AccountClass {
   }) = _AccountClass;
 
   factory AccountClass.fromJson(Map<String, dynamic> json) =>
-      _$AccountClassFromJson(json);
+      _$AccountClassFromJson(json['accountClass'] ?? json);
 }

@@ -51,7 +51,7 @@ class AddressDialogState extends State<AddressDialog> {
         _selectedCountry =
             countries.firstWhere((element) => element.name == address!.country);
       } else {
-        _selectedCountry = const Country(id: "USA", name: "United States");
+        _selectedCountry = Country(id: "USA", name: "United States");
       }
     }
   }

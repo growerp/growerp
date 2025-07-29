@@ -65,3 +65,9 @@ class ProductUpload extends ProductEvent {
   const ProductUpload(this.file);
   final String file;
 }
+
+/// start a [Product] import
+class ProductUom extends ProductEvent {
+  const ProductUom(this.uomTypes);
+  final List<String>? uomTypes;
+}

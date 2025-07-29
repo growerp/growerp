@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:universal_io/io.dart';
 import 'dart:math';
 import 'package:dio/dio.dart';
@@ -439,12 +440,35 @@ class CommonTest {
       {int seconds = 1}) async {
     await tester.tap(find.byKey(Key(key)));
     await tester.pumpAndSettle(Duration(seconds: seconds));
+
+    final Finder itemFinder;
     if (value.isEmpty) {
-      await tester.tap(find.text(value).last);
+      itemFinder = find.text(value).last;
     } else {
-      await tester.tap(find.textContaining(value).last);
+      itemFinder = find.textContaining(value).last;
     }
-    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    if (itemFinder.evaluate().isEmpty) {
+      // Item not visible, need to scroll within dropdown
+      final dropdownFinder = find.byType(ListView).last; // Dropdown's ListView
+
+      // Scroll down until item is found
+      for (int i = 0; i < 10; i++) {
+        // Max 10 scroll attempts
+        await tester.drag(dropdownFinder, const Offset(0, -100));
+        await tester.pumpAndSettle();
+
+        if (itemFinder.evaluate().isNotEmpty) {
+          break;
+        }
+      }
+    }
+
+    // Ensure the item is visible and tap it
+    await tester.ensureVisible(itemFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(itemFinder);
+    await tester.pumpAndSettle();
   }
 
   static String getDropdown(String key,
@@ -496,6 +520,27 @@ class CommonTest {
     TextFormField tff =
         find.byKey(Key(key)).evaluate().single.widget as TextFormField;
     return tff.controller!.text;
+  }
+
+  static String getFormBuilderTextFieldByName(
+      WidgetTester tester, String name) {
+    // Find the FormBuilder field by its unique name.
+    final formFieldFinder = find.byWidgetPredicate(
+        (widget) => widget is FormBuilderTextField && (widget).name == name);
+    expect(formFieldFinder, findsOneWidget,
+        reason: 'Could not find a FormBuilderTextField with name "$name"');
+
+    // The FormBuilderTextField wraps a standard TextField. We need to find it.
+    final textFieldFinder = find.descendant(
+      of: formFieldFinder,
+      matching: find.byType(TextField),
+    );
+    expect(textFieldFinder, findsOneWidget,
+        reason: 'Could not find the underlying TextField for "$name"');
+
+    // Get the widget instance and read the text from its controller.
+    final textField = tester.widget<TextField>(textFieldFinder);
+    return textField.controller!.text;
   }
 
   static bool getCheckbox(String key) {
@@ -674,5 +719,17 @@ class CommonTest {
     String id = getTextField('topHeader').split('#')[1];
     await tapByKey(tester, 'cancel');
     return id;
+  }
+
+  static List<String> checkFormBuilderTextfields(
+      FormBuilderState formState, Map<String, dynamic> expectedFields) {
+    List<String> errors = [];
+    for (var entry in expectedFields.entries) {
+      if (formState.value[entry.key] != entry.value) {
+        errors.add(
+            'Field ${entry.key} has value ${formState.value[entry.key]} but expected ${entry.value}');
+      }
+    }
+    return (errors);
   }
 }

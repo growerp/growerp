@@ -49,11 +49,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.GeneralServices100.get#Authenticate" />
             </method>
         </resource>
-        <resource name="Currencies" require-authentication="anonymous-all">
+        <!-- units of measure including currency, frequency, pieces-->
+        <resource name="Uoms" require-authentication="anonymous-all">
             <method type="get">
-                <service name="growerp.100.GeneralServices100.get#CurrencyList" />
+                <service name="growerp.100.GeneralServices100.get#UomList" />
             </method>
         </resource>
+        <!-- countries-->
         <resource name="Countries" require-authentication="anonymous-all">
             <method type="get">
                 <service name="growerp.100.GeneralServices100.get#CountryList" />

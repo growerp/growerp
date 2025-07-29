@@ -2089,6 +2089,14 @@ along with this software (see the LICENSE.md file). If not, see
 
     <view-entity entity-name="ProductAndCategoryAndPrices" package="growerp.mobile.product">
         <member-entity entity-alias="PROD" entity-name="mantle.product.Product" />
+        <member-entity entity-alias="UOM" entity-name="moqui.basic.Uom"
+            join-from-alias="PROD" join-optional="true">
+            <key-map field-name="amountUomId" related="uomId" />
+        </member-entity>
+        <member-entity entity-alias="ENUM" entity-name="moqui.basic.Enumeration"
+            join-from-alias="UOM" join-optional="true">
+            <key-map field-name="uomTypeEnumId" related="enumId" />
+        </member-entity>
         <member-entity entity-alias="LISTPRICE" entity-name="mantle.product.ProductPrice"
             join-from-alias="PROD" join-optional="true">
             <key-map field-name="productId" />
@@ -2125,6 +2133,12 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="productName" entity-alias="PROD" />
         <alias name="description" entity-alias="PROD" />
         <alias name="ownerPartyId" entity-alias="PROD" />
+        <alias name="uomId" entity-alias="UOM" />
+        <alias name="uomDescription" field="description" entity-alias="UOM" />
+        <alias name="uomAbbreviation" field="abbreviation" entity-alias="UOM" />
+        <alias name="uomTypeId" field="uomTypeEnumId" entity-alias="UOM" />
+        <alias name="typeDescription" field="description" entity-alias="ENUM" />
+        <alias name="amount" field="amountFixed" entity-alias="PROD" />
         <alias name="requireInventory" entity-alias="PROD" />
         <alias name="productFromDate" field="salesIntroductionDate" entity-alias="PROD" />
         <alias name="productThruDate" field="salesDiscontinuationDate" entity-alias="PROD" />

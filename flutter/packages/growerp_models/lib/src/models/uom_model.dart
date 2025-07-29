@@ -12,28 +12,29 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'dart:typed_data';
-import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:growerp_models/growerp_models.dart';
+import 'package:equatable/equatable.dart';
 
-part 'obsidian_model.freezed.dart';
-part 'obsidian_model.g.dart';
+part 'uom_model.freezed.dart';
+part 'uom_model.g.dart';
 
 @freezed
-class Obsidian extends Equatable with _$Obsidian {
-  Obsidian._();
-  factory Obsidian({
-    @Default("") String title,
-    @Uint8ListConverter() Uint8List? zip,
-  }) = _Obsidian;
+class Uom extends Equatable with _$Uom {
+  Uom._();
+  factory Uom({
+    @Default('') String uomId,
+    @Default('') String uomTypeId,
+    @Default('') String typeDescription,
+    @Default('') String abbreviation,
+    @Default('') String description,
+  }) = _Uom;
 
-  factory Obsidian.fromJson(Map<String, dynamic> json) =>
-      _$ObsidianFromJson(json['obsidian'] ?? json);
+  factory Uom.fromJson(Map<String, dynamic> json) =>
+      _$UomFromJson(json['uomList'] ?? json);
 
   @override
-  List<Object?> get props => [title];
+  List<Object?> get props => [uomId];
 
   @override
-  String toString() => title;
+  String toString() => '$description[$uomId]';
 }

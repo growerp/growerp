@@ -14,14 +14,7 @@
 
 part of 'product_bloc.dart';
 
-enum ProductStatus {
-  initial,
-  loading,
-  filesLoading,
-  updateLoading,
-  success,
-  failure
-}
+enum ProductStatus { initial, loading, success, failure }
 
 class ProductState extends Equatable {
   const ProductState({
@@ -29,6 +22,7 @@ class ProductState extends Equatable {
     this.products = const <Product>[],
     this.occupancyDates = const <String>[], // format YYYY-MM-DD
     this.productFullDates = const <Product>[],
+    this.uoms = const <Uom>[],
     this.message,
     this.hasReachedMax = false,
     this.searchString = '',
@@ -39,6 +33,7 @@ class ProductState extends Equatable {
   final List<Product> products;
   final List<String> occupancyDates;
   final List<Product> productFullDates;
+  final List<Uom> uoms;
   final bool hasReachedMax;
   final String searchString;
 
@@ -48,6 +43,7 @@ class ProductState extends Equatable {
     List<Product>? products,
     List<String>? occupancyDates,
     List<Product>? productFullDates,
+    List<Uom>? uoms,
     bool error = false,
     bool? hasReachedMax,
     String? searchString,
@@ -57,17 +53,17 @@ class ProductState extends Equatable {
       products: products ?? this.products,
       occupancyDates: occupancyDates ?? this.occupancyDates,
       productFullDates: productFullDates ?? this.productFullDates,
-      message: message,
+      uoms: uoms ?? this.uoms,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,
     );
   }
 
   @override
-  List<Object?> get props => [status, message, products, hasReachedMax];
+  List<Object?> get props => [status, message, products, hasReachedMax, uoms];
 
   @override
   String toString() =>
-      '$status { #products: ${products.length}, fullDates: $occupancyDates '
+      '$status { #products: ${products.length}, uoms: ${uoms.length} fullDates: $occupancyDates '
       'hasReachedMax: $hasReachedMax message $message}';
 }

@@ -18,6 +18,26 @@ This directory contains comprehensive documentation for extending GrowERP throug
    - State management with BLoC
    - UI components and testing strategies
 
+### 🏗️ Design & Development Patterns
+
+3. **[GrowERP Design Patterns](./GrowERP_Design_Patterns.md)**
+   - Comprehensive design patterns for consistent development
+   - BLoC state management patterns
+   - UI component patterns and form handling
+   - Testing patterns and data model conventions
+
+4. **[GrowERP Code Templates](./GrowERP_Code_Templates.md)**
+   - Ready-to-use code templates for rapid development
+   - BLoC, UI component, and test templates
+   - Model and API integration templates
+   - Quick generation commands and examples
+
+5. **[GrowERP AI Development Instructions](./GrowERP_AI_Instructions.md)**
+   - Comprehensive guide for AI-assisted development
+   - Code quality standards and best practices
+   - Anti-patterns to avoid and quality checklists
+   - Integration guidelines for AI coding tools
+
 3. **[Backend Components Development Guide](./Backend_Components_Development_Guide.md)**
    - Comprehensive guide for Moqui component development
    - Entity, service, and API development
