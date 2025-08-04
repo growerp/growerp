@@ -4,5 +4,14 @@
     "java.configuration.updateBuildConfiguration": "disabled",
     "workbench.colorTheme": "Default Dark Modern",
     "editor.fontSize": 14,
-    "editor.tabSize": 2
+    "editor.tabSize": 2,
+    "dart.analysisExcludedFolders": [
+        "docs/examples"
+    ],
+    "files.exclude": {
+        "**/docs/examples": true
+    },
+    "search.exclude": {
+        "**/docs/examples": true
+    }
 }
