@@ -49,7 +49,14 @@ This directory contains comprehensive documentation for extending GrowERP throug
    - Moqui Data Model (mantle-udm component)
    - REST Interface (e.g., https://test.growerp.org/rest/service.swagger/growerp)
 
-4. **[Stripe Payment processing](./docs/Stripe_Payment_Processing_Documentation.md)**
+5. **[Stripe Payment processing](./Stripe_Payment_Processing_Documentation.md)**
+   - Complete integration guide for Stripe payment processing
+   - Setup, configuration, and best practices
+
+6. **[Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md)**
+   - Comprehensive guide for handling timezone differences between server and client
+   - Implementation details and usage patterns
+   - Quick reference: [Timezone Quick Reference](./GrowERP_Timezone_Quick_Reference.md)
 
 
 ## Quick Start

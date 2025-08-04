@@ -60,7 +60,56 @@ extension DateOnlyCompare on DateTime {
 extension DateOnly on DateTime? {
   String dateOnly() {
     if (this == null) return '';
-    return "${this?.year}-${this?.month.toString().padLeft(2, '0')}-${this?.day.toString().padLeft(2, '0')}";
+    // Always format in local time for display
+    DateTime localDate = this!.toLocal();
+    return DateFormat('yyyy/M/d').format(localDate);
+  }
+}
+
+extension Noon on DateTime? {
+  DateTime noon() {
+    // Always format in local time for display
+    DateTime localDate = this!.toLocal();
+    return DateTime(localDate.year, localDate.month, localDate.day, 12, 0, 0);
+  }
+}
+
+extension DateTimeUtc on DateTime {
+  /// Convert to UTC for server communication
+  DateTime toServerTime() => toUtc();
+
+  /// Convert from server time (assumed UTC) to local time
+  static DateTime fromServerTime(String serverTimeString) {
+    try {
+      DateTime utcTime = DateTime.parse(serverTimeString +
+          (serverTimeString.contains('Z') ||
+                  serverTimeString.contains('+') ||
+                  serverTimeString.contains('-', 10)
+              ? ''
+              : 'Z'));
+      return utcTime.toLocal();
+    } catch (e) {
+      return DateTime.now();
+    }
+  }
+}
+
+extension DateTimeSafeParser on String {
+  /// Safely parse a date string from server, assuming UTC if no timezone info
+  DateTime? toDateTimeSafe() {
+    try {
+      if (isEmpty) return null;
+
+      // If no timezone info, append 'Z' to indicate UTC
+      String timeString = this;
+      if (!contains('Z') && !contains('+') && !contains('-', 10)) {
+        timeString += 'Z';
+      }
+
+      return DateTime.parse(timeString).toLocal();
+    } catch (e) {
+      return null;
+    }
   }
 }
 
