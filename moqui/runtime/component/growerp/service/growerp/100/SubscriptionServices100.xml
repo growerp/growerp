@@ -40,7 +40,6 @@
             <if condition="search != null">
                 <set field="search" value="%${search}%" />
             </if>
-
             <entity-find entity-name="growerp.catalog.SubscriptionAndPartyProduct"
                 list="subscriptionList">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
@@ -153,10 +152,11 @@
                     subscriberPartyId: subscription.subscriber?.partyId,
                     subscriptionTypeId: 'StProduct',
                     externalSubscriptionId: subscription.externalId,
+                      subscriptionTypeEnumId: 'SbstRecurring',
                     ]"
                 out-map="context" />
             <service-call name="growerp.100.SubscriptionServices100.get#Subscription"
-                in-map="[subscriptionId: subscriptionId]"
+                in-map="[subscriptionId: subscriptionId, growerp: true]"
                 out-map="context" />
             <set field="subscription" from="subscriptions[0]" />
         </actions>

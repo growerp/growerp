@@ -933,32 +933,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <!-- process payment with credit card -->
                         <if
                             condition="creditCardNumber &amp;&amp; nameOnCard &amp;&amp; expireMonth &amp;&amp; expireYear &amp;&amp; cVC &amp;&amp; plan">
-                            <!-- save creditcard in user record -->
-                            <set field="expireDate" value="${expireMonth}/20${expireYear}" />
-                            <set field="ccInMap"
-                                from="[
-                                paymentMethodTypeEnumId: 'PmtCreditCard',
-                                ownerPartyId: companyPartyId,
-                                cardNumber: creditCardNumber,
-                                creditCardTypeEnumId: 'Cct' + creditCardType,
-                                expireDate: expireDate,
-                                firstNameOnAccount: nameOnCard,
-                                lastNameOnAccount: '',
-                                paymentGatewayConfigId: System.getProperty('paymentGatewayConfigId'),
-                                ]" />
-                            <service-call
-                                name="mantle.account.PaymentMethodServices.create#CreditCard"
-                                in-map="ccInMap" out-map="userPayment" />
-                            <set field="paymentMethodId" from="userPayment.paymentMethodId" />
-                            <!-- create growerp as supplier -->
-                            <set field="growerpCompany"
-                                from="[name: 'GrowERP', role: 'Supplier',
-                                   email: 'support@growerp.com']" />
-                            <service-call
-                                name="growerp.100.PartyServices100.create#Company"
-                                in-map=" [company: growerpCompany,ownerPartyId: ownerPartyId]"
-                                out-map="companyInfo" />
-                            <set field="growerpPartyId" from="companyInfo.company.partyId" />
+                            <!-- find product prices -->
                             <entity-find entity-name="growerp.mobile.product.ProductAndPrices"
                                 list="productPrices">
                                 <econdition field-name="productId" from="plan" />
@@ -971,45 +946,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <return error="true"
                                     message="Product plan ${plan} not found, please contact support." />
                             </if>
-                            <!-- create payment-->
-                            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                                in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']"
-                                out-map="context" />
-                            <set field="paymentInMap"
-                                from="[
-                                    pseudoId: seqNum,
-                                    statusId: 'PmntProposed',
-                                    paymentType: 'PtPrePayment',
-                                    paymentMethodId: paymentMethodId,
-                                    amount: productPrices[0].price,
-                                    amountUomId: 'USD',
-                                    paymentInstrumentEnumId: 'PiCreditCard',
-                                    effectiveDate: ec.user.nowTimestamp,
-                                    paymentTypeEnumId: 'PmtCreditCard',
-                                    fromPartyId: companyPartyId,
-                                    toPartyId: growerpPartyId,
-                                    memo: memo,
-                                ]" />
-                            <service-call name="create#mantle.account.payment.Payment"
-                                in-map="paymentInMap" out-map="paymentInfo" />
-                            <set field="paymentId" from="paymentInfo.paymentId" />
-                            <!-- get payment gateway config -->
-                            <entity-find-one
-                                entity-name="mantle.account.method.PaymentGatewayConfig"
-                                value-field="paymentGatewayConfig">
-                                <field-map field-name="paymentGatewayConfigId"
-                                    from="System.getProperty('paymentGatewayConfigId')" />
-                            </entity-find-one>
-                            <if condition="!paymentGatewayConfig">
-                                <return error="true"
-                                    message="Payment gateway not configured, please contact support." />
-                            </if>
-                            <!-- authorize Payment -->
-                            <service-call name="${paymentGatewayConfig.authorizeServiceName}"
-                                in-map="[paymentId: paymentId,
-                                    paymentGatewayConfigId: paymentGatewayConfig.paymentGatewayConfigId]"
-                                out-map="context" />
-                            <!-- GrowERP account processing: get GrowERP companyId-->
+                            <!-- get GrowERP companyId-->
                             <entity-find entity-name="growerp.party.OwnerAndCompany"
                                 list="growerpMainCompanies">
                                 <econdition field-name="ownerPartyId" value="GROWERP" />
@@ -1026,74 +963,109 @@ along with this software (see the LICENSE.md file). If not, see
                                 out-map="companyInfo" />
                             <set field="growerpCustomerPartyId" from="companyInfo.company.partyId" />
                             <!-- create payment method and credit card-->
-                            <set field="growerpCcInMap"
-                                from="ccInMap + [
-                                    ownerPartyId: growerpCustomerPartyId,
-                                    cardSecurityCode: cVC]" />
+                            <set field="expireDate" value="${expireMonth}/20${expireYear}" />
+                            <set field="ccInMap"
+                                from="[
+                                paymentMethodTypeEnumId: 'PmtCreditCard',
+                                ownerPartyId: growerpCustomerPartyId,
+                                cardNumber: creditCardNumber,
+                                creditCardTypeEnumId: 'Cct' + creditCardType,
+                                expireDate: expireDate,
+                                firstNameOnAccount: nameOnCard,
+                                lastNameOnAccount: '',
+                                paymentGatewayConfigId: System.getProperty('paymentGatewayConfigId'),
+                                cardSecurityCode: cVC,
+                                ]" />
                             <service-call
                                 name="mantle.account.PaymentMethodServices.create#CreditCard"
-                                in-map="growerpCcInMap" out-map="growerpCcInMap" />
-                            <set field="growerpPaymentMethodId" from="userPayment.paymentMethodId" />
-                            <!-- payment + gateway response id -> refno -->
+                                in-map="ccInMap" out-map="ccOutMap" />
+                            <!-- payment -->
                             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                                 in-map="[ownerPartyId: 'GROWERP', seqName: 'payment']"
                                 out-map="context" />
                             <set field="growerpPaymentInMap"
-                                from="paymentInMap + [pseudoId: seqNum,
+                                from="[pseudoId: seqNum,
+                                    statusId: 'PmntProposed',
+                                    paymentType: 'PtPrePayment',
+                                    amount: productPrices[0].price,
+                                    amountUomId: 'USD',
+                                    paymentInstrumentEnumId: 'PiCreditCard',
+                                    effectiveDate: ec.user.nowTimestamp,
+                                    paymentTypeEnumId: 'PmtCreditCard',
                                     fromPartyId: growerpCustomerPartyId,
                                     toPartyId: growerpMainCompanyPartyId,
-                                    paymentMethodId: growerpPaymentMethodId,
+                                    paymentMethodId: ccOutMap.paymentMethodId,
                                     paymentRefNum: paymentGatewayResponseId]" />
                             <service-call name="create#mantle.account.payment.Payment"
                                 in-map="growerpPaymentInMap" out-map="paymentInfo" />
                             <set field="paymentId" from="paymentInfo.paymentId" />
                             <set field="datePlus"
-                                from="java.sql.Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().minusWeeks(2))" />
+                                from="java.sql.Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().plusWeeks(2))" />
                             <!-- subscription -->
+                            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                                in-map="[ownerPartyId: 'GROWERP', seqName: 'subscription']"
+                                out-map="context" />
                             <service-call
-                                name="growerp.100.SubscriptionServices100.create#Subscription"
-                                in-map="[subscription: [
-                                    subscriber: [partyId: growerpCustomerPartyId],
-                                    externalId: ownerPartyId,
+                                name="create#mantle.product.subscription.Subscription"
+                                in-map="[
+                                    pseudoId: seqNum,
+                                    subscriberPartyId: growerpCustomerPartyId,
+                                    externalSubscriptionId: ownerPartyId,
                                     fromDate: datePlus,
-                                    product: [productId: productPrices[0].productId],
-                                    ownerPartyId: 'GROWERP']]" />
+                                    product: productPrices[0].productId,
+                                    subscriptionTypeId: 'StProduct',
+                                    ownerPartyId: 'GROWERP']"
+                                out-map="context" />
                         </if>
 
                         <!-- prompt for capture of payment if not first tenant != GrowERP-->
                         <if condition="ownerPartyId != 'GROWERP'">
-                            <log
-                                message="Checking for payment capture from: ${companyPartyId} to: ${growerpPartyId}"
-                                level="warn" />
-                            <entity-find entity-name="mantle.account.payment.Payment"
-                                list="payments" limit="1">
-                                <econdition field-name="fromPartyId" from="companyPartyId" />
-                                <econdition field-name="toPartyId" from="growerpPartyId" />
-                                <!-- econdition field-name="statusId" value="PmntAuthorized" /-->
-                                <order-by field-name="-paymentId" />
+                            <!-- test check for existing subscription in GrowERP -->
+                            <entity-find entity-name="mantle.product.subscription.Subscription"
+                                list="subscriptions">
+                                <econdition field-name="externalSubscriptionId" from="ownerPartyId" />
+                                <econdition field-name="ownerPartyId" value="GROWERP" />
+                                <date-filter />
                             </entity-find>
-                            <!-- test check for payments -->
-                            <if condition="!payments">
+
+                            <if condition="!subscriptions &amp;&amp; !subscriptionId">
                                 <set field="authenticate"
                                     from="authenticate + [apiKey: 'paymentFirst']" />
                                 <return />
                             </if>
-                            <!-- check when STRIPE -->
+                            <!-- authorize with STRIPE -->
+                            <!-- get payment gateway config -->
+                            <entity-find-one
+                                entity-name="mantle.account.method.PaymentGatewayConfig"
+                                value-field="paymentGatewayConfig">
+                                <field-map field-name="paymentGatewayConfigId"
+                                    from="System.getProperty('paymentGatewayConfigId')" />
+                            </entity-find-one>
+                            <if condition="!paymentGatewayConfig">
+                                <return error="true"
+                                    message="Payment gateway not configured, please contact support." />
+                            </if>
+                            <!-- authorize Payment -->
+                            <service-call name="${paymentGatewayConfig.authorizeServiceName}"
+                                in-map="[paymentId: paymentId,
+                                    paymentGatewayConfigId: paymentGatewayConfig.paymentGatewayConfigId]"
+                                out-map="context" />
+                            <!-- if Stripe active check gateway response -->
                             <if
                                 condition="System.getProperty('paymentGatewayConfigId') == 'STRIPE'">
                                 <entity-find
                                     entity-name="mantle.account.method.PaymentGatewayResponse"
                                     list="resps">
-                                    <econdition field-name="paymentId" from="payments[0].paymentId" />
-                                    <econdition field-name="paymentOperationEnumId"
-                                        value="PgoCapture" />
+                                    <econdition field-name="paymentId" from="paymentId" />
+                                    <econdition
+                                        field-name="paymentOperationEnumId"
+                                        value="PgoAuthorize" />
                                     <econdition field-name="resultSuccess" value="Y" />
                                 </entity-find>
                                 <if condition="!resps">
-                                    <!-- no capture response from gateway -->
-                                    <set field="authenticate"
-                                        from="authenticate + [apiKey: 'paymentFirst']" />
-                                    <return />
+                                    <!-- no capture response from gateway found-->
+                                    <return error="true"
+                                        message="No payment authorization response found from gateway." />
                                 </if>
                             </if>
                         </if>
