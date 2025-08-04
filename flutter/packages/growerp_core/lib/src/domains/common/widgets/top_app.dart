@@ -92,7 +92,13 @@ class TopApp extends StatelessWidget {
                   child: MaterialApp(
                       navigatorKey: _rootNavigatorKey,
                       title: title,
-                      supportedLocales: const [Locale('en'), Locale('th')],
+                      locale: const Locale('en',
+                          'CA'), // Canadian English uses yyyy-MM-dd format
+                      supportedLocales: const [
+                        Locale('en'),
+                        Locale('th'),
+                        Locale('en', 'CA')
+                      ],
                       scrollBehavior: const MaterialScrollBehavior().copyWith(
                         dragDevices: {
                           PointerDeviceKind.mouse,

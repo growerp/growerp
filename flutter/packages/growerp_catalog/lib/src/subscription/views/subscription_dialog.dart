@@ -20,6 +20,8 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:intl/intl.dart';
+
 import '../blocs/subscription_bloc.dart';
 
 class SubscriptionDialog extends StatefulWidget {
@@ -32,18 +34,30 @@ class SubscriptionDialog extends StatefulWidget {
 class SubscriptionDialogState extends State<SubscriptionDialog> {
   final _formKey = GlobalKey<FormBuilderState>();
   CompanyUser? _selectedSubscriber;
+  Product? _selectedProduct;
   late SubscriptionBloc _subscriptionBloc;
+  late DataFetchBloc<CompaniesUsers> _companyUserBloc;
+  late DataFetchBloc<Products> _productBloc;
 
   @override
   void initState() {
     super.initState();
     _subscriptionBloc = context.read<SubscriptionBloc>();
+    _selectedProduct = widget.subscription.product;
     _selectedSubscriber = widget.subscription.subscriber;
+    _companyUserBloc = context.read<DataFetchBloc<CompaniesUsers>>()
+      ..add(GetDataEvent(() => context
+          .read<RestClient>()
+          .getCompanyUser(limit: 3, role: Role.customer)));
+    _productBloc = context.read<DataFetchBloc<Products>>()
+      ..add(
+          GetDataEvent(() => context.read<RestClient>().getProducts(limit: 3)));
   }
 
   @override
   Widget build(BuildContext context) {
     int columns = ResponsiveBreakpoints.of(context).isMobile ? 1 : 2;
+    bool isPhone = isAPhone(context);
     return BlocListener<SubscriptionBloc, SubscriptionState>(
       listener: (context, state) async {
         switch (state.status) {
@@ -67,9 +81,9 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
         child: popUp(
           context: context,
           title:
-              "Subscription #${widget.subscription.subscriptionId!.isEmpty ? " New" : widget.subscription.pseudoId}",
-          width: columns.toDouble() * 400,
-          height: 1 / columns.toDouble() * 1000,
+              "Subscription #${widget.subscription.subscriptionId == null ? " New" : widget.subscription.pseudoId}",
+          width: columns.toDouble() * (isPhone ? 400 : 300),
+          height: 1 / columns.toDouble() * (isPhone ? 500 : 800),
           child: _subscriptionForm(),
         ),
       ),
@@ -82,98 +96,219 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
       initialValue: {
         'pseudoId': widget.subscription.pseudoId ?? '',
         'description': widget.subscription.description ?? '',
-        'fromDate': widget.subscription.fromDate?.toString() ?? '',
-        'thruDate': widget.subscription.thruDate?.toString() ?? '',
+        'subscriber': _selectedSubscriber,
+        'product': _selectedProduct,
       },
       child: SingleChildScrollView(
         key: const Key('listView'),
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            FormBuilderTextField(
-              name: 'pseudoId',
-              key: const Key('pseudoId'),
-              decoration: const InputDecoration(labelText: 'Id'),
-              validator: FormBuilderValidators.compose([
-                FormBuilderValidators.required(),
-              ]),
+            Row(
+              children: [
+                Flexible(
+                  flex: 1,
+                  child: FormBuilderTextField(
+                    name: 'pseudoId',
+                    key: const Key('pseudoId'),
+                    decoration: const InputDecoration(labelText: 'Id'),
+                  ),
+                ),
+                // Subscriber dropdown
+
+                const SizedBox(width: 16),
+                Flexible(
+                  flex: 3,
+                  child: FormBuilderField<CompanyUser>(
+                    name: 'subscriber',
+                    initialValue: _selectedSubscriber,
+                    builder: (FormFieldState<CompanyUser> field) {
+                      return DropdownSearch<CompanyUser>(
+                        selectedItem: field.value,
+                        popupProps: PopupProps.menu(
+                          isFilterOnline: true,
+                          showSearchBox: true,
+                          searchFieldProps: const TextFieldProps(
+                            autofocus: true,
+                            decoration:
+                                InputDecoration(labelText: "subscriber,name"),
+                          ),
+                          menuProps: MenuProps(
+                              borderRadius: BorderRadius.circular(20.0)),
+                          title: popUp(
+                            context: context,
+                            title: 'Select Subscriber',
+                            height: 50,
+                          ),
+                        ),
+                        dropdownDecoratorProps: DropDownDecoratorProps(
+                          dropdownSearchDecoration: InputDecoration(
+                            labelText: 'Subscriber',
+                            errorText: field.errorText,
+                          ),
+                        ),
+                        key: const Key('subscriber'),
+                        itemAsString: (CompanyUser? u) => " ${u?.name} "
+                            "${u?.company?.name ?? ''}",
+                        asyncItems: (String filter) {
+                          _companyUserBloc.add(GetDataEvent(
+                              () => context.read<RestClient>().getCompanyUser(
+                                    searchString: filter,
+                                    limit: 3,
+                                  )));
+                          return Future.delayed(
+                              const Duration(milliseconds: 150), () {
+                            return Future.value(
+                                (_companyUserBloc.state.data as CompaniesUsers)
+                                    .companiesUsers);
+                          });
+                        },
+                        compareFn: (item, sItem) =>
+                            item.partyId == sItem.partyId,
+                        onChanged: (CompanyUser? newValue) {
+                          setState(() {
+                            _selectedSubscriber = newValue;
+                          });
+                          field.didChange(newValue);
+                        },
+                      );
+                    },
+                    validator: (CompanyUser? value) {
+                      return value == null
+                          ? 'Please select a subscriber'
+                          : null;
+                    },
+                  ),
+                ),
+              ],
             ),
             FormBuilderTextField(
               name: 'description',
               key: const Key('description'),
-              maxLines: 3,
+              maxLines: 2,
               decoration: const InputDecoration(labelText: 'Description'),
-              validator: FormBuilderValidators.compose([
-                FormBuilderValidators.required(),
-              ]),
             ),
-            FormBuilderTextField(
-              name: 'fromDate',
-              key: const Key('fromDate'),
-              decoration: const InputDecoration(labelText: 'From Date'),
-              validator: FormBuilderValidators.compose([
-                FormBuilderValidators.required(),
-              ]),
-            ),
-            FormBuilderTextField(
-              name: 'thruDate',
-              key: const Key('thruDate'),
-              decoration: const InputDecoration(labelText: 'Thru Date'),
-            ),
-            // Subscriber dropdown
-            DropdownSearch<CompanyUser>(
-              selectedItem: _selectedSubscriber,
-              popupProps: PopupProps.menu(
-                isFilterOnline: true,
-                showSearchBox: true,
-                searchFieldProps: const TextFieldProps(
-                  autofocus: true,
-                  decoration: InputDecoration(labelText: "subscriber,name"),
-                ),
-                menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                title: popUp(
-                  context: context,
-                  title: 'Select Subscriber',
-                  height: 50,
+            Row(children: [
+              Expanded(
+                flex: 1,
+                child: FormBuilderDateTimePicker(
+                  name: 'fromDate',
+                  key: const Key('fromDate'),
+                  // Convert from server UTC time to local time for display
+                  initialValue: widget.subscription.fromDate?.toLocal(),
+                  inputType: InputType.date,
+                  format: DateFormat('yyyy/M/d'),
+                  decoration: const InputDecoration(
+                    labelText: 'From Date',
+                    suffixIcon: Icon(Icons.calendar_today),
+                  ),
+                  validator: FormBuilderValidators.compose([
+                    FormBuilderValidators.required(),
+                  ]),
                 ),
               ),
-              dropdownDecoratorProps: const DropDownDecoratorProps(
-                  dropdownSearchDecoration:
-                      InputDecoration(labelText: 'Subscriber')),
-              key: const Key('subscriber'),
-              itemAsString: (CompanyUser? u) => " ${u?.name} "
-                  "${u?.company?.name ?? ''}",
-              asyncItems: (String filter) {
-                // Implement your async fetch for subscribers here
-                return Future.value([]); // Replace with actual fetch logic
+              Expanded(
+                flex: 1,
+                child: FormBuilderDateTimePicker(
+                  name: 'thruDate',
+                  key: const Key('thruDate'),
+                  // Convert from server UTC time to local time for display
+                  initialValue: widget.subscription.thruDate?.toLocal(),
+                  inputType: InputType.date,
+                  format: DateFormat('yyyy/M/d'),
+                  decoration: const InputDecoration(
+                    labelText: 'Thru Date',
+                    suffixIcon: Icon(Icons.calendar_today),
+                  ),
+                ),
+              ),
+            ]),
+            // Product dropdown
+            const SizedBox(height: 16),
+            FormBuilderField<Product>(
+              name: 'product',
+              initialValue: _selectedProduct,
+              builder: (FormFieldState<Product> field) {
+                return DropdownSearch<Product>(
+                  selectedItem: field.value,
+                  popupProps: PopupProps.menu(
+                    isFilterOnline: true,
+                    showSearchBox: true,
+                    searchFieldProps: const TextFieldProps(
+                      autofocus: true,
+                      decoration:
+                          InputDecoration(labelText: "Search products..."),
+                    ),
+                    menuProps:
+                        MenuProps(borderRadius: BorderRadius.circular(20.0)),
+                    title: popUp(
+                      context: context,
+                      title: 'Select Product',
+                      height: 50,
+                    ),
+                  ),
+                  dropdownDecoratorProps: DropDownDecoratorProps(
+                    dropdownSearchDecoration: InputDecoration(
+                      labelText: 'Product',
+                      errorText: field.errorText,
+                    ),
+                  ),
+                  key: const Key('product'),
+                  itemAsString: (Product? p) => "${p?.productName ?? ''} "
+                      "(${p?.pseudoId ?? ''})",
+                  asyncItems: (String filter) {
+                    _productBloc.add(GetDataEvent(() => context
+                        .read<RestClient>()
+                        .getProduct(
+                            searchString: filter,
+                            limit: 3,
+                            isForDropDown: true)));
+                    return Future.delayed(const Duration(milliseconds: 150),
+                        () {
+                      return Future.value(
+                          (_productBloc.state.data as Products).products);
+                    });
+                  },
+                  compareFn: (item, sItem) => item.productId == sItem.productId,
+                  onChanged: (Product? newValue) {
+                    setState(() {
+                      _selectedProduct = newValue;
+                    });
+                    field.didChange(newValue);
+                  },
+                );
               },
-              compareFn: (item, sItem) => item.partyId == sItem.partyId,
-              onChanged: (CompanyUser? newValue) {
-                setState(() {
-                  _selectedSubscriber = newValue;
-                });
+              validator: (Product? value) {
+                return value == null ? 'Please select a product' : null;
               },
             ),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton(
                     key: const Key('update'),
-                    child: Text(widget.subscription.subscriptionId!.isEmpty
+                    child: Text(widget.subscription.subscriptionId == null
                         ? 'Create'
                         : 'Update'),
                     onPressed: () {
                       if (_formKey.currentState!.saveAndValidate()) {
                         final formData = _formKey.currentState!.value;
+                        DateTime? fromDate = formData['fromDate'] as DateTime?;
+                        DateTime? thruDate = formData['thruDate'] as DateTime?;
+                        CompanyUser? subscriber =
+                            formData['subscriber'] as CompanyUser?;
+                        Product? product = formData['product'] as Product?;
+
                         _subscriptionBloc.add(SubscriptionUpdate(Subscription(
                           subscriptionId: widget.subscription.subscriptionId,
                           pseudoId: formData['pseudoId'] ?? '',
                           description: formData['description'] ?? '',
-                          fromDate:
-                              DateTime.tryParse(formData['fromDate'] ?? ''),
-                          thruDate:
-                              DateTime.tryParse(formData['thruDate'] ?? ''),
-                          subscriber: _selectedSubscriber,
+                          // Convert dates to UTC for server storage
+                          fromDate: fromDate?.noon().toServerTime(),
+                          thruDate: thruDate?.noon().toServerTime(),
+                          subscriber: subscriber,
+                          product: product,
                         )));
                       }
                     },

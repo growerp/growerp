@@ -33,8 +33,7 @@ class SearchSubscriptionState extends State<SearchSubscriptionList> {
   @override
   void initState() {
     super.initState();
-    _subscriptionBloc = context.read<SubscriptionBloc>()
-      ..add(const SubscriptionFetch(limit: 0));
+    _subscriptionBloc = context.read<SubscriptionBloc>();
   }
 
   @override

@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:intl/intl.dart';
 import 'package:universal_io/io.dart';
 import 'dart:math';
 import 'package:dio/dio.dart';
@@ -416,6 +417,16 @@ class CommonTest {
     await tester.pump();
     await tester.enterText(find.byKey(Key(key)), value);
     await tester.pump();
+  }
+
+  static Future<void> enterDate(
+      WidgetTester tester, String key, DateTime date) async {
+    await tapByKey(tester, key);
+    await tapByTooltip(tester, 'Switch to input');
+    await tester.enterText(
+        find.byType(TextField).last, DateFormat('yyyy-M-d').format(date));
+    await tester.pump();
+    await CommonTest.tapByText(tester, 'OK');
   }
 
   static Future<void> enterDropDownSearch(

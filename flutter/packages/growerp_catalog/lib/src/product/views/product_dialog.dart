@@ -187,7 +187,9 @@ class ProductDialogState extends State<ProductDialog> {
                       (widget.product.productId.isEmpty
                           ? 'New'
                           : widget.product.pseudoId),
-                  height: classificationId == 'AppAdmin' ? 750 : 600,
+                  height: isPhone
+                      ? (classificationId == 'AppAdmin' ? 750 : 600)
+                      : (classificationId == 'AppAdmin' ? 600 : 600),
                   width: isPhone ? 450 : 800,
                   child: listChild(classificationId, isPhone),
                 ));
@@ -248,9 +250,11 @@ class ProductDialogState extends State<ProductDialog> {
         rows.add(Row(
           children: [
             Expanded(
+                flex: 1,
                 child: Padding(
                     padding: const EdgeInsets.all(10), child: widgets[i++])),
             Expanded(
+                flex: 1,
                 child: Padding(
                     padding: const EdgeInsets.all(10),
                     child: i < widgets.length ? widgets[i] : Container()))
@@ -352,13 +356,49 @@ class ProductDialogState extends State<ProductDialog> {
   List<Widget> _buildFormFields(
       String classificationId, List<Widget> relCategories) {
     return [
-      FormBuilderTextField(
-        name: 'id',
-        key: const Key('id'),
-        initialValue: widget.product.pseudoId,
-        decoration: InputDecoration(
-            labelText:
-                classificationId == 'AppHotel' ? 'Room Type Id' : 'Product Id'),
+      Row(
+        children: [
+          Expanded(
+            flex: 1,
+            child: FormBuilderTextField(
+              name: 'id',
+              key: const Key('id'),
+              initialValue: widget.product.pseudoId,
+              decoration: InputDecoration(
+                  labelText: classificationId == 'AppHotel'
+                      ? 'Room Type Id'
+                      : 'Product Id'),
+            ),
+          ),
+          if (classificationId != 'AppHotel')
+            Expanded(
+              flex: 2,
+              child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                  child: FormBuilderDropdown<String>(
+                    key: const Key('productTypeDropDown'),
+                    name: 'productType',
+                    initialValue: _selectedProductTypeId,
+                    decoration:
+                        const InputDecoration(labelText: 'Product Type'),
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(),
+                    ]),
+                    items: productTypes.map((item) {
+                      return DropdownMenuItem<String>(
+                          value: item,
+                          child: Text(item,
+                              style:
+                                  const TextStyle(color: Color(0xFF4baa9b))));
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedProductTypeId = newValue!;
+                      });
+                    },
+                  )),
+            ),
+        ],
       ),
       FormBuilderTextField(
         name: 'name',
@@ -429,29 +469,6 @@ class ProductDialogState extends State<ProductDialog> {
                   )),
               child: Wrap(spacing: 10.0, children: relCategories)),
         ),
-      if (classificationId != 'AppHotel')
-        Padding(
-            padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-            child: FormBuilderDropdown<String>(
-              key: const Key('productTypeDropDown'),
-              name: 'productType',
-              initialValue: _selectedProductTypeId,
-              decoration: const InputDecoration(labelText: 'Product Type'),
-              validator: FormBuilderValidators.compose([
-                FormBuilderValidators.required(),
-              ]),
-              items: productTypes.map((item) {
-                return DropdownMenuItem<String>(
-                    value: item,
-                    child: Text(item,
-                        style: const TextStyle(color: Color(0xFF4baa9b))));
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedProductTypeId = newValue!;
-                });
-              },
-            )),
       if (classificationId != 'AppHotel' && _selectedProductTypeId != 'Service')
         InputDecorator(
             decoration: InputDecoration(
@@ -586,56 +603,54 @@ class ProductDialogState extends State<ProductDialog> {
               ),
             ],
           )),
-      Row(children: [
-        Expanded(
-            child: OutlinedButton(
-                key: const Key('update'),
-                child: Text(
-                    widget.product.productId.isEmpty ? 'Create' : 'Update'),
-                onPressed: () async {
-                  if (_productDialogFormKey.currentState!.saveAndValidate()) {
-                    final formData = _productDialogFormKey.currentState!.value;
-                    Uint8List? image =
-                        await HelperFunctions.getResizedImage(_imageFile?.path);
-                    if (!mounted) return;
-                    if (_imageFile?.path != null && image == null) {
-                      HelperFunctions.showMessage(
-                          context, "Image upload error!", Colors.red);
-                    } else {
-                      _productBloc.add(ProductUpdate(Product(
-                          productId: widget.product.productId,
-                          pseudoId: formData['id'] ?? '',
-                          productName: formData['name'] ?? '',
-                          assetClassId: classificationId == 'AppHotel'
-                              ? 'Hotel Room'
-                              : 'AsClsInventoryFin', // finished good
-                          description: formData['description'] ?? '',
-                          listPrice:
-                              Decimal.parse(formData['listPrice'] ?? '0.00'),
-                          price: Decimal.parse(formData['price'].isEmpty
-                              ? '0.00'
-                              : formData['price']),
-                          amount: Decimal.parse(formData['amount'].isEmpty
-                              ? '0.00'
-                              : formData['amount']),
-                          uom: formData['uom'] ?? _selectedUom,
-                          assetCount: formData['assets'] == null ||
-                                  formData['assets'].isEmpty
-                              ? 0
-                              : int.parse(formData['assets']),
-                          categories: _selectedCategories,
-                          productTypeId:
-                              formData['productType'] ?? _selectedProductTypeId,
-                          useWarehouse: (formData['productType'] ??
-                                      _selectedProductTypeId) ==
-                                  'Service'
-                              ? false
-                              : formData['useWarehouse'] ?? false,
-                          image: image)));
-                    }
+      Expanded(
+          child: OutlinedButton(
+              key: const Key('update'),
+              child:
+                  Text(widget.product.productId.isEmpty ? 'Create' : 'Update'),
+              onPressed: () async {
+                if (_productDialogFormKey.currentState!.saveAndValidate()) {
+                  final formData = _productDialogFormKey.currentState!.value;
+                  Uint8List? image =
+                      await HelperFunctions.getResizedImage(_imageFile?.path);
+                  if (!mounted) return;
+                  if (_imageFile?.path != null && image == null) {
+                    HelperFunctions.showMessage(
+                        context, "Image upload error!", Colors.red);
+                  } else {
+                    _productBloc.add(ProductUpdate(Product(
+                        productId: widget.product.productId,
+                        pseudoId: formData['id'] ?? '',
+                        productName: formData['name'] ?? '',
+                        assetClassId: classificationId == 'AppHotel'
+                            ? 'Hotel Room'
+                            : 'AsClsInventoryFin', // finished good
+                        description: formData['description'] ?? '',
+                        listPrice:
+                            Decimal.parse(formData['listPrice'] ?? '0.00'),
+                        price: Decimal.parse(formData['price'].isEmpty
+                            ? '0.00'
+                            : formData['price']),
+                        amount: Decimal.parse(formData['amount'].isEmpty
+                            ? '0.00'
+                            : formData['amount']),
+                        uom: formData['uom'] ?? _selectedUom,
+                        assetCount: formData['assets'] == null ||
+                                formData['assets'].isEmpty
+                            ? 0
+                            : int.parse(formData['assets']),
+                        categories: _selectedCategories,
+                        productTypeId:
+                            formData['productType'] ?? _selectedProductTypeId,
+                        useWarehouse: (formData['productType'] ??
+                                    _selectedProductTypeId) ==
+                                'Service'
+                            ? false
+                            : formData['useWarehouse'] ?? false,
+                        image: image)));
                   }
-                }))
-      ])
+                }
+              }))
     ];
   }
 }

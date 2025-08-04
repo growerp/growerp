@@ -30,24 +30,25 @@ void main() {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  testWidgets('''Subscription integration test''', (tester) async {
+  var title = 'GrowERP subscription test';
+
+  testWidgets(title, (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       tester,
       router.generateRoute,
       menuOptions,
       CatalogLocalizations.localizationsDelegates,
-      title: 'Subscription integration test',
+      title: title,
       restClient: restClient,
       blocProviders: getCatalogBlocProviders(restClient, 'AppAdmin'),
       clear: true,
     );
 
-    // delete all subscriptions
     await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "subscriptions": <Subscription>[],
+      "products": subscriptionProducts,
+      "companies": customerCompanies
     });
-
     await SubscriptionTest.selectSubscriptions(tester);
     await SubscriptionTest.addSubscriptions(
         tester, subscriptions.sublist(0, 2));

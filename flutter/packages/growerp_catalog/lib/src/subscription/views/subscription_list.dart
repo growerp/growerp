@@ -163,12 +163,20 @@ class SubscriptionListState extends State<SubscriptionList> {
                                     barrierDismissible: true,
                                     context: context,
                                     builder: (BuildContext context) {
-                                      // Implement your search dialog here
-                                      return BlocProvider.value(
-                                          value: _subscriptionBloc,
-                                          child:
-                                              const SearchSubscriptionList());
-                                    });
+                                      return const SearchSubscriptionList();
+                                    }).then((value) async => value != null &&
+                                        context.mounted
+                                    ?
+                                    // show detail page
+                                    await showDialog(
+                                        barrierDismissible: true,
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return BlocProvider.value(
+                                              value: _subscriptionBloc,
+                                              child: SubscriptionDialog(value));
+                                        })
+                                    : const SizedBox.shrink());
                               },
                               child: const Icon(Icons.search)),
                           const SizedBox(height: 10),

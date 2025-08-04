@@ -36,6 +36,7 @@ class SubscriptionState extends Equatable {
   SubscriptionState copyWith({
     SubscriptionStatus? status,
     List<Subscription>? subscriptions,
+    List<Subscription>? searchResults,
     bool? hasReachedMax,
     String? message,
     String? searchString,
@@ -43,6 +44,7 @@ class SubscriptionState extends Equatable {
     return SubscriptionState(
       status: status ?? this.status,
       subscriptions: subscriptions ?? this.subscriptions,
+      searchResults: searchResults ?? this.searchResults,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       message: message ?? this.message,
       searchString: searchString ?? this.searchString,

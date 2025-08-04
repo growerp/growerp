@@ -4,9 +4,12 @@
     <service verb="get" noun="Subscription">
         <in-parameters>
             <parameter name="growerp" type="Boolean" default-value="false" />
+            <parameter name="subscriptionId" />
+            <parameter name="pseudoId" />
             <parameter name="externalId" />
             <parameter name="start" default-value="0" type="Integer" />
             <parameter name="limit" default-value="20" type="Integer" />
+            <parameter name="search" default="null" />
         </in-parameters>
         <out-parameters>
             <parameter name="subscriptions" type="List">
@@ -24,9 +27,9 @@
             </parameter>
         </out-parameters>
         <actions>
+            <!-- get current user and company -->
             <service-call out-map="parties"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <!-- other tenants can read their own subscriptions -->
             <if condition="growerp == true">
                 <set field="ownerPartyId" value="GROWERP" />
                 <set field="externalId" from="parties.ownerPartyId" />
@@ -34,22 +37,44 @@
                     <set field="ownerPartyId" from="parties.ownerPartyId" />
                 </else>
             </if>
-            <log
-                message="====loooking for growerp: $growerp extId: $externalId ownerId: $ownerPartyId " />
+            <if condition="search != null">
+                <set field="search" value="%${search}%" />
+            </if>
+
             <entity-find entity-name="growerp.catalog.SubscriptionAndPartyProduct"
                 list="subscriptionList">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <econdition field-name="externalId" from="externalId"
                     ignore-if-empty="true" />
+                <econdition field-name="subscriptionId" from="subscriptionId"
+                    ignore-if-empty="true" />
+                <econdition field-name="pseudoId" from="pseudoId"
+                    ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="subscriptionId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="pseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="description" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="lastName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="firstName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="companyName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="email" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="-fromDate" />
             </entity-find>
-            <log
-                message="======found: ${subscriptionList?.size()} subscriptions for ownerPartyId: $ownerPartyId, externalId: $externalId" />
             <set field="subscriptions" from="[]" />
             <iterate list="subscriptionList" entry="item">
                 <script>
                     subscriptions.add([
                         subscriptionId: item.subscriptionId,
                         pseudoId: item.pseudoId,
+                        description: item.description,
                         subscriber: [
                             partyId: item.subscriberPartyId,
                             pseudoId: item.partyPseudoId,
@@ -62,12 +87,12 @@
                             productId: item.productId,
                             pseudoId: item.productPseudoId,
                             productName: item.productName,
-                            amount: item.amount,
+                            amount: item.amount ? item.amount.toString() : '0.00',
                             ],
-                        fromDate: item.fromDate ? ec.l10n.format(item.fromDate,'yyyy-MM-dd') : null,
-                        thruDate: item.thruDate ? ec.l10n.format(item.thruDate,'yyyy-MM-dd') : null,
-                        purchaseFromDate: item.purchaseFromDate ? ec.l10n.format(item.purchaseFromDate,'yyyy-MM-dd') : null,
-                        purchaseThruDate: item.purchaseThruDate ? ec.l10n.format(item.purchaseThruDate,'yyyy-MM-dd') : null,
+                        fromDate: item.fromDate ? ec.l10n.format(item.fromDate,'yyyy-MM-dd HH:mm:ssZ') : null,
+                        thruDate: item.thruDate ? ec.l10n.format(item.thruDate,'yyyy-MM-dd HH:mm:ssZ') : null,
+                        purchaseFromDate: item.purchaseFromDate ? ec.l10n.format(item.purchaseFromDate,'yyyy-MM-dd HH:mm:ssZ') : null,
+                        purchaseThruDate: item.purchaseThruDate ? ec.l10n.format(item.purchaseThruDate,'yyyy-MM-dd HH:mm:ssZ') : null,
                     ])
                 </script>
             </iterate>
@@ -77,11 +102,15 @@
     <service verb="create" noun="Subscription">
         <in-parameters>
             <parameter name="subscription" type="Map" required="true">
+                <parameter name="pseudoId" />
+                <parameter name="description" />
                 <parameter name="subscriber" type="Map">
                     <parameter name="partyId" required="true" />
                 </parameter>
                 <parameter name="fromDate" />
                 <parameter name="thruDate" />
+                <parameter name="purchaseFromDate" />
+                <parameter name="purchaseThruDate" />
                 <parameter name="product" type="Map">
                     <parameter name="productId" required="true" />
                 </parameter>
@@ -90,7 +119,7 @@
             </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="subscriptionId" />
+            <parameter name="subscription" type="Map" />
         </out-parameters>
         <actions>
             <service-call out-map="parties"
@@ -113,15 +142,23 @@
             <!-- create subscription -->
             <service-call name="create#mantle.product.subscription.Subscription"
                 in-map="[
-                    pseudoId: subscription.pseudoId,
-                    fromDate: fromDate ?: ec.user.nowTimestamp,
                     ownerPartyId: ownerPartyId,
-                    productId: subscription.product.productId,
+                    pseudoId: subscription.pseudoId,
+                    description: subscription.description ?: '',
+                    fromDate: subscription.fromDate ?: null,
+                    thruDate: subscription.thruDate ?: null,
+                    purchaseFromDate: subscription.purchaseFromDate ?: ec.user.nowTimestamp,
+                    purchaseThruDate: subscription.purchaseThruDate ?: null,
+                    productId: subscription.product?.productId,
+                    subscriberPartyId: subscription.subscriber?.partyId,
                     subscriptionTypeId: 'StProduct',
-                    subscriberPartyId: subscription.subscriber.partyId,
                     externalSubscriptionId: subscription.externalId,
                     ]"
                 out-map="context" />
+            <service-call name="growerp.100.SubscriptionServices100.get#Subscription"
+                in-map="[subscriptionId: subscriptionId]"
+                out-map="context" />
+            <set field="subscription" from="subscriptions[0]" />
         </actions>
     </service>
 
@@ -129,11 +166,15 @@
         <in-parameters>
             <parameter name="subscription" type="Map" required="true">
                 <parameter name="subscriptionId" required="true" />
+                <parameter name="pseudoId" />
+                <parameter name="description" />
                 <parameter name="subscriber" type="Map">
                     <parameter name="partyId" required="true" />
                 </parameter>
                 <parameter name="fromDate" />
                 <parameter name="thruDate" />
+                <parameter name="purchaseFromDate" />
+                <parameter name="purchaseThruDate" />
                 <parameter name="product" type="Map">
                     <parameter name="productId" required="true" />
                 </parameter>
@@ -142,54 +183,96 @@
             </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="subscriptionId" />
+            <parameter name="subscription" type="Map" />
         </out-parameters>
         <actions>
-            <entity-find-one entity-name="mantle.product.subscription.Subscription"
-                value-field="lookupEntity" />
-            <if condition="lookupEntity == null">
-                <return error="true" message="Subscription with ID ${subscriptionId} not found." />
+            <service-call out-map="parties"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- other tenants can create subscription -->
+            <if condition="subscription.ownerPartyId == 'GROWERP'">
+                <set field="ownerPartyId" value="GROWERP" />
+                <set field="externalId" from="parties.ownerPartyId" />
+                <else><!-- ignore incoming ownerPartyId -->
+                    <set field="ownerPartyId" from="parties.ownerPartyId" />
+                </else>
             </if>
-            <set-service-fields service-name="growerp.SubscriptionServices.update#Subscription"
-                map="context" to-map="lookupEntity" />
-            <update-record value-field="lookupEntity" />
-            <set field="subscriptionId" from="lookupEntity.subscriptionId" />
+            <entity-find-one entity-name="mantle.product.subscription.Subscription"
+                value-field="lookupEntity" for-update="true">
+                <field-map field-name="subscriptionId" from="subscription.subscriptionId" />
+                <field-map field-name="ownerPartyId" from="ownerPartyId" />
+            </entity-find-one>
+            <if condition="lookupEntity == null">
+                <return error="true"
+                    message="Subscription with ID ${subscription.subscriptionId} not found." />
+            </if>
+            <!-- generate pseudoId -->
+            <if condition="!subscription.pseudoId || subscription.pseudoId == ''">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'subscription']"
+                    out-map="context" />
+                <set field="subscription.pseudoId" from="seqNum" />
+            </if>
+
+            <script>
+                lookupEntity.pseudoId = subscription.pseudoId ?: lookupEntity.pseudoId;
+                lookupEntity.description = subscription.description ?: lookupEntity.description;
+                lookupEntity.externalSubscriptionId = subscription.externalId ?: lookupEntity.externalSubscriptionId;
+                lookupEntity.fromDate = subscription.fromDate ?: lookupEntity.fromDate;
+                lookupEntity.thruDate = subscription.thruDate ?: lookupEntity.thruDate;
+                lookupEntity.purchaseFromDate = subscription.purchaseFromDate ?: lookupEntity.purchaseFromDate;
+                lookupEntity.purchaseThruDate = subscription.purchaseThruDate ?: lookupEntity.purchaseThruDate;
+                lookupEntity.productId = subscription.product.productId ?: lookupEntity.productId;
+                lookupEntity.subscriberPartyId = subscription.subscriber.partyId ?: lookupEntity.subscriberPartyId;
+            </script>
+            <entity-update value-field="lookupEntity" />
+            <service-call name="growerp.100.SubscriptionServices100.get#Subscription"
+                in-map="[subscriptionId: subscription.subscriptionId]"
+                out-map="context" />
+            <set field="subscription" from="subscriptions[0]" />
         </actions>
     </service>
 
     <service verb="delete" noun="Subscription">
         <in-parameters>
-            <parameter name="subscriptionId" required="true" />
+            <parameter name="subscription" type="Map" required="true">
+                <parameter name="subscriptionId" />
+                <parameter name="pseudoId" />
+                <parameter name="ownerPartyId" />
+                <parameter name="externalId" />
+            </parameter>
         </in-parameters>
-        <out-parameters />
+        <out-parameters>
+            <parameter name="subscription" type="Map" />
+        </out-parameters>
         <actions>
-            <entity-find-one entity-name="mantle.product.subscription.Subscription"
-                value-field="lookupEntity" />
-            <if condition="lookupEntity == null">
-                <return error="true" message="Subscription with ID ${subscriptionId} not found." />
+            <service-call out-map="parties"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- other tenants can delete subscription -->
+            <if condition="subscription.ownerPartyId == 'GROWERP'">
+                <set field="ownerPartyId" value="GROWERP" />
+                <set field="externalId" from="parties.ownerPartyId" />
+                <else><!-- ignore incoming ownerPartyId -->
+                    <set field="ownerPartyId" from="parties.ownerPartyId" />
+                </else>
             </if>
-            <delete-record value-field="lookupEntity" />
+            <entity-find-one entity-name="mantle.product.subscription.Subscription"
+                value-field="lookupEntity" for-update="true">
+                <field-map field-name="subscriptionId" from="subscription.subscriptionId" />
+                <field-map field-name="pseudoId" from="subscription.pseudoId" />
+                <field-map field-name="ownerPartyId" from="ownerPartyId" />
+            </entity-find-one>
+            <if condition="!lookupEntity">
+                <return error="true"
+                    message="Subscription with ID ${subscription.subscriptionId} not found." />
+            </if>
+            <set field="nowDate" from="ec.user.nowTimestamp" />
+            <set field="lookupEntity.thruDate" from="nowDate" />
+            <entity-update value-field="lookupEntity" />
+            <service-call name="growerp.100.SubscriptionServices100.get#Subscription"
+                in-map="[subscription: subscription]"
+                out-map="context" />
+            <set field="subscription" from="subscriptions[0]" />
         </actions>
     </service>
 
-    <service verb="update" noun="SubscriptionStatus">
-        <in-parameters>
-            <parameter name="subscriptionId" required="true" />
-            <parameter name="statusId" required="true" />
-            <parameter name="origStatusId" required="true" />
-        </in-parameters>
-        <actions>
-            <entity-find-one entity-name="mantle.product.subscription.Subscription"
-                value-field="subscription" />
-            <if condition="subscription == null">
-                <return error="true" message="Subscription with ID ${subscriptionId} not found." />
-            </if>
-            <if condition="subscription.statusId != origStatusId">
-                <return error="true"
-                    message="Subscription status has changed since last view, refresh and try again." />
-            </if>
-            <set field="subscription.statusId" from="statusId" />
-            <update-record value-field="subscription" />
-        </actions>
-    </service>
 </services>

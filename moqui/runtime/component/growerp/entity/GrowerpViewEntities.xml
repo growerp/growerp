@@ -3084,6 +3084,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="ownerPartyId" entity-alias="SUBS" />
         <alias name="subscriptionId" entity-alias="SUBS" />
         <alias name="pseudoId" entity-alias="SUBS" />
+        <alias name="description" entity-alias="SUBS" />
         <alias name="externalId" field="externalSubscriptionId" entity-alias="SUBS" />
         <alias name="fromDate" entity-alias="SUBS" />
         <alias name="thruDate" entity-alias="SUBS" />
