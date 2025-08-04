@@ -18,16 +18,16 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
     SubscriptionFetch event,
     Emitter<SubscriptionState> emit,
   ) async {
-    try {
-      if (state.status == SubscriptionStatus.initial ||
-          event.refresh ||
-          event.searchString != '') {
-        start = 0;
-      } else {
-        start = state.subscriptions.length;
-      }
-      emit(state.copyWith(status: SubscriptionStatus.loading));
+    if (state.status == SubscriptionStatus.initial ||
+        event.refresh ||
+        event.searchString != '') {
+      start = 0;
+    } else {
+      start = state.subscriptions.length;
+    }
+    emit(state.copyWith(status: SubscriptionStatus.loading));
 
+    try {
       final subscriptions = await restClient.getSubscription(
         searchString: event.searchString,
         growerp: event.growerp,
@@ -42,13 +42,13 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
               ? subscriptions.subscriptions
               : (List.of(state.subscriptions)
                 ..addAll(subscriptions.subscriptions)),
-          hasReachedMax: subscriptions.subscriptions.length < 20 ? true : false,
+          hasReachedMax: subscriptions.subscriptions.length < 20,
           searchString: '',
         ));
       } else {
         return emit(state.copyWith(
           status: SubscriptionStatus.success,
-          subscriptions: subscriptions.subscriptions,
+          searchResults: subscriptions.subscriptions,
           hasReachedMax: false,
         ));
       }
@@ -100,9 +100,11 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
     try {
       emit(state.copyWith(status: SubscriptionStatus.loading));
       List<Subscription> subscriptions = List.from(state.subscriptions);
-      await restClient.deleteSubscription(subscription: event.subscription);
-      subscriptions.removeWhere(
+      Subscription updated =
+          await restClient.deleteSubscription(subscription: event.subscription);
+      int index = subscriptions.indexWhere(
           (s) => s.subscriptionId == event.subscription.subscriptionId);
+      if (index != -1) subscriptions[index] = updated;
       emit(state.copyWith(
         status: SubscriptionStatus.success,
         subscriptions: subscriptions,

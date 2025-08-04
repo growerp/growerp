@@ -114,72 +114,71 @@ class HomeFormState extends State<HomeForm> {
           ThemeMode? themeMode = context.read<ThemeBloc>().state.themeMode;
           return Column(children: [
             Expanded(
-                child: ScaffoldMessenger(
-              child: Scaffold(
-                  appBar: AppBar(
-                    backgroundColor:
-                        Theme.of(context).colorScheme.primaryContainer,
-                    key: const Key('HomeFormUnAuth'),
-                    title: const Center(
-                        child: Text(
-                      'Welcome to The GrowERP Business System',
-                      style: TextStyle(fontSize: 15),
-                    )),
-                  ),
-                  body: Center(
-                    child: Column(children: <Widget>[
-                      const SizedBox(height: 100),
-                      company != null && company!.image != null
-                          ? Image.memory(company!.image!,
-                              height: 100, width: 100)
-                          : Image(
-                              image: AssetImage(themeMode == ThemeMode.light
-                                  ? 'packages/growerp_core/images/growerp100.png'
-                                  : 'packages/growerp_core/images/growerpDark100.png'),
-                              height: 80,
-                              width: 80),
-                      const SizedBox(height: 20),
-                      Text(company == null ? widget.title : company!.name!,
-                          style: TextStyle(
-                              fontSize: isPhone ? 15 : 25,
-                              fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 20),
-                      OutlinedButton(
-                          key: const Key('loginButton'),
-                          child: const Text('Login'),
-                          onPressed: () {
-                            // start with login again....even login process interupted
-                            _authBloc.add(AuthUpdateLocal(
-                                state.authenticate!.copyWith(apiKey: '')));
-                            showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return BlocProvider.value(
-                                      value: _authBloc,
-                                      child: const LoginDialog());
-                                });
-                          }),
-                      const Expanded(child: SizedBox(height: 20)),
-                      if (classificationId != 'AppSupport')
+                child: Scaffold(
+                    appBar: AppBar(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.primaryContainer,
+                      key: const Key('HomeFormUnAuth'),
+                      title: const Center(
+                          child: Text(
+                        'Welcome to The GrowERP Business System',
+                        style: TextStyle(fontSize: 15),
+                      )),
+                    ),
+                    body: Center(
+                      child: Column(children: <Widget>[
+                        const SizedBox(height: 100),
+                        company != null && company!.image != null
+                            ? Image.memory(company!.image!,
+                                height: 100, width: 100)
+                            : Image(
+                                image: AssetImage(themeMode == ThemeMode.light
+                                    ? 'packages/growerp_core/images/growerp100.png'
+                                    : 'packages/growerp_core/images/growerpDark100.png'),
+                                height: 80,
+                                width: 80),
+                        const SizedBox(height: 20),
+                        Text(company == null ? widget.title : company!.name!,
+                            style: TextStyle(
+                                fontSize: isPhone ? 15 : 25,
+                                fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 20),
                         OutlinedButton(
-                            key: const Key('newUserButton'),
-                            child: const Text(
-                                'Register new Company and Administrator'),
+                            key: const Key('loginButton'),
+                            child: const Text('Login'),
                             onPressed: () {
+                              // start with login again....even login process interupted
+                              _authBloc.add(AuthUpdateLocal(
+                                  state.authenticate!.copyWith(apiKey: '')));
                               showDialog(
                                   barrierDismissible: true,
                                   context: context,
                                   builder: (BuildContext context) {
                                     return BlocProvider.value(
                                         value: _authBloc,
-                                        child: const RegisterUserDialog(true));
+                                        child: const LoginDialog());
                                   });
                             }),
-                      const SizedBox(height: 50)
-                    ]),
-                  )),
-            )),
+                        const Expanded(child: SizedBox(height: 20)),
+                        if (classificationId != 'AppSupport')
+                          OutlinedButton(
+                              key: const Key('newUserButton'),
+                              child: const Text(
+                                  'Register new Company and Administrator'),
+                              onPressed: () {
+                                showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return BlocProvider.value(
+                                          value: _authBloc,
+                                          child:
+                                              const RegisterUserDialog(true));
+                                    });
+                              }),
+                        const SizedBox(height: 50)
+                      ]),
+                    ))),
             Align(alignment: Alignment.bottomCenter, child: appInfo),
           ]);
         default:

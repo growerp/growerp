@@ -645,6 +645,6 @@ abstract class RestClient {
       {@Field() required Subscription subscription});
 
   @DELETE("rest/s1/growerp/100/Subscription")
-  Future<void> deleteSubscription(
+  Future<Subscription> deleteSubscription(
       {@Field() required Subscription subscription});
 }

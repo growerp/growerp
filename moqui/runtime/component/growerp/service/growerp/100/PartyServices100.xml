@@ -880,8 +880,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
             </if>
             <!-- update currency -->
-            <log
-                message="Updating currency for company ${company.partyId} from ${oldValue.companies[0].currency?.currencyId} to ${company.currency?.currencyId}" />
             <if
                 condition="oldValue.companies[0].currency?.currencyId != company.currency?.currencyId">
                 <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"
@@ -3191,7 +3189,6 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <set field="productStoreId" from="productStore.productStoreId" />
             <set field="facilityId" from="productStore.inventoryFacilityId" />
-
             <!-- get root (browse) category -->
             <entity-find entity-name="mantle.product.store.ProductStoreCategory"
                 list="browseRootList">

@@ -13,6 +13,7 @@
  */
 
 import 'package:decimal/decimal.dart';
+import 'package:growerp_core/src/extensions.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 Company initialCompany = Company(
@@ -475,13 +476,13 @@ List<Activity> activities = [
 List<TimeEntry> timeEntries = [
   TimeEntry(
       hours: Decimal.parse('4'),
-      date: DateTime.now().subtract(const Duration(days: 4))),
+      date: nowNoon.subtract(const Duration(days: 4))),
   TimeEntry(
       hours: Decimal.parse('3'),
-      date: DateTime.now().subtract(const Duration(days: 3))),
+      date: nowNoon.subtract(const Duration(days: 3))),
   TimeEntry(
       hours: Decimal.parse('2'),
-      date: DateTime.now().subtract(const Duration(days: 2)))
+      date: nowNoon.subtract(const Duration(days: 2)))
 ];
 
 List<ChatRoom> chatRooms = [
@@ -566,6 +567,37 @@ List<Product> products = [
     uom: Uom(typeDescription: 'Weight', description: 'Kilogram'),
     useWarehouse: false,
     assetClassId: "AsClsInventoryFin",
+  ),
+];
+
+List<Product> subscriptionProducts = [
+  Product(
+    productName: 'This is subscr product 1 3 days',
+    price: Decimal.parse('23.99'),
+    listPrice: Decimal.parse('27.99'),
+    categories: [categories[0]],
+    productTypeId: productTypes[1], // must be service
+    description: 'This is a dummy description of sub product',
+    amount: Decimal.parse('3.00'),
+    uom: Uom(
+        uomTypeId: 'UT_TIME_FREQ_MEASURE',
+        typeDescription: 'Time/Frequency',
+        uomId: 'TF_day',
+        description: 'Day'),
+  ),
+  Product(
+    productName: 'This is subscr product 2 hourly',
+    price: Decimal.parse('20.99'),
+    listPrice: Decimal.parse('21.99'),
+    categories: [categories[0]],
+    productTypeId: productTypes[1], // must be service
+    description: 'This is a dummy description of second sub product',
+    amount: Decimal.parse('1.00'),
+    uom: Uom(
+        uomTypeId: 'UT_TIME_FREQ_MEASURE',
+        typeDescription: 'Time/Frequency',
+        uomId: 'TF_hr',
+        description: 'Hour'),
   ),
 ];
 
@@ -960,8 +992,8 @@ List<FinDoc> rentalSalesOrders = [
           description: products[2].productName,
           price: products[2].price,
           quantity: Decimal.parse('2'), // nuber of days
-          rentalFromDate: DateTime.now().add(const Duration(days: 2)),
-          rentalThruDate: DateTime.now().add(const Duration(days: 4)),
+          rentalFromDate: nowNoon.add(const Duration(days: 2)),
+          rentalThruDate: nowNoon.add(const Duration(days: 4)),
         ),
       ]),
 ];
@@ -981,7 +1013,7 @@ List<Asset> assets = [
     product: products[0],
     statusId: assetStatusValues[0],
     acquireCost: Decimal.parse('11'),
-    receivedDate: DateTime.now().subtract(const Duration(days: 4)),
+    receivedDate: nowNoon.subtract(const Duration(days: 4)),
     location: locations[0],
   ),
   Asset(
@@ -991,7 +1023,7 @@ List<Asset> assets = [
     product: products[1],
     statusId: assetStatusValues[0],
     acquireCost: Decimal.parse('22'),
-    receivedDate: DateTime.now().subtract(const Duration(days: 4)),
+    receivedDate: nowNoon.subtract(const Duration(days: 4)),
     location: locations[1],
   ),
   Asset(
@@ -1001,7 +1033,7 @@ List<Asset> assets = [
     product: products[2], // only products 2 or rental test fails
     statusId: assetStatusValues[0],
     acquireCost: Decimal.parse('33'),
-    receivedDate: DateTime.now().subtract(const Duration(days: 4)),
+    receivedDate: nowNoon.subtract(const Duration(days: 4)),
   ),
   Asset(
     assetName: 'asset name 4 to be deleted',
@@ -1010,7 +1042,7 @@ List<Asset> assets = [
     product: products[0],
     statusId: assetStatusValues[0],
     acquireCost: Decimal.parse('44'),
-    receivedDate: DateTime.now().subtract(const Duration(days: 4)),
+    receivedDate: nowNoon.subtract(const Duration(days: 4)),
   ),
 ];
 
@@ -1221,7 +1253,7 @@ List<FinDoc> roomReservations = [
       items: [
         FinDocItem(
             description: productsHotel[0].productName,
-            rentalFromDate: DateTime.now(),
+            rentalFromDate: nowNoon,
             quantity: Decimal.parse('1')) // nbr of days
       ]),
 ];
@@ -1480,41 +1512,49 @@ List<FinDoc> requests = [
       description: "this is the sixth request",
       items: []),
 ];
-
+DateTime now = DateTime.now();
+DateTime nowNoon = DateTime.now().noon();
 List<Subscription> subscriptions = [
   Subscription(
-    pseudoId: 'SUB001',
     description: 'Test Subscription 1',
-    thruDate: DateTime(2025, 12, 31),
+    fromDate: nowNoon,
+    thruDate: nowNoon.add(const Duration(days: 1)),
+    product: subscriptionProducts[0],
+    subscriber: CompanyUser.tryParse(customerCompanies[0]),
   ),
   Subscription(
-    pseudoId: 'SUB002',
     description: 'Test Subscription 2',
-    fromDate: DateTime(2025, 2, 1),
-    thruDate: DateTime(2025, 11, 30),
+    fromDate: nowNoon.add(const Duration(days: 10)),
+    thruDate: nowNoon.add(const Duration(days: 11)),
+    product: subscriptionProducts[1],
+    subscriber: CompanyUser.tryParse(customerCompanies[1]),
   ),
   Subscription(
-    pseudoId: 'SUB003',
     description: 'Test Subscription 3',
-    fromDate: DateTime(2025, 3, 1),
-    thruDate: DateTime(2025, 10, 31),
+    fromDate: nowNoon.add(const Duration(days: 20)),
+    thruDate: nowNoon.add(const Duration(days: 21)),
+    product: subscriptionProducts[1],
+    subscriber: CompanyUser.tryParse(customerCompanies[1]),
   ),
   Subscription(
-    pseudoId: 'SUB004',
     description: 'Test Subscription 4',
-    fromDate: DateTime(2025, 4, 1),
-    thruDate: DateTime(2025, 9, 30),
+    fromDate: nowNoon.add(const Duration(days: 30)),
+    thruDate: nowNoon.add(const Duration(days: 31)),
+    product: subscriptionProducts[0],
+    subscriber: CompanyUser.tryParse(customerCompanies[0]),
   ),
   Subscription(
-    pseudoId: 'SUB005',
     description: 'Test Subscription 5',
-    fromDate: DateTime(2025, 5, 1),
-    thruDate: DateTime(2025, 8, 31),
+    fromDate: nowNoon.add(const Duration(days: 40)),
+    thruDate: nowNoon.add(const Duration(days: 41)),
+    product: subscriptionProducts[0],
+    subscriber: CompanyUser.tryParse(customerCompanies[0]),
   ),
   Subscription(
-    pseudoId: 'SUB006',
     description: 'Test Subscription 6',
-    fromDate: DateTime(2025, 6, 1),
-    thruDate: DateTime(2025, 7, 31),
+    fromDate: nowNoon.add(const Duration(days: 50)),
+    thruDate: nowNoon.add(const Duration(days: 51)),
+    product: subscriptionProducts[1],
+    subscriber: CompanyUser.tryParse(customerCompanies[1]),
   ),
 ];

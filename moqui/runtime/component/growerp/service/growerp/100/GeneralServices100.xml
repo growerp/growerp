@@ -645,7 +645,6 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <log message="get UOM list for types: $uomTypes" level="warn" />
             <entity-find entity-name="moqui.basic.UomAndType" list="allUom">
                 <econdition field-name="uomTypeEnumId" operator="in" from="uomTypes"
                     ignore-if-empty="true" />
@@ -905,12 +904,14 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="adminAccess">
                     <then><!-- update company and admin from party registration-->
                         <if condition="companyName &amp;&amp; currencyId">
-                            <!-- update main company name currency: temporary -->
+                            <!-- update main company name currency/demodata: temporary -->
+                            <!-- order: company/currency => payscreen to use currency -->
+                            <set field="temp" value="${currencyId}/${demoData.toString()}" />
                             <service-call name="update#mantle.party.Organization"
                                 out-map="context"
                                 in-map="[partyId: companyPartyId,
                                         organizationName: companyName,
-                                        officeSiteName: currencyId]" />
+                                        officeSiteName: temp]" />
                             <!-- activate owner -->
                             <service-call name="update#mantle.party.Party"
                                 in-map="[partyId: ownerPartyId, disabled: 'N']" />
@@ -1062,7 +1063,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <!-- prompt for capture of payment if not first tenant != GrowERP-->
                         <if condition="ownerPartyId != 'GROWERP'">
                             <log
-                                message="Checking for payment capture from: ${companyPartyId} to: ${growerpPartyId}" />
+                                message="Checking for payment capture from: ${companyPartyId} to: ${growerpPartyId}"
+                                level="warn" />
                             <entity-find entity-name="mantle.account.payment.Payment"
                                 list="payments" limit="1">
                                 <econdition field-name="fromPartyId" from="companyPartyId" />
@@ -1070,7 +1072,6 @@ along with this software (see the LICENSE.md file). If not, see
                                 <!-- econdition field-name="statusId" value="PmntAuthorized" /-->
                                 <order-by field-name="-paymentId" />
                             </entity-find>
-                            <log message="Found payments: ${payments?.size()}" />
                             <!-- test check for payments -->
                             <if condition="!payments">
                                 <set field="authenticate"
@@ -1096,7 +1097,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 </if>
                             </if>
                         </if>
-                        <!-- get temp location currency and remove -->
+                        <!-- get temp location currency/demodata and remove -->
                         <entity-find-one entity-name="mantle.party.Organization"
                             value-field="org" for-update="true">
                             <field-map field-name="partyId" from="companyPartyId" />
@@ -1107,9 +1108,7 @@ along with this software (see the LICENSE.md file). If not, see
                             name="growerp.100.AccountingServices100.init#PartyAccountingConfiguration"
                             in-map="[sourcePartyId: 'DefaultSettings',
                                         organizationPartyId: companyPartyId,
-                                        baseCurrencyUomId: org.officeSiteName]" />
-                        <set field="org.officeSiteName" from="null" />
-                        <entity-update value-field="org" />
+                                        baseCurrencyUomId: org.officeSiteName.split('/')[0]]" />
                         <!-- the organizational setup -->
                         <service-call
                             name="growerp.100.PartyServices100.setup#MainOrganization"
@@ -1159,7 +1158,7 @@ along with this software (see the LICENSE.md file). If not, see
                             </iterate>
                             <else>
                                 <!-- demo data not for growerp itself-->
-                                <if condition="demoData">
+                                <if condition="org.officeSiteName.split('/')[1] == 'true'">
                                     <service-call
                                         name="growerp.100.PartyServices100.load#DemoData"
                                         include-user-login="true"
@@ -1171,6 +1170,9 @@ along with this software (see the LICENSE.md file). If not, see
                                 </if>
                             </else>
                         </if>
+                        <set field="org.officeSiteName" from="null" />
+                        <entity-update value-field="org" />
+
                         <!-- create event -->
                         <service-call
                             name="growerp.100.ActivityServices100.create#Event"

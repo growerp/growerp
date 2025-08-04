@@ -13,13 +13,14 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 class SubscriptionTest {
   static Future<void> selectSubscriptions(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbCatalog', 'SubscriptionList', '2');
+    await CommonTest.selectOption(tester, 'dbCatalog', 'SubscriptionList', '3');
   }
 
   static Future<void> addSubscriptions(
@@ -28,37 +29,37 @@ class SubscriptionTest {
     SaveTest test = await PersistFunctions.getTest();
     if (test.subscriptions.isEmpty) {
       // not yet created
-      await enterSubscriptionData(tester, subscriptions);
       await PersistFunctions.persistTest(
-          test.copyWith(subscriptions: subscriptions));
+          SaveTest(subscriptions: subscriptions));
+      await enterSubscriptionData(tester);
     }
     if (check) {
-      await PersistFunctions.persistTest(test.copyWith(
-          subscriptions: await checkSubscriptionDetail(tester, subscriptions)));
+      await checkSubscriptionDetail(tester);
     }
   }
 
   static Future<void> updateSubscriptions(
-      WidgetTester tester, List<Subscription> subscriptions) async {
-    SaveTest test = await PersistFunctions.getTest();
-    List<Subscription> newSubscriptions = List.of(test.subscriptions);
-    if (newSubscriptions.isNotEmpty &&
-        newSubscriptions[0].description != subscriptions[0].description) {
+      WidgetTester tester, List<Subscription> newSubscriptions) async {
+    List<Subscription> subscriptions =
+        (await PersistFunctions.getTest()).subscriptions;
+    // copy over pseudoId
+    if (newSubscriptions.isNotEmpty) {
       for (int x = 0; x < newSubscriptions.length; x++) {
-        newSubscriptions[x] = subscriptions[x]
-            .copyWith(subscriptionId: newSubscriptions[x].subscriptionId);
+        newSubscriptions[x] =
+            newSubscriptions[x].copyWith(pseudoId: subscriptions[x].pseudoId);
       }
-      await enterSubscriptionData(tester, newSubscriptions);
       await PersistFunctions.persistTest(
-          test.copyWith(subscriptions: newSubscriptions));
+          SaveTest(subscriptions: newSubscriptions));
+      await enterSubscriptionData(tester);
     }
-    await checkSubscriptionDetail(tester, newSubscriptions);
+    await checkSubscriptionDetail(tester);
   }
 
   static Future<void> deleteLastSubscription(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
+    List<Subscription> subscriptions =
+        (await PersistFunctions.getTest()).subscriptions;
     var count = CommonTest.getWidgetCountByKey(tester, 'subscriptionItem');
-    if (count == (test.subscriptions.length)) {
+    if (count == (subscriptions.length)) {
       await CommonTest.gotoMainMenu(tester);
       await selectSubscriptions(tester);
       await CommonTest.tapByKey(tester, 'delete${count - 1}',
@@ -67,52 +68,95 @@ class SubscriptionTest {
       await selectSubscriptions(tester);
       expect(
           find.byKey(const Key('subscriptionItem')), findsNWidgets(count - 1));
-      await PersistFunctions.persistTest(test.copyWith(
-          subscriptions:
-              test.subscriptions.sublist(0, (test.subscriptions.length) - 1)));
+      await PersistFunctions.persistTest(SaveTest(
+          subscriptions: subscriptions.sublist(0, (subscriptions.length) - 1)));
     }
   }
 
-  static Future<void> enterSubscriptionData(
-      WidgetTester tester, List<Subscription> subscriptions) async {
+  static Future<void> enterSubscriptionData(WidgetTester tester) async {
+    List<Subscription> subscriptions =
+        (await PersistFunctions.getTest()).subscriptions;
+    List<Subscription> subscriptionsWithPseudoId = [];
     for (Subscription subscription in subscriptions) {
-      if (subscription.subscriptionId == null) {
+      if (subscription.pseudoId == null) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.doSearch(tester,
-            searchString: subscription.subscriptionId!);
-        await CommonTest.tapByKey(tester, 'code0');
+        await CommonTest.doNewSearch(tester,
+            searchString: subscription.pseudoId!);
         expect(CommonTest.getTextField('topHeader').split('#')[1],
-            subscription.subscriptionId);
+            subscription.pseudoId);
       }
       await CommonTest.checkWidgetKey(tester, 'SubscriptionDialog');
       await CommonTest.enterText(
           tester, 'pseudoId', subscription.pseudoId ?? '');
       await CommonTest.enterText(
           tester, 'description', subscription.description ?? '');
-      await CommonTest.enterText(
-          tester, 'fromDate', subscription.fromDate?.toString() ?? '');
-      await CommonTest.enterText(
-          tester, 'thruDate', subscription.thruDate?.toString() ?? '');
+      if (subscription.fromDate != null) {
+        await CommonTest.enterDate(tester, 'fromDate', subscription.fromDate!);
+      }
+      if (subscription.thruDate != null) {
+        await CommonTest.enterDate(tester, 'thruDate', subscription.thruDate!);
+      }
+      await CommonTest.enterDropDownSearch(
+          tester, 'subscriber', subscription.subscriber!.name!);
+      await CommonTest.enterDropDownSearch(
+          tester, 'product', subscription.product!.productName!);
       // Add more fields as needed
       await CommonTest.tapByKey(tester, 'update');
       await CommonTest.checkWidgetKey(tester, 'SubscriptionList');
+      // new items always added at the top
+      subscriptionsWithPseudoId
+          .add(subscription.copyWith(pseudoId: CommonTest.getTextField('id0')));
+    }
+    // only update when pseudoId was missing
+    if (subscriptions[0].pseudoId == null) {
+      await PersistFunctions.persistTest(
+          SaveTest(subscriptions: subscriptionsWithPseudoId));
     }
   }
 
-  static Future<List<Subscription>> checkSubscriptionDetail(
-      WidgetTester tester, List<Subscription> subscriptions) async {
-    List<Subscription> checked = [];
-    for (int i = 0; i < subscriptions.length; i++) {
-      await CommonTest.doSearch(tester,
-          searchString: subscriptions[i].pseudoId ?? '');
-      await CommonTest.tapByKey(tester, 'code0');
+  static Future<void> checkSubscriptionDetail(WidgetTester tester) async {
+    List<Subscription> subscriptions =
+        (await PersistFunctions.getTest()).subscriptions;
+
+    for (var subscription in subscriptions) {
+      await CommonTest.doNewSearch(tester,
+          searchString: subscription.pseudoId!);
       await CommonTest.checkWidgetKey(tester, 'SubscriptionDialog');
-      // Optionally check fields here
-      checked.add(subscriptions[i]);
+
+      // Get the FormBuilder state for all fields including dropdowns
+      final formState =
+          tester.state<FormBuilderState>(find.byType(FormBuilder));
+      formState.save(); // save into the formbuilder internal value fields
+
+      if (subscription.fromDate != null) {
+        expect((formState.value['fromDate'] as DateTime).dateOnly(),
+            subscription.fromDate.dateOnly());
+      }
+      if (subscription.thruDate != null) {
+        expect((formState.value['thruDate'] as DateTime).dateOnly(),
+            subscription.thruDate.dateOnly());
+      }
+
+      // Check FormBuilder text fields
+      expect(formState.value['description'], subscription.description);
+
+      // Now we can check the FormBuilder dropdown values
+      if (subscription.product != null) {
+        final formProduct = formState.value['product'] as Product?;
+        if (formProduct != null) {
+          expect(formProduct.productName, subscription.product!.productName);
+        }
+      }
+      if (subscription.subscriber != null) {
+        final formSubscriber = formState.value['subscriber'] as CompanyUser?;
+        if (formSubscriber != null) {
+          expect(formSubscriber.name, subscription.subscriber!.name);
+        }
+      }
+
       await CommonTest.tapByKey(tester, 'cancel');
       await CommonTest.checkWidgetKey(tester, 'SubscriptionList');
     }
-    return checked;
   }
 }
