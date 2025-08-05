@@ -207,6 +207,7 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                   ]),
                 ),
               ),
+              const SizedBox(width: 8),
               Expanded(
                 flex: 1,
                 child: FormBuilderDateTimePicker(
@@ -218,6 +219,40 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                   format: DateFormat('yyyy/M/d'),
                   decoration: const InputDecoration(
                     labelText: 'Thru Date',
+                    suffixIcon: Icon(Icons.calendar_today),
+                  ),
+                ),
+              ),
+            ]),
+            const SizedBox(height: 16),
+            Row(children: [
+              Expanded(
+                flex: 1,
+                child: FormBuilderDateTimePicker(
+                  name: 'purchaseFromDate',
+                  key: const Key('purchaseFromDate'),
+                  // Convert from server UTC time to local time for display
+                  initialValue: widget.subscription.purchaseFromDate?.toLocal(),
+                  inputType: InputType.date,
+                  format: DateFormat('yyyy/M/d'),
+                  decoration: const InputDecoration(
+                    labelText: 'Purchase Date',
+                    suffixIcon: Icon(Icons.calendar_today),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 1,
+                child: FormBuilderDateTimePicker(
+                  name: 'purchaseThruDate',
+                  key: const Key('purchaseThruDate'),
+                  // Convert from server UTC time to local time for display
+                  initialValue: widget.subscription.purchaseThruDate?.toLocal(),
+                  inputType: InputType.date,
+                  format: DateFormat('yyyy/M/d'),
+                  decoration: const InputDecoration(
+                    labelText: 'Cancel Date',
                     suffixIcon: Icon(Icons.calendar_today),
                   ),
                 ),
@@ -296,6 +331,10 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                         final formData = _formKey.currentState!.value;
                         DateTime? fromDate = formData['fromDate'] as DateTime?;
                         DateTime? thruDate = formData['thruDate'] as DateTime?;
+                        DateTime? purchaseFromDate =
+                            formData['purchaseFromDate'] as DateTime?;
+                        DateTime? purchaseThruDate =
+                            formData['purchaseThruDate'] as DateTime?;
                         CompanyUser? subscriber =
                             formData['subscriber'] as CompanyUser?;
                         Product? product = formData['product'] as Product?;
@@ -307,6 +346,10 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                           // Convert dates to UTC for server storage
                           fromDate: fromDate?.noon().toServerTime(),
                           thruDate: thruDate?.noon().toServerTime(),
+                          purchaseFromDate:
+                              purchaseFromDate?.noon().toServerTime(),
+                          purchaseThruDate:
+                              purchaseThruDate?.noon().toServerTime(),
                           subscriber: subscriber,
                           product: product,
                         )));

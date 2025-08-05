@@ -56,7 +56,9 @@ class ProductDialogState extends State<ProductDialog> {
   List<Uom> _uomTypes = [];
   List<Uom> uomsOfType = [];
   final ScrollController _scrollController = ScrollController();
+  late Currency currency;
   late String currencyId;
+  late Currency _currencySelected;
   late String currencySymbol;
   late double top;
   double? right;
@@ -64,15 +66,11 @@ class ProductDialogState extends State<ProductDialog> {
   @override
   void initState() {
     super.initState();
-    currencyId = context
-        .read<AuthBloc>()
-        .state
-        .authenticate!
-        .company!
-        .currency!
-        .currencyId!;
+    currency = context.read<AuthBloc>().state.authenticate!.company!.currency!;
+    currencyId = currency.currencyId!;
     currencySymbol = NumberFormat.simpleCurrency(
-            locale: Platform.localeName, name: currencyId)
+            locale: Platform.localeName,
+            name: widget.product.currency?.currencyId ?? currencyId)
         .currencySymbol;
     _productBloc = context.read<ProductBloc>();
     context
@@ -81,6 +79,11 @@ class ProductDialogState extends State<ProductDialog> {
     classificationId = context.read<String>();
     _selectedCategories = List.of(widget.product.categories);
     useWarehouse = widget.product.useWarehouse;
+    _currencySelected = widget.product.currency != null
+        ? currencies.firstWhere(
+            (x) => x.currencyId == widget.product.currency?.currencyId)
+        : currency;
+    currencyId = _currencySelected.currencyId!;
     _selectedProductTypeId = widget.product.productTypeId;
     _productDialogFormKey = GlobalKey<FormBuilderState>();
     top = -100;
@@ -158,10 +161,10 @@ class ProductDialogState extends State<ProductDialog> {
                 .toList();
 
             _selectedUom ??= (() {
-              if (widget.product.uom != null) {
+              if (widget.product.amountUom != null) {
                 try {
                   return _uoms.firstWhere(
-                      (uom) => uom.uomId == widget.product.uom!.uomId);
+                      (uom) => uom.uomId == widget.product.amountUom!.uomId);
                 } catch (e) {
                   return _uoms.isNotEmpty ? _uoms.first : Uom();
                 }
@@ -188,8 +191,8 @@ class ProductDialogState extends State<ProductDialog> {
                           ? 'New'
                           : widget.product.pseudoId),
                   height: isPhone
-                      ? (classificationId == 'AppAdmin' ? 750 : 600)
-                      : (classificationId == 'AppAdmin' ? 600 : 600),
+                      ? (classificationId == 'AppAdmin' ? 750 : 700)
+                      : (classificationId == 'AppHotel' ? 600 : 600),
                   width: isPhone ? 450 : 800,
                   child: listChild(classificationId, isPhone),
                 ));
@@ -252,11 +255,11 @@ class ProductDialogState extends State<ProductDialog> {
             Expanded(
                 flex: 1,
                 child: Padding(
-                    padding: const EdgeInsets.all(10), child: widgets[i++])),
+                    padding: const EdgeInsets.all(5), child: widgets[i++])),
             Expanded(
                 flex: 1,
                 child: Padding(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(5),
                     child: i < widgets.length ? widgets[i] : Container()))
           ],
         ));
@@ -422,41 +425,73 @@ class ProductDialogState extends State<ProductDialog> {
           FormBuilderValidators.required(),
         ]),
       ),
-      Row(
-        children: [
-          Expanded(
-            child: FormBuilderTextField(
-              name: 'listPrice',
-              key: const Key('listPrice'),
-              initialValue: widget.product.listPrice == null
-                  ? ''
-                  : widget.product.listPrice.currency(currencyId: ''),
-              decoration:
-                  InputDecoration(labelText: 'List Price($currencySymbol)'),
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
-              ],
-              validator: FormBuilderValidators.compose([
-                FormBuilderValidators.required(),
-              ]),
+      InputDecorator(
+        decoration: InputDecoration(
+            labelText: 'Prices',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(25.0),
+            )),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 1,
+              child: FormBuilderTextField(
+                name: 'listPrice',
+                key: const Key('listPrice'),
+                initialValue: widget.product.listPrice == null
+                    ? ''
+                    : widget.product.listPrice.currency(currencyId: ''),
+                decoration:
+                    InputDecoration(labelText: 'List Price($currencySymbol)'),
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
+                ],
+                validator: FormBuilderValidators.compose([
+                  FormBuilderValidators.required(),
+                ]),
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: FormBuilderTextField(
-              name: 'price',
-              key: const Key('price'),
-              initialValue: widget.product.price == null
-                  ? ''
-                  : widget.product.price.currency(currencyId: ''),
-              decoration:
-                  InputDecoration(labelText: 'Current Price($currencySymbol)'),
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
-              ],
+            const SizedBox(width: 10),
+            Expanded(
+              flex: 1,
+              child: FormBuilderTextField(
+                name: 'price',
+                key: const Key('price'),
+                initialValue: widget.product.price == null
+                    ? ''
+                    : widget.product.price.currency(currencyId: ''),
+                decoration: InputDecoration(
+                    labelText: 'Current Price($currencySymbol)'),
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
+                ],
+              ),
             ),
-          )
-        ],
+            Expanded(
+              flex: 1,
+              child: FormBuilderDropdown<Currency>(
+                name: 'currency',
+                key: const Key('currency'),
+                initialValue: _currencySelected,
+                decoration: const InputDecoration(labelText: 'Currency'),
+                hint: const Text('Currency'),
+                validator: FormBuilderValidators.compose([
+                  FormBuilderValidators.required(
+                      errorText: 'Currency field required!'),
+                ]),
+                items: currencies.map((item) {
+                  return DropdownMenuItem<Currency>(
+                      value: item, child: Text(item.currencyId!));
+                }).toList(),
+                onChanged: (Currency? newValue) {
+                  setState(() {
+                    _currencySelected = newValue!;
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
       ),
       if (classificationId != 'AppHotel')
         Padding(
@@ -472,7 +507,7 @@ class ProductDialogState extends State<ProductDialog> {
       if (classificationId != 'AppHotel' && _selectedProductTypeId != 'Service')
         InputDecorator(
             decoration: InputDecoration(
-                labelText: 'Product Quantity/Amount',
+                labelText: 'Warehouse/Inventory',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25.0),
                 )),
@@ -509,7 +544,7 @@ class ProductDialogState extends State<ProductDialog> {
             )),
       InputDecorator(
           decoration: InputDecoration(
-              labelText: 'Product Quantity/Amount',
+              labelText: 'Type/Amount',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(25.0),
               )),
@@ -603,54 +638,51 @@ class ProductDialogState extends State<ProductDialog> {
               ),
             ],
           )),
-      Expanded(
-          child: OutlinedButton(
-              key: const Key('update'),
-              child:
-                  Text(widget.product.productId.isEmpty ? 'Create' : 'Update'),
-              onPressed: () async {
-                if (_productDialogFormKey.currentState!.saveAndValidate()) {
-                  final formData = _productDialogFormKey.currentState!.value;
-                  Uint8List? image =
-                      await HelperFunctions.getResizedImage(_imageFile?.path);
-                  if (!mounted) return;
-                  if (_imageFile?.path != null && image == null) {
-                    HelperFunctions.showMessage(
-                        context, "Image upload error!", Colors.red);
-                  } else {
-                    _productBloc.add(ProductUpdate(Product(
-                        productId: widget.product.productId,
-                        pseudoId: formData['id'] ?? '',
-                        productName: formData['name'] ?? '',
-                        assetClassId: classificationId == 'AppHotel'
-                            ? 'Hotel Room'
-                            : 'AsClsInventoryFin', // finished good
-                        description: formData['description'] ?? '',
-                        listPrice:
-                            Decimal.parse(formData['listPrice'] ?? '0.00'),
-                        price: Decimal.parse(formData['price'].isEmpty
-                            ? '0.00'
-                            : formData['price']),
-                        amount: Decimal.parse(formData['amount'].isEmpty
-                            ? '0.00'
-                            : formData['amount']),
-                        uom: formData['uom'] ?? _selectedUom,
-                        assetCount: formData['assets'] == null ||
-                                formData['assets'].isEmpty
+      OutlinedButton(
+          key: const Key('update'),
+          child: Text(widget.product.productId.isEmpty ? 'Create' : 'Update'),
+          onPressed: () async {
+            if (_productDialogFormKey.currentState!.saveAndValidate()) {
+              final formData = _productDialogFormKey.currentState!.value;
+              Uint8List? image =
+                  await HelperFunctions.getResizedImage(_imageFile?.path);
+              if (!mounted) return;
+              if (_imageFile?.path != null && image == null) {
+                HelperFunctions.showMessage(
+                    context, "Image upload error!", Colors.red);
+              } else {
+                _productBloc.add(ProductUpdate(Product(
+                    productId: widget.product.productId,
+                    pseudoId: formData['id'] ?? '',
+                    productName: formData['name'] ?? '',
+                    assetClassId: classificationId == 'AppHotel'
+                        ? 'Hotel Room'
+                        : 'AsClsInventoryFin', // finished good
+                    description: formData['description'] ?? '',
+                    listPrice: Decimal.parse(formData['listPrice'] ?? '0.00'),
+                    price: Decimal.parse(
+                        formData['price'].isEmpty ? '0.00' : formData['price']),
+                    currency: formData['currency'] ?? _currencySelected,
+                    amount: Decimal.parse(formData['amount'].isEmpty
+                        ? '0.00'
+                        : formData['amount']),
+                    amountUom: formData['amountUom'] ?? _selectedUom,
+                    assetCount:
+                        formData['assets'] == null || formData['assets'].isEmpty
                             ? 0
                             : int.parse(formData['assets']),
-                        categories: _selectedCategories,
-                        productTypeId:
-                            formData['productType'] ?? _selectedProductTypeId,
-                        useWarehouse: (formData['productType'] ??
-                                    _selectedProductTypeId) ==
+                    categories: _selectedCategories,
+                    productTypeId:
+                        formData['productType'] ?? _selectedProductTypeId,
+                    useWarehouse:
+                        (formData['productType'] ?? _selectedProductTypeId) ==
                                 'Service'
                             ? false
                             : formData['useWarehouse'] ?? false,
-                        image: image)));
-                  }
-                }
-              }))
+                    image: image)));
+              }
+            }
+          })
     ];
   }
 }

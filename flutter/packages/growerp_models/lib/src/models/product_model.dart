@@ -39,8 +39,9 @@ class Product extends Equatable with _$Product {
     String? description,
     Decimal? listPrice,
     Decimal? price,
+    Currency? currency, // currency, like EUR, USD
     Decimal? amount, // quantity included like duration, length, weight
-    Uom? uom, // like hour, day, month, year, piece
+    Uom? amountUom, // like hour, day, month, year, piece
     @Default([]) List<Category> categories,
     @Default(false) bool useWarehouse,
     int? assetCount,

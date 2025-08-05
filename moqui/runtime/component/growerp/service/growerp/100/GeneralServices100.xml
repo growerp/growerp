@@ -999,20 +999,24 @@ along with this software (see the LICENSE.md file). If not, see
                             <service-call name="create#mantle.account.payment.Payment"
                                 in-map="growerpPaymentInMap" out-map="paymentInfo" />
                             <set field="paymentId" from="paymentInfo.paymentId" />
+                            <!-- two week trial period -->
                             <set field="datePlus"
                                 from="java.sql.Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().plusWeeks(2))" />
                             <!-- subscription -->
                             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                                 in-map="[ownerPartyId: 'GROWERP', seqName: 'subscription']"
                                 out-map="context" />
+                            <log
+                                message="create subscription for ${growerpCustomerPartyId} with product ${productPrices[0].productId} from ${datePlus}" />
                             <service-call
                                 name="create#mantle.product.subscription.Subscription"
                                 in-map="[
                                     pseudoId: seqNum,
                                     subscriberPartyId: growerpCustomerPartyId,
                                     externalSubscriptionId: ownerPartyId,
-                                    fromDate: datePlus,
-                                    product: productPrices[0].productId,
+                                    fromDate: ec.user.nowTimestamp,
+                                    thruDate: datePlus,
+                                    productId: productPrices[0].productId,
                                     subscriptionTypeId: 'StProduct',
                                     ownerPartyId: 'GROWERP']"
                                 out-map="context" />
@@ -1104,6 +1108,8 @@ along with this software (see the LICENSE.md file). If not, see
                                     productName: 'GrowERP do it yourself plan',
                                     description: 'DIY Plan $49 per month|Full functionality, unlimited users!|support charged extra $75/hr',
                                     price: 49.00,
+                                    currencyId: 'USD',
+                                    productTypeId: 'Service',
                                     categories: [category]
                                 ],
                                 [
@@ -1111,6 +1117,8 @@ along with this software (see the LICENSE.md file). If not, see
                                     productName: 'GrowERP small Company plan',
                                     description: 'Small Company Plan $499 per month|Full functionality, unlimited users|including support for 20hrs/month',
                                     price: 499.00,
+                                    currencyId: 'USD',
+                                    productTypeId: 'Service',
                                     categories: [category]
                                 ],
                                 [
@@ -1118,6 +1126,8 @@ along with this software (see the LICENSE.md file). If not, see
                                     productName: 'GrowERP full company plan',
                                     description: 'Full Company Plan $999 per month|Full functionality, unlimited users|including support for 40hrs/month',
                                     price: 999.00,
+                                    currencyId: 'USD',
+                                    productTypeId: 'Service',
                                     categories: [category]
                                 ]
                             ]" />
