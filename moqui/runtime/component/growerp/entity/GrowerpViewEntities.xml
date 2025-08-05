@@ -2139,6 +2139,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="uomTypeId" field="uomTypeEnumId" entity-alias="UOM" />
         <alias name="typeDescription" field="description" entity-alias="ENUM" />
         <alias name="amount" field="amountFixed" entity-alias="PROD" />
+        <alias name="amountUomId" entity-alias="PROD" />
         <alias name="requireInventory" entity-alias="PROD" />
         <alias name="productFromDate" field="salesIntroductionDate" entity-alias="PROD" />
         <alias name="productThruDate" field="salesDiscontinuationDate" entity-alias="PROD" />
@@ -3072,6 +3073,23 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="SUBS" join-optional="true">
             <key-map field-name="productId" />
         </member-entity>
+        <!-- product prices -->
+        <member-entity entity-alias="LISTPRICE" entity-name="mantle.product.ProductPrice"
+            join-from-alias="PROD" join-optional="true">
+            <key-map field-name="productId" />
+            <entity-condition>
+                <date-filter from-field-name="listPriceFromDate" thru-field-name="listPriceThruDate" />
+                <econdition field-name="listPriceTypeEnumId" value="PptList" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="PRICE" entity-name="mantle.product.ProductPrice"
+            join-from-alias="PROD" join-optional="true">
+            <key-map field-name="productId" />
+            <entity-condition>
+                <date-filter from-field-name="priceFromDate" thru-field-name="priceThruDate" />
+                <econdition field-name="priceTypeEnumId" value="PptCurrent" />
+            </entity-condition>
+        </member-entity>
         <!-- order -->
         <member-entity entity-alias="ORD" entity-name="mantle.order.OrderHeader"
             join-from-alias="SUBS" join-optional="true">
@@ -3109,6 +3127,16 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="productName" entity-alias="PROD" />
         <alias name="amount" field="amountFixed" entity-alias="PROD" />
         <alias name="amountUomId" entity-alias="PROD" />
+        <alias name="listPrice" field="price" entity-alias="LISTPRICE" />
+        <alias name="listPriceUomId" field="priceUomId" entity-alias="LISTPRICE" />
+        <alias name="listPriceTypeEnumId" field="priceTypeEnumId" entity-alias="LISTPRICE" />
+        <alias name="listPriceFromDate" field="fromDate" entity-alias="LISTPRICE" />
+        <alias name="listPriceThruDate" field="thruDate" entity-alias="LISTPRICE" />
+        <alias name="price" entity-alias="PRICE" />
+        <alias name="priceUomId" entity-alias="PRICE" />
+        <alias name="priceTypeEnumId" entity-alias="PRICE" />
+        <alias name="priceFromDate" field="fromDate" entity-alias="PRICE" />
+        <alias name="priceThruDate" field="thruDate" entity-alias="PRICE" />
         <alias name="orderId" entity-alias="ORD" />
         <alias name="orderItemSeqId" entity-alias="ORDITEM" />
     </view-entity>

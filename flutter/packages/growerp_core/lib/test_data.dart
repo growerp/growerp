@@ -526,7 +526,7 @@ List<Product> products = [
     description: 'This is a dummy description of first product',
     useWarehouse: true,
     amount: Decimal.parse('1.00'),
-    uom: Uom(typeDescription: 'Weight', description: 'Kilogram'),
+    amountUom: Uom(typeDescription: 'Weight', description: 'Kilogram'),
     assetClassId: "AsClsInventoryFin",
   ),
   Product(
@@ -539,7 +539,7 @@ List<Product> products = [
     description: 'This is a dummy description of second product',
     useWarehouse: true,
     amount: Decimal.parse('1.00'),
-    uom: Uom(typeDescription: 'Length', description: 'Centimeter'),
+    amountUom: Uom(typeDescription: 'Length', description: 'Centimeter'),
     assetClassId: "AsClsInventoryFin",
   ),
   Product(
@@ -552,7 +552,7 @@ List<Product> products = [
     description: 'This is a dummy description of third product',
     useWarehouse: false,
     amount: Decimal.parse('1.00'),
-    uom: Uom(typeDescription: 'Time/Frequency', description: 'Day'),
+    amountUom: Uom(typeDescription: 'Time/Frequency', description: 'Day'),
     assetClassId: "AsClsInventoryFin",
   ),
   Product(
@@ -564,7 +564,7 @@ List<Product> products = [
     productTypeId: productTypes[1],
     description: 'This is the fourth product to be deleted',
     amount: Decimal.parse('1.00'),
-    uom: Uom(typeDescription: 'Weight', description: 'Kilogram'),
+    amountUom: Uom(typeDescription: 'Weight', description: 'Kilogram'),
     useWarehouse: false,
     assetClassId: "AsClsInventoryFin",
   ),
@@ -579,7 +579,7 @@ List<Product> subscriptionProducts = [
     productTypeId: productTypes[1], // must be service
     description: 'This is a dummy description of sub product',
     amount: Decimal.parse('3.00'),
-    uom: Uom(
+    amountUom: Uom(
         uomTypeId: 'UT_TIME_FREQ_MEASURE',
         typeDescription: 'Time/Frequency',
         uomId: 'TF_day',
@@ -593,7 +593,7 @@ List<Product> subscriptionProducts = [
     productTypeId: productTypes[1], // must be service
     description: 'This is a dummy description of second sub product',
     amount: Decimal.parse('1.00'),
-    uom: Uom(
+    amountUom: Uom(
         uomTypeId: 'UT_TIME_FREQ_MEASURE',
         typeDescription: 'Time/Frequency',
         uomId: 'TF_hr',
@@ -1519,6 +1519,8 @@ List<Subscription> subscriptions = [
     description: 'Test Subscription 1',
     fromDate: nowNoon,
     thruDate: nowNoon.add(const Duration(days: 1)),
+    purchaseFromDate: nowNoon,
+    purchaseThruDate: nowNoon.add(const Duration(days: 2)),
     product: subscriptionProducts[0],
     subscriber: CompanyUser.tryParse(customerCompanies[0]),
   ),

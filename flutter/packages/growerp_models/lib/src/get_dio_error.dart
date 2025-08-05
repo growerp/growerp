@@ -40,7 +40,7 @@ Future<String> getDioError(e) async {
           returnMessage +=
               " ${decoded['errors'] ?? ''}[${decoded['errorCode'] ?? ''}]";
         } else {
-          returnMessage += ' ${e.response.toString()}';
+          returnMessage = ' ${e.response.toString()}';
         }
       } catch (_) {
         returnMessage += ' ${e.response.toString()}';

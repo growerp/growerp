@@ -64,15 +64,21 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
   rowContent.add(TableRowContent(
       name: const Text('Price', textAlign: TextAlign.right),
       width: isPhone ? 15 : 5,
-      value: Text(item.price.currency(currencyId: currencyId),
-          key: Key('price$index'), textAlign: TextAlign.right)));
+      value: Text(
+          item.price
+              .currency(currencyId: item.currency?.currencyId ?? currencyId),
+          key: Key('price$index'),
+          textAlign: TextAlign.right)));
 
   if (!isPhone) {
     rowContent.add(TableRowContent(
         name: const Text('List Price', textAlign: TextAlign.right),
         width: isPhone ? 15 : 5,
-        value: Text(item.listPrice.currency(currencyId: currencyId),
-            key: Key('listPrice$index'), textAlign: TextAlign.right)));
+        value: Text(
+            item.listPrice
+                .currency(currencyId: item.currency?.currencyId ?? currencyId),
+            key: Key('listPrice$index'),
+            textAlign: TextAlign.right)));
   }
 
   if (!isPhone && classificationId != 'AppHotel') {

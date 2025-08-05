@@ -18,6 +18,10 @@
                 <parameter name="partyId" />
                 <parameter name="roleTypeId" />
                 <parameter name="productId" />
+                <parameter name="price" />
+                <parameter name="priceUomId" />
+                <parameter name="listPrice" />
+                <parameter name="listPriceUomId" />
                 <parameter name="orderId" />
                 <parameter name="fromDate" />
                 <parameter name="thruDate" />
@@ -87,6 +91,7 @@
                             pseudoId: item.productPseudoId,
                             productName: item.productName,
                             amount: item.amount ? item.amount.toString() : '0.00',
+                            uom: [uomId: item.amountUomId],
                             ],
                         fromDate: item.fromDate ? ec.l10n.format(item.fromDate,'yyyy-MM-dd HH:mm:ssZ') : null,
                         thruDate: item.thruDate ? ec.l10n.format(item.thruDate,'yyyy-MM-dd HH:mm:ssZ') : null,
@@ -266,7 +271,7 @@
                     message="Subscription with ID ${subscription.subscriptionId} not found." />
             </if>
             <set field="nowDate" from="ec.user.nowTimestamp" />
-            <set field="lookupEntity.thruDate" from="nowDate" />
+            <set field="lookupEntity.purchaseThruDate" from="nowDate" />
             <entity-update value-field="lookupEntity" />
             <service-call name="growerp.100.SubscriptionServices100.get#Subscription"
                 in-map="[subscription: subscription]"

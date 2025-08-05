@@ -41,6 +41,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="description" />
                     <parameter name="price" />
                     <parameter name="listPrice" />
+                    <parameter name="currency" type="Map">
+                        <parameter name="currencyId" />
+                    </parameter>
                     <parameter name="categories" type="List">
                         <parameter name="category" type="Map">
                             <parameter name="categoryId" />
@@ -50,7 +53,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="useWarehouse" type="Boolean" />
                     <parameter name="assetCount" />
                     <parameter name="image" />
-                    <parameter name="uom" type="Map">
+                    <parameter name="amountUom" type="Map">
                         <parameter name="uomId" />
                         <parameter name="uomTypeId" />
                         <parameter name="typeDescription" />
@@ -226,11 +229,12 @@ along with this software (see the LICENSE.md file). If not, see
                                     description: product.description?:'',
                                     useWarehouse: product.requireInventory == 'Y' ? true : false,
                                     assetCount: assetCount ? assetCount : null,
-                                    uom: product.uomId ? uom : null,
                                     amount: product.amount ? product.amount.toString() : '1.00',
+                                    amountUom: [uomId: product.amountUomId],
                                     image: imageFile,
                                     price: product.price ? product.price.toString() : '0.00',
                                     listPrice: product.listPrice ? product.listPrice.toString() : '0.00',
+                                    currency: product.priceUomId ? [currencyId : product.priceUomId] : null,
                                 ]" />
                         </else>
                     </if>
@@ -276,7 +280,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </parameter>
                 <parameter name="useWarehouse" type="Boolean" />
                 <parameter name="image" />
-                <parameter name="uom" type="Map">
+                <parameter name="amountUom" type="Map">
                     <parameter name="uomId" />
                 </parameter>
                 <parameter name="amount" />
@@ -292,6 +296,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="description" />
                 <parameter name="price" />
                 <parameter name="listPrice" />
+                <parameter name="currency" type="Map">
+                    <parameter name="currencyId" />
+                </parameter>
                 <parameter name="categories" type="List">
                     <parameter name="category" type="Map">
                         <parameter name="categoryId" />
@@ -301,7 +308,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="useWarehouse" type="Boolean" />
                 <parameter name="assetCount" />
                 <parameter name="image" />
-                <parameter name="uom" type="Map">
+                <parameter name="amountUom" type="Map">
                     <parameter name="uomId" />
                     <parameter name="uomTypeId" />
                     <parameter name="typeDescription" />
@@ -334,7 +341,7 @@ along with this software (see the LICENSE.md file). If not, see
                 description: product.description,
                 salesIntroductionDate: ec.user.nowTimestamp,
                 amountFixed: product.amount,
-                amountUomId: product.uom?.uomId,
+                amountUomId: product.amountUom?.uomId,
                 ownerPartyId: ownerPartyId,
                 productTypeEnumId: prodConvert.convertedStatusId,
                 assetTypeEnumId: prodConvert.convertedStatusId != 'PtService'? 'AstTpInventory' : null,
@@ -349,7 +356,7 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="priceMap"
                 from="[productId: productId,
                         priceTypeEnumId: 'PptList',
-                        priceUomId: pref.baseCurrencyUomId,
+                        priceUomId: product.currency? product.currency.currencyId : pref.baseCurrencyUomId,
                         price: product.listPrice,
                         quantityUomId: 'OTH_ea',
                         fromDate: ec.user.nowTimestamp,
@@ -425,6 +432,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="description" />
                 <parameter name="price" />
                 <parameter name="listPrice" />
+                <parameter name="currency" type="Map">
+                    <parameter name="currencyId" />
+                </parameter>
                 <parameter name="categories" type="List">
                     <parameter name="category" type="Map">
                         <parameter name="categoryId" />
@@ -433,7 +443,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </parameter>
                 <parameter name="useWarehouse" type="Boolean" />
                 <parameter name="image" />
-                <parameter name="uom" type="Map">
+                <parameter name="amountUom" type="Map">
                     <parameter name="uomId" />
                 </parameter>
                 <parameter name="amount" />
@@ -458,7 +468,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="useWarehouse" type="Boolean" />
                 <parameter name="assetCount" />
                 <parameter name="image" />
-                <parameter name="uom" type="Map">
+                <parameter name="amountUom" type="Map">
                     <parameter name="uomId" />
                     <parameter name="uomTypeId" />
                     <parameter name="typeDescription" />
@@ -469,6 +479,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <log message="update product ${product.amountUom}" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <entity-find list="prods" entity-name="mantle.product.Product" for-update="true"
@@ -500,7 +511,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="oldProduct.description" from="product.description" />
                 <set field="oldProduct.productTypeEnumId" from="prodConvert.convertedStatusId" />
                 <set field="oldProduct.requireInventory" from="requireInventory" />
-                <set field="oldProduct.amountUomId" from="product.uom?.uomId" />
+                <set field="oldProduct.amountUomId" from="product.amountUom?.uomId" />
                 <set field="oldProduct.amountFixed" from="product.amount" />
                 <entity-update value-field="oldProduct" />
             </if>
@@ -513,7 +524,7 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="priceMap"
                 from="[productId: product.productId,
                         priceTypeEnumId: 'PptCurrent',
-                        priceUomId: pref.baseCurrencyUomId,
+                        priceUomId: product.currency? product.currency.currencyId : pref.baseCurrencyUomId,
                         price: product.price,
                         quantityUomId: 'OTH_ea',
                         fromDate: nowDate,
@@ -549,7 +560,7 @@ along with this software (see the LICENSE.md file). If not, see
                 condition="(!productPrices &amp;&amp; product.listPrice &amp;&amp; !new BigDecimal(product.listPrice).ZERO) 
                     || (productPrices[0]?.price != product?.price)">
                 <service-call name="create#mantle.product.ProductPrice"
-                    in-map="priceMap + [priceTypeEnumId: 'PptList',price: product.listPrice]" />
+                    in-map="[priceMap + [priceTypeEnumId: 'PptList',price: product.listPrice]]" />
                 <!-- delete old record -->
                 <if condition="productPrices">
                     <service-call name="update#mantle.product.ProductPrice"

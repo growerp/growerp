@@ -97,6 +97,14 @@ class SubscriptionTest {
       if (subscription.thruDate != null) {
         await CommonTest.enterDate(tester, 'thruDate', subscription.thruDate!);
       }
+      if (subscription.purchaseFromDate != null) {
+        await CommonTest.enterDate(
+            tester, 'purchaseFromDate', subscription.purchaseFromDate!);
+      }
+      if (subscription.purchaseThruDate != null) {
+        await CommonTest.enterDate(
+            tester, 'purchaseThruDate', subscription.purchaseThruDate!);
+      }
       await CommonTest.enterDropDownSearch(
           tester, 'subscriber', subscription.subscriber!.name!);
       await CommonTest.enterDropDownSearch(
@@ -136,6 +144,14 @@ class SubscriptionTest {
       if (subscription.thruDate != null) {
         expect((formState.value['thruDate'] as DateTime).dateOnly(),
             subscription.thruDate.dateOnly());
+      }
+      if (subscription.purchaseFromDate != null) {
+        expect((formState.value['purchaseFromDate'] as DateTime).dateOnly(),
+            subscription.purchaseFromDate.dateOnly());
+      }
+      if (subscription.purchaseThruDate != null) {
+        expect((formState.value['purchaseThruDate'] as DateTime).dateOnly(),
+            subscription.purchaseThruDate.dateOnly());
       }
 
       // Check FormBuilder text fields

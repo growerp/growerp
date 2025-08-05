@@ -72,9 +72,9 @@ class ProductTest {
             tester, 'productTypeDropDown', product.productTypeId!);
         // Uom and amount
         await CommonTest.enterDropDown(
-            tester, 'uomTypeDropDown', product.uom!.typeDescription);
+            tester, 'uomTypeDropDown', product.amountUom!.typeDescription);
         await CommonTest.enterDropDown(
-            tester, 'uomDropDown', product.uom!.description);
+            tester, 'uomDropDown', product.amountUom!.description);
         await CommonTest.enterText(tester, 'amount', product.amount.toString());
       }
       await CommonTest.dragUntil(tester, key: 'useWarehouse');
@@ -132,9 +132,9 @@ class ProductTest {
           expect(formState.value['useWarehouse'], product.useWarehouse);
         }
         expect((formState.value['uomType'] as Uom).typeDescription,
-            product.uom!.typeDescription);
+            product.amountUom!.typeDescription);
         expect((formState.value['uom'] as Uom).description,
-            product.uom!.description);
+            product.amountUom!.description);
       }
       newProducts.add(product.copyWith(pseudoId: id));
       await CommonTest.tapByKey(tester, 'cancel');
