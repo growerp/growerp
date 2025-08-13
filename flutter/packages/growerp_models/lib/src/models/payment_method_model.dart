@@ -21,7 +21,7 @@ part 'payment_method_model.freezed.dart';
 part 'payment_method_model.g.dart';
 
 @freezed
-class PaymentMethod with _$PaymentMethod {
+abstract class PaymentMethod with _$PaymentMethod {
   PaymentMethod._();
   factory PaymentMethod({
     String? ccPaymentMethodId,

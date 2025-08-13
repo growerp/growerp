@@ -25,7 +25,7 @@ part 'asset_model.freezed.dart';
 part 'asset_model.g.dart';
 
 @freezed
-class Asset with _$Asset {
+abstract class Asset with _$Asset {
   factory Asset({
     @Default("") String assetId,
     @Default("") String pseudoId,

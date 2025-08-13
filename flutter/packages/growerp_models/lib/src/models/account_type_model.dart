@@ -17,7 +17,7 @@ part 'account_type_model.freezed.dart';
 part 'account_type_model.g.dart';
 
 @freezed
-class AccountType with _$AccountType {
+abstract class AccountType with _$AccountType {
   AccountType._();
   factory AccountType({
     String? accountTypeId,

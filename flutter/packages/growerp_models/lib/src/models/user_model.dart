@@ -25,7 +25,7 @@ part 'user_model.freezed.dart';
 part 'user_model.g.dart';
 
 @freezed
-class User with _$User {
+abstract class User with _$User {
   factory User({
     String? partyId, // allocated by system cannot be changed.
     String? pseudoId,
@@ -72,7 +72,8 @@ class User with _$User {
 
   @override
   String toString() {
-    var userString = 'User $firstName $lastName [$partyId] sec: $userGroup '
+    var userString =
+        'User $firstName $lastName [$partyId] sec: $userGroup '
         ' email: $email';
     var companyString = '';
     if (company != null) {
@@ -104,10 +105,12 @@ List<User> csvToUsers(String csvFile) {
         pseudoId: row[0],
         firstName: row[1],
         lastName: row[2],
-        email: row[3].contains('@example.com') // avoid duplicated emails
+        email:
+            row[3].contains('@example.com') // avoid duplicated emails
             ? (Random().nextInt(1000).toString() + row[3])
             : row[3],
-        loginName: row[4].contains('@@') || // demo username
+        loginName:
+            row[4].contains('@@') || // demo username
                 row[4].contains('@example.com') // avoid duplicated usernames
             ? (Random().nextInt(1000).toString() + row[4])
             : row[4],
@@ -125,19 +128,21 @@ List<User> csvToUsers(String csvFile) {
 String csvFromUsers(List<User> users) {
   var csv = [userCsvFormat];
   for (User user in users) {
-    csv.add(createCsvRow([
-      user.pseudoId ?? '',
-      user.firstName ?? '',
-      user.lastName ?? '',
-      user.email ?? '',
-      user.loginName ?? '',
-      user.telephoneNr ?? '',
-      user.userGroup.toString(),
-      user.language,
-      user.image != null ? base64.encode(user.image!) : '',
-      user.company?.name ?? '',
-      user.company!.role.toString(),
-    ], userCsvLength));
+    csv.add(
+      createCsvRow([
+        user.pseudoId ?? '',
+        user.firstName ?? '',
+        user.lastName ?? '',
+        user.email ?? '',
+        user.loginName ?? '',
+        user.telephoneNr ?? '',
+        user.userGroup.toString(),
+        user.language,
+        user.image != null ? base64.encode(user.image!) : '',
+        user.company?.name ?? '',
+        user.company!.role.toString(),
+      ], userCsvLength),
+    );
   }
   return csv.join();
 }

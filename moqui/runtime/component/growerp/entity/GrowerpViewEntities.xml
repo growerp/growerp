@@ -305,7 +305,6 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="unitAmount" entity-alias="OITEM" />
         <alias name="rentalFromDate" entity-alias="RESERV" />
         <alias name="rentalThruDate" entity-alias="RESERV" />
-        <alias name="assetRentalId" entity-alias="RESERV" />
         <alias name="assetId" entity-alias="RESERV" />
         <alias name="assetName" entity-alias="ASSET" />
     </view-entity>
@@ -1365,6 +1364,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="userFullName" entity-alias="ACCT" />
         <alias name="emailAddress" entity-alias="ACCT" />
         <alias name="locale" entity-alias="ACCT" />
+        <alias name="timeZone" entity-alias="ACCT" />
         <alias name="loginDisabled" field="disabled" entity-alias="ACCT" />
         <alias name="ugMemFromDate" field="fromDate" entity-alias="UGMEM" />
         <alias name="ugMemThruDate" field="thruDate" entity-alias="UGMEM" />

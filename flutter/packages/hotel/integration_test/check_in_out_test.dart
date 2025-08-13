@@ -33,7 +33,11 @@ Future<void> selectCheckInOut(WidgetTester tester) async {
 
 Future<void> selectCheckOut(WidgetTester tester) async {
   await CommonTest.selectOption(
-      tester, '/checkInOut', 'FinDocListCheckOut', '2');
+    tester,
+    '/checkInOut',
+    'FinDocListCheckOut',
+    '2',
+  );
 }
 
 void main() {
@@ -60,11 +64,14 @@ void main() {
       blocProviders: getHotelBlocProviders(restClient, classificationId),
       classificationId: classificationId,
     );
-    await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "products": productsHotel,
-      "assets": roomsHotel,
-      "users": customers
-    });
+    await CommonTest.createCompanyAndAdmin(
+      tester,
+      testData: {
+        "products": productsHotel,
+        "assets": roomsHotel,
+        "users": customers,
+      },
+    );
     await CommonTest.waitForSnackbarToGo(tester);
     await CommonTest.tapByKey(tester, 'refresh');
     await createRoomReservation(tester, roomReservations.sublist(0));
@@ -84,27 +91,32 @@ void main() {
   testWidgets("Test checkout >>>>>", (WidgetTester tester) async {
     RestClient restClient = RestClient(await buildDioClient());
     // change current time so reservation show in checkout
-    CustomizableDateTime.customTime =
-        DateTime.now().add(const Duration(days: 1));
+    CustomizableDateTime.customTime = DateTime.now().add(
+      const Duration(days: 1),
+    );
     await CommonTest.startTestApp(
-        clear: true,
-        restClient: restClient,
-        title: 'Hotel Checkout Test',
-        tester,
-        router.generateRoute,
-        menuOptions,
-        delegates,
-        blocProviders: getHotelBlocProviders(restClient, 'AppHotel'),
-        classificationId: classificationId);
+      clear: true,
+      restClient: restClient,
+      title: 'Hotel Checkout Test',
+      tester,
+      router.generateRoute,
+      menuOptions,
+      delegates,
+      blocProviders: getHotelBlocProviders(restClient, 'AppHotel'),
+      classificationId: classificationId,
+    );
     await selectCheckOut(tester);
     expect(find.byKey(const Key('id0')), findsNWidgets(1));
 
     expect(CommonTest.getTextField('status0'), FinDocStatusVal.approved.hotel);
     await CommonTest.tapByKey(tester, 'id0');
     expect(
-        CommonTest.getDropdown('statusDropDown',
-            classificationId: classificationId),
-        equals(FinDocStatusVal.approved.hotel));
+      CommonTest.getDropdown(
+        'statusDropDown',
+        classificationId: classificationId,
+      ),
+      equals(FinDocStatusVal.approved.hotel),
+    );
     await CommonTest.tapByKey(tester, 'statusDropDown');
     await CommonTest.tapByText(tester, FinDocStatusVal.completed.hotel);
     await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
@@ -112,28 +124,33 @@ void main() {
     await CommonTest.logout(tester);
   }, skip: false);
 
-  testWidgets("Test empty checkin and checkout >>>>>",
-      (WidgetTester tester) async {
+  testWidgets("Test empty checkin and checkout >>>>>", (
+    WidgetTester tester,
+  ) async {
     RestClient restClient = RestClient(await buildDioClient());
-    CustomizableDateTime.customTime =
-        DateTime.now().add(const Duration(days: 1));
+    CustomizableDateTime.customTime = DateTime.now().add(
+      const Duration(days: 1),
+    );
     await CommonTest.startTestApp(
-        clear: true,
-        restClient: restClient,
-        title: 'Hotel reservation empty checkin/out Test',
-        tester,
-        router.generateRoute,
-        menuOptions,
-        delegates,
-        blocProviders: getHotelBlocProviders(restClient, classificationId),
-        classificationId: classificationId);
+      clear: true,
+      restClient: restClient,
+      title: 'Hotel reservation empty checkin/out Test',
+      tester,
+      router.generateRoute,
+      menuOptions,
+      delegates,
+      blocProviders: getHotelBlocProviders(restClient, classificationId),
+      classificationId: classificationId,
+    );
     await selectCheckInOut(tester);
     expect(find.byKey(const Key('id0')), findsNothing);
     await selectCheckOut(tester);
     expect(find.byKey(const Key('id0')), findsNothing);
     await selectReservations(tester);
-    await OrderTest.checkOrderCompleted(tester,
-        classificationId: classificationId);
+    await OrderTest.checkOrderCompleted(
+      tester,
+      classificationId: classificationId,
+    );
     await CommonTest.logout(tester);
   }, skip: false);
 }

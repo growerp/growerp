@@ -23,7 +23,7 @@ part 'gateway_response_model.freezed.dart';
 part 'gateway_response_model.g.dart';
 
 @freezed
-class GatewayResponse extends Equatable with _$GatewayResponse {
+abstract class GatewayResponse extends Equatable with _$GatewayResponse {
   const GatewayResponse._();
   const factory GatewayResponse({
     @Default("") String gatewayResponseId,

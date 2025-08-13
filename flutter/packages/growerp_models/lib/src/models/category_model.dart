@@ -25,7 +25,7 @@ part 'category_model.freezed.dart';
 part 'category_model.g.dart';
 
 @freezed
-class Category extends Equatable with _$Category {
+abstract class Category extends Equatable with _$Category {
   Category._();
   factory Category({
     @Default("") String categoryId,

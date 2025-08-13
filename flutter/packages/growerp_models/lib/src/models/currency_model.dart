@@ -18,7 +18,7 @@ part 'currency_model.freezed.dart';
 part 'currency_model.g.dart';
 
 @freezed
-class Currency with _$Currency {
+abstract class Currency with _$Currency {
   Currency._();
   factory Currency({
     String? currencyId,

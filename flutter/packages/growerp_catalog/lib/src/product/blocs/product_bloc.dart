@@ -44,7 +44,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<ProductDelete>(_onProductDelete);
     on<ProductUpload>(_onProductUpload);
     on<ProductDownload>(_onProductDownload);
-    on<ProductRentalOccupancy>(_onProductRentalOccupancy);
     on<ProductUom>(_onProductUom);
   }
 
@@ -209,35 +208,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           products: state.products,
           message:
               "The request is scheduled and the email will be sent shortly"));
-    } on DioException catch (e) {
-      emit(state.copyWith(
-          status: ProductStatus.failure,
-          products: [],
-          message: await getDioError(e)));
-    }
-  }
-
-  Future<void> _onProductRentalOccupancy(
-    ProductRentalOccupancy event,
-    Emitter<ProductState> emit,
-  ) async {
-    try {
-      emit(state.copyWith(status: ProductStatus.loading));
-      if (event.productId.isNotEmpty) {
-        Products result = await restClient.getDailyRentalOccupancy(
-            productId: event.productId);
-        emit(state.copyWith(
-          status: ProductStatus.success,
-          occupancyDates:
-              result.products.isNotEmpty ? result.products[0].fullDates : [],
-        ));
-      } else {
-        Products result = await restClient.getDailyRentalOccupancy();
-        emit(state.copyWith(
-          status: ProductStatus.success,
-          productFullDates: result.products,
-        ));
-      }
     } on DioException catch (e) {
       emit(state.copyWith(
           status: ProductStatus.failure,

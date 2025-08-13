@@ -18,7 +18,7 @@ part 'country_model.freezed.dart';
 part 'country_model.g.dart';
 
 @freezed
-class Country with _$Country {
+abstract class Country with _$Country {
   Country._();
   factory Country({
     required String id,

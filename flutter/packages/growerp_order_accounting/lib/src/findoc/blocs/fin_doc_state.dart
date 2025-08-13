@@ -35,7 +35,7 @@ class FinDocState extends Equatable {
     this.message,
     this.hasReachedMax = false,
     this.searchString = '',
-    this.productFullDates = const <Product>[],
+    this.productRentalDates = const <ProductRentalDate>[],
   });
 
   final FinDocStatus status;
@@ -47,7 +47,8 @@ class FinDocState extends Equatable {
   final List<User> users;
   final bool hasReachedMax;
   final String searchString;
-  final List<Product> productFullDates;
+  final List<ProductRentalDate>
+      productRentalDates; // productId and rental dates
 
   FinDocState copyWith({
     FinDocStatus? status,
@@ -59,8 +60,7 @@ class FinDocState extends Equatable {
     List<User>? users,
     bool? hasReachedMax,
     String? searchString,
-    List<String>? occupancyDates,
-    List<Product>? productFullDates,
+    List<ProductRentalDate>? productRentalDates,
   }) {
     return FinDocState(
       status: status ?? this.status,
@@ -72,12 +72,12 @@ class FinDocState extends Equatable {
       message: message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,
-      productFullDates: productFullDates ?? this.productFullDates,
+      productRentalDates: productRentalDates ?? this.productRentalDates,
     );
   }
 
   @override
-  List<Object?> get props => [status, message, finDocs];
+  List<Object?> get props => [status, message, finDocs, productRentalDates];
 
   @override
   String toString() => '$status { #finDocs: ${finDocs.length}, '

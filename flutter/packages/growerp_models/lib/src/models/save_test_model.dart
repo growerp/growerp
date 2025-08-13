@@ -19,7 +19,7 @@ part 'save_test_model.freezed.dart';
 part 'save_test_model.g.dart';
 
 @freezed
-class SaveTest with _$SaveTest {
+abstract class SaveTest with _$SaveTest {
   factory SaveTest({
     @Default(false) bool testDataLoaded,
     @Default(0) int sequence,

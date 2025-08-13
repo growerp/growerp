@@ -21,7 +21,7 @@ part 'ledger_report_model.freezed.dart';
 part 'ledger_report_model.g.dart';
 
 @freezed
-class LedgerReport with _$LedgerReport {
+abstract class LedgerReport with _$LedgerReport {
   LedgerReport._();
   factory LedgerReport({
     Company? company,

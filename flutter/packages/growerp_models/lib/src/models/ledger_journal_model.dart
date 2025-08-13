@@ -18,7 +18,7 @@ part 'ledger_journal_model.freezed.dart';
 part 'ledger_journal_model.g.dart';
 
 @freezed
-class LedgerJournal with _$LedgerJournal {
+abstract class LedgerJournal with _$LedgerJournal {
   LedgerJournal._();
   factory LedgerJournal({
     @Default('') String journalId,

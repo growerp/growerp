@@ -19,7 +19,7 @@ part 'uom_model.freezed.dart';
 part 'uom_model.g.dart';
 
 @freezed
-class Uom extends Equatable with _$Uom {
+abstract class Uom extends Equatable with _$Uom {
   Uom._();
   factory Uom({
     @Default('') String uomId,

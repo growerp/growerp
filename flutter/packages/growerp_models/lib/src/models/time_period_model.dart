@@ -18,7 +18,7 @@ part 'time_period_model.freezed.dart';
 part 'time_period_model.g.dart';
 
 @freezed
-class TimePeriod with _$TimePeriod {
+abstract class TimePeriod with _$TimePeriod {
   TimePeriod._();
   factory TimePeriod({
     @Default('') String periodId,

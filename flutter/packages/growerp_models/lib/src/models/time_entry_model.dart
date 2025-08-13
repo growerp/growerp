@@ -30,7 +30,7 @@ List<TimeEntry> timeEntriesFromJson(String str) => List<TimeEntry>.from(
     json.decode(str)["timeEntries"].map((x) => TimeEntry.fromJson(x)));
 
 @freezed
-class TimeEntry with _$TimeEntry {
+abstract class TimeEntry with _$TimeEntry {
   TimeEntry._();
   factory TimeEntry({
     String? timeEntryId,

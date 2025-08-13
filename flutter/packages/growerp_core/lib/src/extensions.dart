@@ -62,7 +62,7 @@ extension DateOnly on DateTime? {
     if (this == null) return '';
     // Always format in local time for display
     DateTime localDate = this!.toLocal();
-    return DateFormat('yyyy/M/d').format(localDate);
+    return DateFormat('yyyy-MM-dd').format(localDate);
   }
 }
 

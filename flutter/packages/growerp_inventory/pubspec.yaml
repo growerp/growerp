@@ -11,8 +11,8 @@ platforms:
   web:
   windows:
 environment:
-  sdk: ">=3.2.6 <4.0.0"
-  flutter: ">=1.17.0"
+  sdk: ">=3.8.0 <4.0.0"
+  flutter: ">=3.32.0"
 
 dependencies:
   flutter:
@@ -38,8 +38,8 @@ dependencies:
   stream_transform: ^2.1.0
   collection: ^1.16.0
   dio: ^5.4.3
-  freezed_annotation: ^2.0.3
-  freezed: ^2.5.2
+  freezed_annotation: ^3.1.0
+  freezed: ^3.2.0
   credit_card_validator: ^2.0.1
   url_launcher: ^6.1.4
   flutter_colorpicker: ^1.1.0
@@ -61,8 +61,7 @@ dev_dependencies:
   mockito: ^5.0.2
   very_good_analysis: ^5.1.0
   bloc_test: ^9.0.1
-  mobx_codegen: ^2.0.4
-  json_serializable: ^6.7.1
+  json_serializable: ^6.10.0
   flutter_lints: ^4.0.0
 
 flutter:

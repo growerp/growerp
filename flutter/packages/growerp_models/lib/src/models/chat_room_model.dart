@@ -20,7 +20,7 @@ part 'chat_room_model.freezed.dart';
 part 'chat_room_model.g.dart';
 
 @freezed
-class ChatRoom with _$ChatRoom {
+abstract class ChatRoom with _$ChatRoom {
   ChatRoom._();
   factory ChatRoom({
     @Default("") String chatRoomId,

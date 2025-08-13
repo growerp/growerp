@@ -20,7 +20,7 @@ part 'chat_message_model.freezed.dart';
 part 'chat_message_model.g.dart';
 
 @freezed
-class ChatMessage with _$ChatMessage {
+abstract class ChatMessage with _$ChatMessage {
   ChatMessage._();
   factory ChatMessage({
     ChatRoom? chatRoom,

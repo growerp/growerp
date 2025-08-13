@@ -26,7 +26,7 @@ part 'findoc_item_model.freezed.dart';
 part 'findoc_item_model.g.dart';
 
 @freezed
-class FinDocItem with _$FinDocItem {
+abstract class FinDocItem with _$FinDocItem {
   FinDocItem._();
   factory FinDocItem({
     String? pseudoId, // for conversion only

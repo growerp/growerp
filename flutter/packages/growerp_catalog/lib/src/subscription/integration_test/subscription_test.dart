@@ -110,7 +110,7 @@ class SubscriptionTest {
       await CommonTest.enterDropDownSearch(
           tester, 'product', subscription.product!.productName!);
       // Add more fields as needed
-      await CommonTest.tapByKey(tester, 'update');
+      await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
       await CommonTest.checkWidgetKey(tester, 'SubscriptionList');
       // new items always added at the top
       subscriptionsWithPseudoId

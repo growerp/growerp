@@ -424,7 +424,7 @@ class CommonTest {
     await tapByKey(tester, key);
     await tapByTooltip(tester, 'Switch to input');
     await tester.enterText(
-        find.byType(TextField).last, DateFormat('yyyy-M-d').format(date));
+        find.byType(TextField).last, DateFormat('yyyy-MM-dd').format(date));
     await tester.pump();
     await CommonTest.tapByText(tester, 'OK');
   }
@@ -531,6 +531,13 @@ class CommonTest {
     TextFormField tff =
         find.byKey(Key(key)).evaluate().single.widget as TextFormField;
     return tff.controller!.text;
+  }
+
+  /// get the content of a TextFormField providing the key
+  static DateTime getDateTimeFormField(String key) {
+    FormField<DateTime> tff =
+        find.byKey(Key(key)).evaluate().single.widget as FormField<DateTime>;
+    return tff.initialValue as DateTime;
   }
 
   static String getFormBuilderTextFieldByName(

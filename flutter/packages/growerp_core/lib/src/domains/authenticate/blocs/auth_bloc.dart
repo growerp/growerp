@@ -13,6 +13,7 @@
  */
 
 import 'dart:async';
+import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -136,15 +137,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
       final result = await restClient.register(
-        classificationId: classificationId,
-        email: event.user.email!,
-        companyPartyId: event.user.company?.partyId,
-        firstName: event.user.firstName!,
-        lastName: event.user.lastName!,
-        userGroup: event.user.userGroup!,
-        // when debug mode password is always qqqqqq9!
-        newPassword: kReleaseMode ? null : 'qqqqqq9!',
-      );
+          classificationId: classificationId,
+          email: event.user.email!,
+          companyPartyId: event.user.company?.partyId,
+          firstName: event.user.firstName!,
+          lastName: event.user.lastName!,
+          userGroup: event.user.userGroup!,
+          // when debug mode password is always qqqqqq9!
+          newPassword: kReleaseMode ? null : 'qqqqqq9!',
+          timeZone: DateTime.now().timeZoneName,
+          locale: PlatformDispatcher.instance.locale);
       await PersistFunctions.persistAuthenticate(result);
       emit(state.copyWith(
           status: AuthStatus.unAuthenticated,
@@ -207,6 +209,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         cVC: event.cVC,
         plan: event.plan,
         classificationId: classificationId,
+        timeZoneOffset: DateTime.now().timeZoneOffset.inMinutes / 60.0,
       );
       if (authenticate.apiKey != null &&
           ![

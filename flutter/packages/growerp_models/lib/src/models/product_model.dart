@@ -28,7 +28,7 @@ part 'product_model.freezed.dart';
 part 'product_model.g.dart';
 
 @freezed
-class Product extends Equatable with _$Product {
+abstract class Product extends Equatable with _$Product {
   const Product._();
   const factory Product({
     @Default("") String productId,
@@ -46,7 +46,6 @@ class Product extends Equatable with _$Product {
     @Default(false) bool useWarehouse,
     int? assetCount,
     @Uint8ListConverter() Uint8List? image,
-    @Default([]) List<String> fullDates,
   }) = _Product;
 
   factory Product.fromJson(Map<String, dynamic> json) =>
@@ -74,32 +73,36 @@ List<Product> csvToProducts(String csvFile, Logger logger) {
   for (final row in result) {
     if (row == result.first) continue;
     try {
-      products.add(Product(
-        pseudoId: row[0],
-        productTypeId: row[1],
-        productName: row[2],
-        description: row[3],
-        listPrice: row[4].isNotEmpty && row[4] != 'null'
-            ? Decimal.parse(row[4])
-            : null,
-        price: row[5].isNotEmpty && row[5] != 'null'
-            ? Decimal.parse(row[5])
-            : null,
-        useWarehouse: row[6] == 'true' ? true : false,
-        categories: [
-          Category(categoryName: row[7]),
-          Category(categoryName: row[8]),
-          Category(categoryName: row[9])
-        ],
-        image: row[10].isNotEmpty ? base64.decode(row[10]) : null,
-      ));
+      products.add(
+        Product(
+          pseudoId: row[0],
+          productTypeId: row[1],
+          productName: row[2],
+          description: row[3],
+          listPrice: row[4].isNotEmpty && row[4] != 'null'
+              ? Decimal.parse(row[4])
+              : null,
+          price: row[5].isNotEmpty && row[5] != 'null'
+              ? Decimal.parse(row[5])
+              : null,
+          useWarehouse: row[6] == 'true' ? true : false,
+          categories: [
+            Category(categoryName: row[7]),
+            Category(categoryName: row[8]),
+            Category(categoryName: row[9]),
+          ],
+          image: row[10].isNotEmpty ? base64.decode(row[10]) : null,
+        ),
+      );
     } catch (e) {
       String fieldList = '';
-      productCsvTitles
-          .asMap()
-          .forEach((index, value) => fieldList += "$value: ${row[index]}\n");
-      logger.e("Error processing product csv line: $fieldList \n"
-          "error message: $e");
+      productCsvTitles.asMap().forEach(
+        (index, value) => fieldList += "$value: ${row[index]}\n",
+      );
+      logger.e(
+        "Error processing product csv line: $fieldList \n"
+        "error message: $e",
+      );
       if (errors++ == 5) exit(1);
     }
   }
@@ -109,19 +112,27 @@ List<Product> csvToProducts(String csvFile, Logger logger) {
 String csvFromProducts(List<Product> products) {
   var csv = [productCsvFormat];
   for (Product product in products) {
-    csv.add(createCsvRow([
-      product.pseudoId,
-      product.productTypeId ?? '',
-      product.productName ?? '',
-      product.description ?? '',
-      product.listPrice.toString(),
-      product.price.toString(),
-      product.useWarehouse.toString(),
-      product.categories.length == 1 ? product.categories[0].categoryName : '',
-      product.categories.length == 2 ? product.categories[1].categoryName : '',
-      product.categories.length == 3 ? product.categories[2].categoryName : '',
-      product.image != null ? base64.encode(product.image!) : '',
-    ], productCsvLength));
+    csv.add(
+      createCsvRow([
+        product.pseudoId,
+        product.productTypeId ?? '',
+        product.productName ?? '',
+        product.description ?? '',
+        product.listPrice.toString(),
+        product.price.toString(),
+        product.useWarehouse.toString(),
+        product.categories.length == 1
+            ? product.categories[0].categoryName
+            : '',
+        product.categories.length == 2
+            ? product.categories[1].categoryName
+            : '',
+        product.categories.length == 3
+            ? product.categories[2].categoryName
+            : '',
+        product.image != null ? base64.encode(product.image!) : '',
+      ], productCsvLength),
+    );
   }
   return csv.join();
 }

@@ -21,7 +21,7 @@ part 'payment_type_model.g.dart';
 /// Payment type used for payments
 /// key is type/isPayable/isApplied
 @freezed
-class PaymentType with _$PaymentType {
+abstract class PaymentType with _$PaymentType {
   PaymentType._();
   factory PaymentType({
     @Default('') String paymentTypeId,

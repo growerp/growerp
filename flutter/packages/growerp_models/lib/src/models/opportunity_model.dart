@@ -20,7 +20,7 @@ part 'opportunity_model.freezed.dart';
 part 'opportunity_model.g.dart';
 
 @freezed
-class Opportunity with _$Opportunity {
+abstract class Opportunity with _$Opportunity {
   Opportunity._();
   factory Opportunity({
     @DateTimeConverter() DateTime? lastUpdated,

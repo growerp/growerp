@@ -191,8 +191,8 @@ class ProductDialogState extends State<ProductDialog> {
                           ? 'New'
                           : widget.product.pseudoId),
                   height: isPhone
-                      ? (classificationId == 'AppAdmin' ? 750 : 700)
-                      : (classificationId == 'AppHotel' ? 600 : 600),
+                      ? (classificationId == 'AppAdmin' ? 850 : 700)
+                      : (classificationId == 'AppAdmin' ? 700 : 600),
                   width: isPhone ? 450 : 800,
                   child: listChild(classificationId, isPhone),
                 ));

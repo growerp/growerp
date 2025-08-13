@@ -216,6 +216,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="my" type="Boolean" default-value="false" />
             <parameter name="docType" />
             <parameter name="open" type="Boolean" default-value="true" />
+            <parameter name="status" />
             <parameter name="startDate">
                 <description>Format should be YYYY-MM-DD</description>
             </parameter>
@@ -312,11 +313,12 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <set field="docType" from="docType?.toLowerCase()" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="startDate">
                 <set field="tsDate"
-                    from="ec.l10n.parseTimestamp(ec.l10n.format(startDate, 'yyyy-MM-dd')
+                    from="ec.l10n.parseTimestamp(ec.l10n.format(startDate, 'yyyy-MM-dd HH:mm:ssZ')
                         + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS')" />
             </if>
             <if condition="search != null">
@@ -407,9 +409,9 @@ along with this software (see the LICENSE.md file). If not, see
                         requestId: item.requestId,
                         pseudoId: item.pseudoId,
                         statusId: convertedStatusId,
-                        creationDate: item.requestDate ? ec.l10n.format(item.requestDate,'yyyy-MM-dd')  : null,
+                        creationDate: item.requestDate ? ec.l10n.format(item.requestDate,'yyyy-MM-dd HH:mm:ssZ')  : null,
                         requestType: requestType.convertedStatusId,
-                        placedDate: item.lastUpdatedStamp ? ec.l10n.format(item.lastUpdatedStamp,'yyyy-MM-dd')  : null,
+                        placedDate: item.lastUpdatedStamp ? ec.l10n.format(item.lastUpdatedStamp,'yyyy-MM-dd HH:mm:ssZ')  : null,
                         otherUser: item.personLastName ? [
                                 type: 'user',
                                 partyId: item.filedByPartyId,
@@ -495,12 +497,20 @@ along with this software (see the LICENSE.md file). If not, see
                     </else-if>
                     <else>
                         <!-- multiple documents -->
-                        <set field="statusList" from="['OrderOpen','OrderPlaced','OrderApproved']" />
+                        <set field="openList" from="['OrderOpen','OrderPlaced','OrderApproved']" />
                         <!--    OrderCompleted OrderCancelled' -->
-                        <if condition="open &amp;&amp; !finDocId &amp;&amp; !search">
-                            <set field="fromDate" from="dayOldDate" />
-                            <set field="status" from="statusList" />
-                            <set field="delStatus" value="OrderCancelled" />
+                        <if condition="(open || status) &amp;&amp; !finDocId &amp;&amp; !search">
+                            <if condition="status"><!-- status overruled open(default)-->
+                                <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                                    in-map="[sales: sales, docType: docType, statusId: status]"
+                                    out-map="context" />
+                                <set field="statusList" from="[convertedStatusId]" />
+                                <else>
+                                    <set field="fromDate" from="dayOldDate" />
+                                    <set field="statusList" from="openList" />
+                                    <set field="delStatus" value="OrderCancelled" />
+                                </else>
+                            </if>
                         </if>
                         <entity-find offset="start" limit="limit" list="items"
                             entity-name="growerp.order.OrderHeaderPartAndParties">
@@ -509,7 +519,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="customerPartyId" from="customerPartyId"
                                 ignore-if-empty="true" />
                             <econditions combine="or">
-                                <econdition field-name="statusId" operator="in" from="status"
+                                <econdition field-name="statusId" operator="in" from="statusList"
                                     ignore-if-empty="true" />
                                 <econdition field-name="lastUpdatedStamp" operator="greater"
                                     from="fromDate" ignore-if-empty="true" />
@@ -608,9 +618,9 @@ along with this software (see the LICENSE.md file). If not, see
                             salesChannel: item.salesChannelDescr,
                             statusId: convertedStatusId,
                             creationDate: item.entryDate
-                                ? ec.l10n.format(item.entryDate,'yyyy-MM-dd') : null,
+                                ? ec.l10n.format(item.entryDate,'yyyy-MM-dd HH:mm:ssZ') : null,
                             placedDate: item.placedDate
-                                ? ec.l10n.format(item.placedDate,'yyyy-MM-dd')  : null,
+                                ? ec.l10n.format(item.placedDate,'yyyy-MM-dd HH:mm:ssZ')  : null,
                             sales: sales,
                             docType: docType,
                             otherUser: userOut,
@@ -650,9 +660,9 @@ along with this software (see the LICENSE.md file). If not, see
                             price: item.unitAmount ? item.unitAmount.toString() : '0.00',
                             asset: [assetId: item.assetId, assetName: item.assetName],
                             rentalFromDate: item.rentalFromDate
-                                ?  ec.l10n.format(item.rentalFromDate,'yyyy-MM-dd')  : null,
+                                ?  ec.l10n.format(item.rentalFromDate,'yyyy-MM-dd HH:mm:ssZ')  : null,
                             rentalThruDate: item.rentalThruDate
-                                ? ec.l10n.format(item.rentalThruDate,'yyyy-MM-dd') : null,
+                                ? ec.l10n.format(item.rentalThruDate,'yyyy-MM-dd HH:mm:ssZ') : null,
                             ]" />
                     <script>finDocItems.add(finDocItem)</script>
                     <!-- check if last line or next line for next order -->
@@ -849,7 +859,7 @@ along with this software (see the LICENSE.md file). If not, see
                             description: item.invoiceName,
                             statusId: convertedStatusId,
                             creationDate: item.invoiceDate
-                                ? ec.l10n.format(item.invoiceDate,'yyyy-MM-dd')  : null,
+                                ? ec.l10n.format(item.invoiceDate,'yyyy-MM-dd HH:mm:ssZ')  : null,
                             otherUser: userOut?.partyId ? userOut : null,
                             otherCompany: company?.partyId ? company : null,
                             grandTotal: item.invoiceTotal
@@ -871,9 +881,9 @@ along with this software (see the LICENSE.md file). If not, see
                         quantity: item.quantity ? item.quantity.toString() : null,
                         price: item.amount ? item.amount.toString() : null,
                         rentalFromDate: item.rentalFromDate
-                            ?  ec.l10n.format(item.rentalFromDate,'yyyy-MM-dd') : null,
+                            ?  ec.l10n.format(item.rentalFromDate,'yyyy-MM-dd HH:mm:ssZ') : null,
                         rentalThruDate: item.rentalThruDate
-                            ? ec.l10n.format(item.rentalThruDate,'yyyy-MM-dd') : null,
+                            ? ec.l10n.format(item.rentalThruDate,'yyyy-MM-dd HH:mm:ssZ') : null,
                         ]" />
                         <script>finDocItems.add(finDocItem)</script>
                     </if>
@@ -1047,7 +1057,7 @@ along with this software (see the LICENSE.md file). If not, see
                             amount: response.amount.toString(),
                             referenceNum: response.referenceNum,
                             transactionDate: response.transactionDate
-                                ? ec.l10n.format(response.transactionDate,'yyyy-MM-dd') : null,
+                                ? ec.l10n.format(response.transactionDate,'yyyy-MM-dd HH:mm:ssZ') : null,
                             resultSuccess: response.resultSuccess == 'Y' ? true : false,
                             resultMessage: response.resultMessage
                         ])</script>
@@ -1074,7 +1084,7 @@ along with this software (see the LICENSE.md file). If not, see
                         invoiceId: item.invoiceId ? item.invoiceId : item.forInvoiceId,
                         statusId: convertedStatusId,
                         creationDate: item.effectiveDate
-                            ? ec.l10n.format(item.effectiveDate,'yyyy-MM-dd') : null,
+                            ? ec.l10n.format(item.effectiveDate,'yyyy-MM-dd HH:mm:ssZ') : null,
                         sales: sales,
                         docType: docType,
                         otherUser: userOut?.partyId ? userOut : null,
@@ -1218,7 +1228,7 @@ along with this software (see the LICENSE.md file). If not, see
                             reference: item.externalId,
                             shipmentMethod: item.shipmentMethod,
                             creationDate: item.entryDate 
-                                ? ec.l10n.format(item.entryDate,'yyyy-MM-dd')  : null,
+                                ? ec.l10n.format(item.entryDate,'yyyy-MM-dd HH:mm:ssZ')  : null,
                             otherUser: userOut?.partyId ? userOut : null,
                             otherCompany: company?.partyId ? company : null,
                             ]" />
@@ -1236,7 +1246,7 @@ along with this software (see the LICENSE.md file). If not, see
                         assetId: item.assetId,
                         assetName: item.assetName,
                         receivedDate: item.entryDate 
-                            ? ec.l10n.format(item.entryDate,'yyyy-MM-dd')  : null,
+                            ? ec.l10n.format(item.entryDate,'yyyy-MM-dd HH:mm:ssZ')  : null,
                         location: location
                         ]" />
                     </if>
@@ -1357,7 +1367,7 @@ along with this software (see the LICENSE.md file). If not, see
                             transactionId: item.transactionId,
                             statusId: convertedStatusId,
                             creationDate: item.transactionDate 
-                                ? ec.l10n.format(item.transactionDate,'yyyy-MM-dd')  : null,
+                                ? ec.l10n.format(item.transactionDate,'yyyy-MM-dd HH:mm:ssZ')  : null,
                             otherUser: userOut,
                             otherCompany: company,
                             isPosted: item.isPosted == 'Y'? true : false,
@@ -1663,7 +1673,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     requestOwnerPartyId: companyUserPartyId ?: userpartyId,
                                     statusId: convertedStatusId,
                                     filedByPartyId: otherPartyId,
-                                    requestDate: nowDate,
+                                    requestDate: ec.l10n.format(nowDate,'yyyy-MM-dd HH:mm:ssZ'),
                                     requestOwnerPartyId: companyPartyId
                                 ]"
                         out-map="context" />
@@ -2015,7 +2025,7 @@ along with this software (see the LICENSE.md file). If not, see
                         paymentTypeEnumId: paymentTypeEnumId,
                         amount: payment.grandTotal,
                         paymentInstrumentEnumId: instrument,
-                        effectiveDate: ec.user.nowTimestamp,
+                        effectiveDate: ec.l10n.format(ec.user.nowTimestamp,'yyyy-MM-dd HH:mm:ssZ'),
                         paymentMethodId: paymentMethodId,
                         paymentGatewayConfigId: paymentGatewayConfigId,
                         toPartyId: toPartyId,
@@ -2062,17 +2072,13 @@ along with this software (see the LICENSE.md file). If not, see
                             out-map="context" />
                         <!-- settime for all dates otherwise ma5tching will fail in
                         AssetsAvailableForProduct-->
-                        <set field="rentalFromDate"
-                            from="ec.l10n.parseTimestamp(item.rentalFromDate.substring(0,10) + ' 15:00:00.000', 'yyyy-MM-dd HH:mm:ss.SSS')" />
-                        <set field="rentalThruDate"
-                            from="ec.l10n.parseTimestamp(item.rentalThruDate.substring(0,10) + ' 12:00:00.000', 'yyyy-MM-dd HH:mm:ss.SSS')" />
                         <service-call name="create#growerp.product.AssetRental"
                             in-map="[   productId: item.product.productId,
-                                    assetId: item.assetId,
+                                    assetId: item.asset?.assetId,
                                     orderId: orderId,
                                     orderItemSeqId: orderItemSeqId,
-                                    rentalFromDate: rentalFromDate,
-                                    rentalThruDate: rentalThruDate,
+                                    rentalFromDate: item.rentalFromDate,
+                                    rentalThruDate: item.rentalThruDate,
                                 ]" />
                     </else-if>
                     <else>
@@ -2427,81 +2433,75 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="productId" />
         </in-parameters>
         <out-parameters>
-            <parameter name="products" type="List">
+            <parameter name="productRentalDates" type="List">
                 <parameter name="productId" />
                 <parameter name="productName" />
-                <parameter name="fullDates" type="List">
-                    <parameter name="fullDate" />
-                    <!-- YYYY-MM-DD -->
-                </parameter>
+                <parameter name="dates" type="List" />
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <set field="nowBeginOfDay"
-                from="java.time.ZonedDateTime.ofInstant(java.time.Instant.now(), java.time.ZoneId.systemDefault()).truncatedTo(java.time.temporal.ChronoUnit.DAYS)" />
-            <set field="nowBeginOfNextDay"
-                from="java.sql.Timestamp.from(nowBeginOfDay.plusDays(1).toInstant())" />
+            <set field="nowUtc"
+                from="Timestamp.from(ec.user.nowTimestamp.toInstant()
+                    .plus(ec.user.getUserAccount().timeZone.toDouble().longValue(), java.time.temporal.ChronoUnit.HOURS))" />
+            <set field="nowUtcBeginOfDay"
+                from="Timestamp.from(nowUtc.toInstant()
+                    .truncatedTo(java.time.temporal.ChronoUnit.DAYS))" />
             <!-- get active rentals -->
             <entity-find entity-name="growerp.product.ProductAndAssetRental" list="rentals">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <econdition field-name="productId" from="productId" ignore-if-empty="true" />
                 <econdition field-name="rentalThruDate" operator="greater-equals"
-                    from="Timestamp.valueOf(nowBeginOfNextDay.toLocalDateTime())" />
+                    from="nowUtcBeginOfDay" />
                 <order-by field-name="productName,productId" />
             </entity-find>
-            <!-- gather fullDates which have rentals of this product -->
+            <!-- gather fullDates(reserved dates) of this product(null is all products) -->
             <set field="fullDates" from="[]" />
-            <set field="products" from="[]" />
+            <set field="productRentalDates" from="[]" /><!-- productId: List<dates>-->
             <iterate list="rentals" entry="rental">
                 <if condition="lastItem &amp;&amp; lastItem.productId != rental.productId">
-                    <service-call name="growerp.100.FinDocServices100.process#RentalLastItem"
-                        out-map="context" in-map="[productId: lastItem.productId, dates: fullDates]" />
-                    <!-- RentalLastItem has as output fullDates -->
-                    <script>products.add([
-                        productId: lastItem.productId,
-                        productName: lastItem.productName,
-                        fullDates: fullDates,
-                        ])</script>
+                    <service-call name="growerp.100.FinDocServices100.get#SoldOutDays"
+                        out-map="context"
+                        in-map="[productId: lastItem.productId, fullDates: fullDates]" />
+                    <!-- SoldOutDays has as output fullDates -->
+                    <script>
+                        productRentalDates.add(
+                            [productId: lastItem.productId,
+                            productName: lastItem.productName,
+                            dates: dates])
+                    </script>
                     <set field="fullDates" from="[]" />
                 </if>
-                <!-- convert date to begin of day -->
-                <set field="rentalFromDate"
-                    from="Timestamp.valueOf(rental.rentalFromDate.toLocalDateTime().atZone(java.time.ZoneId.systemDefault()).truncatedTo(java.time.temporal.ChronoUnit.DAYS).toLocalDateTime())" />
-                <!-- fromdate in the past? set to today-->
-                <if
-                    condition="rentalFromDate &lt; Timestamp.valueOf(nowBeginOfDay.toLocalDateTime())">
-                    <set field="rentalFromdate"
-                        from="Timestamp.valueOf(nowBeginOfDay.toLocalDateTime())" />
-                </if>
-                <set field="rental.rentalThruDate"
-                    from="Timestamp.valueOf(rental.rentalThruDate.toLocalDateTime().atZone(java.time.ZoneId.systemDefault()).truncatedTo(java.time.temporal.ChronoUnit.DAYS).toLocalDateTime())" />
                 <!-- for every date, record the number of assets that have a reservation -->
-                <while condition="rentalFromDate &lt; rental.rentalThruDate">
-                    <set field="rentalDate"
-                        from="[d: rentalFromDate.toString().substring(0,10), n:1]" />
+                <set field="rentalDate" from="rental.rentalFromDate" />
+                <while
+                    condition="rentalDate.toString().substring(0,10)
+                        &lt; rental.rentalThruDate.toString().substring(0,10)">
                     <script>
-                        int index = fullDates.findIndexOf{it.d == rentalDate.d};
+                        int index = fullDates.findIndexOf{it.d.toString().substring(0,10) == 
+                                rentalDate.toString().substring(0,10)};
                         if (index != -1)
                             fullDates[index].n++
                         else
-                            fullDates.add(rentalDate);
+                            fullDates.add([d: ec.l10n.format(rentalDate,'yyyy-MM-dd HH:mm:ssZ'), n:1]);
                     </script>
-                    <!-- add a day to timestamp -->
-                    <set field="rentalFromDate"
-                        from="Timestamp.valueOf(rentalFromDate.toLocalDateTime().atZone(java.time.ZoneId.systemDefault()).plusDays(1).toLocalDateTime())" />
+                    <!-- increment rentalDate -->
+                    <set field="rentalDate"
+                        from="Timestamp.from(rentalDate.toInstant()
+                            .plus(1, java.time.temporal.ChronoUnit.DAYS))" />
                 </while>
                 <set field="lastItem" from="rental" />
             </iterate>
             <if condition="lastItem">
-                <service-call name="growerp.100.FinDocServices100.process#RentalLastItem"
-                    out-map="context" in-map="[productId: lastItem.productId,dates: fullDates]" />
-                <script>products.add([
-                    productId: lastItem.productId,
-                    productName: lastItem.productName,
-                    fullDates: fullDates,
-                    ])</script>
+                <service-call name="growerp.100.FinDocServices100.get#SoldOutDays"
+                    out-map="context" in-map="[productId: lastItem.productId, fullDates: fullDates]" />
+                <script>
+                    productRentalDates.add(
+                        [productId: lastItem.productId,
+                        productName: lastItem.productName,
+                        dates: dates])
+                </script>
             </if>
             <if condition="!productId">
                 <!-- add empty rental products -->
@@ -2510,42 +2510,46 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="productTypeEnumId" value="PtFixedAssetUse" />
                     <order-by field-name="productName,productId" />
                 </entity-find>
-                <set field="newProducts" from="[]" />
                 <iterate list="rentalProducts" entry="rentalProduct">
-                    <script>
-                    var fullDates = products.find 
-                            {it.productId == rentalProduct.productId}?.fullDates;
-                    newProducts.add([
-                        productId: rentalProduct.productId,
-                        productName: rentalProduct.productName,
-                        fullDates: fullDates != null ? fullDates : []])</script>
+                    <if
+                        condition="!productRentalDates.any 
+                        {it.productId == rentalProduct.productId}">
+                        <script>
+                            productRentalDates.add(
+                                [productId: rentalProduct.productId,
+                                productName: rentalProduct.productName,
+                                dates: []])
+                        </script>
+                    </if>
                 </iterate>
-                <set field="products" from="newProducts" />
             </if>
         </actions>
     </service>
 
-    <service verb="process" noun="RentalLastItem">
+    <service verb="get" noun="SoldOutDays">
+        <description> will return the dates when a product has sold out:
+                number of ordered products same or larger the the related nuimber of assets
+        </description>
         <in-parameters>
-            <parameter name="productId" />
-            <parameter name="dates" type="List" />
+            <parameter name="productId" required="true" />
+            <parameter name="fullDates" type="List" /> <!-- list of days, number of assets used-->
         </in-parameters>
         <out-parameters>
-            <parameter name="fullDates" />
+            <parameter name="dates" type="List" /> <!-- list of days-->
         </out-parameters>
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <!-- get available number of assets for this product -->
-            <entity-find-count entity-name="mantle.product.asset.Asset" count-field="nbrOfAssets">
+            <entity-find entity-name="growerp.mobile.asset.ProductAssetSummary" list="assets">
                 <econdition field-name="ownerPartyId" from="companyPartyId" />
                 <econdition field-name="productId" from="productId" />
-            </entity-find-count>
-            <set field="fullDates" from="[]" />
+            </entity-find>
+            <set field="dates" from="[]" />
             <!-- get the dates where the available assets are used -->
-            <iterate list="dates" entry="date">
-                <if condition="date.n &gt;= nbrOfAssets">
-                    <script>fullDates.add(date.d)</script>
+            <iterate list="fullDates" entry="fullDate">
+                <if condition="fullDate.n &gt;= assets[0].totalAssets">
+                    <script>dates.add(fullDate.d)</script>
                 </if>
             </iterate>
         </actions>
@@ -2799,7 +2803,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     out-map="context" />
                                 <service-call
                                     name="mantle.account.PaymentServices.create#InvoicePayment"
-                                    in-map="[invoiceId: invoiceId, effectiveDate:effectiveDate,
+                                    in-map="[invoiceId: invoiceId, effectiveDate: effectiveDate,
                                 statusId: 'PmntPromised', orderId: order.orderId,
                                 pseudoId: seqNum]"
                                     out-map="context" />

@@ -18,7 +18,7 @@ part 'application_model.freezed.dart';
 part 'application_model.g.dart';
 
 @freezed
-class Application with _$Application {
+abstract class Application with _$Application {
   factory Application({
     @Default("") String applicationId,
     String? version, // room, table etc

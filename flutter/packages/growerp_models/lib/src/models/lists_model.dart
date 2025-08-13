@@ -24,10 +24,8 @@ part 'lists_model.g.dart';
 part 'lists_model.freezed.dart';
 
 @freezed
-class Countries with _$Countries {
-  factory Countries({
-    @Default([]) List<Country> countries,
-  }) = _Countries;
+abstract class Countries with _$Countries {
+  factory Countries({@Default([]) List<Country> countries}) = _Countries;
   Countries._();
 
   factory Countries.fromJson(Map<String, dynamic> json) =>
@@ -35,20 +33,16 @@ class Countries with _$Countries {
 }
 
 @freezed
-class Uoms with _$Uoms {
-  factory Uoms({
-    @Default([]) List<Uom> uoms,
-  }) = _Uoms;
+abstract class Uoms with _$Uoms {
+  factory Uoms({@Default([]) List<Uom> uoms}) = _Uoms;
   Uoms._();
 
   factory Uoms.fromJson(Map<String, dynamic> json) => _$UomsFromJson(json);
 }
 
 @freezed
-class GlAccounts with _$GlAccounts {
-  factory GlAccounts({
-    @Default([]) List<GlAccount> glAccounts,
-  }) = _GlAccounts;
+abstract class GlAccounts with _$GlAccounts {
+  factory GlAccounts({@Default([]) List<GlAccount> glAccounts}) = _GlAccounts;
   GlAccounts._();
 
   factory GlAccounts.fromJson(Map<String, dynamic> json) =>
@@ -56,10 +50,8 @@ class GlAccounts with _$GlAccounts {
 }
 
 @freezed
-class Categories with _$Categories {
-  factory Categories({
-    @Default([]) List<Category> categories,
-  }) = _Categories;
+abstract class Categories with _$Categories {
+  factory Categories({@Default([]) List<Category> categories}) = _Categories;
   Categories._();
 
   factory Categories.fromJson(Map<String, dynamic> json) =>
@@ -67,10 +59,8 @@ class Categories with _$Categories {
 }
 
 @freezed
-class Products with _$Products {
-  factory Products({
-    @Default([]) List<Product> products,
-  }) = _Products;
+abstract class Products with _$Products {
+  factory Products({@Default([]) List<Product> products}) = _Products;
   Products._();
 
   factory Products.fromJson(Map<String, dynamic> json) =>
@@ -78,10 +68,20 @@ class Products with _$Products {
 }
 
 @freezed
-class Subscriptions with _$Subscriptions {
-  factory Subscriptions({
-    @Default([]) List<Subscription> subscriptions,
-  }) = _Subscriptions;
+abstract class ProductRentalDates with _$ProductRentalDates {
+  factory ProductRentalDates({
+    @Default([]) List<ProductRentalDate> productRentalDates,
+  }) = _ProductRentalDates;
+  ProductRentalDates._();
+
+  factory ProductRentalDates.fromJson(Map<String, dynamic> json) =>
+      _$ProductRentalDatesFromJson(json);
+}
+
+@freezed
+abstract class Subscriptions with _$Subscriptions {
+  factory Subscriptions({@Default([]) List<Subscription> subscriptions}) =
+      _Subscriptions;
   Subscriptions._();
 
   factory Subscriptions.fromJson(Map<String, dynamic> json) =>
@@ -89,20 +89,17 @@ class Subscriptions with _$Subscriptions {
 }
 
 @freezed
-class Assets with _$Assets {
-  factory Assets({
-    @Default([]) List<Asset> assets,
-  }) = _Assets;
+abstract class Assets with _$Assets {
+  factory Assets({@Default([]) List<Asset> assets}) = _Assets;
   Assets._();
 
   factory Assets.fromJson(Map<String, dynamic> json) => _$AssetsFromJson(json);
 }
 
 @freezed
-class Applications with _$Applications {
-  factory Applications({
-    @Default([]) List<Application> applications,
-  }) = _Applications;
+abstract class Applications with _$Applications {
+  factory Applications({@Default([]) List<Application> applications}) =
+      _Applications;
   Applications._();
 
   factory Applications.fromJson(Map<String, dynamic> json) =>
@@ -110,20 +107,16 @@ class Applications with _$Applications {
 }
 
 @freezed
-class Users with _$Users {
-  factory Users({
-    @Default([]) List<User> users,
-  }) = _Users;
+abstract class Users with _$Users {
+  factory Users({@Default([]) List<User> users}) = _Users;
   Users._();
 
   factory Users.fromJson(Map<String, dynamic> json) => _$UsersFromJson(json);
 }
 
 @freezed
-class Companies with _$Companies {
-  factory Companies({
-    @Default([]) List<Company> companies,
-  }) = _Companies;
+abstract class Companies with _$Companies {
+  factory Companies({@Default([]) List<Company> companies}) = _Companies;
   Companies._();
 
   factory Companies.fromJson(Map<String, dynamic> json) =>
@@ -131,10 +124,9 @@ class Companies with _$Companies {
 }
 
 @freezed
-class RentalFullDates with _$RentalFullDates {
-  factory RentalFullDates({
-    @Default([]) List<String> rentalFullDates,
-  }) = _RentalFullDates;
+abstract class RentalFullDates with _$RentalFullDates {
+  factory RentalFullDates({@Default([]) List<String> rentalFullDates}) =
+      _RentalFullDates;
   RentalFullDates._();
 
   factory RentalFullDates.fromJson(Map<String, dynamic> json) =>
@@ -142,10 +134,8 @@ class RentalFullDates with _$RentalFullDates {
 }
 
 @freezed
-class FinDocs with _$FinDocs {
-  factory FinDocs({
-    @Default([]) List<FinDoc> finDocs,
-  }) = _FinDocs;
+abstract class FinDocs with _$FinDocs {
+  factory FinDocs({@Default([]) List<FinDoc> finDocs}) = _FinDocs;
   FinDocs._();
 
   factory FinDocs.fromJson(Map<String, dynamic> json) =>
@@ -153,10 +143,9 @@ class FinDocs with _$FinDocs {
 }
 
 @freezed
-class FinDocItems with _$FinDocItems {
-  factory FinDocItems({
-    @Default([]) List<FinDocItem> finDocItems,
-  }) = _FinDocItems;
+abstract class FinDocItems with _$FinDocItems {
+  factory FinDocItems({@Default([]) List<FinDocItem> finDocItems}) =
+      _FinDocItems;
   FinDocItems._();
 
   factory FinDocItems.fromJson(Map<String, dynamic> json) =>
@@ -164,10 +153,8 @@ class FinDocItems with _$FinDocItems {
 }
 
 @freezed
-class ItemTypes with _$ItemTypes {
-  factory ItemTypes({
-    @Default([]) List<ItemType> itemTypes,
-  }) = _ItemTypes;
+abstract class ItemTypes with _$ItemTypes {
+  factory ItemTypes({@Default([]) List<ItemType> itemTypes}) = _ItemTypes;
   ItemTypes._();
 
   factory ItemTypes.fromJson(Map<String, dynamic> json) =>
@@ -175,10 +162,9 @@ class ItemTypes with _$ItemTypes {
 }
 
 @freezed
-class PaymentTypes with _$PaymentTypes {
-  factory PaymentTypes({
-    @Default([]) List<PaymentType> paymentTypes,
-  }) = _PaymentTypes;
+abstract class PaymentTypes with _$PaymentTypes {
+  factory PaymentTypes({@Default([]) List<PaymentType> paymentTypes}) =
+      _PaymentTypes;
   PaymentTypes._();
 
   factory PaymentTypes.fromJson(Map<String, dynamic> json) =>
@@ -186,10 +172,8 @@ class PaymentTypes with _$PaymentTypes {
 }
 
 @freezed
-class Locations with _$Locations {
-  factory Locations({
-    @Default([]) List<Location> locations,
-  }) = _Locations;
+abstract class Locations with _$Locations {
+  factory Locations({@Default([]) List<Location> locations}) = _Locations;
   Locations._();
 
   factory Locations.fromJson(Map<String, dynamic> json) =>
@@ -197,10 +181,9 @@ class Locations with _$Locations {
 }
 
 @freezed
-class TimePeriods with _$TimePeriods {
-  factory TimePeriods({
-    @Default([]) List<TimePeriod> timePeriods,
-  }) = _TimePeriods;
+abstract class TimePeriods with _$TimePeriods {
+  factory TimePeriods({@Default([]) List<TimePeriod> timePeriods}) =
+      _TimePeriods;
   TimePeriods._();
 
   factory TimePeriods.fromJson(Map<String, dynamic> json) =>
@@ -208,10 +191,9 @@ class TimePeriods with _$TimePeriods {
 }
 
 @freezed
-class LedgerJournals with _$LedgerJournals {
-  factory LedgerJournals({
-    @Default([]) List<LedgerJournal> ledgerJournals,
-  }) = _LedgerJournals;
+abstract class LedgerJournals with _$LedgerJournals {
+  factory LedgerJournals({@Default([]) List<LedgerJournal> ledgerJournals}) =
+      _LedgerJournals;
   LedgerJournals._();
 
   factory LedgerJournals.fromJson(Map<String, dynamic> json) =>
@@ -219,10 +201,9 @@ class LedgerJournals with _$LedgerJournals {
 }
 
 @freezed
-class AccountClasses with _$AccountClasses {
-  factory AccountClasses({
-    @Default([]) List<AccountClass> accountClasses,
-  }) = _AccountClasses;
+abstract class AccountClasses with _$AccountClasses {
+  factory AccountClasses({@Default([]) List<AccountClass> accountClasses}) =
+      _AccountClasses;
   AccountClasses._();
 
   factory AccountClasses.fromJson(Map<String, dynamic> json) =>
@@ -230,10 +211,9 @@ class AccountClasses with _$AccountClasses {
 }
 
 @freezed
-class AccountTypes with _$AccountTypes {
-  factory AccountTypes({
-    @Default([]) List<AccountType> accountTypes,
-  }) = _AccountTypes;
+abstract class AccountTypes with _$AccountTypes {
+  factory AccountTypes({@Default([]) List<AccountType> accountTypes}) =
+      _AccountTypes;
   AccountTypes._();
 
   factory AccountTypes.fromJson(Map<String, dynamic> json) =>
@@ -241,10 +221,8 @@ class AccountTypes with _$AccountTypes {
 }
 
 @freezed
-class ChatRooms with _$ChatRooms {
-  factory ChatRooms({
-    @Default([]) List<ChatRoom> chatRooms,
-  }) = _ChatRooms;
+abstract class ChatRooms with _$ChatRooms {
+  factory ChatRooms({@Default([]) List<ChatRoom> chatRooms}) = _ChatRooms;
   ChatRooms._();
 
   factory ChatRooms.fromJson(Map<String, dynamic> json) =>
@@ -252,10 +230,9 @@ class ChatRooms with _$ChatRooms {
 }
 
 @freezed
-class ChatMessages with _$ChatMessages {
-  factory ChatMessages({
-    @Default([]) List<ChatMessage> chatMessages,
-  }) = _ChatMessages;
+abstract class ChatMessages with _$ChatMessages {
+  factory ChatMessages({@Default([]) List<ChatMessage> chatMessages}) =
+      _ChatMessages;
   ChatMessages._();
 
   factory ChatMessages.fromJson(Map<String, dynamic> json) =>
@@ -263,10 +240,9 @@ class ChatMessages with _$ChatMessages {
 }
 
 @freezed
-class Notifications with _$Notifications {
-  factory Notifications({
-    @Default([]) List<NotificationWs> notifications,
-  }) = _Notifications;
+abstract class Notifications with _$Notifications {
+  factory Notifications({@Default([]) List<NotificationWs> notifications}) =
+      _Notifications;
   Notifications._();
 
   factory Notifications.fromJson(Map<String, dynamic> json) =>
@@ -274,10 +250,8 @@ class Notifications with _$Notifications {
 }
 
 @freezed
-class Activities with _$Activities {
-  factory Activities({
-    @Default([]) List<Activity> activities,
-  }) = _Activities;
+abstract class Activities with _$Activities {
+  factory Activities({@Default([]) List<Activity> activities}) = _Activities;
   Activities._();
 
   factory Activities.fromJson(Map<String, dynamic> json) =>
@@ -285,10 +259,9 @@ class Activities with _$Activities {
 }
 
 @freezed
-class Opportunities with _$Opportunities {
-  factory Opportunities({
-    @Default([]) List<Opportunity> opportunities,
-  }) = _Opportunities;
+abstract class Opportunities with _$Opportunities {
+  factory Opportunities({@Default([]) List<Opportunity> opportunities}) =
+      _Opportunities;
   Opportunities._();
 
   factory Opportunities.fromJson(Map<String, dynamic> json) =>
@@ -296,10 +269,9 @@ class Opportunities with _$Opportunities {
 }
 
 @freezed
-class CompaniesUsers with _$CompaniesUsers {
-  factory CompaniesUsers({
-    @Default([]) List<CompanyUser> companiesUsers,
-  }) = _CompaniesUsers;
+abstract class CompaniesUsers with _$CompaniesUsers {
+  factory CompaniesUsers({@Default([]) List<CompanyUser> companiesUsers}) =
+      _CompaniesUsers;
   CompaniesUsers._();
 
   factory CompaniesUsers.fromJson(Map<String, dynamic> json) =>

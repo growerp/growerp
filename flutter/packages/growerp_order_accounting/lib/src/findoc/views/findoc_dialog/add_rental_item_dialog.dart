@@ -31,8 +31,11 @@ Future addRentalItemDialog(BuildContext context,
   final productSearchBoxController = TextEditingController();
   Product? selectedProduct;
   DateTime startDate = CustomizableDateTime.current;
-  List<String> rentalDays = [];
+  List<DateTime> rentalDays = [];
   String classificationId = context.read<String>();
+  quantityController.text = quantityController.text == ''
+      ? '1'
+      : quantityController.text; // Default quantity for rental items is 1 day
 
   return showDialog<FinDocItem>(
       context: context,
@@ -41,7 +44,7 @@ Future addRentalItemDialog(BuildContext context,
         bool whichDayOk(DateTime day) {
           var formatter = DateFormat('yyyy-MM-dd');
           String date = formatter.format(day);
-          if (rentalDays.contains(date)) return false;
+          if (rentalDays.any((d) => formatter.format(d) == date)) return false;
           return true;
         }
 
@@ -69,11 +72,9 @@ Future addRentalItemDialog(BuildContext context,
                       child: StatefulBuilder(
                         builder: (BuildContext context, StateSetter setState) {
                           Future<void> selectDate(BuildContext context) async {
-                            productBloc.add(GetDataEvent(() => context
-                                .read<RestClient>()
-                                .getDailyRentalOccupancy(
-                                    productId: selectedProduct!.productId)));
-
+                            finDocBloc.add(FinDocProductRentalDates(
+                              selectedProduct!.productId,
+                            ));
                             final DateTime? picked = await showDatePicker(
                               context: context,
                               initialDate: firstFreeDate(),
@@ -183,17 +184,26 @@ Future addRentalItemDialog(BuildContext context,
                                                 priceController.text =
                                                     newValue!.price.toString();
                                                 itemDescriptionController.text =
-                                                    "${newValue.productName}";
-                                                productBloc.add(GetDataEvent(
-                                                    () => context
-                                                        .read<RestClient>()
-                                                        .getDailyRentalOccupancy(
-                                                            productId: newValue
-                                                                .productId)));
-                                                while (!whichDayOk(startDate)) {
-                                                  startDate = startDate.add(
-                                                      const Duration(days: 1));
-                                                }
+                                                    newValue.productName ?? '';
+                                                finDocBloc.add(
+                                                    FinDocProductRentalDates(
+                                                        newValue.productId));
+                                                await Future.delayed(
+                                                    const Duration(
+                                                        milliseconds: 800),
+                                                    () {});
+                                                setState(() {
+                                                  rentalDays = finDocBloc
+                                                          .state
+                                                          .productRentalDates
+                                                          .isNotEmpty
+                                                      ? finDocBloc
+                                                          .state
+                                                          .productRentalDates[0]
+                                                          .dates
+                                                      : [];
+                                                  startDate = firstFreeDate();
+                                                });
                                               },
                                               validator: (value) =>
                                                   value == null
@@ -226,44 +236,43 @@ Future addRentalItemDialog(BuildContext context,
                                             : null,
                                       ),
                                       const SizedBox(height: 10),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              "${startDate.toLocal()}"
-                                                  .split(' ')[0],
-                                              key: const Key('date'),
+                                      Row(children: [
+                                        Expanded(
+                                          child: FormField<DateTime>(
+                                            key: const Key('setDate'),
+                                            initialValue: startDate,
+                                            validator: (value) => value == null
+                                                ? 'Select a start date'
+                                                : null,
+                                            builder: (field) => InkWell(
+                                              onTap: () async {
+                                                await selectDate(context);
+                                                field.didChange(startDate);
+                                              },
+                                              child: InputDecorator(
+                                                decoration: InputDecoration(
+                                                  labelText: 'Start Date',
+                                                  errorText: field.errorText,
+                                                  suffixIcon: const Icon(
+                                                      Icons.arrow_drop_down),
+                                                ),
+                                                child: Text(
+                                                  "${startDate.toLocal()}"
+                                                      .split(' ')[0],
+                                                ),
+                                              ),
                                             ),
                                           ),
-                                          const SizedBox(width: 10),
-                                          OutlinedButton(
-                                              key: const Key('setDate'),
-                                              child: const Text(
-                                                'Select date',
-                                              ),
-                                              onPressed: () async {
-                                                List prods = (context
-                                                        .read<
-                                                            DataFetchBloc<
-                                                                Products>>()
-                                                        .state
-                                                        .data as Products)
-                                                    .products;
-                                                if (prods.isNotEmpty) {
-                                                  rentalDays =
-                                                      prods[0].fullDates;
-                                                }
-                                                return await selectDate(
-                                                    context);
-                                              }),
-                                        ],
-                                      ),
-                                      TextFormField(
-                                        key: const Key('quantity'),
-                                        decoration: const InputDecoration(
-                                            labelText: 'Nbr. of days'),
-                                        controller: quantityController,
-                                      ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                            child: TextFormField(
+                                          key: const Key('quantity'),
+                                          decoration: const InputDecoration(
+                                              labelText: 'Number of days'),
+                                          controller: quantityController,
+                                        )),
+                                      ]),
                                       const SizedBox(height: 10),
                                       Row(
                                         children: [
@@ -287,18 +296,17 @@ Future addRentalItemDialog(BuildContext context,
                                                     description:
                                                         itemDescriptionController
                                                             .text,
-                                                    rentalFromDate: startDate,
-                                                    rentalThruDate:
-                                                        startDate.add(Duration(
+                                                    rentalFromDate:
+                                                        startDate.noon(),
+                                                    rentalThruDate: startDate
+                                                        .add(Duration(
                                                             days: int.parse(
                                                                 quantityController
-                                                                        .text
-                                                                        .isEmpty
-                                                                    ? '1'
-                                                                    : quantityController
-                                                                        .text))),
-                                                    quantity:
-                                                        Decimal.parse('1'),
+                                                                    .text)))
+                                                        .noon(),
+                                                    quantity: Decimal.parse(
+                                                        quantityController
+                                                            .text),
                                                   ));
                                                 }
                                               },

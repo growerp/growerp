@@ -12,32 +12,27 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:growerp_models/growerp_models.dart';
-part 'content_model.freezed.dart';
-part 'content_model.g.dart';
+part 'product_rental_date_model.freezed.dart';
+part 'product_rental_date_model.g.dart';
 
+/// This model is used to represent rental dates for products
 @freezed
-abstract class Content extends Equatable with _$Content {
-  Content._();
-  factory Content({
-    @Default("") String path, // filename when image
-    @Default("") String title,
-    @Default("") String text,
-    @Uint8ListConverter() Uint8List? image,
-    @Default(0) int seqId,
-  }) = _Content;
+abstract class ProductRentalDate extends Equatable with _$ProductRentalDate {
+  const ProductRentalDate._();
+  const factory ProductRentalDate({
+    @Default("") String productId,
+    String? productName,
+    @Default([]) List<DateTime> dates,
+  }) = _ProductRentalDate;
 
-  factory Content.fromJson(Map<String, dynamic> json) =>
-      _$ContentFromJson(json["content"] ?? json);
-
-  bool isText() => text.isNotEmpty;
+  factory ProductRentalDate.fromJson(Map<String, dynamic> json) =>
+      _$ProductRentalDateFromJson(json['productRentalDate'] ?? json);
 
   @override
-  List<Object?> get props => [path];
+  List<Object?> get props => [productId];
 
   @override
-  String toString() => path;
+  String toString() => '$productName[$productId] #dates: ${dates.length}';
 }

@@ -21,7 +21,7 @@ part 'activity_model.freezed.dart';
 part 'activity_model.g.dart';
 
 @freezed
-class Activity extends Equatable with _$Activity {
+abstract class Activity extends Equatable with _$Activity {
   const Activity._();
   const factory Activity({
     @Default("") String activityId,
