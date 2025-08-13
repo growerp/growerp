@@ -27,7 +27,7 @@ part 'company_model.freezed.dart';
 part 'company_model.g.dart';
 
 @freezed
-class Company with _$Company {
+abstract class Company with _$Company {
   Company._();
   factory Company({
     String? partyId,

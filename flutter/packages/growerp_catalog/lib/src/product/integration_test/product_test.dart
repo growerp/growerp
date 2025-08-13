@@ -50,6 +50,8 @@ class ProductTest {
       formState.save(); // save into the formbuilder internal value fields
 
       await CommonTest.checkWidgetKey(tester, 'ProductDialog');
+      await CommonTest.enterDropDown(
+          tester, 'productTypeDropDown', product.productTypeId!);
       await CommonTest.enterText(tester, 'name', product.productName!);
       await CommonTest.drag(tester);
       await CommonTest.enterText(tester, 'description', product.description!);
@@ -68,8 +70,6 @@ class ProductTest {
         }
         await CommonTest.tapByKey(tester, 'ok');
         await CommonTest.dragUntil(tester, key: 'productTypeDropDown');
-        await CommonTest.enterDropDown(
-            tester, 'productTypeDropDown', product.productTypeId!);
         // Uom and amount
         await CommonTest.enterDropDown(
             tester, 'uomTypeDropDown', product.amountUom!.typeDescription);

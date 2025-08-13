@@ -23,7 +23,7 @@ part 'website_model.freezed.dart';
 part 'website_model.g.dart';
 
 @freezed
-class Website with _$Website {
+abstract class Website with _$Website {
   Website._();
   factory Website({
     @Default('') String id,

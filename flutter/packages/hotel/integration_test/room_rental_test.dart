@@ -35,23 +35,34 @@ Future<void> selectRooms(WidgetTester tester) async {
 
 Future<void> selectUserCustomers(WidgetTester tester) async {
   await CommonTest.selectOption(
-      tester, '/reservations', 'UserListCustomer', '2');
+    tester,
+    '/reservations',
+    'UserListCustomer',
+    '2',
+  );
 }
 
 Future<void> selectCompanyCustomers(WidgetTester tester) async {
   await CommonTest.selectOption(
-      tester, '/reservations', 'CompanyListCustomer', '3');
+    tester,
+    '/reservations',
+    'CompanyListCustomer',
+    '3',
+  );
 }
 
 Future<void> selectReservations(WidgetTester tester) async {
   await CommonTest.selectOption(
-      tester, '/reservations', 'FinDocListSalesOrder');
+    tester,
+    '/reservations',
+    'FinDocListSalesOrder',
+  );
 }
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   String classificationId = 'AppHotel';
-/*
+  /*
   DateTime today = CustomizableDateTime.current;
   DateTime plus2 = today.add(const Duration(days: 2));
   var usFormat = DateFormat('M/d/yyyy');
@@ -77,16 +88,23 @@ void main() {
       blocProviders: getHotelBlocProviders(restClient, classificationId),
       classificationId: classificationId,
     );
-    await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "assets": roomsHotel, // will also add products
-      "users": customers
-    });
+    await CommonTest.createCompanyAndAdmin(
+      tester,
+      testData: {
+        "assets": roomsHotel, // will also add products
+        "users": customers,
+      },
+    );
     await CommonTest.waitForSnackbarToGo(tester);
     await CommonTest.tapByKey(tester, 'refresh');
     await createRoomReservation(tester, roomReservations);
     await selectReservations(tester);
-    await FinDocTest.checkFinDocDetail(tester, FinDocType.order,
-        rental: true, classificationId: 'AppHotel');
+    await FinDocTest.checkFinDocDetail(
+      tester,
+      FinDocType.order,
+      rental: true,
+      classificationId: 'AppHotel',
+    );
     await OrderTest.checkRentalSalesOrderBlocDates(tester);
     await OrderTest.approveOrders(tester, classificationId: classificationId);
     await InvoiceTest.selectSalesInvoices(tester);
@@ -94,18 +112,24 @@ void main() {
     await InvoiceTest.sendOrApproveInvoices(tester);
     await CommonTest.gotoMainMenu(tester);
     await selectReservations(tester);
-    await OrderTest.completeOrders(tester,
-        classificationId: classificationId); // to completed
-    await OrderTest.checkOrderCompleted(tester,
-        classificationId: classificationId);
+    await OrderTest.completeOrders(
+      tester,
+      classificationId: classificationId,
+    ); // to completed
+    await OrderTest.checkOrderCompleted(
+      tester,
+      classificationId: classificationId,
+    );
   }, skip: false);
 }
 
 Future<void> createRoomReservation(
-    WidgetTester tester, List<FinDoc> finDocs) async {
+  WidgetTester tester,
+  List<FinDoc> finDocs,
+) async {
   SaveTest test = await PersistFunctions.getTest();
   List<FinDoc> newOrders = [];
-  var usFormat = DateFormat('M/d/yyyy');
+  var stdFormat = DateFormat('yyyy-MM-dd');
   for (FinDoc finDoc in finDocs) {
     await CommonTest.tapByKey(tester, 'addNew');
     await CommonTest.tapByKey(tester, 'customer');
@@ -114,18 +138,22 @@ Future<void> createRoomReservation(
     await CommonTest.tapByText(tester, finDoc.items[0].description!);
     await CommonTest.tapByKey(tester, 'setDate');
     await CommonTest.tapByTooltip(tester, 'Switch to input');
-    await tester.enterText(find.byType(TextField).last,
-        usFormat.format(finDoc.items[0].rentalFromDate!));
+    await tester.enterText(
+      find.byType(TextField).last,
+      stdFormat.format(finDoc.items[0].rentalFromDate!),
+    );
     await tester.pump();
     await CommonTest.tapByText(tester, 'OK');
-    DateTime textField = DateTime.parse(CommonTest.getTextField('date'));
-    expect(usFormat.format(textField),
-        usFormat.format(finDoc.items[0].rentalFromDate!));
+    expect(
+      CommonTest.getDateTimeFormField('setDate').dateOnly(),
+      finDoc.items[0].rentalFromDate.dateOnly(),
+    );
     // nbr of days
     await CommonTest.enterText(
-        tester, 'quantity', finDoc.items[0].quantity.toString());
-    await CommonTest.enterText(
-        tester, 'nbrOfRooms', finDoc.items.length.toString());
+      tester,
+      'quantity',
+      finDoc.items[0].quantity.toString(),
+    );
     await CommonTest.drag(tester);
     await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     // get productId's from reservations
@@ -134,15 +162,19 @@ Future<void> createRoomReservation(
     List<FinDocItem> newItems = List.of(finDoc.items);
     for (int index = 0; index < finDoc.items.length; index++) {
       var productId = CommonTest.getTextField('itemProductId$index');
-      FinDocItem newItem =
-          finDoc.items[index].copyWith(product: Product(pseudoId: productId));
+      FinDocItem newItem = finDoc.items[index].copyWith(
+        product: Product(pseudoId: productId),
+      );
       newItems[index] = newItem;
     }
     await CommonTest.tapByKey(tester, 'cancel'); // close again
-    newOrders.add(finDoc.copyWith(
+    newOrders.add(
+      finDoc.copyWith(
         orderId: CommonTest.getTextField('id0'),
         pseudoId: CommonTest.getTextField('id0'),
-        items: newItems));
+        items: newItems,
+      ),
+    );
   }
   await PersistFunctions.persistTest(test.copyWith(orders: newOrders));
 }

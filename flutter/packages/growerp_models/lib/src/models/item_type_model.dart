@@ -21,7 +21,7 @@ part 'item_type_model.g.dart';
 /// Item type used for order/invoice and payments
 /// itemTypeId/direction is the unique key
 @freezed
-class ItemType with _$ItemType {
+abstract class ItemType with _$ItemType {
   ItemType._();
   factory ItemType({
     @Default('') String itemTypeId,

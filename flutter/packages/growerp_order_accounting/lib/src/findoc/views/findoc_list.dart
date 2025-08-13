@@ -109,7 +109,8 @@ class FinDocListState extends State<FinDocList> {
         _finDocBloc = context.read<RequestBloc>() as FinDocBloc;
       default:
     }
-    _finDocBloc.add(FinDocFetch(refresh: true, limit: 15, my: my));
+    _finDocBloc.add(
+        FinDocFetch(refresh: true, limit: 15, my: my, status: widget.status));
     bottom = 50;
   }
 

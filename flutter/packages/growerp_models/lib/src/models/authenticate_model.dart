@@ -19,7 +19,7 @@ part 'authenticate_model.freezed.dart';
 part 'authenticate_model.g.dart';
 
 @freezed
-class Authenticate with _$Authenticate {
+abstract class Authenticate with _$Authenticate {
   Authenticate._();
   factory Authenticate({
     final String? apiKey, // api or actions as changePassword, moreinfo

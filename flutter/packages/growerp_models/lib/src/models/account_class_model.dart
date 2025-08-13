@@ -13,13 +13,15 @@
  */
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:equatable/equatable.dart';
+
 part 'account_class_model.freezed.dart';
 part 'account_class_model.g.dart';
 
 @freezed
-class AccountClass with _$AccountClass {
-  AccountClass._();
-  factory AccountClass({
+abstract class AccountClass extends Equatable with _$AccountClass {
+  const AccountClass._();
+  const factory AccountClass({
     String? topClassId,
     String? topDescription,
     String? parentClassId,
@@ -32,4 +34,10 @@ class AccountClass with _$AccountClass {
 
   factory AccountClass.fromJson(Map<String, dynamic> json) =>
       _$AccountClassFromJson(json['accountClass'] ?? json);
+
+  @override
+  List<Object?> get props => [topClassId];
+
+  @override
+  String toString() => '$topDescription[$topClassId]';
 }

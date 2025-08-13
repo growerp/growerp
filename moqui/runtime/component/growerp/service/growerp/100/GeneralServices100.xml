@@ -745,6 +745,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="image" />
                     <parameter name="userId" />
                     <parameter name="locale" />
+                    <parameter name="timeZone" />
                     <parameter name="telephoneNr" />
                     <parameter name="company" type="Map">
                         <parameter name="partyId" />
@@ -1105,6 +1106,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 from="[
                                 [
                                     productId: 'GROWERP_DIY_PLAN',
+                                    subscriptionTypeEnumId: 'StProduct',
                                     productName: 'GrowERP do it yourself plan',
                                     description: 'DIY Plan $49 per month|Full functionality, unlimited users!|support charged extra $75/hr',
                                     price: 49.00,
@@ -1114,6 +1116,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 ],
                                 [
                                     productId: 'GROWERP_SMALL_PLAN',
+                                    subscriptionTypeEnumId: 'StProduct',
                                     productName: 'GrowERP small Company plan',
                                     description: 'Small Company Plan $499 per month|Full functionality, unlimited users|including support for 20hrs/month',
                                     price: 499.00,
@@ -1123,6 +1126,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 ],
                                 [
                                     productId: 'GROWERP_FULL_PLAN',
+                                    subscriptionTypeEnumId: 'StProduct',
                                     productName: 'GrowERP full company plan',
                                     description: 'Full Company Plan $999 per month|Full functionality, unlimited users|including support for 40hrs/month',
                                     price: 999.00,
@@ -1148,7 +1152,9 @@ along with this software (see the LICENSE.md file). If not, see
                                         companyPartyId: companyPartyId,
                                         currencyId: currencyId,
                                         classificationId: classificationId,
-                                        userPartyId: userAccount.partyId]" />
+                                        userPartyId: userAccount.partyId,
+                                        timeZone: userAccount.timeZone,
+                                        ]" />
                                 </if>
                             </else>
                         </if>

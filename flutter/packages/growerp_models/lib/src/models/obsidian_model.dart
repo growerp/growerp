@@ -21,7 +21,7 @@ part 'obsidian_model.freezed.dart';
 part 'obsidian_model.g.dart';
 
 @freezed
-class Obsidian extends Equatable with _$Obsidian {
+abstract class Obsidian extends Equatable with _$Obsidian {
   Obsidian._();
   factory Obsidian({
     @Default("") String title,

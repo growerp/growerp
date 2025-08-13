@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:dio/dio.dart' hide Headers;
 import 'package:retrofit/retrofit.dart';
 
@@ -24,6 +26,8 @@ abstract class RestClient {
     @Field() String? companyPartyId, // required for other than admin
     @Field() String? newPassword,
     @Field('userGroupId') UserGroup? userGroup, // if admin also company
+    @Field() String? timeZone,
+    @Field() Locale? locale,
   });
 
   @POST("rest/s1/growerp/100/Login")
@@ -43,6 +47,7 @@ abstract class RestClient {
     @Field() String? currencyId,
     @Field() bool? demoData,
     @Field() required String classificationId,
+    @Field() double? timeZoneOffset,
   });
 
   @POST("rest/s1/growerp/100/Logout")
@@ -71,8 +76,9 @@ abstract class RestClient {
   });
 
   @GET("rest/s1/growerp/100/Authenticate")
-  Future<Authenticate> getAuthenticate(
-      {@Query('classificationId') required String classificationId});
+  Future<Authenticate> getAuthenticate({
+    @Query('classificationId') required String classificationId,
+  });
 
   // backend application url override
   @GET("rest/s1/growerp/100/Application")
@@ -96,16 +102,12 @@ abstract class RestClient {
   // unit of measure
   @GET("rest/s1/growerp/100/Uoms")
   @Extra({'noApiKey': true})
-  Future<Uoms> getUom(
-    @Query('uomTypes') List<String>? uomTypes,
-  );
+  Future<Uoms> getUom(@Query('uomTypes') List<String>? uomTypes);
 
   // company
   @GET("rest/s1/growerp/100/CompanyFromHost")
   @Extra({'noApiKey': true})
-  Future<Company> getCompanyFromHost(
-    @Query('hostName') String? hostName,
-  );
+  Future<Company> getCompanyFromHost(@Query('hostName') String? hostName);
 
   // company
   @GET("rest/s1/growerp/100/Company")
@@ -143,8 +145,9 @@ abstract class RestClient {
   Future<String> importCompanyUsers(@Field() List<CompanyUser> companyUsers);
 
   @GET("rest/s1/growerp/100/ImportExport")
-  Future<String> exportScreenCompanyUsers(
-      {@Query('entityName') String entityName = 'CompanyUser'});
+  Future<String> exportScreenCompanyUsers({
+    @Query('entityName') String entityName = 'CompanyUser',
+  });
 
   // user
   @GET("rest/s1/growerp/100/User")
@@ -167,18 +170,20 @@ abstract class RestClient {
   Future<User> updateUser({@Field() required User user});
 
   @DELETE("rest/s1/growerp/100/User")
-  Future<User> deleteUser(
-      {@Field() required String partyId,
-      @Field() required bool deleteCompanyToo});
+  Future<User> deleteUser({
+    @Field() required String partyId,
+    @Field() required bool deleteCompanyToo,
+  });
 
   // Website ======
   @GET("rest/s1/growerp/100/Website")
   Future<Website> getWebsite();
 
   @GET("rest/s1/growerp/100/WebsiteContent")
-  Future<Content> getWebsiteContent(
-      {@Query('path') required String path,
-      @Query('text') required String text});
+  Future<Content> getWebsiteContent({
+    @Query('path') required String path,
+    @Query('text') required String text,
+  });
 
   @PATCH("rest/s1/growerp/100/Website")
   Future<Website> updateWebsite({@Field() required Website website});
@@ -198,25 +203,28 @@ abstract class RestClient {
   // catalog
   // asset
   @GET("rest/s1/growerp/100/Asset")
-  Future<Assets> getAsset(
-      {@Query('start') int? start,
-      @Query('limit') int? limit,
-      @Query('companyPartyId') String? companyPartyId,
-      @Query('assetClassId') String? assetClassId,
-      @Query('assetId') String? assetId,
-      @Query('productId') String? productId,
-      @Query('isForDropDown') bool? isForDropDown,
-      @Query('search') String? searchString});
+  Future<Assets> getAsset({
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('companyPartyId') String? companyPartyId,
+    @Query('assetClassId') String? assetClassId,
+    @Query('assetId') String? assetId,
+    @Query('productId') String? productId,
+    @Query('isForDropDown') bool? isForDropDown,
+    @Query('search') String? searchString,
+  });
 
   @POST("rest/s1/growerp/100/Asset")
-  Future<Asset> createAsset(
-      {@Field() required Asset asset,
-      @Field() required String classificationId});
+  Future<Asset> createAsset({
+    @Field() required Asset asset,
+    @Field() required String classificationId,
+  });
 
   @PATCH("rest/s1/growerp/100/Asset")
-  Future<Asset> updateAsset(
-      {@Field() required Asset asset,
-      @Field() required String classificationId});
+  Future<Asset> updateAsset({
+    @Field() required Asset asset,
+    @Field() required String classificationId,
+  });
 
   // categories
   @GET("rest/s1/growerp/100/Categories")
@@ -230,22 +238,25 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/Category")
-  Future<Category> createCategory(
-      {@Field() required Category category,
-      @Field() required String classificationId});
+  Future<Category> createCategory({
+    @Field() required Category category,
+    @Field() required String classificationId,
+  });
 
   @PATCH("rest/s1/growerp/100/Category")
-  Future<Category> updateCategory(
-      {@Field() required Category category,
-      @Field() required String classificationId});
+  Future<Category> updateCategory({
+    @Field() required Category category,
+    @Field() required String classificationId,
+  });
 
   @DELETE("rest/s1/growerp/100/Category")
   Future<Category> deleteCategory({@Field() required Category category});
 
   @POST("rest/s1/growerp/100/ImportExport")
-  Future<String> importScreenCategories(
-      {@Field() required List categories,
-      @Field() required String classificationId});
+  Future<String> importScreenCategories({
+    @Field() required List categories,
+    @Field() required String classificationId,
+  });
 
   @GET("rest/s1/growerp/100/ImportExport")
   Future<String> exportScreenCategories({
@@ -270,22 +281,25 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/Product")
-  Future<Product> createProduct(
-      {@Field() required Product product,
-      @Field() required String classificationId});
+  Future<Product> createProduct({
+    @Field() required Product product,
+    @Field() required String classificationId,
+  });
 
   @PATCH("rest/s1/growerp/100/Product")
-  Future<Product> updateProduct(
-      {@Field() required Product product,
-      @Field() required String classificationId});
+  Future<Product> updateProduct({
+    @Field() required Product product,
+    @Field() required String classificationId,
+  });
 
   @DELETE("rest/s1/growerp/100/Product")
   Future<Product> deleteProduct({@Field() required Product product});
 
   @POST("rest/s1/growerp/100/ImportExport")
-  Future<String> importScreenProducts(
-      {@Field() required List<Product> products,
-      @Field() required String classificationId});
+  Future<String> importScreenProducts({
+    @Field() required List<Product> products,
+    @Field() required String classificationId,
+  });
 
   @GET("rest/s1/growerp/100/ImportExport")
   Future<String> exportScreenProducts({
@@ -295,7 +309,7 @@ abstract class RestClient {
 
   // dayly rental
   @GET("rest/s1/growerp/100/DailyRentalOccupancy")
-  Future<Products> getDailyRentalOccupancy({
+  Future<ProductRentalDates> getDailyRentalOccupancy({
     @Query('productId') String? productId,
   });
 
@@ -312,12 +326,11 @@ abstract class RestClient {
     @Query('start') int? start,
     @Query('limit') int? limit,
     @Query('my') bool? my,
+    @Query('status') FinDocStatusVal? status,
   });
 
   @POST("rest/s1/growerp/100/FinDoc")
-  Future<FinDoc> createFinDoc({
-    @Field() required FinDoc finDoc,
-  });
+  Future<FinDoc> createFinDoc({@Field() required FinDoc finDoc});
 
   @PATCH("rest/s1/growerp/100/FinDoc")
   Future<FinDoc> updateFinDoc({@Field() required FinDoc finDoc});
@@ -326,9 +339,7 @@ abstract class RestClient {
   Future<FinDoc> receiveShipment({@Field() required FinDoc finDoc});
 
   @GET("rest/s1/growerp/100/ItemType")
-  Future<ItemTypes> getItemTypes({
-    @Query('sales') bool? sales,
-  });
+  Future<ItemTypes> getItemTypes({@Query('sales') bool? sales});
 
   @PATCH("rest/s1/growerp/100/ItemType")
   Future<ItemType> updateItemType({
@@ -338,9 +349,7 @@ abstract class RestClient {
   });
 
   @GET("rest/s1/growerp/100/PaymentType")
-  Future<PaymentTypes> getPaymentTypes({
-    @Query('sales') bool? sales,
-  });
+  Future<PaymentTypes> getPaymentTypes({@Query('sales') bool? sales});
 
   @PATCH("rest/s1/growerp/100/PaymentType")
   Future<PaymentType> updatePaymentType({
@@ -354,7 +363,9 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/ImportExport/finDocItems")
   Future<void> importFinDocItem(
-      @Field() List<FinDocItem> finDocItems, @Field() String classificationId);
+    @Field() List<FinDocItem> finDocItems,
+    @Field() String classificationId,
+  );
 
   // finalize import
   @POST("rest/s1/growerp/100/ImportExport/finalizeImport")
@@ -414,9 +425,7 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/TimePeriod")
-  Future<TimePeriods> closeTimePeriod({
-    @Field() required String timePeriodId,
-  });
+  Future<TimePeriods> closeTimePeriod({@Field() required String timePeriodId});
 
   @GET("rest/s1/growerp/100/LedgerJournal")
   Future<LedgerJournals> getLedgerJournal({
@@ -427,14 +436,10 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/GlAccount")
-  Future<GlAccount> createGlAccount({
-    @Field() required GlAccount glAccount,
-  });
+  Future<GlAccount> createGlAccount({@Field() required GlAccount glAccount});
 
   @PATCH("rest/s1/growerp/100/GlAccount")
-  Future<GlAccount> updateGlAccount({
-    @Field() required GlAccount glAccount,
-  });
+  Future<GlAccount> updateGlAccount({@Field() required GlAccount glAccount});
 
   @POST("rest/s1/growerp/100/LedgerJournal")
   Future<LedgerJournal> createLedgerJournal({
@@ -488,14 +493,10 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/ChatRoom")
-  Future<ChatRoom> createChatRoom({
-    @Field() required ChatRoom chatRoom,
-  });
+  Future<ChatRoom> createChatRoom({@Field() required ChatRoom chatRoom});
 
   @PATCH("rest/s1/growerp/100/ChatRoom")
-  Future<ChatRoom> updateChatRoom({
-    @Field() required ChatRoom chatRoom,
-  });
+  Future<ChatRoom> updateChatRoom({@Field() required ChatRoom chatRoom});
 
   @DELETE("rest/s1/growerp/100/ChatRoom")
   Future<ChatRoom> deleteChatRoom({@Field() required String chatRoomId});
@@ -533,34 +534,27 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/Activity")
-  Future<Activity> createActivity({
-    @Field() required Activity activity,
-  });
+  Future<Activity> createActivity({@Field() required Activity activity});
 
   @PATCH("rest/s1/growerp/100/Activity")
-  Future<Activity> updateActivity({
-    @Field() required Activity activity,
-  });
+  Future<Activity> updateActivity({@Field() required Activity activity});
 
   // time entry
   @POST("rest/s1/growerp/100/TimeEntry")
-  Future<TimeEntry> createTimeEntry({
-    @Field() required TimeEntry timeEntry,
-  });
+  Future<TimeEntry> createTimeEntry({@Field() required TimeEntry timeEntry});
 
   @PATCH("rest/s1/growerp/100/TimeEntry")
-  Future<TimeEntry> updateTimeEntry({
-    @Field() required TimeEntry timeEntry,
-  });
+  Future<TimeEntry> updateTimeEntry({@Field() required TimeEntry timeEntry});
 
   @DELETE("rest/s1/growerp/100/TimeEntry")
   Future<TimeEntry> deleteTimeEntry({@Field() required TimeEntry timeEntry});
 
   // import / export ========
   @POST("rest/s1/growerp/100/ImportExport")
-  Future<void> uploadEntities(
-      {@Field() required dynamic entities,
-      @Field() required String classificationId});
+  Future<void> uploadEntities({
+    @Field() required dynamic entities,
+    @Field() required String classificationId,
+  });
 
   @POST("rest/s1/growerp/100/ImportExport/itemTypes")
   Future<String> importItemTypes(@Field() List<ItemType> itemTypes);
@@ -572,8 +566,9 @@ abstract class RestClient {
   Future<String> importGlAccounts(@Field() List<GlAccount> glAccounts);
 
   @GET("rest/s1/growerp/100/ImportExport")
-  Future<String> exportGlAccounts(
-      {@Query('entityName') String entityName = 'GlAccount'});
+  Future<String> exportGlAccounts({
+    @Query('entityName') String entityName = 'GlAccount',
+  });
 
   @POST("rest/s1/growerp/100/ImportExport/companies")
   Future<void> importCompanies(@Field() List<Company> companies);
@@ -583,14 +578,18 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/ImportExport/products")
   Future<void> importProducts(
-      @Field() List<Product> products, @Field() String classificationId);
+    @Field() List<Product> products,
+    @Field() String classificationId,
+  );
 
   @POST("rest/s1/growerp/100/ImportExport/categories")
   Future<void> importCategories(@Field() List<Category> categories);
 
   @POST("rest/s1/growerp/100/ImportExport/assets")
   Future<void> importAssets(
-      @Field() List<Asset> assets, @Field() String classificationId);
+    @Field() List<Asset> assets,
+    @Field() String classificationId,
+  );
 
   @GET("rest/s1/growerp/100/Categories")
   Future<Categories> getCategories({@Query('limit') int? limit});
@@ -614,16 +613,19 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/Opportunity")
-  Future<Opportunity> createOpportunity(
-      {@Field() required Opportunity opportunity});
+  Future<Opportunity> createOpportunity({
+    @Field() required Opportunity opportunity,
+  });
 
   @PATCH("rest/s1/growerp/100/Opportunity")
-  Future<Opportunity> updateOpportunity(
-      {@Field() required Opportunity opportunity});
+  Future<Opportunity> updateOpportunity({
+    @Field() required Opportunity opportunity,
+  });
 
   @DELETE("rest/s1/growerp/100/Opportunity")
-  Future<Opportunity> deleteOpportunity(
-      {@Field() required Opportunity opportunity});
+  Future<Opportunity> deleteOpportunity({
+    @Field() required Opportunity opportunity,
+  });
 
   // subscriptions
   @GET("rest/s1/growerp/100/Subscription")
@@ -637,14 +639,17 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/Subscription")
-  Future<Subscription> createSubscription(
-      {@Field() required Subscription subscription});
+  Future<Subscription> createSubscription({
+    @Field() required Subscription subscription,
+  });
 
   @PATCH("rest/s1/growerp/100/Subscription")
-  Future<Subscription> updateSubscription(
-      {@Field() required Subscription subscription});
+  Future<Subscription> updateSubscription({
+    @Field() required Subscription subscription,
+  });
 
   @DELETE("rest/s1/growerp/100/Subscription")
-  Future<Subscription> deleteSubscription(
-      {@Field() required Subscription subscription});
+  Future<Subscription> deleteSubscription({
+    @Field() required Subscription subscription,
+  });
 }

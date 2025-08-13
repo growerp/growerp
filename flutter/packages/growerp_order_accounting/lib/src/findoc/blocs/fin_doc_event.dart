@@ -32,6 +32,7 @@ class FinDocFetch extends FinDocEvent {
     this.journalId,
     this.limit = 20,
     this.my = false,
+    this.status,
   });
   final String searchString;
   final bool refresh;
@@ -43,9 +44,21 @@ class FinDocFetch extends FinDocEvent {
   final String customerCompanyPartyId;
   final int limit;
   final bool my; // only show 'my' documents
+  final FinDocStatusVal? status; // filter by status
 
   @override
-  List<Object> get props => [customerCompanyPartyId, searchString, refresh];
+  List<Object> get props => [
+        customerCompanyPartyId,
+        searchString,
+        refresh,
+        finDocId ?? '',
+        pseudoId ?? '',
+        docType ?? '',
+        sales ?? false,
+        journalId ?? '',
+        limit,
+        my
+      ];
 }
 
 class FinDocUpdate extends FinDocEvent {
@@ -91,4 +104,9 @@ class FinDocUpdatePaymentType extends FinDocEvent {
   final PaymentType paymentType;
   final bool? update;
   final bool? delete;
+}
+
+class FinDocProductRentalDates extends FinDocEvent {
+  const FinDocProductRentalDates(this.productId);
+  final String? productId;
 }

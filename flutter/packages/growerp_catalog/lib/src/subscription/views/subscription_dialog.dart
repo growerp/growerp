@@ -83,7 +83,7 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
           title:
               "Subscription #${widget.subscription.subscriptionId == null ? " New" : widget.subscription.pseudoId}",
           width: columns.toDouble() * (isPhone ? 400 : 300),
-          height: 1 / columns.toDouble() * (isPhone ? 500 : 800),
+          height: 1 / columns.toDouble() * (isPhone ? 550 : 900),
           child: _subscriptionForm(),
         ),
       ),
@@ -197,7 +197,7 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                   // Convert from server UTC time to local time for display
                   initialValue: widget.subscription.fromDate?.toLocal(),
                   inputType: InputType.date,
-                  format: DateFormat('yyyy/M/d'),
+                  format: DateFormat('yyyy-MM-dd'),
                   decoration: const InputDecoration(
                     labelText: 'From Date',
                     suffixIcon: Icon(Icons.calendar_today),
@@ -216,7 +216,7 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                   // Convert from server UTC time to local time for display
                   initialValue: widget.subscription.thruDate?.toLocal(),
                   inputType: InputType.date,
-                  format: DateFormat('yyyy/M/d'),
+                  format: DateFormat('yyyy-MM-dd'),
                   decoration: const InputDecoration(
                     labelText: 'Thru Date',
                     suffixIcon: Icon(Icons.calendar_today),
@@ -234,7 +234,7 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                   // Convert from server UTC time to local time for display
                   initialValue: widget.subscription.purchaseFromDate?.toLocal(),
                   inputType: InputType.date,
-                  format: DateFormat('yyyy/M/d'),
+                  format: DateFormat('yyyy-MM-dd'),
                   decoration: const InputDecoration(
                     labelText: 'Purchase Date',
                     suffixIcon: Icon(Icons.calendar_today),
@@ -250,7 +250,7 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                   // Convert from server UTC time to local time for display
                   initialValue: widget.subscription.purchaseThruDate?.toLocal(),
                   inputType: InputType.date,
-                  format: DateFormat('yyyy/M/d'),
+                  format: DateFormat('yyyy-MM-dd'),
                   decoration: const InputDecoration(
                     labelText: 'Cancel Date',
                     suffixIcon: Icon(Icons.calendar_today),

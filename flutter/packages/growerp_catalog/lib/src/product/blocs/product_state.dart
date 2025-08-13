@@ -20,8 +20,6 @@ class ProductState extends Equatable {
   const ProductState({
     this.status = ProductStatus.initial,
     this.products = const <Product>[],
-    this.occupancyDates = const <String>[], // format YYYY-MM-DD
-    this.productFullDates = const <Product>[],
     this.uoms = const <Uom>[],
     this.message,
     this.hasReachedMax = false,
@@ -31,8 +29,6 @@ class ProductState extends Equatable {
   final ProductStatus status;
   final String? message;
   final List<Product> products;
-  final List<String> occupancyDates;
-  final List<Product> productFullDates;
   final List<Uom> uoms;
   final bool hasReachedMax;
   final String searchString;
@@ -41,8 +37,6 @@ class ProductState extends Equatable {
     ProductStatus? status,
     String? message,
     List<Product>? products,
-    List<String>? occupancyDates,
-    List<Product>? productFullDates,
     List<Uom>? uoms,
     bool error = false,
     bool? hasReachedMax,
@@ -51,8 +45,6 @@ class ProductState extends Equatable {
     return ProductState(
       status: status ?? this.status,
       products: products ?? this.products,
-      occupancyDates: occupancyDates ?? this.occupancyDates,
-      productFullDates: productFullDates ?? this.productFullDates,
       uoms: uoms ?? this.uoms,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,
@@ -64,6 +56,6 @@ class ProductState extends Equatable {
 
   @override
   String toString() =>
-      '$status { #products: ${products.length}, uoms: ${uoms.length} fullDates: $occupancyDates '
+      '$status { #products: ${products.length}, uoms: ${uoms.length} '
       'hasReachedMax: $hasReachedMax message $message}';
 }

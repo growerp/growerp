@@ -21,7 +21,7 @@ part 'gl_account_model.freezed.dart';
 part 'gl_account_model.g.dart';
 
 @freezed
-class GlAccount with _$GlAccount {
+abstract class GlAccount with _$GlAccount {
   GlAccount._();
   factory GlAccount({
     String? glAccountId,

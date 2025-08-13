@@ -72,6 +72,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     on<FinDocUpdateItemType>(_onFinDocUpdateItemType);
     on<FinDocGetPaymentTypes>(_onFinDocGetPaymentTypes);
     on<FinDocUpdatePaymentType>(_onFinDocUpdatePaymentType);
+    on<FinDocProductRentalDates>(_onFinDocProductRentalDates);
   }
 
   final RestClient restClient;
@@ -114,6 +115,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         searchString: event.searchString,
         journalId: event.journalId,
         my: event.my,
+        status: event.status,
       );
 
       return emit(state.copyWith(
@@ -181,11 +183,14 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
                 (element) => element.requestId == event.finDoc.requestId);
           default:
         }
-        if (docType == FinDocType.transaction &&
-            event.finDoc.status == FinDocStatusVal.cancelled) {
-          finDocs.removeAt(index);
-        } else {
-          finDocs[index] = compResult;
+        // only update the list when not empty and item found
+        if (finDocs != [] && index > 0) {
+          if (docType == FinDocType.transaction &&
+              event.finDoc.status == FinDocStatusVal.cancelled) {
+            finDocs.removeAt(index);
+          } else {
+            finDocs[index] = compResult;
+          }
         }
         return emit(state.copyWith(
             status: FinDocStatus.success,
@@ -360,6 +365,24 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
           status: FinDocStatus.success,
           message: "Payment Type: ${event.paymentType.paymentTypeName} "
               "${event.update != null ? 'updated' : 'removed'}"));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: FinDocStatus.failure, message: await getDioError(e)));
+    }
+  }
+
+  Future<void> _onFinDocProductRentalDates(
+    FinDocProductRentalDates event,
+    Emitter<FinDocState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: FinDocStatus.loading));
+      final result =
+          await restClient.getDailyRentalOccupancy(productId: event.productId);
+      emit(state.copyWith(
+        status: FinDocStatus.success,
+        productRentalDates: result.productRentalDates,
+      ));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: FinDocStatus.failure, message: await getDioError(e)));

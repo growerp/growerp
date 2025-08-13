@@ -19,7 +19,7 @@ part 'stats_model.freezed.dart';
 part 'stats_model.g.dart';
 
 @freezed
-class Stats with _$Stats {
+abstract class Stats with _$Stats {
   Stats._();
   factory Stats({
     @Default(0) int admins,

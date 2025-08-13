@@ -3,7 +3,7 @@
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
     <service verb="get" noun="Subscription">
         <in-parameters>
-            <parameter name="growerp" type="Boolean" default-value="false" />
+            <parameter name="ownerPartyId" />
             <parameter name="subscriptionId" />
             <parameter name="pseudoId" />
             <parameter name="externalId" />
@@ -34,7 +34,7 @@
             <!-- get current user and company -->
             <service-call out-map="parties"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if condition="growerp == true">
+            <if condition="ownerPartyId == 'GROWERP'">
                 <set field="ownerPartyId" value="GROWERP" />
                 <set field="externalId" from="parties.ownerPartyId" />
                 <else><!-- get all subscribers of owner -->
@@ -144,10 +144,12 @@
                 <set field="subscription.pseudoId" from="seqNum" />
             </if>
             <!-- create subscription -->
+            <log message="Creating subscription  ${subscription} for ownerPartyId ${ownerPartyId}." />
             <service-call name="create#mantle.product.subscription.Subscription"
                 in-map="[
                     ownerPartyId: ownerPartyId,
                     pseudoId: subscription.pseudoId,
+                    subscriptionTypeEnumId: 'StProduct',
                     description: subscription.description ?: '',
                     fromDate: subscription.fromDate ?: null,
                     thruDate: subscription.thruDate ?: null,
@@ -157,11 +159,10 @@
                     subscriberPartyId: subscription.subscriber?.partyId,
                     subscriptionTypeId: 'StProduct',
                     externalSubscriptionId: subscription.externalId,
-                      subscriptionTypeEnumId: 'SbstRecurring',
                     ]"
                 out-map="context" />
             <service-call name="growerp.100.SubscriptionServices100.get#Subscription"
-                in-map="[subscriptionId: subscriptionId, growerp: true]"
+                in-map="[subscriptionId: subscriptionId, ownerPartyid: ownerPartyId]"
                 out-map="context" />
             <set field="subscription" from="subscriptions[0]" />
         </actions>

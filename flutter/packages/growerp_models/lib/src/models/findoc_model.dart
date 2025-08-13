@@ -28,7 +28,7 @@ part 'findoc_model.g.dart';
 /// A generalized model for order, shipment, invoice, payment, transaction.
 /// defined by the docType and sales (true/false)
 @freezed
-class FinDoc with _$FinDoc {
+abstract class FinDoc with _$FinDoc {
   FinDoc._();
   factory FinDoc({
     FinDocType? docType, // order, invoice, payment, shipment, transaction
@@ -42,7 +42,7 @@ class FinDoc with _$FinDoc {
     String? transactionId,
     String? requestId,
     String?
-        reference, //transaction id field saved in AcctgTrans/theirAcctgTransId in backend
+    reference, //transaction id field saved in AcctgTrans/theirAcctgTransId in backend
     @PaymentInstrumentConverter() PaymentInstrument? paymentInstrument,
     // ignore: invalid_annotation_target
     @JsonKey(name: 'statusId')
@@ -70,7 +70,8 @@ class FinDoc with _$FinDoc {
   factory FinDoc.fromJson(Map<String, dynamic> json) =>
       _$FinDocFromJson(json['finDoc'] ?? json);
 
-  bool idIsNull() => (invoiceId == null &&
+  bool idIsNull() =>
+      (invoiceId == null &&
           orderId == null &&
           shipmentId == null &&
           invoiceId == null &&
@@ -85,16 +86,16 @@ class FinDoc with _$FinDoc {
   String? id() => docType == FinDocType.transaction
       ? transactionId
       : docType == FinDocType.payment
-          ? paymentId
-          : docType == FinDocType.invoice
-              ? invoiceId
-              : docType == FinDocType.shipment
-                  ? shipmentId
-                  : docType == FinDocType.order
-                      ? orderId
-                      : docType == FinDocType.request
-                          ? requestId
-                          : null;
+      ? paymentId
+      : docType == FinDocType.invoice
+      ? invoiceId
+      : docType == FinDocType.shipment
+      ? shipmentId
+      : docType == FinDocType.order
+      ? orderId
+      : docType == FinDocType.request
+      ? requestId
+      : null;
 
   String? chainId() =>
       shipmentId ?? (invoiceId ?? (paymentId ?? (orderId ?? (transactionId))));
@@ -112,10 +113,11 @@ class FinDoc with _$FinDoc {
       "asset: ${items.isNotEmpty ? items[0].asset?.assetName : ''} "
       "${items.isNotEmpty ? items[0].asset?.assetId : ''}"
       "descr: ${items.isNotEmpty ? items[0].description : ''} ";
-//      "status: $status! otherUser: $otherUser! Items: ${items!.length}";
+  //      "status: $status! otherUser: $otherUser! Items: ${items!.length}";
 }
 
-String finDocCsvFormat = "Id, Sales, finDocType, descr, date, "
+String finDocCsvFormat =
+    "Id, Sales, finDocType, descr, date, "
     "other user Id, other company Id, other company Name, reference number, "
     "check number(blank is cash), totalAmount, Invoice/Payment/order ID, \r\n";
 List<String> finDocCsvTitles = finDocCsvFormat.split(',');
@@ -142,8 +144,9 @@ List<FinDoc> csvToFinDocs(String csvFile, Logger logger) {
           paymentMethod: row[9] != ''
               ? PaymentMethod(ccPaymentMethodId: 'check', checkNumber: row[9])
               : PaymentMethod(ccPaymentMethodId: 'cash'),
-          paymentInstrument:
-              row[9] == '' ? PaymentInstrument.cash : PaymentInstrument.check,
+          paymentInstrument: row[9] == ''
+              ? PaymentInstrument.cash
+              : PaymentInstrument.check,
           grandTotal: row[10] != 'null' && row[10].isNotEmpty
               ? Decimal.parse(row[10].replaceAll(',', ''))
               : null,
@@ -152,10 +155,14 @@ List<FinDoc> csvToFinDocs(String csvFile, Logger logger) {
       );
     } catch (e) {
       String fieldList = '';
-      finDocCsvTitles.asMap().forEach((index, value) =>
-          fieldList += "$value: ${index < row.length ? row[index] : ''}\n");
-      logger.e("Error processing findoc csv line:\n $fieldList \n"
-          "error message: $e");
+      finDocCsvTitles.asMap().forEach(
+        (index, value) =>
+            fieldList += "$value: ${index < row.length ? row[index] : ''}\n",
+      );
+      logger.e(
+        "Error processing findoc csv line:\n $fieldList \n"
+        "error message: $e",
+      );
       if (errors++ == 5) exit(1);
     }
   }
@@ -166,15 +173,17 @@ List<FinDoc> csvToFinDocs(String csvFile, Logger logger) {
 String csvFromFinDocs(List<FinDoc> finDocs) {
   var csv = [finDocCsvFormat];
   for (FinDoc finDoc in finDocs) {
-    csv.add(createCsvRow([
-      finDoc.pseudoId ?? '',
-      finDoc.docType.toString(),
-      finDoc.sales.toString(),
-      finDoc.description ?? '',
-      finDoc.creationDate.toString(),
-      finDoc.otherUser!.pseudoId ?? '',
-      finDoc.otherCompany!.pseudoId!,
-    ], finDocCsvLength));
+    csv.add(
+      createCsvRow([
+        finDoc.pseudoId ?? '',
+        finDoc.docType.toString(),
+        finDoc.sales.toString(),
+        finDoc.description ?? '',
+        finDoc.creationDate.toString(),
+        finDoc.otherUser!.pseudoId ?? '',
+        finDoc.otherCompany!.pseudoId!,
+      ], finDocCsvLength),
+    );
   }
   return csv.join();
 }

@@ -19,7 +19,7 @@ part 'location_model.freezed.dart';
 part 'location_model.g.dart';
 
 @freezed
-class Location with _$Location {
+abstract class Location with _$Location {
   Location._();
   factory Location({
     final String? locationId,

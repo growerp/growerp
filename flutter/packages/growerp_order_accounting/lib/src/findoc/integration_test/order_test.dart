@@ -83,7 +83,7 @@ class OrderTest {
       WidgetTester tester, List<FinDoc> finDocs) async {
     SaveTest test = await PersistFunctions.getTest();
     List<FinDoc> newOrders = [];
-    var usFormat = DateFormat('M/d/yyyy');
+    var stdFormat = DateFormat('M/d/yyyy');
     for (FinDoc finDoc in finDocs) {
       await CommonTest.tapByKey(tester, 'addNew');
       await CommonTest.tapByKey(tester, 'customer');
@@ -96,12 +96,12 @@ class OrderTest {
       await CommonTest.tapByKey(tester, 'setDate');
       await CommonTest.tapByTooltip(tester, 'Switch to input');
       await tester.enterText(find.byType(TextField).last,
-          usFormat.format(finDoc.items[0].rentalFromDate!));
+          stdFormat.format(finDoc.items[0].rentalFromDate!));
       await tester.pump();
       await CommonTest.tapByText(tester, 'OK');
       DateTime textField = DateTime.parse(CommonTest.getTextField('date'));
-      expect(usFormat.format(textField),
-          usFormat.format(finDoc.items[0].rentalFromDate!));
+      expect(stdFormat.format(textField),
+          stdFormat.format(finDoc.items[0].rentalFromDate!));
       await CommonTest.enterText(
           tester, 'quantity', finDoc.items[0].quantity.toString());
       await CommonTest.drag(tester, listViewName: 'listView4');
@@ -134,7 +134,7 @@ class OrderTest {
   static Future<void> checkRentalSalesOrderBlocDates(
       WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
-    var usFormat = DateFormat('M/d/yyyy');
+    var stdFormat = DateFormat('yyyy-MM-dd');
     await CommonTest.tapByKey(tester, 'addNew');
     await CommonTest.tapByKey(tester, 'itemRental');
     await CommonTest.tapByKey(tester, 'product');
@@ -142,7 +142,7 @@ class OrderTest {
     await CommonTest.tapByKey(tester, 'setDate');
     await CommonTest.tapByTooltip(tester, 'Switch to input');
     await tester.enterText(find.byType(TextField).last,
-        usFormat.format(test.orders[0].items[0].rentalFromDate!));
+        stdFormat.format(test.orders[0].items[0].rentalFromDate!));
     await tester.pump();
     await CommonTest.tapByText(tester, 'OK');
     expect(find.text('Out of range.'), findsOneWidget);

@@ -18,7 +18,7 @@ part 'notification_ws_model.freezed.dart';
 part 'notification_ws_model.g.dart';
 
 @freezed
-class NotificationWs with _$NotificationWs {
+abstract class NotificationWs with _$NotificationWs {
   NotificationWs._();
   factory NotificationWs({
     String? topic,

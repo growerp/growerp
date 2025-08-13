@@ -20,7 +20,7 @@ part 'subscription_model.g.dart';
 
 /// Represents a subscription in the GrowERP system.
 @freezed
-class Subscription with _$Subscription {
+abstract class Subscription with _$Subscription {
   Subscription._();
   factory Subscription({
     String? subscriptionId, // Unique systemwide identifier for the subscription

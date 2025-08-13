@@ -18,7 +18,7 @@ part 'address_model.freezed.dart';
 part 'address_model.g.dart';
 
 @freezed
-class Address with _$Address {
+abstract class Address with _$Address {
   Address._();
   factory Address({
     String? addressId, // contactMechId in backend

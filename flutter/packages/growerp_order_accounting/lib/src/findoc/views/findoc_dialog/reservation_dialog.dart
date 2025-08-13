@@ -17,7 +17,6 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../../findoc.dart';
@@ -39,9 +38,11 @@ class ReservationDialogState extends State<ReservationDialog> {
   CompanyUser? _selectedCompanyUser;
   bool loading = false;
   late DataFetchBloc<Products> _productBloc;
+  late SalesOrderBloc _salesOrderBloc; // get/update sales order
+  late FinDocBloc _finDocBloc; // get rental dates
   Product? _selectedProduct;
   late DateTime _selectedDate;
-  List<String> rentalDays = [];
+  List<DateTime> rentalDays = [];
   late String classificationId;
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
@@ -82,36 +83,34 @@ class ReservationDialogState extends State<ReservationDialog> {
       _selectedDate = CustomizableDateTime.current;
     }
     classificationId = GlobalConfiguration().get("classificationId");
+    _finDocBloc = context.read<FinDocBloc>();
+    _salesOrderBloc = context.read<SalesOrderBloc>();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<FinDocBloc, FinDocState>(
-        listenWhen: (previous, current) =>
-            previous.status == FinDocStatus.loading,
-        listener: (context, finDocState) {
-          if (finDocState.status == FinDocStatus.failure) {
-            HelperFunctions.showMessage(
-                context, '${finDocState.message}', Colors.red);
-          }
-          if (finDocState.status == FinDocStatus.success) {
-            Navigator.of(context).pop();
-          }
-        },
-        builder: (context, finDocState) {
-          if (finDocState.status == FinDocStatus.loading) {
-            return const LoadingIndicator();
-          } else {
-            return SizedBox(
-                height: 600, width: 400, child: _addRentalItemDialog());
-          }
-        });
+    return BlocConsumer<SalesOrderBloc, FinDocState>(
+        listener: (context, salesOrderState) {
+      if (salesOrderState.status == FinDocStatus.failure) {
+        HelperFunctions.showMessage(
+            context, '${salesOrderState.message}', Colors.red);
+      }
+      if (salesOrderState.status == FinDocStatus.success) {
+        Navigator.of(context).pop();
+      }
+    }, builder: (context, salesOrderState) {
+      if (salesOrderState.status == FinDocStatus.loading) {
+        return const LoadingIndicator();
+      } else {
+        return SizedBox(height: 600, width: 400, child: _addRentalItemDialog());
+      }
+    });
   }
 
   bool whichDayOk(DateTime day) {
-    var formatter = DateFormat('yyyy-MM-dd');
-    String date = formatter.format(day);
-    if (rentalDays.contains(date)) return false;
+    if (rentalDays.any((date) => date.dateOnly() == _selectedDate.dateOnly())) {
+      return false;
+    }
     return true;
   }
 
@@ -151,7 +150,7 @@ class ReservationDialogState extends State<ReservationDialog> {
         ),
         child: popUp(
             context: context,
-            height: 600,
+            height: 550,
             width: 400,
             title: widget.finDoc.orderId == null
                 ? (classificationId == 'AppHotel'
@@ -164,7 +163,8 @@ class ReservationDialogState extends State<ReservationDialog> {
             child: Form(
                 key: _formKey,
                 child: ListView(key: const Key('listView'), children: <Widget>[
-                  BlocBuilder<DataFetchBloc<CompaniesUsers>, DataFetchState<CompaniesUsers>>(
+                  BlocBuilder<DataFetchBloc<CompaniesUsers>,
+                          DataFetchState<CompaniesUsers>>(
                       builder: (context, state) {
                     switch (state.status) {
                       case DataFetchStatus.loading:
@@ -226,88 +226,73 @@ class ReservationDialogState extends State<ReservationDialog> {
                     }
                   }),
                   const SizedBox(height: 20),
-                  BlocBuilder<DataFetchBloc<Products>, DataFetchState<Products>>(
-                      builder: (context, state) {
-                    switch (state.status) {
-                      case DataFetchStatus.failure:
-                        return const FatalErrorForm(
-                            message: 'server connection problem');
-                      case DataFetchStatus.loading:
-                        return const LoadingIndicator();
-                      case DataFetchStatus.success:
-                        return DropdownSearch<Product>(
-                          selectedItem: _selectedProduct,
-                          popupProps: PopupProps.menu(
-                            showSelectedItems: true,
-                            isFilterOnline: true,
-                            showSearchBox: true,
-                            searchFieldProps: TextFieldProps(
-                              autofocus: true,
-                              decoration: InputDecoration(
-                                labelText: classificationId == 'AppHotel'
-                                    ? 'Room Type'
-                                    : 'Product',
-                              ),
-                              controller: _productSearchBoxController,
-                            ),
-                            menuProps: MenuProps(
-                                borderRadius: BorderRadius.circular(20.0)),
-                            title: popUp(
-                              context: context,
-                              title: 'Select product',
-                              height: 50,
-                            ),
-                          ),
-                          dropdownDecoratorProps: const DropDownDecoratorProps(
-                              dropdownSearchDecoration:
-                                  InputDecoration(labelText: 'Product')),
-                          key: const Key('product'),
-                          itemAsString: (Product? u) =>
-                              " ${u!.productName}[${u.pseudoId}]",
-                          asyncItems: (String filter) {
-                            _productBloc.add(GetDataEvent(
-                                () => context.read<RestClient>().getProduct(
-                                      searchString: filter,
-                                      limit: 3,
-                                      isForDropDown: true,
+                  DropdownSearch<Product>(
+                    selectedItem: _selectedProduct,
+                    popupProps: PopupProps.menu(
+                      showSelectedItems: true,
+                      isFilterOnline: true,
+                      showSearchBox: true,
+                      searchFieldProps: TextFieldProps(
+                        autofocus: true,
+                        decoration: InputDecoration(
+                          labelText: classificationId == 'AppHotel'
+                              ? 'Room Type'
+                              : 'Product',
+                        ),
+                        controller: _productSearchBoxController,
+                      ),
+                      menuProps:
+                          MenuProps(borderRadius: BorderRadius.circular(20.0)),
+                      title: popUp(
+                        context: context,
+                        title: 'Select product',
+                        height: 50,
+                      ),
+                    ),
+                    dropdownDecoratorProps: const DropDownDecoratorProps(
+                        dropdownSearchDecoration:
+                            InputDecoration(labelText: 'Product')),
+                    key: const Key('product'),
+                    itemAsString: (Product? u) =>
+                        " ${u!.productName}[${u.pseudoId}]",
+                    asyncItems: (String filter) {
+                      _productBloc.add(GetDataEvent(
+                          () => context.read<RestClient>().getProduct(
+                                searchString: filter,
+                                limit: 3,
+                                isForDropDown: true,
 //                                      assetClassId:
 //                                          classificationId == 'AppHotel'
 //                                              ? 'Hotel Room'
 //                                              : '',
-                                    )));
-                            return Future.delayed(
-                                const Duration(milliseconds: 150), () {
-                              return Future.value(
-                                  (_productBloc.state.data as Products)
-                                      .products);
-                            });
-                          },
-                          compareFn: (item, sItem) =>
-                              item.productId == sItem.productId,
-                          onChanged: (Product? newValue) async {
-                            setState(() {
-                              _selectedProduct = newValue;
-                            });
-                            _priceController.text = newValue!.price.toString();
-                            _productBloc.add(GetDataEvent(() => context
-                                .read<RestClient>()
-                                .getDailyRentalOccupancy(
-                                    productId: newValue.productId)));
-                            await Future.delayed(
-                                const Duration(milliseconds: 800), () {
-                              setState(() {
-                                _selectedDate = firstFreeDate();
-                              });
-                            });
-                          },
-                          validator: (value) =>
-                              value == null ? "Select a product?" : null,
-                        );
-                      default:
-                        return const Center(child: LoadingIndicator());
-                    }
-                  }),
-                  const SizedBox(height: 20),
+                              )));
+                      return Future.delayed(const Duration(milliseconds: 150),
+                          () {
+                        return Future.value(
+                            (_productBloc.state.data as Products).products);
+                      });
+                    },
+                    compareFn: (item, sItem) =>
+                        item.productId == sItem.productId,
+                    onChanged: (Product? newValue) async {
+                      _priceController.text = newValue!.price.toString();
+                      _finDocBloc.add(FinDocProductRentalDates(
+                        newValue.productId,
+                      ));
+                      await Future.delayed(
+                          const Duration(milliseconds: 800), () {});
+                      setState(() {
+                        _selectedProduct = newValue;
+                        rentalDays =
+                            _finDocBloc.state.productRentalDates.isNotEmpty
+                                ? _finDocBloc.state.productRentalDates[0].dates
+                                : [];
+                        _selectedDate = firstFreeDate();
+                      });
+                    },
+                    validator: (value) =>
+                        value == null ? "Select a product?" : null,
+                  ),
                   TextFormField(
                     key: const Key('price'),
                     decoration:
@@ -321,19 +306,30 @@ class ReservationDialogState extends State<ReservationDialog> {
                   const SizedBox(height: 20),
                   Row(children: [
                     Expanded(
-                        child: Center(
+                      child: FormField<DateTime>(
+                        key: const Key('setDate'),
+                        initialValue: _selectedDate,
+                        validator: (value) =>
+                            value == null ? 'Select a start date' : null,
+                        builder: (field) => InkWell(
+                          onTap: () async {
+                            await selectDate(context);
+                            field.didChange(_selectedDate);
+                          },
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: 'Start Date',
+                              errorText: field.errorText,
+                              suffixIcon: const Icon(Icons.arrow_drop_down),
+                            ),
                             child: Text(
-                      "${_selectedDate.toLocal()}".split(' ')[0],
-                      key: const Key('date'),
-                    ))),
-                    OutlinedButton(
-                      key: const Key('setDate'),
-                      onPressed: () => selectDate(context),
-                      child: const Text(' Update Startdate'),
+                              "${_selectedDate.toLocal()}".split(' ')[0],
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ]),
-                  const SizedBox(height: 20),
-                  Row(children: [
+                    const SizedBox(width: 10),
                     Expanded(
                         child: TextFormField(
                       key: const Key('quantity'),
@@ -341,25 +337,16 @@ class ReservationDialogState extends State<ReservationDialog> {
                           const InputDecoration(labelText: 'Number of days'),
                       controller: _daysController,
                     )),
-                    const SizedBox(width: 10),
-                    Expanded(
-                        child: TextFormField(
-                      key: const Key('nbrOfRooms'),
-                      decoration:
-                          const InputDecoration(labelText: 'Number of rooms'),
-                      controller: _quantityController,
-                    )),
                   ]),
                   const SizedBox(height: 20),
                   Row(children: [
-                    Expanded(
-                        child: OutlinedButton(
+                    OutlinedButton(
                       key: const Key('cancel'),
                       child: const Text('Cancel'),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                    )),
+                    ),
                     const SizedBox(width: 20),
                     Expanded(
                         child: OutlinedButton(
@@ -380,9 +367,12 @@ class ReservationDialogState extends State<ReservationDialog> {
                                         ItemType(itemTypeId: 'ItemRental'),
                                     price: Decimal.parse(_priceController.text),
                                     description: _selectedProduct!.productName,
-                                    rentalFromDate: _selectedDate,
-                                    rentalThruDate: _selectedDate.add(Duration(
-                                        days: int.parse(_daysController.text))),
+                                    rentalFromDate: _selectedDate.noon(),
+                                    rentalThruDate: _selectedDate
+                                        .add(Duration(
+                                            days: int.parse(
+                                                _daysController.text)))
+                                        .noon(),
                                     quantity: _quantityController.text.isEmpty
                                         ? Decimal.parse('1')
                                         : Decimal.parse(
@@ -401,9 +391,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                                   newFinDoc =
                                       newFinDoc.copyWith(items: newItemList);
                                 }
-                                context
-                                    .read<FinDocBloc>()
-                                    .add(FinDocUpdate(newFinDoc));
+                                _salesOrderBloc.add(FinDocUpdate(newFinDoc));
                               }
                             }))
                   ]),

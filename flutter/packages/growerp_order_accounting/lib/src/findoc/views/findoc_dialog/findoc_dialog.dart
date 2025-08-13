@@ -252,89 +252,106 @@ class MyFinDocState extends State<FinDocPage> {
   Widget headerEntry() {
     // list of widgets to display
     List<Widget> widgets = [
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+      Column(
         children: [
-          SizedBox(
-            width: 80,
-            child: TextFormField(
-              key: const Key('pseudoId'),
-              enabled: !readOnly,
-              decoration: const InputDecoration(labelText: 'Id'),
-              controller: _pseudoIdController,
-              keyboardType: TextInputType.number,
-            ),
-          ),
-          const SizedBox(width: 10),
-          BlocBuilder<DataFetchBloc<CompaniesUsers>, DataFetchState<CompaniesUsers>>(
-              builder: (context, state) {
-            switch (state.status) {
-              case DataFetchStatus.failure:
-              case DataFetchStatus.success:
-                return Expanded(
-                  child: DropdownSearch<CompanyUser>(
-                    enabled: !readOnly,
-                    selectedItem: _selectedCompanyUser,
-                    popupProps: PopupProps.menu(
-                      isFilterOnline: true,
-                      showSearchBox: true,
-                      searchFieldProps: TextFieldProps(
-                        autofocus: true,
-                        decoration: InputDecoration(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              SizedBox(
+                width: 80,
+                child: TextFormField(
+                  key: const Key('pseudoId'),
+                  enabled: !readOnly,
+                  decoration: const InputDecoration(labelText: 'Id'),
+                  controller: _pseudoIdController,
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: 10),
+              BlocBuilder<DataFetchBloc<CompaniesUsers>,
+                  DataFetchState<CompaniesUsers>>(builder: (context, state) {
+                switch (state.status) {
+                  case DataFetchStatus.failure:
+                  case DataFetchStatus.success:
+                    return Expanded(
+                      child: DropdownSearch<CompanyUser>(
+                        enabled: !readOnly,
+                        selectedItem: _selectedCompanyUser,
+                        popupProps: PopupProps.menu(
+                          isFilterOnline: true,
+                          showSearchBox: true,
+                          searchFieldProps: TextFieldProps(
+                            autofocus: true,
+                            decoration: InputDecoration(
+                                labelText:
+                                    "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name"),
+                            controller: _companySearchBoxController,
+                          ),
+                          menuProps: MenuProps(
+                              borderRadius: BorderRadius.circular(20.0)),
+                          title: popUp(
+                            context: context,
+                            title:
+                                "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
+                            height: 50,
+                          ),
+                        ),
+                        dropdownDecoratorProps: DropDownDecoratorProps(
+                          dropdownSearchDecoration: InputDecoration(
                             labelText:
-                                "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name"),
-                        controller: _companySearchBoxController,
+                                finDocUpdated.sales ? 'Customer' : 'Supplier',
+                          ),
+                        ),
+                        key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
+                        itemAsString: (CompanyUser? u) =>
+                            u?.name != null ? "${u!.name}[${u.pseudoId}]" : "",
+                        asyncItems: (String filter) {
+                          _companyUserBloc.add(GetDataEvent(() => context
+                              .read<RestClient>()
+                              .getCompanyUser(
+                                  searchString: filter,
+                                  limit: 3,
+                                  role: widget.finDoc.sales
+                                      ? Role.customer
+                                      : Role.supplier)));
+                          return Future.delayed(
+                              const Duration(milliseconds: 150), () {
+                            return Future<List<CompanyUser>>.value(
+                                (_companyUserBloc.state.data as CompaniesUsers)
+                                    .companiesUsers);
+                          });
+                        },
+                        compareFn: (item, sItem) =>
+                            item.partyId == sItem.partyId,
+                        onChanged: (CompanyUser? newValue) {
+                          setState(() {
+                            _selectedCompanyUser = newValue;
+                          });
+                        },
+                        validator: (value) => value == null
+                            ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
+                            : null,
                       ),
-                      menuProps:
-                          MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                      title: popUp(
-                        context: context,
-                        title:
-                            "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
-                        height: 50,
-                      ),
-                    ),
-                    dropdownDecoratorProps: DropDownDecoratorProps(
-                      dropdownSearchDecoration: InputDecoration(
-                        labelText:
-                            finDocUpdated.sales ? 'Customer' : 'Supplier',
-                      ),
-                    ),
-                    key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
-                    itemAsString: (CompanyUser? u) =>
-                        u?.name != null ? "${u!.name}[${u.pseudoId}]" : "",
-                    asyncItems: (String filter) {
-                      _companyUserBloc.add(GetDataEvent(() => context
-                          .read<RestClient>()
-                          .getCompanyUser(
-                              searchString: filter,
-                              limit: 3,
-                              role: widget.finDoc.sales
-                                  ? Role.customer
-                                  : Role.supplier)));
-                      return Future.delayed(const Duration(milliseconds: 150),
-                          () {
-                        return Future<List<CompanyUser>>.value(
-                            (_companyUserBloc.state.data as CompaniesUsers)
-                                .companiesUsers);
-                      });
-                    },
-                    compareFn: (item, sItem) => item.partyId == sItem.partyId,
-                    onChanged: (CompanyUser? newValue) {
-                      setState(() {
-                        _selectedCompanyUser = newValue;
-                      });
-                    },
-                    validator: (value) => value == null
-                        ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
-                        : null,
-                  ),
-                );
+                    );
 
-              default:
-                return const Center(child: LoadingIndicator());
-            }
-          }),
+                  default:
+                    return const Center(child: LoadingIndicator());
+                }
+              }),
+            ],
+          ),
+          if (finDoc.placedDate != null)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Created: ${finDoc.creationDate.dateOnly()}"),
+                  const SizedBox(width: 10),
+                  Text("Placed: ${finDoc.placedDate!.dateOnly()}")
+                ],
+              ),
+            )
         ],
       ),
       Padding(
@@ -681,7 +698,7 @@ class MyFinDocState extends State<FinDocPage> {
           value: Text("${item.product?.pseudoId}",
               textAlign: TextAlign.center, key: Key('itemProductId$index'))));
       rowContent.add(TableRowContent(
-          width: isPhone ? 25 : 27,
+          width: isPhone ? 15 : 27,
           name: 'Description',
           value: Text(item.description ?? '',
               key: Key('itemDescription$index'), textAlign: TextAlign.left)));
@@ -693,8 +710,8 @@ class MyFinDocState extends State<FinDocPage> {
                 textAlign: TextAlign.left, key: Key('itemType$index'))));
       }
       rowContent.add(TableRowContent(
-          width: 10,
-          name: const Text('Qty', textAlign: TextAlign.right),
+          width: 5,
+          name: const Text('Q', textAlign: TextAlign.right),
           value: Text(
               item.quantity == null
                   ? Decimal.zero.toString()
@@ -714,7 +731,7 @@ class MyFinDocState extends State<FinDocPage> {
       }
       if (item.product?.productTypeId == 'Rental') {
         rowContent.add(TableRowContent(
-            width: 10,
+            width: 20,
             name: 'Date',
             value: Text(item.rentalFromDate.dateOnly(),
                 textAlign: TextAlign.right, key: Key('fromDate$index'))));
@@ -733,7 +750,7 @@ class MyFinDocState extends State<FinDocPage> {
       }
       if (!readOnly) {
         rowContent.add(TableRowContent(
-            width: isPhone ? 14 : 8,
+            width: isPhone ? 5 : 8,
             name: '',
             value: IconButton(
               visualDensity: VisualDensity.compact,

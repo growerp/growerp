@@ -1169,6 +1169,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="image" />
                     <parameter name="userId" />
                     <parameter name="locale" />
+                    <parameter name="timeZone" />
                     <parameter name="telephoneNr" />
                     <parameter name="appsUsed" type="List">
                         <parameter name="partyClassificationId" />
@@ -1390,6 +1391,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 image: imageFile,
                                 userId: userInfo?.userId,
                                 locale: userInfo?.locale ?:'',
+                                timeZone: userInfo?.timeZone ?:'',
                                 telephoneNr: telephoneNr,
                                 company: company,
                                 appsUsed: appsUsed,
@@ -1425,6 +1427,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="image" />
                 <parameter name="userId" />
                 <parameter name="locale" />
+                <parameter name="timeZone" />
                 <parameter name="telephoneNr" />
                 <parameter name="address" type="Map">
                     <parameter name="addressId" />
@@ -1523,10 +1526,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </parameter>
                 <parameter name="userId" />
                 <parameter name="locale" />
-                <parameter name="telephoneNr" />
-                <parameter name="appsUsed" type="List">
-                    <parameter name="partyClassificationId" />
-                </parameter>
+                <parameter name="timeZone" />
             </parameter>
             <parameter name="password" />
             <parameter name="login" type="Boolean" default-value="false" />
@@ -1570,7 +1570,9 @@ along with this software (see the LICENSE.md file). If not, see
                     firstName: user.firstName, lastName: user.lastName,
                     emailAddress: user.email,
                     username: user.loginName, newPassword: password,
-                    newPasswordVerify: password, ownerPartyId: ownerPartyId]" />
+                    newPasswordVerify: password, ownerPartyId: ownerPartyId,
+                    timeZone: user.timeZone, locale: user.locale
+                ]" />
             <if condition="user.loginName">
                 <service-call name="mantle.party.PartyServices.create#Account"
                     in-map="inMap" out-map="userAccount" />
@@ -2667,6 +2669,8 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- if userGroup == admin group, root company will be created,   
                 when not, owner (main) company partyId should already exist -->
             <parameter name="userGroupId" />
+            <parameter name="timeZone" />
+            <parameter name="locale" />
         </in-parameters>
         <out-parameters>
             <parameter name="authenticate" type="Map">
@@ -2741,6 +2745,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 firstName: firstName,
                                 lastName: lastName,
                                 loginName: email,
+                                timeZone: timeZone, locale: locale,
                                 company: [name: 'main Organization',
                                           role: 'OrgInternal',
                                           email: email]]" />
@@ -2761,7 +2766,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.PartyServices100.create#User"
                         in-map="[user: [firstName: firstName, lastName: lastName,
                         email: email, role: 'Customer', userGroupId: 'GROWERP_M_OTHER',
-                        loginName: email, company:company], password: newPassword, ownerPartyId: ownerPartyId,
+                        loginName: email, company:company, timeZone: timeZone, locale: locale],
+                        password: newPassword, ownerPartyId: ownerPartyId,
                         classificationId: classificationId]"
                         out-map="context" />
                 </else-if>
@@ -3176,6 +3182,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="currencyId" />
             <parameter name="classificationId" />
             <parameter name="counterMax" default="1" type="Integer" />
+            <parameter name="timeZone" />
         </in-parameters>
         <actions>
             <!-- get single productStore/website for main company -->
@@ -3480,10 +3487,12 @@ along with this software (see the LICENSE.md file). If not, see
                     [ quantity: 1, price: 0.00, orderName: 'third generated order service',
                         productName: 'GrowERP demo movie', itemType: 'ItemServiceProduct'],
                     ]" />
-                <!-- set time at mid day noon -->
-                <set field="nowDate" from="ec.user.nowTimestamp" />
+                <!-- set time at mid day noon adjusted by client timeZoneOffset -->
+                <set field="nowUtc"
+                    from="Timestamp.from(ec.user.nowTimestamp.toInstant()
+                    .minus(timeZone.toDouble().longValue(), java.time.temporal.ChronoUnit.HOURS))" />
                 <set field="nowDate"
-                    from="ec.l10n.parseTimestamp(ec.l10n.format(nowDate, 'yyyy-MM-dd') + ' 12:00:00.000', 'yyyy-MM-dd HH:mm:ss.SSS')" />
+                    from="ec.l10n.parseTimestamp(ec.l10n.format(nowUtc, 'yyyy-MM-dd') + ' 12:00:00.000', 'yyyy-MM-dd HH:mm:ss.SSS')" />
                 <set field="ordersHotel"
                     from="[
                     [ productName: 'Single bed room', quantity: 1,

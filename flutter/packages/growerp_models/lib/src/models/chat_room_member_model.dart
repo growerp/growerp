@@ -19,7 +19,7 @@ part 'chat_room_member_model.freezed.dart';
 part 'chat_room_member_model.g.dart';
 
 @freezed
-class ChatRoomMember with _$ChatRoomMember {
+abstract class ChatRoomMember with _$ChatRoomMember {
   ChatRoomMember._();
   factory ChatRoomMember({
     User? user,

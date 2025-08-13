@@ -19,7 +19,7 @@ part 'marketing_test_model.freezed.dart';
 part 'marketing_test_model.g.dart';
 
 @freezed
-class MarketingTest with _$MarketingTest {
+abstract class MarketingTest with _$MarketingTest {
   factory MarketingTest({
     @Default(0) int sequence,
     Company? company,

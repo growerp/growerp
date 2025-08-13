@@ -61,7 +61,8 @@ Future main() async {
         GlobalConfiguration().updateValue('chatUrl', chat);
         GlobalConfiguration().updateValue('singleCompany', singleCompany);
         debugPrint(
-            '=== New ip: $ip , chat: $chat company: $singleCompany Updated!');
+          '=== New ip: $ip , chat: $chat company: $singleCompany Updated!',
+        );
       }
     } catch (error) {
       debugPrint('===$ip does not respond...not updating databaseUrl: $error');
@@ -79,17 +80,19 @@ Future main() async {
   WsClient notificationClient = WsClient('notws');
 
   Bloc.observer = AppBlocObserver();
-  runApp(TopApp(
-    restClient: restClient,
-    classificationId: classificationId,
-    chatClient: chatClient,
-    notificationClient: notificationClient,
-    title: 'GrowERP Hotel.',
-    router: router.generateRoute,
-    menuOptions: menuOptions,
-    extraDelegates: delegates,
-    extraBlocProviders: getHotelBlocProviders(restClient, classificationId),
-  ));
+  runApp(
+    TopApp(
+      restClient: restClient,
+      classificationId: classificationId,
+      chatClient: chatClient,
+      notificationClient: notificationClient,
+      title: 'GrowERP Hotel.',
+      router: router.generateRoute,
+      menuOptions: menuOptions,
+      extraDelegates: delegates,
+      extraBlocProviders: getHotelBlocProviders(restClient, classificationId),
+    ),
+  );
 }
 
 List<LocalizationsDelegate> delegates = [

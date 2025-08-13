@@ -22,7 +22,7 @@ part 'company_user_model.freezed.dart';
 part 'company_user_model.g.dart';
 
 @freezed
-class CompanyUser with _$CompanyUser {
+abstract class CompanyUser with _$CompanyUser {
   CompanyUser._();
   factory CompanyUser({
     @PartyTypeConverter() PartyType? type,
