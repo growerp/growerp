@@ -110,3 +110,18 @@ class FinDocProductRentalDates extends FinDocEvent {
   const FinDocProductRentalDates(this.productId);
   final String? productId;
 }
+
+class FinDocGatewayPaymentAuthorize extends FinDocEvent {
+  const FinDocGatewayPaymentAuthorize(this.paymentId);
+  final String paymentId;
+}
+
+class FinDocGatewayPaymentCapture extends FinDocEvent {
+  const FinDocGatewayPaymentCapture(this.paymentId);
+  final String paymentId;
+}
+
+class FinDocGatewayPaymentRelease extends FinDocEvent {
+  const FinDocGatewayPaymentRelease(this.paymentId);
+  final String paymentId;
+}

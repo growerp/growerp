@@ -318,7 +318,7 @@ along with this software (see the LICENSE.md file). If not, see
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="startDate">
                 <set field="tsDate"
-                    from="ec.l10n.parseTimestamp(ec.l10n.format(startDate, 'yyyy-MM-dd HH:mm:ssZ')
+                    from="ec.l10n.parseTimestamp(ec.l10n.format(startDate, 'yyyy-MM-dd HH:mm:ss')
                         + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS')" />
             </if>
             <if condition="search != null">
@@ -2025,7 +2025,7 @@ along with this software (see the LICENSE.md file). If not, see
                         paymentTypeEnumId: paymentTypeEnumId,
                         amount: payment.grandTotal,
                         paymentInstrumentEnumId: instrument,
-                        effectiveDate: ec.l10n.format(ec.user.nowTimestamp,'yyyy-MM-dd HH:mm:ssZ'),
+                        effectiveDate: ec.l10n.format(ec.user.nowTimestamp,'yyyy-MM-dd HH:mm:ss'),
                         paymentMethodId: paymentMethodId,
                         paymentGatewayConfigId: paymentGatewayConfigId,
                         toPartyId: toPartyId,

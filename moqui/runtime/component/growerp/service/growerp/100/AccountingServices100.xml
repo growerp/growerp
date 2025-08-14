@@ -1781,4 +1781,70 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <!-- gateway services -->
+    <service verb="action" noun="GatewayPayment">
+        <in-parameters>
+            <parameter name="paymentId" />
+            <parameter name="action" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="finDoc" />
+        </out-parameters>
+        <actions>
+            <set field="paymentGatewayConfigId" from="System.getProperty('paymentGatewayConfigId')" />
+            <entity-find-one entity-name="mantle.account.method.PaymentGatewayConfig"
+                value-field="paymentGatewayConfig" />
+            <set field="actionService"
+                from="[
+                    authorize: paymentGatewayConfig.authorizeServiceName,
+                    capture: paymentGatewayConfig.captureServiceName,
+                    release: paymentGatewayConfig.releaseServiceName,
+                ]" />
+            <set field="service" from="actionService[action]" />
+            <service-call name="${service}"
+                in-map="[paymentId: paymentId, paymentGatewayConfigId: paymentGatewayConfigId]" />
+            <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
+                in-map="[finDocId: paymentId, docType: 'payment', sales: true]" />
+            <set field="finDoc" from="finDocs[0]" />
+        </actions>
+    </service>
+    <service verb="capture" noun="GatewayPayment">
+        <in-parameters>
+            <parameter name="paymentId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="finDoc" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.AccountingServices100.action#GatewayPayment"
+                out-map="context"
+                in-map="[paymentId: paymentId, action: 'capture']" />
+        </actions>
+    </service>
+    <service verb="release" noun="GatewayPayment">
+        <in-parameters>
+            <parameter name="paymentId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="finDoc" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.AccountingServices100.action#GatewayPayment"
+                out-map="context"
+                in-map="[paymentId: paymentId, action: 'release']" />
+        </actions>
+    </service>
+    <service verb="authorize" noun="GatewayPayment">
+        <in-parameters>
+            <parameter name="paymentId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="finDoc" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.AccountingServices100.action#GatewayPayment"
+                out-map="context"
+                in-map="[paymentId: paymentId, action: 'authorize']" />
+        </actions>
+    </service>
 </services>

@@ -73,6 +73,9 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     on<FinDocGetPaymentTypes>(_onFinDocGetPaymentTypes);
     on<FinDocUpdatePaymentType>(_onFinDocUpdatePaymentType);
     on<FinDocProductRentalDates>(_onFinDocProductRentalDates);
+    on<FinDocGatewayPaymentAuthorize>(_onFinDocGatewayPaymentAuthorize);
+    on<FinDocGatewayPaymentCapture>(_onFinDocGatewayPaymentCapture);
+    on<FinDocGatewayPaymentRelease>(_onFinDocGatewayPaymentRelease);
   }
 
   final RestClient restClient;
@@ -382,6 +385,60 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
       emit(state.copyWith(
         status: FinDocStatus.success,
         productRentalDates: result.productRentalDates,
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: FinDocStatus.failure, message: await getDioError(e)));
+    }
+  }
+
+  Future<void> _onFinDocGatewayPaymentAuthorize(
+    FinDocGatewayPaymentAuthorize event,
+    Emitter<FinDocState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: FinDocStatus.parmLoading));
+      final result =
+          await restClient.authorizeGatewayPayment(paymentId: event.paymentId);
+      emit(state.copyWith(
+        status: FinDocStatus.parmSuccess,
+        finDoc: result,
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: FinDocStatus.failure, message: await getDioError(e)));
+    }
+  }
+
+  Future<void> _onFinDocGatewayPaymentCapture(
+    FinDocGatewayPaymentCapture event,
+    Emitter<FinDocState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: FinDocStatus.parmLoading));
+      final result =
+          await restClient.captureGatewayPayment(paymentId: event.paymentId);
+      emit(state.copyWith(
+        status: FinDocStatus.parmSuccess,
+        finDoc: result,
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: FinDocStatus.failure, message: await getDioError(e)));
+    }
+  }
+
+  Future<void> _onFinDocGatewayPaymentRelease(
+    FinDocGatewayPaymentRelease event,
+    Emitter<FinDocState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: FinDocStatus.parmLoading));
+      final result =
+          await restClient.releaseGatewayPayment(paymentId: event.paymentId);
+      emit(state.copyWith(
+        status: FinDocStatus.parmSuccess,
+        finDoc: result,
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
