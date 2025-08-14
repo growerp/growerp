@@ -175,6 +175,14 @@ abstract class RestClient {
     @Field() required bool deleteCompanyToo,
   });
 
+  // payment gateway actions
+  @POST("rest/s1/growerp/100/GatewayPayment")
+  Future<FinDoc> authorizeGatewayPayment({@Field() required String paymentId});
+  @PATCH("rest/s1/growerp/100/GatewayPayment")
+  Future<FinDoc> captureGatewayPayment({@Field() required String paymentId});
+  @DELETE("rest/s1/growerp/100/GatewayPayment")
+  Future<FinDoc> releaseGatewayPayment({@Field() required String paymentId});
+
   // Website ======
   @GET("rest/s1/growerp/100/Website")
   Future<Website> getWebsite();

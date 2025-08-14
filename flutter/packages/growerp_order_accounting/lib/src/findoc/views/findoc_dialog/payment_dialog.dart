@@ -147,6 +147,15 @@ class PaymentDialogState extends State<PaymentDialog> {
                     }
                   },
                   builder: (context, state) {
+                    if (state.status == FinDocStatus.loading ||
+                        state.status == FinDocStatus.parmLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (state.status == FinDocStatus.parmSuccess) {
+                      finDoc = finDoc.copyWith(
+                          gatewayResponses: state.finDoc?.gatewayResponses ??
+                              widget.finDoc.gatewayResponses);
+                    }
                     return SingleChildScrollView(
                         child: paymentForm(state, paymentDialogFormKey));
                   },
@@ -426,6 +435,9 @@ class PaymentDialogState extends State<PaymentDialog> {
               InputDecorator(
                 decoration: InputDecoration(
                   labelText: 'Payment Methods',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                  ),
                   enabled: !readOnly,
                 ),
                 child: Column(
@@ -533,9 +545,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                           softWrap: false,
                         ),
                         onPressed: () {
-                          _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
-                            status: FinDocStatusVal.cancelled,
-                          )));
+                          Navigator.of(context).pop();
                         }),
                     const SizedBox(width: 20),
                     Expanded(
@@ -570,14 +580,65 @@ class PaymentDialogState extends State<PaymentDialog> {
               const SizedBox(height: 20),
               if (finDoc.gatewayResponses.isNotEmpty)
                 InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Gateway Responses',
-                      enabled: false,
-                    ),
-                    child: SizedBox(
-                        height: isPhone ? 100 : 150,
-                        child: SingleChildScrollView(
-                            child: _createGatewayTable()))),
+                    decoration: InputDecoration(
+                        labelText:
+                            'Gateway Responses(${finDoc.gatewayResponses.length})',
+                        enabled: false,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                        )),
+                    child: SingleChildScrollView(child: _createGatewayTable())),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                if (widget.finDoc.paymentId != null &&
+                    !readOnly &&
+                    finDoc.gatewayResponses == [])
+                  Padding(
+                      padding: const EdgeInsetsGeometry.all(5),
+                      child: OutlinedButton(
+                          key: const Key('capture'),
+                          child: const Text(
+                            'Capture',
+                            softWrap: false,
+                          ),
+                          onPressed: () {
+                            _finDocBloc.add(FinDocGatewayPaymentCapture(
+                                widget.finDoc.paymentId!));
+                          })),
+                if (widget.finDoc.paymentId != null &&
+                    !readOnly &&
+                    !finDoc.gatewayResponses.any((e) =>
+                        e.paymentOperation != 'Authorize' && e.resultSuccess))
+                  Padding(
+                      padding: const EdgeInsetsGeometry.all(5),
+                      child: OutlinedButton(
+                          key: const Key('authorize'),
+                          child: const Text(
+                            'Authorize',
+                            softWrap: false,
+                          ),
+                          onPressed: () {
+                            _finDocBloc.add(FinDocGatewayPaymentAuthorize(
+                                widget.finDoc.paymentId!));
+                          })),
+                if (widget.finDoc.paymentId != null &&
+                    !readOnly &&
+                    !finDoc.gatewayResponses.any((e) =>
+                        e.paymentOperation == 'Capture' && e.resultSuccess) &&
+                    !finDoc.gatewayResponses.any((e) =>
+                        e.paymentOperation == 'Release' && e.resultSuccess))
+                  Padding(
+                      padding: const EdgeInsetsGeometry.all(5),
+                      child: OutlinedButton(
+                          key: const Key('release'),
+                          child: const Text(
+                            'Release',
+                            softWrap: false,
+                          ),
+                          onPressed: () {
+                            _finDocBloc.add(FinDocGatewayPaymentRelease(
+                                widget.finDoc.paymentId!));
+                          })),
+              ]),
             ])));
   }
 }

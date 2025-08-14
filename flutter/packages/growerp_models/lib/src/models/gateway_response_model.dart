@@ -46,5 +46,5 @@ abstract class GatewayResponse extends Equatable with _$GatewayResponse {
 
   @override
   String toString() =>
-      'GatewayResponse $gatewayResponseId #$paymentId/$pseudoId $resultSuccess';
+      'GatewayResponse $gatewayResponseId $paymentOperation #$paymentId/$pseudoId $resultSuccess';
 }
