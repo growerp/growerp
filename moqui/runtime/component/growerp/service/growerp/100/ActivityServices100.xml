@@ -208,7 +208,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- translate frontend activity type with backend-->
             <set field="typeConvert"
                 from="[ event: 'WetEvent',WetEvent: 'event',
-                                todo: 'WetTask', WetTask: 'todo']"
+                                ToDo: 'WetTask', WetTask: 'todo']"
                 type="NewMap" />
 
             <set field="activities" from="[]" />
@@ -278,7 +278,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <script>activities.add(eventOut)</script>
                     </iterate>
                 </then>
-                <else-if condition="activityType == 'todo' || activityId">
+                <else-if condition="activityType.toLowerCase() == 'todo' || activityId || pseudoId">
 
                     <!-- only check status for a list -->
                     <if
@@ -303,6 +303,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <return error="true"
                                 message="activity $activityId for owner: $ownerPartyId not found" />
                         </if>
+                        <!-- multiple activities-->
                         <else>
                             <!-- by type -->
                             <entity-find offset="start" limit="limit" list="entries"
@@ -310,8 +311,8 @@ along with this software (see the LICENSE.md file). If not, see
                                 <econdition field-name="workEffortTypeEnumId" from="workEffortType" />
                                 <econdition field-name="ownerPartyId" />
                                 <!--econdition
-                        field-name="assPartyId" from="userPartyId"
-                            ignore-if-empty="true" /-->
+                                field-name="assPartyId" from="userPartyId"
+                                        ignore-if-empty="true" /-->
                                 <econdition field-name="statusId" operator="in"
                                     from="openStatusList" ignore-if-empty="true" />
                                 <econditions combine="or">
@@ -458,7 +459,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </else-if>
                 <else>
                     <return error="true"
-                        message="Activity type $activityType not supported, only event and todo supported" />
+                        message="Activity type $activityType not supported, only Event and ToDo supported" />
                 </else>
             </if>
         </actions>
@@ -616,7 +617,8 @@ along with this software (see the LICENSE.md file). If not, see
                 ]" />
             </if>
             <service-call name="growerp.100.ActivityServices100.get#Activity"
-                in-map="[activityId: workEffortId]" out-map="context" />
+                in-map="[activityId: workEffortId, activityType: activity.activityType]"
+                out-map="context" />
             <set field="activity" from="activities[0]" />
         </actions>
     </service>
@@ -698,7 +700,8 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="growerp.100.ActivityServices100.get#Activity"
-                in-map="[activityId: activity.activityId]" out-map="oldActivity" />
+                in-map="[activityId: activity.activityId, activityType: activity.activityType]"
+                out-map="oldActivity" />
             <!-- owner checked here -->
             <if condition="!oldActivity">
                 <return error="true" message="Activity ${activity.activityId} not found" />
@@ -782,7 +785,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
             </if>
             <service-call name="growerp.100.ActivityServices100.get#Activity"
-                in-map="[activityId: activity.activityId]" out-map="context" />
+                in-map="[activityId: activity.activityId, activityType: activity.activityType]"
+                out-map="context" />
             <set field="activity" from="activities[0]" />
         </actions>
     </service>

@@ -28,7 +28,7 @@ class ActivityFetch extends ActivityEvent {
     this.refresh = false,
     this.isForDropDown = false,
     this.activityId = '',
-    this.activityType = ActivityType.unkwown,
+    this.activityType = ActivityType.unknown,
     this.companyUser,
   });
   final bool my;

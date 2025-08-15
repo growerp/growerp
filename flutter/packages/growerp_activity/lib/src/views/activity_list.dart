@@ -215,7 +215,9 @@ class ActivityListState extends State<ActivityList> {
   }
 
   void _onScroll() {
-    if (_isBottom) _activityBloc.add(const ActivityFetch());
+    if (_isBottom) {
+      _activityBloc.add(ActivityFetch(activityType: widget.activityType));
+    }
   }
 
   bool get _isBottom {
