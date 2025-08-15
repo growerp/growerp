@@ -13,21 +13,21 @@
  */
 
 enum ActivityType {
-  todo('To Do'),
+  todo('ToDo'),
   event('Event'),
-  unkwown('UnKnown');
+  unknown('Unknown');
 
   const ActivityType(this._name);
   final String _name;
 
   static ActivityType tryParse(String val) {
-    switch (val.toLowerCase()) {
-      case 'to do':
+    switch (val) {
+      case 'ToDo':
         return todo;
-      case 'event':
+      case 'Event':
         return event;
     }
-    return unkwown;
+    return unknown;
   }
 
   @override

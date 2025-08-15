@@ -27,7 +27,7 @@ enum FinDocType {
 
   static FinDocType tryParse(String val) {
     switch (val) {
-      case 'request':
+      case 'Request':
         return request;
       case 'Order':
         return order;

@@ -83,7 +83,7 @@ class OrderTest {
       WidgetTester tester, List<FinDoc> finDocs) async {
     SaveTest test = await PersistFunctions.getTest();
     List<FinDoc> newOrders = [];
-    var stdFormat = DateFormat('M/d/yyyy');
+    var stdFormat = DateFormat('yyyy-MM-dd');
     for (FinDoc finDoc in finDocs) {
       await CommonTest.tapByKey(tester, 'addNew');
       await CommonTest.tapByKey(tester, 'customer');
@@ -99,13 +99,17 @@ class OrderTest {
           stdFormat.format(finDoc.items[0].rentalFromDate!));
       await tester.pump();
       await CommonTest.tapByText(tester, 'OK');
-      DateTime textField = DateTime.parse(CommonTest.getTextField('date'));
-      expect(stdFormat.format(textField),
-          stdFormat.format(finDoc.items[0].rentalFromDate!));
+      expect(
+        CommonTest.getDateTimeFormField('setDate').dateOnly(),
+        finDoc.items[0].rentalFromDate.dateOnly(),
+      );
+      // nbr of days
       await CommonTest.enterText(
-          tester, 'quantity', finDoc.items[0].quantity.toString());
-      await CommonTest.drag(tester, listViewName: 'listView4');
-      await CommonTest.tapByKey(tester, 'okRental');
+        tester,
+        'quantity',
+        finDoc.items[0].quantity.toString(),
+      );
+      await CommonTest.tapByKey(tester, 'update');
       await CommonTest.drag(tester);
       await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
       // tap orderId added at the top to get detail
