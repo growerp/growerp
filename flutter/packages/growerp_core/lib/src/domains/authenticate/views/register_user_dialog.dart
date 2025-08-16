@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:flutter_recaptcha_v2/flutter_recaptcha_v2.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../domains.dart';
 
@@ -38,6 +39,8 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
   late AuthBloc _authBloc;
   Company? _presetCompany;
   Company? _selectedCompany;
+  String? reCaptchaToken;
+  RecaptchaV2Controller recaptchaV2Controller = RecaptchaV2Controller();
 
   @override
   void initState() {
@@ -78,7 +81,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                 child: popUp(
                   context: context,
                   title: "Registration",
-                  height: isPhone ? 350 : 300,
+                  height: isPhone ? 450 : 400,
                   child: _registerForm(_authBloc.state.authenticate!),
                 ));
           }
@@ -146,20 +149,40 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                 },
               ),
               const SizedBox(height: 20),
+              SizedBox(
+                height: 100,
+                child: RecaptchaV2(
+                  apiKey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
+                  apiSecret: "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe",
+                  controller: recaptchaV2Controller,
+                  onVerified: (String token) {
+                    setState(() {
+                      reCaptchaToken = token;
+                    });
+                  },
+                ),
+              ),
               const SizedBox(height: 10),
               OutlinedButton(
                   key: const Key('newUserButton'),
                   child: const Text('Register'),
                   onPressed: () async {
+                    if (reCaptchaToken == null) {
+                      HelperFunctions.showMessage(context,
+                          'Please complete the reCAPTCHA', Colors.red);
+                      return;
+                    }
                     if (_registerFormKey.currentState!.validate()) {
-                      _authBloc.add(AuthRegister(User(
-                        company: _presetCompany ??
-                            Company(partyId: _selectedCompany?.partyId),
-                        firstName: _firstNameController.text,
-                        lastName: _lastNameController.text,
-                        email: _emailController.text,
-                        userGroup: widget.admin ? UserGroup.admin : null,
-                      )));
+                      _authBloc.add(AuthRegister(
+                          User(
+                            company: _presetCompany ??
+                                Company(partyId: _selectedCompany?.partyId),
+                            firstName: _firstNameController.text,
+                            lastName: _lastNameController.text,
+                            email: _emailController.text,
+                            userGroup: widget.admin ? UserGroup.admin : null,
+                          ),
+                          reCaptchaToken: reCaptchaToken));
                     }
                   }),
             ])));

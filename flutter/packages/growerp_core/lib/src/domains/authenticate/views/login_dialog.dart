@@ -20,6 +20,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:flutter_recaptcha_v2/flutter_recaptcha_v2.dart';
 
 import '../../../domains/domains.dart';
 import '../../../l10n/generated/core_localizations.dart';
@@ -52,6 +53,8 @@ class LoginDialogState extends State<LoginDialog> {
   late String username;
   late String password;
   late DataFetchBloc productBloc;
+  String? reCaptchaToken;
+  RecaptchaV2Controller recaptchaV2Controller = RecaptchaV2Controller();
 
   @override
   void initState() {
@@ -333,7 +336,7 @@ class LoginDialogState extends State<LoginDialog> {
             : 'qqqqqq9!';
 
     return popUp(
-        height: isPhone(context) ? 300 : 280,
+        height: isPhone(context) ? 420 : 400,
         width: 400,
         context: context,
         title: CoreLocalizations.of(context)!.loginWithExistingUserName,
@@ -381,12 +384,30 @@ class LoginDialogState extends State<LoginDialog> {
                       ),
                     )),
                 const SizedBox(height: 10),
+                SizedBox(
+                  height: 100,
+                  child: RecaptchaV2(
+                    apiKey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
+                    apiSecret: "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe",
+                    controller: recaptchaV2Controller,
+                    onVerified: (String token) {
+                      setState(() {
+                        reCaptchaToken = token;
+                      });
+                    },
+                  ),
+                ),
                 Row(children: [
                   Expanded(
                       child: OutlinedButton(
                           key: const Key('login'),
                           child: const Text('Login'),
                           onPressed: () {
+                            if (reCaptchaToken == null) {
+                              HelperFunctions.showMessage(context,
+                                  'Please complete the reCAPTCHA', Colors.red);
+                              return;
+                            }
                             if (_loginFormKey.currentState!.saveAndValidate()) {
                               final formData =
                                   _loginFormKey.currentState!.value;
@@ -397,7 +418,8 @@ class LoginDialogState extends State<LoginDialog> {
                               _authBloc.add(AuthLogin(
                                   formData['username']?.toString().trim() ?? '',
                                   formData['password']?.toString().trim() ??
-                                      ''));
+                                      '',
+                                  reCaptchaToken: reCaptchaToken));
                             }
                           }))
                 ]),

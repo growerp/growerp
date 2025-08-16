@@ -518,6 +518,12 @@ along with this software (see the LICENSE.md file). If not, see
                 </method>
             </resource>
         </resource>
+        <resource name="VerifyCaptcha" require-authentication="anonymous-all"
+            description="Check if the captcha is valid.">
+            <method type="post">
+                <service name="org.moqui.impl.GoogleServices.verify#ReCaptcha" />
+            </method>
+        </resource>
     </resource>
     <!-- Antwebsystems website -->
     <resource name="storecontents" require-authentication="anonymous-view">

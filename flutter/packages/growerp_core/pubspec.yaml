@@ -68,6 +68,7 @@ dependencies:
   growerp_activity: ^1.8.1
   flutter_form_builder: ^10.1.0
   form_builder_validators: ^11.2.0
+  flutter_recaptcha_v2: ^0.0.3
 
 dev_dependencies:
   flutter_driver:
