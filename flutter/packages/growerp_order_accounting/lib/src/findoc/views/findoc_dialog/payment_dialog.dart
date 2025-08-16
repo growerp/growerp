@@ -591,7 +591,28 @@ class PaymentDialogState extends State<PaymentDialog> {
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 if (widget.finDoc.paymentId != null &&
                     !readOnly &&
-                    finDoc.gatewayResponses == [])
+                    finDoc.gatewayResponses.any((e) =>
+                        e.paymentOperation == 'Authorize' && e.resultSuccess) &&
+                    !finDoc.gatewayResponses.any((e) =>
+                        e.paymentOperation == 'Release' && e.resultSuccess))
+                  Padding(
+                      padding: const EdgeInsetsGeometry.all(5),
+                      child: OutlinedButton(
+                          key: const Key('release'),
+                          child: const Text(
+                            'Release',
+                            softWrap: false,
+                          ),
+                          onPressed: () {
+                            _finDocBloc.add(FinDocGatewayPaymentRelease(
+                                widget.finDoc.paymentId!));
+                          })),
+                if (widget.finDoc.paymentId != null &&
+                    !readOnly &&
+                    finDoc.gatewayResponses.any((e) =>
+                        e.paymentOperation == 'Authorize' && e.resultSuccess) &&
+                    !finDoc.gatewayResponses.any((e) =>
+                        e.paymentOperation == 'Release' && e.resultSuccess))
                   Padding(
                       padding: const EdgeInsetsGeometry.all(5),
                       child: OutlinedButton(
@@ -607,7 +628,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                 if (widget.finDoc.paymentId != null &&
                     !readOnly &&
                     !finDoc.gatewayResponses.any((e) =>
-                        e.paymentOperation != 'Authorize' && e.resultSuccess))
+                        e.paymentOperation == 'Authorize' && e.resultSuccess))
                   Padding(
                       padding: const EdgeInsetsGeometry.all(5),
                       child: OutlinedButton(
@@ -618,24 +639,6 @@ class PaymentDialogState extends State<PaymentDialog> {
                           ),
                           onPressed: () {
                             _finDocBloc.add(FinDocGatewayPaymentAuthorize(
-                                widget.finDoc.paymentId!));
-                          })),
-                if (widget.finDoc.paymentId != null &&
-                    !readOnly &&
-                    !finDoc.gatewayResponses.any((e) =>
-                        e.paymentOperation == 'Capture' && e.resultSuccess) &&
-                    !finDoc.gatewayResponses.any((e) =>
-                        e.paymentOperation == 'Release' && e.resultSuccess))
-                  Padding(
-                      padding: const EdgeInsetsGeometry.all(5),
-                      child: OutlinedButton(
-                          key: const Key('release'),
-                          child: const Text(
-                            'Release',
-                            softWrap: false,
-                          ),
-                          onPressed: () {
-                            _finDocBloc.add(FinDocGatewayPaymentRelease(
                                 widget.finDoc.paymentId!));
                           })),
               ]),
