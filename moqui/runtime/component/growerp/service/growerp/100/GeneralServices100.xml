@@ -1022,7 +1022,6 @@ along with this software (see the LICENSE.md file). If not, see
                                     ownerPartyId: 'GROWERP']"
                                 out-map="context" />
                         </if>
-
                         <!-- prompt for capture of payment if not first tenant != GrowERP-->
                         <if condition="ownerPartyId != 'GROWERP'">
                             <!-- test check for existing subscription in GrowERP -->
@@ -1032,7 +1031,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <econdition field-name="ownerPartyId" value="GROWERP" />
                                 <date-filter />
                             </entity-find>
-
+                            <!-- if no subscription prompt for initial authorization -->
                             <if condition="!subscriptions &amp;&amp; !subscriptionId">
                                 <set field="authenticate"
                                     from="authenticate + [apiKey: 'paymentFirst']" />

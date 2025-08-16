@@ -39,8 +39,11 @@ class _PlanSelectionFormState extends State<PlanSelectionForm> {
   void initState() {
     super.initState();
     productBloc = context.read<DataFetchBloc<Products>>()
-      ..add(GetDataEvent(() =>
-          context.read<RestClient>().getProduct(ownerPartyId: 'GROWERP')));
+      ..add(
+        GetDataEvent(
+          () => context.read<RestClient>().getProduct(ownerPartyId: 'GROWERP'),
+        ),
+      );
     subscriptionBloc = context.read<SubscriptionBloc>()
       ..add(const SubscriptionFetch(growerp: true));
   }
@@ -65,8 +68,11 @@ class _PlanSelectionFormState extends State<PlanSelectionForm> {
         // get products and sort by price
         Products productsList = state.data as Products;
         List<Product> products = List.from(productsList.products)
-          ..sort((a, b) => ((a.price ?? Decimal.zero).toDouble())
-              .compareTo((b.price ?? Decimal.zero).toDouble()));
+          ..sort(
+            (a, b) => ((a.price ?? Decimal.zero).toDouble()).compareTo(
+              (b.price ?? Decimal.zero).toDouble(),
+            ),
+          );
         // get current subscription
         if (subscriptionBloc.state.subscriptions.isEmpty) {
           return const Center(child: Text('No subscription found'));
@@ -77,95 +83,108 @@ class _PlanSelectionFormState extends State<PlanSelectionForm> {
           child: SizedBox(
             width: 400,
             child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: FormBuilder(
-                    autovalidateMode: AutovalidateMode.always,
-                    key: builderFormKey,
-                    child: SingleChildScrollView(
-                      key: const Key('paymentForm'),
-                      child: Column(
-                        children: <Widget>[
-                          FormBuilderCheckboxGroup(
-                            key: const Key('plan'),
-                            initialValue: [selectedPlan],
-                            name: 'plan',
-                            orientation: OptionsOrientation.vertical,
-                            options: [
-                              for (Product product in products)
-                                FormBuilderFieldOption(
-                                    value: product.productId,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: product.description!
+              padding: const EdgeInsets.all(10.0),
+              child: FormBuilder(
+                autovalidateMode: AutovalidateMode.always,
+                key: builderFormKey,
+                child: SingleChildScrollView(
+                  key: const Key('paymentForm'),
+                  child: Column(
+                    children: <Widget>[
+                      FormBuilderCheckboxGroup(
+                        key: const Key('plan'),
+                        initialValue: [selectedPlan],
+                        name: 'plan',
+                        orientation: OptionsOrientation.vertical,
+                        options: [
+                          for (Product product in products)
+                            FormBuilderFieldOption(
+                              value: product.productId,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children:
+                                    product.description != null &&
+                                        product.description!.isNotEmpty &&
+                                        product.description!.contains('|')
+                                    ? product.description!
                                           .split('|')
                                           .asMap()
                                           .entries
-                                          .map((entry) => entry.key == 0
-                                              ? Text(
-                                                  '\n+${entry.value}',
-                                                  style: const TextStyle(
+                                          .map(
+                                            (entry) => entry.key == 0
+                                                ? Text(
+                                                    '\n+${entry.value}',
+                                                    style: const TextStyle(
                                                       fontStyle:
                                                           FontStyle.italic,
                                                       fontWeight:
-                                                          FontWeight.bold),
-                                                )
-                                              : Text(entry.value))
-                                          .toList(),
-                                    )),
-                            ],
-                            decoration: const InputDecoration(
-                              labelText: 'Payment Plans',
-                              border: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(25.0)),
+                                                          FontWeight.bold,
+                                                    ),
+                                                  )
+                                                : Text(entry.value),
+                                          )
+                                          .toList()
+                                    : [Text(product.description ?? '')],
                               ),
                             ),
-                            onChanged: (value) async {
-                              // Ensure only a single option is checked
-                              if (value == null || value.isEmpty) {
-                                // If nothing is selected, revert to the current plan
-                                builderFormKey.currentState?.fields['plan']
-                                    ?.didChange(
-                                        [subscription.product!.productId]);
-                                return;
-                              }
-                              final lastSelected = value.last;
-                              if (value.length > 1) {
-                                // If more than one is selected, keep only the last selected
-                                builderFormKey.currentState?.fields['plan']
-                                    ?.didChange([lastSelected]);
-                                selectedPlan = lastSelected;
-                              } else {
-                                selectedPlan = value.first;
-                              }
-
-                              if (selectedPlan !=
-                                  subscription.product!.productId) {
-                                var product = products.firstWhere(
-                                    (p) => p.productId == selectedPlan,
-                                    orElse: () => products.first);
-                                bool? result = await confirmDialog(
-                                    context,
-                                    'Change your plan',
-                                    'Are you sure you want to change your plan to:\n'
-                                        ' ${product.description!.split('|').first}?');
-                                if (result == true) {
-                                  subscriptionBloc
-                                      .add(SubscriptionUpdate(subscription));
-                                } else {
-                                  // Revert to the current plan if the user cancels
-                                  builderFormKey.currentState?.fields['plan']
-                                      ?.didChange(
-                                          [subscription.product!.productId]);
-                                  selectedPlan = lastSelected;
-                                }
-                              }
-                            },
-                          ),
                         ],
+                        decoration: const InputDecoration(
+                          labelText: 'Payment Plans',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(25.0),
+                            ),
+                          ),
+                        ),
+                        onChanged: (value) async {
+                          // Ensure only a single option is checked
+                          if (value == null || value.isEmpty) {
+                            // If nothing is selected, revert to the current plan
+                            builderFormKey.currentState?.fields['plan']
+                                ?.didChange([subscription.product!.productId]);
+                            return;
+                          }
+                          final lastSelected = value.last;
+                          if (value.length > 1) {
+                            // If more than one is selected, keep only the last selected
+                            builderFormKey.currentState?.fields['plan']
+                                ?.didChange([lastSelected]);
+                            selectedPlan = lastSelected;
+                          } else {
+                            selectedPlan = value.first;
+                          }
+
+                          if (selectedPlan != subscription.product!.productId) {
+                            var product = products.firstWhere(
+                              (p) => p.productId == selectedPlan,
+                              orElse: () => products.first,
+                            );
+                            bool? result = await confirmDialog(
+                              context,
+                              'Change your plan',
+                              'Are you sure you want to change your plan to:\n'
+                                  ' ${product.description!.split('|').first}?',
+                            );
+                            if (result == true) {
+                              subscriptionBloc.add(
+                                SubscriptionUpdate(subscription),
+                              );
+                            } else {
+                              // Revert to the current plan if the user cancels
+                              builderFormKey.currentState?.fields['plan']
+                                  ?.didChange([
+                                    subscription.product!.productId,
+                                  ]);
+                              selectedPlan = lastSelected;
+                            }
+                          }
+                        },
                       ),
-                    ))),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         );
       },

@@ -83,6 +83,11 @@ along with this software (see the LICENSE.md file). If not, see
                 out-map="context" />
             <set field="chargeId" from="authInfoMap.chargeId" />
 
+            <if condition="!amount">
+                <entity-find-one entity-name="mantle.account.payment.Payment" value-field="payment" />
+                <set field="amount" from="payment.amount" />
+            </if>
+
             <service-call name="Stripe.StripePaymentServices.send#StripeCaptureRequest"
                 in-map="context" out-map="context" />
 
@@ -216,6 +221,11 @@ along with this software (see the LICENSE.md file). If not, see
                 out-map="context" />
             <set field="chargeId" from="authInfoMap.chargeId" />
 
+            <if condition="!amount">
+                <entity-find-one entity-name="mantle.account.payment.Payment" value-field="payment" />
+                <set field="amount" from="payment.amount" />
+            </if>
+
             <service-call name="Stripe.StripePaymentServices.send#StripeRefundRequest"
                 in-map="context" out-map="context" />
 
@@ -320,16 +330,21 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="stripeGatewayInfoMap" type="Map" />
         </out-parameters>
         <actions>
-            <if condition="paymentGatewayConfigId == 'GROWERP'">
-                <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="pgs">
-                    <field-map field-name="paymentGatewayConfigId" value="STRIPE" />
-                    <field-map field-name="ownerPartyId" value="100000" />
+            <!-- get owner-->
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- get key -->
+            <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="pgs">
+                <field-map field-name="paymentGatewayConfigId" from="paymentGatewayConfigId" />
+                <field-map field-name="ownerPartyId" from="ownerPartyId" />
+            </entity-find-one>
+            <!-- if stripe key not found, use the one from  GROWERP -->
+            <if condition="!pgs">
+                <entity-find-one entity-name="mantle.account.method.PaymentGateway"
+                    value-field="pgs">
+                    <field-map field-name="paymentGatewayConfigId" from="paymentGatewayConfigId" />
+                    <field-map field-name="ownerPartyId" value="GROWERP" />
                 </entity-find-one>
-                <else>
-                    <service-call out-map="context"
-                        name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-                    <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="pgs" />
-                </else>
             </if>
             <set field="stripeGatewayInfoMap" from="[secretKey:pgs?.secretKey]" />
         </actions>
@@ -472,7 +487,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="amount" from="responseMap.charge.amount / 100" />
                     <set field="payment.statusId" value="PmntAuthorized" />
                     <entity-update value-field="payment" />
-                    <!--                    <log level="info" message="Charge: ${responseMap.charge}"/>-->
                 </then>
                 <else>
                     <if condition="responseMap.refund">
@@ -544,8 +558,6 @@ along with this software (see the LICENSE.md file). If not, see
                         message="Stripe Gateway Config not found for ${System.getProperty('paymentGatewayConfigId')}, please check your configuration."
                     />
                 </else>
-                <log message="=======$responseMap: ${responseMap}======"
-                    level="warn" />
             </if>
         </actions>
     </service>
