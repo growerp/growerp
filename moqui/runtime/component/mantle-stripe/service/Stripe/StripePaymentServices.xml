@@ -464,6 +464,39 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
     </service>
 
+    <service verb="convert" noun="Currency" type="java"
+        location="com.stripe.TransactionServices" method="convertCurrency">
+        <description>Convert an amount from one currency to another using Stripe's Exchange Rate API</description>
+        <in-parameters>
+            <parameter name="secretKey" required="true">
+                <description>Stripe secret key for API access</description>
+            </parameter>
+            <parameter name="amount" type="BigDecimal" required="true">
+                <description>The amount to convert</description>
+            </parameter>
+            <parameter name="fromCurrencyUomId" required="true">
+                <description>The source currency UOM ID (e.g., 'USD')</description>
+            </parameter>
+            <parameter name="toCurrencyUomId" required="true">
+                <description>The target currency UOM ID (e.g., 'EUR')</description>
+            </parameter>
+            <parameter name="exchangeRate" type="BigDecimal">
+                <description>Optional manual exchange rate. If not provided, will fetch current rate from Stripe API.</description>
+            </parameter>
+            <parameter name="roundingMode" default-value="HALF_UP">
+                <description>The rounding mode to use when rounding the converted amount (e.g., HALF_UP, HALF_DOWN, etc.)</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="convertedAmount" type="BigDecimal">
+                <description>The converted amount in the target currency</description>
+            </parameter>
+            <parameter name="responseMap" type="Map">
+                <description>Response map containing conversion details and any error information</description>
+            </parameter>
+        </out-parameters>
+    </service>
+
     <service verb="save" noun="StripeResponse">
         <in-parameters>
             <parameter name="paymentId" />
@@ -557,6 +590,123 @@ along with this software (see the LICENSE.md file). If not, see
                     <return error="true"
                         message="Stripe Gateway Config not found for ${System.getProperty('paymentGatewayConfigId')}, please check your configuration."
                     />
+                </else>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="convert" noun="PaymentAmount">
+        <description>Convert a payment amount from one currency to another using Stripe's Exchange Rate API</description>
+        <in-parameters>
+            <parameter name="paymentGatewayConfigId">
+                <description>Payment gateway config ID to get Stripe credentials. If not provided, will use default.</description>
+            </parameter>
+            <parameter name="paymentId">
+                <description>Payment ID to get the amount from. Either this or amount/fromCurrencyUomId must be provided.</description>
+            </parameter>
+            <parameter name="amount" type="BigDecimal">
+                <description>The amount to convert. Required if paymentId not provided.</description>
+            </parameter>
+            <parameter name="fromCurrencyUomId">
+                <description>The source currency UOM ID. Required if paymentId not provided.</description>
+            </parameter>
+            <parameter name="toCurrencyUomId" required="true">
+                <description>The target currency UOM ID (e.g., 'EUR', 'GBP', 'JPY')</description>
+            </parameter>
+            <parameter name="exchangeRate" type="BigDecimal">
+                <description>Optional manual exchange rate. If not provided, will fetch current rate from Stripe API.</description>
+            </parameter>
+            <parameter name="roundingMode" default-value="HALF_UP">
+                <description>The rounding mode to use when rounding the converted amount</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="convertedAmount" type="BigDecimal">
+                <description>The converted amount in the target currency</description>
+            </parameter>
+            <parameter name="originalAmount" type="BigDecimal">
+                <description>The original amount before conversion</description>
+            </parameter>
+            <parameter name="fromCurrencyUomId">
+                <description>The source currency UOM ID used</description>
+            </parameter>
+            <parameter name="toCurrencyUomId">
+                <description>The target currency UOM ID used</description>
+            </parameter>
+            <parameter name="exchangeRateUsed" type="BigDecimal">
+                <description>The exchange rate that was used for conversion</description>
+            </parameter>
+            <parameter name="conversionSuccessful" type="Boolean" default-value="false">
+                <description>Whether the conversion was successful</description>
+            </parameter>
+            <parameter name="errorMessage">
+                <description>Error message if conversion failed</description>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <!-- Get Stripe gateway info and secret key -->
+            <if condition="!paymentGatewayConfigId">
+                <set field="paymentGatewayConfigId"
+                    from="System.getProperty('paymentGatewayConfigId') ?: 'STRIPE'" />
+            </if>
+
+            <service-call name="Stripe.StripePaymentServices.get#StripeGatewayInfo"
+                in-map="[paymentGatewayConfigId: paymentGatewayConfigId]"
+                out-map="stripeInfo" />
+
+            <if condition="!stripeInfo.stripeGatewayInfoMap?.secretKey">
+                <set field="conversionSuccessful" value="false" />
+                <set field="errorMessage"
+                    value="Stripe secret key not found for gateway config: ${paymentGatewayConfigId}" />
+                <return />
+            </if>
+
+            <set field="secretKey" from="stripeInfo.stripeGatewayInfoMap.secretKey" />
+
+            <!-- Get payment details if paymentId provided -->
+            <if condition="paymentId">
+                <entity-find-one entity-name="mantle.account.payment.Payment" value-field="payment">
+                    <field-map field-name="paymentId" from="paymentId" />
+                </entity-find-one>
+                <if condition="!payment">
+                    <set field="conversionSuccessful" value="false" />
+                    <set field="errorMessage" value="Payment ${paymentId} not found" />
+                    <return />
+                </if>
+                <set field="amount" from="payment.amount" />
+                <set field="fromCurrencyUomId" from="payment.amountUomId" />
+            </if>
+
+            <!-- Validate required parameters -->
+            <if condition="!amount || !fromCurrencyUomId">
+                <set field="conversionSuccessful" value="false" />
+                <set field="errorMessage" value="Amount and fromCurrencyUomId are required" />
+                <return />
+            </if>
+
+            <!-- Set output parameters -->
+            <set field="originalAmount" from="amount" />
+
+            <!-- Call the currency conversion service -->
+            <service-call name="Stripe.StripePaymentServices.convert#Currency"
+                in-map="[secretKey: secretKey, amount: amount, fromCurrencyUomId: fromCurrencyUomId, 
+                         toCurrencyUomId: toCurrencyUomId, exchangeRate: exchangeRate, roundingMode: roundingMode]"
+                out-map="conversionResult" />
+
+            <!-- Process the conversion result -->
+            <if condition="conversionResult.responseMap?.errorInfo?.responseCode == '1'">
+                <then>
+                    <!-- Success -->
+                    <set field="convertedAmount" from="conversionResult.convertedAmount" />
+                    <set field="exchangeRateUsed"
+                        from="conversionResult.responseMap.conversionInfo.exchangeRate" />
+                    <set field="conversionSuccessful" value="true" />
+                </then>
+                <else>
+                    <!-- Error -->
+                    <set field="conversionSuccessful" value="false" />
+                    <set field="errorMessage"
+                        from="conversionResult.responseMap?.errorInfo?.reasonMessage ?: 'Currency conversion failed'" />
                 </else>
             </if>
         </actions>
