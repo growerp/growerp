@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-2.1.xsd">
+    <extend-entity entity-name="mantle.account.method.PaymentGateway" package="mantle.account.method">
+        <field name="isDefault" type="indicator" default="'N'"><description>Default gateway for this type</description></field>
+    </extend-entity>
+    <entity entity-name="PaymentGatewayPaypal" package="Paypal">
+        <field name="paymentGatewayConfigId" type="id" is-pk="true"/>
+        <field name="ownerPartyId" type="id" is-pk="true"/>
+        <field name="clientId" type="text-long" encrypt="true"/>
+        <field name="clientSecret" type="text-long" encrypt="true"/>
+        <relationship type="one" related-entity-name="mantle.account.method.PaymentGatewayConfig">
+            <key-map field-name="paymentGatewayConfigId"/>
+        </relationship>
+        <relationship type="one" related-entity-name="mantle.party.Party" title="Owner">
+            <key-map field-name="ownerPartyId"/>
+        </relationship>
+        <seed-data>
+            <moqui.basic.Enumeration description="PayPal" enumId="PgtPaypal" enumTypeId="PaymentGatewayType" parentEnumId="PgtCreditCard"/>
+
+            <mantle.account.method.PaymentGatewayConfig paymentGatewayConfigId="PAYPAL" paymentGatewayTypeEnumId="PgtPaypal"
+                                                        description="PayPal Payments Default Configuration"/>
+            <mantle.account.method.PaymentGateway paymentGatewayConfigId="PAYPAL" paymentGatewayTypeEnumId="PgtPaypal"
+                                                  isDefault="Y" ownerPartyId="GROWERP"/>
+
+            <Paypal.PaymentGatewayPaypal paymentGatewayConfigId="PAYPAL" ownerPartyId="GROWERP"
+                                         clientId="changeMe" clientSecret="changeMe"/>
+        </seed-data>
+    </entity>
+</entities>

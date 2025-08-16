@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+    <service verb="authorize" noun="Payment">
+        <implements service="mantle.account.PaymentServices.authorize#Payment" />
+        <actions>
+            <service-call name="Paypal.PaypalPaymentServices.get#PaypalGatewayInfo" in-map="context"
+                out-map="context" />
+            <service-call name="Paypal.PaypalPaymentServices.send#PaypalAuthorizeRequest"
+                in-map="context" out-map="context" />
+            <service-call name="Paypal.PaypalPaymentServices.save#PaypalResponse"
+                in-map="context" out-map="context" />
+        </actions>
+    </service>
+    <service verb="capture" noun="Payment">
+        <implements service="mantle.account.PaymentServices.capture#Payment" />
+        <actions>
+            <service-call name="Paypal.PaypalPaymentServices.get#PaypalGatewayInfo" in-map="context"
+                out-map="context" />
+            <service-call name="Paypal.PaypalPaymentServices.get#AuthGatewayInfo" in-map="context"
+                out-map="context" />
+            <service-call name="Paypal.PaypalPaymentServices.send#PaypalCaptureRequest"
+                in-map="context" out-map="context" />
+            <service-call name="Paypal.PaypalPaymentServices.save#PaypalResponse"
+                in-map="context" out-map="context" />
+        </actions>
+    </service>
+    <service verb="authorizeAndCapture" noun="Payment">
+        <implements service="mantle.account.PaymentServices.authorizeAndCapture#Payment" />
+        <actions>
+            <service-call name="Paypal.PaypalPaymentServices.get#PaypalGatewayInfo" in-map="context"
+                out-map="context" />
+            <set field="transactionInfo.capture" from="true" />
+            <service-call name="Paypal.PaypalPaymentServices.send#PaypalAuthorizeRequest"
+                in-map="context" out-map="context" />
+            <service-call name="Paypal.PaypalPaymentServices.save#PaypalResponse"
+                in-map="context" out-map="context" />
+        </actions>
+    </service>
+    <service verb="release" noun="Payment">
+        <implements service="mantle.account.PaymentServices.release#Payment" />
+        <actions>
+            <service-call name="Paypal.PaypalPaymentServices.get#PaypalGatewayInfo" in-map="context"
+                out-map="context" />
+            <service-call name="Paypal.PaypalPaymentServices.get#AuthGatewayInfo" in-map="context"
+                out-map="context" />
+            <service-call name="Paypal.PaypalPaymentServices.send#PaypalReleaseRequest"
+                in-map="context" out-map="context" />
+            <service-call name="Paypal.PaypalPaymentServices.save#PaypalResponse"
+                in-map="context" out-map="context" />
+        </actions>
+    </service>
+    <service verb="refund" noun="Payment">
+        <implements service="mantle.account.PaymentServices.refund#Payment" />
+        <actions>
+            <service-call name="Paypal.PaypalPaymentServices.get#PaypalGatewayInfo" in-map="context"
+                out-map="context" />
+            <service-call name="Paypal.PaypalPaymentServices.get#AuthGatewayInfo" in-map="context"
+                out-map="context" />
+            <service-call name="Paypal.PaypalPaymentServices.send#PaypalRefundRequest"
+                in-map="context" out-map="context" />
+            <service-call name="Paypal.PaypalPaymentServices.save#PaypalResponse"
+                in-map="context" out-map="context" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="PaypalGatewayInfo">
+        <in-parameters>
+            <parameter name="paymentGatewayConfigId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="paypalGatewayInfoMap" type="Map" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="Paypal.PaymentGatewayPaypal" value-field="pgp">
+                <field-map field-name="paymentGatewayConfigId" from="paymentGatewayConfigId" />
+            </entity-find-one>
+            <set field="paypalGatewayInfoMap" from="[clientId:pgp.clientId, clientSecret:pgp.clientSecret]" />
+        </actions>
+    </service>
+    <service verb="get" noun="AuthGatewayInfo">
+        <in-parameters>
+            <parameter name="paymentId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="authInfoMap" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call name="mantle.account.PaymentServices.get#AuthorizePaymentGatewayResponse"
+                in-map="context" out-map="context" />
+            <if condition="!paymentGatewayResponse">
+                <return error="true"
+                    message="Could not find the chargeId from a successful authorization for Payment ${paymentId}" />
+            </if>
+
+            <set field="authInfoMap" from="[chargeId:paymentGatewayResponse.referenceNum]" />
+        </actions>
+    </service>
+
+    <service verb="send" noun="PaypalAuthorizeRequest" type="groovy"
+        location="component://paypal/src/main/groovy/com/paypal/TransactionServices.groovy" method="sendAuthorizeRequest">
+        <in-parameters>
+            <parameter name="paypalGatewayInfoMap" type="Map" required="true" />
+            <parameter name="creditCardInfo" type="Map" required="true" />
+            <parameter name="transactionInfo" type="Map" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="responseMap" type="Map" />
+        </out-parameters>
+    </service>
+    <service verb="send" noun="PaypalCaptureRequest" type="groovy"
+        location="component://paypal/src/main/groovy/com/paypal/TransactionServices.groovy" method="sendCaptureRequest">
+        <in-parameters>
+            <parameter name="paypalGatewayInfoMap" type="Map" required="true" />
+            <parameter name="chargeId" required="true" />
+            <parameter name="amount" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="responseMap" type="Map" />
+        </out-parameters>
+    </service>
+    <service verb="send" noun="PaypalRefundRequest" type="groovy"
+        location="component://paypal/src/main/groovy/com/paypal/TransactionServices.groovy" method="sendRefundRequest">
+        <in-parameters>
+            <parameter name="paypalGatewayInfoMap" type="Map" required="true" />
+            <parameter name="chargeId" required="true" />
+            <parameter name="amount" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="responseMap" type="Map" />
+        </out-parameters>
+    </service>
+    <service verb="send" noun="PaypalReleaseRequest" type="groovy"
+        location="component://paypal/src/main/groovy/com/paypal/TransactionServices.groovy" method="sendReleaseRequest">
+        <in-parameters>
+            <parameter name="paypalGatewayInfoMap" type="Map" required="true" />
+            <parameter name="chargeId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="responseMap" type="Map" />
+        </out-parameters>
+    </service>
+
+    <service verb="save" noun="PaypalResponse">
+        <in-parameters>
+            <parameter name="paymentId" />
+            <parameter name="paymentMethodId" />
+            <parameter name="paymentGatewayConfigId" />
+            <parameter name="paymentOperationEnumId" required="true" />
+            <parameter name="responseMap" type="Map" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="paymentGatewayResponseId" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.account.payment.Payment" value-field="payment" />
+            <if condition="payment &amp;&amp; !paymentMethodId">
+                <set field="paymentMethodId" from="payment.paymentMethodId" />
+            </if>
+
+            <if condition="responseMap.payment">
+                <set field="chargeId" from="responseMap.payment.id" />
+                <set field="amount" from="responseMap.payment.transactions[0].amount.total" />
+            </if>
+            <if condition="responseMap.capture">
+                <set field="chargeId" from="responseMap.capture.id" />
+                <set field="amount" from="responseMap.capture.amount.total" />
+            </if>
+            <if condition="responseMap.refund">
+                <set field="chargeId" from="responseMap.refund.id" />
+                <set field="amount" from="responseMap.refund.amount.total" />
+            </if>
+            <if condition="responseMap.authorization">
+                <set field="chargeId" from="responseMap.authorization.id" />
+                <set field="amount" from="responseMap.authorization.amount.total" />
+            </if>
+            <set field="errorInfo" from="responseMap.errorInfo" />
+
+            <service-call name="create#mantle.account.method.PaymentGatewayResponse"
+                out-map="context"
+                in-map="[
+                        paymentGatewayConfigId:paymentGatewayConfigId,
+                        paymentOperationEnumId:paymentOperationEnumId,
+                        paymentId:paymentId,
+                        paymentMethodId:paymentMethodId,
+                        amount:amount,
+                        amountUomId:payment?.amountUomId,
+                        referenceNum:chargeId,
+                        responseCode:errorInfo.responseCode,
+                        reasonCode:errorInfo.reasonCode,
+                        reasonMessage:errorInfo.reasonMessage,
+                        transactionDate:ec.user.nowTimestamp,
+                        resultSuccess:(errorInfo.responseCode == '1' ? 'Y' : 'N'),
+                        resultDeclined:(errorInfo.responseCode == '2' ? 'Y' : 'N'),
+                        resultError:(errorInfo.exception ? 'Y' : 'N'),
+                        resultBadExpire:'N',
+                        resultBadCardNumber:'N',
+                        resultNsf:'N']" />
+        </actions>
+    </service>
+</services>
