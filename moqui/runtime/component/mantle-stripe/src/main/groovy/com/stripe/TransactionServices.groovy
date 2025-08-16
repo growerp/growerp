@@ -10,6 +10,9 @@ import com.stripe.param.PaymentIntentListParams
 import java.time.LocalDate
 import java.time.ZoneOffset // Import the class directly
 import com.stripe.model.Balance
+import com.stripe.model.ExchangeRate
+import java.util.Currency
+import java.math.RoundingMode
 
 import org.moqui.context.ExecutionContext
 
@@ -226,6 +229,131 @@ class TransactionServices {
             responseMap.errorInfo = ['responseCode':'3','reasonCode':e.getCode(),'reasonMessage':e.getMessage(),'exception':e]
         } catch (Exception e) {
             responseMap.errorInfo = ['responseCode':'3','reasonCode':'','reasonMessage':e.getMessage(),'exception':e]
+        }
+
+        return ['responseMap':responseMap]
+    }
+
+    static Map convertCurrency (ExecutionContext ec) {
+        def secretKey = ec.context.secretKey
+        def amount = ec.context.amount as BigDecimal
+        def fromCurrencyUomId = ec.context.fromCurrencyUomId?.toLowerCase()
+        def toCurrencyUomId = ec.context.toCurrencyUomId?.toLowerCase()
+        def exchangeRate = ec.context.exchangeRate as BigDecimal
+        def roundingMode = ec.context.roundingMode ?: 'HALF_UP'
+
+        if (!amount || !fromCurrencyUomId || !toCurrencyUomId) {
+            return [
+                responseMap: [
+                    errorInfo: [
+                        responseCode: '3',
+                        reasonCode: 'MISSING_PARAMS',
+                        reasonMessage: 'Required parameters missing: amount, fromCurrencyUomId, toCurrencyUomId'
+                    ]
+                ]
+            ]
+        }
+
+        if (!secretKey) {
+            return [
+                responseMap: [
+                    errorInfo: [
+                        responseCode: '3',
+                        reasonCode: 'MISSING_SECRET_KEY',
+                        reasonMessage: 'Stripe secret key is required for currency conversion'
+                    ]
+                ]
+            ]
+        }
+
+        def responseMap = [:]
+
+        try {
+            // Set Stripe API key
+            Stripe.apiKey = secretKey
+
+            BigDecimal convertedAmount
+            BigDecimal usedExchangeRate = exchangeRate
+            
+            // If same currency, no conversion needed
+            if (fromCurrencyUomId == toCurrencyUomId) {
+                convertedAmount = amount
+                usedExchangeRate = 1.0
+            } else {
+                // If exchange rate not provided, fetch it from Stripe
+                if (!exchangeRate) {
+                    try {
+                        // Fetch current exchange rate from Stripe
+                        ExchangeRate stripeExchangeRate = ExchangeRate.retrieve(fromCurrencyUomId)
+                        
+                        // Get the rate for the target currency
+                        def rates = stripeExchangeRate.getRates()
+                        if (rates && rates.containsKey(toCurrencyUomId)) {
+                            usedExchangeRate = rates.get(toCurrencyUomId) as BigDecimal
+                        } else {
+                            return [
+                                responseMap: [
+                                    errorInfo: [
+                                        responseCode: '3',
+                                        reasonCode: 'EXCHANGE_RATE_NOT_AVAILABLE',
+                                        reasonMessage: "Exchange rate from ${fromCurrencyUomId.toUpperCase()} to ${toCurrencyUomId.toUpperCase()} not available from Stripe"
+                                    ]
+                                ]
+                            ]
+                        }
+                    } catch (StripeException e) {
+                        return [
+                            responseMap: [
+                                errorInfo: [
+                                    responseCode: '3',
+                                    reasonCode: 'STRIPE_EXCHANGE_RATE_ERROR',
+                                    reasonMessage: "Failed to fetch exchange rate from Stripe: ${e.getMessage()}",
+                                    exception: e
+                                ]
+                            ]
+                        ]
+                    }
+                }
+                
+                // Perform currency conversion
+                convertedAmount = amount.multiply(usedExchangeRate)
+            }
+
+            // Round the result according to target currency rules
+            try {
+                def currency = Currency.getInstance(toCurrencyUomId.toUpperCase())
+                def fractionDigits = currency.getDefaultFractionDigits()
+                convertedAmount = convertedAmount.setScale(fractionDigits, RoundingMode.valueOf(roundingMode))
+            } catch (Exception e) {
+                // If currency lookup fails, default to 2 decimal places
+                convertedAmount = convertedAmount.setScale(2, RoundingMode.valueOf(roundingMode))
+            }
+
+            responseMap.conversionInfo = [
+                originalAmount: amount,
+                fromCurrencyUomId: fromCurrencyUomId.toUpperCase(),
+                toCurrencyUomId: toCurrencyUomId.toUpperCase(),
+                exchangeRate: usedExchangeRate,
+                convertedAmount: convertedAmount,
+                exchangeRateSource: exchangeRate ? 'provided' : 'stripe_api'
+            ]
+            responseMap.convertedAmount = convertedAmount
+            responseMap.errorInfo = ['responseCode':'1'] // '1' = success
+
+        } catch (StripeException e) {
+            responseMap.errorInfo = [
+                'responseCode':'3',
+                'reasonCode':'STRIPE_API_ERROR',
+                'reasonMessage':"Stripe API error: ${e.getMessage()}",
+                'exception':e
+            ]
+        } catch (Exception e) {
+            responseMap.errorInfo = [
+                'responseCode':'3',
+                'reasonCode':'CONVERSION_ERROR',
+                'reasonMessage':e.getMessage(),
+                'exception':e
+            ]
         }
 
         return ['responseMap':responseMap]
