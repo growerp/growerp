@@ -37,7 +37,8 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
   @override
   void initState() {
     super.initState();
-    _cardType = (widget.paymentMethod?.creditCardType ??
+    _cardType =
+        (widget.paymentMethod?.creditCardType ??
         CreditCardType.getByValue(''))!;
     _creditCardNumberController.text =
         widget.paymentMethod?.creditCardNumber ?? '';
@@ -48,125 +49,140 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-        key: const Key('PaymentMethodDialog'),
-        insetPadding: const EdgeInsets.all(10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: popUp(
-            context: context,
-            height: 450,
-            width: 350,
-            title: 'PaymentMethod',
-            child: _editPaymentMethod(context)));
+      key: const Key('PaymentMethodDialog'),
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        height: 450,
+        width: 350,
+        title: 'PaymentMethod',
+        child: _editPaymentMethod(context),
+      ),
+    );
   }
 
   Widget _editPaymentMethod(BuildContext context) {
     return Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-            key: const Key('listView'),
-            child: Column(
-              children: <Widget>[
-                Visibility(
-                  visible: widget.paymentMethod?.ccDescription != null,
-                  child: Text("${widget.paymentMethod?.ccDescription}",
-                      key: const Key('regCard')),
-                ),
-                const Text("New Card:",
-                    style:
-                        TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 10),
-                DropdownButtonFormField<CreditCardType>(
-                  key: const Key('cardTypeDropDown'),
-                  decoration: const InputDecoration(labelText: 'Card Type'),
-                  hint: const Text('Card Type'),
-                  value: _cardType,
-                  validator: (value) => value == null ? 'field required' : null,
-                  items: CreditCardType.values
-                      .map((item) => DropdownMenuItem<CreditCardType>(
-                            value: item,
-                            child: Text(item.value),
-                          ))
-                      .toList(),
-                  onChanged: (CreditCardType? newValue) {
-                    setState(() {
-                      _cardType = newValue!;
-                    });
-                  },
-                  isExpanded: true,
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  key: const Key('creditCardNumber'),
-                  decoration: const InputDecoration(labelText: 'Card Number'),
-                  controller: _creditCardNumberController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a Credit Card Number?';
-                    }
-                    var valid = _ccValidator.validateCCNum(value);
-                    if (!valid.isPotentiallyValid) {
-                      return 'Card Number not a valid number!';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 10),
-                Row(children: [
-                  Expanded(
-                    child: TextFormField(
-                      key: const Key('expireMonth'),
-                      decoration:
-                          const InputDecoration(labelText: 'Expire Month'),
-                      controller: _expireMonthController,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please enter expiration month?';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextFormField(
-                      key: const Key('expireYear'),
-                      decoration:
-                          const InputDecoration(labelText: 'Expire Year'),
-                      controller: _expireYearController,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please enter a expiration year?';
-                        }
-                        return null;
-                      },
+      key: _formKey,
+      child: SingleChildScrollView(
+        key: const Key('listView'),
+        child: Column(
+          children: <Widget>[
+            Visibility(
+              visible: widget.paymentMethod?.ccDescription != null,
+              child: Text(
+                "${widget.paymentMethod?.ccDescription}",
+                key: const Key('regCard'),
+              ),
+            ),
+            const Text(
+              "New Card:",
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<CreditCardType>(
+              key: const Key('cardTypeDropDown'),
+              decoration: const InputDecoration(labelText: 'Card Type'),
+              hint: const Text('Card Type'),
+              initialValue: _cardType,
+              validator: (value) => value == null ? 'field required' : null,
+              items: CreditCardType.values
+                  .map(
+                    (item) => DropdownMenuItem<CreditCardType>(
+                      value: item,
+                      child: Text(item.value),
                     ),
                   )
-                ]),
-                const SizedBox(height: 10),
-                Row(children: [
-                  Expanded(
-                      child: OutlinedButton(
-                          key: const Key('updatePaymentMethod'),
-                          child: Text(
-                              widget.paymentMethod?.creditCardNumber != null
-                                  ? 'Update'
-                                  : 'Add'),
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              Navigator.of(context).pop(PaymentMethod(
-                                ccDescription: _cardType.toString(),
-                                creditCardType: _cardType,
-                                creditCardNumber:
-                                    _creditCardNumberController.text,
-                                expireMonth: _expireMonthController.text,
-                                expireYear: _expireYearController.text,
-                              ));
-                            }
-                          }))
-                ]),
+                  .toList(),
+              onChanged: (CreditCardType? newValue) {
+                setState(() {
+                  _cardType = newValue!;
+                });
+              },
+              isExpanded: true,
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              key: const Key('creditCardNumber'),
+              decoration: const InputDecoration(labelText: 'Card Number'),
+              controller: _creditCardNumberController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a Credit Card Number?';
+                }
+                var valid = _ccValidator.validateCCNum(value);
+                if (!valid.isPotentiallyValid) {
+                  return 'Card Number not a valid number!';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    key: const Key('expireMonth'),
+                    decoration: const InputDecoration(
+                      labelText: 'Expire Month',
+                    ),
+                    controller: _expireMonthController,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter expiration month?';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextFormField(
+                    key: const Key('expireYear'),
+                    decoration: const InputDecoration(labelText: 'Expire Year'),
+                    controller: _expireYearController,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter a expiration year?';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
               ],
-            )));
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    key: const Key('updatePaymentMethod'),
+                    child: Text(
+                      widget.paymentMethod?.creditCardNumber != null
+                          ? 'Update'
+                          : 'Add',
+                    ),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        Navigator.of(context).pop(
+                          PaymentMethod(
+                            ccDescription: _cardType.toString(),
+                            creditCardType: _cardType,
+                            creditCardNumber: _creditCardNumberController.text,
+                            expireMonth: _expireMonthController.text,
+                            expireYear: _expireYearController.text,
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

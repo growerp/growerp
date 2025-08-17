@@ -25,7 +25,6 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'add_another_item_dialog.dart';
 import 'add_product_item_dialog.dart';
 import 'add_rental_item_dialog.dart';
-import 'add_transaction_item_dialog.dart';
 
 class ShowFinDocDialog extends StatelessWidget {
   final FinDoc finDoc;
@@ -34,16 +33,22 @@ class ShowFinDocDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     RestClient restClient = context.read<RestClient>();
     return BlocProvider<FinDocBloc>(
-        create: (context) => FinDocBloc(
-            restClient, finDoc.sales, finDoc.docType!, context.read<String>())
-          ..add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!)),
-        child: BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
+      create: (context) => FinDocBloc(
+        restClient,
+        finDoc.sales,
+        finDoc.docType!,
+        context.read<String>(),
+      )..add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!)),
+      child: BlocBuilder<FinDocBloc, FinDocState>(
+        builder: (context, state) {
           if (state.status == FinDocStatus.success) {
             return SelectFinDocDialog(finDoc: state.finDocs[0]);
           } else {
             return const LoadingIndicator();
           }
-        }));
+        },
+      ),
+    );
   }
 }
 
@@ -58,34 +63,36 @@ class FinDocDialog extends StatelessWidget {
     //  if (finDoc.status != null && !FinDocStatusVal.statusFixed(finDoc.status!)) {
     if (finDoc.sales) {
       return BlocProvider<SalesCartBloc>(
-          create: (context) => CartBloc(
-              docType: finDoc.docType!,
-              sales: true,
-              finDocBloc: finDoc.docType == FinDocType.order
-                  ? context.read<SalesOrderBloc>() as FinDocBloc
-                  : finDoc.docType == FinDocType.invoice
-                      ? context.read<SalesInvoiceBloc>() as FinDocBloc
-                      : finDoc.docType == FinDocType.shipment
-                          ? context.read<OutgoingShipmentBloc>() as FinDocBloc
-                          : context.read<TransactionBloc>() as FinDocBloc,
-              restClient: restClient)
-            ..add(CartFetch(finDoc)),
-          child: FinDocPage(finDoc));
+        create: (context) => CartBloc(
+          docType: finDoc.docType!,
+          sales: true,
+          finDocBloc: finDoc.docType == FinDocType.order
+              ? context.read<SalesOrderBloc>() as FinDocBloc
+              : finDoc.docType == FinDocType.invoice
+              ? context.read<SalesInvoiceBloc>() as FinDocBloc
+              : finDoc.docType == FinDocType.shipment
+              ? context.read<OutgoingShipmentBloc>() as FinDocBloc
+              : context.read<TransactionBloc>() as FinDocBloc,
+          restClient: restClient,
+        )..add(CartFetch(finDoc)),
+        child: FinDocPage(finDoc),
+      );
     }
     return BlocProvider<PurchaseCartBloc>(
-        create: (context) => CartBloc(
-            docType: finDoc.docType!,
-            sales: false,
-            finDocBloc: finDoc.docType == FinDocType.order
-                ? context.read<PurchaseOrderBloc>() as FinDocBloc
-                : finDoc.docType == FinDocType.invoice
-                    ? context.read<PurchaseInvoiceBloc>() as FinDocBloc
-                    : finDoc.docType == FinDocType.shipment
-                        ? context.read<IncomingShipmentBloc>() as FinDocBloc
-                        : context.read<TransactionBloc>() as FinDocBloc,
-            restClient: restClient)
-          ..add(CartFetch(finDoc)),
-        child: FinDocPage(finDoc));
+      create: (context) => CartBloc(
+        docType: finDoc.docType!,
+        sales: false,
+        finDocBloc: finDoc.docType == FinDocType.order
+            ? context.read<PurchaseOrderBloc>() as FinDocBloc
+            : finDoc.docType == FinDocType.invoice
+            ? context.read<PurchaseInvoiceBloc>() as FinDocBloc
+            : finDoc.docType == FinDocType.shipment
+            ? context.read<IncomingShipmentBloc>() as FinDocBloc
+            : context.read<TransactionBloc>() as FinDocBloc,
+        restClient: restClient,
+      )..add(CartFetch(finDoc)),
+      child: FinDocPage(finDoc),
+    );
     //  } else
     //    return FinDocPage(finDoc);
   }
@@ -138,22 +145,33 @@ class MyFinDocState extends State<FinDocPage> {
     _isPosted = finDocUpdated.isPosted ?? false;
     _updatedStatus = finDocUpdated.status ?? FinDocStatusVal.created;
     _selectedCompanyUser = CompanyUser.tryParse(
-        finDocUpdated.otherCompany ?? finDocUpdated.otherUser);
+      finDocUpdated.otherCompany ?? finDocUpdated.otherUser,
+    );
     _pseudoIdController.text = finDocUpdated.pseudoId ?? '';
     _finDocBloc = context.read<FinDocBloc>();
     _companyUserBloc = context.read<DataFetchBloc<CompaniesUsers>>()
-      ..add(GetDataEvent(() => context.read<RestClient>().getCompanyUser(
-          limit: 3,
-          role: finDoc.sales && finDoc.docType != FinDocType.transaction
-              ? Role.customer
-              : Role.supplier)));
+      ..add(
+        GetDataEvent(
+          () => context.read<RestClient>().getCompanyUser(
+            limit: 3,
+            role: finDoc.sales && finDoc.docType != FinDocType.transaction
+                ? Role.customer
+                : Role.supplier,
+          ),
+        ),
+      );
     _glAccountBloc = context.read<GlAccountBloc>();
     _glAccountBloc.add(const GlAccountFetch(limit: 3));
     _productBloc = context.read<DataFetchBloc<Products>>()
-      ..add(GetDataEvent(() => context.read<RestClient>().getProduct(
-          limit: 3,
-          isForDropDown: true,
-          assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : '')));
+      ..add(
+        GetDataEvent(
+          () => context.read<RestClient>().getProduct(
+            limit: 3,
+            isForDropDown: true,
+            assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : '',
+          ),
+        ),
+      );
     _descriptionController.text = finDocUpdated.description ?? " ";
     if (finDoc.sales) {
       _cartBloc = context.read<SalesCartBloc>() as CartBloc;
@@ -167,8 +185,11 @@ class MyFinDocState extends State<FinDocPage> {
     isPhone = isAPhone(context);
     screenWidth = isPhone ? 400 : 900;
 
-    blocConsumerListener(BuildContext context, CartState state,
-        [bool mounted = true]) {
+    blocConsumerListener(
+      BuildContext context,
+      CartState state, [
+      bool mounted = true,
+    ]) {
       switch (state.status) {
         case CartStatus.complete:
           Navigator.of(context).pop();
@@ -185,66 +206,76 @@ class MyFinDocState extends State<FinDocPage> {
       switch (state.status) {
         case CartStatus.inProcess:
           finDocUpdated = state.finDoc;
-          return Column(children: [
-            // header
-            widget.finDoc.docType == FinDocType.transaction
-                ? headerEntryTransaction()
-                : headerEntry(),
-            // related documents
-            RelatedFinDocs(finDoc: finDocUpdated, context: context),
-            // update buttons
-            const SizedBox(height: 10),
-            if (!readOnly) updateButtons(state),
-            const SizedBox(height: 10),
-            widget.finDoc.docType == FinDocType.transaction
-                ? finDocItemListTransaction(state)
-                : widget.finDoc.docType == FinDocType.shipment
-                    ? finDocItemListShipment(state)
-                    : finDocItemList(state),
-            const SizedBox(height: 10),
-            if (finDoc.docType == FinDocType.shipment)
-              Text("Items# ${finDocUpdated.items.length}"),
-            if (finDoc.docType != FinDocType.shipment)
-              Text(
+          return Column(
+            children: [
+              // header
+              widget.finDoc.docType == FinDocType.transaction
+                  ? headerEntryTransaction()
+                  : headerEntry(),
+              // related documents
+              RelatedFinDocs(finDoc: finDocUpdated, context: context),
+              // update buttons
+              const SizedBox(height: 10),
+              if (!readOnly) updateButtons(state),
+              const SizedBox(height: 10),
+              widget.finDoc.docType == FinDocType.transaction
+                  ? finDocItemListTransaction(state)
+                  : widget.finDoc.docType == FinDocType.shipment
+                  ? finDocItemListShipment(state)
+                  : finDocItemList(state),
+              const SizedBox(height: 10),
+              if (finDoc.docType == FinDocType.shipment)
+                Text("Items# ${finDocUpdated.items.length}"),
+              if (finDoc.docType != FinDocType.shipment)
+                Text(
                   "Items# ${finDocUpdated.items.length}   "
                   "Grand total : ${finDocUpdated.grandTotal.currency(currencyId: currencyId)}",
-                  key: const Key('grandTotal')),
-            const SizedBox(height: 10),
-            if (!readOnly) generalButtons(),
-          ]);
+                  key: const Key('grandTotal'),
+                ),
+              const SizedBox(height: 10),
+              if (!readOnly) generalButtons(),
+            ],
+          );
         default:
           return const LoadingIndicator();
       }
     }
 
     return Dialog(
-        key: Key("FinDocDialog${finDoc.sales == true ? 'Sales' : 'Purchase'}"
-            "${finDoc.docType}"),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+      key: Key(
+        "FinDocDialog${finDoc.sales == true ? 'Sales' : 'Purchase'}"
+        "${finDoc.docType}",
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      insetPadding: const EdgeInsets.all(10),
+      child: SingleChildScrollView(
+        key: const Key('listView'),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        child: popUp(
+          title:
+              "${finDoc.sales ? 'Sales' : 'Purchase'} ${finDoc.docType} "
+              "#${finDoc.pseudoId ?? ' new'}",
+          height: 650,
+          width: screenWidth,
+          context: context,
+          child: Builder(
+            builder: (BuildContext context) {
+              if (finDoc.sales) {
+                return BlocConsumer<SalesCartBloc, CartState>(
+                  listener: blocConsumerListener,
+                  builder: blocConsumerBuilder,
+                );
+              }
+              // purchase from here
+              return BlocConsumer<PurchaseCartBloc, CartState>(
+                listener: blocConsumerListener,
+                builder: blocConsumerBuilder,
+              );
+            },
+          ),
         ),
-        insetPadding: const EdgeInsets.all(10),
-        child: SingleChildScrollView(
-            key: const Key('listView'),
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            child: popUp(
-              title: "${finDoc.sales ? 'Sales' : 'Purchase'} ${finDoc.docType} "
-                  "#${finDoc.pseudoId ?? ' new'}",
-              height: 650,
-              width: screenWidth,
-              context: context,
-              child: Builder(builder: (BuildContext context) {
-                if (finDoc.sales) {
-                  return BlocConsumer<SalesCartBloc, CartState>(
-                      listener: blocConsumerListener,
-                      builder: blocConsumerBuilder);
-                }
-                // purchase from here
-                return BlocConsumer<PurchaseCartBloc, CartState>(
-                    listener: blocConsumerListener,
-                    builder: blocConsumerBuilder);
-              }),
-            )));
+      ),
+    );
   }
 
   /// list the widgets list either in a single column for phone
@@ -268,76 +299,93 @@ class MyFinDocState extends State<FinDocPage> {
                 ),
               ),
               const SizedBox(width: 10),
-              BlocBuilder<DataFetchBloc<CompaniesUsers>,
-                  DataFetchState<CompaniesUsers>>(builder: (context, state) {
-                switch (state.status) {
-                  case DataFetchStatus.failure:
-                  case DataFetchStatus.success:
-                    return Expanded(
-                      child: DropdownSearch<CompanyUser>(
-                        enabled: !readOnly,
-                        selectedItem: _selectedCompanyUser,
-                        popupProps: PopupProps.menu(
-                          isFilterOnline: true,
-                          showSearchBox: true,
-                          searchFieldProps: TextFieldProps(
-                            autofocus: true,
-                            decoration: InputDecoration(
+              BlocBuilder<
+                DataFetchBloc<CompaniesUsers>,
+                DataFetchState<CompaniesUsers>
+              >(
+                builder: (context, state) {
+                  switch (state.status) {
+                    case DataFetchStatus.failure:
+                    case DataFetchStatus.success:
+                      return Expanded(
+                        child: DropdownSearch<CompanyUser>(
+                          enabled: !readOnly,
+                          selectedItem: _selectedCompanyUser,
+                          popupProps: PopupProps.menu(
+                            isFilterOnline: true,
+                            showSearchBox: true,
+                            searchFieldProps: TextFieldProps(
+                              autofocus: true,
+                              decoration: InputDecoration(
                                 labelText:
-                                    "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name"),
-                            controller: _companySearchBoxController,
+                                    "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name",
+                              ),
+                              controller: _companySearchBoxController,
+                            ),
+                            menuProps: MenuProps(
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            title: popUp(
+                              context: context,
+                              title:
+                                  "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
+                              height: 50,
+                            ),
                           ),
-                          menuProps: MenuProps(
-                              borderRadius: BorderRadius.circular(20.0)),
-                          title: popUp(
-                            context: context,
-                            title:
-                                "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
-                            height: 50,
+                          dropdownDecoratorProps: DropDownDecoratorProps(
+                            dropdownSearchDecoration: InputDecoration(
+                              labelText: finDocUpdated.sales
+                                  ? 'Customer'
+                                  : 'Supplier',
+                            ),
                           ),
-                        ),
-                        dropdownDecoratorProps: DropDownDecoratorProps(
-                          dropdownSearchDecoration: InputDecoration(
-                            labelText:
-                                finDocUpdated.sales ? 'Customer' : 'Supplier',
+                          key: Key(
+                            finDocUpdated.sales ? 'customer' : 'supplier',
                           ),
-                        ),
-                        key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
-                        itemAsString: (CompanyUser? u) =>
-                            u?.name != null ? "${u!.name}[${u.pseudoId}]" : "",
-                        asyncItems: (String filter) {
-                          _companyUserBloc.add(GetDataEvent(() => context
-                              .read<RestClient>()
-                              .getCompanyUser(
+                          itemAsString: (CompanyUser? u) => u?.name != null
+                              ? "${u!.name}[${u.pseudoId}]"
+                              : "",
+                          asyncItems: (String filter) {
+                            _companyUserBloc.add(
+                              GetDataEvent(
+                                () => context.read<RestClient>().getCompanyUser(
                                   searchString: filter,
                                   limit: 3,
                                   role: widget.finDoc.sales
                                       ? Role.customer
-                                      : Role.supplier)));
-                          return Future.delayed(
-                              const Duration(milliseconds: 150), () {
-                            return Future<List<CompanyUser>>.value(
-                                (_companyUserBloc.state.data as CompaniesUsers)
-                                    .companiesUsers);
-                          });
-                        },
-                        compareFn: (item, sItem) =>
-                            item.partyId == sItem.partyId,
-                        onChanged: (CompanyUser? newValue) {
-                          setState(() {
-                            _selectedCompanyUser = newValue;
-                          });
-                        },
-                        validator: (value) => value == null
-                            ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
-                            : null,
-                      ),
-                    );
+                                      : Role.supplier,
+                                ),
+                              ),
+                            );
+                            return Future.delayed(
+                              const Duration(milliseconds: 150),
+                              () {
+                                return Future<List<CompanyUser>>.value(
+                                  (_companyUserBloc.state.data
+                                          as CompaniesUsers)
+                                      .companiesUsers,
+                                );
+                              },
+                            );
+                          },
+                          compareFn: (item, sItem) =>
+                              item.partyId == sItem.partyId,
+                          onChanged: (CompanyUser? newValue) {
+                            setState(() {
+                              _selectedCompanyUser = newValue;
+                            });
+                          },
+                          validator: (value) => value == null
+                              ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
+                              : null,
+                        ),
+                      );
 
-                  default:
-                    return const Center(child: LoadingIndicator());
-                }
-              }),
+                    default:
+                      return const Center(child: LoadingIndicator());
+                  }
+                },
+              ),
             ],
           ),
           if (finDoc.placedDate != null)
@@ -348,10 +396,10 @@ class MyFinDocState extends State<FinDocPage> {
                 children: [
                   Text("Created: ${finDoc.creationDate.dateOnly()}"),
                   const SizedBox(width: 10),
-                  Text("Placed: ${finDoc.placedDate!.dateOnly()}")
+                  Text("Placed: ${finDoc.placedDate!.dateOnly()}"),
                 ],
               ),
-            )
+            ),
         ],
       ),
       Padding(
@@ -363,17 +411,23 @@ class MyFinDocState extends State<FinDocPage> {
               width: 145,
               child: DropdownButtonFormField<FinDocStatusVal>(
                 key: const Key('statusDropDown'),
-                decoration:
-                    InputDecoration(labelText: 'Status', enabled: !readOnly),
-                value: _updatedStatus,
+                decoration: InputDecoration(
+                  labelText: 'Status',
+                  enabled: !readOnly,
+                ),
+                initialValue: _updatedStatus,
                 validator: (value) => value == null ? 'field required' : null,
                 items: FinDocStatusVal.validStatusList(_updatedStatus)
-                    .map((label) => DropdownMenuItem<FinDocStatusVal>(
-                          value: label,
-                          child: Text(classificationId == 'AppHotel'
+                    .map(
+                      (label) => DropdownMenuItem<FinDocStatusVal>(
+                        value: label,
+                        child: Text(
+                          classificationId == 'AppHotel'
                               ? label.hotel
-                              : label.name),
-                        ))
+                              : label.name,
+                        ),
+                      ),
+                    )
                     .toList(),
                 onChanged: readOnly
                     ? null
@@ -390,8 +444,9 @@ class MyFinDocState extends State<FinDocPage> {
                 key: const Key('description'),
                 readOnly: readOnly,
                 decoration: InputDecoration(
-                    labelText: '${finDoc.docType} Description',
-                    enabled: !readOnly),
+                  labelText: '${finDoc.docType} Description',
+                  enabled: !readOnly,
+                ),
                 controller: _descriptionController,
               ),
             ),
@@ -401,271 +456,336 @@ class MyFinDocState extends State<FinDocPage> {
     ];
 
     return SizedBox(
-        //  height: isPhone ? 210 : 100,
-        child: Form(
-            key: _formKeyHeader,
-            child: isPhone
-                ? Column(children: widgets)
-                : Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-                    Expanded(child: widgets[0]),
-                    Expanded(child: widgets[1]),
-                  ])));
+      //  height: isPhone ? 210 : 100,
+      child: Form(
+        key: _formKeyHeader,
+        child: isPhone
+            ? Column(children: widgets)
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(child: widgets[0]),
+                  Expanded(child: widgets[1]),
+                ],
+              ),
+      ),
+    );
   }
 
   Widget headerEntryTransaction() {
     return Padding(
-        padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-        child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 80,
-                      child: TextFormField(
-                        key: const Key('pseudoId'),
-                        enabled: !readOnly,
-                        decoration: const InputDecoration(labelText: 'Id'),
-                        controller: _pseudoIdController,
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextFormField(
-                        key: const Key('description'),
-                        readOnly: readOnly,
-                        decoration: InputDecoration(
-                            labelText: '${finDoc.docType} Description',
-                            enabled: !readOnly),
-                        controller: _descriptionController,
-                      ),
-                    ),
-                  ],
+                SizedBox(
+                  width: 80,
+                  child: TextFormField(
+                    key: const Key('pseudoId'),
+                    enabled: !readOnly,
+                    decoration: const InputDecoration(labelText: 'Id'),
+                    controller: _pseudoIdController,
+                    keyboardType: TextInputType.number,
+                  ),
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DropdownSearch<CompanyUser>(
-                        enabled: !readOnly,
-                        selectedItem: _selectedCompanyUser,
-                        popupProps: PopupProps.menu(
-                          isFilterOnline: true,
-                          showSelectedItems: true,
-                          showSearchBox: true,
-                          searchFieldProps: TextFieldProps(
-                            autofocus: true,
-                            decoration: InputDecoration(
-                                labelText:
-                                    "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name"),
-                            controller: _companySearchBoxController,
-                          ),
-                          menuProps: MenuProps(
-                              borderRadius: BorderRadius.circular(20.0)),
-                          title: popUp(
-                            context: context,
-                            title:
-                                "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
-                            height: 50,
-                          ),
-                        ),
-                        dropdownDecoratorProps: const DropDownDecoratorProps(
-                          dropdownSearchDecoration: InputDecoration(
-                            labelText: 'Company/Person',
-                          ),
-                        ),
-                        key: const Key('company'),
-                        itemAsString: (CompanyUser? u) => u!.name ?? '',
-                        asyncItems: (String filter) {
-                          _companyUserBloc.add(GetDataEvent(
-                              () => context.read<RestClient>().getCompanyUser(
-                                    searchString: filter,
-                                    limit: 3,
-                                  )));
-                          return Future.delayed(
-                              const Duration(milliseconds: 150), () {
-                            return Future.value(
-                                (_companyUserBloc.state.data as CompaniesUsers)
-                                    .companiesUsers);
-                          });
-                        },
-                        compareFn: (item, sItem) =>
-                            item.partyId == sItem.partyId,
-                        onChanged: (CompanyUser? newValue) {
-                          _selectedCompanyUser = newValue;
-                        },
-                      ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextFormField(
+                    key: const Key('description'),
+                    readOnly: readOnly,
+                    decoration: InputDecoration(
+                      labelText: '${finDoc.docType} Description',
+                      enabled: !readOnly,
                     ),
-                    Column(children: [
-                      const Text("Posted"),
-                      Radio(
-                        key: const Key('isPosted'),
-                        value: true,
-                        groupValue: _isPosted,
-                        toggleable: true,
-                        onChanged: (newValue) => readOnly
-                            ? null
-                            : setState(() {
-                                _isPosted = newValue;
-                              }),
-                      ),
-                    ]),
-                  ],
+                    controller: _descriptionController,
+                  ),
                 ),
-                if (finDoc.docSubType != null)
-                  InputDecorator(
-                      decoration: const InputDecoration(
-                        labelText: 'Type',
-                      ),
-                      child: Text(finDoc.docSubType!))
               ],
-            )));
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownSearch<CompanyUser>(
+                    enabled: !readOnly,
+                    selectedItem: _selectedCompanyUser,
+                    popupProps: PopupProps.menu(
+                      isFilterOnline: true,
+                      showSelectedItems: true,
+                      showSearchBox: true,
+                      searchFieldProps: TextFieldProps(
+                        autofocus: true,
+                        decoration: InputDecoration(
+                          labelText:
+                              "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name",
+                        ),
+                        controller: _companySearchBoxController,
+                      ),
+                      menuProps: MenuProps(
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      title: popUp(
+                        context: context,
+                        title:
+                            "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
+                        height: 50,
+                      ),
+                    ),
+                    dropdownDecoratorProps: const DropDownDecoratorProps(
+                      dropdownSearchDecoration: InputDecoration(
+                        labelText: 'Company/Person',
+                      ),
+                    ),
+                    key: const Key('company'),
+                    itemAsString: (CompanyUser? u) => u!.name ?? '',
+                    asyncItems: (String filter) {
+                      _companyUserBloc.add(
+                        GetDataEvent(
+                          () => context.read<RestClient>().getCompanyUser(
+                            searchString: filter,
+                            limit: 3,
+                          ),
+                        ),
+                      );
+                      return Future.delayed(
+                        const Duration(milliseconds: 150),
+                        () {
+                          return Future.value(
+                            (_companyUserBloc.state.data as CompaniesUsers)
+                                .companiesUsers,
+                          );
+                        },
+                      );
+                    },
+                    compareFn: (item, sItem) => item.partyId == sItem.partyId,
+                    onChanged: (CompanyUser? newValue) {
+                      _selectedCompanyUser = newValue;
+                    },
+                  ),
+                ),
+                RadioGroup<bool>(
+                  key: const Key('debit'),
+                  groupValue: _isPosted,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _isPosted = value;
+                    });
+                  },
+                  child: const Row(
+                    children: [
+                      Radio<bool>(value: true),
+                      Radio<bool>(value: false),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (finDoc.docSubType != null)
+              InputDecorator(
+                decoration: const InputDecoration(labelText: 'Type'),
+                child: Text(finDoc.docSubType!),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget updateButtons(state) {
     List<Widget> buttons = [
       OutlinedButton(
-          key: const Key('header'),
-          child: const Text("Update Header"),
-          onPressed: () {
-            _cartBloc.add(CartHeader(finDocUpdated.copyWith(
+        key: const Key('header'),
+        child: const Text("Update Header"),
+        onPressed: () {
+          _cartBloc.add(
+            CartHeader(
+              finDocUpdated.copyWith(
                 otherCompany: _selectedCompanyUser?.getCompany(),
                 otherUser: _selectedCompanyUser?.getUser(),
                 description: _descriptionController.text,
-                isPosted: _isPosted)));
-          }),
+                isPosted: _isPosted,
+              ),
+            ),
+          );
+        },
+      ),
       OutlinedButton(
-          key: const Key('addItem'),
-          child: Text(widget.finDoc.docType == FinDocType.transaction
+        key: const Key('addItem'),
+        child: Text(
+          widget.finDoc.docType == FinDocType.transaction
               ? 'Add\n transaction item'
-              : 'Add other item'),
-          onPressed: () async {
-            final dynamic finDocItem;
-            if (widget.finDoc.docType != FinDocType.transaction) {
-              finDocItem = await addAnotherItemDialog(
-                  context, finDocUpdated.sales, state);
-            } else {
-              finDocItem = await addTransactionItemDialog(
-                  context, finDocUpdated.sales, state);
-            }
-            if (finDocItem != null) {
-              _cartBloc.add(CartAdd(
-                  finDoc: finDocUpdated.copyWith(
-                      otherCompany: _selectedCompanyUser?.getCompany(),
-                      otherUser: _selectedCompanyUser?.getUser(),
-                      description: _descriptionController.text,
-                      isPosted: _isPosted),
-                  newItem: finDocItem));
-            }
-          }),
+              : 'Add other item',
+        ),
+        onPressed: () async {
+          final dynamic finDocItem;
+          if (widget.finDoc.docType != FinDocType.transaction) {
+            finDocItem = await addAnotherItemDialog(
+              context,
+              finDocUpdated.sales,
+              state,
+            );
+          } else {
+            finDocItem = await addTransactionItemDialog(
+              context,
+              finDocUpdated.sales,
+              state,
+            );
+          }
+          if (finDocItem != null) {
+            _cartBloc.add(
+              CartAdd(
+                finDoc: finDocUpdated.copyWith(
+                  otherCompany: _selectedCompanyUser?.getCompany(),
+                  otherUser: _selectedCompanyUser?.getUser(),
+                  description: _descriptionController.text,
+                  isPosted: _isPosted,
+                ),
+                newItem: finDocItem,
+              ),
+            );
+          }
+        },
+      ),
       if (widget.finDoc.docType == FinDocType.order)
         OutlinedButton(
-            key: const Key('itemRental'),
-            child: const Text('Add Rental'),
-            onPressed: () async {
-              final dynamic finDocItem =
-                  await addRentalItemDialog(context, _productBloc, _finDocBloc);
-              if (finDocItem != null) {
-                _cartBloc.add(CartAdd(
-                    finDoc: finDocUpdated.copyWith(
-                        otherCompany: _selectedCompanyUser?.getCompany(),
-                        otherUser: _selectedCompanyUser?.getUser(),
-                        description: _descriptionController.text),
-                    newItem: finDocItem));
-              }
-            }),
+          key: const Key('itemRental'),
+          child: const Text('Add Rental'),
+          onPressed: () async {
+            final dynamic finDocItem = await addRentalItemDialog(
+              context,
+              _productBloc,
+              _finDocBloc,
+            );
+            if (finDocItem != null) {
+              _cartBloc.add(
+                CartAdd(
+                  finDoc: finDocUpdated.copyWith(
+                    otherCompany: _selectedCompanyUser?.getCompany(),
+                    otherUser: _selectedCompanyUser?.getUser(),
+                    description: _descriptionController.text,
+                  ),
+                  newItem: finDocItem,
+                ),
+              );
+            }
+          },
+        ),
       if (widget.finDoc.docType != FinDocType.transaction)
         OutlinedButton(
-            key: const Key('addProduct'),
-            child: const Text('Add Product'),
-            onPressed: () async {
-              final dynamic finDocItem = await addProductItemDialog(context);
-              if (finDocItem != null) {
-                _cartBloc.add(CartAdd(
-                    finDoc: finDocUpdated.copyWith(
-                        otherCompany: _selectedCompanyUser?.getCompany(),
-                        otherUser: _selectedCompanyUser?.getUser(),
-                        description: _descriptionController.text),
-                    newItem: finDocItem));
-              }
-            }),
+          key: const Key('addProduct'),
+          child: const Text('Add Product'),
+          onPressed: () async {
+            final dynamic finDocItem = await addProductItemDialog(context);
+            if (finDocItem != null) {
+              _cartBloc.add(
+                CartAdd(
+                  finDoc: finDocUpdated.copyWith(
+                    otherCompany: _selectedCompanyUser?.getCompany(),
+                    otherUser: _selectedCompanyUser?.getUser(),
+                    description: _descriptionController.text,
+                  ),
+                  newItem: finDocItem,
+                ),
+              );
+            }
+          },
+        ),
     ];
 
     if (isPhone) {
       List<Widget> rows = [];
       for (var i = 0; i < buttons.length; i++) {
-        rows.add(Row(children: [
-          Expanded(
-              child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 5, 5),
-                  child: buttons[i])),
-          if (++i < buttons.length)
-            Expanded(
+        rows.add(
+          Row(
+            children: [
+              Expanded(
                 child: Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 0, 5, 5),
+                  child: buttons[i],
+                ),
+              ),
+              if (++i < buttons.length)
+                Expanded(
+                  child: Padding(
                     padding: const EdgeInsets.fromLTRB(5, 0, 10, 5),
-                    child: buttons[i]))
-        ]));
+                    child: buttons[i],
+                  ),
+                ),
+            ],
+          ),
+        );
       }
       return Column(children: rows);
     }
     return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround, children: buttons);
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: buttons,
+    );
   }
 
   Widget generalButtons() {
     return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          Visibility(
-              visible: !finDoc.idIsNull(),
-              child: OutlinedButton(
-                  key: const Key('cancelFinDoc'),
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    _cartBloc.add(CartCancelFinDoc(finDocUpdated));
-                  })),
-          const SizedBox(width: 5),
-          OutlinedButton(
-              key: const Key('clear'),
-              child: const Text('Clear Cart'),
-              onPressed: () {
-                if (finDocUpdated.items.isNotEmpty) {
-                  _cartBloc.add(CartClear());
-                }
-              }),
-          const SizedBox(width: 5),
-          Expanded(
-            child: OutlinedButton(
-                key: const Key('update'),
-                child: Text(
-                    "${finDoc.idIsNull() ? CoreLocalizations.of(context)!.create : CoreLocalizations.of(context)!.update} "
-                    "${finDocUpdated.docType!}"),
-                onPressed: () {
-                  finDocUpdated = finDocUpdated.copyWith(
-                      // set order to created, others not. inprep only used by website.
-                      status: _updatedStatus,
-                      otherCompany: _selectedCompanyUser?.getCompany(),
-                      otherUser: _selectedCompanyUser?.getUser(),
-                      description: _descriptionController.text);
-                  if ((finDocUpdated.docType == FinDocType.transaction &&
-                          finDocUpdated.items.isNotEmpty) ||
-                      (finDocUpdated.items.isNotEmpty &&
-                          (finDocUpdated.otherCompany != null ||
-                              finDocUpdated.otherUser != null))) {
-                    _cartBloc.add(CartCreateFinDoc(finDocUpdated));
-                  } else {
-                    HelperFunctions.showMessage(
-                        context,
-                        'A ${finDocUpdated.sales ? CoreLocalizations.of(context)!.customer : CoreLocalizations.of(context)!.supplier} '
-                        '${CoreLocalizations.of(context)!.andAtLeastOne} '
-                        '${finDocUpdated.docType!} '
-                        '${CoreLocalizations.of(context)!.itemIsRequired}',
-                        Colors.red);
-                  }
-                }),
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        Visibility(
+          visible: !finDoc.idIsNull(),
+          child: OutlinedButton(
+            key: const Key('cancelFinDoc'),
+            child: const Text('Cancel'),
+            onPressed: () {
+              _cartBloc.add(CartCancelFinDoc(finDocUpdated));
+            },
           ),
-        ]);
+        ),
+        const SizedBox(width: 5),
+        OutlinedButton(
+          key: const Key('clear'),
+          child: const Text('Clear Cart'),
+          onPressed: () {
+            if (finDocUpdated.items.isNotEmpty) {
+              _cartBloc.add(CartClear());
+            }
+          },
+        ),
+        const SizedBox(width: 5),
+        Expanded(
+          child: OutlinedButton(
+            key: const Key('update'),
+            child: Text(
+              "${finDoc.idIsNull() ? CoreLocalizations.of(context)!.create : CoreLocalizations.of(context)!.update} "
+              "${finDocUpdated.docType!}",
+            ),
+            onPressed: () {
+              finDocUpdated = finDocUpdated.copyWith(
+                // set order to created, others not. inprep only used by website.
+                status: _updatedStatus,
+                otherCompany: _selectedCompanyUser?.getCompany(),
+                otherUser: _selectedCompanyUser?.getUser(),
+                description: _descriptionController.text,
+              );
+              if ((finDocUpdated.docType == FinDocType.transaction &&
+                      finDocUpdated.items.isNotEmpty) ||
+                  (finDocUpdated.items.isNotEmpty &&
+                      (finDocUpdated.otherCompany != null ||
+                          finDocUpdated.otherUser != null))) {
+                _cartBloc.add(CartCreateFinDoc(finDocUpdated));
+              } else {
+                HelperFunctions.showMessage(
+                  context,
+                  'A ${finDocUpdated.sales ? CoreLocalizations.of(context)!.customer : CoreLocalizations.of(context)!.supplier} '
+                  '${CoreLocalizations.of(context)!.andAtLeastOne} '
+                  '${finDocUpdated.docType!} '
+                  '${CoreLocalizations.of(context)!.itemIsRequired}',
+                  Colors.red,
+                );
+              }
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   Widget finDocItemList(CartState state) {
@@ -673,9 +793,14 @@ class MyFinDocState extends State<FinDocPage> {
     late final ScrollController verticalController = ScrollController();
     late final ScrollController horizontalController = ScrollController();
 
-    TableData getTableData(Bloc bloc, String classificationId,
-        BuildContext context, FinDocItem item, int index,
-        {dynamic extra}) {
+    TableData getTableData(
+      Bloc bloc,
+      String classificationId,
+      BuildContext context,
+      FinDocItem item,
+      int index, {
+      dynamic extra,
+    }) {
       String currencyId = context
           .read<AuthBloc>()
           .state
@@ -684,72 +809,113 @@ class MyFinDocState extends State<FinDocPage> {
           .currency!
           .currencyId!;
       var itemType = item.itemType != null && itemTypes.isNotEmpty
-          ? state.itemTypes
-              .firstWhere((e) => e.itemTypeId == item.itemType!.itemTypeId)
+          ? state.itemTypes.firstWhere(
+              (e) => e.itemTypeId == item.itemType!.itemTypeId,
+            )
           : ItemType();
       List<TableRowContent> rowContent = [];
-      rowContent.add(TableRowContent(
+      rowContent.add(
+        TableRowContent(
           width: isPhone ? 6 : 3,
           name: '#',
-          value: CircleAvatar(child: Text(item.itemSeqId.toString()))));
-      rowContent.add(TableRowContent(
+          value: CircleAvatar(child: Text(item.itemSeqId.toString())),
+        ),
+      );
+      rowContent.add(
+        TableRowContent(
           width: isPhone ? 14 : 8,
           name: 'ProdId',
-          value: Text("${item.product?.pseudoId}",
-              textAlign: TextAlign.center, key: Key('itemProductId$index'))));
-      rowContent.add(TableRowContent(
+          value: Text(
+            "${item.product?.pseudoId}",
+            textAlign: TextAlign.center,
+            key: Key('itemProductId$index'),
+          ),
+        ),
+      );
+      rowContent.add(
+        TableRowContent(
           width: isPhone ? 15 : 27,
           name: 'Description',
-          value: Text(item.description ?? '',
-              key: Key('itemDescription$index'), textAlign: TextAlign.left)));
+          value: Text(
+            item.description ?? '',
+            key: Key('itemDescription$index'),
+            textAlign: TextAlign.left,
+          ),
+        ),
+      );
       if (!isPhone) {
-        rowContent.add(TableRowContent(
+        rowContent.add(
+          TableRowContent(
             width: 8,
             name: 'Item Type',
-            value: Text(itemType.itemTypeName,
-                textAlign: TextAlign.left, key: Key('itemType$index'))));
+            value: Text(
+              itemType.itemTypeName,
+              textAlign: TextAlign.left,
+              key: Key('itemType$index'),
+            ),
+          ),
+        );
       }
-      rowContent.add(TableRowContent(
+      rowContent.add(
+        TableRowContent(
           width: 5,
           name: const Text('Q', textAlign: TextAlign.right),
           value: Text(
-              item.quantity == null
-                  ? Decimal.zero.toString()
-                  : item.quantity.toString(),
-              textAlign: TextAlign.right,
-              key: Key('itemQuantity$index'))));
+            item.quantity == null
+                ? Decimal.zero.toString()
+                : item.quantity.toString(),
+            textAlign: TextAlign.right,
+            key: Key('itemQuantity$index'),
+          ),
+        ),
+      );
       if (!isPhone && item.product?.productTypeId != 'Rental') {
-        rowContent.add(TableRowContent(
+        rowContent.add(
+          TableRowContent(
             width: 12,
             name: const Text('Price', textAlign: TextAlign.right),
             value: Text(
-                item.price == null
-                    ? Decimal.fromInt(0).currency(currencyId: currencyId)
-                    : item.price.currency(currencyId: currencyId),
-                textAlign: TextAlign.right,
-                key: Key('itemPrice$index'))));
+              item.price == null
+                  ? Decimal.fromInt(0).currency(currencyId: currencyId)
+                  : item.price.currency(currencyId: currencyId),
+              textAlign: TextAlign.right,
+              key: Key('itemPrice$index'),
+            ),
+          ),
+        );
       }
       if (item.product?.productTypeId == 'Rental') {
-        rowContent.add(TableRowContent(
+        rowContent.add(
+          TableRowContent(
             width: 20,
             name: 'Date',
-            value: Text(item.rentalFromDate.dateOnly(),
-                textAlign: TextAlign.right, key: Key('fromDate$index'))));
+            value: Text(
+              item.rentalFromDate.dateOnly(),
+              textAlign: TextAlign.right,
+              key: Key('fromDate$index'),
+            ),
+          ),
+        );
       }
       if (!isPhone) {
-        rowContent.add(TableRowContent(
+        rowContent.add(
+          TableRowContent(
             width: 10,
             name: const Text('SubTot.', textAlign: TextAlign.right),
             value: Text(
-                item.price == null
-                    ? Decimal.zero.currency(currencyId: currencyId).toString()
-                    : (item.price! * (item.quantity ?? Decimal.one))
+              item.price == null
+                  ? Decimal.zero.currency(currencyId: currencyId).toString()
+                  : (item.price! * (item.quantity ?? Decimal.one))
                         .currency(currencyId: currencyId)
                         .toString(),
-                textAlign: TextAlign.right)));
+              textAlign: TextAlign.right,
+            ),
+          ),
+        );
       }
       if (!readOnly) {
-        rowContent.add(TableRowContent(
+        rowContent.add(
+          TableRowContent(
             width: isPhone ? 5 : 8,
             name: '',
             value: IconButton(
@@ -760,7 +926,9 @@ class MyFinDocState extends State<FinDocPage> {
               onPressed: () {
                 _cartBloc.add(CartDeleteItem(index));
               },
-            )));
+            ),
+          ),
+        );
       }
 
       return TableData(rowHeight: 40, rowContent: rowContent);
@@ -770,7 +938,8 @@ class MyFinDocState extends State<FinDocPage> {
     SpanDecoration? getBackGround(BuildContext context, int index) {
       return index == 0
           ? SpanDecoration(
-              color: Theme.of(context).colorScheme.tertiaryContainer)
+              color: Theme.of(context).colorScheme.tertiaryContainer,
+            )
           : null;
     } // field content
 
@@ -778,22 +947,26 @@ class MyFinDocState extends State<FinDocPage> {
     var (
       List<List<TableViewCell>> tableViewCells,
       List<double> fieldWidths,
-      double? rowHeight
-    ) = get2dTableData<FinDocItem>(getTableData,
-        bloc: _finDocBloc,
-        classificationId: 'AppAdmin',
-        context: context,
-        items: items,
-        screenWidth: screenWidth);
+      double? rowHeight,
+    ) = get2dTableData<FinDocItem>(
+      getTableData,
+      bloc: _finDocBloc,
+      classificationId: 'AppAdmin',
+      context: context,
+      items: items,
+      screenWidth: screenWidth,
+    );
     return Flexible(
       child: items.isEmpty
           ? const Text("no items yet")
           : TableView.builder(
               diagonalDragBehavior: DiagonalDragBehavior.free,
-              verticalDetails:
-                  ScrollableDetails.vertical(controller: verticalController),
+              verticalDetails: ScrollableDetails.vertical(
+                controller: verticalController,
+              ),
               horizontalDetails: ScrollableDetails.horizontal(
-                  controller: horizontalController),
+                controller: horizontalController,
+              ),
               cellBuilder: (context, vicinity) =>
                   tableViewCells[vicinity.row][vicinity.column],
               // height of table cell
@@ -802,7 +975,8 @@ class MyFinDocState extends State<FinDocPage> {
                   : TableSpan(
                       padding: padding,
                       backgroundDecoration: getBackGround(context, index),
-                      extent: FixedTableSpanExtent(fieldWidths[index])),
+                      extent: FixedTableSpanExtent(fieldWidths[index]),
+                    ),
               pinnedColumnCount: 1,
               // width of table cell
               rowBuilder: (index) => index >= tableViewCells.length
@@ -822,43 +996,74 @@ class MyFinDocState extends State<FinDocPage> {
     late final ScrollController verticalController = ScrollController();
     late final ScrollController horizontalController = ScrollController();
 
-    TableData getTableData(Bloc bloc, String classificationId,
-        BuildContext context, FinDocItem item, int index,
-        {dynamic extra}) {
+    TableData getTableData(
+      Bloc bloc,
+      String classificationId,
+      BuildContext context,
+      FinDocItem item,
+      int index, {
+      dynamic extra,
+    }) {
       List<TableRowContent> rowContent = [];
 
-      rowContent.add(TableRowContent(
+      rowContent.add(
+        TableRowContent(
           name: '#',
           width: isPhone ? 6 : 4,
-          value: CircleAvatar(child: Text((index + 1).toString()))));
-      rowContent.add(TableRowContent(
+          value: CircleAvatar(child: Text((index + 1).toString())),
+        ),
+      );
+      rowContent.add(
+        TableRowContent(
           name: 'ProdId',
           width: isPhone ? 14 : 8,
-          value: Text("${item.product?.pseudoId}",
-              textAlign: TextAlign.center, key: Key('itemProductId$index'))));
-      rowContent.add(TableRowContent(
+          value: Text(
+            "${item.product?.pseudoId}",
+            textAlign: TextAlign.center,
+            key: Key('itemProductId$index'),
+          ),
+        ),
+      );
+      rowContent.add(
+        TableRowContent(
           name: 'Description',
           width: isPhone ? 25 : 28,
-          value: Text(item.description ?? '',
-              key: Key('itemDescription$index'), textAlign: TextAlign.left)));
-      rowContent.add(TableRowContent(
+          value: Text(
+            item.description ?? '',
+            key: Key('itemDescription$index'),
+            textAlign: TextAlign.left,
+          ),
+        ),
+      );
+      rowContent.add(
+        TableRowContent(
           name: 'Qty',
           width: isPhone ? 15 : 10,
           value: Text(
-              item.quantity == null
-                  ? Decimal.zero.toString()
-                  : item.quantity.toString(),
-              textAlign: TextAlign.center,
-              key: Key('itemQuantity$index'))));
+            item.quantity == null
+                ? Decimal.zero.toString()
+                : item.quantity.toString(),
+            textAlign: TextAlign.center,
+            key: Key('itemQuantity$index'),
+          ),
+        ),
+      );
       if (finDoc.status == FinDocStatusVal.completed) {
-        rowContent.add(TableRowContent(
+        rowContent.add(
+          TableRowContent(
             name: 'Location',
             width: isPhone ? 20 : 20,
-            value: Text("${item.asset?.location?.locationName}",
-                textAlign: TextAlign.center, key: Key('itemLocation$index'))));
+            value: Text(
+              "${item.asset?.location?.locationName}",
+              textAlign: TextAlign.center,
+              key: Key('itemLocation$index'),
+            ),
+          ),
+        );
       }
       if (!readOnly) {
-        rowContent.add(TableRowContent(
+        rowContent.add(
+          TableRowContent(
             name: ' ',
             width: isPhone ? 15 : 20,
             value: IconButton(
@@ -869,7 +1074,9 @@ class MyFinDocState extends State<FinDocPage> {
               onPressed: () {
                 _cartBloc.add(CartDeleteItem(index));
               },
-            )));
+            ),
+          ),
+        );
       }
       return TableData(rowHeight: isPhone ? 35 : 20, rowContent: rowContent);
     }
@@ -878,7 +1085,8 @@ class MyFinDocState extends State<FinDocPage> {
     SpanDecoration? getBackGround(BuildContext context, int index) {
       return index == 0
           ? SpanDecoration(
-              color: Theme.of(context).colorScheme.tertiaryContainer)
+              color: Theme.of(context).colorScheme.tertiaryContainer,
+            )
           : null;
     }
 
@@ -886,22 +1094,26 @@ class MyFinDocState extends State<FinDocPage> {
     var (
       List<List<TableViewCell>> tableViewCells,
       List<double> fieldWidths,
-      double? rowHeight
-    ) = get2dTableData<FinDocItem>(getTableData,
-        bloc: _finDocBloc,
-        classificationId: 'AppAdmin',
-        context: context,
-        items: items,
-        screenWidth: screenWidth);
+      double? rowHeight,
+    ) = get2dTableData<FinDocItem>(
+      getTableData,
+      bloc: _finDocBloc,
+      classificationId: 'AppAdmin',
+      context: context,
+      items: items,
+      screenWidth: screenWidth,
+    );
     return Flexible(
       child: items.isEmpty
           ? const Text("no items yet")
           : TableView.builder(
               diagonalDragBehavior: DiagonalDragBehavior.free,
-              verticalDetails:
-                  ScrollableDetails.vertical(controller: verticalController),
+              verticalDetails: ScrollableDetails.vertical(
+                controller: verticalController,
+              ),
               horizontalDetails: ScrollableDetails.horizontal(
-                  controller: horizontalController),
+                controller: horizontalController,
+              ),
               cellBuilder: (context, vicinity) =>
                   tableViewCells[vicinity.row][vicinity.column],
               // height of table cell
@@ -910,7 +1122,8 @@ class MyFinDocState extends State<FinDocPage> {
                   : TableSpan(
                       padding: padding,
                       backgroundDecoration: getBackGround(context, index),
-                      extent: FixedTableSpanExtent(fieldWidths[index])),
+                      extent: FixedTableSpanExtent(fieldWidths[index]),
+                    ),
               pinnedColumnCount: 1,
               // width of table cell
               rowBuilder: (index) => index >= tableViewCells.length
@@ -930,49 +1143,70 @@ class MyFinDocState extends State<FinDocPage> {
     late final ScrollController verticalController = ScrollController();
     late final ScrollController horizontalController = ScrollController();
 
-    TableData getTableData(Bloc bloc, String classificationId,
-        BuildContext context, FinDocItem item, int index,
-        {dynamic extra}) {
+    TableData getTableData(
+      Bloc bloc,
+      String classificationId,
+      BuildContext context,
+      FinDocItem item,
+      int index, {
+      dynamic extra,
+    }) {
       List<TableRowContent> rowContent = [];
-      rowContent.add(TableRowContent(
+      rowContent.add(
+        TableRowContent(
           name: 'Account',
           width: 12,
-          value: Text(item.glAccount!.accountCode ?? '??',
-              key: Key('accountCode$index'))));
-      rowContent.add(TableRowContent(
+          value: Text(
+            item.glAccount!.accountCode ?? '??',
+            key: Key('accountCode$index'),
+          ),
+        ),
+      );
+      rowContent.add(
+        TableRowContent(
           name: 'Debit',
           width: 15,
           value: Text(
-              (item.isDebit!
-                  ? item.price.currency(currencyId: currencyId)
-                  : ''),
-              key: Key('debit$index'))));
-      rowContent.add(TableRowContent(
+            (item.isDebit! ? item.price.currency(currencyId: currencyId) : ''),
+            key: Key('debit$index'),
+          ),
+        ),
+      );
+      rowContent.add(
+        TableRowContent(
           name: 'Credit',
           width: 15,
           value: Text(
-              !item.isDebit! ? item.price.currency(currencyId: currencyId) : '',
-              key: Key('credit$index'))));
-      rowContent.add(TableRowContent(
+            !item.isDebit! ? item.price.currency(currencyId: currencyId) : '',
+            key: Key('credit$index'),
+          ),
+        ),
+      );
+      rowContent.add(
+        TableRowContent(
           name: 'ProdId',
           width: 10,
-          value: Text(item.product?.pseudoId ?? '',
-              key: Key('itemProductId$index'))));
+          value: Text(
+            item.product?.pseudoId ?? '',
+            key: Key('itemProductId$index'),
+          ),
+        ),
+      );
       if (!readOnly) {
-        rowContent.add(TableRowContent(
+        rowContent.add(
+          TableRowContent(
             name: ' ',
             width: 15,
             value: IconButton(
               padding: EdgeInsets.zero,
-              icon: const Icon(
-                Icons.delete_forever,
-                size: 20,
-              ),
+              icon: const Icon(Icons.delete_forever, size: 20),
               key: Key("itemDelete$index"),
               onPressed: () {
                 _cartBloc.add(CartDeleteItem(index));
               },
-            )));
+            ),
+          ),
+        );
       }
       return TableData(rowHeight: 15, rowContent: rowContent);
     }
@@ -981,7 +1215,8 @@ class MyFinDocState extends State<FinDocPage> {
     SpanDecoration? getBackGround(BuildContext context, int index) {
       return index == 0
           ? SpanDecoration(
-              color: Theme.of(context).colorScheme.tertiaryContainer)
+              color: Theme.of(context).colorScheme.tertiaryContainer,
+            )
           : null;
     } // field content
 
@@ -989,13 +1224,15 @@ class MyFinDocState extends State<FinDocPage> {
     var (
       List<List<TableViewCell>> tableViewCells,
       List<double> fieldWidths,
-      double? rowHeight
-    ) = get2dTableData<FinDocItem>(getTableData,
-        bloc: _finDocBloc,
-        classificationId: 'AppAdmin',
-        context: context,
-        items: items,
-        screenWidth: screenWidth);
+      double? rowHeight,
+    ) = get2dTableData<FinDocItem>(
+      getTableData,
+      bloc: _finDocBloc,
+      classificationId: 'AppAdmin',
+      context: context,
+      items: items,
+      screenWidth: screenWidth,
+    );
     return items.isEmpty
         ? const Text("no items yet")
         : Flexible(
@@ -1003,10 +1240,12 @@ class MyFinDocState extends State<FinDocPage> {
               padding: const EdgeInsets.only(left: 10.0),
               child: TableView.builder(
                 diagonalDragBehavior: DiagonalDragBehavior.free,
-                verticalDetails:
-                    ScrollableDetails.vertical(controller: verticalController),
+                verticalDetails: ScrollableDetails.vertical(
+                  controller: verticalController,
+                ),
                 horizontalDetails: ScrollableDetails.horizontal(
-                    controller: horizontalController),
+                  controller: horizontalController,
+                ),
                 cellBuilder: (context, vicinity) =>
                     tableViewCells[vicinity.row][vicinity.column],
                 // height of table cell
@@ -1015,7 +1254,8 @@ class MyFinDocState extends State<FinDocPage> {
                     : TableSpan(
                         padding: padding,
                         backgroundDecoration: getBackGround(context, index),
-                        extent: FixedTableSpanExtent(fieldWidths[index])),
+                        extent: FixedTableSpanExtent(fieldWidths[index]),
+                      ),
                 pinnedColumnCount: 1,
                 // width of table cell
                 rowBuilder: (index) => index >= tableViewCells.length
@@ -1029,5 +1269,167 @@ class MyFinDocState extends State<FinDocPage> {
               ),
             ),
           );
+  }
+
+  Future addTransactionItemDialog(
+    BuildContext context,
+    bool sales,
+    CartState state,
+  ) async {
+    final priceController = TextEditingController();
+    bool? isDebit;
+    GlAccount? selectedGlAccount;
+    GlAccountBloc glAccountBloc = context.read<GlAccountBloc>()
+      ..add(const GlAccountFetch(limit: 3));
+    return showDialog<FinDocItem>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        var addOtherFormKey = GlobalKey<FormState>();
+        return BlocProvider.value(
+          value: glAccountBloc,
+          child: Dialog(
+            key: const Key('addTransactionItemDialog'),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
+            child: popUp(
+              context: context,
+              height: 400,
+              title: 'Add Transaction Item',
+              child: Form(
+                key: addOtherFormKey,
+                child: SingleChildScrollView(
+                  key: const Key('listView2'),
+                  child: Column(
+                    children: <Widget>[
+                      BlocBuilder<GlAccountBloc, GlAccountState>(
+                        builder: (context, state) {
+                          switch (state.status) {
+                            case GlAccountStatus.failure:
+                              return const FatalErrorForm(
+                                message: 'server connection problem',
+                              );
+                            case GlAccountStatus.success:
+                              return DropdownSearch<GlAccount>(
+                                selectedItem: selectedGlAccount,
+                                popupProps: PopupProps.menu(
+                                  isFilterOnline: true,
+                                  showSelectedItems: true,
+                                  showSearchBox: true,
+                                  searchFieldProps: const TextFieldProps(
+                                    autofocus: true,
+                                    decoration: InputDecoration(
+                                      labelText: 'Gl Account',
+                                    ),
+                                  ),
+                                  menuProps: MenuProps(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                  ),
+                                  title: popUp(
+                                    context: context,
+                                    title: 'Select GL Account',
+                                    height: 50,
+                                  ),
+                                ),
+                                dropdownDecoratorProps:
+                                    const DropDownDecoratorProps(
+                                      dropdownSearchDecoration: InputDecoration(
+                                        labelText: 'GL Account',
+                                      ),
+                                    ),
+                                key: const Key('glAccount'),
+                                itemAsString: (GlAccount? u) =>
+                                    " ${u?.accountCode} ${u?.accountName} ",
+                                asyncItems: (String filter) async {
+                                  glAccountBloc.add(
+                                    GlAccountFetch(
+                                      searchString: filter,
+                                      limit: 3,
+                                    ),
+                                  );
+                                  return Future.delayed(
+                                    const Duration(milliseconds: 100),
+                                    () {
+                                      return Future.value(
+                                        glAccountBloc.state.glAccounts,
+                                      );
+                                    },
+                                  );
+                                },
+                                compareFn: (item, sItem) =>
+                                    item.accountCode == sItem.accountCode,
+                                onChanged: (GlAccount? newValue) {
+                                  selectedGlAccount = newValue!;
+                                },
+                              );
+                            default:
+                              return const Center(child: LoadingIndicator());
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      RadioGroup<bool>(
+                        key: const Key('debit'),
+                        groupValue: isDebit,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            isDebit = value!;
+                          });
+                        },
+                        child: const Row(
+                          children: [
+                            Radio<bool>(value: true),
+                            Radio<bool>(value: false),
+                          ],
+                        ),
+                      ),
+
+                      TextFormField(
+                        key: const Key('price'),
+                        decoration: const InputDecoration(labelText: 'Amount'),
+                        controller: priceController,
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Enter Amount?';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      OutlinedButton(
+                        key: const Key('ok'),
+                        child: const Text('Ok'),
+                        onPressed: () {
+                          if (addOtherFormKey.currentState!.validate()) {
+                            // ignore: unnecessary_null_comparison
+                            if (isDebit == null) {
+                              HelperFunctions.showMessage(
+                                context,
+                                'Debit / credit selection required',
+                                Colors.red,
+                              );
+                            } else {
+                              Navigator.of(context).pop(
+                                FinDocItem(
+                                  glAccount: selectedGlAccount,
+                                  isDebit: isDebit,
+                                  price: Decimal.parse(priceController.text),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }

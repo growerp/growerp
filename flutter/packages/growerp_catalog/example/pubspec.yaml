@@ -2,9 +2,9 @@ name: catalog_example
 description: A example project.
 version: 1.0.0+1
 publish_to: none
-environment: 
-  sdk: '>=3.2.6 <4.0.0'
-  flutter: '>=3.0.0'
+environment:
+  sdk: ^3.9.0
+  flutter: ^3.33.0
 dependencies: 
   flutter: 
     sdk: flutter

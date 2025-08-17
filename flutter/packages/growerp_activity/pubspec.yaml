@@ -4,8 +4,8 @@ version: 1.8.1
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 environment:
-  sdk: ">=3.8.0 <4.0.0"
-  flutter: ">=3.32.0"
+  sdk: ^3.9.0
+  flutter: ^3.33.0
 platforms:
   android:
   ios:

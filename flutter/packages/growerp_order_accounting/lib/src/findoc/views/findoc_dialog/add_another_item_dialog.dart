@@ -20,7 +20,10 @@ import 'package:growerp_models/growerp_models.dart';
 import '../../../../growerp_order_accounting.dart';
 
 Future addAnotherItemDialog(
-    BuildContext context, bool sales, CartState state) async {
+  BuildContext context,
+  bool sales,
+  CartState state,
+) async {
   final priceController = TextEditingController();
   final itemDescriptionController = TextEditingController();
   final quantityController = TextEditingController();
@@ -31,89 +34,101 @@ Future addAnotherItemDialog(
     builder: (BuildContext context) {
       var addOtherFormKey = GlobalKey<FormState>();
       return Dialog(
-          key: const Key('addOtherItemDialog'),
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20))),
-          child: popUp(
-            context: context,
-            height: 520,
-            title: 'Add another Item',
-            child: SizedBox(
-                child: Form(
-                    key: addOtherFormKey,
-                    child: SingleChildScrollView(
-                        key: const Key('listView2'),
-                        child: Column(children: <Widget>[
-                          DropdownButtonFormField<ItemType>(
-                            key: const Key('itemType'),
-                            decoration:
-                                const InputDecoration(labelText: 'Item Type'),
-                            hint: const Text('ItemType'),
-                            value: selectedItemType,
-                            validator: (value) =>
-                                value == null ? 'field required' : null,
-                            items: state.itemTypes.map((item) {
-                              return DropdownMenuItem<ItemType>(
-                                  value: item,
-                                  child: Text(
-                                      "${item.itemTypeName} ${item.accountCode} ${item.accountName}"));
-                            }).toList(),
-                            onChanged: (ItemType? newValue) {
-                              selectedItemType = newValue;
-                            },
-                            isExpanded: true,
+        key: const Key('addOtherItemDialog'),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+        ),
+        child: popUp(
+          context: context,
+          height: 520,
+          title: 'Add another Item',
+          child: SizedBox(
+            child: Form(
+              key: addOtherFormKey,
+              child: SingleChildScrollView(
+                key: const Key('listView2'),
+                child: Column(
+                  children: <Widget>[
+                    DropdownButtonFormField<ItemType>(
+                      key: const Key('itemType'),
+                      decoration: const InputDecoration(labelText: 'Item Type'),
+                      hint: const Text('ItemType'),
+                      initialValue: selectedItemType,
+                      validator: (value) =>
+                          value == null ? 'field required' : null,
+                      items: state.itemTypes.map((item) {
+                        return DropdownMenuItem<ItemType>(
+                          value: item,
+                          child: Text(
+                            "${item.itemTypeName} ${item.accountCode} ${item.accountName}",
                           ),
-                          const SizedBox(height: 20),
-                          TextFormField(
-                              key: const Key('itemDescription'),
-                              decoration: const InputDecoration(
-                                  labelText: 'Item Description'),
-                              controller: itemDescriptionController,
-                              validator: (value) {
-                                if (value!.isEmpty) return 'Item description?';
-                                return null;
-                              }),
-                          const SizedBox(height: 20),
-                          TextFormField(
-                            key: const Key('price'),
-                            decoration: const InputDecoration(
-                                labelText: 'Price/Amount'),
-                            controller: priceController,
-                            keyboardType: TextInputType.number,
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'Enter Price or Amount?';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          TextFormField(
-                            key: const Key('quantity'),
-                            decoration:
-                                const InputDecoration(labelText: 'Quantity'),
-                            controller: quantityController,
-                            keyboardType: TextInputType.number,
-                          ),
-                          const SizedBox(height: 20),
-                          OutlinedButton(
-                            key: const Key('ok'),
-                            child: const Text('Ok'),
-                            onPressed: () {
-                              if (addOtherFormKey.currentState!.validate()) {
-                                Navigator.of(context).pop(FinDocItem(
-                                  itemType: selectedItemType,
-                                  price: Decimal.parse(priceController.text),
-                                  description: itemDescriptionController.text,
-                                  quantity: quantityController.text.isEmpty
-                                      ? Decimal.parse('1')
-                                      : Decimal.parse(quantityController.text),
-                                ));
-                              }
-                            },
-                          ),
-                        ])))),
-          ));
+                        );
+                      }).toList(),
+                      onChanged: (ItemType? newValue) {
+                        selectedItemType = newValue;
+                      },
+                      isExpanded: true,
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      key: const Key('itemDescription'),
+                      decoration: const InputDecoration(
+                        labelText: 'Item Description',
+                      ),
+                      controller: itemDescriptionController,
+                      validator: (value) {
+                        if (value!.isEmpty) return 'Item description?';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      key: const Key('price'),
+                      decoration: const InputDecoration(
+                        labelText: 'Price/Amount',
+                      ),
+                      controller: priceController,
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Enter Price or Amount?';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      key: const Key('quantity'),
+                      decoration: const InputDecoration(labelText: 'Quantity'),
+                      controller: quantityController,
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 20),
+                    OutlinedButton(
+                      key: const Key('ok'),
+                      child: const Text('Ok'),
+                      onPressed: () {
+                        if (addOtherFormKey.currentState!.validate()) {
+                          Navigator.of(context).pop(
+                            FinDocItem(
+                              itemType: selectedItemType,
+                              price: Decimal.parse(priceController.text),
+                              description: itemDescriptionController.text,
+                              quantity: quantityController.text.isEmpty
+                                  ? Decimal.parse('1')
+                                  : Decimal.parse(quantityController.text),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
     },
   );
 }

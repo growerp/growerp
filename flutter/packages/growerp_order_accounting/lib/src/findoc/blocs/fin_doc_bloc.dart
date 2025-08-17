@@ -61,11 +61,17 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         OutgoingShipmentBloc,
         TransactionBloc,
         RequestBloc {
-  FinDocBloc(this.restClient, this.sales, this.docType, this.classificationId,
-      {this.journalId = ''})
-      : super(const FinDocState()) {
-    on<FinDocFetch>(_onFinDocFetch,
-        transformer: finDocDroppable(const Duration(milliseconds: 100)));
+  FinDocBloc(
+    this.restClient,
+    this.sales,
+    this.docType,
+    this.classificationId, {
+    this.journalId = '',
+  }) : super(const FinDocState()) {
+    on<FinDocFetch>(
+      _onFinDocFetch,
+      transformer: finDocDroppable(const Duration(milliseconds: 100)),
+    );
     on<FinDocUpdate>(_onFinDocUpdate);
     on<FinDocShipmentReceive>(_onFinDocShipmentReceive);
     on<FinDocGetItemTypes>(_onFinDocGetItemTypes);
@@ -121,19 +127,25 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         status: event.status,
       );
 
-      return emit(state.copyWith(
+      return emit(
+        state.copyWith(
           status: FinDocStatus.success,
           finDocs: current..addAll(result.finDocs),
           itemTypes: itemTypes.itemTypes,
           paymentTypes: paymentTypes.paymentTypes,
           hasReachedMax: result.finDocs.length < event.limit,
           searchString: event.searchString,
-          message: event.refresh ? '${docType}s reloaded' : null));
+          message: event.refresh ? '${docType}s reloaded' : null,
+        ),
+      );
     } on DioException catch (e) {
-      return emit(state.copyWith(
+      return emit(
+        state.copyWith(
           status: FinDocStatus.failure,
           finDocs: state.finDocs,
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -152,38 +164,53 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
       if (event.finDoc.idIsNull()) {
         // create
         FinDoc compResult = await restClient.createFinDoc(
-            finDoc: event.finDoc
-                .copyWith(classificationId: classificationId, items: items));
+          finDoc: event.finDoc.copyWith(
+            classificationId: classificationId,
+            items: items,
+          ),
+        );
         finDocs.insert(0, compResult);
-        return emit(state.copyWith(
+        return emit(
+          state.copyWith(
             status: FinDocStatus.success,
             finDocs: finDocs,
-            message: '${event.finDoc.docType} ${compResult.pseudoId} added'));
+            message: '${event.finDoc.docType} ${compResult.pseudoId} added',
+          ),
+        );
       } else {
         // update
         FinDoc compResult = await restClient.updateFinDoc(
-            finDoc: event.finDoc
-                .copyWith(classificationId: classificationId, items: items));
+          finDoc: event.finDoc.copyWith(
+            classificationId: classificationId,
+            items: items,
+          ),
+        );
         late int index;
         switch (docType) {
           case FinDocType.order:
             index = finDocs.indexWhere(
-                (element) => element.orderId == event.finDoc.orderId);
+              (element) => element.orderId == event.finDoc.orderId,
+            );
           case FinDocType.payment:
             index = finDocs.indexWhere(
-                (element) => element.paymentId == event.finDoc.paymentId);
+              (element) => element.paymentId == event.finDoc.paymentId,
+            );
           case FinDocType.invoice:
             index = finDocs.indexWhere(
-                (element) => element.invoiceId == event.finDoc.invoiceId);
+              (element) => element.invoiceId == event.finDoc.invoiceId,
+            );
           case FinDocType.shipment:
             index = finDocs.indexWhere(
-                (element) => element.shipmentId == event.finDoc.shipmentId);
+              (element) => element.shipmentId == event.finDoc.shipmentId,
+            );
           case FinDocType.transaction:
-            index = finDocs.indexWhere((element) =>
-                element.transactionId == event.finDoc.transactionId);
+            index = finDocs.indexWhere(
+              (element) => element.transactionId == event.finDoc.transactionId,
+            );
           case FinDocType.request:
             index = finDocs.indexWhere(
-                (element) => element.requestId == event.finDoc.requestId);
+              (element) => element.requestId == event.finDoc.requestId,
+            );
           default:
         }
         // only update the list when not empty and item found
@@ -195,15 +222,23 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
             finDocs[index] = compResult;
           }
         }
-        return emit(state.copyWith(
+        return emit(
+          state.copyWith(
             status: FinDocStatus.success,
             finDocs: finDocs,
-            message: "$docType ${compResult.pseudoId!} "
-                "${docType == FinDocType.transaction && event.finDoc.status == FinDocStatusVal.cancelled ? 'Deleted' : 'updated'}"));
+            message:
+                "$docType ${compResult.pseudoId!} "
+                "${docType == FinDocType.transaction && event.finDoc.status == FinDocStatusVal.cancelled ? 'Deleted' : 'updated'}",
+          ),
+        );
       }
     } on DioException catch (e) {
-      return emit(state.copyWith(
-          status: FinDocStatus.failure, message: await getDioError(e)));
+      return emit(
+        state.copyWith(
+          status: FinDocStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -213,17 +248,24 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
   ) async {
     try {
       emit(state.copyWith(status: FinDocStatus.loading));
-      FinDoc compResult =
-          await restClient.receiveShipment(finDoc: event.finDoc);
+      FinDoc compResult = await restClient.receiveShipment(
+        finDoc: event.finDoc,
+      );
       List<FinDoc> finDocs = List.from(state.finDocs);
-      int index =
-          finDocs.indexWhere((element) => element.id() == event.finDoc.id());
+      int index = finDocs.indexWhere(
+        (element) => element.id() == event.finDoc.id(),
+      );
       finDocs[index] = compResult;
       return emit(
-          state.copyWith(status: FinDocStatus.success, finDocs: finDocs));
+        state.copyWith(status: FinDocStatus.success, finDocs: finDocs),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: FinDocStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: FinDocStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -235,26 +277,36 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     try {
       late List<ItemType> itemTypes;
       if (event.searchString == null) {
-        ItemTypes compResult =
-            await restClient.getItemTypes(sales: event.sales);
+        ItemTypes compResult = await restClient.getItemTypes(
+          sales: event.sales,
+        );
         saveItemTypes = List.from(compResult.itemTypes);
         itemTypes = List.from(saveItemTypes);
       } else {
-        itemTypes = List.from(saveItemTypes
-            .where((element) =>
-                '${element.itemTypeName.toLowerCase()} '
-                        '${element.direction.toLowerCase()}'
-                    .contains(event.searchString!.toLowerCase()) ||
-                element.accountCode
-                    .toLowerCase()
-                    .contains(event.searchString!.toLowerCase()))
-            .toList());
+        itemTypes = List.from(
+          saveItemTypes
+              .where(
+                (element) =>
+                    '${element.itemTypeName.toLowerCase()} '
+                            '${element.direction.toLowerCase()}'
+                        .contains(event.searchString!.toLowerCase()) ||
+                    element.accountCode.toLowerCase().contains(
+                      event.searchString!.toLowerCase(),
+                    ),
+              )
+              .toList(),
+        );
       }
       return emit(
-          state.copyWith(itemTypes: itemTypes, status: FinDocStatus.success));
+        state.copyWith(itemTypes: itemTypes, status: FinDocStatus.success),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: FinDocStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: FinDocStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -266,35 +318,56 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     try {
       List<ItemType> itemTypes = List.from(state.itemTypes);
       ItemType compResult = await restClient.updateItemType(
-          itemType: event.itemType, update: event.update, delete: event.delete);
-      int index = itemTypes.indexWhere((element) =>
-          element.itemTypeId == event.itemType.itemTypeId &&
-          element.direction == event.itemType.direction);
-      int saveIndex = saveItemTypes.indexWhere((element) =>
-          element.itemTypeId == event.itemType.itemTypeId &&
-          element.direction == event.itemType.direction);
+        itemType: event.itemType,
+        update: event.update,
+        delete: event.delete,
+      );
+      int index = itemTypes.indexWhere(
+        (element) =>
+            element.itemTypeId == event.itemType.itemTypeId &&
+            element.direction == event.itemType.direction,
+      );
+      int saveIndex = saveItemTypes.indexWhere(
+        (element) =>
+            element.itemTypeId == event.itemType.itemTypeId &&
+            element.direction == event.itemType.direction,
+      );
       if (event.update == true) {
         itemTypes[index] = itemTypes[index].copyWith(
-            accountName: compResult.accountName,
-            accountCode: compResult.accountCode);
+          accountName: compResult.accountName,
+          accountCode: compResult.accountCode,
+        );
         saveItemTypes[saveIndex] = saveItemTypes[saveIndex].copyWith(
-            accountName: compResult.accountName,
-            accountCode: compResult.accountCode);
+          accountName: compResult.accountName,
+          accountCode: compResult.accountCode,
+        );
       }
       if (event.delete == true) {
-        itemTypes[index] =
-            itemTypes[index].copyWith(accountCode: '', accountName: '');
-        saveItemTypes[saveIndex] =
-            saveItemTypes[saveIndex].copyWith(accountCode: '', accountName: '');
+        itemTypes[index] = itemTypes[index].copyWith(
+          accountCode: '',
+          accountName: '',
+        );
+        saveItemTypes[saveIndex] = saveItemTypes[saveIndex].copyWith(
+          accountCode: '',
+          accountName: '',
+        );
       }
-      return emit(state.copyWith(
+      return emit(
+        state.copyWith(
           itemTypes: itemTypes,
           status: FinDocStatus.success,
-          message: "Item Type: ${event.itemType.itemTypeName} "
-              "${event.update != null ? 'updated' : 'removed'}"));
+          message:
+              "Item Type: ${event.itemType.itemTypeName} "
+              "${event.update != null ? 'updated' : 'removed'}",
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: FinDocStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: FinDocStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -306,27 +379,40 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     try {
       late List<PaymentType> paymentTypes;
       if (event.searchString == null) {
-        PaymentTypes compResult =
-            await restClient.getPaymentTypes(sales: event.sales);
+        PaymentTypes compResult = await restClient.getPaymentTypes(
+          sales: event.sales,
+        );
         savePaymentTypes = List.from(compResult.paymentTypes);
         paymentTypes = List.from(savePaymentTypes);
       } else {
-        paymentTypes = List.from(savePaymentTypes
-            .where((element) =>
-                "${element.paymentTypeName.toLowerCase()} -- "
-                        "${element.isPayable ? 'outgoing' : 'incoming'} -- "
-                        "${element.isApplied ? 'y' : 'n'}"
-                    .contains(event.searchString!.toLowerCase()) ||
-                element.accountCode
-                    .toLowerCase()
-                    .contains(event.searchString!.toLowerCase()))
-            .toList());
+        paymentTypes = List.from(
+          savePaymentTypes
+              .where(
+                (element) =>
+                    "${element.paymentTypeName.toLowerCase()} -- "
+                            "${element.isPayable ? 'outgoing' : 'incoming'} -- "
+                            "${element.isApplied ? 'y' : 'n'}"
+                        .contains(event.searchString!.toLowerCase()) ||
+                    element.accountCode.toLowerCase().contains(
+                      event.searchString!.toLowerCase(),
+                    ),
+              )
+              .toList(),
+        );
       }
-      return emit(state.copyWith(
-          paymentTypes: paymentTypes, status: FinDocStatus.success));
+      return emit(
+        state.copyWith(
+          paymentTypes: paymentTypes,
+          status: FinDocStatus.success,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: FinDocStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: FinDocStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -338,39 +424,58 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     try {
       List<PaymentType> paymentTypes = List.from(state.paymentTypes);
       PaymentType compResult = await restClient.updatePaymentType(
-          paymentType: event.paymentType,
-          update: event.update,
-          delete: event.delete);
-      int index = paymentTypes.indexWhere((element) =>
-          element.paymentTypeId == event.paymentType.paymentTypeId &&
-          element.isPayable == event.paymentType.isPayable &&
-          element.isApplied == event.paymentType.isApplied);
-      int saveIndex = savePaymentTypes.indexWhere((element) =>
-          element.paymentTypeId == event.paymentType.paymentTypeId &&
-          element.isPayable == event.paymentType.isPayable &&
-          element.isApplied == event.paymentType.isApplied);
+        paymentType: event.paymentType,
+        update: event.update,
+        delete: event.delete,
+      );
+      int index = paymentTypes.indexWhere(
+        (element) =>
+            element.paymentTypeId == event.paymentType.paymentTypeId &&
+            element.isPayable == event.paymentType.isPayable &&
+            element.isApplied == event.paymentType.isApplied,
+      );
+      int saveIndex = savePaymentTypes.indexWhere(
+        (element) =>
+            element.paymentTypeId == event.paymentType.paymentTypeId &&
+            element.isPayable == event.paymentType.isPayable &&
+            element.isApplied == event.paymentType.isApplied,
+      );
       if (event.update == true) {
         paymentTypes[index] = paymentTypes[index].copyWith(
-            accountName: compResult.accountName,
-            accountCode: compResult.accountCode);
+          accountName: compResult.accountName,
+          accountCode: compResult.accountCode,
+        );
         savePaymentTypes[saveIndex] = savePaymentTypes[saveIndex].copyWith(
-            accountName: compResult.accountName,
-            accountCode: compResult.accountCode);
+          accountName: compResult.accountName,
+          accountCode: compResult.accountCode,
+        );
       }
       if (event.delete == true) {
-        paymentTypes[index] =
-            paymentTypes[index].copyWith(accountCode: '', accountName: '');
-        savePaymentTypes[saveIndex] = savePaymentTypes[saveIndex]
-            .copyWith(accountCode: '', accountName: '');
+        paymentTypes[index] = paymentTypes[index].copyWith(
+          accountCode: '',
+          accountName: '',
+        );
+        savePaymentTypes[saveIndex] = savePaymentTypes[saveIndex].copyWith(
+          accountCode: '',
+          accountName: '',
+        );
       }
-      return emit(state.copyWith(
+      return emit(
+        state.copyWith(
           paymentTypes: paymentTypes,
           status: FinDocStatus.success,
-          message: "Payment Type: ${event.paymentType.paymentTypeName} "
-              "${event.update != null ? 'updated' : 'removed'}"));
+          message:
+              "Payment Type: ${event.paymentType.paymentTypeName} "
+              "${event.update != null ? 'updated' : 'removed'}",
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: FinDocStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: FinDocStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -380,15 +485,22 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
   ) async {
     try {
       emit(state.copyWith(status: FinDocStatus.loading));
-      final result =
-          await restClient.getDailyRentalOccupancy(productId: event.productId);
-      emit(state.copyWith(
-        status: FinDocStatus.success,
-        productRentalDates: result.productRentalDates,
-      ));
+      final result = await restClient.getDailyRentalOccupancy(
+        productId: event.productId,
+      );
+      emit(
+        state.copyWith(
+          status: FinDocStatus.success,
+          productRentalDates: result.productRentalDates,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: FinDocStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: FinDocStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -397,16 +509,25 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     Emitter<FinDocState> emit,
   ) async {
     try {
-      emit(state.copyWith(status: FinDocStatus.parmLoading));
-      final result =
-          await restClient.authorizeGatewayPayment(paymentId: event.paymentId);
-      emit(state.copyWith(
-        status: FinDocStatus.parmSuccess,
-        finDoc: result,
-      ));
+      emit(state.copyWith(status: FinDocStatus.loading));
+      final result = await restClient.authorizeGatewayPayment(
+        paymentId: event.paymentId,
+      );
+      emit(
+        state.copyWith(
+          status: FinDocStatus.success,
+          finDoc: result,
+          message:
+              'Payment ${result.pseudoId} ${result.grandTotal} authorized for payment',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: FinDocStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: FinDocStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -415,16 +536,25 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     Emitter<FinDocState> emit,
   ) async {
     try {
-      emit(state.copyWith(status: FinDocStatus.parmLoading));
-      final result =
-          await restClient.captureGatewayPayment(paymentId: event.paymentId);
-      emit(state.copyWith(
-        status: FinDocStatus.parmSuccess,
-        finDoc: result,
-      ));
+      emit(state.copyWith(status: FinDocStatus.loading));
+      final result = await restClient.captureGatewayPayment(
+        paymentId: event.paymentId,
+      );
+      emit(
+        state.copyWith(
+          status: FinDocStatus.success,
+          finDoc: result,
+          message:
+              'Payment ${result.pseudoId} ${result.grandTotal} captured for payment',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: FinDocStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: FinDocStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -433,16 +563,24 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     Emitter<FinDocState> emit,
   ) async {
     try {
-      emit(state.copyWith(status: FinDocStatus.parmLoading));
-      final result =
-          await restClient.releaseGatewayPayment(paymentId: event.paymentId);
-      emit(state.copyWith(
-        status: FinDocStatus.parmSuccess,
-        finDoc: result,
-      ));
+      emit(state.copyWith(status: FinDocStatus.loading));
+      final result = await restClient.releaseGatewayPayment(
+        paymentId: event.paymentId,
+      );
+      emit(
+        state.copyWith(
+          status: FinDocStatus.success,
+          finDoc: result,
+          message: 'Payment ${result.pseudoId} ${result.grandTotal} refunded',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: FinDocStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: FinDocStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

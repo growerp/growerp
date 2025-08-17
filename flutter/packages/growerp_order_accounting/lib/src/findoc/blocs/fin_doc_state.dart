@@ -14,14 +14,7 @@
 
 part of 'fin_doc_bloc.dart';
 
-enum FinDocStatus {
-  initial,
-  loading,
-  parmLoading,
-  success,
-  parmSuccess,
-  failure
-}
+enum FinDocStatus { initial, loading, success, failure }
 
 class FinDocState extends Equatable {
   const FinDocState({
@@ -50,7 +43,7 @@ class FinDocState extends Equatable {
   final bool hasReachedMax;
   final String searchString;
   final List<ProductRentalDate>
-      productRentalDates; // productId and rental dates
+  productRentalDates; // productId and rental dates
 
   FinDocState copyWith({
     FinDocStatus? status,
@@ -81,10 +74,16 @@ class FinDocState extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [status, message, finDocs, productRentalDates, finDoc];
+  List<Object?> get props => [
+    status,
+    message,
+    finDocs,
+    productRentalDates,
+    finDoc,
+  ];
 
   @override
-  String toString() => '$status { #finDocs: ${finDocs.length}, '
+  String toString() =>
+      '$status { #finDocs: ${finDocs.length}, '
       'hasReachedMax: $hasReachedMax message $message}';
 }
