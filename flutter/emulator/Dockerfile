@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-ARG SDK_VERSION=30
+ARG SDK_VERSION=34
 ARG EMULATOR_ARCH=x86_64
 
 # -------------------- Common -------------------
@@ -39,7 +39,7 @@ ENV LANG=C.UTF-8 \
 # ----------------- Android SDK -----------------
 # https://developer.android.com/studio/index.html#command-tools at the bottom of the page for latest version
 # Additional info about directory structure: https://stackoverflow.com/a/61176718/981330
-ARG COMMANDLINE_TOOLS_URL=https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+ARG COMMANDLINE_TOOLS_URL=https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip
 ARG ANDROID_SDK_FILE_NAME=commandlinetools.zip
 
 RUN curl $COMMANDLINE_TOOLS_URL --progress-bar --location --output $ANDROID_SDK_FILE_NAME && \
