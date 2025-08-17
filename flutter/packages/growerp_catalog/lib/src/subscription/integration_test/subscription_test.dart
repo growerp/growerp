@@ -24,13 +24,16 @@ class SubscriptionTest {
   }
 
   static Future<void> addSubscriptions(
-      WidgetTester tester, List<Subscription> subscriptions,
-      {bool check = true}) async {
+    WidgetTester tester,
+    List<Subscription> subscriptions, {
+    bool check = true,
+  }) async {
     SaveTest test = await PersistFunctions.getTest();
     if (test.subscriptions.isEmpty) {
       // not yet created
       await PersistFunctions.persistTest(
-          SaveTest(subscriptions: subscriptions));
+        SaveTest(subscriptions: subscriptions),
+      );
       await enterSubscriptionData(tester);
     }
     if (check) {
@@ -39,17 +42,21 @@ class SubscriptionTest {
   }
 
   static Future<void> updateSubscriptions(
-      WidgetTester tester, List<Subscription> newSubscriptions) async {
+    WidgetTester tester,
+    List<Subscription> newSubscriptions,
+  ) async {
     List<Subscription> subscriptions =
         (await PersistFunctions.getTest()).subscriptions;
     // copy over pseudoId
     if (newSubscriptions.isNotEmpty) {
       for (int x = 0; x < newSubscriptions.length; x++) {
-        newSubscriptions[x] =
-            newSubscriptions[x].copyWith(pseudoId: subscriptions[x].pseudoId);
+        newSubscriptions[x] = newSubscriptions[x].copyWith(
+          pseudoId: subscriptions[x].pseudoId,
+        );
       }
       await PersistFunctions.persistTest(
-          SaveTest(subscriptions: newSubscriptions));
+        SaveTest(subscriptions: newSubscriptions),
+      );
       await enterSubscriptionData(tester);
     }
     await checkSubscriptionDetail(tester);
@@ -62,14 +69,22 @@ class SubscriptionTest {
     if (count == (subscriptions.length)) {
       await CommonTest.gotoMainMenu(tester);
       await selectSubscriptions(tester);
-      await CommonTest.tapByKey(tester, 'delete${count - 1}',
-          seconds: CommonTest.waitTime);
+      await CommonTest.tapByKey(
+        tester,
+        'delete${count - 1}',
+        seconds: CommonTest.waitTime,
+      );
       await CommonTest.gotoMainMenu(tester);
       await selectSubscriptions(tester);
       expect(
-          find.byKey(const Key('subscriptionItem')), findsNWidgets(count - 1));
-      await PersistFunctions.persistTest(SaveTest(
-          subscriptions: subscriptions.sublist(0, (subscriptions.length) - 1)));
+        find.byKey(const Key('subscriptionItem')),
+        findsNWidgets(count - 1),
+      );
+      await PersistFunctions.persistTest(
+        SaveTest(
+          subscriptions: subscriptions.sublist(0, (subscriptions.length) - 1),
+        ),
+      );
     }
   }
 
@@ -81,45 +96,55 @@ class SubscriptionTest {
       if (subscription.pseudoId == null) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.doNewSearch(tester,
-            searchString: subscription.pseudoId!);
-        expect(CommonTest.getTextField('topHeader').split('#')[1],
-            subscription.pseudoId);
+        await CommonTest.doNewSearch(
+          tester,
+          searchString: subscription.pseudoId!,
+        );
+        expect(
+          CommonTest.getTextField('topHeader').split('#')[1],
+          subscription.pseudoId,
+        );
       }
       await CommonTest.checkWidgetKey(tester, 'SubscriptionDialog');
       await CommonTest.enterText(
-          tester, 'pseudoId', subscription.pseudoId ?? '');
+        tester,
+        'pseudoId',
+        subscription.pseudoId ?? '',
+      );
       await CommonTest.enterText(
-          tester, 'description', subscription.description ?? '');
+        tester,
+        'description',
+        subscription.description ?? '',
+      );
       if (subscription.fromDate != null) {
         await CommonTest.enterDate(tester, 'fromDate', subscription.fromDate!);
       }
       if (subscription.thruDate != null) {
         await CommonTest.enterDate(tester, 'thruDate', subscription.thruDate!);
       }
-      if (subscription.purchaseFromDate != null) {
-        await CommonTest.enterDate(
-            tester, 'purchaseFromDate', subscription.purchaseFromDate!);
-      }
-      if (subscription.purchaseThruDate != null) {
-        await CommonTest.enterDate(
-            tester, 'purchaseThruDate', subscription.purchaseThruDate!);
-      }
       await CommonTest.enterDropDownSearch(
-          tester, 'subscriber', subscription.subscriber!.name!);
+        tester,
+        'subscriber',
+        subscription.subscriber!.name!,
+      );
       await CommonTest.enterDropDownSearch(
-          tester, 'product', subscription.product!.productName!);
+        tester,
+        'product',
+        subscription.product!.productName!,
+      );
       // Add more fields as needed
       await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
       await CommonTest.checkWidgetKey(tester, 'SubscriptionList');
       // new items always added at the top
-      subscriptionsWithPseudoId
-          .add(subscription.copyWith(pseudoId: CommonTest.getTextField('id0')));
+      subscriptionsWithPseudoId.add(
+        subscription.copyWith(pseudoId: CommonTest.getTextField('id0')),
+      );
     }
     // only update when pseudoId was missing
     if (subscriptions[0].pseudoId == null) {
       await PersistFunctions.persistTest(
-          SaveTest(subscriptions: subscriptionsWithPseudoId));
+        SaveTest(subscriptions: subscriptionsWithPseudoId),
+      );
     }
   }
 
@@ -128,30 +153,29 @@ class SubscriptionTest {
         (await PersistFunctions.getTest()).subscriptions;
 
     for (var subscription in subscriptions) {
-      await CommonTest.doNewSearch(tester,
-          searchString: subscription.pseudoId!);
+      await CommonTest.doNewSearch(
+        tester,
+        searchString: subscription.pseudoId!,
+      );
       await CommonTest.checkWidgetKey(tester, 'SubscriptionDialog');
 
       // Get the FormBuilder state for all fields including dropdowns
-      final formState =
-          tester.state<FormBuilderState>(find.byType(FormBuilder));
+      final formState = tester.state<FormBuilderState>(
+        find.byType(FormBuilder),
+      );
       formState.save(); // save into the formbuilder internal value fields
 
       if (subscription.fromDate != null) {
-        expect((formState.value['fromDate'] as DateTime).dateOnly(),
-            subscription.fromDate.dateOnly());
+        expect(
+          (formState.value['fromDate'] as DateTime).dateOnly(),
+          subscription.fromDate.dateOnly(),
+        );
       }
       if (subscription.thruDate != null) {
-        expect((formState.value['thruDate'] as DateTime).dateOnly(),
-            subscription.thruDate.dateOnly());
-      }
-      if (subscription.purchaseFromDate != null) {
-        expect((formState.value['purchaseFromDate'] as DateTime).dateOnly(),
-            subscription.purchaseFromDate.dateOnly());
-      }
-      if (subscription.purchaseThruDate != null) {
-        expect((formState.value['purchaseThruDate'] as DateTime).dateOnly(),
-            subscription.purchaseThruDate.dateOnly());
+        expect(
+          (formState.value['thruDate'] as DateTime).dateOnly(),
+          subscription.thruDate.dateOnly(),
+        );
       }
 
       // Check FormBuilder text fields

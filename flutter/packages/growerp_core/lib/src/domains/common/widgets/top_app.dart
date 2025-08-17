@@ -65,124 +65,109 @@ class TopApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider(create: (context) => restClient),
+        RepositoryProvider(create: (context) => chatClient),
+        RepositoryProvider(create: (context) => notificationClient),
+        RepositoryProvider(create: (context) => classificationId),
+        RepositoryProvider(create: (context) => company),
+      ],
+      child: MultiBlocProvider(
         providers: [
-          RepositoryProvider(create: (context) => restClient),
-          RepositoryProvider(create: (context) => chatClient),
-          RepositoryProvider(create: (context) => notificationClient),
-          RepositoryProvider(create: (context) => classificationId),
-          RepositoryProvider(create: (context) => company),
+          ...getCoreBlocProviders(
+            restClient,
+            chatClient,
+            notificationClient,
+            classificationId,
+            company,
+          ),
+          ...extraBlocProviders,
         ],
-        child: MultiBlocProvider(
-            providers: [
-              ...getCoreBlocProviders(restClient, chatClient,
-                  notificationClient, classificationId, company),
-              ...extraBlocProviders
-            ],
-            child:
-                BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
-              localizationsDelegates.addAll(extraDelegates);
-              return GestureDetector(
-                  onTap: () {
-                    FocusScopeNode currentFocus = FocusScope.of(context);
+        child: BlocBuilder<ThemeBloc, ThemeState>(
+          builder: (context, state) {
+            localizationsDelegates.addAll(extraDelegates);
+            return GestureDetector(
+              onTap: () {
+                FocusScopeNode currentFocus = FocusScope.of(context);
 
-                    if (!currentFocus.hasPrimaryFocus) {
-                      currentFocus.unfocus();
-                    }
+                if (!currentFocus.hasPrimaryFocus) {
+                  currentFocus.unfocus();
+                }
+              },
+              child: MaterialApp(
+                navigatorKey: _rootNavigatorKey,
+                title: title,
+                locale: const Locale(
+                  'en',
+                  'CA',
+                ), // Canadian English uses yyyy-MM-dd format
+                supportedLocales: const [
+                  Locale('en'),
+                  Locale('th'),
+                  Locale('en', 'CA'),
+                ],
+                scrollBehavior: const MaterialScrollBehavior().copyWith(
+                  dragDevices: {
+                    PointerDeviceKind.mouse,
+                    PointerDeviceKind.touch,
                   },
-                  child: MaterialApp(
-                      navigatorKey: _rootNavigatorKey,
-                      title: title,
-                      locale: const Locale('en',
-                          'CA'), // Canadian English uses yyyy-MM-dd format
-                      supportedLocales: const [
-                        Locale('en'),
-                        Locale('th'),
-                        Locale('en', 'CA')
-                      ],
-                      scrollBehavior: const MaterialScrollBehavior().copyWith(
-                        dragDevices: {
-                          PointerDeviceKind.mouse,
-                          PointerDeviceKind.touch,
-                        },
-                      ),
-                      debugShowCheckedModeBanner: false,
-                      localizationsDelegates: localizationsDelegates,
-                      builder: (context, child) => ResponsiveBreakpoints
-                              .builder(child: child!, breakpoints: [
-                            const Breakpoint(start: 0, end: 500, name: MOBILE),
-                            const Breakpoint(
-                                start: 451, end: 800, name: TABLET),
-                            const Breakpoint(
-                                start: 801, end: 1920, name: DESKTOP),
-                            const Breakpoint(
-                                start: 1921, end: double.infinity, name: '4K'),
-                          ]),
-                      themeMode: state.themeMode,
-                      theme: FlexThemeData.light(
-                        scheme: FlexScheme.jungle,
-                        subThemesData: const FlexSubThemesData(
-                          dialogBackgroundSchemeColor:
-                              SchemeColor.outlineVariant,
-                          inputDecoratorBorderType:
-                              FlexInputBorderType.underline,
-                        ),
-                        useMaterial3: true,
-                      ),
-                      darkTheme: FlexThemeData.dark(
-                        scheme: FlexScheme.jungle,
-                        subThemesData: const FlexSubThemesData(
-                          dialogBackgroundSchemeColor:
-                              SchemeColor.outlineVariant,
-                          inputDecoratorBorderType:
-                              FlexInputBorderType.underline,
-                        ),
-                        useMaterial3: true,
-                      ),
-                      onGenerateRoute: router,
-                      navigatorObservers: [AppNavObserver()],
-                      home: Scaffold(
-                        body: BlocConsumer<AuthBloc, AuthState>(
-                          listener: (context, state) {
-                            if (state.status != AuthStatus.initial &&
-                                state.status != AuthStatus.loading) {
-                              switch (state.status) {
-                                case AuthStatus.failure:
-                                  HelperFunctions.showMessage(
-                                      context, '${state.message}', Colors.red);
-                                  break;
-                                default:
-                                  HelperFunctions.showMessage(
-                                      context, state.message, Colors.green);
-                              }
-                            }
-                          },
-                          builder: (context, state) {
-                            switch (state.status) {
-                              case AuthStatus.initial:
-                              case AuthStatus.loading:
-                                return Scaffold(
-                                    // scaffold need for messages
-                                    backgroundColor: Colors.transparent,
-                                    body: Builder(builder: (context) {
-                                      return const LoadingIndicator();
-                                    }));
-                              default:
-                                return !kReleaseMode ||
-                                        GlobalConfiguration().get("test") ==
-                                            true
-                                    ? Banner(
-                                        message: "test",
-                                        color: Colors.red,
-                                        location: BannerLocation.topStart,
-                                        child: HomeForm(
-                                            menuOptions: menuOptions,
-                                            title: title))
-                                    : HomeForm(
-                                        menuOptions: menuOptions, title: title);
-                            }
-                          },
-                        ),
-                      )));
-            })));
+                ),
+                debugShowCheckedModeBanner: false,
+                localizationsDelegates: localizationsDelegates,
+                builder: (context, child) => ResponsiveBreakpoints.builder(
+                  child: child!,
+                  breakpoints: [
+                    const Breakpoint(start: 0, end: 500, name: MOBILE),
+                    const Breakpoint(start: 451, end: 800, name: TABLET),
+                    const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+                    const Breakpoint(
+                      start: 1921,
+                      end: double.infinity,
+                      name: '4K',
+                    ),
+                  ],
+                ),
+                themeMode: state.themeMode,
+                theme: FlexThemeData.light(
+                  scheme: FlexScheme.jungle,
+                  subThemesData: const FlexSubThemesData(
+                    dialogBackgroundSchemeColor: SchemeColor.outlineVariant,
+                    inputDecoratorBorderType: FlexInputBorderType.underline,
+                  ),
+                  useMaterial3: true,
+                ),
+                darkTheme: FlexThemeData.dark(
+                  scheme: FlexScheme.jungle,
+                  subThemesData: const FlexSubThemesData(
+                    dialogBackgroundSchemeColor: SchemeColor.outlineVariant,
+                    inputDecoratorBorderType: FlexInputBorderType.underline,
+                  ),
+                  useMaterial3: true,
+                ),
+                onGenerateRoute: router,
+                navigatorObservers: [AppNavObserver()],
+                home: ScaffoldMessenger(
+                  child: Scaffold(
+                    body:
+                        !kReleaseMode ||
+                            GlobalConfiguration().get("test") == true
+                        ? Banner(
+                            message: "test",
+                            color: Colors.red,
+                            location: BannerLocation.topStart,
+                            child: HomeForm(
+                              menuOptions: menuOptions,
+                              title: title,
+                            ),
+                          )
+                        : HomeForm(menuOptions: menuOptions, title: title),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 }
