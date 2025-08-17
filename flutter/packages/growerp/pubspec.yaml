@@ -11,7 +11,8 @@ executables:
   growerp: growerp
   convertToCsv: convert_to_csv
 environment:
-  sdk: ">=3.8.0 <4.0.0"
+  sdk: ^3.9.0
+  flutter: ^3.33.0
 dependencies:
   dcli: ^7.0.5
   dio: ^5.4.3

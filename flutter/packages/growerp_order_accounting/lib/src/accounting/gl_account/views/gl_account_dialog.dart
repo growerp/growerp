@@ -60,46 +60,52 @@ class GlAccountDialogState extends State<GlAccountDialog> {
   Widget build(BuildContext context) {
     int columns = ResponsiveBreakpoints.of(context).isMobile ? 1 : 2;
     return BlocListener<GlAccountBloc, GlAccountState>(
-        listenWhen: (previous, current) =>
-            previous.status == GlAccountStatus.glAccountLoading,
-        listener: (context, state) async {
-          switch (state.status) {
-            case GlAccountStatus.success:
-              Navigator.of(context).pop();
-              break;
-            case GlAccountStatus.failure:
-              HelperFunctions.showMessage(
-                  context, 'Error: ${state.message}', Colors.red);
-              break;
-            default:
-              const Text("????");
-          }
-        },
-        child: Dialog(
-            key: const Key('GlAccountDialog'),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: popUp(
-                context: context,
-                title: "GlAccount #${widget.glAccount.accountCode ?? " New"}",
-                width: columns.toDouble() * 400,
-                height: columns == 1
-                    ? 1 / columns.toDouble() * 650
-                    : 1 / columns.toDouble() * 700,
-                child: BlocBuilder<GlAccountBloc, GlAccountState>(
-                    builder: (context, state) {
-                  switch (state.status) {
-                    case GlAccountStatus.failure:
-                      return const FatalErrorForm(
-                          message: 'server connection problem');
-                    case GlAccountStatus.success:
-                      return _glAccountForm(state);
-                    default:
-                      return const Center(child: LoadingIndicator());
-                  }
-                }))));
+      listenWhen: (previous, current) =>
+          previous.status == GlAccountStatus.glAccountLoading,
+      listener: (context, state) async {
+        switch (state.status) {
+          case GlAccountStatus.success:
+            Navigator.of(context).pop();
+            break;
+          case GlAccountStatus.failure:
+            HelperFunctions.showMessage(
+              context,
+              'Error: ${state.message}',
+              Colors.red,
+            );
+            break;
+          default:
+            const Text("????");
+        }
+      },
+      child: Dialog(
+        key: const Key('GlAccountDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: popUp(
+          context: context,
+          title: "GlAccount #${widget.glAccount.accountCode ?? " New"}",
+          width: columns.toDouble() * 400,
+          height: columns == 1
+              ? 1 / columns.toDouble() * 650
+              : 1 / columns.toDouble() * 700,
+          child: BlocBuilder<GlAccountBloc, GlAccountState>(
+            builder: (context, state) {
+              switch (state.status) {
+                case GlAccountStatus.failure:
+                  return const FatalErrorForm(
+                    message: 'server connection problem',
+                  );
+                case GlAccountStatus.success:
+                  return _glAccountForm(state);
+                default:
+                  return const Center(child: LoadingIndicator());
+              }
+            },
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _glAccountForm(state) {
@@ -121,10 +127,18 @@ class GlAccountDialogState extends State<GlAccountDialog> {
         },
       ),
       if (widget.glAccount.glAccountId != null)
-        CreditDebitButton(
-            isDebit: debitSelected,
-            canUpdate: false,
-            onValueChanged: (debitSelected) {}),
+        RadioGroup<bool>(
+          key: const Key('debit'),
+          groupValue: debitSelected,
+          onChanged: (bool? value) {
+            setState(() {
+              debitSelected = value!;
+            });
+          },
+          child: const Row(
+            children: [Radio<bool>(value: true), Radio<bool>(value: false)],
+          ),
+        ),
       DropdownSearch<AccountClass>(
         key: const Key('class'),
         selectedItem: classSelected,
@@ -144,14 +158,15 @@ class GlAccountDialogState extends State<GlAccountDialog> {
           ),
         ),
         dropdownDecoratorProps: const DropDownDecoratorProps(
-            dropdownSearchDecoration:
-                InputDecoration(labelText: 'AccountClass')),
+          dropdownSearchDecoration: InputDecoration(labelText: 'AccountClass'),
+        ),
         itemAsString: (AccountClass? u) =>
             " ${u!.topDescription!.substring(0, 1)}-${u.parentDescription}-"
             "${u.description}-${u.detailDescription}",
         asyncItems: (String filter) async {
-          _glAccountBloc
-              .add(GlAccountClassesFetch(searchString: filter, limit: 3));
+          _glAccountBloc.add(
+            GlAccountClassesFetch(searchString: filter, limit: 3),
+          );
           return Future.delayed(const Duration(milliseconds: 100), () {
             return Future.value(_glAccountBloc.state.accountClasses);
           });
@@ -185,12 +200,13 @@ class GlAccountDialogState extends State<GlAccountDialog> {
           ),
         ),
         dropdownDecoratorProps: const DropDownDecoratorProps(
-            dropdownSearchDecoration:
-                InputDecoration(labelText: 'Account Type')),
+          dropdownSearchDecoration: InputDecoration(labelText: 'Account Type'),
+        ),
         itemAsString: (AccountType? u) => " ${u!.description}",
         asyncItems: (String filter) async {
-          _glAccountBloc
-              .add(GlAccountTypesFetch(searchString: filter, limit: 3));
+          _glAccountBloc.add(
+            GlAccountTypesFetch(searchString: filter, limit: 3),
+          );
           return Future.delayed(const Duration(milliseconds: 100), () {
             return Future.value(_glAccountBloc.state.accountTypes);
           });
@@ -206,27 +222,32 @@ class GlAccountDialogState extends State<GlAccountDialog> {
         controller: _postedBalanceController,
       ),
       OutlinedButton(
-          key: const Key('update'),
-          child:
-              Text(widget.glAccount.glAccountId == null ? 'Create' : 'Update'),
-          onPressed: () {
-            if (_formKeyGlAccount.currentState!.validate()) {
-              _glAccountBloc.add(GlAccountUpdate(GlAccount(
-                glAccountId: widget.glAccount.glAccountId,
-                accountName: _accountNameController.text,
-                accountCode: _accountCodeController.text,
-                accountClass: AccountClass(
+        key: const Key('update'),
+        child: Text(widget.glAccount.glAccountId == null ? 'Create' : 'Update'),
+        onPressed: () {
+          if (_formKeyGlAccount.currentState!.validate()) {
+            _glAccountBloc.add(
+              GlAccountUpdate(
+                GlAccount(
+                  glAccountId: widget.glAccount.glAccountId,
+                  accountName: _accountNameController.text,
+                  accountCode: _accountCodeController.text,
+                  accountClass: AccountClass(
                     description: classSelected!.detailDescription!.isNotEmpty
                         ? classSelected?.detailDescription
                         : classSelected!.description!.isNotEmpty
-                            ? classSelected?.description
-                            : classSelected!.parentDescription!.isNotEmpty
-                                ? classSelected?.parentDescription
-                                : classSelected?.topDescription),
-                accountType: typeSelected,
-              )));
-            }
-          }),
+                        ? classSelected?.description
+                        : classSelected!.parentDescription!.isNotEmpty
+                        ? classSelected?.parentDescription
+                        : classSelected?.topDescription,
+                  ),
+                  accountType: typeSelected,
+                ),
+              ),
+            );
+          }
+        },
+      ),
     ];
 
     List<Widget> rows = [];
@@ -234,33 +255,40 @@ class GlAccountDialogState extends State<GlAccountDialog> {
     if (!ResponsiveBreakpoints.of(context).isMobile) {
       // change list in two columns
       for (var i = 0; i < widgets.length; i++) {
-        rows.add(Row(
-          children: [
-            Expanded(
+        rows.add(
+          Row(
+            children: [
+              Expanded(
                 child: Padding(
-                    padding: const EdgeInsets.all(5), child: widgets[i++])),
-            Expanded(
+                  padding: const EdgeInsets.all(5),
+                  child: widgets[i++],
+                ),
+              ),
+              Expanded(
                 child: Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: i < widgets.length ? widgets[i] : Container()))
-          ],
-        ));
+                  padding: const EdgeInsets.all(5),
+                  child: i < widgets.length ? widgets[i] : Container(),
+                ),
+              ),
+            ],
+          ),
+        );
       }
     } else {
       for (var i = 0; i < widgets.length; i++) {
-        column.add(Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: widgets[i],
-        ));
+        column.add(
+          Padding(padding: const EdgeInsets.all(8.0), child: widgets[i]),
+        );
       }
     }
 
     return Form(
       key: _formKeyGlAccount,
       child: SingleChildScrollView(
-          key: const Key('listView'),
-          padding: const EdgeInsets.all(20),
-          child: Column(children: rows.isEmpty ? column : rows)),
+        key: const Key('listView'),
+        padding: const EdgeInsets.all(20),
+        child: Column(children: rows.isEmpty ? column : rows),
+      ),
     );
   }
 }

@@ -51,11 +51,18 @@ class OpportunityDialogState extends State<OpportunityDialog> {
   void initState() {
     super.initState();
     _employeeBloc = context.read<DataFetchBloc<Users>>()
-      ..add(GetDataEvent(() =>
-          context.read<RestClient>().getUser(limit: 3, role: Role.company)));
+      ..add(
+        GetDataEvent(
+          () =>
+              context.read<RestClient>().getUser(limit: 3, role: Role.company),
+        ),
+      );
     _leadBloc = context.read<DataFetchBlocOther<Users>>()
-      ..add(GetDataEvent(
-          () => context.read<RestClient>().getUser(limit: 3, role: Role.lead)));
+      ..add(
+        GetDataEvent(
+          () => context.read<RestClient>().getUser(limit: 3, role: Role.lead),
+        ),
+      );
     _opportunityBloc = context.read<OpportunityBloc>();
     _nameController.text = widget.opportunity.opportunityName ?? '';
     _pseudoIdController.text = widget.opportunity.pseudoId;
@@ -82,32 +89,36 @@ class OpportunityDialogState extends State<OpportunityDialog> {
   Widget build(BuildContext context) {
     int columns = ResponsiveBreakpoints.of(context).isMobile ? 1 : 2;
     return BlocListener<OpportunityBloc, OpportunityState>(
-        listener: (context, state) async {
-          switch (state.status) {
-            case OpportunityStatus.success:
-              Navigator.of(context).pop();
-              break;
-            case OpportunityStatus.failure:
-              HelperFunctions.showMessage(
-                  context, 'Error: ${state.message}', Colors.red);
-              break;
-            default:
-              const Text("????");
-          }
-        },
-        child: Dialog(
-            key: const Key('OpportunityDialog'),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: popUp(
-                context: context,
-                title:
-                    "Opportunity #${widget.opportunity.pseudoId.isEmpty ? " New" : widget.opportunity.pseudoId}",
-                width: columns.toDouble() * 400,
-                height: 1 / columns.toDouble() * 1000,
-                child: _opportunityForm())));
+      listener: (context, state) async {
+        switch (state.status) {
+          case OpportunityStatus.success:
+            Navigator.of(context).pop();
+            break;
+          case OpportunityStatus.failure:
+            HelperFunctions.showMessage(
+              context,
+              'Error: ${state.message}',
+              Colors.red,
+            );
+            break;
+          default:
+            const Text("????");
+        }
+      },
+      child: Dialog(
+        key: const Key('OpportunityDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: popUp(
+          context: context,
+          title:
+              "Opportunity #${widget.opportunity.pseudoId.isEmpty ? " New" : widget.opportunity.pseudoId}",
+          width: columns.toDouble() * 400,
+          height: 1 / columns.toDouble() * 1000,
+          child: _opportunityForm(),
+        ),
+      ),
+    );
   }
 
   Widget _opportunityForm() {
@@ -135,7 +146,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
         key: const Key('estAmount'),
         keyboardType: TextInputType.number,
         inputFormatters: <TextInputFormatter>[
-          FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
+          FilteringTextInputFormatter.allow(RegExp('[0-9.,]+')),
         ],
         decoration: const InputDecoration(labelText: 'Expected revenue Amount'),
         controller: _estAmountController,
@@ -167,7 +178,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
       ),
       DropdownButtonFormField<String>(
         key: const Key('stageId'),
-        value: _selectedStageId,
+        initialValue: _selectedStageId,
         decoration: const InputDecoration(labelText: 'Opportunity Stage'),
         validator: (value) => value == null ? 'field required' : null,
         items: opportunityStages.map((item) {
@@ -187,49 +198,53 @@ class OpportunityDialogState extends State<OpportunityDialog> {
               return const LoadingIndicator();
             case DataFetchStatus.success:
               return DropdownSearch<User>(
-                  selectedItem: _selectedLead,
-                  popupProps: PopupProps.menu(
-                    isFilterOnline: true,
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      autofocus: true,
-                      decoration: const InputDecoration(labelText: "lead,name"),
-                      controller: _leadSearchBoxController,
-                    ),
-                    menuProps:
-                        MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                    title: popUp(
-                      context: context,
-                      title: 'Select Lead',
-                      height: 50,
-                    ),
+                selectedItem: _selectedLead,
+                popupProps: PopupProps.menu(
+                  isFilterOnline: true,
+                  showSearchBox: true,
+                  searchFieldProps: TextFieldProps(
+                    autofocus: true,
+                    decoration: const InputDecoration(labelText: "lead,name"),
+                    controller: _leadSearchBoxController,
                   ),
-                  dropdownDecoratorProps: const DropDownDecoratorProps(
-                      dropdownSearchDecoration:
-                          InputDecoration(labelText: 'Lead')),
-                  key: const Key('lead'),
-                  itemAsString: (User? u) => " ${u?.firstName} ${u?.lastName} "
-                      "${u?.company!.name}",
-                  asyncItems: (String filter) {
-                    _leadBloc.add(GetDataEvent(() => context
-                        .read<RestClient>()
-                        .getUser(
-                            searchString: filter,
-                            limit: 3,
-                            isForDropDown: true,
-                            role: Role.lead)));
-                    return Future.delayed(const Duration(milliseconds: 150),
-                        () {
-                      return Future.value(
-                          (_leadBloc.state.data as Users).users);
-                    });
-                  },
-                  compareFn: (item, sItem) => item.partyId == sItem.partyId,
-                  onChanged: (User? newValue) {
-                    setState(() {
-                      _selectedLead = newValue;
-                    });
+                  menuProps: MenuProps(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  title: popUp(
+                    context: context,
+                    title: 'Select Lead',
+                    height: 50,
+                  ),
+                ),
+                dropdownDecoratorProps: const DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(labelText: 'Lead'),
+                ),
+                key: const Key('lead'),
+                itemAsString: (User? u) =>
+                    " ${u?.firstName} ${u?.lastName} "
+                    "${u?.company!.name}",
+                asyncItems: (String filter) {
+                  _leadBloc.add(
+                    GetDataEvent(
+                      () => context.read<RestClient>().getUser(
+                        searchString: filter,
+                        limit: 3,
+                        isForDropDown: true,
+                        role: Role.lead,
+                      ),
+                    ),
+                  );
+                  return Future.delayed(const Duration(milliseconds: 150), () {
+                    return Future.value((_leadBloc.state.data as Users).users);
                   });
+                },
+                compareFn: (item, sItem) => item.partyId == sItem.partyId,
+                onChanged: (User? newValue) {
+                  setState(() {
+                    _selectedLead = newValue;
+                  });
+                },
+              );
             default:
               return const Center(child: LoadingIndicator());
           }
@@ -244,50 +259,59 @@ class OpportunityDialogState extends State<OpportunityDialog> {
               return const LoadingIndicator();
             case DataFetchStatus.success:
               return DropdownSearch<User>(
-                  selectedItem: _selectedAccount,
-                  popupProps: PopupProps.menu(
-                    isFilterOnline: true,
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      autofocus: true,
-                      decoration:
-                          const InputDecoration(labelText: "employee,name"),
-                      controller: _accountSearchBoxController,
+                selectedItem: _selectedAccount,
+                popupProps: PopupProps.menu(
+                  isFilterOnline: true,
+                  showSearchBox: true,
+                  searchFieldProps: TextFieldProps(
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      labelText: "employee,name",
                     ),
-                    menuProps:
-                        MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                    title: popUp(
-                      context: context,
-                      title: 'Select employee',
-                      height: 50,
-                    ),
+                    controller: _accountSearchBoxController,
                   ),
-                  dropdownDecoratorProps: const DropDownDecoratorProps(
-                      dropdownSearchDecoration:
-                          InputDecoration(labelText: 'Account Employee')),
-                  key: const Key('employee'),
-                  itemAsString: (User? u) => " ${u?.firstName} ${u?.lastName} "
-                      "${u?.company!.name}",
-                  asyncItems: (String filter) {
-                    _employeeBloc.add(GetDataEvent(() => context
-                        .read<RestClient>()
-                        .getUser(
-                            searchString: filter,
-                            limit: 3,
-                            isForDropDown: true,
-                            role: Role.company)));
-                    return Future.delayed(const Duration(milliseconds: 150),
-                        () {
-                      return Future.value(
-                          (_employeeBloc.state.data as Users).users);
-                    });
-                  },
-                  compareFn: (item, sItem) => item.partyId == sItem.partyId,
-                  onChanged: (User? newValue) {
-                    setState(() {
-                      _selectedAccount = newValue;
-                    });
+                  menuProps: MenuProps(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  title: popUp(
+                    context: context,
+                    title: 'Select employee',
+                    height: 50,
+                  ),
+                ),
+                dropdownDecoratorProps: const DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: 'Account Employee',
+                  ),
+                ),
+                key: const Key('employee'),
+                itemAsString: (User? u) =>
+                    " ${u?.firstName} ${u?.lastName} "
+                    "${u?.company!.name}",
+                asyncItems: (String filter) {
+                  _employeeBloc.add(
+                    GetDataEvent(
+                      () => context.read<RestClient>().getUser(
+                        searchString: filter,
+                        limit: 3,
+                        isForDropDown: true,
+                        role: Role.company,
+                      ),
+                    ),
+                  );
+                  return Future.delayed(const Duration(milliseconds: 150), () {
+                    return Future.value(
+                      (_employeeBloc.state.data as Users).users,
+                    );
                   });
+                },
+                compareFn: (item, sItem) => item.partyId == sItem.partyId,
+                onChanged: (User? newValue) {
+                  setState(() {
+                    _selectedAccount = newValue;
+                  });
+                },
+              );
             default:
               return const Center(child: LoadingIndicator());
           }
@@ -296,47 +320,61 @@ class OpportunityDialogState extends State<OpportunityDialog> {
       Row(
         children: [
           Expanded(
-              child: OutlinedButton(
-                  key: const Key('update'),
-                  child: Text(widget.opportunity.opportunityId.isEmpty
-                      ? 'Create'
-                      : 'Update'),
-                  onPressed: () {
-                    if (_formKeyOpportunity.currentState!.validate()) {
-                      _opportunityBloc.add(OpportunityUpdate(Opportunity(
+            child: OutlinedButton(
+              key: const Key('update'),
+              child: Text(
+                widget.opportunity.opportunityId.isEmpty ? 'Create' : 'Update',
+              ),
+              onPressed: () {
+                if (_formKeyOpportunity.currentState!.validate()) {
+                  _opportunityBloc.add(
+                    OpportunityUpdate(
+                      Opportunity(
                         opportunityId: widget.opportunity.opportunityId,
                         opportunityName: _nameController.text,
                         pseudoId: _pseudoIdController.text,
                         description: _descriptionController.text,
                         estAmount: Decimal.parse(_estAmountController.text),
-                        estProbability:
-                            Decimal.parse(_estProbabilityController.text),
+                        estProbability: Decimal.parse(
+                          _estProbabilityController.text,
+                        ),
                         stageId: _selectedStageId,
                         nextStep: _estNextStepController.text,
                         employeeUser: _selectedAccount,
                         leadUser: _selectedLead,
-                      )));
-                    }
-                  }))
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+          ),
         ],
-      )
+      ),
     ];
 
     List<Widget> rows = [];
     if (!ResponsiveBreakpoints.of(context).isMobile) {
       // change list in two columns
       for (var i = 0; i < widgets.length; i++) {
-        rows.add(Row(
-          children: [
-            Expanded(
+        rows.add(
+          Row(
+            children: [
+              Expanded(
                 child: Padding(
-                    padding: const EdgeInsets.all(10), child: widgets[i++])),
-            Expanded(
+                  padding: const EdgeInsets.all(10),
+                  child: widgets[i++],
+                ),
+              ),
+              Expanded(
                 child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: i < widgets.length ? widgets[i] : Container()))
-          ],
-        ));
+                  padding: const EdgeInsets.all(10),
+                  child: i < widgets.length ? widgets[i] : Container(),
+                ),
+              ),
+            ],
+          ),
+        );
       }
     }
     List<Widget> column = [];
@@ -345,11 +383,12 @@ class OpportunityDialogState extends State<OpportunityDialog> {
     }
 
     return Form(
-        key: _formKeyOpportunity,
-        child: SingleChildScrollView(
-          key: const Key('listView'),
-          padding: const EdgeInsets.all(20),
-          child: Column(children: (rows.isEmpty ? column : rows)),
-        ));
+      key: _formKeyOpportunity,
+      child: SingleChildScrollView(
+        key: const Key('listView'),
+        padding: const EdgeInsets.all(20),
+        child: Column(children: (rows.isEmpty ? column : rows)),
+      ),
+    );
   }
 }

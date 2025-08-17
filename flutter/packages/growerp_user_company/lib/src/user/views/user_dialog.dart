@@ -39,22 +39,28 @@ class UserDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     DataFetchBloc userBloc = context.read<DataFetchBloc<Users>>()
-      ..add(GetDataEvent(() => context.read<RestClient>().getUser(
+      ..add(
+        GetDataEvent(
+          () => context.read<RestClient>().getUser(
             partyId: user.partyId,
             limit: 1,
-          )));
+          ),
+        ),
+      );
     return BlocBuilder<DataFetchBloc<Users>, DataFetchState<Users>>(
-        builder: (context, state) {
-      if (state.status == DataFetchStatus.success ||
-          state.status == DataFetchStatus.failure) {
-        if ((userBloc.state.data as Users).users.isEmpty) {
-          return FatalErrorForm(message: 'User ${user.partyId} not found');
+      builder: (context, state) {
+        if (state.status == DataFetchStatus.success ||
+            state.status == DataFetchStatus.failure) {
+          if ((userBloc.state.data as Users).users.isEmpty) {
+            return FatalErrorForm(message: 'User ${user.partyId} not found');
+          }
+          return UserDialogStateFull(
+            user: (userBloc.state.data as Users).users[0],
+          );
         }
-        return UserDialogStateFull(
-            user: (userBloc.state.data as Users).users[0]);
-      }
-      return const LoadingIndicator();
-    });
+        return const LoadingIndicator();
+      },
+    );
   }
 }
 
@@ -128,11 +134,15 @@ class UserDialogState extends State<UserDialogStateFull> {
     _classificationId = context.read<String>();
     currentUser = _authBloc.state.authenticate!.user!;
     _companyBloc = context.read<CompanyBloc>()
-      ..add(CompanyFetch(
+      ..add(
+        CompanyFetch(
           ownerPartyId: _authBloc.state.authenticate!.ownerPartyId!,
           limit: 3,
-          isForDropDown: true));
-    isAdmin = context.read<AuthBloc>().state.authenticate!.user!.userGroup ==
+          isForDropDown: true,
+        ),
+      );
+    isAdmin =
+        context.read<AuthBloc>().state.authenticate!.user!.userGroup ==
         UserGroup.admin;
     top = -100;
 
@@ -165,12 +175,12 @@ class UserDialogState extends State<UserDialogStateFull> {
     super.dispose();
   }
 
-  void _onImageButtonPressed(ImageSource source,
-      {BuildContext? context}) async {
+  void _onImageButtonPressed(
+    ImageSource source, {
+    BuildContext? context,
+  }) async {
     try {
-      final pickedFile = await _picker.pickImage(
-        source: source,
-      );
+      final pickedFile = await _picker.pickImage(source: source);
       _image = await HelperFunctions.getResizedImage(pickedFile?.path);
       setState(() {
         _imageFile = pickedFile;
@@ -202,7 +212,8 @@ class UserDialogState extends State<UserDialogStateFull> {
     right = right ?? (isPhone ? 20 : 40);
     String title = '';
     if (_selectedRole == Role.company) {
-      title = widget.user.userGroup != null &&
+      title =
+          widget.user.userGroup != null &&
               widget.user.userGroup == UserGroup.admin
           ? 'Admininistrator'
           : 'Employee';
@@ -211,126 +222,137 @@ class UserDialogState extends State<UserDialogStateFull> {
     }
 
     return Dialog(
-        key: Key('UserDialog${_selectedRole.name}'),
-        insetPadding: const EdgeInsets.all(10),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: popUp(
-            context: context,
-            title: "$title #${widget.user.pseudoId ?? ' new'}",
-            width: isPhone ? 400 : 800,
-            height: isPhone ? 700 : 600,
-            child: ScaffoldMessenger(
-              child: Scaffold(
-                  backgroundColor: Colors.transparent,
-                  body: Stack(
-                    children: [
-                      BlocConsumer<UserBloc, UserState>(
-                          listener: (context, state) {
-                        if (state.status == UserStatus.failure) {
-                          HelperFunctions.showMessage(
-                              context, state.message, Colors.red);
-                        }
-                        if (state.status == UserStatus.success) {
-                          Navigator.of(context).pop(state.users.isNotEmpty
-                              ? state.users.first
-                              : null);
-                        }
-                      }, builder: (context, state) {
-                        if (state.status == UserStatus.loading) {
-                          return const LoadingIndicator();
-                        }
-                        return listChild();
-                      }),
-                      Positioned(
-                        right: right,
-                        top: top,
-                        child: GestureDetector(
-                          onPanUpdate: (details) {
-                            setState(() {
-                              top += details.delta.dy;
-                              right = right! - details.delta.dx;
-                            });
-                          },
-                          child: Column(
-                            children: [
-                              ImageButtons(
-                                  _scrollController, _onImageButtonPressed),
-                              SizedBox(height: isPhone ? 330 : 280),
-                              Visibility(
-                                visible: isVisible,
-                                child: FloatingActionButton(
-                                  key: const Key("events"),
-                                  tooltip: 'Show user events',
-                                  heroTag: "userEvents",
-                                  onPressed: () async => await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return Dialog(
-                                            child: popUp(
-                                                context: context,
-                                                title: ('User events'),
-                                                child: ActivityList(
-                                                  ActivityType.event,
-                                                  companyUser:
-                                                      CompanyUser.tryParse(
-                                                          widget.user),
-                                                )));
-                                      }),
-                                  child: const Icon(Icons.event_available),
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              if (isPhone)
-                                Visibility(
-                                  visible: isVisible,
-                                  child: FloatingActionButton(
-                                      key: const Key("updateFloat"),
-                                      heroTag: "userUpdate",
-                                      onPressed: () {
-                                        updatedUser = updatedUser.copyWith(
-                                            pseudoId: _idController.text,
-                                            firstName:
-                                                _firstNameController.text,
-                                            lastName: _lastNameController.text,
-                                            email: _emailController.text,
-                                            url: _urlController.text,
-                                            loginName:
-                                                _loginNameController.text,
-                                            telephoneNr:
-                                                _telephoneController.text,
-                                            address: updatedUser.address,
-                                            paymentMethod:
-                                                updatedUser.paymentMethod,
-                                            loginDisabled: _isLoginDisabled,
-                                            userGroup: _selectedUserGroup,
-                                            role: _selectedRole,
-                                            appsUsed: [_classificationId],
-                                            //                      language: Localizations.localeOf(context)
-                                            //                          .languageCode
-                                            //                          .toString(),
-                                            company: _selectedCompany.copyWith(
-                                                role: _selectedRole),
-                                            image: _image);
-
-                                        _userBloc.add(UserUpdate(updatedUser));
-                                        // if logged-in user update authBloc
-                                        if (currentUser.partyId ==
-                                            updatedUser.partyId) {
-                                          _authBloc.add(AuthLoad());
-                                        }
-                                      },
-                                      child: Icon(widget.user.partyId != null
-                                          ? Icons.update_sharp
-                                          : Icons.add_sharp)),
-                                ),
-                            ],
+      key: Key('UserDialog${_selectedRole.name}'),
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: "$title #${widget.user.pseudoId ?? ' new'}",
+        width: isPhone ? 400 : 800,
+        height: isPhone ? 700 : 600,
+        child: ScaffoldMessenger(
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Stack(
+              children: [
+                BlocConsumer<UserBloc, UserState>(
+                  listener: (context, state) {
+                    if (state.status == UserStatus.failure) {
+                      HelperFunctions.showMessage(
+                        context,
+                        state.message,
+                        Colors.red,
+                      );
+                    }
+                    if (state.status == UserStatus.success) {
+                      Navigator.of(
+                        context,
+                      ).pop(state.users.isNotEmpty ? state.users.first : null);
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state.status == UserStatus.loading) {
+                      return const LoadingIndicator();
+                    }
+                    return listChild();
+                  },
+                ),
+                Positioned(
+                  right: right,
+                  top: top,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        top += details.delta.dy;
+                        right = right! - details.delta.dx;
+                      });
+                    },
+                    child: Column(
+                      children: [
+                        ImageButtons(_scrollController, _onImageButtonPressed),
+                        SizedBox(height: isPhone ? 330 : 280),
+                        Visibility(
+                          visible: isVisible,
+                          child: FloatingActionButton(
+                            key: const Key("events"),
+                            tooltip: 'Show user events',
+                            heroTag: "userEvents",
+                            onPressed: () async => await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Dialog(
+                                  child: popUp(
+                                    context: context,
+                                    title: ('User events'),
+                                    child: ActivityList(
+                                      ActivityType.event,
+                                      companyUser: CompanyUser.tryParse(
+                                        widget.user,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            child: const Icon(Icons.event_available),
                           ),
                         ),
-                      ),
-                    ],
-                  )),
-            )));
+                        const SizedBox(height: 10),
+                        if (isPhone)
+                          Visibility(
+                            visible: isVisible,
+                            child: FloatingActionButton(
+                              key: const Key("updateFloat"),
+                              heroTag: "userUpdate",
+                              onPressed: () {
+                                updatedUser = updatedUser.copyWith(
+                                  pseudoId: _idController.text,
+                                  firstName: _firstNameController.text,
+                                  lastName: _lastNameController.text,
+                                  email: _emailController.text,
+                                  url: _urlController.text,
+                                  loginName: _loginNameController.text,
+                                  telephoneNr: _telephoneController.text,
+                                  address: updatedUser.address,
+                                  paymentMethod: updatedUser.paymentMethod,
+                                  loginDisabled: _isLoginDisabled,
+                                  userGroup: _selectedUserGroup,
+                                  role: _selectedRole,
+                                  appsUsed: [_classificationId],
+                                  //                      language: Localizations.localeOf(context)
+                                  //                          .languageCode
+                                  //                          .toString(),
+                                  company: _selectedCompany.copyWith(
+                                    role: _selectedRole,
+                                  ),
+                                  image: _image,
+                                );
+
+                                _userBloc.add(UserUpdate(updatedUser));
+                                // if logged-in user update authBloc
+                                if (currentUser.partyId ==
+                                    updatedUser.partyId) {
+                                  _authBloc.add(AuthLoad());
+                                }
+                              },
+                              child: Icon(
+                                widget.user.partyId != null
+                                    ? Icons.update_sharp
+                                    : Icons.add_sharp,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget listChild() {
@@ -345,7 +367,8 @@ class UserDialogState extends State<UserDialogStateFull> {
                 );
               }
               return _showForm();
-            })
+            },
+          )
         : _showForm();
   }
 
@@ -377,9 +400,7 @@ class UserDialogState extends State<UserDialogStateFull> {
       InputDecorator(
         decoration: InputDecoration(
           labelText: 'User information',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(25.0),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
         ),
         child: Column(
           children: [
@@ -397,12 +418,14 @@ class UserDialogState extends State<UserDialogStateFull> {
                     key: const Key('role'),
                     decoration: const InputDecoration(labelText: 'Role'),
                     hint: const Text('Role'),
-                    value: _selectedRole,
+                    initialValue: _selectedRole,
                     validator: (value) =>
                         value == Role.unknown ? 'Select a valid role!' : null,
                     items: Role.values.map((item) {
                       return DropdownMenuItem<Role>(
-                          value: item, child: Text(item.value));
+                        value: item,
+                        child: Text(item.value),
+                      );
                     }).toList(),
                     onChanged: _selectedRole != Role.unknown
                         ? null
@@ -416,42 +439,47 @@ class UserDialogState extends State<UserDialogStateFull> {
                 ),
               ],
             ),
-            Row(children: [
-              Expanded(
+            Row(
+              children: [
+                Expanded(
                   child: TextFormField(
-                key: const Key('firstName'),
-                decoration: const InputDecoration(labelText: 'First Name'),
-                controller: _firstNameController,
-                validator: (value) {
-                  if (value!.isEmpty) return 'Please enter a first name?';
-                  return null;
-                },
-              )),
-              const SizedBox(width: 10),
-              Expanded(
-                child: TextFormField(
-                  key: const Key('lastName'),
-                  decoration: const InputDecoration(labelText: 'Last Name'),
-                  controller: _lastNameController,
-                  validator: (value) {
-                    if (value!.isEmpty) return 'Please enter a last name?';
-                    return null;
-                  },
+                    key: const Key('firstName'),
+                    decoration: const InputDecoration(labelText: 'First Name'),
+                    controller: _firstNameController,
+                    validator: (value) {
+                      if (value!.isEmpty) return 'Please enter a first name?';
+                      return null;
+                    },
+                  ),
                 ),
-              )
-            ]),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextFormField(
+                    key: const Key('lastName'),
+                    decoration: const InputDecoration(labelText: 'Last Name'),
+                    controller: _lastNameController,
+                    validator: (value) {
+                      if (value!.isEmpty) return 'Please enter a last name?';
+                      return null;
+                    },
+                  ),
+                ),
+              ],
+            ),
             Row(
               children: [
                 Expanded(
                   child: TextFormField(
                     key: const Key('userEmail'),
-                    decoration:
-                        const InputDecoration(labelText: 'Email address'),
+                    decoration: const InputDecoration(
+                      labelText: 'Email address',
+                    ),
                     controller: _emailController,
                     validator: (String? value) {
                       if (value!.isNotEmpty &&
-                          !RegExp(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
-                              .hasMatch(value)) {
+                          !RegExp(
+                            r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
+                          ).hasMatch(value)) {
                         return 'This is not a valid email';
                       }
                       if (value.isEmpty &&
@@ -474,8 +502,9 @@ class UserDialogState extends State<UserDialogStateFull> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('userTelephoneNr'),
-                    decoration:
-                        const InputDecoration(labelText: 'Telephone number'),
+                    decoration: const InputDecoration(
+                      labelText: 'Telephone number',
+                    ),
                     controller: _telephoneController,
                   ),
                 ),
@@ -485,242 +514,289 @@ class UserDialogState extends State<UserDialogStateFull> {
         ),
       ),
       InputDecorator(
-          decoration: InputDecoration(
-              labelText: 'Postal Address',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(25.0),
-              )),
-          child: Row(children: [
+        decoration: InputDecoration(
+          labelText: 'Postal Address',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
+        ),
+        child: Row(
+          children: [
             Expanded(
-                child: InkWell(
-                    key: const Key('address'),
-                    onTap: () async {
-                      var result = await showDialog(
+              child: InkWell(
+                key: const Key('address'),
+                onTap: () async {
+                  var result = await showDialog(
+                    barrierDismissible: true,
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AddressDialog(address: updatedUser.address);
+                    },
+                  );
+                  if (!mounted) return;
+                  if (result is Address) {
+                    setState(() {
+                      updatedUser = updatedUser.copyWith(address: result);
+                    });
+                  }
+                },
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        updatedUser.address?.address1 != null &&
+                                updatedUser.address?.address2 != "_DELETE_"
+                            ? "${updatedUser.address?.city} "
+                                  "${updatedUser.address?.country ?? ''}"
+                            : "No postal address yet",
+                        key: const Key('addressLabel'),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        const Icon(Icons.arrow_drop_down),
+                        const SizedBox(width: 10),
+                        if (updatedUser.address != null &&
+                            updatedUser.address?.address2 != "_DELETE_")
+                          IconButton(
+                            key: const Key('deleteAddress'),
+                            onPressed: isAdmin
+                                ? () => setState(
+                                    () => updatedUser = updatedUser.copyWith(
+                                      address: updatedUser.address!.copyWith(
+                                        address2: "_DELETE_",
+                                      ),
+                                    ),
+                                  )
+                                : null,
+                            icon: const Icon(Icons.clear),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      InputDecorator(
+        decoration: InputDecoration(
+          labelText: 'Payment method',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: InkWell(
+                key: const Key('paymentMethod'),
+                onTap: isAdmin && updatedUser.address != null
+                    ? () async {
+                        var result = await showDialog(
                           barrierDismissible: true,
                           context: context,
                           builder: (BuildContext context) {
-                            return AddressDialog(address: updatedUser.address);
+                            return PaymentMethodDialog(
+                              paymentMethod: updatedUser.paymentMethod,
+                            );
+                          },
+                        );
+                        if (!mounted) return;
+                        if (result is PaymentMethod) {
+                          setState(() {
+                            updatedUser = updatedUser.copyWith(
+                              paymentMethod: result,
+                            );
                           });
-                      if (!mounted) return;
-                      if (result is Address) {
-                        setState(() {
-                          updatedUser = updatedUser.copyWith(address: result);
-                        });
+                        }
                       }
-                    },
-                    child: Row(children: [
-                      Expanded(
-                        child: Text(
-                            updatedUser.address?.address1 != null &&
-                                    updatedUser.address?.address2 != "_DELETE_"
-                                ? "${updatedUser.address?.city} "
-                                    "${updatedUser.address?.country ?? ''}"
-                                : "No postal address yet",
-                            key: const Key('addressLabel')),
+                    : null,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        updatedUser.paymentMethod != null &&
+                                updatedUser.paymentMethod?.ccDescription !=
+                                    "_DELETE_"
+                            ? "${updatedUser.paymentMethod?.ccDescription}"
+                            : "No payment methods yet"
+                                  "${updatedUser.address == null ? ",\nneed postal address to add" : ""}",
+                        key: const Key('paymentMethodLabel'),
                       ),
-                      Row(
-                        children: [
-                          const Icon(Icons.arrow_drop_down),
-                          const SizedBox(width: 10),
-                          if (updatedUser.address != null &&
-                              updatedUser.address?.address2 != "_DELETE_")
-                            IconButton(
-                              key: const Key('deleteAddress'),
-                              onPressed: isAdmin
-                                  ? () => setState(() => updatedUser =
-                                      updatedUser.copyWith(
-                                          address: updatedUser.address!
-                                              .copyWith(address2: "_DELETE_")))
-                                  : null,
-                              icon: const Icon(Icons.clear),
-                            ),
-                        ],
-                      )
-                    ]))),
-          ])),
-      InputDecorator(
-          decoration: InputDecoration(
-              labelText: 'Payment method',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(25.0),
-              )),
-          child: Row(children: [
-            Expanded(
-                child: InkWell(
-                    key: const Key('paymentMethod'),
-                    onTap: isAdmin && updatedUser.address != null
-                        ? () async {
-                            var result = await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return PaymentMethodDialog(
-                                      paymentMethod: updatedUser.paymentMethod);
-                                });
-                            if (!mounted) return;
-                            if (result is PaymentMethod) {
-                              setState(() {
-                                updatedUser =
-                                    updatedUser.copyWith(paymentMethod: result);
-                              });
-                            }
-                          }
-                        : null,
-                    child: Row(children: [
-                      Expanded(
-                        child: Text(
-                            updatedUser.paymentMethod != null &&
-                                    updatedUser.paymentMethod?.ccDescription !=
-                                        "_DELETE_"
-                                ? "${updatedUser.paymentMethod?.ccDescription}"
-                                : "No payment methods yet"
-                                    "${updatedUser.address == null ? ",\nneed postal address to add" : ""}",
-                            key: const Key('paymentMethodLabel')),
-                      ),
-                      Row(
-                        children: [
-                          const Icon(Icons.arrow_drop_down),
-                          const SizedBox(width: 10),
-                          if (updatedUser.paymentMethod != null &&
-                              updatedUser.paymentMethod?.ccDescription !=
-                                  "_DELETE_")
-                            IconButton(
-                                key: const Key('deletePaymentMethod'),
-                                onPressed: isAdmin &&
-                                        updatedUser.paymentMethod != null
-                                    ? () => setState(() => updatedUser =
-                                        updatedUser.copyWith(
-                                            paymentMethod: updatedUser
-                                                .paymentMethod!
-                                                .copyWith(
-                                                    ccDescription: "_DELETE_")))
-                                    : null,
-                                icon: const Icon(Icons.clear)),
-                        ],
-                      )
-                    ]))),
-          ])),
+                    ),
+                    Row(
+                      children: [
+                        const Icon(Icons.arrow_drop_down),
+                        const SizedBox(width: 10),
+                        if (updatedUser.paymentMethod != null &&
+                            updatedUser.paymentMethod?.ccDescription !=
+                                "_DELETE_")
+                          IconButton(
+                            key: const Key('deletePaymentMethod'),
+                            onPressed:
+                                isAdmin && updatedUser.paymentMethod != null
+                                ? () => setState(
+                                    () => updatedUser = updatedUser.copyWith(
+                                      paymentMethod: updatedUser.paymentMethod!
+                                          .copyWith(ccDescription: "_DELETE_"),
+                                    ),
+                                  )
+                                : null,
+                            icon: const Icon(Icons.clear),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
       if (_selectedRole != Role.company)
         InputDecorator(
-            decoration: InputDecoration(
-                labelText: "${_selectedCompany.role?.value ?? Role.unknown}"
-                    " Company information",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                )),
-            child: Column(children: [
-              Row(children: [
-                Expanded(
-                  child: BlocBuilder<CompanyBloc, CompanyState>(
+          decoration: InputDecoration(
+            labelText:
+                "${_selectedCompany.role?.value ?? Role.unknown}"
+                " Company information",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(25.0),
+            ),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: BlocBuilder<CompanyBloc, CompanyState>(
                       builder: (context, state) {
-                    switch (state.status) {
-                      case CompanyStatus.failure:
-                        return const FatalErrorForm(
-                            message: 'server connection problem');
-                      case CompanyStatus.success:
-                        return DropdownSearch<Company>(
-                          key: const Key('userCompanyName'),
-                          selectedItem: _selectedCompany.name == null
-                              ? Company(name: '')
-                              : _selectedCompany,
-                          popupProps: PopupProps.menu(
-                            showSelectedItems: true,
-                            isFilterOnline: true,
-                            showSearchBox: true,
-                            searchFieldProps: TextFieldProps(
-                              autofocus: true,
-                              decoration: const InputDecoration(
-                                  labelText: "company,name"),
-                              controller: _companySearchBoxController,
-                            ),
-                            menuProps: MenuProps(
-                                borderRadius: BorderRadius.circular(20.0)),
-                            title: popUp(
-                              context: context,
-                              title: 'Select company',
-                              height: 50,
-                              width: 450,
-                            ),
-                          ),
-                          dropdownDecoratorProps: const DropDownDecoratorProps(
-                              dropdownSearchDecoration: InputDecoration(
-                                  labelText: 'Company name[id]')),
-                          itemAsString: (Company? u) => u?.pseudoId == null
-                              ? ''
-                              : " ${u!.name}[${u.pseudoId ?? ''}]",
-                          asyncItems: (String filter) {
-                            _companyBloc.add(CompanyFetch(
-                              ownerPartyId:
-                                  _authBloc.state.authenticate!.ownerPartyId!,
-                              searchString: filter,
-                              limit: 3,
-                              isForDropDown: true,
-                            ));
-                            return Future.delayed(
-                                const Duration(milliseconds: 100), () {
-                              return Future.value(_companyBloc.state.companies);
-                            });
-                          },
-                          compareFn: (item, sItem) =>
-                              item.partyId == sItem.partyId,
-                          onChanged: (Company? newValue) {
-                            setState(() {
-                              _selectedCompany = newValue ?? Company();
-                            });
-                          },
-                          validator: (value) =>
-                              value == null && _companyController.text == ''
+                        switch (state.status) {
+                          case CompanyStatus.failure:
+                            return const FatalErrorForm(
+                              message: 'server connection problem',
+                            );
+                          case CompanyStatus.success:
+                            return DropdownSearch<Company>(
+                              key: const Key('userCompanyName'),
+                              selectedItem: _selectedCompany.name == null
+                                  ? Company(name: '')
+                                  : _selectedCompany,
+                              popupProps: PopupProps.menu(
+                                showSelectedItems: true,
+                                isFilterOnline: true,
+                                showSearchBox: true,
+                                searchFieldProps: TextFieldProps(
+                                  autofocus: true,
+                                  decoration: const InputDecoration(
+                                    labelText: "company,name",
+                                  ),
+                                  controller: _companySearchBoxController,
+                                ),
+                                menuProps: MenuProps(
+                                  borderRadius: BorderRadius.circular(20.0),
+                                ),
+                                title: popUp(
+                                  context: context,
+                                  title: 'Select company',
+                                  height: 50,
+                                  width: 450,
+                                ),
+                              ),
+                              dropdownDecoratorProps:
+                                  const DropDownDecoratorProps(
+                                    dropdownSearchDecoration: InputDecoration(
+                                      labelText: 'Company name[id]',
+                                    ),
+                                  ),
+                              itemAsString: (Company? u) => u?.pseudoId == null
+                                  ? ''
+                                  : " ${u!.name}[${u.pseudoId ?? ''}]",
+                              asyncItems: (String filter) {
+                                _companyBloc.add(
+                                  CompanyFetch(
+                                    ownerPartyId: _authBloc
+                                        .state
+                                        .authenticate!
+                                        .ownerPartyId!,
+                                    searchString: filter,
+                                    limit: 3,
+                                    isForDropDown: true,
+                                  ),
+                                );
+                                return Future.delayed(
+                                  const Duration(milliseconds: 100),
+                                  () {
+                                    return Future.value(
+                                      _companyBloc.state.companies,
+                                    );
+                                  },
+                                );
+                              },
+                              compareFn: (item, sItem) =>
+                                  item.partyId == sItem.partyId,
+                              onChanged: (Company? newValue) {
+                                setState(() {
+                                  _selectedCompany = newValue ?? Company();
+                                });
+                              },
+                              validator: (value) =>
+                                  value == null && _companyController.text == ''
                                   ? "Select an existing or Create a new company"
                                   : null,
-                        );
-                      default:
-                        return const Center(child: LoadingIndicator());
-                    }
-                  }),
-                ),
-              ]),
+                            );
+                          default:
+                            return const Center(child: LoadingIndicator());
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 10),
               Row(
                 children: [
                   if (_selectedCompany.name != null)
                     Expanded(
-                        child: OutlinedButton(
-                      key: const Key('editCompany'),
-                      onPressed: () async {
-                        var result = await showDialog(
+                      child: OutlinedButton(
+                        key: const Key('editCompany'),
+                        onPressed: () async {
+                          var result = await showDialog(
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
-                              return ShowCompanyDialog(_selectedCompany,
-                                  dialog: true);
+                              return ShowCompanyDialog(
+                                _selectedCompany,
+                                dialog: true,
+                              );
+                            },
+                          );
+                          if (result is Company) {
+                            setState(() {
+                              _selectedCompany = result;
+                              _selectedRole = result.role!;
                             });
-                        if (result is Company) {
-                          setState(() {
-                            _selectedCompany = result;
-                            _selectedRole = result.role!;
-                          });
-                        }
-                      },
-                      child: const Text('Update'),
-                    )),
+                          }
+                        },
+                        child: const Text('Update'),
+                      ),
+                    ),
                   const SizedBox(width: 5),
                   if (_selectedCompany.name != null)
                     Expanded(
-                        child: OutlinedButton(
-                      key: const Key('removeCompany'),
-                      onPressed: () async {
-                        setState(() {
-                          _selectedCompany = Company();
-                        });
-                      },
-                      child: const Text('Remove'),
-                    )),
+                      child: OutlinedButton(
+                        key: const Key('removeCompany'),
+                        onPressed: () async {
+                          setState(() {
+                            _selectedCompany = Company();
+                          });
+                        },
+                        child: const Text('Remove'),
+                      ),
+                    ),
                   const SizedBox(width: 5),
                   Expanded(
-                      child: OutlinedButton(
-                    key: const Key('newCompany'),
-                    onPressed: () async {
-                      var result = await showDialog(
+                    child: OutlinedButton(
+                      key: const Key('newCompany'),
+                      onPressed: () async {
+                        var result = await showDialog(
                           barrierDismissible: true,
                           context: context,
                           builder: (BuildContext context) {
@@ -728,29 +804,34 @@ class UserDialogState extends State<UserDialogStateFull> {
                               Company(partyId: '_NEW_', role: _selectedRole),
                               dialog: true,
                             );
+                          },
+                        );
+                        if (result is Company) {
+                          setState(() {
+                            _selectedCompany = result;
+                            _selectedRole = result.role!;
                           });
-                      if (result is Company) {
-                        setState(() {
-                          _selectedCompany = result;
-                          _selectedRole = result.role!;
-                        });
-                      }
-                    },
-                    child: Text(_selectedCompany.name != null
-                        ? 'Add new'
-                        : 'Add new related compamy'),
-                  )),
+                        }
+                      },
+                      child: Text(
+                        _selectedCompany.name != null
+                            ? 'Add new'
+                            : 'Add new related compamy',
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ])),
-      InputDecorator(
-          decoration: InputDecoration(
-            labelText: 'User Login',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(25.0),
-            ),
+            ],
           ),
-          child: Column(children: [
+        ),
+      InputDecorator(
+        decoration: InputDecoration(
+          labelText: 'User Login',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
+        ),
+        child: Column(
+          children: [
             TextFormField(
               readOnly: !(currentUser.userGroup == UserGroup.admin),
               key: const Key('loginName'),
@@ -773,72 +854,88 @@ class UserDialogState extends State<UserDialogStateFull> {
             ),
             if (currentUser.userGroup == UserGroup.admin &&
                 _loginNameController.text.isNotEmpty)
-              Column(children: [
-                const SizedBox(height: 10),
-                Row(children: [
-                  Expanded(
-                      child: DropdownButtonFormField<UserGroup>(
-                    decoration:
-                        const InputDecoration(labelText: 'Security User Group'),
-                    key: const Key('userGroup'),
-                    hint: const Text('Security User Group'),
-                    value: _selectedUserGroup,
-                    validator: (value) =>
-                        value == null ? 'field required' : null,
-                    items: localUserGroups.map((item) {
-                      return DropdownMenuItem<UserGroup>(
-                          value: item, child: Text(item.name));
-                    }).toList(),
-                    onChanged: (UserGroup? newValue) {
-                      setState(() {
-                        _selectedUserGroup = newValue!;
-                      });
-                    },
-                    isExpanded: true,
-                  )),
-                  const SizedBox(width: 10),
-                  SizedBox(
-                    width: 100,
-                    height: 60,
-                    child: InputDecorator(
-                        decoration: InputDecoration(
-                          labelText: 'Disabled',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25.0),
+              Column(
+                children: [
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<UserGroup>(
+                          decoration: const InputDecoration(
+                            labelText: 'Security User Group',
                           ),
-                        ),
-                        child: Checkbox(
-                          key: const Key('loginDisabled'),
-                          value: _isLoginDisabled,
-                          onChanged: (bool? value) {
+                          key: const Key('userGroup'),
+                          hint: const Text('Security User Group'),
+                          initialValue: _selectedUserGroup,
+                          validator: (value) =>
+                              value == null ? 'field required' : null,
+                          items: localUserGroups.map((item) {
+                            return DropdownMenuItem<UserGroup>(
+                              value: item,
+                              child: Text(item.name),
+                            );
+                          }).toList(),
+                          onChanged: (UserGroup? newValue) {
                             setState(() {
-                              _isLoginDisabled = value!;
+                              _selectedUserGroup = newValue!;
                             });
                           },
-                        )),
-                  )
-                ])
-              ])
-          ]))
+                          isExpanded: true,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      SizedBox(
+                        width: 100,
+                        height: 60,
+                        child: InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: 'Disabled',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25.0),
+                            ),
+                          ),
+                          child: Checkbox(
+                            key: const Key('loginDisabled'),
+                            value: _isLoginDisabled,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                _isLoginDisabled = value!;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
     ];
-    Widget updateButton = Row(children: [
-      if (widget.user.partyId != null)
-        OutlinedButton(
+    Widget updateButton = Row(
+      children: [
+        if (widget.user.partyId != null)
+          OutlinedButton(
             style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(Colors.red)),
+              backgroundColor: WidgetStateProperty.all(Colors.red),
+            ),
             key: const Key('deleteUser'),
             child: const Text('Delete User'),
             onPressed: () async {
               if (widget.user.partyId != null &&
                   currentUser.partyId == widget.user.partyId) {
-                var result =
-                    await confirmDeleteUserComp(context, widget.user.userGroup);
+                var result = await confirmDeleteUserComp(
+                  context,
+                  widget.user.userGroup,
+                );
                 if (result != null) {
                   if (!mounted) return;
                   // delete company too?
                   if (widget.user.partyId == currentUser.partyId!) {
-                    _userBloc
-                        .add(UserDelete(widget.user.copyWith(image: null)));
+                    _userBloc.add(
+                      UserDelete(widget.user.copyWith(image: null)),
+                    );
                     Navigator.of(context).pop(updatedUser);
                     context.read<AuthBloc>().add(const AuthLoggedOut());
                   }
@@ -846,42 +943,47 @@ class UserDialogState extends State<UserDialogStateFull> {
               } else {
                 _userBloc.add(UserDelete(widget.user.copyWith(image: null)));
               }
-            }),
-      const SizedBox(width: 10),
-      Expanded(
+            },
+          ),
+        const SizedBox(width: 10),
+        Expanded(
           child: OutlinedButton(
-              key: const Key('updateUser'),
-              child: Text(updatedUser.partyId == null ? 'Create' : 'Update'),
-              onPressed: () async {
-                if (_userDialogFormKey.currentState!.validate()) {
-                  updatedUser = updatedUser.copyWith(
-                      pseudoId: _idController.text,
-                      firstName: _firstNameController.text,
-                      lastName: _lastNameController.text,
-                      email: _emailController.text,
-                      url: _urlController.text,
-                      loginName: _loginNameController.text,
-                      telephoneNr: _telephoneController.text,
-                      address: updatedUser.address,
-                      paymentMethod: updatedUser.paymentMethod,
-                      loginDisabled: _isLoginDisabled,
-                      userGroup: _selectedUserGroup,
-                      role: _selectedRole,
-                      appsUsed: [_classificationId],
-//                      language: Localizations.localeOf(context)
-//                          .languageCode
-//                          .toString(),
-                      company: _selectedCompany.copyWith(role: _selectedRole),
-                      image: _image);
+            key: const Key('updateUser'),
+            child: Text(updatedUser.partyId == null ? 'Create' : 'Update'),
+            onPressed: () async {
+              if (_userDialogFormKey.currentState!.validate()) {
+                updatedUser = updatedUser.copyWith(
+                  pseudoId: _idController.text,
+                  firstName: _firstNameController.text,
+                  lastName: _lastNameController.text,
+                  email: _emailController.text,
+                  url: _urlController.text,
+                  loginName: _loginNameController.text,
+                  telephoneNr: _telephoneController.text,
+                  address: updatedUser.address,
+                  paymentMethod: updatedUser.paymentMethod,
+                  loginDisabled: _isLoginDisabled,
+                  userGroup: _selectedUserGroup,
+                  role: _selectedRole,
+                  appsUsed: [_classificationId],
+                  //                      language: Localizations.localeOf(context)
+                  //                          .languageCode
+                  //                          .toString(),
+                  company: _selectedCompany.copyWith(role: _selectedRole),
+                  image: _image,
+                );
 
-                  _userBloc.add(UserUpdate(updatedUser));
-                  // if logged-in user update authBloc
-                  if (currentUser.partyId == updatedUser.partyId) {
-                    _authBloc.add(AuthLoad());
-                  }
+                _userBloc.add(UserUpdate(updatedUser));
+                // if logged-in user update authBloc
+                if (currentUser.partyId == updatedUser.partyId) {
+                  _authBloc.add(AuthLoad());
                 }
-              }))
-    ]);
+              }
+            },
+          ),
+        ),
+      ],
+    );
 
     List<Widget> column = [];
     for (var i = 0; i < widgets.length; i++) {
@@ -892,7 +994,8 @@ class UserDialogState extends State<UserDialogStateFull> {
     List<Widget> rows = [];
     if (!ResponsiveBreakpoints.of(context).isMobile) {
       rows.add(const SizedBox(height: 20));
-      rows.add(SizedBox(
+      rows.add(
+        SizedBox(
           height: 300,
           child: MasonryGridView.count(
             itemCount: widgets.length,
@@ -902,28 +1005,37 @@ class UserDialogState extends State<UserDialogStateFull> {
             itemBuilder: (context, index) {
               return widgets[index];
             },
-          )));
+          ),
+        ),
+      );
       rows.add(updateButton);
     }
 
     return Form(
-        key: _userDialogFormKey,
-        child: SingleChildScrollView(
-            controller: _scrollController,
-            key: const Key('listView'),
-            child: Column(children: <Widget>[
-              const SizedBox(height: 10),
-              CircleAvatar(
-                  radius: 60,
-                  child: _imageFile != null
-                      ? kIsWeb
-                          ? Image.network(_imageFile!.path, scale: 0.3)
-                          : Image.file(File(_imageFile!.path), scale: 0.3)
-                      : widget.user.image != null
-                          ? Image.memory(widget.user.image!, scale: 0.3)
-                          : Text(widget.user.firstName?.substring(0, 1) ?? '',
-                              style: const TextStyle(fontSize: 30))),
-              Column(children: rows.isNotEmpty ? rows : column),
-            ])));
+      key: _userDialogFormKey,
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        key: const Key('listView'),
+        child: Column(
+          children: <Widget>[
+            const SizedBox(height: 10),
+            CircleAvatar(
+              radius: 60,
+              child: _imageFile != null
+                  ? kIsWeb
+                        ? Image.network(_imageFile!.path, scale: 0.3)
+                        : Image.file(File(_imageFile!.path), scale: 0.3)
+                  : widget.user.image != null
+                  ? Image.memory(widget.user.image!, scale: 0.3)
+                  : Text(
+                      widget.user.firstName?.substring(0, 1) ?? '',
+                      style: const TextStyle(fontSize: 30),
+                    ),
+            ),
+            Column(children: rows.isNotEmpty ? rows : column),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -32,8 +32,11 @@ import '../../../../growerp_core.dart';
 import '../../../../test_data.dart';
 
 class CommonTest {
-  static Future<void> takeScreenShot(
-      {binding, tester, String? screenShotName}) async {
+  static Future<void> takeScreenShot({
+    binding,
+    tester,
+    String? screenShotName,
+  }) async {
     if (found.kIsWeb) {
       await binding.takeScreenshot(screenShotName);
       await tester.pumpAndSettle();
@@ -49,15 +52,16 @@ class CommonTest {
   static const int waitTime = 2;
 
   static Future<void> startTestApp(
-      WidgetTester tester,
-      Route<dynamic> Function(RouteSettings) router,
-      List<MenuOption> menuOptions,
-      List<LocalizationsDelegate> extraDelegates,
-      {List<BlocProvider>? blocProviders,
-      required RestClient restClient,
-      bool clear = false,
-      String title = "Growerp testing...",
-      String classificationId = 'AppAdmin'}) async {
+    WidgetTester tester,
+    Route<dynamic> Function(RouteSettings) router,
+    List<MenuOption> menuOptions,
+    List<LocalizationsDelegate> extraDelegates, {
+    List<BlocProvider>? blocProviders,
+    required RestClient restClient,
+    bool clear = false,
+    String title = "Growerp testing...",
+    String classificationId = 'AppAdmin',
+  }) async {
     int seq = Random.secure().nextInt(1024);
     SaveTest test = await PersistFunctions.getTest();
     if (clear == true) {
@@ -67,23 +71,28 @@ class CommonTest {
     }
 
     Bloc.observer = AppBlocObserver();
-    runApp(TopApp(
-      restClient: restClient,
-      classificationId: classificationId,
-      chatClient: WsClient('chat'),
-      notificationClient: WsClient('notws'),
-      router: router,
-      title: title,
-      menuOptions: menuOptions,
-      extraDelegates: extraDelegates,
-      extraBlocProviders: blocProviders ?? [],
-    ));
+    runApp(
+      TopApp(
+        restClient: restClient,
+        classificationId: classificationId,
+        chatClient: WsClient('chat'),
+        notificationClient: WsClient('notws'),
+        router: router,
+        title: title,
+        menuOptions: menuOptions,
+        extraDelegates: extraDelegates,
+        extraBlocProviders: blocProviders ?? [],
+      ),
+    );
     await tester.pump(const Duration());
     await tester.pumpAndSettle(const Duration(seconds: waitTime));
   }
 
-  static Future<void> createCompanyAndAdmin(WidgetTester tester,
-      {bool demoData = false, Map testData = const {}}) async {
+  static Future<void> createCompanyAndAdmin(
+    WidgetTester tester, {
+    bool demoData = false,
+    Map testData = const {},
+  }) async {
     SaveTest test = await PersistFunctions.getTest();
     int seq = test.sequence + 1;
     if (test.admin != null) return; // company already created
@@ -94,10 +103,14 @@ class CommonTest {
     while (exist) {
       try {
         final Map result = await restClient.checkEmail(
-            email: admin.email!.replaceFirst('XXX', '${++seq}'));
+          email: admin.email!.replaceFirst('XXX', '${++seq}'),
+        );
         exist = result['ok'];
-        expect(times++, lessThan(20),
-            reason: "Could not find free email address");
+        expect(
+          times++,
+          lessThan(20),
+          reason: "Could not find free email address",
+        );
       } on DioException catch (e) {
         debugPrint("error checking email: ${await getDioError(e)}");
         expect(true, false, reason: "=============backend error =============");
@@ -115,20 +128,24 @@ class CommonTest {
     // start with clean saveTest
     await waitForSnackbarToGo(tester);
 
-    await PersistFunctions.persistTest(SaveTest(
-      sequence: ++seq,
-      nowDate: DateTime.now(), // used in rental
-      admin: admin.copyWith(email: email, loginName: email),
-    ));
+    await PersistFunctions.persistTest(
+      SaveTest(
+        sequence: ++seq,
+        nowDate: DateTime.now(), // used in rental
+        admin: admin.copyWith(email: email, loginName: email),
+      ),
+    );
     await login(tester, testData: testData, demoData: demoData);
   }
 
-  static Future<void> login(WidgetTester tester,
-      {String? username,
-      String? password,
-      bool demoData = false,
-      int days = 0,
-      Map testData = const {}}) async {
+  static Future<void> login(
+    WidgetTester tester, {
+    String? username,
+    String? password,
+    bool demoData = false,
+    int days = 0,
+    Map testData = const {},
+  }) async {
     CustomizableDateTime.customTime = DateTime.now().add(Duration(days: days));
     if (find
         .byKey(const Key('HomeFormAuth'))
@@ -147,17 +164,25 @@ class CommonTest {
         String companyName = '${initialCompany.name!} ${test.sequence}';
         await enterText(tester, 'companyName', companyName);
         await enterDropDown(
-            tester, 'currency', initialCompany.currency!.description!);
+          tester,
+          'currency',
+          initialCompany.currency!.description!,
+        );
         if (demoData == false) {
           await tapByKey(tester, 'demoData');
         } // no demo data
         await tapByKey(tester, 'continue', seconds: waitTime);
         await waitForSnackbarToGo(tester);
-        await PersistFunctions.persistTest(test.copyWith(
-            company:
-                Company(name: companyName, currency: initialCompany.currency),
+        await PersistFunctions.persistTest(
+          test.copyWith(
+            company: Company(
+              name: companyName,
+              currency: initialCompany.currency,
+            ),
             sequence: test.sequence + 1,
-            nowDate: DateTime.now())); // used in rental
+            nowDate: DateTime.now(),
+          ),
+        ); // used in rental
       }
     }
     // check for credit card input (not shown for first registration)
@@ -168,8 +193,10 @@ class CommonTest {
     SaveTest test = await PersistFunctions.getTest();
     String apiKey = getTextField('apiKey');
     String moquiSessionToken = getTextField('moquiSessionToken');
-    await GlobalConfiguration()
-        .add({"apiKey": apiKey, "moquiSessionToken": moquiSessionToken});
+    await GlobalConfiguration().add({
+      "apiKey": apiKey,
+      "moquiSessionToken": moquiSessionToken,
+    });
     int seq = test.sequence;
     if (!test.testDataLoaded && testData.isNotEmpty) {
       final restClient = RestClient(await buildDioClient());
@@ -181,13 +208,15 @@ class CommonTest {
           if (item is Company || item is User) {
             if (item.email != null) {
               item = item.copyWith(
-                  email: item.email!.replaceFirst('XXX', '${seq++}'));
+                email: item.email!.replaceFirst('XXX', '${seq++}'),
+              );
             }
           }
           if (item is User) {
             if (item.loginName != null) {
               item = item.copyWith(
-                  loginName: item.loginName!.replaceFirst('XXX', '${seq++}'));
+                loginName: item.loginName!.replaceFirst('XXX', '${seq++}'),
+              );
             }
           }
           newList.add(item);
@@ -195,15 +224,16 @@ class CommonTest {
         parsed[k] = newList;
       });
       await restClient.uploadEntities(
-          entities: parsed, classificationId: 'AppAdmin');
+        entities: parsed,
+        classificationId: 'AppAdmin',
+      );
     }
     await PersistFunctions.persistTest(
-        test.copyWith(sequence: seq, testDataLoaded: true));
+      test.copyWith(sequence: seq, testDataLoaded: true),
+    );
   }
 
-  static checkCompanyAndAdmin(
-    WidgetTester tester,
-  ) async {
+  static checkCompanyAndAdmin(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     // appbar
     expect(getTextField('appBarAvatarText'), equals(test.company!.name![0]));
@@ -213,23 +243,34 @@ class CommonTest {
     expect(getTextField('dbCompanySubTitle0'), equals(test.company!.name));
     //  expect(getTextField('dbCompanySubTitle1'),
     //      equals("Email: ${test.company!.email}"));
-    expect(getTextField('dbCompanySubTitle2'),
-        equals("Currency: ${test.company!.currency!.description}"));
+    expect(
+      getTextField('dbCompanySubTitle2'),
+      equals("Currency: ${test.company!.currency!.description}"),
+    );
     expect(getTextField('dbCompanySubTitle3'), equals("Employees: 1"));
     // User
     expect(getTextField('dbUserTitle'), equals("Logged in User"));
-    expect(getTextField('dbUserSubTitle0'),
-        equals("${test.admin!.firstName} ${test.admin!.lastName}"));
     expect(
-        getTextField('dbUserSubTitle1'), equals("Email: ${test.admin!.email}"));
+      getTextField('dbUserSubTitle0'),
+      equals("${test.admin!.firstName} ${test.admin!.lastName}"),
+    );
+    expect(
+      getTextField('dbUserSubTitle1'),
+      equals("Email: ${test.admin!.email}"),
+    );
     expect(getTextField('dbUserSubTitle2'), equals("Login name:"));
     expect(getTextField('dbUserSubTitle3'), equals(" ${test.admin!.email}"));
-    expect(getTextField('dbUserSubTitle4'),
-        equals("Security Group: ${test.admin!.userGroup!.name}"));
+    expect(
+      getTextField('dbUserSubTitle4'),
+      equals("Security Group: ${test.admin!.userGroup!.name}"),
+    );
   }
 
-  static takeScreenshot(WidgetTester tester,
-      IntegrationTestWidgetsFlutterBinding binding, String name) async {
+  static takeScreenshot(
+    WidgetTester tester,
+    IntegrationTestWidgetsFlutterBinding binding,
+    String name,
+  ) async {
     if (Platform.isAndroid) {
       await binding.convertFlutterSurfaceToImage();
       await tester.pumpAndSettle();
@@ -238,14 +279,18 @@ class CommonTest {
   }
 
   static Future<void> selectOption(
-      WidgetTester tester, String option, String formName,
-      [String? tapNumber]) async {
+    WidgetTester tester,
+    String option,
+    String formName, [
+    String? tapNumber,
+  ]) async {
     if (isPhone()) {
-      expect(find.byTooltip('Open navigation menu'), findsOneWidget,
-          reason: "could not find tooltip: 'Open navigation menu' to tap on");
-      await tester.tap(
+      expect(
         find.byTooltip('Open navigation menu'),
+        findsOneWidget,
+        reason: "could not find tooltip: 'Open navigation menu' to tap on",
       );
+      await tester.tap(find.byTooltip('Open navigation menu'));
       await tester.pump(const Duration(seconds: waitTime));
     }
     if (!option.startsWith('tap')) {
@@ -278,8 +323,11 @@ class CommonTest {
     await checkWidgetKey(tester, 'CompanyDialogcompany');
   }
 
-  static Future<void> doNewSearch(WidgetTester tester,
-      {required String searchString, int? seconds}) async {
+  static Future<void> doNewSearch(
+    WidgetTester tester, {
+    required String searchString,
+    int? seconds,
+  }) async {
     seconds ??= waitTime;
     await tapByKey(tester, 'search');
     await enterText(tester, 'searchField', searchString);
@@ -289,8 +337,11 @@ class CommonTest {
     await tester.pumpAndSettle(const Duration(seconds: waitTime));
   }
 
-  static Future<void> doSearch(WidgetTester tester,
-      {required String searchString, int? seconds}) async {
+  static Future<void> doSearch(
+    WidgetTester tester, {
+    required String searchString,
+    int? seconds,
+  }) async {
     seconds ??= waitTime;
     if (tester.any(find.byKey(const Key('searchButton'))) == false) {
       await tapByKey(tester, 'search');
@@ -352,14 +403,23 @@ class CommonTest {
     return found;
   }
 
-  static Future<void> checkWidgetKey(WidgetTester tester, String widgetKey,
-      [int count = 1]) async {
-    expect(find.byKey(Key(widgetKey)), findsNWidgets(count),
-        reason: "looking for widget key: $widgetKey failed");
+  static Future<void> checkWidgetKey(
+    WidgetTester tester,
+    String widgetKey, [
+    int count = 1,
+  ]) async {
+    expect(
+      find.byKey(Key(widgetKey)),
+      findsNWidgets(count),
+      reason: "looking for widget key: $widgetKey failed",
+    );
   }
 
-  static bool doesExistKey(WidgetTester tester, String widgetKey,
-      [int count = 1]) {
+  static bool doesExistKey(
+    WidgetTester tester,
+    String widgetKey, [
+    int count = 1,
+  ]) {
     if (find
         .byKey(Key(widgetKey))
         .toString()
@@ -371,84 +431,120 @@ class CommonTest {
 
   /// check if a particular text can be found on the page.
   static Future<void> checkText(WidgetTester tester, String text) async {
-    expect(find.textContaining(RegExp(text, caseSensitive: false)).last,
-        findsOneWidget);
+    expect(
+      find.textContaining(RegExp(text, caseSensitive: false)).last,
+      findsOneWidget,
+    );
   }
 
   /// [lowLevel]
-  static Future<void> drag(WidgetTester tester,
-      {int seconds = 1, String listViewName = 'listView'}) async {
+  static Future<void> drag(
+    WidgetTester tester, {
+    int seconds = 1,
+    String listViewName = 'listView',
+  }) async {
     await tester.pumpAndSettle();
     await tester.drag(
-        find.byKey(Key(listViewName)).last, const Offset(0, -300));
+      find.byKey(Key(listViewName)).last,
+      const Offset(0, -300),
+    );
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
-  static Future<void> dragNew(WidgetTester tester,
-      {String key = 'listView'}) async {
+  static Future<void> dragNew(
+    WidgetTester tester, {
+    String key = 'listView',
+  }) async {
     await tester.pumpAndSettle();
     await tester.fling(find.byKey(Key(key)).last, const Offset(0, -300), 2000);
     await tester.pumpAndSettle();
   }
 
-  static Future<void> dragUntil(WidgetTester tester,
-      {String listViewName = 'listView', required String key}) async {
+  static Future<void> dragUntil(
+    WidgetTester tester, {
+    String listViewName = 'listView',
+    required String key,
+  }) async {
     int times = 0;
     bool found = false;
     await tester.pumpAndSettle();
     do {
       await tester.drag(
-          find.byKey(Key(listViewName)).last, const Offset(0, -200));
+        find.byKey(Key(listViewName)).last,
+        const Offset(0, -200),
+      );
       await tester.pumpAndSettle(const Duration(milliseconds: 50));
       found = tester.any(find.byKey(Key(key)));
     } while (times++ < 10 && found == false);
   }
 
   /// [lowLevel]
-  static Future<void> refresh(WidgetTester tester,
-      {int seconds = waitTime, String listViewName = 'listView'}) async {
+  static Future<void> refresh(
+    WidgetTester tester, {
+    int seconds = waitTime,
+    String listViewName = 'listView',
+  }) async {
     await tester.drag(find.byKey(Key(listViewName)).last, const Offset(0, 400));
     await tester.pump(Duration(seconds: seconds));
     await tester.pumpAndSettle();
   }
 
   static Future<void> enterText(
-      WidgetTester tester, String key, String value) async {
+    WidgetTester tester,
+    String key,
+    String value,
+  ) async {
     await tester.pump();
     await tester.enterText(find.byKey(Key(key)), value);
     await tester.pump();
   }
 
   static Future<void> enterDate(
-      WidgetTester tester, String key, DateTime date) async {
+    WidgetTester tester,
+    String key,
+    DateTime date,
+  ) async {
     await tapByKey(tester, key);
     await tapByTooltip(tester, 'Switch to input');
     await tester.enterText(
-        find.byType(TextField).last, DateFormat('yyyy-MM-dd').format(date));
+      find.byType(TextField).last,
+      DateFormat('yyyy-MM-dd').format(date),
+    );
     await tester.pump();
     await CommonTest.tapByText(tester, 'OK');
   }
 
   static Future<void> enterDropDownSearch(
-      WidgetTester tester, String key, String value,
-      {int seconds = 1, check = false}) async {
+    WidgetTester tester,
+    String key,
+    String value, {
+    int seconds = 1,
+    check = false,
+  }) async {
     await tapByKey(tester, key); // open search dropdown
     await tester.enterText(find.byType(TextField).last, value);
     await tester.pumpAndSettle(
-        const Duration(seconds: waitTime)); // wait for search result
+      const Duration(seconds: waitTime),
+    ); // wait for search result
     if (check) {
       await tapByType(tester, Checkbox);
     } else {
-      expect(find.textContaining(value).last, findsOneWidget,
-          reason: "could not find text in dropdown: $value");
+      expect(
+        find.textContaining(value).last,
+        findsOneWidget,
+        reason: "could not find text in dropdown: $value",
+      );
       await tester.tap(find.textContaining(value).last);
     }
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
   static Future<void> enterDropDown(
-      WidgetTester tester, String key, String value,
-      {int seconds = 1}) async {
+    WidgetTester tester,
+    String key,
+    String value, {
+    int seconds = 1,
+  }) async {
     await tester.tap(find.byKey(Key(key)));
     await tester.pumpAndSettle(Duration(seconds: seconds));
 
@@ -482,14 +578,13 @@ class CommonTest {
     await tester.pumpAndSettle();
   }
 
-  static String getDropdown(String key,
-      {String classificationId = 'AppAdmin'}) {
-    DropdownButtonFormField tff = find
-        .byKey(Key(key))
-        .last
-        .evaluate()
-        .single
-        .widget as DropdownButtonFormField;
+  static String getDropdown(
+    String key, {
+    String classificationId = 'AppAdmin',
+  }) {
+    DropdownButtonFormField tff =
+        find.byKey(Key(key)).last.evaluate().single.widget
+            as DropdownButtonFormField;
     if (tff.initialValue is Currency) return tff.initialValue.description;
     if (tff.initialValue is UserGroup) return tff.initialValue.toString();
     if (tff.initialValue is RequestType) return tff.initialValue.value;
@@ -541,20 +636,29 @@ class CommonTest {
   }
 
   static String getFormBuilderTextFieldByName(
-      WidgetTester tester, String name) {
+    WidgetTester tester,
+    String name,
+  ) {
     // Find the FormBuilder field by its unique name.
     final formFieldFinder = find.byWidgetPredicate(
-        (widget) => widget is FormBuilderTextField && (widget).name == name);
-    expect(formFieldFinder, findsOneWidget,
-        reason: 'Could not find a FormBuilderTextField with name "$name"');
+      (widget) => widget is FormBuilderTextField && (widget).name == name,
+    );
+    expect(
+      formFieldFinder,
+      findsOneWidget,
+      reason: 'Could not find a FormBuilderTextField with name "$name"',
+    );
 
     // The FormBuilderTextField wraps a standard TextField. We need to find it.
     final textFieldFinder = find.descendant(
       of: formFieldFinder,
       matching: find.byType(TextField),
     );
-    expect(textFieldFinder, findsOneWidget,
-        reason: 'Could not find the underlying TextField for "$name"');
+    expect(
+      textFieldFinder,
+      findsOneWidget,
+      reason: 'Could not find the underlying TextField for "$name"',
+    );
 
     // Get the widget instance and read the text from its controller.
     final textField = tester.widget<TextField>(textFieldFinder);
@@ -568,7 +672,7 @@ class CommonTest {
 
   static bool getRadio(String key) {
     Radio tff = find.byKey(Key(key)).evaluate().single.widget as Radio;
-    return tff.groupValue;
+    return tff.value;
   }
 
   static bool getCheckboxListTile(String text) {
@@ -597,7 +701,9 @@ class CommonTest {
   }
 
   static Future<void> selectMainMenu(
-      WidgetTester tester, String menuOption) async {
+    WidgetTester tester,
+    String menuOption,
+  ) async {
     if (hasKey('cancel')) {
       // company or user detail menu open?
       await tester.tap(find.byKey(const Key('cancel')).last);
@@ -613,51 +719,68 @@ class CommonTest {
     }
   }
 
-  static Future<void> tapByKey(WidgetTester tester, String key,
-      {int seconds = 1}) async {
+  static Future<void> tapByKey(
+    WidgetTester tester,
+    String key, {
+    int seconds = 1,
+  }) async {
     await tester.tap(find.byKey(Key(key)).last);
     await tester.pump();
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
-  static Future<void> tapByWidget(WidgetTester tester, Widget widget,
-      {int seconds = 1}) async {
+  static Future<void> tapByWidget(
+    WidgetTester tester,
+    Widget widget, {
+    int seconds = 1,
+  }) async {
     await tester.tap(find.byWidget(widget).first);
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
-  static Future<void> tapByType(WidgetTester tester, Type type,
-      {int seconds = 1}) async {
+  static Future<void> tapByType(
+    WidgetTester tester,
+    Type type, {
+    int seconds = 1,
+  }) async {
     await tester.tap(find.byType(type).first);
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
-  static Future<void> tapByText(WidgetTester tester, String text,
-      {int seconds = 1}) async {
-    await tester
-        .tap(find.textContaining(RegExp(text, caseSensitive: false)).last);
+  static Future<void> tapByText(
+    WidgetTester tester,
+    String text, {
+    int seconds = 1,
+  }) async {
+    await tester.tap(
+      find.textContaining(RegExp(text, caseSensitive: false)).last,
+    );
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
-  static Future<void> tapByTooltip(WidgetTester tester, String text,
-      {int seconds = 1}) async {
+  static Future<void> tapByTooltip(
+    WidgetTester tester,
+    String text, {
+    int seconds = 1,
+  }) async {
     await tester.tap(find.byTooltip(text));
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
   static Future<void> selectDropDown(
-      WidgetTester tester, String key, String value,
-      {seconds = 1}) async {
+    WidgetTester tester,
+    String key,
+    String value, {
+    seconds = 1,
+  }) async {
     await tapByKey(tester, key, seconds: seconds);
     await tapByText(tester, value);
   }
 
   static String getRandom() {
-    Text tff = find
-        .byKey(const Key('appBarCompanyName'))
-        .evaluate()
-        .single
-        .widget as Text;
+    Text tff =
+        find.byKey(const Key('appBarCompanyName')).evaluate().single.widget
+            as Text;
     return tff.data!.replaceAll(RegExp(r'[^0-9]'), '');
   }
 
@@ -675,7 +798,7 @@ class CommonTest {
           'appName': 'myapp',
           'packageName': 'com.mycompany.myapp',
           'version': '0.0.1',
-          'buildNumber': '1'
+          'buildNumber': '1',
         };
       }
       return null;
@@ -688,16 +811,15 @@ class CommonTest {
   }
 
   static void mockImagePicker() {
-    const MethodChannel channel =
-        MethodChannel('plugins.flutter.io/image_picker');
+    const MethodChannel channel = MethodChannel(
+      'plugins.flutter.io/image_picker',
+    );
 
     handler(MethodCall methodCall) async {
       ByteData data = await rootBundle.load('assets/images/crm.png');
       Uint8List bytes = data.buffer.asUint8List();
       Directory tempDir = await getTemporaryDirectory();
-      File file = await File(
-        '${tempDir.path}/tmp.tmp',
-      ).writeAsBytes(bytes);
+      File file = await File('${tempDir.path}/tmp.tmp').writeAsBytes(bytes);
       debugPrint('=========${file.path}');
       return [
         // file.path;
@@ -706,7 +828,7 @@ class CommonTest {
           'path': file.path,
           'bytes': bytes,
           'size': bytes.lengthInBytes,
-        }
+        },
       ];
     }
 
@@ -717,8 +839,9 @@ class CommonTest {
   }
 
   static void mockUrlLauncher() {
-    const MethodChannel channel =
-        MethodChannel('plugins.flutter.io/url_launcher');
+    const MethodChannel channel = MethodChannel(
+      'plugins.flutter.io/url_launcher',
+    );
 
     handler(MethodCall methodCall) async {
       debugPrint("=========$methodCall");
@@ -731,7 +854,9 @@ class CommonTest {
   }
 
   static Future<String?> getRelatedFindoc(
-      WidgetTester tester, FinDocType type) async {
+    WidgetTester tester,
+    FinDocType type,
+  ) async {
     if (tester.any(find.byKey(Key("rel$type"))) == false) return null;
     await tapByKey(tester, "rel$type");
     String id = getTextField('topHeader').split('#')[1];
@@ -740,12 +865,15 @@ class CommonTest {
   }
 
   static List<String> checkFormBuilderTextfields(
-      FormBuilderState formState, Map<String, dynamic> expectedFields) {
+    FormBuilderState formState,
+    Map<String, dynamic> expectedFields,
+  ) {
     List<String> errors = [];
     for (var entry in expectedFields.entries) {
       if (formState.value[entry.key] != entry.value) {
         errors.add(
-            'Field ${entry.key} has value ${formState.value[entry.key]} but expected ${entry.value}');
+          'Field ${entry.key} has value ${formState.value[entry.key]} but expected ${entry.value}',
+        );
       }
     }
     return (errors);
