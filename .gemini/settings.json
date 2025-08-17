@@ -3,7 +3,8 @@
     "dart": {
       "command": "dart",
       "args": [
-        "mcp-server"
+        "mcp-server",
+        "--experimental-mcp-server"
       ]
     }
   }
