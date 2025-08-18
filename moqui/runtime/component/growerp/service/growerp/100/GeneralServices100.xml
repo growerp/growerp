@@ -745,7 +745,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="image" />
                     <parameter name="userId" />
                     <parameter name="locale" />
-                    <parameter name="timeZone" />
+                    <parameter name="timeZoneOffset" />
                     <parameter name="telephoneNr" />
                     <parameter name="company" type="Map">
                         <parameter name="partyId" />
@@ -804,7 +804,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <return error="true"
                     message="cannot find username: ${username}" public="true" />
             </if>
-
             <!-- check password -->
             <set field="oldPassword" from="password" />
             <script>
@@ -852,7 +851,6 @@ along with this software (see the LICENSE.md file). If not, see
                     out-map="context" />
                 <return />
             </if>
-
             <!-- get person information -->
             <entity-find-one entity-name="mantle.party.Person"
                 value-field="person">
@@ -907,7 +905,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <if condition="companyName &amp;&amp; currencyId">
                             <!-- update main company name currency/demodata: temporary -->
                             <!-- order: company/currency => payscreen to use currency -->
-                            <set field="temp" value="${currencyId}/${demoData.toString()}" />
+                            <set field="temp"
+                                value="${currencyId}/${demoData.toString()}" />
                             <service-call name="update#mantle.party.Organization"
                                 out-map="context"
                                 in-map="[partyId: companyPartyId,
@@ -1007,8 +1006,6 @@ along with this software (see the LICENSE.md file). If not, see
                             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                                 in-map="[ownerPartyId: 'GROWERP', seqName: 'subscription']"
                                 out-map="context" />
-                            <log
-                                message="create subscription for ${growerpCustomerPartyId} with product ${productPrices[0].productId} from ${datePlus}" />
                             <service-call
                                 name="create#mantle.product.subscription.Subscription"
                                 in-map="[
@@ -1152,7 +1149,7 @@ along with this software (see the LICENSE.md file). If not, see
                                         currencyId: currencyId,
                                         classificationId: classificationId,
                                         userPartyId: userAccount.partyId,
-                                        timeZone: userAccount.timeZone,
+                                        timeZoneOffset: userAccount.timeZone,
                                         ]" />
                                 </if>
                             </else>

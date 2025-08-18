@@ -1906,6 +1906,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="userFullName" entity-alias="ACCT" />
         <alias name="emailAddress" entity-alias="ACCT" />
         <alias name="locale" entity-alias="ACCT" />
+        <alias name="timeZone" entity-alias="ACCT" />
         <alias name="personCompanyName" field="organizationName" entity-alias="PERSONCOMPANY" />
         <alias name="personCompanyPartyId" field="partyId" entity-alias="PERSONCOMPANY" />
         <alias name="personCompanyPseudoId" field="pseudoId" entity-alias="PERSONCOMPANYPARTY" />
@@ -2082,6 +2083,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias entity-alias="ACCT" name="userFullName" />
         <alias entity-alias="ACCT" name="emailAddress" />
         <alias entity-alias="ACCT" name="locale" />
+        <alias entity-alias="ACCT" name="timeZone" />
         <alias entity-alias="PCM" name="contactMechPurposeId" />
         <alias entity-alias="CM" name="contactMechTypeEnumId" />
         <alias entity-alias="CM" name="emailAddressAlt" field="infoString" />

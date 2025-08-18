@@ -1169,7 +1169,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="image" />
                     <parameter name="userId" />
                     <parameter name="locale" />
-                    <parameter name="timeZone" />
+                    <parameter name="timeZoneOffset" />
                     <parameter name="telephoneNr" />
                     <parameter name="appsUsed" type="List">
                         <parameter name="partyClassificationId" />
@@ -1391,7 +1391,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 image: imageFile,
                                 userId: userInfo?.userId,
                                 locale: userInfo?.locale ?:'',
-                                timeZone: userInfo?.timeZone ?:'',
+                                timeZoneOffset: userInfo?.timeZone ?:'',
                                 telephoneNr: telephoneNr,
                                 company: company,
                                 appsUsed: appsUsed,
@@ -1427,7 +1427,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="image" />
                 <parameter name="userId" />
                 <parameter name="locale" />
-                <parameter name="timeZone" />
+                <parameter name="timeZoneOffset" />
                 <parameter name="telephoneNr" />
                 <parameter name="address" type="Map">
                     <parameter name="addressId" />
@@ -1526,7 +1526,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </parameter>
                 <parameter name="userId" />
                 <parameter name="locale" />
-                <parameter name="timeZone" />
+                <parameter name="timeZoneOffset" />
             </parameter>
             <parameter name="password" />
             <parameter name="login" type="Boolean" default-value="false" />
@@ -1571,7 +1571,7 @@ along with this software (see the LICENSE.md file). If not, see
                     emailAddress: user.email,
                     username: user.loginName, newPassword: password,
                     newPasswordVerify: password, ownerPartyId: ownerPartyId,
-                    timeZone: user.timeZone, locale: user.locale
+                    timeZone: user.timeZoneOffset, locale: user.locale
                 ]" />
             <if condition="user.loginName">
                 <service-call name="mantle.party.PartyServices.create#Account"
@@ -2669,7 +2669,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- if userGroup == admin group, root company will be created,   
                 when not, owner (main) company partyId should already exist -->
             <parameter name="userGroupId" />
-            <parameter name="timeZone" />
+            <parameter name="timeZoneOffset" />
             <parameter name="locale" />
         </in-parameters>
         <out-parameters>
@@ -2721,7 +2721,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <if condition="!companyPartyId &amp;&amp; userGroupId == 'GROWERP_M_ADMIN'">
                 <then>
-                    <!--  check if new system; if yes: create GrowERP root-->
+                    <!--  check if new empty system; if yes: create GrowERP root-->
                     <entity-find entity-name="moqui.entity.SequenceValueItem"
                         list="systemExist" limit="1">
                         <econdition field-name="seqName" value="GROWERP-party" />
@@ -2745,7 +2745,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 firstName: firstName,
                                 lastName: lastName,
                                 loginName: email,
-                                timeZone: timeZone, locale: locale,
+                                timeZoneOffset: timeZoneOffset, locale: locale,
                                 company: [name: 'main Organization',
                                           role: 'OrgInternal',
                                           email: email]]" />
@@ -2766,7 +2766,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.PartyServices100.create#User"
                         in-map="[user: [firstName: firstName, lastName: lastName,
                         email: email, role: 'Customer', userGroupId: 'GROWERP_M_OTHER',
-                        loginName: email, company:company, timeZone: timeZone, locale: locale],
+                        loginName: email, company:company, timeZone: timeZoneOffset,
+                        locale: locale],
                         password: newPassword, ownerPartyId: ownerPartyId,
                         classificationId: classificationId]"
                         out-map="context" />
@@ -3182,7 +3183,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="currencyId" />
             <parameter name="classificationId" />
             <parameter name="counterMax" default="1" type="Integer" />
-            <parameter name="timeZone" />
+            <parameter name="timeZoneOffset" />
         </in-parameters>
         <actions>
             <!-- get single productStore/website for main company -->
@@ -3488,9 +3489,11 @@ along with this software (see the LICENSE.md file). If not, see
                         productName: 'GrowERP demo movie', itemType: 'ItemServiceProduct'],
                     ]" />
                 <!-- set time at mid day noon adjusted by client timeZoneOffset -->
+                <set field="timeZoneOffsetInMinutes" type="Double"
+                    from="(timeZoneOffset.split(':')[0].toDouble()*60) + timeZoneOffset.split(':')[1].toDouble()" />
                 <set field="nowUtc"
                     from="Timestamp.from(ec.user.nowTimestamp.toInstant()
-                    .minus(timeZone.toDouble().longValue(), java.time.temporal.ChronoUnit.HOURS))" />
+                    .plus(timeZoneOffsetInMinutes.longValue(), java.time.temporal.ChronoUnit.MINUTES))" />
                 <set field="nowDate"
                     from="ec.l10n.parseTimestamp(ec.l10n.format(nowUtc, 'yyyy-MM-dd') + ' 12:00:00.000', 'yyyy-MM-dd HH:mm:ss.SSS')" />
                 <set field="ordersHotel"

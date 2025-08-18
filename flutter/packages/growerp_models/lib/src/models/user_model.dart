@@ -57,7 +57,7 @@ abstract class User with _$User {
     // the localization variables
     @Default('EN') String language,
     @Default('THB') String currency,
-    @Default('GMT') String timeZone,
+    String? timeZoneOffset,
     @Uint8ListConverter() Uint8List? image,
     Company? company,
 
