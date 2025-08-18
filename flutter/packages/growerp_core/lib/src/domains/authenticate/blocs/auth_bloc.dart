@@ -40,17 +40,27 @@ EventTransformer<E> authDroppable<E>(Duration duration) {
 /// keeps the token and apiKey in the [Authenticate] class.
 ///
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc(this.chat, this.notification, this.restClient, this.classificationId,
-      this.company)
-      : super(const AuthState()) {
+  AuthBloc(
+    this.chat,
+    this.notification,
+    this.restClient,
+    this.classificationId,
+    this.company,
+  ) : super(const AuthState()) {
     on<AuthUpdateLocal>(_onAuthUpdateLocal);
     on<AuthLoad>(_onAuthLoad);
-    on<AuthRegister>(_onAuthRegister,
-        transformer: authDroppable(const Duration(milliseconds: 100)));
-    on<AuthLoggedOut>(_onAuthLoggedOut,
-        transformer: authDroppable(const Duration(milliseconds: 100)));
-    on<AuthLogin>(_onAuthLogin,
-        transformer: authDroppable(const Duration(milliseconds: 100)));
+    on<AuthRegister>(
+      _onAuthRegister,
+      transformer: authDroppable(const Duration(milliseconds: 100)),
+    );
+    on<AuthLoggedOut>(
+      _onAuthLoggedOut,
+      transformer: authDroppable(const Duration(milliseconds: 100)),
+    );
+    on<AuthLogin>(
+      _onAuthLogin,
+      transformer: authDroppable(const Duration(milliseconds: 100)),
+    );
     on<AuthResetPassword>(_onAuthResetPassword);
     on<AuthChangePassword>(_onAuthChangePassword);
   }
@@ -61,28 +71,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final String classificationId;
   final Company? company;
 
-  void _onAuthUpdateLocal(
-    AuthUpdateLocal event,
-    Emitter<AuthState> emit,
-  ) {
+  void _onAuthUpdateLocal(AuthUpdateLocal event, Emitter<AuthState> emit) {
     emit(state.copyWith(authenticate: event.authenticate));
   }
 
-  Future<void> _onAuthLoad(
-    AuthLoad event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> _onAuthLoad(AuthLoad event, Emitter<AuthState> emit) async {
     emit(state.copyWith(status: AuthStatus.loading));
-    Authenticate defaultAuthenticate =
-        Authenticate(classificationId: classificationId);
+    Authenticate defaultAuthenticate = Authenticate(
+      classificationId: classificationId,
+    );
     try {
       // check connection with default company
       Companies? companies = await restClient.getCompanies(
-          searchString: company?.partyId, limit: 1);
+        searchString: company?.partyId,
+        limit: 1,
+      );
       defaultAuthenticate = Authenticate(
-          company:
-              companies.companies.isEmpty ? Company() : companies.companies[0],
-          classificationId: classificationId);
+        company: companies.companies.isEmpty
+            ? Company()
+            : companies.companies[0],
+        classificationId: classificationId,
+      );
       // get session data from last time
       Authenticate? localAuthenticate =
           await PersistFunctions.getAuthenticate();
@@ -92,16 +101,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // check if company still valid, not for user support
         if (localAuthenticate.company!.partyId != 'DefaultSettings') {
           Companies? companies = await restClient.getCompanies(
-              limit: 1, searchString: localAuthenticate.company!.partyId!);
+            limit: 1,
+            searchString: localAuthenticate.company!.partyId!,
+          );
           if (companies.companies.isEmpty) {
-            return emit(state.copyWith(
+            return emit(
+              state.copyWith(
                 status: AuthStatus.unAuthenticated,
-                authenticate: defaultAuthenticate));
+                authenticate: defaultAuthenticate,
+              ),
+            );
           }
         }
         // test apiKey and get Authenticate
         Authenticate authResult = await restClient.getAuthenticate(
-            classificationId: classificationId);
+          classificationId: classificationId,
+        );
         // Api key invalid or not present: UnAuthenticated
         if (authResult.apiKey == null) {
           return emit(state.copyWith(status: AuthStatus.unAuthenticated));
@@ -112,20 +127,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         chat.connect(authResult.apiKey!, authResult.user!.userId!);
         // notification
         notification.connect(authResult.apiKey!, authResult.user!.userId!);
-        return emit(state.copyWith(
-            status: AuthStatus.authenticated, authenticate: authResult));
+        return emit(
+          state.copyWith(
+            status: AuthStatus.authenticated,
+            authenticate: authResult,
+          ),
+        );
       } else {
         // UnAuthenticated
-        return emit(state.copyWith(
+        return emit(
+          state.copyWith(
             status: AuthStatus.unAuthenticated,
-            authenticate: defaultAuthenticate));
+            authenticate: defaultAuthenticate,
+          ),
+        );
       }
     } on DioException catch (e) {
       await PersistFunctions.persistAuthenticate(defaultAuthenticate);
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: AuthStatus.failure,
           authenticate: defaultAuthenticate,
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -136,27 +161,35 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
       final result = await restClient.register(
-          classificationId: classificationId,
-          email: event.user.email!,
-          companyPartyId: event.user.company?.partyId,
-          firstName: event.user.firstName!,
-          lastName: event.user.lastName!,
-          userGroup: event.user.userGroup!,
-          // when debug mode password is always qqqqqq9!
-          newPassword: kReleaseMode ? null : 'qqqqqq9!',
-          timeZone: DateTime.now().timeZoneName,
-          locale: PlatformDispatcher.instance.locale);
+        classificationId: classificationId,
+        email: event.user.email!,
+        companyPartyId: event.user.company?.partyId,
+        firstName: event.user.firstName!,
+        lastName: event.user.lastName!,
+        userGroup: event.user.userGroup!,
+        // when debug mode password is always qqqqqq9!
+        newPassword: kReleaseMode ? null : 'qqqqqq9!',
+        timeZoneOffset: DateTime.now().timeZoneOffset.toString(),
+        locale: PlatformDispatcher.instance.locale,
+      );
       await PersistFunctions.persistAuthenticate(result);
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: AuthStatus.unAuthenticated,
           authenticate: result,
-          message: 'Registration successful.\n'
-              'You can now login with the password sent by email'));
+          message:
+              'Registration successful.\n'
+              'You can now login with the password sent by email',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: AuthStatus.failure,
           authenticate: Authenticate(classificationId: classificationId),
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -169,19 +202,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await restClient.logout();
       notification.close();
       chat.close();
-      emit(state.copyWith(
-          status: AuthStatus.unAuthenticated, message: "Logged off"));
+      emit(
+        state.copyWith(
+          status: AuthStatus.unAuthenticated,
+          message: "Logged off",
+        ),
+      );
       PersistFunctions.persistAuthenticate(state.authenticate!);
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: AuthStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
-  Future<void> _onAuthLogin(
-    AuthLogin event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> _onAuthLogin(AuthLogin event, Emitter<AuthState> emit) async {
     try {
       String? creditCardType;
       if (event.creditCardNumber != null) {
@@ -208,7 +246,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         cVC: event.cVC,
         plan: event.plan,
         classificationId: classificationId,
-        timeZoneOffset: DateTime.now().timeZoneOffset.inMinutes / 60.0,
+        timeZoneOffset: DateTime.now().timeZoneOffset.toString(),
       );
       if (authenticate.apiKey != null &&
           ![
@@ -216,32 +254,45 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             'passwordChange',
             'paymentFirst',
             'paymentExpired',
-            'paymentExpiredFinal'
+            'paymentExpiredFinal',
           ].contains(authenticate.apiKey)) {
         // apiKey found so save and authenticated
-        emit(state.copyWith(
+        emit(
+          state.copyWith(
             status: AuthStatus.authenticated,
             authenticate: authenticate,
-            message: 'You are logged in now...'));
+            message: 'You are logged in now...',
+          ),
+        );
         PersistFunctions.persistAuthenticate(state.authenticate!);
         if (state.authenticate!.user!.userId != null) {
           chat.connect(
-              state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
+            state.authenticate!.apiKey!,
+            state.authenticate!.user!.userId!,
+          );
           notification.connect(
-              state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
+            state.authenticate!.apiKey!,
+            state.authenticate!.user!.userId!,
+          );
         }
 
         PersistFunctions.persistKeyValue('apiKey', authenticate.apiKey ?? '');
       } else {
         // login in process
-        emit(state.copyWith(
-          status: AuthStatus.unAuthenticated,
-          authenticate: authenticate,
-        ));
+        emit(
+          state.copyWith(
+            status: AuthStatus.unAuthenticated,
+            authenticate: authenticate,
+          ),
+        );
       }
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: AuthStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -252,13 +303,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       emit(state.copyWith(status: AuthStatus.sendPassword));
       await restClient.resetPassword(username: event.username);
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: AuthStatus.unAuthenticated,
-          message: 'An email with password has been '
-              'send to ${event.username}'));
+          message:
+              'An email with password has been '
+              'send to ${event.username}',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: AuthStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -269,28 +328,40 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
       Authenticate result = await restClient.updatePassword(
-          username: event.username,
-          oldPassword: event.oldPassword,
-          newPassword: event.newPassword,
-          classificationId: classificationId);
+        username: event.username,
+        oldPassword: event.oldPassword,
+        newPassword: event.newPassword,
+        classificationId: classificationId,
+      );
       if (state.authenticate!.user!.userId != null) {
         chat.connect(
-            state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
+          state.authenticate!.apiKey!,
+          state.authenticate!.user!.userId!,
+        );
         notification.connect(
-            state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
+          state.authenticate!.apiKey!,
+          state.authenticate!.user!.userId!,
+        );
       }
 
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: AuthStatus.authenticated,
           authenticate: result,
-          message:
-              'password successfully changed for user: ${event.username}'));
+          message: 'password successfully changed for user: ${event.username}',
+        ),
+      );
       PersistFunctions.persistKeyValue('apiKey', result.apiKey ?? '');
       PersistFunctions.persistAuthenticate(
-          state.authenticate!.copyWith(apiKey: result.apiKey));
+        state.authenticate!.copyWith(apiKey: result.apiKey),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: AuthStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

@@ -26,7 +26,7 @@ abstract class RestClient {
     @Field() String? companyPartyId, // required for other than admin
     @Field() String? newPassword,
     @Field('userGroupId') UserGroup? userGroup, // if admin also company
-    @Field() String? timeZone,
+    @Field() String? timeZoneOffset,
     @Field() Locale? locale,
   });
 
@@ -47,7 +47,7 @@ abstract class RestClient {
     @Field() String? currencyId,
     @Field() bool? demoData,
     @Field() required String classificationId,
-    @Field() double? timeZoneOffset,
+    @Field() String? timeZoneOffset,
   });
 
   @POST("rest/s1/growerp/100/Logout")
