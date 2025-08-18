@@ -340,8 +340,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find-one>
             <!-- if stripe key not found, use the one from  GROWERP -->
             <if condition="!pgs">
-                <entity-find-one entity-name="mantle.account.method.PaymentGateway"
-                    value-field="pgs">
+                <entity-find-one entity-name="Stripe.PaymentGatewayStripe" value-field="pgs">
                     <field-map field-name="paymentGatewayConfigId" from="paymentGatewayConfigId" />
                     <field-map field-name="ownerPartyId" value="GROWERP" />
                 </entity-find-one>
