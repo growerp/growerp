@@ -48,6 +48,7 @@ dev_dependencies:
   test: ^1.19.5
   flutter_lints: ^4.0.0
   flutter_launcher_icons: ^0.14.4
+  msix: ^3.16.12
 
 flutter_launcher_icons:
   image_path: "assets/icon/icon.png"
@@ -59,6 +60,16 @@ flutter_launcher_icons:
   macos:
     generate: true
     image_path: "assets/icon/icon.png"
+
+msix_config:
+  display_name: GrowERP admin
+  publisher: AntWebsystems Co.,Ltd.
+  publisher_display_name: AntWebsystems Co.,Ltd.
+  identity_name: growerp.admin
+  msix_version: 1.9.0.0
+  logo_path: "assets/icon/icon.png"
+  capabilities: internetClient
+  store: true
 
 flutter:
   uses-material-design: true
