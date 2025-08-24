@@ -20,6 +20,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../../../growerp_user_company.dart';
@@ -157,12 +158,23 @@ class CompanyFormState extends State<CompanyDialog> {
     super.dispose();
   }
 
-  void onImageButtonPressed(ImageSource source, {BuildContext? context}) async {
+  void onImageButtonPressed(
+    dynamic sourceOrPath, {
+    BuildContext? context,
+  }) async {
     try {
-      final pickedFile = await _picker.pickImage(source: source);
-      setState(() {
-        _imageFile = pickedFile;
-      });
+      if (sourceOrPath is String) {
+        // Desktop: file path from file_picker
+        setState(() {
+          _imageFile = XFile(sourceOrPath);
+        });
+      } else if (sourceOrPath is ImageSource) {
+        // Mobile/web: use image_picker
+        final pickedFile = await _picker.pickImage(source: sourceOrPath);
+        setState(() {
+          _imageFile = pickedFile;
+        });
+      }
     } catch (e) {
       setState(() {
         _pickImageError = e;
