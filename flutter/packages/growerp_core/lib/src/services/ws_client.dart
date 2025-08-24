@@ -31,8 +31,9 @@ class WsClient {
   var logger = Logger(
     filter: null, // Use the default LogFilter (-> only log in debug mode)
     printer: PrettyPrinter(
-        lineLength: 133,
-        methodCount: 0), // Use the PrettyPrinter to format and print log
+      lineLength: 133,
+      methodCount: 0,
+    ), // Use the PrettyPrinter to format and print log
     output: null, // Use the default LogOutput (-> send everything to console)
   );
 
@@ -42,7 +43,7 @@ class WsClient {
     } else {
       wsUrl = GlobalConfiguration().get("chatUrlDebug");
       if (wsUrl.isEmpty) {
-        if (kIsWeb || Platform.isIOS || Platform.isLinux) {
+        if (kIsWeb || Platform.isIOS || Platform.isMacOS || Platform.isLinux) {
           wsUrl = 'ws://localhost:8080/$path';
         } else if (Platform.isAndroid) {
           wsUrl = 'ws://10.0.2.2:8080/$path';
@@ -56,7 +57,8 @@ class WsClient {
     try {
       logger.i("WS connect $wsUrl");
       channel = WebSocketChannel.connect(
-          Uri.parse("$wsUrl?apiKey=$apiKey&userId=$userId"));
+        Uri.parse("$wsUrl?apiKey=$apiKey&userId=$userId"),
+      );
 
       //await channel.ready;
     } catch (error) {

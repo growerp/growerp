@@ -21,6 +21,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'dart:io' show Platform;
 
 import '../../../get_core_bloc_providers.dart';
 import '../../../services/ws_client.dart';
@@ -149,8 +150,11 @@ class TopApp extends StatelessWidget {
                 home: ScaffoldMessenger(
                   child: Scaffold(
                     body:
-                        !kReleaseMode ||
-                            GlobalConfiguration().get("test") == true
+                        (!kReleaseMode ||
+                                GlobalConfiguration().get("test") == true) &&
+                            //banner not allowed in appstore when in test
+                            !Platform.isIOS &&
+                            !Platform.isMacOS
                         ? Banner(
                             message: "test",
                             color: Colors.red,

@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../product/blocs/product_bloc.dart';
@@ -68,15 +69,23 @@ class CategoryDialogState extends State<CategoryDialog> {
     super.dispose();
   }
 
-  void _onImageButtonPressed(ImageSource source,
-      {BuildContext? context}) async {
+  void _onImageButtonPressed(
+    dynamic sourceOrPath, {
+    BuildContext? context,
+  }) async {
     try {
-      final pickedFile = await _picker.pickImage(
-        source: source,
-      );
-      setState(() {
-        _imageFile = pickedFile;
-      });
+      if (sourceOrPath is String) {
+        // Desktop: file path from file_picker
+        setState(() {
+          _imageFile = XFile(sourceOrPath);
+        });
+      } else if (sourceOrPath is ImageSource) {
+        // Mobile/web: use image_picker
+        final pickedFile = await _picker.pickImage(source: sourceOrPath);
+        setState(() {
+          _imageFile = pickedFile;
+        });
+      }
     } catch (e) {
       setState(() {
         _pickImageError = e;
@@ -101,67 +110,82 @@ class CategoryDialogState extends State<CategoryDialog> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CategoryBloc, CategoryState>(
-        listener: (context, state) async {
-      switch (state.status) {
-        case CategoryStatus.success:
-          Navigator.of(context).pop();
-          break;
-        case CategoryStatus.failure:
-          HelperFunctions.showMessage(
-              context, 'Error: ${state.message}', Colors.red);
-          break;
-        default:
-      }
-    }, builder: (context, categoryState) {
-      return BlocConsumer<ProductBloc, ProductState>(
-          listener: (context, state) async {
+      listener: (context, state) async {
         switch (state.status) {
-          case ProductStatus.failure:
-            HelperFunctions.showMessage(context,
-                'Error getting products: ${state.message}', Colors.red);
+          case CategoryStatus.success:
+            Navigator.of(context).pop();
+            break;
+          case CategoryStatus.failure:
+            HelperFunctions.showMessage(
+              context,
+              'Error: ${state.message}',
+              Colors.red,
+            );
             break;
           default:
         }
-      }, builder: (context, productState) {
-        if (productState.status == ProductStatus.loading ||
-            categoryState.status == CategoryStatus.loading) {
-          return const LoadingIndicator();
-        } else {
-          return Dialog(
-              key: const Key('CategoryDialog'),
-              insetPadding: const EdgeInsets.all(20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: popUp(
+      },
+      builder: (context, categoryState) {
+        return BlocConsumer<ProductBloc, ProductState>(
+          listener: (context, state) async {
+            switch (state.status) {
+              case ProductStatus.failure:
+                HelperFunctions.showMessage(
+                  context,
+                  'Error getting products: ${state.message}',
+                  Colors.red,
+                );
+                break;
+              default:
+            }
+          },
+          builder: (context, productState) {
+            if (productState.status == ProductStatus.loading ||
+                categoryState.status == CategoryStatus.loading) {
+              return const LoadingIndicator();
+            } else {
+              return Dialog(
+                key: const Key('CategoryDialog'),
+                insetPadding: const EdgeInsets.all(20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: popUp(
                   context: context,
                   child: listChild(productState),
                   title:
                       'Category #${widget.category.categoryId.isEmpty ? 'New' : widget.category.pseudoId}',
                   height: 650,
-                  width: 350));
-        }
-      });
-    });
+                  width: 350,
+                ),
+              );
+            }
+          },
+        );
+      },
+    );
   }
 
   Widget listChild(state) {
-    return Builder(builder: (BuildContext context) {
-      return !foundation.kIsWeb &&
-              foundation.defaultTargetPlatform == TargetPlatform.android
-          ? FutureBuilder<void>(
-              future: retrieveLostData(),
-              builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-                if (snapshot.hasError) {
-                  return Text(
-                    'Pick image error: ${snapshot.error}}',
-                    textAlign: TextAlign.center,
-                  );
-                }
-                return _showForm(state);
-              })
-          : _showForm(state);
-    });
+    return Builder(
+      builder: (BuildContext context) {
+        return !foundation.kIsWeb &&
+                foundation.defaultTargetPlatform == TargetPlatform.android
+            ? FutureBuilder<void>(
+                future: retrieveLostData(),
+                builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+                  if (snapshot.hasError) {
+                    return Text(
+                      'Pick image error: ${snapshot.error}}',
+                      textAlign: TextAlign.center,
+                    );
+                  }
+                  return _showForm(state);
+                },
+              )
+            : _showForm(state);
+      },
+    );
   }
 
   Text? _getRetrieveErrorWidget() {
@@ -187,29 +211,27 @@ class CategoryDialogState extends State<CategoryDialog> {
 
     List<Widget> relProducts = [];
     _selectedProducts.asMap().forEach((index, product) {
-      relProducts.add(InputChip(
-          label: Text(
-            product.productName ?? '',
-            key: Key(product.productId),
-          ),
-          deleteIcon: const Icon(
-            Icons.cancel,
-            key: Key("deleteChip"),
-          ),
+      relProducts.add(
+        InputChip(
+          label: Text(product.productName ?? '', key: Key(product.productId)),
+          deleteIcon: const Icon(Icons.cancel, key: Key("deleteChip")),
           onDeleted: () async {
             setState(() {
               _selectedProducts.removeAt(index);
             });
-          }));
+          },
+        ),
+      );
     });
-    relProducts.add(IconButton(
-      iconSize: 25,
-      icon: const Icon(Icons.add_circle),
-      color: Colors.deepOrange,
-      padding: const EdgeInsets.all(0.0),
-      key: const Key('addProducts'),
-      onPressed: () async {
-        var result = await showDialog(
+    relProducts.add(
+      IconButton(
+        iconSize: 25,
+        icon: const Icon(Icons.add_circle),
+        color: Colors.deepOrange,
+        padding: const EdgeInsets.all(0.0),
+        key: const Key('addProducts'),
+        onPressed: () async {
+          var result = await showDialog(
             context: context,
             builder: (BuildContext context) {
               return MultiSelect<Product>(
@@ -217,95 +239,110 @@ class CategoryDialogState extends State<CategoryDialog> {
                 items: state.products,
                 selectedItems: _selectedProducts,
               );
+            },
+          );
+          if (result != null) {
+            setState(() {
+              _selectedProducts = result;
             });
-        if (result != null) {
-          setState(() {
-            _selectedProducts = result;
-          });
-        }
-      },
-    ));
+          }
+        },
+      ),
+    );
     return Stack(
       children: [
         SingleChildScrollView(
-            controller: _scrollController,
-            key: const Key('listView'),
-            child: Form(
-                key: _categoryDialogFormKey,
-                child: Column(children: [
-                  const SizedBox(height: 30),
-                  CircleAvatar(
-                      radius: 60,
-                      child: _imageFile != null
-                          ? foundation.kIsWeb
-                              ? Image.network(_imageFile!.path, scale: 0.3)
-                              : Image.file(File(_imageFile!.path), scale: 0.3)
-                          : widget.category.image != null
-                              ? Image.memory(widget.category.image!, scale: 0.3)
-                              : Text(
-                                  widget.category.categoryName.isEmpty
-                                      ? '?'
-                                      : widget.category.categoryName
-                                          .substring(0, 1),
-                                  style: const TextStyle(fontSize: 30))),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    key: const Key('Id'),
-                    decoration: const InputDecoration(labelText: 'Category Id'),
-                    controller: _idController,
-                  ),
-                  TextFormField(
-                    key: const Key('name'),
-                    decoration:
-                        const InputDecoration(labelText: 'Category Name'),
-                    controller: _nameController,
-                    validator: (value) {
-                      return value!.isEmpty
-                          ? 'Please enter a category name?'
-                          : null;
-                    },
-                  ),
-                  TextFormField(
-                    key: const Key('description'),
-                    decoration: const InputDecoration(labelText: 'Description'),
-                    controller: _descrController,
-                    maxLines: 3,
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please enter a category description?';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  InputDecorator(
-                      decoration: InputDecoration(
-                          labelText:
-                              'Related Products${widget.category.nbrOfProducts > widget.category.products.length ? ' total: '
+          controller: _scrollController,
+          key: const Key('listView'),
+          child: Form(
+            key: _categoryDialogFormKey,
+            child: Column(
+              children: [
+                const SizedBox(height: 30),
+                CircleAvatar(
+                  radius: 60,
+                  child: _imageFile != null
+                      ? foundation.kIsWeb
+                            ? Image.network(_imageFile!.path, scale: 0.3)
+                            : Image.file(File(_imageFile!.path), scale: 0.3)
+                      : widget.category.image != null
+                      ? Image.memory(widget.category.image!, scale: 0.3)
+                      : Text(
+                          widget.category.categoryName.isEmpty
+                              ? '?'
+                              : widget.category.categoryName.substring(0, 1),
+                          style: const TextStyle(fontSize: 30),
+                        ),
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  key: const Key('Id'),
+                  decoration: const InputDecoration(labelText: 'Category Id'),
+                  controller: _idController,
+                ),
+                TextFormField(
+                  key: const Key('name'),
+                  decoration: const InputDecoration(labelText: 'Category Name'),
+                  controller: _nameController,
+                  validator: (value) {
+                    return value!.isEmpty
+                        ? 'Please enter a category name?'
+                        : null;
+                  },
+                ),
+                TextFormField(
+                  key: const Key('description'),
+                  decoration: const InputDecoration(labelText: 'Description'),
+                  controller: _descrController,
+                  maxLines: 3,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter a category description?';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                InputDecorator(
+                  decoration: InputDecoration(
+                    labelText:
+                        'Related Products${widget.category.nbrOfProducts > widget.category.products.length ? ' total: '
                                   '${widget.category.nbrOfProducts}, '
                                   'shown first ${widget.category.products.length}' : ''}',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25.0),
-                          )),
-                      child: Wrap(spacing: 10.0, children: relProducts)),
-                  const SizedBox(height: 10),
-                  OutlinedButton(
-                      key: const Key('update'),
-                      child: Text(widget.category.categoryId.isEmpty
-                          ? 'Create'
-                          : 'Update'),
-                      onPressed: () async {
-                        if (_categoryDialogFormKey.currentState!.validate()) {
-                          _categoryBloc.add(CategoryUpdate(Category(
-                              categoryId: widget.category.categoryId,
-                              categoryName: _nameController.text,
-                              description: _descrController.text,
-                              products: _selectedProducts,
-                              image: await HelperFunctions.getResizedImage(
-                                  _imageFile?.path))));
-                        }
-                      }),
-                ]))),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
+                  ),
+                  child: Wrap(spacing: 10.0, children: relProducts),
+                ),
+                const SizedBox(height: 10),
+                OutlinedButton(
+                  key: const Key('update'),
+                  child: Text(
+                    widget.category.categoryId.isEmpty ? 'Create' : 'Update',
+                  ),
+                  onPressed: () async {
+                    if (_categoryDialogFormKey.currentState!.validate()) {
+                      _categoryBloc.add(
+                        CategoryUpdate(
+                          Category(
+                            categoryId: widget.category.categoryId,
+                            categoryName: _nameController.text,
+                            description: _descrController.text,
+                            products: _selectedProducts,
+                            image: await HelperFunctions.getResizedImage(
+                              _imageFile?.path,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
         Positioned(
           right: right,
           top: top,

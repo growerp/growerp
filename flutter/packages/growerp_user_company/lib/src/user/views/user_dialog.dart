@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -176,15 +177,24 @@ class UserDialogState extends State<UserDialogStateFull> {
   }
 
   void _onImageButtonPressed(
-    ImageSource source, {
+    dynamic sourceOrPath, {
     BuildContext? context,
   }) async {
     try {
-      final pickedFile = await _picker.pickImage(source: source);
-      _image = await HelperFunctions.getResizedImage(pickedFile?.path);
-      setState(() {
-        _imageFile = pickedFile;
-      });
+      if (sourceOrPath is String) {
+        // Desktop: file path from file_picker
+        setState(() {
+          _imageFile = XFile(sourceOrPath);
+        });
+        _image = await HelperFunctions.getResizedImage(sourceOrPath);
+      } else if (sourceOrPath is ImageSource) {
+        // Mobile/web: use image_picker
+        final pickedFile = await _picker.pickImage(source: sourceOrPath);
+        _image = await HelperFunctions.getResizedImage(pickedFile?.path);
+        setState(() {
+          _imageFile = pickedFile;
+        });
+      }
     } catch (e) {
       setState(() {
         _pickImageError = e;
