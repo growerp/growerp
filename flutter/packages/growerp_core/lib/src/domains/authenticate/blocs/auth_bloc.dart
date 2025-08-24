@@ -208,7 +208,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           message: "Logged off",
         ),
       );
-      PersistFunctions.persistAuthenticate(state.authenticate!);
+      PersistFunctions.persistAuthenticate(
+        state.authenticate!.copyWith(apiKey: null),
+      );
+      PersistFunctions.persistKeyValue('apiKey', '');
     } on DioException catch (e) {
       emit(
         state.copyWith(
