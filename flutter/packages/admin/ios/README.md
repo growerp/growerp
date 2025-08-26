@@ -3,10 +3,9 @@
 
 ## flutter method upload:
 
-1. set production url in assets/appsettings.json
-2. in the app directory: flutter build ipa
-3. get Transporter MacOs application
-4. drop build/ios/ipa/*.ipa on to the Transporter
+1. in the app directory: flutter build ipa
+2. get Transporter MacOs application
+3. drop build/ios/ipa/*.ipa on to the Transporter
 
 
 
@@ -42,6 +41,8 @@ create certificates inside xcode easy!:
 
 to test for profile and certificate, provide proper messages:
     flutter build ipa
+
+add this ipa to the transport utitlity
 
 short:
 export FLUTTER_ROOT=/Users/hans/flutter/bin
