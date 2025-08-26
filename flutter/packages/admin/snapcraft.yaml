@@ -1,0 +1,223 @@
+name: growerp-admin
+base: core22
+version: '1.9.14'
+summary: GrowERP Admin - Business Management System
+description: |
+  GrowERP Admin is a comprehensive ERP (Enterprise Resource Planning) application 
+  built with Flutter. It provides business management capabilities including:
+  
+  - User and company management
+  - Inventory tracking and management
+  - Order processing and accounting
+  - Marketing and website management
+  - Activity tracking and reporting
+  - Customer relationship management (CRM)
+  
+  This snap packages the Linux desktop version of the GrowERP Admin application,
+  providing a complete business management solution for Linux systems.
+
+grade: stable
+confinement: strict
+license: Apache-2.0
+website: https://www.growerp.com
+source-code: https://github.com/growerp/growerp
+icon: assets/icon/icon.png
+
+apps:
+  growerp-admin:
+    command: bin/run
+    desktop: share/applications/growerp-admin.desktop
+    plugs:
+      - network
+      - network-bind
+      - desktop
+      - desktop-legacy
+      - wayland
+      - x11
+      - opengl
+      - audio-playback
+      - gsettings
+      - pulseaudio
+      - home
+      - removable-media
+    environment:
+      LD_LIBRARY_PATH: "$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/usr/lib:$SNAP/lib:$LD_LIBRARY_PATH"
+      GTK_PATH: "$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0"
+      GTK_MODULES: "canberra-gtk-module"
+      XDG_DATA_DIRS: "$SNAP/usr/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+      GIO_EXTRA_MODULES: "$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gio/modules"
+      GDK_PIXBUF_MODULE_FILE: "$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0/2.10.0/loaders.cache"
+      GTK_USE_PORTAL: "1"
+      LIBGL_DRIVERS_PATH: "$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri:$SNAP/usr/lib/dri"
+      __EGL_VENDOR_LIBRARY_DIRS: "$SNAP/usr/share/glvnd/egl_vendor.d"
+
+parts:
+  app:
+    plugin: dump
+    source: build/linux/x64/release/bundle
+    stage-packages:
+      # GTK and desktop libraries
+      - libgtk-3-0
+      - libglib2.0-0
+      - libgdk-pixbuf-2.0-0
+      - libgdk-pixbuf2.0-bin
+      - libpango-1.0-0
+      - libatk1.0-0
+      - libcairo2
+      - libcairo-gobject2
+      
+      # X11 and Wayland support
+      - libx11-6
+      - libxcb1
+      - libxcomposite1
+      - libxcursor1
+      - libxdamage1
+      - libxfixes3
+      - libxi6
+      - libxrandr2
+      - libxinerama1
+      - libwayland-client0
+      - libwayland-cursor0
+      - libwayland-egl1
+      
+      # Graphics and rendering
+      - libdrm2
+      - libegl1
+      - libgl1
+      - libglu1-mesa
+      - libglx-mesa0
+      # Mesa drivers for OpenGL support
+      - libgl1-mesa-dri
+      - libgl1-mesa-glx
+      - libglapi-mesa
+      - libegl1-mesa
+      - libgbm1
+      - mesa-utils
+      - mesa-vulkan-drivers
+      - libdrm-intel1
+      - libdrm-radeon1
+      - libdrm-amdgpu1
+      - libdrm-nouveau2
+      - libglvnd0
+      - libglx0
+      - libegl-mesa0
+      
+      # Audio support
+      - libasound2
+      - libpulse0
+      - libcanberra-gtk3-module
+      - libcanberra0
+      
+      # Desktop integration
+      - gsettings-desktop-schemas
+      - dconf-gsettings-backend
+      - dconf-service
+      - adwaita-icon-theme
+      - hicolor-icon-theme
+      - librsvg2-common
+      - sound-theme-freedesktop
+      - shared-mime-info
+      
+      # Essential libraries
+      - libstdc++6
+      - libgcc1
+      - libc6
+      - zlib1g
+      
+      # Fonts
+      - fonts-liberation
+      - fonts-dejavu-core
+      
+    override-prime: |
+      set -e
+      craftctl default
+      
+      # Create the launcher script
+      mkdir -p "$CRAFT_PRIME/bin"
+      cat > "$CRAFT_PRIME/bin/run" <<'EOF'
+      #!/bin/bash
+      set -e
+      
+      # Set up environment variables for GTK and desktop integration
+      export LD_LIBRARY_PATH="$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/usr/lib:$SNAP/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+      export GTK_PATH="$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0"
+      export GTK_MODULES="canberra-gtk-module"
+      export XDG_DATA_DIRS="$SNAP/usr/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+      export GIO_EXTRA_MODULES="$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gio/modules"
+      export GDK_PIXBUF_MODULE_FILE="$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0/2.10.0/loaders.cache"
+      export GTK_USE_PORTAL="1"
+      
+      # Set up OpenGL/Mesa environment
+      export LIBGL_DRIVERS_PATH="$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri:$SNAP/usr/lib/dri"
+      export __EGL_VENDOR_LIBRARY_DIRS="$SNAP/usr/share/glvnd/egl_vendor.d"
+      
+      # Generate GDK pixbuf loaders cache if needed
+      if [ ! -f "$GDK_PIXBUF_MODULE_FILE" ] && command -v gdk-pixbuf-query-loaders >/dev/null 2>&1; then
+        mkdir -p "$(dirname "$GDK_PIXBUF_MODULE_FILE")"
+        gdk-pixbuf-query-loaders > "$GDK_PIXBUF_MODULE_FILE" 2>/dev/null || true
+      fi
+      
+      # Change to snap directory and execute the application
+      cd "$SNAP"
+      exec "$SNAP/admin" "$@"
+      EOF
+      chmod +x "$CRAFT_PRIME/bin/run"
+      
+      # Compile GSettings schemas
+      if [ -d "$CRAFT_PRIME/usr/share/glib-2.0/schemas" ]; then
+        glib-compile-schemas "$CRAFT_PRIME/usr/share/glib-2.0/schemas" 2>/dev/null || true
+      fi
+      
+      # Update icon caches
+      if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+        for theme in Adwaita hicolor; do
+          if [ -d "$CRAFT_PRIME/usr/share/icons/$theme" ]; then
+            gtk-update-icon-cache -f -t "$CRAFT_PRIME/usr/share/icons/$theme" 2>/dev/null || true
+          fi
+        done
+      fi
+      
+      # Update MIME database
+      if command -v update-mime-database >/dev/null 2>&1 && [ -d "$CRAFT_PRIME/usr/share/mime" ]; then
+        update-mime-database "$CRAFT_PRIME/usr/share/mime" 2>/dev/null || true
+      fi
+      
+      # Create desktop file
+      mkdir -p "$CRAFT_PRIME/share/applications"
+      cat > "$CRAFT_PRIME/share/applications/growerp-admin.desktop" <<'EOF'
+      [Desktop Entry]
+      Type=Application
+      Name=GrowERP Admin
+      Comment=Business Management System
+      Exec=growerp-admin.growerp-admin
+      Icon=${SNAP}/share/pixmaps/growerp-admin.png
+      Terminal=false
+      Categories=Office;Finance;
+      StartupNotify=true
+      StartupWMClass=admin
+      MimeType=application/x-growerp;
+      EOF
+      
+      # Create a simple icon (you can replace this with the actual app icon)
+      mkdir -p "$CRAFT_PRIME/share/pixmaps"
+      if [ -f "$CRAFT_PRIME/data/flutter_assets/assets/icon/icon.png" ]; then
+        cp "$CRAFT_PRIME/data/flutter_assets/assets/icon/icon.png" "$CRAFT_PRIME/share/pixmaps/growerp-admin.png"
+      else
+        # Create a simple fallback icon if the app icon is not found
+        echo "Creating fallback icon..."
+        # This would need imagemagick or similar, but for now we'll skip
+      fi
+
+layout:
+  /usr/share/xml/iso-codes:
+    bind: $SNAP/usr/share/xml/iso-codes
+  /usr/share/mime:
+    bind: $SNAP/usr/share/mime
+  /usr/lib/x86_64-linux-gnu/dri:
+    bind: $SNAP/usr/lib/x86_64-linux-gnu/dri
+  /usr/lib/dri:
+    bind: $SNAP/usr/lib/dri
+
+architectures:
+  - build-on: amd64
+    build-for: amd64
