@@ -46,7 +46,7 @@ along with this software (see the LICENSE.md file). If not, see
             <default-response type="none"/>
         </transition>
     <!-- Download GrowERP Admin Windows MSIX package -->
-    <transition name="admin.msix" read-only="true">
+    <transition name="admin1.9.0.msix" read-only="true">
         <actions>
             <script><![CDATA[
                 // Set the path to the admin.msix file
