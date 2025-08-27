@@ -1,6 +1,6 @@
 name: support
 description: System support app, for the GrowERP system
-version: 1.9.10+08
+version: 1.9.10+09
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none

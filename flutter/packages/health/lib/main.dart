@@ -25,11 +25,9 @@ import 'package:growerp_activity/growerp_activity.dart';
 
 import 'menu_options.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'router.dart' as router;
-import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 //webactivate import 'package:web/web.dart' as web;
 
@@ -44,32 +42,16 @@ Future main() async {
   GlobalConfiguration().updateValue('version', packageInfo.version);
   GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
-  // can change backend url by pressing long the title on the home screen.
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String ip = prefs.getString('ip') ?? '';
-  String chat = prefs.getString('chat') ?? '';
-  String singleCompany = prefs.getString('companyPartyId') ?? '';
-  if (ip.isNotEmpty) {
-    late http.Response response;
-    try {
-      response = await http.get(Uri.parse('${ip}rest/s1/growerp/Ping'));
-      if (response.statusCode == 200) {
-        GlobalConfiguration().updateValue('databaseUrl', ip);
-        GlobalConfiguration().updateValue('chatUrl', chat);
-        GlobalConfiguration().updateValue('singleCompany', singleCompany);
-        debugPrint(
-            '=== New ip: $ip , chat: $chat company: $singleCompany Updated!');
-      }
-    } catch (error) {
-      debugPrint('===$ip does not respond...not updating databaseUrl: $error');
-    }
-  }
+  String classificationId = GlobalConfiguration().get("classificationId");
+
+  // check if there is override for the production backend url
+  // if there is a overide we are in test mode: see the banner in the app
+  await getBackendUrlOverride(classificationId, packageInfo.version);
 
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
-  String classificationId = 'AppHealth';
 
   Company? company;
   if (kIsWeb) {
@@ -88,18 +70,20 @@ Future main() async {
     }
   }
 
-  runApp(TopApp(
-    restClient: restClient,
-    classificationId: classificationId,
-    chatClient: chatClient,
-    notificationClient: notificationClient,
-    title: 'GrowERP Health.',
-    router: router.generateRoute,
-    menuOptions: menuOptions,
-    extraDelegates: delegates,
-    extraBlocProviders: getAdminBlocProviders(restClient, classificationId),
-    company: company,
-  ));
+  runApp(
+    TopApp(
+      restClient: restClient,
+      classificationId: classificationId,
+      chatClient: chatClient,
+      notificationClient: notificationClient,
+      title: 'GrowERP Health.',
+      router: router.generateRoute,
+      menuOptions: menuOptions,
+      extraDelegates: delegates,
+      extraBlocProviders: getAdminBlocProviders(restClient, classificationId),
+      company: company,
+    ),
+  );
 }
 
 List<LocalizationsDelegate> delegates = [
