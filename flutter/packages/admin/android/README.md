@@ -1,3 +1,13 @@
+# Simplified submittance to the playstore
+
+in The app directory:
+1. increment version code(0.0.0+??) in pubspec.yaml
+flutter build appbundle
+
+after creation of a release:
+upload bundle in the browser at: https://play.google.com/console
+
+
 # Running fastlane to upload in Playstore
 
 ### create these emulators:
