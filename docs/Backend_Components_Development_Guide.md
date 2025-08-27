@@ -9,15 +9,16 @@ This guide provides detailed instructions for creating and maintaining Moqui com
 1. [Moqui Architecture Overview](#moqui-architecture)
 2. [Component Structure](#component-structure)
 3. [Development Setup](#development-setup)
-4. [Creating a New Component](#creating-component)
-5. [Entity Development](#entity-development)
-6. [Service Development](#service-development)
-7. [Screen/API Development](#screen-development)
-8. [Data Management](#data-management)
-9. [Security and Permissions](#security)
-10. [Testing](#testing)
-11. [Deployment](#deployment)
-12. [Best Practices](#best-practices)
+4. [Backend URL Selection System](#backend-url-selection)
+5. [Creating a New Component](#creating-component)
+6. [Entity Development](#entity-development)
+7. [Service Development](#service-development)
+8. [Screen/API Development](#screen-development)
+9. [Data Management](#data-management)
+10. [Security and Permissions](#security)
+11. [Testing](#testing)
+12. [Deployment](#deployment)
+13. [Best Practices](#best-practices)
 
 ## Moqui Architecture Overview {#moqui-architecture}
 
@@ -145,6 +146,234 @@ cd growerp/moqui
 ```
 
 For production, configure PostgreSQL or MySQL in `MoquiConf.xml`.
+
+## Backend URL Selection System {#backend-url-selection}
+
+GrowERP uses a sophisticated backend URL selection system that allows dynamic discovery and configuration of backend endpoints. This system enables applications to automatically connect to the appropriate backend environment (development, test, or production) based on configuration settings and runtime discovery.
+
+### Architecture Overview
+
+The backend URL selection process involves three main components:
+
+1. **Initial Configuration**: `app_settings.json` files provide bootstrap configuration
+2. **Dynamic Discovery**: `get_backend_url.dart` function queries the backend discovery service
+3. **Database Storage**: `PartyClassification` entity stores application-backend mappings
+
+### Initial Configuration with app_settings.json
+
+Each Flutter application includes an `app_settings.json` file in `assets/cfg/` that provides the initial configuration loaded at startup. This file serves as the foundation for the backend URL selection process.
+
+#### Structure and Contents
+
+```json
+{
+  "classificationId": "AppAdmin",
+  "databaseUrl": "https://backend.growerp.com",
+  "chatUrl": "wss://backend.growerp.com",
+  "databaseUrlDebug": "",
+  "chatUrlDebug": "",
+  "timeout": 20000,
+  "apiKey": "",
+  "test": false
+}
+```
+
+#### Key Configuration Fields
+
+- **classificationId**: Unique identifier linking the application to backend configurations (e.g., "AppAdmin", "AppSupport", "AppHealth")
+- **databaseUrl**: Production backend URL for REST API calls
+- **chatUrl**: Production WebSocket URL for chat functionality
+- **databaseUrlDebug**: Development/debug backend URL (empty by default)
+- **chatUrlDebug**: Development/debug WebSocket URL (empty by default)
+- **timeout**: HTTP request timeout in milliseconds
+- **test**: Boolean flag indicating test environment usage
+
+#### Loading Process
+
+The configuration is loaded during application startup using GlobalConfiguration:
+
+```dart
+await GlobalConfiguration().loadFromAsset('app_settings');
+
+String classificationId = GlobalConfiguration().get("classificationId");
+PackageInfo packageInfo = await PackageInfo.fromPlatform();
+```
+
+This provides the initial `classificationId` and default URLs that are then used by the backend URL discovery process.
+
+#### Critical Role in Final Backend URL Settings
+
+**Yes, the `app_settings.json` files have significant influence on the final backend URL settings through multiple mechanisms:**
+
+##### 1. Foundation Configuration Layer
+- **Default URLs**: `databaseUrl` and `chatUrl` serve as fallback values if dynamic discovery fails
+- **Classification Identity**: `classificationId` is essential for backend discovery service calls
+- **Environment-Specific URLs**: `databaseUrlDebug` and `chatUrlDebug` provide debug environment overrides
+
+##### 2. Three-Level Override Hierarchy
+```
+Level 1: app_settings.json (Bootstrap/Fallback)
+Level 2: Dynamic Discovery (Runtime Override)  
+Level 3: Manual Override (SharedPreferences)
+```
+
+##### 3. Environment-Based URL Resolution
+In debug mode, the system uses debug-specific configuration keys:
+```dart
+if (kDebugMode) {
+  // References 'databaseUrlDebug' and 'chatUrlDebug' from app_settings.json
+  databaseUrl = 'databaseUrlDebug';
+  chatUrl = 'chatUrlDebug';
+} else {
+  // References 'databaseUrl' and 'chatUrl' from app_settings.json
+  databaseUrl = 'databaseUrl';
+  chatUrl = 'chatUrl';
+}
+```
+
+##### 4. Discovery Process Dependencies
+The `classificationId` from app_settings.json is **mandatory** for the backend discovery service:
+```dart
+backendUrl = '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version=$version&applicationId=$classificationId';
+```
+
+##### 5. Final URL Resolution Logic
+- **If discovery succeeds**: GlobalConfiguration values are updated with discovered URLs
+- **If discovery fails**: Original app_settings.json values remain active
+- **Debug environment**: May use `databaseUrlDebug`/`chatUrlDebug` if populated
+
+This makes app_settings.json the **foundational configuration layer** that enables the entire backend URL selection system to function.
+
+### Dynamic Backend URL Discovery
+
+The core backend URL selection logic is implemented in `flutter/packages/growerp_core/lib/src/domains/common/functions/get_backend_url.dart` through the `getBackendUrlOverride()` function.
+
+#### Environment-Based URL Selection
+
+```dart
+Future<void> getBackendUrlOverride(String classificationId, String version) async {
+  late String backendBaseUrl, backendUrl, databaseUrl, chatUrl, secure;
+  
+  if (kDebugMode) {
+    // Development environment
+    bool android = Platform.isAndroid;
+    backendBaseUrl = android ? 'http://10.0.2.2:8080' : 'http://localhost:8080';
+    databaseUrl = 'databaseUrlDebug';
+    chatUrl = 'chatUrlDebug';
+    secure = '';
+  } else {
+    // Production environment
+    backendBaseUrl = 'https://backend.growerp.com';
+    databaseUrl = 'databaseUrl';
+    chatUrl = 'chatUrl';
+    secure = 's';
+  }
+}
+```
+
+#### Backend Discovery Service Call
+
+The function calls the backend discovery REST service:
+
+```dart
+backendUrl = '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version=$version&applicationId=$classificationId';
+response = await http.get(Uri.parse(backendUrl));
+
+String? appBackendUrl = jsonDecode(response.body)['backendUrl'];
+if (response.statusCode == 200 && appBackendUrl != null) {
+  GlobalConfiguration().updateValue(databaseUrl, "http$secure://$appBackendUrl");
+  GlobalConfiguration().updateValue(chatUrl, "ws$secure://$appBackendUrl");
+  GlobalConfiguration().updateValue("test", true);
+}
+```
+
+This call queries the `growerp.100.GeneralServices100.get#BackendUrl` service with:
+- **version**: Application version from `package_info_plus`
+- **applicationId**: The `classificationId` from app_settings.json
+
+### Database Storage: PartyClassification Entity
+
+The backend URL mappings are stored in the `mantle.party.PartyClassification` entity, which links applications to their corresponding backend URLs.
+
+#### Entity Structure
+
+```xml
+<entity entity-name="PartyClassification" package="mantle.party">
+    <field name="partyId" type="id" is-pk="true"/>
+    <field name="partyClassificationId" type="id" is-pk="true"/>
+    <field name="classificationTypeEnumId" type="id"/>
+    <field name="standardCode" type="text-medium"/>
+    <field name="fromDate" type="date-time" is-pk="true"/>
+    <field name="thruDate" type="date-time"/>
+    <!-- Additional fields... -->
+</entity>
+```
+
+#### Backend URL Storage Logic
+
+The `standardCode` field contains the backend URL and version-based routing logic:
+
+```
+standardCode: "backend1.growerp.com" 
+standardCode: "backend2.growerp.com;version>1.9.0"
+```
+
+The format allows for:
+- **Simple URL**: Direct backend URL assignment
+- **Version-based routing**: URL with version constraints for test vs production environments
+
+#### Service Implementation
+
+The `growerp.100.GeneralServices100.get#BackendUrl` service:
+
+1. Queries `PartyClassification` using the provided `applicationId` (classificationId)
+2. Evaluates version constraints in the `standardCode` field
+3. Returns the appropriate backend URL based on application version
+4. Enables dynamic routing between test and production environments
+
+### Frontend Management: ApplicationList Screen
+
+The Flutter application provides a management interface through the `ApplicationList` screen, typically accessed via:
+- **ApplicationDialog**: UI component for configuring backend URLs
+- **Application management screens**: Allow runtime updates to backend configurations
+- **Debug interface**: Long-press functionality on app titles for backend URL overrides
+
+#### Runtime Configuration Updates
+
+```dart
+SharedPreferences prefs = await SharedPreferences.getInstance();
+String ip = prefs.getString('ip') ?? '';
+String chat = prefs.getString('chat') ?? '';
+
+if (ip.isNotEmpty) {
+  GlobalConfiguration().updateValue('databaseUrl', ip);
+  GlobalConfiguration().updateValue('chatUrl', chat);
+}
+```
+
+### Integration with Testing Infrastructure
+
+For automated testing, the system includes:
+
+```bash
+# flutter/test/set_app_settings.sh
+sed -i -e 's"databaseUrlDebug": "","databaseUrlDebug": "http://moqui",g' assets/cfg/app_settings.json
+sed -i -e 's"chatUrlDebug": "","chatUrlDebug": "ws://moqui/chat",g' assets/cfg/app_settings.json
+```
+
+This script configures debug URLs for Docker-based testing environments.
+
+### Configuration Flow Summary
+
+1. **Startup**: `app_settings.json` loaded via `GlobalConfiguration().loadFromAsset()`
+2. **Bootstrap**: Initial `classificationId`, `databaseUrl`, and `chatUrl` values set
+3. **Discovery**: `getBackendUrlOverride()` calls backend service with `classificationId` and version
+4. **Backend Query**: Service queries `PartyClassification` entity using `standardCode` field
+5. **URL Resolution**: Backend returns appropriate URL based on version and environment
+6. **Configuration Update**: `GlobalConfiguration` values updated with discovered URLs
+7. **Runtime Override**: Optional manual override via application management screens
+
+This multi-layered approach ensures robust backend URL management across development, testing, and production environments while providing flexibility for manual configuration when needed.
 
 ## Creating a New Component {#creating-component}
 
