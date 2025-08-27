@@ -69,18 +69,20 @@ Future main() async {
     }
   }
 
-  runApp(TopApp(
-    restClient: restClient,
-    classificationId: classificationId,
-    chatClient: chatClient,
-    notificationClient: notificationClient,
-    title: 'GrowERP administrator.',
-    router: router.generateRoute,
-    menuOptions: menuOptions,
-    extraDelegates: delegates,
-    extraBlocProviders: getAdminBlocProviders(restClient, classificationId),
-    company: company,
-  ));
+  runApp(
+    TopApp(
+      restClient: restClient,
+      classificationId: classificationId,
+      chatClient: chatClient,
+      notificationClient: notificationClient,
+      title: 'GrowERP administrator.',
+      router: router.generateRoute,
+      menuOptions: menuOptions,
+      extraDelegates: delegates,
+      extraBlocProviders: getAdminBlocProviders(restClient, classificationId),
+      company: company,
+    ),
+  );
 }
 
 List<LocalizationsDelegate> delegates = [

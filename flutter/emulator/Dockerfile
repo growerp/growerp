@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-ARG SDK_VERSION=34
+ARG SDK_VERSION=35
 ARG EMULATOR_ARCH=x86_64
 
 # -------------------- Common -------------------

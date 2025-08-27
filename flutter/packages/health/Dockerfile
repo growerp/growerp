@@ -32,7 +32,7 @@ RUN git config --system --add safe.directory '*'
 RUN git config --global --add safe.directory /home/mobiledevops/.flutter-sdk
 
 # activate melos
-RUN dart pub global activate melos 3.4.0
+RUN dart pub global activate melos
 ENV PATH="$PATH":"$HOME/.pub-cache/bin"
 
 # get growerp repos
@@ -40,10 +40,10 @@ USER mobiledevops
 WORKDIR /home/mobiledevops
 # RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
 RUN ls
-COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/
-WORKDIR /home/mobiledevops/
+COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/flutter
+WORKDIR /home/mobiledevops/flutter
 RUN echo "pwd: $PWD"
-RUN sed -i 's\//webactivate \\' /home/mobiledevops/packages/health/lib/main.dart
+RUN sed -i 's\//webactivate \\' packages/health/lib/main.dart
 RUN flutter --version
 RUN melos clean
 RUN melos bootstrap
@@ -52,10 +52,10 @@ RUN melos l10n --no-select
 # build
 RUN melos build --no-select
 # build flutter app
-WORKDIR /home/mobiledevops/packages/health
+WORKDIR /home/mobiledevops/flutter/packages/health
 #RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
 RUN flutter build web --release
 # Stage 2 - Create the run-time image
 FROM nginx
-COPY --from=build-env /home/mobiledevops/packages/health/build/web /usr/share/nginx/html
+COPY --from=build-env /home/mobiledevops/flutter/packages/health/build/web /usr/share/nginx/html
 EXPOSE 80
