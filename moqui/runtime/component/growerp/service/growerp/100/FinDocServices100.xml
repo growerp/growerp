@@ -1054,7 +1054,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 ccDescription: response.description],
                             paymentId: response.paymentId,
                             pseudoId: response.pseudoId,
-                            amount: response.amount.toString(),
+                            amount: response.amount != null ? response.amount.toString() : null,
                             referenceNum: response.referenceNum,
                             transactionDate: response.transactionDate
                                 ? ec.l10n.format(response.transactionDate,'yyyy-MM-dd HH:mm:ssZ') : null,

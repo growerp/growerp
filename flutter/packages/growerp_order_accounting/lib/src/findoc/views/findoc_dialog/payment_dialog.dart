@@ -208,21 +208,60 @@ class PaymentDialogState extends State<PaymentDialog> {
   }
 
   List<DataRow> _createRows() {
-    return finDoc.gatewayResponses
-        .map(
-          (resp) => DataRow(
+    List<DataRow> rows = [];
+
+    for (var resp in finDoc.gatewayResponses) {
+      // Add the main data row
+      rows.add(
+        DataRow(
+          cells: [
+            if (!isPhone) DataCell(Text(resp.gatewayResponseId)),
+            DataCell(Text(resp.paymentOperation)),
+            if (!isPhone)
+              DataCell(Text(resp.paymentMethod?.ccDescription! ?? '')),
+            DataCell(Text(resp.amount != null ? resp.amount.toString() : "")),
+            DataCell(Text(resp.transactionDate.dateOnly())),
+            DataCell(Text(resp.resultSuccess ? 'Y' : 'N')),
+          ],
+        ),
+      );
+
+      // Add an additional row for result message if it exists
+      if (resp.resultMessage != null && resp.resultMessage!.trim().isNotEmpty) {
+        rows.add(
+          DataRow(
             cells: [
-              if (!isPhone) DataCell(Text(resp.gatewayResponseId)),
-              DataCell(Text(resp.paymentOperation)),
-              if (!isPhone)
-                DataCell(Text(resp.paymentMethod?.ccDescription! ?? '')),
-              DataCell(Text(resp.amount.toString())),
-              DataCell(Text(resp.transactionDate.dateOnly())),
-              DataCell(Text(resp.resultSuccess ? 'Y' : 'N')),
+              if (!isPhone) const DataCell(Text('')), // Empty ID cell
+              DataCell(
+                Text(
+                  'Message:',
+                  style: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ),
+              if (!isPhone) const DataCell(Text('')), // Empty Method cell
+              DataCell(
+                Text(
+                  resp.resultMessage!,
+                  style: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey[600],
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const DataCell(Text('')), // Empty Date cell
+              const DataCell(Text('')), // Empty OK cell
             ],
           ),
-        )
-        .toList();
+        );
+      }
+    }
+
+    return rows;
   }
 
   Widget paymentForm(
