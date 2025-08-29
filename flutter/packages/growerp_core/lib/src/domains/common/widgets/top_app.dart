@@ -21,7 +21,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'dart:io' show Platform;
+import 'package:universal_io/io.dart';
 
 import '../../../get_core_bloc_providers.dart';
 import '../../../services/ws_client.dart';
