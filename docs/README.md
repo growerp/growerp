@@ -58,6 +58,8 @@ This directory contains comprehensive documentation for extending GrowERP throug
    - Implementation details and usage patterns
    - Quick reference: [Timezone Quick Reference](./GrowERP_Timezone_Quick_Reference.md)
 
+7. **[Snap Linux distribition Guide](./snap_linux_distribution.md)**
+
 
 ## Quick Start
 
