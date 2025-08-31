@@ -287,7 +287,11 @@ class MenuOptionState extends State<DisplayMenuOption>
                         messages +=
                             "${note.message!["message"]}${index < notiFicationState.notifications.length - 1 ? '\n' : ''}";
                       }
-                      HelperFunctions.showTopMessage(context, messages);
+                      HelperFunctions.showMessage(
+                        context,
+                        messages,
+                        Colors.green,
+                      );
                     }
                   },
                   child: child!,
@@ -321,49 +325,72 @@ class MenuOptionState extends State<DisplayMenuOption>
               ),
             ];
 
-            return Scaffold(
-              key: Key(currentRoute),
-              appBar: AppBar(
-                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                automaticallyImplyLeading: isPhone,
-                bottom: isPhone
-                    ? null
-                    : TabBar(
-                        controller: _controller,
-                        labelPadding: const EdgeInsets.all(5.0),
-                        indicatorSize: TabBarIndicatorSize.label,
-                        indicator: BoxDecoration(
-                          color: tabSelectedBackground,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10),
+            return ScaffoldMessenger(
+              child: Scaffold(
+                key: Key(currentRoute),
+                appBar: AppBar(
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer,
+                  automaticallyImplyLeading: isPhone,
+                  bottom: isPhone
+                      ? null
+                      : TabBar(
+                          controller: _controller,
+                          labelPadding: const EdgeInsets.all(5.0),
+                          indicatorSize: TabBarIndicatorSize.label,
+                          indicator: BoxDecoration(
+                            color: tabSelectedBackground,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(10),
+                              topRight: Radius.circular(10),
+                            ),
                           ),
+                          tabs: tabText,
                         ),
-                        tabs: tabText,
-                      ),
-                title: appBarTitle(
-                  context,
-                  '$title ${isPhone ? '\n' : ', '}${tabItems[tabIndex].label}',
-                  isPhone,
+                  title: appBarTitle(
+                    context,
+                    '$title ${isPhone ? '\n' : ', '}${tabItems[tabIndex].label}',
+                    isPhone,
+                  ),
+                  actions: actions,
                 ),
-                actions: actions,
+                drawer: myDrawer(context, isPhone, menuList),
+                floatingActionButton: floatingActionButtonList[tabIndex],
+                bottomNavigationBar: isPhone
+                    ? BottomNavigationBar(
+                        type: BottomNavigationBarType.fixed,
+                        items: bottomItems,
+                        currentIndex: tabIndex,
+                        selectedItemColor: Colors.amber[800],
+                        onTap: (index) {
+                          setState(() {
+                            tabIndex = index;
+                          });
+                        },
+                      )
+                    : null,
+                body: BlocListener<NotificationBloc, NotificationState>(
+                  listener: (context, notiFicationState) {
+                    if (notiFicationState.status ==
+                            NotificationStatus.success &&
+                        notiFicationState.notifications.isNotEmpty) {
+                      String messages = '';
+                      for (final (index, note)
+                          in notiFicationState.notifications.indexed) {
+                        messages +=
+                            "${note.message!["message"]}${index < notiFicationState.notifications.length - 1 ? '\n' : ''}";
+                      }
+                      HelperFunctions.showMessage(
+                        context,
+                        messages,
+                        Colors.green,
+                      );
+                    }
+                  },
+                  child: Column(children: tabChildren),
+                ),
               ),
-              drawer: myDrawer(context, isPhone, menuList),
-              floatingActionButton: floatingActionButtonList[tabIndex],
-              bottomNavigationBar: isPhone
-                  ? BottomNavigationBar(
-                      type: BottomNavigationBarType.fixed,
-                      items: bottomItems,
-                      currentIndex: tabIndex,
-                      selectedItemColor: Colors.amber[800],
-                      onTap: (index) {
-                        setState(() {
-                          tabIndex = index;
-                        });
-                      },
-                    )
-                  : null,
-              body: Column(children: tabChildren),
             );
           }
 

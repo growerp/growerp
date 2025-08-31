@@ -21,35 +21,32 @@ import 'package:http/http.dart' show get;
 import '../../domains.dart';
 
 class HelperFunctions {
-  static showMessage(BuildContext context, String? message, dynamic colors,
-      {int? seconds}) {
+  static showMessage(
+    BuildContext context,
+    String? message,
+    dynamic colors, {
+    int? seconds,
+  }) {
     if (message != null && message != "null") {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(snackBar(context, colors, message, seconds: seconds));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(snackBar(context, colors, message, seconds: seconds));
     }
   }
 
-  static showTopMessage(
-    context,
-    String message, {
-    Duration? duration,
-  }) {
+  static showTopMessage(context, String message, {Duration? duration}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         dismissDirection: DismissDirection.up,
         duration: duration ?? const Duration(milliseconds: 1000),
         backgroundColor: Colors.yellow,
         margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height - 150,
-            left: 10,
-            right: 10),
-        behavior: SnackBarBehavior.floating,
-        content: Text(
-          message,
-          style: const TextStyle(
-            fontSize: 20,
-          ),
+          bottom: MediaQuery.of(context).size.height - 150,
+          left: 10,
+          right: 10,
         ),
+        behavior: SnackBarBehavior.floating,
+        content: Text(message, style: const TextStyle(fontSize: 20)),
       ),
     );
   }

@@ -35,7 +35,7 @@ int _notificationLimit = 20;
 
 class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   NotificationBloc(this.restClient, this.notificationClient, this.authBloc)
-      : super(const NotificationState()) {
+    : super(const NotificationState()) {
     on<NotificationFetch>(_onNotificationFetch);
     on<NotificationReceive>(_onNotificationReceive);
     on<NotificationSend>(_onNotificationSend);
@@ -49,24 +49,34 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     NotificationFetch event,
     Emitter<NotificationState> emit,
   ) async {
-    if (state.status == NotificationStatus.initial) {
-      notificationClient.send("subscribe: ALL");
-      final myStream = notificationClient.stream();
-      myStream.listen((data) =>
-          add(NotificationReceive(NotificationWs.fromJson(jsonDecode(data)))));
-    }
     try {
+      if (state.status == NotificationStatus.initial) {
+        notificationClient.send("subscribe: ALL");
+        final myStream = notificationClient.stream();
+        myStream.listen(
+          (data) => add(
+            NotificationReceive(NotificationWs.fromJson(jsonDecode(data))),
+          ),
+        );
+      }
+
       Notifications compResult = await restClient.getNotifications(
-          limit: event.limit ?? _notificationLimit);
-      return emit(state.copyWith(
-        status: NotificationStatus.success,
-        notifications: compResult.notifications,
-      ));
+        limit: event.limit ?? _notificationLimit,
+      );
+      return emit(
+        state.copyWith(
+          status: NotificationStatus.success,
+          notifications: compResult.notifications,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: NotificationStatus.failure,
           notifications: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -75,10 +85,12 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     Emitter<NotificationState> emit,
   ) async {
     emit(state.copyWith(status: NotificationStatus.loading));
-    emit(state.copyWith(
-      notifications: [event.notification],
-      status: NotificationStatus.success,
-    ));
+    emit(
+      state.copyWith(
+        notifications: [event.notification],
+        status: NotificationStatus.success,
+      ),
+    );
   }
 }
 
@@ -86,7 +98,7 @@ Future<void> _onNotificationSend(
   NotificationSend event,
   Emitter<NotificationState> emit,
 ) async {
-/*    try {
+  /*    try {
       notificationClient.send(event.notification);
       await restClient.createNotification(
           notification: Notification(

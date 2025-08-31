@@ -58,7 +58,13 @@ This directory contains comprehensive documentation for extending GrowERP throug
    - Implementation details and usage patterns
    - Quick reference: [Timezone Quick Reference](./GrowERP_Timezone_Quick_Reference.md)
 
-7. **[Snap Linux distribition Guide](./snap_linux_distribution.md)**
+7. **[WebSocket Notification System](./WebSocket_Notification_System.md)**
+   - Real-time notification system implementation
+   - Moqui NotificationMessage framework integration
+   - Topic-based subscriptions and user preferences
+   - WebSocket connection management and error handling
+
+8. **[Snap Linux distribition Guide](./snap_linux_distribution.md)**
 
 
 ## Quick Start

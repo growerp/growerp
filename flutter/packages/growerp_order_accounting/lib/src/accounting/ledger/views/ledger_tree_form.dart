@@ -72,24 +72,35 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
         // recursive function
         final result = TreeNode(
           key: ValueKey(glAccount.accountCode),
-          content: Row(children: [
-            SizedBox(
-                width: (isPhone(context) ? 210 : 400) -
+          content: Row(
+            children: [
+              SizedBox(
+                width:
+                    (isPhone(context) ? 210 : 400) -
                     (glAccount.level!.toDouble() * 10),
-                child:
-                    Text('${glAccount.accountCode} ${glAccount.accountName} ')),
-            SizedBox(
+                child: Text(
+                  '${glAccount.accountCode} ${glAccount.accountName} ',
+                ),
+              ),
+              SizedBox(
                 width: 100,
                 child: Text(
-                    (Decimal.parse(glAccount.postedBalance.toString()))
-                        .currency(currencyId: currencyId),
-                    textAlign: TextAlign.right)),
-            if (isLargerThanPhone(context))
-              SizedBox(
+                  (Decimal.parse(
+                    glAccount.postedBalance.toString(),
+                  )).currency(currencyId: currencyId),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+              if (isLargerThanPhone(context))
+                SizedBox(
                   width: 100,
-                  child: Text(glAccount.rollUp.currency(currencyId: currencyId),
-                      textAlign: TextAlign.right))
-          ]),
+                  child: Text(
+                    glAccount.rollUp.currency(currencyId: currencyId),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+            ],
+          ),
           children: glAccount.children.map(getTreeNode).toList(),
         );
         return result;
@@ -104,70 +115,88 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
       return iterable;
     }
 
-    return BlocConsumer<LedgerBloc, LedgerState>(listener: (context, state) {
-      if (state.status == LedgerStatus.failure) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-      }
-      if (state.status == LedgerStatus.success) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
-      }
-    }, builder: (context, state) {
-      if (state.status == LedgerStatus.failure) {
-        return const FatalErrorForm(message: 'Could not load Ledger tree!');
-      }
-      if (state.status == LedgerStatus.loading) {
-        return const LoadingIndicator();
-      }
-      if (state.status == LedgerStatus.success) {
-        _nodes = convert(
-            state.ledgerReport != null ? state.ledgerReport!.glAccounts : []);
-      }
-      return ListView(
-        children: <Widget>[
-          const SizedBox(height: 10),
-          Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-            if (!expanded)
-              OutlinedButton(
-                child: const Text('Expand All'),
-                onPressed: () => setState(() {
-                  _controller!.expandAll();
-                  expanded = !expanded;
-                }),
-              ),
-            const SizedBox(width: 10),
-            if (expanded)
-              OutlinedButton(
-                child: const Text('Collapse All'),
-                onPressed: () => setState(() {
-                  _controller!.collapseAll();
-                  expanded = !expanded;
-                }),
-              ),
-            OutlinedButton(
-                child: const Text('Recalculate'),
-                onPressed: () => _ledgerBloc.add(LedgerCalculate())),
-          ]),
-          const SizedBox(height: 10),
-          Row(children: [
-            const SizedBox(width: 20),
-            SizedBox(
-                width: isPhone(context) ? 220 : 410,
-                child: const Text('Gl Account ID  GL Account Name')),
-            const SizedBox(
-                width: 100,
-                child: Text('This Account', textAlign: TextAlign.right)),
-            if (isLargerThanPhone(context))
-              const SizedBox(
+    return BlocConsumer<LedgerBloc, LedgerState>(
+      listener: (context, state) {
+        if (state.status == LedgerStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+        if (state.status == LedgerStatus.success) {
+          HelperFunctions.showMessage(
+            context,
+            '${state.message}',
+            Colors.green,
+          );
+        }
+      },
+      builder: (context, state) {
+        if (state.status == LedgerStatus.failure) {
+          return const FatalErrorForm(message: 'Could not load Ledger tree!');
+        }
+        if (state.status == LedgerStatus.loading) {
+          return const LoadingIndicator();
+        }
+        if (state.status == LedgerStatus.success) {
+          _nodes = convert(
+            state.ledgerReport != null ? state.ledgerReport!.glAccounts : [],
+          );
+        }
+        return ListView(
+          children: <Widget>[
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (!expanded)
+                  OutlinedButton(
+                    child: const Text('Expand All'),
+                    onPressed: () => setState(() {
+                      _controller!.expandAll();
+                      expanded = !expanded;
+                    }),
+                  ),
+                const SizedBox(width: 10),
+                if (expanded)
+                  OutlinedButton(
+                    child: const Text('Collapse All'),
+                    onPressed: () => setState(() {
+                      _controller!.collapseAll();
+                      expanded = !expanded;
+                    }),
+                  ),
+                OutlinedButton(
+                  child: const Text('Recalculate'),
+                  onPressed: () => _ledgerBloc.add(LedgerCalculate()),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const SizedBox(width: 20),
+                SizedBox(
+                  width: isPhone(context) ? 220 : 410,
+                  child: const Text('Gl Account ID  GL Account Name'),
+                ),
+                const SizedBox(
                   width: 100,
-                  child: Text('Total Tree', textAlign: TextAlign.right))
-          ]),
-          const Divider(),
-          TreeView(
+                  child: Text('This Account', textAlign: TextAlign.right),
+                ),
+                if (isLargerThanPhone(context))
+                  const SizedBox(
+                    width: 100,
+                    child: Text('Total Tree', textAlign: TextAlign.right),
+                  ),
+              ],
+            ),
+            const Divider(),
+            TreeView(
               treeController: _controller,
               nodes: _nodes as List<TreeNode>,
-              indent: 10)
-        ],
-      );
-    });
+              indent: 10,
+            ),
+          ],
+        );
+      },
+    );
   }
 }
