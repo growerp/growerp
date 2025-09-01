@@ -1724,6 +1724,10 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="finDoc.isPosted == true">
                         <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
                             in-map="[acctgTransId: acctgTransId]" />
+                        <if condition="ec.message.getMessageInfos().toString().contains('[danger]')">
+                            <return error="true"
+                                message="${ec.message.getMessagesString()}" />
+                        </if>
                     </if>
                 </else-if>
                 <!-- create shipment -->
@@ -2388,6 +2392,10 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="finDoc.isPosted == true &amp;&amp; transaction.isPosted == 'N'">
                         <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
                             in-map="[acctgTransId: finDoc.transactionId]" />
+                        <if condition="ec.message.getMessageInfos().toString().contains('[danger]')">
+                            <return error="true"
+                                message="${ec.message.getMessagesString()}" />
+                        </if>
                     </if>
                     <!-- remove physically unposted transaction with status cancelled -->
                     <if condition="finDoc.statusId == 'FinDocCancelled'">
@@ -3180,6 +3188,10 @@ along with this software (see the LICENSE.md file). If not, see
                 </iterate>
                 <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
                     in-map="[acctgTransId: entries[0].acctgTransId]" />
+                    <if condition="ec.message.getMessageInfos().toString().contains('[danger]')">
+                        <return error="true"
+                            message="${ec.message.getMessagesString()}" />
+                    </if>
                 <service-call name="update#mantle.account.payment.Payment"
                     in-map="[paymentId: paymentOld.paymentId, statusId: 'PmntConfirmed']" />
             </if-->
