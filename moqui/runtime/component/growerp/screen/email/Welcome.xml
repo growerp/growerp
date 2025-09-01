@@ -20,15 +20,20 @@ along with this software (see the LICENSE.md file). If not, see
                 <html><body>
                 Welcome to the GrowERP ${classification} system, ${firstName!} ${lastName!}<br/><br/>
                 <#if  classification == 'Admin'>    
-                You can now start a website, sell products, manage your inventory and your accounting is done automatically.<br/>
+                You can now start a website, sell products, manage your inventory and your accounting is done automatically.<br/><br/>
 
                 If you sell products on your website, you can enter your Stripe secret key on the website admin screen and incoming payments will be handled by your own stripe account.
                 Your secret key is safe with us: it is encrypted in our database<br/><br/>
+                
                 </#if>
                 When you need any support, please let us know at
                 <a href="mailto:support@growerp.com?subject=Question%20about%20Growerp-${classification}">support@growerp.com</a><br/><br/>
-                <b>Your password to login is ${newPassword}</b> <br/><br/>
-                We will regularly send you an email with tips about the system. 
+                <b>Your password to login is ${newPassword} Please Note you need a credit card to register in our production system</b> <br/><br/>
+
+                If you just want to test, we also have a test system with limited availability and is cleared regularly: <br/>
+                Please register again at <a href="https://admin.growerp.org">https://admin.growerp.org</a><br/><br/>
+
+                We will send you weekly an email with tips about the system.
                 But for now, look around and let us know your comments!
                 <br/><br/>
                 Regards, <br/> The Growerp-${classification} Team!
