@@ -521,7 +521,7 @@ class MyFinDocState extends State<FinDocPage> {
                     decoration: InputDecoration(
                       labelText: '${finDoc.docType} Type',
                     ),
-                    child: Text(finDoc.docSubType!),
+                    child: Text(finDoc.docSubType ?? ''),
                   ),
                 ),
                 const SizedBox(width: 10),

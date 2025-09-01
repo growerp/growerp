@@ -6,50 +6,57 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future<String> getDioError(e) async {
   String returnMessage = '';
   if (e is DioException) {
-    late String expression;
-    switch (e.type) {
-      case DioExceptionType.connectionError:
-        expression = "Connection error:";
-      case DioExceptionType.badResponse:
-        expression = "Bad response:";
-      case DioExceptionType.badCertificate:
-        expression = "Bad certificate:";
-      case DioExceptionType.receiveTimeout:
-        expression = "Receive timeout:";
-      case DioExceptionType.connectionTimeout:
-        expression = "Connection timeout:";
-      case DioExceptionType.sendTimeout:
-        expression = "Send timeout:";
-      case DioExceptionType.cancel:
-        expression = "Request cancelled:";
-      case DioExceptionType.unknown:
-        expression = "Exception unknown:  ${e.error}";
-    }
-    if (e.type != DioExceptionType.unknown) {
-      returnMessage += "$expression ${e.message}";
-    } else {
-      returnMessage += expression;
-    }
     if (e.response != null) {
       try {
         // Try to decode as JSON, but handle if not a JSON string
-        final dynamic decoded = e.response is String
-            ? json.decode(e.response as String)
-            : e.response;
+        final dynamic responseData = e.response!.data;
+        final dynamic decoded = responseData is String
+            ? json.decode(responseData)
+            : responseData;
         if (decoded is Map<String, dynamic>) {
-          returnMessage +=
-              " ${decoded['errors'] ?? ''}[${decoded['errorCode'] ?? ''}]";
+          // Extract and format error messages properly - only show the clean error text
+          String errorMessage = '';
+          if (decoded['errors'] != null &&
+              decoded['errors'].toString().isNotEmpty) {
+            errorMessage = decoded['errors'].toString();
+            // Clean up the message by removing extra whitespace and formatting
+            errorMessage = errorMessage.replaceAll('\\n', '\n').trim();
+
+            // Return only the clean error message without technical prefixes
+            returnMessage = errorMessage;
+          } else if (decoded['errorCode'] != null) {
+            returnMessage = 'Error code: ${decoded['errorCode']}';
+          }
         } else {
-          returnMessage = ' ${e.response.toString()}';
+          // Fallback to technical error for non-JSON responses
+          returnMessage = 'Server error occurred';
         }
       } catch (_) {
-        returnMessage += ' ${e.response.toString()}';
+        returnMessage = 'Server error occurred';
       }
+    } else {
+      // Handle cases where there's no response (connection issues, etc.)
+      late String expression;
+      switch (e.type) {
+        case DioExceptionType.connectionError:
+          expression = "Connection error";
+        case DioExceptionType.receiveTimeout:
+          expression = "Request timeout";
+        case DioExceptionType.connectionTimeout:
+          expression = "Connection timeout";
+        case DioExceptionType.sendTimeout:
+          expression = "Send timeout";
+        case DioExceptionType.cancel:
+          expression = "Request cancelled";
+        default:
+          expression = "Network error";
+      }
+      returnMessage = expression;
     }
   } else if (e is FormatException) {
-    returnMessage = 'FormatException: ${e.message}';
+    returnMessage = 'Invalid data format';
   } else {
-    returnMessage = e.toString();
+    returnMessage = 'An error occurred';
   }
 
   if (returnMessage.trim().isEmpty) returnMessage = "Server Connection error";

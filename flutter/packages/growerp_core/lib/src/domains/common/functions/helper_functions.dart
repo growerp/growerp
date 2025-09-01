@@ -28,27 +28,55 @@ class HelperFunctions {
     int? seconds,
   }) {
     if (message != null && message != "null") {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(snackBar(context, colors, message, seconds: seconds));
+      try {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(snackBar(context, colors, message, seconds: seconds));
+      } catch (e) {
+        // ScaffoldMessenger not available yet, ignore silently
+        debugPrint('SnackBar not shown - no Scaffold available: $message');
+      }
     }
   }
 
   static showTopMessage(context, String message, {Duration? duration}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        dismissDirection: DismissDirection.up,
-        duration: duration ?? const Duration(milliseconds: 1000),
-        backgroundColor: Colors.yellow,
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).size.height - 150,
-          left: 10,
-          right: 10,
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          dismissDirection: DismissDirection.up,
+          duration: duration ?? const Duration(milliseconds: 3000),
+          backgroundColor: Colors.green[600],
+          margin: EdgeInsets.only(
+            top: 100,
+            bottom: MediaQuery.of(context).size.height - 200,
+            left: 20,
+            right: 20,
+          ),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 4,
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        behavior: SnackBarBehavior.floating,
-        content: Text(message, style: const TextStyle(fontSize: 20)),
-      ),
-    );
+      );
+    } catch (e) {
+      // ScaffoldMessenger not available yet, ignore silently
+      debugPrint('TopMessage not shown - no Scaffold available: $message');
+    }
   }
 
   static Future<Uint8List?> getResizedImage(imagePath) async {
