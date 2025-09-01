@@ -54,6 +54,8 @@ abstract class FinDoc with _$FinDoc {
     User? otherUser, //a contact person
     Company? otherCompany, // the other company
     Decimal? grandTotal,
+    Decimal? originalGrandTotal,
+    Currency? originalCurrency, // currency, like EUR, USD
     String? classificationId, // is productStore
     String? salesChannel,
     String? shipmentMethod,

@@ -136,6 +136,10 @@ class CommonTest {
       ),
     );
     await login(tester, testData: testData, demoData: demoData);
+    // check for notification message
+    if (hasKey('dismiss')) {
+      await tapByKey(tester, 'dismiss');
+    }
   }
 
   static Future<void> login(
@@ -613,6 +617,12 @@ class CommonTest {
     }
     if (tff.selectedItem is AccountType) return tff.selectedItem.description;
     return tff.selectedItem.toString();
+  }
+
+  /// get the state of a switch field identified by a key
+  static bool? getSwitchField(String key) {
+    Switch tff = find.byKey(Key(key)).last.evaluate().single.widget as Switch;
+    return tff.value;
   }
 
   /// get the content of a text field identified by a key

@@ -76,9 +76,11 @@ class PaymentDialogState extends State<PaymentDialog> {
   late bool readOnly;
   late PaymentInstrument _paymentInstrument;
   final _amountController = TextEditingController();
+  final _origAmountController = TextEditingController();
   final _pseudoIdController = TextEditingController();
   late String currencyId;
   late String currencySymbol;
+  late String origCurrencySymbol;
 
   @override
   void initState() {
@@ -95,6 +97,10 @@ class PaymentDialogState extends State<PaymentDialog> {
     currencySymbol = NumberFormat.simpleCurrency(
       locale: Platform.localeName,
       name: currencyId,
+    ).currencySymbol;
+    origCurrencySymbol = NumberFormat.simpleCurrency(
+      locale: Platform.localeName,
+      name: widget.finDoc.originalCurrency?.currencyId,
     ).currencySymbol;
     readOnly = finDoc.status == null
         ? false
@@ -437,6 +443,18 @@ class PaymentDialogState extends State<PaymentDialog> {
                       keyboardType: TextInputType.number,
                       validator: (value) =>
                           value!.isEmpty ? "Enter Price or Amount?" : null,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextFormField(
+                      enabled: !readOnly,
+                      key: const Key('origAmount'),
+                      decoration: InputDecoration(
+                        labelText: 'OrigAmount($origCurrencySymbol)',
+                      ),
+                      controller: _origAmountController,
+                      keyboardType: TextInputType.number,
                     ),
                   ),
                 ],

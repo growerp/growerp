@@ -91,6 +91,7 @@ class _ImageButtonsState extends State<ImageButtons> {
                 FilePickerResult? result = await FilePicker.platform.pickFiles(
                   type: FileType.image,
                 );
+                if (!mounted) return;
                 if (result != null && result.files.single.path != null) {
                   widget.onImageButtonPressed(
                     result.files.single.path,

@@ -1055,6 +1055,8 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="statusId" entity-alias="PAY" />
         <alias name="effectiveDate" entity-alias="PAY" />
         <alias name="amount" entity-alias="PAY" />
+        <alias name="originalAmount" field="originalCurrencyAmount" entity-alias="PAY" />
+        <alias name="originalCurrency" field="originalCurrencyUomId" entity-alias="PAY" />
         <alias name="paymentInstrumentId" field="paymentInstrumentEnumId" entity-alias="PAY" />
         <alias name="paymentTypeId" field="enumId" entity-alias="ENUM" />
         <alias name="paymentTypeDescription" field="description" entity-alias="ENUM" />
