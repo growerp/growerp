@@ -36,8 +36,8 @@ USER mobiledevops
 # activate melos
 RUN dart pub global activate melos 3.4.0
 ENV PATH="$PATH":"$HOME/.pub-cache/bin"
-ENV FLUTTER_HOME "/home/mobiledevops/.flutter-sdk"
-ENV PATH $PATH:$FLUTTER_HOME/bin
+ENV FLUTTER_HOME="/home/mobiledevops/.flutter-sdk"
+ENV PATH="$PATH:$FLUTTER_HOME/bin"
 
 # get growerp repos
 #RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /opt/growerp

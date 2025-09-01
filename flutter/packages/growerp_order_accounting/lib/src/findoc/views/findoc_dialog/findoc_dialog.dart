@@ -481,14 +481,47 @@ class MyFinDocState extends State<FinDocPage> {
           children: [
             Row(
               children: [
-                SizedBox(
-                  width: 80,
+                Expanded(
                   child: TextFormField(
                     key: const Key('pseudoId'),
                     enabled: !readOnly,
                     decoration: const InputDecoration(labelText: 'Id'),
                     controller: _pseudoIdController,
                     keyboardType: TextInputType.number,
+                  ),
+                ),
+
+                const Text('Posted?'),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Row(
+                    children: [
+                      const Text('No'),
+                      Switch(
+                        key: const Key('isPosted'),
+                        value: _isPosted ?? false,
+                        onChanged: readOnly
+                            ? null
+                            : (bool value) {
+                                setState(() {
+                                  _isPosted = value;
+                                });
+                              },
+                      ),
+                      const Text('Yes'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: '${finDoc.docType} Type',
+                    ),
+                    child: Text(finDoc.docSubType!),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -505,88 +538,6 @@ class MyFinDocState extends State<FinDocPage> {
                 ),
               ],
             ),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownSearch<CompanyUser>(
-                    enabled: !readOnly,
-                    selectedItem: _selectedCompanyUser,
-                    popupProps: PopupProps.menu(
-                      isFilterOnline: true,
-                      showSelectedItems: true,
-                      showSearchBox: true,
-                      searchFieldProps: TextFieldProps(
-                        autofocus: true,
-                        decoration: InputDecoration(
-                          labelText:
-                              "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name",
-                        ),
-                        controller: _companySearchBoxController,
-                      ),
-                      menuProps: MenuProps(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                      title: popUp(
-                        context: context,
-                        title:
-                            "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
-                        height: 50,
-                      ),
-                    ),
-                    dropdownDecoratorProps: const DropDownDecoratorProps(
-                      dropdownSearchDecoration: InputDecoration(
-                        labelText: 'Company/Person',
-                      ),
-                    ),
-                    key: const Key('company'),
-                    itemAsString: (CompanyUser? u) => u!.name ?? '',
-                    asyncItems: (String filter) {
-                      _companyUserBloc.add(
-                        GetDataEvent(
-                          () => context.read<RestClient>().getCompanyUser(
-                            searchString: filter,
-                            limit: 3,
-                          ),
-                        ),
-                      );
-                      return Future.delayed(
-                        const Duration(milliseconds: 150),
-                        () {
-                          return Future.value(
-                            (_companyUserBloc.state.data as CompaniesUsers)
-                                .companiesUsers,
-                          );
-                        },
-                      );
-                    },
-                    compareFn: (item, sItem) => item.partyId == sItem.partyId,
-                    onChanged: (CompanyUser? newValue) {
-                      _selectedCompanyUser = newValue;
-                    },
-                  ),
-                ),
-                RadioGroup<bool>(
-                  key: const Key('debit'),
-                  groupValue: _isPosted,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      _isPosted = value;
-                    });
-                  },
-                  child: const Row(
-                    children: [
-                      Radio<bool>(value: true),
-                      Radio<bool>(value: false),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            if (finDoc.docSubType != null)
-              InputDecorator(
-                decoration: const InputDecoration(labelText: 'Type'),
-                child: Text(finDoc.docSubType!),
-              ),
           ],
         ),
       ),
@@ -764,6 +715,7 @@ class MyFinDocState extends State<FinDocPage> {
                 otherCompany: _selectedCompanyUser?.getCompany(),
                 otherUser: _selectedCompanyUser?.getUser(),
                 description: _descriptionController.text,
+                isPosted: _isPosted,
               );
               if ((finDocUpdated.docType == FinDocType.transaction &&
                       finDocUpdated.items.isNotEmpty) ||
@@ -1276,8 +1228,8 @@ class MyFinDocState extends State<FinDocPage> {
     bool sales,
     CartState state,
   ) async {
-    final priceController = TextEditingController();
-    bool? isDebit;
+    final priceController = TextEditingController(text: '');
+    bool? isDebit = true;
     GlAccount? selectedGlAccount;
     GlAccountBloc glAccountBloc = context.read<GlAccountBloc>()
       ..add(const GlAccountFetch(limit: 3));
@@ -1369,56 +1321,55 @@ class MyFinDocState extends State<FinDocPage> {
                         },
                       ),
                       const SizedBox(height: 20),
-                      RadioGroup<bool>(
-                        key: const Key('debit'),
-                        groupValue: isDebit,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            isDebit = value!;
-                          });
-                        },
-                        child: const Row(
-                          children: [
-                            Radio<bool>(value: true),
-                            Radio<bool>(value: false),
-                          ],
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              key: const Key('price'),
+                              decoration: const InputDecoration(
+                                labelText: 'Amount',
+                              ),
+                              controller: priceController,
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return 'Enter Amount?';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          const Text('Credit'),
+                          StatefulBuilder(
+                            builder: (context, setState) {
+                              return Switch(
+                                key: const Key('isDebit'),
+                                value: isDebit ?? true,
+                                onChanged: (bool value) {
+                                  setState(() {
+                                    isDebit = value;
+                                  });
+                                },
+                              );
+                            },
+                          ),
+                          const Text('Debit'),
+                        ],
                       ),
 
-                      TextFormField(
-                        key: const Key('price'),
-                        decoration: const InputDecoration(labelText: 'Amount'),
-                        controller: priceController,
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'Enter Amount?';
-                          }
-                          return null;
-                        },
-                      ),
                       const SizedBox(height: 20),
                       OutlinedButton(
                         key: const Key('ok'),
                         child: const Text('Ok'),
                         onPressed: () {
                           if (addOtherFormKey.currentState!.validate()) {
-                            // ignore: unnecessary_null_comparison
-                            if (isDebit == null) {
-                              HelperFunctions.showMessage(
-                                context,
-                                'Debit / credit selection required',
-                                Colors.red,
-                              );
-                            } else {
-                              Navigator.of(context).pop(
-                                FinDocItem(
-                                  glAccount: selectedGlAccount,
-                                  isDebit: isDebit,
-                                  price: Decimal.parse(priceController.text),
-                                ),
-                              );
-                            }
+                            Navigator.of(context).pop(
+                              FinDocItem(
+                                glAccount: selectedGlAccount,
+                                isDebit: isDebit,
+                                price: Decimal.parse(priceController.text),
+                              ),
+                            );
                           }
                         },
                       ),

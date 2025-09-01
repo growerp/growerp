@@ -14,7 +14,7 @@ screenshots
 # Miscellaneous
 *.class
 *.log
-*.pyc
+*.pyc``
 *.swp
 .DS_Store
 .atom/
@@ -43,6 +43,12 @@ screenshots
 .pub-cache/
 .pub/
 build/
+
+#snap
+*.snap
+**/parts/**
+**/prime/**
+**/stage/**
 
 # Web related
 lib/generated_plugin_registrant.dart

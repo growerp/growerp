@@ -270,6 +270,10 @@ along with this software (see the LICENSE.md file). If not, see
                     </parameter>
                     <parameter name="telephoneNr" />
                     <parameter name="grandTotal" />
+                    <parameter name="originalGrandTotal" />
+                    <parameter name="originalCurrency" type="Map">
+                        <parameter name="currencyId" />
+                    </parameter>
                     <parameter name="classificationId" />
                     <parameter name="journal">
                         <parameter name="journalId" />
@@ -1090,6 +1094,8 @@ along with this software (see the LICENSE.md file). If not, see
                         otherUser: userOut?.partyId ? userOut : null,
                         otherCompany: company?.partyId ? company : null,
                         grandTotal: item.amount ? item.amount.toString() : '0.00',
+                        originalGrandTotal: item.originalAmount ? item.originalAmount.toString() : '0.00',
+                        originalCurrency: item.originalCurrency ? [currencyId : item.originalCurrency] : null,
                         items: [[paymentType: paymentType, glAccount: glAccount]],
                         gatewayResponses: gatewayResponses
                         ]" />
@@ -1571,6 +1577,10 @@ along with this software (see the LICENSE.md file). If not, see
                     </parameter>
                 </parameter>
                 <parameter name="grandTotal" />
+                <parameter name="originalGrandTotal" />
+                <parameter name="originalCurrency" type="Map">
+                    <parameter name="currencyId" />
+                </parameter>
                 <parameter name="classificationId" />
                 <parameter name="isPosted" type="Boolean" />
                 <parameter name="journal">
@@ -2024,6 +2034,8 @@ along with this software (see the LICENSE.md file). If not, see
                         statusId: payment.statusId,
                         paymentTypeEnumId: paymentTypeEnumId,
                         amount: payment.grandTotal,
+                        originalCurrencyAmount: payment.originalGrandTotal,
+                        originalCurrencyUomId: payment.originalCurrency?.currencyId,
                         paymentInstrumentEnumId: instrument,
                         effectiveDate: ec.l10n.format(ec.user.nowTimestamp,'yyyy-MM-dd HH:mm:ss'),
                         paymentMethodId: paymentMethodId,
@@ -2214,6 +2226,10 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="role" />
                 </parameter>
                 <parameter name="grandTotal" />
+                <parameter name="originalGrandTotal" />
+                <parameter name="originalCurrency" type="Map">
+                    <parameter name="currencyId" />
+                </parameter>
                 <parameter name="classificationId" />
                 <parameter name="items" type="List">
                     <parameter name="item" type="Map">
@@ -3030,7 +3046,12 @@ along with this software (see the LICENSE.md file). If not, see
                         </else>
                     </if>
                     <set field="amount" from="payment.grandTotal" type="BigDecimal" />
+                    <set field="originalCurrencyAmount" from="payment.originalGrandTotal"
+                        type="BigDecimal" />
                     <set field="paymentOld.amount" from="amount" />
+                    <set field="paymentOld.originalCurrencyAmount" from="originalCurrencyAmount" />
+                    <set field="paymentOld.originalCurrencyUomId"
+                        from="payment.originalCurrency?.currencyId" />
                     <!-- first item stores the paymentType needed for posting -->
                     <if condition="payment.items &amp;&amp; payment.items[0].paymentType">
                         <entity-find entity-name="mantle.ledger.config.PaymentTypeGlAccount"
