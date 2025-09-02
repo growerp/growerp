@@ -21,7 +21,7 @@ import 'package:http/http.dart' show get;
 import '../../domains.dart';
 
 class HelperFunctions {
-  static showMessage(
+  static void showMessage(
     BuildContext context,
     String? message,
     dynamic colors, {
@@ -39,7 +39,11 @@ class HelperFunctions {
     }
   }
 
-  static showTopMessage(context, String message, {Duration? duration}) {
+  static void showTopMessage(
+    BuildContext context,
+    String message, {
+    Duration? duration,
+  }) {
     try {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -79,7 +83,7 @@ class HelperFunctions {
     }
   }
 
-  static Future<Uint8List?> getResizedImage(imagePath) async {
+  static Future<Uint8List?> getResizedImage(String? imagePath) async {
     if (imagePath != null) {
       const LoadingIndicator();
       Uint8List imageData;

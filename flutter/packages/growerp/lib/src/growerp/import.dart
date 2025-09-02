@@ -67,7 +67,7 @@ Future<bool> login(RestClient client, String username, String password,
   return alreadyRegistered;
 }
 
-import(String inputFile, String? backendUrl, String username, String password,
+Future<void> import(String inputFile, String? backendUrl, String username, String password,
     String companyName, String currencyId,
     {FileType startFileType = FileType.unknown,
     FileType stopFileType = FileType.unknown,

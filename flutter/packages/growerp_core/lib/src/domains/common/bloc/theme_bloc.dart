@@ -13,7 +13,10 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
     on<ThemeSwitch>(_onThemeSwitch);
   }
 
-  Future<void> _onThemeModeGet(event, emit) async {
+  Future<void> _onThemeModeGet(
+    ThemeModeGet event,
+    Emitter<ThemeState> emit,
+  ) async {
     ThemeMode? themeMode = GlobalConfiguration().get('themeMode');
     if (themeMode == null) {
       GlobalConfiguration().addValue('themeMode', ThemeMode.light.toString());
@@ -21,12 +24,18 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
     return emit(state.copyWith(themeMode: themeMode));
   }
 
-  Future<void> _onThemeSwitch(event, emit) async {
+  Future<void> _onThemeSwitch(
+    ThemeSwitch event,
+    Emitter<ThemeState> emit,
+  ) async {
     GlobalConfiguration().addValue('themeMode', ThemeMode.light.toString());
-    return emit(state.copyWith(
+    return emit(
+      state.copyWith(
         themeMode: state.themeMode == ThemeMode.light
             ? ThemeMode.dark
-            : ThemeMode.light));
+            : ThemeMode.light,
+      ),
+    );
   }
 
   @override

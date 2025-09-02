@@ -108,7 +108,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
     );
   }
 
-  Widget _glAccountForm(state) {
+  Widget _glAccountForm(GlAccountState state) {
     List<Widget> widgets = [
       TextFormField(
         key: const Key('code'),

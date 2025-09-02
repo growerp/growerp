@@ -29,17 +29,24 @@ Future main() async {
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
 
-  runApp(TopApp(
-    restClient: restClient,
-    classificationId: 'AppAdmin',
-    chatClient: chatClient,
-    notificationClient: notificationClient,
-    title: 'GrowERP package: growerp_core.',
-    router: generateRoute,
-    menuOptions: menuOptions,
-    extraBlocProviders: getCoreBlocProviders(
-        restClient, chatClient, notificationClient, 'AppAdmin', null),
-  ));
+  runApp(
+    TopApp(
+      restClient: restClient,
+      classificationId: 'AppAdmin',
+      chatClient: chatClient,
+      notificationClient: notificationClient,
+      title: 'GrowERP package: growerp_core.',
+      router: generateRoute,
+      menuOptions: menuOptions,
+      extraBlocProviders: getCoreBlocProviders(
+        restClient,
+        chatClient,
+        notificationClient,
+        'AppAdmin',
+        null,
+      ),
+    ),
+  );
 }
 
 // Menu definition
@@ -49,7 +56,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
-    userGroups: [UserGroup.admin, UserGroup.employee],
+    userGroups: <UserGroup>[UserGroup.admin, UserGroup.employee],
     child: const MainMenu(),
   ),
   MenuOption(
@@ -57,7 +64,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/company.png',
     title: 'Organization',
     route: '/company',
-    userGroups: [UserGroup.admin, UserGroup.employee],
+    userGroups: <UserGroup>[UserGroup.admin, UserGroup.employee],
     child: const MainMenu(),
   ),
   MenuOption(
@@ -73,19 +80,24 @@ List<MenuOption> menuOptions = [
 // routing
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (kDebugMode) {
-    debugPrint('>>>NavigateTo { ${settings.name} '
-        'with: ${settings.arguments.toString()} }');
+    debugPrint(
+      '>>>NavigateTo { ${settings.name} '
+      'with: ${settings.arguments.toString()} }',
+    );
   }
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
-          builder: (context) => HomeForm(menuOptions: menuOptions));
+        builder: (context) => HomeForm(menuOptions: menuOptions),
+      );
     case '/company':
       return MaterialPageRoute(
-          builder: (context) => HomeForm(menuOptions: menuOptions));
+        builder: (context) => HomeForm(menuOptions: menuOptions),
+      );
     case '/user':
       return MaterialPageRoute(
-          builder: (context) => HomeForm(menuOptions: menuOptions));
+        builder: (context) => HomeForm(menuOptions: menuOptions),
+      );
     default:
       return coreRoute(settings);
   }
@@ -96,28 +108,32 @@ class MainMenu extends StatelessWidget {
   const MainMenu({super.key});
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state.status == AuthStatus.authenticated) {
-        Authenticate authenticate = state.authenticate!;
-        return DashBoardForm(dashboardItems: [
-          makeDashboardItem('dbCompany', context, menuOptions[1], [
-            authenticate.company!.name!.length > 20
-                ? "${authenticate.company!.name!.substring(0, 20)}..."
-                : "${authenticate.company!.name}",
-            "Email: ${authenticate.company!.email}",
-            "Currency: ${authenticate.company!.currency!.description}",
-            "Employees: ${authenticate.company!.employees.length}",
-          ]),
-          makeDashboardItem('dbUser', context, menuOptions[2], [
-            "${authenticate.user!.firstName!} ${authenticate.user!.lastName!}",
-            "Email: ${authenticate.user!.email}",
-            "Login name:",
-            " ${authenticate.user!.loginName}",
-            "Security Group: ${authenticate.user!.userGroup!.name}"
-          ]),
-        ]);
-      }
-      return const LoadingIndicator();
-    });
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          Authenticate authenticate = state.authenticate!;
+          return DashBoardForm(
+            dashboardItems: [
+              makeDashboardItem('dbCompany', context, menuOptions[1], [
+                authenticate.company!.name!.length > 20
+                    ? "${authenticate.company!.name!.substring(0, 20)}..."
+                    : "${authenticate.company!.name}",
+                "Email: ${authenticate.company!.email}",
+                "Currency: ${authenticate.company!.currency!.description}",
+                "Employees: ${authenticate.company!.employees.length}",
+              ]),
+              makeDashboardItem('dbUser', context, menuOptions[2], [
+                "${authenticate.user!.firstName!} ${authenticate.user!.lastName!}",
+                "Email: ${authenticate.user!.email}",
+                "Login name:",
+                " ${authenticate.user!.loginName}",
+                "Security Group: ${authenticate.user!.userGroup!.name}",
+              ]),
+            ],
+          );
+        }
+        return const LoadingIndicator();
+      },
+    );
   }
 }

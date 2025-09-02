@@ -544,7 +544,7 @@ class MyFinDocState extends State<FinDocPage> {
     );
   }
 
-  Widget updateButtons(state) {
+  Widget updateButtons(dynamic state) {
     List<Widget> buttons = [
       OutlinedButton(
         key: const Key('header'),

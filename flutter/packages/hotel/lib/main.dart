@@ -107,7 +107,7 @@ List<LocalizationsDelegate> delegates = [
   ActivityLocalizations.delegate,
 ];
 
-List<BlocProvider> getHotelBlocProviders(restClient, classificationId) {
+List<BlocProvider> getHotelBlocProviders(RestClient restClient, String classificationId) {
   return [
     ...getInventoryBlocProviders(restClient, classificationId),
     ...getUserCompanyBlocProviders(restClient, classificationId),

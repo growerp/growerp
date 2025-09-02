@@ -23,64 +23,70 @@ class PdfFormats {
   //
   // financial document, ivoice, payment, order etc....
   static Future<Uint8List> finDocPdf(
-      PdfPageFormat format, Company company, FinDoc finDoc,
-      {String currencyId = 'USD'}) async {
+    PdfPageFormat format,
+    Company company,
+    FinDoc finDoc, {
+    String currencyId = 'USD',
+  }) async {
     final pdf = pw.Document();
 
-    pdf.addPage(MultiPage(
-      build: (context) => [
-        buildHeader(company, finDoc),
-        SizedBox(height: 3 * PdfPageFormat.cm),
-        buildTitle(finDoc),
-        buildFinDoc(finDoc, currencyId: currencyId),
-        Divider(),
-        buildTotal(finDoc, currencyId: currencyId),
-      ],
-      footer: (context) => buildFooter(company, finDoc),
-    ));
+    pdf.addPage(
+      MultiPage(
+        build: (context) => [
+          buildHeader(company, finDoc),
+          SizedBox(height: 3 * PdfPageFormat.cm),
+          buildTitle(finDoc),
+          buildFinDoc(finDoc, currencyId: currencyId),
+          Divider(),
+          buildTotal(finDoc, currencyId: currencyId),
+        ],
+        footer: (context) => buildFooter(company, finDoc),
+      ),
+    );
 
     return pdf.save();
   }
 
   static Widget buildHeader(Company company, FinDoc finDoc) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SizedBox(height: 1 * PdfPageFormat.cm),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SizedBox(height: 1 * PdfPageFormat.cm),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              buildSupplierAddress(company),
-              Container(
-                height: 50,
-                width: 50,
-                child: BarcodeWidget(
-                  barcode: Barcode.qrCode(),
-                  data: finDoc.pseudoId!,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 1 * PdfPageFormat.cm),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              buildCustomerAddress(CompanyUser.tryParse(
-                  finDoc.otherCompany ?? finDoc.otherUser)!),
-              buildFinDocInfo(finDoc),
-            ],
+          buildSupplierAddress(company),
+          Container(
+            height: 50,
+            width: 50,
+            child: BarcodeWidget(
+              barcode: Barcode.qrCode(),
+              data: finDoc.pseudoId!,
+            ),
           ),
         ],
-      );
+      ),
+      SizedBox(height: 1 * PdfPageFormat.cm),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          buildCustomerAddress(
+            CompanyUser.tryParse(finDoc.otherCompany ?? finDoc.otherUser)!,
+          ),
+          buildFinDocInfo(finDoc),
+        ],
+      ),
+    ],
+  );
 
   static Widget buildCustomerAddress(CompanyUser customer) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("${customer.name}"),
-          Text(customer.email ?? ''),
-          Text(customer.address != null ? customer.address.toString() : ''),
-        ],
-      );
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text("${customer.name}"),
+      Text(customer.email ?? ''),
+      Text(customer.address != null ? customer.address.toString() : ''),
+    ],
+  );
 
   static Widget buildFinDocInfo(FinDoc info) {
     final titles = <String>[
@@ -104,34 +110,34 @@ class PdfFormats {
     );
   }
 
-  static buildSupplierAddress(Company supplier) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          supplier.image != null
-              ? pw.Container(
-                  width: 200,
-                  height: 100,
-                  child: pw.Image(pw.MemoryImage(supplier.image!)))
-              : Text(""),
-          Text("${supplier.name}",
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          SizedBox(height: 1 * PdfPageFormat.mm),
-          Text(supplier.email!),
-        ],
-      );
+  static pw.Widget buildSupplierAddress(Company supplier) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      supplier.image != null
+          ? pw.Container(
+              width: 200,
+              height: 100,
+              child: pw.Image(pw.MemoryImage(supplier.image!)),
+            )
+          : Text(""),
+      Text("${supplier.name}", style: TextStyle(fontWeight: FontWeight.bold)),
+      SizedBox(height: 1 * PdfPageFormat.mm),
+      Text(supplier.email!),
+    ],
+  );
 
   static Widget buildTitle(FinDoc finDoc) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${finDoc.docType}',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 0.8 * PdfPageFormat.cm),
-          Text(finDoc.description ?? 'Description here'),
-          SizedBox(height: 0.8 * PdfPageFormat.cm),
-        ],
-      );
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        '${finDoc.docType}',
+        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      ),
+      SizedBox(height: 0.8 * PdfPageFormat.cm),
+      Text(finDoc.description ?? 'Description here'),
+      SizedBox(height: 0.8 * PdfPageFormat.cm),
+    ],
+  );
 
   static Widget buildFinDoc(FinDoc finDoc, {String currencyId = 'USD'}) {
     final headers = ['Description', 'Type', 'Quantity', 'Unit Price', 'Total'];
@@ -168,8 +174,10 @@ class PdfFormats {
 
   static Widget buildTotal(FinDoc finDoc, {String currencyId = 'USD'}) {
     final netTotal = finDoc.items
-        .map((item) =>
-            item.price ?? Decimal.zero * (item.quantity ?? Decimal.zero))
+        .map(
+          (item) =>
+              item.price ?? Decimal.zero * (item.quantity ?? Decimal.zero),
+        )
         .reduce((item1, item2) => item1 + item2);
     //final vatPercent = finDoc.items.first.vat;
     //final vat = netTotal * vatPercent;
@@ -190,11 +198,11 @@ class PdfFormats {
                   value: netTotal.currency(currencyId: currencyId),
                   unite: true,
                 ),
-//                buildText(
-//                  title: 'Vat ${vatPercent * 100} %',
-//                  value: vat,
-//                  unite: true,
-//                ),
+                //                buildText(
+                //                  title: 'Vat ${vatPercent * 100} %',
+                //                  value: vat,
+                //                  unite: true,
+                //                ),
                 Divider(),
                 buildText(
                   title: 'Total amount due',
@@ -218,17 +226,17 @@ class PdfFormats {
   }
 
   static Widget buildFooter(Company company, FinDoc finDoc) => Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Divider(),
-          SizedBox(height: 2 * PdfPageFormat.mm),
-//          buildSimpleText(title: 'Address', value: finDoc.supplier.address),
-          SizedBox(height: 1 * PdfPageFormat.mm),
-//          buildSimpleText(title: 'Paypal', value: finDoc.supplier.paymentInfo),
-        ],
-      );
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Divider(),
+      SizedBox(height: 2 * PdfPageFormat.mm),
+      //          buildSimpleText(title: 'Address', value: finDoc.supplier.address),
+      SizedBox(height: 1 * PdfPageFormat.mm),
+      //          buildSimpleText(title: 'Paypal', value: finDoc.supplier.paymentInfo),
+    ],
+  );
 
-  static buildSimpleText({
+  static pw.Widget buildSimpleText({
     required String title,
     required String value,
   }) {
@@ -245,7 +253,7 @@ class PdfFormats {
     );
   }
 
-  static buildText({
+  static pw.Widget buildText({
     required String title,
     required String value,
     double width = double.infinity,

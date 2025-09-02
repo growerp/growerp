@@ -33,10 +33,12 @@ import '../../../../test_data.dart';
 
 class CommonTest {
   static Future<void> takeScreenShot({
-    binding,
-    tester,
+    IntegrationTestWidgetsFlutterBinding? binding,
+    WidgetTester? tester,
     String? screenShotName,
   }) async {
+    if (binding == null || tester == null || screenShotName == null) return;
+
     if (found.kIsWeb) {
       await binding.takeScreenshot(screenShotName);
       await tester.pumpAndSettle();
@@ -237,7 +239,7 @@ class CommonTest {
     );
   }
 
-  static checkCompanyAndAdmin(WidgetTester tester) async {
+  static Future<void> checkCompanyAndAdmin(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     // appbar
     expect(getTextField('appBarAvatarText'), equals(test.company!.name![0]));
@@ -270,7 +272,7 @@ class CommonTest {
     );
   }
 
-  static takeScreenshot(
+  static Future<void> takeScreenshot(
     WidgetTester tester,
     IntegrationTestWidgetsFlutterBinding binding,
     String name,

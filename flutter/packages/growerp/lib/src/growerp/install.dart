@@ -3,7 +3,7 @@ import 'package:dcli/dcli.dart';
 
 import '../src.dart';
 
-install(String growerpPath, String branch) {
+void install(String growerpPath, String branch) {
   logger.i('installing GrowERP: backend and starting the flutter admin app');
   if (exists(growerpPath)) {
     if (!exists('$growerpPath/flutter')) {

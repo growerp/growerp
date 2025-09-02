@@ -1,0 +1,9 @@
+name: growerp
+repository: https://github.com/growerp/growerp
+
+packages:
+  - packages/growerp_models
+
+command:
+  bootstrap:
+    runPubGetInParallel: false

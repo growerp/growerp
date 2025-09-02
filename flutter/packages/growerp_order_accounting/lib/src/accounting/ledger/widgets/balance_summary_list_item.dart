@@ -13,14 +13,16 @@
  */
 
 import 'package:decimal/decimal.dart';
-import 'package:decimal/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 class BalanceSummaryListItem extends StatelessWidget {
-  const BalanceSummaryListItem(
-      {super.key, required this.glAccount, required this.index});
+  const BalanceSummaryListItem({
+    super.key,
+    required this.glAccount,
+    required this.index,
+  });
 
   final GlAccount glAccount;
   final int index;
@@ -30,7 +32,8 @@ class BalanceSummaryListItem extends StatelessWidget {
     return ListTile(
       leading: CircleAvatar(
         child: Text(
-            glAccount.accountName!.isEmpty ? '?' : glAccount.accountName![0]),
+          glAccount.accountName!.isEmpty ? '?' : glAccount.accountName![0],
+        ),
       ),
       title: Column(
         children: [
@@ -38,34 +41,57 @@ class BalanceSummaryListItem extends StatelessWidget {
           Row(
             children: <Widget>[
               Expanded(
-                  child:
-                      Text("${glAccount.accountCode}", key: Key("code$index"))),
+                child: Text("${glAccount.accountCode}", key: Key("code$index")),
+              ),
               if (!isPhone(context))
                 Expanded(
-                    child: Text("${glAccount.accountName}",
-                        key: Key("name$index"))),
-              Expanded(
                   child: Text(
-                      Constant.numberFormat.format(DecimalIntl(Decimal.parse(
-                          glAccount.beginningBalance.toString()))),
-                      textAlign: TextAlign.right)),
-              if (!isPhone(context))
-                Expanded(
-                    child: Text(
-                        Constant.numberFormat.format(DecimalIntl(
-                            Decimal.parse(glAccount.postedDebits.toString()))),
-                        textAlign: TextAlign.right)),
-              if (!isPhone(context))
-                Expanded(
-                    child: Text(
-                        Constant.numberFormat.format(DecimalIntl(
-                            Decimal.parse(glAccount.postedCredits.toString()))),
-                        textAlign: TextAlign.right)),
+                    "${glAccount.accountName}",
+                    key: Key("name$index"),
+                  ),
+                ),
               Expanded(
+                child: Text(
+                  Constant.numberFormat.format(
+                    Decimal.parse(
+                      glAccount.beginningBalance.toString(),
+                    ).toDouble(),
+                  ),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+              if (!isPhone(context))
+                Expanded(
                   child: Text(
-                      Constant.numberFormat.format(DecimalIntl(
-                          Decimal.parse(glAccount.postedBalance.toString()))),
-                      textAlign: TextAlign.right)),
+                    Constant.numberFormat.format(
+                      Decimal.parse(
+                        glAccount.postedDebits.toString(),
+                      ).toDouble(),
+                    ),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+              if (!isPhone(context))
+                Expanded(
+                  child: Text(
+                    Constant.numberFormat.format(
+                      Decimal.parse(
+                        glAccount.postedCredits.toString(),
+                      ).toDouble(),
+                    ),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+              Expanded(
+                child: Text(
+                  Constant.numberFormat.format(
+                    Decimal.parse(
+                      glAccount.postedBalance.toString(),
+                    ).toDouble(),
+                  ),
+                  textAlign: TextAlign.right,
+                ),
+              ),
             ],
           ),
         ],

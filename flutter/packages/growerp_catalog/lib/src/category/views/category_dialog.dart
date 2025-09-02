@@ -166,7 +166,7 @@ class CategoryDialogState extends State<CategoryDialog> {
     );
   }
 
-  Widget listChild(state) {
+  Widget listChild(ProductState state) {
     return Builder(
       builder: (BuildContext context) {
         return !foundation.kIsWeb &&
@@ -197,7 +197,7 @@ class CategoryDialogState extends State<CategoryDialog> {
     return null;
   }
 
-  Widget _showForm(state) {
+  Widget _showForm(ProductState state) {
     final Text? retrieveError = _getRetrieveErrorWidget();
     if (retrieveError != null) {
       return retrieveError;

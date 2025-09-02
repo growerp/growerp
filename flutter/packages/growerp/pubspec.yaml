@@ -17,7 +17,7 @@ dependencies:
   dcli: ^7.0.5
   dio: ^5.4.3
   fast_csv: ^0.2.6
-  get_it: ^7.6.4
+  get_it: ^8.2.0
   growerp_models: ^1.9.0
   hive: ^2.2.3
   logger: ^2.0.2+1
@@ -26,4 +26,4 @@ dependencies:
   spreadsheet_decoder: ^2.2.0
 
 dev_dependencies:
-  flutter_lints: ^4.0.0
+  flutter_lints: ^6.0.0

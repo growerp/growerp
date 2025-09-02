@@ -44,65 +44,81 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
     right = right ?? (isAPhone(context) ? 20 : 50);
 
     return Dialog(
-        key: const Key('TimeEntryListDialog'),
-        insetPadding: const EdgeInsets.all(10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: popUp(
-            context: context,
-            child: _showList(isPhone(context)),
-            title: 'Time Entry Information',
-            height: 400,
-            width: 400));
+      key: const Key('TimeEntryListDialog'),
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        child: _showList(isPhone(context)),
+        title: 'Time Entry Information',
+        height: 400,
+        width: 400,
+      ),
+    );
   }
 
-  Widget _showList(isPhone) {
+  Widget _showList(bool isPhone) {
     return Stack(
       children: [
         GestureDetector(
-            onTap: () {},
-            child: Center(
-                child: BlocListener<ActivityBloc, ActivityState>(
-                    listener: (context, state) async {
-              switch (state.status) {
-                case ActivityBlocStatus.success:
-                  HelperFunctions.showMessage(
-                      context, 'Update successfull', Colors.green);
-                  Navigator.of(context).pop();
-                  break;
-                case ActivityBlocStatus.failure:
-                  HelperFunctions.showMessage(
-                      context, 'Error: ${state.message}', Colors.red);
-                  break;
-                default:
-                  const Text("????");
-              }
-            }, child: BlocBuilder<ActivityBloc, ActivityState>(
-                        builder: (context, state_) {
-              return ListView.builder(
-                physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: widget.timeEntries.length + 1,
-                itemBuilder: (BuildContext context, int index) {
-                  if (widget.timeEntries.isEmpty) {
-                    return const Center(
-                        heightFactor: 20,
-                        child: Text('No time entries found',
-                            key: Key('empty'), textAlign: TextAlign.center));
-                  }
-                  if (index == 0) {
-                    return TimeEntryListHeader(
-                      activityBloc: context.read<ActivityBloc>(),
+          onTap: () {},
+          child: Center(
+            child: BlocListener<ActivityBloc, ActivityState>(
+              listener: (context, state) async {
+                switch (state.status) {
+                  case ActivityBlocStatus.success:
+                    HelperFunctions.showMessage(
+                      context,
+                      'Update successfull',
+                      Colors.green,
                     );
-                  }
-                  index--;
-                  return TimeEntryListItem(
-                      index: index,
-                      activityId: '',
-                      timeEntry: widget.timeEntries[index]);
+                    Navigator.of(context).pop();
+                    break;
+                  case ActivityBlocStatus.failure:
+                    HelperFunctions.showMessage(
+                      context,
+                      'Error: ${state.message}',
+                      Colors.red,
+                    );
+                    break;
+                  default:
+                    const Text("????");
+                }
+              },
+              child: BlocBuilder<ActivityBloc, ActivityState>(
+                builder: (context, state_) {
+                  return ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: widget.timeEntries.length + 1,
+                    itemBuilder: (BuildContext context, int index) {
+                      if (widget.timeEntries.isEmpty) {
+                        return const Center(
+                          heightFactor: 20,
+                          child: Text(
+                            'No time entries found',
+                            key: Key('empty'),
+                            textAlign: TextAlign.center,
+                          ),
+                        );
+                      }
+                      if (index == 0) {
+                        return TimeEntryListHeader(
+                          activityBloc: context.read<ActivityBloc>(),
+                        );
+                      }
+                      index--;
+                      return TimeEntryListItem(
+                        index: index,
+                        activityId: '',
+                        timeEntry: widget.timeEntries[index],
+                      );
+                    },
+                  );
                 },
-              );
-            })))),
+              ),
+            ),
+          ),
+        ),
         Positioned(
           right: right,
           bottom: bottom,
@@ -114,21 +130,25 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
               });
             },
             child: FloatingActionButton(
-                key: const Key("addNew"),
-                heroTag: "timeEntryAdd",
-                onPressed: () async {
-                  await showDialog(
-                      barrierDismissible: true,
-                      context: context,
-                      builder: (BuildContext context) {
-                        return BlocProvider.value(
-                            value: activityBloc,
-                            child: TimeEntryDialog(
-                                TimeEntry(activityId: widget.activityId)));
-                      });
-                },
-                tooltip: 'Add New',
-                child: const Icon(Icons.add)),
+              key: const Key("addNew"),
+              heroTag: "timeEntryAdd",
+              onPressed: () async {
+                await showDialog(
+                  barrierDismissible: true,
+                  context: context,
+                  builder: (BuildContext context) {
+                    return BlocProvider.value(
+                      value: activityBloc,
+                      child: TimeEntryDialog(
+                        TimeEntry(activityId: widget.activityId),
+                      ),
+                    );
+                  },
+                );
+              },
+              tooltip: 'Add New',
+              child: const Icon(Icons.add),
+            ),
           ),
         ),
       ],

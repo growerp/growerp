@@ -29,7 +29,7 @@ import '../../common/common.dart';
 import '../company_user.dart';
 import 'user_dialog.dart';
 
-/// a class to start the <CompanyDialog> from anywhere
+/// a class to start the `CompanyDialog` from anywhere
 /// 1. a null [Company] input will show the current main company information
 /// from the [AuthBloc]
 /// 2. a [Company.partyId] = "_NEW_" will show an empty form in order
