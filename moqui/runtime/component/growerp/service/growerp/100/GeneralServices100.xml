@@ -798,12 +798,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <field-map field-name="username" />
             </entity-find-one>
             <if condition="!userAccount">
-                <set field="authenticate"
-                    from="[user: [loginName: username],
-                            classificationId: classificationId]" />
                 <return error="true"
                     message="cannot find username: ${username}" public="true" />
             </if>
+            <!-- default auth return values -->
+            <set field="authenticate"
+                from="[user: [loginName: username],
+                            classificationId: classificationId]" />
             <!-- check password -->
             <set field="oldPassword" from="password" />
             <script>
