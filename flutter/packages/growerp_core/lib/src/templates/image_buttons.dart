@@ -93,10 +93,7 @@ class _ImageButtonsState extends State<ImageButtons> {
                 );
                 if (!mounted) return;
                 if (result != null && result.files.single.path != null) {
-                  widget.onImageButtonPressed(
-                    result.files.single.path,
-                    context: context,
-                  );
+                  widget.onImageButtonPressed(result.files.single.path);
                 }
               } else {
                 // Use image_picker for mobile/web

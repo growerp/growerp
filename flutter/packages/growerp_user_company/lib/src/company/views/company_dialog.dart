@@ -661,47 +661,41 @@ class CompanyFormState extends State<CompanyDialog> {
                   ? () async {
                       Uint8List? convImage;
                       if (_companyDialogFormKey.currentState!.validate()) {
-                        if (_imageFile?.path != null && company.image == null) {
-                          HelperFunctions.showMessage(
-                            context,
-                            "Image upload error!",
-                            Colors.red,
-                          );
+                        if (_imageFile?.path != null) {
                           convImage = await HelperFunctions.getResizedImage(
                             _imageFile?.path,
                           );
-                        } else {
-                          company = Company(
-                            partyId: company.partyId,
-                            pseudoId: _idController.text,
-                            email: _emailController.text,
-                            url: _urlController.text,
-                            name: _nameController.text,
-                            role: _selectedRole,
-                            telephoneNr: _telephoneController.text,
-                            currency: _selectedCurrency,
-                            address: company.address,
-                            paymentMethod: company.paymentMethod,
-                            vatPerc: Decimal.parse(
-                              _vatPercController.text.isEmpty
-                                  ? '0'
-                                  : _vatPercController.text,
-                            ),
-                            salesPerc: Decimal.parse(
-                              _salesPercController.text.isEmpty
-                                  ? '0'
-                                  : _salesPercController.text,
-                            ),
-                            hostName: _hostNameController.text,
-                            secondaryBackend: _backendController.text,
-                            image: convImage,
-                          );
-                          companyBloc.add(CompanyUpdate(company));
-                          authBloc.add(AuthLoad());
-                          // get new copy of main company
-                          if (company.partyId == authBloc.company?.partyId) {
-                            company = authenticate.company!;
-                          }
+                        }
+                        company = Company(
+                          partyId: company.partyId,
+                          pseudoId: _idController.text,
+                          email: _emailController.text,
+                          url: _urlController.text,
+                          name: _nameController.text,
+                          role: _selectedRole,
+                          telephoneNr: _telephoneController.text,
+                          currency: _selectedCurrency,
+                          address: company.address,
+                          paymentMethod: company.paymentMethod,
+                          vatPerc: Decimal.parse(
+                            _vatPercController.text.isEmpty
+                                ? '0'
+                                : _vatPercController.text,
+                          ),
+                          salesPerc: Decimal.parse(
+                            _salesPercController.text.isEmpty
+                                ? '0'
+                                : _salesPercController.text,
+                          ),
+                          hostName: _hostNameController.text,
+                          secondaryBackend: _backendController.text,
+                          image: convImage,
+                        );
+                        companyBloc.add(CompanyUpdate(company));
+                        authBloc.add(AuthLoad());
+                        // get new copy of main company
+                        if (company.partyId == authBloc.company?.partyId) {
+                          company = authenticate.company!;
                         }
                       }
                     }
