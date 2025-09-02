@@ -39,17 +39,19 @@ Future main() async {
   String classificationId = GlobalConfiguration().get("classificationId");
   Bloc.observer = AppBlocObserver();
 
-  runApp(TopApp(
-    restClient: RestClient(await buildDioClient()),
-    classificationId: GlobalConfiguration().get("classificationId"),
-    chatClient: WsClient('chat'),
-    notificationClient: WsClient('notws'),
-    title: 'GrowERP Activity Management: ToDo, Event, ....',
-    router: router.generateRoute,
-    menuOptions: menuOptions,
-    extraDelegates: extraDelegates,
-    extraBlocProviders: getExampleBlocProviders(restClient, classificationId),
-  ));
+  runApp(
+    TopApp(
+      restClient: RestClient(await buildDioClient()),
+      classificationId: GlobalConfiguration().get("classificationId"),
+      chatClient: WsClient('chat'),
+      notificationClient: WsClient('notws'),
+      title: 'GrowERP Activity Management: ToDo, Event, ....',
+      router: router.generateRoute,
+      menuOptions: menuOptions,
+      extraDelegates: extraDelegates,
+      extraBlocProviders: getExampleBlocProviders(restClient, classificationId),
+    ),
+  );
 }
 
 // Menu definition
@@ -86,21 +88,25 @@ class MainMenuForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state.status == AuthStatus.authenticated) {
-        Authenticate authenticate = state.authenticate!;
-        return DashBoardForm(dashboardItems: [
-          makeDashboardItem('dbTodo', context, menuOptions[1], [
-            "To Do: ${authenticate.stats?.todoActivities ?? 0}",
-          ]),
-          makeDashboardItem('dbEvent', context, menuOptions[2], [
-            "Events: ${authenticate.stats?.eventActivities ?? 0}",
-          ]),
-        ]);
-      }
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          Authenticate authenticate = state.authenticate!;
+          return DashBoardForm(
+            dashboardItems: [
+              makeDashboardItem('dbTodo', context, menuOptions[1], [
+                "To Do: ${authenticate.stats?.todoActivities ?? 0}",
+              ]),
+              makeDashboardItem('dbEvent', context, menuOptions[2], [
+                "Events: ${authenticate.stats?.eventActivities ?? 0}",
+              ]),
+            ],
+          );
+        }
 
-      return const LoadingIndicator();
-    });
+        return const LoadingIndicator();
+      },
+    );
   }
 }
 
@@ -108,8 +114,9 @@ List<LocalizationsDelegate<dynamic>> extraDelegates = const [
   UserCompanyLocalizations.delegate,
 ];
 
-List<BlocProvider> getExampleBlocProviders(restClient, classificationId) {
-  return [
-    ...getUserCompanyBlocProviders(restClient, classificationId),
-  ];
+List<BlocProvider> getExampleBlocProviders(
+  RestClient restClient,
+  String classificationId,
+) {
+  return [...getUserCompanyBlocProviders(restClient, classificationId)];
 }

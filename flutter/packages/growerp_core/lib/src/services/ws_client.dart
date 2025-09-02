@@ -53,7 +53,7 @@ class WsClient {
     logger.i('Using base websocket backend url: $wsUrl with path: $path');
   }
 
-  connect(String apiKey, String userId) async {
+  Future<void> connect(String apiKey, String userId) async {
     try {
       logger.i("WS connect $wsUrl");
       channel = WebSocketChannel.connect(
@@ -73,7 +73,7 @@ class WsClient {
     streamController = StreamController.broadcast()..addStream(channel.stream);
   }
 
-  send(Object message) {
+  void send(Object message) {
     String out;
     debugPrint("Send message: $message");
     if (message is ChatMessage) {
@@ -85,11 +85,11 @@ class WsClient {
     channel.sink.add(out);
   }
 
-  stream() {
+  Stream<dynamic> stream() {
     return streamController.stream;
   }
 
-  close() {
+  void close() {
     channel.sink.close(status.normalClosure);
     streamController.close();
   }

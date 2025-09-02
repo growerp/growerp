@@ -7,7 +7,7 @@ import 'package:logger/logger.dart';
 
 import '../src.dart';
 
-export(String? backendUrl, String outputDirectory, String username,
+Future<void> export(String? backendUrl, String outputDirectory, String username,
     String password) async {
   var logger = Logger(filter: MyFilter());
   int timeout = 600; //in seconds

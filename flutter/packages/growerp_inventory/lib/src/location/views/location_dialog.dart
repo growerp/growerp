@@ -52,86 +52,100 @@ class LocationDialogState extends State<LocationDialog> {
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return Dialog(
-        key: const Key('LocationDialog'),
-        insetPadding: const EdgeInsets.all(10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+      key: const Key('LocationDialog'),
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: BlocListener<LocationBloc, LocationState>(
+        listener: (context, state) async {
+          switch (state.status) {
+            case LocationStatus.success:
+              HelperFunctions.showMessage(
+                context,
+                '${location.locationId == null ? "Add" : "Update"} successfull',
+                Colors.green,
+              );
+              Navigator.of(context).pop();
+              break;
+            case LocationStatus.failure:
+              HelperFunctions.showMessage(
+                context,
+                'Error: ${state.message}',
+                Colors.red,
+              );
+              break;
+            default:
+              const Text("????");
+          }
+        },
+        child: popUp(
+          context: context,
+          child: _showForm(isPhone),
+          title: 'Location Information #${location.pseudoId ?? "New"}',
+          height: 400,
+          width: 400,
         ),
-        child: BlocListener<LocationBloc, LocationState>(
-            listener: (context, state) async {
-              switch (state.status) {
-                case LocationStatus.success:
-                  HelperFunctions.showMessage(
-                      context,
-                      '${location.locationId == null ? "Add" : "Update"} successfull',
-                      Colors.green);
-                  Navigator.of(context).pop();
-                  break;
-                case LocationStatus.failure:
-                  HelperFunctions.showMessage(
-                      context, 'Error: ${state.message}', Colors.red);
-                  break;
-                default:
-                  const Text("????");
-              }
-            },
-            child: popUp(
-                context: context,
-                child: _showForm(isPhone),
-                title: 'Location Information #${location.pseudoId ?? "New"}',
-                height: 400,
-                width: 400)));
+      ),
+    );
   }
 
-  Widget _showForm(isPhone) {
+  Widget _showForm(bool isPhone) {
     return Center(
-        child: Form(
-            key: _formKey,
-            child: ListView(key: const Key('listView'), children: <Widget>[
-              TextFormField(
-                key: const Key('id'),
-                decoration: const InputDecoration(labelText: 'Location Id'),
-                controller: _pseudoIdController,
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                key: const Key('name'),
-                decoration: const InputDecoration(labelText: 'Location Name'),
-                controller: _nameController,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter a location name?';
-                  }
-                  return null;
-                },
-              ),
-              if (location.locationId != null)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-                  child: TextFormField(
-                    readOnly: true, // total of assets can not be updated here
-                    controller: _qohController,
-                    key: const Key('qoh'),
-                    decoration: const InputDecoration(
-                        labelText: 'Quantity on Hand', enabled: false),
+      child: Form(
+        key: _formKey,
+        child: ListView(
+          key: const Key('listView'),
+          children: <Widget>[
+            TextFormField(
+              key: const Key('id'),
+              decoration: const InputDecoration(labelText: 'Location Id'),
+              controller: _pseudoIdController,
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              key: const Key('name'),
+              decoration: const InputDecoration(labelText: 'Location Name'),
+              controller: _nameController,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Please enter a location name?';
+                }
+                return null;
+              },
+            ),
+            if (location.locationId != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                child: TextFormField(
+                  readOnly: true, // total of assets can not be updated here
+                  controller: _qohController,
+                  key: const Key('qoh'),
+                  decoration: const InputDecoration(
+                    labelText: 'Quantity on Hand',
+                    enabled: false,
                   ),
                 ),
-              const SizedBox(height: 10),
-              OutlinedButton(
-                  key: const Key('update'),
-                  child:
-                      Text(location.locationId == null ? 'Create' : 'Update'),
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      context.read<LocationBloc>().add(LocationUpdate(
-                            Location(
-                              locationId: location.locationId,
-                              pseudoId: _pseudoIdController.text,
-                              locationName: _nameController.text,
-                            ),
-                          ));
-                    }
-                  }),
-            ])));
+              ),
+            const SizedBox(height: 10),
+            OutlinedButton(
+              key: const Key('update'),
+              child: Text(location.locationId == null ? 'Create' : 'Update'),
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  context.read<LocationBloc>().add(
+                    LocationUpdate(
+                      Location(
+                        locationId: location.locationId,
+                        pseudoId: _pseudoIdController.text,
+                        locationName: _nameController.text,
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

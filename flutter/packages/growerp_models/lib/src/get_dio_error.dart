@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Future<String> getDioError(e) async {
+Future<String> getDioError(dynamic e) async {
   String returnMessage = '';
   if (e is DioException) {
     if (e.response != null) {

@@ -123,7 +123,7 @@ class ActivityDialogState extends State<ActivityDialog> {
     );
   }
 
-  Widget _showForm(isPhone) {
+  Widget _showForm(bool isPhone) {
     Future<void> selectDate(BuildContext context) async {
       final DateTime? picked = await showDatePicker(
         context: context,

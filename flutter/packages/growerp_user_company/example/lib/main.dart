@@ -28,23 +28,26 @@ Future main() async {
   WsClient notificationClient = WsClient('notws');
   String classificationId = GlobalConfiguration().get("classificationId");
 
-  runApp(TopApp(
-    restClient: restClient,
-    classificationId: classificationId,
-    chatClient: chatClient,
-    notificationClient: notificationClient,
-    title: 'GrowERP package: growerp_user_company.',
-    router: generateRoute,
-    menuOptions: menuOptions,
-    extraDelegates: const [UserCompanyLocalizations.delegate],
-    extraBlocProviders: getExampleBlocProviders(restClient, classificationId),
-  ));
+  runApp(
+    TopApp(
+      restClient: restClient,
+      classificationId: classificationId,
+      chatClient: chatClient,
+      notificationClient: notificationClient,
+      title: 'GrowERP package: growerp_user_company.',
+      router: generateRoute,
+      menuOptions: menuOptions,
+      extraDelegates: const [UserCompanyLocalizations.delegate],
+      extraBlocProviders: getExampleBlocProviders(restClient, classificationId),
+    ),
+  );
 }
 
-List<BlocProvider> getExampleBlocProviders(restClient, classificationId) {
-  return [
-    ...getUserCompanyBlocProviders(restClient, classificationId),
-  ];
+List<BlocProvider> getExampleBlocProviders(
+  RestClient restClient,
+  String classificationId,
+) {
+  return [...getUserCompanyBlocProviders(restClient, classificationId)];
 }
 
 // Menu definition
@@ -74,34 +77,22 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const CompanyList(
-          key: Key('Lead'),
-          role: Role.lead,
-        ),
+        form: const CompanyList(key: Key('Lead'), role: Role.lead),
         label: 'Leads',
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const CompanyList(
-          key: Key('Customer'),
-          role: Role.customer,
-        ),
+        form: const CompanyList(key: Key('Customer'), role: Role.customer),
         label: 'Customers',
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const CompanyList(
-          key: Key('Supplier'),
-          role: Role.supplier,
-        ),
+        form: const CompanyList(key: Key('Supplier'), role: Role.supplier),
         label: 'Suppliers',
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const CompanyList(
-          key: Key('All'),
-          role: null,
-        ),
+        form: const CompanyList(key: Key('All'), role: null),
         label: 'All',
         icon: const Icon(Icons.home),
       ),
@@ -115,42 +106,27 @@ List<MenuOption> menuOptions = [
     userGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
-        form: const UserList(
-          key: Key('Employee'),
-          role: Role.company,
-        ),
+        form: const UserList(key: Key('Employee'), role: Role.company),
         label: 'Employees',
         icon: const Icon(Icons.business),
       ),
       TabItem(
-        form: const UserList(
-          key: Key('Lead'),
-          role: Role.lead,
-        ),
+        form: const UserList(key: Key('Lead'), role: Role.lead),
         label: 'Leads',
         icon: const Icon(Icons.business),
       ),
       TabItem(
-        form: const UserList(
-          key: Key('Customer'),
-          role: Role.customer,
-        ),
+        form: const UserList(key: Key('Customer'), role: Role.customer),
         label: 'Customers',
         icon: const Icon(Icons.school),
       ),
       TabItem(
-        form: const UserList(
-          key: Key('Supplier'),
-          role: Role.supplier,
-        ),
+        form: const UserList(key: Key('Supplier'), role: Role.supplier),
         label: 'Suppliers',
         icon: const Icon(Icons.business),
       ),
       TabItem(
-        form: const UserList(
-          key: Key('All'),
-          role: Role.unknown,
-        ),
+        form: const UserList(key: Key('All'), role: Role.unknown),
         label: 'All',
         icon: const Icon(Icons.business),
       ),
@@ -164,34 +140,22 @@ List<MenuOption> menuOptions = [
     userGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
-        form: const CompanyUserList(
-          key: Key('Lead'),
-          role: Role.lead,
-        ),
+        form: const CompanyUserList(key: Key('Lead'), role: Role.lead),
         label: 'Leads',
         icon: const Icon(Icons.business),
       ),
       TabItem(
-        form: const CompanyUserList(
-          key: Key('Customer'),
-          role: Role.customer,
-        ),
+        form: const CompanyUserList(key: Key('Customer'), role: Role.customer),
         label: 'Customers',
         icon: const Icon(Icons.school),
       ),
       TabItem(
-        form: const CompanyUserList(
-          key: Key('Supplier'),
-          role: Role.supplier,
-        ),
+        form: const CompanyUserList(key: Key('Supplier'), role: Role.supplier),
         label: 'Suppliers',
         icon: const Icon(Icons.business),
       ),
       TabItem(
-        form: const CompanyUserList(
-          key: Key('All'),
-          role: Role.unknown,
-        ),
+        form: const CompanyUserList(key: Key('All'), role: Role.unknown),
         label: 'All',
         icon: const Icon(Icons.business),
       ),
@@ -201,36 +165,45 @@ List<MenuOption> menuOptions = [
 
 // routing
 Route<dynamic> generateRoute(RouteSettings settings) {
-  debugPrint('>>>NavigateTo { ${settings.name} '
-      'with: ${settings.arguments} }');
+  debugPrint(
+    '>>>NavigateTo { ${settings.name} '
+    'with: ${settings.arguments} }',
+  );
 
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
-          builder: (context) => HomeForm(menuOptions: menuOptions));
+        builder: (context) => HomeForm(menuOptions: menuOptions),
+      );
     case '/company':
       return MaterialPageRoute(
-          builder: (context) =>
-              ShowCompanyDialog(settings.arguments as Company));
+        builder: (context) => ShowCompanyDialog(settings.arguments as Company),
+      );
     case '/user':
       return MaterialPageRoute(
-          builder: (context) => UserDialog(settings.arguments as User));
+        builder: (context) => UserDialog(settings.arguments as User),
+      );
     case '/companies':
       return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+        builder: (context) =>
+            DisplayMenuOption(menuList: menuOptions, menuIndex: 1, tabIndex: 0),
+      );
     case '/users':
       return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 2, tabIndex: 0));
+        builder: (context) =>
+            DisplayMenuOption(menuList: menuOptions, menuIndex: 2, tabIndex: 0),
+      );
     case '/companiesUsers':
       return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 3, tabIndex: 0));
+        builder: (context) =>
+            DisplayMenuOption(menuList: menuOptions, menuIndex: 3, tabIndex: 0),
+      );
     default:
       return MaterialPageRoute(
-          builder: (context) => FatalErrorForm(
-              message: "Routing not found for request: ${settings.name}"));
+        builder: (context) => FatalErrorForm(
+          message: "Routing not found for request: ${settings.name}",
+        ),
+      );
   }
 }
 
@@ -240,36 +213,41 @@ class MainMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
-    return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-      Expanded(
-        child: DashBoardForm(dashboardItems: [
-          makeDashboardItem('dbCompanies', context, menuOptions[1], [
-            authenticate.company!.name!.length > 20
-                ? "${authenticate.company!.name!.substring(0, 20)}..."
-                : "${authenticate.company!.name}",
-            "Customers: ${authenticate.stats != null ? authenticate.stats!.customers : 0}",
-            "Leads: ${authenticate.stats != null ? authenticate.stats!.leads : 0}",
-            "Suppliers: ${authenticate.stats != null ? authenticate.stats!.suppliers : 0}",
-          ]),
-          makeDashboardItem('dbUsers', context, menuOptions[2], [
-            authenticate.company!.name!.length > 20
-                ? "${authenticate.company!.name!.substring(0, 20)}..."
-                : "${authenticate.company!.name}",
-            "Employees: ${authenticate.company?.employees.length ?? 0}",
-            "Customers: ${authenticate.stats != null ? authenticate.stats?.customers ?? 0 : 0}",
-            "Leads: ${authenticate.stats != null ? authenticate.stats?.leads ?? 0 : 0}",
-            "Suppliers: ${authenticate.stats != null ? authenticate.stats?.suppliers ?? 0 : 0}",
-          ]),
-          makeDashboardItem('dbCompaniesUsers', context, menuOptions[3], [
-            authenticate.company!.name!.length > 20
-                ? "${authenticate.company!.name!.substring(0, 20)}..."
-                : "${authenticate.company!.name}",
-            "Customers: ${authenticate.stats != null ? authenticate.stats?.customers ?? 0 : 0}",
-            "Leads: ${authenticate.stats != null ? authenticate.stats?.leads ?? 0 : 0}",
-            "Suppliers: ${authenticate.stats != null ? authenticate.stats?.suppliers ?? 0 : 0}",
-          ])
-        ]),
-      ),
-    ]);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          child: DashBoardForm(
+            dashboardItems: [
+              makeDashboardItem('dbCompanies', context, menuOptions[1], [
+                authenticate.company!.name!.length > 20
+                    ? "${authenticate.company!.name!.substring(0, 20)}..."
+                    : "${authenticate.company!.name}",
+                "Customers: ${authenticate.stats != null ? authenticate.stats!.customers : 0}",
+                "Leads: ${authenticate.stats != null ? authenticate.stats!.leads : 0}",
+                "Suppliers: ${authenticate.stats != null ? authenticate.stats!.suppliers : 0}",
+              ]),
+              makeDashboardItem('dbUsers', context, menuOptions[2], [
+                authenticate.company!.name!.length > 20
+                    ? "${authenticate.company!.name!.substring(0, 20)}..."
+                    : "${authenticate.company!.name}",
+                "Employees: ${authenticate.company?.employees.length ?? 0}",
+                "Customers: ${authenticate.stats != null ? authenticate.stats?.customers ?? 0 : 0}",
+                "Leads: ${authenticate.stats != null ? authenticate.stats?.leads ?? 0 : 0}",
+                "Suppliers: ${authenticate.stats != null ? authenticate.stats?.suppliers ?? 0 : 0}",
+              ]),
+              makeDashboardItem('dbCompaniesUsers', context, menuOptions[3], [
+                authenticate.company!.name!.length > 20
+                    ? "${authenticate.company!.name!.substring(0, 20)}..."
+                    : "${authenticate.company!.name}",
+                "Customers: ${authenticate.stats != null ? authenticate.stats?.customers ?? 0 : 0}",
+                "Leads: ${authenticate.stats != null ? authenticate.stats?.leads ?? 0 : 0}",
+                "Suppliers: ${authenticate.stats != null ? authenticate.stats?.suppliers ?? 0 : 0}",
+              ]),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }

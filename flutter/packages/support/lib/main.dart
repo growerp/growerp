@@ -66,18 +66,20 @@ Future main() async {
   }
 
   //company = Company(partyId: '100002', name: 'hallo hallo');
-  runApp(TopApp(
-    restClient: restClient,
-    classificationId: classificationId,
-    chatClient: chatClient,
-    notificationClient: notificationClient,
-    title: 'GrowERP System Support.',
-    router: router.generateRoute,
-    menuOptions: menuOptions,
-    extraDelegates: delegates,
-    extraBlocProviders: getSupportBlocProviders(restClient, classificationId),
-    company: company,
-  ));
+  runApp(
+    TopApp(
+      restClient: restClient,
+      classificationId: classificationId,
+      chatClient: chatClient,
+      notificationClient: notificationClient,
+      title: 'GrowERP System Support.',
+      router: router.generateRoute,
+      menuOptions: menuOptions,
+      extraDelegates: delegates,
+      extraBlocProviders: getSupportBlocProviders(restClient, classificationId),
+      company: company,
+    ),
+  );
 }
 
 List<LocalizationsDelegate> delegates = [
@@ -85,7 +87,10 @@ List<LocalizationsDelegate> delegates = [
   ActivityLocalizations.delegate,
 ];
 
-List<BlocProvider> getSupportBlocProviders(restClient, classificationId) {
+List<BlocProvider> getSupportBlocProviders(
+  RestClient restClient,
+  String classificationId,
+) {
   return [
     ...getUserCompanyBlocProviders(restClient, classificationId),
     BlocProvider<ApplicationBloc>(

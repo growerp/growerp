@@ -1,0 +1,36 @@
+name: chat_example
+description: A example project.
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+  flutter: ^3.33.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  growerp_core: ^1.9.0
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_bloc: ^8.1.4
+  growerp_models: ^1.9.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/cfg/
+    - packages/growerp_core/images/dashBoard.png
+    - packages/growerp_core/images/dashBoardGrey.png
+    - packages/growerp_core/images/company.png
+    - packages/growerp_core/images/companyGrey.png
+    - packages/growerp_core/images/growerp.jpg
+    - packages/growerp_core/images/growerpDark.jpg
+    - packages/growerp_core/images/growerp100.png
+    - packages/growerp_core/images/growerpDark100.png

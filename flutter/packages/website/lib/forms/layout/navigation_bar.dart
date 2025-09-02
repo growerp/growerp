@@ -8,10 +8,10 @@ class NavigationMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenTypeLayout(
-      mobile: const NavigationMenuMobile(),
-      tablet: const NavigationMenuTabletDesktop(20),
-      desktop: const NavigationMenuTabletDesktop(50),
+    return ScreenTypeLayout.builder(
+      mobile: (context) => const NavigationMenuMobile(),
+      tablet: (context) => const NavigationMenuTabletDesktop(20),
+      desktop: (context) => const NavigationMenuTabletDesktop(50),
     );
   }
 }
@@ -33,7 +33,7 @@ class NavigationMenuMobile extends StatelessWidget {
               Scaffold.of(context).openDrawer();
             },
           ),
-          const NavBarLogo()
+          const NavBarLogo(),
         ],
       ),
     );
@@ -63,7 +63,7 @@ class NavigationMenuTabletDesktop extends StatelessWidget {
               SizedBox(width: spacing),
               const NavBarItem('OFBiz', ofbizRoute),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -76,12 +76,11 @@ class NavBarLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-        mouseCursor: WidgetStateMouseCursor.clickable,
-        onTap: () {
-          Navigator.pushNamed(context, homeRoute);
-        },
-        child: SizedBox(
-          child: Image.asset('assets/growerp.png'),
-        ));
+      mouseCursor: WidgetStateMouseCursor.clickable,
+      onTap: () {
+        Navigator.pushNamed(context, homeRoute);
+      },
+      child: SizedBox(child: Image.asset('assets/growerp.png')),
+    );
   }
 }

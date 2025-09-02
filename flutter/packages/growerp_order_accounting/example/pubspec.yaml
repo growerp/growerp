@@ -10,7 +10,7 @@ dependencies:
   growerp_order_accounting:
     path: ../
   growerp_inventory: ^1.9.0
-  fl_chart: ^0.69.0
+  fl_chart: ^1.1.0
 
 dev_dependencies:
   flutter_test:

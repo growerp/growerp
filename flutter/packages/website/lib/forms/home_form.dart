@@ -8,9 +8,9 @@ class HomeForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenTypeLayout(
-      mobile: const HomeContentMobile(),
-      desktop: const HomeContentDesktop(),
+    return ScreenTypeLayout.builder(
+      mobile: (context) => const HomeContentMobile(),
+      desktop: (context) => const HomeContentDesktop(),
     );
   }
 }
@@ -23,11 +23,7 @@ class HomeContentDesktop extends StatelessWidget {
     return const Row(
       children: <Widget>[
         GrowerpDetails(),
-        Expanded(
-          child: Center(
-            child: CallToAction('Follow us on twitter'),
-          ),
-        )
+        Expanded(child: Center(child: CallToAction('Follow us on twitter'))),
       ],
     );
   }
@@ -59,17 +55,17 @@ class GrowerpDetails extends StatelessWidget {
       builder: (context, sizingInformation) {
         var textAlignment =
             sizingInformation.deviceScreenType == DeviceScreenType.desktop
-                ? TextAlign.left
-                : TextAlign.center;
+            ? TextAlign.left
+            : TextAlign.center;
         double titleSize =
             sizingInformation.deviceScreenType == DeviceScreenType.mobile
-                ? 25
-                : 40;
+            ? 25
+            : 40;
 
         double descriptionSize =
             sizingInformation.deviceScreenType == DeviceScreenType.mobile
-                ? 16
-                : 21;
+            ? 16
+            : 21;
 
         return SizedBox(
           width: 800,
@@ -81,21 +77,19 @@ class GrowerpDetails extends StatelessWidget {
                 'Open Source ERP, multiplatform, single codebase,'
                 ' user interface for Moqui & Apache Ofbiz.',
                 style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    height: 1.0,
-                    fontSize: titleSize),
+                  fontWeight: FontWeight.w800,
+                  height: 1.0,
+                  fontSize: titleSize,
+                ),
                 textAlign: textAlignment,
               ),
               Text(
                 'A Flutter user interface which runs natively on Android,'
                 ' IOS, Webbrowser, Linux, Windows and Mac using'
                 ' either Moqui or Apache Ofbiz as backend.',
-                style: TextStyle(
-                  fontSize: descriptionSize,
-                  height: 1.7,
-                ),
+                style: TextStyle(fontSize: descriptionSize, height: 1.7),
                 textAlign: textAlignment,
-              )
+              ),
             ],
           ),
         );
@@ -110,9 +104,9 @@ class CallToAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenTypeLayout(
-      mobile: CallToActionMobile(title),
-      tablet: CallToActionTabletDesktop(title),
+    return ScreenTypeLayout.builder(
+      mobile: (context) => CallToActionMobile(title),
+      tablet: (context) => CallToActionTabletDesktop(title),
     );
   }
 }
@@ -149,15 +143,18 @@ class CallToActionTabletDesktop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 15),
-        child: InkWell(
-          child: Text(title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: Colors.black,
-              )),
-          onTap: () => launchUrl(Uri.parse('https://twitter.com/grow_erp')),
-        ));
+      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 15),
+      child: InkWell(
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: Colors.black,
+          ),
+        ),
+        onTap: () => launchUrl(Uri.parse('https://twitter.com/grow_erp')),
+      ),
+    );
   }
 }

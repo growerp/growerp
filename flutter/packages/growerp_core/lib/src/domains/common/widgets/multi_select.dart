@@ -20,11 +20,12 @@ class MultiSelect<T> extends StatefulWidget {
   final String title;
   final List<T> items;
   final List<T> selectedItems;
-  const MultiSelect(
-      {super.key,
-      this.title = 'Please select one or more',
-      required this.items,
-      this.selectedItems = const []});
+  const MultiSelect({
+    super.key,
+    this.title = 'Please select one or more',
+    required this.items,
+    this.selectedItems = const [],
+  });
 
   @override
   MultiSelectState createState() => MultiSelectState<T>();
@@ -34,8 +35,8 @@ class MultiSelectState<T> extends State<MultiSelect> {
   late List<T> selectedItems;
   String message = '';
 
-// This function is triggered when a checkbox is checked or unchecked
-  void _itemChange(itemValue, bool isSelected) {
+  // This function is triggered when a checkbox is checked or unchecked
+  void _itemChange(dynamic itemValue, bool isSelected) {
     setState(() {
       if (isSelected) {
         selectedItems.add(itemValue);
@@ -61,29 +62,36 @@ class MultiSelectState<T> extends State<MultiSelect> {
       children: [
         widget.items.isEmpty
             ? const Center(
-                child: Text('nothing found, add some?',
-                    style: TextStyle(color: Colors.red)))
+                child: Text(
+                  'nothing found, add some?',
+                  style: TextStyle(color: Colors.red),
+                ),
+              )
             : ListBody(
                 children: widget.items
-                    .map((item) => CheckboxListTile(
-                          value: selectedItems.contains(item),
-                          title: Text(item.toString()),
-                          controlAffinity: ListTileControlAffinity.leading,
-                          onChanged: (isChecked) =>
-                              _itemChange(item, isChecked!),
-                        ))
+                    .map(
+                      (item) => CheckboxListTile(
+                        value: selectedItems.contains(item),
+                        title: Text(item.toString()),
+                        controlAffinity: ListTileControlAffinity.leading,
+                        onChanged: (isChecked) => _itemChange(item, isChecked!),
+                      ),
+                    )
                     .toList(),
               ),
-        Row(children: [
-          Expanded(
+        Row(
+          children: [
+            Expanded(
               child: OutlinedButton(
-            key: const Key('ok'),
-            onPressed: (() {
-              return Navigator.pop(context, selectedItems);
-            }),
-            child: const Text('OK'),
-          ))
-        ]),
+                key: const Key('ok'),
+                onPressed: (() {
+                  return Navigator.pop(context, selectedItems);
+                }),
+                child: const Text('OK'),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }

@@ -25,7 +25,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../../../growerp_user_company.dart';
 
-/// a class to start the <CompanyDialog> from anywhere
+/// a class to start the [CompanyDialog] from anywhere
 /// 1. a null [Company] input will show the current main company information
 /// from the [AuthBloc]
 /// 2. a [Company.partyId] = "_NEW_" will show an empty form in order

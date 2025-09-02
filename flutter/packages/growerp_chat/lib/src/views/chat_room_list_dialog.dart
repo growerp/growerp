@@ -58,21 +58,27 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
     left = isPhone ? 250 : 700;
     limit = (MediaQuery.of(context).size.height / 35).round();
     return BlocConsumer<ChatRoomBloc, ChatRoomState>(
-        listener: (context, state) {
-      if (state.status == ChatRoomStatus.failure) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-      }
-      if (state.status == ChatRoomStatus.success) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
-      }
-    }, builder: (context, state) {
-      if (state.status == ChatRoomStatus.failure) {
-        return FatalErrorForm(
-            message: 'Error processing ChatRoom: ${state.message}');
-      }
-      if (state.status == ChatRoomStatus.success) {
-        chatRooms = state.chatRooms;
-        return Dialog(
+      listener: (context, state) {
+        if (state.status == ChatRoomStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+        if (state.status == ChatRoomStatus.success) {
+          HelperFunctions.showMessage(
+            context,
+            '${state.message}',
+            Colors.green,
+          );
+        }
+      },
+      builder: (context, state) {
+        if (state.status == ChatRoomStatus.failure) {
+          return FatalErrorForm(
+            message: 'Error processing ChatRoom: ${state.message}',
+          );
+        }
+        if (state.status == ChatRoomStatus.success) {
+          chatRooms = state.chatRooms;
+          return Dialog(
             key: const Key('ChatRoomListDialog'),
             insetPadding: const EdgeInsets.only(left: 20, right: 20),
             shape: RoundedRectangleBorder(
@@ -97,29 +103,33 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                         });
                       },
                       child: FloatingActionButton(
-                          key: const Key("addNew"),
-                          heroTag: "chatRoomAdd",
-                          onPressed: () async {
-                            await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return ChatRoomDialog(ChatRoom());
-                                });
-                          },
-                          tooltip: 'Add New',
-                          child: const Icon(Icons.add)),
+                        key: const Key("addNew"),
+                        heroTag: "chatRoomAdd",
+                        onPressed: () async {
+                          await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return ChatRoomDialog(ChatRoom());
+                            },
+                          );
+                        },
+                        tooltip: 'Add New',
+                        child: const Icon(Icons.add),
+                      ),
                     ),
                   ),
                 ],
               ),
-            ));
-      }
-      return const Center(child: LoadingIndicator());
-    });
+            ),
+          );
+        }
+        return const Center(child: LoadingIndicator());
+      },
+    );
   }
 
-  Widget roomList(state) {
+  Widget roomList(ChatRoomState state) {
     return ListView.builder(
       key: const Key('listView'),
       physics: const AlwaysScrollableScrollPhysics(),
@@ -131,9 +141,13 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
         if (index == 0) return listHeader(context);
         if (index == 1 && chatRooms.isEmpty) {
           return Center(
-              heightFactor: 20,
-              child: Text("no ${entityName}s found!",
-                  key: const Key('empty'), textAlign: TextAlign.center));
+            heightFactor: 20,
+            child: Text(
+              "no ${entityName}s found!",
+              key: const Key('empty'),
+              textAlign: TextAlign.center,
+            ),
+          );
         }
         index--;
         return index >= chatRooms.length
@@ -141,66 +155,78 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
             : Dismissible(
                 key: const Key('chatRoomItem'),
                 direction: DismissDirection.startToEnd,
-                child: ListDetail(chatRoom: chatRooms[index], index: index));
+                child: ListDetail(chatRoom: chatRooms[index], index: index),
+              );
       },
     );
   }
 
   ListTile listHeader(BuildContext context) {
     return ListTile(
-        key: const Key("search"),
-        onTap: (() {
-          setState(() {
-            search = !search;
-          });
-        }),
-        leading: const Icon(Icons.search_sharp, size: 30),
-        title: search
-            ? Row(children: <Widget>[
+      key: const Key("search"),
+      onTap: (() {
+        setState(() {
+          search = !search;
+        });
+      }),
+      leading: const Icon(Icons.search_sharp, size: 30),
+      title: search
+          ? Row(
+              children: <Widget>[
                 SizedBox(
-                    width:
-                        ResponsiveBreakpoints.of(context).isMobile ? 150 : 250,
-                    child: TextField(
-                      key: const Key("searchField"),
-                      textInputAction: TextInputAction.go,
-                      autofocus: true,
-                      decoration: const InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        hintText: "search in name ..",
+                  width: ResponsiveBreakpoints.of(context).isMobile ? 150 : 250,
+                  child: TextField(
+                    key: const Key("searchField"),
+                    textInputAction: TextInputAction.go,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent),
                       ),
-                      onChanged: ((value) {
-                        searchString = value;
-                      }),
-                      onSubmitted: ((value) {
-                        _chatRoomBloc.add(
-                            ChatRoomFetch(searchString: value, limit: limit));
-                        setState(() {
-                          search = !search;
-                        });
-                      }),
-                    )),
+                      hintText: "search in name ..",
+                    ),
+                    onChanged: ((value) {
+                      searchString = value;
+                    }),
+                    onSubmitted: ((value) {
+                      _chatRoomBloc.add(
+                        ChatRoomFetch(searchString: value, limit: limit),
+                      );
+                      setState(() {
+                        search = !search;
+                      });
+                    }),
+                  ),
+                ),
                 OutlinedButton(
-                    child: const Text('Search'),
-                    onPressed: () {
-                      _chatRoomBloc.add(ChatRoomFetch(
-                          searchString: searchString, limit: limit));
-                    })
-              ])
-            : Column(children: [
-                Row(children: <Widget>[
-                  const Expanded(
-                      child: Text("Name", textAlign: TextAlign.center)),
-                  if (!ResponsiveBreakpoints.of(context).isMobile)
-                    const Text("Status", textAlign: TextAlign.center),
-                  const Text("Pvt.", textAlign: TextAlign.center),
-                  const Text("#Mem.", textAlign: TextAlign.center),
-                  const Text("    ", textAlign: TextAlign.center),
-                ]),
+                  child: const Text('Search'),
+                  onPressed: () {
+                    _chatRoomBloc.add(
+                      ChatRoomFetch(searchString: searchString, limit: limit),
+                    );
+                  },
+                ),
+              ],
+            )
+          : Column(
+              children: [
+                Row(
+                  children: <Widget>[
+                    const Expanded(
+                      child: Text("Name", textAlign: TextAlign.center),
+                    ),
+                    if (!ResponsiveBreakpoints.of(context).isMobile)
+                      const Text("Status", textAlign: TextAlign.center),
+                    const Text("Pvt.", textAlign: TextAlign.center),
+                    const Text("#Mem.", textAlign: TextAlign.center),
+                    const Text("    ", textAlign: TextAlign.center),
+                  ],
+                ),
                 const Divider(),
-              ]),
-        trailing: const Text(' '));
+              ],
+            ),
+      trailing: const Text(' '),
+    );
   }
 
   @override
@@ -213,8 +239,9 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
     if (currentScroll > 0 && maxScroll - currentScroll <= _scrollThreshold) {
-      _chatRoomBloc
-          .add(ChatRoomFetch(limit: limit, searchString: searchString));
+      _chatRoomBloc.add(
+        ChatRoomFetch(limit: limit, searchString: searchString),
+      );
     }
   }
 }
@@ -228,41 +255,48 @@ class ListDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-        leading: Badge(
-          label: chatRoom.hasRead ? null : const Text('!'),
-          child: CircleAvatar(
-            child: Text(chatRoom.chatRoomName != null
-                ? chatRoom.chatRoomName![0]
-                : "?"),
+      leading: Badge(
+        label: chatRoom.hasRead ? null : const Text('!'),
+        child: CircleAvatar(
+          child: Text(
+            chatRoom.chatRoomName != null ? chatRoom.chatRoomName![0] : "?",
           ),
         ),
-        title: Row(
-          children: <Widget>[
-            Expanded(
-                key: Key('chatRoomName$index'),
-                child: Text(chatRoom.chatRoomName ?? '??')),
-            if (!ResponsiveBreakpoints.of(context).isMobile)
-              Text(chatRoom.hasRead ? 'All messages read' : 'unread messages',
-                  key: Key('unRead$index')),
-            Text(chatRoom.isPrivate != true ? ' N   ' : 'Y   ',
-                key: Key('isPrivate$index')),
-            Text("${chatRoom.members.length}", key: Key('nbrMembers$index')),
-          ],
-        ),
-        onTap: () async {
-          await showDialog(
-              barrierDismissible: true,
-              context: context,
-              builder: (BuildContext context) {
-                return ChatDialog(chatRoom);
-              });
-        },
-        trailing: IconButton(
-          key: Key('delete$index'),
-          icon: const Icon(Icons.close),
-          onPressed: () {
-            context.read<ChatRoomBloc>().add(ChatRoomDelete(chatRoom));
+      ),
+      title: Row(
+        children: <Widget>[
+          Expanded(
+            key: Key('chatRoomName$index'),
+            child: Text(chatRoom.chatRoomName ?? '??'),
+          ),
+          if (!ResponsiveBreakpoints.of(context).isMobile)
+            Text(
+              chatRoom.hasRead ? 'All messages read' : 'unread messages',
+              key: Key('unRead$index'),
+            ),
+          Text(
+            chatRoom.isPrivate != true ? ' N   ' : 'Y   ',
+            key: Key('isPrivate$index'),
+          ),
+          Text("${chatRoom.members.length}", key: Key('nbrMembers$index')),
+        ],
+      ),
+      onTap: () async {
+        await showDialog(
+          barrierDismissible: true,
+          context: context,
+          builder: (BuildContext context) {
+            return ChatDialog(chatRoom);
           },
-        ));
+        );
+      },
+      trailing: IconButton(
+        key: Key('delete$index'),
+        icon: const Icon(Icons.close),
+        onPressed: () {
+          context.read<ChatRoomBloc>().add(ChatRoomDelete(chatRoom));
+        },
+      ),
+    );
   }
 }

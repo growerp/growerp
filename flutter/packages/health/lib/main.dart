@@ -93,7 +93,10 @@ List<LocalizationsDelegate> delegates = [
   ActivityLocalizations.delegate,
 ];
 
-List<BlocProvider> getAdminBlocProviders(restClient, classificationId) {
+List<BlocProvider> getAdminBlocProviders(
+  RestClient restClient,
+  String classificationId,
+) {
   return [
     ...getUserCompanyBlocProviders(restClient, classificationId),
     ...getMarketingBlocProviders(restClient),
