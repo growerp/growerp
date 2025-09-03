@@ -2466,13 +2466,8 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <set field="timeZoneOffsetInMinutes" type="Double"
-                from="(timeZoneOffset.split(':')[0].toDouble()*60) + timeZoneOffset.split(':')[1].toDouble()" />
-            <set field="nowUtc"
-                from="Timestamp.from(ec.user.nowTimestamp.toInstant()
-                    .plus(timeZoneOffsetInMinutes.longValue(), java.time.temporal.ChronoUnit.MINUTES))" />
             <set field="nowUtcBeginOfDay"
-                from="Timestamp.from(nowUtc.toInstant()
+                from="Timestamp.from(ec.user.nowTimestamp.toInstant()
                     .truncatedTo(java.time.temporal.ChronoUnit.DAYS))" />
             <!-- get active rentals -->
             <entity-find entity-name="growerp.product.ProductAndAssetRental" list="rentals">
