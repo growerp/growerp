@@ -6,6 +6,9 @@
         "mcp-server",
         "--experimental-mcp-server"
       ]
+    },
+    "growerp-system": {
+      "httpUrl": "http://localhost:8080/rest/s1/mcp/protocol"
     }
   }
 }

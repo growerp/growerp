@@ -105,7 +105,7 @@ Response:
 ### 2. Execute a Tool
 
 ```bash
-curl -X POST http://localhost:8080/rest/s1/mcp/mcp \
+curl -X POST http://localhost:8080/rest/s1/mcp/protocol \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -164,7 +164,7 @@ Response:
 ### 4. Read a Resource
 
 ```bash
-curl -X POST http://localhost:8080/rest/s1/mcp/mcp \
+curl -X POST http://localhost:8080/rest/s1/mcp/protocol \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -180,10 +180,18 @@ curl -X POST http://localhost:8080/rest/s1/mcp/mcp \
 
 The MCP server supports the full MCP protocol through JSON-RPC 2.0. Here are the core methods:
 
+**Endpoints Available:**
+- `/rest/s1/mcp/protocol` - **Recommended for MCP clients** (supports standard JSON-RPC format)
+- `/rest/s1/mcp/mcp` - Legacy endpoint (requires request wrapper)
+
+### Using the Standard MCP Endpoint
+
+For MCP clients like Gemini CLI, use the `/rest/s1/mcp/protocol` endpoint with standard JSON-RPC format:
+
 ### Initialize Connection
 
 ```bash
-curl -X POST http://localhost:8080/rest/s1/mcp/mcp \
+curl -X POST http://localhost:8080/rest/s1/mcp/protocol \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -206,23 +214,26 @@ curl -X POST http://localhost:8080/rest/s1/mcp/mcp \
 curl -X POST http://localhost:8080/rest/s1/mcp/mcp \
   -H "Content-Type: application/json" \
   -d '{
-    "jsonrpc": "2.0",
-    "method": "tools/list",
-    "id": 2
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "tools/list",
+      "params": {},
+      "id": 2
+    }
   }'
 ```
 
 ### Call a Tool
 
 ```bash
-curl -X POST http://localhost:8080/rest/s1/mcp/mcp \
+curl -X POST http://localhost:8080/rest/s1/mcp/protocol \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
     "method": "tools/call",
     "params": {
-      "name": "get_companies",
-      "arguments": {"limit": 3}
+      "name": "ping_system",
+      "arguments": {}
     },
     "id": 3
   }'
@@ -231,11 +242,12 @@ curl -X POST http://localhost:8080/rest/s1/mcp/mcp \
 ### List Resources
 
 ```bash
-curl -X POST http://localhost:8080/rest/s1/mcp/mcp \
+curl -X POST http://localhost:8080/rest/s1/mcp/protocol \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
     "method": "resources/list",
+    "params": {},
     "id": 4
   }'
 ```
@@ -243,7 +255,7 @@ curl -X POST http://localhost:8080/rest/s1/mcp/mcp \
 ### Read a Resource
 
 ```bash
-curl -X POST http://localhost:8080/rest/s1/mcp/mcp \
+curl -X POST http://localhost:8080/rest/s1/mcp/protocol \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -254,6 +266,10 @@ curl -X POST http://localhost:8080/rest/s1/mcp/mcp \
     "id": 5
   }'
 ```
+
+### Legacy Format (for backward compatibility)
+
+If you need to use the legacy `/rest/s1/mcp/mcp` endpoint, wrap requests in a `request` field:
 
 ## Integration with AI Tools
 
@@ -266,7 +282,7 @@ import json
 class GrowERPMCPClient:
     def __init__(self, base_url="http://localhost:8080"):
         self.base_url = base_url
-        self.mcp_endpoint = f"{base_url}/rest/s1/mcp/mcp"
+        self.mcp_endpoint = f"{base_url}/rest/s1/mcp/protocol"
         
     def call_tool(self, tool_name, arguments=None):
         payload = {
@@ -300,7 +316,7 @@ print(client.get_companies(5))
 class GrowERPMCPClient {
     constructor(baseUrl = 'http://localhost:8080') {
         this.baseUrl = baseUrl;
-        this.mcpEndpoint = `${baseUrl}/rest/s1/mcp/mcp`;
+        this.mcpEndpoint = `${baseUrl}/rest/s1/mcp/protocol`;
     }
     
     async callTool(toolName, arguments = {}) {

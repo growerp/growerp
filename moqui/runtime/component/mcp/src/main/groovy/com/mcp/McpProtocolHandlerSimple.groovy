@@ -25,6 +25,8 @@ class McpProtocolHandlerSimple {
         def params = request.params ?: [:]
         def id = request.id
         
+        ec.logger.info("MCP Request: method=${method}, params=${params}, id=${id}")
+        
         try {
             Map result
             switch (method) {
@@ -42,6 +44,9 @@ class McpProtocolHandlerSimple {
                     break
                 case "tools/call":
                     result = toolManager.executeTool(params.name as String, params.arguments as Map ?: [:])
+                    break
+                case "prompts/list":
+                    result = handlePromptsList()
                     break
                 default:
                     result = [error: [code: -32601, message: "Method not found: ${method}"]]
@@ -81,6 +86,15 @@ class McpProtocolHandlerSimple {
                 name: "GrowERP MCP Server",
                 version: "1.0.0"
             ]
+        ]
+    }
+    
+    /**
+     * Handle prompts list
+     */
+    private Map handlePromptsList() {
+        return [
+            prompts: []
         ]
     }
 }
