@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    require-authentication="false" track-artifact-hit="false" default-menu-include="false">
+
+    <!-- MCP (Model Context Protocol) Server endpoints -->
+    <transition name="mcp" method="get" begin-transaction="false">
+        <actions><script><![CDATA[
+            import groovy.json.JsonBuilder
+            
+            def welcomeMessage = [
+                message: "GrowERP Model Context Protocol Server",
+                version: "1.0.0",
+                status: "healthy",
+                endpoints: [
+                    health: "/rest/s1/growerp/mcp/health",
+                    resources: "/rest/s1/growerp/mcp/resources", 
+                    tools: "/rest/s1/growerp/mcp/tools",
+                    request: "/rest/s1/growerp/mcp/request"
+                ]
+            ]
+            
+            ec.web.response.setContentType("application/json")
+            def jsonResponse = new JsonBuilder(welcomeMessage)
+            ec.web.sendTextResponse(jsonResponse.toString())
+        ]]></script></actions>
+        <default-response type="none"/>
+    </transition>
+    
+    <transition name="mcpHealth" method="get" begin-transaction="false">
+        <service-call name="com.mcp.get#McpHealth" out-map="healthResult"/>
+        <actions><script><![CDATA[
+            import groovy.json.JsonBuilder
+            
+            ec.web.response.setContentType("application/json")
+            def jsonResponse = new JsonBuilder(healthResult)
+            ec.web.sendTextResponse(jsonResponse.toString())
+        ]]></script></actions>
+        <default-response type="none"/>
+    </transition>
+    
+    <transition name="mcpResources" method="get" begin-transaction="false">
+        <service-call name="com.mcp.list#McpResources" out-map="resourceResult"/>
+        <actions><script><![CDATA[
+            import groovy.json.JsonBuilder
+            
+            ec.web.response.setContentType("application/json")
+            def jsonResponse = new JsonBuilder(resourceResult)
+            ec.web.sendTextResponse(jsonResponse.toString())
+        ]]></script></actions>
+        <default-response type="none"/>
+    </transition>
+    
+    <transition name="mcpTools" method="get" begin-transaction="false">
+        <service-call name="com.mcp.list#McpTools" out-map="toolResult"/>
+        <actions><script><![CDATA[
+            import groovy.json.JsonBuilder
+            
+            ec.web.response.setContentType("application/json")
+            def jsonResponse = new JsonBuilder(toolResult)
+            ec.web.sendTextResponse(jsonResponse.toString())
+        ]]></script></actions>
+        <default-response type="none"/>
+    </transition>
+    
+    <transition name="mcpRequest" method="post" begin-transaction="false">
+        <actions><script><![CDATA[
+            import groovy.json.JsonBuilder
+            import groovy.json.JsonSlurper
+            
+            // Parse the request body
+            def requestBody = ec.web.request.reader.text
+            def jsonSlurper = new JsonSlurper()
+            def mcpRequest = jsonSlurper.parseText(requestBody)
+            
+            // Extract MCP request parameters
+            def method = mcpRequest.method ?: "initialize"
+            def params = mcpRequest.params ?: [:]
+            def id = mcpRequest.id ?: null
+            
+            // Call the MCP handler service
+            def context = [method: method, params: params, id: id]
+            ec.service.sync().name("com.mcp.handle#McpRequest").parameters(context).call()
+            
+            ec.web.response.setContentType("application/json")
+            def jsonResponse = new JsonBuilder(ec.context.response)
+            ec.web.sendTextResponse(jsonResponse.toString())
+        ]]></script></actions>
+        <default-response type="none"/>
+    </transition>
+
+    <widgets><!--
+        this should never be viewed... -->
+    </widgets>
+</screen>

@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+  default-menu-include="false" standalone="true">
+
+    <parameter name="method" required="false"/>
+    <parameter name="id" required="false"/>
+    
+    <always-actions>
+        <set field="requestMethod" from="ec.web.request.method"/>
+        <set field="contentType" from="ec.web.request.getContentType()"/>
+
+    <!-- Handle CORS preflight requests -->
+        <if condition="requestMethod == 'OPTIONS'">
+            <script>
+                ec.web.response.setHeader("Access-Control-Allow-Origin", "*")
+                ec.web.response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+                ec.web.response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+                ec.web.response.setHeader("Access-Control-Max-Age", "3600")
+                ec.web.response.setStatus(200)
+            </script>
+            <return/>
+        </if>
+
+    <!-- Set CORS headers for all requests -->
+        <script>
+            ec.web.response.setHeader("Access-Control-Allow-Origin", "*")
+            ec.web.response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+            ec.web.response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+            ec.web.response.setContentType("application/json")
+        </script>
+    </always-actions>
+
+    <transition name="server" method="post">
+        <parameter name="action" required="true"/>
+        <actions>
+            <if condition="action == 'start'">
+                <service-call name="growerp.mcp.start#McpServer" in-map="context" out-map="context"/>
+                <script>
+                    import groovy.json.JsonBuilder
+                    def result = new JsonBuilder([
+                        success: true,
+                        serverId: serverId,
+                        status: status,
+                        port: port
+                    ])
+                    ec.web.sendTextResponse(result.toString())
+                </script>
+            <else-if condition="action == 'stop'">
+                <service-call name="growerp.mcp.stop#McpServer" in-map="context" out-map="context"/>
+                <script>
+                    import groovy.json.JsonBuilder
+                    def result = new JsonBuilder([
+                        success: true,
+                        status: status
+                    ])
+                    ec.web.sendTextResponse(result.toString())
+                </script>
+            </else-if>
+            <else-if condition="action == 'list'">
+                <service-call name="growerp.mcp.list#McpServers" out-map="context"/>
+                <script>
+                    import groovy.json.JsonBuilder
+                    def result = new JsonBuilder([
+                        success: true,
+                        servers: serverList
+                    ])
+                    ec.web.sendTextResponse(result.toString())
+                </script>
+            </else-if>
+            <else>
+                <script>
+                    import groovy.json.JsonBuilder
+                    def result = new JsonBuilder([
+                        success: false,
+                        error: "Unknown action: ${action}"
+                    ])
+                    ec.web.response.setStatus(400)
+                    ec.web.sendTextResponse(result.toString())
+                </script>
+            </else>
+            </if>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+    <transition name="protocol" method="post">
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonSlurper
+                import groovy.json.JsonBuilder
+                
+                try {
+                    // Parse JSON request body
+                    def requestBody = ec.web.request.reader.text
+                    if (!requestBody) {
+                        throw new IllegalArgumentException("Request body is required")
+                    }
+                    
+                    def jsonSlurper = new JsonSlurper()
+                    def requestData = jsonSlurper.parseText(requestBody)
+                    
+                    // Extract MCP protocol fields
+                    def method = requestData.method
+                    def params = requestData.params ?: [:]
+                    def requestId = requestData.id
+                    
+                    if (!method) {
+                        throw new IllegalArgumentException("Method is required")
+                    }
+                    
+                    // Call MCP protocol handler
+                    def serviceResult = ec.service.sync().name("growerp.mcp.handle#McpRequest")
+                        .parameters([
+                            method: method,
+                            params: params,
+                            requestId: requestId
+                        ]).call()
+                    
+                    // Format response according to JSON-RPC 2.0 spec
+                    def response = [
+                        jsonrpc: "2.0"
+                    ]
+                    
+                    if (requestId != null) {
+                        response.id = requestId
+                    }
+                    
+                    if (serviceResult.response?.error) {
+                        response.error = serviceResult.response.error
+                    } else {
+                        response.result = serviceResult.response
+                    }
+                    
+                    def result = new JsonBuilder(response)
+                    ec.web.sendTextResponse(result.toString())
+                    
+                } catch (Exception e) {
+                    ec.logger.error("Error handling MCP protocol request", e)
+                    
+                    def errorResponse = [
+                        jsonrpc: "2.0",
+                        error: [
+                            code: -32603,
+                            message: "Internal error: ${e.message}"
+                        ],
+                        id: null
+                    ]
+                    
+                    def result = new JsonBuilder(errorResponse)
+                    ec.web.response.setStatus(500)
+                    ec.web.sendTextResponse(result.toString())
+                }
+            ]]></script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+  <!-- WebSocket endpoint for real-time MCP communication -->
+    <transition name="ws" method="get">
+        <actions>
+            <script><![CDATA[
+                // Check for WebSocket upgrade request
+                def upgradeHeader = ec.web.request.getHeader("Upgrade")
+                def connectionHeader = ec.web.request.getHeader("Connection")
+                
+                if (upgradeHeader?.toLowerCase() == "websocket" && 
+                    connectionHeader?.toLowerCase()?.contains("upgrade")) {
+                    
+                    // This is a WebSocket upgrade request
+                    // In a real implementation, you would handle the WebSocket protocol here
+                    // For now, return an info message
+                    
+                    import groovy.json.JsonBuilder
+                    def result = new JsonBuilder([
+                        message: "WebSocket endpoint available",
+                        note: "Use a WebSocket library to connect to this endpoint"
+                    ])
+                    
+                    ec.web.response.setContentType("application/json")
+                    ec.web.sendTextResponse(result.toString())
+                } else {
+                    // Regular HTTP request to WebSocket endpoint
+                    import groovy.json.JsonBuilder
+                    def result = new JsonBuilder([
+                        message: "MCP WebSocket endpoint",
+                        usage: "Connect using WebSocket protocol for real-time MCP communication"
+                    ])
+                    
+                    ec.web.response.setContentType("application/json")
+                    ec.web.sendTextResponse(result.toString())
+                }
+            ]]></script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+  <!-- Health check endpoint -->
+    <transition name="health" method="get">
+        <actions>
+            <script>
+                import groovy.json.JsonBuilder
+                
+                try {
+                    // Check system health
+                    def healthy = true
+                    def message = "MCP Server is healthy"
+                    
+                    // Test database connection
+                    def entityCount = ec.entity.find("Party").count()
+                    
+                    def result = new JsonBuilder([
+                        status: healthy ? "healthy" : "unhealthy",
+                        message: message,
+                        timestamp: new Date().time,
+                        version: "1.0.0",
+                        moqui: ec.factory.moquiVersion,
+                        database: [
+                            connected: true,
+                            entityCount: entityCount
+                        ]
+                    ])
+                    
+                    ec.web.sendTextResponse(result.toString())
+                    
+                } catch (Exception e) {
+                    ec.logger.error("Health check failed", e)
+                    
+                    def result = new JsonBuilder([
+                        status: "unhealthy",
+                        message: "Health check failed: ${e.message}",
+                        timestamp: new Date().time
+                    ])
+                    
+                    ec.web.response.setStatus(503)
+                    ec.web.sendTextResponse(result.toString())
+                }
+            </script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+  <!-- Default action - return server info -->
+    <actions>
+        <script>
+            import groovy.json.JsonBuilder
+            
+            def result = new JsonBuilder([
+                name: "growerp-mcp-server",
+                version: "1.0.0",
+                description: "Model Context Protocol Server for GrowERP/Moqui Backend",
+                endpoints: [
+                    "POST /server - Server management (start/stop/list)",
+                    "POST /protocol - MCP protocol communication",
+                    "GET /ws - WebSocket endpoint",
+                    "GET /health - Health check"
+                ],
+                mcp: [
+                    protocolVersion: "2024-11-05",
+                    capabilities: [
+                        "resources",
+                        "tools", 
+                        "prompts",
+                        "logging"
+                    ]
+                ]
+            ])
+            
+            ec.web.sendTextResponse(result.toString())
+        </script>
+    </actions>
+
+    <widgets>
+        <label text="MCP API Endpoint"/>
+    </widgets>
+    
+</screen>

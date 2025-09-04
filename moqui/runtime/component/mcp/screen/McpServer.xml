@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    default-menu-include="false" standalone="true">
+
+    <parameter name="method" required="false"/>
+    <parameter name="params" required="false"/>
+    <parameter name="id" required="false"/>
+
+    <transition name="mcp">
+        <actions>
+            <if condition="!method">
+                <set field="method" value="initialize"/>
+            </if>
+            
+            <service-call name="com.mcp.handle#McpRequest" in-map="context" out-map="mcpResult"/>
+            
+            <script><![CDATA[
+                import groovy.json.JsonBuilder
+                
+                // Set response content type
+                ec.web.response.setContentType("application/json")
+                ec.web.response.setCharacterEncoding("UTF-8")
+                
+                // Build JSON response
+                def jsonResponse = new JsonBuilder(mcpResult.response)
+                ec.web.response.writer.write(jsonResponse.toString())
+                ec.web.response.writer.flush()
+            ]]></script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+    <transition name="health">
+        <actions>
+            <service-call name="com.mcp.get#McpHealth" out-map="healthResult"/>
+            
+            <script><![CDATA[
+                import groovy.json.JsonBuilder
+                
+                ec.web.response.setContentType("application/json")
+                def jsonResponse = new JsonBuilder(healthResult)
+                ec.web.response.writer.write(jsonResponse.toString())
+                ec.web.response.writer.flush()
+            ]]></script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+    <transition name="resources">
+        <actions>
+            <service-call name="com.mcp.list#McpResources" out-map="resourceResult"/>
+            
+            <script><![CDATA[
+                import groovy.json.JsonBuilder
+                
+                ec.web.response.setContentType("application/json")
+                def jsonResponse = new JsonBuilder(resourceResult)
+                ec.web.response.writer.write(jsonResponse.toString())
+                ec.web.response.writer.flush()
+            ]]></script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+    <transition name="tools">
+        <actions>
+            <service-call name="com.mcp.list#McpTools" out-map="toolResult"/>
+            
+            <script><![CDATA[
+                import groovy.json.JsonBuilder
+                
+                ec.web.response.setContentType("application/json")
+                def jsonResponse = new JsonBuilder(toolResult)
+                ec.web.response.writer.write(jsonResponse.toString())
+                ec.web.response.writer.flush()
+            ]]></script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+    <actions>
+        <!-- Default action for root endpoint -->
+        <service-call name="com.mcp.get#McpHealth" out-map="healthResult"/>
+        
+        <script><![CDATA[
+            import groovy.json.JsonBuilder
+            
+            def welcomeMessage = [
+                message: "GrowERP Model Context Protocol Server",
+                version: "1.0.0",
+                status: healthResult.status,
+                endpoints: [
+                    health: "/rest/s1/mcp/health",
+                    resources: "/rest/s1/mcp/resources", 
+                    tools: "/rest/s1/mcp/tools",
+                    mcp: "/rest/s1/mcp/mcp"
+                ]
+            ]
+            
+            ec.web.response.setContentType("application/json")
+            def jsonResponse = new JsonBuilder(welcomeMessage)
+            ec.web.response.writer.write(jsonResponse.toString())
+            ec.web.response.writer.flush()
+        ]]></script>
+    </actions>
+
+<widgets><!--
+        this should never be viewed... --></widgets>
+</screen>
