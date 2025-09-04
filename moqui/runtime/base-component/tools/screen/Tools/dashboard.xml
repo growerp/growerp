@@ -12,8 +12,9 @@ You should have received a copy of the CC0 Public Domain Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
-        default-menu-index="1" menu-image="fa fa-dashboard" menu-image-type="icon">
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+    default-menu-index="1" menu-image="fa fa-dashboard" menu-image-type="icon">
 
     <transition name="reloadEcfi" begin-transaction="false">
         <actions>
@@ -57,13 +58,18 @@ along with this software (see the LICENSE.md file). If not, see
                         </fail-widgets></section>
                     </widgets></section-iterate>
 
-                    <container-dialog id="EntitySwagger" button-text="Entity Master API">
-                        <section-iterate name="EntitySwaggerSection" list="masterEntityNameList" entry="masterEntityName"><widgets>
-                            <container><link url="/toolstatic/lib/swagger-ui/index.html?url=${restUrl}/master.swagger/${masterEntityName}" url-type="plain"
+                                <!--container-dialog
+                                id="EntitySwagger" button-text="Entity Master API">
+                        <section-iterate name="EntitySwaggerSection" list="masterEntityNameList"
+                                entry="masterEntityName"><widgets>
+                            <container><link
+                                url="/toolstatic/lib/swagger-ui/index.html?url=${restUrl}/master.swagger/${masterEntityName}"
+                                url-type="plain"
                                     text="${masterEntityName}" link-type="anchor" target-window="_blank"/></container>
                         </widgets></section-iterate>
-                    </container-dialog>
-                    <!-- Generates enough that Swagger UI has a hard time loading it, takes a long time or fails:
+                    </container-dialog-->
+                                <!-- Generates enough that Swagger UI has a hard time loading it,
+                                takes a long time or fails:
                     <link url="/toolstatic/lib/swagger-ui/index.html?url=${restUrl}/master.swagger/all"
                             url-type="plain" target-window="_blank" text="Entity Master API"/>
                     -->
@@ -88,6 +94,7 @@ along with this software (see the LICENSE.md file). If not, see
             </box-body></container-box>
         </row-col></container-row>
 
-        <!-- <link url="reloadEcfi" text="Reload Framework" link-type="anchor" confirmation="Are you sure? This is for development and emergency use only."/> -->
+        <!-- <link url="reloadEcfi" text="Reload Framework" link-type="anchor" confirmation="Are you
+        sure? This is for development and emergency use only."/> -->
     </widgets>
 </screen>

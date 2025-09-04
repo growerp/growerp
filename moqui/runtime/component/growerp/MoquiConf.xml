@@ -4,6 +4,9 @@
 
     <!-- can be overridden in the docker-compose.yml env setting: paymentGatewayConfigId: 'STRIPE' -->
     <default-property name="paymentGatewayConfigId" value="TEST_APPROVE" /><!-- STRIPE -->
+    <default-property name="default_locale" value="UTC" />
+    <default-property name="default_time_zone" value="UTC" />
+    <default-property name="database_time_zone" value="UTC" />
 
 
     <webapp-list>

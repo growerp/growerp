@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domaicrn Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/rest-api-2.1.xsd"
+    name="mcp" displayName="MCP REST API" version="1.0.0"
+    description="Services for the MCP server">
+
+    <resource name="health" require-authentication="anonymous-all"
+        description=" to check if the mcp is available, no authorization required">
+        <method type="get">
+            <service name="McpServices.get#Health" />
+        </method>
+    </resource>
+    <resource name="tools" require-authentication="anonymous-all"
+        description=" Check Available MCP Tools, no authorization required">
+        <method type="get">
+            <service name="McpServices.list#Tools" />
+        </method>
+    </resource>
+    <resource name="resources" require-authentication="anonymous-all"
+        description=" Check Available MCP Resources, no authorization required">
+        <method type="get">
+            <service name="McpServices.list#McpResources" />
+        </method>
+    </resource>
+    <resource name="mcp" require-authentication="anonymous-all"
+        description=" Check Available MCP Tools, no authorization required">
+        <method type="get">
+            <service name="McpServices.list#Tools" />
+        </method>
+        <method type="post">
+            <service name="McpServices.execute#McpTool" />
+        </method>
+    </resource>
+</resource>

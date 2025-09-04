@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+  <!-- MCP Server Management Services -->
+
+  <service verb="start" noun="McpServer">
+    <description>Start the MCP Server</description>
+    <in-parameters>
+      <parameter name="port" type="Integer" default="3000" />
+      <parameter name="debug" type="Boolean" default="false" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="serverId" type="String" />
+      <parameter name="status" type="String" />
+    </out-parameters>
+    <actions>
+      <set field="serverId" value="mcp-server-${ec.user.userId}-${ec.context.nowTimestamp.time}" />
+      <set field="status" value="started" />
+      <log level="info" message="MCP Server started with ID: ${serverId} on port ${port}" />
+    </actions>
+  </service>
+
+  <service verb="stop" noun="McpServer">
+    <description>Stop the MCP Server</description>
+    <in-parameters>
+      <parameter name="serverId" type="String" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="status" type="String" />
+    </out-parameters>
+    <actions>
+      <set field="status" value="stopped" />
+      <log level="info" message="MCP Server stopped: ${serverId}" />
+    </actions>
+  </service>
+
+  <service verb="handle" noun="McpRequest">
+    <description>Handle MCP Protocol Request</description>
+    <in-parameters>
+      <parameter name="method" type="String" required="true" />
+      <parameter name="params" type="Map" />
+      <parameter name="id" type="String" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="response" type="Map" />
+    </out-parameters>
+    <actions>
+      <script><![CDATA[
+                import com.mcp.McpProtocolHandlerSimple
+                
+                def handler = new McpProtocolHandlerSimple(ec)
+                def request = [
+                    method: method,
+                    params: params ?: [:],
+                    id: id
+                ]
+                
+                response = handler.handleRequest(request)
+            ]]></script>
+    </actions>
+  </service>
+
+  <service verb="list" noun="McpResources">
+    <description>List available MCP resources</description>
+    <out-parameters>
+      <parameter name="resources" type="List" />
+    </out-parameters>
+    <actions>
+      <script><![CDATA[
+                import com.mcp.McpResourceManagerSimple
+                
+                def resourceManager = new McpResourceManagerSimple(ec)
+                def result = resourceManager.listResources()
+                resources = result.resources
+            ]]></script>
+    </actions>
+  </service>
+
+  <service verb="read" noun="McpResource">
+    <description>Read a specific MCP resource</description>
+    <in-parameters>
+      <parameter name="uri" type="String" required="true" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="contents" type="List" />
+    </out-parameters>
+    <actions>
+      <script><![CDATA[
+                import com.mcp.McpResourceManagerSimple
+                
+                def resourceManager = new McpResourceManagerSimple(ec)
+                def result = resourceManager.readResource(uri)
+                contents = result.contents
+            ]]></script>
+    </actions>
+  </service>
+
+  <service verb="list" noun="Tools">
+    <description>List available MCP tools</description>
+    <out-parameters>
+      <parameter name="tools" type="List" />
+    </out-parameters>
+    <actions>
+      <script><![CDATA[
+                import com.mcp.McpToolManagerSimple
+                
+                def toolManager = new McpToolManagerSimple(ec)
+                def result = toolManager.listTools()
+                tools = result.tools
+            ]]></script>
+    </actions>
+  </service>
+
+  <service verb="execute" noun="McpTool">
+    <description>Execute an MCP tool</description>
+    <in-parameters>
+      <parameter name="name" type="String" required="true" />
+      <parameter name="arguments" type="Map" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="result" type="Map" />
+    </out-parameters>
+    <actions>
+      <script><![CDATA[
+                import com.mcp.McpToolManagerSimple
+                
+                def toolManager = new McpToolManagerSimple(ec)
+                result = toolManager.executeTool(name, arguments ?: [:])
+            ]]></script>
+    </actions>
+  </service>
+
+  <service verb="get" noun="Health">
+    <description>Get MCP server health status</description>
+    <out-parameters>
+      <parameter name="status" type="String" />
+      <parameter name="timestamp" type="Long" />
+      <parameter name="version" type="String" />
+    </out-parameters>
+    <actions>
+      <set field="status" value="healthy" />
+      <set field="timestamp" from="java.time.ZonedDateTime.now().toInstant().toEpochMilli()" />
+      <set field="version" value="1.0.0" />
+    </actions>
+  </service>
+
+</services>

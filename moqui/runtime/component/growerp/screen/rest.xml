@@ -22,13 +22,15 @@ along with this software (see the LICENSE.md file). If not, see
             <default-response type="none"/>
         </transition-->
 
-        <transition name="api_key" begin-transaction="false">
+    <!--transition
+    name="api_key" begin-transaction="false">
             <actions><script>
                 try { ec.web.sendTextResponse(ec.user.getLoginKey()) }
-                catch (org.moqui.context.AuthenticationRequiredException are) { ec.web.sendError(401, are.message, are) }
+                catch (org.moqui.context.AuthenticationRequiredException are) { ec.web.sendError(401, are.message,
+    are) }
             </script></actions>
             <default-response type="none"/>
-        </transition>
+        </transition-->
     <!-- Get a session token for clients that are not authenticated (no api_key) to use for all
     request methods other than GET -->
     <!--transition
