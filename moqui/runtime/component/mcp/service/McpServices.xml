@@ -38,9 +38,7 @@
   <service verb="handle" noun="McpRequest">
     <description>Handle MCP Protocol Request</description>
     <in-parameters>
-      <parameter name="method" type="String" required="true" />
-      <parameter name="params" type="Map" />
-      <parameter name="id" type="String" />
+      <parameter name="request" type="Map" required="true" />
     </in-parameters>
     <out-parameters>
       <parameter name="response" type="Map" />
@@ -50,13 +48,64 @@
                 import com.mcp.McpProtocolHandlerSimple
                 
                 def handler = new McpProtocolHandlerSimple(ec)
-                def request = [
-                    method: method,
-                    params: params ?: [:],
-                    id: id
-                ]
-                
                 response = handler.handleRequest(request)
+            ]]></script>
+    </actions>
+  </service>
+
+  <service verb="handle" noun="McpRequestFlexible">
+    <description>Handle MCP Protocol Request (flexible format)</description>
+    <in-parameters>
+      <parameter name="jsonrpc" type="String" />
+      <parameter name="method" type="String" />
+      <parameter name="params" type="Map" />
+      <parameter name="id" type="Object" />
+      <parameter name="request" type="Map" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="jsonrpc" type="String" />
+      <parameter name="id" type="Object" />
+      <parameter name="result" type="Map" />
+      <parameter name="error" type="Map" />
+    </out-parameters>
+    <actions>
+      <script><![CDATA[
+                import com.mcp.McpProtocolHandlerSimple
+                
+                def handler = new McpProtocolHandlerSimple(ec)
+                
+                // Check if we have a wrapped request or direct JSON-RPC
+                Map mcpRequest
+                if (request != null) {
+                    // Wrapped format
+                    mcpRequest = request
+                } else {
+                    // Direct JSON-RPC format
+                    mcpRequest = [
+                        jsonrpc: jsonrpc,
+                        method: method,
+                        params: params,
+                        id: id
+                    ]
+                }
+                
+                def response
+                if (mcpRequest.method == "prompts/list") {
+                    // Handle prompts/list directly in the service
+                    response = [
+                        jsonrpc: "2.0",
+                        id: mcpRequest.id,
+                        result: [prompts: []]
+                    ]
+                } else {
+                    response = handler.handleRequest(mcpRequest)
+                }
+                
+                // Return the response fields directly
+                jsonrpc = response.jsonrpc
+                id = response.id
+                result = response.result
+                error = response.error
             ]]></script>
     </actions>
   </service>
@@ -109,6 +158,16 @@
                 def result = toolManager.listTools()
                 tools = result.tools
             ]]></script>
+    </actions>
+  </service>
+
+  <service verb="list" noun="Prompts">
+    <description>List available MCP prompts</description>
+    <out-parameters>
+      <parameter name="prompts" type="List" />
+    </out-parameters>
+    <actions>
+      <set field="prompts" from="[]" />
     </actions>
   </service>
 
