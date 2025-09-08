@@ -85,7 +85,6 @@ void main() {
     await CommonTest.tapByText(tester, FinDocStatusVal.approved.hotel);
     await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     await CommonTest.waitForSnackbarToGo(tester);
-    await CommonTest.logout(tester);
   }, skip: false);
 
   testWidgets("Test checkout >>>>>", (WidgetTester tester) async {
@@ -121,7 +120,6 @@ void main() {
     await CommonTest.tapByText(tester, FinDocStatusVal.completed.hotel);
     await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     await CommonTest.waitForSnackbarToGo(tester);
-    await CommonTest.logout(tester);
   }, skip: false);
 
   testWidgets("Test empty checkin and checkout >>>>>", (
@@ -151,6 +149,5 @@ void main() {
       tester,
       classificationId: classificationId,
     );
-    await CommonTest.logout(tester);
   }, skip: false);
 }
