@@ -111,6 +111,7 @@ class ExecutionContextFactoryImpl implements ExecutionContextFactory {
 
     protected final Map<String, WebappInfo> webappInfoMap = new HashMap<>()
     protected final List<NotificationMessageListener> registeredNotificationMessageListeners = []
+    protected final Set<String> growerpRestServices = new HashSet<>()
 
     protected final Map<String, ArtifactStatsInfo> artifactStatsInfoByType = new HashMap<>()
     public final Map<ArtifactType, Boolean> artifactTypeAuthzEnabled = new EnumMap<ArtifactType, Boolean>(ArtifactType.class)
@@ -224,6 +225,7 @@ class ExecutionContextFactoryImpl implements ExecutionContextFactory {
         // logger.info("Logger Facade initialized")
         resourceFacade = new ResourceFacadeImpl(this)
         logger.info("Resource Facade initialized")
+        loadGrowerpRestServices()
 
         transactionFacade = new TransactionFacadeImpl(this)
         logger.info("Transaction Facade initialized")
@@ -1417,6 +1419,11 @@ class ExecutionContextFactoryImpl implements ExecutionContextFactory {
 
     void countArtifactHit(ArtifactType artifactTypeEnum, String artifactSubType, String artifactName,
               Map<String, Object> parameters, long startTime, double runningTimeMillis, Long outputSize) {
+        if (ArtifactExecutionInfo.AT_SERVICE.is(artifactTypeEnum)) {
+            if (!growerpRestServices.contains(artifactName)) {
+                return
+            }
+        }
         boolean isEntity = ArtifactExecutionInfo.AT_ENTITY.is(artifactTypeEnum) || (artifactSubType != null && artifactSubType.startsWith('entity'))
         // don't count the ones this calls
         if (isEntity && entitiesToSkipHitCount.contains(artifactName)) return
@@ -1842,4 +1849,22 @@ class ExecutionContextFactoryImpl implements ExecutionContextFactory {
     }
 
     @Override String toString() { return "ExecutionContextFactory " + moquiVersion }
+
+    private void loadGrowerpRestServices() {
+        ResourceReference growerpRestXml = resourceFacade.getLocationReference("component://growerp/service/growerp.rest.xml");
+        if (growerpRestXml.exists()) {
+            MNode rootNode = MNode.parse(growerpRestXml);
+            findServiceNames(rootNode, growerpRestServices);
+        }
+    }
+
+    private void findServiceNames(MNode node, Set<String> serviceNames) {
+        if ("service".equals(node.getName())) {
+            String serviceNameAttr = node.attribute("name");
+            if (serviceNameAttr) serviceNames.add(serviceNameAttr);
+        }
+        for (MNode child : node.getChildren()) {
+            findServiceNames(child, serviceNames);
+        }
+    }
 }
