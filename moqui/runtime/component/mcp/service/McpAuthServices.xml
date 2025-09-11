@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+  <!-- MCP Authorization Services -->
+
+  <service verb="validate" noun="McpApiKey">
+    <description>Validate API key for MCP access with classificationId AppSupport</description>
+    <in-parameters>
+      <parameter name="apiKey" type="String" required="false" />
+      <parameter name="classificationId" type="String" default-value="AppSupport" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="authenticated" type="Boolean" />
+      <parameter name="userId" type="String" />
+      <parameter name="ownerPartyId" type="String" />
+      <parameter name="companyPartyId" type="String" />
+      <parameter name="userPartyId" type="String" />
+      <parameter name="errorMessage" type="String" />
+    </out-parameters>
+    <actions>
+      <set field="authenticated" value="false" />
+
+      <!-- Get API key from header if not passed as parameter -->
+      <if condition="!apiKey">
+        <set field="apiKey" from="ec.web?.request?.getHeader('api_key')" />
+      </if>
+
+      <!-- If still no API key, check current user -->
+      <if condition="!apiKey &amp;&amp; ec.user.userId">
+        <set field="apiKey" from="ec.user.getLoginKey()" />
+      </if>
+
+      <!-- If no API key found, return not authenticated -->
+      <if
+        condition="!apiKey || apiKey.trim().isEmpty() || 'null'.equals(apiKey) || 'undefined'.equals(apiKey)">
+        <set field="errorMessage" value="API key required for MCP access" />
+        <return />
+      </if>
+
+      <!-- Validate the API key by attempting to login -->
+      <script><![CDATA[
+        try {
+          // Save current user state
+          def currentUserId = ec.user.userId
+          def currentUsername = ec.user.username
+          
+          // Attempt login with the API key
+          def loginResult = ec.user.loginUserKey(apiKey.trim())
+          
+          if (loginResult && ec.user.userId) {
+            // Successfully authenticated
+            authenticated = true
+            userId = ec.user.userId
+            
+            // Get related company and owner information using GrowERP service
+            try {
+              def authResult = ec.service.sync().name("growerp.100.GeneralServices100.get#Authenticate")
+                .parameter("classificationId", classificationId)
+                .call()
+              
+              if (authResult && authResult.authenticate) {
+                ownerPartyId = authResult.authenticate.ownerPartyId
+                companyPartyId = authResult.authenticate.company?.partyId
+                userPartyId = authResult.authenticate.user?.partyId
+              } else {
+                errorMessage = "User not authorized for classification: " + classificationId
+                authenticated = false
+              }
+            } catch (Exception e) {
+              ec.logger.warn("Error getting authentication details: " + e.message)
+              errorMessage = "Authentication validation failed: " + e.message
+              authenticated = false
+            }
+          } else {
+            errorMessage = "Invalid API key"
+          }
+          
+          // Restore original user state if it was different
+          if (currentUserId && currentUserId != ec.user.userId) {
+            if (currentUsername) {
+              ec.user.loginUser(currentUsername, null)
+            } else {
+              ec.user.logoutUser()
+            }
+          }
+        } catch (Exception e) {
+          ec.logger.warn("Error validating API key: " + e.message)
+          errorMessage = "API key validation failed: " + e.message
+          authenticated = false
+        }
+      ]]></script>
+    </actions>
+  </service>
+
+  <service verb="create" noun="AuthPrompt">
+    <description>Create an authentication prompt for AI when authorization fails</description>
+    <in-parameters>
+      <parameter name="requestId" type="Object" required="false" />
+      <parameter name="operation" type="String" default-value="login" />
+      <parameter name="reason" type="String" default-value="Authentication required" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="promptResponse" type="Map" />
+    </out-parameters>
+    <actions>
+      <!-- Create a structured response that tells the AI to prompt for credentials -->
+      <set field="promptResponse"
+        from="[
+        jsonrpc: '2.0',
+        id: requestId,
+        error: [
+          code: -32002,
+          message: 'Authentication required',
+          data: [
+            type: 'auth_prompt',
+            operation: operation,
+            reason: reason,
+            prompt: [
+              name: 'growerp_login',
+              description: 'Login to GrowERP to access MCP services',
+              arguments: [
+                properties: [
+                  username: [
+                    type: 'string',
+                    description: 'GrowERP username/email',
+                    required: true
+                  ],
+                  password: [
+                    type: 'string',
+                    description: 'GrowERP password',
+                    required: true,
+                    secret: true
+                  ],
+                  classificationId: [
+                    type: 'string',
+                    description: 'User classification (default: AppSupport)',
+                    default: 'AppSupport'
+                  ]
+                ],
+                required: ['username', 'password']
+              ],
+              instructions: 'Please provide your GrowERP credentials to access MCP services. Use test@example.com/qqqqqq9! for testing.'
+            ]
+          ]
+        ]
+      ]" />
+    </actions>
+  </service>
+
+  <service verb="handle" noun="LoginPrompt">
+    <description>Handle login attempt from AI prompt response</description>
+    <in-parameters>
+      <parameter name="username" type="String" required="true" />
+      <parameter name="password" type="String" required="true" />
+      <parameter name="classificationId" type="String" default-value="AppSupport" />
+      <parameter name="requestId" type="Object" required="false" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="loginResponse" type="Map" />
+      <parameter name="success" type="Boolean" />
+      <parameter name="apiKey" type="String" />
+      <parameter name="errorMessage" type="String" />
+    </out-parameters>
+    <actions>
+      <set field="success" value="false" />
+
+      <!-- Attempt to login with provided credentials -->
+      <script><![CDATA[
+        try {
+          // Call GrowERP login service
+          def loginResult = ec.service.sync().name("growerp.100.GeneralServices100.login#User")
+            .parameter("username", username)
+            .parameter("password", password)
+            .parameter("classificationId", classificationId)
+            .call()
+          
+          if (loginResult && loginResult.authenticate && loginResult.authenticate.apiKey) {
+            success = true
+            apiKey = loginResult.authenticate.apiKey
+            
+            // Create successful login response
+            loginResponse = [
+              jsonrpc: '2.0',
+              id: requestId,
+              result: [
+                type: 'auth_success',
+                message: 'Login successful',
+                apiKey: apiKey,
+                instructions: 'Use this API key in the api_key header for subsequent MCP requests',
+                user: [
+                  userId: loginResult.authenticate.user?.userId,
+                  name: loginResult.authenticate.user?.fullName,
+                  email: loginResult.authenticate.user?.email
+                ],
+                company: [
+                  name: loginResult.authenticate.company?.name,
+                  partyId: loginResult.authenticate.company?.partyId
+                ]
+              ]
+            ]
+          } else {
+            errorMessage = "Login failed: Invalid credentials or insufficient permissions"
+            loginResponse = [
+              jsonrpc: '2.0',
+              id: requestId,
+              error: [
+                code: -32003,
+                message: errorMessage,
+                data: [
+                  type: 'auth_failed',
+                  reason: 'Invalid username/password or missing AppSupport classification',
+                  retry: true
+                ]
+              ]
+            ]
+          }
+        } catch (Exception e) {
+          ec.logger.warn("Login error: " + e.message)
+          errorMessage = "Login failed: " + e.message
+          loginResponse = [
+            jsonrpc: '2.0',
+            id: requestId,
+            error: [
+              code: -32003,
+              message: errorMessage,
+              data: [
+                type: 'auth_error',
+                reason: e.message,
+                retry: true
+              ]
+            ]
+          ]
+        }
+      ]]></script>
+    </actions>
+  </service>
+
+  <service verb="check" noun="McpAuthorization">
+    <description>Check if current user is authorized for MCP operations</description>
+    <in-parameters>
+      <parameter name="operation" type="String" default-value="read" />
+      <parameter name="resource" type="String" default-value="mcp" />
+      <parameter name="method" type="String" required="true" />
+      <parameter name="requestId" type="Object" required="false" />
+      <parameter name="enablePrompts" type="Boolean" default-value="true" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="authorized" type="Boolean" />
+      <parameter name="errorMessage" type="String" />
+      <parameter name="authPrompt" type="Map" />
+      <parameter name="requiresAuth" type="Boolean" />
+    </out-parameters>
+    <actions>
+      <set field="authorized" value="false" />
+      <set field="requiresAuth" value="false" />
+
+      <!-- First validate API key -->
+      <service-call name="McpAuthServices.validate#McpApiKey" out-map="authResult" />
+
+      <if condition="!authResult.authenticated">
+        <set field="requiresAuth" value="true" />
+        <if condition="enablePrompts">
+          <!-- Create authentication prompt for AI -->
+          <service-call name="McpAuthServices.create#AuthPrompt"
+            in-map="[requestId: requestId, operation: 'login', reason: authResult.errorMessage ?: 'API key required']"
+            out-map="promptResult" />
+          <set field="authPrompt" from="promptResult.promptResponse" />
+          <else>
+            <set field="errorMessage" from="authResult.errorMessage ?: 'Authentication required'" />
+          </else>
+        </if>
+        <return />
+      </if>
+
+      <!-- Check if user has required permissions -->
+      <if condition="ec.user.hasPermission('MCP_VIEW') || ec.user.hasPermission('MCP_ADMIN')">
+        <set field="authorized" value="true" />
+        <else>
+          <if
+            condition="operation == 'execute' &amp;&amp; !ec.user.hasPermission('MCP_EXECUTE')
+             &amp;&amp; (method != 'tools/list' || method != 'initialize')">
+            <set field="errorMessage" value="Execute permission required for MCP tool operations" />
+            <else>
+              <!-- For basic operations, if authenticated via API key with AppSupport, allow access -->
+              <set field="authorized" value="true" />
+            </else>
+          </if>
+        </else>
+      </if>
+    </actions>
+  </service>
+
+</services>

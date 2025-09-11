@@ -218,7 +218,7 @@ class McpResourceManager {
         // Get sample company data
         EntityList companies = ec.entity.find("Party")
             .condition("partyTypeEnumId", "PtyOrganization")
-            .orderBy("organizationName")
+            .orderBy("companyName")
             .limit(10)
             .list()
         
@@ -236,7 +236,7 @@ class McpResourceManager {
                         [
                             partyId: it.partyId,
                             partyTypeEnumId: it.partyTypeEnumId,
-                            organizationName: it.organizationName,
+                            companyName: it.companyName,
                             description: it.description
                         ]
                     },
