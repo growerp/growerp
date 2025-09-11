@@ -270,7 +270,7 @@ curl -X POST http://localhost:8080/rest/s1/mcp/mcp \
 private def executeGetCompanies(Map arguments) {
     try {
         def companies = ec.entity.find("mantle.party.Organization")
-            .selectField("partyId, organizationName")
+            .selectField("partyId, companyName")
             .limit(limit as Integer)
             .list()
         // ... rest of implementation
@@ -495,7 +495,7 @@ grep -A 20 "entity.*Organization" runtime/component/growerp/entity/
 **Test Database Queries**
 ```sql
 -- Test query directly in database
-SELECT partyId, organizationName 
+SELECT partyId, companyName 
 FROM Party p 
 JOIN Organization o ON p.partyId = o.partyId 
 LIMIT 10;

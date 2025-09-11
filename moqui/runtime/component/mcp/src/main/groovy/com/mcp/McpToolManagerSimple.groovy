@@ -48,6 +48,7 @@ class McpToolManagerSimple {
      * Execute a tool
      */
     Map executeTool(String name, Map arguments) {
+        ec.logger.info("========Executing tool: ${name} with arguments: ${arguments}")
         try {
             switch (name) {
                 case "ping_system":
@@ -57,6 +58,17 @@ class McpToolManagerSimple {
                 default:
                     return [text: "Unknown tool: ${name}"]
             }
+        } catch (IllegalStateException e) {
+            // Authentication error - return error response that can be converted to JSON-RPC error
+            if (e.message?.contains("Authentication required")) {
+                return [
+                    _error: true,
+                    _authRequired: true, 
+                    _errorCode: -32002,
+                    text: e.message
+                ]
+            }
+            return [text: "Error: ${e.message}"]
         } catch (Exception e) {
             ec.logger.error("Error executing tool ${name}", e)
             return [text: "Error: ${e.message}"]
@@ -67,27 +79,8 @@ class McpToolManagerSimple {
      * Get companies
      */
     private Map getCompanies(Map arguments) {
-        def limit = arguments.limit ?: 10
-        
-        try {
-            def companies = ec.entity.find("mantle.party.Party")
-                .condition("partyTypeEnumId", "PtyOrganization") 
-                .limit(limit as Integer)
-                .list()
-                
-            def result = companies.collect { company ->
-                [
-                    partyId: company.partyId,
-                    organizationName: company.organizationName ?: company.partyId
-                ]
-            }
-            
-            return [
-                text: "Found ${result.size()} companies",
-                data: result
-            ]
-        } catch (Exception e) {
-            return [text: "Error retrieving companies: ${e.message}"]
-        }
+        // Simple authentication check - always fail for testing
+        ec.logger.info("Testing authentication check in get_companies")
+        throw new IllegalStateException("Authentication required: API key required for get_companies")
     }
 }

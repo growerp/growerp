@@ -18,31 +18,31 @@ along with this software (see the LICENSE.md file). If not, see
     description="Services for the MCP server">
 
     <resource name="health" require-authentication="anonymous-all"
-        description=" to check if the mcp is available, no authorization required">
+        description="Check if the MCP is available, requires API key authentication">
         <method type="get">
             <service name="McpServices.get#Health" />
         </method>
     </resource>
     <resource name="tools" require-authentication="anonymous-all"
-        description=" Check Available MCP Tools, no authorization required">
+        description="Check Available MCP Tools, requires API key authentication">
         <method type="get">
             <service name="McpServices.list#Tools" />
         </method>
     </resource>
-    <resource name="resources" require-authentication="anonymous-all"
-        description=" Check Available MCP Resources, no authorization required">
+    <resource name="resources" require-authentication="true"
+        description="Check Available MCP Resources, requires API key authentication">
         <method type="get">
             <service name="McpServices.list#McpResources" />
         </method>
     </resource>
     <resource name="prompts" require-authentication="anonymous-all"
-        description=" Check Available MCP Prompts, no authorization required">
+        description="Check Available MCP Prompts, requires API key authentication">
         <method type="get">
             <service name="McpServices.list#Prompts" />
         </method>
     </resource>
     <resource name="mcp" require-authentication="anonymous-all"
-        description=" Check Available MCP Tools, no authorization required">
+        description="MCP endpoints with API key authentication required">
         <method type="get">
             <service name="McpServices.list#Tools" />
         </method>
@@ -55,5 +55,20 @@ along with this software (see the LICENSE.md file). If not, see
         <method type="post">
             <service name="McpServices.handle#McpRequestFlexible" />
         </method>
+    </resource>
+    <resource name="auth" require-authentication="anonymous-all"
+        description="Authentication endpoints for MCP">
+        <resource name="login" require-authentication="anonymous-all"
+            description="Handle login prompt from AI">
+            <method type="post">
+                <service name="McpAuthServices.handle#LoginPrompt" />
+            </method>
+        </resource>
+        <resource name="prompt" require-authentication="anonymous-all"
+            description="Create authentication prompt">
+            <method type="get">
+                <service name="McpAuthServices.create#AuthPrompt" />
+            </method>
+        </resource>
     </resource>
 </resource>

@@ -44,6 +44,22 @@
       <parameter name="response" type="Map" />
     </out-parameters>
     <actions>
+      <!-- Validate authorization -->
+      <service-call name="McpAuthServices.check#McpAuthorization"
+        in-map="[operation: 'execute', method: method]" out-map="authCheck" />
+      <if condition="!authCheck.authorized">
+        <set field="response"
+          from="[
+          jsonrpc: '2.0',
+          id: request.id,
+          error: [
+            code: -32001,
+            message: 'Authorization failed: ' + (authCheck.errorMessage ?: 'Access denied')
+          ]
+        ]" />
+        <return />
+      </if>
+
       <script><![CDATA[
                 import com.mcp.McpProtocolHandlerSimple
                 
@@ -69,6 +85,57 @@
       <parameter name="error" type="Map" />
     </out-parameters>
     <actions>
+      <!-- Extract method and ID for authorization -->
+      <set field="requestMethod" from="request?.method ?: method" />
+      <set field="requestId" from="request?.id ?: id" />
+
+      <!-- Handle special login method -->
+      <if condition="requestMethod == 'auth/login'">
+        <!-- Extract credentials from params -->
+        <set field="loginParams" from="request?.params ?: params" />
+        <service-call name="McpAuthServices.handle#LoginPrompt"
+          in-map="[
+            username: loginParams?.username,
+            password: loginParams?.password, 
+            classificationId: loginParams?.classificationId ?: 'AppSupport',
+            requestId: requestId
+          ]"
+          out-map="loginResult" />
+
+        <!-- Return login response -->
+        <set field="jsonrpc" value="2.0" />
+        <set field="id" from="requestId" />
+        <if condition="loginResult.success">
+          <set field="result" from="loginResult.loginResponse.result" />
+          <else>
+            <set field="error" from="loginResult.loginResponse.error" />
+          </else>
+        </if>
+        <return />
+      </if>
+
+      <!-- Validate authorization -->
+      <service-call name="McpAuthServices.check#McpAuthorization"
+        in-map="[operation: 'execute', method: requestMethod, requestId: requestId]"
+        out-map="authCheck" />
+      <if condition="!authCheck.authorized">
+        <set field="jsonrpc" value="2.0" />
+        <set field="id" from="requestId" />
+
+        <!-- Return authentication prompt if available -->
+        <if condition="authCheck.authPrompt">
+          <set field="error" from="authCheck.authPrompt.error" />
+          <else>
+            <set field="error"
+              from="[
+            code: -32001,
+            message: 'Authorization failed: ' + (authCheck.errorMessage ?: 'Access denied')
+          ]" />
+          </else>
+        </if>
+        <return />
+      </if>
+
       <script><![CDATA[
                 import com.mcp.McpProtocolHandlerSimple
                 
@@ -97,6 +164,59 @@
                         id: mcpRequest.id,
                         result: [prompts: []]
                     ]
+                } else if (mcpRequest.method == "tools/list") {
+                    // Handle tools/list with proper authorization check
+                    def toolsResult = ec.service.sync().name("McpServices.list#Tools").call()
+                    if (toolsResult.errorResponse) {
+                        // Return the authentication prompt or error response
+                        response = toolsResult.errorResponse
+                        response.id = mcpRequest.id  // Set the correct request ID
+                    } else if (toolsResult.errors) {
+                        response = [
+                            jsonrpc: "2.0",
+                            id: mcpRequest.id,
+                            error: [
+                                code: -32001,
+                                message: toolsResult.errors.join(", ")
+                            ]
+                        ]
+                    } else {
+                        response = [
+                            jsonrpc: "2.0",
+                            id: mcpRequest.id,
+                            result: [tools: toolsResult.tools ?: []]
+                        ]
+                    }
+                } else if (mcpRequest.method == "tools/call") {
+                   logger.info("========Handling tools/call request: ${mcpRequest}")
+                    // Handle tools/call with proper authorization check
+                    def toolParams = mcpRequest.params ?: [:]
+                    def toolResult = ec.service.sync().name("McpServices.execute#McpTool")
+                        .parameter("name", toolParams.name)
+                        .parameter("arguments", toolParams.arguments ?: [:])
+                        .call()
+                    
+                    if (toolResult.errorResponse) {
+                        // Return the authentication prompt or error response
+                        response = toolResult.errorResponse
+                        response.id = mcpRequest.id  // Set the correct request ID
+                    } else if (toolResult.errors) {
+                        response = [
+                            jsonrpc: "2.0",
+                            id: mcpRequest.id,
+                            error: [
+                                code: -32001,
+                                message: toolResult.errors.join(", ")
+                            ]
+                        ]
+                    } else {
+                        // Return the tool result content directly
+                        response = [
+                            jsonrpc: "2.0",
+                            id: mcpRequest.id,
+                            result: toolResult.result ?: [content: [[type: "text", text: "Tool executed successfully"]]]
+                        ]
+                    }
                 } else {
                     response = handler.handleRequest(mcpRequest)
                 }
@@ -116,6 +236,13 @@
       <parameter name="resources" type="List" />
     </out-parameters>
     <actions>
+      <!-- Validate authorization -->
+      <service-call name="McpAuthServices.check#McpAuthorization"
+        in-map="[operation: 'read', method: 'resources/list']" out-map="authCheck" />
+      <if condition="!authCheck.authorized">
+        <return error="true" message="${authCheck.errorMessage ?: 'Authorization required'}" />
+      </if>
+
       <script><![CDATA[
                 import com.mcp.McpResourceManagerSimple
                 
@@ -135,6 +262,13 @@
       <parameter name="contents" type="List" />
     </out-parameters>
     <actions>
+      <!-- Validate authorization -->
+      <service-call name="McpAuthServices.check#McpAuthorization"
+        in-map="[operation: 'read', method: 'resources/read']" out-map="authCheck" />
+      <if condition="!authCheck.authorized">
+        <return error="true" message="${authCheck.errorMessage ?: 'Authorization required'}" />
+      </if>
+
       <script><![CDATA[
                 import com.mcp.McpResourceManagerSimple
                 
@@ -149,13 +283,36 @@
     <description>List available MCP tools</description>
     <out-parameters>
       <parameter name="tools" type="List" />
+      <parameter name="errorResponse" type="Map" />
     </out-parameters>
     <actions>
+      <!-- Validate authorization -->
+      <service-call name="McpAuthServices.check#McpAuthorization"
+        in-map="[operation: 'read', method: 'tools/list']" out-map="authCheck" />
+      <if condition="!authCheck.authorized">
+        <!-- Return authentication prompt if available, otherwise error -->
+        <if condition="authCheck.authPrompt">
+          <set field="errorResponse" from="authCheck.authPrompt" />
+          <else>
+            <set field="errorResponse"
+              from="[
+            jsonrpc: '2.0',
+            id: null,
+            error: [
+              code: -32001,
+              message: authCheck.errorMessage ?: 'Authorization required'
+            ]
+          ]" />
+          </else>
+        </if>
+        <return error="true" message="Authentication required" />
+      </if>
+
       <script><![CDATA[
-                import com.mcp.McpToolManagerSimple
+                import com.mcp.McpToolManager
                 
-                def toolManager = new McpToolManagerSimple(ec)
-                def result = toolManager.listTools()
+                def toolManager = new McpToolManager(ec)
+                def result = toolManager.listTools([:])
                 tools = result.tools
             ]]></script>
     </actions>
@@ -167,6 +324,13 @@
       <parameter name="prompts" type="List" />
     </out-parameters>
     <actions>
+      <!-- Validate authorization -->
+      <service-call name="McpAuthServices.check#McpAuthorization"
+        in-map="[operation: 'read', method: 'prompts/list']" out-map="authCheck" />
+      <if condition="!authCheck.authorized">
+        <return error="true" message="${authCheck.errorMessage ?: 'Authorization required'}" />
+      </if>
+
       <set field="prompts" from="[]" />
     </actions>
   </service>
@@ -179,13 +343,46 @@
     </in-parameters>
     <out-parameters>
       <parameter name="result" type="Map" />
+      <parameter name="errorResponse" type="Map" />
     </out-parameters>
     <actions>
+      <!-- Validate authorization for tool execution -->
+      <service-call name="McpAuthServices.check#McpAuthorization"
+        in-map="[operation: 'execute', method: 'tools/execute']" out-map="authCheck" />
+      <if condition="!authCheck.authorized">
+        <!-- Return authentication prompt if available, otherwise error -->
+        <if condition="authCheck.authPrompt">
+          <set field="errorResponse" from="authCheck.authPrompt" />
+          <else>
+            <set field="errorResponse"
+              from="[
+            jsonrpc: '2.0',
+            id: null,
+            error: [
+              code: -32001,
+              message: authCheck.errorMessage ?: 'Execution authorization required'
+            ]
+          ]" />
+          </else>
+        </if>
+        <return error="true" message="Authentication required" />
+      </if>
+
       <script><![CDATA[
-                import com.mcp.McpToolManagerSimple
+                import com.mcp.McpToolManager
+                logger.info("=====!!=xml ==Executing tool service: ${name} with arguments: ${arguments}")
+                def toolManager = new McpToolManager(ec)
+                result = toolManager.callTool([name: name, arguments: arguments ?: [:]])
                 
-                def toolManager = new McpToolManagerSimple(ec)
-                result = toolManager.executeTool(name, arguments ?: [:])
+                // Check if the tool returned an authentication error
+                if (result.isError && result.isAuthError) {
+                    // Create authentication prompt
+                    def promptResult = ec.service.sync().name("McpAuthServices.create#AuthPrompt")
+                        .parameter("operation", "login")
+                        .parameter("reason", "Authentication required for tool execution")
+                        .call()
+                    errorResponse = promptResult.promptResponse
+                }
             ]]></script>
     </actions>
   </service>
@@ -198,6 +395,12 @@
       <parameter name="version" type="String" />
     </out-parameters>
     <actions>
+      <!-- Validate API key but allow basic health check -->
+      <service-call name="McpAuthServices.validate#McpApiKey" out-map="authResult" />
+      <if condition="!authResult.authenticated">
+        <return error="true" message="${authResult.errorMessage ?: 'API key required'}" />
+      </if>
+
       <set field="status" value="healthy" />
       <set field="timestamp" from="java.time.ZonedDateTime.now().toInstant().toEpochMilli()" />
       <set field="version" value="1.0.0" />

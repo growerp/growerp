@@ -1,12 +1,19 @@
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
 apply plugin: 'groovy'
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+def jarBaseName = 'CompiledComponentName' // Customize compiled file name
 def moquiDir = file(projectDir.absolutePath + '/../../..')
 def frameworkDir = file(moquiDir.absolutePath + '/framework')
 def componentNode = parseComponent(project)
 version = componentNode.'@version'
-
-// Parse component.xml file
-Node parseComponent(project) { new XmlParser().parse(project.file('component.xml')) }
 
 repositories {
     flatDir name: 'localLib', dirs: frameworkDir.absolutePath + '/lib'
@@ -25,14 +32,20 @@ dependencies {
     // Note: Most dependencies are provided by the Moqui framework
 }
 
-// by default the Java plugin runs test on build, change to not do that (only run test if explicit task)
-// no longer works as of gradle 4.8 or possibly earlier, use clear() instead: check.dependsOn.remove(test)
-check.dependsOn.clear()
+task cleanLib(type: Delete) { delete fileTree(dir: projectDir.absolutePath+'/lib', include: '*') }
+clean.dependsOn cleanLib
 
-jar { 
-    baseName = componentNode.'@name'
-    archiveVersion = componentNode.'@version'
+jar {
+    destinationDir = file(projectDir.absolutePath + '/lib') // Declaring compiled Groovy goes into lib directory
+    baseName = jarBaseName
 }
+
+task copyDependencies { doLast {
+    copy { from (configurations.runtimeClasspath - project(':framework').configurations.runtimeClasspath - project(':framework').jar.archivePath)
+        into file(projectDir.absolutePath + '/lib') }
+} }
+copyDependencies.dependsOn cleanLib
+jar.dependsOn copyDependencies
 
 test {
     useJUnitPlatform()
