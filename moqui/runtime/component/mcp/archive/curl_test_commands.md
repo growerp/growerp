@@ -23,18 +23,9 @@ Expected: Authentication prompt with login details.
 ## 2. Login and Get API Key
 
 ```bash
-curl -X POST http://localhost:8080/rest/s1/mcp/auth/login \
+curl -s -X POST "http://localhost:8080/rest/s1/mcp/auth/login" \
   -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "id": 2,
-    "method": "login",
-    "params": {
-      "username": "test@example.com",
-      "password": "qqqqqq9!",
-      "classificationId": "AppSupport"
-    }
-  }' | jq .
+  -d '{"username": "test@example.com", "password": "qqqqqq9!", "classificationId": "AppSupport", "requestId": 2}' | jq -r '.apiKey'
 ```
 
 Expected: Success response with API key.

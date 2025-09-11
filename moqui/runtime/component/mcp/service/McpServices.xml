@@ -188,7 +188,6 @@
                         ]
                     }
                 } else if (mcpRequest.method == "tools/call") {
-                   logger.info("========Handling tools/call request: ${mcpRequest}")
                     // Handle tools/call with proper authorization check
                     def toolParams = mcpRequest.params ?: [:]
                     def toolResult = ec.service.sync().name("McpServices.execute#McpTool")
@@ -370,7 +369,6 @@
 
       <script><![CDATA[
                 import com.mcp.McpToolManager
-                logger.info("=====!!=xml ==Executing tool service: ${name} with arguments: ${arguments}")
                 def toolManager = new McpToolManager(ec)
                 result = toolManager.callTool([name: name, arguments: arguments ?: [:]])
                 

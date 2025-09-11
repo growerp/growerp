@@ -11,9 +11,9 @@ GrowERP is an open-source, multi-platform ERP application built with a modular a
 ### Try GrowERP Now
 
 **Production Applications:** Require credit card with 2 weeks trial
-- **Admin App with complete functionality**: [Linux](https://snapcraft.io/growerp-admin) | [Windows](https://github.com/growerp/growerp/releases/download/1.9.15/growerpSetup.exe) | [MacOs](https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755) | [Web](https://admin.growerp.com) | [Android](https://play.google.com/store/apps/details?id=org.growerp.admin) | [iOS](https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755)
+- **Admin App with complete functionality**: [Web](https://admin.growerp.com) | [Linux](https://snapcraft.io/growerp-admin) | [Windows](https://github.com/growerp/growerp/releases/download/1.9.15/growerpSetup.exe) | [MacOs](https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755)  | [Android](https://play.google.com/store/apps/details?id=org.growerp.admin) | [iOS](https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755)
 
-**Applications under test:**
+**Applications limited availability under test:** dummy credit card always approved 
 - **Admin next version**: [admin.growerp.org](https://admin.growerp.org)
 - **Hotel**: [hotel.growerp.org](https://hotel.growerp.org)
 - **Freelance**: [freelance.growerp.org](https://freelance.growerp.org)
@@ -33,20 +33,65 @@ growerp install
 
 ## 📚 Documentation
 
-### 🏗️ Extensibility & Development
-- **[📖 Extensibility Overview](./docs/README.md)** - Complete guide to GrowERP's modular architecture
-- **[🧩 Building Blocks Guide](./docs/Building_Blocks_Development_Guide.md)** - Create Flutter packages (growerp_* packages)
-- **[⚙️ Backend Components Guide](./docs/Backend_Components_Development_Guide.md)** - Develop Moqui components
-- **[📋 Management Summary](./docs/Management_Summary_Open_Source_Extensibility.md)** - Strategic overview for decision makers
+> **🚀 Quick Start**: New to GrowERP? Start with the [Extensibility Overview](./docs/README.md) for a complete roadmap, then check the [Building Blocks Guide](./docs/Building_Blocks_Development_Guide.md) for frontend development or the [Backend Components Guide](./docs/Backend_Components_Development_Guide.md) for backend development.
 
-### 🤝 Contributing
+### 🏗️ Core Development & Architecture
+
+- **[📖 Extensibility Overview](./docs/README.md)** - Complete guide to GrowERP's modular architecture and development patterns
+- **[🧩 Building Blocks Guide](./docs/Building_Blocks_Development_Guide.md)** - Create Flutter packages (growerp_* packages)
+- **[⚙️ Backend Components Guide](./docs/Backend_Components_Development_Guide.md)** - Develop Moqui components and services
+- **[🎨 Design Patterns](./docs/GrowERP_Design_Patterns.md)** - Established patterns and conventions for consistent development
+- **[📝 Code Templates](./docs/GrowERP_Code_Templates.md)** - Ready-to-use templates for rapid development
+- **[🤖 AI Development Guide](./docs/GrowERP_AI_Instructions.md)** - AI-assisted development best practices
+
+### 🔧 Integration & APIs
+
+- **[🔗 Data Models Guide](./docs/basic_explanation_of_the_frontend_REST_Backend_data_models.md)** - Frontend-backend data model integration
+- **[🤖 AI Integration (MCP Server)](./moqui/runtime/component/mcp/docs/README.md)** - Model Context Protocol server for AI business automation
+- **[💳 Stripe Payment Processing](./docs/Stripe_Payment_Processing_Documentation.md)** - Complete payment integration guide
+- **[🌐 WebSocket Notifications](./docs/WebSocket_Notification_System.md)** - Real-time notification system
+- **[🕐 Timezone Management](./docs/GrowERP_Timezone_Management_Guide.md)** - Handle timezone differences between client and server
+
+### 🚀 Deployment & Operations
+
+- **[🐳 Docker Installation](./docker/README.md)** - Containerized deployment and development
+- **[📦 Snap Distribution](./docs/snap_linux_distribution.md)** - Linux Snap package distribution
+- **[⚙️ Backend URL Selection](./docs/Backend_URL_Selection_System_Documentation.md)** - Backend configuration and routing
+
+### 📋 Business & Management
+
+- **[📊 Management Summary](./docs/Management_Summary_Open_Source_Extensibility.md)** - Strategic overview for decision makers
+- **[📈 Leads Management](./docs/leads_upload_process.md)** - Lead import and export processes
+- **[💰 Subscription Functions](./docs/Moqui_Subscription_Function.md)** - Subscription and billing management
+
+### 🤝 Contributing & Community
+
 - **[🔧 Contributing Guide](./CONTRIBUTING.md)** - How to contribute to GrowERP
-- **[📜 Code of Conduct](./CODE_OF_CONDUCT.md)** - Community guidelines
+- **[📜 Code of Conduct](./CODE_OF_CONDUCT.md)** - Community guidelines and expectations
 - **[📄 License](./LICENSE)** - CC0 1.0 Universal (Public Domain)
+- **[🎯 Development Prompts](./docs/prompts.md)** - AI prompts for development assistance
 
 ### 📖 Additional Resources
-- **[User Documentation](https://www.growerp.com)** - End-user guides and tutorials
-- **[Technical Documentation](./GrowERPObs/)** - Detailed technical documentation
+
+- **[🌐 User Documentation](https://www.growerp.com)** - End-user guides, tutorials, and support
+- **[📚 Technical Documentation](./GrowERPObs/)** - Comprehensive technical documentation and examples
+- **[📂 Documentation Examples](./docs/examples/)** - Code examples and implementation samples
+
+### 📝 Documentation Status & Maintenance
+
+The GrowERP documentation is actively maintained and regularly updated. Key features:
+
+- **📊 Comprehensive Coverage**: 25+ detailed guides covering all aspects of development and deployment
+- **🔗 Cross-Referenced**: All documents include links to related topics and examples
+- **🎯 Use Case Focused**: Documentation organized by developer needs and experience levels
+- **📱 Multi-Platform**: Covers Web, Android, iOS, Linux, Windows, and macOS development
+- **🤖 AI-Ready**: Includes AI integration guides and MCP server documentation
+
+> **💡 Documentation Navigation Tip**: 
+> Start with the [Extensibility Overview](./docs/README.md) for a complete roadmap of all available documentation. Each guide includes cross-references and practical examples to help you find exactly what you need for your specific use case.
+
+> **🔄 Contributing to Documentation**: 
+> Found something missing or outdated? We welcome documentation contributions! See our [Contributing Guide](./CONTRIBUTING.md) for how to improve the docs.
 
 ## 🏛️ Architecture Overview
 

@@ -48,7 +48,6 @@ class McpToolManagerSimple {
      * Execute a tool
      */
     Map executeTool(String name, Map arguments) {
-        ec.logger.info("========Executing tool: ${name} with arguments: ${arguments}")
         try {
             switch (name) {
                 case "ping_system":

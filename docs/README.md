@@ -1,6 +1,18 @@
 # GrowERP Extensibility Documentation
 
-This directory contains comprehensive documentation for extending GrowERP through its modular architecture. GrowERP is designed with extensibility at its core, allowing developers to create custom applications and extend functionality through well-defined building blocks and configuration systems.
+This directory contai8. **[WebSocket Notification System](./WebSocket_Notification_System.md)**
+   - Real-time notification system implementation
+   - Moqui NotificationMessage framework integration
+   - Topic-based subscriptions and user preferences
+   - WebSocket connection management and error handling
+
+9. **[Model Context Protocol (MCP) Server](../moqui/runtime/component/growerp/docs/README.md)**
+   - AI integration system for business automation
+   - Model Context Protocol server implementation
+   - Business tools and operations integration
+   - Multi-language client examples and authentication
+
+10. **[Snap Linux distribition Guide](./snap_linux_distribution.md)**rehensive documentation for extending GrowERP through its modular architecture. GrowERP is designed with extensibility at its core, allowing developers to create custom applications and extend functionality through well-defined building blocks and configuration systems.
 
 ## Documentation Overview
 
@@ -95,6 +107,15 @@ If you want to create a complete application:
 2. Choose the building blocks you need
 3. Configure your menu system
 4. Customize templates as needed
+
+### For AI Integration
+
+If you want to integrate AI agents with GrowERP:
+
+1. Read the [MCP Server Documentation](../moqui/runtime/component/growerp/docs/README.md)
+2. Set up API key authentication
+3. Choose from 25+ available business tools
+4. Implement your AI client using provided examples
 
 ## Architecture Overview
 
@@ -199,10 +220,18 @@ graph TB
 - **Services**: Business logic with validation, transactions, and error handling
 - **APIs**: REST endpoints with automatic JSON serialization and authentication
 
+### AI Integration
+
+- **MCP Server**: Model Context Protocol server for AI-powered business automation
+- **Business Tools**: 25+ integrated business operations accessible to AI agents
+- **Authentication**: Secure API key-based access with user classification
+- **Multi-language Support**: Client examples in Python, Node.js, JavaScript, and more
+
 ### Integration Patterns
 
 - **State Management**: BLoC pattern for consistent frontend state management
 - **API Communication**: Standardized REST API patterns with error handling
+- **AI Integration**: Model Context Protocol (MCP) server for AI-powered business automation
 - **Security**: Role-based access control at both frontend and backend levels
 - **Testing**: Comprehensive testing strategies for both layers
 

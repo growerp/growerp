@@ -50,8 +50,6 @@ class McpToolManager {
             throw new IllegalArgumentException("Tool name is required")
         }
         
-        ec.logger.info("===========Calling tool: ${name} with arguments: ${arguments}")
-        
         try {
             Map<String, Object> result = executeTool(name, arguments)
             
@@ -370,7 +368,6 @@ class McpToolManager {
     }
     
     private Map<String, Object> executeTool(String toolName, Map<String, Object> arguments) {
-        logger.info("===!!===ex groovy==Executing tool: ${toolName} with arguments: ${arguments}")
         switch (toolName) {
             // Entity CRUD operations
             case "create_company":
@@ -421,7 +418,6 @@ class McpToolManager {
     
     // Entity CRUD implementations
     private Map<String, Object> executeCreateCompany(Map<String, Object> arguments) {
-        logger.info("========Calling tool: create_company with arguments: ${arguments}")
         String companyName = arguments.companyName as String
         String description = arguments.description as String
         String currencyUomId = (arguments.currencyUomId as String) ?: "USD"
