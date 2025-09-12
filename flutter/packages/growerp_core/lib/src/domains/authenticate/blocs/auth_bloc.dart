@@ -280,6 +280,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
 
         PersistFunctions.persistKeyValue('apiKey', authenticate.apiKey ?? '');
+        PersistFunctions.persistKeyValue(
+          'moquiSessionToken',
+          authenticate.moquiSessionToken ?? '',
+        );
       } else {
         // login in process
         emit(

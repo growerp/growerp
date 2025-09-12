@@ -7,9 +7,10 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// https://kamaravichow.medium.com/caching-with-dio-hive-in-flutter-e630ac5fc777
-Future<Dio> buildDioClient(
-    {Duration timeout = const Duration(seconds: 15),
-    String? overrideUrl}) async {
+Future<Dio> buildDioClient({
+  Duration timeout = const Duration(seconds: 15),
+  String? overrideUrl,
+}) async {
   bool android = false;
   try {
     if (Platform.isAndroid) {
@@ -23,15 +24,16 @@ Future<Dio> buildDioClient(
 
   final dio = Dio()
     ..options = BaseOptions(
-        baseUrl: overrideUrl != null
-            ? '$overrideUrl/'
-            : kReleaseMode
-                ? '$databaseUrl/'
-                : databaseUrlDebug.isNotEmpty
-                    ? '$databaseUrlDebug/'
-                    : android == true
-                        ? 'http://10.0.2.2:8080/'
-                        : 'http://localhost:8080/')
+      baseUrl: overrideUrl != null
+          ? '$overrideUrl/'
+          : kReleaseMode
+          ? '$databaseUrl/'
+          : databaseUrlDebug.isNotEmpty
+          ? '$databaseUrlDebug/'
+          : android == true
+          ? 'http://10.0.2.2:8080/'
+          : 'http://localhost:8080/',
+    )
     ..options.connectTimeout = const Duration(seconds: 5)
     ..options.receiveTimeout = timeout
     ..httpClientAdapter;
@@ -47,14 +49,17 @@ Future<Dio> buildDioClient(
 
   dio.interceptors.add(KeyInterceptor(prefs));
 
-  dio.interceptors.add(PrettyDioLogger(
+  dio.interceptors.add(
+    PrettyDioLogger(
       requestHeader: true,
       requestBody: true,
       responseBody: true,
       responseHeader: true,
       error: true,
       compact: true,
-      maxWidth: 133));
+      maxWidth: 133,
+    ),
+  );
 
   logger.i("accessing backend at ${dio.options.baseUrl}");
 
@@ -67,22 +72,30 @@ class KeyInterceptor extends Interceptor {
   final SharedPreferences prefs;
   @override
   void onRequest(
-      RequestOptions options, RequestInterceptorHandler handler) async {
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     if (options.extra['noApiKey'] == null) {
       options.headers['api_key'] = prefs.getString('apiKey');
 
       if (options.method != 'GET') {
-        options.headers['moquiSessionToken'] =
-            prefs.getStringList('moquiSessionToken');
+        options.headers['moquiSessionToken'] = prefs.getString(
+          'moquiSessionToken',
+        );
       }
     }
+    debugPrint(
+      'REQUEST[======${options.method}] => PATH: ${options.headers.toString()}',
+    );
     return super.onRequest(options, handler);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) async {
-    await prefs.setStringList(
-        'moquiSessionToken', response.headers['moquiSessionToken'] ?? []);
+    await prefs.setString(
+      'moquiSessionToken',
+      response.headers['moquiSessionToken']?.first ?? '',
+    );
 
     //  response.headers.removeAll('set-cookie');
 
