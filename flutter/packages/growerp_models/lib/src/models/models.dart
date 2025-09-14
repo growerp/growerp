@@ -49,3 +49,4 @@ export 'notification_ws_model.dart';
 export 'subscription_model.dart';
 export 'uom_model.dart';
 export 'product_rental_date_model.dart';
+export 'rest_request_model.dart';

@@ -277,3 +277,13 @@ abstract class CompaniesUsers with _$CompaniesUsers {
   factory CompaniesUsers.fromJson(Map<String, dynamic> json) =>
       _$CompaniesUsersFromJson(json);
 }
+
+@freezed
+abstract class RestRequests with _$RestRequests {
+  factory RestRequests({@Default([]) List<RestRequest> restRequests}) =
+      _RestRequests;
+  RestRequests._();
+
+  factory RestRequests.fromJson(Map<String, dynamic> json) =>
+      _$RestRequestsFromJson(json);
+}

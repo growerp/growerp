@@ -8,6 +8,15 @@
     <default-property name="default_time_zone" value="UTC" />
     <default-property name="database_time_zone" value="UTC" />
 
+    <server-stats bin-length-seconds="900" visit-enabled="false" visit-ip-info-on-login="true"
+        visitor-enabled="false">
+        <!-- not sure if these really work -->
+        <artifact-stats type="AT_XML_SCREEN" persist-bin="false" persist-hit="false" />
+        <artifact-stats type="AT_XML_SCREEN_CONTENT" persist-bin="false" persist-hit="false" />
+        <artifact-stats type="AT_XML_SCREEN_TRANS" persist-bin="false" persist-hit="false" />
+        <artifact-stats type="AT_SERVICE" persist-bin="false" persist-hit="true" />
+        <artifact-stats type="AT_ENTITY" persist-bin="false" />
+    </server-stats>
 
     <webapp-list>
         <webapp name="webroot">

@@ -24,10 +24,7 @@ List<MenuOption> menuOptions = [
     title: 'Main',
     route: '/',
     userGroups: [UserGroup.system],
-    child: const CompanyList(
-      mainOnly: true,
-      role: Role.unknown,
-    ),
+    child: const CompanyList(mainOnly: true, role: Role.unknown),
   ),
   MenuOption(
     image: 'packages/growerp_core/images/productsGrey.png',
@@ -36,5 +33,13 @@ List<MenuOption> menuOptions = [
     route: '/applications',
     userGroups: [UserGroup.system],
     child: const ApplicationList(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/orderGrey.png',
+    selectedImage: 'packages/growerp_core/images/order.png',
+    title: 'REST Requests',
+    route: '/rest-requests',
+    userGroups: [UserGroup.system],
+    child: const RestRequestList(),
   ),
 ];

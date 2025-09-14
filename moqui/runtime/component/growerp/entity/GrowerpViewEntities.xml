@@ -1201,6 +1201,86 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="otherCompanyName" field="organizationName" entity-alias="CORG" />
     </view-entity>
 
+    <view-entity entity-name="OwnerPersonRestRequest" package="growerp.party">
+        <description>get all people related to a certain companyId = PR = toPartyId</description>
+        <!-- owner -->
+        <member-entity entity-alias="PTYOWNER" entity-name="mantle.party.Party">
+            <entity-condition>
+                <econdition field-name="partyTypeEnumId" value="PtyOwner" />
+                <econdition field-name="disabled" operator="not-equals" value="Y"
+                    or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <!-- owner to person -->
+        <member-entity entity-alias="PTYPERSON" entity-name="mantle.party.Party"
+            join-from-alias="PTYOWNER">
+            <key-map field-name="partyId" related="ownerPartyId" />
+            <entity-condition>
+                <econdition field-name="partyTypeEnumId" value="PtyPerson" />
+                <econdition field-name="disabled" operator="not-equals" value="Y"
+                    or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="PERSON" entity-name="mantle.party.Person"
+            join-from-alias="PTYPERSON">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <!-- account -->
+        <member-entity entity-alias="ACCT" entity-name="moqui.security.UserAccount"
+            join-from-alias="PTYPERSON" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <!-- person to company -->
+        <member-entity entity-alias="PERSONTOCOMPANY" entity-name="mantle.party.PartyRelationship"
+            join-from-alias="PERSON" join-optional="true">
+            <key-map field-name="partyId" related="fromPartyId" />
+            <!--entity-condition>
+                <econdition field-name="relationshipTypeEnumId" value="PrtEmployee" />
+                <date-filter from-field-name="userFromDate" thru-field-name="userThruDate" />
+            </entity-condition-->
+        </member-entity>
+        <member-entity entity-alias="ORGCOMPANYPARTY" entity-name="mantle.party.Party"
+            join-from-alias="PERSONTOCOMPANY" join-optional="true">
+            <key-map field-name="toPartyId" related="partyId" />
+            <entity-condition>
+                <econdition field-name="disabled" operator="not-equals" value="Y"
+                    or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="ORGCOMPANY" entity-name="mantle.party.Organization"
+            join-from-alias="ORGCOMPANYPARTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <!-- company role-->
+        <member-entity entity-alias="RESTHIT" entity-name="moqui.server.ArtifactHit"
+            join-from-alias="ACCT" join-optional="true">
+            <key-map field-name="userId" />
+        </member-entity>
+        <alias-all entity-alias="RESTHIT" />
+        <alias name="ownerPartyId" field="partyId" entity-alias="PTYOWNER" />
+        <alias name="ownerTypeEnumId" field="partyTypeEnumId" entity-alias="PTYOWNER" />
+        <alias name="ownerDisabled" field="disabled" entity-alias="PTYOWNER" />
+        <alias name="userDisabled" field="disabled" entity-alias="PTYPERSON" />
+        <alias name="userTypeEnumId" field="partyTypeEnumId" entity-alias="PTYPERSON" />
+        <alias name="userPartyId" field="partyId" entity-alias="PERSON" />
+        <alias name="userPseudoId" field="pseudoId" entity-alias="PTYPERSON" />
+        <alias name="firstName" entity-alias="PERSON" />
+        <alias name="lastName" entity-alias="PERSON" />
+        <!-- userlogin -->
+        <alias name="userId" entity-alias="ACCT" />
+        <alias name="loginName" field="username" entity-alias="ACCT" />
+        <alias name="userFullName" entity-alias="ACCT" />
+        <alias name="emailAddress" entity-alias="ACCT" />
+        <!-- company -->
+        <alias name="userFromDate" field="fromDate" entity-alias="PERSONTOCOMPANY" />
+        <alias name="userThruDate" field="thruDate" entity-alias="PERSONTOCOMPANY" />
+        <alias name="personToCompanyId" field="partyRelationshipId" entity-alias="PERSONTOCOMPANY" />
+        <alias name="companyPartyId" field="partyId" entity-alias="ORGCOMPANYPARTY" />
+        <alias name="companyPseudoId" field="pseudoId" entity-alias="ORGCOMPANYPARTY" />
+        <alias name="companyDisabled" field="disabled" entity-alias="ORGCOMPANYPARTY" />
+        <alias name="companyName" field="organizationName" entity-alias="ORGCOMPANY" />
+    </view-entity>
+
     <view-entity entity-name="OwnerPersonDetailAndCompany" package="growerp.party">
         <description>get all people related to a certain companyId = PR = toPartyId</description>
         <!-- owner -->

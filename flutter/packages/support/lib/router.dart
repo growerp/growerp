@@ -23,24 +23,36 @@ import 'src/application/application.dart';
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (debug.kDebugMode) {
     if (kDebugMode) {
-      debugPrint('>>>NavigateTo { ${settings.name} '
-          'with: ${settings.arguments.toString()} }');
+      debugPrint(
+        '>>>NavigateTo { ${settings.name} '
+        'with: ${settings.arguments.toString()} }',
+      );
     }
   }
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
-          settings: settings, builder: (context) => const ApplicationList());
+        settings: settings,
+        builder: (context) => const ApplicationList(),
+      );
     case '/applications':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) =>
-              DisplayMenuOption(menuList: menuOptions, menuIndex: 1));
+        settings: settings,
+        builder: (context) =>
+            DisplayMenuOption(menuList: menuOptions, menuIndex: 1),
+      );
+    case '/rest-requests':
+      return MaterialPageRoute(
+        settings: settings,
+        builder: (context) =>
+            DisplayMenuOption(menuList: menuOptions, menuIndex: 2),
+      );
     case '/subscriptions':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) =>
-              DisplayMenuOption(menuList: menuOptions, menuIndex: 2));
+        settings: settings,
+        builder: (context) =>
+            DisplayMenuOption(menuList: menuOptions, menuIndex: 3),
+      );
     default:
       return coreRoute(settings);
   }

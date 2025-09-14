@@ -75,6 +75,17 @@ abstract class RestClient {
     @Query('limit') int? limit,
   });
 
+  @GET("rest/s1/growerp/100/RestRequest")
+  Future<RestRequests> getRestRequest({
+    @Query('hitId') String? hitId,
+    @Query('userId') String? userId,
+    @Query('ownerPartyId') String? ownerPartyId,
+    @Query('startDateTime') String? startDateTime,
+    @Query('endDateTime') String? endDateTime,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
   @GET("rest/s1/growerp/100/Authenticate")
   Future<Authenticate> getAuthenticate({
     @Query('classificationId') required String classificationId,
