@@ -1382,5 +1382,96 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="get" noun="RestRequest">
+        <description>Get REST request data from OwnerPersonRestRequest entity and convert to RestRequest model format</description>
+        <in-parameters>
+            <parameter name="hitId" /><!-- specific REST request hit ID -->
+            <parameter name="userId" /><!-- filter by user ID -->
+            <parameter name="ownerPartyId" /><!-- filter by owner party ID -->
+            <parameter name="startDateTime" /><!-- filter by start date -->
+            <parameter name="endDateTime" /><!-- filter by end date -->
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="restRequests" type="List">
+                <parameter name="restRequest" type="Map">
+                    <parameter name="user" type="Map">
+                        <parameter name="partyId" />
+                        <parameter name="firstName" />
+                        <parameter name="lastName" />
+                        <parameter name="email" />
+                        <parameter name="loginName" />
+                    </parameter>
+                    <parameter name="dateTime" />
+                    <parameter name="restRequestName" />
+                    <parameter name="serverIp" />
+                    <parameter name="serverHostName" />
+                    <parameter name="parameterString" />
+                    <parameter name="wasError" type="Boolean" />
+                    <parameter name="errorMessage" />
+                    <parameter name="requestUrl" />
+                    <parameter name="referrerUrl" />
+                    <parameter name="isSlowHit" type="Boolean" />
+                    <parameter name="runningTimeMillis" type="Integer" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <!-- Get related company and owner -->
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+            <!-- Use provided ownerPartyId or fallback to current user's owner -->
+            <!--if
+            condition="!ownerPartyId">
+                <set field="ownerPartyId" from="context.ownerPartyId" />
+            </if-->
+
+            <!-- Query OwnerPersonRestRequest entity -->
+            <entity-find entity-name="growerp.party.OwnerPersonRestRequest" list="restRequestData"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" from="onlyOwnerPartyId" ignore-if-empty="true" />
+                <econdition field-name="hitId" ignore-if-empty="true" />
+                <econdition field-name="userId" ignore-if-empty="true" />
+                <econdition field-name="startDateTime" operator="greater-equals"
+                    from="startDateTime" ignore-if-empty="true" />
+                <econdition field-name="startDateTime" operator="less-equals"
+                    from="endDateTime" ignore-if-empty="true" />
+                <order-by field-name="-startDateTime" />
+            </entity-find>
+
+            <!-- Convert to RestRequest model format -->
+            <set field="restRequests" from="[]" />
+            <iterate list="restRequestData" entry="restData">
+                <set field="restRequest" from="[:]" />
+                <!-- Create complete restRequest object with consistent pattern -->
+                <set field="restRequest"
+                    from="[
+                    user: [
+                        partyId: restData.userPartyId,
+                        firstName: restData.firstName,
+                        lastName: restData.lastName,
+                        email: restData.emailAddress,
+                        loginName: restData.loginName
+                    ],
+                    dateTime: restData.startDateTime ? ec.l10n.format(restData.startDateTime,'yyyy-MM-dd HH:mm:ssZ') : null,
+                    restRequestName: restData.artifactName.substring(restData.artifactName.lastIndexOf('.') + 1),
+                    serverIp: restData.serverIpAddress,
+                    serverHostName: restData.serverHostName,
+                    parameterString: restData.parameterString,
+                    wasError: restData.wasError == 'Y',
+                    errorMessage: restData.errorMessage,
+                    requestUrl: restData.requestUrl,
+                    referrerUrl: restData.referrerUrl,
+                    isSlowHit: restData.isSlowHit == 'Y',
+                    runningTimeMillis: restData.runningTimeMillis?.intValue()
+                ]" />
+
+                <script>restRequests.add(restRequest)</script>
+            </iterate>
+        </actions>
+    </service>
+
 </services>
  

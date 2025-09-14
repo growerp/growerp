@@ -32,6 +32,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.GeneralServices100.get#BackendUrl" />
             </method>
         </resource>
+        <resource name="RestRequest"
+            description="Get a REST request of a owner, or user">
+            <method type="get">
+                <service name="growerp.100.GeneralServices100.get#RestRequest" />
+            </method>
+        </resource>
         <resource name="Application"
             description="Get/add/delete the application overrides for base url, for list, no authorization required">
             <method type="get">

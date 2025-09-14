@@ -8,7 +8,7 @@ https://github.com/moqui/moqui-framework/blob/master/framework/src/main/resource
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/moqui-conf-3.xsd">
 
     <server-stats
-        stats-skip-condition="pathInfo?.startsWith('/rpc') || pathInfo?.startsWith('/rest') || pathInfo?.startsWith('/status')" />
+        stats-skip-condition="pathInfo?.startsWith('/rpc') || pathInfo?.startsWith('/status')" />
 
     <!-- NOTE: using the environment variable is relatively secure in a container environment, but
     for more security set it here instead -->

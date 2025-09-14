@@ -96,5 +96,8 @@ List<BlocProvider> getSupportBlocProviders(
     BlocProvider<ApplicationBloc>(
       create: (context) => ApplicationBloc(restClient),
     ),
+    BlocProvider<RestRequestBloc>(
+      create: (context) => RestRequestBloc(restClient),
+    ),
   ];
 }
