@@ -26,23 +26,18 @@ java -jar moqui.war no-run-es
 curl http://localhost:8080/rest/s1/mcp/health
 
 # 3. Get API key for authentication
-API_KEY=$(curl -s -X POST "http://localhost:8080/rest/s1/mcp/auth/login" 
-  -H "Content-Type: application/json" 
+API_KEY=$(curl -s -X POST "http://localhost:8080/rest/s1/mcp/auth/login" \
+  -H "Content-Type: application/json" \
   -d '{
-    "jsonrpc": "2.0",
-    "method": "login",
-    "params": {
-      "username": "test@example.com",
-      "password": "qqqqqq9!",
-      "classificationId": "AppSupport"
-    },
-    "id": 1
-  }' | jq -r '.result.apiKey')
+    "username": "test@example.com",
+    "password": "qqqqqq9!",
+    "classificationId": "AppSupport"
+  }' | jq -r '.loginResponse.result.apiKey')
 
 # 4. Execute a business tool
-curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" 
-  -H "Content-Type: application/json" 
-  -H "api_key: $API_KEY" 
+curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
+  -H "Content-Type: application/json" \
+  -H "api_key: $API_KEY" \
   -d '{
     "jsonrpc": "2.0",
     "method": "tools/call",
@@ -119,8 +114,12 @@ financials = await client.call_tool("get_financial_summary", {"period": "month"}
 ```
 
 ### Claude Desktop Integration
-```json
-// ~/.config/claude-desktop/config.json
+```bash
+# Create the config directory if it doesn't exist
+mkdir -p ~/.config/claude-desktop
+
+# Create the configuration file
+cat > ~/.config/claude-desktop/config.json << 'EOF'
 {
   "mcp": {
     "servers": {
@@ -131,6 +130,7 @@ financials = await client.call_tool("get_financial_summary", {"period": "month"}
     }
   }
 }
+EOF
 ```
 
 ## 🏗️ Architecture
