@@ -83,19 +83,11 @@ if [ ! -z "$API_KEY" ]; then
     echo "Step 3: Testing get_companies tool with API key from login..."
     echo "API Key: ${API_KEY:0:20}... (length: ${#API_KEY})"
     
-    # Create clean JSON in a temporary file
-    cat > /tmp/mcp_test.json << 'EOF'
-{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "get_companies", "arguments": {"limit": 3}}, "id": 3}
-EOF
-    
     # Test with the API key from GrowERP login
     AUTHED_RESPONSE=$(curl -s -X POST "${BASE_URL}/rest/s1/mcp/protocol" \
       -H "Content-Type: application/json" \
       -H "api_key: ${API_KEY}" \
-      -d @/tmp/mcp_test.json 2>&1)
-    
-    # Clean up temp file
-    rm -f /tmp/mcp_test.json
+      -d '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "get_companies", "arguments": {"limit": 3}}, "id": 3}' 2>&1)
     
     if echo "$AUTHED_RESPONSE" | grep -q '"content"'; then
         echo "✅ get_companies tool works with API key!"
