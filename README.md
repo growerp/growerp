@@ -11,7 +11,7 @@ GrowERP is an open-source, multi-platform ERP application built with a modular a
 ### Try GrowERP Now
 
 **Production Applications:** Require credit card with 2 weeks trial
-- **Admin App with complete functionality**: [Web](https://admin.growerp.com) | [Linux](https://snapcraft.io/growerp-admin) | [Windows](https://github.com/growerp/growerp/releases/download/1.9.15/growerpSetup.exe) | [MacOs](https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755)  | [Android](https://play.google.com/store/apps/details?id=org.growerp.admin) | [iOS](https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755)
+- **Admin App with complete functionality**: [Web](https://admin.growerp.com) | [Linux](https://snapcraft.io/growerp-admin) | [Windows](https://apps.microsoft.com/detail/9nwx6kftjnql?hl=en-US&gl=TH) | [MacOs](https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755)  | [Android](https://play.google.com/store/apps/details?id=org.growerp.admin) | [iOS](https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755)
 
 **Applications limited availability under test:** dummy credit card always approved 
 - **Admin next version**: [admin.growerp.org](https://admin.growerp.org)
