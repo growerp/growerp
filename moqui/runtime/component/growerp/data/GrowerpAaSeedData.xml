@@ -187,7 +187,14 @@ along with this software (see the LICENSE.md file). If not, see
         bodyScreenLocation="component://growerp/screen/email/Welcome.xml"
         fromAddress="support@growerp.com" fromName="GrowERP system"
         ccAddresses="" bccAddresses="info@growerp.com"
-        subject="Welcome and Password!" sendPartial="Y" />
+        subject="Welcome and Password on our production system" sendPartial="Y" />
+    <moqui.basic.email.EmailTemplate emailTemplateId="WELCOME_TEST"
+        description="Welcome email with Password"
+        emailServerId="SYSTEM" emailTypeEnumId="EMT_SYSTEM"
+        bodyScreenLocation="component://growerp/screen/email/WelcomeTest.xml"
+        fromAddress="support@growerp.com" fromName="GrowERP system"
+        ccAddresses="" bccAddresses="info@growerp.com"
+        subject="Welcome and Password on our test system" sendPartial="Y" />
     <!-- export -->
     <moqui.basic.email.EmailTemplate emailTemplateId="GrowerpExportCategories"
         description="GrowERP export Categories"
