@@ -241,6 +241,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="employees" type="List">
                         <parameter name="employee" type="Map">
                             <parameter name="partyId" />
+                            <parameter name="pseudoId" />
                             <parameter name="email" />
                             <parameter name="firstName" />
                             <parameter name="lastName" />
@@ -1721,12 +1722,19 @@ along with this software (see the LICENSE.md file). If not, see
                     value-field="emailExist">
                     <field-map field-name="emailServerId" value="SYSTEM" />
                 </entity-find-one>
+                <if condition="ec.web.getHostName(false).endsWith('.com')">
+                    <set field="templateId" value="WELCOME" />
+                    <else>
+                        <set field="templateId" value="WELCOME_TEST" />
+                    </else>
+                </if>
                 <if
                     condition="emailExist &amp;&amp; emailExist.mailPassword != 'SMTP_PASSWORD'
                                 &amp;&amp; !user.email.contains('example.com')">
                     <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
                         async="true">
-                        <field-map field-name="emailTemplateId" value="WELCOME" />
+                        <field-map field-name="emailTemplateId" from="templateId" />
+                        <field-map field-name="fromAddress" value="WELCOME" />
                         <field-map field-name="toAddresses" from="user.email" />
                         <field-map field-name="bodyParameters"
                             from="[classification: classificationId? classificationId.substring(3) : '',
@@ -1816,6 +1824,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </parameter>
                 <parameter name="company" type="Map">
                     <parameter name="partyId" />
+                    <parameter name="pseudoId" />
                     <parameter name="name" />
                     <parameter name="email" />
                     <parameter name="role" />
@@ -1828,6 +1837,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="user" type="Map">
                 <parameter name="partyId" />
+                <parameter name="pseudoId" />
                 <parameter name="email" />
                 <parameter name="url" />
                 <parameter name="firstName" />
@@ -1860,6 +1870,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </parameter>
                 <parameter name="company" type="Map">
                     <parameter name="partyId" />
+                    <parameter name="pseudoId" />
                     <parameter name="name" />
                     <parameter name="email" />
                     <parameter name="role" />
@@ -2212,6 +2223,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="user" type="Map">
                 <parameter name="partyId" />
+                <parameter name="pseudoId" />
                 <parameter name="email" />
                 <parameter name="url" />
                 <parameter name="firstName" />
@@ -2227,6 +2239,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="telephoneNr" />
                 <parameter name="company" type="Map">
                     <parameter name="partyId" />
+                    <parameter name="pseudoId" />
                     <parameter name="name" />
                     <parameter name="email" />
                     <parameter name="role" />
@@ -2313,6 +2326,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="limit" type="Integer" default-value="20" />
             <parameter name="search" default="null" />
             <parameter name="partyId" />
+            <parameter name="pseudoId" />
             <parameter name="export" type="Boolean" default-value="false" />
         </in-parameters>
         <out-parameters>
@@ -2342,6 +2356,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </parameter>
                 <parameter name="company" type="Map">
                     <parameter name="partyId" />
+                    <parameter name="pseudoId" />
                     <parameter name="name" />
                     <parameter name="pseudoId" />
                 </parameter>
@@ -2378,6 +2393,7 @@ along with this software (see the LICENSE.md file). If not, see
                 entity-name="growerp.party.OwnerCompanyUser">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <econdition field-name="partyId" from="partyId" ignore-if-empty="true" />
+                <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
                 <econdition field-name="role" ignore-if-empty="true" />
                 <econdition field-name="customerStatusId" ignore-if-empty="true" or-null="true" />
                 <econdition field-name="toPartyId" operator="is-null" ignore="export" />
@@ -2510,6 +2526,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
             <parameter name="user" type="Map" required="true">
                 <parameter name="partyId" />
+                <parameter name="pseudoId" />
                 <parameter name="email" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
@@ -2543,6 +2560,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="customerInfo" type="Map">
                 <parameter name="partyId" />
+                <parameter name="pseudoId" />
                 <parameter name="email" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
@@ -2678,6 +2696,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="classificationId" />
                 <parameter name="user" type="Map">
                     <parameter name="partyId" />
+                    <parameter name="pseudoId" />
                     <parameter name="email" />
                     <parameter name="url" />
                     <parameter name="loginName" />
@@ -2687,6 +2706,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="userGroupId" />
                     <parameter name="company" type="Map">
                         <parameter name="partyId" />
+                        <parameter name="pseudoId" />
                     </parameter>
                 </parameter>
             </parameter>
