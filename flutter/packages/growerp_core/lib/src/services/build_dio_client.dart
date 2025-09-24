@@ -22,6 +22,29 @@ Future<Dio> buildDioClient({
   String databaseUrl = GlobalConfiguration().get('databaseUrl');
   String databaseUrlDebug = GlobalConfiguration().get('databaseUrlDebug');
 
+  // Get timeout values from configuration
+  int connectTimeoutSeconds;
+  int receiveTimeoutSeconds;
+
+  if (kReleaseMode) {
+    connectTimeoutSeconds =
+        GlobalConfiguration().get('connectTimeoutProd') ?? 15;
+    receiveTimeoutSeconds =
+        GlobalConfiguration().get('receiveTimeoutProd') ?? 60;
+  } else {
+    connectTimeoutSeconds =
+        GlobalConfiguration().get('connectTimeoutTest') ?? 20;
+    receiveTimeoutSeconds =
+        GlobalConfiguration().get('receiveTimeoutTest') ?? 120;
+  }
+
+  // Use provided timeout duration if it's longer than config, otherwise use config
+  final configReceiveTimeout = Duration(seconds: receiveTimeoutSeconds);
+  final effectiveReceiveTimeout =
+      timeout.inSeconds > configReceiveTimeout.inSeconds
+      ? timeout
+      : configReceiveTimeout;
+
   final dio = Dio()
     ..options = BaseOptions(
       baseUrl: overrideUrl != null
@@ -34,8 +57,8 @@ Future<Dio> buildDioClient({
           ? 'http://10.0.2.2:8080/'
           : 'http://localhost:8080/',
     )
-    ..options.connectTimeout = const Duration(seconds: 15)
-    ..options.receiveTimeout = timeout
+    ..options.connectTimeout = Duration(seconds: connectTimeoutSeconds)
+    ..options.receiveTimeout = effectiveReceiveTimeout
     ..httpClientAdapter;
 
   //dio.options.headers['Content-Type'] = 'application/json; charset=UTF-8';
