@@ -15,7 +15,7 @@ along with this software (see the LICENSE.md file). If not, see
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
-    <service verb="get" noun="Products" authenticate="false">
+    <service verb="get" noun="Product" authenticate="false">
         <description> get a single, or all products</description>
         <in-parameters>
             <parameter name="classificationId" default="AppAdmin" /><!-- AppHotel AppXXXXX-->
@@ -414,7 +414,7 @@ along with this software (see the LICENSE.md file). If not, see
                         base64: product.image]" />
             </if>
             <!-- return created product -->
-            <service-call name="growerp.100.CatalogServices100.get#Products"
+            <service-call name="growerp.100.CatalogServices100.get#Product"
                 in-map="[productId: productId]" out-map="context" />
             <set field="product" from="products[0]" />
         </actions>
@@ -625,7 +625,7 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[type: 'product', id: product.productId,
                         base64: product.image]" />
             </if>
-            <service-call name="growerp.100.CatalogServices100.get#Products"
+            <service-call name="growerp.100.CatalogServices100.get#Product"
                 in-map="[productId: product.productId]" out-map="context" />
             <set field="product" from="products[0]" />
         </actions>
@@ -675,13 +675,13 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <set field="prods[0].salesDiscontinuationDate" from="ec.user.nowTimestamp" />
             <entity-update value-field="prods[0]" />
-            <service-call name="growerp.100.CatalogServices100.get#Products"
+            <service-call name="growerp.100.CatalogServices100.get#Product"
                 in-map="[productId: product.productId]" out-map="context" />
             <set field="product" from="products[0]" />
         </actions>
     </service>
 
-    <service verb="get" noun="ProductCategories" authenticate="false">
+    <service verb="get" noun="ProductCategory" authenticate="false">
         <description> get a single or all categories to group products</description>
         <in-parameters>
             <parameter name="companyPartyId" />
@@ -894,7 +894,7 @@ along with this software (see the LICENSE.md file). If not, see
                             fromDate: ec.user.nowTimestamp]" />
             </iterate>
             <!-- get added category -->
-            <service-call name="growerp.100.CatalogServices100.get#ProductCategories"
+            <service-call name="growerp.100.CatalogServices100.get#ProductCategory"
                 in-map="[categoryId: productCategoryId]" out-map="context" />
             <set field="category" from="categories[0]" />
         </actions>
@@ -970,7 +970,7 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[type: 'category', id: category.categoryId, base64: category.image]" />
             </if>
             <!-- return category information -->
-            <service-call name="growerp.100.CatalogServices100.get#ProductCategories"
+            <service-call name="growerp.100.CatalogServices100.get#ProductCategory"
                 in-map="[categoryId: category.categoryId]" out-map="context" />
             <set field="category" from="categories[0]" />
         </actions>
@@ -1026,7 +1026,7 @@ along with this software (see the LICENSE.md file). If not, see
                         message="could not find rollup for category: ${category.categoryId}" />
                 </else>
             </if>
-            <service-call name="growerp.100.CatalogServices100.get#ProductCategories"
+            <service-call name="growerp.100.CatalogServices100.get#ProductCategory"
                 in-map="[categoryId: category.categoryId]" out-map="context" />
             <set field="category" from="categories[0]" />
         </actions>
