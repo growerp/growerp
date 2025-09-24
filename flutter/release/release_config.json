@@ -1,0 +1,30 @@
+{
+  "defaultApps": [
+    "admin",
+    "freelance",
+    "health",
+    "hotel",
+    "support",
+    "growerp-moqui"
+  ],
+  "dockerRegistry": "growerp",
+  "repositoryUrl": "git@github.com:growerp/growerp.git",
+  "tempWorkspaceDir": "/tmp/growerp",
+  "defaultPushToDockerHub": true,
+  "defaultPushToTestServer": false,
+  "versionTagPrefix": "",
+  "dockerBuildArgs": {
+    "progress": "plain",
+    "no-cache": true
+  },
+  "gitSettings": {
+    "autoStash": true,
+    "autoPull": true,
+    "autoCleanup": true
+  },
+  "versionUpgrade": {
+    "defaultPatch": true,
+    "defaultMinor": false,
+    "defaultMajor": false
+  }
+}

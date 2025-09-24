@@ -20,7 +20,14 @@ Our release cycle follows these steps:
 Before a new release is initiated, we ensure all automated integration tests are passing on the `master` branch. This is a critical quality gate.
 
 ### 2. Tagging and Versioning
-Once verified, a new release is prepared using the `flutter/createPushDockerImages.dart` script. This tool automatically assigns and increments the necessary tag numbers and versions for all applications and the backend.
+Once verified, a new release is prepared using the enhanced **GrowERP Release Tool**. This tool automatically assigns and increments the necessary tag numbers and versions for all applications and the backend.
+
+The release tool can be found at `flutter/release/release.sh` and provides:
+- Interactive application selection
+- Flexible version increment options (patch, minor, major)
+- Automated Docker image building and tagging
+- Git repository management and tagging
+- Both local and repository workspace modes
 
 ### 3. Staging Deployment
 The newly versioned Docker images are deployed to our test environment. It's important to note that our test systems are configured to use the `latest` images to ensure we are always testing the most recent code.
@@ -72,9 +79,21 @@ Our hotfix script provides a safety valve, giving us the structured control of a
 
 ### Standard Release Tools
 
-- **`flutter/createPushDockerImages.dart`**: Automated versioning and Docker image creation
+- **`flutter/release.sh`**: Enhanced production release tool with interactive interface
+- **`flutter/release/release_tool.dart`**: Core release automation script
+- **`flutter/release/release_config.json`**: Configurable release settings
 - **Integration Tests**: Automated quality gate before releases
 - **Docker Compose**: Production deployment management
+
+#### Enhanced Release Tool Features
+- **Interactive Selection**: Choose specific applications to build
+- **Version Management**: Patch, minor, and major version increments
+- **Workspace Modes**: Local development vs repository-based releases
+- **Docker Integration**: Automated image building with proper tagging
+- **Configuration**: JSON-based settings with sensible defaults
+- **Validation**: Comprehensive environment and dependency checks
+
+For detailed usage instructions, see the [Release Tool Documentation](../flutter/release/README.md).
 
 ### Hotfix Tools
 
@@ -94,11 +113,15 @@ For detailed information about the hotfix process, see the [Hotfix Documentation
 graph TD
     A[Development on Master] --> B[All Tests Pass?]
     B -->|No| A
-    B -->|Yes| C[Run createPushDockerImages.dart]
-    C --> D[Deploy to Test Environment]
-    D --> E[Validation on Test]
-    E --> F[Update Production docker-compose.yaml]
-    F --> G[Deploy to Production]
+    B -->|Yes| C[Run Enhanced Release Tool]
+    C --> D[Select Applications & Version Type]
+    D --> E[Build Docker Images]
+    E --> F[Push to Docker Hub]
+    F --> G[Create Git Tags]
+    G --> H[Deploy to Test Environment]
+    H --> I[Validation on Test]
+    I --> J[Update Production docker-compose.yaml]
+    J --> K[Deploy to Production]
 ```
 
 ### Hotfix Flow

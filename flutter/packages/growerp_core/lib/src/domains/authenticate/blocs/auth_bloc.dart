@@ -23,6 +23,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:credit_card_type_detector/credit_card_type_detector.dart';
 
 import '../../../services/ws_client.dart';
+import '../../../services/build_dio_client.dart';
 import '../../common/functions/functions.dart';
 
 part 'auth_event.dart';
@@ -235,7 +236,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       emit(state.copyWith(status: AuthStatus.loading));
       PersistFunctions.removeAuthenticate();
-      Authenticate authenticate = await restClient.login(
+
+      // Use extended timeout for demo data creation as it involves heavy database operations
+      final clientToUse = event.demoData == true
+          ? RestClient(
+              await buildDioClient(timeout: const Duration(seconds: 900)),
+            ) // 15 minutes for demo data
+          : restClient;
+
+      Authenticate authenticate = await clientToUse.login(
         username: event.username,
         password: event.password,
         companyName: event.companyName,
