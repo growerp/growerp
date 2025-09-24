@@ -1,6 +1,99 @@
 # GrowERP Extensibility Documentation
 
-This directory contai8. **[WebSocket Notification System](./WebSocket_Notification_System.md)**
+This directory contai8. **[WebSocket No10. # GrowERP Extensibility Documentation
+
+This directory contains comprehensive documentation for extending GrowERP through its modular architecture. GrowERP is designed with extensibility at its core, allowing developers to create custom applications and extend functionality through well-defined building blocks and configuration systems.
+
+## Documentation Overview
+
+### 📚 Main Guides
+
+1. **[GrowERP Extensibility Guide](./GrowERP_Extensibility_Guide.md)**
+   - Complete overview of GrowERP's extensibility architecture
+   - Frontend and backend extensibility patterns
+   - Integration patterns and security
+   - Examples and best practices
+
+2. **[Building Blocks Development Guide](./Building_Blocks_Development_Guide.md)**
+   - Detailed guide for creating Flutter packages (growerp_* packages)
+   - Package structure and development patterns
+   - State management with BLoC
+   - UI components and testing strategies
+
+### 🚀 Release & Version Management
+
+3. **[Version Management and Release Process](./GrowERP_Version_Management_and_Release_Process.md)**
+   - Comprehensive guide to GrowERP's release strategy and version management
+   - Standard release process with master branch as single source of truth
+   - Hotfix procedure for urgent production fixes
+   - Trunk-based development methodology and best practices
+
+### 🎨 Design & Development Patterns
+
+4. **[GrowERP Design Patterns](./GrowERP_Design_Patterns.md)**
+   - Comprehensive design patterns for consistent development
+   - BLoC state management patterns
+   - UI component patterns and form handling
+   - Testing patterns and data model conventions
+
+5. **[GrowERP Code Templates](./GrowERP_Code_Templates.md)**
+   - Ready-to-use code templates for rapid development
+   - BLoC, UI component, and test templates
+   - Model and API integration templates
+   - Quick generation commands and examples
+
+6. **[GrowERP AI Development Instructions](./GrowERP_AI_Instructions.md)**
+   - Comprehensive guide for AI-assisted development
+   - Code quality standards and best practices
+   - Anti-patterns to avoid and quality checklists
+   - Integration guidelines for AI coding tools
+
+### 🔧 Backend & Integration
+
+7. **[Backend Components Development Guide](./Backend_Components_Development_Guide.md)**
+   - Comprehensive guide for Moqui component development
+   - Entity, service, and API development
+   - Data management and security
+   - Testing and deployment strategies
+
+8. **[Data Model Basic Guide](./basic_explanation_of_the_frontend_REST_Backend_data_models.md)**
+   - Flutter Data Model (growerp_models package)
+   - Moqui Data Model (mantle-udm component)
+   - REST Interface (e.g., https://test.growerp.org/rest/service.swagger/growerp)
+
+9. **[Stripe Payment Processing](./Stripe_Payment_Processing_Documentation.md)**
+   - Complete integration guide for Stripe payment processing
+   - Setup, configuration, and best practices
+
+10. **[Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md)**
+    - Comprehensive guide for handling timezone differences between server and client
+    - Implementation details and usage patterns
+    - Quick reference: [Timezone Quick Reference](./GrowERP_Timezone_Quick_Reference.md)
+
+11. **[WebSocket Notification System](./WebSocket_Notification_System.md)**
+    - Real-time notification system implementation
+    - Moqui NotificationMessage framework integration
+    - Topic-based subscriptions and user preferences
+    - WebSocket connection management and error handling
+
+12. **[Model Context Protocol (MCP) Server](../moqui/runtime/component/growerp/docs/README.md)**
+    - AI integration system for business automation
+    - Model Context Protocol server implementation
+    - Business tools and operations integration
+    - Multi-language client examples and authentication
+
+13. **[Snap Linux Distribution Guide](./snap_linux_distribution.md)**
+    - Guide for packaging GrowERP as a Snap package for Linux distribution
+    - Guide for packaging GrowERP as a Snap package for Linux distribution
+
+11. **[Version Management and Release Process](./GrowERP_Version_Management_and_Release_Process.md)**
+    - Comprehensive guide to GrowERP's release strategy and version management
+    - Standard release process with master branch as single source of truth
+    - Hotfix procedure for urgent production fixes
+    - Trunk-based development methodology and best practices
+
+
+## Quick Startcation System](./WebSocket_Notification_System.md)**
    - Real-time notification system implementation
    - Moqui NotificationMessage framework integration
    - Topic-based subscriptions and user preferences

@@ -49,6 +49,26 @@ docker image rm image-name
 ```sh
 dart pub global activate melos # only one time
 melos clean
+melos bootstrap
+melos build
+melos l10n
+```
+
+## Hot Fix Release Tool
+
+For creating production hot fixes, use the automated hot fix tool:
+
+```bash
+./hotfix.sh
+```
+
+This tool helps you:
+- Create branches from production tags
+- Apply commits from master to hot fix branches  
+- Build and push Docker images with proper versioning
+- Manage Git tags and releases
+
+See `hotfix/README.md` for detailed documentation.
 melos bootstrap # remove references to pub.dev and use local packages
 melos build     # generate data models
 melos l10n      # generate language localization files

@@ -1,0 +1,24 @@
+{
+  "defaultApps": [
+    "admin",
+    "freelance",
+    "health",
+    "hotel",
+    "support",
+    "growerp-moqui"
+  ],
+  "dockerRegistry": "growerp",
+  "defaultPushToDockerHub": true,
+  "branchPrefix": "hotfix-",
+  "versionTagPrefix": "",
+  "maxDisplayTags": 10,
+  "maxDisplayCommits": 15,
+  "dockerBuildArgs": {
+    "progress": "plain",
+    "no-cache": true
+  },
+  "gitSettings": {
+    "fetchAll": true,
+    "autoCleanup": true
+  }
+}
