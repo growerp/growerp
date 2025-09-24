@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// https://kamaravichow.medium.com/caching-with-dio-hive-in-flutter-e630ac5fc777
 Future<Dio> buildDioClient({
-  Duration timeout = const Duration(seconds: 15),
+  Duration timeout = const Duration(seconds: 60),
   String? overrideUrl,
 }) async {
   bool android = false;
@@ -34,7 +34,7 @@ Future<Dio> buildDioClient({
           ? 'http://10.0.2.2:8080/'
           : 'http://localhost:8080/',
     )
-    ..options.connectTimeout = const Duration(seconds: 5)
+    ..options.connectTimeout = const Duration(seconds: 15)
     ..options.receiveTimeout = timeout
     ..httpClientAdapter;
 
