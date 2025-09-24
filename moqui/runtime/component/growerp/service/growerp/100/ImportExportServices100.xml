@@ -1873,7 +1873,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="fileText" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.CatalogServices100.get#ProductCategories"
+            <service-call name="growerp.100.CatalogServices100.get#ProductCategory"
                 in-map="[classificationId: classificationId]" out-map="context" />
             <set field="fileText" value="" />
             <script><![CDATA[
@@ -1904,7 +1904,7 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <script>logger.warn("getting products")</script>
-            <service-call name="growerp.100.CatalogServices100.get#Products"
+            <service-call name="growerp.100.CatalogServices100.get#Product"
                 out-map="context" />
             <set field="fileText" value="" />
             <script><![CDATA[

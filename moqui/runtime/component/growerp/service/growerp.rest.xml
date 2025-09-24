@@ -155,7 +155,7 @@ along with this software (see the LICENSE.md file). If not, see
         <resource name="Categories" require-authentication="anonymous-all">
             <!-- separate from Categoryfor security reasons -->
             <method type="get">
-                <service name="growerp.100.CatalogServices100.get#ProductCategories" />
+                <service name="growerp.100.CatalogServices100.get#ProductCategory" />
             </method>
         </resource>
         <resource name="Category">
@@ -187,7 +187,7 @@ along with this software (see the LICENSE.md file). If not, see
         <resource name="Products" require-authentication="anonymous-all">
             <!-- separate from Product for security reasons -->
             <method type="get">
-                <service name="growerp.100.CatalogServices100.get#Products" />
+                <service name="growerp.100.CatalogServices100.get#Product" />
             </method>
         </resource>
         <resource name="Product">

@@ -482,10 +482,12 @@ class McpResourceManager {
                     category: "Party Management",
                     description: "Services for managing companies, users, and party relationships",
                     services: [
-                        "growerp.mobile.PartyServices.create#Company",
-                        "growerp.mobile.PartyServices.update#Company", 
-                        "growerp.mobile.PartyServices.create#Person",
-                        "growerp.mobile.PartyServices.update#Person"
+                        "growerp.100.PartyServices100.create#Company",
+                        "growerp.100.PartyServices100.update#Company",
+                        "growerp.100.PartyServices100.get#Company",
+                        "growerp.100.PartyServices100.create#User",
+                        "growerp.100.PartyServices100.update#User",
+                        "growerp.100.PartyServices100.get#User"
                     ]
                 ]
             case "catalog":
@@ -493,10 +495,11 @@ class McpResourceManager {
                     category: "Catalog Management",
                     description: "Services for managing products, categories, and catalog data",
                     services: [
-                        "growerp.mobile.ProductServices.create#Product",
-                        "growerp.mobile.ProductServices.update#Product",
-                        "growerp.mobile.ProductServices.create#Category",
-                        "growerp.mobile.ProductServices.update#Category"
+                        "growerp.100.CatalogServices100.create#Product",
+                        "growerp.100.CatalogServices100.update#Product",
+                        "growerp.100.CatalogServices100.get#Product",
+                        "growerp.100.CatalogServices100.create#Category",
+                        "growerp.100.CatalogServices100.update#Category"
                     ]
                 ]
             case "order":
@@ -504,9 +507,9 @@ class McpResourceManager {
                     category: "Order Management", 
                     description: "Services for managing orders, invoices, and financial documents",
                     services: [
-                        "growerp.mobile.OrderServices.create#FinDoc",
-                        "growerp.mobile.OrderServices.update#FinDoc",
-                        "growerp.mobile.OrderServices.approve#FinDoc"
+                        "growerp.100.FinDocServices100.create#FinDoc",
+                        "growerp.100.FinDocServices100.update#FinDoc",
+                        "growerp.100.FinDocServices100.get#FinDoc"
                     ]
                 ]
             case "accounting":
@@ -514,8 +517,9 @@ class McpResourceManager {
                     category: "Accounting",
                     description: "Financial and accounting related services",
                     services: [
-                        "growerp.mobile.AccountingServices.create#GlAccount",
-                        "growerp.mobile.AccountingServices.post#AcctgTrans"
+                        "growerp.100.AccountingServices100.get#BalanceSummary",
+                        "growerp.100.AccountingServices100.create#GlAccount",
+                        "growerp.100.AccountingServices100.post#AcctgTrans"
                     ]
                 ]
             default:

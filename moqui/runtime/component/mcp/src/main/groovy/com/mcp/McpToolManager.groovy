@@ -100,17 +100,53 @@ class McpToolManager {
         return [
             [
                 name: "create_company",
-                description: "Create a new company in the system",
+                description: "Create a new company in the system. You can either provide a 'company' object with nested properties, or use flat parameters like 'name', 'email', etc.",
                 inputSchema: [
                     type: "object",
                     properties: [
-                        companyName: [type: "string", description: "Company name"],
-                        description: [type: "string", description: "Company description"],
-                        currencyUomId: [type: "string", description: "Default currency (USD, EUR, etc.)"],
-                        emailAddress: [type: "string", description: "Company email address"],
-                        website: [type: "string", description: "Company website"]
+                        // Nested company object (preferred)
+                        company: [
+                            type: "object",
+                            description: "Company information object",
+                            properties: [
+                                name: [type: "string", description: "Company name"],
+                                role: [type: "string", description: "Company role (Customer, Supplier, Internal)"],
+                                email: [type: "string", description: "Company email address"],
+                                url: [type: "string", description: "Company website URL"],
+                                currency: [
+                                    type: "object",
+                                    properties: [
+                                        currencyId: [type: "string", description: "Currency ID (USD, EUR, etc.)"]
+                                    ]
+                                ],
+                                address: [
+                                    type: "object",
+                                    properties: [
+                                        address1: [type: "string", description: "Primary address line"],
+                                        city: [type: "string", description: "City"],
+                                        country: [type: "string", description: "Country"]
+                                    ]
+                                ],
+                                telephoneNr: [type: "string", description: "Telephone number"]
+                            ],
+                            required: ["name"]
+                        ],
+                        // Flat parameters (alternative)
+                        name: [type: "string", description: "Company name (alternative to company.name)"],
+                        companyName: [type: "string", description: "Company name (alias for name)"],
+                        role: [type: "string", description: "Company role (Customer, Supplier, Internal)"],
+                        email: [type: "string", description: "Company email address"],
+                        emailAddress: [type: "string", description: "Company email address (alias for email)"],
+                        url: [type: "string", description: "Company website URL"],
+                        currencyUomId: [type: "string", description: "Currency ID (USD, EUR, etc.)"],
+                        telephoneNr: [type: "string", description: "Telephone number"]
                     ],
-                    required: ["companyName"]
+                    // Either company object OR name is required
+                    anyOf: [
+                        [required: ["company"]],
+                        [required: ["name"]],
+                        [required: ["companyName"]]
+                    ]
                 ]
             ],
             [
@@ -130,17 +166,111 @@ class McpToolManager {
             ],
             [
                 name: "create_product",
-                description: "Create a new product in the catalog",
+                description: "Create a new product in the catalog. You can either provide a 'product' object with nested properties, or use flat parameters like 'productName', 'price', etc.",
                 inputSchema: [
                     type: "object",
                     properties: [
-                        productName: [type: "string", description: "Product name"],
+                        // Nested product object (preferred)
+                        product: [
+                            type: "object",
+                            description: "Product information object",
+                            properties: [
+                                pseudoId: [type: "string", description: "Product pseudo ID"],
+                                productTypeId: [type: "string", description: "Product type ID"],
+                                assetClassId: [type: "string", description: "Asset class ID"],
+                                productName: [type: "string", description: "Product name"],
+                                description: [type: "string", description: "Product description"],
+                                price: [type: "number", description: "Product price"],
+                                listPrice: [type: "number", description: "List price"],
+                                categories: [
+                                    type: "array",
+                                    description: "Product categories",
+                                    items: [
+                                        type: "object",
+                                        properties: [
+                                            categoryId: [type: "string", description: "Category ID"],
+                                            categoryName: [type: "string", description: "Category name"],
+                                            description: [type: "string", description: "Category description"],
+                                            image: [type: "string", description: "Category image"]
+                                        ]
+                                    ]
+                                ],
+                                useWarehouse: [type: "boolean", description: "Whether product uses warehouse management"],
+                                image: [type: "string", description: "Product image"],
+                                amountUom: [
+                                    type: "object",
+                                    description: "Unit of measure for amounts",
+                                    properties: [
+                                        uomId: [type: "string", description: "UOM ID"]
+                                    ]
+                                ],
+                                amount: [type: "number", description: "Amount/quantity"]
+                            ],
+                            required: ["productName"]
+                        ],
+                        // Flat parameters (alternative)
+                        productName: [type: "string", description: "Product name (alternative to product.productName)"],
                         description: [type: "string", description: "Product description"],
+                        price: [type: "number", description: "Product price"],
                         listPrice: [type: "number", description: "List price"],
-                        productCategoryId: [type: "string", description: "Product category ID"],
-                        productTypeEnumId: [type: "string", description: "Product type (PtFinished, PtService, etc.)"]
+                        productTypeId: [type: "string", description: "Product type ID"],
+                        assetClassId: [type: "string", description: "Asset class ID"],
+                        categoryId: [type: "string", description: "Primary category ID"],
+                        useWarehouse: [type: "boolean", description: "Whether product uses warehouse management"],
+                        image: [type: "string", description: "Product image"]
                     ],
-                    required: ["productName"]
+                    // Either product object OR productName is required
+                    anyOf: [
+                        [required: ["product"]],
+                        [required: ["productName"]]
+                    ]
+                ]
+            ],
+            [
+                name: "create_category",
+                description: "Create a new product category to group products. You can either provide a 'category' object with nested properties, or use flat parameters like 'categoryName', 'description', etc.",
+                inputSchema: [
+                    type: "object",
+                    properties: [
+                        // Nested category object (preferred)
+                        category: [
+                            type: "object",
+                            description: "Category information object",
+                            properties: [
+                                pseudoId: [type: "string", description: "Category pseudo ID"],
+                                categoryName: [type: "string", description: "Category name"],
+                                description: [type: "string", description: "Category description"],
+                                image: [type: "string", description: "Category image (base64 encoded)"],
+                                products: [
+                                    type: "array",
+                                    description: "Products to include in this category",
+                                    items: [
+                                        type: "object",
+                                        properties: [
+                                            productId: [type: "string", description: "Product ID"]
+                                        ],
+                                        required: ["productId"]
+                                    ]
+                                ]
+                            ],
+                            required: ["categoryName"]
+                        ],
+                        // Flat parameters (alternative)
+                        categoryName: [type: "string", description: "Category name (alternative to category.categoryName)"],
+                        description: [type: "string", description: "Category description"],
+                        pseudoId: [type: "string", description: "Category pseudo ID"],
+                        image: [type: "string", description: "Category image (base64 encoded)"],
+                        productIds: [
+                            type: "array", 
+                            description: "Array of product IDs to include in this category",
+                            items: [type: "string"]
+                        ]
+                    ],
+                    // Either category object OR categoryName is required
+                    anyOf: [
+                        [required: ["category"]],
+                        [required: ["categoryName"]]
+                    ]
                 ]
             ],
             [
@@ -227,28 +357,140 @@ class McpToolManager {
             ],
             [
                 name: "create_invoice",
-                description: "Create an invoice",
+                description: "Create an invoice. You can either provide a 'finDoc' object with nested properties, or use flat parameters like 'sales', 'otherCompanyPartyId', etc.",
                 inputSchema: [
                     type: "object",
                     properties: [
-                        partyId: [type: "string", description: "Customer/Supplier party ID"],
-                        invoiceType: [type: "string", description: "Invoice type (sales/purchase)"],
-                        finDocId: [type: "string", description: "Related order ID (optional)"],
+                        // Nested finDoc object (preferred)
+                        finDoc: [
+                            type: "object",
+                            description: "Financial document information object",
+                            properties: [
+                                docType: [type: "string", description: "Document type (should be 'invoice')", default: "invoice"],
+                                sales: [type: "boolean", description: "Whether this is a sales invoice (true) or purchase invoice (false)"],
+                                pseudoId: [type: "string", description: "Invoice pseudo ID"],
+                                reference: [type: "string", description: "Invoice reference/number"],
+                                statusId: [type: "string", description: "Invoice status ID"],
+                                paymentInstrument: [type: "string", description: "Payment instrument"],
+                                description: [type: "string", description: "Invoice description"],
+                                otherUser: [
+                                    type: "object",
+                                    description: "Other user information",
+                                    properties: [
+                                        partyId: [type: "string", description: "User party ID"]
+                                    ]
+                                ],
+                                otherCompany: [
+                                    type: "object",
+                                    description: "Customer/Supplier company information",
+                                    properties: [
+                                        partyId: [type: "string", description: "Company party ID"],
+                                        paymentMethod: [
+                                            type: "object",
+                                            description: "Payment method information",
+                                            properties: [
+                                                ccPaymentMethodId: [type: "string", description: "Credit card payment method ID"]
+                                            ]
+                                        ]
+                                    ],
+                                    required: ["partyId"]
+                                ],
+                                grandTotal: [type: "number", description: "Invoice grand total"],
+                                classificationId: [type: "string", description: "Classification ID"],
+                                isPosted: [type: "boolean", description: "Whether invoice is posted to accounting"],
+                                journal: [
+                                    type: "object",
+                                    description: "Journal information",
+                                    properties: [
+                                        journalId: [type: "string", description: "Journal ID"]
+                                    ]
+                                ],
+                                items: [
+                                    type: "array",
+                                    description: "Invoice line items",
+                                    items: [
+                                        type: "object",
+                                        properties: [
+                                            itemSeqId: [type: "string", description: "Item sequence ID"],
+                                            itemType: [
+                                                type: "object",
+                                                properties: [
+                                                    itemTypeId: [type: "string", description: "Item type ID"],
+                                                    itemTypeName: [type: "string", description: "Item type name"]
+                                                ]
+                                            ],
+                                            paymentType: [
+                                                type: "object",
+                                                properties: [
+                                                    paymentTypeId: [type: "string", description: "Payment type ID"],
+                                                    paymentTypeName: [type: "string", description: "Payment type name"]
+                                                ]
+                                            ],
+                                            productId: [type: "string", description: "Product ID"],
+                                            pseudoProductId: [type: "string", description: "Product pseudo ID"],
+                                            description: [type: "string", description: "Item description"],
+                                            quantity: [type: "number", description: "Item quantity"],
+                                            price: [type: "number", description: "Item unit price"],
+                                            isDebit: [type: "boolean", description: "Whether this is a debit item"],
+                                            glAccount: [
+                                                type: "object",
+                                                properties: [
+                                                    glAccountId: [type: "string", description: "GL account ID"]
+                                                ]
+                                            ],
+                                            asset: [
+                                                type: "object",
+                                                properties: [
+                                                    assetId: [type: "string", description: "Asset ID"],
+                                                    assetName: [type: "string", description: "Asset name"],
+                                                    location: [
+                                                        type: "object",
+                                                        properties: [
+                                                            locationId: [type: "string", description: "Location ID"],
+                                                            locationName: [type: "string", description: "Location name"]
+                                                        ]
+                                                    ]
+                                                ]
+                                            ],
+                                            rentalFromDate: [type: "string", description: "Rental start date"],
+                                            rentalThruDate: [type: "string", description: "Rental end date"]
+                                        ],
+                                        required: ["quantity", "price"]
+                                    ]
+                                ],
+                                requestType: [type: "string", description: "Request type"]
+                            ],
+                            required: ["docType", "otherCompany", "items"]
+                        ],
+                        // Flat parameters (alternative)
+                        sales: [type: "boolean", description: "Whether this is a sales invoice (true) or purchase invoice (false)"],
+                        otherCompanyPartyId: [type: "string", description: "Customer/Supplier party ID"],
+                        partyId: [type: "string", description: "Customer/Supplier party ID (alias for otherCompanyPartyId)"],
+                        invoiceType: [type: "string", description: "Invoice type (sales/purchase) - converted to boolean"],
+                        reference: [type: "string", description: "Invoice reference/number"],
+                        description: [type: "string", description: "Invoice description"],
+                        grandTotal: [type: "number", description: "Invoice grand total"],
                         items: [
                             type: "array",
-                            description: "Invoice items",
+                            description: "Invoice line items",
                             items: [
                                 type: "object",
                                 properties: [
                                     productId: [type: "string", description: "Product ID"],
-                                    quantity: [type: "number", description: "Quantity"],
-                                    price: [type: "number", description: "Unit price"]
+                                    quantity: [type: "number", description: "Item quantity"],
+                                    price: [type: "number", description: "Item unit price"],
+                                    description: [type: "string", description: "Item description"]
                                 ],
-                                required: ["productId", "quantity", "price"]
+                                required: ["quantity", "price"]
                             ]
                         ]
                     ],
-                    required: ["partyId", "invoiceType", "items"]
+                    // Either finDoc object OR required flat parameters
+                    anyOf: [
+                        [required: ["finDoc"]],
+                        [required: ["items", "otherCompanyPartyId"]],
+                        [required: ["items", "partyId"]]
+                    ]
                 ]
             ],
             [
@@ -274,9 +516,17 @@ class McpToolManager {
                 inputSchema: [
                     type: "object",
                     properties: [
-                        limit: [type: "number", description: "Maximum number of results", default: 20],
-                        searchTerm: [type: "string", description: "Search term for company name"],
-                        partyTypeEnumId: [type: "string", description: "Party type filter"]
+                        companyPartyId: [type: "string", description: "Specific company party ID to retrieve"],
+                        companyPseudoId: [type: "string", description: "Company pseudo ID"],
+                        firstName: [type: "string", description: "First name filter"],
+                        lastName: [type: "string", description: "Last name filter"],
+                        companyName: [type: "string", description: "Company name filter"],
+                        userPartyId: [type: "string", description: "User party ID filter"],
+                        role: [type: "string", description: "Company role filter"],
+                        start: [type: "integer", description: "Starting index for pagination", default: 0],
+                        limit: [type: "integer", description: "Maximum number of results", default: 20],
+                        searchString: [type: "string", description: "General search string"],
+                        isForDropDown: [type: "boolean", description: "Format results for dropdown display"]
                     ]
                 ]
             ],
@@ -298,9 +548,30 @@ class McpToolManager {
                 inputSchema: [
                     type: "object",
                     properties: [
-                        limit: [type: "number", description: "Maximum number of results", default: 20],
-                        searchTerm: [type: "string", description: "Search term for product name"],
-                        productCategoryId: [type: "string", description: "Filter by category"]
+                        pseudoId: [type: "string", description: "Product pseudo ID"],
+                        categoryId: [type: "string", description: "Product category ID filter"],
+                        productId: [type: "string", description: "Specific product ID to retrieve"],
+                        productTypeId: [type: "string", description: "Product type ID filter"],
+                        assetClassId: [type: "string", description: "Asset class ID filter"],
+                        start: [type: "integer", description: "Starting index for pagination", default: 0],
+                        limit: [type: "integer", description: "Maximum number of results", default: 20],
+                        isForDropDown: [type: "boolean", description: "Format results for dropdown display"],
+                        search: [type: "string", description: "General search string for product name/description"]
+                    ]
+                ]
+            ],
+            [
+                name: "get_categories",
+                description: "Retrieve product categories with optional filtering",
+                inputSchema: [
+                    type: "object",
+                    properties: [
+                        companyPartyId: [type: "string", description: "Company party ID filter"],
+                        categoryId: [type: "string", description: "Specific category ID to retrieve"],
+                        start: [type: "integer", description: "Starting index for pagination", default: 0],
+                        limit: [type: "integer", description: "Maximum number of results", default: 20],
+                        isForDropDown: [type: "boolean", description: "Format results for dropdown display", default: false],
+                        search: [type: "string", description: "General search string for category name/description"]
                     ]
                 ]
             ],
@@ -318,8 +589,8 @@ class McpToolManager {
                 ]
             ],
             [
-                name: "get_financial_summary",
-                description: "Get financial summary and reports",
+                name: "get_balance_summary",
+                description: "Get balance summary and reports",
                 inputSchema: [
                     type: "object",
                     properties: [
@@ -376,6 +647,8 @@ class McpToolManager {
                 return executeCreateUser(arguments)
             case "create_product":
                 return executeCreateProduct(arguments)
+            case "create_category":
+                return executeCreateCategory(arguments)
             case "update_company":
                 return executeUpdateCompany(arguments)
             case "update_user":
@@ -393,16 +666,24 @@ class McpToolManager {
                 
             // Query operations
             case "get_companies":
-                return executeGetCompanies(arguments)
+                return ec.service.sync().name("growerp.100.PartyServices100.get#Company")
+                .parameters(arguments + [searchString: arguments.companyName ? arguments.companyName : arguments.partyId? arguments.partyId : arguments.role]).call()
             case "get_users":
-                return executeGetUsers(arguments)
+                return ec.service.sync().name("growerp.100.PartyServices100.get#User")
+                .parameters(arguments).call()
             case "get_products":
-                return executeGetProducts(arguments)
+                return ec.service.sync().name("growerp.100.CatalogServices100.get#Product")
+                .parameters(arguments).call()
+            case "get_categories":
+                return ec.service.sync().name("growerp.100.CatalogServices100.get#ProductCategory")
+                .parameters(arguments).call()
             case "get_orders":
-                return executeGetOrders(arguments)
-            case "get_financial_summary":
-                return executeGetFinancialSummary(arguments)
-                
+                return ec.service.sync().name("growerp.100.FinDocServices100.get#FinDoc")
+                .parameters(arguments + [docType: 'order']).call()
+            case "get_balance_summary":
+                return ec.service.sync().name("growerp.100.AccountingServices100.get#BalanceSummary")
+                .parameters(arguments).call()
+
             // System operations
             case "ping_system":
                 return executePingSystem(arguments)
@@ -418,30 +699,56 @@ class McpToolManager {
     
     // Entity CRUD implementations
     private Map<String, Object> executeCreateCompany(Map<String, Object> arguments) {
-        String companyName = arguments.companyName as String
-        String description = arguments.description as String
-        String currencyUomId = (arguments.currencyUomId as String) ?: "USD"
-        String emailAddress = arguments.emailAddress as String
-        String website = arguments.website as String
+        logger.info("executeCreateCompany called with arguments: ${arguments}")
         
-        Map<String, Object> serviceParams = [
-            companyName: companyName,
-            description: description,
-            currencyUomId: currencyUomId
-        ]
+        Map<String, Object> company = null
         
-        if (emailAddress) serviceParams.emailAddress = emailAddress
-        if (website) serviceParams.website = website
+        // Try to get company parameter first (nested structure)
+        if (arguments.company instanceof Map) {
+            company = arguments.company as Map<String, Object>
+        }
+        // If no nested company, treat arguments as flat company data
+        else if (arguments.name || arguments.companyName) {
+            company = arguments.clone() as Map<String, Object>
+            // Handle common flat parameter mappings
+            if (arguments.companyName && !company.name) {
+                company.name = arguments.companyName
+            }
+            if (arguments.emailAddress && !company.email) {
+                company.email = arguments.emailAddress
+            }
+            if (arguments.currencyUomId && !company.currency) {
+                company.currency = [currencyId: arguments.currencyUomId]
+            }
+        }
+        
+        if (!company || !company.name) {
+            throw new IllegalArgumentException("Company name is required. Received arguments: ${arguments}")
+        }
+        
+        // Ensure required fields have defaults
+        if (!company.role) {
+            company.role = "Customer" // Default role
+        }
+        
+        logger.info("Processed company parameter: ${company}")
+        
+        // The service expects the company parameter directly
+        Map<String, Object> serviceParams = [company: company]
         
         try {
-            Map<String, Object> result = ec.service.sync().name("growerp.mobile.PartyServices.create#Company")
+            Map<String, Object> result = ec.service.sync().name("growerp.100.PartyServices100.create#Company")
                 .parameters(serviceParams).call()
+
+            String companyName = company.name ?: "Unknown"
+            String partyId = result.company?.pseudoId ?: result.company.partyId
             
             return [
-                text: "Successfully created company '${companyName}' with ID: ${result.partyId}",
+                text: "Successfully created company '${companyName}' with partyId: ${partyId}",
                 data: result
             ]
         } catch (Exception e) {
+            logger.error("Service call failed with company: ${company}", e)
             throw new RuntimeException("Failed to create company: ${e.message}", e)
         }
     }
@@ -463,11 +770,11 @@ class McpToolManager {
         if (companyPartyId) serviceParams.companyPartyId = companyPartyId
         
         try {
-            Map<String, Object> result = ec.service.sync().name("growerp.mobile.PartyServices.create#Person")
+            Map<String, Object> result = ec.service.sync().name("growerp.100.PartyServices100.create#User")
                 .parameters(serviceParams).call()
             
             return [
-                text: "Successfully created user '${username}' with ID: ${result.partyId}",
+                text: "Successfully created user '${username}' with partyId: ${result.partyId}",
                 data: result
             ]
         } catch (Exception e) {
@@ -476,194 +783,96 @@ class McpToolManager {
     }
     
     private Map<String, Object> executeCreateProduct(Map<String, Object> arguments) {
-        String productName = arguments.productName as String
-        String description = arguments.description as String
-        BigDecimal listPrice = arguments.listPrice as BigDecimal
-        String productCategoryId = arguments.productCategoryId as String
-        String productTypeEnumId = (arguments.productTypeEnumId as String) ?: "PtFinished"
+        logger.info("executeCreateProduct called with arguments: ${arguments}")
         
+        Map<String, Object> product = null
+        
+        // Try to get product parameter first (nested structure)
+        if (arguments.product instanceof Map) {
+            product = arguments.product as Map<String, Object>
+        }
+        // If no nested product, treat arguments as flat product data
+        else if (arguments.productName) {
+            product = arguments.clone() as Map<String, Object>
+            // Handle common flat parameter mappings
+            if (arguments.productCategoryId && !product.categories) {
+                product.categories = [[categoryId: arguments.productCategoryId]]
+            }
+        }
+        
+        if (!product || !product.productName) {
+            throw new IllegalArgumentException("Product name is required. Received arguments: ${arguments}")
+        }
+        
+        logger.info("Processed product parameter: ${product}")
+        
+        // The service expects the product parameter directly, plus classificationId
         Map<String, Object> serviceParams = [
-            productName: productName,
-            description: description,
-            productTypeEnumId: productTypeEnumId
+            product: product,
+            classificationId: "AppAdmin" // Default classification
         ]
         
-        if (listPrice) serviceParams.listPrice = listPrice
-        if (productCategoryId) serviceParams.productCategoryId = productCategoryId
-        
         try {
-            Map<String, Object> result = ec.service.sync().name("growerp.mobile.ProductServices.create#Product")
+            Map<String, Object> result = ec.service.sync().name("growerp.100.CatalogServices100.create#Product")
                 .parameters(serviceParams).call()
+
+            String productName = product.productName ?: "Unknown"
+            String productId = result.product?.productId ?: result.productId
             
             return [
-                text: "Successfully created product '${productName}' with ID: ${result.productId}",
+                text: "Successfully created product '${productName}' with productId: ${productId}",
                 data: result
             ]
         } catch (Exception e) {
+            logger.error("Service call failed with product: ${product}", e)
             throw new RuntimeException("Failed to create product: ${e.message}", e)
         }
-    }
+    }    
     
-    // Query implementations
-    private Map<String, Object> executeGetCompanies(Map<String, Object> arguments) {
-        // Check for explicit API key authentication - more strict than service
-        String apiKey = ec.web?.request?.getHeader('api_key')
+    private Map<String, Object> executeCreateCategory(Map<String, Object> arguments) {
+        logger.info("executeCreateCategory called with arguments: ${arguments}")
         
-        if (!apiKey || apiKey.trim().isEmpty() || 'null'.equals(apiKey) || 'undefined'.equals(apiKey)) {
-            throw new IllegalStateException("Authentication required: API key required for MCP tool access")
+        Map<String, Object> category = null
+        
+        // Try to get category parameter first (nested structure)
+        if (arguments.category instanceof Map) {
+            category = arguments.category as Map<String, Object>
+        }
+        // If no nested category, treat arguments as flat category data
+        else if (arguments.categoryName) {
+            category = arguments.clone() as Map<String, Object>
+            // Handle flat productIds array to nested products structure
+            if (arguments.productIds && !category.products) {
+                category.products = (arguments.productIds as List<String>).collect { productId ->
+                    [productId: productId]
+                }
+            }
         }
         
-        // Validate the API key
-        def authResult = ec.service.sync().name("McpAuthServices.validate#McpApiKey")
-            .parameter("apiKey", apiKey).call()
-        if (!authResult.authenticated) {
-            throw new IllegalStateException("Authentication required: ${authResult.errorMessage ?: 'Invalid API key'}")
+        if (!category || !category.categoryName) {
+            throw new IllegalArgumentException("Category name is required. Received arguments: ${arguments}")
         }
         
-        // Simple implementation to test authentication
-        return [
-            text: "Authentication successful! Found 3 companies: Main Company, Test Company, Demo Company",
-            data: [
-                [partyId: "100001", companyName: "Main Company", partyTypeEnumId: "PtyOrganization"],
-                [partyId: "100002", companyName: "Test Company", partyTypeEnumId: "PtyOrganization"], 
-                [partyId: "100003", companyName: "Demo Company", partyTypeEnumId: "PtyOrganization"]
+        logger.info("Processed category parameter: ${category}")
+        
+        // The service expects the category parameter directly
+        Map<String, Object> serviceParams = [category: category]
+        
+        try {
+            Map<String, Object> result = ec.service.sync().name("growerp.100.CatalogServices100.create#ProductCategory")
+                .parameters(serviceParams).call()
+
+            String categoryName = category.categoryName ?: "Unknown"
+            String categoryId = result.category?.categoryId ?: result.categoryId
+            
+            return [
+                text: "Successfully created category '${categoryName}' with categoryId: ${categoryId}",
+                data: result
             ]
-        ]
-    }
-    
-    private Map<String, Object> executeGetUsers(Map<String, Object> arguments) {
-        Integer limit = (arguments.limit as Integer) ?: 20
-        String searchTerm = arguments.searchTerm as String
-        String companyPartyId = arguments.companyPartyId as String
-        
-        EntityFind entityFind = ec.entity.find("UserAccount")
-        
-        if (searchTerm) {
-            entityFind.condition([
-                ec.entity.conditionFactory.makeCondition("username", "like", "%${searchTerm}%"),
-                ec.entity.conditionFactory.makeCondition("userFullName", "like", "%${searchTerm}%")
-            ], "or")
+        } catch (Exception e) {
+            logger.error("Service call failed with category: ${category}", e)
+            throw new RuntimeException("Failed to create category: ${e.message}", e)
         }
-        
-        EntityList users = entityFind.orderBy("username").limit(limit).list()
-        
-        StringBuilder result = new StringBuilder("Found ${users.size()} users:\n\n")
-        
-        users.each { EntityValue user ->
-            result.append("- ${user.username}")
-            if (user.userFullName) {
-                result.append(" (${user.userFullName})")
-            }
-            if (user.emailAddress) {
-                result.append(" - ${user.emailAddress}")
-            }
-            result.append("\n")
-        }
-        
-        return [
-            text: result.toString(),
-            data: users.collect { EntityValue it ->
-                [
-                    userId: it.userId,
-                    username: it.username,
-                    userFullName: it.userFullName,
-                    emailAddress: it.emailAddress,
-                    disabled: it.disabled
-                ]
-            }
-        ]
-    }
-    
-    private Map<String, Object> executeGetProducts(Map<String, Object> arguments) {
-        Integer limit = (arguments.limit as Integer) ?: 20
-        String searchTerm = arguments.searchTerm as String
-        String productCategoryId = arguments.productCategoryId as String
-        
-        EntityFind entityFind = ec.entity.find("Product")
-        
-        if (searchTerm) {
-            entityFind.condition([
-                ec.entity.conditionFactory.makeCondition("productName", "like", "%${searchTerm}%"),
-                ec.entity.conditionFactory.makeCondition("description", "like", "%${searchTerm}%")
-            ], "or")
-        }
-        
-        if (productCategoryId) {
-            entityFind.condition("productCategoryId", productCategoryId)
-        }
-        
-        EntityList products = entityFind.orderBy("productName").limit(limit).list()
-        
-        StringBuilder result = new StringBuilder("Found ${products.size()} products:\n\n")
-        
-        products.each { EntityValue product ->
-            result.append("- ${product.productName} (ID: ${product.productId})")
-            if (product.description) {
-                result.append(" - ${product.description}")
-            }
-            result.append("\n")
-        }
-        
-        return [
-            text: result.toString(),
-            data: products.collect { EntityValue it ->
-                [
-                    productId: it.productId,
-                    productName: it.productName,
-                    description: it.description,
-                    productTypeEnumId: it.productTypeEnumId
-                ]
-            }
-        ]
-    }
-    
-    private Map<String, Object> executeGetOrders(Map<String, Object> arguments) {
-        Integer limit = (arguments.limit as Integer) ?: 20
-        String docType = arguments.docType as String
-        String statusId = arguments.statusId as String
-        String partyId = arguments.partyId as String
-        
-        EntityFind entityFind = ec.entity.find("growerp.mobile.FinDoc")
-        
-        if (docType) {
-            entityFind.condition("docType", docType)
-        }
-        
-        if (statusId) {
-            entityFind.condition("statusId", statusId)
-        }
-        
-        if (partyId) {
-            entityFind.condition("otherPartyId", partyId)
-        }
-        
-        EntityList orders = entityFind.orderBy("-entryDate").limit(limit).list()
-        
-        StringBuilder result = new StringBuilder("Found ${orders.size()} orders:\n\n")
-        
-        orders.each { EntityValue order ->
-            result.append("- ${order.description ?: order.finDocId}")
-            result.append(" (${order.docType})")
-            if (order.grandTotal) {
-                result.append(" - \$${order.grandTotal}")
-            }
-            result.append(" - ${order.statusId}")
-            result.append("\n")
-        }
-        
-        return [
-            text: result.toString(),
-            data: orders.collect { EntityValue it ->
-                [
-                    finDocId: it.finDocId,
-                    docType: it.docType,
-                    description: it.description,
-                    grandTotal: it.grandTotal,
-                    statusId: it.statusId,
-                    entryDate: it.entryDate
-                ]
-            }
-        ]
     }
     
     // System operations
@@ -757,11 +966,11 @@ class McpToolManager {
         ]
         
         try {
-            Map<String, Object> result = ec.service.sync().name("growerp.mobile.OrderServices.create#FinDoc")
+            Map<String, Object> result = ec.service.sync().name("growerp.100.FinDocServices100.create#FinDoc")
                 .parameters(serviceParams).call()
             
             return [
-                text: "Successfully created sales order with ID: ${result.finDocId}",
+                text: "Successfully created sales order with orderId: ${result.finDocId}",
                 data: result
             ]
         } catch (Exception e) {
@@ -781,11 +990,11 @@ class McpToolManager {
         ]
         
         try {
-            Map<String, Object> result = ec.service.sync().name("growerp.mobile.OrderServices.create#FinDoc")
+            Map<String, Object> result = ec.service.sync().name("growerp.100.FinDocServices100.create#FinDoc")
                 .parameters(serviceParams).call()
             
             return [
-                text: "Successfully created purchase order with ID: ${result.finDocId}",
+                text: "Successfully created purchase order with orderId: ${result.finDocId}",
                 data: result
             ]
         } catch (Exception e) {
@@ -794,29 +1003,69 @@ class McpToolManager {
     }
     
     private Map<String, Object> executeCreateInvoice(Map<String, Object> arguments) {
-        // Implementation for creating invoices
-        String partyId = arguments.partyId as String
-        String invoiceType = arguments.invoiceType as String
-        String finDocId = arguments.finDocId as String
-        List<Map> items = arguments.items as List<Map>
+        logger.info("executeCreateInvoice called with arguments: ${arguments}")
         
-        Map<String, Object> serviceParams = [
-            salesInvoiceType: invoiceType,
-            otherCompanyPartyId: partyId,
-            items: items
-        ]
+        Map<String, Object> finDoc = null
         
-        if (finDocId) serviceParams.orderId = finDocId
+        // Try to get finDoc parameter first (nested structure)
+        if (arguments.finDoc instanceof Map) {
+            finDoc = arguments.finDoc as Map<String, Object>
+        }
+        // If no nested finDoc, treat arguments as flat invoice data
+        else if (arguments.items || arguments.partyId || arguments.otherCompanyPartyId) {
+            finDoc = [:]
+            finDoc.docType = "invoice"
+            finDoc.items = arguments.items as List<Map>
+            
+            // Handle party ID mapping
+            String partyId = arguments.otherCompanyPartyId ?: arguments.partyId
+            if (partyId) {
+                finDoc.otherCompany = [partyId: partyId]
+            }
+            
+            // Handle sales/purchase type
+            if (arguments.invoiceType) {
+                finDoc.sales = (arguments.invoiceType == "sales")
+            } else if (arguments.sales != null) {
+                finDoc.sales = arguments.sales
+            }
+            
+            // Handle other flat parameters
+            if (arguments.reference) finDoc.reference = arguments.reference
+            if (arguments.description) finDoc.description = arguments.description
+            if (arguments.grandTotal) finDoc.grandTotal = arguments.grandTotal
+        }
+        
+        if (!finDoc || !finDoc.items || !finDoc.otherCompany?.partyId) {
+            throw new IllegalArgumentException("Invoice requires items and customer/supplier party ID. Received arguments: ${arguments}")
+        }
+        
+        // Ensure required fields have defaults
+        if (!finDoc.docType) {
+            finDoc.docType = "invoice"
+        }
+        if (finDoc.sales == null) {
+            finDoc.sales = true // Default to sales invoice
+        }
+        
+        logger.info("Processed finDoc parameter: ${finDoc}")
+        
+        // The service expects the finDoc parameter directly
+        Map<String, Object> serviceParams = [finDoc: finDoc]
         
         try {
-            Map<String, Object> result = ec.service.sync().name("growerp.mobile.OrderServices.create#FinDoc")
+            Map<String, Object> result = ec.service.sync().name("growerp.100.FinDocServices100.create#FinDoc")
                 .parameters(serviceParams).call()
+
+            String invoiceType = finDoc.sales ? "sales" : "purchase"
+            String invoiceId = result.finDoc?.invoiceId ?: result.finDoc?.pseudoId ?: "Unknown"
             
             return [
-                text: "Successfully created ${invoiceType} invoice with ID: ${result.finDocId}",
+                text: "Successfully created ${invoiceType} invoice with invoiceId: ${invoiceId}",
                 data: result
             ]
         } catch (Exception e) {
+            logger.error("Service call failed with finDoc: ${finDoc}", e)
             throw new RuntimeException("Failed to create invoice: ${e.message}", e)
         }
     }
@@ -832,7 +1081,7 @@ class McpToolManager {
         ]
         
         try {
-            Map<String, Object> result = ec.service.sync().name("growerp.mobile.OrderServices.update#FinDoc")
+            Map<String, Object> result = ec.service.sync().name("growerp.100.FinDocServices100.update#FinDoc")
                 .parameters(serviceParams).call()
             
             return [
@@ -858,7 +1107,7 @@ class McpToolManager {
         if (emailAddress) serviceParams.emailAddress = emailAddress
         
         try {
-            Map<String, Object> result = ec.service.sync().name("growerp.mobile.PartyServices.update#Company")
+            Map<String, Object> result = ec.service.sync().name("growerp.100.PartyServices100.update#Company")
                 .parameters(serviceParams).call()
             
             return [
@@ -886,7 +1135,7 @@ class McpToolManager {
         if (disabled) serviceParams.disabled = disabled
         
         try {
-            Map<String, Object> result = ec.service.sync().name("growerp.mobile.PartyServices.update#Person")
+            Map<String, Object> result = ec.service.sync().name("growerp.100.PartyServices100.update#User")
                 .parameters(serviceParams).call()
             
             return [

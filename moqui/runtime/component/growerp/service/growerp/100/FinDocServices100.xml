@@ -250,12 +250,14 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="description" />
                     <parameter name="otherUser" type="Map">
                         <parameter name="partyId" />
+                        <parameter name="pseudoId" />
                         <parameter name="firstName" />
                         <parameter name="lastName" />
                         <parameter name="email" />
                     </parameter>
                     <parameter name="otherCompany" type="Map">
                         <parameter name="partyId" />
+                        <parameter name="pseudoId" />
                         <parameter name="name" />
                     </parameter>
                     <parameter name="shipmentMethod" />
@@ -1481,9 +1483,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="description" />
                 <parameter name="otherUser" type="Map">
                     <parameter name="partyId" />
+                    <parameter name="pseudoId" />
                 </parameter>
                 <parameter name="otherCompany" type="Map">
                     <parameter name="partyId" />
+                    <parameter name="pseudoId" />
                     <parameter name="paymentMethod" type="Map">
                         <parameter name="ccPaymentMethodId" />
                     </parameter>
@@ -1545,6 +1549,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="description" />
                 <parameter name="otherUser" type="Map">
                     <parameter name="partyId" />
+                    <parameter name="pseudoId" />
                     <parameter name="email" />
                     <parameter name="firstName" />
                     <parameter name="lastName" />
@@ -1560,6 +1565,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </parameter>
                 <parameter name="otherCompany" type="Map">
                     <parameter name="partyId" />
+                    <parameter name="pseudoId" />
                     <parameter name="name" />
                     <parameter name="role" />
                     <parameter name="address" type="Map">
@@ -1642,6 +1648,15 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <set field="otherPartyId"
                 from="finDoc.otherCompany?.partyId ?: finDoc.otherUser?.partyId" />
+            <if condition="!otherPartyId &amp;&amp; finDoc.otherCompany?.pseudoId">
+                <service-call name="growerp.100.PartyServices100.get#Company" out-map="context"
+                    in-map="[pseudoId: finDoc.otherCompany.pseudoId]" />
+                <if condition="!companies || companies.size() == 0">
+                    <return error="true"
+                        message="No company found with pseudoId ${finDoc.otherCompany.pseudoId}" />
+                </if>
+                <set field="otherPartyId" from="companies[0].partyId" />
+            </if>
             <service-call name="growerp.100.FinDocServices100.convert#StatusId" out-map="context"
                 in-map="[sales: finDoc?.sales, docType: finDoc.docType, statusId: finDoc.statusId]" />
             <set field="finDoc.statusId" from="convertedStatusId" />
@@ -2155,9 +2170,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="description" />
                 <parameter name="otherUser" type="Map">
                     <parameter name="partyId" />
+                    <parameter name="pseudoId" />
                 </parameter>
                 <parameter name="otherCompany" type="Map">
                     <parameter name="partyId" />
+                    <parameter name="pseudoId" />
                     <parameter name="name" />
                     <parameter name="paymentMethod" type="Map">
                         <parameter name="ccPaymentMethodId" />
@@ -2210,6 +2227,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="description" />
                 <parameter name="otherUser" type="Map">
                     <parameter name="partyId" />
+                    <parameter name="pseudoId" />
                     <parameter name="email" />
                     <parameter name="firstName" />
                     <parameter name="lastName" />
@@ -2225,6 +2243,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </parameter>
                 <parameter name="otherCompany" type="Map">
                     <parameter name="partyId" />
+                    <parameter name="pseudoId" />
                     <parameter name="name" />
                     <parameter name="email" />
                     <parameter name="role" />
