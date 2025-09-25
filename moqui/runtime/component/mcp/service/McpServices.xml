@@ -347,6 +347,12 @@
     <actions>
       <!-- Direct API key validation for tool execution -->
       <set field="apiKey" from="ec.web?.request?.getHeader('api_key')" />
+      <if condition="!apiKey">
+        <set field="authHeader" from="ec.web?.request?.getHeader('Authorization')" />
+        <if condition="authHeader?.startsWith('Bearer ')">
+          <set field="apiKey" from="authHeader.substring(7)" />
+        </if>
+      </if>
       <if condition="!apiKey || apiKey.trim().isEmpty()">
         <!-- No API key provided - return authentication prompt -->
         <service-call name="McpAuthServices.create#AuthPrompt"

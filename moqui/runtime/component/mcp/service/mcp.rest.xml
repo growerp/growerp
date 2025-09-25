@@ -58,6 +58,30 @@ along with this software (see the LICENSE.md file). If not, see
     </resource>
     <resource name="auth" require-authentication="anonymous-all"
         description="Authentication endpoints for MCP">
+        <resource name="discovery" require-authentication="anonymous-all"
+            description="OAuth 2.0 discovery endpoint">
+            <method type="get">
+                <service name="McpAuthServices.get#OauthDiscovery" />
+            </method>
+        </resource>
+        <resource name="token" require-authentication="anonymous-all"
+            description="OAuth 2.0 token endpoint">
+            <method type="post">
+                <service name="McpAuthServices.handle#OauthToken" />
+            </method>
+        </resource>
+        <resource name="userinfo" require-authentication="anonymous-all"
+            description="OAuth 2.0 user info endpoint">
+            <method type="get">
+                <service name="McpAuthServices.get#UserInfo" />
+            </method>
+        </resource>
+        <resource name="jwks" require-authentication="anonymous-all"
+            description="JSON Web Key Set endpoint">
+            <method type="get">
+                <service name="McpAuthServices.get#Jwks" />
+            </method>
+        </resource>
         <resource name="login" require-authentication="anonymous-all"
             description="Handle login prompt from AI">
             <method type="post">

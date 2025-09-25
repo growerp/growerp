@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
-  default-menu-include="false" standalone="true">
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+    default-menu-include="false" standalone="true">
 
     <parameter name="method" required="false"/>
     <parameter name="id" required="false"/>
@@ -10,7 +10,7 @@
         <set field="requestMethod" from="ec.web.request.method"/>
         <set field="contentType" from="ec.web.request.getContentType()"/>
 
-    <!-- Handle CORS preflight requests -->
+        <!-- Handle CORS preflight requests -->
         <if condition="requestMethod == 'OPTIONS'">
             <script>
                 ec.web.response.setHeader("Access-Control-Allow-Origin", "*")
@@ -22,7 +22,7 @@
             <return/>
         </if>
 
-    <!-- Set CORS headers for all requests -->
+        <!-- Set CORS headers for all requests -->
         <script>
             ec.web.response.setHeader("Access-Control-Allow-Origin", "*")
             ec.web.response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
@@ -82,6 +82,11 @@
             </if>
         </actions>
         <default-response type="none"/>
+    </transition>
+
+    <!-- Auth endpoint delegation -->
+    <transition name="auth">
+        <default-response url="../McpAuth"/>
     </transition>
 
     <transition name="protocol" method="post">
@@ -156,7 +161,7 @@
         <default-response type="none"/>
     </transition>
 
-  <!-- WebSocket endpoint for real-time MCP communication -->
+    <!-- WebSocket endpoint for real-time MCP communication -->
     <transition name="ws" method="get">
         <actions>
             <script><![CDATA[
@@ -195,7 +200,7 @@
         <default-response type="none"/>
     </transition>
 
-  <!-- Health check endpoint -->
+    <!-- Health check endpoint -->
     <transition name="health" method="get">
         <actions>
             <script>
@@ -240,7 +245,7 @@
         <default-response type="none"/>
     </transition>
 
-  <!-- Default action - return server info -->
+    <!-- Default action - return server info -->
     <actions>
         <script>
             import groovy.json.JsonBuilder

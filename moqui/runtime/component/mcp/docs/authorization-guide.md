@@ -85,7 +85,7 @@ All MCP REST endpoints now require authentication:
 
 ### Manual Testing
 
-1. **Login to get API key**:
+#### Option 1: Direct Login (Original Method)
 ```bash
 curl -X POST "http://localhost:8080/rest/s1/growerp/100/Login" \
   -H "Content-Type: application/json" \
@@ -96,17 +96,50 @@ curl -X POST "http://localhost:8080/rest/s1/growerp/100/Login" \
   }'
 ```
 
-2. **Use API key for MCP requests**:
+#### Option 2: OAuth 2.0 Token Flow (Recommended)
 ```bash
-curl -X GET "http://localhost:8080/rest/s1/mcp/health" \
-  -H "api_key: YOUR_API_KEY_HERE"
+# OAuth Discovery
+curl -X GET "http://localhost:8080/rest/s1/mcp/auth/discovery"
+
+# OAuth Token Request
+curl -X POST "http://localhost:8080/rest/s1/mcp/auth/token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grantType": "password",
+    "username": "test@example.com",
+    "password": "qqqqqq9!",
+    "clientId": "mcp-client",
+    "classificationId": "AppSupport"
+  }'
 ```
 
-3. **Test MCP Protocol**:
+2. **Use API key for MCP requests** (multiple auth methods supported):
 ```bash
+# Method 1: API Key Header
+curl -X GET "http://localhost:8080/rest/s1/mcp/health" \
+  -H "api_key: YOUR_API_KEY_HERE"
+
+# Method 2: Bearer Token (OAuth 2.0 Standard)
+curl -X GET "http://localhost:8080/rest/s1/mcp/health" \
+  -H "Authorization: Bearer YOUR_API_KEY_HERE"
+```
+
+3. **Test MCP Protocol** (supports both authentication methods):
+```bash
+# Using API Key Header
 curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
   -H "Content-Type: application/json" \
   -H "api_key: YOUR_API_KEY_HERE" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/list",
+    "id": 1
+  }'
+
+# Using OAuth Bearer Token
+curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY_HERE" \
   -d '{
     "jsonrpc": "2.0",
     "method": "tools/list",
@@ -116,10 +149,25 @@ curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
 
 ### Automated Testing
 
-Run the provided test script:
+#### Run All Tests
 ```bash
 cd /home/hans/growerp/moqui/runtime/component/mcp
+./run_all_tests.sh
+```
+
+#### Individual Test Scripts
+```bash
+# OAuth 2.0 Complete Flow Test
+./test_oauth_complete.sh
+
+# Authentication Tests
 groovy test_mcp_auth.groovy
+
+# Protocol Tests  
+./test_mcp_protocol.sh
+
+# Initialization Tests
+./test_mcp_initialization_auth.sh
 ```
 
 ## Configuration

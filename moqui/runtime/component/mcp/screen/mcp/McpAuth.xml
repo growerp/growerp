@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+  default-menu-include="false" standalone="true" require-authentication="false">
+
+    <parameter name="method" required="false"/>
+    <parameter name="id" required="false"/>
+    
+    <always-actions>
+        <set field="requestMethod" from="ec.web.request.method"/>
+        <set field="contentType" from="ec.web.request.getContentType()"/>
+
+    <!-- Handle CORS preflight requests -->
+        <if condition="requestMethod == 'OPTIONS'">
+            <script>
+                ec.web.response.setHeader("Access-Control-Allow-Origin", "*")
+                ec.web.response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+                ec.web.response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, api_key")
+                ec.web.response.setHeader("Access-Control-Max-Age", "3600")
+                ec.web.response.setStatus(200)
+            </script>
+            <return/>
+        </if>
+
+    <!-- Set CORS headers for all requests -->
+        <script>
+            ec.web.response.setHeader("Access-Control-Allow-Origin", "*")
+            ec.web.response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+            ec.web.response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, api_key")
+            ec.web.response.setContentType("application/json")
+        </script>
+    </always-actions>
+
+  <!-- OAuth Discovery endpoint -->
+    <transition name="discovery" method="get">
+        <actions>
+            <service-call name="McpAuthServices.get#OauthDiscovery" out-map="discoveryResult"/>
+            <script>
+                import groovy.json.JsonBuilder
+                def result = new JsonBuilder(discoveryResult.discoveryConfig)
+                ec.web.sendTextResponse(result.toString())
+            </script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+  <!-- OAuth Token endpoint (maps to login) -->
+    <transition name="token" method="post">
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonSlurper
+                import groovy.json.JsonBuilder
+                
+                try {
+                    def requestBody = ec.web.request.reader.text
+                    def contentType = ec.web.request.getContentType()
+                    
+                    def username, password, grantType, clientId, classificationId
+                    
+                    // Handle different content types
+                    if (contentType?.contains("application/x-www-form-urlencoded")) {
+                        // Parse form data
+                        def params = [:]
+                        requestBody.split('&').each { param ->
+                            def keyValue = param.split('=', 2)
+                            if (keyValue.length == 2) {
+                                params[URLDecoder.decode(keyValue[0], 'UTF-8')] = URLDecoder.decode(keyValue[1], 'UTF-8')
+                            }
+                        }
+                        username = params.username
+                        password = params.password
+                        grantType = params.grant_type
+                        clientId = params.client_id
+                        classificationId = params.classificationId ?: params.classification_id ?: "AppSupport"
+                    } else {
+                        // Parse JSON
+                        def jsonSlurper = new JsonSlurper()
+                        def requestData = jsonSlurper.parseText(requestBody)
+                        username = requestData.username
+                        password = requestData.password
+                        grantType = requestData.grant_type ?: requestData.grantType
+                        clientId = requestData.client_id ?: requestData.clientId
+                        classificationId = requestData.classificationId ?: requestData.classification_id ?: "AppSupport"
+                    }
+                    
+                    // Validate OAuth parameters
+                    if (!grantType || grantType != "password") {
+                        def errorResponse = [
+                            error: "unsupported_grant_type",
+                            error_description: "Only 'password' grant type is supported"
+                        ]
+                        ec.web.response.setStatus(400)
+                        def result = new JsonBuilder(errorResponse)
+                        ec.web.sendTextResponse(result.toString())
+                        return
+                    }
+                    
+                    if (!username || !password) {
+                        def errorResponse = [
+                            error: "invalid_request",
+                            error_description: "Username and password are required"
+                        ]
+                        ec.web.response.setStatus(400)
+                        def result = new JsonBuilder(errorResponse)
+                        ec.web.sendTextResponse(result.toString())
+                        return
+                    }
+                    
+                    // Call login service
+                    def loginResult = ec.service.sync().name("McpAuthServices.handle#LoginPrompt")
+                        .parameters([
+                            username: username,
+                            password: password,
+                            classificationId: classificationId,
+                            requestId: "oauth-token"
+                        ]).call()
+                    
+                    if (loginResult.success && loginResult.apiKey) {
+                        // Return OAuth-compliant token response
+                        def tokenResponse = [
+                            access_token: loginResult.apiKey,
+                            token_type: "api_key",
+                            expires_in: 3600, // 1 hour
+                            scope: "MCP_VIEW MCP_EXECUTE",
+                            user_info: loginResult.loginResponse?.result?.user,
+                            company_info: loginResult.loginResponse?.result?.company
+                        ]
+                        def result = new JsonBuilder(tokenResponse)
+                        ec.web.sendTextResponse(result.toString())
+                    } else {
+                        // Return OAuth error
+                        def errorResponse = [
+                            error: "invalid_grant",
+                            error_description: loginResult.errorMessage ?: "Authentication failed"
+                        ]
+                        ec.web.response.setStatus(401)
+                        def result = new JsonBuilder(errorResponse)
+                        ec.web.sendTextResponse(result.toString())
+                    }
+                    
+                } catch (Exception e) {
+                    ec.logger.error("OAuth token error", e)
+                    def errorResponse = [
+                        error: "server_error",
+                        error_description: "Internal server error: ${e.message}"
+                    ]
+                    ec.web.response.setStatus(500)
+                    def result = new JsonBuilder(errorResponse)
+                    ec.web.sendTextResponse(result.toString())
+                }
+            ]]></script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+  <!-- Login endpoint (original format) -->
+    <transition name="login" method="post">
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonSlurper
+                import groovy.json.JsonBuilder
+                
+                try {
+                    def requestBody = ec.web.request.reader.text
+                    if (!requestBody) {
+                        throw new IllegalArgumentException("Request body is required")
+                    }
+                    
+                    def jsonSlurper = new JsonSlurper()
+                    def requestData = jsonSlurper.parseText(requestBody)
+                    
+                    def username = requestData.username
+                    def password = requestData.password
+                    def classificationId = requestData.classificationId ?: "AppSupport"
+                    
+                    if (!username || !password) {
+                        throw new IllegalArgumentException("Username and password are required")
+                    }
+                    
+                    // Call login service
+                    def loginResult = ec.service.sync().name("McpAuthServices.handle#LoginPrompt")
+                        .parameters([
+                            username: username,
+                            password: password,
+                            classificationId: classificationId,
+                            requestId: "login"
+                        ]).call()
+                    
+                    // Return the full login response structure
+                    def response = [
+                        loginResponse: loginResult.loginResponse,
+                        success: loginResult.success,
+                        apiKey: loginResult.apiKey
+                    ]
+                    
+                    if (!loginResult.success) {
+                        ec.web.response.setStatus(401)
+                    }
+                    
+                    def result = new JsonBuilder(response)
+                    ec.web.sendTextResponse(result.toString())
+                    
+                } catch (Exception e) {
+                    ec.logger.error("Login error", e)
+                    def errorResponse = [
+                        success: false,
+                        error: e.message,
+                        loginResponse: [
+                            jsonrpc: "2.0",
+                            error: [
+                                code: -32603,
+                                message: "Login failed: ${e.message}"
+                            ]
+                        ]
+                    ]
+                    
+                    ec.web.response.setStatus(500)
+                    def result = new JsonBuilder(errorResponse)
+                    ec.web.sendTextResponse(result.toString())
+                }
+            ]]></script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+  <!-- Authentication prompt endpoint -->
+    <transition name="prompt" method="post">
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonSlurper
+                import groovy.json.JsonBuilder
+                
+                try {
+                    def requestBody = ec.web.request.reader.text
+                    def requestData = [:]
+                    
+                    if (requestBody) {
+                        def jsonSlurper = new JsonSlurper()
+                        requestData = jsonSlurper.parseText(requestBody)
+                    }
+                    
+                    def operation = requestData.operation ?: "login"
+                    def reason = requestData.reason ?: "Authentication required"
+                    def requestId = requestData.requestId
+                    
+                    // Create authentication prompt
+                    def promptResult = ec.service.sync().name("McpAuthServices.create#AuthPrompt")
+                        .parameters([
+                            operation: operation,
+                            reason: reason,
+                            requestId: requestId
+                        ]).call()
+                    
+                    def result = new JsonBuilder(promptResult.promptResponse)
+                    ec.web.sendTextResponse(result.toString())
+                    
+                } catch (Exception e) {
+                    ec.logger.error("Auth prompt error", e)
+                    def errorResponse = [
+                        jsonrpc: "2.0",
+                        error: [
+                            code: -32603,
+                            message: "Failed to create auth prompt: ${e.message}"
+                        ]
+                    ]
+                    
+                    ec.web.response.setStatus(500)
+                    def result = new JsonBuilder(errorResponse)
+                    ec.web.sendTextResponse(result.toString())
+                }
+            ]]></script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+  <!-- User info endpoint (OAuth standard) -->
+    <transition name="userinfo" method="get">
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonBuilder
+                
+                try {
+                    // Validate current session/API key
+                    def authResult = ec.service.sync().name("McpAuthServices.validate#McpApiKey").call()
+                    
+                    if (authResult.authenticated) {
+                        // Get user information
+                        def userInfo = [
+                            sub: authResult.userId,
+                            user_id: authResult.userId,
+                            owner_party_id: authResult.ownerPartyId,
+                            company_party_id: authResult.companyPartyId,
+                            user_party_id: authResult.userPartyId,
+                            authenticated: true
+                        ]
+                        
+                        def result = new JsonBuilder(userInfo)
+                        ec.web.sendTextResponse(result.toString())
+                    } else {
+                        def errorResponse = [
+                            error: "invalid_token",
+                            error_description: authResult.errorMessage ?: "Invalid or expired token"
+                        ]
+                        ec.web.response.setStatus(401)
+                        def result = new JsonBuilder(errorResponse)
+                        ec.web.sendTextResponse(result.toString())
+                    }
+                    
+                } catch (Exception e) {
+                    ec.logger.error("Userinfo error", e)
+                    def errorResponse = [
+                        error: "server_error",
+                        error_description: "Internal server error: ${e.message}"
+                    ]
+                    ec.web.response.setStatus(500)
+                    def result = new JsonBuilder(errorResponse)
+                    ec.web.sendTextResponse(result.toString())
+                }
+            ]]></script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+  <!-- JWKS endpoint (OAuth standard - minimal implementation) -->
+    <transition name="jwks" method="get">
+        <actions>
+            <script>
+                import groovy.json.JsonBuilder
+                
+                // Simple JWKS response - since we use API keys, this is mostly for compliance
+                def jwks = [
+                    keys: [
+                        [
+                            kty: "oct", // Symmetric key type for API keys
+                            use: "sig",
+                            kid: "api-key-1",
+                            alg: "HS256"
+                            // Note: We don't expose the actual key material
+                        ]
+                    ]
+                ]
+                
+                def result = new JsonBuilder(jwks)
+                ec.web.sendTextResponse(result.toString())
+            </script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+  <!-- Default action - return auth server info -->
+    <actions>
+        <script>
+            import groovy.json.JsonBuilder
+            
+            def result = new JsonBuilder([
+                name: "growerp-mcp-auth-server",
+                version: "1.0.0",
+                description: "Authentication server for GrowERP MCP",
+                oauth_version: "2.0",
+                endpoints: [
+                    "GET /discovery - OAuth 2.0 discovery document",
+                    "POST /token - OAuth 2.0 token endpoint",
+                    "POST /login - GrowERP login endpoint",
+                    "POST /prompt - Authentication prompt creation",
+                    "GET /userinfo - User information endpoint",
+                    "GET /jwks - JSON Web Key Set"
+                ],
+                supported_grant_types: ["password"],
+                supported_response_types: ["token"],
+                supported_scopes: ["MCP_VIEW", "MCP_EXECUTE", "MCP_ADMIN"]
+            ])
+            
+            ec.web.sendTextResponse(result.toString())
+        </script>
+    </actions>
+
+    <widgets>
+        <label text="MCP Auth Server"/>
+    </widgets>
+    
+</screen>

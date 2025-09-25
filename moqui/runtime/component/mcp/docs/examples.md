@@ -6,30 +6,27 @@ This document provides comprehensive examples of how to use the GrowERP MCP Serv
 
 ### 1. cURL Examples
 
-#### Authentication and Setup
+#### Authentication and Setup (OAuth 2.0)
 ```bash
-# Get API key for authentication
-API_KEY=$(curl -s -X POST "http://localhost:8080/rest/s1/mcp/auth/login" \
+# Get OAuth 2.0 access token for authentication
+ACCESS_TOKEN=$(curl -s -X POST "http://localhost:8080/rest/s1/mcp/auth/token" \
   -H "Content-Type: application/json" \
   -d '{
-    "jsonrpc": "2.0",
-    "method": "login",
-    "params": {
-      "username": "test@example.com",
-      "password": "qqqqqq9!",
-      "classificationId": "AppSupport"
-    },
-    "id": 1
-  }' | jq -r '.result.apiKey')
+    "grantType": "password",
+    "username": "test@example.com",
+    "password": "qqqqqq9!",
+    "clientId": "mcp-client",
+    "classificationId": "AppSupport"
+  }' | jq -r '.access_token')
 
-echo "API Key: $API_KEY"
+echo "Access Token: $ACCESS_TOKEN"
 ```
 
 #### Test System Health
 ```bash
 curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
   -H "Content-Type: application/json" \
-  -H "api_key: $API_KEY" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
   -d '{
     "jsonrpc": "2.0",
     "method": "tools/call",
@@ -45,7 +42,7 @@ curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
 ```bash
 curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
   -H "Content-Type: application/json" \
-  -H "api_key: $API_KEY" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
   -d '{
     "jsonrpc": "2.0",
     "method": "tools/call",

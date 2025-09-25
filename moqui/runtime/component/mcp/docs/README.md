@@ -1,6 +1,17 @@
 # GrowERP MCP Server Documentation
 
-Welcome to the comprehensive documentation for the GrowERP Model Context Protocol (MCP) Server. This server provides AI agents and development tools with structured access to GrowERP business data and operations through the standardized MCP protocol.
+Welcome to the comprehensive docume### 1. Authentication (OAuth 2.0)
+```bash
+# OAuth 2.0 Token Request - Get access token
+ACCESS_TOKEN=$(curl -s -X POST "http://localhost:8080/rest/s1/mcp/auth/token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grantType": "password",
+    "username": "test@example.com",
+    "password": "qqqqqq9!",
+    "clientId": "mcp-client",
+    "classificationId": "AppSupport"
+  }' | jq -r '.access_token') GrowERP Model Context Protocol (MCP) Server. This server provides AI agents and development tools with structured access to GrowERP business data and operations through the standardized MCP protocol.
 
 ## 📚 Documentation Structure
 
@@ -15,6 +26,7 @@ Welcome to the comprehensive documentation for the GrowERP Model Context Protoco
 - **[Configuration Guide](configuration.md)** - Detailed configuration options and tuning
 
 ### Security & Operations
+- **[MCP Client Authorization Guide](mcp-client-authorization-guide.md)** - Complete guide for configuring MCP clients with OAuth
 - **[Security Guide](security-guide.md)** - Authentication, authorization, and security best practices  
 - **[Deployment Guide](deployment-guide.md)** - Production deployment and AI integration
 - **[Testing Guide](testing-guide.md)** - Test suite overview and quality assurance
@@ -70,26 +82,78 @@ Here's how an AI agent interacts with the MCP server:
 
 ### 1. Authentication
 ```bash
-# Get API key for secure access
-API_KEY=$(curl -s -X POST "http://localhost:8080/rest/s1/mcp/auth/login" \
+### 1. Authentication (OAuth 2.0)
+```bash
+# OAuth 2.0 Token Request - Get access token
+ACCESS_TOKEN=$(curl -s -X POST "http://localhost:8080/rest/s1/mcp/auth/token" \
   -H "Content-Type: application/json" \
   -d '{
-    "jsonrpc": "2.0",
-    "method": "login", 
-    "params": {
-      "username": "test@example.com",
-      "password": "qqqqqq9!",
-      "classificationId": "AppSupport"
-    },
-    "id": 1
-  }' | jq -r '.result.apiKey')
+    "grantType": "password",
+    "username": "test@example.com",
+    "password": "qqqqqq9!",
+    "clientId": "mcp-client",
+    "classificationId": "AppSupport"
+  }' | jq -r '.access_token')
 ```
 
 ### 2. Check Server Health
 ```bash
 curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
   -H "Content-Type: application/json" \
-  -H "api_key: $API_KEY" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "ping_system",
+      "arguments": {}
+    },
+    "id": 2
+  }'
+```
+
+### 3. Execute Business Operations
+```bash
+# Get companies
+curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "get_companies",
+      "arguments": {"limit": 5}
+    },
+    "id": 3
+  }'
+
+# Create a sales order
+curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -d '{
+    "jsonrpc": "2.0", 
+    "method": "tools/call",
+    "params": {
+      "name": "create_sales_order",
+      "arguments": {
+        "customerPartyId": "100001",
+        "items": [
+          {"productId": "PROD-001", "quantity": 2, "price": 29.99}
+        ]
+      }
+    },
+    "id": 4
+  }'
+```
+```
+
+### 2. Check Server Health
+```bash
+curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
   -d '{
     "jsonrpc": "2.0",
     "method": "tools/call",
@@ -258,35 +322,32 @@ java -jar moqui.war no-run-es
 curl http://localhost:8080/rest/s1/mcp/health
 ```
 
-### Step 2: Authenticate
-Get an API key for secure access:
+### Step 2: Authenticate (OAuth 2.0)
+Get an access token for secure API access:
 
 ```bash
-# Get API key using test credentials
-API_KEY=$(curl -s -X POST "http://localhost:8080/rest/s1/mcp/auth/login" \
+# OAuth 2.0 Token Request using test credentials
+ACCESS_TOKEN=$(curl -s -X POST "http://localhost:8080/rest/s1/mcp/auth/token" \
   -H "Content-Type: application/json" \
   -d '{
-    "jsonrpc": "2.0",
-    "method": "login",
-    "params": {
-      "username": "test@example.com", 
-      "password": "qqqqqq9!",
-      "classificationId": "AppSupport"
-    },
-    "id": 1
-  }' | jq -r '.result.apiKey')
+    "grantType": "password",
+    "username": "test@example.com", 
+    "password": "qqqqqq9!",
+    "clientId": "mcp-client",
+    "classificationId": "AppSupport"
+  }' | jq -r '.access_token')
 
-echo "Your API Key: $API_KEY"
+echo "Your Access Token: $ACCESS_TOKEN"
 ```
 
 ### Step 3: Execute Your First Tool
-Use the API key to call business tools:
+Use the Bearer token to call business tools:
 
 ```bash
 # Check system status
 curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
   -H "Content-Type: application/json" \
-  -H "api_key: $API_KEY" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
   -d '{
     "jsonrpc": "2.0",
     "method": "tools/call", 
@@ -300,7 +361,7 @@ curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
 # Get business data
 curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
   -H "Content-Type: application/json" \
-  -H "api_key: $API_KEY" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
   -d '{
     "jsonrpc": "2.0",
     "method": "tools/call",

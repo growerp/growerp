@@ -26,6 +26,14 @@
         <set field="apiKey" from="ec.web?.request?.getHeader('api_key')" />
       </if>
 
+      <!-- Check for Bearer token in Authorization header -->
+      <if condition="!apiKey">
+        <set field="authHeader" from="ec.web?.request?.getHeader('Authorization')" />
+        <if condition="authHeader?.startsWith('Bearer ')">
+          <set field="apiKey" from="authHeader.substring(7)" />
+        </if>
+      </if>
+
       <!-- If still no API key, check current user -->
       <if condition="!apiKey &amp;&amp; ec.user.userId">
         <set field="apiKey" from="ec.user.getLoginKey()" />
@@ -77,13 +85,13 @@
           }
           
           // Restore original user state if it was different
-          if (currentUserId && currentUserId != ec.user.userId) {
+          /* if (currentUserId && currentUserId != ec.user.userId) {
             if (currentUsername) {
               ec.user.loginUser(currentUsername, null)
             } else {
               ec.user.logoutUser()
             }
-          }
+          } */
         } catch (Exception e) {
           ec.logger.warn("Error validating API key: " + e.message)
           errorMessage = "API key validation failed: " + e.message
@@ -164,15 +172,19 @@
 
         // Construct the full issuer and token endpoint URLs
         String issuer = baseUrl + "/rest/s1/mcp"
-        String tokenEndpoint = baseUrl + "/rest/s1/mcp/auth/login"
+        String tokenEndpoint = baseUrl + "/rest/s1/mcp/auth/token"
+        String userInfoEndpoint = baseUrl + "/rest/s1/mcp/auth/userinfo"
+        String jwksEndpoint = baseUrl + "/rest/s1/mcp/auth/jwks"
 
         discoveryConfig = [
           issuer: issuer,
           token_endpoint: tokenEndpoint,
+          userinfo_endpoint: userInfoEndpoint,
+          jwks_uri: jwksEndpoint,
           // Advertise the 'password' grant type, which matches the username/password login flow
           grant_types_supported: ["password"],
           // The 'token' is the API key
-          token_types_supported: ["api_key"],
+          token_types_supported: ["Bearer"],
           // Let the client know which scopes are available (optional but good practice)
           scopes_supported: ["MCP_VIEW", "MCP_EXECUTE", "MCP_ADMIN"],
           // The credentials are in the POST body, not basic auth
@@ -271,6 +283,129 @@
     </actions>
   </service>
 
+  <service verb="handle" noun="OauthToken">
+    <description>OAuth 2.0 token endpoint - handle password grant</description>
+    <in-parameters>
+      <parameter name="grantType" type="String" required="true" />
+      <parameter name="username" type="String" required="false" />
+      <parameter name="password" type="String" required="false" />
+      <parameter name="clientId" type="String" required="false" />
+      <parameter name="classificationId" type="String" default-value="AppSupport" />
+      <parameter name="scope" type="String" required="false" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="access_token" type="String" />
+      <parameter name="token_type" type="String" />
+      <parameter name="expires_in" type="Integer" />
+      <parameter name="scope" type="String" />
+      <parameter name="error" type="String" />
+      <parameter name="error_description" type="String" />
+    </out-parameters>
+    <actions>
+      <script><![CDATA[
+        try {
+          // Validate grant type
+          if (grantType != "password") {
+            error = "unsupported_grant_type"
+            error_description = "Only 'password' grant type is supported"
+            return
+          }
+          
+          if (!username || !password) {
+            error = "invalid_request"
+            error_description = "Username and password are required"
+            return
+          }
+          
+          // Call login service
+          def loginResult = ec.service.sync().name("McpAuthServices.handle#LoginPrompt")
+            .parameters([
+              username: username,
+              password: password,
+              classificationId: classificationId,
+              requestId: "oauth-token"
+            ]).call()
+          
+          if (loginResult.success && loginResult.apiKey) {
+            // Return OAuth-compliant token response
+            access_token = loginResult.apiKey
+            token_type = "api_key"
+            expires_in = 3600 // 1 hour
+            scope = scope ?: "MCP_VIEW MCP_EXECUTE"
+          } else {
+            error = "invalid_grant"
+            error_description = loginResult.errorMessage ?: "Authentication failed"
+          }
+          
+        } catch (Exception e) {
+          ec.logger.error("OAuth token error", e)
+          error = "server_error"
+          error_description = "Internal server error: ${e.message}"
+        }
+      ]]></script>
+    </actions>
+  </service>
+
+  <service verb="get" noun="UserInfo">
+    <description>OAuth 2.0 user info endpoint</description>
+    <out-parameters>
+      <parameter name="sub" type="String" />
+      <parameter name="user_id" type="String" />
+      <parameter name="owner_party_id" type="String" />
+      <parameter name="company_party_id" type="String" />
+      <parameter name="user_party_id" type="String" />
+      <parameter name="authenticated" type="Boolean" />
+      <parameter name="error" type="String" />
+      <parameter name="error_description" type="String" />
+    </out-parameters>
+    <actions>
+      <script><![CDATA[
+        try {
+          // Validate current session/API key
+          def authResult = ec.service.sync().name("McpAuthServices.validate#McpApiKey").call()
+          
+          if (authResult.authenticated) {
+            sub = authResult.userId
+            user_id = authResult.userId
+            owner_party_id = authResult.ownerPartyId
+            company_party_id = authResult.companyPartyId
+            user_party_id = authResult.userPartyId
+            authenticated = true
+          } else {
+            error = "invalid_token"
+            error_description = authResult.errorMessage ?: "Invalid or expired token"
+          }
+          
+        } catch (Exception e) {
+          ec.logger.error("Userinfo error", e)
+          error = "server_error"
+          error_description = "Internal server error: ${e.message}"
+        }
+      ]]></script>
+    </actions>
+  </service>
+
+  <service verb="get" noun="Jwks">
+    <description>JSON Web Key Set endpoint</description>
+    <out-parameters>
+      <parameter name="keys" type="List" />
+    </out-parameters>
+    <actions>
+      <script><![CDATA[
+        // Simple JWKS response - since we use API keys, this is mostly for compliance
+        keys = [
+          [
+            kty: "oct", // Symmetric key type for API keys
+            use: "sig",
+            kid: "api-key-1",
+            alg: "HS256"
+            // Note: We don't expose the actual key material
+          ]
+        ]
+      ]]></script>
+    </actions>
+  </service>
+
   <service verb="check" noun="McpAuthorization">
     <description>Check if current user is authorized for MCP operations</description>
     <in-parameters>
@@ -290,7 +425,7 @@
       <set field="authorized" value="false" />
       <set field="requiresAuth" value="false" />
 
-      <!-- First validate API key -->
+      <!-- First, perform login using the API key -->
       <service-call name="McpAuthServices.validate#McpApiKey" out-map="authResult" />
 
       <if condition="!authResult.authenticated">
@@ -308,34 +443,23 @@
         <return />
       </if>
 
-      <!-- Check if user has required permissions -->
-      <if condition="ec.user.hasPermission('MCP_VIEW') || ec.user.hasPermission('MCP_ADMIN')">
-        <set field="authorized" value="true" />
+      <!-- At this point, the user is authenticated. Now check permissions. -->
+      <if condition="operation == 'execute' || method == 'tools/call' || method == 'tools/execute'">
+        <if condition="ec.user.hasPermission('MCP_EXECUTE') || ec.user.hasPermission('MCP_ADMIN')">
+          <set field="authorized" value="true" />
+          <else>
+            <set field="errorMessage"
+              value="MCP_EXECUTE or MCP_ADMIN permission required for tool execution" />
+            <set field="authorized" value="false" />
+          </else>
+        </if>
         <else>
-          <!-- For tool execution operations, require actual user authentication (not anonymous) -->
-          <if
-            condition="operation == 'execute' || method == 'tools/call' || method == 'tools/execute'">
-            <!-- Deny anonymous users for tool execution -->
-            <if condition="ec.user.username == 'anonymous'">
-              <set field="errorMessage"
-                value="Tool execution requires user authentication (anonymous access denied)" />
-              <set field="authorized" value="false" />
-              <else>
-                <!-- For authenticated users, check MCP_EXECUTE permission -->
-                <if condition="ec.user.hasPermission('MCP_EXECUTE')">
-                  <set field="authorized" value="true" />
-                  <else>
-                    <set field="errorMessage"
-                      value="Execute permission required for MCP tool operations" />
-                    <set field="authorized" value="false" />
-                  </else>
-                </if>
-              </else>
-            </if>
+          <if condition="ec.user.hasPermission('MCP_VIEW') || ec.user.hasPermission('MCP_ADMIN')">
+            <set field="authorized" value="true" />
             <else>
-              <!-- For basic operations (list, initialize), if authenticated via API key, allow
-              access -->
-              <set field="authorized" value="true" />
+              <set field="errorMessage"
+                value="MCP_VIEW or MCP_ADMIN permission required for this operation" />
+              <set field="authorized" value="false" />
             </else>
           </if>
         </else>

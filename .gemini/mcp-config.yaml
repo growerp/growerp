@@ -1,0 +1,24 @@
+mcpServers:
+  dart:
+    command: dart
+    args:
+      - mcp-server
+      - --experimental-mcp-server
+  
+  growerp-system:
+    httpUrl: http://localhost:8080/rest/s1/mcp/protocol
+    auth:
+      type: oauth2
+      tokenUrl: http://localhost:8080/rest/s1/mcp/auth/login
+      grantType: password
+      credentials:
+        username: test@example.com
+        password: qqqqqq9!
+        classificationId: AppSupport
+      # Optional: Scopes if your server supports them
+      scopes:
+        - MCP_VIEW
+        - MCP_EXECUTE
+      # Optional: Token refresh settings
+      refreshToken: true
+      tokenStorage: memory  # or file

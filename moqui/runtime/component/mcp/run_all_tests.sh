@@ -33,13 +33,7 @@ OVERALL_EXIT_CODE=0
 # Test categories
 declare -A TEST_RESULTS
 
-echo -e "${BLUE}1. Skipping Groovy Unit Tests (not required)...${NC}"
-echo "----------------------------------------"
-echo "Groovy unit tests are skipped as they are not needed for MCP functionality verification."
-TEST_RESULTS["Unit Tests"]="Skipped (not required)"
-
-echo ""
-echo -e "${BLUE}2. Running MCP Server Protocol Tests...${NC}"
+echo -e "${BLUE}1. Running MCP Server Protocol Tests...${NC}"
 echo "----------------------------------------"
 
 if [ -f "test-mcp-server.sh" ]; then
@@ -68,7 +62,7 @@ else
 fi
 
 echo ""
-echo -e "${BLUE}3. Running MCP Authentication Tests...${NC}"
+echo -e "${BLUE}2. Running MCP Authentication Tests...${NC}"
 echo "----------------------------------------"
 
 if [ -f "test_mcp_auth.sh" ]; then
@@ -94,7 +88,7 @@ else
 fi
 
 echo ""
-echo -e "${BLUE}4. Running MCP Initialization Flow Tests...${NC}"
+echo -e "${BLUE}3. Running MCP Initialization Flow Tests...${NC}"
 echo "----------------------------------------"
 
 if [ -f "test_mcp_initialization_auth.sh" ]; then
@@ -120,7 +114,7 @@ else
 fi
 
 echo ""
-echo -e "${BLUE}5. Running MCP Authentication Prompt Tests...${NC}"
+echo -e "${BLUE}4. Running MCP Authentication Prompt Tests...${NC}"
 echo "----------------------------------------"
 
 if [ -f "test_auth_prompts.sh" ]; then
@@ -144,6 +138,33 @@ if [ -f "test_auth_prompts.sh" ]; then
 else
     echo "test_auth_prompts.sh not found"
     TEST_RESULTS["Prompt Tests"]="Script not found"
+fi
+
+echo ""
+echo -e "${BLUE}5. Running OAuth 2.0 Complete Flow Tests...${NC}"
+echo "----------------------------------------"
+
+if [ -f "test_oauth_complete.sh" ]; then
+    chmod +x test_oauth_complete.sh
+    OAUTH_TEST_OUTPUT=$(./test_oauth_complete.sh 2>&1)
+    OAUTH_TEST_EXIT_CODE=$?
+    
+    echo "$OAUTH_TEST_OUTPUT"
+    
+    # Check for successful OAuth tests
+    if echo "$OAUTH_TEST_OUTPUT" | grep -q "OAuth 2.0 Flow Testing Complete"; then
+        TEST_RESULTS["OAuth Tests"]="Passed: 1, Failed: 0"
+        TOTAL_PASSED=$((TOTAL_PASSED + 1))
+        TOTAL_TESTS=$((TOTAL_TESTS + 1))
+    else
+        TEST_RESULTS["OAuth Tests"]="Passed: 0, Failed: 1"
+        TOTAL_FAILED=$((TOTAL_FAILED + 1))
+        TOTAL_TESTS=$((TOTAL_TESTS + 1))
+        OVERALL_EXIT_CODE=1
+    fi
+else
+    echo "test_oauth_complete.sh not found"
+    TEST_RESULTS["OAuth Tests"]="Script not found"
 fi
 
 echo ""
@@ -171,7 +192,6 @@ fi
 
 echo ""
 echo -e "${BOLD}Available Test Files:${NC}"
-echo "  Unit Tests: $(find src/test/groovy -name "*.groovy" 2>/dev/null | wc -l) Groovy spec files"
 echo "  Integration Tests: $(ls -1 test_*.sh 2>/dev/null | wc -l) shell script files" 
 echo "  Protocol Tests: $(ls -1 test-mcp-*.sh 2>/dev/null | wc -l) MCP protocol files"
 
@@ -190,14 +210,7 @@ echo ""
 # Individual Test Results Summary
 echo -e "${BOLD}Individual Test Results:${NC}"
 
-# Unit Tests Details
-echo -e "${BLUE}📋 Groovy Unit Tests:${NC}"
-echo -e "   ${YELLOW}⚠️  Skipped (not required for MCP functionality)${NC}"
-if [ -d "src/test/groovy" ]; then
-    GROOVY_COUNT=$(find src/test/groovy -name "*.groovy" 2>/dev/null | wc -l)
-    echo -e "   ${YELLOW}ℹ️  Found $GROOVY_COUNT Groovy test files (not executed)${NC}"
-fi
-echo ""
+
 
 # Protocol Tests Details
 echo -e "${BLUE}🔌 MCP Protocol Tests:${NC}"
@@ -301,7 +314,7 @@ echo -e "${BOLD}Test Suite Summary:${NC}"
 printf "%-25s %-10s %-10s %-10s %-10s\n" "Test Category" "Status" "Passed" "Failed" "Skipped"
 echo "------------------------------------------------------------------------"
 
-for category in "Unit Tests" "Protocol Tests" "Auth Tests" "Initialization Tests" "Prompt Tests"; do
+for category in "Protocol Tests" "Auth Tests" "Initialization Tests" "Prompt Tests"; do
     if [[ -n "${TEST_RESULTS[$category]}" ]]; then
         result="${TEST_RESULTS[$category]}"
         if echo "$result" | grep -q "Script not found\|No tests found"; then
