@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "growerptest": {
+      "httpUrl": "http://localhost:8080/rest/s1/mcp/protocol",
+    }
+  }
+}

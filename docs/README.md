@@ -27,6 +27,7 @@ This directory contains comprehensive documentation for extending GrowERP throug
    - Standard release process with master branch as single source of truth
    - Hotfix procedure for urgent production fixes
    - Trunk-based development methodology and best practices
+   - Enhanced release tooling: [Release Tool Documentation](../flutter/release/README.md)
 
 ### 🎨 Design & Development Patterns
 
