@@ -161,9 +161,45 @@ curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
 
 Expected: Authentication prompt with login details
 
-### 2. Login and Get API Key
+### 2. OAuth 2.0 Authentication (Recommended)
 ```bash
-# Login to get API key
+# Get OAuth 2.0 access token
+ACCESS_TOKEN=$(curl -s -X POST "http://localhost:8080/rest/s1/mcp/auth/token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grantType": "password",
+    "username": "test@example.com",
+    "password": "qqqqqq9!",
+    "clientId": "mcp-client",
+    "classificationId": "AppSupport"
+  }' | jq -r '.access_token')
+
+echo "Access Token: $ACCESS_TOKEN"
+```
+
+### 3. Use Bearer Token for Protected Access
+```bash
+curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "get_companies",
+      "arguments": {}
+    },
+    "id": 3
+  }'
+```
+
+Expected: Successful response with company data
+
+### 4. Legacy API Key Authentication (Backward Compatibility)
+For existing integrations, the API key method is still supported:
+
+```bash
+# Legacy login to get API key
 API_KEY=$(curl -s -X POST "http://localhost:8080/rest/s1/mcp/auth/login" \
   -H "Content-Type: application/json" \
   -d '{
@@ -177,11 +213,7 @@ API_KEY=$(curl -s -X POST "http://localhost:8080/rest/s1/mcp/auth/login" \
     "id": 2
   }' | jq -r '.result.apiKey')
 
-echo "API Key: $API_KEY"
-```
-
-### 3. Use API Key for Protected Access
-```bash
+# Use API key header (legacy method)
 curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
   -H "Content-Type: application/json" \
   -H "api_key: $API_KEY" \
@@ -196,9 +228,7 @@ curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
   }'
 ```
 
-Expected: Successful response with company data
-
-### 4. Test Invalid API Key
+### 5. Test Invalid Credentials
 ```bash
 curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" \
   -H "Content-Type: application/json" \
@@ -310,14 +340,18 @@ Granular permissions by role:
 }
 ```
 
-### OAuth Integration
-Future support for OAuth 2.0:
+### OAuth 2.0 Integration
+Full OAuth 2.0 support is now available:
 ```json
 {
   "oauth": {
-    "provider": "growerp",
-    "scope": "mcp.read mcp.execute",
-    "redirect_uri": "https://app.growerp.com/mcp/callback"
+    "discoveryUrl": "http://localhost:8080/rest/s1/mcp/auth/discovery",
+    "tokenEndpoint": "http://localhost:8080/rest/s1/mcp/auth/token",
+    "grantType": "password",
+    "username": "test@example.com",
+    "password": "qqqqqq9!",
+    "clientId": "mcp-client",
+    "scopes": ["MCP_VIEW", "MCP_EXECUTE", "MCP_ADMIN"]
   }
 }
 ```

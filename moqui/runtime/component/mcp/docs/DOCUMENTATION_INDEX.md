@@ -20,7 +20,8 @@ This document provides a complete overview of the GrowERP MCP Server component d
 │   ├── 🛠️ troubleshooting.md              # Common issues and solutions
 │   ├── 📋 implementation-summary.md        # Complete implementation overview
 │   ├── 🔐 authorization-guide.md           # Detailed auth implementation
-│   ├── 🐍 groovy-client-guide.md           # Native Groovy integration
+│   ├── � mcp-client-authorization-guide.md # MCP client authentication setup
+│   ├── �🐍 groovy-client-guide.md           # Native Groovy integration
 │   ├── 💻 curl-examples.md                 # Command-line examples
 │   └── 📂 examples/                        # Code examples and test files
 │       ├── 📄 README.md                    # Examples directory guide
@@ -101,7 +102,8 @@ This document provides a complete overview of the GrowERP MCP Server component d
 → **[docs/api-reference.md](docs/api-reference.md)** (Complete tool documentation)
 
 ### "I need to set up authentication"
-→ **[docs/security-guide.md](docs/security-guide.md)** (Authentication setup)
+→ **[docs/mcp-client-authorization-guide.md](docs/mcp-client-authorization-guide.md)** (MCP client auth setup)
+→ **[docs/security-guide.md](docs/security-guide.md)** (Server authentication setup)
 → **[docs/curl-examples.md](docs/curl-examples.md)** (Command-line testing)
 
 ### "I want to add custom business tools"
@@ -146,6 +148,8 @@ This document provides a complete overview of the GrowERP MCP Server component d
 ## 🆕 Recent Updates
 
 - ✅ **Complete Documentation**: All major components documented
+- ✅ **OAuth Implementation**: Full OAuth 2.0 server with discovery endpoint
+- ✅ **MCP Client Authentication**: Comprehensive client setup guide
 - ✅ **Security Implementation**: API key authentication system  
 - ✅ **Testing Framework**: Comprehensive test suite with Spock
 - ✅ **Production Ready**: Deployment guides and configuration

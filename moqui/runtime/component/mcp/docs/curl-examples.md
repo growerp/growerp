@@ -1,6 +1,6 @@
 # GrowERP MCP Authentication Test Commands
 
-This document provides complete curl commands for testing the MCP authentication system.
+This document provides complete curl commands for testing the MCP authentication system using OAuth 2.0 and legacy methods.
 
 ## 1. Test Authentication Prompt (No Auth)
 
@@ -20,21 +20,50 @@ curl -X POST http://localhost:8080/rest/s1/mcp/protocol \
 
 Expected: Authentication prompt with login details.
 
-## 2. Login and Get API Key
+## 2. OAuth 2.0 Authentication (Recommended)
 
 ```bash
-curl -s -X POST "http://localhost:8080/rest/s1/mcp/auth/login" \
+# Get OAuth 2.0 access token
+ACCESS_TOKEN=$(curl -s -X POST "http://localhost:8080/rest/s1/mcp/auth/token" \
   -H "Content-Type: application/json" \
-  -d '{"username": "test@example.com", "password": "qqqqqq9!", "classificationId": "AppSupport", "requestId": 2}' | jq -r '.apiKey'
+  -d '{
+    "grantType": "password",
+    "username": "test@example.com",
+    "password": "qqqqqq9!",
+    "clientId": "mcp-client",
+    "classificationId": "AppSupport"
+  }' | jq -r '.access_token')
+
+echo "Access Token: $ACCESS_TOKEN"
 ```
 
-Expected: Success response with API key.
+Expected: Success response with OAuth access token.
 
-## 3. Use API Key for Tool Access
-
-First, extract the API key from the login response:
+## 3. Use Bearer Token for Tool Access
 
 ```bash
+curl -X POST http://localhost:8080/rest/s1/mcp/protocol \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "tools/call",
+    "params": {
+      "name": "get_companies",
+      "arguments": {"limit": 5}
+    }
+  }' | jq .
+```
+
+Expected: Success response with company data.
+
+## 4. Legacy API Key Authentication (Backward Compatibility)
+
+For existing integrations, API key authentication is still supported:
+
+```bash
+# Get API key using legacy method
 API_KEY=$(curl -s -X POST http://localhost:8080/rest/s1/mcp/auth/login \
   -H "Content-Type: application/json" \
   -d '{
@@ -49,28 +78,31 @@ API_KEY=$(curl -s -X POST http://localhost:8080/rest/s1/mcp/auth/login \
   }' | jq -r '.loginResponse.result.apiKey')
 
 echo "API Key: $API_KEY"
-```
 
-Then use it to access protected tools:
-
-```bash
+# Use API key header for tool access
 curl -X POST http://localhost:8080/rest/s1/mcp/protocol \
   -H "Content-Type: application/json" \
   -H "api_key: $API_KEY" \
   -d '{
     "jsonrpc": "2.0",
-    "id": 3,
+    "id": 4,
     "method": "tools/call",
     "params": {
       "name": "get_companies",
-      "arguments": {}
+      "arguments": {"limit": 5}
     }
   }' | jq .
 ```
 
 Expected: List of companies without authentication prompt.
 
-## 4. One-liner Test with Extracted API Key
+## 5. One-liner Test with OAuth 2.0
+
+```bash
+ACCESS_TOKEN=$(curl -s -X POST "http://localhost:8080/rest/s1/mcp/auth/token" -H "Content-Type: application/json" -d '{"grantType": "password", "username": "test@example.com", "password": "qqqqqq9!", "clientId": "mcp-client", "classificationId": "AppSupport"}' | jq -r '.access_token') && curl -X POST "http://localhost:8080/rest/s1/mcp/protocol" -H "Content-Type: application/json" -H "Authorization: Bearer $ACCESS_TOKEN" -d '{"jsonrpc": "2.0", "id": 5, "method": "tools/call", "params": {"name": "get_companies", "arguments": {}}}' | jq .
+```
+
+## 6. One-liner Test with Legacy API Key
 
 ```bash
 API_KEY=$(curl -s -X POST http://localhost:8080/rest/s1/mcp/auth/login -H "Content-Type: application/json" -d '{"jsonrpc": "2.0", "id": 2, "method": "login", "params": {"username": "test@example.com", "password": "qqqqqq9!", "classificationId": "AppSupport"}}' | jq -r '.loginResponse.result.apiKey') && curl -X POST http://localhost:8080/rest/s1/mcp/protocol -H "Content-Type: application/json" -H "api_key: $API_KEY" -d '{"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "get_companies", "arguments": {}}}' | jq .
