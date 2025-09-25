@@ -11,6 +11,16 @@ generated
 pubspec_overrides.yaml
 screenshots
 
+#  windows build files
+**/MANUAL_COMPILATION_STEPS.md
+**/Output/
+**/WINDOWS_DISTRIBUTION_README.md
+**/build-windows-installer.bat
+**/compile-installer.bat
+**/compile-installer.ps1
+**/distribution/
+*.iss
+
 # Miscellaneous
 *.class
 *.log

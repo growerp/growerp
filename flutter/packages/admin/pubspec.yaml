@@ -1,5 +1,5 @@
 name: admin
-version: 1.10.0+91
+version: 1.10.1+91
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none
@@ -63,11 +63,11 @@ flutter_launcher_icons:
     image_path: "assets/icon/icon.png"
 
 msix_config:
-  display_name: GrowERP admin
-  publisher: AntWebsystems Co.,Ltd.
-  publisher_display_name: AntWebsystems Co.,Ltd.
-  identity_name: growerp.admin
-  msix_version: 1.9.0.0
+  display_name: GrowERP
+  publisher: CN=68EEF479-7015-49FC-9C60-33E5A2EB731C
+  publisher_display_name: 'AntWebsystems Co.,Ltd'
+  identity_name: AntWebsystemsCo.LTD.GrowERP
+  msix_version: 1.10.1.0
   logo_path: "assets/icon/icon.png"
   capabilities: internetClient
   store: true
