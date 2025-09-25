@@ -20,7 +20,7 @@ curl -s -X POST "${BASE_URL}/rest/s1/growerp/logout" > /dev/null
 
 PROMPT_RESPONSE=$(curl -s -X POST "${BASE_URL}/rest/s1/mcp/protocol" \
   -H "Content-Type: application/json" \
-  -d '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "get_companies", "arguments": {"limit": 3}}, "id": 1}')
+  -d '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "get_users", "arguments": {"limit": 3}}, "id": 1}')
 
 echo "Response: $PROMPT_RESPONSE"
 echo ""
@@ -30,7 +30,7 @@ echo "Step 1b: Testing with explicit empty api_key header..."
 EMPTY_KEY_RESPONSE=$(curl -s -X POST "${BASE_URL}/rest/s1/mcp/protocol" \
   -H "Content-Type: application/json" \
   -H "api_key: " \
-  -d '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "get_companies", "arguments": {"limit": 3}}, "id": 1}')
+  -d '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "get_users", "arguments": {"limit": 3}}, "id": 1}')
 
 echo "Empty key response: $EMPTY_KEY_RESPONSE"
 echo ""

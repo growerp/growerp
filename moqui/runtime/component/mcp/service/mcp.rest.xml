@@ -29,8 +29,8 @@ along with this software (see the LICENSE.md file). If not, see
             <service name="McpServices.list#Tools" />
         </method>
     </resource>
-    <resource name="resources" require-authentication="true"
-        description="Check Available MCP Resources, requires API key authentication">
+    <resource name="resources" require-authentication="anonymous-all"
+        description="Check Available MCP Resources, listing is public but access requires API key authentication">
         <method type="get">
             <service name="McpServices.list#McpResources" />
         </method>
@@ -68,6 +68,15 @@ along with this software (see the LICENSE.md file). If not, see
             description="Create authentication prompt">
             <method type="get">
                 <service name="McpAuthServices.create#AuthPrompt" />
+            </method>
+        </resource>
+    </resource>
+
+    <!-- Standard OAuth/OIDC discovery endpoint -->
+    <resource name=".well-known" require-authentication="anonymous-all">
+        <resource name="oauth-authorization-server" require-authentication="anonymous-all">
+            <method type="get">
+                <service name="McpAuthServices.get#OauthDiscovery" />
             </method>
         </resource>
     </resource>

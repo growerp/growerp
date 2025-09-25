@@ -345,6 +345,17 @@
       <parameter name="errorResponse" type="Map" />
     </out-parameters>
     <actions>
+      <!-- Direct API key validation for tool execution -->
+      <set field="apiKey" from="ec.web?.request?.getHeader('api_key')" />
+      <if condition="!apiKey || apiKey.trim().isEmpty()">
+        <!-- No API key provided - return authentication prompt -->
+        <service-call name="McpAuthServices.create#AuthPrompt"
+          in-map="[operation: 'login', reason: 'API key required for tool execution']"
+          out-map="promptResult" />
+        <set field="errorResponse" from="promptResult.promptResponse" />
+        <return />
+      </if>
+
       <!-- Validate authorization for tool execution -->
       <service-call name="McpAuthServices.check#McpAuthorization"
         in-map="[operation: 'execute', method: 'tools/execute']" out-map="authCheck" />

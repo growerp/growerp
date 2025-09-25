@@ -148,6 +148,41 @@
     </actions>
   </service>
 
+  <service verb="get" noun="OauthDiscovery">
+    <description>
+      Provide an OAuth 2.0 / OIDC-like discovery document for clients that expect it.
+      This points to the custom token/login implementation.
+    </description>
+    <out-parameters>
+      <parameter name="discoveryConfig" type="Map" />
+    </out-parameters>
+    <actions>
+      <script>
+        // Get the base URL from the request, ensuring it's an absolute URL
+        String baseUrl = ec.web.getWebappRootUrl(true, null)
+        if (baseUrl.endsWith("/")) baseUrl = baseUrl.substring(0, baseUrl.length() - 1)
+
+        // Construct the full issuer and token endpoint URLs
+        String issuer = baseUrl + "/rest/s1/mcp"
+        String tokenEndpoint = baseUrl + "/rest/s1/mcp/auth/login"
+
+        discoveryConfig = [
+          issuer: issuer,
+          token_endpoint: tokenEndpoint,
+          // Advertise the 'password' grant type, which matches the username/password login flow
+          grant_types_supported: ["password"],
+          // The 'token' is the API key
+          token_types_supported: ["api_key"],
+          // Let the client know which scopes are available (optional but good practice)
+          scopes_supported: ["MCP_VIEW", "MCP_EXECUTE", "MCP_ADMIN"],
+          // The credentials are in the POST body, not basic auth
+          token_endpoint_auth_methods_supported: ["none"], 
+          response_types_supported: ["token"]
+        ]
+      </script>
+    </actions>
+  </service>
+
   <service verb="handle" noun="LoginPrompt">
     <description>Handle login attempt from AI prompt response</description>
     <in-parameters>
@@ -277,12 +312,29 @@
       <if condition="ec.user.hasPermission('MCP_VIEW') || ec.user.hasPermission('MCP_ADMIN')">
         <set field="authorized" value="true" />
         <else>
+          <!-- For tool execution operations, require actual user authentication (not anonymous) -->
           <if
-            condition="operation == 'execute' &amp;&amp; !ec.user.hasPermission('MCP_EXECUTE')
-             &amp;&amp; (method != 'tools/list' || method != 'initialize')">
-            <set field="errorMessage" value="Execute permission required for MCP tool operations" />
+            condition="operation == 'execute' || method == 'tools/call' || method == 'tools/execute'">
+            <!-- Deny anonymous users for tool execution -->
+            <if condition="ec.user.username == 'anonymous'">
+              <set field="errorMessage"
+                value="Tool execution requires user authentication (anonymous access denied)" />
+              <set field="authorized" value="false" />
+              <else>
+                <!-- For authenticated users, check MCP_EXECUTE permission -->
+                <if condition="ec.user.hasPermission('MCP_EXECUTE')">
+                  <set field="authorized" value="true" />
+                  <else>
+                    <set field="errorMessage"
+                      value="Execute permission required for MCP tool operations" />
+                    <set field="authorized" value="false" />
+                  </else>
+                </if>
+              </else>
+            </if>
             <else>
-              <!-- For basic operations, if authenticated via API key with AppSupport, allow access -->
+              <!-- For basic operations (list, initialize), if authenticated via API key, allow
+              access -->
               <set field="authorized" value="true" />
             </else>
           </if>

@@ -33,16 +33,16 @@ fi
 echo "✅ Login successful! API Key: ${API_KEY:0:16}..."
 echo ""
 
-# Step 2: Test MCP endpoints without authentication (should fail)
-echo "Step 2: Testing MCP endpoints without authentication (should fail)..."
+# Step 2: Test MCP discovery endpoints without authentication (should be public per MCP spec)
+echo "Step 2: Testing MCP discovery endpoints without authentication (should be public per MCP spec)..."
 
-UNAUTH_RESPONSE=$(curl -s -w "\n%{http_code}" -X GET "${BASE_URL}/rest/s1/mcp/health")
+UNAUTH_RESPONSE=$(curl -s -w "\n%{http_code}" -X GET "${BASE_URL}/rest/s1/mcp/resources")
 UNAUTH_STATUS=$(echo "$UNAUTH_RESPONSE" | tail -n1)
 
-if [ "$UNAUTH_STATUS" -ge 400 ]; then
-    echo "✅ MCP endpoints properly reject unauthenticated requests (HTTP $UNAUTH_STATUS)"
+if [ "$UNAUTH_STATUS" -eq 200 ]; then
+    echo "✅ MCP discovery endpoints are public as required by MCP spec (HTTP $UNAUTH_STATUS)"
 else
-    echo "❌ MCP endpoints allowed unauthenticated access (HTTP $UNAUTH_STATUS)"
+    echo "⚠️  MCP discovery endpoints returned unexpected status (HTTP $UNAUTH_STATUS)"
 fi
 echo ""
 

@@ -8,10 +8,7 @@
       ]
     },
     "growerp-system": {
-      "httpUrl": "http://localhost:8080/rest/s1/mcp/protocol",
-      "headers": {
-        "api_key": "UrhKlcpzSoIsKsarKANdeILmYcZNKUg8rQUpVSXY"
-      }
+      "httpUrl": "http://localhost:8080/rest/s1/mcp/protocol"
     }
   }
 }
