@@ -66,6 +66,7 @@
             </ul>
 
             <!-- Right aligned nav items -->
+            <#if storeInfo.productStore.productStoreId != "100000">
             <ul class="navbar-nav ml-auto">
                 <#if partyDetail??>
                     <li class="nav-item dropdown">
@@ -122,6 +123,7 @@
                     </div>
                 </li>
             </ul>
+            </#if>
         </div>
     </div>
 </nav>
