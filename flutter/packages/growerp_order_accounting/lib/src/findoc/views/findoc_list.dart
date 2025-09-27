@@ -18,6 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/src/findoc/widgets/search_findoc_list.dart';
+import 'package:growerp_order_accounting/src/l10n/generated/order_accounting_localizations.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import '../findoc.dart';
@@ -73,6 +74,7 @@ class FinDocListState extends State<FinDocList> {
   late AuthBloc _authBloc;
   late double bottom;
   double? right;
+  late OrderAccountingLocalizations _local;
 
   @override
   void initState() {
@@ -116,6 +118,7 @@ class FinDocListState extends State<FinDocList> {
 
   @override
   Widget build(BuildContext context) {
+    _local = OrderAccountingLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
     limit = (MediaQuery.of(context).size.height / 100).round();
     isPhone = isAPhone(context);
@@ -125,10 +128,26 @@ class FinDocListState extends State<FinDocList> {
             heightFactor: 20,
             child: Text(
                 widget.journalId != null
-                    ? "no journal entries found"
-                    : "no (${widget.docType == FinDocType.transaction ? 'unposted' : 'open'})"
-                        "${widget.docType == FinDocType.shipment ? "${widget.sales ? 'outgoing' : 'incoming'} " : "${widget.docType == FinDocType.transaction || widget.docType == FinDocType.request ? '' : widget.sales ? 'sales' : 'purchase'} "}"
-                        "${entityName}s found!",
+                    ? _local.noJournalEntries
+                    : widget.docType == FinDocType.transaction
+                        ? _local.noOpenTransactions
+                        : widget.docType == FinDocType.order
+                            ? (widget.sales
+                                ? _local.noOpenOrders
+                                : _local.noPurchaseOrders)
+                            : widget.docType == FinDocType.invoice
+                                ? (widget.sales
+                                    ? _local.noOpenInvoices
+                                    : _local.noPurchaseInvoices)
+                                : widget.docType == FinDocType.payment
+                                    ? (widget.sales
+                                        ? _local.noOpenPayments
+                                        : _local.noPurchasePayments)
+                                    : widget.docType == FinDocType.shipment
+                                        ? (widget.sales
+                                            ? _local.noOpenShipments
+                                            : _local.noIncomingShipments)
+                                        : _local.noOpenRequests,
                 style: const TextStyle(fontSize: 20.0)));
       }
       // get table data formatted for tableView
@@ -313,7 +332,7 @@ class FinDocListState extends State<FinDocList> {
                                                         sales: widget.sales,
                                                         docType:
                                                             widget.docType)))),
-                                tooltip: 'Add New',
+                                tooltip: _local.addNew,
                                 child: const Icon(Icons.add)),
                           ),
                         Padding(
@@ -323,7 +342,7 @@ class FinDocListState extends State<FinDocList> {
                               heroTag: "btn3",
                               onPressed: () async => _finDocBloc
                                   .add(const FinDocFetch(refresh: true)),
-                              tooltip: 'refresh',
+                              tooltip: _local.refresh,
                               child: const Icon(Icons.refresh)),
                         )
                       ],
