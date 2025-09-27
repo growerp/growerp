@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/src/l10n/generated/order_accounting_localizations.dart';
 import '../../accounting.dart';
 
 class GlAccountList extends StatefulWidget {
@@ -33,6 +34,7 @@ class GlAccountsState extends State<GlAccountList> {
   late int limit;
   late double bottom;
   double? right;
+  late OrderAccountingLocalizations _local;
 
   @override
   void initState() {
@@ -47,6 +49,7 @@ class GlAccountsState extends State<GlAccountList> {
 
   @override
   Widget build(BuildContext context) {
+    _local = OrderAccountingLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
     limit = (MediaQuery.of(context).size.height / 100).round();
     return BlocConsumer<GlAccountBloc, GlAccountState>(
@@ -61,7 +64,7 @@ class GlAccountsState extends State<GlAccountList> {
       switch (state.status) {
         case GlAccountStatus.failure:
           return Center(
-              child: Text('failed to fetch glAccounts: ${state.message}'));
+              child: Text('${_local.fetchGlAccountFail} ${state.message}'));
         case GlAccountStatus.success:
           return Stack(
             children: [
@@ -86,11 +89,10 @@ class GlAccountsState extends State<GlAccountList> {
                               if (index == 0) {
                                 return Visibility(
                                     visible: state.glAccounts.isEmpty,
-                                    child: const Center(
+                                    child: Center(
                                         heightFactor: 20,
-                                        child: Text(
-                                            'No active glAccounts found',
-                                            key: Key('empty'),
+                                        child: Text(_local.noGlAccounts,
+                                            key: const Key('empty'),
                                             textAlign: TextAlign.center)));
                               }
                               index--;
@@ -130,7 +132,7 @@ class GlAccountsState extends State<GlAccountList> {
                                         child: const GlAccountFilesDialog());
                                   });
                             },
-                            tooltip: 'GL Accounts up/download',
+                            tooltip: _local.glAccountFile,
                             child: const Icon(Icons.file_copy)),
                         const SizedBox(height: 10),
                         FloatingActionButton(
@@ -151,9 +153,9 @@ class GlAccountsState extends State<GlAccountList> {
                                   limit: limit,
                                   refresh: refresh));
                             },
-                            tooltip: 'Trial Balance',
+                            tooltip: _local.trialBalance,
                             child: Text(
-                              "TB",
+                              _local.tb,
                               style: trialBalance
                                   ? const TextStyle(
                                       decoration: TextDecoration.lineThrough)
