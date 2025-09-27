@@ -47,28 +47,6 @@ along with this software (see the LICENSE.md file). If not, see
             </script></actions>
             <default-response type="none"/>
         </transition>
-    <!-- Download GrowERP Admin Windows MSIX package -->
-    <transition name="admin1.9.0.msix" read-only="true">
-        <actions>
-            <script><![CDATA[
-                // Set the path to the admin.msix file
-                def msixPath = "admin.msix"
-                def resourceRef = ec.resource.getLocationReference("file://" + ec.factory.getRuntimePath() + "/" + msixPath)
-
-                if (resourceRef && resourceRef.getExists()) {
-                    // Set proper headers for MSIX download
-                    ec.web.response.setHeader("Content-Type", "application/msix")
-                    ec.web.response.setHeader("Content-Disposition", "attachment; filename=\"GrowERP-Admin-1.9.14.msix\"")
-                    ec.web.sendResourceResponse(resourceRef.getLocation(), true)
-                } else {
-                    ec.web.response.sendError(404, "MSIX file not found")
-                }
-            ]]></script>
-        </actions>
-        <default-response type="none"/>
-    </transition>
-
-    
         <widgets><!--
         this should never be viewed... --></widgets>
 </screen>
