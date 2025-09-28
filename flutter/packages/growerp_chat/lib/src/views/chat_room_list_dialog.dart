@@ -18,6 +18,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
+import '../l10n/generated/chat_localizations.dart';
 
 import '../blocs/blocs.dart';
 import 'views.dart';
@@ -86,7 +87,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
             ),
             child: popUp(
               context: context,
-              title: ('Chat users and groups'),
+              title: ChatLocalizations.of(context)!.chatUsersAndGroups,
               height: classificationId == 'AppAdmin' ? 550 : 600,
               width: isPhone ? 450 : 800,
               child: Stack(
@@ -114,7 +115,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                             },
                           );
                         },
-                        tooltip: 'Add New',
+                        tooltip: ChatLocalizations.of(context)!.addNew,
                         child: const Icon(Icons.add),
                       ),
                     ),
@@ -143,7 +144,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
           return Center(
             heightFactor: 20,
             child: Text(
-              "no ${entityName}s found!",
+              "${ChatLocalizations.of(context)!.no} ${entityName}${ChatLocalizations.of(context)!.sFound}",
               key: const Key('empty'),
               textAlign: TextAlign.center,
             ),
@@ -179,11 +180,11 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                     key: const Key("searchField"),
                     textInputAction: TextInputAction.go,
                     autofocus: true,
-                    decoration: const InputDecoration(
-                      focusedBorder: OutlineInputBorder(
+                    decoration: InputDecoration(
+                      focusedBorder: const OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.transparent),
                       ),
-                      hintText: "search in name ..",
+                      hintText: ChatLocalizations.of(context)!.searchInName,
                     ),
                     onChanged: ((value) {
                       searchString = value;
@@ -199,7 +200,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                   ),
                 ),
                 OutlinedButton(
-                  child: const Text('Search'),
+                  child: Text(ChatLocalizations.of(context)!.search),
                   onPressed: () {
                     _chatRoomBloc.add(
                       ChatRoomFetch(searchString: searchString, limit: limit),
@@ -212,13 +213,13 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
               children: [
                 Row(
                   children: <Widget>[
-                    const Expanded(
-                      child: Text("Name", textAlign: TextAlign.center),
+                    Expanded(
+                      child: Text(ChatLocalizations.of(context)!.name, textAlign: TextAlign.center),
                     ),
                     if (!ResponsiveBreakpoints.of(context).isMobile)
-                      const Text("Status", textAlign: TextAlign.center),
-                    const Text("Pvt.", textAlign: TextAlign.center),
-                    const Text("#Mem.", textAlign: TextAlign.center),
+                      Text(ChatLocalizations.of(context)!.status, textAlign: TextAlign.center),
+                    Text(ChatLocalizations.of(context)!.pvt, textAlign: TextAlign.center),
+                    Text(ChatLocalizations.of(context)!.nroMembers, textAlign: TextAlign.center),
                     const Text("    ", textAlign: TextAlign.center),
                   ],
                 ),
@@ -271,7 +272,7 @@ class ListDetail extends StatelessWidget {
           ),
           if (!ResponsiveBreakpoints.of(context).isMobile)
             Text(
-              chatRoom.hasRead ? 'All messages read' : 'unread messages',
+              chatRoom.hasRead ? ChatLocalizations.of(context)!.allMessagesRead : ChatLocalizations.of(context)!.unreadMessages,
               key: Key('unRead$index'),
             ),
           Text(

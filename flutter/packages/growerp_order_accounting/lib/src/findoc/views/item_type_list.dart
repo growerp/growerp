@@ -16,6 +16,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/src/findoc/findoc.dart';
+import 'package:growerp_order_accounting/src/l10n/generated/order_accounting_localizations.dart';
 
 import '../../accounting/accounting.dart';
 
@@ -34,6 +35,7 @@ class ItemTypeListState extends State<ItemTypeList> {
   late bool showAll;
   double? top;
   double? left;
+  late OrderAccountingLocalizations _local;
 
   @override
   void initState() {
@@ -47,6 +49,7 @@ class ItemTypeListState extends State<ItemTypeList> {
 
   @override
   Widget build(BuildContext context) {
+    _local = OrderAccountingLocalizations.of(context)!;
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     top = top ?? (isAPhone(context) ? 500 : height - 200);
@@ -69,7 +72,7 @@ class ItemTypeListState extends State<ItemTypeList> {
           switch (state.status) {
             case FinDocStatus.failure:
               return Center(
-                  child: Text('failed to fetch itemTypes: ${state.message}'));
+                  child: Text('${_local.fetchItemTypesFail} ${state.message}'));
             case FinDocStatus.success:
               var newList = [];
               for (var item in state.itemTypes) {
@@ -95,10 +98,10 @@ class ItemTypeListState extends State<ItemTypeList> {
                                 controller: _scrollController,
                                 itemBuilder: (BuildContext context, int index) {
                                   if (newList.isEmpty) {
-                                    return const Center(
+                                    return Center(
                                         heightFactor: 20,
-                                        child: Text('No Item Types Active',
-                                            key: Key('empty'),
+                                        child: Text(_local.noItemTypes,
+                                            key: const Key('empty'),
                                             textAlign: TextAlign.center));
                                   }
                                   return ItemTypeListItem(
@@ -123,10 +126,10 @@ class ItemTypeListState extends State<ItemTypeList> {
                               showAll = !showAll;
                             });
                           },
-                          tooltip: 'Show all/used',
+                          tooltip: _local.showAllUsed,
                           label: showAll
-                              ? const Text('All')
-                              : const Text('only used')),
+                              ? Text(_local.all)
+                              : Text(_local.onlyUsed)),
                     ),
                   ),
                 ],
