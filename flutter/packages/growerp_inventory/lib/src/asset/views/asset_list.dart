@@ -18,6 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import '../asset.dart';
+import '../../l10n/generated/inventory_localizations.dart';
 
 class AssetList extends StatefulWidget {
   const AssetList({super.key});
@@ -33,6 +34,7 @@ class AssetListState extends State<AssetList> {
   late String entityName;
   late double bottom;
   double? right;
+  late InventoryLocalizations localizations;
 
   @override
   void initState() {
@@ -47,6 +49,7 @@ class AssetListState extends State<AssetList> {
 
   @override
   Widget build(BuildContext context) {
+    localizations = InventoryLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
     return BlocConsumer<AssetBloc, AssetState>(
         listenWhen: (previous, current) =>
@@ -54,26 +57,26 @@ class AssetListState extends State<AssetList> {
         listener: (context, state) {
           if (state.status == AssetStatus.failure) {
             HelperFunctions.showMessage(
-                context, '${state.message}', Colors.red);
+                context, localizations.error(state.message ?? ''), Colors.red);
           }
           if (state.status == AssetStatus.success) {
             HelperFunctions.showMessage(
-                context, '${state.message}', Colors.green);
+                context, state.message ?? '', Colors.green);
           }
         },
         builder: (context, state) {
           switch (state.status) {
             case AssetStatus.failure:
               return Center(
-                  child: Text('failed to fetch assets: ${state.message}'));
+                  child: Text(localizations.failedToFetchAssets(state.message ?? '')));
             case AssetStatus.success:
               Widget tableView() {
                 if (state.assets.isEmpty) {
                   return Center(
                       child: Text(
-                          context.read<String>() == 'AppHotel'
-                              ? "No Rooms found, add one"
-                              : 'No Assets found, add one',
+                          classificationId == 'AppHotel'
+                              ? localizations.noRoomsFound
+                              : localizations.noAssetsFound,
                           style: const TextStyle(fontSize: 20.0)));
                 }
                 // get table data formatted for tableView
@@ -197,7 +200,7 @@ class AssetListState extends State<AssetList> {
                                             child: AssetDialog(Asset()));
                                       });
                                 },
-                                tooltip: CoreLocalizations.of(context)!.addNew,
+                                tooltip: localizations.addNew,
                                 child: const Icon(Icons.add)),
                           ],
                         )),

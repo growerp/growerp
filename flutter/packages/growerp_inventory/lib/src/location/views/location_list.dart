@@ -20,6 +20,7 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import '../location.dart';
 import '../widgets/widgets.dart';
+import '../../l10n/generated/inventory_localizations.dart';
 
 class LocationList extends StatefulWidget {
   const LocationList({super.key});
@@ -38,6 +39,7 @@ class LocationListState extends State<LocationList> {
   String? searchString;
   late double bottom;
   double? right;
+  late InventoryLocalizations localizations;
 
   @override
   void initState() {
@@ -50,6 +52,7 @@ class LocationListState extends State<LocationList> {
 
   @override
   Widget build(BuildContext context) {
+    localizations = InventoryLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
     limit = (MediaQuery.of(context).size.height / 100).round();
     return BlocBuilder<LocationBloc, LocationState>(
@@ -57,16 +60,17 @@ class LocationListState extends State<LocationList> {
         switch (state.status) {
           case LocationStatus.failure:
             return Center(
-                child: Text('failed to fetch locations: ${state.message}'));
+                child: Text(localizations.failedToFetchLocations(
+                    state.message ?? '')));
           case LocationStatus.success:
             locations = state.locations;
 
             Widget tableView() {
               if (locations.isEmpty) {
-                return const Center(
+                return Center(
                     heightFactor: 20,
-                    child: Text("no locations found",
-                        style: TextStyle(fontSize: 20.0)));
+                    child: Text(localizations.noLocationsFound,
+                        style: const TextStyle(fontSize: 20.0)));
               }
               // get table data formatted for tableView
               var (
@@ -189,7 +193,7 @@ class LocationListState extends State<LocationList> {
                                         child: LocationDialog(Location()));
                                   });
                             },
-                            tooltip: 'Add New',
+                            tooltip: localizations.addNew,
                             child: const Icon(Icons.add)),
                       ],
                     ),
