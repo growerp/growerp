@@ -1,4 +1,5 @@
 {
+  "@@locale": "th",
   "chatNotActive": "แชทไม่ทำงาน!",
   "messageText": "ข้อความ..",
   "send": "ส่ง",
@@ -15,7 +16,7 @@
   "chatUsersAndGroups": "ผู้ใช้และกลุ่มแชท",
   "addNew": "เพิ่มใหม่",
   "no": "ไม่พบ ",
-  "sFound": "!",
+  "sFound": " ที่พบ!",
   "searchInName": "ค้นหาในชื่อ ..",
   "search": "ค้นหา",
   "name": "ชื่อ",
