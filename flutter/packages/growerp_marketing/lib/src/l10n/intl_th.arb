@@ -1,3 +1,4 @@
 {
-  "opportunityName": "name thai"
+  "@@locale": "th",
+  "opportunityName": "ชื่อโอกาสทางธุรกิจ"
 }

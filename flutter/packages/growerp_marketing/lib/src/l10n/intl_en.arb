@@ -1,3 +1,7 @@
 {
-  "opportunityName": "Opportunity Name"
+  "@@locale": "en",
+  "opportunityName": "Opportunity Name",
+  "@opportunityName": {
+    "description": "Label for opportunity name field"
+  }
 }

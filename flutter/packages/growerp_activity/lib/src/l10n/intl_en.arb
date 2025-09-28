@@ -1,3 +1,7 @@
 {
-  "activity_price": "Price"
+  "@@locale": "en",
+  "activity_price": "Price",
+  "@activity_price": {
+    "description": "Label for activity price field"
+  }
 }

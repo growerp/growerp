@@ -1,17 +1,59 @@
 {
   "@@locale": "en",
   "addNew": "Add new",
+  "@addNew": {
+    "description": "Add new item button text"
+  },
   "andAtLeastOne": "and at least one ",
+  "@andAtLeastOne": {
+    "description": "Partial validation message indicating minimum requirement"
+  },
   "create": "Create",
+  "@create": {
+    "description": "Create button text"
+  },
   "customer": "Customer",
+  "@customer": {
+    "description": "Label for customer"
+  },
   "invoice": "Invoice",
+  "@invoice": {
+    "description": "Label for invoice"
+  },
   "itemIsRequired": "item is required",
+  "@itemIsRequired": {
+    "description": "Validation message indicating a required item"
+  },
   "loginWithExistingUserName": "Login with Existing user name",
+  "@loginWithExistingUserName": {
+    "description": "Login form header text for existing users"
+  },
   "order": "Order",
+  "@order": {
+    "description": "Label for order"
+  },
   "payment": "Payment",
+  "@payment": {
+    "description": "Label for payment"
+  },
   "shipment": "Shipment",
+  "@shipment": {
+    "description": "Label for shipment"
+  },
   "supplier": "Supplier",
+  "@supplier": {
+    "description": "Label for supplier"
+  },
   "transaction": "Transaction",
+  "@transaction": {
+    "description": "Label for transaction"
+  },
   "unknown": "Unknown",
-  "update": "update"
+  "@unknown": {
+    "description": "Placeholder text for unknown values"
+  },
+  "update": "update",
+  "@update": {
+    "description": "Update button text"
+  }
 }

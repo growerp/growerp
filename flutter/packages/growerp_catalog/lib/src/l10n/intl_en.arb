@@ -1,3 +1,7 @@
 {
-  "catalog_price": "Price"
+  "@@locale": "en",
+  "catalog_price": "Price",
+  "@catalog_price": {
+    "description": "Label for catalog price field"
+  }
 }

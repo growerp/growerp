@@ -1,3 +1,7 @@
 {
-  "productName": "Product name"
+  "@@locale": "en",
+  "productName": "Product name",
+  "@productName": {
+    "description": "Label for product name field"
+  }
 }
