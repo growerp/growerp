@@ -18,7 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import '../blocs/activity_bloc.dart';
+import '../../growerp_activity.dart';
 
 class TimeEntryDialog extends StatefulWidget {
   final TimeEntry timeEntry;
@@ -38,47 +38,65 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
   void initState() {
     super.initState();
     _commentsController.text = widget.timeEntry.comments ?? '';
-    _hoursController.text =
-        widget.timeEntry.hours != null ? widget.timeEntry.hours.toString() : '';
+    _hoursController.text = widget.timeEntry.hours != null
+        ? widget.timeEntry.hours.toString()
+        : '';
     activityBloc = context.read<ActivityBloc>();
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: GestureDetector(
-            onTap: () {},
-            child: Dialog(
-                key: const Key('TimeEntryDialog'),
-                insetPadding: const EdgeInsets.all(10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: BlocListener<ActivityBloc, ActivityState>(
-                    listener: (context, state) async {
-                      switch (state.status) {
-                        case ActivityBlocStatus.success:
-                          HelperFunctions.showMessage(
-                              context,
-                              '${widget.timeEntry.timeEntryId == null ? "Add" : "Update"} successfull',
-                              Colors.green);
-                          Navigator.of(context).pop();
-                          break;
-                        case ActivityBlocStatus.failure:
-                          HelperFunctions.showMessage(
-                              context, 'Error: ${state.message}', Colors.red);
-                          break;
-                        default:
-                          const Text("????");
-                      }
-                    },
-                    child: popUp(
-                        context: context,
-                        child: _showForm(),
-                        title: 'Enter Time Entries',
-                        height: 400,
-                        width: 400)))));
+      onTap: () => Navigator.of(context).pop(),
+      child: GestureDetector(
+        onTap: () {},
+        child: Dialog(
+          key: const Key('TimeEntryDialog'),
+          insetPadding: const EdgeInsets.all(10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: BlocListener<ActivityBloc, ActivityState>(
+            listener: (context, state) async {
+              switch (state.status) {
+                case ActivityBlocStatus.success:
+                  HelperFunctions.showMessage(
+                    context,
+                    widget.timeEntry.timeEntryId == null
+                        ? ActivityLocalizations.of(
+                            context,
+                          )!.timeEntry_addSuccess
+                        : ActivityLocalizations.of(
+                            context,
+                          )!.timeEntry_updateSuccess,
+                    Colors.green,
+                  );
+                  Navigator.of(context).pop();
+                  break;
+                case ActivityBlocStatus.failure:
+                  HelperFunctions.showMessage(
+                    context,
+                    ActivityLocalizations.of(
+                      context,
+                    )!.activity_error(state.message ?? 'unknown'),
+                    Colors.red,
+                  );
+                  break;
+                default:
+                  const Text("????");
+              }
+            },
+            child: popUp(
+              context: context,
+              child: _showForm(),
+              title: ActivityLocalizations.of(context)!.timeEntry_title,
+              height: 400,
+              width: 400,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _showForm() {
@@ -86,8 +104,9 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
       final DateTime? picked = await showDatePicker(
         context: context,
         initialDate: _selectedDate,
-        firstDate:
-            CustomizableDateTime.current.subtract(const Duration(days: 31)),
+        firstDate: CustomizableDateTime.current.subtract(
+          const Duration(days: 31),
+        ),
         lastDate: CustomizableDateTime.current.add(const Duration(days: 356)),
       );
       if (picked != null && picked != _selectedDate) {
@@ -98,59 +117,87 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
     }
 
     return Center(
-        child: Form(
-            key: _formKey,
-            child: ListView(key: const Key('listView'), children: <Widget>[
-              Center(
-                  child: Text(
-                      "TimeEntry${widget.timeEntry.timeEntryId == null ? "New" : "${widget.timeEntry.timeEntryId}"}",
-                      style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold))),
-              const SizedBox(height: 30),
-              Row(children: [
+      child: Form(
+        key: _formKey,
+        child: ListView(
+          key: const Key('listView'),
+          children: <Widget>[
+            Center(
+              child: Text(
+                widget.timeEntry.timeEntryId == null
+                    ? ActivityLocalizations.of(context)!.timeEntry_new
+                    : ActivityLocalizations.of(
+                        context,
+                      )!.timeEntry_id(widget.timeEntry.timeEntryId!),
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
+            Row(
+              children: [
                 Expanded(
-                    child: Center(
-                        child: Text(
-                  "${_selectedDate.toLocal()}".split(' ')[0],
-                  key: const Key('date'),
-                ))),
+                  child: Center(
+                    child: Text(
+                      "${_selectedDate.toLocal()}".split(' ')[0],
+                      key: const Key('date'),
+                    ),
+                  ),
+                ),
                 SizedBox(
-                    width: 100,
-                    child: OutlinedButton(
-                      key: const Key('setDate'),
-                      onPressed: () => selectDate(context),
-                      child: const Text('Update\n date'),
-                    )),
-              ]),
-              const SizedBox(height: 20),
-              TextFormField(
-                key: const Key('hours'),
-                decoration: const InputDecoration(labelText: '# hours'),
-                controller: _hoursController,
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter a number of hours?';
-                  }
-                  return null;
-                },
+                  width: 100,
+                  child: OutlinedButton(
+                    key: const Key('setDate'),
+                    onPressed: () => selectDate(context),
+                    child: Text(
+                      ActivityLocalizations.of(context)!.timeEntry_updateDate,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              key: const Key('hours'),
+              decoration: InputDecoration(
+                labelText: ActivityLocalizations.of(context)!.timeEntry_hours,
               ),
-              const SizedBox(height: 20),
-              TextFormField(
-                key: const Key('comments'),
-                decoration: const InputDecoration(labelText: 'Comments'),
-                controller: _commentsController,
+              controller: _hoursController,
+              keyboardType: TextInputType.number,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return ActivityLocalizations.of(
+                    context,
+                  )!.timeEntry_hoursError;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              key: const Key('comments'),
+              decoration: InputDecoration(
+                labelText: ActivityLocalizations.of(
+                  context,
+                )!.timeEntry_comments,
               ),
-              const SizedBox(height: 30),
-              OutlinedButton(
-                  key: const Key('update'),
-                  child: Text(widget.timeEntry.timeEntryId == null
-                      ? 'Create'
-                      : 'Update'),
-                  onPressed: () async {
-                    activityBloc.add(ActivityTimeEntryUpdate(TimeEntry(
+              controller: _commentsController,
+            ),
+            const SizedBox(height: 30),
+            OutlinedButton(
+              key: const Key('update'),
+              child: Text(
+                widget.timeEntry.timeEntryId == null
+                    ? ActivityLocalizations.of(context)!.activity_create
+                    : ActivityLocalizations.of(context)!.activity_update,
+              ),
+              onPressed: () async {
+                activityBloc.add(
+                  ActivityTimeEntryUpdate(
+                    TimeEntry(
                       date: _selectedDate,
                       hours: Decimal.parse(_hoursController.text),
                       activityId: widget.timeEntry.activityId,
@@ -160,9 +207,15 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
                           .authenticate!
                           .user!
                           .partyId!,
-                    )));
-                    Navigator.of(context).pop();
-                  })
-            ])));
+                    ),
+                  ),
+                );
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

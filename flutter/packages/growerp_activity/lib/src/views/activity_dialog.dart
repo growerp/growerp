@@ -86,7 +86,9 @@ class ActivityDialogState extends State<ActivityDialog> {
           case ActivityBlocStatus.failure:
             HelperFunctions.showMessage(
               context,
-              'Error: ${state.message}',
+              ActivityLocalizations.of(
+                context,
+              )!.activity_error(state.message ?? ''),
               Colors.red,
             );
             break;
@@ -105,8 +107,12 @@ class ActivityDialogState extends State<ActivityDialog> {
               ),
               child: popUp(
                 context: context,
-                title:
-                    '${widget.activity.activityType} #${widget.activity.pseudoId.isEmpty ? 'New' : widget.activity.pseudoId}',
+                title: ActivityLocalizations.of(context)!.activity_title(
+                  widget.activity.activityType.toString(),
+                  widget.activity.pseudoId.isEmpty
+                      ? ActivityLocalizations.of(context)!.activity_new
+                      : widget.activity.pseudoId,
+                ),
                 height: isPhone ? 650 : 550,
                 width: 350,
                 child: _showForm(isPhone),
@@ -114,7 +120,9 @@ class ActivityDialogState extends State<ActivityDialog> {
             );
           case ActivityBlocStatus.failure:
             return FatalErrorForm(
-              message: '${widget.activity.activityType} load problem',
+              message: ActivityLocalizations.of(
+                context,
+              )!.activity_loadError(widget.activity.activityType.toString()),
             );
           default:
             return const Center(child: LoadingIndicator());
@@ -156,7 +164,9 @@ class ActivityDialogState extends State<ActivityDialog> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('pseudoId'),
-                    decoration: const InputDecoration(labelText: 'Id'),
+                    decoration: InputDecoration(
+                      labelText: ActivityLocalizations.of(context)!.activity_id,
+                    ),
                     controller: _pseudoIdController,
                   ),
                 ),
@@ -165,10 +175,17 @@ class ActivityDialogState extends State<ActivityDialog> {
                   Expanded(
                     child: DropdownButtonFormField<ActivityStatus>(
                       key: const Key('statusDropDown'),
-                      decoration: const InputDecoration(labelText: 'Status'),
+                      decoration: InputDecoration(
+                        labelText: ActivityLocalizations.of(
+                          context,
+                        )!.activity_status,
+                      ),
                       initialValue: _updatedStatus,
-                      validator: (value) =>
-                          value == null ? 'field required' : null,
+                      validator: (value) => value == null
+                          ? ActivityLocalizations.of(
+                              context,
+                            )!.activity_fieldRequired
+                          : null,
                       items:
                           ActivityStatus.validActivityStatusList(_updatedStatus)
                               .map(
@@ -191,12 +208,16 @@ class ActivityDialogState extends State<ActivityDialog> {
             TextFormField(
               key: const Key('name'),
               decoration: InputDecoration(
-                labelText: '${widget.activity.activityType} Name',
+                labelText: ActivityLocalizations.of(
+                  context,
+                )!.activity_nameError(widget.activity.activityType.toString()),
               ),
               controller: _nameController,
               validator: (value) {
                 if (value!.isEmpty) {
-                  return 'Please enter a ${widget.activity.activityType} name?';
+                  return ActivityLocalizations.of(context)!.activity_nameError(
+                    widget.activity.activityType.toString(),
+                  );
                 }
                 return null;
               },
@@ -205,7 +226,11 @@ class ActivityDialogState extends State<ActivityDialog> {
             TextFormField(
               key: const Key('description'),
               maxLines: 3,
-              decoration: const InputDecoration(labelText: 'Description'),
+              decoration: InputDecoration(
+                labelText: ActivityLocalizations.of(
+                  context,
+                )!.activity_description,
+              ),
               controller: _descriptionController,
             ),
             if (widget.activity.activityType == ActivityType.todo)
@@ -215,8 +240,10 @@ class ActivityDialogState extends State<ActivityDialog> {
                 builder: (context, state) {
                   switch (state.status) {
                     case DataFetchStatus.failure:
-                      return const FatalErrorForm(
-                        message: 'server connection problem',
+                      return FatalErrorForm(
+                        message: ActivityLocalizations.of(
+                          context,
+                        )!.activity_serverError,
                       );
                     case DataFetchStatus.loading:
                       return const LoadingIndicator();
@@ -228,8 +255,10 @@ class ActivityDialogState extends State<ActivityDialog> {
                           showSearchBox: true,
                           searchFieldProps: TextFieldProps(
                             autofocus: true,
-                            decoration: const InputDecoration(
-                              labelText: "employee,name",
+                            decoration: InputDecoration(
+                              labelText: ActivityLocalizations.of(
+                                context,
+                              )!.activity_employeeName,
                             ),
                             controller: _assigneeSearchBoxController,
                           ),
@@ -238,13 +267,17 @@ class ActivityDialogState extends State<ActivityDialog> {
                           ),
                           title: popUp(
                             context: context,
-                            title: 'Select employee',
+                            title: ActivityLocalizations.of(
+                              context,
+                            )!.activity_selectEmployee,
                             height: 50,
                           ),
                         ),
-                        dropdownDecoratorProps: const DropDownDecoratorProps(
+                        dropdownDecoratorProps: DropDownDecoratorProps(
                           dropdownSearchDecoration: InputDecoration(
-                            labelText: 'Assignee Employee',
+                            labelText: ActivityLocalizations.of(
+                              context,
+                            )!.activity_assignee,
                           ),
                         ),
                         key: const Key('assignee'),
@@ -295,8 +328,10 @@ class ActivityDialogState extends State<ActivityDialog> {
                 builder: (context, state) {
                   switch (state.status) {
                     case DataFetchStatus.failure:
-                      return const FatalErrorForm(
-                        message: 'server connection problem',
+                      return FatalErrorForm(
+                        message: ActivityLocalizations.of(
+                          context,
+                        )!.activity_serverError,
                       );
                     case DataFetchStatus.loading:
                       return const LoadingIndicator();
@@ -308,8 +343,10 @@ class ActivityDialogState extends State<ActivityDialog> {
                           showSearchBox: true,
                           searchFieldProps: TextFieldProps(
                             autofocus: true,
-                            decoration: const InputDecoration(
-                              labelText: "third party,name",
+                            decoration: InputDecoration(
+                              labelText: ActivityLocalizations.of(
+                                context,
+                              )!.activity_thirdPartyName,
                             ),
                             controller: _assigneeSearchBoxController,
                           ),
@@ -318,13 +355,17 @@ class ActivityDialogState extends State<ActivityDialog> {
                           ),
                           title: popUp(
                             context: context,
-                            title: 'Select third party',
+                            title: ActivityLocalizations.of(
+                              context,
+                            )!.activity_selectThirdParty,
                             height: 50,
                           ),
                         ),
-                        dropdownDecoratorProps: const DropDownDecoratorProps(
+                        dropdownDecoratorProps: DropDownDecoratorProps(
                           dropdownSearchDecoration: InputDecoration(
-                            labelText: 'ThirdParty',
+                            labelText: ActivityLocalizations.of(
+                              context,
+                            )!.activity_thirdParty,
                           ),
                         ),
                         key: const Key('thirdParty'),
@@ -367,7 +408,9 @@ class ActivityDialogState extends State<ActivityDialog> {
             const SizedBox(height: 20),
             InputDecorator(
               decoration: InputDecoration(
-                labelText: 'Estimated start date',
+                labelText: ActivityLocalizations.of(
+                  context,
+                )!.activity_startDate,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25.0),
                 ),
@@ -385,7 +428,9 @@ class ActivityDialogState extends State<ActivityDialog> {
                   OutlinedButton(
                     key: const Key('setDate'),
                     onPressed: () => selectDate(context),
-                    child: const Text(' Update'),
+                    child: Text(
+                      ActivityLocalizations.of(context)!.activity_update,
+                    ),
                   ),
                 ],
               ),
@@ -397,7 +442,9 @@ class ActivityDialogState extends State<ActivityDialog> {
                     widget.activity.activityType == ActivityType.todo)
                   OutlinedButton(
                     key: const Key('TimeEntries'),
-                    child: const Text('TimeEntries'),
+                    child: Text(
+                      ActivityLocalizations.of(context)!.activity_timeEntries,
+                    ),
                     onPressed: () async {
                       await showDialog(
                         barrierDismissible: true,
@@ -419,7 +466,9 @@ class ActivityDialogState extends State<ActivityDialog> {
                   child: OutlinedButton(
                     key: const Key('update'),
                     child: Text(
-                      widget.activity.activityId.isEmpty ? 'Create' : 'Update',
+                      widget.activity.activityId.isEmpty
+                          ? ActivityLocalizations.of(context)!.activity_create
+                          : ActivityLocalizations.of(context)!.activity_update,
                     ),
                     onPressed: () async {
                       if (widget.companyUser != null &&

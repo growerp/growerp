@@ -44,10 +44,13 @@ class ActivityListState extends State<ActivityList> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _activityBloc = context.read<ActivityBloc>();
-    _activityBloc.add(ActivityFetch(
+    _activityBloc.add(
+      ActivityFetch(
         refresh: true,
         activityType: widget.activityType,
-        companyUser: widget.companyUser));
+        companyUser: widget.companyUser,
+      ),
+    );
     bottom = 50;
   }
 
@@ -58,25 +61,34 @@ class ActivityListState extends State<ActivityList> {
     Widget tableView() {
       if (activities.isEmpty) {
         return Center(
-            child: Text("No ${widget.activityType}'s found, add one with '+'",
-                style: const TextStyle(fontSize: 20.0)));
+          child: Text(
+            ActivityLocalizations.of(
+              context,
+            )!.activity_notFound(widget.activityType.toString()),
+            style: const TextStyle(fontSize: 20.0),
+          ),
+        );
       }
       // get table data formatted for tableView
       var (
         List<List<TableViewCell>> tableViewCells,
         List<double> fieldWidths,
-        double? rowHeight
-      ) = get2dTableData<Activity>(getTableData,
-          bloc: _activityBloc,
-          classificationId: '',
-          context: context,
-          items: activities);
+        double? rowHeight,
+      ) = get2dTableData<Activity>(
+        getTableData,
+        bloc: _activityBloc,
+        classificationId: '',
+        context: context,
+        items: activities,
+      );
       return TableView.builder(
         diagonalDragBehavior: DiagonalDragBehavior.free,
-        verticalDetails:
-            ScrollableDetails.vertical(controller: _scrollController),
-        horizontalDetails:
-            ScrollableDetails.horizontal(controller: _horizontalController),
+        verticalDetails: ScrollableDetails.vertical(
+          controller: _scrollController,
+        ),
+        horizontalDetails: ScrollableDetails.horizontal(
+          controller: _horizontalController,
+        ),
         cellBuilder: (context, vicinity) =>
             tableViewCells[vicinity.row][vicinity.column],
         columnBuilder: (index) => index >= tableViewCells[0].length
@@ -94,116 +106,144 @@ class ActivityListState extends State<ActivityList> {
                 backgroundDecoration: getBackGround(context, index),
                 extent: FixedTableSpanExtent(rowHeight!),
                 recognizerFactories: <Type, GestureRecognizerFactory>{
-                    TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-                            TapGestureRecognizer>(
+                  TapGestureRecognizer:
+                      GestureRecognizerFactoryWithHandlers<
+                        TapGestureRecognizer
+                      >(
                         () => TapGestureRecognizer(),
                         (TapGestureRecognizer t) => t.onTap = () => showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return index > activities.length
-                                  ? const BottomLoader()
-                                  : Dismissible(
-                                      key: const Key('activityItem'),
-                                      direction: DismissDirection.startToEnd,
-                                      child: BlocProvider.value(
-                                          value: _activityBloc,
-                                          child: ActivityDialog(
-                                              activities[index - 1], null)));
-                            }))
-                  }),
+                          barrierDismissible: true,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return index > activities.length
+                                ? const BottomLoader()
+                                : Dismissible(
+                                    key: const Key('activityItem'),
+                                    direction: DismissDirection.startToEnd,
+                                    child: BlocProvider.value(
+                                      value: _activityBloc,
+                                      child: ActivityDialog(
+                                        activities[index - 1],
+                                        null,
+                                      ),
+                                    ),
+                                  );
+                          },
+                        ),
+                      ),
+                },
+              ),
         pinnedRowCount: 1,
       );
     }
 
     return BlocConsumer<ActivityBloc, ActivityState>(
-        listener: (context, state) {
-      if (state.status == ActivityBlocStatus.failure) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-      }
-      if (state.status == ActivityBlocStatus.success) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
-      }
-    }, builder: (context, state) {
-      if (state.status == ActivityBlocStatus.failure) {
-        return Center(
+      listener: (context, state) {
+        if (state.status == ActivityBlocStatus.failure) {
+          HelperFunctions.showMessage(
+            context,
+            ActivityLocalizations.of(
+              context,
+            )!.activity_error(state.message ?? 'unknown'),
+            Colors.red,
+          );
+        }
+      },
+      builder: (context, state) {
+        if (state.status == ActivityBlocStatus.failure) {
+          return Center(
             child: Text(
-                "failed to fetch ${widget.activityType}'s  ${state.message}"));
-      }
-      if (state.status == ActivityBlocStatus.success) {
-        activities = state.activities;
-        return Stack(
-          children: [
-            tableView(),
-            Positioned(
-              right: right,
-              bottom: bottom,
-              child: GestureDetector(
-                onPanUpdate: (details) {
-                  setState(() {
-                    right = right! - details.delta.dx;
-                    bottom -= details.delta.dy;
-                  });
-                },
-                child:
-                    Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  FloatingActionButton(
-                      key: const Key("search"),
-                      heroTag: "btn1",
-                      onPressed: () async {
-                        // find findoc id to show
-                        await showDialog(
+              ActivityLocalizations.of(context)!.activity_fetchError(
+                widget.activityType.toString(),
+                state.message ?? '',
+              ),
+            ),
+          );
+        }
+        if (state.status == ActivityBlocStatus.success) {
+          activities = state.activities;
+          return Stack(
+            children: [
+              tableView(),
+              Positioned(
+                right: right,
+                bottom: bottom,
+                child: GestureDetector(
+                  onPanUpdate: (details) {
+                    setState(() {
+                      right = right! - details.delta.dx;
+                      bottom -= details.delta.dy;
+                    });
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FloatingActionButton(
+                        key: const Key("search"),
+                        heroTag: "btn1",
+                        onPressed: () async {
+                          // find findoc id to show
+                          await showDialog(
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
                               // search separate from finDocBloc
                               return BlocProvider.value(
-                                  value:
-                                      context.read<DataFetchBloc<Locations>>(),
-                                  child:
-                                      SearchActivityList(widget.activityType));
-                            }).then((value) async => value != null &&
-                                context.mounted
-                            ?
-                            // show detail page
-                            await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return BlocProvider.value(
-                                      value: _activityBloc,
-                                      child: ActivityDialog(value, null));
-                                })
-                            : const SizedBox.shrink());
-                      },
-                      child: const Icon(Icons.search)),
-                  const SizedBox(height: 10),
-                  FloatingActionButton(
-                      heroTag: 'activityNew',
-                      key: const Key("addNew"),
-                      onPressed: () async {
-                        await showDialog(
+                                value: context.read<DataFetchBloc<Locations>>(),
+                                child: SearchActivityList(widget.activityType),
+                              );
+                            },
+                          ).then(
+                            (value) async => value != null && context.mounted
+                                ?
+                                  // show detail page
+                                  await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return BlocProvider.value(
+                                        value: _activityBloc,
+                                        child: ActivityDialog(value, null),
+                                      );
+                                    },
+                                  )
+                                : const SizedBox.shrink(),
+                          );
+                        },
+                        child: const Icon(Icons.search),
+                      ),
+                      const SizedBox(height: 10),
+                      FloatingActionButton(
+                        heroTag: 'activityNew',
+                        key: const Key("addNew"),
+                        onPressed: () async {
+                          await showDialog(
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
                               return BlocProvider.value(
-                                  value: _activityBloc,
-                                  child: ActivityDialog(
-                                      Activity(
-                                          activityType: widget.activityType),
-                                      widget.companyUser));
-                            });
-                      },
-                      tooltip: CoreLocalizations.of(context)!.addNew,
-                      child: const Icon(Icons.add))
-                ]),
+                                value: _activityBloc,
+                                child: ActivityDialog(
+                                  Activity(activityType: widget.activityType),
+                                  widget.companyUser,
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        tooltip: CoreLocalizations.of(context)!.addNew,
+                        child: const Icon(Icons.add),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ],
-        );
-      }
-      return const LoadingIndicator();
-    });
+            ],
+          );
+        }
+        return const LoadingIndicator();
+      },
+    );
   }
 
   @override
