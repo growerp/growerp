@@ -18,7 +18,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_order_accounting/src/l10n/generated/order_accounting_localizations.dart';
 
 import '../../../../growerp_order_accounting.dart';
 
@@ -97,9 +96,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
             builder: (context, state) {
               switch (state.status) {
                 case GlAccountStatus.failure:
-                  return FatalErrorForm(
-                    message: _local.serverProblem,
-                  );
+                  return FatalErrorForm(message: _local.serverProblem);
                 case GlAccountStatus.success:
                   return _glAccountForm(state);
                 default:
@@ -162,8 +159,9 @@ class GlAccountDialogState extends State<GlAccountDialog> {
           ),
         ),
         dropdownDecoratorProps: DropDownDecoratorProps(
-          dropdownSearchDecoration:
-              InputDecoration(labelText: _local.accountClass),
+          dropdownSearchDecoration: InputDecoration(
+            labelText: _local.accountClass,
+          ),
         ),
         itemAsString: (AccountClass? u) =>
             " ${u!.topDescription!.substring(0, 1)}-${u.parentDescription}-"
@@ -205,8 +203,9 @@ class GlAccountDialogState extends State<GlAccountDialog> {
           ),
         ),
         dropdownDecoratorProps: DropDownDecoratorProps(
-          dropdownSearchDecoration:
-              InputDecoration(labelText: _local.accountType),
+          dropdownSearchDecoration: InputDecoration(
+            labelText: _local.accountType,
+          ),
         ),
         itemAsString: (AccountType? u) => " ${u!.description}",
         asyncItems: (String filter) async {
@@ -229,9 +228,9 @@ class GlAccountDialogState extends State<GlAccountDialog> {
       ),
       OutlinedButton(
         key: const Key('update'),
-        child: Text(widget.glAccount.glAccountId == null
-            ? _local.create
-            : _local.update),
+        child: Text(
+          widget.glAccount.glAccountId == null ? _local.create : _local.update,
+        ),
         onPressed: () {
           if (_formKeyGlAccount.currentState!.validate()) {
             _glAccountBloc.add(
@@ -244,10 +243,10 @@ class GlAccountDialogState extends State<GlAccountDialog> {
                     description: classSelected!.detailDescription!.isNotEmpty
                         ? classSelected?.detailDescription
                         : classSelected!.description!.isNotEmpty
-                            ? classSelected?.description
-                            : classSelected!.parentDescription!.isNotEmpty
-                                ? classSelected?.parentDescription
-                                : classSelected?.topDescription,
+                        ? classSelected?.description
+                        : classSelected!.parentDescription!.isNotEmpty
+                        ? classSelected?.parentDescription
+                        : classSelected?.topDescription,
                   ),
                   accountType: typeSelected,
                 ),

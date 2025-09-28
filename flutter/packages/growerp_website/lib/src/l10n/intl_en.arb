@@ -1,3 +1,7 @@
 {
-  "shopDropdownCategories": "Shop dropdown Categories"
+  "@@locale": "en",
+  "shopDropdownCategories": "Shop dropdown Categories",
+  "@shopDropdownCategories": {
+    "description": "Label for shop dropdown categories section"
+  }
 }

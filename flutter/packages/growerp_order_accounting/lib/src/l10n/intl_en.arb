@@ -1,43 +1,167 @@
 {
+  "@@locale": "en",
   "nameAndCompany": "name & Company",
+  "@nameAndCompany": {
+    "description": "Label showing name and company together"
+  },
   "glAccount": "GlAccount #",
+  "@glAccount": {
+    "description": "GL Account header or label with number symbol"
+  },
   "newGlAccount": " New",
+  "@newGlAccount": {
+    "description": "Button or label for creating a new GL account"
+  },
   "serverProblem": "Server connection problem",
+  "@serverProblem": {
+    "description": "Error message for server connectivity issues"
+  },
   "glAccountId": "GlAccount Id",
+  "@glAccountId": {
+    "description": "GL Account ID field label"
+  },
   "glAccountIdNull": "Please enter a glAccount Id?",
+  "@glAccountIdNull": {
+    "description": "Error message for empty GL Account ID field"
+  },
   "glAccountName": "GlAccount Name",
+  "@glAccountName": {
+    "description": "GL Account name field label"
+  },
   "glAccountNameNull": "Please enter a glAccount name?",
+  "@glAccountNameNull": {
+    "description": "Error message for empty GL Account name field"
+  },
   "accountClass": "Account Class",
+  "@accountClass": {
+    "description": "Account class field label"
+  },
   "selectGlAccountClass": "Select GL Account Class",
+  "@selectGlAccountClass": {
+    "description": "Dropdown hint for selecting GL account class"
+  },
   "fieldRequired": "Field required",
+  "@fieldRequired": {
+    "description": "Generic required field error message"
+  },
   "accountType": "Account Type",
+  "@accountType": {
+    "description": "Account type field label"
+  },
   "selectGlAccountType": "Select GL Account Type",
+  "@selectGlAccountType": {
+    "description": "Dropdown hint for selecting GL account type"
+  },
   "postedBalance": "Posted Balance",
+  "@postedBalance": {
+    "description": "Posted balance field label showing account balance"
+  },
   "create": "Create",
+  "@create": {
+    "description": "Create button text"
+  },
   "update": "Update",
+  "@update": {
+    "description": "Update button text"
+  },
   "fetchGlAccountFail": "failed to fetch glAccounts: ",
+  "@fetchGlAccountFail": {
+    "description": "Error message when GL accounts fail to load"
+  },
   "noGlAccounts": "No active glAccounts found",
+  "@noGlAccounts": {
+    "description": "Message when no GL accounts are found"
+  },
   "glAccountFile": "GL Accounts up/download",
+  "@glAccountFile": {
+    "description": "GL Accounts file upload/download section header"
+  },
   "trialBalance": "Trial Balance",
+  "@trialBalance": {
+    "description": "Trial balance report header"
+  },
   "tb": "TB",
+  "@tb": {
+    "description": "Abbreviation for Trial Balance"
+  },
   "reservation": "Reservation",
+  "@reservation": {
+    "description": "Reservation section or label"
+  },
   "noJournalEntries": "no journal entries found",
+  "@noJournalEntries": {
+    "description": "Message when no journal entries are found"
+  },
   "noOpenTransactions": "no (unposted) transactions found!",
+  "@noOpenTransactions": {
+    "description": "Message when no unposted transactions are found"
+  },
   "noOpenOrders": "no (open) sales orders found!",
+  "@noOpenOrders": {
+    "description": "Message when no open sales orders are found"
+  },
   "noOpenInvoices": "no (open) sales invoices found!",
+  "@noOpenInvoices": {
+    "description": "Message when no open sales invoices are found"
+  },
   "noOpenPayments": "no (open) sales payments found!",
+  "@noOpenPayments": {
+    "description": "Message when no open sales payments are found"
+  },
   "noOpenShipments": "no (open) outgoing shipments found!",
+  "@noOpenShipments": {
+    "description": "Message when no open outgoing shipments are found"
+  },
   "noOpenRequests": "no (open) requests found!",
+  "@noOpenRequests": {
+    "description": "Message when no open requests are found"
+  },
   "noPurchaseOrders": "no (open) purchase orders found!",
+  "@noPurchaseOrders": {
+    "description": "Message when no open purchase orders are found"
+  },
   "noPurchaseInvoices": "no (open) purchase invoices found!",
+  "@noPurchaseInvoices": {
+    "description": "Message when no open purchase invoices are found"
+  },
   "noPurchasePayments": "no (open) purchase payments found!",
+  "@noPurchasePayments": {
+    "description": "Message when no open purchase payments are found"
+  },
   "noIncomingShipments": "no (open) incoming shipments found!",
+  "@noIncomingShipments": {
+    "description": "Message when no open incoming shipments are found"
+  },
   "addNew": "Add New",
+  "@addNew": {
+    "description": "Add new item button text"
+  },
   "refresh": "Refresh",
+  "@refresh": {
+    "description": "Refresh button text"
+  },
   "fetchItemTypesFail": "failed to fetch itemTypes: ",
+  "@fetchItemTypesFail": {
+    "description": "Error message when item types fail to load"
+  },
   "noItemTypes": "No Item Types Active",
+  "@noItemTypes": {
+    "description": "Message when no active item types are found"
+  },
   "showAllUsed": "Show all/used",
+  "@showAllUsed": {
+    "description": "Toggle button text for showing all or used items"
+  },
   "all": "All",
+  "@all": {
+    "description": "Filter option to show all items"
+  },
   "onlyUsed": "only used",
-  "fetchPaymentTypesFail": "failed to fetch paymentTypes: "
+  "@onlyUsed": {
+    "description": "Filter option to show only used items"
+  },
+  "fetchPaymentTypesFail": "failed to fetch paymentTypes: ",
+  "@fetchPaymentTypesFail": {
+    "description": "Error message when payment types fail to load"
+  }
 }

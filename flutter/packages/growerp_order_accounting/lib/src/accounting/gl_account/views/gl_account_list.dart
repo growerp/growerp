@@ -17,8 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_order_accounting/src/l10n/generated/order_accounting_localizations.dart';
-import '../../accounting.dart';
 
 class GlAccountList extends StatefulWidget {
   const GlAccountList({super.key});
@@ -53,139 +51,171 @@ class GlAccountsState extends State<GlAccountList> {
     right = right ?? (isAPhone(context) ? 20 : 50);
     limit = (MediaQuery.of(context).size.height / 100).round();
     return BlocConsumer<GlAccountBloc, GlAccountState>(
-        listener: (context, state) {
-      if (state.status == GlAccountStatus.failure) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-      }
-      if (state.status == GlAccountStatus.success) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
-      }
-    }, builder: (context, state) {
-      switch (state.status) {
-        case GlAccountStatus.failure:
-          return Center(
-              child: Text('${_local.fetchGlAccountFail} ${state.message}'));
-        case GlAccountStatus.success:
-          return Stack(
-            children: [
-              Column(children: [
-                const GlAccountListHeader(),
-                Expanded(
-                    child: RefreshIndicator(
+      listener: (context, state) {
+        if (state.status == GlAccountStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+        if (state.status == GlAccountStatus.success) {
+          HelperFunctions.showMessage(
+            context,
+            '${state.message}',
+            Colors.green,
+          );
+        }
+      },
+      builder: (context, state) {
+        switch (state.status) {
+          case GlAccountStatus.failure:
+            return Center(
+              child: Text('${_local.fetchGlAccountFail} ${state.message}'),
+            );
+          case GlAccountStatus.success:
+            return Stack(
+              children: [
+                Column(
+                  children: [
+                    const GlAccountListHeader(),
+                    Expanded(
+                      child: RefreshIndicator(
                         onRefresh: (() async => _glAccountBloc.add(
-                            GlAccountFetch(
-                                refresh: true,
-                                limit: limit,
-                                trialBalance: trialBalance))),
+                          GlAccountFetch(
+                            refresh: true,
+                            limit: limit,
+                            trialBalance: trialBalance,
+                          ),
+                        )),
                         child: ListView.builder(
-                            key: const Key('listView'),
-                            shrinkWrap: true,
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            itemCount: state.hasReachedMax
-                                ? state.glAccounts.length + 1
-                                : state.glAccounts.length + 2,
-                            controller: _scrollController,
-                            itemBuilder: (BuildContext context, int index) {
-                              if (index == 0) {
-                                return Visibility(
-                                    visible: state.glAccounts.isEmpty,
-                                    child: Center(
-                                        heightFactor: 20,
-                                        child: Text(_local.noGlAccounts,
-                                            key: const Key('empty'),
-                                            textAlign: TextAlign.center)));
-                              }
-                              index--;
-                              return index >= state.glAccounts.length
-                                  ? const BottomLoader()
-                                  : Dismissible(
-                                      key: const Key('glAccountItem'),
-                                      direction: DismissDirection.startToEnd,
-                                      child: GlAccountListItem(
-                                          glAccount: state.glAccounts[index],
-                                          index: index));
-                            })))
-              ]),
-              Positioned(
-                right: right,
-                bottom: bottom,
-                child: GestureDetector(
-                  onPanUpdate: (details) {
-                    setState(() {
-                      right = right! - details.delta.dx;
-                      bottom -= details.delta.dy;
-                    });
-                  },
-                  child: Column(
+                          key: const Key('listView'),
+                          shrinkWrap: true,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: state.hasReachedMax
+                              ? state.glAccounts.length + 1
+                              : state.glAccounts.length + 2,
+                          controller: _scrollController,
+                          itemBuilder: (BuildContext context, int index) {
+                            if (index == 0) {
+                              return Visibility(
+                                visible: state.glAccounts.isEmpty,
+                                child: Center(
+                                  heightFactor: 20,
+                                  child: Text(
+                                    _local.noGlAccounts,
+                                    key: const Key('empty'),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              );
+                            }
+                            index--;
+                            return index >= state.glAccounts.length
+                                ? const BottomLoader()
+                                : Dismissible(
+                                    key: const Key('glAccountItem'),
+                                    direction: DismissDirection.startToEnd,
+                                    child: GlAccountListItem(
+                                      glAccount: state.glAccounts[index],
+                                      index: index,
+                                    ),
+                                  );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Positioned(
+                  right: right,
+                  bottom: bottom,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        right = right! - details.delta.dx;
+                        bottom -= details.delta.dy;
+                      });
+                    },
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         FloatingActionButton(
-                            heroTag: 'glAccountFiles',
-                            key: const Key("upDownload"),
-                            onPressed: () async {
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return BlocProvider.value(
-                                        value: _glAccountBloc,
-                                        child: const GlAccountFilesDialog());
-                                  });
-                            },
-                            tooltip: _local.glAccountFile,
-                            child: const Icon(Icons.file_copy)),
+                          heroTag: 'glAccountFiles',
+                          key: const Key("upDownload"),
+                          onPressed: () async {
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BlocProvider.value(
+                                  value: _glAccountBloc,
+                                  child: const GlAccountFilesDialog(),
+                                );
+                              },
+                            );
+                          },
+                          tooltip: _local.glAccountFile,
+                          child: const Icon(Icons.file_copy),
+                        ),
                         const SizedBox(height: 10),
                         FloatingActionButton(
-                            heroTag: "trialBalance",
-                            key: const Key("tb"),
-                            onPressed: () {
-                              bool refresh = false;
-                              if (trialBalance == false) {
-                                trialBalance = true;
-                                limit = 999;
-                              } else {
-                                trialBalance = false;
-                                refresh = true;
-                                limit = 20;
-                              }
-                              _glAccountBloc.add(GlAccountFetch(
-                                  trialBalance: trialBalance,
-                                  limit: limit,
-                                  refresh: refresh));
-                            },
-                            tooltip: _local.trialBalance,
-                            child: Text(
-                              _local.tb,
-                              style: trialBalance
-                                  ? const TextStyle(
-                                      decoration: TextDecoration.lineThrough)
-                                  : null,
-                            )),
+                          heroTag: "trialBalance",
+                          key: const Key("tb"),
+                          onPressed: () {
+                            bool refresh = false;
+                            if (trialBalance == false) {
+                              trialBalance = true;
+                              limit = 999;
+                            } else {
+                              trialBalance = false;
+                              refresh = true;
+                              limit = 20;
+                            }
+                            _glAccountBloc.add(
+                              GlAccountFetch(
+                                trialBalance: trialBalance,
+                                limit: limit,
+                                refresh: refresh,
+                              ),
+                            );
+                          },
+                          tooltip: _local.trialBalance,
+                          child: Text(
+                            _local.tb,
+                            style: trialBalance
+                                ? const TextStyle(
+                                    decoration: TextDecoration.lineThrough,
+                                  )
+                                : null,
+                          ),
+                        ),
                         const SizedBox(height: 10),
                         FloatingActionButton(
-                            heroTag: "addNew",
-                            key: const Key("addNew"),
-                            onPressed: () async {
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return BlocProvider.value(
-                                        value: _glAccountBloc,
-                                        child: GlAccountDialog(GlAccount()));
-                                  });
-                            },
-                            tooltip: CoreLocalizations.of(context)!.addNew,
-                            child: const Icon(Icons.add))
-                      ]),
+                          heroTag: "addNew",
+                          key: const Key("addNew"),
+                          onPressed: () async {
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BlocProvider.value(
+                                  value: _glAccountBloc,
+                                  child: GlAccountDialog(GlAccount()),
+                                );
+                              },
+                            );
+                          },
+                          tooltip: CoreLocalizations.of(context)!.addNew,
+                          child: const Icon(Icons.add),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ],
-          );
-        default:
-          return const Center(child: LoadingIndicator());
-      }
-    });
+              ],
+            );
+          default:
+            return const Center(child: LoadingIndicator());
+        }
+      },
+    );
   }
 
   @override
@@ -198,8 +228,9 @@ class GlAccountsState extends State<GlAccountList> {
 
   void _onScroll() {
     if (_isBottom) {
-      _glAccountBloc
-          .add(GlAccountFetch(trialBalance: trialBalance, limit: limit));
+      _glAccountBloc.add(
+        GlAccountFetch(trialBalance: trialBalance, limit: limit),
+      );
     }
   }
 

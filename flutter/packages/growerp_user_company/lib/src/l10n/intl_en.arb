@@ -1,4 +1,7 @@
 {
   "@@locale": "en",
-  "numberOfEmployees": "Nr.Employees"
+  "numberOfEmployees": "Nr.Employees",
+  "@numberOfEmployees": {
+    "description": "Label for number of employees field"
+  }
 }
