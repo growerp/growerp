@@ -1,3 +1,17 @@
 {
-  "@@locale": "th"
+  "@@locale": "th",
+  "addNew": "เพิ่มใหม่",
+  "andAtLeastOne": "และอย่างน้อยหนึ่ง ",
+  "create": "สร้าง",
+  "customer": "ลูกค้า",
+  "invoice": "ใบแจ้งหนี้",
+  "itemIsRequired": "รายการที่ต้องการ",
+  "loginWithExistingUserName": "เข้าสู่ระบบด้วยชื่อผู้ใช้ที่มีอยู่",
+  "order": "ใบสั่ง",
+  "payment": "การชำระเงิน",
+  "shipment": "การจัดส่ง",
+  "supplier": "ซัพพลายเออร์",
+  "transaction": "ธุรกรรม",
+  "unknown": "ไม่ทราบ",
+  "update": "อัปเดต"
 }
