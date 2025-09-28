@@ -18,6 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import 'package:growerp_core/l10n/generated/core_localizations.dart';
 import '../../../templates/templates.dart';
 import '../../domains.dart';
 
@@ -103,7 +104,7 @@ class HomeFormState extends State<HomeForm> {
                             Icons.do_not_disturb,
                             key: Key('HomeFormAuth'),
                           ),
-                          tooltip: 'Logout',
+                          tooltip: CoreLocalizations.of(context)!.logout,
                           onPressed: () => {
                             _authBloc.add(const AuthLoggedOut()),
                           },
@@ -140,12 +141,50 @@ class HomeFormState extends State<HomeForm> {
                           context,
                         ).colorScheme.primaryContainer,
                         key: const Key('HomeFormUnAuth'),
-                        title: const Center(
+                        title: Center(
                           child: Text(
-                            'Welcome to The GrowERP Business System',
-                            style: TextStyle(fontSize: 15),
+                            CoreLocalizations.of(
+                              context,
+                            )!.welcomeToGrowERPBusinessSystem,
+                            style: const TextStyle(fontSize: 15),
                           ),
                         ),
+                        actions: [
+                          PopupMenuButton<Locale>(
+                            key: const Key('languageSelector'),
+                            icon: const Icon(Icons.language),
+                            tooltip: CoreLocalizations.of(
+                              context,
+                            )!.selectLanguage,
+                            onSelected: (Locale locale) {
+                              context.read<LocaleBloc>().add(
+                                LocaleChanged(locale),
+                              );
+                            },
+                            itemBuilder: (BuildContext context) => [
+                              const PopupMenuItem<Locale>(
+                                value: Locale('en'),
+                                child: Row(
+                                  children: [
+                                    Text('🇺🇸'),
+                                    SizedBox(width: 8),
+                                    Text('English'),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuItem<Locale>(
+                                value: Locale('th'),
+                                child: Row(
+                                  children: [
+                                    Text('🇹🇭'),
+                                    SizedBox(width: 8),
+                                    Text('ไทย'),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                       body: Center(
                         child: Column(
@@ -177,7 +216,7 @@ class HomeFormState extends State<HomeForm> {
                             const SizedBox(height: 20),
                             OutlinedButton(
                               key: const Key('loginButton'),
-                              child: const Text('Login'),
+                              child: Text(CoreLocalizations.of(context)!.login),
                               onPressed: () {
                                 // start with login again....even login process interupted
                                 _authBloc.add(
@@ -201,8 +240,10 @@ class HomeFormState extends State<HomeForm> {
                             if (classificationId != 'AppSupport')
                               OutlinedButton(
                                 key: const Key('newUserButton'),
-                                child: const Text(
-                                  'Register new Company and Administrator',
+                                child: Text(
+                                  CoreLocalizations.of(
+                                    context,
+                                  )!.registerNewCompanyAndAdmin,
                                 ),
                                 onPressed: () {
                                   showDialog(

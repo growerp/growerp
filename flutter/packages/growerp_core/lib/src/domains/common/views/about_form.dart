@@ -16,6 +16,7 @@ import 'package:about/about.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_core/src/domains/common/functions/screen_size.dart';
+import 'package:growerp_core/l10n/generated/core_localizations.dart';
 
 import '../widgets/widgets.dart';
 
@@ -37,62 +38,74 @@ class _AboutFormState extends State<AboutForm> {
     var year = DateTime.now().year;
 
     return Dialog(
-        insetPadding: const EdgeInsets.all(10),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: popUp(
-            context: context,
-            title: "About GrowERP",
-            width: isAPhone(context) ? 400 : 800,
-            height: isPhone(context) ? 700 : 600,
-            child: AboutPage(
-                dialog: false,
-                title: Text('About GrowERP and this $appName app'),
-                applicationVersion: 'Version $version, build #$build',
-                applicationName: packageName,
-                applicationDescription: Center(child: Text(databaseUrl)),
-                applicationIcon: Image.asset(
-                  'packages/growerp_core/images/growerp.png',
-                  height: 100,
-                  width: 200,
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: CoreLocalizations.of(context)!.aboutGrowERP,
+        width: isAPhone(context) ? 400 : 800,
+        height: isPhone(context) ? 700 : 600,
+        child: AboutPage(
+          dialog: false,
+          title: Text(CoreLocalizations.of(context)!.aboutApp(appName)),
+          applicationVersion: CoreLocalizations.of(
+            context,
+          )!.version(version, build),
+          applicationName: packageName,
+          applicationDescription: Center(child: Text(databaseUrl)),
+          applicationIcon: Image.asset(
+            'packages/growerp_core/images/growerp.png',
+            height: 100,
+            width: 200,
+          ),
+          applicationLegalese: CoreLocalizations.of(context)!.copyright(year),
+          children: <Widget>[
+            Center(
+              child: SizedBox(
+                width: 300,
+                child: Form(
+                  child: Column(
+                    children: <Widget>[
+                      MarkdownPageListTile(
+                        filename: '../../../../../../../../../../README.md',
+                        title: Text(CoreLocalizations.of(context)!.viewReadme),
+                        icon: const Icon(Icons.all_inclusive),
+                      ),
+                      MarkdownPageListTile(
+                        filename: '../../../../../../../../../../LICENSE',
+                        title: Text(CoreLocalizations.of(context)!.viewLicense),
+                        icon: const Icon(Icons.description),
+                      ),
+                      MarkdownPageListTile(
+                        filename:
+                            '../../../../../../../../../../CONTRIBUTING.md',
+                        title: Text(
+                          CoreLocalizations.of(context)!.contributing,
+                        ),
+                        icon: const Icon(Icons.share),
+                      ),
+                      MarkdownPageListTile(
+                        filename:
+                            '../../../../../../../../../../CODE_OF_CONDUCT.md',
+                        title: Text(
+                          CoreLocalizations.of(context)!.privacyCodeOfConduct,
+                        ),
+                        icon: const Icon(Icons.sentiment_satisfied),
+                      ),
+                      LicensesPageListTile(
+                        title: Text(
+                          CoreLocalizations.of(context)!.openSourceLicenses,
+                        ),
+                        icon: const Icon(Icons.favorite),
+                      ),
+                    ],
+                  ),
                 ),
-                applicationLegalese: '© GrowERP, $year',
-                children: const <Widget>[
-                  Center(
-                      child: SizedBox(
-                          width: 300,
-                          child: Form(
-                              child: Column(
-                            children: <Widget>[
-                              MarkdownPageListTile(
-                                filename:
-                                    '../../../../../../../../../../README.md',
-                                title: Text('View Readme'),
-                                icon: Icon(Icons.all_inclusive),
-                              ),
-                              MarkdownPageListTile(
-                                filename:
-                                    '../../../../../../../../../../LICENSE',
-                                title: Text('View License'),
-                                icon: Icon(Icons.description),
-                              ),
-                              MarkdownPageListTile(
-                                filename:
-                                    '../../../../../../../../../../CONTRIBUTING.md',
-                                title: Text('Contributing'),
-                                icon: Icon(Icons.share),
-                              ),
-                              MarkdownPageListTile(
-                                filename:
-                                    '../../../../../../../../../../CODE_OF_CONDUCT.md',
-                                title: Text('Privacy, Code of conduct'),
-                                icon: Icon(Icons.sentiment_satisfied),
-                              ),
-                              LicensesPageListTile(
-                                title: Text('Open source Licenses'),
-                                icon: Icon(Icons.favorite),
-                              ),
-                            ],
-                          ))))
-                ])));
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

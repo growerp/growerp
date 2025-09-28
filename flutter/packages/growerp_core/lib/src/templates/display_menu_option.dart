@@ -85,15 +85,15 @@ class MenuOptionState extends State<DisplayMenuOption>
         MenuOption(
           image: 'packages/growerp_core/images/dashBoardGrey.png',
           selectedImage: 'packages/growerp_core/images/dashBoard.png',
-          title: 'Main',
+          title: CoreLocalizations.of(context)!.main,
           route: '/',
           child: Container(
             height: 45,
             color: Colors.black,
-            child: const Center(
+            child: Center(
               child: Text(
-                'No Access to any option',
-                style: TextStyle(color: Colors.red, fontSize: 25),
+                CoreLocalizations.of(context)!.noAccess,
+                style: const TextStyle(color: Colors.red, fontSize: 25),
               ),
             ),
           ),
@@ -158,7 +158,7 @@ class MenuOptionState extends State<DisplayMenuOption>
               arguments: tabItems[tabIndex].floatButtonArgs,
             );
           },
-          tooltip: 'Add New',
+          tooltip: CoreLocalizations.of(context)!.addNew,
           child: const Icon(Icons.add),
         );
       }
@@ -175,7 +175,7 @@ class MenuOptionState extends State<DisplayMenuOption>
               },
             );
           },
-          tooltip: 'Add New',
+          tooltip: CoreLocalizations.of(context)!.addNew,
           child: const Icon(Icons.add),
         );
       }
@@ -224,7 +224,9 @@ class MenuOptionState extends State<DisplayMenuOption>
                 child: const Icon(Icons.chat),
               ),
               padding: EdgeInsets.zero,
-              tooltip: unReadRooms.isEmpty ? 'Chat' : unReadRooms.toString(),
+              tooltip: unReadRooms.isEmpty
+                  ? CoreLocalizations.of(context)!.chat
+                  : unReadRooms.toString(),
               onPressed: () async => {
                 await showDialog(
                   barrierDismissible: true,
@@ -242,7 +244,7 @@ class MenuOptionState extends State<DisplayMenuOption>
               IconButton(
                 key: const Key('homeButton'),
                 icon: const Icon(Icons.home),
-                tooltip: 'Go Home',
+                tooltip: CoreLocalizations.of(context)!.goHome,
                 onPressed: () {
                   if (currentRoute.startsWith('/acct')) {
                     Navigator.pushNamed(context, '/accounting');
@@ -400,7 +402,7 @@ class MenuOptionState extends State<DisplayMenuOption>
                   !Platform.isIOS &&
                   !Platform.isMacOS)) {
             return Banner(
-              message: "test",
+              message: CoreLocalizations.of(context)!.test,
               color: Colors.red,
               location: BannerLocation.topStart,
               child: showPage(simplePage, context, tabPage),

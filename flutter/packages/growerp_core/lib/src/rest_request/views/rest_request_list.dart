@@ -16,6 +16,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
+
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -55,10 +56,10 @@ class RestRequestListState extends State<RestRequestList> {
       builder: (BuildContext context) {
         Widget tableView() {
           if (restRequests.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
-                'No REST requests found',
-                style: TextStyle(fontSize: 20.0),
+                CoreLocalizations.of(context)!.noRestRequests,
+                style: const TextStyle(fontSize: 20.0),
               ),
             );
           }
@@ -143,8 +144,8 @@ class RestRequestListState extends State<RestRequestList> {
           },
           builder: (context, state) {
             if (state.status == RestRequestStatus.failure) {
-              return const FatalErrorForm(
-                message: "Could not load REST requests!",
+              return FatalErrorForm(
+                message: CoreLocalizations.of(context)!.cannotLoadRestRequests,
               );
             } else {
               restRequests = state.restRequests;
@@ -177,7 +178,7 @@ class RestRequestListState extends State<RestRequestList> {
                             const RestRequestFetch(refresh: true),
                           );
                         },
-                        tooltip: 'Refresh',
+                        tooltip: CoreLocalizations.of(context)!.refresh,
                         child: const Icon(Icons.refresh),
                       ),
                     ),

@@ -1,0 +1,521 @@
+{
+    "@@locale": "en",
+    "loginWithExistingUserName": "Login with existing username",
+    "@loginWithExistingUserName": {
+        "description": "Login form header text"
+    },
+    "createPassword": "Create New Password",
+    "@createPassword": {
+        "description": "Header for password creation form"
+    },
+    "username": "Username: {username}",
+    "@username": {
+        "description": "Username display with placeholder",
+        "placeholders": {
+            "username": {
+                "type": "String",
+                "description": "The username to display"
+            }
+        }
+    },
+    "password": "Password",
+    "@password": {
+        "description": "Password field label"
+    },
+    "passwordHelper": "At least 8 characters, including alpha, number & special character, no previous password.",
+    "@passwordHelper": {
+        "description": "Password requirements helper text"
+    },
+    "passwordError": "Please enter first password?",
+    "@passwordError": {
+        "description": "Error message for empty password field"
+    },
+    "passwordValidationError": "At least 8 characters, including alpha, number & special character.",
+    "@passwordValidationError": {
+        "description": "Error message for invalid password format"
+    },
+    "verifyPassword": "Verify Password",
+    "@verifyPassword": {
+        "description": "Password confirmation field label"
+    },
+    "verifyPasswordHelper": "Enter the new password again.",
+    "@verifyPasswordHelper": {
+        "description": "Helper text for password confirmation field"
+    },
+    "verifyPasswordError": "Enter password again to verify?",
+    "@verifyPasswordError": {
+        "description": "Error message for empty password confirmation field"
+    },
+    "passwordMismatch": "Password is not matching",
+    "@passwordMismatch": {
+        "description": "Error message for mismatched password confirmation"
+    },
+    "submitNewPassword": "Submit new Password",
+    "@submitNewPassword": {
+        "description": "Submit button text for new password form"
+    },
+    "completeRegistration": "Complete your registration",
+    "@completeRegistration": {
+        "description": "Registration completion form header"
+    },
+    "welcome": "Welcome!",
+    "@welcome": {
+        "description": "Welcome greeting message"
+    },
+    "enterCompanyAndCurrency": "please enter both the company name\nand currency for the new company",
+    "@enterCompanyAndCurrency": {
+        "description": "Helper text for company and currency form fields"
+    },
+    "enterCompanyName": "please enter optionally a company name you work for.",
+    "@enterCompanyName": {
+        "description": "Helper text for optional company name field"
+    },
+    "businessCompanyName": "Business Company name",
+    "@businessCompanyName": {
+        "description": "Business company name field label"
+    },
+    "businessNameError": "Please enter business name(\"Private\" for Private person)",
+    "@businessNameError": {
+        "description": "Error message for empty business name field"
+    },
+    "currency": "Currency",
+    "@currency": {
+        "description": "Currency field label"
+    },
+    "currencyError": "Currency field required!",
+    "@currencyError": {
+        "description": "Error message for empty currency field"
+    },
+    "generateDemoData": "Generate demo data",
+    "@generateDemoData": {
+        "description": "Checkbox label for generating demo data"
+    },
+    "demoData": "DemoData",
+    "@demoData": {
+        "description": "Demo data label or header"
+    },
+    "continueButton": "Continue",
+    "@continueButton": {
+        "description": "Continue button text"
+    },
+    "usernameEmail": "Username/Email",
+    "@usernameEmail": {
+        "description": "Username or email field label"
+    },
+    "usernameEmailError": "Please enter username or email?",
+    "@usernameEmailError": {
+        "description": "Error message for empty username/email field"
+    },
+    "passwordError2": "Please enter your password?",
+    "@passwordError2": {
+        "description": "Error message for empty password field on login"
+    },
+    "login": "Login",
+    "@login": {
+        "description": "Login button text"
+    },
+    "forgotPassword": "forgot/change password?",
+    "@forgotPassword": {
+        "description": "Forgot password link text"
+    },
+    "subscription": "Subscription",
+    "@subscription": {
+        "description": "Subscription section header"
+    },
+    "currentPaymentMethod": "Your current payment method:\n{ccDescription}",
+    "@currentPaymentMethod": {
+        "description": "Message showing the user's current payment method",
+        "placeholders": {
+            "ccDescription": {
+                "type": "String",
+                "description": "Credit card description"
+            }
+        }
+    },
+    "trialPeriod": "You have a trial period for 2 weeks,\nWe will only charge if you not cancel\nbefore that time",
+    "@trialPeriod": {
+        "description": "Trial period information message"
+    },
+    "testSystem": "This is a Test system\nso this credit Card will always be approved",
+    "@testSystem": {
+        "description": "Test system notification message"
+    },
+    "paymentPlan": "Payment Plan",
+    "@paymentPlan": {
+        "description": "Payment plan section header"
+    },
+    "selectPlanError": "Please select a single plan",
+    "@selectPlanError": {
+        "description": "Error message for plan selection"
+    },
+    "creditCardInfo": "Credit card information",
+    "@creditCardInfo": {
+        "description": "Credit card information section header"
+    },
+    "creditCardDetails": "Enter your credit card details",
+    "@creditCardDetails": {
+        "description": "Instructions for entering credit card details"
+    },
+    "number": "Number",
+    "@number": {
+        "description": "Credit card number field label"
+    },
+    "numberHint": "XXXX XXXX XXXX XXXX",
+    "@numberHint": {
+        "description": "Placeholder text for credit card number"
+    },
+    "expiryDate": "Expiry month/year",
+    "@expiryDate": {
+        "description": "Credit card expiry date field label"
+    },
+    "expiryDateHint": "XX/XX",
+    "@expiryDateHint": {
+        "description": "Placeholder text for credit card expiry date"
+    },
+    "cvvCode": "CVV Code",
+    "@cvvCode": {
+        "description": "Credit card CVV code field label"
+    },
+    "cvvHint": "XXX",
+    "@cvvHint": {
+        "description": "Placeholder text for CVV code"
+    },
+    "nameOnCard": "Name on Card",
+    "@nameOnCard": {
+        "description": "Name on credit card field label"
+    },
+    "payWithinWeek": "Pay within one week",
+    "@payWithinWeek": {
+        "description": "Payment deadline notification"
+    },
+    "registerAndCharge": "Register and charge in 2 weeks",
+    "@registerAndCharge": {
+        "description": "Registration and charging timeline information"
+    },
+    "sendNewPassword": "Send new Password by email",
+    "@sendNewPassword": {
+        "description": "Button text for sending new password via email"
+    },
+    "email": "Email:",
+    "@email": {
+        "description": "Email field label"
+    },
+    "ok": "Ok",
+    "@ok": {
+        "description": "OK button text"
+    },
+    "deleteWarning": "Please note you will be blocked using the system.\nThis cannot be undone!",
+    "@deleteWarning": {
+        "description": "Warning message about account deletion consequences"
+    },
+    "onlyUserDelete": "Only User delete",
+    "@onlyUserDelete": {
+        "description": "Option to delete only the user account"
+    },
+    "userAndCompanyDelete": "User AND Company delete",
+    "@userAndCompanyDelete": {
+        "description": "Option to delete both user and company"
+    },
+    "deleteYourself": "Delete yourself",
+    "@deleteYourself": {
+        "description": "Button text for self-deletion"
+    },
+    "deleteYourselfAndCompany": "Delete yourself and opt. company?",
+    "@deleteYourselfAndCompany": {
+        "description": "Confirmation text for deleting user and optional company"
+    },
+    "registration": "Registration",
+    "@registration": {
+        "description": "Registration form header"
+    },
+    "firstName": "First Name",
+    "@firstName": {
+        "description": "First name field label"
+    },
+    "firstNameError": "Please enter your first name?",
+    "@firstNameError": {
+        "description": "Error message for empty first name field"
+    },
+    "lastName": "Last Name",
+    "@lastName": {
+        "description": "Last name field label"
+    },
+    "lastNameError": "Please enter your last name?",
+    "@lastNameError": {
+        "description": "Error message for empty last name field"
+    },
+    "tempPassword": "A temporary password will be send by email",
+    "@tempPassword": {
+        "description": "Information about temporary password delivery"
+    },
+    "emailAddress": "Email address",
+    "@emailAddress": {
+        "description": "Email address field label"
+    },
+    "emailAddressError": "Please enter Email address?",
+    "@emailAddressError": {
+        "description": "Error message for empty email address field"
+    },
+    "emailAddressError2": "This is not a valid email",
+    "@emailAddressError2": {
+        "description": "Error message for invalid email format"
+    },
+    "register": "Register",
+    "@register": {
+        "description": "Register button text"
+    },
+    "aboutGrowERP": "About GrowERP",
+    "@aboutGrowERP": {
+        "description": "About GrowERP section header"
+    },
+    "aboutApp": "About GrowERP and this {appName} app",
+    "@aboutApp": {
+        "description": "About page header showing the app name",
+        "placeholders": {
+            "appName": {
+                "type": "String",
+                "description": "Name of the current application"
+            }
+        }
+    },
+    "version": "Version {version}, build #{build}",
+    "@version": {
+        "description": "Version information display",
+        "placeholders": {
+            "version": {
+                "type": "String",
+                "description": "Version number of the application"
+            },
+            "build": {
+                "type": "String",
+                "description": "Build number of the application"
+            }
+        }
+    },
+    "copyright": "© GrowERP, {year}",
+    "@copyright": {
+        "description": "Copyright notice with year",
+        "placeholders": {
+            "year": {
+                "type": "int",
+                "description": "Copyright year"
+            }
+        }
+    },
+    "viewReadme": "View Readme",
+    "@viewReadme": {
+        "description": "Button text to view readme file"
+    },
+    "viewLicense": "View License",
+    "@viewLicense": {
+        "description": "Button text to view license information"
+    },
+    "contributing": "Contributing",
+    "@contributing": {
+        "description": "Contributing section header or button text"
+    },
+    "privacyCodeOfConduct": "Privacy, Code of conduct",
+    "@privacyCodeOfConduct": {
+        "description": "Privacy and code of conduct section header"
+    },
+    "openSourceLicenses": "Open source Licenses",
+    "@openSourceLicenses": {
+        "description": "Open source licenses section header"
+    },
+    "enterBackendUrl": "Enter a backend && chat url in the form of: xxx.yyy.zzz",
+    "@enterBackendUrl": {
+        "description": "Instructions for entering backend URL"
+    },
+    "backendServer": "Backend server:",
+    "@backendServer": {
+        "description": "Backend server configuration label"
+    },
+    "fieldRequired": "field required!",
+    "@fieldRequired": {
+        "description": "Generic required field error message"
+    },
+    "chatServer": "Chat server:",
+    "@chatServer": {
+        "description": "Chat server configuration label"
+    },
+    "companyPartyId": "partyId of main company:",
+    "@companyPartyId": {
+        "description": "Company party ID configuration label"
+    },
+    "cancel": "Cancel",
+    "@cancel": {
+        "description": "Cancel button text"
+    },
+    "restart": "Restart",
+    "@restart": {
+        "description": "Restart button text"
+    },
+    "main": "Main",
+    "@main": {
+        "description": "Main navigation or section header"
+    },
+    "noAccess": "No Access to any option",
+    "@noAccess": {
+        "description": "Message when user has no access to any options"
+    },
+    "addNew": "Add New",
+    "@addNew": {
+        "description": "Add new item button text"
+    },
+    "chat": "Chat",
+    "@chat": {
+        "description": "Chat menu item or button text"
+    },
+    "goHome": "Go Home",
+    "@goHome": {
+        "description": "Navigation button to go to home screen"
+    },
+    "test": "test",
+    "@test": {
+        "description": "Test label or placeholder text"
+    },
+    "theme": "Theme",
+    "@theme": {
+        "description": "Theme setting label"
+    },
+    "error": "error: should not arrive here",
+    "@error": {
+        "description": "Generic error message"
+    },
+    "noAccessHere": "No access to any option here, ",
+    "@noAccessHere": {
+        "description": "Message when user has no access to current section"
+    },
+    "noRestRequests": "No REST requests found",
+    "@noRestRequests": {
+        "description": "Message when no REST requests are available"
+    },
+    "cannotLoadRestRequests": "Could not load REST requests!",
+    "@cannotLoadRestRequests": {
+        "description": "Error message when REST requests fail to load"
+    },
+    "refresh": "Refresh",
+    "@refresh": {
+        "description": "Refresh button text"
+    },
+    "restRequestDetails": "REST Request Details",
+    "@restRequestDetails": {
+        "description": "Header for REST request details screen"
+    },
+    "dateTime": "Date/Time",
+    "@dateTime": {
+        "description": "Date and time field label"
+    },
+    "unknown": "Unknown",
+    "@unknown": {
+        "description": "Placeholder text for unknown values"
+    },
+    "user": "User",
+    "@user": {
+        "description": "User label or menu item"
+    },
+    "notAvailable": "N/A",
+    "@notAvailable": {
+        "description": "Abbreviation for Not Available"
+    },
+    "loginName": "Login Name",
+    "@loginName": {
+        "description": "Login name field label"
+    },
+    "requestName": "Request Name",
+    "@requestName": {
+        "description": "Request name field label"
+    },
+    "serverIp": "Server IP",
+    "@serverIp": {
+        "description": "Server IP address field label"
+    },
+    "serverHost": "Server Host",
+    "@serverHost": {
+        "description": "Server hostname field label"
+    },
+    "runningTime": "Running Time",
+    "@runningTime": {
+        "description": "Request running time field label"
+    },
+    "ms": " ms",
+    "@ms": {
+        "description": "Milliseconds unit abbreviation"
+    },
+    "status": "Status",
+    "@status": {
+        "description": "Status field label"
+    },
+    "success": "Success",
+    "@success": {
+        "description": "Success confirmation message"
+    },
+    "slowHit": "Slow Hit",
+    "@slowHit": {
+        "description": "Label for slow performance indicator"
+    },
+    "yes": "Yes",
+    "@yes": {
+        "description": "Yes confirmation button text"
+    },
+    "no": "No",
+    "@no": {
+        "description": "No confirmation button text"
+    },
+    "errorMessage": "Error Message:",
+    "@errorMessage": {
+        "description": "Error message field label"
+    },
+    "requestUrl": "Request URL:",
+    "@requestUrl": {
+        "description": "Request URL field label"
+    },
+    "referrerUrl": "Referrer URL:",
+    "@referrerUrl": {
+        "description": "Referrer URL field label"
+    },
+    "parameters": "Parameters:",
+    "@parameters": {
+        "description": "Parameters field label"
+    },
+    "logout": "Logout",
+    "@logout": {
+        "description": "Logout button text"
+    },
+    "welcomeToGrowERPBusinessSystem": "Welcome to The GrowERP Business System",
+    "@welcomeToGrowERPBusinessSystem": {
+        "description": "Main welcome message for the GrowERP system"
+    },
+    "selectLanguage": "Select Language",
+    "@selectLanguage": {
+        "description": "Language selection dropdown or button text"
+    },
+    "registerNewCompanyAndAdmin": "Register new Company and Administrator",
+    "@registerNewCompanyAndAdmin": {
+        "description": "Registration form header for new company and admin"
+    },
+    "create": "Create",
+    "@create": {
+        "description": "Create button text"
+    },
+    "update": "Update",
+    "@update": {
+        "description": "Update button text"
+    },
+    "customer": "Customer",
+    "@customer": {
+        "description": "Label for customer"
+    },
+    "supplier": "Supplier",
+    "@supplier": {
+        "description": "Label for supplier"
+    },
+    "andAtLeastOne": "and at least one ",
+    "@andAtLeastOne": {
+        "description": "Partial validation message indicating minimum requirement"
+    },
+    "itemIsRequired": "item is required",
+    "@itemIsRequired": {
+        "description": "Validation message indicating a required item"
+    }
+}

@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_core/l10n/generated/core_localizations.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../domains.dart';
@@ -25,13 +26,10 @@ Future<bool?> confirmDeleteUserComp(
   UserGroup? userGroup,
 ) {
   List<Widget> actions = [
-    const Text(
-      "Please note you will be blocked using the system."
-      "\nThis cannot be undone!",
-    ),
+    Text(CoreLocalizations.of(context)!.deleteWarning),
     const SizedBox(height: 20),
     OutlinedButton(
-      child: const Text("Only User delete"),
+      child: Text(CoreLocalizations.of(context)!.onlyUserDelete),
       onPressed: () {
         Navigator.of(context).pop(false);
       },
@@ -41,7 +39,7 @@ Future<bool?> confirmDeleteUserComp(
     actions.add(const SizedBox(height: 10));
     actions.add(
       OutlinedButton(
-        child: const Text("User AND Company delete"),
+        child: Text(CoreLocalizations.of(context)!.userAndCompanyDelete),
         onPressed: () {
           Navigator.of(context).pop(true);
         },
@@ -61,8 +59,9 @@ Future<bool?> confirmDeleteUserComp(
         child: popUp(
           height: 300,
           context: context,
-          title:
-              "Delete yourself ${userGroup == UserGroup.admin ? ' and opt. company?' : ''}",
+          title: userGroup == UserGroup.admin
+              ? CoreLocalizations.of(context)!.deleteYourselfAndCompany
+              : CoreLocalizations.of(context)!.deleteYourself,
           child: Column(children: actions),
         ),
       );

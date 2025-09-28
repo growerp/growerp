@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
+
 import 'package:growerp_models/growerp_models.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -33,7 +34,7 @@ class RestRequestDetailDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: "REST Request Details",
+        title: CoreLocalizations.of(context)!.restRequestDetails,
         width: isPhone ? 400 : 800,
         height: isPhone ? 700 : 600,
         child: SingleChildScrollView(
@@ -41,54 +42,69 @@ class RestRequestDetailDialog extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildDetailRow(
-                'Date/Time',
+                CoreLocalizations.of(context)!.dateTime,
                 restRequest.dateTime != null
                     ? DateFormat(
                         'dd/MM/yyyy HH:mm:ss',
                       ).format(restRequest.dateTime!)
-                    : 'Unknown',
+                    : CoreLocalizations.of(context)!.unknown,
               ),
               _buildDetailRow(
-                'User',
+                CoreLocalizations.of(context)!.user,
                 '${restRequest.user?.firstName ?? ''} ${restRequest.user?.lastName ?? ''}',
               ),
-              _buildDetailRow('Email', restRequest.user?.email ?? 'N/A'),
               _buildDetailRow(
-                'Login Name',
-                restRequest.user?.loginName ?? 'N/A',
+                CoreLocalizations.of(context)!.email,
+                restRequest.user?.email ??
+                    CoreLocalizations.of(context)!.notAvailable,
               ),
               _buildDetailRow(
-                'Request Name',
-                restRequest.restRequestName ?? 'N/A',
-              ),
-              _buildDetailRow('Server IP', restRequest.serverIp ?? 'N/A'),
-              _buildDetailRow(
-                'Server Host',
-                restRequest.serverHostName ?? 'N/A',
+                CoreLocalizations.of(context)!.loginName,
+                restRequest.user?.loginName ??
+                    CoreLocalizations.of(context)!.notAvailable,
               ),
               _buildDetailRow(
-                'Running Time',
-                '${restRequest.runningTimeMillis ?? 0} ms',
+                CoreLocalizations.of(context)!.requestName,
+                restRequest.restRequestName ??
+                    CoreLocalizations.of(context)!.notAvailable,
               ),
               _buildDetailRow(
-                'Status',
-                restRequest.wasError == true ? 'Error' : 'Success',
+                CoreLocalizations.of(context)!.serverIp,
+                restRequest.serverIp ??
+                    CoreLocalizations.of(context)!.notAvailable,
+              ),
+              _buildDetailRow(
+                CoreLocalizations.of(context)!.serverHost,
+                restRequest.serverHostName ??
+                    CoreLocalizations.of(context)!.notAvailable,
+              ),
+              _buildDetailRow(
+                CoreLocalizations.of(context)!.runningTime,
+                '${restRequest.runningTimeMillis ?? 0}${CoreLocalizations.of(context)!.ms}',
+              ),
+              _buildDetailRow(
+                CoreLocalizations.of(context)!.status,
+                restRequest.wasError == true
+                    ? CoreLocalizations.of(context)!.error
+                    : CoreLocalizations.of(context)!.success,
                 valueColor: restRequest.wasError == true
                     ? Colors.red
                     : Colors.green,
               ),
               _buildDetailRow(
-                'Slow Hit',
-                restRequest.isSlowHit == true ? 'Yes' : 'No',
+                CoreLocalizations.of(context)!.slowHit,
+                restRequest.isSlowHit == true
+                    ? CoreLocalizations.of(context)!.yes
+                    : CoreLocalizations.of(context)!.no,
                 valueColor: restRequest.isSlowHit == true
                     ? Colors.orange
                     : Colors.green,
               ),
               if (restRequest.errorMessage?.isNotEmpty == true) ...[
                 const SizedBox(height: 10),
-                const Text(
-                  'Error Message:',
-                  style: TextStyle(
+                Text(
+                  CoreLocalizations.of(context)!.errorMessage,
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.red,
                   ),
@@ -112,9 +128,9 @@ class RestRequestDetailDialog extends StatelessWidget {
               ],
               if (restRequest.requestUrl?.isNotEmpty == true) ...[
                 const SizedBox(height: 10),
-                const Text(
-                  'Request URL:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  CoreLocalizations.of(context)!.requestUrl,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 5),
                 Container(
@@ -132,9 +148,9 @@ class RestRequestDetailDialog extends StatelessWidget {
               ],
               if (restRequest.referrerUrl?.isNotEmpty == true) ...[
                 const SizedBox(height: 10),
-                const Text(
-                  'Referrer URL:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  CoreLocalizations.of(context)!.referrerUrl,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 5),
                 Container(
@@ -152,9 +168,9 @@ class RestRequestDetailDialog extends StatelessWidget {
               ],
               if (restRequest.parameterString?.isNotEmpty == true) ...[
                 const SizedBox(height: 10),
-                const Text(
-                  'Parameters:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  CoreLocalizations.of(context)!.parameters,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 5),
                 Container(
