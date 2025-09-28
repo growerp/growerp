@@ -1,3 +1,4 @@
 {
-  "price": "Price thai"
+  "@@locale": "th",
+  "catalog_price": "ราคา"
 }

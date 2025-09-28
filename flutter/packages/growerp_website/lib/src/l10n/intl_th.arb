@@ -1,3 +1,4 @@
 {
-  "shopDropdownCategories": "Price thai"
+  "@@locale": "th",
+  "shopDropdownCategories": "หมวดหมู่ดรอปดาวน์ของร้านค้า"
 }
