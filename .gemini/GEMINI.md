@@ -36,6 +36,17 @@ GrowERP is an open-source, multi-platform ERP system designed to streamline busi
     ```bash
     java -jar moqui.war no-run-es
     ```
+## missing flutter and or dart execute:
+```sh
+  #!/bin/bash
+        FLUTTER_DIR="/tmp/flutter_install"
+        mkdir -p "$FLUTTER_DIR"
+        cd "$FLUTTER_DIR"
+        wget -q --show-progress https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.35.4-stable.tar.xz # Replace with desired version
+        tar xf flutter_linux_3.19.6-stable.tar.xz
+        export FLUTTER_ROOT="$FLUTTER_DIR/flutter"
+        export PATH="$FLUTTER_ROOT/bin:$PATH"
+```
 
 ## 📦 Project-Specific Conventions
 - **Package Hierarchy**: Lower-level packages (e.g., `growerp_models`) are dependencies for higher-level domain packages.
