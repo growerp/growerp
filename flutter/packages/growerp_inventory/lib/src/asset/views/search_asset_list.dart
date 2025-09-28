@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 
 import 'package:growerp_models/growerp_models.dart';
+import '../../l10n/generated/inventory_localizations.dart';
 
 class SearchAssetList extends StatefulWidget {
   const SearchAssetList({super.key});
@@ -26,8 +27,9 @@ class SearchAssetList extends StatefulWidget {
 }
 
 class SearchAssetState extends State<SearchAssetList> {
-  late DataFetchBloc _assetBloc;
-  List<Asset> locations = [];
+  late DataFetchBloc<Assets> _assetBloc;
+  List<Asset> assets = [];
+  late InventoryLocalizations localizations;
 
   @override
   void initState() {
@@ -38,23 +40,25 @@ class SearchAssetState extends State<SearchAssetList> {
 
   @override
   Widget build(BuildContext context) {
+    localizations = InventoryLocalizations.of(context)!;
     return BlocConsumer<DataFetchBloc<Assets>, DataFetchState<Assets>>(
         listener: (context, state) {
       if (state.status == DataFetchStatus.failure) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        HelperFunctions.showMessage(
+            context, localizations.error(state.message ?? ''), Colors.red);
       }
     }, builder: (context, state) {
       if (state.status == DataFetchStatus.failure) {
         return Center(
-            child: Text('failed to fetch search items: ${state.message}'));
+            child: Text(localizations.failedToFetchSearchItems(state.message ?? '')));
       }
       if (state.status == DataFetchStatus.success) {
-        locations = (state.data as Assets).assets;
+        assets = (state.data as Assets).assets;
       }
       return Stack(
         children: [
           AssetSearchDialog(
-              finDocBloc: _assetBloc, widget: widget, locations: locations),
+              assetBloc: _assetBloc, widget: widget, assets: assets),
           if (state.status == DataFetchStatus.loading) const LoadingIndicator(),
         ],
       );
@@ -65,17 +69,18 @@ class SearchAssetState extends State<SearchAssetList> {
 class AssetSearchDialog extends StatelessWidget {
   const AssetSearchDialog({
     super.key,
-    required DataFetchBloc finDocBloc,
+    required DataFetchBloc<Assets> assetBloc,
     required this.widget,
-    required this.locations,
-  }) : _assetBloc = finDocBloc;
+    required this.assets,
+  }) : _assetBloc = assetBloc;
 
-  final DataFetchBloc _assetBloc;
+  final DataFetchBloc<Assets> _assetBloc;
   final SearchAssetList widget;
-  final List<Asset> locations;
+  final List<Asset> assets;
 
   @override
   Widget build(BuildContext context) {
+    final InventoryLocalizations localizations = InventoryLocalizations.of(context)!;
     final ScrollController scrollController = ScrollController();
     return Dialog(
         key: const Key('SearchDialog'),
@@ -85,7 +90,7 @@ class AssetSearchDialog extends StatelessWidget {
         ),
         child: popUp(
             context: context,
-            title: 'Asset Search ',
+            title: localizations.assetSearch,
             height: 500,
             width: 350,
             child: Column(children: [
@@ -93,10 +98,10 @@ class AssetSearchDialog extends StatelessWidget {
                   key: const Key('searchField'),
                   textInputAction: TextInputAction.search,
                   autofocus: true,
-                  decoration: const InputDecoration(labelText: "Search input"),
+                  decoration: InputDecoration(labelText: localizations.searchInput),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Please enter a search value?';
+                      return localizations.enterSearchValue;
                     }
                     return null;
                   },
@@ -105,37 +110,37 @@ class AssetSearchDialog extends StatelessWidget {
                           .read<RestClient>()
                           .getAsset(limit: 5, searchString: value)))),
               const SizedBox(height: 20),
-              const Text('Search results'),
+              Text(localizations.searchResults),
               Expanded(
                   child: ListView.builder(
                       key: const Key('listView'),
                       shrinkWrap: true,
                       physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: locations.length + 2,
+                      itemCount: assets.length + 2,
                       controller: scrollController,
                       itemBuilder: (BuildContext context, int index) {
                         if (index == 0) {
                           return Visibility(
-                              visible: locations.isEmpty,
-                              child: const Center(
+                              visible: assets.isEmpty,
+                              child: Center(
                                   heightFactor: 20,
-                                  child: Text('No search items found (yet)',
-                                      key: Key('empty'),
+                                  child: Text(localizations.noSearchItemsFound,
+                                      key: const Key('empty'),
                                       textAlign: TextAlign.center)));
                         }
                         index--;
-                        return index >= locations.length
+                        return index >= assets.length
                             ? const Text('')
                             : Dismissible(
                                 key: const Key('searchItem'),
                                 direction: DismissDirection.startToEnd,
                                 child: ListTile(
                                   title: Text(
-                                      "ID: ${locations[index].pseudoId}\n"
-                                      "Name: ${locations[index].assetName}",
+                                      "${localizations.id}${assets[index].pseudoId}\n"
+                                      "${localizations.name}${assets[index].assetName}",
                                       key: Key("searchResult$index")),
                                   onTap: () => Navigator.of(context)
-                                      .pop(locations[index]),
+                                      .pop(assets[index]),
                                 ));
                       }))
             ])));
