@@ -22,7 +22,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
 import '../../../domains/domains.dart';
-import '../../../l10n/generated/core_localizations.dart';
+import 'package:growerp_core/l10n/generated/core_localizations.dart';
 
 class LoginDialog extends StatefulWidget {
   const LoginDialog({super.key});
@@ -135,24 +135,22 @@ class LoginDialogState extends State<LoginDialog> {
     return popUp(
       height: 500,
       context: context,
-      title: "Create New Password",
+      title: CoreLocalizations.of(context)!.createPassword,
       child: FormBuilder(
         key: _changePasswordFormKey,
         child: Column(
           children: <Widget>[
             const SizedBox(height: 40),
-            Text("username: $username"),
+            Text(CoreLocalizations.of(context)!.username(username)),
             const SizedBox(height: 20),
             FormBuilderTextField(
-              name: 'password1',
-              key: const Key("password1"),
+              name: 'password',
+              key: const Key("password"),
               autofocus: true,
               obscureText: _obscureText3,
               decoration: InputDecoration(
-                labelText: 'Password',
-                helperText:
-                    'At least 8 characters, including alpha, number '
-                    '&\nspecial character, no previous password.',
+                labelText: CoreLocalizations.of(context)!.password,
+                helperText: CoreLocalizations.of(context)!.passwordHelper,
                 suffixIcon: GestureDetector(
                   onTap: () {
                     setState(() {
@@ -166,7 +164,7 @@ class LoginDialogState extends State<LoginDialog> {
               ),
               validator: FormBuilderValidators.compose([
                 FormBuilderValidators.required(
-                  errorText: 'Please enter first password?',
+                  errorText: CoreLocalizations.of(context)!.passwordError,
                 ),
                 (value) {
                   if (value != null) {
@@ -174,7 +172,9 @@ class LoginDialogState extends State<LoginDialog> {
                       r'^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).{8,}',
                     );
                     if (!regExpRequire.hasMatch(value)) {
-                      return 'At least 8 characters, including alpha, number & special character.';
+                      return CoreLocalizations.of(
+                        context,
+                      )!.passwordValidationError;
                     }
                   }
                   return null;
@@ -187,8 +187,8 @@ class LoginDialogState extends State<LoginDialog> {
               key: const Key("password2"),
               obscureText: _obscureText4,
               decoration: InputDecoration(
-                labelText: 'Verify Password',
-                helperText: 'Enter the new password again.',
+                labelText: CoreLocalizations.of(context)!.verifyPassword,
+                helperText: CoreLocalizations.of(context)!.verifyPasswordHelper,
                 suffixIcon: GestureDetector(
                   onTap: () {
                     setState(() {
@@ -202,17 +202,15 @@ class LoginDialogState extends State<LoginDialog> {
               ),
               validator: FormBuilderValidators.compose([
                 FormBuilderValidators.required(
-                  errorText: 'Enter password again to verify?',
+                  errorText: CoreLocalizations.of(context)!.verifyPasswordError,
                 ),
                 (value) {
-                  final password1 = _changePasswordFormKey
+                  final password = _changePasswordFormKey
                       .currentState
-                      ?.fields['password1']
+                      ?.fields['password']
                       ?.value;
-                  if (value != null &&
-                      password1 != null &&
-                      value != password1) {
-                    return 'Password is not matching';
+                  if (value != null && password != null && value != password) {
+                    return CoreLocalizations.of(context)!.passwordMismatch;
                   }
                   return null;
                 },
@@ -220,7 +218,7 @@ class LoginDialogState extends State<LoginDialog> {
             ),
             const SizedBox(height: 20),
             OutlinedButton(
-              child: const Text('Submit new Password'),
+              child: Text(CoreLocalizations.of(context)!.submitNewPassword),
               onPressed: () {
                 if (_changePasswordFormKey.currentState!.saveAndValidate()) {
                   final formData = _changePasswordFormKey.currentState!.value;
@@ -245,7 +243,7 @@ class LoginDialogState extends State<LoginDialog> {
     return popUp(
       height: user?.userGroup == UserGroup.admin ? 450 : 350,
       context: context,
-      title: 'Complete your registration',
+      title: CoreLocalizations.of(context)!.completeRegistration,
       child: FormBuilder(
         key: _moreInfoFormKey,
         initialValue: {
@@ -262,28 +260,32 @@ class LoginDialogState extends State<LoginDialog> {
               Column(
                 children: [
                   const SizedBox(height: 10),
-                  const Text("Welcome!", textAlign: TextAlign.center),
+                  Text(
+                    CoreLocalizations.of(context)!.welcome,
+                    textAlign: TextAlign.center,
+                  ),
                   Text("${user?.firstName} ${user?.lastName}"),
                   if (user?.userGroup == UserGroup.admin)
-                    const Text(
-                      "please enter both the company name\nand currency for the new company",
+                    Text(
+                      CoreLocalizations.of(context)!.enterCompanyAndCurrency,
                     ),
                   if (user?.userGroup != UserGroup.admin)
-                    const Text(
-                      "please enter optionally a company name you work for.",
-                    ),
+                    Text(CoreLocalizations.of(context)!.enterCompanyName),
                   const SizedBox(height: 10),
                   FormBuilderTextField(
                     name: 'companyName',
                     key: const Key('companyName'),
-                    decoration: const InputDecoration(
-                      labelText: 'Business Company name',
+                    decoration: InputDecoration(
+                      labelText: CoreLocalizations.of(
+                        context,
+                      )!.businessCompanyName,
                     ),
                     validator: user?.userGroup == UserGroup.admin
                         ? FormBuilderValidators.compose([
                             FormBuilderValidators.required(
-                              errorText:
-                                  'Please enter business name("Private" for Private person)',
+                              errorText: CoreLocalizations.of(
+                                context,
+                              )!.businessNameError,
                             ),
                           ])
                         : null,
@@ -294,11 +296,15 @@ class LoginDialogState extends State<LoginDialog> {
                     FormBuilderDropdown<Currency>(
                       name: 'currency',
                       key: const Key('currency'),
-                      decoration: const InputDecoration(labelText: 'Currency'),
-                      hint: const Text('Currency'),
+                      decoration: InputDecoration(
+                        labelText: CoreLocalizations.of(context)!.currency,
+                      ),
+                      hint: Text(CoreLocalizations.of(context)!.currency),
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(
-                          errorText: 'Currency field required!',
+                          errorText: CoreLocalizations.of(
+                            context,
+                          )!.currencyError,
                         ),
                       ]),
                       items: currencies.map((item) {
@@ -318,9 +324,11 @@ class LoginDialogState extends State<LoginDialog> {
                     FormBuilderCheckbox(
                       name: 'demoData',
                       key: const Key('demoData'),
-                      title: const Text("Generate demo data"),
-                      decoration: const InputDecoration(
-                        labelText: 'DemoData',
+                      title: Text(
+                        CoreLocalizations.of(context)!.generateDemoData,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: CoreLocalizations.of(context)!.demoData,
                         border: InputBorder.none,
                       ),
                       onChanged: (bool? value) {
@@ -332,7 +340,7 @@ class LoginDialogState extends State<LoginDialog> {
                   const SizedBox(height: 10),
                   OutlinedButton(
                     key: const Key('continue'),
-                    child: const Text('Continue'),
+                    child: Text(CoreLocalizations.of(context)!.continueButton),
                     onPressed: () {
                       if (_moreInfoFormKey.currentState!.saveAndValidate()) {
                         final formData = _moreInfoFormKey.currentState!.value;
@@ -393,10 +401,14 @@ class LoginDialogState extends State<LoginDialog> {
                 name: 'username',
                 autofocus: defaultUsername.isEmpty,
                 key: const Key('username'),
-                decoration: const InputDecoration(labelText: 'Username/Email'),
+                decoration: InputDecoration(
+                  labelText: CoreLocalizations.of(context)!.usernameEmail,
+                ),
                 validator: FormBuilderValidators.compose([
                   FormBuilderValidators.required(
-                    errorText: 'Please enter username or email?',
+                    errorText: CoreLocalizations.of(
+                      context,
+                    )!.usernameEmailError,
                   ),
                 ]),
               ),
@@ -406,12 +418,12 @@ class LoginDialogState extends State<LoginDialog> {
                 key: const Key('password'),
                 validator: FormBuilderValidators.compose([
                   FormBuilderValidators.required(
-                    errorText: 'Please enter your password?',
+                    errorText: CoreLocalizations.of(context)!.passwordError2,
                   ),
                 ]),
                 obscureText: _obscureText,
                 decoration: InputDecoration(
-                  labelText: 'Password',
+                  labelText: CoreLocalizations.of(context)!.password,
                   suffixIcon: GestureDetector(
                     onTap: () {
                       setState(() {
@@ -430,7 +442,7 @@ class LoginDialogState extends State<LoginDialog> {
                   Expanded(
                     child: OutlinedButton(
                       key: const Key('login'),
-                      child: const Text('Login'),
+                      child: Text(CoreLocalizations.of(context)!.login),
                       onPressed: () {
                         if (_loginFormKey.currentState!.saveAndValidate()) {
                           final formData = _loginFormKey.currentState!.value;
@@ -453,7 +465,7 @@ class LoginDialogState extends State<LoginDialog> {
               const SizedBox(height: 20),
               Center(
                 child: GestureDetector(
-                  child: const Text('forgot/change password?'),
+                  child: Text(CoreLocalizations.of(context)!.forgotPassword),
                   onTap: () async {
                     String username =
                         authenticate.user?.loginName ??
@@ -503,7 +515,7 @@ class LoginDialogState extends State<LoginDialog> {
       height: isPhone(context) ? 700 : 700,
       width: 400,
       context: context,
-      title: "Subscription",
+      title: CoreLocalizations.of(context)!.subscription,
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: FormBuilder(
@@ -522,7 +534,9 @@ class LoginDialogState extends State<LoginDialog> {
                 if (paymentMethod != null)
                   Center(
                     child: Text(
-                      'Your current payment method:\n${paymentMethod.ccDescription}',
+                      CoreLocalizations.of(
+                        context,
+                      )!.currentPaymentMethod(paymentMethod.ccDescription!),
                       style: const TextStyle(fontSize: 16),
                     ),
                   ),
@@ -530,8 +544,8 @@ class LoginDialogState extends State<LoginDialog> {
                   Center(
                     child: Text(
                       kReleaseMode && GlobalConfiguration().get("test") == false
-                          ? 'You have a trial period for 2 weeks,\nWe will only charge if you not cancel\nbefore that time'
-                          : 'This is a Test system\nso this credit Card will always be approved',
+                          ? CoreLocalizations.of(context)!.trialPeriod
+                          : CoreLocalizations.of(context)!.testSystem,
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.yellow,
@@ -568,9 +582,9 @@ class LoginDialogState extends State<LoginDialog> {
                         ),
                       ),
                   ],
-                  decoration: const InputDecoration(
-                    labelText: 'Payment Plan',
-                    border: OutlineInputBorder(
+                  decoration: InputDecoration(
+                    labelText: CoreLocalizations.of(context)!.paymentPlan,
+                    border: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(25.0)),
                     ),
                   ),
@@ -580,7 +594,7 @@ class LoginDialogState extends State<LoginDialog> {
                   validator: FormBuilderValidators.compose([
                     (val) {
                       if (val == null || val.isEmpty || val.length > 1) {
-                        return 'Please select a single plan';
+                        return CoreLocalizations.of(context)!.selectPlanError;
                       }
                       return null;
                     },
@@ -589,8 +603,8 @@ class LoginDialogState extends State<LoginDialog> {
                 const SizedBox(height: 10),
                 InputDecorator(
                   decoration: InputDecoration(
-                    labelText: 'Credit card information',
-                    hintText: 'Enter your credit card details',
+                    labelText: CoreLocalizations.of(context)!.creditCardInfo,
+                    hintText: CoreLocalizations.of(context)!.creditCardDetails,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25.0),
                     ),
@@ -601,9 +615,9 @@ class LoginDialogState extends State<LoginDialog> {
                     children: [
                       FormBuilderTextField(
                         name: 'cardNumber',
-                        decoration: const InputDecoration(
-                          labelText: 'Number',
-                          hintText: 'XXXX XXXX XXXX XXXX',
+                        decoration: InputDecoration(
+                          labelText: CoreLocalizations.of(context)!.number,
+                          hintText: CoreLocalizations.of(context)!.numberHint,
                         ),
                         validator: FormBuilderValidators.creditCard(),
                       ),
@@ -613,9 +627,13 @@ class LoginDialogState extends State<LoginDialog> {
                             flex: 2,
                             child: FormBuilderTextField(
                               name: 'expiryDate',
-                              decoration: const InputDecoration(
-                                labelText: 'Expiry month/year',
-                                hintText: 'XX/XX',
+                              decoration: InputDecoration(
+                                labelText: CoreLocalizations.of(
+                                  context,
+                                )!.expiryDate,
+                                hintText: CoreLocalizations.of(
+                                  context,
+                                )!.expiryDateHint,
                               ),
                               validator:
                                   FormBuilderValidators.creditCardExpirationDate(),
@@ -626,9 +644,13 @@ class LoginDialogState extends State<LoginDialog> {
                             flex: 1,
                             child: FormBuilderTextField(
                               name: 'cvvCode',
-                              decoration: const InputDecoration(
-                                labelText: 'CVV Code',
-                                hintText: 'XXX',
+                              decoration: InputDecoration(
+                                labelText: CoreLocalizations.of(
+                                  context,
+                                )!.cvvCode,
+                                hintText: CoreLocalizations.of(
+                                  context,
+                                )!.cvvHint,
                               ),
                               validator: FormBuilderValidators.creditCardCVC(),
                             ),
@@ -637,8 +659,8 @@ class LoginDialogState extends State<LoginDialog> {
                       ),
                       FormBuilderTextField(
                         name: 'cardHolderName',
-                        decoration: const InputDecoration(
-                          labelText: 'Name on Card',
+                        decoration: InputDecoration(
+                          labelText: CoreLocalizations.of(context)!.nameOnCard,
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -648,7 +670,9 @@ class LoginDialogState extends State<LoginDialog> {
                             if (expired)
                               OutlinedButton(
                                 key: const Key('payWeek'),
-                                child: const Text('Pay within one week'),
+                                child: Text(
+                                  CoreLocalizations.of(context)!.payWithinWeek,
+                                ),
                                 onPressed: () {
                                   context.read<AuthBloc>().add(
                                     AuthLogin(
@@ -663,8 +687,10 @@ class LoginDialogState extends State<LoginDialog> {
                             Expanded(
                               child: OutlinedButton(
                                 key: const Key('pay'),
-                                child: const Text(
-                                  'Register and charge in 2 weeks',
+                                child: Text(
+                                  CoreLocalizations.of(
+                                    context,
+                                  )!.registerAndCharge,
                                 ),
                                 onPressed: () {
                                   if (builderFormKey.currentState!

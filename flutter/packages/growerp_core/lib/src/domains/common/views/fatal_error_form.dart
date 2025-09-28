@@ -13,36 +13,40 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_core/l10n/generated/core_localizations.dart';
 
 class FatalErrorForm extends StatelessWidget {
   final String message;
   final String? route;
   final String buttonText;
 
-  const FatalErrorForm(
-      {super.key,
-      required this.message,
-      this.route,
-      this.buttonText = 'Restart'});
+  const FatalErrorForm({
+    super.key,
+    required this.message,
+    this.route,
+    this.buttonText = 'Restart',
+  });
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 300,
-              height: 200,
-              child: Text(
-                message,
-                style: const TextStyle(color: Colors.red, fontSize: 15),
-              ),
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 300,
+            height: 200,
+            child: Text(
+              message,
+              style: const TextStyle(color: Colors.red, fontSize: 15),
             ),
-            OutlinedButton(
-                child: Text(buttonText),
-                onPressed: () => Navigator.pushNamed(context, '/')),
-          ]),
+          ),
+          OutlinedButton(
+            child: Text(CoreLocalizations.of(context)!.restart),
+            onPressed: () => Navigator.pushNamed(context, '/'),
+          ),
+        ],
+      ),
     );
   }
 }

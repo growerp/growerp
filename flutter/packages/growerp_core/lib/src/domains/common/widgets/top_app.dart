@@ -26,7 +26,7 @@ import 'package:universal_io/io.dart';
 import '../../../get_core_bloc_providers.dart';
 import '../../../services/ws_client.dart';
 import '../../domains.dart';
-import '../../../l10n/generated/core_localizations.dart';
+import 'package:growerp_core/l10n/generated/core_localizations.dart';
 
 class TopApp extends StatelessWidget {
   TopApp({
@@ -85,89 +85,91 @@ class TopApp extends StatelessWidget {
           ...extraBlocProviders,
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
-          builder: (context, state) {
+          builder: (context, themeState) {
             localizationsDelegates.addAll(extraDelegates);
-            return GestureDetector(
-              onTap: () {
-                FocusScopeNode currentFocus = FocusScope.of(context);
+            return BlocBuilder<LocaleBloc, LocaleState>(
+              builder: (context, localeState) {
+                return GestureDetector(
+                  onTap: () {
+                    FocusScopeNode currentFocus = FocusScope.of(context);
 
-                if (!currentFocus.hasPrimaryFocus) {
-                  currentFocus.unfocus();
-                }
-              },
-              child: MaterialApp(
-                navigatorKey: _rootNavigatorKey,
-                title: title,
-                locale: const Locale(
-                  'en',
-                  'CA',
-                ), // Canadian English uses yyyy-MM-dd format
-                supportedLocales: const [
-                  Locale('en'),
-                  Locale('th'),
-                  Locale('en', 'CA'),
-                ],
-                scrollBehavior: const MaterialScrollBehavior().copyWith(
-                  dragDevices: {
-                    PointerDeviceKind.mouse,
-                    PointerDeviceKind.touch,
+                    if (!currentFocus.hasPrimaryFocus) {
+                      currentFocus.unfocus();
+                    }
                   },
-                ),
-                debugShowCheckedModeBanner: false,
-                localizationsDelegates: localizationsDelegates,
-                builder: (context, child) => ResponsiveBreakpoints.builder(
-                  child: child!,
-                  breakpoints: [
-                    const Breakpoint(start: 0, end: 500, name: MOBILE),
-                    const Breakpoint(start: 451, end: 800, name: TABLET),
-                    const Breakpoint(start: 801, end: 1920, name: DESKTOP),
-                    const Breakpoint(
-                      start: 1921,
-                      end: double.infinity,
-                      name: '4K',
+                  child: MaterialApp(
+                    navigatorKey: _rootNavigatorKey,
+                    title: title,
+                    locale: localeState.locale,
+                    supportedLocales: const [
+                      Locale('en'),
+                      Locale('th'),
+                      Locale('en', 'CA'),
+                    ],
+                    scrollBehavior: const MaterialScrollBehavior().copyWith(
+                      dragDevices: {
+                        PointerDeviceKind.mouse,
+                        PointerDeviceKind.touch,
+                      },
                     ),
-                  ],
-                ),
-                themeMode: state.themeMode,
-                theme: FlexThemeData.light(
-                  scheme: FlexScheme.jungle,
-                  subThemesData: const FlexSubThemesData(
-                    dialogBackgroundSchemeColor: SchemeColor.outlineVariant,
-                    inputDecoratorBorderType: FlexInputBorderType.underline,
+                    debugShowCheckedModeBanner: false,
+                    localizationsDelegates: localizationsDelegates,
+                    builder: (context, child) => ResponsiveBreakpoints.builder(
+                      child: child!,
+                      breakpoints: [
+                        const Breakpoint(start: 0, end: 500, name: MOBILE),
+                        const Breakpoint(start: 451, end: 800, name: TABLET),
+                        const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+                        const Breakpoint(
+                          start: 1921,
+                          end: double.infinity,
+                          name: '4K',
+                        ),
+                      ],
+                    ),
+                    themeMode: themeState.themeMode,
+                    theme: FlexThemeData.light(
+                      scheme: FlexScheme.jungle,
+                      subThemesData: const FlexSubThemesData(
+                        dialogBackgroundSchemeColor: SchemeColor.outlineVariant,
+                        inputDecoratorBorderType: FlexInputBorderType.underline,
+                      ),
+                      useMaterial3: true,
+                    ),
+                    darkTheme: FlexThemeData.dark(
+                      scheme: FlexScheme.jungle,
+                      subThemesData: const FlexSubThemesData(
+                        dialogBackgroundSchemeColor: SchemeColor.outlineVariant,
+                        inputDecoratorBorderType: FlexInputBorderType.underline,
+                      ),
+                      useMaterial3: true,
+                    ),
+                    onGenerateRoute: router,
+                    navigatorObservers: [AppNavObserver()],
+                    home: ScaffoldMessenger(
+                      child: Scaffold(
+                        body:
+                            (!kReleaseMode ||
+                                    GlobalConfiguration().get("test") ==
+                                        true) &&
+                                //banner not allowed in appstore when in test
+                                !Platform.isIOS &&
+                                !Platform.isMacOS
+                            ? Banner(
+                                message: "test",
+                                color: Colors.red,
+                                location: BannerLocation.topStart,
+                                child: HomeForm(
+                                  menuOptions: menuOptions,
+                                  title: title,
+                                ),
+                              )
+                            : HomeForm(menuOptions: menuOptions, title: title),
+                      ),
+                    ),
                   ),
-                  useMaterial3: true,
-                ),
-                darkTheme: FlexThemeData.dark(
-                  scheme: FlexScheme.jungle,
-                  subThemesData: const FlexSubThemesData(
-                    dialogBackgroundSchemeColor: SchemeColor.outlineVariant,
-                    inputDecoratorBorderType: FlexInputBorderType.underline,
-                  ),
-                  useMaterial3: true,
-                ),
-                onGenerateRoute: router,
-                navigatorObservers: [AppNavObserver()],
-                home: ScaffoldMessenger(
-                  child: Scaffold(
-                    body:
-                        (!kReleaseMode ||
-                                GlobalConfiguration().get("test") == true) &&
-                            //banner not allowed in appstore when in test
-                            !Platform.isIOS &&
-                            !Platform.isMacOS
-                        ? Banner(
-                            message: "test",
-                            color: Colors.red,
-                            location: BannerLocation.topStart,
-                            child: HomeForm(
-                              menuOptions: menuOptions,
-                              title: title,
-                            ),
-                          )
-                        : HomeForm(menuOptions: menuOptions, title: title),
-                  ),
-                ),
-              ),
+                );
+              },
             );
           },
         ),

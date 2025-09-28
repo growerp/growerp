@@ -17,6 +17,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:growerp_core/l10n/generated/core_localizations.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../domains.dart';
@@ -45,7 +46,8 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
     _firstNameController.text = kReleaseMode ? '' : 'John';
     _lastNameController.text = kReleaseMode ? '' : 'Doe';
     _authBloc = context.read<AuthBloc>();
-    _emailController.text = _authBloc.state.authenticate?.user?.loginName ??
+    _emailController.text =
+        _authBloc.state.authenticate?.user?.loginName ??
         (kReleaseMode ? '' : 'test@example.com');
     _presetCompany = context.read<Company?>();
   }
@@ -54,114 +56,138 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
+      backgroundColor: Colors.transparent,
+      body: BlocConsumer<AuthBloc, AuthState>(
+        listener: (context, state) {
           switch (state.status) {
             case AuthStatus.failure:
               HelperFunctions.showMessage(
-                  context, '${state.message}', Colors.red);
+                context,
+                '${state.message}',
+                Colors.red,
+              );
             case AuthStatus.unAuthenticated:
               Navigator.of(context).pop();
               break;
             default:
               HelperFunctions.showMessage(context, state.message, Colors.green);
           }
-        }, builder: (context, state) {
+        },
+        builder: (context, state) {
           if (state.status == AuthStatus.loading) {
             return const LoadingIndicator();
           } else {
             return Dialog(
-                insetPadding: const EdgeInsets.all(10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: popUp(
-                  context: context,
-                  title: "Registration",
-                  height: isPhone ? 350 : 300,
-                  child: _registerForm(_authBloc.state.authenticate!),
-                ));
+              insetPadding: const EdgeInsets.all(10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: popUp(
+                context: context,
+                title: CoreLocalizations.of(context)!.registration,
+                height: isPhone ? 350 : 300,
+                child: _registerForm(_authBloc.state.authenticate!),
+              ),
+            );
           }
-        }));
+        },
+      ),
+    );
   }
 
   Widget _registerForm(Authenticate authenticate) {
     return Form(
-        key: _registerFormKey,
-        child: SingleChildScrollView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            key: const Key('listView'),
-            child: Column(children: <Widget>[
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      key: const Key('firstName'),
-                      decoration:
-                          const InputDecoration(labelText: 'First Name'),
-                      controller: _firstNameController,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please enter your first name?';
-                        }
-                        return null;
-                      },
+      key: _registerFormKey,
+      child: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        key: const Key('listView'),
+        child: Column(
+          children: <Widget>[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    key: const Key('firstName'),
+                    decoration: InputDecoration(
+                      labelText: CoreLocalizations.of(context)!.firstName,
                     ),
+                    controller: _firstNameController,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return CoreLocalizations.of(context)!.firstNameError;
+                      }
+                      return null;
+                    },
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextFormField(
-                      key: const Key('lastName'),
-                      decoration: const InputDecoration(labelText: 'Last Name'),
-                      controller: _lastNameController,
-                      validator: (value) {
-                        if (value!.isEmpty)
-                          return 'Please enter your last name?';
-                        return null;
-                      },
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextFormField(
+                    key: const Key('lastName'),
+                    decoration: InputDecoration(
+                      labelText: CoreLocalizations.of(context)!.lastName,
                     ),
+                    controller: _lastNameController,
+                    validator: (value) {
+                      if (value!.isEmpty)
+                        return CoreLocalizations.of(context)!.lastNameError;
+                      return null;
+                    },
                   ),
-                ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              CoreLocalizations.of(context)!.tempPassword,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.orange),
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              key: const Key('email'),
+              decoration: InputDecoration(
+                labelText: CoreLocalizations.of(context)!.emailAddress,
               ),
-              const SizedBox(height: 10),
-              const Text('A temporary password will be send by email',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.orange,
-                  )),
-              const SizedBox(height: 10),
-              TextFormField(
-                key: const Key('email'),
-                decoration: const InputDecoration(labelText: 'Email address'),
-                controller: _emailController,
-                validator: (String? value) {
-                  if (value!.isEmpty) return 'Please enter Email address?';
-                  if (!RegExp(
-                          r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
-                      .hasMatch(value)) {
-                    return 'This is not a valid email';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              const SizedBox(height: 10),
-              OutlinedButton(
-                  key: const Key('newUserButton'),
-                  child: const Text('Register'),
-                  onPressed: () async {
-                    if (_registerFormKey.currentState!.validate()) {
-                      _authBloc.add(AuthRegister(User(
-                        company: _presetCompany ??
+              controller: _emailController,
+              validator: (String? value) {
+                if (value!.isEmpty)
+                  return CoreLocalizations.of(context)!.emailAddressError;
+                if (!RegExp(
+                  r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
+                ).hasMatch(value)) {
+                  return CoreLocalizations.of(context)!.emailAddressError2;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            OutlinedButton(
+              key: const Key('newUserButton'),
+              child: Text(CoreLocalizations.of(context)!.register),
+              onPressed: () async {
+                if (_registerFormKey.currentState!.validate()) {
+                  _authBloc.add(
+                    AuthRegister(
+                      User(
+                        company:
+                            _presetCompany ??
                             Company(partyId: _selectedCompany?.partyId),
                         firstName: _firstNameController.text,
                         lastName: _lastNameController.text,
                         email: _emailController.text,
                         userGroup: widget.admin ? UserGroup.admin : null,
-                      )));
-                    }
-                  }),
-            ])));
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
