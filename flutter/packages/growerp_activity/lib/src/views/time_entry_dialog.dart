@@ -19,6 +19,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../blocs/activity_bloc.dart';
+import '../l10n/activity_localizations.dart';
 
 class TimeEntryDialog extends StatefulWidget {
   final TimeEntry timeEntry;
@@ -61,13 +62,20 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
                         case ActivityBlocStatus.success:
                           HelperFunctions.showMessage(
                               context,
-                              '${widget.timeEntry.timeEntryId == null ? "Add" : "Update"} successfull',
+                              widget.timeEntry.timeEntryId == null
+                                  ? ActivityLocalizations.of(context)!
+                                      .timeEntry_addSuccess
+                                  : ActivityLocalizations.of(context)!
+                                      .timeEntry_updateSuccess,
                               Colors.green);
                           Navigator.of(context).pop();
                           break;
                         case ActivityBlocStatus.failure:
                           HelperFunctions.showMessage(
-                              context, 'Error: ${state.message}', Colors.red);
+                              context,
+                              ActivityLocalizations.of(context)!
+                                  .activity_error(state.message ?? 'unknown'),
+                              Colors.red);
                           break;
                         default:
                           const Text("????");
@@ -76,7 +84,8 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
                     child: popUp(
                         context: context,
                         child: _showForm(),
-                        title: 'Enter Time Entries',
+                        title:
+                            ActivityLocalizations.of(context)!.timeEntry_title,
                         height: 400,
                         width: 400)))));
   }
@@ -103,7 +112,10 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
             child: ListView(key: const Key('listView'), children: <Widget>[
               Center(
                   child: Text(
-                      "TimeEntry${widget.timeEntry.timeEntryId == null ? "New" : "${widget.timeEntry.timeEntryId}"}",
+                      widget.timeEntry.timeEntryId == null
+                          ? ActivityLocalizations.of(context)!.timeEntry_new
+                          : ActivityLocalizations.of(context)!
+                              .timeEntry_id(widget.timeEntry.timeEntryId!),
                       style: const TextStyle(
                           fontSize: 10,
                           color: Colors.black,
@@ -121,18 +133,21 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
                     child: OutlinedButton(
                       key: const Key('setDate'),
                       onPressed: () => selectDate(context),
-                      child: const Text('Update\n date'),
+                      child: Text(
+                          ActivityLocalizations.of(context)!.timeEntry_updateDate),
                     )),
               ]),
               const SizedBox(height: 20),
               TextFormField(
                 key: const Key('hours'),
-                decoration: const InputDecoration(labelText: '# hours'),
+                decoration: InputDecoration(
+                    labelText: ActivityLocalizations.of(context)!.timeEntry_hours),
                 controller: _hoursController,
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value!.isEmpty) {
-                    return 'Please enter a number of hours?';
+                    return ActivityLocalizations.of(context)!
+                        .timeEntry_hoursError;
                   }
                   return null;
                 },
@@ -140,15 +155,17 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
               const SizedBox(height: 20),
               TextFormField(
                 key: const Key('comments'),
-                decoration: const InputDecoration(labelText: 'Comments'),
+                decoration: InputDecoration(
+                    labelText:
+                        ActivityLocalizations.of(context)!.timeEntry_comments),
                 controller: _commentsController,
               ),
               const SizedBox(height: 30),
               OutlinedButton(
                   key: const Key('update'),
                   child: Text(widget.timeEntry.timeEntryId == null
-                      ? 'Create'
-                      : 'Update'),
+                      ? ActivityLocalizations.of(context)!.activity_create
+                      : ActivityLocalizations.of(context)!.activity_update),
                   onPressed: () async {
                     activityBloc.add(ActivityTimeEntryUpdate(TimeEntry(
                       date: _selectedDate,
