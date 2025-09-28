@@ -1,6 +1,6 @@
 {
-  "@@locale": "th",
-  "pageHomeWelcome": "ยินดีต้อนรับ {name}",
-  "screenNotFound": "ไม่พบหน้าจอ {screen}",
-  "classificationNotDefined": "ไม่พบบริษัท {classificationId} ในระบบ\nไปที่แอปผู้ดูแลระบบเพื่อสร้างใหม่!"
+    "@@locale": "th_TH",
+    "pageHomeWelcome": "ยินดีต้อนรับ {name}",
+    "screenNotFound": "ไม่พบหน้าจอ {screen}",
+    "classificationNotDefined": "ไม่พบบริษัท {classificationId} ในระบบ\n ไปที่แอปผู้ดูแลระบบเพื่อสร้าง!"
 }

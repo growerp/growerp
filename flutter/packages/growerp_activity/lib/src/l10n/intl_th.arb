@@ -1,3 +1,4 @@
 {
-  "price": "Price thai"
+  "@@locale": "th",
+  "activity_price": "ราคา"
 }

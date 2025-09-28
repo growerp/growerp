@@ -1,3 +1,4 @@
 {
-  "productName": "name thai"
+  "@@locale": "th",
+  "productName": "ชื่อสินค้า"
 }
