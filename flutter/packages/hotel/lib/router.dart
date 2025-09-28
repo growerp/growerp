@@ -22,95 +22,152 @@ import 'menu_option_data.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   debugPrint(
-      ">>>NavigateTo { ${settings.name} with: ${settings.arguments.toString()} }");
+    ">>>NavigateTo { ${settings.name} with: ${settings.arguments.toString()} }",
+  );
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 0, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 0,
+          tabIndex: 0,
+        ),
+      );
     case '/company':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) =>
-              ShowCompanyDialog(settings.arguments as Company));
+        settings: settings,
+        builder: (context) => ShowCompanyDialog(settings.arguments as Company),
+      );
     case '/user':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => UserDialog(settings.arguments as User));
+        settings: settings,
+        builder: (context) => UserDialog(settings.arguments as User),
+      );
     case '/myHotel':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 1,
+          tabIndex: 0,
+        ),
+      );
     case '/customers':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 5, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 5,
+          tabIndex: 0,
+        ),
+      );
     case '/admins':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 1, tabIndex: 1));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 1,
+          tabIndex: 1,
+        ),
+      );
     case '/employees':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 1, tabIndex: 2));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 1,
+          tabIndex: 2,
+        ),
+      );
     case '/rooms':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 2, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 2,
+          tabIndex: 0,
+        ),
+      );
     case '/findoc':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => ShowFinDocDialog(settings.arguments as FinDoc));
+        settings: settings,
+        builder: (context) => ShowFinDocDialog(settings.arguments as FinDoc),
+      );
     case '/reservations':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 3, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 3,
+          tabIndex: 0,
+        ),
+      );
     case '/checkInOut':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 4, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 4,
+          tabIndex: 0,
+        ),
+      );
     case '/accounting':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => HomeForm(menuOptions: acctMenuOptions));
+        settings: settings,
+        builder: (context) => const HomeForm(menuOptions: getAcctMenuOptions),
+      );
     case '/acctSales':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 1, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getAcctMenuOptions(context),
+          menuIndex: 1,
+          tabIndex: 0,
+        ),
+      );
     case '/acctPurchase':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 2, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getAcctMenuOptions(context),
+          menuIndex: 2,
+          tabIndex: 0,
+        ),
+      );
     case '/acctLedger':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 3, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getAcctMenuOptions(context),
+          menuIndex: 3,
+          tabIndex: 0,
+        ),
+      );
     case '/acctReports':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 4, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getAcctMenuOptions(context),
+          menuIndex: 4,
+          tabIndex: 0,
+        ),
+      );
     case '/printer':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) =>
-              PrintingForm(finDocIn: settings.arguments as FinDoc));
+        settings: settings,
+        builder: (context) =>
+            PrintingForm(finDocIn: settings.arguments as FinDoc),
+      );
     case '/acctSetup':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 5, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getAcctMenuOptions(context),
+          menuIndex: 5,
+          tabIndex: 0,
+        ),
+      );
     default:
       return coreRoute(settings);
   }

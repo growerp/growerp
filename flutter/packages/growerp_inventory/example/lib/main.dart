@@ -37,7 +37,7 @@ Future main() async {
       notificationClient: notificationClient,
       title: 'GrowERP package: growerp_inventory.',
       router: generateRoute,
-      menuOptions: menuOptions,
+      menuOptions: (context) => menuOptions(context),
       extraDelegates: const [InventoryLocalizations.delegate],
       extraBlocProviders: getInventoryBlocProviders(restClient, "AppAdmin"),
     ),
@@ -45,7 +45,7 @@ Future main() async {
 }
 
 // Menu definition
-List<MenuOption> menuOptions = [
+List<MenuOption> menuOptions(BuildContext context) => [
   MenuOption(
     image: 'packages/growerp_core/images/dashBoardGrey.png',
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
@@ -75,9 +75,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.money),
       ),
       TabItem(
-        form: const LocationList(
-          key: Key('Locations'),
-        ),
+        form: const LocationList(key: Key('Locations')),
         label: 'WH Locations',
         icon: const Icon(Icons.location_pin),
       ),
@@ -88,31 +86,46 @@ List<MenuOption> menuOptions = [
 // routing
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (kDebugMode) {
-    debugPrint('>>>NavigateTo { ${settings.name} '
-        'with: ${settings.arguments.toString()} }');
+    debugPrint(
+      '>>>NavigateTo { ${settings.name} '
+      'with: ${settings.arguments.toString()} }',
+    );
   }
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
-          builder: (context) => HomeForm(menuOptions: menuOptions));
+        builder: (context) => const HomeForm(menuOptions: menuOptions),
+      );
     case '/company':
       return MaterialPageRoute(
-          builder: (context) => HomeForm(menuOptions: menuOptions));
+        builder: (context) => HomeForm(menuOptions: (ctx) => menuOptions(ctx)),
+      );
     case '/user':
       return MaterialPageRoute(
-          builder: (context) => HomeForm(menuOptions: menuOptions));
+        builder: (context) => HomeForm(menuOptions: (ctx) => menuOptions(ctx)),
+      );
     case '/inventory':
       return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 2, tabIndex: 0));
+        builder: (context) => DisplayMenuOption(
+          menuList: menuOptions(context),
+          menuIndex: 2,
+          tabIndex: 0,
+        ),
+      );
     case '/assets':
       return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 3, tabIndex: 0));
+        builder: (context) => DisplayMenuOption(
+          menuList: menuOptions(context),
+          menuIndex: 3,
+          tabIndex: 0,
+        ),
+      );
     default:
       return MaterialPageRoute(
-          builder: (context) => FatalErrorForm(
-              message: "Routing not found for request: ${settings.name}"));
+        builder: (context) => FatalErrorForm(
+          message: "Routing not found for request: ${settings.name}",
+        ),
+      );
   }
 }
 
@@ -121,25 +134,30 @@ class MainMenu extends StatelessWidget {
   const MainMenu({super.key});
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state.status == AuthStatus.authenticated) {
-        Authenticate authenticate = state.authenticate!;
-        return DashBoardForm(dashboardItems: [
-          makeDashboardItem('dbCompany', context, menuOptions[1], [
-            authenticate.company!.name!.length > 20
-                ? "${authenticate.company!.name!.substring(0, 20)}..."
-                : "${authenticate.company!.name}",
-            "Email: ${authenticate.company!.email}",
-            "Currency: ${authenticate.company!.currency!.description}",
-            "Employees: ${authenticate.company!.employees.length}",
-          ]),
-          makeDashboardItem('dbInventory', context, menuOptions[2], [
-            "Number of assets: ${authenticate.stats?.assets ?? 0}",
-            "Wh Locations: ${authenticate.stats?.whLocations ?? 0}",
-          ]),
-        ]);
-      }
-      return const LoadingIndicator();
-    });
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          Authenticate authenticate = state.authenticate!;
+          final options = menuOptions(context);
+          return DashBoardForm(
+            dashboardItems: [
+              makeDashboardItem('dbCompany', context, options[1], [
+                authenticate.company!.name!.length > 20
+                    ? "${authenticate.company!.name!.substring(0, 20)}..."
+                    : "${authenticate.company!.name}",
+                "Email: ${authenticate.company!.email}",
+                "Currency: ${authenticate.company!.currency!.description}",
+                "Employees: ${authenticate.company!.employees.length}",
+              ]),
+              makeDashboardItem('dbInventory', context, options[2], [
+                "Number of assets: ${authenticate.stats?.assets ?? 0}",
+                "Wh Locations: ${authenticate.stats?.whLocations ?? 0}",
+              ]),
+            ],
+          );
+        }
+        return const LoadingIndicator();
+      },
+    );
   }
 }

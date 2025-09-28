@@ -20,6 +20,34 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+// Static menuOptions for testing (no localization needed)
+List<MenuOption> testMenuOptions = [
+  MenuOption(
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    title: 'Main',
+    route: '/',
+    userGroups: <UserGroup>[UserGroup.admin, UserGroup.employee],
+    child: const MainMenu(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/companyGrey.png',
+    selectedImage: 'packages/growerp_core/images/company.png',
+    title: 'Organization',
+    route: '/company',
+    userGroups: <UserGroup>[UserGroup.admin, UserGroup.employee],
+    child: const MainMenu(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    title: 'Logged in User',
+    route: '/user',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const MainMenu(),
+  ),
+];
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -30,19 +58,23 @@ void main() {
   // not implemented yet, use integration_test/chat_test.dart and lib/chatEcho_main.dart
   testWidgets('''GrowERP chat test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, generateRoute, menuOptions,
-        CoreLocalizations.localizationsDelegates,
-        restClient: restClient,
-        clear: true); // use data from previous run, ifnone same as true
+    await CommonTest.startTestApp(
+      tester,
+      generateRoute,
+      testMenuOptions,
+      CoreLocalizations.localizationsDelegates,
+      restClient: restClient,
+      clear: true,
+    ); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester);
     //  await UserTest.selectEmployees(tester);
     //  await UserTest.addAdministrators(tester, [administrators[0]], check: false);
-//    await ChatTest.selectChatRoom(tester);
-//    await ChatTest.addRooms(tester, chatRooms);
-//    await ChatTest.updateRooms(tester);
-//    await ChatTest.deleteRooms(tester);
+    //    await ChatTest.selectChatRoom(tester);
+    //    await ChatTest.addRooms(tester, chatRooms);
+    //    await ChatTest.updateRooms(tester);
+    //    await ChatTest.deleteRooms(tester);
     // needchat echo running
-//    await ChatTest.sendDirectMessage(tester);
-//    await ChatTest.sendRoomMessage(tester);
+    //    await ChatTest.sendDirectMessage(tester);
+    //    await ChatTest.sendRoomMessage(tester);
   });
 }

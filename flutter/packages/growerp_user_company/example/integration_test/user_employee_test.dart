@@ -21,6 +21,19 @@ import 'package:growerp_core/test_data.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+
+// Static menuOptions for testing (no localization needed)
+List<MenuOption> testMenuOptions = [
+  MenuOption(
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    title: 'Main',
+    route: '/',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const MainMenu(),
+  ),
+];
+
 Future<void> main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -34,7 +47,7 @@ Future<void> main() async {
 
   testWidgets('''GrowERP user employee test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+    await CommonTest.startTestApp(tester, generateRoute, testMenuOptions,
         UserCompanyLocalizations.localizationsDelegates,
         restClient: restClient,
         clear: true,

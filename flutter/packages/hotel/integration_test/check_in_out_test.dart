@@ -21,11 +21,22 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:intl/intl.dart';
 import 'package:hotel/router.dart' as router;
-import 'package:hotel/menu_option_data.dart';
 import 'package:hotel/main.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import 'room_rental_test.dart';
+
+// Static menuOptions for testing (no localization needed)
+List<MenuOption> testMenuOptions = [
+  MenuOption(
+    image: "packages/growerp_core/images/dashBoardGrey.png",
+    selectedImage: "packages/growerp_core/images/dashBoard.png",
+    title: 'Main',
+    route: '/',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const Center(child: Text('Test Menu')),
+  ),
+];
 
 Future<void> selectCheckInOut(WidgetTester tester) async {
   await CommonTest.selectOption(tester, '/checkInOut', 'FinDocListCheckIn');
@@ -59,7 +70,7 @@ void main() {
       title: 'Hotel check in Test',
       tester,
       router.generateRoute,
-      menuOptions,
+      testMenuOptions,
       delegates,
       blocProviders: getHotelBlocProviders(restClient, classificationId),
       classificationId: classificationId,
@@ -99,7 +110,7 @@ void main() {
       title: 'Hotel Checkout Test',
       tester,
       router.generateRoute,
-      menuOptions,
+      testMenuOptions,
       delegates,
       blocProviders: getHotelBlocProviders(restClient, 'AppHotel'),
       classificationId: classificationId,
@@ -135,7 +146,7 @@ void main() {
       title: 'Hotel reservation empty checkin/out Test',
       tester,
       router.generateRoute,
-      menuOptions,
+      testMenuOptions,
       delegates,
       blocProviders: getHotelBlocProviders(restClient, classificationId),
       classificationId: classificationId,

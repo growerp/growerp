@@ -33,53 +33,56 @@ class AdminDbForm extends StatelessWidget {
         .currency!
         .currencyId!;
     String currencySymbol = NumberFormat.simpleCurrency(
-            locale: Platform.localeName, name: currencyId)
-        .currencySymbol;
+      locale: Platform.localeName,
+      name: currencyId,
+    ).currencySymbol;
     Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Expanded(
-          child: DashBoardForm(dashboardItems: [
-            makeDashboardItem('dbCompany', context, menuOptions[1], [
-              authenticate.company!.name!.length > 20
-                  ? "${authenticate.company!.name!.substring(0, 20)}..."
-                  : "${authenticate.company!.name}",
-              "Administrators: ${authenticate.stats?.admins ?? 0}",
-              "Other Employees: ${authenticate.stats?.employees ?? 0}",
-            ]),
-            makeDashboardItem('dbCrm', context, menuOptions[2], [
-              "All Opportunities: ${authenticate.stats?.opportunities ?? 0}",
-              "Leads: ${authenticate.stats?.leads ?? 0}",
-              "Customers: ${authenticate.stats?.customers ?? 0}",
-            ]),
-            makeDashboardItem('dbCatalog', context, menuOptions[3], [
-              "Categories: ${authenticate.stats?.categories ?? 0}",
-              "Products: ${authenticate.stats?.products ?? 0}",
-              "Assets: ${authenticate.stats?.assets ?? 0}",
-            ]),
-            makeDashboardItem('dbOrders', context, menuOptions[4], [
-              "Sales Orders: ${authenticate.stats?.openSlsOrders ?? 0}",
-              "Customers: ${authenticate.stats?.customers ?? 0}",
-              "Purchase Orders: ${authenticate.stats?.openPurOrders ?? 0}",
-              "Suppliers: ${authenticate.stats?.suppliers ?? 0}",
-            ]),
-            makeDashboardItem('dbInventory', context, menuOptions[5], [
-              "Incoming Shipments: ${authenticate.stats?.incomingShipments ?? 0}",
-              "Outgoing Shipments: ${authenticate.stats?.outgoingShipments ?? 0}",
-              "Wh Locations: ${authenticate.stats?.whLocations ?? 0}",
-            ]),
-            makeDashboardItem('dbAccounting', context, menuOptions[6], [
-              "Sales open invoices:",
-              "$currencySymbol "
-                  "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
-                  "(${authenticate.stats?.salesInvoicesNotPaidCount ?? 0})",
-              "Purchase unpaid invoices:",
-              "$currencySymbol "
-                  "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
-                  "(${authenticate.stats?.purchInvoicesNotPaidCount ?? 0})",
-            ])
-          ]),
+          child: DashBoardForm(
+            dashboardItems: [
+              makeDashboardItem('dbCompany', context, menuOptions(context)[1], [
+                authenticate.company!.name!.length > 20
+                    ? "${authenticate.company!.name!.substring(0, 20)}..."
+                    : "${authenticate.company!.name}",
+                "${CoreLocalizations.of(context)!.administrators}: ${authenticate.stats?.admins ?? 0}",
+                "${CoreLocalizations.of(context)!.otherEmployees}: ${authenticate.stats?.employees ?? 0}",
+              ]),
+              makeDashboardItem('dbCrm', context, menuOptions(context)[2], [
+                "${CoreLocalizations.of(context)!.allOpportunities}: ${authenticate.stats?.opportunities ?? 0}",
+                "${CoreLocalizations.of(context)!.leads}: ${authenticate.stats?.leads ?? 0}",
+                "${CoreLocalizations.of(context)!.customers}: ${authenticate.stats?.customers ?? 0}",
+              ]),
+              makeDashboardItem('dbCatalog', context, menuOptions(context)[3], [
+                "${CoreLocalizations.of(context)!.categories}: ${authenticate.stats?.categories ?? 0}",
+                "${CoreLocalizations.of(context)!.products}: ${authenticate.stats?.products ?? 0}",
+                "${CoreLocalizations.of(context)!.assets}: ${authenticate.stats?.assets ?? 0}",
+              ]),
+              makeDashboardItem('dbOrders', context, menuOptions(context)[4], [
+                "${CoreLocalizations.of(context)!.salesOrders}: ${authenticate.stats?.openSlsOrders ?? 0}",
+                "${CoreLocalizations.of(context)!.customers}: ${authenticate.stats?.customers ?? 0}",
+                "${CoreLocalizations.of(context)!.purchaseOrders}: ${authenticate.stats?.openPurOrders ?? 0}",
+                "${CoreLocalizations.of(context)!.suppliers}: ${authenticate.stats?.suppliers ?? 0}",
+              ]),
+              makeDashboardItem('dbInventory', context, menuOptions(context)[5], [
+                "${CoreLocalizations.of(context)!.incomingShipments}: ${authenticate.stats?.incomingShipments ?? 0}",
+                "${CoreLocalizations.of(context)!.outgoingShipments}: ${authenticate.stats?.outgoingShipments ?? 0}",
+                "${CoreLocalizations.of(context)!.whLocations}: ${authenticate.stats?.whLocations ?? 0}",
+              ]),
+              makeDashboardItem('dbAccounting', context, menuOptions(context)[6], [
+                "${CoreLocalizations.of(context)!.salesOpenInvoices}:",
+                "$currencySymbol "
+                    "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
+                    "(${authenticate.stats?.salesInvoicesNotPaidCount ?? 0})",
+                "${CoreLocalizations.of(context)!.purchaseUnpaidInvoices}:",
+                "$currencySymbol "
+                    "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
+                    "(${authenticate.stats?.purchInvoicesNotPaidCount ?? 0})",
+              ]),
+            ],
+          ),
         ),
       ],
     );

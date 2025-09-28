@@ -35,33 +35,38 @@ class AccountingForm extends StatelessWidget {
         .currency!
         .currencyId!;
     String currencySymbol = NumberFormat.simpleCurrency(
-            locale: Platform.localeName, name: currencyId)
-        .currencySymbol;
+      locale: Platform.localeName,
+      name: currencyId,
+    ).currencySymbol;
     Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
+    List<MenuOption> acctOptions = getAcctMenuOptions(context);
     return DashBoardForm(
       key: const Key('AcctDashBoard'),
       dashboardItems: [
-        makeDashboardItem('acctSales', context, acctMenuOptions[1], [
+        makeDashboardItem('acctSales', context, acctOptions[1], [
           "Open invoices: ",
           "$currencySymbol "
               "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.salesInvoicesNotPaidCount})",
         ]),
-        makeDashboardItem('acctPurchase', context, acctMenuOptions[2], [
+        makeDashboardItem('acctPurchase', context, acctOptions[2], [
           "Open invoices: ",
           "$currencySymbol "
               "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.purchInvoicesNotPaidCount})",
         ]),
-        makeDashboardItem('acctLedger', context, acctMenuOptions[3], []),
-        makeDashboardItem('acctReports', context, acctMenuOptions[4], [
+        makeDashboardItem('acctLedger', context, acctOptions[3], []),
+        makeDashboardItem('acctReports', context, acctOptions[4], [
           "Revenue Expense",
           "Balance Sheet",
           "Balance summary",
         ]),
-        makeDashboardItem('AcctSetup', context, acctMenuOptions[5],
-            ["Time Periods", "Item Types", "Payment Types"]),
-        makeDashboardItem('Main dashboard', context, acctMenuOptions[6], []),
+        makeDashboardItem('AcctSetup', context, acctOptions[5], [
+          "Time Periods",
+          "Item Types",
+          "Payment Types",
+        ]),
+        makeDashboardItem('Main dashboard', context, acctOptions[6], []),
       ],
     );
   }

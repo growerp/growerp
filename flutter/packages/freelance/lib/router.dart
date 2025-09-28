@@ -1,5 +1,5 @@
 /*
- * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * This GrowERP software is               menuList: getMenuOptions(context), menuIndex: 6, tabIndex: 0));n the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
  * 
  * To the extent possible under law, the author(s) have dedicated all
@@ -21,84 +21,140 @@ import 'acct_menu_options.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (kDebugMode) {
-    debugPrint(">>>NavigateTo { ${settings.name} "
-        "with: ${settings.arguments.toString()} }");
+    debugPrint(
+      ">>>NavigateTo { ${settings.name} "
+      "with: ${settings.arguments.toString()} }",
+    );
   }
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 0, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 0,
+          tabIndex: 0,
+        ),
+      );
     case '/company':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 1,
+          tabIndex: 0,
+        ),
+      );
     case '/tasks':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 1,
+          tabIndex: 0,
+        ),
+      );
     case '/orders':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 4, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 4,
+          tabIndex: 0,
+        ),
+      );
     case '/catalog':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 3, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 3,
+          tabIndex: 0,
+        ),
+      );
     case '/sales':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 4, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 4,
+          tabIndex: 0,
+        ),
+      );
     case '/purchase':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 5, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 5,
+          tabIndex: 0,
+        ),
+      );
     case '/crm':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 2, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 2,
+          tabIndex: 0,
+        ),
+      );
     case '/accounting':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => HomeForm(menuOptions: acctMenuOptions));
+        settings: settings,
+        builder: (context) => const HomeForm(menuOptions: getAcctMenuOptions),
+      );
     case '/acctSales':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 1, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getAcctMenuOptions(context),
+          menuIndex: 1,
+          tabIndex: 0,
+        ),
+      );
     case '/acctPurchase':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 2, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getAcctMenuOptions(context),
+          menuIndex: 2,
+          tabIndex: 0,
+        ),
+      );
     case '/acctLedger':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 3, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getAcctMenuOptions(context),
+          menuIndex: 3,
+          tabIndex: 0,
+        ),
+      );
     case '/acctReports':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 4, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getAcctMenuOptions(context),
+          menuIndex: 4,
+          tabIndex: 0,
+        ),
+      );
     case '/website':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) =>
-              DisplayMenuOption(menuList: menuOptions, menuIndex: 5));
+        settings: settings,
+        builder: (context) =>
+            DisplayMenuOption(menuList: getMenuOptions(context), menuIndex: 5),
+      );
     case '/acctSetup':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 5, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getAcctMenuOptions(context),
+          menuIndex: 5,
+          tabIndex: 0,
+        ),
+      );
     default:
       return coreRoute(settings);
   }

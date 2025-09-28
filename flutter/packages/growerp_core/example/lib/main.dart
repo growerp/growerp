@@ -35,22 +35,16 @@ Future main() async {
       classificationId: 'AppAdmin',
       chatClient: chatClient,
       notificationClient: notificationClient,
-      title: 'GrowERP package: growerp_core.',
+      title: 'GrowERP core package',
       router: generateRoute,
-      menuOptions: menuOptions,
-      extraBlocProviders: getCoreBlocProviders(
-        restClient,
-        chatClient,
-        notificationClient,
-        'AppAdmin',
-        null,
-      ),
+      menuOptions: (context) => menuOptions(context),
+      extraDelegates: const [],
     ),
   );
 }
 
 // Menu definition
-List<MenuOption> menuOptions = [
+List<MenuOption> menuOptions(BuildContext context) => [
   MenuOption(
     image: 'packages/growerp_core/images/dashBoardGrey.png',
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
@@ -88,15 +82,15 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
-        builder: (context) => HomeForm(menuOptions: menuOptions),
+        builder: (context) => const HomeForm(menuOptions: menuOptions),
       );
     case '/company':
       return MaterialPageRoute(
-        builder: (context) => HomeForm(menuOptions: menuOptions),
+        builder: (context) => const HomeForm(menuOptions: menuOptions),
       );
     case '/user':
       return MaterialPageRoute(
-        builder: (context) => HomeForm(menuOptions: menuOptions),
+        builder: (context) => const HomeForm(menuOptions: menuOptions),
       );
     default:
       return coreRoute(settings);
@@ -112,9 +106,10 @@ class MainMenu extends StatelessWidget {
       builder: (context, state) {
         if (state.status == AuthStatus.authenticated) {
           Authenticate authenticate = state.authenticate!;
+          final options = menuOptions(context);
           return DashBoardForm(
             dashboardItems: [
-              makeDashboardItem('dbCompany', context, menuOptions[1], [
+              makeDashboardItem('dbCompany', context, options[1], [
                 authenticate.company!.name!.length > 20
                     ? "${authenticate.company!.name!.substring(0, 20)}..."
                     : "${authenticate.company!.name}",
@@ -122,7 +117,7 @@ class MainMenu extends StatelessWidget {
                 "Currency: ${authenticate.company!.currency!.description}",
                 "Employees: ${authenticate.company!.employees.length}",
               ]),
-              makeDashboardItem('dbUser', context, menuOptions[2], [
+              makeDashboardItem('dbUser', context, options[2], [
                 "${authenticate.user!.firstName!} ${authenticate.user!.lastName!}",
                 "Email: ${authenticate.user!.email}",
                 "Login name:",

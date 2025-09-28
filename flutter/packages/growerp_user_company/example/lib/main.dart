@@ -34,9 +34,9 @@ Future main() async {
       classificationId: classificationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
-      title: 'GrowERP package: growerp_user_company.',
+      title: 'GrowERP package user & company',
       router: generateRoute,
-      menuOptions: menuOptions,
+      menuOptions: (context) => menuOptions(context),
       extraDelegates: const [UserCompanyLocalizations.delegate],
       extraBlocProviders: getExampleBlocProviders(restClient, classificationId),
     ),
@@ -51,7 +51,7 @@ List<BlocProvider> getExampleBlocProviders(
 }
 
 // Menu definition
-List<MenuOption> menuOptions = [
+List<MenuOption> menuOptions(BuildContext context) => [
   MenuOption(
     image: 'packages/growerp_core/images/dashBoardGrey.png',
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
@@ -173,7 +173,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
-        builder: (context) => HomeForm(menuOptions: menuOptions),
+        builder: (context) => const HomeForm(menuOptions: menuOptions),
       );
     case '/company':
       return MaterialPageRoute(
@@ -185,18 +185,27 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       );
     case '/companies':
       return MaterialPageRoute(
-        builder: (context) =>
-            DisplayMenuOption(menuList: menuOptions, menuIndex: 1, tabIndex: 0),
+        builder: (context) => DisplayMenuOption(
+          menuList: menuOptions(context),
+          menuIndex: 1,
+          tabIndex: 0,
+        ),
       );
     case '/users':
       return MaterialPageRoute(
-        builder: (context) =>
-            DisplayMenuOption(menuList: menuOptions, menuIndex: 2, tabIndex: 0),
+        builder: (context) => DisplayMenuOption(
+          menuList: menuOptions(context),
+          menuIndex: 2,
+          tabIndex: 0,
+        ),
       );
     case '/companiesUsers':
       return MaterialPageRoute(
-        builder: (context) =>
-            DisplayMenuOption(menuList: menuOptions, menuIndex: 3, tabIndex: 0),
+        builder: (context) => DisplayMenuOption(
+          menuList: menuOptions(context),
+          menuIndex: 3,
+          tabIndex: 0,
+        ),
       );
     default:
       return MaterialPageRoute(
@@ -217,34 +226,39 @@ class MainMenu extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Expanded(
-          child: DashBoardForm(
-            dashboardItems: [
-              makeDashboardItem('dbCompanies', context, menuOptions[1], [
-                authenticate.company!.name!.length > 20
-                    ? "${authenticate.company!.name!.substring(0, 20)}..."
-                    : "${authenticate.company!.name}",
-                "Customers: ${authenticate.stats != null ? authenticate.stats!.customers : 0}",
-                "Leads: ${authenticate.stats != null ? authenticate.stats!.leads : 0}",
-                "Suppliers: ${authenticate.stats != null ? authenticate.stats!.suppliers : 0}",
-              ]),
-              makeDashboardItem('dbUsers', context, menuOptions[2], [
-                authenticate.company!.name!.length > 20
-                    ? "${authenticate.company!.name!.substring(0, 20)}..."
-                    : "${authenticate.company!.name}",
-                "Employees: ${authenticate.company?.employees.length ?? 0}",
-                "Customers: ${authenticate.stats != null ? authenticate.stats?.customers ?? 0 : 0}",
-                "Leads: ${authenticate.stats != null ? authenticate.stats?.leads ?? 0 : 0}",
-                "Suppliers: ${authenticate.stats != null ? authenticate.stats?.suppliers ?? 0 : 0}",
-              ]),
-              makeDashboardItem('dbCompaniesUsers', context, menuOptions[3], [
-                authenticate.company!.name!.length > 20
-                    ? "${authenticate.company!.name!.substring(0, 20)}..."
-                    : "${authenticate.company!.name}",
-                "Customers: ${authenticate.stats != null ? authenticate.stats?.customers ?? 0 : 0}",
-                "Leads: ${authenticate.stats != null ? authenticate.stats?.leads ?? 0 : 0}",
-                "Suppliers: ${authenticate.stats != null ? authenticate.stats?.suppliers ?? 0 : 0}",
-              ]),
-            ],
+          child: Builder(
+            builder: (context) {
+              final options = menuOptions(context);
+              return DashBoardForm(
+                dashboardItems: [
+                  makeDashboardItem('dbCompanies', context, options[1], [
+                    authenticate.company!.name!.length > 20
+                        ? "${authenticate.company!.name!.substring(0, 20)}..."
+                        : "${authenticate.company!.name}",
+                    "Customers: ${authenticate.stats != null ? authenticate.stats!.customers : 0}",
+                    "Leads: ${authenticate.stats != null ? authenticate.stats!.leads : 0}",
+                    "Suppliers: ${authenticate.stats != null ? authenticate.stats!.suppliers : 0}",
+                  ]),
+                  makeDashboardItem('dbUsers', context, options[2], [
+                    authenticate.company!.name!.length > 20
+                        ? "${authenticate.company!.name!.substring(0, 20)}..."
+                        : "${authenticate.company!.name}",
+                    "Employees: ${authenticate.company?.employees.length ?? 0}",
+                    "Customers: ${authenticate.stats != null ? authenticate.stats?.customers ?? 0 : 0}",
+                    "Leads: ${authenticate.stats != null ? authenticate.stats?.leads ?? 0 : 0}",
+                    "Suppliers: ${authenticate.stats != null ? authenticate.stats?.suppliers ?? 0 : 0}",
+                  ]),
+                  makeDashboardItem('dbCompaniesUsers', context, options[3], [
+                    authenticate.company!.name!.length > 20
+                        ? "${authenticate.company!.name!.substring(0, 20)}..."
+                        : "${authenticate.company!.name}",
+                    "Customers: ${authenticate.stats != null ? authenticate.stats?.customers ?? 0 : 0}",
+                    "Leads: ${authenticate.stats != null ? authenticate.stats?.leads ?? 0 : 0}",
+                    "Suppliers: ${authenticate.stats != null ? authenticate.stats?.suppliers ?? 0 : 0}",
+                  ]),
+                ],
+              );
+            },
           ),
         ),
       ],

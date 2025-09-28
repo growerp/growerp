@@ -47,7 +47,7 @@ Future main() async {
       notificationClient: WsClient('notws'),
       title: 'GrowERP Activity Management: ToDo, Event, ....',
       router: router.generateRoute,
-      menuOptions: menuOptions,
+      menuOptions: (context) => menuOptions(context),
       extraDelegates: extraDelegates,
       extraBlocProviders: getExampleBlocProviders(restClient, classificationId),
     ),
@@ -55,7 +55,7 @@ Future main() async {
 }
 
 // Menu definition
-List<MenuOption> menuOptions = [
+List<MenuOption> menuOptions(BuildContext context) => [
   MenuOption(
     image: 'packages/growerp_core/images/dashBoardGrey.png',
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
@@ -92,12 +92,13 @@ class MainMenuForm extends StatelessWidget {
       builder: (context, state) {
         if (state.status == AuthStatus.authenticated) {
           Authenticate authenticate = state.authenticate!;
+          final options = menuOptions(context);
           return DashBoardForm(
             dashboardItems: [
-              makeDashboardItem('dbTodo', context, menuOptions[1], [
+              makeDashboardItem('dbTodo', context, options[1], [
                 "To Do: ${authenticate.stats?.todoActivities ?? 0}",
               ]),
-              makeDashboardItem('dbEvent', context, menuOptions[2], [
+              makeDashboardItem('dbEvent', context, options[2], [
                 "Events: ${authenticate.stats?.eventActivities ?? 0}",
               ]),
             ],

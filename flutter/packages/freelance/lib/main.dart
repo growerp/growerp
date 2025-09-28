@@ -76,7 +76,7 @@ Future main() async {
       notificationClient: notificationClient,
       title: 'GrowERP Freelance.',
       router: router.generateRoute,
-      menuOptions: menuOptions,
+      menuOptions: getMenuOptions,
       extraDelegates: const [
         UserCompanyLocalizations.delegate,
         CatalogLocalizations.delegate,

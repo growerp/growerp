@@ -21,13 +21,52 @@ import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:inventory_example/main.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:flutter/material.dart';
+
+// Static menuOptions for testing (no localization needed)
+List<MenuOption> testMenuOptions = [
+  MenuOption(
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    title: 'Main',
+    route: '/',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const MainMenu(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/companyGrey.png',
+    selectedImage: 'packages/growerp_core/images/company.png',
+    title: 'Organization',
+    route: '/company',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const MainMenu(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    title: 'Inventory',
+    route: '/inventory',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    tabItems: [
+      TabItem(
+        form: const LocationList(),
+        label: 'Locations',
+        icon: const Icon(Icons.home),
+      ),
+    ],
+  ),
+];
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   Future<void> selectLocation(WidgetTester tester) async {
     await CommonTest.selectOption(
-        tester, 'dbInventory', 'LocationListLocations', '2');
+      tester,
+      'dbInventory',
+      'LocationListLocations',
+      '2',
+    );
   }
 
   setUp(() async {
@@ -36,15 +75,22 @@ void main() {
 
   testWidgets('''GrowERP location test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, generateRoute, menuOptions,
-        InventoryLocalizations.localizationsDelegates,
-        restClient: restClient,
-        blocProviders: getInventoryBlocProviders(restClient, "AppAdmin"),
-        title: "Inventory location test",
-        clear: true); // use data from previous run, ifnone same as true
-    await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "products": products.sublist(0, 3) // will create category too
-    });
+    await CommonTest.startTestApp(
+      tester,
+      generateRoute,
+      testMenuOptions,
+      InventoryLocalizations.localizationsDelegates,
+      restClient: restClient,
+      blocProviders: getInventoryBlocProviders(restClient, "AppAdmin"),
+      title: "Inventory location test",
+      clear: true,
+    ); // use data from previous run, ifnone same as true
+    await CommonTest.createCompanyAndAdmin(
+      tester,
+      testData: {
+        "products": products.sublist(0, 3), // will create category too
+      },
+    );
     await selectLocation(tester);
     await LocationTest.addLocations(tester, locations.sublist(0, 2));
     await LocationTest.updateLocations(tester, locations.sublist(2, 4));

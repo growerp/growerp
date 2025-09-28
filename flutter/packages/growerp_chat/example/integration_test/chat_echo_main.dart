@@ -31,20 +31,23 @@ Future main() async {
   await GlobalConfiguration().loadFromAsset('app_settings');
 
   Bloc.observer = AppBlocObserver();
-  runApp(ChatApp(
-    restClient: RestClient(await buildDioClient()),
-    chatClient: WsClient('chat'),
-    notificationClient: WsClient('notws'),
-  ));
+  runApp(
+    ChatApp(
+      restClient: RestClient(await buildDioClient()),
+      chatClient: WsClient('chat'),
+      notificationClient: WsClient('notws'),
+    ),
+  );
 }
 
 class ChatApp extends StatelessWidget {
-  const ChatApp(
-      {super.key,
-      required this.restClient,
-      required this.chatClient,
-      required this.notificationClient,
-      this.company});
+  const ChatApp({
+    super.key,
+    required this.restClient,
+    required this.chatClient,
+    required this.notificationClient,
+    this.company,
+  });
 
   final RestClient restClient;
   final WsClient chatClient;
@@ -54,27 +57,33 @@ class ChatApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
-      providers: [
-        RepositoryProvider(create: (context) => chatClient),
-      ],
+      providers: [RepositoryProvider(create: (context) => chatClient)],
       child: MultiBlocProvider(
         providers: [
           BlocProvider<AuthBloc>(
-              create: (context) => AuthBloc(chatClient, notificationClient,
-                  restClient, 'AppAdmin', company)
-                ..add(AuthLoad()),
-              lazy: false),
+            create: (context) => AuthBloc(
+              chatClient,
+              notificationClient,
+              restClient,
+              'AppAdmin',
+              company,
+            )..add(AuthLoad()),
+            lazy: false,
+          ),
           BlocProvider<ChatRoomBloc>(
-            create: (context) => ChatRoomBloc(context.read<RestClient>(),
-                chatClient, context.read<AuthBloc>())
-              ..add(const ChatRoomFetch()),
+            create: (context) => ChatRoomBloc(
+              context.read<RestClient>(),
+              chatClient,
+              context.read<AuthBloc>(),
+            )..add(const ChatRoomFetch()),
           ),
           BlocProvider<ChatMessageBloc>(
             create: (context) => ChatMessageBloc(
-                context.read<RestClient>(),
-                chatClient,
-                context.read<AuthBloc>(),
-                context.read<ChatRoomBloc>()),
+              context.read<RestClient>(),
+              chatClient,
+              context.read<AuthBloc>(),
+              context.read<ChatRoomBloc>(),
+            ),
             lazy: false,
           ),
         ],
@@ -91,42 +100,48 @@ class MyChatApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      builder: (context, child) => ResponsiveBreakpoints.builder(
+        child: child!,
+        breakpoints: [
+          const Breakpoint(start: 0, end: 450, name: MOBILE),
+          const Breakpoint(start: 451, end: 800, name: TABLET),
+          const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+          const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
         ],
-        builder: (context, child) => ResponsiveBreakpoints.builder(
-              child: child!,
-              breakpoints: [
-                const Breakpoint(start: 0, end: 450, name: MOBILE),
-                const Breakpoint(start: 451, end: 800, name: TABLET),
-                const Breakpoint(start: 801, end: 1920, name: DESKTOP),
-                const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
-              ],
-            ),
-        theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
-        darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
-        //      onGenerateRoute: router.generateRoute,
-        home: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, state) {
-            if (state.status == AuthStatus.failure) {
-              return const FatalErrorForm(
-                  message: 'Internet or server problem?');
-            }
-            if (state.status == AuthStatus.authenticated) {
-              return HomeForm(menuOptions: menuOptions, title: title);
-            }
-            if (state.status == AuthStatus.unAuthenticated) {
-              return HomeForm(menuOptions: menuOptions, title: title);
-            }
-            if (state.status == AuthStatus.changeIp) {
-              return const ChangeIpForm();
-            }
-            return const SplashForm();
-          },
-        ));
+      ),
+      theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+      darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
+      //      onGenerateRoute: router.generateRoute,
+      home: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          if (state.status == AuthStatus.failure) {
+            return const FatalErrorForm(message: 'Internet or server problem?');
+          }
+          if (state.status == AuthStatus.authenticated) {
+            return HomeForm(
+              menuOptions: (context) => menuOptions,
+              title: title,
+            );
+          }
+          if (state.status == AuthStatus.unAuthenticated) {
+            return HomeForm(
+              menuOptions: (context) => menuOptions,
+              title: title,
+            );
+          }
+          if (state.status == AuthStatus.changeIp) {
+            return const ChangeIpForm();
+          }
+          return const SplashForm();
+        },
+      ),
+    );
   }
 }
 
@@ -179,10 +194,11 @@ class ChatRoomsEchoState extends State<ChatRooms> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state.status == AuthStatus.authenticated) {
-        authenticate = state.authenticate!;
-        return BlocConsumer<ChatRoomBloc, ChatRoomState>(
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          authenticate = state.authenticate!;
+          return BlocConsumer<ChatRoomBloc, ChatRoomState>(
             listener: (context, state) {},
             builder: (context, state) {
               if (state.status == ChatRoomStatus.failure) {
@@ -192,45 +208,57 @@ class ChatRoomsEchoState extends State<ChatRooms> {
                 chatRooms = state.chatRooms;
                 if (chatRooms.isEmpty) {
                   return const Center(
-                      heightFactor: 20,
-                      child: Text('waiting for chats to arrive....',
-                          key: Key('empty'), textAlign: TextAlign.center));
+                    heightFactor: 20,
+                    child: Text(
+                      'waiting for chats to arrive....',
+                      key: Key('empty'),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
                 }
                 // receive chat message (caused chatroom added on the list)
                 _chatMessageBloc = context.read<ChatMessageBloc>()
-                  ..add(ChatMessageFetch(
+                  ..add(
+                    ChatMessageFetch(
                       chatRoomName: chatRooms[0].chatRoomName!,
                       chatRoomId: chatRooms[0].chatRoomId,
-                      limit: limit));
+                      limit: limit,
+                    ),
+                  );
                 return BlocBuilder<ChatMessageBloc, ChatMessageState>(
-                    builder: (context, state) {
-                  if (state.status == ChatMessageStatus.success) {
-                    messages = state.chatMessages;
-                    if (chatRooms.isNotEmpty && messages.isNotEmpty) {
-                      // echo message
-                      _chatMessageBloc.add(ChatMessageSendWs(ChatMessage(
-                          fromUserId: authenticate.user!.userId!,
-                          chatRoom:
-                              ChatRoom(chatRoomId: chatRooms[0].chatRoomId),
-                          content: messages[0].content!)));
-                      // delete chatroom: set not active
-                      _chatRoomBloc.add(
-                        ChatRoomDelete(chatRooms[0]),
-                      );
-                      _chatRoomBloc.add(
-                        const ChatRoomFetch(refresh: true),
-                      );
-                      chatRooms = [];
+                  builder: (context, state) {
+                    if (state.status == ChatMessageStatus.success) {
+                      messages = state.chatMessages;
+                      if (chatRooms.isNotEmpty && messages.isNotEmpty) {
+                        // echo message
+                        _chatMessageBloc.add(
+                          ChatMessageSendWs(
+                            ChatMessage(
+                              fromUserId: authenticate.user!.userId!,
+                              chatRoom: ChatRoom(
+                                chatRoomId: chatRooms[0].chatRoomId,
+                              ),
+                              content: messages[0].content!,
+                            ),
+                          ),
+                        );
+                        // delete chatroom: set not active
+                        _chatRoomBloc.add(ChatRoomDelete(chatRooms[0]));
+                        _chatRoomBloc.add(const ChatRoomFetch(refresh: true));
+                        chatRooms = [];
+                      }
                     }
-                  }
-                  return const Center(child: Text(' processing'));
-                });
+                    return const Center(child: Text(' processing'));
+                  },
+                );
               } else {
                 return const Center(child: Text(' processing'));
               }
-            });
-      }
-      return const Center(child: Text('Not Authorized!'));
-    });
+            },
+          );
+        }
+        return const Center(child: Text('Not Authorized!'));
+      },
+    );
   }
 }

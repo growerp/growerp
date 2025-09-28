@@ -21,6 +21,34 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+// Static menuOptions for testing (no localization needed)
+List<MenuOption> testMenuOptions = [
+  MenuOption(
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    title: 'Main',
+    route: '/',
+    userGroups: <UserGroup>[UserGroup.admin, UserGroup.employee],
+    child: const MainMenu(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/companyGrey.png',
+    selectedImage: 'packages/growerp_core/images/company.png',
+    title: 'Organization',
+    route: '/company',
+    userGroups: <UserGroup>[UserGroup.admin, UserGroup.employee],
+    child: const MainMenu(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    title: 'Logged in User',
+    route: '/user',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const MainMenu(),
+  ),
+];
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -28,28 +56,34 @@ void main() {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  testWidgets("prepare empty system for chat test>>>>>>",
-      (WidgetTester tester) async {
+  testWidgets("prepare empty system for chat test>>>>>>", (
+    WidgetTester tester,
+  ) async {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
-        tester,
-        generateRoute,
-        menuOptions,
-        restClient: restClient,
-        CoreLocalizations.localizationsDelegates,
-        clear: true); // use data from previous run, ifnone same as true
+      tester,
+      generateRoute,
+      testMenuOptions,
+      restClient: restClient,
+      CoreLocalizations.localizationsDelegates,
+      clear: true,
+    ); // use data from previous run, ifnone same as true
     // userlogin in mainadmin data.dart should be used for chatecho
     await CommonTest.createCompanyAndAdmin(tester);
-//    await UserTest.selectEmployees(tester);
-//    await UserTest.addAdministrators(tester, [administrators[0]], check: false);
+    //    await UserTest.selectEmployees(tester);
+    //    await UserTest.addAdministrators(tester, [administrators[0]], check: false);
   }, skip: true);
-// now start chatEco_main.dart with the userlog in when the company created
+  // now start chatEco_main.dart with the userlog in when the company created
   testWidgets("Chatroom maintenance>>>>>>", (WidgetTester tester) async {
     RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, generateRoute, menuOptions,
-        CoreLocalizations.localizationsDelegates,
-        restClient: restClient,
-        clear: true); // use data from previous run, ifnone same as true
+    await CommonTest.startTestApp(
+      tester,
+      generateRoute,
+      testMenuOptions,
+      CoreLocalizations.localizationsDelegates,
+      restClient: restClient,
+      clear: true,
+    ); // use data from previous run, ifnone same as true
     // chatrooms screen
     await CommonTest.tapByTooltip(tester, 'Chat');
     expect(find.byKey(const Key('ChatRoomListDialog')), findsOneWidget);
@@ -75,17 +109,22 @@ void main() {
     // leave chatrooms form
     await CommonTest.tapByKey(tester, 'cancel');
   }, skip: true);
-  testWidgets("chat with chat echo in other process>>>>>>",
-      (WidgetTester tester) async {
+  testWidgets("chat with chat echo in other process>>>>>>", (
+    WidgetTester tester,
+  ) async {
     RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, generateRoute, menuOptions,
-        CoreLocalizations.localizationsDelegates,
-        restClient: restClient,
-        clear: true); // use data from previous run, ifnone same as true
-//    await CommonTest.logout(tester);
-//    await CommonTest.login(tester,
-//        username: 'email3@example.org',
-//        password: 'qqqqqq9!'); // chatrooms screen
+    await CommonTest.startTestApp(
+      tester,
+      generateRoute,
+      testMenuOptions,
+      CoreLocalizations.localizationsDelegates,
+      restClient: restClient,
+      clear: true,
+    ); // use data from previous run, ifnone same as true
+    //    await CommonTest.logout(tester);
+    //    await CommonTest.login(tester,
+    //        username: 'email3@example.org',
+    //        password: 'qqqqqq9!'); // chatrooms screen
     await CommonTest.tapByTooltip(tester, 'Chat');
     await CommonTest.refresh(tester);
     // open new chat

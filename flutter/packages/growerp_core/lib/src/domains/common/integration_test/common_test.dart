@@ -81,7 +81,7 @@ class CommonTest {
         notificationClient: WsClient('notws'),
         router: router,
         title: title,
-        menuOptions: menuOptions,
+        menuOptions: (context) => menuOptions,
         extraDelegates: extraDelegates,
         extraBlocProviders: blocProviders ?? [],
       ),

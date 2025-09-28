@@ -74,7 +74,7 @@ Future main() async {
       notificationClient: notificationClient,
       title: 'GrowERP System Support.',
       router: router.generateRoute,
-      menuOptions: menuOptions,
+      menuOptions: getMenuOptions,
       extraDelegates: delegates,
       extraBlocProviders: getSupportBlocProviders(restClient, classificationId),
       company: company,

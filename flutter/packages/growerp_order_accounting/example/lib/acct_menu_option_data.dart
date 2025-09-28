@@ -20,7 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 import 'accounting_form.dart';
 
-List<MenuOption> acctMenuOptions = [
+List<MenuOption> acctMenuOptions(BuildContext context) => [
   MenuOption(
     image: "packages/growerp_core/images/accountingGrey.png",
     selectedImage: "packages/growerp_core/images/accounting.png",
@@ -30,140 +30,140 @@ List<MenuOption> acctMenuOptions = [
     child: const AccountingForm(),
   ),
   MenuOption(
-      image: "packages/growerp_core/images/orderGrey.png",
-      selectedImage: "packages/growerp_core/images/order.png",
-      title: "Accounting Sales",
-      route: '/acctSales',
-      userGroups: [
-        UserGroup.admin,
-      ],
-      tabItems: [
-        TabItem(
-          form: const FinDocList(
-              key: Key("SalesInvoice"),
-              sales: true,
-              docType: FinDocType.invoice),
-          label: "Outgoing Invoices",
-          icon: const Icon(Icons.home),
+    image: "packages/growerp_core/images/orderGrey.png",
+    selectedImage: "packages/growerp_core/images/order.png",
+    title: "Accounting Sales",
+    route: '/acctSales',
+    userGroups: [UserGroup.admin],
+    tabItems: [
+      TabItem(
+        form: const FinDocList(
+          key: Key("SalesInvoice"),
+          sales: true,
+          docType: FinDocType.invoice,
         ),
-        TabItem(
-          form: const FinDocList(
-              key: Key("SalesPayment"),
-              sales: true,
-              docType: FinDocType.payment),
-          label: "Incoming Payments",
-          icon: const Icon(Icons.home),
+        label: "Outgoing Invoices",
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const FinDocList(
+          key: Key("SalesPayment"),
+          sales: true,
+          docType: FinDocType.payment,
         ),
-      ]),
+        label: "Incoming Payments",
+        icon: const Icon(Icons.home),
+      ),
+    ],
+  ),
   MenuOption(
-      image: "packages/growerp_core/images/supplierGrey.png",
-      selectedImage: "packages/growerp_core/images/supplier.png",
-      title: "Acctg. Purchasing",
-      route: '/acctPurchase',
-      userGroups: [
-        UserGroup.admin,
-      ],
-      tabItems: [
-        TabItem(
-          form: const FinDocList(
-              key: Key("PurchaseInvoice"),
-              sales: false,
-              docType: FinDocType.invoice),
-          label: "Incoming Invoices",
-          icon: const Icon(Icons.home),
+    image: "packages/growerp_core/images/supplierGrey.png",
+    selectedImage: "packages/growerp_core/images/supplier.png",
+    title: "Acctg. Purchasing",
+    route: '/acctPurchase',
+    userGroups: [UserGroup.admin],
+    tabItems: [
+      TabItem(
+        form: const FinDocList(
+          key: Key("PurchaseInvoice"),
+          sales: false,
+          docType: FinDocType.invoice,
         ),
-        TabItem(
-          form: const FinDocList(
-              key: Key("PurchasePayment"),
-              sales: false,
-              docType: FinDocType.payment),
-          label: "Outgoing Payments",
-          icon: const Icon(Icons.home),
+        label: "Incoming Invoices",
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const FinDocList(
+          key: Key("PurchasePayment"),
+          sales: false,
+          docType: FinDocType.payment,
         ),
-      ]),
+        label: "Outgoing Payments",
+        icon: const Icon(Icons.home),
+      ),
+    ],
+  ),
   MenuOption(
-      image: "packages/growerp_core/images/accountingGrey.png",
-      selectedImage: "packages/growerp_core/images/accounting.png",
-      title: "Acctg. Ledger",
-      route: '/acctLedger',
-      userGroups: [
-        UserGroup.admin,
-      ],
-      tabItems: [
-        TabItem(
-          form: const LedgerTreeForm(),
-          label: "Ledger Tree",
-          icon: const Icon(Icons.account_tree),
+    image: "packages/growerp_core/images/accountingGrey.png",
+    selectedImage: "packages/growerp_core/images/accounting.png",
+    title: "Acctg. Ledger",
+    route: '/acctLedger',
+    userGroups: [UserGroup.admin],
+    tabItems: [
+      TabItem(
+        form: const LedgerTreeForm(),
+        label: "Ledger Tree",
+        icon: const Icon(Icons.account_tree),
+      ),
+      TabItem(
+        form: const GlAccountList(),
+        label: "Ledger Accnt",
+        icon: const Icon(Icons.format_list_bulleted),
+      ),
+      TabItem(
+        form: const FinDocList(
+          key: Key("Transaction"),
+          sales: true,
+          docType: FinDocType.transaction,
         ),
-        TabItem(
-          form: const GlAccountList(),
-          label: "Ledger Accnt",
-          icon: const Icon(Icons.format_list_bulleted),
-        ),
-        TabItem(
-          form: const FinDocList(
-              key: Key("Transaction"),
-              sales: true,
-              docType: FinDocType.transaction),
-          label: "Ledger Transaction",
-          icon: const Icon(Icons.view_list),
-        ),
-        TabItem(
-          form: const LedgerJournalList(key: Key("LedgerJournal")),
-          label: "Ledger Journals",
-          icon: const Icon(Icons.checklist),
-        ),
-      ]),
+        label: "Ledger Transaction",
+        icon: const Icon(Icons.view_list),
+      ),
+      TabItem(
+        form: const LedgerJournalList(key: Key("LedgerJournal")),
+        label: "Ledger Journals",
+        icon: const Icon(Icons.checklist),
+      ),
+    ],
+  ),
   MenuOption(
-      image: "packages/growerp_core/images/reportGrey.png",
-      selectedImage: "packages/growerp_core/images/report.png",
-      title: "Acctg. Reports",
-      route: '/acctReports',
-      tabItems: [
-        TabItem(
-          form: const RevenueExpenseChart(),
-          label: "Revenue/Expense",
-          icon: const Icon(Icons.list),
-        ),
-        TabItem(
-          form: const BalanceSheetForm(),
-          label: "Balance Sheet",
-          icon: const Icon(Icons.list),
-        ),
-        TabItem(
-          form: const BalanceSummaryList(),
-          label: "Balance Summary",
-          icon: const Icon(Icons.list),
-        ),
-      ],
-      userGroups: [
-        UserGroup.admin
-      ]),
+    image: "packages/growerp_core/images/reportGrey.png",
+    selectedImage: "packages/growerp_core/images/report.png",
+    title: "Acctg. Reports",
+    route: '/acctReports',
+    tabItems: [
+      TabItem(
+        form: const RevenueExpenseChart(),
+        label: "Revenue/Expense",
+        icon: const Icon(Icons.list),
+      ),
+      TabItem(
+        form: const BalanceSheetForm(),
+        label: "Balance Sheet",
+        icon: const Icon(Icons.list),
+      ),
+      TabItem(
+        form: const BalanceSummaryList(),
+        label: "Balance Summary",
+        icon: const Icon(Icons.list),
+      ),
+    ],
+    userGroups: [UserGroup.admin],
+  ),
   MenuOption(
-      image: "packages/growerp_core/images/setupGrey.png",
-      selectedImage: "packages/growerp_core/images/setup.png",
-      title: "SetUp",
-      route: '/acctSetup',
-      tabItems: [
-        TabItem(
-          form: const TimePeriodListForm(),
-          label: "Time Periods",
-          icon: const Icon(Icons.list),
-        ),
-        TabItem(
-          form: const ItemTypeList(),
-          label: "Item Types",
-          icon: const Icon(Icons.list),
-        ),
-        TabItem(
-          form: const PaymentTypeList(),
-          label: "Paymt Types",
-          icon: const Icon(Icons.list),
-        ),
-      ],
-      userGroups: [
-        UserGroup.admin
-      ]),
+    image: "packages/growerp_core/images/setupGrey.png",
+    selectedImage: "packages/growerp_core/images/setup.png",
+    title: "SetUp",
+    route: '/acctSetup',
+    tabItems: [
+      TabItem(
+        form: const TimePeriodListForm(),
+        label: "Time Periods",
+        icon: const Icon(Icons.list),
+      ),
+      TabItem(
+        form: const ItemTypeList(),
+        label: "Item Types",
+        icon: const Icon(Icons.list),
+      ),
+      TabItem(
+        form: const PaymentTypeList(),
+        label: "Paymt Types",
+        icon: const Icon(Icons.list),
+      ),
+    ],
+    userGroups: [UserGroup.admin],
+  ),
   MenuOption(
     image: "packages/growerp_core/images/dashBoardGrey.png",
     selectedImage: "packages/growerp_core/images/dashBoard.png",

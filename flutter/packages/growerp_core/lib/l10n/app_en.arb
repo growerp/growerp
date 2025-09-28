@@ -515,6 +515,266 @@
         "description": "Partial validation message indicating minimum requirement"
     },
     "itemIsRequired": "item is required",
+    "organization": "Organization",
+    "@organization": {
+        "description": "Organization menu item or section header"
+    },
+    "company": "Company",
+    "@company": {
+        "description": "Company menu item or section header"
+    },
+    "employees": "Employees",
+    "@employees": {
+        "description": "Employees menu item or section header"
+    },
+    "website": "Website",
+    "@website": {
+        "description": "Website menu item or section header"
+    },
+    "crm": "CRM",
+    "@crm": {
+        "description": "CRM (Customer Relationship Management) menu item"
+    },
+    "myTodoTasks": "My To Do, tasks",
+    "@myTodoTasks": {
+        "description": "My to-do tasks menu item"
+    },
+    "opportunities": "Opportunities",
+    "@opportunities": {
+        "description": "Opportunities menu item or section header"
+    },
+    "myOpportunities": "My Opportunities",
+    "@myOpportunities": {
+        "description": "My opportunities menu item"
+    },
+    "leads": "Leads",
+    "@leads": {
+        "description": "Leads menu item or section header"
+    },
+    "customers": "Customers",
+    "@customers": {
+        "description": "Customers menu item or section header"
+    },
+    "requests": "Requests",
+    "@requests": {
+        "description": "Requests menu item or section header"
+    },
+    "catalog": "Catalog",
+    "@catalog": {
+        "description": "Catalog menu item or section header"
+    },
+    "products": "Products",
+    "@products": {
+        "description": "Products menu item or section header"
+    },
+    "assets": "Assets",
+    "@assets": {
+        "description": "Assets menu item or section header"
+    },
+    "categories": "Categories",
+    "@categories": {
+        "description": "Categories menu item or section header"
+    },
+    "subscriptions": "Subscriptions",
+    "@subscriptions": {
+        "description": "Subscriptions menu item or section header"
+    },
+    "orders": "Orders",
+    "@orders": {
+        "description": "Orders menu item or section header"
+    },
+    "salesOrders": "Sales orders",
+    "@salesOrders": {
+        "description": "Sales orders menu item or section header"
+    },
+    "purchaseOrders": "Purchase orders",
+    "@purchaseOrders": {
+        "description": "Purchase orders menu item or section header"
+    },
+    "suppliers": "Suppliers",
+    "@suppliers": {
+        "description": "Suppliers menu item or section header"
+    },
+    "inventory": "Inventory",
+    "@inventory": {
+        "description": "Inventory menu item or section header"
+    },
+    "outgoingShipments": "Outgoing shipments",
+    "@outgoingShipments": {
+        "description": "Outgoing shipments menu item or section header"
+    },
+    "incomingShipments": "Incoming shipments",
+    "@incomingShipments": {
+        "description": "Incoming shipments menu item or section header"
+    },
+    "whLocations": "WH Locations",
+    "@whLocations": {
+        "description": "Warehouse locations menu item or section header"
+    },
+    "accounting": "Accounting",
+    "@accounting": {
+        "description": "Accounting menu item or section header"
+    },
+    "accountingDashboard": "Accounting\nDashBoard",
+    "@accountingDashboard": {
+        "description": "Accounting dashboard menu item"
+    },
+    "accountingSales": "Accounting Sales",
+    "@accountingSales": {
+        "description": "Accounting sales menu item"
+    },
+    "accountingPurch": "Accounting Purch.",
+    "@accountingPurch": {
+        "description": "Accounting purchase menu item"
+    },
+    "accountingLedger": "Accounting Ledger",
+    "@accountingLedger": {
+        "description": "Accounting ledger menu item"
+    },
+    "outgoingInvoices": "Outgoing Invoices",
+    "@outgoingInvoices": {
+        "description": "Outgoing invoices menu item or section header"
+    },
+    "incomingPayments": "Incoming Payments",
+    "@incomingPayments": {
+        "description": "Incoming payments menu item or section header"
+    },
+    "incomingInvoices": "Incoming Invoices",
+    "@incomingInvoices": {
+        "description": "Incoming invoices menu item or section header"
+    },
+    "outgoingPayments": "Outgoing Payments",
+    "@outgoingPayments": {
+        "description": "Outgoing payments menu item or section header"
+    },
+    "ledgerTree": "Ledger Tree",
+    "@ledgerTree": {
+        "description": "Ledger tree menu item or section header"
+    },
+    "ledgerAccnt": "Ledger Accnt",
+    "@ledgerAccnt": {
+        "description": "Ledger account menu item or section header"
+    },
+    "ledgerTransaction": "Ledger Transaction",
+    "@ledgerTransaction": {
+        "description": "Ledger transaction menu item or section header"
+    },
+    "ledgerJournals": "Ledger Journals",
+    "@ledgerJournals": {
+        "description": "Ledger journals menu item or section header"
+    },
+    "reports": "Reports",
+    "@reports": {
+        "description": "Reports menu item or section header"
+    },
+    "revenueExpense": "Revenue/Expense",
+    "@revenueExpense": {
+        "description": "Revenue and expense report menu item"
+    },
+    "balanceSheet": "Balance Sheet",
+    "@balanceSheet": {
+        "description": "Balance sheet report menu item"
+    },
+    "balanceSummary": "Balance Summary",
+    "@balanceSummary": {
+        "description": "Balance summary report menu item"
+    },
+    "setUp": "SetUp",
+    "@setUp": {
+        "description": "Setup menu item or section header"
+    },
+    "timePeriods": "Time Periods",
+    "@timePeriods": {
+        "description": "Time periods menu item or section header"
+    },
+    "itemTypes": "Item Types",
+    "@itemTypes": {
+        "description": "Item types menu item or section header"
+    },
+    "paymtTypes": "Paymt Types",
+    "@paymtTypes": {
+        "description": "Payment types menu item or section header"
+    },
+    "planSelection": "Plan Selection",
+    "@planSelection": {
+        "description": "Plan selection menu item or section header"
+    },
+    "mainDashboard": "Main dashboard",
+    "@mainDashboard": {
+        "description": "Main dashboard menu item or navigation link"
+    },
+    "about": "About",
+    "@about": {
+        "description": "About menu item or section header"
+    },
+    "tasks": "Tasks",
+    "@tasks": {
+        "description": "Tasks menu item or section header"
+    },
+    "applications": "Applications",
+    "@applications": {
+        "description": "Applications menu item or section header"
+    },
+    "restRequests": "REST Requests",
+    "@restRequests": {
+        "description": "REST requests menu item or section header"
+    },
+    "clients": "Clients",
+    "@clients": {
+        "description": "Clients menu item or section header"
+    },
+    "staff": "Staff",
+    "@staff": {
+        "description": "Staff menu item or section header"
+    },
+    "myHotel": "My Hotel",
+    "@myHotel": {
+        "description": "My hotel menu item or section header"
+    },
+    "rooms": "Rooms",
+    "@rooms": {
+        "description": "Rooms menu item or section header"
+    },
+    "roomTypes": "Room Types",
+    "@roomTypes": {
+        "description": "Room types menu item or section header"
+    },
+    "reservations": "Reservations",
+    "@reservations": {
+        "description": "Reservations menu item or section header"
+    },
+    "inOut": "In-Out",
+    "@inOut": {
+        "description": "Check in/out menu item or section header"
+    },
+    "checkIn": "CheckIn",
+    "@checkIn": {
+        "description": "Check in menu item or button text"
+    },
+    "checkOut": "CheckOut",
+    "@checkOut": {
+        "description": "Check out menu item or button text"
+    },
+    "administrators": "Administrators",
+    "@administrators": {
+        "description": "Administrators menu item or section header"
+    },
+    "otherEmployees": "Other Employees",
+    "@otherEmployees": {
+        "description": "Other employees menu item or section header"
+    },
+    "allOpportunities": "All Opportunities",
+    "@allOpportunities": {
+        "description": "All opportunities menu item or section header"
+    },
+    "salesOpenInvoices": "Sales open invoices",
+    "@salesOpenInvoices": {
+        "description": "Sales open invoices menu item or section header"
+    },
+    "purchaseUnpaidInvoices": "Purchase unpaid invoices",
+    "@purchaseUnpaidInvoices": {
+        "description": "Purchase unpaid invoices menu item or section header"
+    },
     "@itemIsRequired": {
         "description": "Validation message indicating a required item"
     }

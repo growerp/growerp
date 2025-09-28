@@ -25,121 +25,123 @@ import 'views/forms.dart' as local;
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-List<MenuOption> menuOptions = [
+List<MenuOption> getMenuOptions(BuildContext context) => [
   MenuOption(
     image: "packages/growerp_core/images/dashBoardGrey.png",
     selectedImage: "packages/growerp_core/images/dashBoard.png",
-    title: "Main",
+    title: CoreLocalizations.of(context)!.main,
     route: '/',
     userGroups: [UserGroup.admin, UserGroup.employee],
     child: const local.FreelanceDbForm(),
   ),
   MenuOption(
-      image: "packages/growerp_core/images/tasksGrey.png",
-      selectedImage: "packages/growerp_core/images/activities.png",
-      title: "Tasks",
-      route: '/tasks',
-      userGroups: [UserGroup.admin, UserGroup.employee],
-      child: const ActivityList(ActivityType.todo)),
+    image: "packages/growerp_core/images/tasksGrey.png",
+    selectedImage: "packages/growerp_core/images/activities.png",
+    title: CoreLocalizations.of(context)!.tasks,
+    route: '/tasks',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const ActivityList(ActivityType.todo),
+  ),
   MenuOption(
     image: "packages/growerp_core/images/crmGrey.png",
     selectedImage: "packages/growerp_core/images/crm.png",
-    title: "CRM",
+    title: CoreLocalizations.of(context)!.crm,
     route: '/crm',
     userGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
         form: const OpportunityList(),
-        label: "My Opportunities",
+        label: CoreLocalizations.of(context)!.myOpportunities,
         icon: const Icon(Icons.home),
       ),
       TabItem(
         form: const UserList(key: Key("Lead"), role: Role.lead),
-        label: "Leads",
+        label: CoreLocalizations.of(context)!.leads,
         icon: const Icon(Icons.business),
       ),
       TabItem(
-        form: const UserList(
-          key: Key("Customer"),
-          role: Role.customer,
-        ),
-        label: "Customers",
+        form: const UserList(key: Key("Customer"), role: Role.customer),
+        label: CoreLocalizations.of(context)!.customers,
         icon: const Icon(Icons.school),
       ),
     ],
   ),
   MenuOption(
-      image: "packages/growerp_core/images/productsGrey.png",
-      selectedImage: "packages/growerp_core/images/products.png",
-      title: "Catalog",
-      route: '/catalog',
-      userGroups: [
-        UserGroup.admin,
-        UserGroup.employee
-      ],
-      tabItems: [
-        TabItem(
-          form: const ProductList(),
-          label: "Products",
-          icon: const Icon(Icons.home),
-        ),
-        TabItem(
-          form: const CategoryList(),
-          label: "Categories",
-          icon: const Icon(Icons.business),
-        ),
-      ]),
-  MenuOption(
-    image: 'packages/growerp_core/images/orderGrey.png',
-    selectedImage: 'packages/growerp_core/images/order.png',
-    title: 'Orders',
-    route: '/orders',
+    image: "packages/growerp_core/images/productsGrey.png",
+    selectedImage: "packages/growerp_core/images/products.png",
+    title: CoreLocalizations.of(context)!.catalog,
+    route: '/catalog',
     userGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
-        form: const FinDocList(
-            key: Key('SalesOrder'), sales: true, docType: FinDocType.order),
-        label: 'Sales orders',
+        form: const ProductList(),
+        label: CoreLocalizations.of(context)!.products,
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const UserList(
-          key: Key('Customer'),
-          role: Role.customer,
-        ),
-        label: 'Customers',
-        icon: const Icon(Icons.business),
-      ),
-      TabItem(
-        form: const FinDocList(
-            key: Key('PurchaseOrder'), sales: false, docType: FinDocType.order),
-        label: 'Purchase orders',
-        icon: const Icon(Icons.home),
-      ),
-      TabItem(
-        form: const UserList(key: Key('Supplier'), role: Role.supplier),
-        label: 'Suppliers',
+        form: const CategoryList(),
+        label: CoreLocalizations.of(context)!.categories,
         icon: const Icon(Icons.business),
       ),
     ],
   ),
   MenuOption(
-      image: "packages/growerp_core/images/tasksGrey.png",
-      selectedImage: "packages/growerp_core/images/activities.png",
-      title: "Website",
-      route: '/website',
-      userGroups: [UserGroup.admin, UserGroup.employee],
-      child: const WebsiteDialog()),
+    image: 'packages/growerp_core/images/orderGrey.png',
+    selectedImage: 'packages/growerp_core/images/order.png',
+    title: CoreLocalizations.of(context)!.orders,
+    route: '/orders',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    tabItems: [
+      TabItem(
+        form: const FinDocList(
+          key: Key('SalesOrder'),
+          sales: true,
+          docType: FinDocType.order,
+        ),
+        label: CoreLocalizations.of(context)!.salesOrders,
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const UserList(key: Key('Customer'), role: Role.customer),
+        label: CoreLocalizations.of(context)!.customers,
+        icon: const Icon(Icons.business),
+      ),
+      TabItem(
+        form: const FinDocList(
+          key: Key('PurchaseOrder'),
+          sales: false,
+          docType: FinDocType.order,
+        ),
+        label: CoreLocalizations.of(context)!.purchaseOrders,
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const UserList(key: Key('Supplier'), role: Role.supplier),
+        label: CoreLocalizations.of(context)!.suppliers,
+        icon: const Icon(Icons.business),
+      ),
+    ],
+  ),
   MenuOption(
-      image: "packages/growerp_core/images/accountingGrey.png",
-      selectedImage: "packages/growerp_core/images/accounting.png",
-      title: "Accounting",
-      route: '/accounting',
-      userGroups: [UserGroup.admin]),
+    image: "packages/growerp_core/images/tasksGrey.png",
+    selectedImage: "packages/growerp_core/images/activities.png",
+    title: CoreLocalizations.of(context)!.website,
+    route: '/website',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const WebsiteDialog(),
+  ),
   MenuOption(
-      image: "packages/growerp_core/images/infoGrey.png",
-      selectedImage: "packages/growerp_core/images/info.png",
-      title: "About",
-      route: '/about',
-      userGroups: [UserGroup.admin]),
+    image: "packages/growerp_core/images/accountingGrey.png",
+    selectedImage: "packages/growerp_core/images/accounting.png",
+    title: CoreLocalizations.of(context)!.accounting,
+    route: '/accounting',
+    userGroups: [UserGroup.admin],
+  ),
+  MenuOption(
+    image: "packages/growerp_core/images/infoGrey.png",
+    selectedImage: "packages/growerp_core/images/info.png",
+    title: CoreLocalizations.of(context)!.about,
+    route: '/about',
+    userGroups: [UserGroup.admin],
+  ),
 ];

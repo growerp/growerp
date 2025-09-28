@@ -25,33 +25,37 @@ class AccountingForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
+    final acctOptions = acctMenuOptions(context);
     return DashBoardForm(
       key: const Key('AcctDashBoard'),
       dashboardItems: [
-        makeDashboardItem('acctSales', context, acctMenuOptions[1], [
+        makeDashboardItem('acctSales', context, acctOptions[1], [
           "Sls open inv: "
               "${authenticate.company!.currency!.description} "
               "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.salesInvoicesNotPaidCount})",
         ]),
-        makeDashboardItem('acctPurchase', context, acctMenuOptions[2], [
+        makeDashboardItem('acctPurchase', context, acctOptions[2], [
           "Pur unp inv: "
               "${authenticate.company!.currency!.description} "
               "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.purchInvoicesNotPaidCount})",
         ]),
-        makeDashboardItem('acctLedger', context, acctMenuOptions[3], [
+        makeDashboardItem('acctLedger', context, acctOptions[3], [
           "Accounts",
           "Transactions",
           "Journals",
         ]),
-        makeDashboardItem('reports', context, acctMenuOptions[4], [
+        makeDashboardItem('reports', context, acctOptions[4], [
           "Balance Sheet",
           "Balance summary",
         ]),
-        makeDashboardItem('AcctSetup', context, acctMenuOptions[5],
-            ["Time Periods", "Item Types", "Payment Types"]),
-        makeDashboardItem('Main dashboard', context, acctMenuOptions[6], []),
+        makeDashboardItem('AcctSetup', context, acctOptions[5], [
+          "Time Periods",
+          "Item Types",
+          "Payment Types",
+        ]),
+        makeDashboardItem('Main dashboard', context, acctOptions[6], []),
       ],
     );
   }

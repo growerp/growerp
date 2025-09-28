@@ -34,50 +34,80 @@ class FreelanceDbForm extends StatelessWidget {
         .currency!
         .currencyId!;
     String currencySymbol = NumberFormat.simpleCurrency(
-            locale: Platform.localeName, name: currencyId)
-        .currencySymbol;
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state.status == AuthStatus.authenticated) {
-        Authenticate authenticate = state.authenticate!;
-        return DashBoardForm(dashboardItems: [
-          makeDashboardItem('dbCompany', context, menuOptions[1], [
-            authenticate.company!.name!.length > 20
-                ? "${authenticate.company!.name!.substring(0, 20)}..."
-                : "${authenticate.company!.name}",
-            "All open tasks: ${authenticate.stats?.allTasks ?? 0}",
-            "Not Invoiced hours: ${authenticate.stats?.notInvoicedHours ?? 0}",
-          ]),
-          makeDashboardItem('dbCrm', context, menuOptions[2], [
-            "All Opportunities: ${authenticate.stats?.opportunities ?? 0}",
-            "My Opportunities: ${authenticate.stats?.myOpportunities ?? 0}",
-            "Leads: ${authenticate.stats?.leads ?? 0}",
-            "Customers: ${authenticate.stats?.customers ?? 0}",
-          ]),
-          makeDashboardItem('dbCatalog', context, menuOptions[3], [
-            "Categories: ${authenticate.stats?.categories ?? 0}",
-            "Products: ${authenticate.stats?.products ?? 0}",
-            "Assets: ${authenticate.stats?.products ?? 0}",
-          ]),
-          makeDashboardItem('dbOrders', context, menuOptions[4], [
-            "Sales Orders: ${authenticate.stats?.openSlsOrders ?? 0}",
-            "Customers: ${authenticate.stats?.customers ?? 0}",
-            "Purchase Orders: ${authenticate.stats?.openPurOrders ?? 0}",
-            "Suppliers: ${authenticate.stats?.suppliers ?? 0}",
-          ]),
-          makeDashboardItem('dbAccounting', context, menuOptions[6], [
-            "Sales open invoices: \n"
-                "$currencySymbol "
-                "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
-                "(${authenticate.stats?.salesInvoicesNotPaidCount ?? 0})",
-            "Purchase unpaid invoices: \n"
-                "$currencySymbol "
-                "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
-                "(${authenticate.stats?.purchInvoicesNotPaidCount ?? 0})",
-          ]),
-          makeDashboardItem('dbWebsite', context, menuOptions[5], []),
-        ]);
-      }
-      return const LoadingIndicator();
-    });
+      locale: Platform.localeName,
+      name: currencyId,
+    ).currencySymbol;
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          Authenticate authenticate = state.authenticate!;
+          return DashBoardForm(
+            dashboardItems: [
+              makeDashboardItem(
+                'dbCompany',
+                context,
+                getMenuOptions(context)[1],
+                [
+                  authenticate.company!.name!.length > 20
+                      ? "${authenticate.company!.name!.substring(0, 20)}..."
+                      : "${authenticate.company!.name}",
+                  "All open tasks: ${authenticate.stats?.allTasks ?? 0}",
+                  "Not Invoiced hours: ${authenticate.stats?.notInvoicedHours ?? 0}",
+                ],
+              ),
+              makeDashboardItem('dbCrm', context, getMenuOptions(context)[2], [
+                "All Opportunities: ${authenticate.stats?.opportunities ?? 0}",
+                "My Opportunities: ${authenticate.stats?.myOpportunities ?? 0}",
+                "Leads: ${authenticate.stats?.leads ?? 0}",
+                "Customers: ${authenticate.stats?.customers ?? 0}",
+              ]),
+              makeDashboardItem(
+                'dbCatalog',
+                context,
+                getMenuOptions(context)[3],
+                [
+                  "Categories: ${authenticate.stats?.categories ?? 0}",
+                  "Products: ${authenticate.stats?.products ?? 0}",
+                  "Assets: ${authenticate.stats?.products ?? 0}",
+                ],
+              ),
+              makeDashboardItem(
+                'dbOrders',
+                context,
+                getMenuOptions(context)[4],
+                [
+                  "Sales Orders: ${authenticate.stats?.openSlsOrders ?? 0}",
+                  "Customers: ${authenticate.stats?.customers ?? 0}",
+                  "Purchase Orders: ${authenticate.stats?.openPurOrders ?? 0}",
+                  "Suppliers: ${authenticate.stats?.suppliers ?? 0}",
+                ],
+              ),
+              makeDashboardItem(
+                'dbAccounting',
+                context,
+                getMenuOptions(context)[6],
+                [
+                  "Sales open invoices: \n"
+                      "$currencySymbol "
+                      "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
+                      "(${authenticate.stats?.salesInvoicesNotPaidCount ?? 0})",
+                  "Purchase unpaid invoices: \n"
+                      "$currencySymbol "
+                      "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
+                      "(${authenticate.stats?.purchInvoicesNotPaidCount ?? 0})",
+                ],
+              ),
+              makeDashboardItem(
+                'dbInventory',
+                context,
+                getMenuOptions(context)[5],
+                [],
+              ),
+            ],
+          );
+        }
+        return const LoadingIndicator();
+      },
+    );
   }
 }
