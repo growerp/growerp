@@ -18,8 +18,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 import '../../growerp_activity.dart';
+import '../l10n/activity_localizations.dart';
 
 class ActivityList extends StatefulWidget {
   final ActivityType activityType;
@@ -58,7 +60,9 @@ class ActivityListState extends State<ActivityList> {
     Widget tableView() {
       if (activities.isEmpty) {
         return Center(
-            child: Text("No ${widget.activityType}'s found, add one with '+'",
+            child: Text(
+                ActivityLocalizations.of(context)!
+                    .activity_notFound(widget.activityType.toString()),
                 style: const TextStyle(fontSize: 20.0)));
       }
       // get table data formatted for tableView
@@ -118,17 +122,19 @@ class ActivityListState extends State<ActivityList> {
 
     return BlocConsumer<ActivityBloc, ActivityState>(
         listener: (context, state) {
-      if (state.status == ActivityBlocStatus.failure) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-      }
-      if (state.status == ActivityBlocStatus.success) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
-      }
-    }, builder: (context, state) {
+          if (state.status == ActivityBlocStatus.failure) {
+            HelperFunctions.showMessage(
+                context,
+                ActivityLocalizations.of(context)!
+                    .activity_error(state.message ?? 'unknown'),
+                Colors.red);
+          }
+        }, builder: (context, state) {
       if (state.status == ActivityBlocStatus.failure) {
         return Center(
-            child: Text(
-                "failed to fetch ${widget.activityType}'s  ${state.message}"));
+            child: Text(ActivityLocalizations.of(context)!
+                .activity_fetchError(
+                    widget.activityType.toString(), state.message ?? '')));
       }
       if (state.status == ActivityBlocStatus.success) {
         activities = state.activities;

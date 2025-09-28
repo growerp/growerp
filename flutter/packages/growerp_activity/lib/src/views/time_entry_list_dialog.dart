@@ -18,6 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../growerp_activity.dart';
+import '../l10n/activity_localizations.dart';
 
 class TimeEntryListDialog extends StatefulWidget {
   final String activityId;
@@ -50,7 +51,7 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
       child: popUp(
         context: context,
         child: _showList(isPhone(context)),
-        title: 'Time Entry Information',
+        title: ActivityLocalizations.of(context)!.timeEntry_listTitle,
         height: 400,
         width: 400,
       ),
@@ -69,7 +70,7 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
                   case ActivityBlocStatus.success:
                     HelperFunctions.showMessage(
                       context,
-                      'Update successfull',
+                      ActivityLocalizations.of(context)!.timeEntry_updateSuccess,
                       Colors.green,
                     );
                     Navigator.of(context).pop();
@@ -77,7 +78,8 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
                   case ActivityBlocStatus.failure:
                     HelperFunctions.showMessage(
                       context,
-                      'Error: ${state.message}',
+                      ActivityLocalizations.of(context)!
+                          .activity_error(state.message ?? 'unknown'),
                       Colors.red,
                     );
                     break;
@@ -92,11 +94,11 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
                     itemCount: widget.timeEntries.length + 1,
                     itemBuilder: (BuildContext context, int index) {
                       if (widget.timeEntries.isEmpty) {
-                        return const Center(
+                        return Center(
                           heightFactor: 20,
                           child: Text(
-                            'No time entries found',
-                            key: Key('empty'),
+                            ActivityLocalizations.of(context)!.timeEntry_notFound,
+                            key: const Key('empty'),
                             textAlign: TextAlign.center,
                           ),
                         );
@@ -146,7 +148,7 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
                   },
                 );
               },
-              tooltip: 'Add New',
+              tooltip: ActivityLocalizations.of(context)!.activity_addNew,
               child: const Icon(Icons.add),
             ),
           ),
