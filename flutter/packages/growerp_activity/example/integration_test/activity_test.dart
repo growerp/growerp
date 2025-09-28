@@ -22,6 +22,34 @@ import 'package:integration_test/integration_test.dart';
 import 'package:growerp_activity/growerp_activity.dart';
 import 'package:growerp_core/test_data.dart';
 
+// Static menuOptions for testing (no localization needed)
+List<MenuOption> testMenuOptions = [
+  MenuOption(
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    title: 'Main',
+    route: '/',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const MainMenuForm(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/crmGrey.png',
+    selectedImage: 'packages/growerp_core/images/crm.png',
+    title: 'To Do',
+    route: '/todos',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const ActivityList(ActivityType.todo),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/crmGrey.png',
+    selectedImage: 'packages/growerp_core/images/crm.png',
+    title: 'Events',
+    route: '/events',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const ActivityList(ActivityType.event),
+  ),
+];
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -32,14 +60,15 @@ void main() {
   testWidgets('''GrowERP Activity test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
-        tester,
-        generateRoute,
-        menuOptions,
-        restClient: restClient,
-        ActivityLocalizations.localizationsDelegates,
-        blocProviders: getActivityBlocProviders(restClient, 'AppAdmin'),
-        title: "Activity test",
-        clear: true); // use data from previous run, ifnone same as true
+      tester,
+      generateRoute,
+      testMenuOptions,
+      restClient: restClient,
+      ActivityLocalizations.localizationsDelegates,
+      blocProviders: getActivityBlocProviders(restClient, 'AppAdmin'),
+      title: "Activity test",
+      clear: true,
+    ); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester);
     await ActivityTest.selectActivities(tester);
     await ActivityTest.addActivities(tester, activities);

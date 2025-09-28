@@ -20,6 +20,34 @@ import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+// Static menuOptions for testing (no localization needed)
+List<MenuOption> testMenuOptions = [
+  MenuOption(
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    title: 'Main',
+    route: '/',
+    userGroups: <UserGroup>[UserGroup.admin, UserGroup.employee],
+    child: const MainMenu(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/companyGrey.png',
+    selectedImage: 'packages/growerp_core/images/company.png',
+    title: 'Organization',
+    route: '/company',
+    userGroups: <UserGroup>[UserGroup.admin, UserGroup.employee],
+    child: const MainMenu(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    title: 'Logged in User',
+    route: '/user',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const MainMenu(),
+  ),
+];
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -32,7 +60,7 @@ void main() {
     await CommonTest.startTestApp(
       tester,
       generateRoute,
-      menuOptions,
+      testMenuOptions,
       CoreLocalizations.localizationsDelegates,
       restClient: restClient,
       clear: true,

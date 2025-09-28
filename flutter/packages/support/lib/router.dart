@@ -39,19 +39,19 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
         settings: settings,
         builder: (context) =>
-            DisplayMenuOption(menuList: menuOptions, menuIndex: 1),
+            DisplayMenuOption(menuList: getMenuOptions(context), menuIndex: 1),
       );
     case '/rest-requests':
       return MaterialPageRoute(
         settings: settings,
         builder: (context) =>
-            DisplayMenuOption(menuList: menuOptions, menuIndex: 2),
+            DisplayMenuOption(menuList: getMenuOptions(context), menuIndex: 2),
       );
     case '/subscriptions':
       return MaterialPageRoute(
         settings: settings,
         builder: (context) =>
-            DisplayMenuOption(menuList: menuOptions, menuIndex: 3),
+            DisplayMenuOption(menuList: getMenuOptions(context), menuIndex: 3),
       );
     default:
       return coreRoute(settings);

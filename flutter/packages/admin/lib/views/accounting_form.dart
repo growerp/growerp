@@ -34,34 +34,52 @@ class AccountingForm extends StatelessWidget {
         .currency!
         .currencyId!;
     String currencySymbol = NumberFormat.simpleCurrency(
-            locale: Platform.localeName, name: currencyId)
-        .currencySymbol;
+      locale: Platform.localeName,
+      name: currencyId,
+    ).currencySymbol;
     Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
+
     return DashBoardForm(
       key: const Key('AcctDashBoard'),
       dashboardItems: [
-        makeDashboardItem('acctSales', context, acctMenuOptions[1], [
+        makeDashboardItem('acctSales', context, acctMenuOptions(context)[1], [
           "Open invoices: ",
           "$currencySymbol "
               "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.salesInvoicesNotPaidCount})",
         ]),
-        makeDashboardItem('acctPurchase', context, acctMenuOptions[2], [
-          "Open invoices: ",
-          "$currencySymbol "
-              "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
-              "(${authenticate.stats?.purchInvoicesNotPaidCount})",
+        makeDashboardItem(
+          'acctPurchase',
+          context,
+          acctMenuOptions(context)[2],
+          [
+            "Open invoices: ",
+            "$currencySymbol "
+                "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
+                "(${authenticate.stats?.purchInvoicesNotPaidCount})",
+          ],
+        ),
+        makeDashboardItem('acctLedger', context, acctMenuOptions(context)[3], [
+          "Accounts",
+          "Transactions",
+          "Journal",
         ]),
-        makeDashboardItem('acctLedger', context, acctMenuOptions[3],
-            ["Accounts", "Transactions", "Journal"]),
-        makeDashboardItem('acctReports', context, acctMenuOptions[4], [
+        makeDashboardItem('acctReports', context, acctMenuOptions(context)[4], [
           "Revenue Expense",
           "Balance Sheet",
           "Balance summary",
         ]),
-        makeDashboardItem('AcctSetup', context, acctMenuOptions[5],
-            ["Time Periods", "Item Types", "Payment Types"]),
-        makeDashboardItem('Main dashboard', context, acctMenuOptions[6], []),
+        makeDashboardItem('AcctSetup', context, acctMenuOptions(context)[5], [
+          "Time Periods",
+          "Item Types",
+          "Payment Types",
+        ]),
+        makeDashboardItem(
+          'Main dashboard',
+          context,
+          acctMenuOptions(context)[6],
+          [],
+        ),
       ],
     );
   }

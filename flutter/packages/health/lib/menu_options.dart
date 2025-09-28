@@ -20,11 +20,11 @@ import 'views/main_menu_form.dart' as local;
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-List<MenuOption> menuOptions = [
+List<MenuOption> getMenuOptions(BuildContext context) => [
   MenuOption(
     image: 'packages/growerp_core/images/dashBoardGrey.png',
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Main',
+    title: CoreLocalizations.of(context)!.main,
     route: '/',
     userGroups: [UserGroup.admin, UserGroup.employee, UserGroup.other],
     child: const local.AdminDbForm(),
@@ -33,49 +33,43 @@ List<MenuOption> menuOptions = [
     key: 'dbRequests',
     image: 'packages/growerp_core/images/accountingGrey.png',
     selectedImage: 'packages/growerp_core/images/accounting.png',
-    title: 'Requests',
+    title: CoreLocalizations.of(context)!.requests,
     route: '/requests',
     userGroups: [UserGroup.admin, UserGroup.other, UserGroup.employee],
     child: const FinDocList(
-        key: Key('Request'), sales: false, docType: FinDocType.request),
+      key: Key('Request'),
+      sales: false,
+      docType: FinDocType.request,
+    ),
   ),
   MenuOption(
     key: 'dbCustomers',
     image: 'packages/growerp_core/images/accountingGrey.png',
     selectedImage: 'packages/growerp_core/images/accounting.png',
-    title: 'Clients',
+    title: CoreLocalizations.of(context)!.clients,
     route: '/customers',
     userGroups: [UserGroup.employee, UserGroup.admin],
-    child: const UserList(
-      key: Key('Customer'),
-      role: Role.customer,
-    ),
+    child: const UserList(key: Key('Customer'), role: Role.customer),
   ),
   MenuOption(
     key: 'dbEmployees',
     image: 'packages/growerp_core/images/accountingGrey.png',
     selectedImage: 'packages/growerp_core/images/accounting.png',
-    title: 'Staff',
+    title: CoreLocalizations.of(context)!.staff,
     route: '/employees',
     userGroups: [UserGroup.employee, UserGroup.admin],
-    child: const UserList(
-      key: Key('Employee'),
-      role: Role.company,
-    ),
+    child: const UserList(key: Key('Employee'), role: Role.company),
   ),
   MenuOption(
     key: 'dbCompany',
     image: 'packages/growerp_core/images/accountingGrey.png',
     selectedImage: 'packages/growerp_core/images/accounting.png',
-    title: 'Organization',
+    title: CoreLocalizations.of(context)!.organization,
     route: '/company',
     userGroups: [UserGroup.admin, UserGroup.employee],
-    child: ShowCompanyDialog(
-      Company(),
-      dialog: false,
-    ),
+    child: ShowCompanyDialog(Company(), dialog: false),
   ),
-/*  MenuOption(
+  /*  MenuOption(
     key: 'dbWebsite',
     image: 'packages/growerp_core/images/crmGrey.png',
     selectedImage: 'packages/growerp_core/images/crm.png',

@@ -88,7 +88,7 @@ Future main() async {
       notificationClient: notificationClient,
       title: 'GrowERP Hotel.',
       router: router.generateRoute,
-      menuOptions: menuOptions,
+      menuOptions: getMenuOptions,
       extraDelegates: delegates,
       extraBlocProviders: getHotelBlocProviders(restClient, classificationId),
     ),
@@ -107,7 +107,10 @@ List<LocalizationsDelegate> delegates = [
   ActivityLocalizations.delegate,
 ];
 
-List<BlocProvider> getHotelBlocProviders(RestClient restClient, String classificationId) {
+List<BlocProvider> getHotelBlocProviders(
+  RestClient restClient,
+  String classificationId,
+) {
   return [
     ...getInventoryBlocProviders(restClient, classificationId),
     ...getUserCompanyBlocProviders(restClient, classificationId),

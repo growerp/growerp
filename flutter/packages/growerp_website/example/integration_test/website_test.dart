@@ -22,6 +22,26 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+// Static menuOptions for testing (no localization needed)
+List<MenuOption> testMenuOptions = [
+  MenuOption(
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    title: 'Main',
+    route: '/',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const MainMenuForm(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/crmGrey.png',
+    selectedImage: 'packages/growerp_core/images/crm.png',
+    title: 'Website',
+    route: '/website',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const WebsiteDialog(),
+  ),
+];
+
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -37,16 +57,23 @@ void main() {
   testWidgets(testName, (tester) async {
     try {
       RestClient restClient = RestClient(await buildDioClient());
-      await CommonTest.startTestApp(tester, generateRoute, menuOptions,
-          WebsiteLocalizations.localizationsDelegates,
-          title: testName,
-          restClient: restClient,
-          blocProviders: getWebsiteBlocProviders(restClient),
-          clear: true); // use data from previous run, ifnone same as true
-      await CommonTest.createCompanyAndAdmin(tester, testData: {
-        // related categories also created
-        "products": products.sublist(0, 2),
-      });
+      await CommonTest.startTestApp(
+        tester,
+        generateRoute,
+        testMenuOptions,
+        WebsiteLocalizations.localizationsDelegates,
+        title: testName,
+        restClient: restClient,
+        blocProviders: getWebsiteBlocProviders(restClient),
+        clear: true,
+      ); // use data from previous run, ifnone same as true
+      await CommonTest.createCompanyAndAdmin(
+        tester,
+        testData: {
+          // related categories also created
+          "products": products.sublist(0, 2),
+        },
+      );
       await selectWebsite(tester);
       await WebsiteTest.updateTitle(tester);
       await WebsiteTest.updateTextSection(tester);
@@ -56,7 +83,10 @@ void main() {
       await WebsiteTest.updateShopCategories(tester);
     } catch (error) {
       await CommonTest.takeScreenShot(
-          binding: binding, tester: tester, screenShotName: "Website_Error");
+        binding: binding,
+        tester: tester,
+        screenShotName: "Website_Error",
+      );
       rethrow;
     }
     await CommonTest.logout(tester);

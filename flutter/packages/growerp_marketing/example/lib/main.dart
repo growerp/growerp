@@ -29,21 +29,23 @@ Future main() async {
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
 
-  runApp(TopApp(
-    restClient: restClient,
-    classificationId: 'AppAdmin',
-    chatClient: chatClient,
-    notificationClient: notificationClient,
-    title: 'GrowERP Marketing',
-    router: generateRoute,
-    menuOptions: menuOptions,
-    extraDelegates: const [MarketingLocalizations.delegate],
-    extraBlocProviders: getMarketingBlocProviders(restClient),
-  ));
+  runApp(
+    TopApp(
+      restClient: restClient,
+      classificationId: 'AppAdmin',
+      chatClient: chatClient,
+      notificationClient: notificationClient,
+      title: 'GrowERP Marketing',
+      router: generateRoute,
+      menuOptions: menuOptions,
+      extraDelegates: const [MarketingLocalizations.delegate],
+      extraBlocProviders: getMarketingBlocProviders(restClient),
+    ),
+  );
 }
 
 // Menu definition
-List<MenuOption> menuOptions = [
+List<MenuOption> menuOptions(BuildContext context) => [
   MenuOption(
     image: 'packages/growerp_core/images/dashBoardGrey.png',
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
@@ -65,27 +67,35 @@ List<MenuOption> menuOptions = [
 // routing
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (kDebugMode) {
-    debugPrint('>>>NavigateTo { ${settings.name} '
-        'with: ${settings.arguments.toString()} }');
+    debugPrint(
+      '>>>NavigateTo { ${settings.name} '
+      'with: ${settings.arguments.toString()} }',
+    );
   }
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
-          builder: (context) => HomeForm(menuOptions: menuOptions));
+        builder: (context) => const HomeForm(menuOptions: menuOptions),
+      );
     case '/company':
       return MaterialPageRoute(
-          builder: (context) => HomeForm(menuOptions: menuOptions));
+        builder: (context) => HomeForm(menuOptions: (ctx) => menuOptions(ctx)),
+      );
     case '/user':
       return MaterialPageRoute(
-          builder: (context) => HomeForm(menuOptions: menuOptions));
+        builder: (context) => HomeForm(menuOptions: (ctx) => menuOptions(ctx)),
+      );
     case '/crm':
       return MaterialPageRoute(
-          builder: (context) =>
-              DisplayMenuOption(menuList: menuOptions, menuIndex: 1));
+        builder: (context) =>
+            DisplayMenuOption(menuList: menuOptions(context), menuIndex: 1),
+      );
     default:
       return MaterialPageRoute(
-          builder: (context) => FatalErrorForm(
-              message: "Routing not found for request: ${settings.name}"));
+        builder: (context) => FatalErrorForm(
+          message: "Routing not found for request: ${settings.name}",
+        ),
+      );
   }
 }
 
@@ -95,17 +105,22 @@ class MainMenuForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state.status == AuthStatus.authenticated) {
-        Authenticate authenticate = state.authenticate!;
-        return DashBoardForm(dashboardItems: [
-          makeDashboardItem('dbCrm', context, menuOptions[1], [
-            "Opportunities: ${authenticate.stats?.opportunities ?? 0}",
-          ]),
-        ]);
-      }
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          Authenticate authenticate = state.authenticate!;
+          final options = menuOptions(context);
+          return DashBoardForm(
+            dashboardItems: [
+              makeDashboardItem('dbCrm', context, options[1], [
+                "Opportunities: ${authenticate.stats?.opportunities ?? 0}",
+              ]),
+            ],
+          );
+        }
 
-      return const LoadingIndicator();
-    });
+        return const LoadingIndicator();
+      },
+    );
   }
 }

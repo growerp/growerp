@@ -12,16 +12,17 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'src/application/application.dart';
 
-List<MenuOption> menuOptions = [
+List<MenuOption> getMenuOptions(BuildContext context) => [
   MenuOption(
     image: 'packages/growerp_core/images/dashBoardGrey.png',
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Main',
+    title: CoreLocalizations.of(context)!.main,
     route: '/',
     userGroups: [UserGroup.system],
     child: const CompanyList(mainOnly: true, role: Role.unknown),
@@ -29,7 +30,7 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: 'packages/growerp_core/images/productsGrey.png',
     selectedImage: 'packages/growerp_core/images/products.png',
-    title: 'Applications',
+    title: CoreLocalizations.of(context)!.applications,
     route: '/applications',
     userGroups: [UserGroup.system],
     child: const ApplicationList(),
@@ -37,7 +38,7 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: 'packages/growerp_core/images/orderGrey.png',
     selectedImage: 'packages/growerp_core/images/order.png',
-    title: 'REST Requests',
+    title: CoreLocalizations.of(context)!.restRequests,
     route: '/rest-requests',
     userGroups: [UserGroup.system],
     child: const RestRequestList(),

@@ -24,53 +24,67 @@ import 'package:growerp_models/growerp_models.dart';
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (debug.kDebugMode) {
     if (kDebugMode) {
-      debugPrint('>>>NavigateTo { ${settings.name} '
-          'with: ${settings.arguments.toString()} }');
+      debugPrint(
+        '>>>NavigateTo { ${settings.name} '
+        'with: ${settings.arguments.toString()} }',
+      );
     }
   }
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 0, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: getMenuOptions(context),
+          menuIndex: 0,
+          tabIndex: 0,
+        ),
+      );
     case '/requests':
       return MaterialPageRoute(
-          builder: (context) =>
-              DisplayMenuOption(menuList: menuOptions, menuIndex: 1));
+        builder: (context) =>
+            DisplayMenuOption(menuList: getMenuOptions(context), menuIndex: 1),
+      );
     case '/user':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => UserDialog(settings.arguments as User));
+        settings: settings,
+        builder: (context) => UserDialog(settings.arguments as User),
+      );
     case '/customers':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) =>
-              DisplayMenuOption(menuList: menuOptions, menuIndex: 2));
+        settings: settings,
+        builder: (context) =>
+            DisplayMenuOption(menuList: getMenuOptions(context), menuIndex: 2),
+      );
     case '/employees':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) =>
-              DisplayMenuOption(menuList: menuOptions, menuIndex: 3));
+        settings: settings,
+        builder: (context) =>
+            DisplayMenuOption(menuList: getMenuOptions(context), menuIndex: 3),
+      );
     case '/company':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) =>
-              DisplayMenuOption(menuList: menuOptions, menuIndex: 4));
+        settings: settings,
+        builder: (context) =>
+            DisplayMenuOption(menuList: getMenuOptions(context), menuIndex: 4),
+      );
     case '/website':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) =>
-              DisplayMenuOption(menuList: menuOptions, menuIndex: 5));
+        settings: settings,
+        builder: (context) =>
+            DisplayMenuOption(menuList: getMenuOptions(context), menuIndex: 5),
+      );
     case '/findoc':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => ShowFinDocDialog(settings.arguments as FinDoc));
+        settings: settings,
+        builder: (context) => ShowFinDocDialog(settings.arguments as FinDoc),
+      );
     case '/printer':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) =>
-              PrintingForm(finDocIn: settings.arguments as FinDoc));
+        settings: settings,
+        builder: (context) =>
+            PrintingForm(finDocIn: settings.arguments as FinDoc),
+      );
     default:
       return coreRoute(settings);
   }

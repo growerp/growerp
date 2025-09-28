@@ -20,37 +20,49 @@ import 'package:growerp_models/growerp_models.dart';
 import 'main.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
-  debugPrint('>>>Root NavigateTo { ${settings.name} '
-      'with: ${settings.arguments.toString()} }');
+  debugPrint(
+    '>>>Root NavigateTo { ${settings.name} '
+    'with: ${settings.arguments.toString()} }',
+  );
 
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-                menuList: menuOptions,
-                menuIndex: 0,
-                tabIndex: 0,
-              ));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: menuOptions(context),
+          menuIndex: 0,
+          tabIndex: 0,
+        ),
+      );
     case '/todos':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: menuOptions(context),
+          menuIndex: 1,
+          tabIndex: 0,
+        ),
+      );
     case '/events':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 2, tabIndex: 0));
+        settings: settings,
+        builder: (context) => DisplayMenuOption(
+          menuList: menuOptions(context),
+          menuIndex: 2,
+          tabIndex: 0,
+        ),
+      );
     case '/company':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) =>
-              ShowCompanyDialog(settings.arguments as Company));
+        settings: settings,
+        builder: (context) => ShowCompanyDialog(settings.arguments as Company),
+      );
     case '/user':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => UserDialog(settings.arguments as User));
+        settings: settings,
+        builder: (context) => UserDialog(settings.arguments as User),
+      );
     default:
       return coreRoute(settings);
   }

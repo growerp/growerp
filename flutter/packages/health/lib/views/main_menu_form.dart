@@ -26,18 +26,19 @@ class AdminDbForm extends StatelessWidget {
     Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
     List<Widget> dashboardItems = [];
 
-    for (final option in menuOptions) {
+    for (final option in getMenuOptions(context)) {
       if (option.userGroups!.contains(authenticate.user?.userGroup!) &&
           option.title != 'Main') {
-        dashboardItems
-            .add(makeDashboardItem(option.key ?? '', context, option, [
-          if (option.key == 'dbRequests')
-            "#: ${authenticate.stats?.requests ?? 0}",
-          if (option.key == 'dbCustomers')
-            "#: ${authenticate.stats?.customers}",
-          if (option.key == 'dbEmployees')
-            "#: ${authenticate.stats?.employees ?? 0}",
-        ]));
+        dashboardItems.add(
+          makeDashboardItem(option.key ?? '', context, option, [
+            if (option.key == 'dbRequests')
+              "#: ${authenticate.stats?.requests ?? 0}",
+            if (option.key == 'dbCustomers')
+              "#: ${authenticate.stats?.customers}",
+            if (option.key == 'dbEmployees')
+              "#: ${authenticate.stats?.employees ?? 0}",
+          ]),
+        );
       }
     }
     return Column(

@@ -31,21 +31,23 @@ Future main() async {
   WsClient notificationClient = WsClient('notws');
   Bloc.observer = AppBlocObserver();
 
-  runApp(TopApp(
-    restClient: RestClient(await buildDioClient()),
-    classificationId: 'AppAdmin',
-    chatClient: chatClient,
-    notificationClient: notificationClient,
-    title: 'GrowERP Catalog.',
-    router: generateRoute,
-    menuOptions: menuOptions,
-    extraDelegates: const [CatalogLocalizations.delegate],
-    extraBlocProviders: getCatalogBlocProviders(restClient, 'AppAdmin'),
-  ));
+  runApp(
+    TopApp(
+      restClient: RestClient(await buildDioClient()),
+      classificationId: 'AppAdmin',
+      chatClient: chatClient,
+      notificationClient: notificationClient,
+      title: 'GrowERP Catalog.',
+      router: generateRoute,
+      menuOptions: (context) => menuOptions(context),
+      extraDelegates: const [CatalogLocalizations.delegate],
+      extraBlocProviders: getCatalogBlocProviders(restClient, 'AppAdmin'),
+    ),
+  );
 }
 
 // Menu definition
-List<MenuOption> menuOptions = [
+List<MenuOption> menuOptions(BuildContext context) => [
   MenuOption(
     image: 'packages/growerp_core/images/dashBoardGrey.png',
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
@@ -55,57 +57,66 @@ List<MenuOption> menuOptions = [
     child: const MainMenuForm(),
   ),
   MenuOption(
-      image: 'packages/growerp_core/images/productsGrey.png',
-      selectedImage: 'packages/growerp_core/images/products.png',
-      title: 'Catalog',
-      route: '/catalog',
-      userGroups: [
-        UserGroup.admin,
-        UserGroup.employee
-      ],
-      tabItems: [
-        TabItem(
-          form: const ProductList(),
-          label: 'Products',
-          icon: const Icon(Icons.home),
-        ),
-        TabItem(
-          form: const CategoryList(),
-          label: 'Categories',
-          icon: const Icon(Icons.business),
-        ),
-        TabItem(
-          form: const SubscriptionList(),
-          label: 'Subscriptions',
-          icon: const Icon(Icons.subscriptions),
-        ),
-      ]),
+    image: 'packages/growerp_core/images/productsGrey.png',
+    selectedImage: 'packages/growerp_core/images/products.png',
+    title: 'Catalog',
+    route: '/catalog',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    tabItems: [
+      TabItem(
+        form: const ProductList(),
+        label: 'Products',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const CategoryList(),
+        label: 'Categories',
+        icon: const Icon(Icons.business),
+      ),
+      TabItem(
+        form: const SubscriptionList(),
+        label: 'Subscriptions',
+        icon: const Icon(Icons.subscriptions),
+      ),
+    ],
+  ),
 ];
 
 // routing
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (kDebugMode) {
-    debugPrint('>>>NavigateTo { ${settings.name} '
-        'with: ${settings.arguments.toString()} }');
+    debugPrint(
+      '>>>NavigateTo { ${settings.name} '
+      'with: ${settings.arguments.toString()} }',
+    );
   }
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
-          builder: (context) => HomeForm(menuOptions: menuOptions));
+        builder: (context) => const HomeForm(menuOptions: menuOptions),
+      );
     case '/company':
       return MaterialPageRoute(
-          builder: (context) => HomeForm(menuOptions: menuOptions));
+        builder: (context) => HomeForm(menuOptions: (ctx) => menuOptions(ctx)),
+      );
     case '/user':
       return MaterialPageRoute(
-          builder: (context) => HomeForm(menuOptions: menuOptions));
+        builder: (context) => HomeForm(menuOptions: (ctx) => menuOptions(ctx)),
+      );
     case '/catalog':
       return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+        builder: (context) => DisplayMenuOption(
+          menuList: menuOptions(context),
+          menuIndex: 1,
+          tabIndex: 0,
+        ),
+      );
     default:
       return MaterialPageRoute(
-          builder: (context) => FatalErrorForm(
-              message: "Routing not found for request: ${settings.name}"));
+        builder: (context) => FatalErrorForm(
+          message: "Routing not found for request: ${settings.name}",
+        ),
+      );
   }
 }
 
@@ -115,18 +126,23 @@ class MainMenuForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state.status == AuthStatus.authenticated) {
-        Authenticate authenticate = state.authenticate!;
-        return DashBoardForm(dashboardItems: [
-          makeDashboardItem('dbCatalog', context, menuOptions[1], [
-            "Categories: ${authenticate.stats?.categories ?? 0}",
-            "Products: ${authenticate.stats?.products ?? 0}",
-          ]),
-        ]);
-      }
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          Authenticate authenticate = state.authenticate!;
+          final options = menuOptions(context);
+          return DashBoardForm(
+            dashboardItems: [
+              makeDashboardItem('dbCatalog', context, options[1], [
+                "Categories: ${authenticate.stats?.categories ?? 0}",
+                "Products: ${authenticate.stats?.products ?? 0}",
+              ]),
+            ],
+          );
+        }
 
-      return const LoadingIndicator();
-    });
+        return const LoadingIndicator();
+      },
+    );
   }
 }

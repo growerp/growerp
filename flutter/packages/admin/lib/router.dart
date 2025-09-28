@@ -36,7 +36,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           settings: settings,
           builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 0, tabIndex: 0));
+              menuList: getMenuOptions(context), menuIndex: 0, tabIndex: 0));
     case '/company':
       return MaterialPageRoute(
           settings: settings,
@@ -46,7 +46,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           settings: settings,
           builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+              menuList: getMenuOptions(context), menuIndex: 1, tabIndex: 0));
     case '/user':
       return MaterialPageRoute(
           settings: settings,
@@ -55,12 +55,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           settings: settings,
           builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 2, tabIndex: 0));
+              menuList: getMenuOptions(context), menuIndex: 2, tabIndex: 0));
     case '/catalog':
       return MaterialPageRoute(
           settings: settings,
           builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 3, tabIndex: 0));
+              menuList: getMenuOptions(context), menuIndex: 3, tabIndex: 0));
     case '/category':
       return MaterialPageRoute(
           settings: settings,
@@ -70,7 +70,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           settings: settings,
           builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 4, tabIndex: 0));
+              menuList: getMenuOptions(context), menuIndex: 4, tabIndex: 0));
     case '/findoc':
       return MaterialPageRoute(
           settings: settings,
@@ -79,7 +79,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           settings: settings,
           builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 5, tabIndex: 0));
+              menuList: getMenuOptions(context), menuIndex: 5, tabIndex: 0));
     case '/printer':
       return MaterialPageRoute(
           settings: settings,
@@ -88,32 +88,32 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case '/accounting':
       return MaterialPageRoute(
           settings: settings,
-          builder: (context) => HomeForm(menuOptions: acctMenuOptions));
+          builder: (context) => HomeForm(menuOptions: getAcctMenuOptions));
     case '/acctSales':
       return MaterialPageRoute(
           settings: settings,
           builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 1, tabIndex: 0));
+              menuList: getAcctMenuOptions(context), menuIndex: 1, tabIndex: 0));
     case '/acctPurchase':
       return MaterialPageRoute(
           settings: settings,
           builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 2, tabIndex: 0));
+              menuList: getAcctMenuOptions(context), menuIndex: 2, tabIndex: 0));
     case '/acctLedger':
       return MaterialPageRoute(
           settings: settings,
           builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 3, tabIndex: 0));
+              menuList: getAcctMenuOptions(context), menuIndex: 3, tabIndex: 0));
     case '/acctReports':
       return MaterialPageRoute(
           settings: settings,
           builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 4, tabIndex: 0));
+              menuList: getAcctMenuOptions(context), menuIndex: 4, tabIndex: 0));
     case '/acctSetup':
       return MaterialPageRoute(
           settings: settings,
           builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 5, tabIndex: 0));
+              menuList: getAcctMenuOptions(context), menuIndex: 5, tabIndex: 0));
     default:
       return coreRoute(settings);
   }

@@ -51,7 +51,7 @@ class TopApp extends StatelessWidget {
   final WsClient notificationClient;
   final String title;
   final Route<dynamic> Function(RouteSettings) router;
-  final List<MenuOption> menuOptions;
+  final List<MenuOption> Function(BuildContext) menuOptions;
   final List<LocalizationsDelegate> extraDelegates;
   final List<BlocProvider> extraBlocProviders;
   final _rootNavigatorKey = GlobalKey<NavigatorState>();

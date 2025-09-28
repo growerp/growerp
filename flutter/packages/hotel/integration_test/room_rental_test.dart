@@ -18,12 +18,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'package:hotel/menu_option_data.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:intl/intl.dart';
 import 'package:hotel/router.dart' as router;
 import 'package:hotel/main.dart';
 import 'package:growerp_models/growerp_models.dart';
+
+// Static menuOptions for testing (no localization needed)
+List<MenuOption> testMenuOptions = [
+  MenuOption(
+    image: "packages/growerp_core/images/dashBoardGrey.png",
+    selectedImage: "packages/growerp_core/images/dashBoard.png",
+    title: 'Main',
+    route: '/',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const Center(child: Text('Test Menu')),
+  ),
+];
 
 Future<void> selectRoomTypes(WidgetTester tester) async {
   await CommonTest.selectOption(tester, '/rooms', 'ProductList', '2');
@@ -82,7 +93,7 @@ void main() {
       title: 'Hotel reservation Test',
       tester,
       router.generateRoute,
-      menuOptions,
+      testMenuOptions,
       delegates,
       restClient: restClient,
       blocProviders: getHotelBlocProviders(restClient, classificationId),
