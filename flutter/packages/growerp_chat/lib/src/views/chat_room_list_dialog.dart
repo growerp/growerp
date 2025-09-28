@@ -144,7 +144,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
           return Center(
             heightFactor: 20,
             child: Text(
-              "${ChatLocalizations.of(context)!.no} ${entityName}${ChatLocalizations.of(context)!.sFound}",
+              "${ChatLocalizations.of(context)!.no} $entityName${ChatLocalizations.of(context)!.sFound}",
               key: const Key('empty'),
               textAlign: TextAlign.center,
             ),
