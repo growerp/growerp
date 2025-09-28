@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
+import '../l10n/generated/chat_localizations.dart';
 
 import '../blocs/blocs.dart';
 
@@ -48,7 +49,7 @@ class ChatState extends State<ChatDialog> {
   Widget build(BuildContext context) {
     chat = context.read<WsClient>();
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    if (chat == null) return (const Center(child: Text("chat not active!")));
+    if (chat == null) return (Center(child: Text(ChatLocalizations.of(context)!.chatNotActive)));
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state.status == AuthStatus.authenticated) {
         authenticate = state.authenticate!;
@@ -127,14 +128,14 @@ class ChatState extends State<ChatDialog> {
           key: const Key('messageContent'),
           autofocus: true,
           controller: messageController,
-          decoration: const InputDecoration(labelText: 'Message text..'),
+          decoration: InputDecoration(labelText: ChatLocalizations.of(context)!.messageText),
         )),
         const SizedBox(
           width: 16,
         ),
         OutlinedButton(
             key: const Key('send'),
-            child: const Text('Send'),
+            child: Text(ChatLocalizations.of(context)!.send),
             onPressed: () {
               messageController.text.isEmpty
                   ? null

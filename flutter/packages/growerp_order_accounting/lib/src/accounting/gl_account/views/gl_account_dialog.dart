@@ -18,6 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/src/l10n/generated/order_accounting_localizations.dart';
 
 import '../../../../growerp_order_accounting.dart';
 
@@ -37,6 +38,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
   AccountClass? classSelected;
   AccountType? typeSelected;
   late GlAccountBloc _glAccountBloc;
+  late OrderAccountingLocalizations _local;
 
   @override
   void initState() {
@@ -58,6 +60,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
 
   @override
   Widget build(BuildContext context) {
+    _local = OrderAccountingLocalizations.of(context)!;
     int columns = ResponsiveBreakpoints.of(context).isMobile ? 1 : 2;
     return BlocListener<GlAccountBloc, GlAccountState>(
       listenWhen: (previous, current) =>
@@ -84,7 +87,8 @@ class GlAccountDialogState extends State<GlAccountDialog> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: popUp(
           context: context,
-          title: "GlAccount #${widget.glAccount.accountCode ?? " New"}",
+          title:
+              "${_local.glAccount} #${widget.glAccount.accountCode ?? _local.newGlAccount}",
           width: columns.toDouble() * 400,
           height: columns == 1
               ? 1 / columns.toDouble() * 650
@@ -93,8 +97,8 @@ class GlAccountDialogState extends State<GlAccountDialog> {
             builder: (context, state) {
               switch (state.status) {
                 case GlAccountStatus.failure:
-                  return const FatalErrorForm(
-                    message: 'server connection problem',
+                  return FatalErrorForm(
+                    message: _local.serverProblem,
                   );
                 case GlAccountStatus.success:
                   return _glAccountForm(state);
@@ -112,18 +116,18 @@ class GlAccountDialogState extends State<GlAccountDialog> {
     List<Widget> widgets = [
       TextFormField(
         key: const Key('code'),
-        decoration: const InputDecoration(labelText: 'GlAccount Id'),
+        decoration: InputDecoration(labelText: _local.glAccountId),
         controller: _accountCodeController,
         validator: (value) {
-          return value!.isEmpty ? 'Please enter a glAccount Id?' : null;
+          return value!.isEmpty ? _local.glAccountIdNull : null;
         },
       ),
       TextFormField(
         key: const Key('name'),
-        decoration: const InputDecoration(labelText: 'GlAccount Name'),
+        decoration: InputDecoration(labelText: _local.glAccountName),
         controller: _accountNameController,
         validator: (value) {
-          return value!.isEmpty ? 'Please enter a glAccount name?' : null;
+          return value!.isEmpty ? _local.glAccountNameNull : null;
         },
       ),
       if (widget.glAccount.glAccountId != null)
@@ -146,19 +150,20 @@ class GlAccountDialogState extends State<GlAccountDialog> {
           isFilterOnline: true,
           showSelectedItems: true,
           showSearchBox: true,
-          searchFieldProps: const TextFieldProps(
+          searchFieldProps: TextFieldProps(
             autofocus: true,
-            decoration: InputDecoration(labelText: 'Account Class'),
+            decoration: InputDecoration(labelText: _local.accountClass),
           ),
           menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
           title: popUp(
             context: context,
-            title: 'Select GL Account Class',
+            title: _local.selectGlAccountClass,
             height: 50,
           ),
         ),
-        dropdownDecoratorProps: const DropDownDecoratorProps(
-          dropdownSearchDecoration: InputDecoration(labelText: 'AccountClass'),
+        dropdownDecoratorProps: DropDownDecoratorProps(
+          dropdownSearchDecoration:
+              InputDecoration(labelText: _local.accountClass),
         ),
         itemAsString: (AccountClass? u) =>
             " ${u!.topDescription!.substring(0, 1)}-${u.parentDescription}-"
@@ -179,7 +184,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
         onChanged: (AccountClass? newValue) {
           classSelected = newValue!;
         },
-        validator: (value) => value == null ? 'field required' : null,
+        validator: (value) => value == null ? _local.fieldRequired : null,
       ),
       DropdownSearch<AccountType>(
         key: const Key('type'),
@@ -188,19 +193,20 @@ class GlAccountDialogState extends State<GlAccountDialog> {
           isFilterOnline: true,
           showSelectedItems: true,
           showSearchBox: true,
-          searchFieldProps: const TextFieldProps(
+          searchFieldProps: TextFieldProps(
             autofocus: true,
-            decoration: InputDecoration(labelText: 'Account Type'),
+            decoration: InputDecoration(labelText: _local.accountType),
           ),
           menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
           title: popUp(
             context: context,
-            title: 'Select GL Account Type',
+            title: _local.selectGlAccountType,
             height: 50,
           ),
         ),
-        dropdownDecoratorProps: const DropDownDecoratorProps(
-          dropdownSearchDecoration: InputDecoration(labelText: 'Account Type'),
+        dropdownDecoratorProps: DropDownDecoratorProps(
+          dropdownSearchDecoration:
+              InputDecoration(labelText: _local.accountType),
         ),
         itemAsString: (AccountType? u) => " ${u!.description}",
         asyncItems: (String filter) async {
@@ -218,12 +224,14 @@ class GlAccountDialogState extends State<GlAccountDialog> {
       ),
       TextFormField(
         key: const Key('postedBalance'),
-        decoration: const InputDecoration(labelText: 'Posted Balance'),
+        decoration: InputDecoration(labelText: _local.postedBalance),
         controller: _postedBalanceController,
       ),
       OutlinedButton(
         key: const Key('update'),
-        child: Text(widget.glAccount.glAccountId == null ? 'Create' : 'Update'),
+        child: Text(widget.glAccount.glAccountId == null
+            ? _local.create
+            : _local.update),
         onPressed: () {
           if (_formKeyGlAccount.currentState!.validate()) {
             _glAccountBloc.add(
@@ -236,10 +244,10 @@ class GlAccountDialogState extends State<GlAccountDialog> {
                     description: classSelected!.detailDescription!.isNotEmpty
                         ? classSelected?.detailDescription
                         : classSelected!.description!.isNotEmpty
-                        ? classSelected?.description
-                        : classSelected!.parentDescription!.isNotEmpty
-                        ? classSelected?.parentDescription
-                        : classSelected?.topDescription,
+                            ? classSelected?.description
+                            : classSelected!.parentDescription!.isNotEmpty
+                                ? classSelected?.parentDescription
+                                : classSelected?.topDescription,
                   ),
                   accountType: typeSelected,
                 ),
