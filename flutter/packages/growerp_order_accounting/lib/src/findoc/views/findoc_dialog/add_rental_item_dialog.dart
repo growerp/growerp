@@ -85,6 +85,10 @@ Future addRentalItemDialog(
                       firstDate: CustomizableDateTime.current,
                       lastDate: DateTime(CustomizableDateTime.current.year + 1),
                       selectableDayPredicate: whichDayOk,
+                      locale: const Locale(
+                        'sv',
+                        'SE',
+                      ), // Swedish locale uses YYYY-MM-DD format
                       builder: (BuildContext context, Widget? child) {
                         return Theme(
                           data: ThemeData(primarySwatch: Colors.green),
