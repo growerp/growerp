@@ -18,7 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:flutter/gestures.dart';
-
+import '../../l10n/generated/marketing_localizations.dart';
 import '../bloc/opportunity_bloc.dart';
 import '../widgets/widgets.dart';
 import 'views.dart';
@@ -37,6 +37,7 @@ class OpportunitiesState extends State<OpportunityList> {
   late List<Opportunity> opportunities;
   late double bottom;
   double? right;
+  late MarketingLocalizations localizations;
 
   @override
   void initState() {
@@ -49,6 +50,7 @@ class OpportunitiesState extends State<OpportunityList> {
 
   @override
   Widget build(BuildContext context) {
+    localizations = MarketingLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
     return BlocConsumer<OpportunityBloc, OpportunityState>(
       listener: (context, state) {
@@ -64,16 +66,16 @@ class OpportunitiesState extends State<OpportunityList> {
         switch (state.status) {
           case OpportunityStatus.failure:
             return Center(
-                child: Text('failed to fetch opportunities: ${state.message}'));
+                child: Text(localizations.fetchError(state.message!)));
           case OpportunityStatus.success:
             opportunities = state.opportunities;
 
             Widget tableView() {
               if (opportunities.isEmpty) {
-                return const Center(
+                return Center(
                     heightFactor: 20,
-                    child: Text("no opportunities found",
-                        style: TextStyle(fontSize: 20.0)));
+                    child: Text(localizations.noOpportunities,
+                        style: const TextStyle(fontSize: 20.0)));
               }
               // get table data formatted for tableView
               var (
@@ -196,7 +198,7 @@ class OpportunitiesState extends State<OpportunityList> {
                                           child: OpportunityDialog(
                                               Opportunity())));
                             },
-                            tooltip: 'Add New',
+                            tooltip: localizations.addNew,
                             child: const Icon(Icons.add)),
                       ],
                     ),

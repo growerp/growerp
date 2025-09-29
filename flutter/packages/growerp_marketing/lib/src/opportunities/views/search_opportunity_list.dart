@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-
+import '../../l10n/generated/marketing_localizations.dart';
 import '../bloc/opportunity_bloc.dart';
 
 class SearchOpportunityList extends StatefulWidget {
@@ -29,6 +29,7 @@ class SearchOpportunityList extends StatefulWidget {
 class SearchOpportunityState extends State<SearchOpportunityList> {
   late OpportunityBloc _opportunityBloc;
   List<Opportunity> opportunities = [];
+  late MarketingLocalizations localizations;
 
   @override
   void initState() {
@@ -39,6 +40,7 @@ class SearchOpportunityState extends State<SearchOpportunityList> {
 
   @override
   Widget build(BuildContext context) {
+    localizations = MarketingLocalizations.of(context)!;
     return BlocConsumer<OpportunityBloc, OpportunityState>(
         listener: (context, state) {
       if (state.status == OpportunityStatus.failure) {
@@ -47,7 +49,7 @@ class SearchOpportunityState extends State<SearchOpportunityList> {
     }, builder: (context, state) {
       if (state.status == OpportunityStatus.failure) {
         return Center(
-            child: Text('failed to fetch search items: ${state.message}'));
+            child: Text(localizations.fetchSearchError(state.message!)));
       }
       if (state.status == OpportunityStatus.success) {
         opportunities = state.searchResults;
@@ -81,6 +83,7 @@ class OpportunitySearchDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ScrollController scrollController = ScrollController();
+    final localizations = MarketingLocalizations.of(context)!;
     return Dialog(
         key: const Key('SearchDialog'),
         insetPadding: const EdgeInsets.all(10),
@@ -89,7 +92,7 @@ class OpportunitySearchDialog extends StatelessWidget {
         ),
         child: popUp(
             context: context,
-            title: 'Opportunity Search ',
+            title: localizations.opportunitySearch,
             height: 500,
             width: 350,
             child: Column(children: [
@@ -97,17 +100,18 @@ class OpportunitySearchDialog extends StatelessWidget {
                   key: const Key('searchField'),
                   textInputAction: TextInputAction.search,
                   autofocus: true,
-                  decoration: const InputDecoration(labelText: "Search input"),
+                  decoration:
+                      InputDecoration(labelText: localizations.searchInput),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Please enter a search value?';
+                      return localizations.enterSearchValue;
                     }
                     return null;
                   },
                   onFieldSubmitted: (value) => _opportunityBloc
                       .add(OpportunityFetch(limit: 5, searchString: value))),
               const SizedBox(height: 20),
-              const Text('Search results'),
+              Text(localizations.searchResults),
               Expanded(
                   child: ListView.builder(
                       key: const Key('listView'),
@@ -119,10 +123,10 @@ class OpportunitySearchDialog extends StatelessWidget {
                         if (index == 0) {
                           return Visibility(
                               visible: opportunities.isEmpty,
-                              child: const Center(
+                              child: Center(
                                   heightFactor: 20,
-                                  child: Text('No search items found (yet)',
-                                      key: Key('empty'),
+                                  child: Text(localizations.noSearchItems,
+                                      key: const Key('empty'),
                                       textAlign: TextAlign.center)));
                         }
                         index--;
@@ -133,8 +137,10 @@ class OpportunitySearchDialog extends StatelessWidget {
                                 direction: DismissDirection.startToEnd,
                                 child: ListTile(
                                   title: Text(
-                                      "ID: ${opportunities[index].pseudoId}\n"
-                                      "Name: ${opportunities[index].opportunityName}",
+                                      localizations.searchResult(
+                                          opportunities[index].pseudoId,
+                                          opportunities[index].opportunityName ??
+                                              ''),
                                       key: Key("searchResult$index")),
                                   onTap: () => Navigator.of(context)
                                       .pop(opportunities[index]),
