@@ -18,7 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
-import '../../l10n/generated/marketing_localizations.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 import '../bloc/opportunity_bloc.dart';
 
 TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
