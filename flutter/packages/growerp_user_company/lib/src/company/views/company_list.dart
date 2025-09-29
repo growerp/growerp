@@ -82,10 +82,10 @@ class CompanyListState extends State<CompanyList> {
     return Builder(builder: (BuildContext context) {
       Widget tableView() {
         if (companies.isEmpty) {
-          return const Center(
+          return Center(
               heightFactor: 20,
-              child:
-                  Text("no companies found", style: TextStyle(fontSize: 20.0)));
+              child: Text(UserCompanyLocalizations.of(context)!.companyNone,
+                  style: const TextStyle(fontSize: 20.0)));
         }
         // get table data formatted for tableView
         var (

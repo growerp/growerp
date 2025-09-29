@@ -39,6 +39,7 @@ class ShowCompanyDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var localizations = UserCompanyLocalizations.of(context)!;
     if (company.partyId != null && company.partyId != '_NEW_') {
       DataFetchBloc companyBloc = context.read<DataFetchBloc<Companies>>()
         ..add(
@@ -55,7 +56,8 @@ class ShowCompanyDialog extends StatelessWidget {
               state.status == DataFetchStatus.failure) {
             if ((companyBloc.state.data as Companies).companies.isEmpty) {
               return FatalErrorForm(
-                message: 'Company ${company.partyId} not found',
+                message: localizations.companyNotFound(
+                    company.partyId.toString()),
               );
             }
             return CompanyDialog(
@@ -323,12 +325,15 @@ class CompanyFormState extends State<CompanyDialog> {
               });
             }
           },
-          /*        onDeleted: () async {
-          bool? result = await confirmDialog(context,
-              "Remove ${employee.firstName} ${employee.lastName}?", "");
+          onDeleted: () async {
+          bool? result = await confirmDialog(
+              context,
+              localizations.removeEmployee(
+                  employee.firstName!, employee.lastName!),
+              "");
           if (result == true) {
             setState(() {
-              _selectedCategories.removeAt(index);
+              employees.removeAt(index);
               if (_selectedCategories.isEmpty) {
                 _selectedCategories.add(Category(categoryId: 'allDelete'));
               }

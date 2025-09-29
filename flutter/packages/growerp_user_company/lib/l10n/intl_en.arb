@@ -704,8 +704,8 @@
   "@newCompany": {
     "description": "Title for creating a new company"
   },
-  "new": "New",
-  "@new": {
+  "newItem": "New",
+  "@newItem": {
     "description": "Short text for new item"
   },
   "paymentMethodDetail": "Payment Method Detail",
@@ -747,5 +747,26 @@
   "clients": "Clients",
   "@clients": {
     "description": "Plural of client"
+  },
+  "companyNotFound": "Company {companyId} not found",
+  "@companyNotFound": {
+    "description": "Error message when a company is not found",
+    "placeholders": {
+      "companyId": {
+        "type": "String"
+      }
+    }
+  },
+  "removeEmployee": "Remove {firstName} {lastName}?",
+  "@removeEmployee": {
+    "description": "Confirmation message to remove an employee",
+    "placeholders": {
+      "firstName": {
+        "type": "String"
+      },
+      "lastName": {
+        "type": "String"
+      }
+    }
   }
 }

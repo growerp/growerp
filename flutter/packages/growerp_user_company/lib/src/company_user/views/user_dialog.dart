@@ -231,7 +231,7 @@ class UserDialogState extends State<UserDialog> {
       insetPadding: const EdgeInsets.all(10),
       child: popUp(
         context: context,
-        title: "$title #${widget.user.pseudoId ?? ' new'}",
+        title: "$title #${widget.user.pseudoId ?? localizations.newItem}",
         width: isPhone ? 400 : 800,
         height: isPhone ? 700 : 600,
         child: ScaffoldMessenger(

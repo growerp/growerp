@@ -150,7 +150,7 @@
   "website": "เว็บไซต์",
   "websiteAddress": "ที่อยู่เว็บไซต์",
   "newCompany": "บริษัทใหม่",
-  "new": "ใหม่",
+  "newItem": "ใหม่",
   "paymentMethodDetail": "รายละเอียดวิธีการชำระเงิน",
   "noUsers": "ไม่พบผู้ใช้",
   "noLeads": "ไม่พบลูกค้าเป้าหมาย",
@@ -160,5 +160,7 @@
   "noAdmins": "ไม่พบผู้ดูแลระบบ",
   "noClients": "ไม่พบลูกค้า",
   "client": "ลูกค้า",
-  "clients": "ลูกค้า"
+  "clients": "ลูกค้า",
+  "companyNotFound": "ไม่พบบริษัท {companyId}",
+  "removeEmployee": "ลบ {firstName} {lastName}?"
 }
