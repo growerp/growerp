@@ -49,10 +49,11 @@ class ChatState extends State<ChatDialog> {
   Widget build(BuildContext context) {
     chat = context.read<WsClient>();
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    if (chat == null)
+    if (chat == null) {
       return (Center(
         child: Text(ChatLocalizations.of(context)!.chatNotActive),
       ));
+    }
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         if (state.status == AuthStatus.authenticated) {

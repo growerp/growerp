@@ -18,7 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:flutter/gestures.dart';
-import '../../l10n/generated/marketing_localizations.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 import '../bloc/opportunity_bloc.dart';
 import '../widgets/widgets.dart';
 import 'views.dart';
