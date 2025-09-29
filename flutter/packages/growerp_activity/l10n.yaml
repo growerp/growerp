@@ -1,6 +1,6 @@
-arb-dir: lib/src/l10n
+arb-dir: lib/l10n
 template-arb-file: intl_en.arb
-output-dir: lib/src/l10n/generated
+output-dir: lib/l10n/generated
 output-localization-file: activity_localizations.dart
 output-class: ActivityLocalizations
 preferred-supported-locales: [en, th]

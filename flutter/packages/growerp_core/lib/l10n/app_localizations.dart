@@ -98,719 +98,29 @@ abstract class AppLocalizations {
     Locale('th'),
   ];
 
-  /// Login form header text
+  /// About app dialog title
   ///
   /// In en, this message translates to:
-  /// **'Login with existing username'**
-  String get loginWithExistingUserName;
+  /// **'About {appName}'**
+  String aboutApp(String appName);
 
-  /// Header for password creation form
-  ///
-  /// In en, this message translates to:
-  /// **'Create New Password'**
-  String get createPassword;
-
-  /// Username display with placeholder
-  ///
-  /// In en, this message translates to:
-  /// **'Username: {username}'**
-  String username(String username);
-
-  /// Password field label
-  ///
-  /// In en, this message translates to:
-  /// **'Password'**
-  String get password;
-
-  /// Password requirements helper text
-  ///
-  /// In en, this message translates to:
-  /// **'At least 8 characters, including alpha, number & special character, no previous password.'**
-  String get passwordHelper;
-
-  /// Error message for empty password field
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter first password?'**
-  String get passwordError;
-
-  /// Error message for invalid password format
-  ///
-  /// In en, this message translates to:
-  /// **'At least 8 characters, including alpha, number & special character.'**
-  String get passwordValidationError;
-
-  /// Password confirmation field label
-  ///
-  /// In en, this message translates to:
-  /// **'Verify Password'**
-  String get verifyPassword;
-
-  /// Helper text for password confirmation field
-  ///
-  /// In en, this message translates to:
-  /// **'Enter the new password again.'**
-  String get verifyPasswordHelper;
-
-  /// Error message for empty password confirmation field
-  ///
-  /// In en, this message translates to:
-  /// **'Enter password again to verify?'**
-  String get verifyPasswordError;
-
-  /// Error message for mismatched password confirmation
-  ///
-  /// In en, this message translates to:
-  /// **'Password is not matching'**
-  String get passwordMismatch;
-
-  /// Submit button text for new password form
-  ///
-  /// In en, this message translates to:
-  /// **'Submit new Password'**
-  String get submitNewPassword;
-
-  /// Registration completion form header
-  ///
-  /// In en, this message translates to:
-  /// **'Complete your registration'**
-  String get completeRegistration;
-
-  /// Welcome greeting message
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome!'**
-  String get welcome;
-
-  /// Helper text for company and currency form fields
-  ///
-  /// In en, this message translates to:
-  /// **'please enter both the company name\nand currency for the new company'**
-  String get enterCompanyAndCurrency;
-
-  /// Helper text for optional company name field
-  ///
-  /// In en, this message translates to:
-  /// **'please enter optionally a company name you work for.'**
-  String get enterCompanyName;
-
-  /// Business company name field label
-  ///
-  /// In en, this message translates to:
-  /// **'Business Company name'**
-  String get businessCompanyName;
-
-  /// Error message for empty business name field
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter business name(\"Private\" for Private person)'**
-  String get businessNameError;
-
-  /// Currency field label
-  ///
-  /// In en, this message translates to:
-  /// **'Currency'**
-  String get currency;
-
-  /// Error message for empty currency field
-  ///
-  /// In en, this message translates to:
-  /// **'Currency field required!'**
-  String get currencyError;
-
-  /// Checkbox label for generating demo data
-  ///
-  /// In en, this message translates to:
-  /// **'Generate demo data'**
-  String get generateDemoData;
-
-  /// Demo data label or header
-  ///
-  /// In en, this message translates to:
-  /// **'DemoData'**
-  String get demoData;
-
-  /// Continue button text
-  ///
-  /// In en, this message translates to:
-  /// **'Continue'**
-  String get continueButton;
-
-  /// Username or email field label
-  ///
-  /// In en, this message translates to:
-  /// **'Username/Email'**
-  String get usernameEmail;
-
-  /// Error message for empty username/email field
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter username or email?'**
-  String get usernameEmailError;
-
-  /// Error message for empty password field on login
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter your password?'**
-  String get passwordError2;
-
-  /// Login button text
-  ///
-  /// In en, this message translates to:
-  /// **'Login'**
-  String get login;
-
-  /// Forgot password link text
-  ///
-  /// In en, this message translates to:
-  /// **'forgot/change password?'**
-  String get forgotPassword;
-
-  /// Subscription section header
-  ///
-  /// In en, this message translates to:
-  /// **'Subscription'**
-  String get subscription;
-
-  /// Message showing the user's current payment method
-  ///
-  /// In en, this message translates to:
-  /// **'Your current payment method:\n{ccDescription}'**
-  String currentPaymentMethod(String ccDescription);
-
-  /// Trial period information message
-  ///
-  /// In en, this message translates to:
-  /// **'You have a trial period for 2 weeks,\nWe will only charge if you not cancel\nbefore that time'**
-  String get trialPeriod;
-
-  /// Test system notification message
-  ///
-  /// In en, this message translates to:
-  /// **'This is a Test system\nso this credit Card will always be approved'**
-  String get testSystem;
-
-  /// Payment plan section header
-  ///
-  /// In en, this message translates to:
-  /// **'Payment Plan'**
-  String get paymentPlan;
-
-  /// Error message for plan selection
-  ///
-  /// In en, this message translates to:
-  /// **'Please select a single plan'**
-  String get selectPlanError;
-
-  /// Credit card information section header
-  ///
-  /// In en, this message translates to:
-  /// **'Credit card information'**
-  String get creditCardInfo;
-
-  /// Instructions for entering credit card details
-  ///
-  /// In en, this message translates to:
-  /// **'Enter your credit card details'**
-  String get creditCardDetails;
-
-  /// Credit card number field label
-  ///
-  /// In en, this message translates to:
-  /// **'Number'**
-  String get number;
-
-  /// Placeholder text for credit card number
-  ///
-  /// In en, this message translates to:
-  /// **'XXXX XXXX XXXX XXXX'**
-  String get numberHint;
-
-  /// Credit card expiry date field label
-  ///
-  /// In en, this message translates to:
-  /// **'Expiry month/year'**
-  String get expiryDate;
-
-  /// Placeholder text for credit card expiry date
-  ///
-  /// In en, this message translates to:
-  /// **'XX/XX'**
-  String get expiryDateHint;
-
-  /// Credit card CVV code field label
-  ///
-  /// In en, this message translates to:
-  /// **'CVV Code'**
-  String get cvvCode;
-
-  /// Placeholder text for CVV code
-  ///
-  /// In en, this message translates to:
-  /// **'XXX'**
-  String get cvvHint;
-
-  /// Name on credit card field label
-  ///
-  /// In en, this message translates to:
-  /// **'Name on Card'**
-  String get nameOnCard;
-
-  /// Payment deadline notification
-  ///
-  /// In en, this message translates to:
-  /// **'Pay within one week'**
-  String get payWithinWeek;
-
-  /// Registration and charging timeline information
-  ///
-  /// In en, this message translates to:
-  /// **'Register and charge in 2 weeks'**
-  String get registerAndCharge;
-
-  /// Button text for sending new password via email
-  ///
-  /// In en, this message translates to:
-  /// **'Send new Password by email'**
-  String get sendNewPassword;
-
-  /// Email field label
-  ///
-  /// In en, this message translates to:
-  /// **'Email:'**
-  String get email;
-
-  /// OK button text
-  ///
-  /// In en, this message translates to:
-  /// **'Ok'**
-  String get ok;
-
-  /// Warning message about account deletion consequences
-  ///
-  /// In en, this message translates to:
-  /// **'Please note you will be blocked using the system.\nThis cannot be undone!'**
-  String get deleteWarning;
-
-  /// Option to delete only the user account
-  ///
-  /// In en, this message translates to:
-  /// **'Only User delete'**
-  String get onlyUserDelete;
-
-  /// Option to delete both user and company
-  ///
-  /// In en, this message translates to:
-  /// **'User AND Company delete'**
-  String get userAndCompanyDelete;
-
-  /// Button text for self-deletion
-  ///
-  /// In en, this message translates to:
-  /// **'Delete yourself'**
-  String get deleteYourself;
-
-  /// Confirmation text for deleting user and optional company
-  ///
-  /// In en, this message translates to:
-  /// **'Delete yourself and opt. company?'**
-  String get deleteYourselfAndCompany;
-
-  /// Registration form header
-  ///
-  /// In en, this message translates to:
-  /// **'Registration'**
-  String get registration;
-
-  /// First name field label
-  ///
-  /// In en, this message translates to:
-  /// **'First Name'**
-  String get firstName;
-
-  /// Error message for empty first name field
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter your first name?'**
-  String get firstNameError;
-
-  /// Last name field label
-  ///
-  /// In en, this message translates to:
-  /// **'Last Name'**
-  String get lastName;
-
-  /// Error message for empty last name field
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter your last name?'**
-  String get lastNameError;
-
-  /// Information about temporary password delivery
-  ///
-  /// In en, this message translates to:
-  /// **'A temporary password will be send by email'**
-  String get tempPassword;
-
-  /// Email address field label
-  ///
-  /// In en, this message translates to:
-  /// **'Email address'**
-  String get emailAddress;
-
-  /// Error message for empty email address field
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter Email address?'**
-  String get emailAddressError;
-
-  /// Error message for invalid email format
-  ///
-  /// In en, this message translates to:
-  /// **'This is not a valid email'**
-  String get emailAddressError2;
-
-  /// Register button text
-  ///
-  /// In en, this message translates to:
-  /// **'Register'**
-  String get register;
-
-  /// About GrowERP section header
+  /// About GrowERP menu item
   ///
   /// In en, this message translates to:
   /// **'About GrowERP'**
   String get aboutGrowERP;
 
-  /// About page header showing the app name
+  /// Accounts menu item or section header
   ///
   /// In en, this message translates to:
-  /// **'About GrowERP and this {appName} app'**
-  String aboutApp(String appName);
-
-  /// Version information display
-  ///
-  /// In en, this message translates to:
-  /// **'Version {version}, build #{build}'**
-  String version(String version, String build);
-
-  /// Copyright notice with year
-  ///
-  /// In en, this message translates to:
-  /// **'© GrowERP, {year}'**
-  String copyright(int year);
-
-  /// Button text to view readme file
-  ///
-  /// In en, this message translates to:
-  /// **'View Readme'**
-  String get viewReadme;
-
-  /// Button text to view license information
-  ///
-  /// In en, this message translates to:
-  /// **'View License'**
-  String get viewLicense;
-
-  /// Contributing section header or button text
-  ///
-  /// In en, this message translates to:
-  /// **'Contributing'**
-  String get contributing;
-
-  /// Privacy and code of conduct section header
-  ///
-  /// In en, this message translates to:
-  /// **'Privacy, Code of conduct'**
-  String get privacyCodeOfConduct;
-
-  /// Open source licenses section header
-  ///
-  /// In en, this message translates to:
-  /// **'Open source Licenses'**
-  String get openSourceLicenses;
-
-  /// Instructions for entering backend URL
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a backend && chat url in the form of: xxx.yyy.zzz'**
-  String get enterBackendUrl;
-
-  /// Backend server configuration label
-  ///
-  /// In en, this message translates to:
-  /// **'Backend server:'**
-  String get backendServer;
-
-  /// Generic required field error message
-  ///
-  /// In en, this message translates to:
-  /// **'field required!'**
-  String get fieldRequired;
-
-  /// Chat server configuration label
-  ///
-  /// In en, this message translates to:
-  /// **'Chat server:'**
-  String get chatServer;
-
-  /// Company party ID configuration label
-  ///
-  /// In en, this message translates to:
-  /// **'partyId of main company:'**
-  String get companyPartyId;
-
-  /// Cancel button text
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get cancel;
-
-  /// Restart button text
-  ///
-  /// In en, this message translates to:
-  /// **'Restart'**
-  String get restart;
-
-  /// Main navigation or section header
-  ///
-  /// In en, this message translates to:
-  /// **'Main'**
-  String get main;
-
-  /// Message when user has no access to any options
-  ///
-  /// In en, this message translates to:
-  /// **'No Access to any option'**
-  String get noAccess;
+  /// **'Accounts'**
+  String get accounts;
 
   /// Add new item button text
   ///
   /// In en, this message translates to:
-  /// **'Add New'**
+  /// **'Add new'**
   String get addNew;
-
-  /// Chat menu item or button text
-  ///
-  /// In en, this message translates to:
-  /// **'Chat'**
-  String get chat;
-
-  /// Navigation button to go to home screen
-  ///
-  /// In en, this message translates to:
-  /// **'Go Home'**
-  String get goHome;
-
-  /// Test label or placeholder text
-  ///
-  /// In en, this message translates to:
-  /// **'test'**
-  String get test;
-
-  /// Theme setting label
-  ///
-  /// In en, this message translates to:
-  /// **'Theme'**
-  String get theme;
-
-  /// Generic error message
-  ///
-  /// In en, this message translates to:
-  /// **'error: should not arrive here'**
-  String get error;
-
-  /// Message when user has no access to current section
-  ///
-  /// In en, this message translates to:
-  /// **'No access to any option here, '**
-  String get noAccessHere;
-
-  /// Message when no REST requests are available
-  ///
-  /// In en, this message translates to:
-  /// **'No REST requests found'**
-  String get noRestRequests;
-
-  /// Error message when REST requests fail to load
-  ///
-  /// In en, this message translates to:
-  /// **'Could not load REST requests!'**
-  String get cannotLoadRestRequests;
-
-  /// Refresh button text
-  ///
-  /// In en, this message translates to:
-  /// **'Refresh'**
-  String get refresh;
-
-  /// Header for REST request details screen
-  ///
-  /// In en, this message translates to:
-  /// **'REST Request Details'**
-  String get restRequestDetails;
-
-  /// Date and time field label
-  ///
-  /// In en, this message translates to:
-  /// **'Date/Time'**
-  String get dateTime;
-
-  /// Placeholder text for unknown values
-  ///
-  /// In en, this message translates to:
-  /// **'Unknown'**
-  String get unknown;
-
-  /// User label or menu item
-  ///
-  /// In en, this message translates to:
-  /// **'User'**
-  String get user;
-
-  /// Abbreviation for Not Available
-  ///
-  /// In en, this message translates to:
-  /// **'N/A'**
-  String get notAvailable;
-
-  /// Login name field label
-  ///
-  /// In en, this message translates to:
-  /// **'Login Name'**
-  String get loginName;
-
-  /// Request name field label
-  ///
-  /// In en, this message translates to:
-  /// **'Request Name'**
-  String get requestName;
-
-  /// Server IP address field label
-  ///
-  /// In en, this message translates to:
-  /// **'Server IP'**
-  String get serverIp;
-
-  /// Server hostname field label
-  ///
-  /// In en, this message translates to:
-  /// **'Server Host'**
-  String get serverHost;
-
-  /// Request running time field label
-  ///
-  /// In en, this message translates to:
-  /// **'Running Time'**
-  String get runningTime;
-
-  /// Milliseconds unit abbreviation
-  ///
-  /// In en, this message translates to:
-  /// **' ms'**
-  String get ms;
-
-  /// Status field label
-  ///
-  /// In en, this message translates to:
-  /// **'Status'**
-  String get status;
-
-  /// Success confirmation message
-  ///
-  /// In en, this message translates to:
-  /// **'Success'**
-  String get success;
-
-  /// Label for slow performance indicator
-  ///
-  /// In en, this message translates to:
-  /// **'Slow Hit'**
-  String get slowHit;
-
-  /// Yes confirmation button text
-  ///
-  /// In en, this message translates to:
-  /// **'Yes'**
-  String get yes;
-
-  /// No confirmation button text
-  ///
-  /// In en, this message translates to:
-  /// **'No'**
-  String get no;
-
-  /// Error message field label
-  ///
-  /// In en, this message translates to:
-  /// **'Error Message:'**
-  String get errorMessage;
-
-  /// Request URL field label
-  ///
-  /// In en, this message translates to:
-  /// **'Request URL:'**
-  String get requestUrl;
-
-  /// Referrer URL field label
-  ///
-  /// In en, this message translates to:
-  /// **'Referrer URL:'**
-  String get referrerUrl;
-
-  /// Parameters field label
-  ///
-  /// In en, this message translates to:
-  /// **'Parameters:'**
-  String get parameters;
-
-  /// Logout button text
-  ///
-  /// In en, this message translates to:
-  /// **'Logout'**
-  String get logout;
-
-  /// Main welcome message for the GrowERP system
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome to The GrowERP Business System'**
-  String get welcomeToGrowERPBusinessSystem;
-
-  /// Language selection dropdown or button text
-  ///
-  /// In en, this message translates to:
-  /// **'Select Language'**
-  String get selectLanguage;
-
-  /// Registration form header for new company and admin
-  ///
-  /// In en, this message translates to:
-  /// **'Register new Company and Administrator'**
-  String get registerNewCompanyAndAdmin;
-
-  /// Create button text
-  ///
-  /// In en, this message translates to:
-  /// **'Create'**
-  String get create;
-
-  /// Update button text
-  ///
-  /// In en, this message translates to:
-  /// **'Update'**
-  String get update;
-
-  /// Label for customer
-  ///
-  /// In en, this message translates to:
-  /// **'Customer'**
-  String get customer;
-
-  /// Label for supplier
-  ///
-  /// In en, this message translates to:
-  /// **'Supplier'**
-  String get supplier;
 
   /// Partial validation message indicating minimum requirement
   ///
@@ -818,11 +128,1151 @@ abstract class AppLocalizations {
   /// **'and at least one '**
   String get andAtLeastOne;
 
+  /// Backend server input label
+  ///
+  /// In en, this message translates to:
+  /// **'Backend Server'**
+  String get backendServer;
+
+  /// Balance sheet report menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Balance Sheet'**
+  String get balanceSheet;
+
+  /// Balance summary report menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Balance Summary'**
+  String get balanceSummary;
+
+  /// Business name validation error message
+  ///
+  /// In en, this message translates to:
+  /// **'Business company name required!'**
+  String get businessCompanyName;
+
+  /// Business name validation error message
+  ///
+  /// In en, this message translates to:
+  /// **'Business name is required!'**
+  String get businessNameError;
+
+  /// Cancel button text
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// Error message when REST requests fail to load
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot load rest requests!'**
+  String get cannotLoadRestRequests;
+
+  /// Chat menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get chat;
+
+  /// Chat server input label
+  ///
+  /// In en, this message translates to:
+  /// **'Chat Server'**
+  String get chatServer;
+
+  /// Complete registration dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Registration'**
+  String get completeRegistration;
+
+  /// Company party ID input label
+  ///
+  /// In en, this message translates to:
+  /// **'Company Party Id'**
+  String get companyPartyId;
+
+  /// Continue button text
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueButton;
+
+  /// Contributing menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Contributing'**
+  String get contributing;
+
+  /// Copyright text with year
+  ///
+  /// In en, this message translates to:
+  /// **'© {year} GrowERP.com'**
+  String copyright(String year);
+
+  /// Create button text
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// Create password dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Create password'**
+  String get createPassword;
+
+  /// Credit card details hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Credit card details'**
+  String get creditCardDetails;
+
+  /// Credit card info label
+  ///
+  /// In en, this message translates to:
+  /// **'Credit card info'**
+  String get creditCardInfo;
+
+  /// Currency input label
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get currency;
+
+  /// Currency validation error message
+  ///
+  /// In en, this message translates to:
+  /// **'Currency is required!'**
+  String get currencyError;
+
+  /// Current payment method display text
+  ///
+  /// In en, this message translates to:
+  /// **'Current payment method: {method}'**
+  String currentPaymentMethod(String method);
+
+  /// Label for customer
+  ///
+  /// In en, this message translates to:
+  /// **'Customer'**
+  String get customer;
+
+  /// CVV code input label
+  ///
+  /// In en, this message translates to:
+  /// **'CVV'**
+  String get cvvCode;
+
+  /// CVV code input hint
+  ///
+  /// In en, this message translates to:
+  /// **'123'**
+  String get cvvHint;
+
+  /// Date and time label
+  ///
+  /// In en, this message translates to:
+  /// **'Date/Time'**
+  String get dateTime;
+
+  /// Delete warning dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Warning'**
+  String get deleteWarning;
+
+  /// Delete yourself button text
+  ///
+  /// In en, this message translates to:
+  /// **'Delete yourself'**
+  String get deleteYourself;
+
+  /// Delete yourself and company button text
+  ///
+  /// In en, this message translates to:
+  /// **'Delete yourself and company'**
+  String get deleteYourselfAndCompany;
+
+  /// Demo data checkbox label
+  ///
+  /// In en, this message translates to:
+  /// **'Demo data'**
+  String get demoData;
+
+  /// Email input label
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// Email address input label
+  ///
+  /// In en, this message translates to:
+  /// **'Email Address'**
+  String get emailAddress;
+
+  /// Email address validation error message
+  ///
+  /// In en, this message translates to:
+  /// **'Email address is required!'**
+  String get emailAddressError;
+
+  /// Email address format validation error message
+  ///
+  /// In en, this message translates to:
+  /// **'Email address format incorrect!'**
+  String get emailAddressError2;
+
+  /// Enter backend URL dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Enter backend URL'**
+  String get enterBackendUrl;
+
+  /// Company and currency input instruction
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your company name and currency'**
+  String get enterCompanyAndCurrency;
+
+  /// Company name input instruction
+  ///
+  /// In en, this message translates to:
+  /// **'Enter company name'**
+  String get enterCompanyName;
+
+  /// Error status text
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// Error message label
+  ///
+  /// In en, this message translates to:
+  /// **'Error message'**
+  String get errorMessage;
+
+  /// Expiry date input label
+  ///
+  /// In en, this message translates to:
+  /// **'MM/YY'**
+  String get expiryDate;
+
+  /// Expiry date input hint
+  ///
+  /// In en, this message translates to:
+  /// **'12/25'**
+  String get expiryDateHint;
+
+  /// Field required validation error message
+  ///
+  /// In en, this message translates to:
+  /// **'Field is required!'**
+  String get fieldRequired;
+
+  /// First name input label
+  ///
+  /// In en, this message translates to:
+  /// **'First Name'**
+  String get firstName;
+
+  /// First name validation error message
+  ///
+  /// In en, this message translates to:
+  /// **'First name is required!'**
+  String get firstNameError;
+
+  /// Forgot password link text
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPassword;
+
+  /// Generate demo data checkbox text
+  ///
+  /// In en, this message translates to:
+  /// **'Generate demo data?'**
+  String get generateDemoData;
+
+  /// Go home button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Go Home'**
+  String get goHome;
+
+  /// Label for invoice
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice'**
+  String get invoice;
+
   /// Validation message indicating a required item
   ///
   /// In en, this message translates to:
   /// **'item is required'**
   String get itemIsRequired;
+
+  /// Item types menu item or section header
+  ///
+  /// In en, this message translates to:
+  /// **'Item Types'**
+  String get itemTypes;
+
+  /// Journal menu item or section header
+  ///
+  /// In en, this message translates to:
+  /// **'Journal'**
+  String get journal;
+
+  /// Last name input label
+  ///
+  /// In en, this message translates to:
+  /// **'Last Name'**
+  String get lastName;
+
+  /// Last name validation error message
+  ///
+  /// In en, this message translates to:
+  /// **'Last name is required!'**
+  String get lastNameError;
+
+  /// Login button text
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get login;
+
+  /// Login name label
+  ///
+  /// In en, this message translates to:
+  /// **'Login name'**
+  String get loginName;
+
+  /// Login form header text for existing users
+  ///
+  /// In en, this message translates to:
+  /// **'Login with Existing user name'**
+  String get loginWithExistingUserName;
+
+  /// Logout button text
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logout;
+
+  /// Main menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Main'**
+  String get main;
+
+  /// Main dashboard menu item or navigation link
+  ///
+  /// In en, this message translates to:
+  /// **'Main Dashboard'**
+  String get mainDashboard;
+
+  /// Milliseconds abbreviation
+  ///
+  /// In en, this message translates to:
+  /// **'ms'**
+  String get ms;
+
+  /// Name on card input label
+  ///
+  /// In en, this message translates to:
+  /// **'Name on card'**
+  String get nameOnCard;
+
+  /// No answer text
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get no;
+
+  /// No access error message
+  ///
+  /// In en, this message translates to:
+  /// **'No access to this page!'**
+  String get noAccess;
+
+  /// No access here error message
+  ///
+  /// In en, this message translates to:
+  /// **'No Access Here!'**
+  String get noAccessHere;
+
+  /// No REST requests message
+  ///
+  /// In en, this message translates to:
+  /// **'No REST requests found...'**
+  String get noRestRequests;
+
+  /// Not available placeholder text
+  ///
+  /// In en, this message translates to:
+  /// **'Not available'**
+  String get notAvailable;
+
+  /// Number input label
+  ///
+  /// In en, this message translates to:
+  /// **'Number'**
+  String get number;
+
+  /// Card number input hint
+  ///
+  /// In en, this message translates to:
+  /// **'1234 5678 9012 3456'**
+  String get numberHint;
+
+  /// OK button text
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// Only delete user option text
+  ///
+  /// In en, this message translates to:
+  /// **'Only delete user, not company'**
+  String get onlyUserDelete;
+
+  /// Label for open invoices dashboard item
+  ///
+  /// In en, this message translates to:
+  /// **'Open invoices:'**
+  String get openInvoices;
+
+  /// Open source licenses menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Open Source Licenses'**
+  String get openSourceLicenses;
+
+  /// Label for order
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get order;
+
+  /// Parameters label
+  ///
+  /// In en, this message translates to:
+  /// **'Parameters'**
+  String get parameters;
+
+  /// Password input label
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// Password validation error message
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required!'**
+  String get passwordError;
+
+  /// Password validation error message variant
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required!'**
+  String get passwordError2;
+
+  /// Password helper text
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum 5 characters'**
+  String get passwordHelper;
+
+  /// Password mismatch validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match!'**
+  String get passwordMismatch;
+
+  /// Password validation error message
+  ///
+  /// In en, this message translates to:
+  /// **'Password should be at least 5 characters'**
+  String get passwordValidationError;
+
+  /// Label for payment
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get payment;
+
+  /// Payment plan input label
+  ///
+  /// In en, this message translates to:
+  /// **'Payment plan'**
+  String get paymentPlan;
+
+  /// Payment types menu item or section header
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Types'**
+  String get paymentTypes;
+
+  /// Pay within week checkbox text
+  ///
+  /// In en, this message translates to:
+  /// **'Pay within a week'**
+  String get payWithinWeek;
+
+  /// Privacy and code of conduct menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy/Code of Conduct'**
+  String get privacyCodeOfConduct;
+
+  /// Referrer URL label
+  ///
+  /// In en, this message translates to:
+  /// **'Referrer URL'**
+  String get referrerUrl;
+
+  /// Refresh button text
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// Register button text
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get register;
+
+  /// Register and charge button text
+  ///
+  /// In en, this message translates to:
+  /// **'Register and charge'**
+  String get registerAndCharge;
+
+  /// Register new company link text
+  ///
+  /// In en, this message translates to:
+  /// **'Register new company and admin'**
+  String get registerNewCompanyAndAdmin;
+
+  /// Registration dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Registration'**
+  String get registration;
+
+  /// Request name label
+  ///
+  /// In en, this message translates to:
+  /// **'Request name'**
+  String get requestName;
+
+  /// Request URL label
+  ///
+  /// In en, this message translates to:
+  /// **'Request URL'**
+  String get requestUrl;
+
+  /// Restart button text
+  ///
+  /// In en, this message translates to:
+  /// **'Restart'**
+  String get restart;
+
+  /// REST request details title
+  ///
+  /// In en, this message translates to:
+  /// **'Rest Request Details'**
+  String get restRequestDetails;
+
+  /// Revenue and expense report menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue/Expense'**
+  String get revenueExpense;
+
+  /// Running time label
+  ///
+  /// In en, this message translates to:
+  /// **'Running time'**
+  String get runningTime;
+
+  /// Select language instruction
+  ///
+  /// In en, this message translates to:
+  /// **'Select language'**
+  String get selectLanguage;
+
+  /// Select plan validation error message
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a plan!'**
+  String get selectPlanError;
+
+  /// Send new password dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Send new password'**
+  String get sendNewPassword;
+
+  /// Server host label
+  ///
+  /// In en, this message translates to:
+  /// **'Server host'**
+  String get serverHost;
+
+  /// Server IP label
+  ///
+  /// In en, this message translates to:
+  /// **'Server IP'**
+  String get serverIp;
+
+  /// Label for shipment
+  ///
+  /// In en, this message translates to:
+  /// **'Shipment'**
+  String get shipment;
+
+  /// Slow hit label
+  ///
+  /// In en, this message translates to:
+  /// **'Slow hit'**
+  String get slowHit;
+
+  /// Status label
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
+
+  /// Submit new password button text
+  ///
+  /// In en, this message translates to:
+  /// **'Submit new password'**
+  String get submitNewPassword;
+
+  /// Subscription dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get subscription;
+
+  /// Success status text
+  ///
+  /// In en, this message translates to:
+  /// **'Success'**
+  String get success;
+
+  /// Label for supplier
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier'**
+  String get supplier;
+
+  /// Temporary password information text
+  ///
+  /// In en, this message translates to:
+  /// **'A temporary password will be sent by email'**
+  String get tempPassword;
+
+  /// Test menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Test'**
+  String get test;
+
+  /// Test system text
+  ///
+  /// In en, this message translates to:
+  /// **'Test system'**
+  String get testSystem;
+
+  /// Theme menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
+
+  /// Time periods menu item or section header
+  ///
+  /// In en, this message translates to:
+  /// **'Time Periods'**
+  String get timePeriods;
+
+  /// Label for transaction
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction'**
+  String get transaction;
+
+  /// Transactions menu item or section header
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get transactions;
+
+  /// Trial period text
+  ///
+  /// In en, this message translates to:
+  /// **'Trial period'**
+  String get trialPeriod;
+
+  /// Placeholder text for unknown values
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknown;
+
+  /// Update button text
+  ///
+  /// In en, this message translates to:
+  /// **'update'**
+  String get update;
+
+  /// User label
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get user;
+
+  /// Delete user and company option text
+  ///
+  /// In en, this message translates to:
+  /// **'Delete user and company'**
+  String get userAndCompanyDelete;
+
+  /// Username display text
+  ///
+  /// In en, this message translates to:
+  /// **'Username: {username}'**
+  String username(String username);
+
+  /// Username or email input label
+  ///
+  /// In en, this message translates to:
+  /// **'Username/Email'**
+  String get usernameEmail;
+
+  /// Username/email validation error message
+  ///
+  /// In en, this message translates to:
+  /// **'Username/email is required!'**
+  String get usernameEmailError;
+
+  /// Verify password input label
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Password'**
+  String get verifyPassword;
+
+  /// Verify password validation error message
+  ///
+  /// In en, this message translates to:
+  /// **'Verify password is required!'**
+  String get verifyPasswordError;
+
+  /// Verify password helper text
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter password'**
+  String get verifyPasswordHelper;
+
+  /// Version display text
+  ///
+  /// In en, this message translates to:
+  /// **'Version: {version} build: {build}'**
+  String version(String version, String build);
+
+  /// View license menu item
+  ///
+  /// In en, this message translates to:
+  /// **'View License'**
+  String get viewLicense;
+
+  /// View readme menu item
+  ///
+  /// In en, this message translates to:
+  /// **'View Readme'**
+  String get viewReadme;
+
+  /// Welcome message
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome!'**
+  String get welcome;
+
+  /// Welcome message on home page
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to the GrowERP business system!'**
+  String get welcomeToGrowERPBusinessSystem;
+
+  /// Yes answer text
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yes;
+
+  /// About menu item
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
+
+  /// Accounting menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Accounting'**
+  String get accounting;
+
+  /// Accounting dashboard menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Accounting Dashboard'**
+  String get accountingDashboard;
+
+  /// Accounting ledger menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Accounting Ledger'**
+  String get accountingLedger;
+
+  /// Accounting purchase menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Accounting Purchase'**
+  String get accountingPurch;
+
+  /// Accounting sales menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Accounting Sales'**
+  String get accountingSales;
+
+  /// Administrators label
+  ///
+  /// In en, this message translates to:
+  /// **'Administrators'**
+  String get administrators;
+
+  /// All opportunities label
+  ///
+  /// In en, this message translates to:
+  /// **'All Opportunities'**
+  String get allOpportunities;
+
+  /// Assets menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Assets'**
+  String get assets;
+
+  /// Catalog menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Catalog'**
+  String get catalog;
+
+  /// Categories menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get categories;
+
+  /// Company menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get company;
+
+  /// CRM menu item
+  ///
+  /// In en, this message translates to:
+  /// **'CRM'**
+  String get crm;
+
+  /// Customers menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Customers'**
+  String get customers;
+
+  /// Employees menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Employees'**
+  String get employees;
+
+  /// Incoming invoices menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Incoming Invoices'**
+  String get incomingInvoices;
+
+  /// Incoming payments menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Incoming Payments'**
+  String get incomingPayments;
+
+  /// Incoming shipments menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Incoming Shipments'**
+  String get incomingShipments;
+
+  /// Inventory menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory'**
+  String get inventory;
+
+  /// Leads menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Leads'**
+  String get leads;
+
+  /// Ledger account menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger Account'**
+  String get ledgerAccnt;
+
+  /// Ledger journals menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger Journals'**
+  String get ledgerJournals;
+
+  /// Ledger transaction menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger Transaction'**
+  String get ledgerTransaction;
+
+  /// Ledger tree menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger Tree'**
+  String get ledgerTree;
+
+  /// My todo tasks menu item
+  ///
+  /// In en, this message translates to:
+  /// **'My Todo Tasks'**
+  String get myTodoTasks;
+
+  /// Opportunities menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Opportunities'**
+  String get opportunities;
+
+  /// Orders menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get orders;
+
+  /// Organization menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Organization'**
+  String get organization;
+
+  /// Other employees label
+  ///
+  /// In en, this message translates to:
+  /// **'Other Employees'**
+  String get otherEmployees;
+
+  /// Outgoing invoices menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Outgoing Invoices'**
+  String get outgoingInvoices;
+
+  /// Outgoing payments menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Outgoing Payments'**
+  String get outgoingPayments;
+
+  /// Outgoing shipments menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Outgoing Shipments'**
+  String get outgoingShipments;
+
+  /// Payment types menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Types'**
+  String get paymtTypes;
+
+  /// Plan selection menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Plan Selection'**
+  String get planSelection;
+
+  /// Products menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Products'**
+  String get products;
+
+  /// Purchase orders menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase Orders'**
+  String get purchaseOrders;
+
+  /// Purchase unpaid invoices label
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase Unpaid Invoices'**
+  String get purchaseUnpaidInvoices;
+
+  /// Reports menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get reports;
+
+  /// Requests menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get requests;
+
+  /// Sales open invoices label
+  ///
+  /// In en, this message translates to:
+  /// **'Sales Open Invoices'**
+  String get salesOpenInvoices;
+
+  /// Sales orders menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Sales Orders'**
+  String get salesOrders;
+
+  /// Set up menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Set Up'**
+  String get setUp;
+
+  /// Subscriptions menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions'**
+  String get subscriptions;
+
+  /// Suppliers menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Suppliers'**
+  String get suppliers;
+
+  /// Website menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get website;
+
+  /// Warehouse locations menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Warehouse Locations'**
+  String get whLocations;
+
+  /// Check in menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Check In'**
+  String get checkIn;
+
+  /// Check out menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Check Out'**
+  String get checkOut;
+
+  /// In/out menu item
+  ///
+  /// In en, this message translates to:
+  /// **'In/Out'**
+  String get inOut;
+
+  /// My hotel menu item
+  ///
+  /// In en, this message translates to:
+  /// **'My Hotel'**
+  String get myHotel;
+
+  /// Reservations menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Reservations'**
+  String get reservations;
+
+  /// Rooms menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Rooms'**
+  String get rooms;
+
+  /// Room types menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Room Types'**
+  String get roomTypes;
+
+  /// Tasks menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get tasks;
+
+  /// My opportunities menu item
+  ///
+  /// In en, this message translates to:
+  /// **'My Opportunities'**
+  String get myOpportunities;
+
+  /// Clients menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Clients'**
+  String get clients;
+
+  /// Staff menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get staff;
+
+  /// Applications menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Applications'**
+  String get applications;
+
+  /// REST requests menu item
+  ///
+  /// In en, this message translates to:
+  /// **'REST Requests'**
+  String get restRequests;
 }
 
 class _AppLocalizationsDelegate
