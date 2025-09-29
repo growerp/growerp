@@ -61,7 +61,6 @@ class AssetDialogState extends State<AssetDialog> {
   @override
   void initState() {
     super.initState();
-    localizations = InventoryLocalizations.of(context)!;
     currencyId = context
         .read<AuthBloc>()
         .state
@@ -106,6 +105,7 @@ class AssetDialogState extends State<AssetDialog> {
 
   @override
   Widget build(BuildContext context) {
+    localizations = InventoryLocalizations.of(context)!;
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocConsumer<AssetBloc, AssetState>(
       listener: (context, state) {
