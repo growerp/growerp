@@ -34,23 +34,29 @@ void main() {
   testWidgets('''GrowERP Order Purchase test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
-        tester,
-        router.generateRoute,
-        menuOptions,
-        const [
-          OrderAccountingLocalizations.delegate,
-          InventoryLocalizations.delegate
-        ],
-        restClient: restClient,
-        blocProviders:
-            getOrderAccountingBlocProvidersExample(restClient, 'AppAdmin'),
-        title: "Order Purchase Test",
-        clear: true); // use data from previous run, ifnone same as true
+      tester,
+      router.generateRoute,
+      testMenuOptions,
+      const [
+        OrderAccountingLocalizations.delegate,
+        InventoryLocalizations.delegate,
+      ],
+      restClient: restClient,
+      blocProviders: getOrderAccountingBlocProvidersExample(
+        restClient,
+        'AppAdmin',
+      ),
+      title: "Order Purchase Test",
+      clear: true,
+    ); // use data from previous run, ifnone same as true
 
-    await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "assets": assets, // will also load products and WH locations
-      "companies": supplierCompanies,
-    });
+    await CommonTest.createCompanyAndAdmin(
+      tester,
+      testData: {
+        "assets": assets, // will also load products and WH locations
+        "companies": supplierCompanies,
+      },
+    );
 
     await OrderTest.selectPurchaseOrders(tester);
     await OrderTest.addOrders(tester, purchaseOrders.sublist(0, 1));

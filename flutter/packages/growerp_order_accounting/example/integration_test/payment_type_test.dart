@@ -32,12 +32,16 @@ void main() {
 
   testWidgets(title, (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
-        OrderAccountingLocalizations.localizationsDelegates,
-        title: title,
-        restClient: restClient,
-        blocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
-        clear: true); // use data from previous run, ifnone same as true
+    await CommonTest.startTestApp(
+      tester,
+      router.generateRoute,
+      testMenuOptions,
+      OrderAccountingLocalizations.localizationsDelegates,
+      title: title,
+      restClient: restClient,
+      blocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
+      clear: true,
+    ); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester);
 
     await PaymentTypeTest.selectPaymentType(tester);

@@ -32,19 +32,27 @@ void main() {
 
   testWidgets('''GrowERP ledger journal test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
-        OrderAccountingLocalizations.localizationsDelegates,
-        restClient: restClient,
-        blocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
-        clear: true); // use data from previous run, ifnone same as true
+    await CommonTest.startTestApp(
+      tester,
+      router.generateRoute,
+      testMenuOptions,
+      OrderAccountingLocalizations.localizationsDelegates,
+      restClient: restClient,
+      blocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
+      clear: true,
+    ); // use data from previous run, ifnone same as true
 
     await CommonTest.createCompanyAndAdmin(tester);
 
     await LedgerJournalTest.selectLedgerJournal(tester);
     await LedgerJournalTest.addLedgerJournals(
-        tester, ledgerJournals.sublist(0, 2));
+      tester,
+      ledgerJournals.sublist(0, 2),
+    );
     await LedgerJournalTest.updateLedgerJournals(
-        tester, ledgerJournals.sublist(2, 4));
+      tester,
+      ledgerJournals.sublist(2, 4),
+    );
     await LedgerJournalTest.deleteLastLedgerJournal(tester);
   });
 }

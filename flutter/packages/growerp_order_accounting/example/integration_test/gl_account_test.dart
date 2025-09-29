@@ -32,17 +32,24 @@ void main() {
 
   testWidgets('''GlAccount test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
-        OrderAccountingLocalizations.localizationsDelegates,
-        title: 'GlAccount test',
-        restClient: restClient,
-        blocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
-        clear: true); // use data from previous run, ifnone same as true
+    await CommonTest.startTestApp(
+      tester,
+      router.generateRoute,
+      testMenuOptions,
+      OrderAccountingLocalizations.localizationsDelegates,
+      title: 'GlAccount test',
+      restClient: restClient,
+      blocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
+      clear: true,
+    ); // use data from previous run, ifnone same as true
 
     //delete the ledger accounts
-    await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "glAccounts": <GlAccount>[], // delete all
-    });
+    await CommonTest.createCompanyAndAdmin(
+      tester,
+      testData: {
+        "glAccounts": <GlAccount>[], // delete all
+      },
+    );
 
     await GlAccountTest.selectLedgerAccounts(tester);
     await GlAccountTest.addGlAccounts(tester, glAccounts.sublist(0, 2));

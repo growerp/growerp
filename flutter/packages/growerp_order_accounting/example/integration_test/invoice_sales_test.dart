@@ -32,17 +32,24 @@ void main() {
 
   testWidgets('''GrowERP Invoice sales test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
-        OrderAccountingLocalizations.localizationsDelegates,
-        blocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
-        title: "Invoice Sales test",
-        restClient: restClient,
-        clear: true); // use data from previous run, ifnone same as true
+    await CommonTest.startTestApp(
+      tester,
+      router.generateRoute,
+      testMenuOptions,
+      OrderAccountingLocalizations.localizationsDelegates,
+      blocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
+      title: "Invoice Sales test",
+      restClient: restClient,
+      clear: true,
+    ); // use data from previous run, ifnone same as true
     // prepare
-    await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "products": products.sublist(0, 3),
-      "companies": customerCompanies,
-    });
+    await CommonTest.createCompanyAndAdmin(
+      tester,
+      testData: {
+        "products": products.sublist(0, 3),
+        "companies": customerCompanies,
+      },
+    );
     await InvoiceTest.selectSalesInvoices(tester);
     await InvoiceTest.addInvoices(tester, salesInvoices.sublist(0, 2));
     await InvoiceTest.updateInvoices(tester, salesInvoices.sublist(2, 4));
