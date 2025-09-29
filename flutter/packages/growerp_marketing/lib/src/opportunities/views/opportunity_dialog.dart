@@ -209,8 +209,9 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                   showSearchBox: true,
                   searchFieldProps: TextFieldProps(
                     autofocus: true,
-                    decoration:
-                        InputDecoration(labelText: localizations.leadSearch),
+                    decoration: InputDecoration(
+                      labelText: localizations.leadSearch,
+                    ),
                     controller: _leadSearchBoxController,
                   ),
                   menuProps: MenuProps(
@@ -223,8 +224,9 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                   ),
                 ),
                 dropdownDecoratorProps: DropDownDecoratorProps(
-                  dropdownSearchDecoration:
-                      InputDecoration(labelText: localizations.lead),
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: localizations.lead,
+                  ),
                 ),
                 key: const Key('lead'),
                 itemAsString: (User? u) =>
