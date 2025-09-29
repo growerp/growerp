@@ -136,7 +136,9 @@ class AssetDialogState extends State<AssetDialog> {
               child: popUp(
                 context: context,
                 title:
-                    (classificationId == 'AppHotel' ? localizations.roomNumber : localizations.assetNumber) +
+                    (classificationId == 'AppHotel'
+                        ? localizations.roomNumber
+                        : localizations.assetNumber) +
                     (widget.asset.pseudoId.isEmpty
                         ? localizations.newLabel
                         : widget.asset.pseudoId),
@@ -250,9 +252,7 @@ class AssetDialogState extends State<AssetDialog> {
               builder: (context, state) {
                 switch (state.status) {
                   case DataFetchStatus.failure:
-                    return FatalErrorForm(
-                      message: localizations.serverProblem,
-                    );
+                    return FatalErrorForm(message: localizations.serverProblem);
                   case DataFetchStatus.success:
                     return DropdownSearch<Product>(
                       key: const Key('productDropDown'),
@@ -330,7 +330,9 @@ class AssetDialogState extends State<AssetDialog> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     key: const Key('statusDropDown'),
-                    decoration: InputDecoration(labelText: localizations.status),
+                    decoration: InputDecoration(
+                      labelText: localizations.status,
+                    ),
                     initialValue: _statusId,
                     validator: (value) =>
                         value == null ? localizations.fieldRequired : null,
@@ -436,7 +438,11 @@ class AssetDialogState extends State<AssetDialog> {
             const SizedBox(height: 20),
             OutlinedButton(
               key: const Key('update'),
-              child: Text(widget.asset.assetId.isEmpty ? localizations.create : localizations.update),
+              child: Text(
+                widget.asset.assetId.isEmpty
+                    ? localizations.create
+                    : localizations.update,
+              ),
               onPressed: () async {
                 if (_assetDialogformKey.currentState!.validate()) {
                   _assetBloc.add(

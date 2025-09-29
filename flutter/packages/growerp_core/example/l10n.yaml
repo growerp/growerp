@@ -1,6 +1,0 @@
-preferred-supported-locales: [en, th]
-output-dir: ./lib/l10n/generated
-arb-dir: ./lib/l10n
-template-arb-file: intl_en.arb
-output-localization-file: core_localizations.dart
-output-class: CoreLocalizations

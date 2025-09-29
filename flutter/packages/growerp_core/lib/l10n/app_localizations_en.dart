@@ -9,10 +9,387 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get loginWithExistingUserName => 'Login with existing username';
+  String aboutApp(String appName) {
+    return 'About $appName';
+  }
 
   @override
-  String get createPassword => 'Create New Password';
+  String get aboutGrowERP => 'About GrowERP';
+
+  @override
+  String get accounts => 'Accounts';
+
+  @override
+  String get addNew => 'Add new';
+
+  @override
+  String get andAtLeastOne => 'and at least one ';
+
+  @override
+  String get backendServer => 'Backend Server';
+
+  @override
+  String get balanceSheet => 'Balance Sheet';
+
+  @override
+  String get balanceSummary => 'Balance Summary';
+
+  @override
+  String get businessCompanyName => 'Business company name required!';
+
+  @override
+  String get businessNameError => 'Business name is required!';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get cannotLoadRestRequests => 'Cannot load rest requests!';
+
+  @override
+  String get chat => 'Chat';
+
+  @override
+  String get chatServer => 'Chat Server';
+
+  @override
+  String get completeRegistration => 'Complete Registration';
+
+  @override
+  String get companyPartyId => 'Company Party Id';
+
+  @override
+  String get continueButton => 'Continue';
+
+  @override
+  String get contributing => 'Contributing';
+
+  @override
+  String copyright(String year) {
+    return '© $year GrowERP.com';
+  }
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get createPassword => 'Create password';
+
+  @override
+  String get creditCardDetails => 'Credit card details';
+
+  @override
+  String get creditCardInfo => 'Credit card info';
+
+  @override
+  String get currency => 'Currency';
+
+  @override
+  String get currencyError => 'Currency is required!';
+
+  @override
+  String currentPaymentMethod(String method) {
+    return 'Current payment method: $method';
+  }
+
+  @override
+  String get customer => 'Customer';
+
+  @override
+  String get cvvCode => 'CVV';
+
+  @override
+  String get cvvHint => '123';
+
+  @override
+  String get dateTime => 'Date/Time';
+
+  @override
+  String get deleteWarning => 'Delete Warning';
+
+  @override
+  String get deleteYourself => 'Delete yourself';
+
+  @override
+  String get deleteYourselfAndCompany => 'Delete yourself and company';
+
+  @override
+  String get demoData => 'Demo data';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get emailAddress => 'Email Address';
+
+  @override
+  String get emailAddressError => 'Email address is required!';
+
+  @override
+  String get emailAddressError2 => 'Email address format incorrect!';
+
+  @override
+  String get enterBackendUrl => 'Enter backend URL';
+
+  @override
+  String get enterCompanyAndCurrency =>
+      'Please enter your company name and currency';
+
+  @override
+  String get enterCompanyName => 'Enter company name';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get errorMessage => 'Error message';
+
+  @override
+  String get expiryDate => 'MM/YY';
+
+  @override
+  String get expiryDateHint => '12/25';
+
+  @override
+  String get fieldRequired => 'Field is required!';
+
+  @override
+  String get firstName => 'First Name';
+
+  @override
+  String get firstNameError => 'First name is required!';
+
+  @override
+  String get forgotPassword => 'Forgot password?';
+
+  @override
+  String get generateDemoData => 'Generate demo data?';
+
+  @override
+  String get goHome => 'Go Home';
+
+  @override
+  String get invoice => 'Invoice';
+
+  @override
+  String get itemIsRequired => 'item is required';
+
+  @override
+  String get itemTypes => 'Item Types';
+
+  @override
+  String get journal => 'Journal';
+
+  @override
+  String get lastName => 'Last Name';
+
+  @override
+  String get lastNameError => 'Last name is required!';
+
+  @override
+  String get login => 'Login';
+
+  @override
+  String get loginName => 'Login name';
+
+  @override
+  String get loginWithExistingUserName => 'Login with Existing user name';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
+  String get main => 'Main';
+
+  @override
+  String get mainDashboard => 'Main Dashboard';
+
+  @override
+  String get ms => 'ms';
+
+  @override
+  String get nameOnCard => 'Name on card';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get noAccess => 'No access to this page!';
+
+  @override
+  String get noAccessHere => 'No Access Here!';
+
+  @override
+  String get noRestRequests => 'No REST requests found...';
+
+  @override
+  String get notAvailable => 'Not available';
+
+  @override
+  String get number => 'Number';
+
+  @override
+  String get numberHint => '1234 5678 9012 3456';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get onlyUserDelete => 'Only delete user, not company';
+
+  @override
+  String get openInvoices => 'Open invoices:';
+
+  @override
+  String get openSourceLicenses => 'Open Source Licenses';
+
+  @override
+  String get order => 'Order';
+
+  @override
+  String get parameters => 'Parameters';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get passwordError => 'Password is required!';
+
+  @override
+  String get passwordError2 => 'Password is required!';
+
+  @override
+  String get passwordHelper => 'Minimum 5 characters';
+
+  @override
+  String get passwordMismatch => 'Passwords do not match!';
+
+  @override
+  String get passwordValidationError =>
+      'Password should be at least 5 characters';
+
+  @override
+  String get payment => 'Payment';
+
+  @override
+  String get paymentPlan => 'Payment plan';
+
+  @override
+  String get paymentTypes => 'Payment Types';
+
+  @override
+  String get payWithinWeek => 'Pay within a week';
+
+  @override
+  String get privacyCodeOfConduct => 'Privacy/Code of Conduct';
+
+  @override
+  String get referrerUrl => 'Referrer URL';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String get register => 'Register';
+
+  @override
+  String get registerAndCharge => 'Register and charge';
+
+  @override
+  String get registerNewCompanyAndAdmin => 'Register new company and admin';
+
+  @override
+  String get registration => 'Registration';
+
+  @override
+  String get requestName => 'Request name';
+
+  @override
+  String get requestUrl => 'Request URL';
+
+  @override
+  String get restart => 'Restart';
+
+  @override
+  String get restRequestDetails => 'Rest Request Details';
+
+  @override
+  String get revenueExpense => 'Revenue/Expense';
+
+  @override
+  String get runningTime => 'Running time';
+
+  @override
+  String get selectLanguage => 'Select language';
+
+  @override
+  String get selectPlanError => 'Please select a plan!';
+
+  @override
+  String get sendNewPassword => 'Send new password';
+
+  @override
+  String get serverHost => 'Server host';
+
+  @override
+  String get serverIp => 'Server IP';
+
+  @override
+  String get shipment => 'Shipment';
+
+  @override
+  String get slowHit => 'Slow hit';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get submitNewPassword => 'Submit new password';
+
+  @override
+  String get subscription => 'Subscription';
+
+  @override
+  String get success => 'Success';
+
+  @override
+  String get supplier => 'Supplier';
+
+  @override
+  String get tempPassword => 'A temporary password will be sent by email';
+
+  @override
+  String get test => 'Test';
+
+  @override
+  String get testSystem => 'Test system';
+
+  @override
+  String get theme => 'Theme';
+
+  @override
+  String get timePeriods => 'Time Periods';
+
+  @override
+  String get transaction => 'Transaction';
+
+  @override
+  String get transactions => 'Transactions';
+
+  @override
+  String get trialPeriod => 'Trial period';
+
+  @override
+  String get unknown => 'Unknown';
+
+  @override
+  String get update => 'update';
+
+  @override
+  String get user => 'User';
+
+  @override
+  String get userAndCompanyDelete => 'Delete user and company';
 
   @override
   String username(String username) {
@@ -20,375 +397,215 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get password => 'Password';
+  String get usernameEmail => 'Username/Email';
 
   @override
-  String get passwordHelper =>
-      'At least 8 characters, including alpha, number & special character, no previous password.';
-
-  @override
-  String get passwordError => 'Please enter first password?';
-
-  @override
-  String get passwordValidationError =>
-      'At least 8 characters, including alpha, number & special character.';
+  String get usernameEmailError => 'Username/email is required!';
 
   @override
   String get verifyPassword => 'Verify Password';
 
   @override
-  String get verifyPasswordHelper => 'Enter the new password again.';
+  String get verifyPasswordError => 'Verify password is required!';
 
   @override
-  String get verifyPasswordError => 'Enter password again to verify?';
-
-  @override
-  String get passwordMismatch => 'Password is not matching';
-
-  @override
-  String get submitNewPassword => 'Submit new Password';
-
-  @override
-  String get completeRegistration => 'Complete your registration';
-
-  @override
-  String get welcome => 'Welcome!';
-
-  @override
-  String get enterCompanyAndCurrency =>
-      'please enter both the company name\nand currency for the new company';
-
-  @override
-  String get enterCompanyName =>
-      'please enter optionally a company name you work for.';
-
-  @override
-  String get businessCompanyName => 'Business Company name';
-
-  @override
-  String get businessNameError =>
-      'Please enter business name(\"Private\" for Private person)';
-
-  @override
-  String get currency => 'Currency';
-
-  @override
-  String get currencyError => 'Currency field required!';
-
-  @override
-  String get generateDemoData => 'Generate demo data';
-
-  @override
-  String get demoData => 'DemoData';
-
-  @override
-  String get continueButton => 'Continue';
-
-  @override
-  String get usernameEmail => 'Username/Email';
-
-  @override
-  String get usernameEmailError => 'Please enter username or email?';
-
-  @override
-  String get passwordError2 => 'Please enter your password?';
-
-  @override
-  String get login => 'Login';
-
-  @override
-  String get forgotPassword => 'forgot/change password?';
-
-  @override
-  String get subscription => 'Subscription';
-
-  @override
-  String currentPaymentMethod(String ccDescription) {
-    return 'Your current payment method:\n$ccDescription';
-  }
-
-  @override
-  String get trialPeriod =>
-      'You have a trial period for 2 weeks,\nWe will only charge if you not cancel\nbefore that time';
-
-  @override
-  String get testSystem =>
-      'This is a Test system\nso this credit Card will always be approved';
-
-  @override
-  String get paymentPlan => 'Payment Plan';
-
-  @override
-  String get selectPlanError => 'Please select a single plan';
-
-  @override
-  String get creditCardInfo => 'Credit card information';
-
-  @override
-  String get creditCardDetails => 'Enter your credit card details';
-
-  @override
-  String get number => 'Number';
-
-  @override
-  String get numberHint => 'XXXX XXXX XXXX XXXX';
-
-  @override
-  String get expiryDate => 'Expiry month/year';
-
-  @override
-  String get expiryDateHint => 'XX/XX';
-
-  @override
-  String get cvvCode => 'CVV Code';
-
-  @override
-  String get cvvHint => 'XXX';
-
-  @override
-  String get nameOnCard => 'Name on Card';
-
-  @override
-  String get payWithinWeek => 'Pay within one week';
-
-  @override
-  String get registerAndCharge => 'Register and charge in 2 weeks';
-
-  @override
-  String get sendNewPassword => 'Send new Password by email';
-
-  @override
-  String get email => 'Email:';
-
-  @override
-  String get ok => 'Ok';
-
-  @override
-  String get deleteWarning =>
-      'Please note you will be blocked using the system.\nThis cannot be undone!';
-
-  @override
-  String get onlyUserDelete => 'Only User delete';
-
-  @override
-  String get userAndCompanyDelete => 'User AND Company delete';
-
-  @override
-  String get deleteYourself => 'Delete yourself';
-
-  @override
-  String get deleteYourselfAndCompany => 'Delete yourself and opt. company?';
-
-  @override
-  String get registration => 'Registration';
-
-  @override
-  String get firstName => 'First Name';
-
-  @override
-  String get firstNameError => 'Please enter your first name?';
-
-  @override
-  String get lastName => 'Last Name';
-
-  @override
-  String get lastNameError => 'Please enter your last name?';
-
-  @override
-  String get tempPassword => 'A temporary password will be send by email';
-
-  @override
-  String get emailAddress => 'Email address';
-
-  @override
-  String get emailAddressError => 'Please enter Email address?';
-
-  @override
-  String get emailAddressError2 => 'This is not a valid email';
-
-  @override
-  String get register => 'Register';
-
-  @override
-  String get aboutGrowERP => 'About GrowERP';
-
-  @override
-  String aboutApp(String appName) {
-    return 'About GrowERP and this $appName app';
-  }
+  String get verifyPasswordHelper => 'Re-enter password';
 
   @override
   String version(String version, String build) {
-    return 'Version $version, build #$build';
+    return 'Version: $version build: $build';
   }
-
-  @override
-  String copyright(int year) {
-    return '© GrowERP, $year';
-  }
-
-  @override
-  String get viewReadme => 'View Readme';
 
   @override
   String get viewLicense => 'View License';
 
   @override
-  String get contributing => 'Contributing';
+  String get viewReadme => 'View Readme';
 
   @override
-  String get privacyCodeOfConduct => 'Privacy, Code of conduct';
+  String get welcome => 'Welcome!';
 
   @override
-  String get openSourceLicenses => 'Open source Licenses';
-
-  @override
-  String get enterBackendUrl =>
-      'Enter a backend && chat url in the form of: xxx.yyy.zzz';
-
-  @override
-  String get backendServer => 'Backend server:';
-
-  @override
-  String get fieldRequired => 'field required!';
-
-  @override
-  String get chatServer => 'Chat server:';
-
-  @override
-  String get companyPartyId => 'partyId of main company:';
-
-  @override
-  String get cancel => 'Cancel';
-
-  @override
-  String get restart => 'Restart';
-
-  @override
-  String get main => 'Main';
-
-  @override
-  String get noAccess => 'No Access to any option';
-
-  @override
-  String get addNew => 'Add New';
-
-  @override
-  String get chat => 'Chat';
-
-  @override
-  String get goHome => 'Go Home';
-
-  @override
-  String get test => 'test';
-
-  @override
-  String get theme => 'Theme';
-
-  @override
-  String get error => 'error: should not arrive here';
-
-  @override
-  String get noAccessHere => 'No access to any option here, ';
-
-  @override
-  String get noRestRequests => 'No REST requests found';
-
-  @override
-  String get cannotLoadRestRequests => 'Could not load REST requests!';
-
-  @override
-  String get refresh => 'Refresh';
-
-  @override
-  String get restRequestDetails => 'REST Request Details';
-
-  @override
-  String get dateTime => 'Date/Time';
-
-  @override
-  String get unknown => 'Unknown';
-
-  @override
-  String get user => 'User';
-
-  @override
-  String get notAvailable => 'N/A';
-
-  @override
-  String get loginName => 'Login Name';
-
-  @override
-  String get requestName => 'Request Name';
-
-  @override
-  String get serverIp => 'Server IP';
-
-  @override
-  String get serverHost => 'Server Host';
-
-  @override
-  String get runningTime => 'Running Time';
-
-  @override
-  String get ms => ' ms';
-
-  @override
-  String get status => 'Status';
-
-  @override
-  String get success => 'Success';
-
-  @override
-  String get slowHit => 'Slow Hit';
+  String get welcomeToGrowERPBusinessSystem =>
+      'Welcome to the GrowERP business system!';
 
   @override
   String get yes => 'Yes';
 
   @override
-  String get no => 'No';
+  String get about => 'About';
 
   @override
-  String get errorMessage => 'Error Message:';
+  String get accounting => 'Accounting';
 
   @override
-  String get requestUrl => 'Request URL:';
+  String get accountingDashboard => 'Accounting Dashboard';
 
   @override
-  String get referrerUrl => 'Referrer URL:';
+  String get accountingLedger => 'Accounting Ledger';
 
   @override
-  String get parameters => 'Parameters:';
+  String get accountingPurch => 'Accounting Purchase';
 
   @override
-  String get logout => 'Logout';
+  String get accountingSales => 'Accounting Sales';
 
   @override
-  String get welcomeToGrowERPBusinessSystem =>
-      'Welcome to The GrowERP Business System';
+  String get administrators => 'Administrators';
 
   @override
-  String get selectLanguage => 'Select Language';
+  String get allOpportunities => 'All Opportunities';
 
   @override
-  String get registerNewCompanyAndAdmin =>
-      'Register new Company and Administrator';
+  String get assets => 'Assets';
 
   @override
-  String get create => 'Create';
+  String get catalog => 'Catalog';
 
   @override
-  String get update => 'Update';
+  String get categories => 'Categories';
 
   @override
-  String get customer => 'Customer';
+  String get company => 'Company';
 
   @override
-  String get supplier => 'Supplier';
+  String get crm => 'CRM';
 
   @override
-  String get andAtLeastOne => 'and at least one ';
+  String get customers => 'Customers';
 
   @override
-  String get itemIsRequired => 'item is required';
+  String get employees => 'Employees';
+
+  @override
+  String get incomingInvoices => 'Incoming Invoices';
+
+  @override
+  String get incomingPayments => 'Incoming Payments';
+
+  @override
+  String get incomingShipments => 'Incoming Shipments';
+
+  @override
+  String get inventory => 'Inventory';
+
+  @override
+  String get leads => 'Leads';
+
+  @override
+  String get ledgerAccnt => 'Ledger Account';
+
+  @override
+  String get ledgerJournals => 'Ledger Journals';
+
+  @override
+  String get ledgerTransaction => 'Ledger Transaction';
+
+  @override
+  String get ledgerTree => 'Ledger Tree';
+
+  @override
+  String get myTodoTasks => 'My Todo Tasks';
+
+  @override
+  String get opportunities => 'Opportunities';
+
+  @override
+  String get orders => 'Orders';
+
+  @override
+  String get organization => 'Organization';
+
+  @override
+  String get otherEmployees => 'Other Employees';
+
+  @override
+  String get outgoingInvoices => 'Outgoing Invoices';
+
+  @override
+  String get outgoingPayments => 'Outgoing Payments';
+
+  @override
+  String get outgoingShipments => 'Outgoing Shipments';
+
+  @override
+  String get paymtTypes => 'Payment Types';
+
+  @override
+  String get planSelection => 'Plan Selection';
+
+  @override
+  String get products => 'Products';
+
+  @override
+  String get purchaseOrders => 'Purchase Orders';
+
+  @override
+  String get purchaseUnpaidInvoices => 'Purchase Unpaid Invoices';
+
+  @override
+  String get reports => 'Reports';
+
+  @override
+  String get requests => 'Requests';
+
+  @override
+  String get salesOpenInvoices => 'Sales Open Invoices';
+
+  @override
+  String get salesOrders => 'Sales Orders';
+
+  @override
+  String get setUp => 'Set Up';
+
+  @override
+  String get subscriptions => 'Subscriptions';
+
+  @override
+  String get suppliers => 'Suppliers';
+
+  @override
+  String get website => 'Website';
+
+  @override
+  String get whLocations => 'Warehouse Locations';
+
+  @override
+  String get checkIn => 'Check In';
+
+  @override
+  String get checkOut => 'Check Out';
+
+  @override
+  String get inOut => 'In/Out';
+
+  @override
+  String get myHotel => 'My Hotel';
+
+  @override
+  String get reservations => 'Reservations';
+
+  @override
+  String get rooms => 'Rooms';
+
+  @override
+  String get roomTypes => 'Room Types';
+
+  @override
+  String get tasks => 'Tasks';
+
+  @override
+  String get myOpportunities => 'My Opportunities';
+
+  @override
+  String get clients => 'Clients';
+
+  @override
+  String get staff => 'Staff';
+
+  @override
+  String get applications => 'Applications';
+
+  @override
+  String get restRequests => 'REST Requests';
 }

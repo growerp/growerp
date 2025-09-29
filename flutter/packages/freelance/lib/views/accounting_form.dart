@@ -43,33 +43,38 @@ class AccountingForm extends StatelessWidget {
       key: const Key('AcctDashBoard'),
       dashboardItems: [
         makeDashboardItem('acctSales', context, acctOptions[1], [
-          "Open invoices: ",
+          CoreLocalizations.of(context)!.openInvoices,
           "$currencySymbol "
               "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.salesInvoicesNotPaidCount})",
         ]),
         makeDashboardItem('acctPurchase', context, acctOptions[2], [
-          "Open invoices: ",
+          CoreLocalizations.of(context)!.openInvoices,
           "$currencySymbol "
               "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.purchInvoicesNotPaidCount})",
         ]),
         makeDashboardItem('acctLedger', context, acctOptions[3], [
-          "Accounts",
-          "Transactions",
-          "Journal",
+          CoreLocalizations.of(context)!.accounts,
+          CoreLocalizations.of(context)!.transactions,
+          CoreLocalizations.of(context)!.journal,
         ]),
         makeDashboardItem('acctReports', context, acctOptions[4], [
-          "Revenue Expense",
-          "Balance Sheet",
-          "Balance summary",
+          CoreLocalizations.of(context)!.revenueExpense,
+          CoreLocalizations.of(context)!.balanceSheet,
+          CoreLocalizations.of(context)!.balanceSummary,
         ]),
         makeDashboardItem('AcctSetup', context, acctOptions[5], [
-          "Time Periods",
-          "Item Types",
-          "Payment Types",
+          CoreLocalizations.of(context)!.timePeriods,
+          CoreLocalizations.of(context)!.itemTypes,
+          CoreLocalizations.of(context)!.paymentTypes,
         ]),
-        makeDashboardItem('Main dashboard', context, acctOptions[6], []),
+        makeDashboardItem(
+          CoreLocalizations.of(context)!.mainDashboard,
+          context,
+          acctOptions[6],
+          [],
+        ),
       ],
     );
   }

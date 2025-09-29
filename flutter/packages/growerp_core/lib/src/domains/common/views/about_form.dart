@@ -58,7 +58,9 @@ class _AboutFormState extends State<AboutForm> {
             height: 100,
             width: 200,
           ),
-          applicationLegalese: CoreLocalizations.of(context)!.copyright(year),
+          applicationLegalese: CoreLocalizations.of(
+            context,
+          )!.copyright(year.toString()),
           children: <Widget>[
             Center(
               child: SizedBox(
