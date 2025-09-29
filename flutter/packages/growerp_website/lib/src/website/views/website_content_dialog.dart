@@ -8,8 +8,6 @@ import 'package:markdown_widget/markdown_widget.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:growerp_core/growerp_core.dart';
-//import 'package:html_editor_enhanced/html_editor.dart';
-//import 'package:html_editor_enhanced/utils/options.dart';
 
 import '../../../growerp_website.dart';
 
@@ -20,8 +18,9 @@ class WebsiteContentDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-      create: (BuildContext context) => ContentBloc(context.read<RestClient>()),
-      child: WebsiteContent(websiteId, content));
+    create: (BuildContext context) => ContentBloc(context.read<RestClient>()),
+    child: WebsiteContent(websiteId, content),
+  );
 }
 
 class WebsiteContent extends StatefulWidget {
@@ -44,9 +43,11 @@ class WebsiteContentState extends State<WebsiteContent> {
   late bool isMarkDown;
   late ContentBloc _contentBloc;
   late ThemeBloc _themeBloc;
+  late WebsiteLocalizations l10n;
 
-  MethodChannel channel =
-      const MethodChannel('plugins.flutter.io/url_launcher');
+  MethodChannel channel = const MethodChannel(
+    'plugins.flutter.io/url_launcher',
+  );
   final ImagePicker _picker = ImagePicker();
   final ScrollController _scrollController = ScrollController();
 
@@ -66,6 +67,12 @@ class WebsiteContentState extends State<WebsiteContent> {
   }
 
   @override
+  void didChangeDependencies() {
+    l10n = WebsiteLocalizations.of(context)!;
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
@@ -75,100 +82,110 @@ class WebsiteContentState extends State<WebsiteContent> {
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocConsumer<ContentBloc, ContentState>(
-        listenWhen: ((previous, current) =>
-            (previous.status == ContentStatus.updating &&
-                current.status == ContentStatus.success) ||
-            current.status == ContentStatus.failure),
-        listener: (context, state) {
-          switch (state.status) {
-            case ContentStatus.success:
-              //      HelperFunctions.showMessage(
-              //          context, "${state.message}", Colors.green);
-              Navigator.of(context).pop(newContent);
-              break;
-            case ContentStatus.failure:
-              HelperFunctions.showMessage(context,
-                  'Error getting content: ${state.message}', Colors.red);
-              break;
-            default:
-          }
-        },
-        builder: (context, state) {
-          switch (state.status) {
-            case ContentStatus.failure:
-              return Center(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.of(context).pop(newContent),
-                  child: const Text("press to continue"),
+      listenWhen: ((previous, current) =>
+          (previous.status == ContentStatus.updating &&
+              current.status == ContentStatus.success) ||
+          current.status == ContentStatus.failure),
+      listener: (context, state) {
+        switch (state.status) {
+          case ContentStatus.success:
+            //      HelperFunctions.showMessage(
+            //          context, "${state.message}", Colors.green);
+            Navigator.of(context).pop(newContent);
+            break;
+          case ContentStatus.failure:
+            HelperFunctions.showMessage(
+              context,
+              '${l10n.errorTitle}: ${state.message}',
+              Colors.red,
+            );
+            break;
+          default:
+        }
+      },
+      builder: (context, state) {
+        switch (state.status) {
+          case ContentStatus.failure:
+            return Center(
+              child: OutlinedButton(
+                onPressed: () => Navigator.of(context).pop(newContent),
+                child: Text(l10n.continueButton),
+              ),
+            );
+          case ContentStatus.success:
+            newContent = state.content!;
+            data = state.content!.text;
+            if (newData.isEmpty) newData = data;
+            if (widget.content.text.isNotEmpty) {
+              return Dialog(
+                key: const Key('WebsiteContentText'),
+                insetPadding: const EdgeInsets.all(20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: popUp(
+                  context: context,
+                  width: isPhone ? 400 : 800,
+                  height: 600,
+                  title:
+                      '${l10n.update} ${l10n.content} ${widget.content.title}',
+                  child: _showMdTextForm(isPhone),
                 ),
               );
-            case ContentStatus.success:
-              newContent = state.content!;
-              data = state.content!.text;
-              if (newData.isEmpty) newData = data;
-              if (widget.content.text.isNotEmpty) {
-                return Dialog(
-                    key: const Key('WebsiteContentText'),
-                    insetPadding: const EdgeInsets.all(20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: popUp(
-                        context: context,
-                        width: isPhone ? 400 : 800,
-                        height: 600,
-                        title: 'Update content ${widget.content.title}',
-                        child: _showMdTextForm(isPhone)));
-//                        isMarkDown
-//                            ? _showMdTextForm(isPhone)
-//                            : _showHtmlTextForm(isPhone)));
-              } else {
-                double top = 0;
-                double left = 250;
-                return Dialog(
-                  key: const Key('WebsiteContentImage'),
-                  insetPadding: const EdgeInsets.all(20),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: popUp(
-                      context: context,
-                      width: isPhone ? 350 : 800,
-                      height: 500,
-                      title: 'Image information ${widget.content.title}',
-                      child: Stack(
-                        children: [
-                          imageChild(isPhone),
-                          Positioned(
-                            left: left,
-                            top: top,
-                            child: GestureDetector(
-                              onPanUpdate: (details) {
-                                setState(() {
-                                  left += details.delta.dx;
-                                  top += details.delta.dy;
-                                });
-                              },
-                              child: ImageButtons(
-                                  _scrollController, _onImageButtonPressed),
-                            ),
+              //                        isMarkDown
+              //                            ? _showMdTextForm(isPhone)
+              //                            : _showHtmlTextForm(isPhone)));
+            } else {
+              double top = 0;
+              double left = 250;
+              return Dialog(
+                key: const Key('WebsiteContentImage'),
+                insetPadding: const EdgeInsets.all(20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: popUp(
+                  context: context,
+                  width: isPhone ? 350 : 800,
+                  height: 500,
+                  title: l10n.imageInformation(widget.content.title),
+                  child: Stack(
+                    children: [
+                      imageChild(isPhone),
+                      Positioned(
+                        left: left,
+                        top: top,
+                        child: GestureDetector(
+                          onPanUpdate: (details) {
+                            setState(() {
+                              left += details.delta.dx;
+                              top += details.delta.dy;
+                            });
+                          },
+                          child: ImageButtons(
+                            _scrollController,
+                            _onImageButtonPressed,
                           ),
-                        ],
-                      )),
-                );
-              }
-            default:
-              return const Center(child: LoadingIndicator());
-          }
-        });
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+          default:
+            return const Center(child: LoadingIndicator());
+        }
+      },
+    );
   }
 
-  void _onImageButtonPressed(ImageSource source,
-      {BuildContext? context}) async {
+  void _onImageButtonPressed(
+    ImageSource source, {
+    BuildContext? context,
+  }) async {
     try {
-      final pickedFile = await _picker.pickImage(
-        source: source,
-      );
+      final pickedFile = await _picker.pickImage(source: source);
       setState(() {
         _imageFile = pickedFile;
       });
@@ -194,22 +211,25 @@ class WebsiteContentState extends State<WebsiteContent> {
   }
 
   Widget imageChild(bool isPhone) {
-    return Builder(builder: (BuildContext context) {
-      return !foundation.kIsWeb &&
-              foundation.defaultTargetPlatform == TargetPlatform.android
-          ? FutureBuilder<void>(
-              future: retrieveLostData(),
-              builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-                if (snapshot.hasError) {
-                  return Text(
-                    'Pick image error: ${snapshot.error}}',
-                    textAlign: TextAlign.center,
-                  );
-                }
-                return _showImageForm(isPhone);
-              })
-          : _showImageForm(isPhone);
-    });
+    return Builder(
+      builder: (BuildContext context) {
+        return !foundation.kIsWeb &&
+                foundation.defaultTargetPlatform == TargetPlatform.android
+            ? FutureBuilder<void>(
+                future: retrieveLostData(),
+                builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+                  if (snapshot.hasError) {
+                    return Text(
+                      '${l10n.errorTitle}: ${snapshot.error}}',
+                      textAlign: TextAlign.center,
+                    );
+                  }
+                  return _showImageForm(isPhone);
+                },
+              )
+            : _showImageForm(isPhone);
+      },
+    );
   }
 
   Text? _getRetrieveErrorWidget() {
@@ -228,126 +248,166 @@ class WebsiteContentState extends State<WebsiteContent> {
     }
     if (_pickImageError != null) {
       return Text(
-        'Pick image error: $_pickImageError',
+        '${l10n.errorTitle}: $_pickImageError',
         textAlign: TextAlign.center,
       );
     }
     return Form(
-        key: _websiteContFormKey,
-        child: SingleChildScrollView(
-            key: const Key('listView'),
-            child: Column(children: <Widget>[
-              const SizedBox(height: 40),
-              CircleAvatar(
-                  radius: 60,
-                  child: _imageFile != null
-                      ? foundation.kIsWeb
-                          ? Image.network(_imageFile!.path, scale: 0.3)
-                          : Image.file(File(_imageFile!.path), scale: 0.3)
-                      : newContent.image != null
-                          ? Image.memory(newContent.image!, scale: 0.3)
-                          : Text(newContent.title.isEmpty
-                              ? '?'
-                              : newContent.title[0])),
-              const SizedBox(height: 30),
-              TextFormField(
-                key: const Key('imageName'),
-                decoration: const InputDecoration(labelText: 'Image Name'),
-                controller: _nameController,
-                validator: (value) {
-                  return value!.isEmpty ? 'Please enter a name?' : null;
-                },
-              ),
-              const SizedBox(height: 10),
-              Row(children: [
+      key: _websiteContFormKey,
+      child: SingleChildScrollView(
+        key: const Key('listView'),
+        child: Column(
+          children: <Widget>[
+            const SizedBox(height: 40),
+            CircleAvatar(
+              radius: 60,
+              child: _imageFile != null
+                  ? foundation.kIsWeb
+                        ? Image.network(_imageFile!.path, scale: 0.3)
+                        : Image.file(File(_imageFile!.path), scale: 0.3)
+                  : newContent.image != null
+                  ? Image.memory(newContent.image!, scale: 0.3)
+                  : Text(newContent.title.isEmpty ? '?' : newContent.title[0]),
+            ),
+            const SizedBox(height: 30),
+            TextFormField(
+              key: const Key('imageName'),
+              decoration: InputDecoration(labelText: l10n.name),
+              controller: _nameController,
+              validator: (value) {
+                return value!.isEmpty
+                    ? '${l10n.name} ${l10n.errorTitle}'
+                    : null;
+              },
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
                 Expanded(
-                    child: OutlinedButton(
-                        key: const Key('update'),
-                        child: Text(
-                            widget.content.path.isEmpty ? 'Create' : 'Update'),
-                        onPressed: () async {
-                          if (_websiteContFormKey.currentState!.validate()) {
-                            Uint8List? image =
-                                await HelperFunctions.getResizedImage(
-                                    _imageFile?.path);
-                            if (!mounted) return;
-                            if (_imageFile?.path != null && image == null) {
-                              HelperFunctions.showMessage(
-                                  context, "Image upload error!", Colors.red);
-                            } else {
-                              _contentBloc.add(ContentUpdate(
-                                  widget.websiteId,
-                                  widget.content.copyWith(
-                                      title: _nameController.text,
-                                      image: image)));
-                            }
-                          }
-                        }))
-              ])
-            ])));
+                  child: OutlinedButton(
+                    key: const Key('update'),
+                    child: Text(
+                      widget.content.path.isEmpty ? l10n.create : l10n.update,
+                    ),
+                    onPressed: () async {
+                      if (_websiteContFormKey.currentState!.validate()) {
+                        Uint8List? image =
+                            await HelperFunctions.getResizedImage(
+                              _imageFile?.path,
+                            );
+                        if (!mounted) return;
+                        if (_imageFile?.path != null && image == null) {
+                          HelperFunctions.showMessage(
+                            context,
+                            l10n.errorTitle,
+                            Colors.red,
+                          );
+                        } else {
+                          _contentBloc.add(
+                            ContentUpdate(
+                              widget.websiteId,
+                              widget.content.copyWith(
+                                title: _nameController.text,
+                                image: image,
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _showMdTextForm(bool isPhone) {
     Widget input = TextFormField(
-        key: const Key('mdInput'),
-        autofocus: true,
-        decoration: const InputDecoration(labelText: 'Enter text here...'),
-        expands: true,
-        maxLines: null,
-        textAlignVertical: TextAlignVertical.top,
-        textInputAction: TextInputAction.newline,
-        initialValue: data,
-        onChanged: (text) {
-          setState(() {
-            newData = text;
-          });
+      key: const Key('mdInput'),
+      autofocus: true,
+      decoration: InputDecoration(labelText: l10n.description),
+      expands: true,
+      maxLines: null,
+      textAlignVertical: TextAlignVertical.top,
+      textInputAction: TextInputAction.newline,
+      initialValue: data,
+      onChanged: (text) {
+        setState(() {
+          newData = text;
         });
-    return Column(children: [
-      isPhone
-          ? Expanded(
-              child: Column(children: [
-              Expanded(child: input),
-              const SizedBox(height: 10),
-              Expanded(
-                child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25.0),
-                      border: Border.all(style: BorderStyle.solid, width: 0.80),
+      },
+    );
+    return Column(
+      children: [
+        isPhone
+            ? Expanded(
+                child: Column(
+                  children: [
+                    Expanded(child: input),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(25.0),
+                          border: Border.all(
+                            style: BorderStyle.solid,
+                            width: 0.80,
+                          ),
+                        ),
+                        child: MarkdownWidget(
+                          data: newData,
+                          config: _themeBloc.state.themeMode == ThemeMode.dark
+                              ? MarkdownConfig.darkConfig
+                              : MarkdownConfig.defaultConfig,
+                        ),
+                      ),
                     ),
-                    child: MarkdownWidget(
+                  ],
+                ),
+              )
+            : Expanded(
+                child: Row(
+                  children: [
+                    Expanded(child: input),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: MarkdownWidget(
                         data: newData,
                         config: _themeBloc.state.themeMode == ThemeMode.dark
                             ? MarkdownConfig.darkConfig
-                            : MarkdownConfig.defaultConfig)),
-              )
-            ]))
-          : Expanded(
-              child: Row(children: [
-              Expanded(child: input),
-              const SizedBox(width: 20),
-              Expanded(
-                  child: MarkdownWidget(
-                      data: newData,
-                      config: _themeBloc.state.themeMode == ThemeMode.dark
-                          ? MarkdownConfig.darkConfig
-                          : MarkdownConfig.defaultConfig)),
-            ])),
-      const SizedBox(height: 10),
-      OutlinedButton(
+                            : MarkdownConfig.defaultConfig,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+        const SizedBox(height: 10),
+        OutlinedButton(
           key: const Key('update'),
-          child: Text(widget.content.path.isEmpty ? 'Create' : 'Update'),
+          child: Text(widget.content.path.isEmpty ? l10n.create : l10n.update),
           onPressed: () async {
             if (newData != '') {
-              _contentBloc.add(ContentUpdate(
-                  widget.websiteId, widget.content.copyWith(text: newData)));
+              _contentBloc.add(
+                ContentUpdate(
+                  widget.websiteId,
+                  widget.content.copyWith(text: newData),
+                ),
+              );
             } else {
               Navigator.of(context).pop();
             }
-          })
-    ]);
+          },
+        ),
+      ],
+    );
   }
-/*
+
+  /*
   Widget _showHtmlTextForm(bool isPhone) {
      Widget input = TextFormField(
         key: const Key('htmlInput'),
