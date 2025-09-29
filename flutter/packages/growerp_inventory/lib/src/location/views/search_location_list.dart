@@ -17,7 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import '../../l10n/generated/inventory_localizations.dart';
+import 'package:growerp_inventory/l10n/generated/inventory_localizations.dart';
 
 class SearchLocationList extends StatefulWidget {
   const SearchLocationList({super.key});

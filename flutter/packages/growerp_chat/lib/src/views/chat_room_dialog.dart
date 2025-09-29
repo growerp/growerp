@@ -18,7 +18,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
-import '../l10n/generated/chat_localizations.dart';
+import 'package:growerp_chat/l10n/generated/chat_localizations.dart';
 
 import '../blocs/blocs.dart';
 
@@ -44,26 +44,37 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
     super.initState();
     _nameController.text = widget.chatRoom.chatRoomName ?? '';
     _userBloc = context.read<DataFetchBloc<Users>>()
-      ..add(GetDataEvent(() => context
-          .read<RestClient>()
-          .getUser(limit: 3, isForDropDown: true, loginOnly: true)));
+      ..add(
+        GetDataEvent(
+          () => context.read<RestClient>().getUser(
+            limit: 3,
+            isForDropDown: true,
+            loginOnly: true,
+          ),
+        ),
+      );
   }
 
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocConsumer<ChatRoomBloc, ChatRoomState>(
-        listener: (context, state) {
-      if (state.status == ChatRoomStatus.failure) {
-        loading = false;
-        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-      }
-      if (state.status == ChatRoomStatus.success) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
-        Navigator.of(context).pop();
-      }
-    }, builder: (BuildContext context, state) {
-      return Dialog(
+      listener: (context, state) {
+        if (state.status == ChatRoomStatus.failure) {
+          loading = false;
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+        if (state.status == ChatRoomStatus.success) {
+          HelperFunctions.showMessage(
+            context,
+            '${state.message}',
+            Colors.green,
+          );
+          Navigator.of(context).pop();
+        }
+      },
+      builder: (BuildContext context, state) {
+        return Dialog(
           key: const Key('ChatRoomDialog'),
           insetPadding: const EdgeInsets.only(left: 20, right: 20),
           shape: RoundedRectangleBorder(
@@ -75,87 +86,109 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
             height: 600,
             width: isPhone ? 300 : 800,
             child: _showForm(isPhone),
-          ));
-    });
+          ),
+        );
+      },
+    );
   }
 
   Widget _showForm(bool isPhone) {
     return Center(
-        child: Form(
-            key: _formKey,
-            child: ListView(key: const Key('listView'), children: <Widget>[
-              Center(
-                  child: Text(
-                      "${ChatLocalizations.of(context)!.chat} #${widget.chatRoom.chatRoomId.isEmpty ? ChatLocalizations.of(context)!.newChat : widget.chatRoom.chatRoomId}",
-                      style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold))),
-              const SizedBox(height: 30),
-              DropdownSearch<User>(
-                key: const Key('userDropDown'),
-                popupProps: PopupProps.menu(
-                  isFilterOnline: true,
-                  showSearchBox: true,
-                  searchFieldProps: TextFieldProps(
-                    autofocus: true,
-                    decoration:
-                        InputDecoration(labelText: ChatLocalizations.of(context)!.selectChatPartner),
-                    controller: _userSearchBoxController,
-                  ),
-                  menuProps:
-                      MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                  title: popUp(
-                    context: context,
-                    title: ChatLocalizations.of(context)!.selectChatPartner,
-                    height: 50,
-                  ),
+      child: Form(
+        key: _formKey,
+        child: ListView(
+          key: const Key('listView'),
+          children: <Widget>[
+            Center(
+              child: Text(
+                "${ChatLocalizations.of(context)!.chat} #${widget.chatRoom.chatRoomId.isEmpty ? ChatLocalizations.of(context)!.newChat : widget.chatRoom.chatRoomId}",
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
                 ),
-                selectedItem: _selectedUser,
-                dropdownDecoratorProps: DropDownDecoratorProps(
-                    dropdownSearchDecoration:
-                        InputDecoration(labelText: ChatLocalizations.of(context)!.chatPartner)),
-                itemAsString: (User? u) => " ${u!.firstName} ${u.lastName}",
-                asyncItems: (String filter) {
-                  _userBloc.add(GetDataEvent(() => context
-                      .read<RestClient>()
-                      .getUser(
-                          searchString: filter,
-                          limit: 3,
-                          isForDropDown: true,
-                          loginOnly: true)));
-                  return Future.delayed(const Duration(milliseconds: 150), () {
-                    return Future.value((_userBloc.state.data as Users).users);
-                  });
-                },
-                compareFn: (item, sItem) => item.partyId == sItem.partyId,
-                validator: (value) =>
-                    _nameController.text.isEmpty && value == null
-                        ? ChatLocalizations.of(context)!.fieldRequired
-                        : null,
-                onChanged: (User? newValue) {
-                  _selectedUser = newValue;
-                },
               ),
-              const SizedBox(height: 20),
-              OutlinedButton(
-                  key: const Key('update'),
-                  child: Text(
-                      widget.chatRoom.chatRoomId.isEmpty ? ChatLocalizations.of(context)!.create : ChatLocalizations.of(context)!.update),
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate() && !loading) {
-                      context.read<ChatRoomBloc>().add(ChatRoomUpdate(
-                              widget.chatRoom.copyWith(
-                                  chatRoomName: _nameController.text.isEmpty
-                                      ? null
-                                      : _nameController.text,
-                                  isPrivate: true,
-                                  members: [
-                                ChatRoomMember(
-                                    user: _selectedUser!, isActive: true)
-                              ])));
-                    }
-                  }),
-            ])));
+            ),
+            const SizedBox(height: 30),
+            DropdownSearch<User>(
+              key: const Key('userDropDown'),
+              popupProps: PopupProps.menu(
+                isFilterOnline: true,
+                showSearchBox: true,
+                searchFieldProps: TextFieldProps(
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    labelText: ChatLocalizations.of(context)!.selectChatPartner,
+                  ),
+                  controller: _userSearchBoxController,
+                ),
+                menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
+                title: popUp(
+                  context: context,
+                  title: ChatLocalizations.of(context)!.selectChatPartner,
+                  height: 50,
+                ),
+              ),
+              selectedItem: _selectedUser,
+              dropdownDecoratorProps: DropDownDecoratorProps(
+                dropdownSearchDecoration: InputDecoration(
+                  labelText: ChatLocalizations.of(context)!.chatPartner,
+                ),
+              ),
+              itemAsString: (User? u) => " ${u!.firstName} ${u.lastName}",
+              asyncItems: (String filter) {
+                _userBloc.add(
+                  GetDataEvent(
+                    () => context.read<RestClient>().getUser(
+                      searchString: filter,
+                      limit: 3,
+                      isForDropDown: true,
+                      loginOnly: true,
+                    ),
+                  ),
+                );
+                return Future.delayed(const Duration(milliseconds: 150), () {
+                  return Future.value((_userBloc.state.data as Users).users);
+                });
+              },
+              compareFn: (item, sItem) => item.partyId == sItem.partyId,
+              validator: (value) =>
+                  _nameController.text.isEmpty && value == null
+                  ? ChatLocalizations.of(context)!.fieldRequired
+                  : null,
+              onChanged: (User? newValue) {
+                _selectedUser = newValue;
+              },
+            ),
+            const SizedBox(height: 20),
+            OutlinedButton(
+              key: const Key('update'),
+              child: Text(
+                widget.chatRoom.chatRoomId.isEmpty
+                    ? ChatLocalizations.of(context)!.create
+                    : ChatLocalizations.of(context)!.update,
+              ),
+              onPressed: () async {
+                if (_formKey.currentState!.validate() && !loading) {
+                  context.read<ChatRoomBloc>().add(
+                    ChatRoomUpdate(
+                      widget.chatRoom.copyWith(
+                        chatRoomName: _nameController.text.isEmpty
+                            ? null
+                            : _nameController.text,
+                        isPrivate: true,
+                        members: [
+                          ChatRoomMember(user: _selectedUser!, isActive: true),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

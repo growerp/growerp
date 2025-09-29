@@ -16,7 +16,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/src/findoc/findoc.dart';
-import 'package:growerp_order_accounting/src/l10n/generated/order_accounting_localizations.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 import '../../accounting/accounting.dart';
 
@@ -56,87 +56,100 @@ class ItemTypeListState extends State<ItemTypeList> {
     left = left ?? (isAPhone(context) ? 250 : width - 300);
 
     return BlocConsumer<FinDocBloc, FinDocState>(
-        listenWhen: (previous, current) =>
-            previous.status == FinDocStatus.loading,
-        listener: (context, state) {
-          if (state.status == FinDocStatus.failure) {
-            HelperFunctions.showMessage(
-                context, '${state.message}', Colors.red);
-          }
-          if (state.status == FinDocStatus.success) {
-            HelperFunctions.showMessage(
-                context, '${state.message}', Colors.green);
-          }
-        },
-        builder: (context, state) {
-          switch (state.status) {
-            case FinDocStatus.failure:
-              return Center(
-                  child: Text('${_local.fetchItemTypesFail} ${state.message}'));
-            case FinDocStatus.success:
-              var newList = [];
-              for (var item in state.itemTypes) {
-                if (showAll) {
-                  newList.add(item);
-                } else {
-                  if (item.accountCode != '') newList.add(item);
-                }
+      listenWhen: (previous, current) =>
+          previous.status == FinDocStatus.loading,
+      listener: (context, state) {
+        if (state.status == FinDocStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+        if (state.status == FinDocStatus.success) {
+          HelperFunctions.showMessage(
+            context,
+            '${state.message}',
+            Colors.green,
+          );
+        }
+      },
+      builder: (context, state) {
+        switch (state.status) {
+          case FinDocStatus.failure:
+            return Center(
+              child: Text('${_local.fetchItemTypesFail} ${state.message}'),
+            );
+          case FinDocStatus.success:
+            var newList = [];
+            for (var item in state.itemTypes) {
+              if (showAll) {
+                newList.add(item);
+              } else {
+                if (item.accountCode != '') newList.add(item);
               }
-              return Stack(
-                children: [
-                  Column(children: [
+            }
+            return Stack(
+              children: [
+                Column(
+                  children: [
                     const ItemTypeListHeader(),
                     Expanded(
-                        child: RefreshIndicator(
-                            onRefresh: (() async =>
-                                finDocBloc.add(const FinDocGetItemTypes())),
-                            child: ListView.builder(
-                                key: const Key('listView'),
-                                shrinkWrap: true,
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                itemCount: newList.length,
-                                controller: _scrollController,
-                                itemBuilder: (BuildContext context, int index) {
-                                  if (newList.isEmpty) {
-                                    return Center(
-                                        heightFactor: 20,
-                                        child: Text(_local.noItemTypes,
-                                            key: const Key('empty'),
-                                            textAlign: TextAlign.center));
-                                  }
-                                  return ItemTypeListItem(
-                                      itemType: newList[index], index: index);
-                                })))
-                  ]),
-                  Positioned(
-                    left: left,
-                    top: top,
-                    child: GestureDetector(
-                      onPanUpdate: (details) {
+                      child: RefreshIndicator(
+                        onRefresh: (() async =>
+                            finDocBloc.add(const FinDocGetItemTypes())),
+                        child: ListView.builder(
+                          key: const Key('listView'),
+                          shrinkWrap: true,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: newList.length,
+                          controller: _scrollController,
+                          itemBuilder: (BuildContext context, int index) {
+                            if (newList.isEmpty) {
+                              return Center(
+                                heightFactor: 20,
+                                child: Text(
+                                  _local.noItemTypes,
+                                  key: const Key('empty'),
+                                  textAlign: TextAlign.center,
+                                ),
+                              );
+                            }
+                            return ItemTypeListItem(
+                              itemType: newList[index],
+                              index: index,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Positioned(
+                  left: left,
+                  top: top,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        left = left! + details.delta.dx;
+                        top = top! + details.delta.dy;
+                      });
+                    },
+                    child: FloatingActionButton.extended(
+                      heroTag: 'showAll',
+                      key: const Key("switchShow"),
+                      onPressed: () {
                         setState(() {
-                          left = left! + details.delta.dx;
-                          top = top! + details.delta.dy;
+                          showAll = !showAll;
                         });
                       },
-                      child: FloatingActionButton.extended(
-                          heroTag: 'showAll',
-                          key: const Key("switchShow"),
-                          onPressed: () {
-                            setState(() {
-                              showAll = !showAll;
-                            });
-                          },
-                          tooltip: _local.showAllUsed,
-                          label: showAll
-                              ? Text(_local.all)
-                              : Text(_local.onlyUsed)),
+                      tooltip: _local.showAllUsed,
+                      label: showAll ? Text(_local.all) : Text(_local.onlyUsed),
                     ),
                   ),
-                ],
-              );
-            default:
-              return const Center(child: LoadingIndicator());
-          }
-        });
+                ),
+              ],
+            );
+          default:
+            return const Center(child: LoadingIndicator());
+        }
+      },
+    );
   }
 }

@@ -16,6 +16,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 class AddressDialog extends StatefulWidget {
   final Address? address;
@@ -48,8 +49,9 @@ class AddressDialogState extends State<AddressDialog> {
       _cityController.text = address!.city ?? '';
       _provinceController.text = address!.province ?? '';
       if (address?.country != null && countries.isNotEmpty) {
-        _selectedCountry =
-            countries.firstWhere((element) => element.name == address!.country);
+        _selectedCountry = countries.firstWhere(
+          (element) => element.name == address!.country,
+        );
       } else {
         _selectedCountry = Country(id: "USA", name: "United States");
       }
@@ -58,140 +60,151 @@ class AddressDialogState extends State<AddressDialog> {
 
   @override
   Widget build(BuildContext context) {
+    var localizations = UserCompanyLocalizations.of(context)!;
     return Dialog(
       key: const Key('AddressDialog'),
       insetPadding: const EdgeInsets.all(10),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
-          context: context,
-          title: address == null
-              ? "New Company Address"
-              : "Company Address #${address!.addressId}",
-          height: 700,
-          width: 350,
-          child: _editAddress(context)),
+        context: context,
+        title: address == null
+            ? localizations.newCompanyAddress
+            : localizations.companyAddressDetail(address!.addressId!),
+        height: 700,
+        width: 350,
+        child: _editAddress(context),
+      ),
     );
   }
 
   Widget _editAddress(BuildContext context) {
+    var localizations = UserCompanyLocalizations.of(context)!;
     return Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-            key: const Key('listView'),
-            child: Column(
-              children: <Widget>[
-                const SizedBox(height: 20),
-                TextFormField(
-                  key: const Key('address1'),
-                  decoration:
-                      const InputDecoration(labelText: 'Address line 1'),
-                  controller: _address1Controller,
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Please enter a Street name?';
-                    }
-                    return null;
-                  },
+      key: _formKey,
+      child: SingleChildScrollView(
+        key: const Key('listView'),
+        child: Column(
+          children: <Widget>[
+            const SizedBox(height: 20),
+            TextFormField(
+              key: const Key('address1'),
+              decoration: InputDecoration(labelText: localizations.address1),
+              controller: _address1Controller,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return localizations.address1Error;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              key: const Key('address2'),
+              decoration: InputDecoration(labelText: localizations.address2),
+              controller: _address2Controller,
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              key: const Key('postalCode'),
+              decoration: InputDecoration(labelText: localizations.postalCode),
+              controller: _postalCodeController,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return localizations.postalCodeError;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              key: const Key('city'),
+              decoration: InputDecoration(labelText: localizations.city),
+              controller: _cityController,
+              validator: (value) {
+                if (value!.isEmpty) return localizations.cityError;
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              key: const Key('province'),
+              decoration: InputDecoration(labelText: localizations.province),
+              controller: _provinceController,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return localizations.provinceError;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            DropdownSearch<Country>(
+              key: const Key('country'),
+              selectedItem: _selectedCountry,
+              popupProps: PopupProps.menu(
+                isFilterOnline: true,
+                showSearchBox: true,
+                searchFieldProps: TextFieldProps(
+                  autofocus: true,
+                  decoration: InputDecoration(labelText: localizations.country),
+                  controller: _countrySearchBoxController,
                 ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  key: const Key('address2'),
-                  decoration:
-                      const InputDecoration(labelText: 'Address line 2'),
-                  controller: _address2Controller,
+                menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
+                title: popUp(
+                  context: context,
+                  title: localizations.selectCountry,
+                  height: 50,
                 ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  key: const Key('postalCode'),
-                  decoration: const InputDecoration(labelText: 'PostalCode'),
-                  controller: _postalCodeController,
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Please enter a Postal Code?';
-                    }
-                    return null;
-                  },
+              ),
+              dropdownDecoratorProps: DropDownDecoratorProps(
+                dropdownSearchDecoration: InputDecoration(
+                  labelText: localizations.country,
                 ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  key: const Key('city'),
-                  decoration: const InputDecoration(labelText: 'City'),
-                  controller: _cityController,
-                  validator: (value) {
-                    if (value!.isEmpty) return 'Please enter a City?';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  key: const Key('province'),
-                  decoration:
-                      const InputDecoration(labelText: 'Province/State'),
-                  controller: _provinceController,
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Please enter a Province or State?';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                DropdownSearch<Country>(
-                  key: const Key('country'),
-                  selectedItem: _selectedCountry,
-                  popupProps: PopupProps.menu(
-                    isFilterOnline: true,
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      autofocus: true,
-                      decoration: const InputDecoration(labelText: 'Country'),
-                      controller: _countrySearchBoxController,
+              ),
+              itemAsString: (Country? u) => " ${u!.name}",
+              items: countries,
+              validator: (value) {
+                if (value == null) {
+                  return localizations.countryError;
+                }
+                return null;
+              },
+              onChanged: (Country? newValue) {
+                _selectedCountry = newValue;
+              },
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    key: const Key('updateAddress'),
+                    child: Text(
+                      widget.address == null
+                          ? localizations.create
+                          : localizations.update,
                     ),
-                    menuProps:
-                        MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                    title: popUp(
-                      context: context,
-                      title: 'Select country',
-                      height: 50,
-                    ),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        Navigator.of(context).pop(
+                          Address(
+                            address1: _address1Controller.text,
+                            address2: _address2Controller.text,
+                            postalCode: _postalCodeController.text,
+                            city: _cityController.text,
+                            province: _provinceController.text,
+                            country: _selectedCountry?.name,
+                          ),
+                        );
+                      }
+                    },
                   ),
-                  dropdownDecoratorProps: const DropDownDecoratorProps(
-                      dropdownSearchDecoration:
-                          InputDecoration(labelText: 'Country')),
-                  itemAsString: (Country? u) => " ${u!.name}",
-                  items: countries,
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Please Select a country?';
-                    }
-                    return null;
-                  },
-                  onChanged: (Country? newValue) {
-                    _selectedCountry = newValue;
-                  },
                 ),
-                const SizedBox(height: 20),
-                Row(children: [
-                  Expanded(
-                      child: OutlinedButton(
-                          key: const Key('updateAddress'),
-                          child: Text(
-                              widget.address == null ? 'Create' : 'Update'),
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              Navigator.of(context).pop(Address(
-                                  address1: _address1Controller.text,
-                                  address2: _address2Controller.text,
-                                  postalCode: _postalCodeController.text,
-                                  city: _cityController.text,
-                                  province: _provinceController.text,
-                                  country: _selectedCountry?.name));
-                            }
-                          }))
-                ]),
               ],
-            )));
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

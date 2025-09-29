@@ -22,6 +22,8 @@
   "cityError": "กรุณากรอกเมือง",
   "company": "บริษัท",
   "companyAddress": "ที่อยู่บริษัท",
+  "newCompanyAddress": "ที่อยู่บริษัทใหม่",
+  "companyAddressDetail": "ที่อยู่บริษัท #{addressId}",
   "companyDelete": "บริษัท {name} ถูกลบแล้ว",
   "companyDetail": "รายละเอียดบริษัท",
   "companyName": "ชื่อบริษัท",

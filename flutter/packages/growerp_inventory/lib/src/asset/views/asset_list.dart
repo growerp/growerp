@@ -18,7 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import '../asset.dart';
-import '../../l10n/generated/inventory_localizations.dart';
+import 'package:growerp_inventory/l10n/generated/inventory_localizations.dart';
 
 class AssetList extends StatefulWidget {
   const AssetList({super.key});
@@ -52,165 +52,192 @@ class AssetListState extends State<AssetList> {
     localizations = InventoryLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
     return BlocConsumer<AssetBloc, AssetState>(
-        listenWhen: (previous, current) =>
-            previous.status == AssetStatus.loading,
-        listener: (context, state) {
-          if (state.status == AssetStatus.failure) {
-            HelperFunctions.showMessage(
-                context, localizations.error(state.message ?? ''), Colors.red);
-          }
-          if (state.status == AssetStatus.success) {
-            HelperFunctions.showMessage(
-                context, state.message ?? '', Colors.green);
-          }
-        },
-        builder: (context, state) {
-          switch (state.status) {
-            case AssetStatus.failure:
-              return Center(
-                  child: Text(localizations.failedToFetchAssets(state.message ?? '')));
-            case AssetStatus.success:
-              Widget tableView() {
-                if (state.assets.isEmpty) {
-                  return Center(
-                      child: Text(
-                          classificationId == 'AppHotel'
-                              ? localizations.noRoomsFound
-                              : localizations.noAssetsFound,
-                          style: const TextStyle(fontSize: 20.0)));
-                }
-                // get table data formatted for tableView
-                var (
-                  List<List<TableViewCell>> tableViewCells,
-                  List<double> fieldWidths,
-                  double? rowHeight
-                ) = get2dTableData<Asset>(getTableData,
-                    bloc: _assetBloc,
-                    classificationId: classificationId,
-                    context: context,
-                    items: state.assets);
-                return TableView.builder(
-                  diagonalDragBehavior: DiagonalDragBehavior.free,
-                  verticalDetails:
-                      ScrollableDetails.vertical(controller: _scrollController),
-                  horizontalDetails: ScrollableDetails.horizontal(
-                      controller: _horizontalController),
-                  cellBuilder: (context, vicinity) =>
-                      tableViewCells[vicinity.row][vicinity.column],
-                  columnBuilder: (index) => index >= tableViewCells[0].length
-                      ? null
-                      : TableSpan(
-                          padding: padding,
-                          backgroundDecoration: getBackGround(context, index),
-                          extent: FixedTableSpanExtent(fieldWidths[index]),
-                        ),
-                  pinnedColumnCount: 1,
-                  rowBuilder: (index) => index >= tableViewCells.length
-                      ? null
-                      : TableSpan(
-                          padding: padding,
-                          backgroundDecoration: getBackGround(context, index),
-                          extent: FixedTableSpanExtent(rowHeight!),
-                          recognizerFactories: <Type, GestureRecognizerFactory>{
-                              TapGestureRecognizer:
-                                  GestureRecognizerFactoryWithHandlers<
-                                          TapGestureRecognizer>(
-                                      () => TapGestureRecognizer(),
-                                      (TapGestureRecognizer t) =>
-                                          t.onTap = () => showDialog(
-                                              barrierDismissible: true,
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return index >
-                                                        state.assets.length
-                                                    ? const BottomLoader()
-                                                    : Dismissible(
-                                                        key: const Key(
-                                                            'assetItem'),
-                                                        direction:
-                                                            DismissDirection
-                                                                .startToEnd,
-                                                        child: BlocProvider.value(
-                                                            value: _assetBloc,
-                                                            child: AssetDialog(
-                                                                state.assets[
-                                                                    index -
-                                                                        1])));
-                                              }))
-                            }),
-                  pinnedRowCount: 1,
+      listenWhen: (previous, current) => previous.status == AssetStatus.loading,
+      listener: (context, state) {
+        if (state.status == AssetStatus.failure) {
+          HelperFunctions.showMessage(
+            context,
+            localizations.error(state.message ?? ''),
+            Colors.red,
+          );
+        }
+        if (state.status == AssetStatus.success) {
+          HelperFunctions.showMessage(
+            context,
+            state.message ?? '',
+            Colors.green,
+          );
+        }
+      },
+      builder: (context, state) {
+        switch (state.status) {
+          case AssetStatus.failure:
+            return Center(
+              child: Text(
+                localizations.failedToFetchAssets(state.message ?? ''),
+              ),
+            );
+          case AssetStatus.success:
+            Widget tableView() {
+              if (state.assets.isEmpty) {
+                return Center(
+                  child: Text(
+                    classificationId == 'AppHotel'
+                        ? localizations.noRoomsFound
+                        : localizations.noAssetsFound,
+                    style: const TextStyle(fontSize: 20.0),
+                  ),
                 );
               }
-              return Stack(
-                children: [
-                  tableView(),
-                  Positioned(
-                    right: right,
-                    bottom: bottom,
-                    child: GestureDetector(
-                        onPanUpdate: (details) {
-                          setState(() {
-                            right = right! - details.delta.dx;
-                            bottom -= details.delta.dy;
-                          });
-                        },
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            FloatingActionButton(
-                                key: const Key("search"),
-                                heroTag: "btn1",
-                                onPressed: () async {
-                                  // find findoc id to show
-                                  await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        // search separate from finDocBloc
-                                        return BlocProvider.value(
-                                            value: context.read<
-                                                DataFetchBloc<Locations>>(),
-                                            child: const SearchAssetList());
-                                      }).then((value) async => value != null &&
-                                          context.mounted
-                                      ?
-                                      // show detail page
-                                      await showDialog(
-                                          barrierDismissible: true,
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return BlocProvider.value(
-                                                value: _assetBloc,
-                                                child: AssetDialog(value));
-                                          })
-                                      : const SizedBox.shrink());
-                                },
-                                child: const Icon(Icons.search)),
-                            const SizedBox(height: 10),
-                            FloatingActionButton(
-                                heroTag: "assetNew",
-                                key: const Key("addNew"),
-                                onPressed: () async {
-                                  await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return BlocProvider.value(
-                                            value: _assetBloc,
-                                            child: AssetDialog(Asset()));
-                                      });
-                                },
-                                tooltip: localizations.addNew,
-                                child: const Icon(Icons.add)),
-                          ],
-                        )),
-                  ),
-                ],
+              // get table data formatted for tableView
+              var (
+                List<List<TableViewCell>> tableViewCells,
+                List<double> fieldWidths,
+                double? rowHeight,
+              ) = get2dTableData<Asset>(
+                getTableData,
+                bloc: _assetBloc,
+                classificationId: classificationId,
+                context: context,
+                items: state.assets,
               );
-            default:
-              return const Center(child: LoadingIndicator());
-          }
-        });
+              return TableView.builder(
+                diagonalDragBehavior: DiagonalDragBehavior.free,
+                verticalDetails: ScrollableDetails.vertical(
+                  controller: _scrollController,
+                ),
+                horizontalDetails: ScrollableDetails.horizontal(
+                  controller: _horizontalController,
+                ),
+                cellBuilder: (context, vicinity) =>
+                    tableViewCells[vicinity.row][vicinity.column],
+                columnBuilder: (index) => index >= tableViewCells[0].length
+                    ? null
+                    : TableSpan(
+                        padding: padding,
+                        backgroundDecoration: getBackGround(context, index),
+                        extent: FixedTableSpanExtent(fieldWidths[index]),
+                      ),
+                pinnedColumnCount: 1,
+                rowBuilder: (index) => index >= tableViewCells.length
+                    ? null
+                    : TableSpan(
+                        padding: padding,
+                        backgroundDecoration: getBackGround(context, index),
+                        extent: FixedTableSpanExtent(rowHeight!),
+                        recognizerFactories: <Type, GestureRecognizerFactory>{
+                          TapGestureRecognizer:
+                              GestureRecognizerFactoryWithHandlers<
+                                TapGestureRecognizer
+                              >(
+                                () => TapGestureRecognizer(),
+                                (TapGestureRecognizer t) =>
+                                    t.onTap = () => showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return index > state.assets.length
+                                            ? const BottomLoader()
+                                            : Dismissible(
+                                                key: const Key('assetItem'),
+                                                direction:
+                                                    DismissDirection.startToEnd,
+                                                child: BlocProvider.value(
+                                                  value: _assetBloc,
+                                                  child: AssetDialog(
+                                                    state.assets[index - 1],
+                                                  ),
+                                                ),
+                                              );
+                                      },
+                                    ),
+                              ),
+                        },
+                      ),
+                pinnedRowCount: 1,
+              );
+            }
+            return Stack(
+              children: [
+                tableView(),
+                Positioned(
+                  right: right,
+                  bottom: bottom,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        right = right! - details.delta.dx;
+                        bottom -= details.delta.dy;
+                      });
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FloatingActionButton(
+                          key: const Key("search"),
+                          heroTag: "btn1",
+                          onPressed: () async {
+                            // find findoc id to show
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                // search separate from finDocBloc
+                                return BlocProvider.value(
+                                  value: context
+                                      .read<DataFetchBloc<Locations>>(),
+                                  child: const SearchAssetList(),
+                                );
+                              },
+                            ).then(
+                              (value) async => value != null && context.mounted
+                                  ?
+                                    // show detail page
+                                    await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return BlocProvider.value(
+                                          value: _assetBloc,
+                                          child: AssetDialog(value),
+                                        );
+                                      },
+                                    )
+                                  : const SizedBox.shrink(),
+                            );
+                          },
+                          child: const Icon(Icons.search),
+                        ),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
+                          heroTag: "assetNew",
+                          key: const Key("addNew"),
+                          onPressed: () async {
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BlocProvider.value(
+                                  value: _assetBloc,
+                                  child: AssetDialog(Asset()),
+                                );
+                              },
+                            );
+                          },
+                          tooltip: localizations.addNew,
+                          child: const Icon(Icons.add),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          default:
+            return const Center(child: LoadingIndicator());
+        }
+      },
+    );
   }
 
   @override

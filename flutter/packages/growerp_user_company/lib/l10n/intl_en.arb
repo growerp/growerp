@@ -41,7 +41,7 @@
     "description": "Title for the address detail view",
     "placeholders": {
       "addressId": {
-        "type": "int",
+        "type": "String",
         "example": "123"
       }
     }
@@ -93,6 +93,19 @@
   "companyAddress": "Company Address",
   "@companyAddress": {
     "description": "The address of a company"
+  },
+  "newCompanyAddress": "New Company Address",
+  "@newCompanyAddress": {
+    "description": "Title for creating a new company address"
+  },
+  "companyAddressDetail": "Company Address #{addressId}",
+  "@companyAddressDetail": {
+    "description": "Title for the company address detail view",
+    "placeholders": {
+      "addressId": {
+        "type": "String"
+      }
+    }
   },
   "companyDelete": "Company {name} deleted",
   "@companyDelete": {
@@ -632,6 +645,27 @@
   "userNone": "No users found",
   "@userNone": {
     "description": "Message when no users are found"
+  },
+  "noClientFound": "No clients found",
+  "@noClientFound": {
+    "description": "Message when no clients are found"
+  },
+  "noUsersFound": "no {role} users found",
+  "@noUsersFound": {
+    "description": "Message when no users are found for a role",
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "addNewUser": "Add New User",
+  "@addNewUser": {
+    "description": "Action button text to add a new user"
+  },
+  "userUpDownload": "Users up/download",
+  "@userUpDownload": {
+    "description": "Tooltip for user up/download button"
   },
   "userUpdate": "User {name} updated",
   "@userUpdate": {
