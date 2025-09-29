@@ -15,8 +15,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
-
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 class SearchFinDocList extends StatefulWidget {
   const SearchFinDocList(
@@ -29,8 +29,9 @@ class SearchFinDocList extends StatefulWidget {
 }
 
 class SearchFinDocState extends State<SearchFinDocList> {
-  late DataFetchBloc _finDocBloc;
+  late DataFetchBloc<FinDocs> _finDocBloc;
   List<FinDoc> finDocs = [];
+  late OrderAccountingLocalizations _local;
 
   @override
   void initState() {
@@ -41,6 +42,7 @@ class SearchFinDocState extends State<SearchFinDocList> {
 
   @override
   Widget build(BuildContext context) {
+    _local = OrderAccountingLocalizations.of(context)!;
     return BlocConsumer<DataFetchBloc<FinDocs>, DataFetchState<FinDocs>>(
         listener: (context, state) {
       if (state.status == DataFetchStatus.failure) {
@@ -49,7 +51,7 @@ class SearchFinDocState extends State<SearchFinDocList> {
     }, builder: (context, state) {
       if (state.status == DataFetchStatus.failure) {
         return Center(
-            child: Text('failed to fetch search items: ${state.message}'));
+            child: Text('${_local.fetchSearchItemsFail} ${state.message}'));
       }
       if (state.status == DataFetchStatus.success) {
         finDocs = (state.data as FinDocs).finDocs;
@@ -68,18 +70,19 @@ class SearchFinDocState extends State<SearchFinDocList> {
 class FinDocSearchDialog extends StatelessWidget {
   const FinDocSearchDialog({
     super.key,
-    required DataFetchBloc finDocBloc,
+    required DataFetchBloc<FinDocs> finDocBloc,
     required this.widget,
     required this.finDocs,
   }) : _finDocBloc = finDocBloc;
 
-  final DataFetchBloc _finDocBloc;
+  final DataFetchBloc<FinDocs> _finDocBloc;
   final SearchFinDocList widget;
   final List<FinDoc> finDocs;
 
   @override
   Widget build(BuildContext context) {
     final ScrollController scrollController = ScrollController();
+    final local = OrderAccountingLocalizations.of(context)!;
     return Dialog(
         key: const Key('SearchDialog'),
         insetPadding: const EdgeInsets.all(10),
@@ -88,7 +91,7 @@ class FinDocSearchDialog extends StatelessWidget {
         ),
         child: popUp(
             context: context,
-            title: '${widget.docType} Search ',
+            title: local.searchFinDoc,
             height: 500,
             width: 350,
             child: Column(children: [
@@ -96,10 +99,10 @@ class FinDocSearchDialog extends StatelessWidget {
                   key: const Key('searchField'),
                   textInputAction: TextInputAction.search,
                   autofocus: true,
-                  decoration: const InputDecoration(labelText: "Search input"),
+                  decoration: InputDecoration(labelText: local.searchInput),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Please enter a search value?';
+                      return local.enterSearchValue;
                     }
                     return null;
                   },
@@ -114,7 +117,7 @@ class FinDocSearchDialog extends StatelessWidget {
                     Future.delayed(const Duration(milliseconds: 150));
                   }),
               const SizedBox(height: 20),
-              const Text('Search results'),
+              Text(local.searchResults),
               Expanded(
                   child: ListView.builder(
                       key: const Key('listView'),
@@ -126,10 +129,10 @@ class FinDocSearchDialog extends StatelessWidget {
                         if (index == 0) {
                           return Visibility(
                               visible: finDocs.isEmpty,
-                              child: const Center(
+                              child: Center(
                                   heightFactor: 20,
-                                  child: Text('No search items found (yet)',
-                                      key: Key('empty'),
+                                  child: Text(local.noSearchItems,
+                                      key: const Key('empty'),
                                       textAlign: TextAlign.center)));
                         }
                         index--;
@@ -144,8 +147,8 @@ class FinDocSearchDialog extends StatelessWidget {
                               direction: DismissDirection.startToEnd,
                               child: ListTile(
                                 title: Text(
-                                    "ID: ${finDocs[index].pseudoId}  "
-                                    "Date: ${finDocs[index].creationDate.dateOnly()}",
+                                    "${local.id}: ${finDocs[index].pseudoId}  "
+                                    "${local.date}: ${finDocs[index].creationDate.dateOnly()}",
                                     key: Key("searchResult$index")),
                                 subtitle: Column(children: [
                                   if (finDocs[index].docSubType != null)

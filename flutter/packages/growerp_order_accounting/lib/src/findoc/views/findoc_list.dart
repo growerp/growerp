@@ -85,7 +85,7 @@ class FinDocListState extends State<FinDocList> {
     myFocusNode = FocusNode();
     entityName =
         classificationId == 'AppHotel' && widget.docType == FinDocType.order
-        ? 'Reservation'
+        ? _local.reservation
         : widget.docType.toString();
     _scrollController.addListener(_onScroll);
     switch (widget.docType) {

@@ -16,9 +16,10 @@ import 'package:collection/collection.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../findoc.dart';
 
@@ -38,6 +39,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
   final List<Location> _selectedLocations = [];
   List<FinDocItem> newItems = [];
   late bool confirm;
+  late OrderAccountingLocalizations _local;
 
   @override
   void initState() {
@@ -57,6 +59,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    _local = OrderAccountingLocalizations.of(context)!;
     return Dialog(
         key: Key(
             "ShipmentReceiveDialog${widget.finDoc.sales ? 'Sales' : 'Purchase'}"),
@@ -66,7 +69,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
         ),
         child: popUp(
             context: context,
-            title: 'Incoming Shipment# ${widget.finDoc.pseudoId}',
+            title: '${_local.incomingShipment} ${widget.finDoc.pseudoId}',
             width: isPhone ? 400 : 800,
             height: isPhone
                 ? 600
@@ -92,28 +95,24 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                               backgroundColor: Colors.transparent,
                             )
                           : null,
-                      title: const Column(children: [
+                      title: Column(children: [
                         Center(
                             child: Text(
-                          'For every Item either:\n'
-                          '- Select an existing location\n'
-                          '- Enter a new location\n'
-                          '- leave empty for a new location with\n'
-                          '   the name of the item and received date',
+                          _local.itemLocationInstructions,
                         )),
-                        SizedBox(height: 30),
+                        const SizedBox(height: 30),
                         Row(children: <Widget>[
-                          Text('ProductId  '),
-                          Expanded(child: Text('Description')),
-                          Text('quantity'),
+                          Text('${_local.productId}  '),
+                          Expanded(child: Text(_local.description)),
+                          Text(_local.quantity),
                         ]),
                       ]),
-                      subtitle: const Row(children: <Widget>[
+                      subtitle: Row(children: <Widget>[
                         Expanded(
-                            child: Text('existing location',
+                            child: Text(_local.location,
                                 textAlign: TextAlign.center)),
                         Expanded(
-                            child: Text('new location',
+                            child: Text(_local.newLocation,
                                 textAlign: TextAlign.center)),
                       ]),
                     ),
@@ -121,10 +120,10 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                   ]);
                 }
                 if (index == 1 && newItems.isEmpty) {
-                  return const Center(
+                  return Center(
                       heightFactor: 20,
-                      child: Text("no items found!",
-                          key: Key('empty'), textAlign: TextAlign.center));
+                      child: Text(_local.noItems,
+                          key: const Key('empty'), textAlign: TextAlign.center));
                 }
                 index--;
                 return ListTile(
@@ -143,7 +142,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                     const SizedBox(height: 10),
                     confirm
                         ? Text(
-                            'To location: ${newItems[index].asset?.location?.locationName}')
+                            '${_local.toLocation} ${newItems[index].asset?.location?.locationName}')
                         : Row(children: <Widget>[
                             Expanded(
                                 child: SizedBox(
@@ -156,8 +155,8 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                                           showSearchBox: true,
                                           searchFieldProps: TextFieldProps(
                                             autofocus: true,
-                                            decoration: const InputDecoration(
-                                                labelText: "location name"),
+                                            decoration: InputDecoration(
+                                                labelText: _local.locationName),
                                             controller:
                                                 _locationSearchBoxControllers[
                                                     index],
@@ -167,15 +166,16 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                                                   BorderRadius.circular(20.0)),
                                           title: popUp(
                                             context: context,
-                                            title: 'Select location',
+                                            title: _local.selectLocation,
                                             height: 50,
                                           ),
                                         ),
                                         dropdownDecoratorProps:
-                                            const DropDownDecoratorProps(
+                                            DropDownDecoratorProps(
                                                 dropdownSearchDecoration:
                                                     InputDecoration(
-                                                        labelText: 'Location')),
+                                                        labelText:
+                                                            _local.location)),
                                         itemAsString: (Location? u) =>
                                             " ${u?.locationName}",
                                         asyncItems: (String filter) {
@@ -204,8 +204,8 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                             Expanded(
                                 child: TextFormField(
                               key: Key('newLocation$index'),
-                              decoration: const InputDecoration(
-                                  labelText: 'New Location'),
+                              decoration: InputDecoration(
+                                  labelText: _local.newLocation),
                               controller: _newLocationControllers[index],
                               onChanged: (_) {
                                 setState(() {
@@ -225,7 +225,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                 visible: confirm,
                 child: OutlinedButton(
                     key: const Key('back'),
-                    child: const Text('Go back'),
+                    child: Text(_local.goBack),
                     onPressed: () async {
                       setState(() {
                         confirm = false;
@@ -250,7 +250,8 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
             Expanded(
                 child: OutlinedButton(
                     key: const Key('update'),
-                    child: Text(confirm ? 'Confirm ' : 'Receive shipment'),
+                    child:
+                        Text(confirm ? _local.confirm : _local.receiveShipment),
                     onPressed: () async {
                       setState(() {
                         if (confirm == false) {
