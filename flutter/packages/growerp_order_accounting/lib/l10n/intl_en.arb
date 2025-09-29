@@ -163,5 +163,373 @@
   "fetchPaymentTypesFail": "failed to fetch paymentTypes: ",
   "@fetchPaymentTypesFail": {
     "description": "Error message when payment types fail to load"
+  },
+  "search": "Search",
+  "@search": {
+    "description": "Search button text"
+  },
+  "searchFinDoc": "Search Financial Document",
+  "@searchFinDoc": {
+    "description": "Title for the financial document search dialog"
+  },
+  "newRental": "New Reservation",
+  "@newRental": {
+    "description": "Button or label for creating a new reservation"
+  },
+  "sales": "Sales",
+  "@sales": {
+    "description": "Label for sales documents"
+  },
+  "purchase": "Purchase",
+  "@purchase": {
+    "description": "Label for purchase documents"
+  },
+  "fetchSearchItemsFail": "failed to fetch search items: ",
+  "@fetchSearchItemsFail": {
+    "description": "Error message when search items fail to load"
+  },
+  "searchInput": "Search input",
+  "@searchInput": {
+    "description": "Label for search input field"
+  },
+  "enterSearchValue": "Please enter a search value?",
+  "@enterSearchValue": {
+    "description": "Error message for empty search field"
+  },
+  "searchResults": "Search results",
+  "@searchResults": {
+    "description": "Header for search results"
+  },
+  "noSearchItems": "No search items found (yet)",
+  "@noSearchItems": {
+    "description": "Message when no search items are found"
+  },
+  "id": "ID",
+  "@id": {
+    "description": "Abbreviation for Identifier"
+  },
+  "date": "Date",
+  "@date": {
+    "description": "Date label"
+  },
+  "finDocId": "FinDoc Id",
+  "@finDocId": {
+    "description": "Financial Document ID field label"
+  },
+  "customer": "Customer",
+  "@customer": {
+    "description": "Label for customer"
+  },
+  "supplier": "Supplier",
+  "@supplier": {
+    "description": "Label for supplier"
+  },
+  "selectCustomer": "Select Customer",
+  "@selectCustomer": {
+    "description": "Dropdown hint for selecting a customer"
+  },
+  "selectSupplier": "Select Supplier",
+  "@selectSupplier": {
+    "description": "Dropdown hint for selecting a supplier"
+  },
+  "status": "Status",
+  "@status": {
+    "description": "Label for status"
+  },
+  "description": "Description",
+  "@description": {
+    "description": "Label for description"
+  },
+  "created": "Created",
+  "@created": {
+    "description": "Label for creation date"
+  },
+  "placed": "Placed",
+  "@placed": {
+    "description": "Label for placed date"
+  },
+  "posted": "Posted?",
+  "@posted": {
+    "description": "Label for posted status"
+  },
+  "no": "No",
+  "@no": {
+    "description": "Negative response"
+  },
+  "yes": "Yes",
+  "@yes": {
+    "description": "Positive response"
+  },
+  "updateHeader": "Update Header",
+  "@updateHeader": {
+    "description": "Button text to update header"
+  },
+  "addTransactionItem": "Add\n transaction item",
+  "@addTransactionItem": {
+    "description": "Button text to add a transaction item"
+  },
+  "addOtherItem": "Add other item",
+  "@addOtherItem": {
+    "description": "Button text to add another item"
+  },
+  "addRental": "Add Rental",
+  "@addRental": {
+    "description": "Button text to add a rental item"
+  },
+  "addProduct": "Add Product",
+  "@addProduct": {
+    "description": "Button text to add a product"
+  },
+  "cancelFinDoc": "Cancel",
+  "@cancelFinDoc": {
+    "description": "Button text to cancel a financial document"
+  },
+  "clearCart": "Clear Cart",
+  "@clearCart": {
+    "description": "Button text to clear the cart"
+  },
+  "noItems": "no items yet",
+  "@noItems": {
+    "description": "Message when there are no items"
+  },
+  "item": "Item",
+  "@item": {
+    "description": "Label for an item"
+  },
+  "glAccount": "Gl Account",
+  "@glAccount": {
+    "description": "Label for GL Account"
+  },
+  "debit": "Debit",
+  "@debit": {
+    "description": "Label for debit amount"
+  },
+  "credit": "Credit",
+  "@credit": {
+    "description": "Label for credit amount"
+  },
+  "productId": "ProdId",
+  "@productId": {
+    "description": "Label for product ID"
+  },
+  "quantity": "Q",
+  "@quantity": {
+    "description": "Abbreviation for Quantity"
+  },
+  "price": "Price",
+  "@price": {
+    "description": "Label for price"
+  },
+  "subTotal": "SubTot.",
+  "@subTotal": {
+    "description": "Abbreviation for Subtotal"
+  },
+  "location": "Location",
+  "@location": {
+    "description": "Label for location"
+  },
+  "addTransactionItemTitle": "Add Transaction Item",
+  "@addTransactionItemTitle": {
+    "description": "Title for the add transaction item dialog"
+  },
+  "amount": "Amount",
+  "@amount": {
+    "description": "Label for amount"
+  },
+  "enterAmount": "Enter Amount?",
+  "@enterAmount": {
+    "description": "Error message for empty amount field"
+  },
+  "ok": "Ok",
+  "@ok": {
+    "description": "Confirmation button text"
+  },
+  "newOrder": "New order",
+  "@newOrder": {
+    "description": "Button or label for creating a new order"
+  },
+  "orderId": "Order #",
+  "@orderId": {
+    "description": "Order ID header or label with number symbol"
+  },
+  "reservationId": "Reservation #",
+  "@reservationId": {
+    "description": "Reservation ID header or label with number symbol"
+  },
+  "customerSearch": "customer,name",
+  "@customerSearch": {
+    "description": "Label for customer search field"
+  },
+  "roomType": "Room Type",
+  "@roomType": {
+    "description": "Label for room type"
+  },
+  "product": "Product",
+  "@product": {
+    "description": "Label for product"
+  },
+  "selectProduct": "Select product",
+  "@selectProduct": {
+    "description": "Dropdown hint for selecting a product"
+  },
+  "priceAmount": "Price/Amount",
+  "@priceAmount": {
+    "description": "Label for price or amount"
+  },
+  "enterPriceAmount": "Enter Price or Amount?",
+  "@enterPriceAmount": {
+    "description": "Error message for empty price or amount field"
+  },
+  "selectStartDate": "Select a start date",
+  "@selectStartDate": {
+    "description": "Error message for empty start date field"
+  },
+  "startDate": "Start Date",
+  "@startDate": {
+    "description": "Label for start date"
+  },
+  "numberOfDays": "Number of days",
+  "@numberOfDays": {
+    "description": "Label for number of days"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "incomingShipment": "Incoming Shipment #",
+  "@incomingShipment": {
+    "description": "Header for incoming shipment"
+  },
+  "itemLocationInstructions": "For every Item either:\n- Select an existing location\n- Enter a new location\n- leave empty for a new location with\n   the name of the item and received date",
+  "@itemLocationInstructions": {
+    "description": "Instructions for item location"
+  },
+  "toLocation": "To location: ",
+  "@toLocation": {
+    "description": "Label for destination location"
+  },
+  "locationName": "location name",
+  "@locationName": {
+    "description": "Label for location name"
+  },
+  "selectLocation": "Select location",
+  "@selectLocation": {
+    "description": "Dropdown hint for selecting a location"
+  },
+  "newLocation": "New Location",
+  "@newLocation": {
+    "description": "Label for new location"
+  },
+  "goBack": "Go back",
+  "@goBack": {
+    "description": "Button text to go back"
+  },
+  "confirm": "Confirm ",
+  "@confirm": {
+    "description": "Confirmation button text"
+  },
+  "receiveShipment": "Receive shipment",
+  "@receiveShipment": {
+    "description": "Button text to receive a shipment"
+  },
+  "incoming": "Incoming",
+  "@incoming": {
+    "description": "Label for incoming documents"
+  },
+  "outgoing": "Outgoing",
+  "@outgoing": {
+    "description": "Label for outgoing documents"
+  },
+  "paymentId": "Payment #",
+  "@paymentId": {
+    "description": "Payment ID header or label with number symbol"
+  },
+  "new": "New",
+  "@new": {
+    "description": "Label for new items"
+  },
+  "paymentType": "Payment Type",
+  "@paymentType": {
+    "description": "Label for payment type"
+  },
+  "enterPaymentType": "Enter a item type for posting?",
+  "@enterPaymentType": {
+    "description": "Error message for empty payment type field"
+  },
+  "apply": "Apply:",
+  "@apply": {
+    "description": "Label for apply"
+  },
+  "paymentMethods": "Payment Methods",
+  "@paymentMethods": {
+    "description": "Header for payment methods"
+  },
+  "creditCard": "Credit Card",
+  "@creditCard": {
+    "description": "Label for credit card"
+  },
+  "cash": "Cash",
+  "@cash": {
+    "description": "Label for cash"
+  },
+  "check": "Check",
+  "@check": {
+    "description": "Label for check"
+  },
+  "bank": "Bank",
+  "@bank": {
+    "description": "Label for bank"
+  },
+  "gatewayResponses": "Gateway Responses",
+  "@gatewayResponses": {
+    "description": "Header for gateway responses"
+  },
+  "operation": "Operation",
+  "@operation": {
+    "description": "Label for operation"
+  },
+  "method": "Method",
+  "@method": {
+    "description": "Label for method"
+  },
+  "result": "OK?",
+  "@result": {
+    "description": "Label for result"
+  },
+  "message": "Message:",
+  "@message": {
+    "description": "Label for message"
+  },
+  "release": "Release",
+  "@release": {
+    "description": "Button text to release a payment"
+  },
+  "capture": "Capture",
+  "@capture": {
+    "description": "Button text to capture a payment"
+  },
+  "authorize": "Authorize",
+  "@authorize": {
+    "description": "Button text to authorize a payment"
+  },
+  "name": "Name",
+  "@name": {
+    "description": "Generic name label"
+  },
+  "select": "Select",
+  "@select": {
+    "description": "Prefix for selection actions"
+  },
+  "type": "Type",
+  "@type": {
+    "description": "Generic type label"
+  },
+  "itemOrCustomerRequired": "A {companyRole} and at least one {docType} item is required",
+  "@itemOrCustomerRequired": {
+    "description": "Validation error when creating a document",
+    "placeholders": {
+      "companyRole": {},
+      "docType": {}
+    }
   }
 }
