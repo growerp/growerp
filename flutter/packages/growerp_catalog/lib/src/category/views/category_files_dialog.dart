@@ -40,33 +40,42 @@ class _FilesHeaderState extends State<CategoryFilesDialog> {
   Widget build(BuildContext context) {
     var catalogLocalizations = CatalogLocalizations.of(context)!;
     return BlocConsumer<CategoryBloc, CategoryState>(
-        listener: (context, state) async {
-      if (state.status == CategoryStatus.failure) {
-        HelperFunctions.showMessage(
+      listener: (context, state) async {
+        if (state.status == CategoryStatus.failure) {
+          HelperFunctions.showMessage(
             context,
             catalogLocalizations.error(state.message ?? ''),
-            Colors.red);
-      }
-      if (state.status == CategoryStatus.success) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
-        Navigator.of(context).pop();
-      }
-    }, builder: (context, state) {
-      return Stack(children: [
-        popUpDialog(
-            context: context,
-            title: catalogLocalizations.categoryFiles,
-            children: [
-              const SizedBox(height: 40),
-              Text(catalogLocalizations.downloadFormat),
-              const SizedBox(height: 10),
-              OutlinedButton(
+            Colors.red,
+          );
+        }
+        if (state.status == CategoryStatus.success) {
+          HelperFunctions.showMessage(
+            context,
+            '${state.message}',
+            Colors.green,
+          );
+          Navigator.of(context).pop();
+        }
+      },
+      builder: (context, state) {
+        return Stack(
+          children: [
+            popUpDialog(
+              context: context,
+              title: catalogLocalizations.categoryFiles,
+              children: [
+                const SizedBox(height: 40),
+                Text(catalogLocalizations.downloadFormat),
+                const SizedBox(height: 10),
+                OutlinedButton(
                   key: const Key('upload'),
                   child: Text(catalogLocalizations.uploadCsv),
                   onPressed: () async {
                     FilePickerResult? result = await FilePicker.platform
                         .pickFiles(
-                            allowedExtensions: ['csv'], type: FileType.custom);
+                          allowedExtensions: ['csv'],
+                          type: FileType.custom,
+                        );
                     if (result != null) {
                       String fileString = '';
                       if (foundation.kIsWeb) {
@@ -78,19 +87,25 @@ class _FilesHeaderState extends State<CategoryFilesDialog> {
                       }
                       _categoryBloc.add(CategoryUpload(fileString));
                     }
-                  }),
-              const SizedBox(height: 20),
-              OutlinedButton(
+                  },
+                ),
+                const SizedBox(height: 20),
+                OutlinedButton(
                   key: const Key('download'),
                   child: Text(catalogLocalizations.downloadEmail),
                   onPressed: () {
                     _categoryBloc.add(CategoryDownload());
-                  }),
-              const SizedBox(height: 20),
-              Text(catalogLocalizations.emailData),
-            ]),
-        if (state.status == CategoryStatus.loading) const LoadingIndicator(),
-      ]);
-    });
+                  },
+                ),
+                const SizedBox(height: 20),
+                Text(catalogLocalizations.emailData),
+              ],
+            ),
+            if (state.status == CategoryStatus.loading)
+              const LoadingIndicator(),
+          ],
+        );
+      },
+    );
   }
 }

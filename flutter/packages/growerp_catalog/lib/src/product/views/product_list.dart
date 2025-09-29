@@ -60,25 +60,32 @@ class ProductListState extends State<ProductList> {
     Widget tableView() {
       if (products.isEmpty) {
         return Center(
-            child: Text(catalogLocalizations.noProducts(entityName),
-                style: const TextStyle(fontSize: 20.0)));
+          child: Text(
+            catalogLocalizations.noProducts(entityName),
+            style: const TextStyle(fontSize: 20.0),
+          ),
+        );
       }
       // get table data formatted for tableView
       var (
         List<List<TableViewCell>> tableViewCells,
         List<double> fieldWidths,
-        double? rowHeight
-      ) = get2dTableData<Product>(getTableData,
-          bloc: _productBloc,
-          classificationId: classificationId,
-          context: context,
-          items: products);
+        double? rowHeight,
+      ) = get2dTableData<Product>(
+        getTableData,
+        bloc: _productBloc,
+        classificationId: classificationId,
+        context: context,
+        items: products,
+      );
       return TableView.builder(
         diagonalDragBehavior: DiagonalDragBehavior.free,
-        verticalDetails:
-            ScrollableDetails.vertical(controller: _scrollController),
-        horizontalDetails:
-            ScrollableDetails.horizontal(controller: _horizontalController),
+        verticalDetails: ScrollableDetails.vertical(
+          controller: _scrollController,
+        ),
+        horizontalDetails: ScrollableDetails.horizontal(
+          controller: _horizontalController,
+        ),
         cellBuilder: (context, vicinity) =>
             tableViewCells[vicinity.row][vicinity.column],
         columnBuilder: (index) => index >= tableViewCells[0].length
@@ -96,137 +103,160 @@ class ProductListState extends State<ProductList> {
                 backgroundDecoration: getBackGround(context, index),
                 extent: FixedTableSpanExtent(rowHeight!),
                 recognizerFactories: <Type, GestureRecognizerFactory>{
-                    TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-                            TapGestureRecognizer>(
+                  TapGestureRecognizer:
+                      GestureRecognizerFactoryWithHandlers<
+                        TapGestureRecognizer
+                      >(
                         () => TapGestureRecognizer(),
                         (TapGestureRecognizer t) => t.onTap = () => showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return index > products.length
-                                  ? const BottomLoader()
-                                  : Dismissible(
-                                      key: const Key('productItem'),
-                                      direction: DismissDirection.startToEnd,
-                                      child: BlocProvider.value(
-                                          value: _productBloc,
-                                          child: ProductDialog(
-                                              products[index - 1])));
-                            }))
-                  }),
+                          barrierDismissible: true,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return index > products.length
+                                ? const BottomLoader()
+                                : Dismissible(
+                                    key: const Key('productItem'),
+                                    direction: DismissDirection.startToEnd,
+                                    child: BlocProvider.value(
+                                      value: _productBloc,
+                                      child: ProductDialog(products[index - 1]),
+                                    ),
+                                  );
+                          },
+                        ),
+                      ),
+                },
+              ),
         pinnedRowCount: 1,
       );
     }
 
     return BlocConsumer<ProductBloc, ProductState>(
-        listenWhen: (previous, current) =>
-            previous.status == ProductStatus.loading,
-        listener: (context, state) {
-          if (state.status == ProductStatus.failure) {
-            HelperFunctions.showMessage(
-                context, '${state.message}', Colors.red);
-          }
-          if (state.status == ProductStatus.success) {
-            started = true;
-            HelperFunctions.showMessage(
-                context, '${state.message}', Colors.green);
-          }
-        },
-        builder: (context, state) {
-          switch (state.status) {
-            case ProductStatus.failure:
-              return Center(
-                  child: Text(catalogLocalizations
-                      .fetchProductError(state.message ?? '')));
-            case ProductStatus.success:
-              products = state.products;
-              return Stack(
-                children: [
-                  tableView(),
-                  Positioned(
-                    right: right,
-                    bottom: bottom,
-                    child: GestureDetector(
-                      onPanUpdate: (details) {
-                        setState(() {
-                          right = right! - details.delta.dx;
-                          bottom -= details.delta.dy;
-                        });
-                      },
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            FloatingActionButton(
-                                key: const Key("search"),
-                                heroTag: "btn1",
-                                onPressed: () async {
-                                  // find findoc id to show
-                                  await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        // search separate from finDocBloc
-                                        return BlocProvider.value(
-                                            value: context.read<
-                                                DataFetchBloc<Locations>>(),
-                                            child: const SearchProductList());
-                                      }).then((value) async => value != null &&
-                                          context.mounted
-                                      ?
-                                      // show detail page
-                                      await showDialog(
-                                          barrierDismissible: true,
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return BlocProvider.value(
-                                                value: _productBloc,
-                                                child: ProductDialog(value));
-                                          })
-                                      : const SizedBox.shrink());
-                                },
-                                child: const Icon(Icons.search)),
-                            const SizedBox(height: 10),
-                            FloatingActionButton(
-                                heroTag: 'productFiles',
-                                key: const Key("upDownload"),
-                                onPressed: () async {
-                                  await showDialog(
+      listenWhen: (previous, current) =>
+          previous.status == ProductStatus.loading,
+      listener: (context, state) {
+        if (state.status == ProductStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+        if (state.status == ProductStatus.success) {
+          started = true;
+          HelperFunctions.showMessage(
+            context,
+            '${state.message}',
+            Colors.green,
+          );
+        }
+      },
+      builder: (context, state) {
+        switch (state.status) {
+          case ProductStatus.failure:
+            return Center(
+              child: Text(
+                catalogLocalizations.fetchProductError(state.message ?? ''),
+              ),
+            );
+          case ProductStatus.success:
+            products = state.products;
+            return Stack(
+              children: [
+                tableView(),
+                Positioned(
+                  right: right,
+                  bottom: bottom,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        right = right! - details.delta.dx;
+                        bottom -= details.delta.dy;
+                      });
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FloatingActionButton(
+                          key: const Key("search"),
+                          heroTag: "btn1",
+                          onPressed: () async {
+                            // find findoc id to show
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                // search separate from finDocBloc
+                                return BlocProvider.value(
+                                  value: context
+                                      .read<DataFetchBloc<Locations>>(),
+                                  child: const SearchProductList(),
+                                );
+                              },
+                            ).then(
+                              (value) async => value != null && context.mounted
+                                  ?
+                                    // show detail page
+                                    await showDialog(
                                       barrierDismissible: true,
                                       context: context,
                                       builder: (BuildContext context) {
                                         return BlocProvider.value(
-                                            value: _productBloc,
-                                            child: const ProductFilesDialog());
-                                      });
-                                },
-                                tooltip: catalogLocalizations.productUpDown,
-                                child: const Icon(Icons.file_copy)),
-                            const SizedBox(height: 10),
-                            FloatingActionButton(
-                                heroTag: 'productNew',
-                                key: const Key("addNew"),
-                                onPressed: () async {
-                                  await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return BlocProvider.value(
-                                            value: _productBloc,
-                                            child:
-                                                const ProductDialog(Product()));
-                                      });
-                                },
-                                tooltip: CoreLocalizations.of(context)!.addNew,
-                                child: const Icon(Icons.add))
-                          ]),
+                                          value: _productBloc,
+                                          child: ProductDialog(value),
+                                        );
+                                      },
+                                    )
+                                  : const SizedBox.shrink(),
+                            );
+                          },
+                          child: const Icon(Icons.search),
+                        ),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
+                          heroTag: 'productFiles',
+                          key: const Key("upDownload"),
+                          onPressed: () async {
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BlocProvider.value(
+                                  value: _productBloc,
+                                  child: const ProductFilesDialog(),
+                                );
+                              },
+                            );
+                          },
+                          tooltip: catalogLocalizations.productUpDown,
+                          child: const Icon(Icons.file_copy),
+                        ),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
+                          heroTag: 'productNew',
+                          key: const Key("addNew"),
+                          onPressed: () async {
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BlocProvider.value(
+                                  value: _productBloc,
+                                  child: const ProductDialog(Product()),
+                                );
+                              },
+                            );
+                          },
+                          tooltip: CoreLocalizations.of(context)!.addNew,
+                          child: const Icon(Icons.add),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              );
-            default:
-              return const Center(child: LoadingIndicator());
-          }
-        });
+                ),
+              ],
+            );
+          default:
+            return const Center(child: LoadingIndicator());
+        }
+      },
+    );
   }
 
   @override

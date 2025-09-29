@@ -132,8 +132,9 @@ class CategoryDialogState extends State<CategoryDialog> {
               case ProductStatus.failure:
                 HelperFunctions.showMessage(
                   context,
-                  catalogLocalizations
-                      .errorGettingProducts(state.message ?? ''),
+                  catalogLocalizations.errorGettingProducts(
+                    state.message ?? '',
+                  ),
                   Colors.red,
                 );
                 break;
@@ -155,9 +156,10 @@ class CategoryDialogState extends State<CategoryDialog> {
                   context: context,
                   child: listChild(productState),
                   title: catalogLocalizations.categoryNumber(
-                      widget.category.categoryId.isEmpty
-                          ? catalogLocalizations.newItem
-                          : widget.category.pseudoId),
+                    widget.category.categoryId.isEmpty
+                        ? catalogLocalizations.newItem
+                        : widget.category.pseudoId,
+                  ),
                   height: 650,
                   width: 350,
                 ),
@@ -179,8 +181,9 @@ class CategoryDialogState extends State<CategoryDialog> {
                 builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
                   if (snapshot.hasError) {
                     return Text(
-                      CatalogLocalizations.of(context)!
-                          .pickImageError(snapshot.error.toString()),
+                      CatalogLocalizations.of(
+                        context,
+                      )!.pickImageError(snapshot.error.toString()),
                       textAlign: TextAlign.center,
                     );
                   }
@@ -283,13 +286,15 @@ class CategoryDialogState extends State<CategoryDialog> {
                 TextFormField(
                   key: const Key('Id'),
                   decoration: InputDecoration(
-                      labelText: catalogLocalizations.categoryId),
+                    labelText: catalogLocalizations.categoryId,
+                  ),
                   controller: _idController,
                 ),
                 TextFormField(
                   key: const Key('name'),
                   decoration: InputDecoration(
-                      labelText: catalogLocalizations.categoryName),
+                    labelText: catalogLocalizations.categoryName,
+                  ),
                   controller: _nameController,
                   validator: (value) {
                     return value!.isEmpty
@@ -300,7 +305,8 @@ class CategoryDialogState extends State<CategoryDialog> {
                 TextFormField(
                   key: const Key('description'),
                   decoration: InputDecoration(
-                      labelText: catalogLocalizations.description),
+                    labelText: catalogLocalizations.description,
+                  ),
                   controller: _descrController,
                   maxLines: 3,
                   validator: (value) {
