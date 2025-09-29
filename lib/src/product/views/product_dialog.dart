@@ -1,12 +1,12 @@
 /*
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
- * 
+ *
  * To the extent possible under law, the author(s) have dedicated all
  * copyright and related and neighboring rights to this software to the
  * public domain worldwide. This software is distributed without any
  * warranty.
- * 
+ *
  * You should have received a copy of the CC0 Public Domain Dedication
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
@@ -27,8 +27,10 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_catalog/src/l10n/activity_localizations.dart';
 
-import '../../../growerp_catalog.dart';
+import '../../category/blocs/category_bloc.dart';
+import '../product.dart';
 
 class ProductDialog extends StatefulWidget {
   final Product product;
@@ -136,12 +138,10 @@ class ProductDialogState extends State<ProductDialog> {
 
   @override
   Widget build(BuildContext context) {
+    var al = ActivityLocalizations.of(context)!;
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
     right = right ?? (isPhone ? 20 : 150);
-    if (classificationId == 'AppHotel') {
-      _selectedProductTypeId = catalogLocalizations.rental;
-    }
+    if (classificationId == 'AppHotel') _selectedProductTypeId = 'Rental';
     return BlocConsumer<ProductBloc, ProductState>(
       listener: (context, state) async {
         switch (state.status) {
@@ -204,15 +204,13 @@ class ProductDialogState extends State<ProductDialog> {
                 ),
                 child: popUp(
                   context: context,
-                  title: (classificationId == 'AppAdmin'
-                          ? catalogLocalizations.productNumber(
-                              widget.product.productId.isEmpty
-                                  ? catalogLocalizations.newItem
-                                  : widget.product.pseudoId)
-                          : catalogLocalizations.roomTypeNumber(
-                              widget.product.productId.isEmpty
-                                  ? catalogLocalizations.newItem
-                                  : widget.product.pseudoId)),
+                  title:
+                      (classificationId == 'AppAdmin'
+                          ? al.product
+                          : 'Room Type #') +
+                      (widget.product.productId.isEmpty
+                          ? 'New'
+                          : widget.product.pseudoId),
                   height: isPhone
                       ? (classificationId == 'AppAdmin' ? 850 : 700)
                       : (classificationId == 'AppAdmin' ? 700 : 600),
@@ -237,8 +235,7 @@ class ProductDialogState extends State<ProductDialog> {
                 builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
                   if (snapshot.hasError) {
                     return Text(
-                      CatalogLocalizations.of(context)!
-                          .pickImageError(snapshot.error.toString()),
+                      'Pick image error: ${snapshot.error}}',
                       textAlign: TextAlign.center,
                     );
                   }
@@ -260,14 +257,14 @@ class ProductDialogState extends State<ProductDialog> {
   }
 
   Widget _showForm(String classificationId, bool isPhone) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+    var al = ActivityLocalizations.of(context)!;
     final Text? retrieveError = _getRetrieveErrorWidget();
     if (retrieveError != null) {
       return retrieveError;
     }
     if (_pickImageError != null) {
       return Text(
-        catalogLocalizations.pickImageError(_pickImageError.toString()),
+        'Pick image error: $_pickImageError',
         textAlign: TextAlign.center,
       );
     }
@@ -355,7 +352,7 @@ class ProductDialogState extends State<ProductDialog> {
   }
 
   List<Widget> _buildRelatedCategories() {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+    var al = ActivityLocalizations.of(context)!;
     List<Widget> relCategories = [];
     _selectedCategories.asMap().forEach((index, category) {
       relCategories.add(
@@ -382,7 +379,7 @@ class ProductDialogState extends State<ProductDialog> {
             context: context,
             builder: (BuildContext context) {
               return MultiSelect<Category>(
-                title: catalogLocalizations.selectCategories,
+                title: al.selectCategories,
                 items: _categories,
                 selectedItems: _selectedCategories,
               );
@@ -403,7 +400,7 @@ class ProductDialogState extends State<ProductDialog> {
     String classificationId,
     List<Widget> relCategories,
   ) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+    var al = ActivityLocalizations.of(context)!;
     return [
       Row(
         children: [
@@ -415,8 +412,8 @@ class ProductDialogState extends State<ProductDialog> {
               initialValue: widget.product.pseudoId,
               decoration: InputDecoration(
                 labelText: classificationId == 'AppHotel'
-                    ? catalogLocalizations.roomTypeId
-                    : catalogLocalizations.productId,
+                    ? 'Room Type Id'
+                    : al.id,
               ),
             ),
           ),
@@ -429,8 +426,7 @@ class ProductDialogState extends State<ProductDialog> {
                   key: const Key('productTypeDropDown'),
                   name: 'productType',
                   initialValue: _selectedProductTypeId,
-                  decoration: InputDecoration(
-                      labelText: catalogLocalizations.productType),
+                  decoration: InputDecoration(labelText: al.productType),
                   validator: FormBuilderValidators.compose([
                     FormBuilderValidators.required(),
                   ]),
@@ -459,8 +455,8 @@ class ProductDialogState extends State<ProductDialog> {
         initialValue: widget.product.productName ?? '',
         decoration: InputDecoration(
           labelText: classificationId == 'AppHotel'
-              ? catalogLocalizations.roomTypeName
-              : catalogLocalizations.productName,
+              ? 'Room Type Name'
+              : al.product,
         ),
         validator: FormBuilderValidators.compose([
           FormBuilderValidators.required(),
@@ -471,15 +467,14 @@ class ProductDialogState extends State<ProductDialog> {
         key: const Key('description'),
         initialValue: widget.product.description ?? '',
         maxLines: 3,
-        decoration:
-            InputDecoration(labelText: catalogLocalizations.description),
+        decoration: InputDecoration(labelText: al.description),
         validator: FormBuilderValidators.compose([
           FormBuilderValidators.required(),
         ]),
       ),
       InputDecorator(
         decoration: InputDecoration(
-          labelText: catalogLocalizations.prices,
+          labelText: al.prices,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
         ),
         child: Row(
@@ -493,7 +488,7 @@ class ProductDialogState extends State<ProductDialog> {
                     ? ''
                     : widget.product.listPrice.currency(currencyId: ''),
                 decoration: InputDecoration(
-                  labelText: catalogLocalizations.listPrice(currencySymbol),
+                  labelText: al.listPrice(currencySymbol),
                 ),
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.allow(RegExp('[0-9.,]+')),
@@ -513,7 +508,7 @@ class ProductDialogState extends State<ProductDialog> {
                     ? ''
                     : widget.product.price.currency(currencyId: ''),
                 decoration: InputDecoration(
-                  labelText: catalogLocalizations.currentPrice(currencySymbol),
+                  labelText: al.currentPrice(currencySymbol),
                 ),
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.allow(RegExp('[0-9.,]+')),
@@ -526,12 +521,11 @@ class ProductDialogState extends State<ProductDialog> {
                 name: 'currency',
                 key: const Key('currency'),
                 initialValue: _currencySelected,
-                decoration:
-                    InputDecoration(labelText: catalogLocalizations.currency),
-                hint: Text(catalogLocalizations.currency),
+                decoration: InputDecoration(labelText: al.currency),
+                hint: Text(al.currency),
                 validator: FormBuilderValidators.compose([
                   FormBuilderValidators.required(
-                    errorText: catalogLocalizations.currencyRequired,
+                    errorText: 'Currency field required!',
                   ),
                 ]),
                 items: currencies.map((item) {
@@ -555,7 +549,7 @@ class ProductDialogState extends State<ProductDialog> {
           padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
           child: InputDecorator(
             decoration: InputDecoration(
-              labelText: catalogLocalizations.relatedCategories,
+              labelText: al.relatedCategories,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(25.0),
               ),
@@ -566,7 +560,7 @@ class ProductDialogState extends State<ProductDialog> {
       if (classificationId != 'AppHotel' && _selectedProductTypeId != 'Service')
         InputDecorator(
           decoration: InputDecoration(
-            labelText: catalogLocalizations.warehouseInventory,
+            labelText: al.warehouseInventory,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(25.0),
             ),
@@ -578,9 +572,9 @@ class ProductDialogState extends State<ProductDialog> {
                   key: const Key('useWarehouse'),
                   name: 'useWarehouse',
                   initialValue: useWarehouse,
-                  title: Text(
-                    catalogLocalizations.useWarehouse,
-                    style: const TextStyle(color: Color(0xFF4baa9b)),
+                  title: const Text(
+                    "Use Warehouse?",
+                    style: TextStyle(color: Color(0xFF4baa9b)),
                   ),
                   onChanged: (bool? value) {
                     setState(() {
@@ -597,7 +591,7 @@ class ProductDialogState extends State<ProductDialog> {
                       ? ''
                       : widget.product.assetCount.toString(),
                   decoration: InputDecoration(
-                    labelText: catalogLocalizations.assetsInWarehouse,
+                    labelText: al.assetsInWarehouse,
                   ),
                   inputFormatters: <TextInputFormatter>[
                     FilteringTextInputFormatter.allow(RegExp('[0-9.,]+')),
@@ -609,7 +603,7 @@ class ProductDialogState extends State<ProductDialog> {
         ),
       InputDecorator(
         decoration: InputDecoration(
-          labelText: catalogLocalizations.typeAmount,
+          labelText: al.typeAmount,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
         ),
         child: Column(
@@ -629,8 +623,7 @@ class ProductDialogState extends State<ProductDialog> {
                             (uom) => uom.uomTypeId == _selectedUom?.uomTypeId,
                           )
                         : (_uomTypes.isNotEmpty ? _uoms.first : null),
-                    decoration:
-                        InputDecoration(labelText: catalogLocalizations.uomType),
+                    decoration: InputDecoration(labelText: al.uomType),
                     items: _uomTypes.map((uom) {
                       return DropdownMenuItem<Uom>(
                         value: uom,
@@ -674,11 +667,11 @@ class ProductDialogState extends State<ProductDialog> {
                       name: 'uom',
                       initialValue: _selectedUom,
                       decoration: InputDecoration(
-                        labelText: catalogLocalizations.uom,
+                        labelText: al.uom,
                       ),
                       validator: (value) {
                         return value == null
-                            ? catalogLocalizations.uomRequired
+                            ? 'Please select a unit of measure'
                             : null;
                       },
                       items: uomsOfType.map((uom) {
@@ -707,8 +700,7 @@ class ProductDialogState extends State<ProductDialog> {
               initialValue: widget.product.amount == null
                   ? '1'
                   : widget.product.amount.toString(),
-              decoration: InputDecoration(
-                  labelText: catalogLocalizations.amountQuantity),
+              decoration: InputDecoration(labelText: al.amountQuantity),
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(RegExp('[0-9.,]+')),
               ],
@@ -718,9 +710,7 @@ class ProductDialogState extends State<ProductDialog> {
       ),
       OutlinedButton(
         key: const Key('update'),
-        child: Text(widget.product.productId.isEmpty
-            ? catalogLocalizations.create
-            : catalogLocalizations.update),
+        child: Text(widget.product.productId.isEmpty ? al.create : al.update),
         onPressed: () async {
           if (_productDialogFormKey.currentState!.saveAndValidate()) {
             final formData = _productDialogFormKey.currentState!.value;
@@ -731,7 +721,7 @@ class ProductDialogState extends State<ProductDialog> {
             if (_imageFile?.path != null && image == null) {
               HelperFunctions.showMessage(
                 context,
-                catalogLocalizations.imageUploadError,
+                "Image upload error!",
                 Colors.red,
               );
             } else {
@@ -742,8 +732,8 @@ class ProductDialogState extends State<ProductDialog> {
                     pseudoId: formData['id'] ?? '',
                     productName: formData['name'] ?? '',
                     assetClassId: classificationId == 'AppHotel'
-                        ? catalogLocalizations.hotelRoom
-                        : catalogLocalizations.inventoryFin, // finished good
+                        ? 'Hotel Room'
+                        : 'AsClsInventoryFin', // finished good
                     description: formData['description'] ?? '',
                     listPrice: Decimal.parse(formData['listPrice'] ?? '0.00'),
                     price: Decimal.parse(
@@ -756,16 +746,16 @@ class ProductDialogState extends State<ProductDialog> {
                     amountUom: formData['amountUom'] ?? _selectedUom,
                     assetCount:
                         formData['assets'] == null || formData['assets'].isEmpty
-                            ? 0
-                            : int.parse(formData['assets']),
+                        ? 0
+                        : int.parse(formData['assets']),
                     categories: _selectedCategories,
                     productTypeId:
                         formData['productType'] ?? _selectedProductTypeId,
                     useWarehouse:
                         (formData['productType'] ?? _selectedProductTypeId) ==
-                                'Service'
-                            ? false
-                            : formData['useWarehouse'] ?? false,
+                            'Service'
+                        ? false
+                        : formData['useWarehouse'] ?? false,
                     image: image,
                   ),
                 ),

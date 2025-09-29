@@ -1,12 +1,12 @@
 /*
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
- * 
+ *
  * To the extent possible under law, the author(s) have dedicated all
  * copyright and related and neighboring rights to this software to the
  * public domain worldwide. This software is distributed without any
  * warranty.
- * 
+ *
  * You should have received a copy of the CC0 Public Domain Dedication
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
@@ -21,8 +21,9 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:intl/intl.dart';
+import 'package:growerp_catalog/src/l10n/activity_localizations.dart';
 
-import '../../../growerp_catalog.dart';
+import '../blocs/subscription_bloc.dart';
 
 class SubscriptionDialog extends StatefulWidget {
   final Subscription subscription;
@@ -56,9 +57,9 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    var al = ActivityLocalizations.of(context)!;
     int columns = ResponsiveBreakpoints.of(context).isMobile ? 1 : 2;
     bool isPhone = isAPhone(context);
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
     return BlocListener<SubscriptionBloc, SubscriptionState>(
       listener: (context, state) async {
         switch (state.status) {
@@ -67,12 +68,10 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
             break;
           case SubscriptionStatus.failure:
             HelperFunctions.showMessage(
-                context,
-                catalogLocalizations.error(state.message ?? ''),
-                Colors.red);
+                context, 'Error: ${state.message}', Colors.red);
             break;
           default:
-            Text(catalogLocalizations.question);
+            const Text("????");
         }
       },
       child: Dialog(
@@ -83,10 +82,8 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
         ),
         child: popUp(
           context: context,
-          title: catalogLocalizations.subscriptionNumber(
-              widget.subscription.subscriptionId == null
-                  ? catalogLocalizations.newItem
-                  : widget.subscription.pseudoId ?? ''),
+          title:
+              "Subscription #${widget.subscription.subscriptionId == null ? " New" : widget.subscription.pseudoId}",
           width: columns.toDouble() * (isPhone ? 400 : 300),
           height: 1 / columns.toDouble() * (isPhone ? 550 : 900),
           child: _subscriptionForm(),
@@ -96,7 +93,7 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
   }
 
   Widget _subscriptionForm() {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+    var al = ActivityLocalizations.of(context)!;
     return FormBuilder(
       key: _formKey,
       initialValue: {
@@ -117,9 +114,7 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                   child: FormBuilderTextField(
                     name: 'pseudoId',
                     key: const Key('pseudoId'),
-                    decoration: InputDecoration(
-                        labelText: catalogLocalizations.id(
-                            widget.subscription.pseudoId ?? '')),
+                    decoration: InputDecoration(labelText: al.id),
                   ),
                 ),
                 // Subscriber dropdown
@@ -138,20 +133,20 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                           showSearchBox: true,
                           searchFieldProps: TextFieldProps(
                             autofocus: true,
-                            decoration: InputDecoration(
-                                labelText: catalogLocalizations.subscriberName),
+                            decoration:
+                                InputDecoration(labelText: al.subscriberName),
                           ),
                           menuProps: MenuProps(
                               borderRadius: BorderRadius.circular(20.0)),
                           title: popUp(
                             context: context,
-                            title: catalogLocalizations.selectSubscriber,
+                            title: al.selectSubscriber,
                             height: 50,
                           ),
                         ),
                         dropdownDecoratorProps: DropDownDecoratorProps(
                           dropdownSearchDecoration: InputDecoration(
-                            labelText: catalogLocalizations.subscriberLabel,
+                            labelText: al.subscriber,
                             errorText: field.errorText,
                           ),
                         ),
@@ -183,7 +178,7 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                     },
                     validator: (CompanyUser? value) {
                       return value == null
-                          ? catalogLocalizations.subscriberRequired
+                          ? 'Please select a subscriber'
                           : null;
                     },
                   ),
@@ -195,20 +190,19 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                 padding: const EdgeInsets.all(8.0),
                 child: Row(children: [
                   Expanded(
-                      child: Text(catalogLocalizations.purchased(
-                          widget.subscription.purchaseFromDate!.dateOnly()))),
+                      child: Text(
+                          "Purchased: ${widget.subscription.purchaseFromDate?.dateOnly()}")),
                   const SizedBox(width: 8),
                   Expanded(
-                      child: Text(catalogLocalizations.cancelled(
-                          widget.subscription.purchaseThruDate.dateOnly()))),
+                      child: Text(
+                          "Cancelled: ${widget.subscription.purchaseThruDate.dateOnly()}")),
                 ]),
               ),
             FormBuilderTextField(
               name: 'description',
               key: const Key('description'),
               maxLines: 2,
-              decoration:
-                  InputDecoration(labelText: catalogLocalizations.description),
+              decoration: InputDecoration(labelText: al.description),
             ),
             Row(children: [
               Expanded(
@@ -221,7 +215,7 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                   inputType: InputType.date,
                   format: DateFormat('yyyy-MM-dd'),
                   decoration: InputDecoration(
-                    labelText: catalogLocalizations.fromDate,
+                    labelText: al.fromDate,
                     suffixIcon: const Icon(Icons.calendar_today),
                   ),
                   validator: FormBuilderValidators.compose([
@@ -240,7 +234,7 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                   inputType: InputType.date,
                   format: DateFormat('yyyy-MM-dd'),
                   decoration: InputDecoration(
-                    labelText: catalogLocalizations.thruDate,
+                    labelText: al.thruDate,
                     suffixIcon: const Icon(Icons.calendar_today),
                   ),
                 ),
@@ -258,20 +252,20 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                     showSearchBox: true,
                     searchFieldProps: TextFieldProps(
                       autofocus: true,
-                      decoration: InputDecoration(
-                          labelText: catalogLocalizations.searchProducts),
+                      decoration:
+                          InputDecoration(labelText: al.searchProducts),
                     ),
                     menuProps:
                         MenuProps(borderRadius: BorderRadius.circular(20.0)),
                     title: popUp(
                       context: context,
-                      title: catalogLocalizations.selectProduct,
+                      title: al.selectProduct,
                       height: 50,
                     ),
                   ),
                   dropdownDecoratorProps: DropDownDecoratorProps(
                     dropdownSearchDecoration: InputDecoration(
-                      labelText: catalogLocalizations.product,
+                      labelText: al.product,
                       errorText: field.errorText,
                     ),
                   ),
@@ -301,9 +295,7 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                 );
               },
               validator: (Product? value) {
-                return value == null
-                    ? catalogLocalizations.productRequired
-                    : null;
+                return value == null ? 'Please select a product' : null;
               },
             ),
             const SizedBox(height: 16),
@@ -313,8 +305,8 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                   child: OutlinedButton(
                     key: const Key('update'),
                     child: Text(widget.subscription.subscriptionId == null
-                        ? catalogLocalizations.create
-                        : catalogLocalizations.update),
+                        ? al.create
+                        : al.update),
                     onPressed: () {
                       if (_formKey.currentState!.saveAndValidate()) {
                         final formData = _formKey.currentState!.value;

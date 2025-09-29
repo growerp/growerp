@@ -19,7 +19,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart' as foundation;
 
-import '../blocs/category_bloc.dart';
+import '../../../growerp_catalog.dart';
 
 class CategoryFilesDialog extends StatefulWidget {
   const CategoryFilesDialog({super.key});
@@ -38,11 +38,14 @@ class _FilesHeaderState extends State<CategoryFilesDialog> {
 
   @override
   Widget build(BuildContext context) {
+    var catalogLocalizations = CatalogLocalizations.of(context)!;
     return BlocConsumer<CategoryBloc, CategoryState>(
         listener: (context, state) async {
       if (state.status == CategoryStatus.failure) {
         HelperFunctions.showMessage(
-            context, 'Error: ${state.message}', Colors.red);
+            context,
+            catalogLocalizations.error(state.message ?? ''),
+            Colors.red);
       }
       if (state.status == CategoryStatus.success) {
         HelperFunctions.showMessage(context, '${state.message}', Colors.green);
@@ -50,38 +53,42 @@ class _FilesHeaderState extends State<CategoryFilesDialog> {
       }
     }, builder: (context, state) {
       return Stack(children: [
-        popUpDialog(context: context, title: "Category Up/Download", children: [
-          const SizedBox(height: 40),
-          const Text("Download first to obtain the format"),
-          const SizedBox(height: 10),
-          OutlinedButton(
-              key: const Key('upload'),
-              child: const Text('Upload CSV file'),
-              onPressed: () async {
-                FilePickerResult? result = await FilePicker.platform.pickFiles(
-                    allowedExtensions: ['csv'], type: FileType.custom);
-                if (result != null) {
-                  String fileString = '';
-                  if (foundation.kIsWeb) {
-                    foundation.Uint8List bytes = result.files.first.bytes!;
-                    fileString = String.fromCharCodes(bytes);
-                  } else {
-                    File file = File(result.files.single.path!);
-                    fileString = await file.readAsString();
-                  }
-                  _categoryBloc.add(CategoryUpload(fileString));
-                }
-              }),
-          const SizedBox(height: 20),
-          OutlinedButton(
-              key: const Key('download'),
-              child: const Text('Download via email'),
-              onPressed: () {
-                _categoryBloc.add(CategoryDownload());
-              }),
-          const SizedBox(height: 20),
-          const Text("A data file will be send by email"),
-        ]),
+        popUpDialog(
+            context: context,
+            title: catalogLocalizations.categoryFiles,
+            children: [
+              const SizedBox(height: 40),
+              Text(catalogLocalizations.downloadFormat),
+              const SizedBox(height: 10),
+              OutlinedButton(
+                  key: const Key('upload'),
+                  child: Text(catalogLocalizations.uploadCsv),
+                  onPressed: () async {
+                    FilePickerResult? result = await FilePicker.platform
+                        .pickFiles(
+                            allowedExtensions: ['csv'], type: FileType.custom);
+                    if (result != null) {
+                      String fileString = '';
+                      if (foundation.kIsWeb) {
+                        foundation.Uint8List bytes = result.files.first.bytes!;
+                        fileString = String.fromCharCodes(bytes);
+                      } else {
+                        File file = File(result.files.single.path!);
+                        fileString = await file.readAsString();
+                      }
+                      _categoryBloc.add(CategoryUpload(fileString));
+                    }
+                  }),
+              const SizedBox(height: 20),
+              OutlinedButton(
+                  key: const Key('download'),
+                  child: Text(catalogLocalizations.downloadEmail),
+                  onPressed: () {
+                    _categoryBloc.add(CategoryDownload());
+                  }),
+              const SizedBox(height: 20),
+              Text(catalogLocalizations.emailData),
+            ]),
         if (state.status == CategoryStatus.loading) const LoadingIndicator(),
       ]);
     });

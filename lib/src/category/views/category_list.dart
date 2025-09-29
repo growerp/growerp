@@ -1,12 +1,12 @@
 /*
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
- * 
+ *
  * To the extent possible under law, the author(s) have dedicated all
  * copyright and related and neighboring rights to this software to the
  * public domain worldwide. This software is distributed without any
  * warranty.
- * 
+ *
  * You should have received a copy of the CC0 Public Domain Dedication
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
@@ -18,8 +18,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
+import 'package:growerp_catalog/src/l10n/activity_localizations.dart';
 
-import '../../../growerp_catalog.dart';
+import '../category.dart';
 
 class CategoryList extends StatefulWidget {
   const CategoryList({super.key});
@@ -48,11 +49,11 @@ class CategoriesListState extends State<CategoryList> {
     bottom = 50;
   }
 
-  Widget tableView() {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+  Widget tableView(BuildContext context) {
+    var al = ActivityLocalizations.of(context)!;
     if (categories.isEmpty) {
       return Center(
-          child: Text(catalogLocalizations.noCategories,
+          child: Text(al.noCategoriesYet,
               style: const TextStyle(fontSize: 20.0)));
     }
     var (
@@ -111,7 +112,7 @@ class CategoriesListState extends State<CategoryList> {
 
   @override
   Widget build(BuildContext context) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+    var al = ActivityLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
     return BlocConsumer<CategoryBloc, CategoryState>(
         listenWhen: (previous, current) =>
@@ -131,12 +132,11 @@ class CategoriesListState extends State<CategoryList> {
           switch (state.status) {
             case CategoryStatus.failure:
               return Center(
-                  child: Text(catalogLocalizations
-                      .fetchCategoriesError(state.message ?? '')));
+                  child: Text(al.fetchCategoriesFailed(state.message!)));
             case CategoryStatus.success:
               categories = state.categories;
               return Stack(children: [
-                tableView(),
+                tableView(context),
                 Positioned(
                   right: right,
                   bottom: bottom,
@@ -193,7 +193,7 @@ class CategoriesListState extends State<CategoryList> {
                                             child:
                                                 const CategoryFilesDialog()));
                               },
-                              tooltip: catalogLocalizations.categoryUpDown,
+                              tooltip: al.categoryUpDown,
                               child: const Icon(Icons.file_copy)),
                           const SizedBox(height: 10),
                           FloatingActionButton(
@@ -209,7 +209,7 @@ class CategoriesListState extends State<CategoryList> {
                                           child: CategoryDialog(Category()));
                                     });
                               },
-                              tooltip: catalogLocalizations.addNew,
+                              tooltip: 'Add New',
                               child: const Icon(Icons.add)),
                         ]),
                   ),
