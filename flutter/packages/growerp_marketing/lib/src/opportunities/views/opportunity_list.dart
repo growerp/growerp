@@ -59,40 +59,51 @@ class OpportunitiesState extends State<OpportunityList> {
         }
         if (state.status == OpportunityStatus.success) {
           HelperFunctions.showMessage(
-              context, '${state.message}', Colors.green);
+            context,
+            '${state.message}',
+            Colors.green,
+          );
         }
       },
       builder: (context, state) {
         switch (state.status) {
           case OpportunityStatus.failure:
             return Center(
-                child: Text(localizations.fetchError(state.message!)));
+              child: Text(localizations.fetchError(state.message!)),
+            );
           case OpportunityStatus.success:
             opportunities = state.opportunities;
 
             Widget tableView() {
               if (opportunities.isEmpty) {
                 return Center(
-                    heightFactor: 20,
-                    child: Text(localizations.noOpportunities,
-                        style: const TextStyle(fontSize: 20.0)));
+                  heightFactor: 20,
+                  child: Text(
+                    localizations.noOpportunities,
+                    style: const TextStyle(fontSize: 20.0),
+                  ),
+                );
               }
               // get table data formatted for tableView
               var (
                 List<List<TableViewCell>> tableViewCells,
                 List<double> fieldWidths,
-                double? rowHeight
-              ) = get2dTableData<Opportunity>(getTableData,
-                  bloc: _opportunityBloc,
-                  classificationId: 'AppAdmin',
-                  context: context,
-                  items: opportunities);
+                double? rowHeight,
+              ) = get2dTableData<Opportunity>(
+                getTableData,
+                bloc: _opportunityBloc,
+                classificationId: 'AppAdmin',
+                context: context,
+                items: opportunities,
+              );
               return TableView.builder(
                 diagonalDragBehavior: DiagonalDragBehavior.free,
-                verticalDetails:
-                    ScrollableDetails.vertical(controller: _scrollController),
+                verticalDetails: ScrollableDetails.vertical(
+                  controller: _scrollController,
+                ),
                 horizontalDetails: ScrollableDetails.horizontal(
-                    controller: _horizontalScrollController),
+                  controller: _horizontalScrollController,
+                ),
                 cellBuilder: (context, vicinity) =>
                     tableViewCells[vicinity.row][vicinity.column],
                 columnBuilder: (index) => index >= tableViewCells[0].length
@@ -110,34 +121,35 @@ class OpportunitiesState extends State<OpportunityList> {
                         backgroundDecoration: getBackGround(context, index),
                         extent: FixedTableSpanExtent(rowHeight!),
                         recognizerFactories: <Type, GestureRecognizerFactory>{
-                            TapGestureRecognizer:
-                                GestureRecognizerFactoryWithHandlers<
-                                        TapGestureRecognizer>(
-                                    () => TapGestureRecognizer(),
-                                    (TapGestureRecognizer t) =>
-                                        t.onTap = () => showDialog(
-                                            barrierDismissible: true,
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return index >
-                                                      state.opportunities.length
-                                                  ? const BottomLoader()
-                                                  : Dismissible(
-                                                      key: const Key(
-                                                          'opportunityItem'),
-                                                      direction:
-                                                          DismissDirection
-                                                              .startToEnd,
-                                                      child: BlocProvider.value(
-                                                          value:
-                                                              _opportunityBloc,
-                                                          child:
-                                                              OpportunityDialog(
-                                                                  opportunities[
-                                                                      index -
-                                                                          1])));
-                                            }))
-                          }),
+                          TapGestureRecognizer:
+                              GestureRecognizerFactoryWithHandlers<
+                                TapGestureRecognizer
+                              >(
+                                () => TapGestureRecognizer(),
+                                (
+                                  TapGestureRecognizer t,
+                                ) => t.onTap = () => showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return index > state.opportunities.length
+                                        ? const BottomLoader()
+                                        : Dismissible(
+                                            key: const Key('opportunityItem'),
+                                            direction:
+                                                DismissDirection.startToEnd,
+                                            child: BlocProvider.value(
+                                              value: _opportunityBloc,
+                                              child: OpportunityDialog(
+                                                opportunities[index - 1],
+                                              ),
+                                            ),
+                                          );
+                                  },
+                                ),
+                              ),
+                        },
+                      ),
                 pinnedRowCount: 1,
               );
             }
@@ -158,48 +170,56 @@ class OpportunitiesState extends State<OpportunityList> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         FloatingActionButton(
-                            key: const Key("search"),
-                            heroTag: "btn1",
-                            onPressed: () async {
-                              // find findoc id to show
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    // search separate from finDocBloc
-                                    return BlocProvider.value(
-                                        value: _opportunityBloc,
-                                        child: const SearchOpportunityList());
-                                  }).then((value) async => value != null &&
-                                      context.mounted
+                          key: const Key("search"),
+                          heroTag: "btn1",
+                          onPressed: () async {
+                            // find findoc id to show
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                // search separate from finDocBloc
+                                return BlocProvider.value(
+                                  value: _opportunityBloc,
+                                  child: const SearchOpportunityList(),
+                                );
+                              },
+                            ).then(
+                              (value) async => value != null && context.mounted
                                   ?
-                                  // show detail page
-                                  await showDialog(
+                                    // show detail page
+                                    await showDialog(
                                       barrierDismissible: true,
                                       context: context,
                                       builder: (BuildContext context) {
                                         return BlocProvider.value(
-                                            value: _opportunityBloc,
-                                            child: OpportunityDialog(value));
-                                      })
-                                  : const SizedBox.shrink());
-                            },
-                            child: const Icon(Icons.search)),
+                                          value: _opportunityBloc,
+                                          child: OpportunityDialog(value),
+                                        );
+                                      },
+                                    )
+                                  : const SizedBox.shrink(),
+                            );
+                          },
+                          child: const Icon(Icons.search),
+                        ),
                         const SizedBox(height: 10),
                         FloatingActionButton(
-                            key: const Key("addNew"),
-                            onPressed: () async {
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      BlocProvider.value(
-                                          value: _opportunityBloc,
-                                          child: OpportunityDialog(
-                                              Opportunity())));
-                            },
-                            tooltip: localizations.addNew,
-                            child: const Icon(Icons.add)),
+                          key: const Key("addNew"),
+                          onPressed: () async {
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  BlocProvider.value(
+                                    value: _opportunityBloc,
+                                    child: OpportunityDialog(Opportunity()),
+                                  ),
+                            );
+                          },
+                          tooltip: localizations.addNew,
+                          child: const Icon(Icons.add),
+                        ),
                       ],
                     ),
                   ),

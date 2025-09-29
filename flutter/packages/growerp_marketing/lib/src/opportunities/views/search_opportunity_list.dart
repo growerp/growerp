@@ -42,29 +42,33 @@ class SearchOpportunityState extends State<SearchOpportunityList> {
   Widget build(BuildContext context) {
     localizations = MarketingLocalizations.of(context)!;
     return BlocConsumer<OpportunityBloc, OpportunityState>(
-        listener: (context, state) {
-      if (state.status == OpportunityStatus.failure) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-      }
-    }, builder: (context, state) {
-      if (state.status == OpportunityStatus.failure) {
-        return Center(
-            child: Text(localizations.fetchSearchError(state.message!)));
-      }
-      if (state.status == OpportunityStatus.success) {
-        opportunities = state.searchResults;
-      }
-      return Stack(
-        children: [
-          OpportunitySearchDialog(
+      listener: (context, state) {
+        if (state.status == OpportunityStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+      },
+      builder: (context, state) {
+        if (state.status == OpportunityStatus.failure) {
+          return Center(
+            child: Text(localizations.fetchSearchError(state.message!)),
+          );
+        }
+        if (state.status == OpportunityStatus.success) {
+          opportunities = state.searchResults;
+        }
+        return Stack(
+          children: [
+            OpportunitySearchDialog(
               opportunityBloc: _opportunityBloc,
               widget: widget,
-              opportunities: opportunities),
-          if (state.status == OpportunityStatus.loading)
-            const LoadingIndicator(),
-        ],
-      );
-    });
+              opportunities: opportunities,
+            ),
+            if (state.status == OpportunityStatus.loading)
+              const LoadingIndicator(),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -85,67 +89,78 @@ class OpportunitySearchDialog extends StatelessWidget {
     final ScrollController scrollController = ScrollController();
     final localizations = MarketingLocalizations.of(context)!;
     return Dialog(
-        key: const Key('SearchDialog'),
-        insetPadding: const EdgeInsets.all(10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+      key: const Key('SearchDialog'),
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: localizations.opportunitySearch,
+        height: 500,
+        width: 350,
+        child: Column(
+          children: [
+            TextFormField(
+              key: const Key('searchField'),
+              textInputAction: TextInputAction.search,
+              autofocus: true,
+              decoration: InputDecoration(labelText: localizations.searchInput),
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return localizations.enterSearchValue;
+                }
+                return null;
+              },
+              onFieldSubmitted: (value) => _opportunityBloc.add(
+                OpportunityFetch(limit: 5, searchString: value),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(localizations.searchResults),
+            Expanded(
+              child: ListView.builder(
+                key: const Key('listView'),
+                shrinkWrap: true,
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: opportunities.length + 2,
+                controller: scrollController,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == 0) {
+                    return Visibility(
+                      visible: opportunities.isEmpty,
+                      child: Center(
+                        heightFactor: 20,
+                        child: Text(
+                          localizations.noSearchItems,
+                          key: const Key('empty'),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  }
+                  index--;
+                  return index >= opportunities.length
+                      ? const Text('')
+                      : Dismissible(
+                          key: const Key('searchItem'),
+                          direction: DismissDirection.startToEnd,
+                          child: ListTile(
+                            title: Text(
+                              localizations.searchResult(
+                                opportunities[index].pseudoId,
+                                opportunities[index].opportunityName ?? '',
+                              ),
+                              key: Key("searchResult$index"),
+                            ),
+                            onTap: () =>
+                                Navigator.of(context).pop(opportunities[index]),
+                          ),
+                        );
+                },
+              ),
+            ),
+          ],
         ),
-        child: popUp(
-            context: context,
-            title: localizations.opportunitySearch,
-            height: 500,
-            width: 350,
-            child: Column(children: [
-              TextFormField(
-                  key: const Key('searchField'),
-                  textInputAction: TextInputAction.search,
-                  autofocus: true,
-                  decoration:
-                      InputDecoration(labelText: localizations.searchInput),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return localizations.enterSearchValue;
-                    }
-                    return null;
-                  },
-                  onFieldSubmitted: (value) => _opportunityBloc
-                      .add(OpportunityFetch(limit: 5, searchString: value))),
-              const SizedBox(height: 20),
-              Text(localizations.searchResults),
-              Expanded(
-                  child: ListView.builder(
-                      key: const Key('listView'),
-                      shrinkWrap: true,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: opportunities.length + 2,
-                      controller: scrollController,
-                      itemBuilder: (BuildContext context, int index) {
-                        if (index == 0) {
-                          return Visibility(
-                              visible: opportunities.isEmpty,
-                              child: Center(
-                                  heightFactor: 20,
-                                  child: Text(localizations.noSearchItems,
-                                      key: const Key('empty'),
-                                      textAlign: TextAlign.center)));
-                        }
-                        index--;
-                        return index >= opportunities.length
-                            ? const Text('')
-                            : Dismissible(
-                                key: const Key('searchItem'),
-                                direction: DismissDirection.startToEnd,
-                                child: ListTile(
-                                  title: Text(
-                                      localizations.searchResult(
-                                          opportunities[index].pseudoId,
-                                          opportunities[index].opportunityName ??
-                                              ''),
-                                      key: Key("searchResult$index")),
-                                  onTap: () => Navigator.of(context)
-                                      .pop(opportunities[index]),
-                                ));
-                      }))
-            ])));
+      ),
+    );
   }
 }
