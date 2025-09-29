@@ -157,7 +157,8 @@ class CompanyListState extends State<CompanyList> {
       blocBuilder(context, state) {
         if (state.status == CompanyStatus.failure) {
           return FatalErrorForm(
-              message: "Could not load ${widget.role.toString()}s!");
+              message: UserCompanyLocalizations.of(context)!
+                  .couldNotLoad(widget.role.toString()));
         } else {
           companies = state.companies;
           hasReachedMax = state.hasReachedMax;
@@ -228,7 +229,7 @@ class CompanyListState extends State<CompanyList> {
                                       )));
                                 });
                           },
-                          tooltip: 'Add New',
+                          tooltip: UserCompanyLocalizations.of(context)!.addNew,
                           child: const Icon(Icons.add)),
                       const SizedBox(height: 10),
                       if (widget.mainOnly)
@@ -238,7 +239,8 @@ class CompanyListState extends State<CompanyList> {
                             onPressed: () async => _companyBloc.add(
                                 CompanyFetch(
                                     refresh: true, mainOnly: widget.mainOnly)),
-                            tooltip: 'refresh',
+                            tooltip:
+                                UserCompanyLocalizations.of(context)!.refresh,
                             child: const Icon(Icons.refresh)),
                     ],
                   ),

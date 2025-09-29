@@ -699,5 +699,53 @@
   "websiteAddress": "Website Address",
   "@websiteAddress": {
     "description": "Full label for a website address"
+  },
+  "newCompany": "New Company",
+  "@newCompany": {
+    "description": "Title for creating a new company"
+  },
+  "new": "New",
+  "@new": {
+    "description": "Short text for new item"
+  },
+  "paymentMethodDetail": "Payment Method Detail",
+  "@paymentMethodDetail": {
+    "description": "Title for the payment method detail view"
+  },
+  "noUsers": "No users found",
+  "@noUsers": {
+    "description": "Message when no users are found"
+  },
+  "noLeads": "No leads found",
+  "@noLeads": {
+    "description": "Message when no leads are found"
+  },
+  "noCustomers": "No customers found",
+  "@noCustomers": {
+    "description": "Message when no customers are found"
+  },
+  "noSuppliers": "No suppliers found",
+  "@noSuppliers": {
+    "description": "Message when no suppliers are found"
+  },
+  "noEmployees": "No employees found",
+  "@noEmployees": {
+    "description": "Message when no employees are found"
+  },
+  "noAdmins": "No admins found",
+  "@noAdmins": {
+    "description": "Message when no admins are found"
+  },
+  "noClients": "No clients found",
+  "@noClients": {
+    "description": "Message when no clients are found"
+  },
+  "client": "Client",
+  "@client": {
+    "description": "A person or organization using the services of a lawyer or other professional person or company."
+  },
+  "clients": "Clients",
+  "@clients": {
+    "description": "Plural of client"
   }
 }
