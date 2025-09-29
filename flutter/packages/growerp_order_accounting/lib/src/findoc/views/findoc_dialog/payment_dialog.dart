@@ -12,14 +12,15 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:universal_io/io.dart';
-import 'package:growerp_core/growerp_core.dart';
 import 'package:decimal/decimal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 import 'package:intl/intl.dart';
+import 'package:universal_io/io.dart';
 
 import '../../../accounting/accounting.dart';
 import '../../findoc.dart';
@@ -81,6 +82,7 @@ class PaymentDialogState extends State<PaymentDialog> {
   late String currencyId;
   late String currencySymbol;
   late String origCurrencySymbol;
+  late OrderAccountingLocalizations _local;
 
   @override
   void initState() {
@@ -144,6 +146,7 @@ class PaymentDialogState extends State<PaymentDialog> {
   @override
   Widget build(BuildContext context) {
     isPhone = isAPhone(context);
+    _local = OrderAccountingLocalizations.of(context)!;
     return Dialog(
       insetPadding: const EdgeInsets.all(10), // required for wider dialog
       key: Key("PaymentDialog${finDoc.sales ? 'Sales' : 'Purchase'}"),
@@ -155,8 +158,8 @@ class PaymentDialogState extends State<PaymentDialog> {
           height: 650,
           width: 800,
           title:
-              "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
-              "Payment #${finDoc.pseudoId ?? 'New'}",
+              "${finDoc.sales ? _local.incoming : _local.outgoing} "
+              "${_local.paymentId}${finDoc.pseudoId ?? _local.newItem}",
           child: BlocConsumer<FinDocBloc, FinDocState>(
             listener: (context, state) {
               if (state.status == FinDocStatus.success) {
@@ -204,12 +207,12 @@ class PaymentDialogState extends State<PaymentDialog> {
 
   List<DataColumn> _createColumns() {
     return [
-      if (!isPhone) const DataColumn(label: Text('ID')),
-      const DataColumn(label: Text('Operation')),
-      if (!isPhone) const DataColumn(label: Text('Method')),
-      const DataColumn(label: Text('Amount')),
-      const DataColumn(label: Text('Date')),
-      const DataColumn(label: Text('OK?')),
+      if (!isPhone) DataColumn(label: Text(_local.id)),
+      DataColumn(label: Text(_local.operation)),
+      if (!isPhone) DataColumn(label: Text(_local.method)),
+      DataColumn(label: Text(_local.amount)),
+      DataColumn(label: Text(_local.date)),
+      DataColumn(label: Text(_local.result)),
     ];
   }
 
@@ -240,7 +243,7 @@ class PaymentDialogState extends State<PaymentDialog> {
               if (!isPhone) const DataCell(Text('')), // Empty ID cell
               DataCell(
                 Text(
-                  'Message:',
+                  _local.message,
                   style: TextStyle(
                     fontStyle: FontStyle.italic,
                     color: Colors.grey[600],
@@ -293,7 +296,7 @@ class PaymentDialogState extends State<PaymentDialog> {
     }
 
     final companyLabel =
-        "Select ${finDocUpdated.sales ? 'customer' : 'supplier'}";
+        "Select ${finDocUpdated.sales ? _local.customer : _local.supplier}";
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
       child: Form(
@@ -307,7 +310,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                   child: TextFormField(
                     key: const Key('pseudoId'),
                     enabled: !readOnly,
-                    decoration: const InputDecoration(labelText: 'Id'),
+                    decoration: InputDecoration(labelText: _local.id),
                     controller: _pseudoIdController,
                     keyboardType: TextInputType.number,
                   ),
@@ -382,7 +385,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                               });
                             },
                             validator: (value) => value == null
-                                ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
+                                ? "Select ${finDocUpdated.sales ? _local.customer : _local.supplier}!"
                                 : null,
                           );
                         case DataFetchStatus.failure:
@@ -406,7 +409,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                     child: DropdownButtonFormField<FinDocStatusVal>(
                       key: const Key('statusDropDown'),
                       decoration: InputDecoration(
-                        labelText: 'Status',
+                        labelText: _local.status,
                         enabled: !readOnly,
                       ),
                       initialValue: _updatedStatus,
@@ -437,12 +440,12 @@ class PaymentDialogState extends State<PaymentDialog> {
                       enabled: !readOnly,
                       key: const Key('amount'),
                       decoration: InputDecoration(
-                        labelText: 'Amount($currencySymbol)',
+                        labelText: '${_local.amount}($currencySymbol)',
                       ),
                       controller: _amountController,
                       keyboardType: TextInputType.number,
                       validator: (value) =>
-                          value!.isEmpty ? "Enter Price or Amount?" : null,
+                          value!.isEmpty ? _local.enterAmount : null,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -468,21 +471,21 @@ class PaymentDialogState extends State<PaymentDialog> {
                 ignoring: readOnly,
                 child: DropdownButtonFormField<PaymentType>(
                   decoration: InputDecoration(
-                    labelText: 'Payment Type',
+                    labelText: _local.paymentType,
                     enabled: !readOnly,
                   ),
                   key: const Key('paymentType'),
                   initialValue: _selectedPaymentType,
                   validator: (value) =>
                       value == null && _selectedGlAccount == null
-                      ? 'Enter a item type for posting?'
+                      ? _local.enterPaymentType
                       : null,
                   items: state.paymentTypes.map((item) {
                     return DropdownMenuItem<PaymentType>(
                       value: item,
                       child: Text(
                         "${item.paymentTypeName} ${item.accountCode} "
-                        "Apply: ${item.isApplied ? 'Y' : 'N'} ${isPhone ? '\n' : ''}"
+                        "${_local.apply} ${item.isApplied ? _local.yes : _local.no} ${isPhone ? '\n' : ''}"
                         "${item.accountName}",
                         overflow: TextOverflow.ellipsis,
                         maxLines: 2,
@@ -510,22 +513,23 @@ class PaymentDialogState extends State<PaymentDialog> {
                         isFilterOnline: true,
                         showSelectedItems: true,
                         showSearchBox: true,
-                        searchFieldProps: const TextFieldProps(
+                        searchFieldProps: TextFieldProps(
                           autofocus: true,
-                          decoration: InputDecoration(labelText: 'Gl Account'),
+                          decoration:
+                              InputDecoration(labelText: _local.glAccount),
                         ),
                         menuProps: MenuProps(
                           borderRadius: BorderRadius.circular(20.0),
                         ),
                         title: popUp(
                           context: context,
-                          title: 'Select GL Account',
+                          title: _local.selectGlAccount,
                           height: 50,
                         ),
                       ),
-                      dropdownDecoratorProps: const DropDownDecoratorProps(
+                      dropdownDecoratorProps: DropDownDecoratorProps(
                         dropdownSearchDecoration: InputDecoration(
-                          labelText: 'GL Account',
+                          labelText: _local.glAccount,
                         ),
                       ),
                       key: const Key('glAccount'),
@@ -556,7 +560,7 @@ class PaymentDialogState extends State<PaymentDialog> {
             const SizedBox(height: 10),
             InputDecorator(
               decoration: InputDecoration(
-                labelText: 'Payment Methods',
+                labelText: _local.paymentMethods,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25.0),
                 ),
@@ -598,8 +602,8 @@ class PaymentDialogState extends State<PaymentDialog> {
                                               ?.paymentMethod
                                               ?.ccDescription !=
                                           null))
-                              ? "Credit Card ${finDoc.sales == false ? _authBloc.state.authenticate?.company?.paymentMethod?.ccDescription : _selectedCompanyUser?.paymentMethod?.ccDescription}"
-                              : 'Credit Card',
+                              ? "${_local.creditCard} ${finDoc.sales == false ? _authBloc.state.authenticate?.company?.paymentMethod?.ccDescription : _selectedCompanyUser?.paymentMethod?.ccDescription}"
+                              : _local.creditCard,
                         ),
                       ),
                     ],
@@ -621,7 +625,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                               : null;
                         },
                       ),
-                      const Text("Cash"),
+                      Text(_local.cash),
                     ],
                   ),
                   Row(
@@ -642,7 +646,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                               : null;
                         },
                       ),
-                      const Text("Check"),
+                      Text(_local.check),
                     ],
                   ),
                   Row(
@@ -663,7 +667,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                         },
                       ),
                       Text(
-                        "Bank ${finDoc.otherCompany?.paymentMethod?.creditCardNumber ?? ''}",
+                        "${_local.bank} ${finDoc.otherCompany?.paymentMethod?.creditCardNumber ?? ''}",
                       ),
                     ],
                   ),
@@ -676,7 +680,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                 children: [
                   OutlinedButton(
                     key: const Key('cancelFinDoc'),
-                    child: const Text('Cancel', softWrap: false),
+                    child: Text(_local.cancel, softWrap: false),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -686,7 +690,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                     child: OutlinedButton(
                       key: const Key('update'),
                       child: Text(
-                        '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}',
+                        '${finDoc.idIsNull() ? _local.create : _local.update} ${finDocUpdated.docType}',
                       ),
                       onPressed: () {
                         if (paymentDialogFormKey.currentState!.validate()) {
@@ -722,7 +726,7 @@ class PaymentDialogState extends State<PaymentDialog> {
               InputDecorator(
                 decoration: InputDecoration(
                   labelText:
-                      'Gateway Responses(${finDoc.gatewayResponses.length})',
+                      '${_local.gatewayResponses}(${finDoc.gatewayResponses.length})',
                   enabled: false,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25.0),
@@ -746,7 +750,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                     padding: const EdgeInsetsGeometry.all(5),
                     child: OutlinedButton(
                       key: const Key('release'),
-                      child: const Text('Release', softWrap: false),
+                      child: Text(_local.release, softWrap: false),
                       onPressed: () {
                         _finDocBloc.add(
                           FinDocGatewayPaymentRelease(widget.finDoc.paymentId!),
@@ -767,7 +771,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                     padding: const EdgeInsetsGeometry.all(5),
                     child: OutlinedButton(
                       key: const Key('capture'),
-                      child: const Text('Capture', softWrap: false),
+                      child: Text(_local.capture, softWrap: false),
                       onPressed: () {
                         _finDocBloc.add(
                           FinDocGatewayPaymentCapture(widget.finDoc.paymentId!),
@@ -785,7 +789,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                     padding: const EdgeInsetsGeometry.all(5),
                     child: OutlinedButton(
                       key: const Key('authorize'),
-                      child: const Text('Authorize', softWrap: false),
+                      child: Text(_local.authorize, softWrap: false),
                       onPressed: () {
                         _finDocBloc.add(
                           FinDocGatewayPaymentAuthorize(
