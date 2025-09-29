@@ -1,12 +1,12 @@
 /*
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
- * 
+ *
  * To the extent possible under law, the author(s) have dedicated all
  * copyright and related and neighboring rights to this software to the
  * public domain worldwide. This software is distributed without any
  * warranty.
- * 
+ *
  * You should have received a copy of the CC0 Public Domain Dedication
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
@@ -18,8 +18,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
+import 'package:growerp_catalog/src/l10n/activity_localizations.dart';
 
-import '../../../growerp_catalog.dart';
+import '../product.dart';
 
 class ProductList extends StatefulWidget {
   const ProductList({super.key});
@@ -53,14 +54,14 @@ class ProductListState extends State<ProductList> {
 
   @override
   Widget build(BuildContext context) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+    var al = ActivityLocalizations.of(context)!;
     limit = (MediaQuery.of(context).size.height / 100).round();
     right = right ?? (isAPhone(context) ? 20 : 50);
 
     Widget tableView() {
       if (products.isEmpty) {
         return Center(
-            child: Text(catalogLocalizations.noProducts(entityName),
+            child: Text(al.noEntityFound(entityName),
                 style: const TextStyle(fontSize: 20.0)));
       }
       // get table data formatted for tableView
@@ -136,8 +137,7 @@ class ProductListState extends State<ProductList> {
           switch (state.status) {
             case ProductStatus.failure:
               return Center(
-                  child: Text(catalogLocalizations
-                      .fetchProductError(state.message ?? '')));
+                  child: Text(al.fetchProductFailed(state.message!)));
             case ProductStatus.success:
               products = state.products;
               return Stack(
@@ -199,7 +199,7 @@ class ProductListState extends State<ProductList> {
                                             child: const ProductFilesDialog());
                                       });
                                 },
-                                tooltip: catalogLocalizations.productUpDown,
+                                tooltip: al.productUpDown,
                                 child: const Icon(Icons.file_copy)),
                             const SizedBox(height: 10),
                             FloatingActionButton(

@@ -1,12 +1,12 @@
 /*
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
- * 
+ *
  * To the extent possible under law, the author(s) have dedicated all
  * copyright and related and neighboring rights to this software to the
  * public domain worldwide. This software is distributed without any
  * warranty.
- * 
+ *
  * You should have received a copy of the CC0 Public Domain Dedication
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
@@ -14,78 +14,71 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_catalog/src/l10n/activity_localizations.dart';
 
-import '../../../growerp_catalog.dart';
-
-class SearchSubscriptionList extends StatefulWidget {
-  const SearchSubscriptionList({super.key});
+class SearchProductList extends StatefulWidget {
+  const SearchProductList({super.key});
 
   @override
-  SearchSubscriptionState createState() => SearchSubscriptionState();
+  SearchProductState createState() => SearchProductState();
 }
 
-class SearchSubscriptionState extends State<SearchSubscriptionList> {
-  late SubscriptionBloc _subscriptionBloc;
-  List<Subscription> subscriptions = [];
+class SearchProductState extends State<SearchProductList> {
+  late DataFetchBloc _productBloc;
+  List<Product> products = [];
 
   @override
   void initState() {
     super.initState();
-    _subscriptionBloc = context.read<SubscriptionBloc>();
+    _productBloc = context.read<DataFetchBloc<Products>>()
+      ..add(
+          GetDataEvent(() => context.read<RestClient>().getProduct(limit: 0)));
   }
 
   @override
   Widget build(BuildContext context) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
-    return BlocConsumer<SubscriptionBloc, SubscriptionState>(
+    var al = ActivityLocalizations.of(context)!;
+    return BlocConsumer<DataFetchBloc<Products>, DataFetchState<Products>>(
         listener: (context, state) {
-      if (state.status == SubscriptionStatus.failure) {
-        HelperFunctions.showMessage(
-            context,
-            catalogLocalizations.error(state.message ?? ''),
-            Colors.red);
+      if (state.status == DataFetchStatus.failure) {
+        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
       }
     }, builder: (context, state) {
-      if (state.status == SubscriptionStatus.failure) {
+      if (state.status == DataFetchStatus.failure) {
         return Center(
-            child: Text(
-                catalogLocalizations.fetchSearchError(state.message ?? '')));
+            child: Text(al.fetchSearchItemsFailed(state.message!)));
       }
-      if (state.status == SubscriptionStatus.success) {
-        subscriptions = state.searchResults ?? [];
+      if (state.status == DataFetchStatus.success) {
+        products = (state.data as Products).products;
       }
       return Stack(
         children: [
-          SubscriptionSearchDialog(
-              subscriptionBloc: _subscriptionBloc,
-              widget: widget,
-              subscriptions: subscriptions),
-          if (state.status == SubscriptionStatus.loading)
-            const LoadingIndicator(),
+          ProductSearchDialog(
+              finDocBloc: _productBloc, widget: widget, products: products),
+          if (state.status == DataFetchStatus.loading) const LoadingIndicator(),
         ],
       );
     });
   }
 }
 
-class SubscriptionSearchDialog extends StatelessWidget {
-  const SubscriptionSearchDialog({
+class ProductSearchDialog extends StatelessWidget {
+  const ProductSearchDialog({
     super.key,
-    required this.subscriptionBloc,
+    required DataFetchBloc finDocBloc,
     required this.widget,
-    required this.subscriptions,
-  });
+    required this.products,
+  }) : _productBloc = finDocBloc;
 
-  final SubscriptionBloc subscriptionBloc;
-  final SearchSubscriptionList widget;
-  final List<Subscription> subscriptions;
+  final DataFetchBloc _productBloc;
+  final SearchProductList widget;
+  final List<Product> products;
 
   @override
   Widget build(BuildContext context) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+    var al = ActivityLocalizations.of(context)!;
     final ScrollController scrollController = ScrollController();
     return Dialog(
         key: const Key('SearchDialog'),
@@ -95,7 +88,7 @@ class SubscriptionSearchDialog extends StatelessWidget {
         ),
         child: popUp(
             context: context,
-            title: catalogLocalizations.subscriptionSearch,
+            title: al.productSearch,
             height: 500,
             width: 350,
             child: Column(children: [
@@ -103,49 +96,49 @@ class SubscriptionSearchDialog extends StatelessWidget {
                   key: const Key('searchField'),
                   textInputAction: TextInputAction.search,
                   autofocus: true,
-                  decoration: InputDecoration(
-                      labelText: catalogLocalizations.searchInput),
+                  decoration: InputDecoration(labelText: al.searchInput),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return catalogLocalizations.enterSearch;
+                      return 'Please enter a search value?';
                     }
                     return null;
                   },
-                  onFieldSubmitted: (value) => subscriptionBloc
-                      .add(SubscriptionFetch(limit: 5, searchString: value))),
+                  onFieldSubmitted: (value) => _productBloc.add(GetDataEvent(
+                      () => context
+                          .read<RestClient>()
+                          .getProduct(limit: 5, searchString: value)))),
               const SizedBox(height: 20),
-              Text(catalogLocalizations.searchResults),
+              Text(al.searchResults),
               Expanded(
                   child: ListView.builder(
                       key: const Key('listView'),
                       shrinkWrap: true,
                       physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: subscriptions.length + 2,
+                      itemCount: products.length + 2,
                       controller: scrollController,
                       itemBuilder: (BuildContext context, int index) {
                         if (index == 0) {
                           return Visibility(
-                              visible: subscriptions.isEmpty,
+                              visible: products.isEmpty,
                               child: Center(
                                   heightFactor: 20,
-                                  child: Text(
-                                      catalogLocalizations.noSearchItems,
+                                  child: Text(al.noSearchItems,
                                       key: const Key('empty'),
                                       textAlign: TextAlign.center)));
                         }
                         index--;
-                        return index >= subscriptions.length
+                        return index >= products.length
                             ? const Text('')
                             : Dismissible(
                                 key: const Key('searchItem'),
                                 direction: DismissDirection.startToEnd,
                                 child: ListTile(
                                   title: Text(
-                                      "${catalogLocalizations.id(subscriptions[index].pseudoId ?? '')}\n"
-                                      "${catalogLocalizations.subscriber(subscriptions[index].subscriber?.name ?? '')}",
+                                      "ID: ${products[index].pseudoId}\n"
+                                      "Name: ${products[index].productName}",
                                       key: Key("searchResult$index")),
                                   onTap: () => Navigator.of(context)
-                                      .pop(subscriptions[index]),
+                                      .pop(products[index]),
                                 ));
                       }))
             ])));
