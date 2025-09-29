@@ -1,7 +1,97 @@
 {
-  "@@locale": "en",
-  "opportunityName": "Opportunity Name",
-  "@opportunityName": {
-    "description": "Label for opportunity name field"
-  }
+    "@@locale": "en",
+    "tableHdrShortId": "ShortId",
+    "tableHdrId": "Id",
+    "tableHdrName": "Name",
+    "tableHdrAmount": "Amount",
+    "tableHdrProbability": "Probability",
+    "tableHdrLead": "Lead name/company",
+    "tableHdrLeadEmail": "Lead Email",
+    "tableHdrStage": "Stage",
+    "tableHdrNextStep": "Next Step",
+    "tableHdrDelete": " ",
+    "removeItemTooltip": "Remove Item",
+    "deleteItemConfirm": "Delete {id}?",
+    "@deleteItemConfirm": {
+        "description": "Confirmation dialog for deleting an item",
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "cannotBeUndone": "This action cannot be undone!",
+    "error": "Error: {message}",
+    "@error": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "unknown": "Unknown",
+    "opportunityNew": "New Opportunity",
+    "opportunityWithMessage": "Opportunity {id}",
+    "@opportunityWithMessage": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "id": "ID",
+    "opportunityName": "Opportunity Name",
+    "enterOppName": "Enter Opportunity Name",
+    "description": "Description",
+    "expRevenue": "Expected Revenue",
+    "enterAmount": "Enter Amount",
+    "estProbability": "Estimated Probability",
+    "enterProbability": "Enter Probability",
+    "nextStep": "Next Step",
+    "enterNextStep": "Enter Next Step",
+    "stage": "Stage",
+    "fieldRequired": "Field is required",
+    "leadSearch": "Lead Search",
+    "selectLead": "Select Lead",
+    "lead": "Lead",
+    "employeeSearch": "Employee Search",
+    "selectEmployee": "Select Employee",
+    "accountEmployee": "Account Employee",
+    "create": "Create",
+    "update": "Update",
+    "serverProblem": "Server problem",
+    "fetchError": "Fetch error: {message}",
+    "@fetchError": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "noOpportunities": "No opportunities found",
+    "addNew": "Add New",
+    "fetchSearchError": "Search error: {message}",
+    "@fetchSearchError": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "opportunitySearch": "Opportunity Search",
+    "searchInput": "Search Input",
+    "enterSearchValue": "Enter Search Value",
+    "searchResults": "Search Results",
+    "noSearchItems": "No search items",
+    "searchResult": "ID: {id}, Name: {name}",
+    "@searchResult": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            },
+            "name": {
+                "type": "String"
+            }
+        }
+    }
 }

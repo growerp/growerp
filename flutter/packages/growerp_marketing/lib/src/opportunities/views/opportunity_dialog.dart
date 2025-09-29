@@ -20,6 +20,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import '../../l10n/generated/marketing_localizations.dart';
 import '../bloc/opportunity_bloc.dart';
 
 class OpportunityDialog extends StatefulWidget {
@@ -46,6 +47,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
   late OpportunityBloc _opportunityBloc;
   late DataFetchBloc<Users> _employeeBloc;
   late DataFetchBlocOther<Users> _leadBloc;
+  late MarketingLocalizations localizations;
 
   @override
   void initState() {
@@ -87,6 +89,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
 
   @override
   Widget build(BuildContext context) {
+    localizations = MarketingLocalizations.of(context)!;
     int columns = ResponsiveBreakpoints.of(context).isMobile ? 1 : 2;
     return BlocListener<OpportunityBloc, OpportunityState>(
       listener: (context, state) async {
@@ -97,12 +100,12 @@ class OpportunityDialogState extends State<OpportunityDialog> {
           case OpportunityStatus.failure:
             HelperFunctions.showMessage(
               context,
-              'Error: ${state.message}',
+              localizations.error(state.message ?? ''),
               Colors.red,
             );
             break;
           default:
-            const Text("????");
+            Text(localizations.unknown);
         }
       },
       child: Dialog(
@@ -111,8 +114,11 @@ class OpportunityDialogState extends State<OpportunityDialog> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: popUp(
           context: context,
-          title:
-              "Opportunity #${widget.opportunity.pseudoId.isEmpty ? " New" : widget.opportunity.pseudoId}",
+          title: widget.opportunity.pseudoId.isEmpty
+              ? localizations.opportunityNew
+              : localizations.opportunityWithMessage(
+                  widget.opportunity.pseudoId,
+                ),
           width: columns.toDouble() * 400,
           height: 1 / columns.toDouble() * 1000,
           child: _opportunityForm(),
@@ -125,21 +131,21 @@ class OpportunityDialogState extends State<OpportunityDialog> {
     List<Widget> widgets = [
       TextFormField(
         key: const Key('pseudoId'),
-        decoration: const InputDecoration(labelText: 'Id'),
+        decoration: InputDecoration(labelText: localizations.id),
         controller: _pseudoIdController,
       ),
       TextFormField(
         key: const Key('name'),
-        decoration: const InputDecoration(labelText: 'Opportunity Name'),
+        decoration: InputDecoration(labelText: localizations.opportunityName),
         controller: _nameController,
         validator: (value) {
-          return value!.isEmpty ? 'Please enter a opportunity name?' : null;
+          return value!.isEmpty ? localizations.enterOppName : null;
         },
       ),
       TextFormField(
         key: const Key('description'),
         maxLines: 3,
-        decoration: const InputDecoration(labelText: 'Description'),
+        decoration: InputDecoration(labelText: localizations.description),
         controller: _descriptionController,
       ),
       TextFormField(
@@ -148,10 +154,10 @@ class OpportunityDialogState extends State<OpportunityDialog> {
         inputFormatters: <TextInputFormatter>[
           FilteringTextInputFormatter.allow(RegExp('[0-9.,]+')),
         ],
-        decoration: const InputDecoration(labelText: 'Expected revenue Amount'),
+        decoration: InputDecoration(labelText: localizations.expRevenue),
         controller: _estAmountController,
         validator: (value) {
-          return value!.isEmpty ? 'Please enter an amount?' : null;
+          return value!.isEmpty ? localizations.enterAmount : null;
         },
       ),
       TextFormField(
@@ -160,27 +166,26 @@ class OpportunityDialogState extends State<OpportunityDialog> {
         inputFormatters: [
           FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
         ],
-        decoration: const InputDecoration(labelText: 'Estimated Probabilty %'),
+        decoration: InputDecoration(labelText: localizations.estProbability),
         controller: _estProbabilityController,
         validator: (value) {
-          return value!.isEmpty
-              ? 'Please enter a probability % (1-100)?'
-              : null;
+          return value!.isEmpty ? localizations.enterProbability : null;
         },
       ),
       TextFormField(
         key: const Key('nextStep'),
-        decoration: const InputDecoration(labelText: 'Next step'),
+        decoration: InputDecoration(labelText: localizations.nextStep),
         controller: _estNextStepController,
         validator: (value) {
-          return value!.isEmpty ? 'Next step?' : null;
+          return value!.isEmpty ? localizations.enterNextStep : null;
         },
       ),
       DropdownButtonFormField<String>(
         key: const Key('stageId'),
         initialValue: _selectedStageId,
-        decoration: const InputDecoration(labelText: 'Opportunity Stage'),
-        validator: (value) => value == null ? 'field required' : null,
+        decoration: InputDecoration(labelText: localizations.stage),
+        validator: (value) =>
+            value == null ? localizations.fieldRequired : null,
         items: opportunityStages.map((item) {
           return DropdownMenuItem<String>(value: item, child: Text(item));
         }).toList(),
@@ -193,7 +198,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
         builder: (context, state) {
           switch (state.status) {
             case DataFetchStatus.failure:
-              return const FatalErrorForm(message: 'server connection problem');
+              return FatalErrorForm(message: localizations.serverProblem);
             case DataFetchStatus.loading:
               return const LoadingIndicator();
             case DataFetchStatus.success:
@@ -204,7 +209,8 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                   showSearchBox: true,
                   searchFieldProps: TextFieldProps(
                     autofocus: true,
-                    decoration: const InputDecoration(labelText: "lead,name"),
+                    decoration:
+                        InputDecoration(labelText: localizations.leadSearch),
                     controller: _leadSearchBoxController,
                   ),
                   menuProps: MenuProps(
@@ -212,12 +218,13 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                   ),
                   title: popUp(
                     context: context,
-                    title: 'Select Lead',
+                    title: localizations.selectLead,
                     height: 50,
                   ),
                 ),
-                dropdownDecoratorProps: const DropDownDecoratorProps(
-                  dropdownSearchDecoration: InputDecoration(labelText: 'Lead'),
+                dropdownDecoratorProps: DropDownDecoratorProps(
+                  dropdownSearchDecoration:
+                      InputDecoration(labelText: localizations.lead),
                 ),
                 key: const Key('lead'),
                 itemAsString: (User? u) =>
@@ -254,7 +261,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
         builder: (context, state) {
           switch (state.status) {
             case DataFetchStatus.failure:
-              return const FatalErrorForm(message: 'server connection problem');
+              return FatalErrorForm(message: localizations.serverProblem);
             case DataFetchStatus.loading:
               return const LoadingIndicator();
             case DataFetchStatus.success:
@@ -265,8 +272,8 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                   showSearchBox: true,
                   searchFieldProps: TextFieldProps(
                     autofocus: true,
-                    decoration: const InputDecoration(
-                      labelText: "employee,name",
+                    decoration: InputDecoration(
+                      labelText: localizations.employeeSearch,
                     ),
                     controller: _accountSearchBoxController,
                   ),
@@ -275,13 +282,13 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                   ),
                   title: popUp(
                     context: context,
-                    title: 'Select employee',
+                    title: localizations.selectEmployee,
                     height: 50,
                   ),
                 ),
-                dropdownDecoratorProps: const DropDownDecoratorProps(
+                dropdownDecoratorProps: DropDownDecoratorProps(
                   dropdownSearchDecoration: InputDecoration(
-                    labelText: 'Account Employee',
+                    labelText: localizations.accountEmployee,
                   ),
                 ),
                 key: const Key('employee'),
@@ -323,7 +330,9 @@ class OpportunityDialogState extends State<OpportunityDialog> {
             child: OutlinedButton(
               key: const Key('update'),
               child: Text(
-                widget.opportunity.opportunityId.isEmpty ? 'Create' : 'Update',
+                widget.opportunity.opportunityId.isEmpty
+                    ? localizations.create
+                    : localizations.update,
               ),
               onPressed: () {
                 if (_formKeyOpportunity.currentState!.validate()) {

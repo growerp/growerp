@@ -18,16 +18,18 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
+import '../../l10n/generated/marketing_localizations.dart';
 import '../bloc/opportunity_bloc.dart';
 
 TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
     Opportunity item, int index,
     {dynamic extra}) {
+  final localizations = MarketingLocalizations.of(context)!;
   List<TableRowContent> rowContent = [];
   bool isPhone = isAPhone(context);
   if (isPhone) {
     rowContent.add(TableRowContent(
-        name: 'ShortId',
+        name: localizations.tableHdrShortId,
         width: 15,
         value: CircleAvatar(
           minRadius: 20,
@@ -39,30 +41,30 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
         )));
   }
   rowContent.add(TableRowContent(
-      name: 'Id',
+      name: localizations.tableHdrId,
       width: isPhone ? 15 : 10,
       value: Text(item.pseudoId, key: Key('id$index'))));
   rowContent.add(TableRowContent(
-      name: 'name',
+      name: localizations.tableHdrName,
       width: isPhone ? 35 : 15,
       value: Text("${item.opportunityName}", key: Key('name$index'))));
   if (!isPhone) {
     rowContent.add(TableRowContent(
-        name: 'Amount',
+        name: localizations.tableHdrAmount,
         width: 5,
         value: Text(item.estAmount.toString(),
             key: Key('estAmount$index'), textAlign: TextAlign.center)));
   }
   if (!isPhone) {
     rowContent.add(TableRowContent(
-        name: 'Probability',
+        name: localizations.tableHdrProbability,
         width: 5,
         value: Text(item.estProbability.toString(),
             key: Key('estProbability$index'), textAlign: TextAlign.center)));
   }
   if (!isPhone) {
     rowContent.add(TableRowContent(
-        name: 'Lead name/company',
+        name: localizations.tableHdrLead,
         width: 15,
         value: Text(
           (item.leadUser != null
@@ -75,7 +77,7 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
   }
   if (!isPhone) {
     rowContent.add(TableRowContent(
-        name: 'Lead Email',
+        name: localizations.tableHdrLeadEmail,
         width: 10,
         value: Text(
           item.leadUser != null ? item.leadUser!.email ?? '' : "",
@@ -84,28 +86,30 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
   }
   if (!isPhone) {
     rowContent.add(TableRowContent(
-        name: 'Stage',
+        name: localizations.tableHdrStage,
         width: 8,
         value: Text("${item.stageId}",
             key: Key('stageId$index'), textAlign: TextAlign.center)));
   }
   rowContent.add(TableRowContent(
-      name: 'next Step',
+      name: localizations.tableHdrNextStep,
       width: 17,
       value: Text(item.nextStep != null ? "${item.nextStep}" : "",
           key: Key('nextStep$index'), textAlign: TextAlign.center)));
   rowContent.add(TableRowContent(
       width: isPhone ? 5 : 5,
-      name: ' ',
+      name: localizations.tableHdrDelete,
       value: IconButton(
           visualDensity: VisualDensity.compact,
           padding: EdgeInsets.zero,
           key: Key('delete$index'),
           icon: const Icon(Icons.delete_forever),
-          tooltip: 'remove item',
+          tooltip: localizations.removeItemTooltip,
           onPressed: () async {
             bool? result = await confirmDialog(
-                context, "delete ${item.pseudoId}?", "cannot be undone!");
+                context,
+                localizations.deleteItemConfirm(item.pseudoId),
+                localizations.cannotBeUndone);
             if (result == true) {
               bloc.add(OpportunityDelete(item));
             }
