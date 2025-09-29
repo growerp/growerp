@@ -19,6 +19,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 import '../../findoc.dart';
 
 class ReservationDialog extends StatefulWidget {
@@ -50,6 +51,7 @@ class ReservationDialogState extends State<ReservationDialog> {
   final TextEditingController _productSearchBoxController =
       TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  late OrderAccountingLocalizations _local;
 
   @override
   void initState() {
@@ -89,6 +91,7 @@ class ReservationDialogState extends State<ReservationDialog> {
 
   @override
   Widget build(BuildContext context) {
+    _local = OrderAccountingLocalizations.of(context)!;
     return BlocConsumer<SalesOrderBloc, FinDocState>(
         listener: (context, salesOrderState) {
       if (salesOrderState.status == FinDocStatus.failure) {
@@ -154,11 +157,11 @@ class ReservationDialogState extends State<ReservationDialog> {
             width: 400,
             title: widget.finDoc.orderId == null
                 ? (classificationId == 'AppHotel'
-                    ? "New Reservation"
-                    : "New order")
+                    ? _local.newRental
+                    : _local.newOrder)
                 : (classificationId == 'AppHotel'
-                        ? "Reservation #"
-                        : "Order #") +
+                        ? _local.reservationId
+                        : _local.orderId) +
                     widget.finDoc.pseudoId!,
             child: Form(
                 key: _formKey,
@@ -178,21 +181,21 @@ class ReservationDialogState extends State<ReservationDialog> {
                             showSearchBox: true,
                             searchFieldProps: TextFieldProps(
                               autofocus: true,
-                              decoration: const InputDecoration(
-                                  labelText: "customer,name"),
+                              decoration: InputDecoration(
+                                  labelText: _local.customerSearch),
                               controller: _userSearchBoxController,
                             ),
                             menuProps: MenuProps(
                                 borderRadius: BorderRadius.circular(20.0)),
                             title: popUp(
                               context: context,
-                              title: 'Select customer',
+                              title: _local.selectCustomer,
                               height: 50,
                             ),
                           ),
-                          dropdownDecoratorProps: const DropDownDecoratorProps(
+                          dropdownDecoratorProps: DropDownDecoratorProps(
                               dropdownSearchDecoration:
-                                  InputDecoration(labelText: 'Customer')),
+                                  InputDecoration(labelText: _local.customer)),
                           key: const Key('customer'),
                           itemAsString: (CompanyUser? u) => " ${u!.name ?? ''}",
                           asyncItems: (String filter) {
@@ -236,8 +239,8 @@ class ReservationDialogState extends State<ReservationDialog> {
                         autofocus: true,
                         decoration: InputDecoration(
                           labelText: classificationId == 'AppHotel'
-                              ? 'Room Type'
-                              : 'Product',
+                              ? _local.roomType
+                              : _local.product,
                         ),
                         controller: _productSearchBoxController,
                       ),
@@ -245,13 +248,13 @@ class ReservationDialogState extends State<ReservationDialog> {
                           MenuProps(borderRadius: BorderRadius.circular(20.0)),
                       title: popUp(
                         context: context,
-                        title: 'Select product',
+                        title: _local.selectProduct,
                         height: 50,
                       ),
                     ),
-                    dropdownDecoratorProps: const DropDownDecoratorProps(
+                    dropdownDecoratorProps: DropDownDecoratorProps(
                         dropdownSearchDecoration:
-                            InputDecoration(labelText: 'Product')),
+                            InputDecoration(labelText: _local.product)),
                     key: const Key('product'),
                     itemAsString: (Product? u) =>
                         " ${u!.productName}[${u.pseudoId}]",
@@ -296,10 +299,10 @@ class ReservationDialogState extends State<ReservationDialog> {
                   TextFormField(
                     key: const Key('price'),
                     decoration:
-                        const InputDecoration(labelText: 'Price/Amount'),
+                        InputDecoration(labelText: _local.priceAmount),
                     controller: _priceController,
                     validator: (value) {
-                      if (value!.isEmpty) return 'Enter Price or Amount?';
+                      if (value!.isEmpty) return _local.enterPriceAmount;
                       return null;
                     },
                   ),
@@ -310,7 +313,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                         key: const Key('setDate'),
                         initialValue: _selectedDate,
                         validator: (value) =>
-                            value == null ? 'Select a start date' : null,
+                            value == null ? _local.selectStartDate : null,
                         builder: (field) => InkWell(
                           onTap: () async {
                             await selectDate(context);
@@ -318,7 +321,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                           },
                           child: InputDecorator(
                             decoration: InputDecoration(
-                              labelText: 'Start Date',
+                              labelText: _local.startDate,
                               errorText: field.errorText,
                               suffixIcon: const Icon(Icons.arrow_drop_down),
                             ),
@@ -334,7 +337,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                         child: TextFormField(
                       key: const Key('quantity'),
                       decoration:
-                          const InputDecoration(labelText: 'Number of days'),
+                          InputDecoration(labelText: _local.numberOfDays),
                       controller: _daysController,
                     )),
                   ]),
@@ -342,7 +345,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                   Row(children: [
                     OutlinedButton(
                       key: const Key('cancel'),
-                      child: const Text('Cancel'),
+                      child: Text(_local.cancel),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
@@ -352,8 +355,8 @@ class ReservationDialogState extends State<ReservationDialog> {
                         child: OutlinedButton(
                             key: const Key('update'),
                             child: Text(widget.finDoc.orderId == null
-                                ? 'Create'
-                                : 'Update'),
+                                ? _local.create
+                                : _local.update),
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {
                                 FinDoc newFinDoc = widget.finDoc.copyWith(

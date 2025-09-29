@@ -16,10 +16,10 @@ import 'package:decimal/decimal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:growerp_core/test_data.dart';
-import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import 'add_another_item_dialog.dart';
@@ -125,6 +125,7 @@ class MyFinDocState extends State<FinDocPage> {
   late FinDocStatusVal _updatedStatus;
   late String currencyId;
   late double screenWidth;
+  late OrderAccountingLocalizations _local;
 
   @override
   void initState() {
@@ -184,7 +185,7 @@ class MyFinDocState extends State<FinDocPage> {
   Widget build(BuildContext context) {
     isPhone = isAPhone(context);
     screenWidth = isPhone ? 400 : 900;
-
+    _local = OrderAccountingLocalizations.of(context)!;
     blocConsumerListener(
       BuildContext context,
       CartState state, [
@@ -253,8 +254,8 @@ class MyFinDocState extends State<FinDocPage> {
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: popUp(
           title:
-              "${finDoc.sales ? 'Sales' : 'Purchase'} ${finDoc.docType} "
-              "#${finDoc.pseudoId ?? ' new'}",
+              "${finDoc.sales ? _local.sales : _local.purchase} ${finDoc.docType} "
+              "#${finDoc.pseudoId ?? _local.new}",
           height: 650,
           width: screenWidth,
           context: context,
@@ -293,7 +294,7 @@ class MyFinDocState extends State<FinDocPage> {
                 child: TextFormField(
                   key: const Key('pseudoId'),
                   enabled: !readOnly,
-                  decoration: const InputDecoration(labelText: 'Id'),
+                  decoration: InputDecoration(labelText: _local.finDocId),
                   controller: _pseudoIdController,
                   keyboardType: TextInputType.number,
                 ),
@@ -318,7 +319,7 @@ class MyFinDocState extends State<FinDocPage> {
                               autofocus: true,
                               decoration: InputDecoration(
                                 labelText:
-                                    "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name",
+                                    "${finDocUpdated.sales ? _local.customer : _local.supplier} ${_local.name}",
                               ),
                               controller: _companySearchBoxController,
                             ),
@@ -328,15 +329,15 @@ class MyFinDocState extends State<FinDocPage> {
                             title: popUp(
                               context: context,
                               title:
-                                  "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
+                                  "${_local.select} ${finDocUpdated.sales ? _local.customer : _local.supplier}",
                               height: 50,
                             ),
                           ),
                           dropdownDecoratorProps: DropDownDecoratorProps(
                             dropdownSearchDecoration: InputDecoration(
                               labelText: finDocUpdated.sales
-                                  ? 'Customer'
-                                  : 'Supplier',
+                                  ? _local.customer
+                                  : _local.supplier,
                             ),
                           ),
                           key: Key(
@@ -376,7 +377,7 @@ class MyFinDocState extends State<FinDocPage> {
                             });
                           },
                           validator: (value) => value == null
-                              ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
+                              ? "${_local.select} ${finDocUpdated.sales ? _local.customer : _local.supplier}!"
                               : null,
                         ),
                       );
@@ -394,9 +395,9 @@ class MyFinDocState extends State<FinDocPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Created: ${finDoc.creationDate.dateOnly()}"),
+                  Text("${_local.created}: ${finDoc.creationDate.dateOnly()}"),
                   const SizedBox(width: 10),
-                  Text("Placed: ${finDoc.placedDate!.dateOnly()}"),
+                  Text("${_local.placed}: ${finDoc.placedDate!.dateOnly()}"),
                 ],
               ),
             ),
@@ -412,11 +413,11 @@ class MyFinDocState extends State<FinDocPage> {
               child: DropdownButtonFormField<FinDocStatusVal>(
                 key: const Key('statusDropDown'),
                 decoration: InputDecoration(
-                  labelText: 'Status',
+                  labelText: _local.status,
                   enabled: !readOnly,
                 ),
                 initialValue: _updatedStatus,
-                validator: (value) => value == null ? 'field required' : null,
+                validator: (value) => value == null ? _local.fieldRequired : null,
                 items: FinDocStatusVal.validStatusList(_updatedStatus)
                     .map(
                       (label) => DropdownMenuItem<FinDocStatusVal>(
@@ -444,7 +445,7 @@ class MyFinDocState extends State<FinDocPage> {
                 key: const Key('description'),
                 readOnly: readOnly,
                 decoration: InputDecoration(
-                  labelText: '${finDoc.docType} Description',
+                  labelText: '${finDoc.docType} ${_local.description}',
                   enabled: !readOnly,
                 ),
                 controller: _descriptionController,
@@ -485,18 +486,18 @@ class MyFinDocState extends State<FinDocPage> {
                   child: TextFormField(
                     key: const Key('pseudoId'),
                     enabled: !readOnly,
-                    decoration: const InputDecoration(labelText: 'Id'),
+                    decoration: InputDecoration(labelText: _local.id),
                     controller: _pseudoIdController,
                     keyboardType: TextInputType.number,
                   ),
                 ),
 
-                const Text('Posted?'),
+                Text(_local.posted),
                 const SizedBox(width: 20),
                 Expanded(
                   child: Row(
                     children: [
-                      const Text('No'),
+                      Text(_local.no),
                       Switch(
                         key: const Key('isPosted'),
                         value: _isPosted ?? false,
@@ -508,7 +509,7 @@ class MyFinDocState extends State<FinDocPage> {
                                 });
                               },
                       ),
-                      const Text('Yes'),
+                      Text(_local.yes),
                     ],
                   ),
                 ),
@@ -519,7 +520,7 @@ class MyFinDocState extends State<FinDocPage> {
                 Expanded(
                   child: InputDecorator(
                     decoration: InputDecoration(
-                      labelText: '${finDoc.docType} Type',
+                      labelText: '${finDoc.docType} ${_local.type}',
                     ),
                     child: Text(finDoc.docSubType ?? ''),
                   ),
@@ -530,7 +531,7 @@ class MyFinDocState extends State<FinDocPage> {
                     key: const Key('description'),
                     readOnly: readOnly,
                     decoration: InputDecoration(
-                      labelText: '${finDoc.docType} Description',
+                      labelText: '${finDoc.docType} ${_local.description}',
                       enabled: !readOnly,
                     ),
                     controller: _descriptionController,
@@ -548,7 +549,7 @@ class MyFinDocState extends State<FinDocPage> {
     List<Widget> buttons = [
       OutlinedButton(
         key: const Key('header'),
-        child: const Text("Update Header"),
+        child: Text(_local.updateHeader),
         onPressed: () {
           _cartBloc.add(
             CartHeader(
@@ -566,8 +567,8 @@ class MyFinDocState extends State<FinDocPage> {
         key: const Key('addItem'),
         child: Text(
           widget.finDoc.docType == FinDocType.transaction
-              ? 'Add\n transaction item'
-              : 'Add other item',
+              ? _local.addTransactionItem
+              : _local.addOtherItem,
         ),
         onPressed: () async {
           final dynamic finDocItem;
@@ -602,7 +603,7 @@ class MyFinDocState extends State<FinDocPage> {
       if (widget.finDoc.docType == FinDocType.order)
         OutlinedButton(
           key: const Key('itemRental'),
-          child: const Text('Add Rental'),
+          child: Text(_local.addRental),
           onPressed: () async {
             final dynamic finDocItem = await addRentalItemDialog(
               context,
@@ -626,7 +627,7 @@ class MyFinDocState extends State<FinDocPage> {
       if (widget.finDoc.docType != FinDocType.transaction)
         OutlinedButton(
           key: const Key('addProduct'),
-          child: const Text('Add Product'),
+          child: Text(_local.addProduct),
           onPressed: () async {
             final dynamic finDocItem = await addProductItemDialog(context);
             if (finDocItem != null) {
@@ -684,7 +685,7 @@ class MyFinDocState extends State<FinDocPage> {
           visible: !finDoc.idIsNull(),
           child: OutlinedButton(
             key: const Key('cancelFinDoc'),
-            child: const Text('Cancel'),
+            child: Text(_local.cancelFinDoc),
             onPressed: () {
               _cartBloc.add(CartCancelFinDoc(finDocUpdated));
             },
@@ -693,7 +694,7 @@ class MyFinDocState extends State<FinDocPage> {
         const SizedBox(width: 5),
         OutlinedButton(
           key: const Key('clear'),
-          child: const Text('Clear Cart'),
+          child: Text(_local.clearCart),
           onPressed: () {
             if (finDocUpdated.items.isNotEmpty) {
               _cartBloc.add(CartClear());
@@ -705,7 +706,7 @@ class MyFinDocState extends State<FinDocPage> {
           child: OutlinedButton(
             key: const Key('update'),
             child: Text(
-              "${finDoc.idIsNull() ? CoreLocalizations.of(context)!.create : CoreLocalizations.of(context)!.update} "
+              "${finDoc.idIsNull() ? _local.create : _local.update} "
               "${finDocUpdated.docType!}",
             ),
             onPressed: () {
@@ -726,10 +727,11 @@ class MyFinDocState extends State<FinDocPage> {
               } else {
                 HelperFunctions.showMessage(
                   context,
-                  'A ${finDocUpdated.sales ? CoreLocalizations.of(context)!.customer : CoreLocalizations.of(context)!.supplier} '
-                  '${CoreLocalizations.of(context)!.andAtLeastOne} '
-                  '${finDocUpdated.docType!} '
-                  '${CoreLocalizations.of(context)!.itemIsRequired}',
+                  _local.itemOrCustomerRequired(
+                      (finDocUpdated.sales
+                          ? _local.customer
+                          : _local.supplier),
+                      finDocUpdated.docType.toString()),
                   Colors.red,
                 );
               }
@@ -760,9 +762,10 @@ class MyFinDocState extends State<FinDocPage> {
           .company!
           .currency!
           .currencyId!;
-      var itemType = item.itemType != null && itemTypes.isNotEmpty
+      var itemType = item.itemType != null && state.itemTypes.isNotEmpty
           ? state.itemTypes.firstWhere(
               (e) => e.itemTypeId == item.itemType!.itemTypeId,
+              orElse: () => ItemType(),
             )
           : ItemType();
       List<TableRowContent> rowContent = [];
@@ -776,7 +779,7 @@ class MyFinDocState extends State<FinDocPage> {
       rowContent.add(
         TableRowContent(
           width: isPhone ? 14 : 8,
-          name: 'ProdId',
+          name: _local.productId,
           value: Text(
             "${item.product?.pseudoId}",
             textAlign: TextAlign.center,
@@ -787,7 +790,7 @@ class MyFinDocState extends State<FinDocPage> {
       rowContent.add(
         TableRowContent(
           width: isPhone ? 15 : 27,
-          name: 'Description',
+          name: _local.description,
           value: Text(
             item.description ?? '',
             key: Key('itemDescription$index'),
@@ -799,7 +802,7 @@ class MyFinDocState extends State<FinDocPage> {
         rowContent.add(
           TableRowContent(
             width: 8,
-            name: 'Item Type',
+            name: _local.item,
             value: Text(
               itemType.itemTypeName,
               textAlign: TextAlign.left,
@@ -811,7 +814,7 @@ class MyFinDocState extends State<FinDocPage> {
       rowContent.add(
         TableRowContent(
           width: 5,
-          name: const Text('Q', textAlign: TextAlign.right),
+          name: Text(_local.quantity, textAlign: TextAlign.right),
           value: Text(
             item.quantity == null
                 ? Decimal.zero.toString()
@@ -825,7 +828,7 @@ class MyFinDocState extends State<FinDocPage> {
         rowContent.add(
           TableRowContent(
             width: 12,
-            name: const Text('Price', textAlign: TextAlign.right),
+            name: Text(_local.price, textAlign: TextAlign.right),
             value: Text(
               item.price == null
                   ? Decimal.fromInt(0).currency(currencyId: currencyId)
@@ -840,7 +843,7 @@ class MyFinDocState extends State<FinDocPage> {
         rowContent.add(
           TableRowContent(
             width: 20,
-            name: 'Date',
+            name: _local.date,
             value: Text(
               item.rentalFromDate.dateOnly(),
               textAlign: TextAlign.right,
@@ -853,7 +856,7 @@ class MyFinDocState extends State<FinDocPage> {
         rowContent.add(
           TableRowContent(
             width: 10,
-            name: const Text('SubTot.', textAlign: TextAlign.right),
+            name: Text(_local.subTotal, textAlign: TextAlign.right),
             value: Text(
               item.price == null
                   ? Decimal.zero.currency(currencyId: currencyId).toString()
@@ -910,7 +913,7 @@ class MyFinDocState extends State<FinDocPage> {
     );
     return Flexible(
       child: items.isEmpty
-          ? const Text("no items yet")
+          ? Text(_local.noItems)
           : TableView.builder(
               diagonalDragBehavior: DiagonalDragBehavior.free,
               verticalDetails: ScrollableDetails.vertical(
@@ -967,7 +970,7 @@ class MyFinDocState extends State<FinDocPage> {
       );
       rowContent.add(
         TableRowContent(
-          name: 'ProdId',
+          name: _local.productId,
           width: isPhone ? 14 : 8,
           value: Text(
             "${item.product?.pseudoId}",
@@ -978,7 +981,7 @@ class MyFinDocState extends State<FinDocPage> {
       );
       rowContent.add(
         TableRowContent(
-          name: 'Description',
+          name: _local.description,
           width: isPhone ? 25 : 28,
           value: Text(
             item.description ?? '',
@@ -989,7 +992,7 @@ class MyFinDocState extends State<FinDocPage> {
       );
       rowContent.add(
         TableRowContent(
-          name: 'Qty',
+          name: _local.quantity,
           width: isPhone ? 15 : 10,
           value: Text(
             item.quantity == null
@@ -1003,7 +1006,7 @@ class MyFinDocState extends State<FinDocPage> {
       if (finDoc.status == FinDocStatusVal.completed) {
         rowContent.add(
           TableRowContent(
-            name: 'Location',
+            name: _local.location,
             width: isPhone ? 20 : 20,
             value: Text(
               "${item.asset?.location?.locationName}",
@@ -1057,7 +1060,7 @@ class MyFinDocState extends State<FinDocPage> {
     );
     return Flexible(
       child: items.isEmpty
-          ? const Text("no items yet")
+          ? Text(_local.noItems)
           : TableView.builder(
               diagonalDragBehavior: DiagonalDragBehavior.free,
               verticalDetails: ScrollableDetails.vertical(
@@ -1106,7 +1109,7 @@ class MyFinDocState extends State<FinDocPage> {
       List<TableRowContent> rowContent = [];
       rowContent.add(
         TableRowContent(
-          name: 'Account',
+          name: _local.glAccount,
           width: 12,
           value: Text(
             item.glAccount!.accountCode ?? '??',
@@ -1116,7 +1119,7 @@ class MyFinDocState extends State<FinDocPage> {
       );
       rowContent.add(
         TableRowContent(
-          name: 'Debit',
+          name: _local.debit,
           width: 15,
           value: Text(
             (item.isDebit! ? item.price.currency(currencyId: currencyId) : ''),
@@ -1126,7 +1129,7 @@ class MyFinDocState extends State<FinDocPage> {
       );
       rowContent.add(
         TableRowContent(
-          name: 'Credit',
+          name: _local.credit,
           width: 15,
           value: Text(
             !item.isDebit! ? item.price.currency(currencyId: currencyId) : '',
@@ -1136,7 +1139,7 @@ class MyFinDocState extends State<FinDocPage> {
       );
       rowContent.add(
         TableRowContent(
-          name: 'ProdId',
+          name: _local.productId,
           width: 10,
           value: Text(
             item.product?.pseudoId ?? '',
@@ -1186,7 +1189,7 @@ class MyFinDocState extends State<FinDocPage> {
       screenWidth: screenWidth,
     );
     return items.isEmpty
-        ? const Text("no items yet")
+        ? Text(_local.noItems)
         : Flexible(
             child: Padding(
               padding: const EdgeInsets.only(left: 10.0),
@@ -1248,7 +1251,7 @@ class MyFinDocState extends State<FinDocPage> {
             child: popUp(
               context: context,
               height: 400,
-              title: 'Add Transaction Item',
+              title: _local.addTransactionItemTitle,
               child: Form(
                 key: addOtherFormKey,
                 child: SingleChildScrollView(
@@ -1259,8 +1262,8 @@ class MyFinDocState extends State<FinDocPage> {
                         builder: (context, state) {
                           switch (state.status) {
                             case GlAccountStatus.failure:
-                              return const FatalErrorForm(
-                                message: 'server connection problem',
+                              return FatalErrorForm(
+                                message: _local.serverProblem,
                               );
                             case GlAccountStatus.success:
                               return DropdownSearch<GlAccount>(
@@ -1269,10 +1272,10 @@ class MyFinDocState extends State<FinDocPage> {
                                   isFilterOnline: true,
                                   showSelectedItems: true,
                                   showSearchBox: true,
-                                  searchFieldProps: const TextFieldProps(
+                                  searchFieldProps: TextFieldProps(
                                     autofocus: true,
                                     decoration: InputDecoration(
-                                      labelText: 'Gl Account',
+                                      labelText: _local.glAccount,
                                     ),
                                   ),
                                   menuProps: MenuProps(
@@ -1280,14 +1283,14 @@ class MyFinDocState extends State<FinDocPage> {
                                   ),
                                   title: popUp(
                                     context: context,
-                                    title: 'Select GL Account',
+                                    title: _local.selectGlAccount,
                                     height: 50,
                                   ),
                                 ),
                                 dropdownDecoratorProps:
-                                    const DropDownDecoratorProps(
+                                    DropDownDecoratorProps(
                                       dropdownSearchDecoration: InputDecoration(
-                                        labelText: 'GL Account',
+                                        labelText: _local.glAccount,
                                       ),
                                     ),
                                 key: const Key('glAccount'),
@@ -1326,20 +1329,20 @@ class MyFinDocState extends State<FinDocPage> {
                           Expanded(
                             child: TextFormField(
                               key: const Key('price'),
-                              decoration: const InputDecoration(
-                                labelText: 'Amount',
+                              decoration: InputDecoration(
+                                labelText: _local.amount,
                               ),
                               controller: priceController,
                               keyboardType: TextInputType.number,
                               validator: (value) {
                                 if (value!.isEmpty) {
-                                  return 'Enter Amount?';
+                                  return _local.enterAmount;
                                 }
                                 return null;
                               },
                             ),
                           ),
-                          const Text('Credit'),
+                          Text(_local.credit),
                           StatefulBuilder(
                             builder: (context, setState) {
                               return Switch(
@@ -1353,14 +1356,14 @@ class MyFinDocState extends State<FinDocPage> {
                               );
                             },
                           ),
-                          const Text('Debit'),
+                          Text(_local.debit),
                         ],
                       ),
 
                       const SizedBox(height: 20),
                       OutlinedButton(
                         key: const Key('ok'),
-                        child: const Text('Ok'),
+                        child: Text(_local.ok),
                         onPressed: () {
                           if (addOtherFormKey.currentState!.validate()) {
                             Navigator.of(context).pop(
