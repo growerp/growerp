@@ -18,7 +18,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
-import '../l10n/generated/chat_localizations.dart';
+import 'package:growerp_chat/l10n/generated/chat_localizations.dart';
 
 import '../blocs/blocs.dart';
 import 'views.dart';
@@ -214,12 +214,24 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                 Row(
                   children: <Widget>[
                     Expanded(
-                      child: Text(ChatLocalizations.of(context)!.name, textAlign: TextAlign.center),
+                      child: Text(
+                        ChatLocalizations.of(context)!.name,
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                     if (!ResponsiveBreakpoints.of(context).isMobile)
-                      Text(ChatLocalizations.of(context)!.status, textAlign: TextAlign.center),
-                    Text(ChatLocalizations.of(context)!.pvt, textAlign: TextAlign.center),
-                    Text(ChatLocalizations.of(context)!.nroMembers, textAlign: TextAlign.center),
+                      Text(
+                        ChatLocalizations.of(context)!.status,
+                        textAlign: TextAlign.center,
+                      ),
+                    Text(
+                      ChatLocalizations.of(context)!.pvt,
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      ChatLocalizations.of(context)!.nroMembers,
+                      textAlign: TextAlign.center,
+                    ),
                     const Text("    ", textAlign: TextAlign.center),
                   ],
                 ),
@@ -272,7 +284,9 @@ class ListDetail extends StatelessWidget {
           ),
           if (!ResponsiveBreakpoints.of(context).isMobile)
             Text(
-              chatRoom.hasRead ? ChatLocalizations.of(context)!.allMessagesRead : ChatLocalizations.of(context)!.unreadMessages,
+              chatRoom.hasRead
+                  ? ChatLocalizations.of(context)!.allMessagesRead
+                  : ChatLocalizations.of(context)!.unreadMessages,
               key: Key('unRead$index'),
             ),
           Text(

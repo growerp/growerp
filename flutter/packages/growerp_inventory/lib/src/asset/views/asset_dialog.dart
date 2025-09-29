@@ -26,7 +26,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../asset.dart';
-import '../../l10n/generated/inventory_localizations.dart';
+import 'package:growerp_inventory/l10n/generated/inventory_localizations.dart';
 
 class AssetDialog extends StatefulWidget {
   final Asset asset;

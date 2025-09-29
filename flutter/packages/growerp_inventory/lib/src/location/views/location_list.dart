@@ -20,7 +20,7 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import '../location.dart';
 import '../widgets/widgets.dart';
-import '../../l10n/generated/inventory_localizations.dart';
+import 'package:growerp_inventory/l10n/generated/inventory_localizations.dart';
 
 class LocationList extends StatefulWidget {
   const LocationList({super.key});
@@ -60,34 +60,43 @@ class LocationListState extends State<LocationList> {
         switch (state.status) {
           case LocationStatus.failure:
             return Center(
-                child: Text(localizations.failedToFetchLocations(
-                    state.message ?? '')));
+              child: Text(
+                localizations.failedToFetchLocations(state.message ?? ''),
+              ),
+            );
           case LocationStatus.success:
             locations = state.locations;
 
             Widget tableView() {
               if (locations.isEmpty) {
                 return Center(
-                    heightFactor: 20,
-                    child: Text(localizations.noLocationsFound,
-                        style: const TextStyle(fontSize: 20.0)));
+                  heightFactor: 20,
+                  child: Text(
+                    localizations.noLocationsFound,
+                    style: const TextStyle(fontSize: 20.0),
+                  ),
+                );
               }
               // get table data formatted for tableView
               var (
                 List<List<TableViewCell>> tableViewCells,
                 List<double> fieldWidths,
-                double? rowHeight
-              ) = get2dTableData<Location>(getTableData,
-                  bloc: _locationBloc,
-                  classificationId: 'AppAdmin',
-                  context: context,
-                  items: locations);
+                double? rowHeight,
+              ) = get2dTableData<Location>(
+                getTableData,
+                bloc: _locationBloc,
+                classificationId: 'AppAdmin',
+                context: context,
+                items: locations,
+              );
               return TableView.builder(
                 diagonalDragBehavior: DiagonalDragBehavior.free,
-                verticalDetails:
-                    ScrollableDetails.vertical(controller: _scrollController),
+                verticalDetails: ScrollableDetails.vertical(
+                  controller: _scrollController,
+                ),
                 horizontalDetails: ScrollableDetails.horizontal(
-                    controller: _horizontalController),
+                  controller: _horizontalController,
+                ),
                 cellBuilder: (context, vicinity) =>
                     tableViewCells[vicinity.row][vicinity.column],
                 columnBuilder: (index) => index >= tableViewCells[0].length
@@ -105,31 +114,34 @@ class LocationListState extends State<LocationList> {
                         backgroundDecoration: getBackGround(context, index),
                         extent: FixedTableSpanExtent(rowHeight!),
                         recognizerFactories: <Type, GestureRecognizerFactory>{
-                            TapGestureRecognizer:
-                                GestureRecognizerFactoryWithHandlers<
-                                        TapGestureRecognizer>(
-                                    () => TapGestureRecognizer(),
-                                    (TapGestureRecognizer t) =>
-                                        t.onTap = () => showDialog(
-                                            barrierDismissible: true,
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return index >
-                                                      state.locations.length
-                                                  ? const BottomLoader()
-                                                  : Dismissible(
-                                                      key: const Key(
-                                                          'locationItem'),
-                                                      direction:
-                                                          DismissDirection
-                                                              .startToEnd,
-                                                      child: BlocProvider.value(
-                                                          value: _locationBloc,
-                                                          child: LocationDialog(
-                                                              locations[
-                                                                  index - 1])));
-                                            }))
-                          }),
+                          TapGestureRecognizer:
+                              GestureRecognizerFactoryWithHandlers<
+                                TapGestureRecognizer
+                              >(
+                                () => TapGestureRecognizer(),
+                                (TapGestureRecognizer t) =>
+                                    t.onTap = () => showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return index > state.locations.length
+                                            ? const BottomLoader()
+                                            : Dismissible(
+                                                key: const Key('locationItem'),
+                                                direction:
+                                                    DismissDirection.startToEnd,
+                                                child: BlocProvider.value(
+                                                  value: _locationBloc,
+                                                  child: LocationDialog(
+                                                    locations[index - 1],
+                                                  ),
+                                                ),
+                                              );
+                                      },
+                                    ),
+                              ),
+                        },
+                      ),
                 pinnedRowCount: 1,
               );
             }
@@ -151,50 +163,59 @@ class LocationListState extends State<LocationList> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         FloatingActionButton(
-                            key: const Key("search"),
-                            heroTag: "btn1",
-                            onPressed: () async {
-                              // find findoc id to show
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    // search separate from finDocBloc
-                                    return BlocProvider.value(
-                                        value: context
-                                            .read<DataFetchBloc<Locations>>(),
-                                        child: const SearchLocationList());
-                                  }).then((value) async => value != null &&
-                                      context.mounted
+                          key: const Key("search"),
+                          heroTag: "btn1",
+                          onPressed: () async {
+                            // find findoc id to show
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                // search separate from finDocBloc
+                                return BlocProvider.value(
+                                  value: context
+                                      .read<DataFetchBloc<Locations>>(),
+                                  child: const SearchLocationList(),
+                                );
+                              },
+                            ).then(
+                              (value) async => value != null && context.mounted
                                   ?
-                                  // show detail page
-                                  await showDialog(
+                                    // show detail page
+                                    await showDialog(
                                       barrierDismissible: true,
                                       context: context,
                                       builder: (BuildContext context) {
                                         return BlocProvider.value(
-                                            value: _locationBloc,
-                                            child: LocationDialog(value));
-                                      })
-                                  : const SizedBox.shrink());
-                            },
-                            child: const Icon(Icons.search)),
+                                          value: _locationBloc,
+                                          child: LocationDialog(value),
+                                        );
+                                      },
+                                    )
+                                  : const SizedBox.shrink(),
+                            );
+                          },
+                          child: const Icon(Icons.search),
+                        ),
                         const SizedBox(height: 10),
                         FloatingActionButton(
-                            key: const Key("addNew"),
-                            heroTag: "btn2",
-                            onPressed: () async {
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return BlocProvider.value(
-                                        value: _locationBloc,
-                                        child: LocationDialog(Location()));
-                                  });
-                            },
-                            tooltip: localizations.addNew,
-                            child: const Icon(Icons.add)),
+                          key: const Key("addNew"),
+                          heroTag: "btn2",
+                          onPressed: () async {
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BlocProvider.value(
+                                  value: _locationBloc,
+                                  child: LocationDialog(Location()),
+                                );
+                              },
+                            );
+                          },
+                          tooltip: localizations.addNew,
+                          child: const Icon(Icons.add),
+                        ),
                       ],
                     ),
                   ),
