@@ -60,7 +60,7 @@ class AddressDialogState extends State<AddressDialog> {
 
   @override
   Widget build(BuildContext context) {
-    var localizations = UserCompanyLocalizations.of(context)!;
+    final localizations = UserCompanyLocalizations.of(context)!;
     return Dialog(
       key: const Key('AddressDialog'),
       insetPadding: const EdgeInsets.all(10),
@@ -72,13 +72,12 @@ class AddressDialogState extends State<AddressDialog> {
             : localizations.companyAddressDetail(address!.addressId!),
         height: 700,
         width: 350,
-        child: _editAddress(context),
+        child: _editAddress(localizations),
       ),
     );
   }
 
-  Widget _editAddress(BuildContext context) {
-    var localizations = UserCompanyLocalizations.of(context)!;
+  Widget _editAddress(UserCompanyLocalizations localizations) {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(

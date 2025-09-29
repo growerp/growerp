@@ -27,6 +27,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_activity/growerp_activity.dart';
 import 'package:flutter/rendering.dart';
+import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 import '../../common/address_dialog.dart';
 import '../../common/payment_method_dialog.dart';
@@ -218,6 +219,7 @@ class UserDialogState extends State<UserDialogStateFull> {
 
   @override
   Widget build(BuildContext context) {
+    var localizations = UserCompanyLocalizations.of(context)!;
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
     right = right ?? (isPhone ? 20 : 40);
     String title = '';
@@ -225,8 +227,8 @@ class UserDialogState extends State<UserDialogStateFull> {
       title =
           widget.user.userGroup != null &&
               widget.user.userGroup == UserGroup.admin
-          ? 'Admininistrator'
-          : 'Employee';
+          ? localizations.administrator
+          : localizations.employee;
     } else {
       title = _selectedRole.name;
     }
@@ -237,12 +239,15 @@ class UserDialogState extends State<UserDialogStateFull> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: "$title #${widget.user.pseudoId ?? ' new'}",
+        title: "$title #${widget.user.pseudoId ?? localizations.newItem}",
         width: isPhone ? 400 : 800,
         height: isPhone ? 700 : 600,
         child: ScaffoldMessenger(
           child: Scaffold(
             backgroundColor: Colors.transparent,
+            floatingActionButton: isPhone
+                ? fab(localizations)
+                : updateButton(localizations),
             body: Stack(
               children: [
                 BlocConsumer<UserBloc, UserState>(
@@ -264,7 +269,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                     if (state.status == UserStatus.loading) {
                       return const LoadingIndicator();
                     }
-                    return listChild();
+                    return listChild(localizations);
                   },
                 ),
                 Positioned(
@@ -285,7 +290,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                           visible: isVisible,
                           child: FloatingActionButton(
                             key: const Key("events"),
-                            tooltip: 'Show user events',
+                            tooltip: localizations.userEvents,
                             heroTag: "userEvents",
                             onPressed: () async => await showDialog(
                               barrierDismissible: true,
@@ -294,7 +299,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                                 return Dialog(
                                   child: popUp(
                                     context: context,
-                                    title: ('User events'),
+                                    title: (localizations.userEvents),
                                     child: ActivityList(
                                       ActivityType.event,
                                       companyUser: CompanyUser.tryParse(
@@ -309,50 +314,6 @@ class UserDialogState extends State<UserDialogStateFull> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        if (isPhone)
-                          Visibility(
-                            visible: isVisible,
-                            child: FloatingActionButton(
-                              key: const Key("updateFloat"),
-                              heroTag: "userUpdate",
-                              onPressed: () {
-                                updatedUser = updatedUser.copyWith(
-                                  pseudoId: _idController.text,
-                                  firstName: _firstNameController.text,
-                                  lastName: _lastNameController.text,
-                                  email: _emailController.text,
-                                  url: _urlController.text,
-                                  loginName: _loginNameController.text,
-                                  telephoneNr: _telephoneController.text,
-                                  address: updatedUser.address,
-                                  paymentMethod: updatedUser.paymentMethod,
-                                  loginDisabled: _isLoginDisabled,
-                                  userGroup: _selectedUserGroup,
-                                  role: _selectedRole,
-                                  appsUsed: [_classificationId],
-                                  //                      language: Localizations.localeOf(context)
-                                  //                          .languageCode
-                                  //                          .toString(),
-                                  company: _selectedCompany.copyWith(
-                                    role: _selectedRole,
-                                  ),
-                                  image: _image,
-                                );
-
-                                _userBloc.add(UserUpdate(updatedUser));
-                                // if logged-in user update authBloc
-                                if (currentUser.partyId ==
-                                    updatedUser.partyId) {
-                                  _authBloc.add(AuthLoad());
-                                }
-                              },
-                              child: Icon(
-                                widget.user.partyId != null
-                                    ? Icons.update_sharp
-                                    : Icons.add_sharp,
-                              ),
-                            ),
-                          ),
                       ],
                     ),
                   ),
@@ -365,7 +326,24 @@ class UserDialogState extends State<UserDialogStateFull> {
     );
   }
 
-  Widget listChild() {
+  Widget fab(UserCompanyLocalizations localizations) {
+    return Visibility(
+      visible: isVisible,
+      child: FloatingActionButton(
+        key: const Key("updateFloat"),
+        heroTag: "userUpdate",
+        onPressed: () {
+          update(localizations);
+        },
+        child: Icon(
+          widget.user.partyId != null ? Icons.update : Icons.add,
+          size: 30,
+        ),
+      ),
+    );
+  }
+
+  Widget listChild(UserCompanyLocalizations localizations) {
     return !kIsWeb && defaultTargetPlatform == TargetPlatform.android
         ? FutureBuilder<void>(
             future: retrieveLostData(),
@@ -376,10 +354,10 @@ class UserDialogState extends State<UserDialogStateFull> {
                   textAlign: TextAlign.center,
                 );
               }
-              return _showForm();
+              return _showForm(localizations);
             },
           )
-        : _showForm();
+        : _showForm(localizations);
   }
 
   Text? _getRetrieveErrorWidget() {
@@ -391,7 +369,7 @@ class UserDialogState extends State<UserDialogStateFull> {
     return null;
   }
 
-  Widget _showForm() {
+  Widget _showForm(UserCompanyLocalizations localizations) {
     final Text? retrieveError = _getRetrieveErrorWidget();
     if (retrieveError != null) {
       return retrieveError;
@@ -402,14 +380,14 @@ class UserDialogState extends State<UserDialogStateFull> {
         textAlign: TextAlign.center,
       );
     }
-    return _userDialog();
+    return _userDialog(localizations);
   }
 
-  Widget _userDialog() {
+  Widget _userDialog(UserCompanyLocalizations localizations) {
     List<Widget> widgets = [
       InputDecorator(
         decoration: InputDecoration(
-          labelText: 'User information',
+          labelText: localizations.userInfo,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
         ),
         child: Column(
@@ -419,18 +397,18 @@ class UserDialogState extends State<UserDialogStateFull> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('id'),
-                    decoration: const InputDecoration(labelText: 'ID'),
+                    decoration: InputDecoration(labelText: localizations.id),
                     controller: _idController,
                   ),
                 ),
                 Expanded(
                   child: DropdownButtonFormField<Role>(
                     key: const Key('role'),
-                    decoration: const InputDecoration(labelText: 'Role'),
-                    hint: const Text('Role'),
+                    decoration: InputDecoration(labelText: localizations.role),
+                    hint: Text(localizations.role),
                     initialValue: _selectedRole,
                     validator: (value) =>
-                        value == Role.unknown ? 'Select a valid role!' : null,
+                        value == Role.unknown ? localizations.roleError : null,
                     items: Role.values.map((item) {
                       return DropdownMenuItem<Role>(
                         value: item,
@@ -454,10 +432,14 @@ class UserDialogState extends State<UserDialogStateFull> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('firstName'),
-                    decoration: const InputDecoration(labelText: 'First Name'),
+                    decoration: InputDecoration(
+                      labelText: localizations.firstName,
+                    ),
                     controller: _firstNameController,
                     validator: (value) {
-                      if (value!.isEmpty) return 'Please enter a first name?';
+                      if (value!.isEmpty) {
+                        return localizations.firstNameError;
+                      }
                       return null;
                     },
                   ),
@@ -466,10 +448,12 @@ class UserDialogState extends State<UserDialogStateFull> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('lastName'),
-                    decoration: const InputDecoration(labelText: 'Last Name'),
+                    decoration: InputDecoration(
+                      labelText: localizations.lastName,
+                    ),
                     controller: _lastNameController,
                     validator: (value) {
-                      if (value!.isEmpty) return 'Please enter a last name?';
+                      if (value!.isEmpty) return localizations.lastNameError;
                       return null;
                     },
                   ),
@@ -481,8 +465,8 @@ class UserDialogState extends State<UserDialogStateFull> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('userEmail'),
-                    decoration: const InputDecoration(
-                      labelText: 'Email address',
+                    decoration: InputDecoration(
+                      labelText: localizations.emailAddress,
                     ),
                     controller: _emailController,
                     validator: (String? value) {
@@ -490,11 +474,11 @@ class UserDialogState extends State<UserDialogStateFull> {
                           !RegExp(
                             r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
                           ).hasMatch(value)) {
-                        return 'This is not a valid email';
+                        return localizations.emailInvalid;
                       }
                       if (value.isEmpty &&
                           _loginNameController.text.isNotEmpty) {
-                        return 'Email for login required!';
+                        return localizations.emailLoginRequired;
                       }
                       return null;
                     },
@@ -504,7 +488,9 @@ class UserDialogState extends State<UserDialogStateFull> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('userUrl'),
-                    decoration: const InputDecoration(labelText: 'Web address'),
+                    decoration: InputDecoration(
+                      labelText: localizations.webAddress,
+                    ),
                     controller: _urlController,
                   ),
                 ),
@@ -512,8 +498,8 @@ class UserDialogState extends State<UserDialogStateFull> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('userTelephoneNr'),
-                    decoration: const InputDecoration(
-                      labelText: 'Telephone number',
+                    decoration: InputDecoration(
+                      labelText: localizations.telephoneNr,
                     ),
                     controller: _telephoneController,
                   ),
@@ -525,7 +511,7 @@ class UserDialogState extends State<UserDialogStateFull> {
       ),
       InputDecorator(
         decoration: InputDecoration(
-          labelText: 'Postal Address',
+          labelText: localizations.postalAddress,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
         ),
         child: Row(
@@ -556,7 +542,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                                 updatedUser.address?.address2 != "_DELETE_"
                             ? "${updatedUser.address?.city} "
                                   "${updatedUser.address?.country ?? ''}"
-                            : "No postal address yet",
+                            : localizations.noPostalAddress,
                         key: const Key('addressLabel'),
                       ),
                     ),
@@ -590,7 +576,7 @@ class UserDialogState extends State<UserDialogStateFull> {
       ),
       InputDecorator(
         decoration: InputDecoration(
-          labelText: 'Payment method',
+          labelText: localizations.paymentMethod,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
         ),
         child: Row(
@@ -627,8 +613,8 @@ class UserDialogState extends State<UserDialogStateFull> {
                                 updatedUser.paymentMethod?.ccDescription !=
                                     "_DELETE_"
                             ? "${updatedUser.paymentMethod?.ccDescription}"
-                            : "No payment methods yet"
-                                  "${updatedUser.address == null ? ",\nneed postal address to add" : ""}",
+                            : "${localizations.noPaymentMethod}"
+                                  "${updatedUser.address == null ? ", ${localizations.needPostalAddress}" : ""}",
                         key: const Key('paymentMethodLabel'),
                       ),
                     ),
@@ -664,9 +650,7 @@ class UserDialogState extends State<UserDialogStateFull> {
       if (_selectedRole != Role.company)
         InputDecorator(
           decoration: InputDecoration(
-            labelText:
-                "${_selectedCompany.role?.value ?? Role.unknown}"
-                " Company information",
+            labelText: localizations.relatedCompanyInfo,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(25.0),
             ),
@@ -680,8 +664,8 @@ class UserDialogState extends State<UserDialogStateFull> {
                       builder: (context, state) {
                         switch (state.status) {
                           case CompanyStatus.failure:
-                            return const FatalErrorForm(
-                              message: 'server connection problem',
+                            return FatalErrorForm(
+                              message: localizations.serverConnectionProblem,
                             );
                           case CompanyStatus.success:
                             return DropdownSearch<Company>(
@@ -695,8 +679,8 @@ class UserDialogState extends State<UserDialogStateFull> {
                                 showSearchBox: true,
                                 searchFieldProps: TextFieldProps(
                                   autofocus: true,
-                                  decoration: const InputDecoration(
-                                    labelText: "company,name",
+                                  decoration: InputDecoration(
+                                    labelText: localizations.companyName,
                                   ),
                                   controller: _companySearchBoxController,
                                 ),
@@ -705,17 +689,16 @@ class UserDialogState extends State<UserDialogStateFull> {
                                 ),
                                 title: popUp(
                                   context: context,
-                                  title: 'Select company',
+                                  title: localizations.selectCompany,
                                   height: 50,
                                   width: 450,
                                 ),
                               ),
-                              dropdownDecoratorProps:
-                                  const DropDownDecoratorProps(
-                                    dropdownSearchDecoration: InputDecoration(
-                                      labelText: 'Company name[id]',
-                                    ),
-                                  ),
+                              dropdownDecoratorProps: DropDownDecoratorProps(
+                                dropdownSearchDecoration: InputDecoration(
+                                  labelText: localizations.companyName,
+                                ),
+                              ),
                               itemAsString: (Company? u) => u?.pseudoId == null
                                   ? ''
                                   : " ${u!.name}[${u.pseudoId ?? ''}]",
@@ -749,7 +732,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                               },
                               validator: (value) =>
                                   value == null && _companyController.text == ''
-                                  ? "Select an existing or Create a new company"
+                                  ? localizations.selectOrCreateCompany
                                   : null,
                             );
                           default:
@@ -785,7 +768,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                             });
                           }
                         },
-                        child: const Text('Update'),
+                        child: Text(localizations.update),
                       ),
                     ),
                   const SizedBox(width: 5),
@@ -798,7 +781,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                             _selectedCompany = Company();
                           });
                         },
-                        child: const Text('Remove'),
+                        child: Text(localizations.remove),
                       ),
                     ),
                   const SizedBox(width: 5),
@@ -825,8 +808,8 @@ class UserDialogState extends State<UserDialogStateFull> {
                       },
                       child: Text(
                         _selectedCompany.name != null
-                            ? 'Add new'
-                            : 'Add new related compamy',
+                            ? localizations.addNew
+                            : localizations.addNewRelatedCompany,
                       ),
                     ),
                   ),
@@ -837,7 +820,7 @@ class UserDialogState extends State<UserDialogStateFull> {
         ),
       InputDecorator(
         decoration: InputDecoration(
-          labelText: 'User Login',
+          labelText: localizations.userLogin,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
         ),
         child: Column(
@@ -845,7 +828,7 @@ class UserDialogState extends State<UserDialogStateFull> {
             TextFormField(
               readOnly: !(currentUser.userGroup == UserGroup.admin),
               key: const Key('loginName'),
-              decoration: const InputDecoration(labelText: 'User Login Name '),
+              decoration: InputDecoration(labelText: localizations.userName),
               controller: _loginNameController,
               onChanged: (value) {
                 if (value.isNotEmpty != _hasLogin) {
@@ -857,7 +840,7 @@ class UserDialogState extends State<UserDialogStateFull> {
               validator: (value) {
                 if (widget.user.userGroup == UserGroup.admin &&
                     value!.isEmpty) {
-                  return 'An administrator needs a username!';
+                  return localizations.adminNeedsUsername;
                 }
                 return null;
               },
@@ -871,14 +854,15 @@ class UserDialogState extends State<UserDialogStateFull> {
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<UserGroup>(
-                          decoration: const InputDecoration(
-                            labelText: 'Security User Group',
+                          decoration: InputDecoration(
+                            labelText: localizations.securityUserGroup,
                           ),
                           key: const Key('userGroup'),
-                          hint: const Text('Security User Group'),
+                          hint: Text(localizations.securityUserGroup),
                           initialValue: _selectedUserGroup,
-                          validator: (value) =>
-                              value == null ? 'field required' : null,
+                          validator: (value) => value == null
+                              ? localizations.fieldRequired
+                              : null,
                           items: localUserGroups.map((item) {
                             return DropdownMenuItem<UserGroup>(
                               value: item,
@@ -899,7 +883,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                         height: 60,
                         child: InputDecorator(
                           decoration: InputDecoration(
-                            labelText: 'Disabled',
+                            labelText: localizations.disabled,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(25.0),
                             ),
@@ -923,83 +907,11 @@ class UserDialogState extends State<UserDialogStateFull> {
         ),
       ),
     ];
-    Widget updateButton = Row(
-      children: [
-        if (widget.user.partyId != null)
-          OutlinedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.red),
-            ),
-            key: const Key('deleteUser'),
-            child: const Text('Delete User'),
-            onPressed: () async {
-              if (widget.user.partyId != null &&
-                  currentUser.partyId == widget.user.partyId) {
-                var result = await confirmDeleteUserComp(
-                  context,
-                  widget.user.userGroup,
-                );
-                if (result != null) {
-                  if (!mounted) return;
-                  // delete company too?
-                  if (widget.user.partyId == currentUser.partyId!) {
-                    _userBloc.add(
-                      UserDelete(widget.user.copyWith(image: null)),
-                    );
-                    Navigator.of(context).pop(updatedUser);
-                    context.read<AuthBloc>().add(const AuthLoggedOut());
-                  }
-                }
-              } else {
-                _userBloc.add(UserDelete(widget.user.copyWith(image: null)));
-              }
-            },
-          ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: OutlinedButton(
-            key: const Key('updateUser'),
-            child: Text(updatedUser.partyId == null ? 'Create' : 'Update'),
-            onPressed: () async {
-              if (_userDialogFormKey.currentState!.validate()) {
-                updatedUser = updatedUser.copyWith(
-                  pseudoId: _idController.text,
-                  firstName: _firstNameController.text,
-                  lastName: _lastNameController.text,
-                  email: _emailController.text,
-                  url: _urlController.text,
-                  loginName: _loginNameController.text,
-                  telephoneNr: _telephoneController.text,
-                  address: updatedUser.address,
-                  paymentMethod: updatedUser.paymentMethod,
-                  loginDisabled: _isLoginDisabled,
-                  userGroup: _selectedUserGroup,
-                  role: _selectedRole,
-                  appsUsed: [_classificationId],
-                  //                      language: Localizations.localeOf(context)
-                  //                          .languageCode
-                  //                          .toString(),
-                  company: _selectedCompany.copyWith(role: _selectedRole),
-                  image: _image,
-                );
-
-                _userBloc.add(UserUpdate(updatedUser));
-                // if logged-in user update authBloc
-                if (currentUser.partyId == updatedUser.partyId) {
-                  _authBloc.add(AuthLoad());
-                }
-              }
-            },
-          ),
-        ),
-      ],
-    );
-
     List<Widget> column = [];
     for (var i = 0; i < widgets.length; i++) {
       column.add(Padding(padding: const EdgeInsets.all(10), child: widgets[i]));
     }
-    column.add(updateButton);
+    if (isPhone) column.add(const SizedBox(height: 70));
 
     List<Widget> rows = [];
     if (!ResponsiveBreakpoints.of(context).isMobile) {
@@ -1018,7 +930,6 @@ class UserDialogState extends State<UserDialogStateFull> {
           ),
         ),
       );
-      rows.add(updateButton);
     }
 
     return Form(
@@ -1047,5 +958,87 @@ class UserDialogState extends State<UserDialogStateFull> {
         ),
       ),
     );
+  }
+
+  Widget updateButton(UserCompanyLocalizations localizations) {
+    return Row(
+      children: [
+        if (widget.user.partyId != null)
+          OutlinedButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(Colors.red),
+            ),
+            key: const Key('deleteUser'),
+            child: Text(localizations.deleteUser),
+            onPressed: () async {
+              if (widget.user.partyId != null &&
+                  currentUser.partyId == widget.user.partyId) {
+                var result = await confirmDeleteUserComp(
+                  context,
+                  widget.user.userGroup,
+                );
+                if (result != null) {
+                  if (!mounted) return;
+                  // delete company too?
+                  if (widget.user.partyId == currentUser.partyId!) {
+                    _userBloc.add(
+                      UserDelete(widget.user.copyWith(image: null)),
+                    );
+                    Navigator.of(context).pop(updatedUser);
+                    context.read<AuthBloc>().add(const AuthLoggedOut());
+                  }
+                }
+              } else {
+                _userBloc.add(UserDelete(widget.user.copyWith(image: null)));
+              }
+            },
+          ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: OutlinedButton(
+            key: const Key('updateUser'),
+            child: Text(
+              updatedUser.partyId == null
+                  ? localizations.create
+                  : localizations.update,
+            ),
+            onPressed: () async {
+              update(localizations);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  void update(UserCompanyLocalizations localizations) {
+    if (_userDialogFormKey.currentState!.validate()) {
+      updatedUser = updatedUser.copyWith(
+        pseudoId: _idController.text,
+        firstName: _firstNameController.text,
+        lastName: _lastNameController.text,
+        email: _emailController.text,
+        url: _urlController.text,
+        loginName: _loginNameController.text,
+        telephoneNr: _telephoneController.text,
+        address: updatedUser.address,
+        paymentMethod: updatedUser.paymentMethod,
+        loginDisabled: _isLoginDisabled,
+        userGroup: _selectedUserGroup,
+        role: _selectedRole,
+        appsUsed: [_classificationId],
+        //                      language: Localizations.localeOf(context)
+        //                          .languageCode
+        //                          .toString(),
+        company: _selectedCompany.copyWith(role: _selectedRole),
+        image: _image,
+      );
+
+      _userBloc.add(UserUpdate(updatedUser));
+      // if logged-in user update authBloc
+      if (currentUser.partyId == updatedUser.partyId) {
+        _authBloc.add(AuthLoad());
+      }
+    }
   }
 }

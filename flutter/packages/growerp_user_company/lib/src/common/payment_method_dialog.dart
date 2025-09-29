@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:credit_card_validator/credit_card_validator.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 class PaymentMethodDialog extends StatefulWidget {
   final PaymentMethod? paymentMethod;
@@ -48,6 +49,7 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = UserCompanyLocalizations.of(context)!;
     return Dialog(
       key: const Key('PaymentMethodDialog'),
       insetPadding: const EdgeInsets.all(10),
@@ -56,13 +58,13 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
         context: context,
         height: 450,
         width: 350,
-        title: 'PaymentMethod',
-        child: _editPaymentMethod(context),
+        title: localizations.paymentMethodDetail,
+        child: _editPaymentMethod(localizations),
       ),
     );
   }
 
-  Widget _editPaymentMethod(BuildContext context) {
+  Widget _editPaymentMethod(UserCompanyLocalizations localizations) {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
@@ -76,17 +78,20 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
                 key: const Key('regCard'),
               ),
             ),
-            const Text(
-              "New Card:",
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            Text(
+              localizations.paymentMethodNewCard,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             DropdownButtonFormField<CreditCardType>(
               key: const Key('cardTypeDropDown'),
-              decoration: const InputDecoration(labelText: 'Card Type'),
-              hint: const Text('Card Type'),
+              decoration: InputDecoration(
+                labelText: localizations.paymentMethodCardType,
+              ),
+              hint: Text(localizations.paymentMethodCardType),
               initialValue: _cardType,
-              validator: (value) => value == null ? 'field required' : null,
+              validator: (value) =>
+                  value == null ? localizations.fieldRequired : null,
               items: CreditCardType.values
                   .map(
                     (item) => DropdownMenuItem<CreditCardType>(
@@ -105,15 +110,17 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
             const SizedBox(height: 10),
             TextFormField(
               key: const Key('creditCardNumber'),
-              decoration: const InputDecoration(labelText: 'Card Number'),
+              decoration: InputDecoration(
+                labelText: localizations.paymentMethodCardNumber,
+              ),
               controller: _creditCardNumberController,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter a Credit Card Number?';
+                  return localizations.paymentMethodCardNumberError;
                 }
                 var valid = _ccValidator.validateCCNum(value);
                 if (!valid.isPotentiallyValid) {
-                  return 'Card Number not a valid number!';
+                  return localizations.paymentMethodCardNumberInvalid;
                 }
                 return null;
               },
@@ -124,13 +131,13 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('expireMonth'),
-                    decoration: const InputDecoration(
-                      labelText: 'Expire Month',
+                    decoration: InputDecoration(
+                      labelText: localizations.paymentMethodExpireMonth,
                     ),
                     controller: _expireMonthController,
                     validator: (value) {
                       if (value!.isEmpty) {
-                        return 'Please enter expiration month?';
+                        return localizations.paymentMethodExpireMonthError;
                       }
                       return null;
                     },
@@ -140,11 +147,13 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('expireYear'),
-                    decoration: const InputDecoration(labelText: 'Expire Year'),
+                    decoration: InputDecoration(
+                      labelText: localizations.paymentMethodExpireYear,
+                    ),
                     controller: _expireYearController,
                     validator: (value) {
                       if (value!.isEmpty) {
-                        return 'Please enter a expiration year?';
+                        return localizations.paymentMethodExpireYearError;
                       }
                       return null;
                     },
@@ -160,8 +169,8 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
                     key: const Key('updatePaymentMethod'),
                     child: Text(
                       widget.paymentMethod?.creditCardNumber != null
-                          ? 'Update'
-                          : 'Add',
+                          ? localizations.update
+                          : localizations.add,
                     ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {

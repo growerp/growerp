@@ -148,5 +148,94 @@
   "vatPercentage": "เปอร์เซ็นต์ภาษีมูลค่าเพิ่ม",
   "webAddress": "ที่อยู่เว็บ",
   "website": "เว็บไซต์",
-  "websiteAddress": "ที่อยู่เว็บไซต์"
+  "websiteAddress": "ที่อยู่เว็บไซต์",
+  "newCompany": "บริษัทใหม่",
+  "newItem": "ใหม่",
+  "paymentMethodDetail": "รายละเอียดวิธีการชำระเงิน",
+  "noUsers": "ไม่พบผู้ใช้",
+  "noLeads": "ไม่พบลูกค้าเป้าหมาย",
+  "noCustomers": "ไม่พบลูกค้า",
+  "noSuppliers": "ไม่พบซัพพลายเออร์",
+  "noEmployees": "ไม่พบพนักงาน",
+  "noAdmins": "ไม่พบผู้ดูแลระบบ",
+  "noClients": "ไม่พบลูกค้า",
+  "client": "ลูกค้า",
+  "clients": "ลูกค้า",
+  "companyNotFound": "ไม่พบบริษัท {companyId}",
+  "userNotFound": "ไม่พบผู้ใช้ {userId}",
+  "serverConnectionProblem": "ปัญหาการเชื่อมต่อเซิร์ฟเวอร์",
+  "userDeleted": "ผู้ใช้ {name} ถูกลบแล้ว",
+  "companyPersonNameEmail": "ชื่อบริษัท/บุคคล\nอีเมล",
+  "companyUserSearch": "ค้นหาบริษัท/ผู้ใช้",
+  "searchResults": "ผลการค้นหา",
+  "noClientFound": "ไม่พบลูกค้า",
+  "noUsersFound": "ไม่พบผู้ใช้ {role}",
+  "@noUsersFound": {
+    "description": "ข้อความเมื่อไม่พบผู้ใช้สำหรับบทบาทนั้น",
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "addNewUser": "เพิ่มผู้ใช้ใหม่",
+  "userUpDownload": "อัปโหลด/ดาวน์โหลดผู้ใช้",
+  "showUserEvents": "แสดงกิจกรรมของผู้ใช้",
+  "telephoneNumber": "หมายเลขโทรศัพท์",
+  "roleCompanyInfo": "ข้อมูล บริษัท {role}",
+  "companyId": "ชื่อบริษัท[id]",
+  "updateCompany": "อัปเดต",
+  "removeCompany": "ลบ",
+  "addNewRelatedComp": "เพิ่ม บริษัท ที่เกี่ยวข้องใหม่",
+  "userLoginName": "ชื่อล็อกอินผู้ใช้",
+  "delete": "ลบ",
+  "imageUploadError": "เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ!",
+  "companyUpdated": "บริษัท {name} อัปเดตแล้ว...",
+  "@companyUpdated": {
+    "description": "ข้อความยืนยันเมื่อมีการอัปเดตบริษัท",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "companyAdded": "เพิ่มบริษัท {name} แล้ว",
+  "@companyAdded": {
+    "description": "ข้อความยืนยันเมื่อมีการเพิ่มบริษัท",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUpdated": "ผู้ใช้ {name} อัปเดตแล้ว...",
+  "@userUpdated": {
+    "description": "ข้อความยืนยันเมื่อมีการอัปเดตผู้ใช้",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userAdded": "เพิ่มผู้ใช้ {name} ที่ด้านบนของรายการแล้ว...",
+  "@userAdded": {
+    "description": "ข้อความยืนยันเมื่อมีการเพิ่มผู้ใช้",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "asCompany": "อย่างไรก็ตาม ตอนนี้แสดงเป็นบริษัท",
+  "@asCompany": {
+    "description": "ข้อความระบุว่าขณะนี้ผู้ใช้แสดงเป็นบริษัท"
+  },
+  "compUserUploadSuccess": "การอัปโหลดบริษัท/ผู้ใช้สิ้นสุดลงแล้ว",
+  "@compUserUploadSuccess": {
+    "description": "ข้อความแสดงความสำเร็จในการอัปโหลดบริษัท/ผู้ใช้"
+  },
+  "compUserDownloadSuccess": "คำขอกำหนดเวลาแล้วและอีเมลจะถูกส่งในไม่ช้า",
+  "@compUserDownloadSuccess": {
+    "description": "ข้อความแสดงความสำเร็จในการดาวน์โหลดบริษัท/ผู้ใช้"
+  }
 }

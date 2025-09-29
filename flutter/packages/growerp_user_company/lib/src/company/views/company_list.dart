@@ -77,198 +77,250 @@ class CompanyListState extends State<CompanyList> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = UserCompanyLocalizations.of(context)!;
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
     right = right ?? (isAPhone(context) ? 20 : 50);
-    return Builder(builder: (BuildContext context) {
-      Widget tableView() {
-        if (companies.isEmpty) {
-          return const Center(
+    return Builder(
+      builder: (BuildContext context) {
+        Widget tableView() {
+          if (companies.isEmpty) {
+            return Center(
               heightFactor: 20,
-              child:
-                  Text("no companies found", style: TextStyle(fontSize: 20.0)));
-        }
-        // get table data formatted for tableView
-        var (
-          List<List<TableViewCell>> tableViewCells,
-          List<double> fieldWidths,
-          double? rowHeight
-        ) = get2dTableData<Company>(getTableData,
+              child: Text(
+                localizations.companyNone,
+                style: const TextStyle(fontSize: 20.0),
+              ),
+            );
+          }
+          // get table data formatted for tableView
+          var (
+            List<List<TableViewCell>> tableViewCells,
+            List<double> fieldWidths,
+            double? rowHeight,
+          ) = get2dTableData<Company>(
+            getTableData,
             bloc: _companyBloc,
             classificationId: 'AppAdmin',
             context: context,
-            items: companies);
-        return TableView.builder(
-          diagonalDragBehavior: DiagonalDragBehavior.free,
-          verticalDetails:
-              ScrollableDetails.vertical(controller: _scrollController),
-          horizontalDetails:
-              ScrollableDetails.horizontal(controller: _horizontalController),
-          cellBuilder: (context, vicinity) =>
-              tableViewCells[vicinity.row][vicinity.column],
-          columnBuilder: (index) => index >= tableViewCells[0].length
-              ? null
-              : TableSpan(
-                  padding: companyUserPadding,
-                  backgroundDecoration:
-                      getCompanyUserBackGround(context, index),
-                  extent: FixedTableSpanExtent(fieldWidths[index]),
-                ),
-          pinnedColumnCount: 1,
-          rowBuilder: (index) => index >= tableViewCells.length
-              ? null
-              : TableSpan(
-                  padding: companyUserPadding,
-                  backgroundDecoration:
-                      getCompanyUserBackGround(context, index),
-                  extent: FixedTableSpanExtent(rowHeight!),
-                  recognizerFactories: <Type, GestureRecognizerFactory>{
+            items: companies,
+          );
+          return TableView.builder(
+            diagonalDragBehavior: DiagonalDragBehavior.free,
+            verticalDetails: ScrollableDetails.vertical(
+              controller: _scrollController,
+            ),
+            horizontalDetails: ScrollableDetails.horizontal(
+              controller: _horizontalController,
+            ),
+            cellBuilder: (context, vicinity) =>
+                tableViewCells[vicinity.row][vicinity.column],
+            columnBuilder: (index) => index >= tableViewCells[0].length
+                ? null
+                : TableSpan(
+                    padding: companyUserPadding,
+                    backgroundDecoration: getCompanyUserBackGround(
+                      context,
+                      index,
+                    ),
+                    extent: FixedTableSpanExtent(fieldWidths[index]),
+                  ),
+            pinnedColumnCount: 1,
+            rowBuilder: (index) => index >= tableViewCells.length
+                ? null
+                : TableSpan(
+                    padding: companyUserPadding,
+                    backgroundDecoration: getCompanyUserBackGround(
+                      context,
+                      index,
+                    ),
+                    extent: FixedTableSpanExtent(rowHeight!),
+                    recognizerFactories: <Type, GestureRecognizerFactory>{
                       TapGestureRecognizer:
                           GestureRecognizerFactoryWithHandlers<
-                                  TapGestureRecognizer>(
-                              () => TapGestureRecognizer(),
-                              (TapGestureRecognizer t) =>
-                                  t.onTap = () => showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return index > companies.length
-                                            ? const BottomLoader()
-                                            : Dismissible(
-                                                key: const Key('companyItem'),
-                                                direction:
-                                                    DismissDirection.startToEnd,
-                                                child: BlocProvider.value(
-                                                    value: _companyBloc,
-                                                    child: CompanyDialog(
-                                                        companies[index - 1])));
-                                      }))
-                    }),
-          pinnedRowCount: 1,
-        );
-      }
-
-      blocListener(context, state) {
-        if (state.status == CompanyStatus.success) {
-          HelperFunctions.showMessage(
-              context, '${state.message}', Colors.green);
+                            TapGestureRecognizer
+                          >(
+                            () => TapGestureRecognizer(),
+                            (TapGestureRecognizer t) => t.onTap = () =>
+                                showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return index > companies.length
+                                        ? const BottomLoader()
+                                        : Dismissible(
+                                            key: const Key('companyItem'),
+                                            direction:
+                                                DismissDirection.startToEnd,
+                                            child: BlocProvider.value(
+                                              value: _companyBloc,
+                                              child: CompanyDialog(
+                                                companies[index - 1],
+                                              ),
+                                            ),
+                                          );
+                                  },
+                                ),
+                          ),
+                    },
+                  ),
+            pinnedRowCount: 1,
+          );
         }
-      }
 
-      blocBuilder(context, state) {
-        if (state.status == CompanyStatus.failure) {
-          return FatalErrorForm(
-              message: "Could not load ${widget.role.toString()}s!");
-        } else {
-          companies = state.companies;
-          hasReachedMax = state.hasReachedMax;
-          if (companies.isNotEmpty) {
-            Future.delayed(const Duration(milliseconds: 100), () {
-              WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => _scrollController.jumpTo(currentScroll));
-            });
+        blocListener(context, state) {
+          if (state.status == CompanyStatus.success) {
+            HelperFunctions.showMessage(
+              context,
+              '${state.message}',
+              Colors.green,
+            );
           }
-          return Stack(
-            children: [
-              tableView(),
-              Positioned(
-                right: right,
-                bottom: bottom,
-                child: GestureDetector(
-                  onPanUpdate: (details) {
-                    setState(() {
-                      right = right! - details.delta.dx;
-                      bottom -= details.delta.dy;
-                    });
-                  },
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      FloatingActionButton(
+        }
+
+        blocBuilder(context, state) {
+          if (state.status == CompanyStatus.failure) {
+            return FatalErrorForm(
+              message: localizations.couldNotLoad(widget.role.toString()),
+            );
+          } else {
+            companies = state.companies;
+            hasReachedMax = state.hasReachedMax;
+            if (companies.isNotEmpty) {
+              Future.delayed(const Duration(milliseconds: 100), () {
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => _scrollController.jumpTo(currentScroll),
+                );
+              });
+            }
+            return Stack(
+              children: [
+                tableView(),
+                Positioned(
+                  right: right,
+                  bottom: bottom,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        right = right! - details.delta.dx;
+                        bottom -= details.delta.dy;
+                      });
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FloatingActionButton(
                           key: const Key("search"),
                           heroTag: "companybtn1",
                           onPressed: () async {
                             // find findoc id to show
                             await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  // search separate from finDocBloc
-                                  return BlocProvider.value(
-                                      value: context
-                                          .read<DataFetchBloc<Companies>>(),
-                                      child: const SearchCompanyList());
-                                }).then((value) async => value != null
-                                ?
-                                // show detail page
-                                await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return BlocProvider.value(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                // search separate from finDocBloc
+                                return BlocProvider.value(
+                                  value: context
+                                      .read<DataFetchBloc<Companies>>(),
+                                  child: const SearchCompanyList(),
+                                );
+                              },
+                            ).then(
+                              (value) async => value != null
+                                  ?
+                                    // show detail page
+                                    await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return BlocProvider.value(
                                           value: _companyBloc,
-                                          child: CompanyDialog(value));
-                                    })
-                                : const SizedBox.shrink());
+                                          child: CompanyDialog(value),
+                                        );
+                                      },
+                                    )
+                                  : const SizedBox.shrink(),
+                            );
                           },
-                          child: const Icon(Icons.search)),
-                      const SizedBox(height: 10),
-                      FloatingActionButton(
+                          child: const Icon(Icons.search),
+                        ),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
                           key: const Key("addNewCompany"),
                           heroTag: "companybtn2",
                           onPressed: () async {
                             await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return BlocProvider.value(
-                                      value: _companyBloc,
-                                      child: CompanyDialog(Company(
-                                        partyId: '_NEW_',
-                                        role: widget.role,
-                                      )));
-                                });
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BlocProvider.value(
+                                  value: _companyBloc,
+                                  child: CompanyDialog(
+                                    Company(
+                                      partyId: '_NEW_',
+                                      role: widget.role,
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
                           },
-                          tooltip: 'Add New',
-                          child: const Icon(Icons.add)),
-                      const SizedBox(height: 10),
-                      if (widget.mainOnly)
-                        FloatingActionButton(
+                          tooltip: localizations.addNew,
+                          child: const Icon(Icons.add),
+                        ),
+                        const SizedBox(height: 10),
+                        if (widget.mainOnly)
+                          FloatingActionButton(
                             key: const Key("refresh"),
                             heroTag: "companybtn3",
                             onPressed: () async => _companyBloc.add(
-                                CompanyFetch(
-                                    refresh: true, mainOnly: widget.mainOnly)),
-                            tooltip: 'refresh',
-                            child: const Icon(Icons.refresh)),
-                    ],
+                              CompanyFetch(
+                                refresh: true,
+                                mainOnly: widget.mainOnly,
+                              ),
+                            ),
+                            tooltip: localizations.refresh,
+                            child: const Icon(Icons.refresh),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          );
+              ],
+            );
+          }
         }
-      }
 
-      if (widget.mainOnly) {
-        return BlocConsumer<CompanyBloc, CompanyState>(
-            listener: blocListener, builder: blocBuilder);
-      } else {
-        switch (widget.role) {
-          case Role.lead:
-            return BlocConsumer<CompanyLeadBloc, CompanyState>(
-                listener: blocListener, builder: blocBuilder);
-          case Role.customer:
-            return BlocConsumer<CompanyCustomerBloc, CompanyState>(
-                listener: blocListener, builder: blocBuilder);
-          case Role.supplier:
-            return BlocConsumer<CompanySupplierBloc, CompanyState>(
-                listener: blocListener, builder: blocBuilder);
-          default:
-            return BlocConsumer<CompanyBloc, CompanyState>(
-                listener: blocListener, builder: blocBuilder);
+        if (widget.mainOnly) {
+          return BlocConsumer<CompanyBloc, CompanyState>(
+            listener: blocListener,
+            builder: blocBuilder,
+          );
+        } else {
+          switch (widget.role) {
+            case Role.lead:
+              return BlocConsumer<CompanyLeadBloc, CompanyState>(
+                listener: blocListener,
+                builder: blocBuilder,
+              );
+            case Role.customer:
+              return BlocConsumer<CompanyCustomerBloc, CompanyState>(
+                listener: blocListener,
+                builder: blocBuilder,
+              );
+            case Role.supplier:
+              return BlocConsumer<CompanySupplierBloc, CompanyState>(
+                listener: blocListener,
+                builder: blocBuilder,
+              );
+            default:
+              return BlocConsumer<CompanyBloc, CompanyState>(
+                listener: blocListener,
+                builder: blocBuilder,
+              );
+          }
         }
-      }
-    });
+      },
+    );
   }
 
   @override

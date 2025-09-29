@@ -27,6 +27,7 @@ import 'dart:io';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter/rendering.dart';
+import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 import '../../common/common.dart';
 import '../../company/bloc/company_bloc.dart';
@@ -213,6 +214,7 @@ class UserDialogState extends State<UserDialog> {
 
   @override
   Widget build(BuildContext context) {
+    var localizations = UserCompanyLocalizations.of(context)!;
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
     right = right ?? (isPhone ? 20 : 40);
     String title = '';
@@ -231,7 +233,7 @@ class UserDialogState extends State<UserDialog> {
       insetPadding: const EdgeInsets.all(10),
       child: popUp(
         context: context,
-        title: "$title #${widget.user.pseudoId ?? ' new'}",
+        title: "$title #${widget.user.pseudoId ?? localizations.newItem}",
         width: isPhone ? 400 : 800,
         height: isPhone ? 700 : 600,
         child: ScaffoldMessenger(
