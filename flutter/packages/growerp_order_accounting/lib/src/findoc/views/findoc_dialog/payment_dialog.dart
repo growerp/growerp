@@ -515,8 +515,9 @@ class PaymentDialogState extends State<PaymentDialog> {
                         showSearchBox: true,
                         searchFieldProps: TextFieldProps(
                           autofocus: true,
-                          decoration:
-                              InputDecoration(labelText: _local.glAccount),
+                          decoration: InputDecoration(
+                            labelText: _local.glAccount,
+                          ),
                         ),
                         menuProps: MenuProps(
                           borderRadius: BorderRadius.circular(20.0),

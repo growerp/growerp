@@ -416,7 +416,8 @@ class MyFinDocState extends State<FinDocPage> {
                   enabled: !readOnly,
                 ),
                 initialValue: _updatedStatus,
-                validator: (value) => value == null ? _local.fieldRequired : null,
+                validator: (value) =>
+                    value == null ? _local.fieldRequired : null,
                 items: FinDocStatusVal.validStatusList(_updatedStatus)
                     .map(
                       (label) => DropdownMenuItem<FinDocStatusVal>(
@@ -727,10 +728,9 @@ class MyFinDocState extends State<FinDocPage> {
                 HelperFunctions.showMessage(
                   context,
                   _local.itemOrCustomerRequired(
-                      (finDocUpdated.sales
-                          ? _local.customer
-                          : _local.supplier),
-                      finDocUpdated.docType.toString()),
+                    (finDocUpdated.sales ? _local.customer : _local.supplier),
+                    finDocUpdated.docType.toString(),
+                  ),
                   Colors.red,
                 );
               }
@@ -1286,12 +1286,11 @@ class MyFinDocState extends State<FinDocPage> {
                                     height: 50,
                                   ),
                                 ),
-                                dropdownDecoratorProps:
-                                    DropDownDecoratorProps(
-                                      dropdownSearchDecoration: InputDecoration(
-                                        labelText: _local.glAccount,
-                                      ),
-                                    ),
+                                dropdownDecoratorProps: DropDownDecoratorProps(
+                                  dropdownSearchDecoration: InputDecoration(
+                                    labelText: _local.glAccount,
+                                  ),
+                                ),
                                 key: const Key('glAccount'),
                                 itemAsString: (GlAccount? u) =>
                                     " ${u?.accountCode} ${u?.accountName} ",
