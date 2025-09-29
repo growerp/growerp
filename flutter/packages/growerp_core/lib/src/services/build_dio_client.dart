@@ -107,9 +107,6 @@ class KeyInterceptor extends Interceptor {
         );
       }
     }
-    debugPrint(
-      'REQUEST[======${options.method}] => PATH: ${options.headers.toString()}',
-    );
     return super.onRequest(options, handler);
   }
 

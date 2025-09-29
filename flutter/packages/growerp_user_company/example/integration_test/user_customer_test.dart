@@ -1,5 +1,9 @@
 /*
- * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * This GrowERP soimimport 'package:growerp_models/growerp_models.dart';
+
+Future<void> main() async {owerp_models/growerp_models.dart';
+
+Future<void> main() async { public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
  * 
  * To the extent possible under law, the author(s) have dedicated all
@@ -21,19 +25,6 @@ import 'package:growerp_core/test_data.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-
-// Static menuOptions for testing (no localization needed)
-List<MenuOption> testMenuOptions = [
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Main',
-    route: '/',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const MainMenu(),
-  ),
-];
-
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -47,12 +38,16 @@ void main() {
 
   testWidgets('''GrowERP user customer test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, generateRoute, testMenuOptions,
-        UserCompanyLocalizations.localizationsDelegates,
-        restClient: restClient,
-        blocProviders: getUserCompanyBlocProviders(restClient, 'AppAdmin'),
-        title: 'GrowERP user-customer test',
-        clear: true);
+    await CommonTest.startTestApp(
+      tester,
+      generateRoute,
+      testMenuOptions,
+      UserCompanyLocalizations.localizationsDelegates,
+      restClient: restClient,
+      blocProviders: getUserCompanyBlocProviders(restClient, 'AppAdmin'),
+      title: 'GrowERP user-customer test',
+      clear: true,
+    );
     await CommonTest.createCompanyAndAdmin(tester);
     await selectCustomers(tester);
     await UserTest.addUsers(tester, customers.sublist(0, 2));
