@@ -41,33 +41,39 @@ class SearchSubscriptionState extends State<SearchSubscriptionList> {
   Widget build(BuildContext context) {
     var catalogLocalizations = CatalogLocalizations.of(context)!;
     return BlocConsumer<SubscriptionBloc, SubscriptionState>(
-        listener: (context, state) {
-      if (state.status == SubscriptionStatus.failure) {
-        HelperFunctions.showMessage(
+      listener: (context, state) {
+        if (state.status == SubscriptionStatus.failure) {
+          HelperFunctions.showMessage(
             context,
             catalogLocalizations.error(state.message ?? ''),
-            Colors.red);
-      }
-    }, builder: (context, state) {
-      if (state.status == SubscriptionStatus.failure) {
-        return Center(
+            Colors.red,
+          );
+        }
+      },
+      builder: (context, state) {
+        if (state.status == SubscriptionStatus.failure) {
+          return Center(
             child: Text(
-                catalogLocalizations.fetchSearchError(state.message ?? '')));
-      }
-      if (state.status == SubscriptionStatus.success) {
-        subscriptions = state.searchResults ?? [];
-      }
-      return Stack(
-        children: [
-          SubscriptionSearchDialog(
+              catalogLocalizations.fetchSearchError(state.message ?? ''),
+            ),
+          );
+        }
+        if (state.status == SubscriptionStatus.success) {
+          subscriptions = state.searchResults ?? [];
+        }
+        return Stack(
+          children: [
+            SubscriptionSearchDialog(
               subscriptionBloc: _subscriptionBloc,
               widget: widget,
-              subscriptions: subscriptions),
-          if (state.status == SubscriptionStatus.loading)
-            const LoadingIndicator(),
-        ],
-      );
-    });
+              subscriptions: subscriptions,
+            ),
+            if (state.status == SubscriptionStatus.loading)
+              const LoadingIndicator(),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -88,66 +94,78 @@ class SubscriptionSearchDialog extends StatelessWidget {
     var catalogLocalizations = CatalogLocalizations.of(context)!;
     final ScrollController scrollController = ScrollController();
     return Dialog(
-        key: const Key('SearchDialog'),
-        insetPadding: const EdgeInsets.all(10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+      key: const Key('SearchDialog'),
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: catalogLocalizations.subscriptionSearch,
+        height: 500,
+        width: 350,
+        child: Column(
+          children: [
+            TextFormField(
+              key: const Key('searchField'),
+              textInputAction: TextInputAction.search,
+              autofocus: true,
+              decoration: InputDecoration(
+                labelText: catalogLocalizations.searchInput,
+              ),
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return catalogLocalizations.enterSearch;
+                }
+                return null;
+              },
+              onFieldSubmitted: (value) => subscriptionBloc.add(
+                SubscriptionFetch(limit: 5, searchString: value),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(catalogLocalizations.searchResults),
+            Expanded(
+              child: ListView.builder(
+                key: const Key('listView'),
+                shrinkWrap: true,
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: subscriptions.length + 2,
+                controller: scrollController,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == 0) {
+                    return Visibility(
+                      visible: subscriptions.isEmpty,
+                      child: Center(
+                        heightFactor: 20,
+                        child: Text(
+                          catalogLocalizations.noSearchItems,
+                          key: const Key('empty'),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  }
+                  index--;
+                  return index >= subscriptions.length
+                      ? const Text('')
+                      : Dismissible(
+                          key: const Key('searchItem'),
+                          direction: DismissDirection.startToEnd,
+                          child: ListTile(
+                            title: Text(
+                              "${catalogLocalizations.id(subscriptions[index].pseudoId ?? '')}\n"
+                              "${catalogLocalizations.subscriber(subscriptions[index].subscriber?.name ?? '')}",
+                              key: Key("searchResult$index"),
+                            ),
+                            onTap: () =>
+                                Navigator.of(context).pop(subscriptions[index]),
+                          ),
+                        );
+                },
+              ),
+            ),
+          ],
         ),
-        child: popUp(
-            context: context,
-            title: catalogLocalizations.subscriptionSearch,
-            height: 500,
-            width: 350,
-            child: Column(children: [
-              TextFormField(
-                  key: const Key('searchField'),
-                  textInputAction: TextInputAction.search,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                      labelText: catalogLocalizations.searchInput),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return catalogLocalizations.enterSearch;
-                    }
-                    return null;
-                  },
-                  onFieldSubmitted: (value) => subscriptionBloc
-                      .add(SubscriptionFetch(limit: 5, searchString: value))),
-              const SizedBox(height: 20),
-              Text(catalogLocalizations.searchResults),
-              Expanded(
-                  child: ListView.builder(
-                      key: const Key('listView'),
-                      shrinkWrap: true,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: subscriptions.length + 2,
-                      controller: scrollController,
-                      itemBuilder: (BuildContext context, int index) {
-                        if (index == 0) {
-                          return Visibility(
-                              visible: subscriptions.isEmpty,
-                              child: Center(
-                                  heightFactor: 20,
-                                  child: Text(
-                                      catalogLocalizations.noSearchItems,
-                                      key: const Key('empty'),
-                                      textAlign: TextAlign.center)));
-                        }
-                        index--;
-                        return index >= subscriptions.length
-                            ? const Text('')
-                            : Dismissible(
-                                key: const Key('searchItem'),
-                                direction: DismissDirection.startToEnd,
-                                child: ListTile(
-                                  title: Text(
-                                      "${catalogLocalizations.id(subscriptions[index].pseudoId ?? '')}\n"
-                                      "${catalogLocalizations.subscriber(subscriptions[index].subscriber?.name ?? '')}",
-                                      key: Key("searchResult$index")),
-                                  onTap: () => Navigator.of(context)
-                                      .pop(subscriptions[index]),
-                                ));
-                      }))
-            ])));
+      ),
+    );
   }
 }

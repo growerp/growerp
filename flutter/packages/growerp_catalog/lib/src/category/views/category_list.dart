@@ -52,24 +52,31 @@ class CategoriesListState extends State<CategoryList> {
     var catalogLocalizations = CatalogLocalizations.of(context)!;
     if (categories.isEmpty) {
       return Center(
-          child: Text(catalogLocalizations.noCategories,
-              style: const TextStyle(fontSize: 20.0)));
+        child: Text(
+          catalogLocalizations.noCategories,
+          style: const TextStyle(fontSize: 20.0),
+        ),
+      );
     }
     var (
       List<List<TableViewCell>> tableViewCells,
       List<double> fieldWidths,
-      double? rowHeight
-    ) = get2dTableData<Category>(getCategoryTableData,
-        bloc: _categoryBloc,
-        classificationId: 'AppAdmin',
-        context: context,
-        items: categories);
+      double? rowHeight,
+    ) = get2dTableData<Category>(
+      getCategoryTableData,
+      bloc: _categoryBloc,
+      classificationId: 'AppAdmin',
+      context: context,
+      items: categories,
+    );
     return TableView.builder(
       diagonalDragBehavior: DiagonalDragBehavior.free,
-      verticalDetails:
-          ScrollableDetails.vertical(controller: _scrollController),
-      horizontalDetails:
-          ScrollableDetails.horizontal(controller: _horizontalController),
+      verticalDetails: ScrollableDetails.vertical(
+        controller: _scrollController,
+      ),
+      horizontalDetails: ScrollableDetails.horizontal(
+        controller: _horizontalController,
+      ),
       cellBuilder: (context, vicinity) =>
           tableViewCells[vicinity.row][vicinity.column],
       columnBuilder: (index) => index >= tableViewCells[0].length
@@ -87,24 +94,30 @@ class CategoriesListState extends State<CategoryList> {
               backgroundDecoration: getCategoryBackGround(context, index),
               extent: FixedTableSpanExtent(rowHeight!),
               recognizerFactories: <Type, GestureRecognizerFactory>{
-                  TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-                          TapGestureRecognizer>(
+                TapGestureRecognizer:
+                    GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
                       () => TapGestureRecognizer(),
                       (TapGestureRecognizer t) => t.onTap = () => showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return index > categories.length
-                                ? const BottomLoader()
-                                : Dismissible(
-                                    key: const Key('dummy'),
-                                    direction: DismissDirection.startToEnd,
-                                    child: BlocProvider.value(
-                                        value: _categoryBloc,
-                                        child: CategoryDialog(
-                                            categories[index - 1])));
-                          }))
-                }),
+                        barrierDismissible: true,
+                        context: context,
+                        builder: (BuildContext context) {
+                          return index > categories.length
+                              ? const BottomLoader()
+                              : Dismissible(
+                                  key: const Key('dummy'),
+                                  direction: DismissDirection.startToEnd,
+                                  child: BlocProvider.value(
+                                    value: _categoryBloc,
+                                    child: CategoryDialog(
+                                      categories[index - 1],
+                                    ),
+                                  ),
+                                );
+                        },
+                      ),
+                    ),
+              },
+            ),
       pinnedRowCount: 1,
     );
   }
@@ -114,28 +127,33 @@ class CategoriesListState extends State<CategoryList> {
     var catalogLocalizations = CatalogLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
     return BlocConsumer<CategoryBloc, CategoryState>(
-        listenWhen: (previous, current) =>
-            previous.status == CategoryStatus.loading,
-        listener: (context, state) {
-          if (state.status == CategoryStatus.failure) {
-            HelperFunctions.showMessage(
-                context, '${state.message}', Colors.red);
-          }
-          if (state.status == CategoryStatus.success) {
-            started = true;
-            HelperFunctions.showMessage(
-                context, '${state.message}', Colors.green);
-          }
-        },
-        builder: (context, state) {
-          switch (state.status) {
-            case CategoryStatus.failure:
-              return Center(
-                  child: Text(catalogLocalizations
-                      .fetchCategoriesError(state.message ?? '')));
-            case CategoryStatus.success:
-              categories = state.categories;
-              return Stack(children: [
+      listenWhen: (previous, current) =>
+          previous.status == CategoryStatus.loading,
+      listener: (context, state) {
+        if (state.status == CategoryStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+        if (state.status == CategoryStatus.success) {
+          started = true;
+          HelperFunctions.showMessage(
+            context,
+            '${state.message}',
+            Colors.green,
+          );
+        }
+      },
+      builder: (context, state) {
+        switch (state.status) {
+          case CategoryStatus.failure:
+            return Center(
+              child: Text(
+                catalogLocalizations.fetchCategoriesError(state.message ?? ''),
+              ),
+            );
+          case CategoryStatus.success:
+            categories = state.categories;
+            return Stack(
+              children: [
                 tableView(),
                 Positioned(
                   right: right,
@@ -148,77 +166,91 @@ class CategoriesListState extends State<CategoryList> {
                       });
                     },
                     child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          FloatingActionButton(
-                              key: const Key("search"),
-                              heroTag: "btn1",
-                              onPressed: () async {
-                                // find findoc id to show
-                                await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      // search separate
-                                      return BlocProvider.value(
-                                          value: context
-                                              .read<DataFetchBloc<Locations>>(),
-                                          child: const SearchCategoryList());
-                                    }).then((value) async => value != null &&
-                                        context.mounted
-                                    ?
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FloatingActionButton(
+                          key: const Key("search"),
+                          heroTag: "btn1",
+                          onPressed: () async {
+                            // find findoc id to show
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                // search separate
+                                return BlocProvider.value(
+                                  value: context
+                                      .read<DataFetchBloc<Locations>>(),
+                                  child: const SearchCategoryList(),
+                                );
+                              },
+                            ).then(
+                              (value) async => value != null && context.mounted
+                                  ?
                                     // show detail page
                                     await showDialog(
-                                        barrierDismissible: true,
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return BlocProvider.value(
-                                              value: _categoryBloc,
-                                              child: CategoryDialog(value));
-                                        })
-                                    : const SizedBox.shrink());
-                              },
-                              child: const Icon(Icons.search)),
-                          const SizedBox(height: 10),
-                          FloatingActionButton(
-                              heroTag: 'catFiles',
-                              key: const Key("upDownload"),
-                              onPressed: () async {
-                                await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) =>
-                                        BlocProvider.value(
-                                            value: _categoryBloc,
-                                            child:
-                                                const CategoryFilesDialog()));
-                              },
-                              tooltip: catalogLocalizations.categoryUpDown,
-                              child: const Icon(Icons.file_copy)),
-                          const SizedBox(height: 10),
-                          FloatingActionButton(
-                              heroTag: 'catNew',
-                              key: const Key("addNew"),
-                              onPressed: () async {
-                                await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return BlocProvider.value(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return BlocProvider.value(
                                           value: _categoryBloc,
-                                          child: CategoryDialog(Category()));
-                                    });
+                                          child: CategoryDialog(value),
+                                        );
+                                      },
+                                    )
+                                  : const SizedBox.shrink(),
+                            );
+                          },
+                          child: const Icon(Icons.search),
+                        ),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
+                          heroTag: 'catFiles',
+                          key: const Key("upDownload"),
+                          onPressed: () async {
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  BlocProvider.value(
+                                    value: _categoryBloc,
+                                    child: const CategoryFilesDialog(),
+                                  ),
+                            );
+                          },
+                          tooltip: catalogLocalizations.categoryUpDown,
+                          child: const Icon(Icons.file_copy),
+                        ),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
+                          heroTag: 'catNew',
+                          key: const Key("addNew"),
+                          onPressed: () async {
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BlocProvider.value(
+                                  value: _categoryBloc,
+                                  child: CategoryDialog(Category()),
+                                );
                               },
-                              tooltip: catalogLocalizations.addNew,
-                              child: const Icon(Icons.add)),
-                        ]),
+                            );
+                          },
+                          tooltip: catalogLocalizations.addNew,
+                          child: const Icon(Icons.add),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ]);
-            default:
-              return const Center(child: LoadingIndicator());
-          }
-        });
+              ],
+            );
+          default:
+            return const Center(child: LoadingIndicator());
+        }
+      },
+    );
   }
 
   @override

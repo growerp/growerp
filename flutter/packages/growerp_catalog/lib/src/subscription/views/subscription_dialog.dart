@@ -46,12 +46,18 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
     _selectedProduct = widget.subscription.product;
     _selectedSubscriber = widget.subscription.subscriber;
     _companyUserBloc = context.read<DataFetchBloc<CompaniesUsers>>()
-      ..add(GetDataEvent(() => context
-          .read<RestClient>()
-          .getCompanyUser(limit: 3, role: Role.customer)));
+      ..add(
+        GetDataEvent(
+          () => context.read<RestClient>().getCompanyUser(
+            limit: 3,
+            role: Role.customer,
+          ),
+        ),
+      );
     _productBloc = context.read<DataFetchBloc<Products>>()
       ..add(
-          GetDataEvent(() => context.read<RestClient>().getProducts(limit: 3)));
+        GetDataEvent(() => context.read<RestClient>().getProducts(limit: 3)),
+      );
   }
 
   @override
@@ -67,9 +73,10 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
             break;
           case SubscriptionStatus.failure:
             HelperFunctions.showMessage(
-                context,
-                catalogLocalizations.error(state.message ?? ''),
-                Colors.red);
+              context,
+              catalogLocalizations.error(state.message ?? ''),
+              Colors.red,
+            );
             break;
           default:
             Text(catalogLocalizations.question);
@@ -78,15 +85,14 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
       child: Dialog(
         key: const Key('SubscriptionDialog'),
         insetPadding: const EdgeInsets.all(10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: popUp(
           context: context,
           title: catalogLocalizations.subscriptionNumber(
-              widget.subscription.subscriptionId == null
-                  ? catalogLocalizations.newItem
-                  : widget.subscription.pseudoId ?? ''),
+            widget.subscription.subscriptionId == null
+                ? catalogLocalizations.newItem
+                : widget.subscription.pseudoId ?? '',
+          ),
           width: columns.toDouble() * (isPhone ? 400 : 300),
           height: 1 / columns.toDouble() * (isPhone ? 550 : 900),
           child: _subscriptionForm(),
@@ -118,12 +124,14 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                     name: 'pseudoId',
                     key: const Key('pseudoId'),
                     decoration: InputDecoration(
-                        labelText: catalogLocalizations.id(
-                            widget.subscription.pseudoId ?? '')),
+                      labelText: catalogLocalizations.id(
+                        widget.subscription.pseudoId ?? '',
+                      ),
+                    ),
                   ),
                 ),
-                // Subscriber dropdown
 
+                // Subscriber dropdown
                 const SizedBox(width: 16),
                 Flexible(
                   flex: 3,
@@ -139,10 +147,12 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                           searchFieldProps: TextFieldProps(
                             autofocus: true,
                             decoration: InputDecoration(
-                                labelText: catalogLocalizations.subscriberName),
+                              labelText: catalogLocalizations.subscriberName,
+                            ),
                           ),
                           menuProps: MenuProps(
-                              borderRadius: BorderRadius.circular(20.0)),
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
                           title: popUp(
                             context: context,
                             title: catalogLocalizations.selectSubscriber,
@@ -156,20 +166,27 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                           ),
                         ),
                         key: const Key('subscriber'),
-                        itemAsString: (CompanyUser? u) => " ${u?.name} "
+                        itemAsString: (CompanyUser? u) =>
+                            " ${u?.name} "
                             "${u?.company?.name ?? ''}",
                         asyncItems: (String filter) {
-                          _companyUserBloc.add(GetDataEvent(
+                          _companyUserBloc.add(
+                            GetDataEvent(
                               () => context.read<RestClient>().getCompanyUser(
-                                    searchString: filter,
-                                    limit: 3,
-                                  )));
+                                searchString: filter,
+                                limit: 3,
+                              ),
+                            ),
+                          );
                           return Future.delayed(
-                              const Duration(milliseconds: 150), () {
-                            return Future.value(
+                            const Duration(milliseconds: 150),
+                            () {
+                              return Future.value(
                                 (_companyUserBloc.state.data as CompaniesUsers)
-                                    .companiesUsers);
-                          });
+                                    .companiesUsers,
+                              );
+                            },
+                          );
                         },
                         compareFn: (item, sItem) =>
                             item.partyId == sItem.partyId,
@@ -193,59 +210,72 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
             if (widget.subscription.subscriptionId != null)
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Row(children: [
-                  Expanded(
-                      child: Text(catalogLocalizations.purchased(
-                          widget.subscription.purchaseFromDate!.dateOnly()))),
-                  const SizedBox(width: 8),
-                  Expanded(
-                      child: Text(catalogLocalizations.cancelled(
-                          widget.subscription.purchaseThruDate.dateOnly()))),
-                ]),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        catalogLocalizations.purchased(
+                          widget.subscription.purchaseFromDate!.dateOnly(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        catalogLocalizations.cancelled(
+                          widget.subscription.purchaseThruDate.dateOnly(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             FormBuilderTextField(
               name: 'description',
               key: const Key('description'),
               maxLines: 2,
-              decoration:
-                  InputDecoration(labelText: catalogLocalizations.description),
+              decoration: InputDecoration(
+                labelText: catalogLocalizations.description,
+              ),
             ),
-            Row(children: [
-              Expanded(
-                flex: 1,
-                child: FormBuilderDateTimePicker(
-                  name: 'fromDate',
-                  key: const Key('fromDate'),
-                  // Convert from server UTC time to local time for display
-                  initialValue: widget.subscription.fromDate?.toLocal(),
-                  inputType: InputType.date,
-                  format: DateFormat('yyyy-MM-dd'),
-                  decoration: InputDecoration(
-                    labelText: catalogLocalizations.fromDate,
-                    suffixIcon: const Icon(Icons.calendar_today),
-                  ),
-                  validator: FormBuilderValidators.compose([
-                    FormBuilderValidators.required(),
-                  ]),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 1,
-                child: FormBuilderDateTimePicker(
-                  name: 'thruDate',
-                  key: const Key('thruDate'),
-                  // Convert from server UTC time to local time for display
-                  initialValue: widget.subscription.thruDate?.toLocal(),
-                  inputType: InputType.date,
-                  format: DateFormat('yyyy-MM-dd'),
-                  decoration: InputDecoration(
-                    labelText: catalogLocalizations.thruDate,
-                    suffixIcon: const Icon(Icons.calendar_today),
+            Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: FormBuilderDateTimePicker(
+                    name: 'fromDate',
+                    key: const Key('fromDate'),
+                    // Convert from server UTC time to local time for display
+                    initialValue: widget.subscription.fromDate?.toLocal(),
+                    inputType: InputType.date,
+                    format: DateFormat('yyyy-MM-dd'),
+                    decoration: InputDecoration(
+                      labelText: catalogLocalizations.fromDate,
+                      suffixIcon: const Icon(Icons.calendar_today),
+                    ),
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(),
+                    ]),
                   ),
                 ),
-              ),
-            ]),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 1,
+                  child: FormBuilderDateTimePicker(
+                    name: 'thruDate',
+                    key: const Key('thruDate'),
+                    // Convert from server UTC time to local time for display
+                    initialValue: widget.subscription.thruDate?.toLocal(),
+                    inputType: InputType.date,
+                    format: DateFormat('yyyy-MM-dd'),
+                    decoration: InputDecoration(
+                      labelText: catalogLocalizations.thruDate,
+                      suffixIcon: const Icon(Icons.calendar_today),
+                    ),
+                  ),
+                ),
+              ],
+            ),
             // Product dropdown
             FormBuilderField<Product>(
               name: 'product',
@@ -259,10 +289,12 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                     searchFieldProps: TextFieldProps(
                       autofocus: true,
                       decoration: InputDecoration(
-                          labelText: catalogLocalizations.searchProducts),
+                        labelText: catalogLocalizations.searchProducts,
+                      ),
                     ),
-                    menuProps:
-                        MenuProps(borderRadius: BorderRadius.circular(20.0)),
+                    menuProps: MenuProps(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
                     title: popUp(
                       context: context,
                       title: catalogLocalizations.selectProduct,
@@ -276,20 +308,27 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                     ),
                   ),
                   key: const Key('product'),
-                  itemAsString: (Product? p) => "${p?.productName ?? ''} "
+                  itemAsString: (Product? p) =>
+                      "${p?.productName ?? ''} "
                       "(${p?.pseudoId ?? ''})",
                   asyncItems: (String filter) {
-                    _productBloc.add(GetDataEvent(() => context
-                        .read<RestClient>()
-                        .getProduct(
-                            searchString: filter,
-                            limit: 3,
-                            isForDropDown: true)));
-                    return Future.delayed(const Duration(milliseconds: 150),
-                        () {
-                      return Future.value(
-                          (_productBloc.state.data as Products).products);
-                    });
+                    _productBloc.add(
+                      GetDataEvent(
+                        () => context.read<RestClient>().getProduct(
+                          searchString: filter,
+                          limit: 3,
+                          isForDropDown: true,
+                        ),
+                      ),
+                    );
+                    return Future.delayed(
+                      const Duration(milliseconds: 150),
+                      () {
+                        return Future.value(
+                          (_productBloc.state.data as Products).products,
+                        );
+                      },
+                    );
                   },
                   compareFn: (item, sItem) => item.productId == sItem.productId,
                   onChanged: (Product? newValue) {
@@ -312,9 +351,11 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                 Expanded(
                   child: OutlinedButton(
                     key: const Key('update'),
-                    child: Text(widget.subscription.subscriptionId == null
-                        ? catalogLocalizations.create
-                        : catalogLocalizations.update),
+                    child: Text(
+                      widget.subscription.subscriptionId == null
+                          ? catalogLocalizations.create
+                          : catalogLocalizations.update,
+                    ),
                     onPressed: () {
                       if (_formKey.currentState!.saveAndValidate()) {
                         final formData = _formKey.currentState!.value;
@@ -324,16 +365,21 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                             formData['subscriber'] as CompanyUser?;
                         Product? product = formData['product'] as Product?;
 
-                        _subscriptionBloc.add(SubscriptionUpdate(Subscription(
-                          subscriptionId: widget.subscription.subscriptionId,
-                          pseudoId: formData['pseudoId'] ?? '',
-                          description: formData['description'] ?? '',
-                          // Convert dates to UTC for server storage
-                          fromDate: fromDate?.noon().toServerTime(),
-                          thruDate: thruDate?.noon().toServerTime(),
-                          subscriber: subscriber,
-                          product: product,
-                        )));
+                        _subscriptionBloc.add(
+                          SubscriptionUpdate(
+                            Subscription(
+                              subscriptionId:
+                                  widget.subscription.subscriptionId,
+                              pseudoId: formData['pseudoId'] ?? '',
+                              description: formData['description'] ?? '',
+                              // Convert dates to UTC for server storage
+                              fromDate: fromDate?.noon().toServerTime(),
+                              thruDate: thruDate?.noon().toServerTime(),
+                              subscriber: subscriber,
+                              product: product,
+                            ),
+                          ),
+                        );
                       }
                     },
                   ),

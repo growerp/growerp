@@ -74,8 +74,8 @@ class ProductDialogState extends State<ProductDialog> {
     ).currencySymbol;
     _productBloc = context.read<ProductBloc>();
     context.read<CategoryBloc>().add(
-          const CategoryFetch(isForDropDown: true, limit: 3),
-        );
+      const CategoryFetch(isForDropDown: true, limit: 3),
+    );
     classificationId = context.read<String>();
     _selectedCategories = List.of(widget.product.categories);
     useWarehouse = widget.product.useWarehouse;
@@ -205,14 +205,16 @@ class ProductDialogState extends State<ProductDialog> {
                 child: popUp(
                   context: context,
                   title: (classificationId == 'AppAdmin'
-                          ? catalogLocalizations.productNumber(
-                              widget.product.productId.isEmpty
-                                  ? catalogLocalizations.newItem
-                                  : widget.product.pseudoId)
-                          : catalogLocalizations.roomTypeNumber(
-                              widget.product.productId.isEmpty
-                                  ? catalogLocalizations.newItem
-                                  : widget.product.pseudoId)),
+                      ? catalogLocalizations.productNumber(
+                          widget.product.productId.isEmpty
+                              ? catalogLocalizations.newItem
+                              : widget.product.pseudoId,
+                        )
+                      : catalogLocalizations.roomTypeNumber(
+                          widget.product.productId.isEmpty
+                              ? catalogLocalizations.newItem
+                              : widget.product.pseudoId,
+                        )),
                   height: isPhone
                       ? (classificationId == 'AppAdmin' ? 850 : 700)
                       : (classificationId == 'AppAdmin' ? 700 : 600),
@@ -237,8 +239,9 @@ class ProductDialogState extends State<ProductDialog> {
                 builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
                   if (snapshot.hasError) {
                     return Text(
-                      CatalogLocalizations.of(context)!
-                          .pickImageError(snapshot.error.toString()),
+                      CatalogLocalizations.of(
+                        context,
+                      )!.pickImageError(snapshot.error.toString()),
                       textAlign: TextAlign.center,
                     );
                   }
@@ -430,7 +433,8 @@ class ProductDialogState extends State<ProductDialog> {
                   name: 'productType',
                   initialValue: _selectedProductTypeId,
                   decoration: InputDecoration(
-                      labelText: catalogLocalizations.productType),
+                    labelText: catalogLocalizations.productType,
+                  ),
                   validator: FormBuilderValidators.compose([
                     FormBuilderValidators.required(),
                   ]),
@@ -471,8 +475,9 @@ class ProductDialogState extends State<ProductDialog> {
         key: const Key('description'),
         initialValue: widget.product.description ?? '',
         maxLines: 3,
-        decoration:
-            InputDecoration(labelText: catalogLocalizations.description),
+        decoration: InputDecoration(
+          labelText: catalogLocalizations.description,
+        ),
         validator: FormBuilderValidators.compose([
           FormBuilderValidators.required(),
         ]),
@@ -526,8 +531,9 @@ class ProductDialogState extends State<ProductDialog> {
                 name: 'currency',
                 key: const Key('currency'),
                 initialValue: _currencySelected,
-                decoration:
-                    InputDecoration(labelText: catalogLocalizations.currency),
+                decoration: InputDecoration(
+                  labelText: catalogLocalizations.currency,
+                ),
                 hint: Text(catalogLocalizations.currency),
                 validator: FormBuilderValidators.compose([
                   FormBuilderValidators.required(
@@ -629,8 +635,9 @@ class ProductDialogState extends State<ProductDialog> {
                             (uom) => uom.uomTypeId == _selectedUom?.uomTypeId,
                           )
                         : (_uomTypes.isNotEmpty ? _uoms.first : null),
-                    decoration:
-                        InputDecoration(labelText: catalogLocalizations.uomType),
+                    decoration: InputDecoration(
+                      labelText: catalogLocalizations.uomType,
+                    ),
                     items: _uomTypes.map((uom) {
                       return DropdownMenuItem<Uom>(
                         value: uom,
@@ -708,7 +715,8 @@ class ProductDialogState extends State<ProductDialog> {
                   ? '1'
                   : widget.product.amount.toString(),
               decoration: InputDecoration(
-                  labelText: catalogLocalizations.amountQuantity),
+                labelText: catalogLocalizations.amountQuantity,
+              ),
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(RegExp('[0-9.,]+')),
               ],
@@ -718,9 +726,11 @@ class ProductDialogState extends State<ProductDialog> {
       ),
       OutlinedButton(
         key: const Key('update'),
-        child: Text(widget.product.productId.isEmpty
-            ? catalogLocalizations.create
-            : catalogLocalizations.update),
+        child: Text(
+          widget.product.productId.isEmpty
+              ? catalogLocalizations.create
+              : catalogLocalizations.update,
+        ),
         onPressed: () async {
           if (_productDialogFormKey.currentState!.saveAndValidate()) {
             final formData = _productDialogFormKey.currentState!.value;
@@ -756,16 +766,16 @@ class ProductDialogState extends State<ProductDialog> {
                     amountUom: formData['amountUom'] ?? _selectedUom,
                     assetCount:
                         formData['assets'] == null || formData['assets'].isEmpty
-                            ? 0
-                            : int.parse(formData['assets']),
+                        ? 0
+                        : int.parse(formData['assets']),
                     categories: _selectedCategories,
                     productTypeId:
                         formData['productType'] ?? _selectedProductTypeId,
                     useWarehouse:
                         (formData['productType'] ?? _selectedProductTypeId) ==
-                                'Service'
-                            ? false
-                            : formData['useWarehouse'] ?? false,
+                            'Service'
+                        ? false
+                        : formData['useWarehouse'] ?? false,
                     image: image,
                   ),
                 ),
