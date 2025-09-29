@@ -39,6 +39,7 @@ class ShowCompanyDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var localizations = UserCompanyLocalizations.of(context)!;
     if (company.partyId != null && company.partyId != '_NEW_') {
       DataFetchBloc companyBloc = context.read<DataFetchBloc<Companies>>()
         ..add(
@@ -55,7 +56,9 @@ class ShowCompanyDialog extends StatelessWidget {
               state.status == DataFetchStatus.failure) {
             if ((companyBloc.state.data as Companies).companies.isEmpty) {
               return FatalErrorForm(
-                message: 'Company ${company.partyId} not found',
+                message: localizations.companyNotFound(
+                  company.partyId.toString(),
+                ),
               );
             }
             return CompanyDialog(
@@ -198,6 +201,7 @@ class CompanyFormState extends State<CompanyDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = UserCompanyLocalizations.of(context)!;
     isPhone = isAPhone(context);
     right = right ?? (isPhone ? 20 : 150);
     return Dialog(
@@ -209,13 +213,17 @@ class CompanyFormState extends State<CompanyDialog> {
           widget.dialog == true
               ? popUp(
                   context: context,
-                  title:
-                      "$_selectedRole Company #${company.partyId == null ? 'New' : company.pseudoId}",
+                  title: company.partyId == null
+                      ? localizations.newCompany
+                      : localizations.companyRoleDetail(
+                          _selectedRole.value,
+                          company.pseudoId ?? '',
+                        ),
                   width: isPhone ? 400 : 900,
                   height: isPhone ? 700 : 750,
-                  child: listChild(),
+                  child: listChild(localizations),
                 )
-              : listChild(),
+              : listChild(localizations),
           Positioned(
             right: right,
             top: top,
@@ -234,7 +242,7 @@ class CompanyFormState extends State<CompanyDialog> {
     );
   }
 
-  Widget listChild() {
+  Widget listChild(UserCompanyLocalizations localizations) {
     return ScaffoldMessenger(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -261,14 +269,16 @@ class CompanyFormState extends State<CompanyDialog> {
                         (BuildContext context, AsyncSnapshot<void> snapshot) {
                           if (snapshot.hasError) {
                             return Text(
-                              'Pick image error: ${snapshot.error}}',
+                              localizations.pickImageError(
+                                snapshot.error.toString(),
+                              ),
                               textAlign: TextAlign.center,
                             );
                           }
-                          return showForm();
+                          return showForm(localizations);
                         },
                   )
-                : showForm();
+                : showForm(localizations);
           },
         ),
       ),
@@ -284,14 +294,14 @@ class CompanyFormState extends State<CompanyDialog> {
     return null;
   }
 
-  Widget showForm() {
+  Widget showForm(UserCompanyLocalizations localizations) {
     final Text? retrieveError = getRetrieveErrorWidget();
     if (retrieveError != null) {
       return retrieveError;
     }
     if (_pickImageError != null) {
       return Text(
-        'Pick image error: $_pickImageError',
+        localizations.pickImageError(_pickImageError.toString()),
         textAlign: TextAlign.center,
       );
     }
@@ -319,23 +329,21 @@ class CompanyFormState extends State<CompanyDialog> {
               });
             }
           },
-          /*        onDeleted: () async {
-          bool? result = await confirmDialog(context,
-              "Remove ${employee.firstName} ${employee.lastName}?", "");
-          if (result == true) {
-            setState(() {
-              _selectedCategories.removeAt(index);
-              if (_selectedCategories.isEmpty) {
-                _selectedCategories.add(Category(categoryId: 'allDelete'));
-              }
-              _websiteBloc.add(WebsiteUpdate(Website(
-                  id: state.website!.id,
-                  productCategories: _selectedCategories)));
-
-            });
-          }
-        },
-*/
+          onDeleted: () async {
+            bool? result = await confirmDialog(
+              context,
+              localizations.removeEmployee(
+                employee.firstName!,
+                employee.lastName!,
+              ),
+              "",
+            );
+            if (result == true) {
+              setState(() {
+                employees.removeAt(index);
+              });
+            }
+          },
         ),
       );
     });
@@ -365,7 +373,7 @@ class CompanyFormState extends State<CompanyDialog> {
           Expanded(
             child: TextFormField(
               key: const Key('id'),
-              decoration: const InputDecoration(labelText: 'ID'),
+              decoration: InputDecoration(labelText: localizations.id),
               controller: _idController,
             ),
           ),
@@ -375,11 +383,11 @@ class CompanyFormState extends State<CompanyDialog> {
             Expanded(
               child: DropdownButtonFormField<Role>(
                 key: const Key('role'),
-                decoration: const InputDecoration(labelText: 'Role'),
-                hint: const Text('Role'),
+                decoration: InputDecoration(labelText: localizations.role),
+                hint: Text(localizations.role),
                 initialValue: _selectedRole,
                 validator: (value) =>
-                    value == Role.unknown ? 'Select a valid role!' : null,
+                    value == Role.unknown ? localizations.roleError : null,
                 items: Role.values.map((item) {
                   return DropdownMenuItem<Role>(
                     value: item,
@@ -401,10 +409,10 @@ class CompanyFormState extends State<CompanyDialog> {
       TextFormField(
         readOnly: !isAdmin,
         key: const Key('companyName'),
-        decoration: const InputDecoration(labelText: 'Company Name'),
+        decoration: InputDecoration(labelText: localizations.companyName),
         controller: _nameController,
         validator: (value) {
-          if (value!.isEmpty) return 'Please enter the company Name?';
+          if (value!.isEmpty) return localizations.companyNameError;
           return null;
         },
       ),
@@ -413,7 +421,7 @@ class CompanyFormState extends State<CompanyDialog> {
           Expanded(
             child: TextFormField(
               key: const Key('telephoneNr'),
-              decoration: const InputDecoration(labelText: 'Telephone number'),
+              decoration: InputDecoration(labelText: localizations.telephone),
               controller: _telephoneController,
             ),
           ),
@@ -421,11 +429,11 @@ class CompanyFormState extends State<CompanyDialog> {
           Expanded(
             child: DropdownButtonFormField<Currency>(
               key: const Key('currency'),
-              decoration: const InputDecoration(labelText: 'Currency'),
-              hint: const Text('Currency'),
+              decoration: InputDecoration(labelText: localizations.currency),
+              hint: Text(localizations.currency),
               initialValue: _selectedCurrency,
               validator: (value) =>
-                  value == null ? 'Currency field required!' : null,
+                  value == null ? localizations.currencyError : null,
               items: currencies.map((item) {
                 return DropdownMenuItem<Currency>(
                   value: item,
@@ -445,7 +453,7 @@ class CompanyFormState extends State<CompanyDialog> {
       TextFormField(
         readOnly: !isAdmin,
         key: const Key('email'),
-        decoration: const InputDecoration(labelText: 'Email address'),
+        decoration: InputDecoration(labelText: localizations.emailAddress),
         controller: _emailController,
         validator: (value) {
           if (value != null &&
@@ -453,7 +461,7 @@ class CompanyFormState extends State<CompanyDialog> {
               !RegExp(
                 r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
               ).hasMatch(value)) {
-            return 'This is not a valid email';
+            return localizations.emailInvalid;
           }
           return null;
         },
@@ -461,7 +469,7 @@ class CompanyFormState extends State<CompanyDialog> {
       TextFormField(
         readOnly: !isAdmin,
         key: const Key('url'),
-        decoration: const InputDecoration(labelText: 'Web address'),
+        decoration: InputDecoration(labelText: localizations.webAddress),
         controller: _urlController,
       ),
       if (company.role == Role.company)
@@ -475,7 +483,9 @@ class CompanyFormState extends State<CompanyDialog> {
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
-                decoration: const InputDecoration(labelText: 'VAT. percentage'),
+                decoration: InputDecoration(
+                  labelText: localizations.vatPercentage,
+                ),
                 controller: _vatPercController,
               ),
             ),
@@ -488,8 +498,8 @@ class CompanyFormState extends State<CompanyDialog> {
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
-                decoration: const InputDecoration(
-                  labelText: 'Sales Tax percentage',
+                decoration: InputDecoration(
+                  labelText: localizations.salesTaxPercentage,
                 ),
                 controller: _salesPercController,
               ),
@@ -497,7 +507,7 @@ class CompanyFormState extends State<CompanyDialog> {
           ],
         ),
       InputDecorator(
-        decoration: const InputDecoration(labelText: 'Postal Address'),
+        decoration: InputDecoration(labelText: localizations.postalAddress),
         child: Row(
           children: [
             Expanded(
@@ -526,7 +536,7 @@ class CompanyFormState extends State<CompanyDialog> {
                                 company.address?.address2 != "_DELETE_"
                             ? "${company.address?.city} "
                                   "${company.address?.country ?? ''}"
-                            : "No postal address yet",
+                            : localizations.noPostalAddress,
                         key: const Key('addressLabel'),
                       ),
                     ),
@@ -559,7 +569,7 @@ class CompanyFormState extends State<CompanyDialog> {
         ),
       ),
       InputDecorator(
-        decoration: const InputDecoration(labelText: 'Payment method'),
+        decoration: InputDecoration(labelText: localizations.paymentMethod),
         child: Row(
           children: [
             Expanded(
@@ -592,8 +602,8 @@ class CompanyFormState extends State<CompanyDialog> {
                                 company.paymentMethod?.ccDescription !=
                                     "_DELETE_"
                             ? "${company.paymentMethod?.ccDescription}"
-                            : "No payment methods yet"
-                                  "${company.address == null ? ",\nneed postal address to add" : ""}",
+                            : "${localizations.noPaymentMethod}"
+                                  "${company.address == null ? ", \n${localizations.needPostalAddress}" : ""}",
                         key: const Key('paymentMethodLabel'),
                       ),
                     ),
@@ -631,7 +641,7 @@ class CompanyFormState extends State<CompanyDialog> {
               child: TextFormField(
                 readOnly: !isAdmin,
                 key: const Key('hostName'),
-                decoration: const InputDecoration(labelText: 'HostName'),
+                decoration: InputDecoration(labelText: localizations.hostName),
                 controller: _hostNameController,
               ),
             ),
@@ -640,8 +650,8 @@ class CompanyFormState extends State<CompanyDialog> {
               child: TextFormField(
                 readOnly: !isAdmin,
                 key: const Key('secondaryBackend'),
-                decoration: const InputDecoration(
-                  labelText: 'Secondary Backend',
+                decoration: InputDecoration(
+                  labelText: localizations.secondaryBackend,
                 ),
                 controller: _backendController,
               ),
@@ -700,7 +710,11 @@ class CompanyFormState extends State<CompanyDialog> {
                       }
                     }
                   : null,
-              child: Text(company.partyId == null ? 'Create' : 'Update'),
+              child: Text(
+                company.partyId == null
+                    ? localizations.create
+                    : localizations.update,
+              ),
             ),
           ),
         ),
@@ -778,6 +792,7 @@ class CompanyForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var localizations = UserCompanyLocalizations.of(context)!;
     return Form(
       key: _companyDialogFormKey,
       child: SingleChildScrollView(
@@ -812,7 +827,7 @@ class CompanyForm extends StatelessWidget {
               if (widget.dialog)
                 InputDecorator(
                   decoration: InputDecoration(
-                    labelText: 'Employees',
+                    labelText: localizations.employees,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25.0),
                     ),

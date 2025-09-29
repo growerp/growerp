@@ -21,6 +21,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 import 'package:stream_transform/stream_transform.dart';
 
@@ -40,10 +41,12 @@ EventTransformer<E> companyUserDroppable<E>(Duration duration) {
 
 class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
     with CompanyUserLeadBloc, CompanyUserCustomerBloc, CompanyUserSupplierBloc {
-  CompanyUserBloc(this.restClient, this.role)
-      : super(const CompanyUserState()) {
-    on<CompanyUserFetch>(_onCompanyUserFetch,
-        transformer: companyUserDroppable(const Duration(milliseconds: 100)));
+  CompanyUserBloc(this.restClient, this.role, this.localizations)
+    : super(const CompanyUserState()) {
+    on<CompanyUserFetch>(
+      _onCompanyUserFetch,
+      transformer: companyUserDroppable(const Duration(milliseconds: 100)),
+    );
     on<CompanyUserUpdate>(_onCompanyUserUpdate);
     on<CompanyUserDelete>(_onCompanyUserDelete);
     on<CompanyUserUpload>(_onCompanyUserUpload);
@@ -51,6 +54,7 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
   }
 
   final RestClient restClient;
+  final UserCompanyLocalizations localizations;
   Role role = Role.unknown;
   int start = 0;
 
@@ -71,35 +75,49 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
     try {
       emit(state.copyWith(status: CompanyUserStatus.loading));
       if (event.type == PartyType.company && event.partyId != null) {
-        Companies compUserResult =
-            await restClient.getCompany(companyPartyId: event.partyId);
-        return emit(state.copyWith(
+        Companies compUserResult = await restClient.getCompany(
+          companyPartyId: event.partyId,
+        );
+        return emit(
+          state.copyWith(
             status: CompanyUserStatus.success,
             company: compUserResult.companies.isNotEmpty
                 ? compUserResult.companies[0]
-                : null));
+                : null,
+          ),
+        );
       }
       if (event.type == PartyType.user && event.partyId != null) {
         Users userResult = await restClient.getUser(partyId: event.partyId);
-        return emit(state.copyWith(
+        return emit(
+          state.copyWith(
             status: CompanyUserStatus.success,
-            user: userResult.users.isNotEmpty ? userResult.users[0] : null));
+            user: userResult.users.isNotEmpty ? userResult.users[0] : null,
+          ),
+        );
       }
       final CompaniesUsers compUserResult = await restClient.getCompanyUser(
-          role: role,
-          searchString: event.searchString,
-          start: start,
-          limit: event.limit);
-
-      return emit(state.copyWith(
-        status: CompanyUserStatus.success,
-        companiesUsers: current..addAll(compUserResult.companiesUsers),
-        hasReachedMax: compUserResult.companiesUsers.length < event.limit,
+        role: role,
         searchString: event.searchString,
-      ));
+        start: start,
+        limit: event.limit,
+      );
+
+      return emit(
+        state.copyWith(
+          status: CompanyUserStatus.success,
+          companiesUsers: current..addAll(compUserResult.companiesUsers),
+          hasReachedMax: compUserResult.companiesUsers.length < event.limit,
+          searchString: event.searchString,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: CompanyUserStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: CompanyUserStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -117,23 +135,27 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
         if (event.companyUser?.partyId != null) {
           // update company
           result = await restClient.updateCompany(
-              company: event.companyUser!.getCompany()!);
+            company: event.companyUser!.getCompany()!,
+          );
           int index = companiesUsers.indexWhere(
-              (element) => element.partyId == event.companyUser!.partyId);
+            (element) => element.partyId == event.companyUser!.partyId,
+          );
           if (index == -1) {
             debugPrint(
-                "===could not find partyId; ${event.companyUser!.partyId} in list: $companiesUsers");
+              "===could not find partyId; ${event.companyUser!.partyId} in list: $companiesUsers",
+            );
           } else {
             companiesUsers.removeAt(index);
             companiesUsers.insert(0, CompanyUser.tryParse(result)!);
-            message = 'Company ${result.name} updated...';
+            message = localizations.companyUpdated(result.name!);
           }
         } else {
           // add company
           result = await restClient.createCompany(
-              company: event.companyUser!.getCompany()!);
+            company: event.companyUser!.getCompany()!,
+          );
           companiesUsers.insert(0, CompanyUser.tryParse(result)!);
-          message = 'Company ${result.name} added';
+          message = localizations.companyAdded(result.name!);
         }
       } else {
         if (event.companyUser?.company?.name != null) {
@@ -144,16 +166,17 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
           // we should do that here too.
           var obj = event.companyUser;
           companyUser = CompanyUser(
-              role: obj!.role,
-              type: PartyType.company,
-              name: obj.company?.name,
-              email: obj.company?.email,
-              url: obj.company?.url,
-              telephoneNr: obj.company?.telephoneNr,
-              image: obj.company?.image,
-              paymentMethod: obj.company?.paymentMethod,
-              address: obj.company?.address,
-              employees: [event.companyUser?.getUser() ?? User()]);
+            role: obj!.role,
+            type: PartyType.company,
+            name: obj.company?.name,
+            email: obj.company?.email,
+            url: obj.company?.url,
+            telephoneNr: obj.company?.telephoneNr,
+            image: obj.company?.image,
+            paymentMethod: obj.company?.paymentMethod,
+            address: obj.company?.address,
+            employees: [event.companyUser?.getUser() ?? User()],
+          );
         } else {
           companyUser = event.companyUser!;
         }
@@ -161,56 +184,72 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
         User result;
         if (event.companyUser?.partyId != null) {
           // update user
-          result =
-              await restClient.updateUser(user: event.companyUser!.getUser()!);
+          result = await restClient.updateUser(
+            user: event.companyUser!.getUser()!,
+          );
           int index = companiesUsers.indexWhere(
-              (element) => element.partyId == event.companyUser!.partyId);
+            (element) => element.partyId == event.companyUser!.partyId,
+          );
           if (index == -1) {
             debugPrint(
-                "===could not find partyId; ${event.companyUser!.partyId} in list: $companiesUsers");
+              "===could not find partyId; ${event.companyUser!.partyId} in list: $companiesUsers",
+            );
           } else {
             companiesUsers.removeAt(index);
-            message = 'User ${companyUser.name} updated...';
+            message = localizations.userUpdated(companyUser.name!);
           }
         } else {
           // add user
-          result =
-              await restClient.createUser(user: event.companyUser!.getUser()!);
-          message = 'User ${companyUser.name} added at top of list...';
+          result = await restClient.createUser(
+            user: event.companyUser!.getUser()!,
+          );
+          message = localizations.userAdded(companyUser.name!);
         }
         if (event.companyUser?.company?.name != null) {
-          message += "\nHowever now displayed as a company";
+          message += "\n${localizations.asCompany}";
         }
         // now depending if the company/user is reversed pick the correct id.
         if (event.companyUser?.company?.name == null) {
           companiesUsers.insert(
-              0,
-              companyUser.copyWith(
-                  pseudoId: result.pseudoId, partyId: result.partyId));
+            0,
+            companyUser.copyWith(
+              pseudoId: result.pseudoId,
+              partyId: result.partyId,
+            ),
+          );
         } else {
           companiesUsers.insert(
-              0,
-              companyUser.copyWith(
-                  pseudoId: result.company?.pseudoId,
-                  partyId: result.company?.partyId,
-                  employees: [
-                    companyUser.employees?[0].copyWith(
-                            pseudoId: result.pseudoId,
-                            partyId: result.partyId) ??
-                        User()
-                  ]));
+            0,
+            companyUser.copyWith(
+              pseudoId: result.company?.pseudoId,
+              partyId: result.company?.partyId,
+              employees: [
+                companyUser.employees?[0].copyWith(
+                      pseudoId: result.pseudoId,
+                      partyId: result.partyId,
+                    ) ??
+                    User(),
+              ],
+            ),
+          );
         }
       }
 
-      return emit(state.copyWith(
+      return emit(
+        state.copyWith(
           status: CompanyUserStatus.success,
           companiesUsers: companiesUsers,
-          message: message));
+          message: message,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: CompanyUserStatus.failure,
           companiesUsers: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -226,33 +265,43 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
       // import csv into companyUsers
       for (final row in result) {
         if (line++ < 2 || row.length < 12) continue;
-        companyUsers.add(CompanyUser(
-          pseudoId: row[0],
-          type: PartyType.tryParse(row[1]),
-          name: row[2],
-          role: Role.tryParse(row[3]),
-          email: row[4],
-          url: row[5],
-          telephoneNr: row[6],
-          address: Address(
+        companyUsers.add(
+          CompanyUser(
+            pseudoId: row[0],
+            type: PartyType.tryParse(row[1]),
+            name: row[2],
+            role: Role.tryParse(row[3]),
+            email: row[4],
+            url: row[5],
+            telephoneNr: row[6],
+            address: Address(
               address1: row[7],
               address2: row[8],
               postalCode: row[09],
               city: row[10],
               province: row[11],
               country: row[12],
-              countryId: row[13]),
-          company: Company(pseudoId: row[13], name: row[14]),
-        ));
+              countryId: row[13],
+            ),
+            company: Company(pseudoId: row[13], name: row[14]),
+          ),
+        );
       }
       await restClient.importCompanyUsers(companyUsers);
-      return emit(state.copyWith(
+      return emit(
+        state.copyWith(
           status: CompanyUserStatus.success,
           companiesUsers: state.companiesUsers,
-          message: "Companies/Users upload ended successfully"));
+          message: localizations.compUserUploadSuccess,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: CompanyUserStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: CompanyUserStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -263,16 +312,21 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
     try {
       emit(state.copyWith(status: CompanyUserStatus.filesLoading));
       await restClient.exportScreenCompanyUsers();
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: CompanyUserStatus.success,
           companiesUsers: state.companiesUsers,
-          message:
-              "The request is scheduled and the email will be sent shortly"));
+          message: localizations.compUserDownloadSuccess,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: CompanyUserStatus.failure,
           companiesUsers: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -284,18 +338,28 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
       emit(state.copyWith(status: CompanyUserStatus.loading));
       List<CompanyUser> companiesUsers = List.from(state.companiesUsers);
       await restClient.deleteUser(
-          partyId: event.user!.partyId!, deleteCompanyToo: false);
-      int index = companiesUsers
-          .indexWhere((element) => element.partyId == event.user!.partyId);
+        partyId: event.user!.partyId!,
+        deleteCompanyToo: false,
+      );
+      int index = companiesUsers.indexWhere(
+        (element) => element.partyId == event.user!.partyId,
+      );
       companiesUsers.removeAt(index);
-      return emit(state.copyWith(
+      return emit(
+        state.copyWith(
           searchString: '',
           status: CompanyUserStatus.success,
           companiesUsers: companiesUsers,
-          message: 'User ${event.user!.firstName} is deleted now..'));
+          message: localizations.userDeleted(event.user!.getName()),
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: CompanyUserStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: CompanyUserStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

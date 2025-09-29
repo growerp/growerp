@@ -699,5 +699,189 @@
   "websiteAddress": "Website Address",
   "@websiteAddress": {
     "description": "Full label for a website address"
+  },
+  "newCompany": "New Company",
+  "@newCompany": {
+    "description": "Title for creating a new company"
+  },
+  "newItem": "New",
+  "@newItem": {
+    "description": "Short text for new item"
+  },
+  "paymentMethodDetail": "Payment Method Detail",
+  "@paymentMethodDetail": {
+    "description": "Title for the payment method detail view"
+  },
+  "noUsers": "No users found",
+  "@noUsers": {
+    "description": "Message when no users are found"
+  },
+  "noLeads": "No leads found",
+  "@noLeads": {
+    "description": "Message when no leads are found"
+  },
+  "noCustomers": "No customers found",
+  "@noCustomers": {
+    "description": "Message when no customers are found"
+  },
+  "noSuppliers": "No suppliers found",
+  "@noSuppliers": {
+    "description": "Message when no suppliers are found"
+  },
+  "noEmployees": "No employees found",
+  "@noEmployees": {
+    "description": "Message when no employees are found"
+  },
+  "noAdmins": "No admins found",
+  "@noAdmins": {
+    "description": "Message when no admins are found"
+  },
+  "noClients": "No clients found",
+  "@noClients": {
+    "description": "Message when no clients are found"
+  },
+  "client": "Client",
+  "@client": {
+    "description": "A person or organization using the services of a lawyer or other professional person or company."
+  },
+  "clients": "Clients",
+  "@clients": {
+    "description": "Plural of client"
+  },
+  "companyNotFound": "Company {companyId} not found",
+  "@companyNotFound": {
+    "description": "Error message when a company is not found",
+    "placeholders": {
+      "companyId": {
+        "type": "String"
+      }
+    }
+  },
+  "userNotFound": "User {userId} not found",
+  "@userNotFound": {
+    "description": "Error message when user is not found",
+    "placeholders": {
+      "userId": {
+        "type": "String"
+      }
+    }
+  },
+  "serverConnectionProblem": "Server connection problem",
+  "@serverConnectionProblem": {
+    "description": "Error message for server connectivity issues"
+  },
+  "companyPersonNameEmail": "Company/Person Name\nEmail",
+  "@companyPersonNameEmail": {
+    "description": "Column header for company/person name and email"
+  },
+  "companyUserSearch": "Company/User Search",
+  "@companyUserSearch": {
+    "description": "Title for company/user search page"
+  },
+  "searchResults": "Search results",
+  "@searchResults": {
+    "description": "Title for search results section"
+  },
+  "showUserEvents": "Show user events",
+  "@showUserEvents": {
+    "description": "Tooltip for showing user events"
+  },
+  "telephoneNumber": "Telephone number",
+  "@telephoneNumber": {
+    "description": "Label for telephone number"
+  },
+  "roleCompanyInfo": "{role} Company information",
+  "@roleCompanyInfo": {
+    "description": "Title for company information section with a role",
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "companyId": "Company name[id]",
+  "@companyId": {
+    "description": "Label for company name with id"
+  },
+  "updateCompany": "Update",
+  "@updateCompany": {
+    "description": "Button text to update a company"
+  },
+  "removeCompany": "Remove",
+  "@removeCompany": {
+    "description": "Button text to remove a company"
+  },
+  "addNewRelatedComp": "Add new related company",
+  "@addNewRelatedComp": {
+    "description": "Button text to add a new related company"
+  },
+  "userLoginName": "User Login Name",
+  "@userLoginName": {
+    "description": "Label for user login name"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Button text to delete"
+  },
+  "imageUploadError": "Image upload error!",
+  "@imageUploadError": {
+    "description": "Error message when image upload fails"
+  },
+  "companyUpdated": "Company {name} updated...",
+  "@companyUpdated": {
+    "description": "Confirmation message when a company is updated",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "companyAdded": "Company {name} added",
+  "@companyAdded": {
+    "description": "Confirmation message when a company is added",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUpdated": "User {name} updated...",
+  "@userUpdated": {
+    "description": "Confirmation message when a user is updated",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userAdded": "User {name} added at top of list...",
+  "@userAdded": {
+    "description": "Confirmation message when a user is added",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "asCompany": "However now displayed as a company",
+  "@asCompany": {
+    "description": "Message indicating that a user is now displayed as a company"
+  },
+  "compUserUploadSuccess": "Companies/Users upload ended successfully",
+  "@compUserUploadSuccess": {
+    "description": "Success message for company/user upload"
+  },
+  "compUserDownloadSuccess": "The request is scheduled and the email will be sent shortly",
+  "@compUserDownloadSuccess": {
+    "description": "Success message for company/user download"
+  },
+  "userDeleted": "User {name} is deleted now..",
+  "@userDeleted": {
+    "description": "Confirmation message when a user is deleted",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }
