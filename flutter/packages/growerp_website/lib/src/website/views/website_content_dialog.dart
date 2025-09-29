@@ -44,6 +44,7 @@ class WebsiteContentState extends State<WebsiteContent> {
   late bool isMarkDown;
   late ContentBloc _contentBloc;
   late ThemeBloc _themeBloc;
+  late WebsiteLocalizations l10n;
 
   MethodChannel channel =
       const MethodChannel('plugins.flutter.io/url_launcher');
@@ -63,6 +64,12 @@ class WebsiteContentState extends State<WebsiteContent> {
     _contentBloc = context.read<ContentBloc>();
     _contentBloc.add(ContentFetch(widget.websiteId, widget.content));
     _themeBloc = context.read<ThemeBloc>();
+  }
+
+  @override
+  void didChangeDependencies() {
+    l10n = WebsiteLocalizations.of(context)!;
+    super.didChangeDependencies();
   }
 
   @override
@@ -88,7 +95,7 @@ class WebsiteContentState extends State<WebsiteContent> {
               break;
             case ContentStatus.failure:
               HelperFunctions.showMessage(context,
-                  'Error getting content: ${state.message}', Colors.red);
+                  '${l10n.errorTitle}: ${state.message}', Colors.red);
               break;
             default:
           }
@@ -99,7 +106,7 @@ class WebsiteContentState extends State<WebsiteContent> {
               return Center(
                 child: OutlinedButton(
                   onPressed: () => Navigator.of(context).pop(newContent),
-                  child: const Text("press to continue"),
+                  child: Text(l10n.continueButton),
                 ),
               );
             case ContentStatus.success:
@@ -117,7 +124,8 @@ class WebsiteContentState extends State<WebsiteContent> {
                         context: context,
                         width: isPhone ? 400 : 800,
                         height: 600,
-                        title: 'Update content ${widget.content.title}',
+                        title:
+                            '${l10n.update} ${l10n.content} ${widget.content.title}',
                         child: _showMdTextForm(isPhone)));
 //                        isMarkDown
 //                            ? _showMdTextForm(isPhone)
@@ -135,7 +143,7 @@ class WebsiteContentState extends State<WebsiteContent> {
                       context: context,
                       width: isPhone ? 350 : 800,
                       height: 500,
-                      title: 'Image information ${widget.content.title}',
+                      title: l10n.imageInformation(widget.content.title),
                       child: Stack(
                         children: [
                           imageChild(isPhone),
@@ -202,7 +210,7 @@ class WebsiteContentState extends State<WebsiteContent> {
               builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
                 if (snapshot.hasError) {
                   return Text(
-                    'Pick image error: ${snapshot.error}}',
+                    '${l10n.errorTitle}: ${snapshot.error}}',
                     textAlign: TextAlign.center,
                   );
                 }
@@ -228,7 +236,7 @@ class WebsiteContentState extends State<WebsiteContent> {
     }
     if (_pickImageError != null) {
       return Text(
-        'Pick image error: $_pickImageError',
+        '${l10n.errorTitle}: $_pickImageError',
         textAlign: TextAlign.center,
       );
     }
@@ -252,10 +260,12 @@ class WebsiteContentState extends State<WebsiteContent> {
               const SizedBox(height: 30),
               TextFormField(
                 key: const Key('imageName'),
-                decoration: const InputDecoration(labelText: 'Image Name'),
+                decoration: InputDecoration(labelText: l10n.name),
                 controller: _nameController,
                 validator: (value) {
-                  return value!.isEmpty ? 'Please enter a name?' : null;
+                  return value!.isEmpty
+                      ? '${l10n.name} ${l10n.errorTitle}'
+                      : null;
                 },
               ),
               const SizedBox(height: 10),
@@ -263,8 +273,9 @@ class WebsiteContentState extends State<WebsiteContent> {
                 Expanded(
                     child: OutlinedButton(
                         key: const Key('update'),
-                        child: Text(
-                            widget.content.path.isEmpty ? 'Create' : 'Update'),
+                        child: Text(widget.content.path.isEmpty
+                            ? l10n.create
+                            : l10n.update),
                         onPressed: () async {
                           if (_websiteContFormKey.currentState!.validate()) {
                             Uint8List? image =
@@ -273,7 +284,7 @@ class WebsiteContentState extends State<WebsiteContent> {
                             if (!mounted) return;
                             if (_imageFile?.path != null && image == null) {
                               HelperFunctions.showMessage(
-                                  context, "Image upload error!", Colors.red);
+                                  context, l10n.errorTitle, Colors.red);
                             } else {
                               _contentBloc.add(ContentUpdate(
                                   widget.websiteId,
@@ -291,7 +302,7 @@ class WebsiteContentState extends State<WebsiteContent> {
     Widget input = TextFormField(
         key: const Key('mdInput'),
         autofocus: true,
-        decoration: const InputDecoration(labelText: 'Enter text here...'),
+        decoration: InputDecoration(labelText: l10n.description),
         expands: true,
         maxLines: null,
         textAlignVertical: TextAlignVertical.top,
@@ -336,7 +347,8 @@ class WebsiteContentState extends State<WebsiteContent> {
       const SizedBox(height: 10),
       OutlinedButton(
           key: const Key('update'),
-          child: Text(widget.content.path.isEmpty ? 'Create' : 'Update'),
+          child: Text(
+              widget.content.path.isEmpty ? l10n.create : l10n.update),
           onPressed: () async {
             if (newData != '') {
               _contentBloc.add(ContentUpdate(
