@@ -1,12 +1,12 @@
 /*
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
- * 
+ *
  * To the extent possible under law, the author(s) have dedicated all
  * copyright and related and neighboring rights to this software to the
  * public domain worldwide. This software is distributed without any
  * warranty.
- * 
+ *
  * You should have received a copy of the CC0 Public Domain Dedication
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
@@ -14,79 +14,73 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_catalog/src/l10n/activity_localizations.dart';
 
-import '../../../growerp_catalog.dart';
-import '../blocs/subscription_bloc.dart';
-
-class SearchSubscriptionList extends StatefulWidget {
-  const SearchSubscriptionList({super.key});
+class SearchCategoryList extends StatefulWidget {
+  const SearchCategoryList({super.key});
 
   @override
-  SearchSubscriptionState createState() => SearchSubscriptionState();
+  SearchCategoryState createState() => SearchCategoryState();
 }
 
-class SearchSubscriptionState extends State<SearchSubscriptionList> {
-  late SubscriptionBloc _subscriptionBloc;
-  List<Subscription> subscriptions = [];
+class SearchCategoryState extends State<SearchCategoryList> {
+  late DataFetchBloc _categoryBloc;
+  List<Category> categories = [];
 
   @override
   void initState() {
     super.initState();
-    _subscriptionBloc = context.read<SubscriptionBloc>();
+    _categoryBloc = context.read<DataFetchBloc<Categories>>()
+      ..add(
+          GetDataEvent(() => context.read<RestClient>().getCategory(limit: 0)));
   }
 
   @override
   Widget build(BuildContext context) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
-    return BlocConsumer<SubscriptionBloc, SubscriptionState>(
+    var al = ActivityLocalizations.of(context)!;
+    return BlocConsumer<DataFetchBloc<Categories>, DataFetchState<Categories>>(
         listener: (context, state) {
-      if (state.status == SubscriptionStatus.failure) {
-        HelperFunctions.showMessage(
-            context,
-            catalogLocalizations.error(state.message ?? ''),
-            Colors.red);
+      if (state.status == DataFetchStatus.failure) {
+        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
       }
     }, builder: (context, state) {
-      if (state.status == SubscriptionStatus.failure) {
+      if (state.status == DataFetchStatus.failure) {
         return Center(
-            child: Text(
-                catalogLocalizations.fetchSearchError(state.message ?? '')));
+            child: Text(al.fetchSearchItemsFailed(state.message!)));
       }
-      if (state.status == SubscriptionStatus.success) {
-        subscriptions = state.searchResults ?? [];
+      if (state.status == DataFetchStatus.success) {
+        categories = (state.data as Categories).categories;
       }
       return Stack(
         children: [
-          SubscriptionSearchDialog(
-              subscriptionBloc: _subscriptionBloc,
+          CategorySearchDialog(
+              finDocBloc: _categoryBloc,
               widget: widget,
-              subscriptions: subscriptions),
-          if (state.status == SubscriptionStatus.loading)
-            const LoadingIndicator(),
+              categories: categories),
+          if (state.status == DataFetchStatus.loading) const LoadingIndicator(),
         ],
       );
     });
   }
 }
 
-class SubscriptionSearchDialog extends StatelessWidget {
-  const SubscriptionSearchDialog({
+class CategorySearchDialog extends StatelessWidget {
+  const CategorySearchDialog({
     super.key,
-    required this.subscriptionBloc,
+    required DataFetchBloc finDocBloc,
     required this.widget,
-    required this.subscriptions,
-  });
+    required this.categories,
+  }) : _categoryBloc = finDocBloc;
 
-  final SubscriptionBloc subscriptionBloc;
-  final SearchSubscriptionList widget;
-  final List<Subscription> subscriptions;
+  final DataFetchBloc _categoryBloc;
+  final SearchCategoryList widget;
+  final List<Category> categories;
 
   @override
   Widget build(BuildContext context) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+    var al = ActivityLocalizations.of(context)!;
     final ScrollController scrollController = ScrollController();
     return Dialog(
         key: const Key('SearchDialog'),
@@ -96,7 +90,7 @@ class SubscriptionSearchDialog extends StatelessWidget {
         ),
         child: popUp(
             context: context,
-            title: catalogLocalizations.subscriptionSearch,
+            title: al.categorySearch,
             height: 500,
             width: 350,
             child: Column(children: [
@@ -104,49 +98,49 @@ class SubscriptionSearchDialog extends StatelessWidget {
                   key: const Key('searchField'),
                   textInputAction: TextInputAction.search,
                   autofocus: true,
-                  decoration: InputDecoration(
-                      labelText: catalogLocalizations.searchInput),
+                  decoration: InputDecoration(labelText: al.searchInput),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return catalogLocalizations.enterSearch;
+                      return 'Please enter a search value?';
                     }
                     return null;
                   },
-                  onFieldSubmitted: (value) => subscriptionBloc
-                      .add(SubscriptionFetch(limit: 5, searchString: value))),
+                  onFieldSubmitted: (value) => _categoryBloc.add(GetDataEvent(
+                      () => context
+                          .read<RestClient>()
+                          .getCategory(limit: 5, searchString: value)))),
               const SizedBox(height: 20),
-              Text(catalogLocalizations.searchResults),
+              Text(al.searchResults),
               Expanded(
                   child: ListView.builder(
                       key: const Key('listView'),
                       shrinkWrap: true,
                       physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: subscriptions.length + 2,
+                      itemCount: categories.length + 2,
                       controller: scrollController,
                       itemBuilder: (BuildContext context, int index) {
                         if (index == 0) {
                           return Visibility(
-                              visible: subscriptions.isEmpty,
+                              visible: categories.isEmpty,
                               child: Center(
                                   heightFactor: 20,
-                                  child: Text(
-                                      catalogLocalizations.noSearchItems,
+                                  child: Text(al.noSearchItems,
                                       key: const Key('empty'),
                                       textAlign: TextAlign.center)));
                         }
                         index--;
-                        return index >= subscriptions.length
+                        return index >= categories.length
                             ? const Text('')
                             : Dismissible(
                                 key: const Key('searchItem'),
                                 direction: DismissDirection.startToEnd,
                                 child: ListTile(
                                   title: Text(
-                                      "${catalogLocalizations.id(subscriptions[index].pseudoId)}\n"
-                                      "${catalogLocalizations.subscriber(subscriptions[index].subscriber?.name ?? '')}",
+                                      "ID: ${categories[index].pseudoId}\n"
+                                      "Name: ${categories[index].categoryName}",
                                       key: Key("searchResult$index")),
                                   onTap: () => Navigator.of(context)
-                                      .pop(subscriptions[index]),
+                                      .pop(categories[index]),
                                 ));
                       }))
             ])));

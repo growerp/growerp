@@ -1,12 +1,12 @@
 /*
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
- * 
+ *
  * To the extent possible under law, the author(s) have dedicated all
  * copyright and related and neighboring rights to this software to the
  * public domain worldwide. This software is distributed without any
  * warranty.
- * 
+ *
  * You should have received a copy of the CC0 Public Domain Dedication
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
@@ -17,8 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-
-import '../../../growerp_catalog.dart';
+import 'package:growerp_catalog/src/l10n/activity_localizations.dart';
 import '../blocs/subscription_bloc.dart';
 
 class SearchSubscriptionList extends StatefulWidget {
@@ -40,20 +39,16 @@ class SearchSubscriptionState extends State<SearchSubscriptionList> {
 
   @override
   Widget build(BuildContext context) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+    var al = ActivityLocalizations.of(context)!;
     return BlocConsumer<SubscriptionBloc, SubscriptionState>(
         listener: (context, state) {
       if (state.status == SubscriptionStatus.failure) {
-        HelperFunctions.showMessage(
-            context,
-            catalogLocalizations.error(state.message ?? ''),
-            Colors.red);
+        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
       }
     }, builder: (context, state) {
       if (state.status == SubscriptionStatus.failure) {
         return Center(
-            child: Text(
-                catalogLocalizations.fetchSearchError(state.message ?? '')));
+            child: Text(al.fetchSearchItemsFailed(state.message!)));
       }
       if (state.status == SubscriptionStatus.success) {
         subscriptions = state.searchResults ?? [];
@@ -86,7 +81,7 @@ class SubscriptionSearchDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+    var al = ActivityLocalizations.of(context)!;
     final ScrollController scrollController = ScrollController();
     return Dialog(
         key: const Key('SearchDialog'),
@@ -96,7 +91,7 @@ class SubscriptionSearchDialog extends StatelessWidget {
         ),
         child: popUp(
             context: context,
-            title: catalogLocalizations.subscriptionSearch,
+            title: al.subscriptionSearch,
             height: 500,
             width: 350,
             child: Column(children: [
@@ -104,18 +99,17 @@ class SubscriptionSearchDialog extends StatelessWidget {
                   key: const Key('searchField'),
                   textInputAction: TextInputAction.search,
                   autofocus: true,
-                  decoration: InputDecoration(
-                      labelText: catalogLocalizations.searchInput),
+                  decoration: InputDecoration(labelText: al.searchInput),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return catalogLocalizations.enterSearch;
+                      return 'Please enter a search value?';
                     }
                     return null;
                   },
                   onFieldSubmitted: (value) => subscriptionBloc
                       .add(SubscriptionFetch(limit: 5, searchString: value))),
               const SizedBox(height: 20),
-              Text(catalogLocalizations.searchResults),
+              Text(al.searchResults),
               Expanded(
                   child: ListView.builder(
                       key: const Key('listView'),
@@ -129,8 +123,7 @@ class SubscriptionSearchDialog extends StatelessWidget {
                               visible: subscriptions.isEmpty,
                               child: Center(
                                   heightFactor: 20,
-                                  child: Text(
-                                      catalogLocalizations.noSearchItems,
+                                  child: Text(al.noSearchItems,
                                       key: const Key('empty'),
                                       textAlign: TextAlign.center)));
                         }
@@ -142,8 +135,8 @@ class SubscriptionSearchDialog extends StatelessWidget {
                                 direction: DismissDirection.startToEnd,
                                 child: ListTile(
                                   title: Text(
-                                      "${catalogLocalizations.id(subscriptions[index].pseudoId)}\n"
-                                      "${catalogLocalizations.subscriber(subscriptions[index].subscriber?.name ?? '')}",
+                                      "ID: ${subscriptions[index].pseudoId}\n"
+                                      "Subscriber: ${subscriptions[index].subscriber?.name ?? ''}",
                                       key: Key("searchResult$index")),
                                   onTap: () => Navigator.of(context)
                                       .pop(subscriptions[index]),
