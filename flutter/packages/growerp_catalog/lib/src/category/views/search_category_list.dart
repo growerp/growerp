@@ -17,6 +17,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../../../growerp_catalog.dart';
+
 class SearchCategoryList extends StatefulWidget {
   const SearchCategoryList({super.key});
 
@@ -46,7 +48,8 @@ class SearchCategoryState extends State<SearchCategoryList> {
     }, builder: (context, state) {
       if (state.status == DataFetchStatus.failure) {
         return Center(
-            child: Text('failed to fetch search items: ${state.message}'));
+            child: Text(CatalogLocalizations.of(context)!
+                .fetchSearchError(state.message ?? '')));
       }
       if (state.status == DataFetchStatus.success) {
         categories = (state.data as Categories).categories;
@@ -78,6 +81,7 @@ class CategorySearchDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var catalogLocalizations = CatalogLocalizations.of(context)!;
     final ScrollController scrollController = ScrollController();
     return Dialog(
         key: const Key('SearchDialog'),
@@ -87,7 +91,7 @@ class CategorySearchDialog extends StatelessWidget {
         ),
         child: popUp(
             context: context,
-            title: 'Category Search ',
+            title: catalogLocalizations.categorySearch,
             height: 500,
             width: 350,
             child: Column(children: [
@@ -95,10 +99,11 @@ class CategorySearchDialog extends StatelessWidget {
                   key: const Key('searchField'),
                   textInputAction: TextInputAction.search,
                   autofocus: true,
-                  decoration: const InputDecoration(labelText: "Search input"),
+                  decoration: InputDecoration(
+                      labelText: catalogLocalizations.searchInput),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Please enter a search value?';
+                      return catalogLocalizations.enterSearch;
                     }
                     return null;
                   },
@@ -107,7 +112,7 @@ class CategorySearchDialog extends StatelessWidget {
                           .read<RestClient>()
                           .getCategory(limit: 5, searchString: value)))),
               const SizedBox(height: 20),
-              const Text('Search results'),
+              Text(catalogLocalizations.searchResults),
               Expanded(
                   child: ListView.builder(
                       key: const Key('listView'),
@@ -119,10 +124,11 @@ class CategorySearchDialog extends StatelessWidget {
                         if (index == 0) {
                           return Visibility(
                               visible: categories.isEmpty,
-                              child: const Center(
+                              child: Center(
                                   heightFactor: 20,
-                                  child: Text('No search items found (yet)',
-                                      key: Key('empty'),
+                                  child: Text(
+                                      catalogLocalizations.noSearchItems,
+                                      key: const Key('empty'),
                                       textAlign: TextAlign.center)));
                         }
                         index--;
@@ -133,8 +139,9 @@ class CategorySearchDialog extends StatelessWidget {
                                 direction: DismissDirection.startToEnd,
                                 child: ListTile(
                                   title: Text(
-                                      "ID: ${categories[index].pseudoId}\n"
-                                      "Name: ${categories[index].categoryName}",
+                                      catalogLocalizations.idLabel(
+                                          categories[index].pseudoId,
+                                          categories[index].categoryName),
                                       key: Key("searchResult$index")),
                                   onTap: () => Navigator.of(context)
                                       .pop(categories[index]),

@@ -1,12 +1,12 @@
 /*
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
- * 
+ *
  * To the extent possible under law, the author(s) have dedicated all
  * copyright and related and neighboring rights to this software to the
  * public domain worldwide. This software is distributed without any
  * warranty.
- * 
+ *
  * You should have received a copy of the CC0 Public Domain Dedication
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
@@ -21,8 +21,8 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_catalog/src/l10n/activity_localizations.dart';
 
-import '../../../growerp_catalog.dart';
 import '../../product/blocs/product_bloc.dart';
 import '../blocs/category_bloc.dart';
 
@@ -110,7 +110,7 @@ class CategoryDialogState extends State<CategoryDialog> {
 
   @override
   Widget build(BuildContext context) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+    var al = ActivityLocalizations.of(context)!;
     return BlocConsumer<CategoryBloc, CategoryState>(
       listener: (context, state) async {
         switch (state.status) {
@@ -120,7 +120,7 @@ class CategoryDialogState extends State<CategoryDialog> {
           case CategoryStatus.failure:
             HelperFunctions.showMessage(
               context,
-              catalogLocalizations.error(state.message ?? ''),
+              'Error: ${state.message}',
               Colors.red,
             );
             break;
@@ -134,8 +134,7 @@ class CategoryDialogState extends State<CategoryDialog> {
               case ProductStatus.failure:
                 HelperFunctions.showMessage(
                   context,
-                  catalogLocalizations
-                      .errorGettingProducts(state.message ?? ''),
+                  'Error getting products: ${state.message}',
                   Colors.red,
                 );
                 break;
@@ -156,10 +155,8 @@ class CategoryDialogState extends State<CategoryDialog> {
                 child: popUp(
                   context: context,
                   child: listChild(productState),
-                  title: catalogLocalizations.categoryNumber(
-                      widget.category.categoryId.isEmpty
-                          ? catalogLocalizations.new
-                          : widget.category.pseudoId),
+                  title:
+                      '${al.category} #${widget.category.categoryId.isEmpty ? 'New' : widget.category.pseudoId}',
                   height: 650,
                   width: 350,
                 ),
@@ -181,8 +178,7 @@ class CategoryDialogState extends State<CategoryDialog> {
                 builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
                   if (snapshot.hasError) {
                     return Text(
-                      CatalogLocalizations.of(context)!
-                          .pickImageError(snapshot.error.toString()),
+                      'Pick image error: ${snapshot.error}}',
                       textAlign: TextAlign.center,
                     );
                   }
@@ -204,14 +200,14 @@ class CategoryDialogState extends State<CategoryDialog> {
   }
 
   Widget _showForm(ProductState state) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+    var al = ActivityLocalizations.of(context)!;
     final Text? retrieveError = _getRetrieveErrorWidget();
     if (retrieveError != null) {
       return retrieveError;
     }
     if (_pickImageError != null) {
       return Text(
-        catalogLocalizations.pickImageError(_pickImageError.toString()),
+        'Pick image error: $_pickImageError',
         textAlign: TextAlign.center,
       );
     }
@@ -242,7 +238,7 @@ class CategoryDialogState extends State<CategoryDialog> {
             context: context,
             builder: (BuildContext context) {
               return MultiSelect<Product>(
-                title: catalogLocalizations.selectProducts,
+                title: al.selectProduct,
                 items: state.products,
                 selectedItems: _selectedProducts,
               );
@@ -284,30 +280,27 @@ class CategoryDialogState extends State<CategoryDialog> {
                 const SizedBox(height: 10),
                 TextFormField(
                   key: const Key('Id'),
-                  decoration: InputDecoration(
-                      labelText: catalogLocalizations.categoryId),
+                  decoration: InputDecoration(labelText: al.id),
                   controller: _idController,
                 ),
                 TextFormField(
                   key: const Key('name'),
-                  decoration: InputDecoration(
-                      labelText: catalogLocalizations.categoryName),
+                  decoration: InputDecoration(labelText: al.category),
                   controller: _nameController,
                   validator: (value) {
                     return value!.isEmpty
-                        ? catalogLocalizations.enterCategoryName
+                        ? 'Please enter a category name?'
                         : null;
                   },
                 ),
                 TextFormField(
                   key: const Key('description'),
-                  decoration: InputDecoration(
-                      labelText: catalogLocalizations.description),
+                  decoration: InputDecoration(labelText: al.description),
                   controller: _descrController,
                   maxLines: 3,
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return catalogLocalizations.enterCategoryDescription;
+                      return 'Please enter a category description?';
                     }
                     return null;
                   },
@@ -316,7 +309,9 @@ class CategoryDialogState extends State<CategoryDialog> {
                 InputDecorator(
                   decoration: InputDecoration(
                     labelText:
-                        '${catalogLocalizations.relatedProducts}${widget.category.nbrOfProducts > widget.category.products.length ? catalogLocalizations.totalShown(widget.category.nbrOfProducts, widget.category.products.length) : ''}',
+                        'Related Products${widget.category.nbrOfProducts > widget.category.products.length ? ' total: '
+                                  '${widget.category.nbrOfProducts}, '
+                                  'shown first ${widget.category.products.length}' : ''}',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25.0),
                     ),
@@ -327,9 +322,7 @@ class CategoryDialogState extends State<CategoryDialog> {
                 OutlinedButton(
                   key: const Key('update'),
                   child: Text(
-                    widget.category.categoryId.isEmpty
-                        ? catalogLocalizations.create
-                        : catalogLocalizations.update,
+                    widget.category.categoryId.isEmpty ? al.create : al.update,
                   ),
                   onPressed: () async {
                     if (_categoryDialogFormKey.currentState!.validate()) {

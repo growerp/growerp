@@ -17,6 +17,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../../../growerp_catalog.dart';
+
 class SearchProductList extends StatefulWidget {
   const SearchProductList({super.key});
 
@@ -46,7 +48,8 @@ class SearchProductState extends State<SearchProductList> {
     }, builder: (context, state) {
       if (state.status == DataFetchStatus.failure) {
         return Center(
-            child: Text('failed to fetch search items: ${state.message}'));
+            child: Text(CatalogLocalizations.of(context)!
+                .fetchSearchError(state.message ?? '')));
       }
       if (state.status == DataFetchStatus.success) {
         products = (state.data as Products).products;
@@ -76,6 +79,7 @@ class ProductSearchDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var catalogLocalizations = CatalogLocalizations.of(context)!;
     final ScrollController scrollController = ScrollController();
     return Dialog(
         key: const Key('SearchDialog'),
@@ -85,7 +89,7 @@ class ProductSearchDialog extends StatelessWidget {
         ),
         child: popUp(
             context: context,
-            title: 'Product Search ',
+            title: catalogLocalizations.productSearch,
             height: 500,
             width: 350,
             child: Column(children: [
@@ -93,10 +97,11 @@ class ProductSearchDialog extends StatelessWidget {
                   key: const Key('searchField'),
                   textInputAction: TextInputAction.search,
                   autofocus: true,
-                  decoration: const InputDecoration(labelText: "Search input"),
+                  decoration: InputDecoration(
+                      labelText: catalogLocalizations.searchInput),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Please enter a search value?';
+                      return catalogLocalizations.enterSearch;
                     }
                     return null;
                   },
@@ -105,7 +110,7 @@ class ProductSearchDialog extends StatelessWidget {
                           .read<RestClient>()
                           .getProduct(limit: 5, searchString: value)))),
               const SizedBox(height: 20),
-              const Text('Search results'),
+              Text(catalogLocalizations.searchResults),
               Expanded(
                   child: ListView.builder(
                       key: const Key('listView'),
@@ -117,10 +122,11 @@ class ProductSearchDialog extends StatelessWidget {
                         if (index == 0) {
                           return Visibility(
                               visible: products.isEmpty,
-                              child: const Center(
+                              child: Center(
                                   heightFactor: 20,
-                                  child: Text('No search items found (yet)',
-                                      key: Key('empty'),
+                                  child: Text(
+                                      catalogLocalizations.noSearchItems,
+                                      key: const Key('empty'),
                                       textAlign: TextAlign.center)));
                         }
                         index--;
@@ -131,8 +137,9 @@ class ProductSearchDialog extends StatelessWidget {
                                 direction: DismissDirection.startToEnd,
                                 child: ListTile(
                                   title: Text(
-                                      "ID: ${products[index].pseudoId}\n"
-                                      "Name: ${products[index].productName}",
+                                      catalogLocalizations.idLabel(
+                                          products[index].pseudoId,
+                                          products[index].productName ?? ''),
                                       key: Key("searchResult$index")),
                                   onTap: () => Navigator.of(context)
                                       .pop(products[index]),

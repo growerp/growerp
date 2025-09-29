@@ -1,0 +1,214 @@
+{
+  "@@locale": "en",
+  "productUpDown": "Product Up/Download",
+  "@productUpDown": {
+    "description": "Dialog title for product up/download"
+  },
+  "downloadFirst": "Download first to obtain the format",
+  "@downloadFirst": {
+    "description": "Instruction to download format first"
+  },
+  "uploadCsv": "Upload CSV file",
+  "@uploadCsv": {
+    "description": "Button text for uploading a CSV file"
+  },
+  "downloadViaEmail": "Download via email",
+  "@downloadViaEmail": {
+    "description": "Button text for downloading via email"
+  },
+  "dataFileSendEmail": "A data file will be send by email",
+  "@dataFileSendEmail": {
+    "description": "Confirmation message that a data file will be sent by email"
+  },
+  "noEntityFound": "No {entityName}s found, add one with '+'",
+  "@noEntityFound": {
+    "description": "Message when no items of a certain entity are found",
+    "placeholders": {
+      "entityName": {
+        "type": "String"
+      }
+    }
+  },
+  "fetchProductFailed": "failed to fetch product: {message}",
+  "@fetchProductFailed": {
+    "description": "Error message when fetching a product fails",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "fetchSearchItemsFailed": "failed to fetch search items: {message}",
+  "@fetchSearchItemsFailed": {
+    "description": "Error message when fetching search items fails",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "productSearch": "Product Search",
+  "@productSearch": {
+    "description": "Title for product search"
+  },
+  "searchInput": "Search input",
+  "@searchInput": {
+    "description": "Label for a search input field"
+  },
+  "searchResults": "Search results",
+  "@searchResults": {
+    "description": "Title for search results"
+  },
+  "noSearchItems": "No search items found (yet)",
+  "@noSearchItems": {
+    "description": "Message when no search items are found"
+  },
+  "selectCategories": "Select one or more categories",
+  "@selectCategories": {
+    "description": "Title for category selection dialog"
+  },
+  "productType": "Product Type",
+  "@productType": {
+    "description": "Label for product type field"
+  },
+  "description": "Description",
+  "@description": {
+    "description": "Label for description field"
+  },
+  "prices": "Prices",
+  "@prices": {
+    "description": "Label for prices section"
+  },
+  "listPrice": "List Price({currencySymbol})",
+  "@listPrice": {
+    "description": "Label for list price field",
+    "placeholders": {
+      "currencySymbol": {
+        "type": "String"
+      }
+    }
+  },
+  "currentPrice": "Current Price({currencySymbol})",
+  "@currentPrice": {
+    "description": "Label for current price field",
+    "placeholders": {
+      "currencySymbol": {
+        "type": "String"
+      }
+    }
+  },
+  "currency": "Currency",
+  "@currency": {
+    "description": "Label for currency field"
+  },
+  "relatedCategories": "Related categories",
+  "@relatedCategories": {
+    "description": "Label for related categories section"
+  },
+  "warehouseInventory": "Warehouse/Inventory",
+  "@warehouseInventory": {
+    "description": "Label for warehouse/inventory section"
+  },
+  "assetsInWarehouse": "Assets in warehouse",
+  "@assetsInWarehouse": {
+    "description": "Label for assets in warehouse field"
+  },
+  "typeAmount": "Type/Amount",
+  "@typeAmount": {
+    "description": "Label for type/amount section"
+  },
+  "uomType": "UOM Type",
+  "@uomType": {
+    "description": "Label for Unit of Measure type field"
+  },
+  "uom": "Unit of Measure",
+  "@uom": {
+    "description": "Label for Unit of Measure field"
+  },
+  "amountQuantity": "Amount/Quantity",
+  "@amountQuantity": {
+    "description": "Label for amount/quantity field"
+  },
+  "create": "Create",
+  "@create": {
+    "description": "Button text for create action"
+  },
+  "update": "Update",
+  "@update": {
+    "description": "Button text for update action"
+  },
+  "id": "Id",
+  "@id": {
+    "description": "Label for Id field"
+  },
+  "subscriberName": "subscriber,name",
+  "@subscriberName": {
+    "description": "Hint text for subscriber name"
+  },
+  "selectSubscriber": "Select Subscriber",
+  "@selectSubscriber": {
+    "description": "Title for subscriber selection dialog"
+  },
+  "subscriber": "Subscriber",
+  "@subscriber": {
+    "description": "Label for subscriber field"
+  },
+  "fromDate": "From Date",
+  "@fromDate": {
+    "description": "Label for from date field"
+  },
+  "thruDate": "Thru Date",
+  "@thruDate": {
+    "description": "Label for thru date field"
+  },
+  "searchProducts": "Search products...",
+  "@searchProducts": {
+    "description": "Hint text for product search"
+  },
+  "selectProduct": "Select Product",
+  "@selectProduct": {
+    "description": "Title for product selection dialog"
+  },
+  "product": "Product",
+  "@product": {
+    "description": "Label for product field"
+  },
+  "subscriptionSearch": "Subscription Search",
+  "@subscriptionSearch": {
+    "description": "Title for subscription search"
+  },
+  "fetchSubscriptionFailed": "failed to fetch subscription: {message}",
+  "@fetchSubscriptionFailed": {
+    "description": "Error message when fetching a subscription fails",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "category": "Category",
+  "@category": {
+    "description": "Label for category field"
+  },
+  "categorySearch": "Category Search",
+  "@categorySearch": {
+    "description": "Title for category search"
+  },
+  "categoryUpDown": "Category Up/Download",
+  "@categoryUpDown": {
+    "description": "Dialog title for category up/download"
+  },
+  "noCategoriesYet": "No categories yet, add one with '+'",
+  "@noCategoriesYet": {
+    "description": "Message when no categories are found"
+  },
+  "fetchCategoriesFailed": "failed to fetch categories: {message}",
+  "@fetchCategoriesFailed": {
+    "description": "Error message when fetching categories fails",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  }
+}
