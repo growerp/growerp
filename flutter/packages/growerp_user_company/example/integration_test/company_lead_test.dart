@@ -21,19 +21,6 @@ import 'package:growerp_core/test_data.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-
-// Static menuOptions for testing (no localization needed)
-List<MenuOption> testMenuOptions = [
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Main',
-    route: '/',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const MainMenu(),
-  ),
-];
-
 Future<void> main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -43,17 +30,25 @@ Future<void> main() async {
 
   Future<void> selectLeads(WidgetTester tester) async {
     await CommonTest.selectOption(
-        tester, 'dbCompanies', 'CompanyListLead', '2');
+      tester,
+      'dbCompanies',
+      'CompanyListLead',
+      '2',
+    );
   }
 
   testWidgets('''GrowERP company lead test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, generateRoute, testMenuOptions,
-        UserCompanyLocalizations.localizationsDelegates,
-        restClient: restClient,
-        title: "lead company test",
-        blocProviders: getUserCompanyBlocProviders(restClient, 'AppAdmin'),
-        clear: true);
+    await CommonTest.startTestApp(
+      tester,
+      generateRoute,
+      testMenuOptions,
+      UserCompanyLocalizations.localizationsDelegates,
+      restClient: restClient,
+      title: "lead company test",
+      blocProviders: getUserCompanyBlocProviders(restClient, 'AppAdmin'),
+      clear: true,
+    );
     await CommonTest.createCompanyAndAdmin(tester);
     await selectLeads(tester);
     await CompanyTest.addCompanies(tester, leadCompanies.sublist(0, 3));

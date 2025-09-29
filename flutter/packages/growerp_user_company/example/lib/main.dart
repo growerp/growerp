@@ -50,6 +50,119 @@ List<BlocProvider> getExampleBlocProviders(
   return [...getUserCompanyBlocProviders(restClient, classificationId)];
 }
 
+// Static test menu definition for integration tests
+List<MenuOption> testMenuOptions = [
+  MenuOption(
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    title: 'Main',
+    route: '/',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const MainMenu(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/companyGrey.png',
+    selectedImage: 'packages/growerp_core/images/company.png',
+    title: 'Companies',
+    route: '/companies',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    tabItems: [
+      TabItem(
+        form: ShowCompanyDialog(
+          Company(role: Role.company),
+          key: const Key('CompanyForm'),
+          dialog: false,
+        ),
+        label: 'Company',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const CompanyList(key: Key('Lead'), role: Role.lead),
+        label: 'Leads',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const CompanyList(key: Key('Customer'), role: Role.customer),
+        label: 'Customers',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const CompanyList(key: Key('Supplier'), role: Role.supplier),
+        label: 'Suppliers',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const CompanyList(key: Key('All'), role: null),
+        label: 'All',
+        icon: const Icon(Icons.home),
+      ),
+    ],
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/usersGrey.png',
+    selectedImage: 'packages/growerp_core/images/users.png',
+    title: 'Users',
+    route: '/users',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    tabItems: [
+      TabItem(
+        form: const UserList(key: Key('Employee'), role: Role.company),
+        label: 'Employees',
+        icon: const Icon(Icons.business),
+      ),
+      TabItem(
+        form: const UserList(key: Key('Lead'), role: Role.lead),
+        label: 'Leads',
+        icon: const Icon(Icons.business),
+      ),
+      TabItem(
+        form: const UserList(key: Key('Customer'), role: Role.customer),
+        label: 'Customers',
+        icon: const Icon(Icons.school),
+      ),
+      TabItem(
+        form: const UserList(key: Key('Supplier'), role: Role.supplier),
+        label: 'Suppliers',
+        icon: const Icon(Icons.business),
+      ),
+      TabItem(
+        form: const UserList(key: Key('All'), role: Role.unknown),
+        label: 'All',
+        icon: const Icon(Icons.business),
+      ),
+    ],
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/usersGrey.png',
+    selectedImage: 'packages/growerp_core/images/users.png',
+    title: 'Companies & Users',
+    route: '/companiesUsers',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    tabItems: [
+      TabItem(
+        form: const CompanyUserList(key: Key('Lead'), role: Role.lead),
+        label: 'Leads',
+        icon: const Icon(Icons.business),
+      ),
+      TabItem(
+        form: const CompanyUserList(key: Key('Customer'), role: Role.customer),
+        label: 'Customers',
+        icon: const Icon(Icons.school),
+      ),
+      TabItem(
+        form: const CompanyUserList(key: Key('Supplier'), role: Role.supplier),
+        label: 'Suppliers',
+        icon: const Icon(Icons.business),
+      ),
+      TabItem(
+        form: const CompanyUserList(key: Key('All'), role: Role.unknown),
+        label: 'All',
+        icon: const Icon(Icons.business),
+      ),
+    ],
+  ),
+];
+
 // Menu definition
 List<MenuOption> menuOptions(BuildContext context) => [
   MenuOption(
