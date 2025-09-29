@@ -138,6 +138,10 @@ class ActivityDialogState extends State<ActivityDialog> {
         initialDate: CustomizableDateTime.current,
         firstDate: CustomizableDateTime.current,
         lastDate: CustomizableDateTime.current.add(const Duration(days: 356)),
+        locale: const Locale(
+          'sv',
+          'SE',
+        ), // Swedish locale uses YYYY-MM-DD format
         builder: (BuildContext context, Widget? child) {
           return Theme(
             data: ThemeData(primarySwatch: Colors.green),

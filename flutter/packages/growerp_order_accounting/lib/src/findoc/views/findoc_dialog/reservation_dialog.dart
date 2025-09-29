@@ -20,6 +20,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
+import 'package:intl/intl.dart';
 import '../../findoc.dart';
 
 class ReservationDialog extends StatefulWidget {
@@ -57,21 +58,33 @@ class ReservationDialogState extends State<ReservationDialog> {
   void initState() {
     super.initState();
     _selectedCompanyUser = CompanyUser.tryParse(
-        widget.finDoc.otherCompany ?? widget.finDoc.otherUser);
+      widget.finDoc.otherCompany ?? widget.finDoc.otherUser,
+    );
     _companyUserBloc = context.read<DataFetchBloc<CompaniesUsers>>()
-      ..add(GetDataEvent(() => context.read<RestClient>().getCompanyUser(
-          limit: 3,
-          role: widget.finDoc.sales ? Role.customer : Role.supplier)));
+      ..add(
+        GetDataEvent(
+          () => context.read<RestClient>().getCompanyUser(
+            limit: 3,
+            role: widget.finDoc.sales ? Role.customer : Role.supplier,
+          ),
+        ),
+      );
     _productBloc = context.read<DataFetchBloc<Products>>()
-      ..add(GetDataEvent(() => context.read<RestClient>().getProduct(
-          limit: 3,
-          isForDropDown: true,
-//          assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : '',
-          classificationId: classificationId)));
+      ..add(
+        GetDataEvent(
+          () => context.read<RestClient>().getProduct(
+            limit: 3,
+            isForDropDown: true,
+            //          assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : '',
+            classificationId: classificationId,
+          ),
+        ),
+      );
     if (widget.finDoc.items.isNotEmpty) {
       _selectedProduct = Product(
-          productId: widget.finDoc.items[0].product?.productId ?? '',
-          productName: widget.finDoc.items[0].description);
+        productId: widget.finDoc.items[0].product?.productId ?? '',
+        productName: widget.finDoc.items[0].description,
+      );
       _priceController.text = widget.finDoc.items[0].price.toString();
       _quantityController.text = widget.finDoc.items[0].quantity.toString();
       _selectedDate = widget.finDoc.items[0].rentalFromDate!;
@@ -93,21 +106,30 @@ class ReservationDialogState extends State<ReservationDialog> {
   Widget build(BuildContext context) {
     _local = OrderAccountingLocalizations.of(context)!;
     return BlocConsumer<SalesOrderBloc, FinDocState>(
-        listener: (context, salesOrderState) {
-      if (salesOrderState.status == FinDocStatus.failure) {
-        HelperFunctions.showMessage(
-            context, '${salesOrderState.message}', Colors.red);
-      }
-      if (salesOrderState.status == FinDocStatus.success) {
-        Navigator.of(context).pop();
-      }
-    }, builder: (context, salesOrderState) {
-      if (salesOrderState.status == FinDocStatus.loading) {
-        return const LoadingIndicator();
-      } else {
-        return SizedBox(height: 600, width: 400, child: _addRentalItemDialog());
-      }
-    });
+      listener: (context, salesOrderState) {
+        if (salesOrderState.status == FinDocStatus.failure) {
+          HelperFunctions.showMessage(
+            context,
+            '${salesOrderState.message}',
+            Colors.red,
+          );
+        }
+        if (salesOrderState.status == FinDocStatus.success) {
+          Navigator.of(context).pop();
+        }
+      },
+      builder: (context, salesOrderState) {
+        if (salesOrderState.status == FinDocStatus.loading) {
+          return const LoadingIndicator();
+        } else {
+          return SizedBox(
+            height: 600,
+            width: 400,
+            child: _addRentalItemDialog(),
+          );
+        }
+      },
+    );
   }
 
   bool whichDayOk(DateTime day) {
@@ -133,9 +155,15 @@ class ReservationDialogState extends State<ReservationDialog> {
         firstDate: CustomizableDateTime.current,
         lastDate: CustomizableDateTime.current.add(const Duration(days: 356)),
         selectableDayPredicate: whichDayOk,
+        locale: const Locale(
+          'sv',
+          'SE',
+        ), // Swedish locale uses YYYY-MM-DD format
         builder: (BuildContext context, Widget? child) {
           return Theme(
-              data: ThemeData(primarySwatch: Colors.green), child: child!);
+            data: ThemeData(primarySwatch: Colors.green),
+            child: child!,
+          );
         },
       );
       if (picked != null && picked != _selectedDate) {
@@ -146,258 +174,288 @@ class ReservationDialogState extends State<ReservationDialog> {
     }
 
     return Dialog(
-        key: const Key('ReservationDialog'),
-        insetPadding: const EdgeInsets.all(10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: popUp(
-            context: context,
-            height: 550,
-            width: 400,
-            title: widget.finDoc.orderId == null
-                ? (classificationId == 'AppHotel'
-                    ? _local.newRental
-                    : _local.newOrder)
-                : (classificationId == 'AppHotel'
-                        ? _local.reservationId
-                        : _local.orderId) +
-                    widget.finDoc.pseudoId!,
-            child: Form(
-                key: _formKey,
-                child: ListView(key: const Key('listView'), children: <Widget>[
-                  BlocBuilder<DataFetchBloc<CompaniesUsers>,
-                          DataFetchState<CompaniesUsers>>(
-                      builder: (context, state) {
-                    switch (state.status) {
-                      case DataFetchStatus.loading:
-                        return const LoadingIndicator();
-                      case DataFetchStatus.failure:
-                      case DataFetchStatus.success:
-                        return DropdownSearch<CompanyUser>(
-                          selectedItem: _selectedCompanyUser,
-                          popupProps: PopupProps.menu(
-                            isFilterOnline: true,
-                            showSearchBox: true,
-                            searchFieldProps: TextFieldProps(
-                              autofocus: true,
-                              decoration: InputDecoration(
-                                  labelText: _local.customerSearch),
-                              controller: _userSearchBoxController,
+      key: const Key('ReservationDialog'),
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        height: 550,
+        width: 400,
+        title: widget.finDoc.orderId == null
+            ? (classificationId == 'AppHotel'
+                  ? _local.newRental
+                  : _local.newOrder)
+            : (classificationId == 'AppHotel'
+                      ? _local.reservationId
+                      : _local.orderId) +
+                  widget.finDoc.pseudoId!,
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            key: const Key('listView'),
+            children: <Widget>[
+              BlocBuilder<
+                DataFetchBloc<CompaniesUsers>,
+                DataFetchState<CompaniesUsers>
+              >(
+                builder: (context, state) {
+                  switch (state.status) {
+                    case DataFetchStatus.loading:
+                      return const LoadingIndicator();
+                    case DataFetchStatus.failure:
+                    case DataFetchStatus.success:
+                      return DropdownSearch<CompanyUser>(
+                        selectedItem: _selectedCompanyUser,
+                        popupProps: PopupProps.menu(
+                          isFilterOnline: true,
+                          showSearchBox: true,
+                          searchFieldProps: TextFieldProps(
+                            autofocus: true,
+                            decoration: InputDecoration(
+                              labelText: _local.customerSearch,
                             ),
-                            menuProps: MenuProps(
-                                borderRadius: BorderRadius.circular(20.0)),
-                            title: popUp(
-                              context: context,
-                              title: _local.selectCustomer,
-                              height: 50,
-                            ),
+                            controller: _userSearchBoxController,
                           ),
-                          dropdownDecoratorProps: DropDownDecoratorProps(
-                              dropdownSearchDecoration:
-                                  InputDecoration(labelText: _local.customer)),
-                          key: const Key('customer'),
-                          itemAsString: (CompanyUser? u) => " ${u!.name ?? ''}",
-                          asyncItems: (String filter) {
-                            _companyUserBloc.add(GetDataEvent(() => context
-                                .read<RestClient>()
-                                .getCompanyUser(
-                                    searchString: filter,
-                                    limit: 3,
-                                    role: widget.finDoc.sales
-                                        ? Role.customer
-                                        : Role.supplier)));
-                            return Future.delayed(
-                                const Duration(milliseconds: 150), () {
-                              return Future.value((_companyUserBloc.state.data
-                                      as CompaniesUsers)
-                                  .companiesUsers);
-                            });
-                          },
-                          compareFn: (item, sItem) =>
-                              item.partyId == sItem.partyId,
-                          onChanged: (CompanyUser? newValue) {
-                            setState(() {
-                              _selectedCompanyUser = newValue;
-                            });
-                          },
-                          validator: (value) =>
-                              value == null ? 'field required' : null,
-                        );
-                      default:
-                        return const Center(child: LoadingIndicator());
-                    }
-                  }),
-                  const SizedBox(height: 20),
-                  DropdownSearch<Product>(
-                    selectedItem: _selectedProduct,
-                    popupProps: PopupProps.menu(
-                      showSelectedItems: true,
-                      isFilterOnline: true,
-                      showSearchBox: true,
-                      searchFieldProps: TextFieldProps(
-                        autofocus: true,
-                        decoration: InputDecoration(
-                          labelText: classificationId == 'AppHotel'
-                              ? _local.roomType
-                              : _local.product,
+                          menuProps: MenuProps(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          title: popUp(
+                            context: context,
+                            title: _local.selectCustomer,
+                            height: 50,
+                          ),
                         ),
-                        controller: _productSearchBoxController,
-                      ),
-                      menuProps:
-                          MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                      title: popUp(
-                        context: context,
-                        title: _local.selectProduct,
-                        height: 50,
-                      ),
-                    ),
-                    dropdownDecoratorProps: DropDownDecoratorProps(
-                        dropdownSearchDecoration:
-                            InputDecoration(labelText: _local.product)),
-                    key: const Key('product'),
-                    itemAsString: (Product? u) =>
-                        " ${u!.productName}[${u.pseudoId}]",
-                    asyncItems: (String filter) {
-                      _productBloc.add(GetDataEvent(
-                          () => context.read<RestClient>().getProduct(
+                        dropdownDecoratorProps: DropDownDecoratorProps(
+                          dropdownSearchDecoration: InputDecoration(
+                            labelText: _local.customer,
+                          ),
+                        ),
+                        key: const Key('customer'),
+                        itemAsString: (CompanyUser? u) => " ${u!.name ?? ''}",
+                        asyncItems: (String filter) {
+                          _companyUserBloc.add(
+                            GetDataEvent(
+                              () => context.read<RestClient>().getCompanyUser(
                                 searchString: filter,
                                 limit: 3,
-                                isForDropDown: true,
-//                                      assetClassId:
-//                                          classificationId == 'AppHotel'
-//                                              ? 'Hotel Room'
-//                                              : '',
-                              )));
-                      return Future.delayed(const Duration(milliseconds: 150),
-                          () {
-                        return Future.value(
-                            (_productBloc.state.data as Products).products);
-                      });
-                    },
-                    compareFn: (item, sItem) =>
-                        item.productId == sItem.productId,
-                    onChanged: (Product? newValue) async {
-                      _priceController.text = newValue!.price.toString();
-                      _finDocBloc.add(FinDocProductRentalDates(
-                        newValue.productId,
-                      ));
-                      await Future.delayed(
-                          const Duration(milliseconds: 800), () {});
-                      setState(() {
-                        _selectedProduct = newValue;
-                        rentalDays =
-                            _finDocBloc.state.productRentalDates.isNotEmpty
-                                ? _finDocBloc.state.productRentalDates[0].dates
-                                : [];
-                        _selectedDate = firstFreeDate();
-                      });
-                    },
-                    validator: (value) =>
-                        value == null ? "Select a product?" : null,
-                  ),
-                  TextFormField(
-                    key: const Key('price'),
-                    decoration:
-                        InputDecoration(labelText: _local.priceAmount),
-                    controller: _priceController,
-                    validator: (value) {
-                      if (value!.isEmpty) return _local.enterPriceAmount;
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  Row(children: [
-                    Expanded(
-                      child: FormField<DateTime>(
-                        key: const Key('setDate'),
-                        initialValue: _selectedDate,
+                                role: widget.finDoc.sales
+                                    ? Role.customer
+                                    : Role.supplier,
+                              ),
+                            ),
+                          );
+                          return Future.delayed(
+                            const Duration(milliseconds: 150),
+                            () {
+                              return Future.value(
+                                (_companyUserBloc.state.data as CompaniesUsers)
+                                    .companiesUsers,
+                              );
+                            },
+                          );
+                        },
+                        compareFn: (item, sItem) =>
+                            item.partyId == sItem.partyId,
+                        onChanged: (CompanyUser? newValue) {
+                          setState(() {
+                            _selectedCompanyUser = newValue;
+                          });
+                        },
                         validator: (value) =>
-                            value == null ? _local.selectStartDate : null,
-                        builder: (field) => InkWell(
-                          onTap: () async {
-                            await selectDate(context);
-                            field.didChange(_selectedDate);
-                          },
-                          child: InputDecorator(
-                            decoration: InputDecoration(
-                              labelText: _local.startDate,
-                              errorText: field.errorText,
-                              suffixIcon: const Icon(Icons.arrow_drop_down),
-                            ),
-                            child: Text(
-                              "${_selectedDate.toLocal()}".split(' ')[0],
-                            ),
+                            value == null ? 'field required' : null,
+                      );
+                    default:
+                      return const Center(child: LoadingIndicator());
+                  }
+                },
+              ),
+              const SizedBox(height: 20),
+              DropdownSearch<Product>(
+                selectedItem: _selectedProduct,
+                popupProps: PopupProps.menu(
+                  showSelectedItems: true,
+                  isFilterOnline: true,
+                  showSearchBox: true,
+                  searchFieldProps: TextFieldProps(
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      labelText: classificationId == 'AppHotel'
+                          ? _local.roomType
+                          : _local.product,
+                    ),
+                    controller: _productSearchBoxController,
+                  ),
+                  menuProps: MenuProps(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  title: popUp(
+                    context: context,
+                    title: _local.selectProduct,
+                    height: 50,
+                  ),
+                ),
+                dropdownDecoratorProps: DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: _local.product,
+                  ),
+                ),
+                key: const Key('product'),
+                itemAsString: (Product? u) =>
+                    " ${u!.productName}[${u.pseudoId}]",
+                asyncItems: (String filter) {
+                  _productBloc.add(
+                    GetDataEvent(
+                      () => context.read<RestClient>().getProduct(
+                        searchString: filter,
+                        limit: 3,
+                        isForDropDown: true,
+                        //                                      assetClassId:
+                        //                                          classificationId == 'AppHotel'
+                        //                                              ? 'Hotel Room'
+                        //                                              : '',
+                      ),
+                    ),
+                  );
+                  return Future.delayed(const Duration(milliseconds: 150), () {
+                    return Future.value(
+                      (_productBloc.state.data as Products).products,
+                    );
+                  });
+                },
+                compareFn: (item, sItem) => item.productId == sItem.productId,
+                onChanged: (Product? newValue) async {
+                  _priceController.text = newValue!.price.toString();
+                  _finDocBloc.add(FinDocProductRentalDates(newValue.productId));
+                  await Future.delayed(
+                    const Duration(milliseconds: 800),
+                    () {},
+                  );
+                  setState(() {
+                    _selectedProduct = newValue;
+                    rentalDays = _finDocBloc.state.productRentalDates.isNotEmpty
+                        ? _finDocBloc.state.productRentalDates[0].dates
+                        : [];
+                    _selectedDate = firstFreeDate();
+                  });
+                },
+                validator: (value) =>
+                    value == null ? "Select a product?" : null,
+              ),
+              TextFormField(
+                key: const Key('price'),
+                decoration: InputDecoration(labelText: _local.priceAmount),
+                controller: _priceController,
+                validator: (value) {
+                  if (value!.isEmpty) return _local.enterPriceAmount;
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: FormField<DateTime>(
+                      key: const Key('setDate'),
+                      initialValue: _selectedDate,
+                      validator: (value) =>
+                          value == null ? _local.selectStartDate : null,
+                      builder: (field) => InkWell(
+                        onTap: () async {
+                          await selectDate(context);
+                          field.didChange(_selectedDate);
+                        },
+                        child: InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: _local.startDate,
+                            errorText: field.errorText,
+                            suffixIcon: const Icon(Icons.arrow_drop_down),
+                          ),
+                          child: Text(
+                            DateFormat('yyyy-MM-dd').format(_selectedDate),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                        child: TextFormField(
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextFormField(
                       key: const Key('quantity'),
-                      decoration:
-                          InputDecoration(labelText: _local.numberOfDays),
+                      decoration: InputDecoration(
+                        labelText: _local.numberOfDays,
+                      ),
                       controller: _daysController,
-                    )),
-                  ]),
-                  const SizedBox(height: 20),
-                  Row(children: [
-                    OutlinedButton(
-                      key: const Key('cancel'),
-                      child: Text(_local.cancel),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  OutlinedButton(
+                    key: const Key('cancel'),
+                    child: Text(_local.cancel),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: OutlinedButton(
+                      key: const Key('update'),
+                      child: Text(
+                        widget.finDoc.orderId == null
+                            ? _local.create
+                            : _local.update,
+                      ),
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        if (_formKey.currentState!.validate()) {
+                          FinDoc newFinDoc = widget.finDoc.copyWith(
+                            otherUser: _selectedCompanyUser?.getUser(),
+                            otherCompany: _selectedCompanyUser?.getCompany(),
+                            status: FinDocStatusVal.created,
+                          );
+                          FinDocItem newItem = FinDocItem(
+                            product: _selectedProduct,
+                            itemType: ItemType(itemTypeId: 'ItemRental'),
+                            price: Decimal.parse(_priceController.text),
+                            description: _selectedProduct!.productName,
+                            rentalFromDate: _selectedDate.noon(),
+                            rentalThruDate: _selectedDate
+                                .add(
+                                  Duration(
+                                    days: int.parse(_daysController.text),
+                                  ),
+                                )
+                                .noon(),
+                            quantity: _quantityController.text.isEmpty
+                                ? Decimal.parse('1')
+                                : Decimal.parse(_quantityController.text),
+                          );
+                          if (widget.original?.orderId == null) {
+                            newFinDoc = newFinDoc.copyWith(items: [newItem]);
+                          } else {
+                            List<FinDocItem> newItemList = List.of(
+                              widget.original!.items,
+                            );
+                            int index = newItemList.indexWhere(
+                              (element) =>
+                                  element.itemSeqId == newItem.itemSeqId,
+                            );
+                            newItemList[index] = newItem;
+                            newFinDoc = newFinDoc.copyWith(items: newItemList);
+                          }
+                          _salesOrderBloc.add(FinDocUpdate(newFinDoc));
+                        }
                       },
                     ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                        child: OutlinedButton(
-                            key: const Key('update'),
-                            child: Text(widget.finDoc.orderId == null
-                                ? _local.create
-                                : _local.update),
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                FinDoc newFinDoc = widget.finDoc.copyWith(
-                                    otherUser: _selectedCompanyUser?.getUser(),
-                                    otherCompany:
-                                        _selectedCompanyUser?.getCompany(),
-                                    status: FinDocStatusVal.created);
-                                FinDocItem newItem = FinDocItem(
-                                    product: _selectedProduct,
-                                    itemType:
-                                        ItemType(itemTypeId: 'ItemRental'),
-                                    price: Decimal.parse(_priceController.text),
-                                    description: _selectedProduct!.productName,
-                                    rentalFromDate: _selectedDate.noon(),
-                                    rentalThruDate: _selectedDate
-                                        .add(Duration(
-                                            days: int.parse(
-                                                _daysController.text)))
-                                        .noon(),
-                                    quantity: _quantityController.text.isEmpty
-                                        ? Decimal.parse('1')
-                                        : Decimal.parse(
-                                            _quantityController.text));
-                                if (widget.original?.orderId == null) {
-                                  newFinDoc =
-                                      newFinDoc.copyWith(items: [newItem]);
-                                } else {
-                                  List<FinDocItem> newItemList =
-                                      List.of(widget.original!.items);
-                                  int index = newItemList.indexWhere(
-                                      (element) =>
-                                          element.itemSeqId ==
-                                          newItem.itemSeqId);
-                                  newItemList[index] = newItem;
-                                  newFinDoc =
-                                      newFinDoc.copyWith(items: newItemList);
-                                }
-                                _salesOrderBloc.add(FinDocUpdate(newFinDoc));
-                              }
-                            }))
-                  ]),
-                ]))));
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

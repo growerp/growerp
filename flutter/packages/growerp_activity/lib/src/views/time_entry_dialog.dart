@@ -108,6 +108,10 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
           const Duration(days: 31),
         ),
         lastDate: CustomizableDateTime.current.add(const Duration(days: 356)),
+        locale: const Locale(
+          'sv',
+          'SE',
+        ), // Swedish locale uses YYYY-MM-DD format
       );
       if (picked != null && picked != _selectedDate) {
         setState(() {

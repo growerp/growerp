@@ -18,10 +18,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
+import 'package:growerp_catalog/growerp_catalog.dart';
+import 'package:growerp_inventory/growerp_inventory.dart';
+import 'package:growerp_website/growerp_website.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:intl/intl.dart';
 import 'package:hotel/router.dart' as router;
 import 'package:hotel/main.dart';
+import 'package:hotel/views/gantt_form.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import 'room_rental_test.dart';
@@ -34,7 +39,130 @@ List<MenuOption> testMenuOptions = [
     title: 'Main',
     route: '/',
     userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const Center(child: Text('Test Menu')),
+    child: const GanttForm(),
+  ),
+  MenuOption(
+    image: "packages/growerp_core/images/companyGrey.png",
+    selectedImage: "packages/growerp_core/images/company.png",
+    title: 'My Hotel',
+    route: '/myHotel',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    tabItems: [
+      TabItem(
+        form: ShowCompanyDialog(
+          Company(role: Role.company),
+          key: const Key('CompanyForm'),
+          dialog: false,
+        ),
+        label: 'Company',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const UserList(key: Key('Employee'), role: Role.company),
+        label: 'Employees',
+        icon: const Icon(Icons.school),
+      ),
+      TabItem(
+        form: const WebsiteDialog(),
+        label: 'Website',
+        icon: const Icon(Icons.webhook),
+      ),
+    ],
+  ),
+  MenuOption(
+    image: "packages/growerp_core/images/single-bedGrey.png",
+    selectedImage: "packages/growerp_core/images/single-bed.png",
+    title: 'Rooms',
+    route: '/rooms',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    tabItems: [
+      TabItem(
+        form: const AssetList(),
+        label: 'Rooms',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const ProductList(),
+        label: 'Room Types',
+        icon: const Icon(Icons.home),
+      ),
+    ],
+  ),
+  MenuOption(
+    image: "packages/growerp_core/images/reservationGrey.png",
+    selectedImage: "packages/growerp_core/images/reservation.png",
+    title: 'Reservations',
+    route: '/reservations',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    tabItems: [
+      TabItem(
+        form: const FinDocList(
+          key: Key("SalesOrder"),
+          sales: true,
+          docType: FinDocType.order,
+          onlyRental: true,
+        ),
+        label: 'Reservations',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const CompanyUserList(key: Key('Customer'), role: Role.customer),
+        label: 'Customers',
+        icon: const Icon(Icons.school),
+      ),
+      TabItem(
+        form: const FinDocList(
+          key: Key('PurchaseOrder'),
+          sales: false,
+          docType: FinDocType.order,
+        ),
+        label: 'Purchase Orders',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const CompanyUserList(key: Key('Supplier'), role: Role.supplier),
+        label: 'Suppliers',
+        icon: const Icon(Icons.business),
+      ),
+    ],
+  ),
+  MenuOption(
+    image: "packages/growerp_core/images/check-in-outGrey.png",
+    selectedImage: "packages/growerp_core/images/check-in-out.png",
+    title: 'In/Out',
+    route: '/checkInOut',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    tabItems: [
+      TabItem(
+        form: const FinDocList(
+          key: Key("Check-In"),
+          sales: true,
+          docType: FinDocType.order,
+          onlyRental: true,
+          status: FinDocStatusVal.created,
+        ),
+        label: 'Check In',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const FinDocList(
+          key: Key("Check-Out"),
+          sales: true,
+          docType: FinDocType.order,
+          onlyRental: true,
+          status: FinDocStatusVal.approved,
+        ),
+        label: 'Check Out',
+        icon: const Icon(Icons.home),
+      ),
+    ],
+  ),
+  MenuOption(
+    image: "packages/growerp_core/images/accountingGrey.png",
+    selectedImage: "packages/growerp_core/images/accounting.png",
+    title: 'Accounting',
+    route: '/accounting',
+    userGroups: [UserGroup.admin],
   ),
 ];
 
