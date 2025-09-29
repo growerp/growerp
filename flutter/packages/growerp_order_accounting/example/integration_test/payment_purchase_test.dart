@@ -32,18 +32,24 @@ void main() {
 
   testWidgets('''GrowERP payment purchase test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
-    await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
-        OrderAccountingLocalizations.localizationsDelegates,
-        title: 'Payment Purchase Test',
-        restClient: restClient,
-        blocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
-        clear: true); // use data from previous run, ifnone same as true
+    await CommonTest.startTestApp(
+      tester,
+      router.generateRoute,
+      testMenuOptions,
+      OrderAccountingLocalizations.localizationsDelegates,
+      title: 'Payment Purchase Test',
+      restClient: restClient,
+      blocProviders: getOrderAccountingBlocProviders(restClient, 'AppAdmin'),
+      clear: true,
+    ); // use data from previous run, ifnone same as true
     List<Company> companies = [
-      company.copyWith(partyId: '_MOD_', name: initialCompany.name)
+      company.copyWith(partyId: '_MOD_', name: initialCompany.name),
     ];
     companies.addAll(supplierCompanies.sublist(0, 4));
-    await CommonTest.createCompanyAndAdmin(tester,
-        testData: {"companies": companies});
+    await CommonTest.createCompanyAndAdmin(
+      tester,
+      testData: {"companies": companies},
+    );
     await CommonTest.logout(tester); // get updated company payment info
     await CommonTest.login(tester);
     await PaymentTest.selectPurchasePayments(tester);

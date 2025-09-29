@@ -61,6 +61,104 @@ List<BlocProvider> getOrderAccountingBlocProvidersExample(
   ];
 }
 
+// Static test menu definition for integration tests
+List<MenuOption> testMenuOptions = [
+  MenuOption(
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    title: 'Main',
+    route: '/',
+    userGroups: [UserGroup.admin, UserGroup.employee, UserGroup.other],
+    child: const MainMenuForm(),
+  ),
+  MenuOption(
+    key: 'dbOrders',
+    image: 'packages/growerp_core/images/orderGrey.png',
+    selectedImage: 'packages/growerp_core/images/order.png',
+    title: 'Orders',
+    route: '/orders',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    tabItems: [
+      TabItem(
+        form: const FinDocList(
+          key: Key('SalesOrder'),
+          sales: true,
+          docType: FinDocType.order,
+        ),
+        label: 'Sales orders',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const FinDocList(
+          key: Key('PurchaseOrder'),
+          sales: false,
+          docType: FinDocType.order,
+        ),
+        label: 'Purchase orders',
+        icon: const Icon(Icons.home),
+      ),
+    ],
+  ),
+  MenuOption(
+    key: 'dbAccounting',
+    image: 'packages/growerp_core/images/accountingGrey.png',
+    selectedImage: 'packages/growerp_core/images/accounting.png',
+    title: 'Accounting',
+    route: '/accounting',
+    userGroups: [UserGroup.admin],
+  ),
+  MenuOption(
+    key: 'dbShipments',
+    image: 'packages/growerp_core/images/supplierGrey.png',
+    selectedImage: 'packages/growerp_core/images/supplier.png',
+    title: 'Shipments',
+    route: '/shipments',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    tabItems: [
+      TabItem(
+        form: const FinDocList(
+          key: Key('ShipmentsOut'),
+          sales: true,
+          docType: FinDocType.shipment,
+        ),
+        label: 'Outgoing shipments',
+        icon: const Icon(Icons.send),
+      ),
+      TabItem(
+        form: const FinDocList(
+          key: Key('ShipmentsIn'),
+          sales: false,
+          docType: FinDocType.shipment,
+        ),
+        label: 'Incoming shipments',
+        icon: const Icon(Icons.call_received),
+      ),
+    ],
+  ),
+  MenuOption(
+    key: 'dbInventory',
+    image: 'packages/growerp_core/images/supplierGrey.png',
+    selectedImage: 'packages/growerp_core/images/supplier.png',
+    title: 'Inventory',
+    route: '/inventory',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const LocationList(),
+  ),
+  MenuOption(
+    key: 'dbRequests',
+    image: 'packages/growerp_core/images/accountingGrey.png',
+    selectedImage: 'packages/growerp_core/images/accounting.png',
+    title: 'Requests',
+    route: '/requests',
+    userGroups: [UserGroup.admin],
+    child: const FinDocList(
+      key: Key('Request'),
+      sales: false,
+      docType: FinDocType.request,
+    ),
+  ),
+];
+
 // Menu definition
 List<MenuOption> menuOptions = [
   MenuOption(
