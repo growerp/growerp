@@ -34,7 +34,7 @@ class SearchFinDocList extends StatefulWidget {
 class SearchFinDocState extends State<SearchFinDocList> {
   late DataFetchBloc<FinDocs> _finDocBloc;
   List<FinDoc> finDocs = [];
-  late OrderAccountingLocalizations _local;
+  late OrderAccountingLocalizations _localizations;
 
   @override
   void initState() {
@@ -45,7 +45,7 @@ class SearchFinDocState extends State<SearchFinDocList> {
 
   @override
   Widget build(BuildContext context) {
-    _local = OrderAccountingLocalizations.of(context)!;
+    _localizations = OrderAccountingLocalizations.of(context)!;
     return BlocConsumer<DataFetchBloc<FinDocs>, DataFetchState<FinDocs>>(
       listener: (context, state) {
         if (state.status == DataFetchStatus.failure) {
@@ -55,7 +55,7 @@ class SearchFinDocState extends State<SearchFinDocList> {
       builder: (context, state) {
         if (state.status == DataFetchStatus.failure) {
           return Center(
-            child: Text('${_local.fetchSearchItemsFail} ${state.message}'),
+            child: Text('${_localizations.fetchSearchItemsFail} ${state.message}'),
           );
         }
         if (state.status == DataFetchStatus.success) {

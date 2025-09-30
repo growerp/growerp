@@ -34,7 +34,7 @@ class AssetListState extends State<AssetList> {
   late String entityName;
   late double bottom;
   double? right;
-  late InventoryLocalizations localizations;
+  late InventoryLocalizations _localizations;
 
   @override
   void initState() {
@@ -49,7 +49,7 @@ class AssetListState extends State<AssetList> {
 
   @override
   Widget build(BuildContext context) {
-    localizations = InventoryLocalizations.of(context)!;
+    _localizations = InventoryLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
     return BlocConsumer<AssetBloc, AssetState>(
       listenWhen: (previous, current) => previous.status == AssetStatus.loading,
@@ -57,7 +57,7 @@ class AssetListState extends State<AssetList> {
         if (state.status == AssetStatus.failure) {
           HelperFunctions.showMessage(
             context,
-            localizations.error(state.message ?? ''),
+            _localizations.error(state.message ?? ''),
             Colors.red,
           );
         }
@@ -74,7 +74,7 @@ class AssetListState extends State<AssetList> {
           case AssetStatus.failure:
             return Center(
               child: Text(
-                localizations.failedToFetchAssets(state.message ?? ''),
+                _localizations.failedToFetchAssets(state.message ?? ''),
               ),
             );
           case AssetStatus.success:
@@ -83,8 +83,8 @@ class AssetListState extends State<AssetList> {
                 return Center(
                   child: Text(
                     classificationId == 'AppHotel'
-                        ? localizations.noRoomsFound
-                        : localizations.noAssetsFound,
+                        ? _localizations.noRoomsFound
+                        : _localizations.noAssetsFound,
                     style: const TextStyle(fontSize: 20.0),
                   ),
                 );
@@ -224,7 +224,7 @@ class AssetListState extends State<AssetList> {
                               },
                             );
                           },
-                          tooltip: localizations.addNew,
+                          tooltip: _localizations.addNew,
                           child: const Icon(Icons.add),
                         ),
                       ],

@@ -35,7 +35,7 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
   final _descriptionController = TextEditingController();
 
   late LedgerJournalBloc _ledgerJournalBloc;
-  late OrderAccountingLocalizations _local;
+  late OrderAccountingLocalizations _localizations;
 
   @override
   void initState() {
@@ -49,7 +49,7 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
 
   @override
   Widget build(BuildContext context) {
-    _local = OrderAccountingLocalizations.of(context)!;
+    _localizations = OrderAccountingLocalizations.of(context)!;
     int columns = ResponsiveBreakpoints.of(context).isMobile ? 1 : 2;
     return BlocListener<LedgerJournalBloc, LedgerJournalState>(
       listener: (context, state) async {
@@ -75,7 +75,7 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
         child: popUp(
           context: context,
           title:
-              "${_local.ledgerJournal} #${widget.ledgerJournal.journalId.isEmpty ? " New" : widget.ledgerJournal.journalId}",
+              "${_localizations.ledgerJournal} #${widget.ledgerJournal.journalId.isEmpty ? " New" : widget.ledgerJournal.journalId}",
           width: columns.toDouble() * 400,
           height: 1 / columns.toDouble() * 1200,
           child: _ledgerJournalForm(),
@@ -88,10 +88,10 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
     List<Widget> widgets = [
       TextFormField(
         key: const Key('name'),
-        decoration: InputDecoration(labelText: _local.ledgerJournalName),
+        decoration: InputDecoration(labelText: _localizations.ledgerJournalName),
         controller: _nameController,
         validator: (value) {
-          return value!.isEmpty ? _local.ledgerJournalNameNull : null;
+          return value!.isEmpty ? _localizations.ledgerJournalNameNull : null;
         },
       ),
       Row(
@@ -99,7 +99,7 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
           if (widget.ledgerJournal.journalId.isNotEmpty)
             OutlinedButton(
               key: const Key('post'),
-              child: Text(_local.updateHeaderShort),
+              child: Text(_localizations.updateHeaderShort),
               onPressed: () {
                 if (_formKeyLedgerJournal.currentState!.validate()) {
                   _ledgerJournalBloc.add(
@@ -120,8 +120,8 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
               key: const Key('update'),
               child: Text(
                 widget.ledgerJournal.journalId.isEmpty
-                    ? _local.create
-                    : _local.update,
+                    ? _localizations.create
+                    : _localizations.update,
               ),
               onPressed: () {
                 if (_formKeyLedgerJournal.currentState!.validate()) {

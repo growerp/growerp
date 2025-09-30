@@ -32,7 +32,7 @@ class GlAccountsState extends State<GlAccountList> {
   late int limit;
   late double bottom;
   double? right;
-  late OrderAccountingLocalizations _local;
+  late OrderAccountingLocalizations _localizations;
 
   @override
   void initState() {
@@ -47,7 +47,7 @@ class GlAccountsState extends State<GlAccountList> {
 
   @override
   Widget build(BuildContext context) {
-    _local = OrderAccountingLocalizations.of(context)!;
+    _localizations = OrderAccountingLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
     limit = (MediaQuery.of(context).size.height / 100).round();
     return BlocConsumer<GlAccountBloc, GlAccountState>(
@@ -67,7 +67,7 @@ class GlAccountsState extends State<GlAccountList> {
         switch (state.status) {
           case GlAccountStatus.failure:
             return Center(
-              child: Text('${_local.fetchGlAccountFail} ${state.message}'),
+              child: Text('${_localizations.fetchGlAccountFail} ${state.message}'),
             );
           case GlAccountStatus.success:
             return Stack(
@@ -99,7 +99,7 @@ class GlAccountsState extends State<GlAccountList> {
                                 child: Center(
                                   heightFactor: 20,
                                   child: Text(
-                                    _local.noGlAccounts,
+                                    _localizations.noGlAccounts,
                                     key: const Key('empty'),
                                     textAlign: TextAlign.center,
                                   ),
@@ -151,7 +151,7 @@ class GlAccountsState extends State<GlAccountList> {
                               },
                             );
                           },
-                          tooltip: _local.glAccountFiles,
+                          tooltip: _localizations.glAccountFiles,
                           child: const Icon(Icons.file_copy),
                         ),
                         const SizedBox(height: 10),
@@ -176,9 +176,9 @@ class GlAccountsState extends State<GlAccountList> {
                               ),
                             );
                           },
-                          tooltip: _local.trialBalance,
+                          tooltip: _localizations.trialBalance,
                           child: Text(
-                            _local.tb,
+                            _localizations.tb,
                             style: trialBalance
                                 ? const TextStyle(
                                     decoration: TextDecoration.lineThrough,

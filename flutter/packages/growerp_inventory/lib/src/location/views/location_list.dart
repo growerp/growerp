@@ -39,7 +39,7 @@ class LocationListState extends State<LocationList> {
   String? searchString;
   late double bottom;
   double? right;
-  late InventoryLocalizations localizations;
+  late InventoryLocalizations _localizations;
 
   @override
   void initState() {
@@ -52,7 +52,7 @@ class LocationListState extends State<LocationList> {
 
   @override
   Widget build(BuildContext context) {
-    localizations = InventoryLocalizations.of(context)!;
+    _localizations = InventoryLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
     limit = (MediaQuery.of(context).size.height / 100).round();
     return BlocBuilder<LocationBloc, LocationState>(
@@ -61,7 +61,7 @@ class LocationListState extends State<LocationList> {
           case LocationStatus.failure:
             return Center(
               child: Text(
-                localizations.failedToFetchLocations(state.message ?? ''),
+                _localizations.failedToFetchLocations(state.message ?? ''),
               ),
             );
           case LocationStatus.success:
@@ -72,7 +72,7 @@ class LocationListState extends State<LocationList> {
                 return Center(
                   heightFactor: 20,
                   child: Text(
-                    localizations.noLocationsFound,
+                    _localizations.noLocationsFound,
                     style: const TextStyle(fontSize: 20.0),
                   ),
                 );
@@ -213,7 +213,7 @@ class LocationListState extends State<LocationList> {
                               },
                             );
                           },
-                          tooltip: localizations.addNew,
+                          tooltip: _localizations.addNew,
                           child: const Icon(Icons.add),
                         ),
                       ],

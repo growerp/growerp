@@ -56,7 +56,7 @@ class AssetDialogState extends State<AssetDialog> {
   late String _statusId;
   late String currencyId;
   late String currencySymbol;
-  late InventoryLocalizations localizations;
+  late InventoryLocalizations _localizations;
 
   @override
   void initState() {
@@ -105,7 +105,7 @@ class AssetDialogState extends State<AssetDialog> {
 
   @override
   Widget build(BuildContext context) {
-    localizations = InventoryLocalizations.of(context)!;
+    _localizations = InventoryLocalizations.of(context)!;
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocConsumer<AssetBloc, AssetState>(
       listener: (context, state) {
@@ -116,7 +116,7 @@ class AssetDialogState extends State<AssetDialog> {
           case AssetStatus.failure:
             HelperFunctions.showMessage(
               context,
-              localizations.error(state.message ?? ''),
+              _localizations.error(state.message ?? ''),
               Colors.red,
             );
             break;
@@ -137,10 +137,10 @@ class AssetDialogState extends State<AssetDialog> {
                 context: context,
                 title:
                     (classificationId == 'AppHotel'
-                        ? localizations.roomNumber
-                        : localizations.assetNumber) +
+                        ? _localizations.roomNumber
+                        : _localizations.assetNumber) +
                     (widget.asset.pseudoId.isEmpty
-                        ? localizations.newLabel
+                        ? _localizations.newLabel
                         : widget.asset.pseudoId),
                 height: 450,
                 width: 350,
@@ -148,7 +148,7 @@ class AssetDialogState extends State<AssetDialog> {
               ),
             );
           case AssetStatus.failure:
-            return FatalErrorForm(message: localizations.assetLoadProblem);
+            return FatalErrorForm(message: _localizations.assetLoadProblem);
           default:
             return const Center(child: LoadingIndicator());
         }
@@ -166,7 +166,7 @@ class AssetDialogState extends State<AssetDialog> {
             const SizedBox(height: 10),
             TextFormField(
               key: const Key('pseudoId'),
-              decoration: InputDecoration(labelText: localizations.idLabel),
+              decoration: InputDecoration(labelText: _localizations.idLabel),
               controller: _pseudoIdController,
             ),
             const SizedBox(height: 10),
@@ -174,12 +174,12 @@ class AssetDialogState extends State<AssetDialog> {
               key: const Key('name'),
               decoration: InputDecoration(
                 labelText: classificationId == 'AppHotel'
-                    ? localizations.roomNameLabel
-                    : localizations.assetNameLabel,
+                    ? _localizations.roomNameLabel
+                    : _localizations.assetNameLabel,
               ),
               controller: _nameController,
               validator: (value) {
-                if (value!.isEmpty) return localizations.enterAssetName;
+                if (value!.isEmpty) return _localizations.enterAssetName;
                 return null;
               },
             ),
@@ -192,7 +192,7 @@ class AssetDialogState extends State<AssetDialog> {
                     child: TextFormField(
                       key: const Key('quantityOnHand'),
                       decoration: InputDecoration(
-                        labelText: localizations.qtyOnHand,
+                        labelText: _localizations.qtyOnHand,
                       ),
                       keyboardType: TextInputType.number,
                       inputFormatters: <TextInputFormatter>[
@@ -201,7 +201,7 @@ class AssetDialogState extends State<AssetDialog> {
                       controller: _quantityOnHandController,
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return localizations.enterQtyOnHand;
+                          return _localizations.enterQtyOnHand;
                         }
                         return null;
                       },
@@ -211,7 +211,7 @@ class AssetDialogState extends State<AssetDialog> {
                     child: TextFormField(
                       key: const Key('availableToPromise'),
                       decoration: InputDecoration(
-                        labelText: localizations.qtyPromise,
+                        labelText: _localizations.qtyPromise,
                       ),
                       keyboardType: TextInputType.number,
                       inputFormatters: <TextInputFormatter>[
@@ -220,7 +220,7 @@ class AssetDialogState extends State<AssetDialog> {
                       controller: _atpController,
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return localizations.enterQtyPromise;
+                          return _localizations.enterQtyPromise;
                         }
                         return null;
                       },
@@ -230,7 +230,7 @@ class AssetDialogState extends State<AssetDialog> {
                     child: TextFormField(
                       key: const Key('acquireCost'),
                       decoration: InputDecoration(
-                        labelText: localizations.aqrdCosts(currencySymbol),
+                        labelText: _localizations.aqrdCosts(currencySymbol),
                       ),
                       keyboardType: TextInputType.number,
                       inputFormatters: <TextInputFormatter>[
@@ -239,7 +239,7 @@ class AssetDialogState extends State<AssetDialog> {
                       controller: _acquireCostController,
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return localizations.enterAquiredCost;
+                          return _localizations.enterAquiredCost;
                         }
                         return null;
                       },
@@ -252,7 +252,7 @@ class AssetDialogState extends State<AssetDialog> {
               builder: (context, state) {
                 switch (state.status) {
                   case DataFetchStatus.failure:
-                    return FatalErrorForm(message: localizations.serverProblem);
+                    return FatalErrorForm(message: _localizations.serverProblem);
                   case DataFetchStatus.success:
                     return DropdownSearch<Product>(
                       key: const Key('productDropDown'),
@@ -265,7 +265,7 @@ class AssetDialogState extends State<AssetDialog> {
                           autofocus: true,
                           decoration: InputDecoration(
                             labelText:
-                                "${classificationId == 'AppHotel' ? localizations.roomTypeName : localizations.productIdName} name",
+                                "${classificationId == 'AppHotel' ? _localizations.roomTypeName : _localizations.productIdName} name",
                           ),
                           controller: _productSearchBoxController,
                         ),
@@ -275,15 +275,15 @@ class AssetDialogState extends State<AssetDialog> {
                         title: popUp(
                           context: context,
                           title:
-                              '${localizations.select} ${classificationId == 'AppHotel' ? localizations.roomTypeName : localizations.product}',
+                              '${_localizations.select} ${classificationId == 'AppHotel' ? _localizations.roomTypeName : _localizations.product}',
                           height: 50,
                         ),
                       ),
                       dropdownDecoratorProps: DropDownDecoratorProps(
                         dropdownSearchDecoration: InputDecoration(
                           labelText: classificationId == 'AppHotel'
-                              ? localizations.roomTypeId
-                              : localizations.productId,
+                              ? _localizations.roomTypeId
+                              : _localizations.productId,
                         ),
                       ),
                       itemAsString: (Product? u) =>
@@ -315,7 +315,7 @@ class AssetDialogState extends State<AssetDialog> {
                         });
                       },
                       validator: (value) =>
-                          value == null ? localizations.fieldRequired : null,
+                          value == null ? _localizations.fieldRequired : null,
                     );
                   default:
                     return const Center(child: LoadingIndicator());
@@ -331,11 +331,11 @@ class AssetDialogState extends State<AssetDialog> {
                   child: DropdownButtonFormField<String>(
                     key: const Key('statusDropDown'),
                     decoration: InputDecoration(
-                      labelText: localizations.status,
+                      labelText: _localizations.status,
                     ),
                     initialValue: _statusId,
                     validator: (value) =>
-                        value == null ? localizations.fieldRequired : null,
+                        value == null ? _localizations.fieldRequired : null,
                     items: assetStatusValues
                         .map(
                           (label) => DropdownMenuItem<String>(
@@ -363,7 +363,7 @@ class AssetDialogState extends State<AssetDialog> {
                             switch (state.status) {
                               case DataFetchStatus.failure:
                                 return FatalErrorForm(
-                                  message: localizations.serverProblem,
+                                  message: _localizations.serverProblem,
                                 );
                               case DataFetchStatus.success:
                                 return DropdownSearch<Location>(
@@ -375,7 +375,7 @@ class AssetDialogState extends State<AssetDialog> {
                                     searchFieldProps: TextFieldProps(
                                       autofocus: true,
                                       decoration: InputDecoration(
-                                        labelText: localizations.locationName,
+                                        labelText: _localizations.locationName,
                                       ),
                                       controller: _locationSearchBoxController,
                                     ),
@@ -384,7 +384,7 @@ class AssetDialogState extends State<AssetDialog> {
                                     ),
                                     title: popUp(
                                       context: context,
-                                      title: localizations.selectLocation,
+                                      title: _localizations.selectLocation,
                                       height: 50,
                                     ),
                                   ),
@@ -392,7 +392,7 @@ class AssetDialogState extends State<AssetDialog> {
                                       DropDownDecoratorProps(
                                         dropdownSearchDecoration:
                                             InputDecoration(
-                                              labelText: localizations.location,
+                                              labelText: _localizations.location,
                                             ),
                                       ),
                                   itemAsString: (Location? u) =>
@@ -440,8 +440,8 @@ class AssetDialogState extends State<AssetDialog> {
               key: const Key('update'),
               child: Text(
                 widget.asset.assetId.isEmpty
-                    ? localizations.create
-                    : localizations.update,
+                    ? _localizations.create
+                    : _localizations.update,
               ),
               onPressed: () async {
                 if (_assetDialogformKey.currentState!.validate()) {
