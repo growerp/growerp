@@ -18,6 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart' as foundation;
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 import '../gl_account.dart';
 
@@ -30,6 +31,8 @@ class GlAccountFilesDialog extends StatefulWidget {
 
 class _FilesHeaderState extends State<GlAccountFilesDialog> {
   late GlAccountBloc glAccountBloc;
+  late OrderAccountingLocalizations _local;
+
   @override
   void initState() {
     glAccountBloc = BlocProvider.of<GlAccountBloc>(context);
@@ -38,6 +41,7 @@ class _FilesHeaderState extends State<GlAccountFilesDialog> {
 
   @override
   Widget build(BuildContext context) {
+    _local = OrderAccountingLocalizations.of(context)!;
     return BlocConsumer<GlAccountBloc, GlAccountState>(
         listener: (context, state) async {
       if (state.status == GlAccountStatus.failure) {
@@ -51,14 +55,14 @@ class _FilesHeaderState extends State<GlAccountFilesDialog> {
       return Stack(children: [
         popUpDialog(
             context: context,
-            title: "GlAccount Up/Download",
+            title: _local.glAccountUpDown,
             children: [
               const SizedBox(height: 40),
-              const Text("Download first to obtain the format"),
+              Text(_local.downloadFirst),
               const SizedBox(height: 10),
               OutlinedButton(
                   key: const Key('upload'),
-                  child: const Text('Upload CSV file'),
+                  child: Text(_local.uploadCsv),
                   onPressed: () async {
                     FilePickerResult? result = await FilePicker.platform
                         .pickFiles(
@@ -78,12 +82,12 @@ class _FilesHeaderState extends State<GlAccountFilesDialog> {
               const SizedBox(height: 20),
               OutlinedButton(
                   key: const Key('download'),
-                  child: const Text('Download via email'),
+                  child: Text(_local.downloadEmail),
                   onPressed: () {
                     glAccountBloc.add(GlAccountDownload());
                   }),
               const SizedBox(height: 20),
-              const Text("A data file will be send by email"),
+              Text(_local.dataFileSendEmail),
             ]),
         if (state.status == GlAccountStatus.loading) const LoadingIndicator(),
       ]);

@@ -90,18 +90,18 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
           _selectedPeriod = state.ledgerReport!.period!;
 
           var months = [
-            'Jan',
-            'Feb',
-            'Mar',
-            'Apr',
-            'May',
-            'Jun',
-            'Jul',
-            'Aug',
-            'Sep',
-            'Oct',
-            'Nov',
-            'Dec'
+            _local.jan,
+            _local.feb,
+            _local.mar,
+            _local.apr,
+            _local.may,
+            _local.jun,
+            _local.jul,
+            _local.aug,
+            _local.sep,
+            _local.oct,
+            _local.nov,
+            _local.dec
           ];
           // calculate maxY and minY
           double maxY = 0.0, minY = 0.0;
@@ -149,7 +149,7 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
                       children: [
                         IconButton(
                           icon: const Icon(Icons.arrow_back),
-                          tooltip: 'Previous Year',
+                          tooltip: _local.previousYear,
                           onPressed: () {
                             // Extract the year from the period name
                             String currentPeriodName =

@@ -124,7 +124,8 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                                   // Show message if year doesn't exist
                                   HelperFunctions.showMessage(
                                     context,
-                                    'Data for year $previousYear is not available',
+                                  _local.dataForYearNotAvailable(
+                                      previousYear.toString()),
                                     Colors.orange,
                                   );
                                   return;
@@ -159,14 +160,14 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                               },
                             ),
                             Text(
-                              'Year: ${_getYearFromPeriod(_selectedPeriod.periodName)}',
+                            '${_local.year} ${_getYearFromPeriod(_selectedPeriod.periodName)}',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             IconButton(
                               icon: const Icon(Icons.arrow_forward),
-                              tooltip: 'Next Year',
+                            tooltip: _local.nextYear,
                               onPressed: () {
                                 // Extract the year from the period name
                                 String currentPeriodName =
@@ -206,7 +207,8 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                                   // Show message if year doesn't exist
                                   HelperFunctions.showMessage(
                                     context,
-                                    'Data for year $nextYear is not available',
+                                  _local.dataForYearNotAvailable(
+                                      nextYear.toString()),
                                     Colors.orange,
                                   );
                                   return;
@@ -242,7 +244,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                           ],
                         ),
                         Text(
-                          'Period: ${_selectedPeriod.periodName}',
+                        '${_local.period} ${_selectedPeriod.periodName}',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -277,7 +279,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                                             heightFactor: 20,
                                             child: Text(
                                                 started
-                                                    ? 'No balanceSummary.accountList found'
+                                                  ? _local.noBalanceSummaryFound
                                                     : '',
                                                 key: const Key('empty'),
                                                 textAlign: TextAlign.center)))
@@ -313,9 +315,9 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                                           heroTag: 'yearButton',
                                           mini: true,
                                           backgroundColor: Colors.blue,
-                                          child: const Text(
-                                            'Y',
-                                            style: TextStyle(
+                                        child: Text(
+                                          _local.yearLetter,
+                                          style: const TextStyle(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -336,9 +338,9 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                                           heroTag: 'quarterButton',
                                           mini: true,
                                           backgroundColor: Colors.green,
-                                          child: const Text(
-                                            'Q',
-                                            style: TextStyle(
+                                        child: Text(
+                                          _local.quarterLetter,
+                                          style: const TextStyle(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -362,9 +364,9 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                                         heroTag: 'monthButton',
                                         mini: true,
                                         backgroundColor: Colors.orange,
-                                        child: const Text(
-                                          'M',
-                                          style: TextStyle(
+                                      child: Text(
+                                        _local.monthLetter,
+                                        style: const TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -383,8 +385,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                 ],
               );
             case LedgerStatus.failure:
-              return const FatalErrorForm(
-                  message: 'failed to get Balance Summary');
+            return FatalErrorForm(message: _local.getBalanceSummaryFail);
             default:
               return const LoadingIndicator();
           }

@@ -151,7 +151,7 @@ class GlAccountsState extends State<GlAccountList> {
                               },
                             );
                           },
-                          tooltip: _local.glAccountFile,
+                          tooltip: _local.glAccountFiles,
                           child: const Icon(Icons.file_copy),
                         ),
                         const SizedBox(height: 10),

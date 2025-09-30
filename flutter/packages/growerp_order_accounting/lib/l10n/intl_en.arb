@@ -539,5 +539,216 @@
       "companyRole": {},
       "docType": {}
     }
+  },
+  "glAccountUpDown": "GlAccount Up/Download",
+  "@glAccountUpDown": {
+    "description": "Label for GL Account Up/Download"
+  },
+  "downloadFirst": "Download first to obtain the format",
+  "@downloadFirst": {
+    "description": "Instruction to download format first"
+  },
+  "uploadCsv": "Upload CSV file",
+  "@uploadCsv": {
+    "description": "Button to upload CSV file"
+  },
+  "downloadEmail": "Download via email",
+  "@downloadEmail": {
+    "description": "Button to download via email"
+  },
+  "dataFileSendEmail": "A data file will be send by email",
+  "@dataFileSendEmail": {
+    "description": "Info message about data file being sent by email"
+  },
+  "glAccountFiles": "glAccount Files",
+  "@glAccountFiles": {
+    "description": "Label for GL Account files"
+  },
+  "totalAssets": "Total Assets",
+  "@totalAssets": {
+    "description": "Label for total assets"
+  },
+  "totalEquityAndDistribution": "Total Equity + Distribution",
+  "@totalEquityAndDistribution": {
+    "description": "Label for total equity and distribution"
+  },
+  "totalLiabilityAndEquity": "Total Liability + Equity",
+  "@totalLiabilityAndEquity": {
+    "description": "Label for total liability and equity"
+  },
+  "totalUnbookedNetIncome": "Total Unbooked net income",
+  "@totalUnbookedNetIncome": {
+    "description": "Label for total unbooked net income"
+  },
+  "liabilityEquityUnbookedNetIncome": "Liability + Equity + Unbd. Net Income",
+  "@liabilityEquityUnbookedNetIncome": {
+    "description": "Label for liability, equity and unbooked net income"
+  },
+  "previousYear": "Previous Year",
+  "@previousYear": {
+    "description": "Button to go to previous year"
+  },
+  "nextYear": "Next Year",
+  "@nextYear": {
+    "description": "Button to go to next year"
+  },
+  "year": "Year: ",
+  "@year": {
+    "description": "Label for year"
+  },
+  "period": "Period: ",
+  "@period": {
+    "description": "Label for period"
+  },
+  "expand": "Exp.",
+  "@expand": {
+    "description": "Abbreviation for expand"
+  },
+  "collapse": "Col.",
+  "@collapse": {
+    "description": "Abbreviation for collapse"
+  },
+  "glAccountIdAndName": "Gl Account ID GL Account Name",
+  "@glAccountIdAndName": {
+    "description": "Header for GL Account ID and Name"
+  },
+  "postedHeader": "Posted",
+  "@postedHeader": {
+    "description": "Header for posted amounts"
+  },
+  "dataForYearNotAvailable": "Data for year {year} is not available",
+  "@dataForYearNotAvailable": {
+    "description": "Message when data for a year is not available",
+    "placeholders": {
+      "year": {}
+    }
+  },
+  "yearLetter": "Y",
+  "@yearLetter": {
+    "description": "Letter for year"
+  },
+  "quarterLetter": "Q",
+  "@quarterLetter": {
+    "description": "Letter for quarter"
+  },
+  "monthLetter": "M",
+  "@monthLetter": {
+    "description": "Letter for month"
+  },
+  "getBalanceSheetFail": "failed to get balance sheet",
+  "@getBalanceSheetFail": {
+    "description": "Error message when balance sheet fails to load"
+  },
+  "noBalanceSummaryFound": "No balance summary found",
+  "@noBalanceSummaryFound": {
+    "description": "Message when no balance summary is found"
+  },
+  "getBalanceSummaryFail": "failed to get Balance Summary",
+  "@getBalanceSummaryFail": {
+    "description": "Error message when balance summary fails to load"
+  },
+  "expandAll": "Expand All",
+  "@expandAll": {
+    "description": "Button to expand all items"
+  },
+  "collapseAll": "Collapse All",
+  "@collapseAll": {
+    "description": "Button to collapse all items"
+  },
+  "recalculate": "Recalculate",
+  "@recalculate": {
+    "description": "Button to recalculate"
+  },
+  "thisAccount": "This Account",
+  "@thisAccount": {
+    "description": "Header for this account"
+  },
+  "totalTree": "Total Tree",
+  "@totalTree": {
+    "description": "Header for total tree"
+  },
+  "getLedgerTreeFail": "Could not load Ledger tree!",
+  "@getLedgerTreeFail": {
+    "description": "Error message when ledger tree fails to load"
+  },
+  "jan": "Jan",
+  "@jan": {
+    "description": "Abbreviation for January"
+  },
+  "feb": "Feb",
+  "@feb": {
+    "description": "Abbreviation for February"
+  },
+  "mar": "Mar",
+  "@mar": {
+    "description": "Abbreviation for March"
+  },
+  "apr": "Apr",
+  "@apr": {
+    "description": "Abbreviation for April"
+  },
+  "may": "May",
+  "@may": {
+    "description": "Abbreviation for May"
+  },
+  "jun": "Jun",
+  "@jun": {
+    "description": "Abbreviation for June"
+  },
+  "jul": "Jul",
+  "@jul": {
+    "description": "Abbreviation for July"
+  },
+  "aug": "Aug",
+  "@aug": {
+    "description": "Abbreviation for August"
+  },
+  "sep": "Sep",
+  "@sep": {
+    "description": "Abbreviation for September"
+  },
+  "oct": "Oct",
+  "@oct": {
+    "description": "Abbreviation for October"
+  },
+  "nov": "Nov",
+  "@nov": {
+    "description": "Abbreviation for November"
+  },
+  "dec": "Dec",
+  "@dec": {
+    "description": "Abbreviation for December"
+  },
+  "byMonth": "By Month",
+  "@byMonth": {
+    "description": "Label for by month"
+  },
+  "noDataForPeriod": "no data found for period ",
+  "@noDataForPeriod": {
+    "description": "Message when no data is found for a period"
+  },
+  "ledgerJournal": "LedgerJournal #",
+  "@ledgerJournal": {
+    "description": "Ledger Journal header or label with number symbol"
+  },
+  "ledgerJournalName": "LedgerJournal Name",
+  "@ledgerJournalName": {
+    "description": "Ledger Journal name field label"
+  },
+  "ledgerJournalNameNull": "Please enter a ledgerJournal name?",
+  "@ledgerJournalNameNull": {
+    "description": "Error message for empty Ledger Journal name field"
+  },
+  "updateHeaderShort": "Upd.Header",
+  "@updateHeaderShort": {
+    "description": "Abbreviation for Update Header"
+  },
+  "getLedgerJournalFail": "failed to fetch ledgerJournals: ",
+  "@getLedgerJournalFail": {
+    "description": "Error message when ledger journals fail to load"
+  },
+  "noLedgerJournalFound": "No active ledgerJournals found",
+  "@noLedgerJournalFound": {
+    "description": "Message when no active ledger journals are found"
   }
 }

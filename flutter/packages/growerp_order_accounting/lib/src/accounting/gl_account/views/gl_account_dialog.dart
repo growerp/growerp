@@ -72,7 +72,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
           case GlAccountStatus.failure:
             HelperFunctions.showMessage(
               context,
-              'Error: ${state.message}',
+              '${_local.error}: ${state.message}',
               Colors.red,
             );
             break;
