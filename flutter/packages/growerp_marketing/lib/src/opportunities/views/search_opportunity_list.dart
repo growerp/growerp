@@ -86,7 +86,7 @@ class OpportunitySearchDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _localizations = MarketingLocalizations.of(context)!;
+    final localizations = MarketingLocalizations.of(context)!;
     final ScrollController scrollController = ScrollController();
     return Dialog(
       key: const Key('SearchDialog'),
@@ -94,7 +94,7 @@ class OpportunitySearchDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: _localizations.opportunitySearch,
+        title: localizations.opportunitySearch,
         height: 500,
         width: 350,
         child: Column(
@@ -103,10 +103,10 @@ class OpportunitySearchDialog extends StatelessWidget {
               key: const Key('searchField'),
               textInputAction: TextInputAction.search,
               autofocus: true,
-              decoration: InputDecoration(labelText: _localizations.searchInput),
+              decoration: InputDecoration(labelText: localizations.searchInput),
               validator: (value) {
                 if (value!.isEmpty) {
-                  return _localizations.enterSearchValue;
+                  return localizations.enterSearchValue;
                 }
                 return null;
               },
@@ -115,7 +115,7 @@ class OpportunitySearchDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Text(_localizations.searchResults),
+            Text(localizations.searchResults),
             Expanded(
               child: ListView.builder(
                 key: const Key('listView'),
@@ -130,7 +130,7 @@ class OpportunitySearchDialog extends StatelessWidget {
                       child: Center(
                         heightFactor: 20,
                         child: Text(
-                          _localizations.noSearchItems,
+                          localizations.noSearchItems,
                           key: const Key('empty'),
                           textAlign: TextAlign.center,
                         ),
@@ -145,7 +145,7 @@ class OpportunitySearchDialog extends StatelessWidget {
                           direction: DismissDirection.startToEnd,
                           child: ListTile(
                             title: Text(
-                              _localizations.searchResult(
+                              localizations.searchResult(
                                 opportunities[index].pseudoId,
                                 opportunities[index].opportunityName ?? '',
                               ),
