@@ -133,5 +133,137 @@
   "name": "ชื่อ",
   "select": "เลือก",
   "type": "ประเภท",
-  "itemOrCustomerRequired": "ต้องมี {companyRole} และรายการ {docType} อย่างน้อยหนึ่งรายการ"
+  "itemOrCustomerRequired": "ต้องมี {companyRole} และรายการ {docType} อย่างน้อยหนึ่งรายการ",
+  "request": "คำขอ",
+  "@request": {
+    "description": "ป้ายกำกับคำขอ"
+  },
+  "requester": "ผู้ขอ",
+  "@requester": {
+    "description": "ป้ายกำกับผู้ขอ"
+  },
+  "selectRequester": "เลือกผู้ขอ",
+  "@selectRequester": {
+    "description": "คำแนะนำสำหรับเลือกผู้ขอ"
+  },
+  "postalCodeCare": "คุณกำลังมองหาการดูแลในรหัสไปรษณีย์ใด",
+  "@postalCodeCare": {
+    "description": "ป้ายกำกับสำหรับคำถามรหัสไปรษณีย์"
+  },
+  "telephoneNumberQuestion": "หมายเลขโทรศัพท์ของคุณคืออะไร",
+  "@telephoneNumberQuestion": {
+    "description": "ป้ายกำกับสำหรับคำถามหมายเลขโทรศัพท์"
+  },
+  "careTypeQuestion": "คุณกำลังมองหาการดูแลประเภทใด",
+  "@careTypeQuestion": {
+    "description": "ป้ายกำกับสำหรับคำถามประเภทการดูแล"
+  },
+  "residentialCare": "การดูแลที่อยู่อาศัย",
+  "@residentialCare": {
+    "description": "ตัวเลือกการดูแลที่อยู่อาศัย"
+  },
+  "homeCare": "การดูแลที่บ้าน",
+  "@homeCare": {
+    "description": "ตัวเลือกการดูแลที่บ้าน"
+  },
+  "shortTermCare": "การดูแลระยะสั้น",
+  "@shortTermCare": {
+    "description": "ตัวเลือกการดูแลระยะสั้น"
+  },
+  "retirementLiving": "การใช้ชีวิตวัยเกษียณ",
+  "@retirementLiving": {
+    "description": "ตัวเลือกการใช้ชีวิตวัยเกษียณ"
+  },
+  "careForWhomQuestion": "การดูแลนี้สำหรับใคร",
+  "@careForWhomQuestion": {
+    "description": "ป้ายกำกับสำหรับคำถามว่าการดูแลสำหรับใคร"
+  },
+  "myself": "ตัวเอง",
+  "@myself": {
+    "description": "ตัวเลือกตัวเอง"
+  },
+  "myParent": "พ่อแม่ของฉัน",
+  "@myParent": {
+    "description": "ตัวเลือกพ่อแม่ของฉัน"
+  },
+  "myPartner": "คู่ของฉัน",
+  "@myPartner": {
+    "description": "ตัวเลือกคู่ของฉัน"
+  },
+  "myChild": "ลูกของฉัน",
+  "@myChild": {
+    "description": "ตัวเลือกลูกของฉัน"
+  },
+  "myClient": "ลูกค้าของฉัน",
+  "@myClient": {
+    "description": "ตัวเลือกลูกค้าของฉัน"
+  },
+  "other": "อื่น ๆ",
+  "@other": {
+    "description": "ตัวเลือกอื่น ๆ"
+  },
+  "timeframeQuestion": "คุณกำลังมองหากรอบเวลาแบบไหน",
+  "@timeframeQuestion": {
+    "description": "ป้ายกำกับสำหรับคำถามกรอบเวลา"
+  },
+  "notSure": "ฉันไม่แน่ใจ",
+  "@notSure": {
+    "description": "ตัวเลือกไม่แน่ใจ"
+  },
+  "shortTerm": "ระยะสั้น",
+  "@shortTerm": {
+    "description": "ตัวเลือกระยะสั้น"
+  },
+  "longTerm": "ระยะยาว",
+  "@longTerm": {
+    "description": "ตัวเลือกระยะยาว"
+  },
+  "howSoonCareQuestion": "คุณอาจต้องการการดูแลเร็วแค่ไหน",
+  "@howSoonCareQuestion": {
+    "description": "ป้ายกำกับสำหรับคำถามว่าต้องการการดูแลเร็วแค่ไหน"
+  },
+  "asap": "เร็วที่สุดเท่าที่จะทำได้",
+  "@asap": {
+    "description": "ตัวเลือกเร็วที่สุดเท่าที่จะทำได้"
+  },
+  "withinThreeMonths": "ภายในสามเดือน",
+  "@withinThreeMonths": {
+    "description": "ตัวเลือกภายในสามเดือน"
+  },
+  "withinSixMonths": "ภายในหกเดือน",
+  "@withinSixMonths": {
+    "description": "ตัวเลือกภายในหกเดือน"
+  },
+  "moreThanSixMonths": "มากกว่า 6 เดือน",
+  "@moreThanSixMonths": {
+    "description": "ตัวเลือกมากกว่า 6 เดือน"
+  },
+  "acatStatusQuestion": "สถานะการประเมิน ACAT ของคุณเป็นอย่างไร",
+  "@acatStatusQuestion": {
+    "description": "ป้ายกำกับสำหรับคำถามสถานะ ACAT"
+  },
+  "acatNotStarted": "ยังไม่ได้เริ่มการประเมิน",
+  "@acatNotStarted": {
+    "description": "ตัวเลือกยังไม่ได้เริ่ม ACAT"
+  },
+  "acatInProgress": "กำลังดำเนินการประเมิน",
+  "@acatInProgress": {
+    "description": "ตัวเลือกกำลังดำเนินการ ACAT"
+  },
+  "acatComplete": "การประเมินเสร็จสมบูรณ์",
+  "@acatComplete": {
+    "description": "ตัวเลือกการประเมิน ACAT เสร็จสมบูรณ์"
+  },
+  "cancelRequest": "ยกเลิกคำขอ",
+  "@cancelRequest": {
+    "description": "ข้อความปุ่มเพื่อยกเลิกคำขอ"
+  },
+  "requestType": "ประเภทคำขอ",
+  "@requestType": {
+    "description": "ป้ายกำกับสำหรับประเภทคำขอ"
+  },
+  "company": "บริษัท",
+  "@company": {
+    "description": "ป้ายกำกับบริษัท"
+  }
 }
