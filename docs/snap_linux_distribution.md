@@ -40,8 +40,20 @@ sudo snap install --dangerous growerp-admin_*.snap
 
 ### Snap Store Installation (May have OpenGL issues)
 You can also install from the Snap Store:
+
+**Stable version:**
 ```bash
 sudo snap install growerp-admin
+```
+
+**Beta version:**
+```bash
+sudo snap install growerp-admin --beta
+```
+
+**Edge version (development):**
+```bash
+sudo snap install growerp-admin --edge
 ```
 
 **Note**: The current Snap Store version may have OpenGL/Mesa driver issues causing segmentation faults. If you encounter libGL errors, please use the local build which includes the necessary Mesa drivers.
@@ -49,7 +61,7 @@ sudo snap install growerp-admin
 ## Running the Application
 
 ```bash
-growerp-admin.growerp-admin
+growerp-admin
 ```
 
 The application will also appear in your desktop environment's application menu.
@@ -80,8 +92,37 @@ To publish to the Snap Store:
 
 3. **Upload and release**:
    ```bash
+   # Release to stable channel
    snapcraft upload growerp-admin_*.snap --release=stable
+   
+   # Release to beta channel
+   snapcraft upload growerp-admin_*.snap --release=beta
+   
+   # Release to edge channel (development)
+   snapcraft upload growerp-admin_*.snap --release=edge
    ```
+
+## Channel Management
+
+### Switching Between Channels
+You can switch between different release channels:
+
+```bash
+# Switch to beta channel
+sudo snap refresh growerp-admin --beta
+
+# Switch to edge channel  
+sudo snap refresh growerp-admin --edge
+
+# Switch back to stable
+sudo snap refresh growerp-admin --stable
+```
+
+### Check Current Channel
+To see which channel you're currently using:
+```bash
+snap list growerp-admin
+```
 
 ## Troubleshooting
 

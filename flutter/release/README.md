@@ -224,7 +224,7 @@ Selected: admin, hotel
    New version: 1.9.1
    Workspace: Local
    Push to Docker Hub: Yes
-   Push to test server: No
+   Push to GitHub: No
 
 🚀 Starting release process...
 
