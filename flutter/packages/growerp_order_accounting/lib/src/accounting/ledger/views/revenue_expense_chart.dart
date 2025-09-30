@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 import '../../accounting.dart';
@@ -47,21 +48,29 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
   late LedgerBloc _ledgerBloc;
   late bool expanded;
   late TimePeriod _selectedPeriod;
+  late OrderAccountingLocalizations _local;
 
   @override
   void initState() {
     super.initState();
     _ledgerBloc = context.read<LedgerBloc>();
-    _selectedPeriod =
-        TimePeriod(periodName: 'Y${DateTime.now().year}', periodType: 'Y');
-    _ledgerBloc.add(LedgerFetch(ReportType.revenueExpense,
-        periodName: _selectedPeriod.periodName));
+    _selectedPeriod = TimePeriod(
+      periodName: 'Y${DateTime.now().year}',
+      periodType: 'Y',
+    );
+    _ledgerBloc.add(
+      LedgerFetch(
+        ReportType.revenueExpense,
+        periodName: _selectedPeriod.periodName,
+      ),
+    );
     level = 0;
     expanded = false;
   }
 
   @override
   Widget build(BuildContext context) {
+    _local = OrderAccountingLocalizations.of(context)!;
     Color getColor(int line) {
       switch (line) {
         case 1:
@@ -79,331 +88,370 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
       }
     }
 
-    return BlocConsumer<LedgerBloc, LedgerState>(listener: (context, state) {
-      if (state.status == LedgerStatus.failure) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-      }
-    }, builder: (context, state) {
-      switch (state.status) {
-        case LedgerStatus.success:
-        case LedgerStatus.failure:
-          _selectedPeriod = state.ledgerReport!.period!;
+    return BlocConsumer<LedgerBloc, LedgerState>(
+      listener: (context, state) {
+        if (state.status == LedgerStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+      },
+      builder: (context, state) {
+        switch (state.status) {
+          case LedgerStatus.success:
+          case LedgerStatus.failure:
+            _selectedPeriod = state.ledgerReport!.period!;
 
-          var months = [
-            'Jan',
-            'Feb',
-            'Mar',
-            'Apr',
-            'May',
-            'Jun',
-            'Jul',
-            'Aug',
-            'Sep',
-            'Oct',
-            'Nov',
-            'Dec'
-          ];
-          // calculate maxY and minY
-          double maxY = 0.0, minY = 0.0;
-          List<List<double>> newCsvRows = [];
-          int row = 1;
-          if (state.ledgerReport?.csvRows != null) {
-            for (int i = 1; i < 13; i++) {
-              List<double> newRow = [];
-              if (months.indexWhere((month) =>
-                          state.ledgerReport?.csvRows?[row][0]
-                              .substring(0, 3) ==
-                          month) ==
-                      i - 1 &&
-                  row < state.ledgerReport!.csvRows!.length - 1) {
-                for (int cell = 1;
+            var months = [
+              _local.jan,
+              _local.feb,
+              _local.mar,
+              _local.apr,
+              _local.may,
+              _local.jun,
+              _local.jul,
+              _local.aug,
+              _local.sep,
+              _local.oct,
+              _local.nov,
+              _local.dec,
+            ];
+            // calculate maxY and minY
+            double maxY = 0.0, minY = 0.0;
+            List<List<double>> newCsvRows = [];
+            int row = 1;
+            if (state.ledgerReport?.csvRows != null) {
+              for (int i = 1; i < 13; i++) {
+                List<double> newRow = [];
+                if (months.indexWhere(
+                          (month) =>
+                              state.ledgerReport?.csvRows?[row][0].substring(
+                                0,
+                                3,
+                              ) ==
+                              month,
+                        ) ==
+                        i - 1 &&
+                    row < state.ledgerReport!.csvRows!.length - 1) {
+                  for (
+                    int cell = 1;
                     cell < state.ledgerReport!.csvRows![row].length;
-                    cell++) {
-                  double doubleCell =
-                      double.parse(state.ledgerReport!.csvRows![row][cell]);
-                  if (doubleCell < minY) {
-                    minY = doubleCell;
+                    cell++
+                  ) {
+                    double doubleCell = double.parse(
+                      state.ledgerReport!.csvRows![row][cell],
+                    );
+                    if (doubleCell < minY) {
+                      minY = doubleCell;
+                    }
+                    if (doubleCell > maxY) {
+                      maxY = doubleCell;
+                    }
+                    newRow.add(doubleCell);
                   }
-                  if (doubleCell > maxY) {
-                    maxY = doubleCell;
-                  }
-                  newRow.add(doubleCell);
+                  row++;
+                } else {
+                  newRow = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
                 }
-                row++;
-              } else {
-                newRow = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+                newCsvRows.add(newRow);
               }
-              newCsvRows.add(newRow);
             }
-          }
 
-          return Column(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back),
-                          tooltip: 'Previous Year',
-                          onPressed: () {
-                            // Extract the year from the period name
-                            String currentPeriodName =
-                                _selectedPeriod.periodName;
-                            String yearStr = '';
-                            int year = 0;
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back),
+                            tooltip: _local.previousYear,
+                            onPressed: () {
+                              // Extract the year from the period name
+                              String currentPeriodName =
+                                  _selectedPeriod.periodName;
+                              String yearStr = '';
+                              int year = 0;
 
-                            if (currentPeriodName.contains('q')) {
-                              // Format: Y2025q1
-                              yearStr = currentPeriodName.substring(1, 5);
-                              year =
-                                  int.tryParse(yearStr) ?? DateTime.now().year;
-                            } else if (currentPeriodName.contains('m')) {
-                              // Format: Y2025m01
-                              yearStr = currentPeriodName.substring(1, 5);
-                              year =
-                                  int.tryParse(yearStr) ?? DateTime.now().year;
-                            } else {
-                              // Format: Y2025
-                              yearStr = currentPeriodName.substring(1);
-                              year =
-                                  int.tryParse(yearStr) ?? DateTime.now().year;
-                            }
+                              if (currentPeriodName.contains('q')) {
+                                // Format: Y2025q1
+                                yearStr = currentPeriodName.substring(1, 5);
+                                year =
+                                    int.tryParse(yearStr) ??
+                                    DateTime.now().year;
+                              } else if (currentPeriodName.contains('m')) {
+                                // Format: Y2025m01
+                                yearStr = currentPeriodName.substring(1, 5);
+                                year =
+                                    int.tryParse(yearStr) ??
+                                    DateTime.now().year;
+                              } else {
+                                // Format: Y2025
+                                yearStr = currentPeriodName.substring(1);
+                                year =
+                                    int.tryParse(yearStr) ??
+                                    DateTime.now().year;
+                              }
 
-                            // Go to previous year
-                            int previousYear = year - 1;
+                              // Go to previous year
+                              int previousYear = year - 1;
 
-                            // Check if the previous year exists in available periods
-                            bool yearExists = _checkYearExists(
-                                previousYear, state.timePeriods);
-
-                            if (!yearExists) {
-                              // Show message if year doesn't exist
-                              HelperFunctions.showMessage(
-                                context,
-                                'Data for year $previousYear is not available',
-                                Colors.orange,
+                              // Check if the previous year exists in available periods
+                              bool yearExists = _checkYearExists(
+                                previousYear,
+                                state.timePeriods,
                               );
-                              return;
-                            }
 
-                            // Determine the new period name based on current period type
-                            String newPeriodName = '';
-                            if (_selectedPeriod.periodType == 'Y') {
-                              newPeriodName = 'Y$previousYear';
-                            } else if (_selectedPeriod.periodType == 'Q') {
-                              // Extract quarter number
-                              int quarterIndex = currentPeriodName.indexOf('q');
-                              String quarter =
-                                  currentPeriodName.substring(quarterIndex + 1);
-                              newPeriodName = 'Y$previousYear${'q$quarter'}';
-                            } else if (_selectedPeriod.periodType == 'M') {
-                              // Extract month number
-                              int monthIndex = currentPeriodName.indexOf('m');
-                              String month =
-                                  currentPeriodName.substring(monthIndex + 1);
-                              newPeriodName = 'Y$previousYear${'m$month'}';
-                            }
+                              if (!yearExists) {
+                                // Show message if year doesn't exist
+                                HelperFunctions.showMessage(
+                                  context,
+                                  'Data for year $previousYear is not available',
+                                  Colors.orange,
+                                );
+                                return;
+                              }
 
-                            // Fetch data for the previous year
-                            _ledgerBloc.add(LedgerFetch(
-                              ReportType.revenueExpense,
-                              periodName: newPeriodName,
-                            ));
-                          },
-                        ),
-                        Text(
-                          'Year: ${_getYearFromPeriod(_selectedPeriod.periodName)}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
+                              // Determine the new period name based on current period type
+                              String newPeriodName = '';
+                              if (_selectedPeriod.periodType == 'Y') {
+                                newPeriodName = 'Y$previousYear';
+                              } else if (_selectedPeriod.periodType == 'Q') {
+                                // Extract quarter number
+                                int quarterIndex = currentPeriodName.indexOf(
+                                  'q',
+                                );
+                                String quarter = currentPeriodName.substring(
+                                  quarterIndex + 1,
+                                );
+                                newPeriodName = 'Y$previousYear${'q$quarter'}';
+                              } else if (_selectedPeriod.periodType == 'M') {
+                                // Extract month number
+                                int monthIndex = currentPeriodName.indexOf('m');
+                                String month = currentPeriodName.substring(
+                                  monthIndex + 1,
+                                );
+                                newPeriodName = 'Y$previousYear${'m$month'}';
+                              }
+
+                              // Fetch data for the previous year
+                              _ledgerBloc.add(
+                                LedgerFetch(
+                                  ReportType.revenueExpense,
+                                  periodName: newPeriodName,
+                                ),
+                              );
+                            },
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.arrow_forward),
-                          tooltip: 'Next Year',
-                          onPressed: () {
-                            // Extract the year from the period name
-                            String currentPeriodName =
-                                _selectedPeriod.periodName;
-                            String yearStr = '';
-                            int year = 0;
+                          Text(
+                            'Year: ${_getYearFromPeriod(_selectedPeriod.periodName)}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.arrow_forward),
+                            tooltip: 'Next Year',
+                            onPressed: () {
+                              // Extract the year from the period name
+                              String currentPeriodName =
+                                  _selectedPeriod.periodName;
+                              String yearStr = '';
+                              int year = 0;
 
-                            if (currentPeriodName.contains('q')) {
-                              // Format: Y2025q1
-                              yearStr = currentPeriodName.substring(1, 5);
-                              year =
-                                  int.tryParse(yearStr) ?? DateTime.now().year;
-                            } else if (currentPeriodName.contains('m')) {
-                              // Format: Y2025m01
-                              yearStr = currentPeriodName.substring(1, 5);
-                              year =
-                                  int.tryParse(yearStr) ?? DateTime.now().year;
-                            } else {
-                              // Format: Y2025
-                              yearStr = currentPeriodName.substring(1);
-                              year =
-                                  int.tryParse(yearStr) ?? DateTime.now().year;
-                            }
+                              if (currentPeriodName.contains('q')) {
+                                // Format: Y2025q1
+                                yearStr = currentPeriodName.substring(1, 5);
+                                year =
+                                    int.tryParse(yearStr) ??
+                                    DateTime.now().year;
+                              } else if (currentPeriodName.contains('m')) {
+                                // Format: Y2025m01
+                                yearStr = currentPeriodName.substring(1, 5);
+                                year =
+                                    int.tryParse(yearStr) ??
+                                    DateTime.now().year;
+                              } else {
+                                // Format: Y2025
+                                yearStr = currentPeriodName.substring(1);
+                                year =
+                                    int.tryParse(yearStr) ??
+                                    DateTime.now().year;
+                              }
 
-                            // Go to next year (but don't exceed current year)
-                            int nextYear = year + 1;
-                            int currentYear = DateTime.now().year;
-                            if (nextYear > currentYear) {
-                              nextYear = currentYear;
-                            }
+                              // Go to next year (but don't exceed current year)
+                              int nextYear = year + 1;
+                              int currentYear = DateTime.now().year;
+                              if (nextYear > currentYear) {
+                                nextYear = currentYear;
+                              }
 
-                            // Check if the next year exists in available periods
-                            bool yearExists =
-                                _checkYearExists(nextYear, state.timePeriods);
-
-                            if (!yearExists) {
-                              // Show message if year doesn't exist
-                              HelperFunctions.showMessage(
-                                context,
-                                'Data for year $nextYear is not available',
-                                Colors.orange,
+                              // Check if the next year exists in available periods
+                              bool yearExists = _checkYearExists(
+                                nextYear,
+                                state.timePeriods,
                               );
-                              return;
-                            }
 
-                            // Determine the new period name based on current period type
-                            String newPeriodName = '';
-                            if (_selectedPeriod.periodType == 'Y') {
-                              newPeriodName = 'Y$nextYear';
-                            } else if (_selectedPeriod.periodType == 'Q') {
-                              // Extract quarter number
-                              int quarterIndex = currentPeriodName.indexOf('q');
-                              String quarter =
-                                  currentPeriodName.substring(quarterIndex + 1);
-                              newPeriodName = 'Y$nextYear${'q$quarter'}';
-                            } else if (_selectedPeriod.periodType == 'M') {
-                              // Extract month number
-                              int monthIndex = currentPeriodName.indexOf('m');
-                              String month =
-                                  currentPeriodName.substring(monthIndex + 1);
-                              newPeriodName = 'Y$nextYear${'m$month'}';
-                            }
+                              if (!yearExists) {
+                                // Show message if year doesn't exist
+                                HelperFunctions.showMessage(
+                                  context,
+                                  'Data for year $nextYear is not available',
+                                  Colors.orange,
+                                );
+                                return;
+                              }
 
-                            // Fetch data for the next year
-                            _ledgerBloc.add(LedgerFetch(
-                              ReportType.revenueExpense,
-                              periodName: newPeriodName,
-                            ));
-                          },
-                        ),
-                      ],
-                    ),
-                    Text(
-                      'Period: ${_selectedPeriod.periodName}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                              // Determine the new period name based on current period type
+                              String newPeriodName = '';
+                              if (_selectedPeriod.periodType == 'Y') {
+                                newPeriodName = 'Y$nextYear';
+                              } else if (_selectedPeriod.periodType == 'Q') {
+                                // Extract quarter number
+                                int quarterIndex = currentPeriodName.indexOf(
+                                  'q',
+                                );
+                                String quarter = currentPeriodName.substring(
+                                  quarterIndex + 1,
+                                );
+                                newPeriodName = 'Y$nextYear${'q$quarter'}';
+                              } else if (_selectedPeriod.periodType == 'M') {
+                                // Extract month number
+                                int monthIndex = currentPeriodName.indexOf('m');
+                                String month = currentPeriodName.substring(
+                                  monthIndex + 1,
+                                );
+                                newPeriodName = 'Y$nextYear${'m$month'}';
+                              }
+
+                              // Fetch data for the next year
+                              _ledgerBloc.add(
+                                LedgerFetch(
+                                  ReportType.revenueExpense,
+                                  periodName: newPeriodName,
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                      Text(
+                        'Period: ${_selectedPeriod.periodName}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              if (state.ledgerReport?.csvRows == null ||
-                  (minY == 0.0 && maxY == 0.0))
-                Text(
+                if (state.ledgerReport?.csvRows == null ||
+                    (minY == 0.0 && maxY == 0.0))
+                  Text(
                     "no data found for period ${state.ledgerReport?.period!.periodName.substring(1, 5)}",
-                    textAlign: TextAlign.center),
-              if (state.ledgerReport?.csvRows != null &&
-                  (minY != 0.0 || maxY != 0.0))
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: LineChart(
-                      LineChartData(
+                    textAlign: TextAlign.center,
+                  ),
+                if (state.ledgerReport?.csvRows != null &&
+                    (minY != 0.0 || maxY != 0.0))
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: LineChart(
+                        LineChartData(
                           titlesData: FlTitlesData(
-                              show: true,
-                              topTitles: const AxisTitles(
-                                  axisNameWidget: Text("By Month")),
-                              leftTitles:
-                                  const AxisTitles(axisNameWidget: Text('\$')),
-                              bottomTitles: AxisTitles(
-                                  axisNameSize: 50,
-                                  axisNameWidget: Padding(
-                                    padding: const EdgeInsets.all(15.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        0,
-                                        1,
-                                        2,
-                                        3,
-                                        4,
-                                        5,
-                                        6,
-                                        7,
-                                        8,
-                                        9,
-                                        10,
-                                        11,
-                                        12
-                                      ]
-                                          .map((e) => Text(
-                                                e.toString(),
-                                                style: const TextStyle(
-                                                  fontSize: 15,
-                                                ),
-                                              ))
+                            show: true,
+                            topTitles: const AxisTitles(
+                              axisNameWidget: Text("By Month"),
+                            ),
+                            leftTitles: const AxisTitles(
+                              axisNameWidget: Text('\$'),
+                            ),
+                            bottomTitles: AxisTitles(
+                              axisNameSize: 50,
+                              axisNameWidget: Padding(
+                                padding: const EdgeInsets.all(15.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children:
+                                      [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                                          .map(
+                                            (e) => Text(
+                                              e.toString(),
+                                              style: const TextStyle(
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                          )
                                           .toList(),
-                                    ),
-                                  ))),
-                          extraLinesData: ExtraLinesData(horizontalLines: [
-                            for (int title = 0;
+                                ),
+                              ),
+                            ),
+                          ),
+                          extraLinesData: ExtraLinesData(
+                            horizontalLines: [
+                              for (
+                                int title = 0;
                                 title <
                                     state.ledgerReport!.csvRows![0].length - 1;
-                                title++)
-                              HorizontalLine(
+                                title++
+                              )
+                                HorizontalLine(
                                   strokeWidth: 0,
                                   y: maxY - maxY / 16 - (title * maxY / 16),
                                   label: HorizontalLineLabel(
-                                      style: TextStyle(
-                                        color: getColor(title),
-                                      ),
-                                      show: true,
-                                      labelResolver: (p0) => state.ledgerReport!
-                                          .csvRows![0][title + 1]))
-                          ]),
+                                    style: TextStyle(color: getColor(title)),
+                                    show: true,
+                                    labelResolver: (p0) =>
+                                        state.ledgerReport!.csvRows![0][title +
+                                            1],
+                                  ),
+                                ),
+                            ],
+                          ),
                           lineBarsData: [
-                            for (int column = 0;
-                                column < newCsvRows[0].length;
-                                column++)
+                            for (
+                              int column = 0;
+                              column < newCsvRows[0].length;
+                              column++
+                            )
                               LineChartBarData(
-                                  dotData: const FlDotData(show: false),
-                                  preventCurveOverShooting: true,
-                                  isCurved: true,
-                                  show: true,
-                                  color: getColor(column),
-                                  spots: [
-                                    for (int x = 1;
-                                        x < newCsvRows.length + 1;
-                                        x++)
-                                      FlSpot(x.toDouble(),
-                                          newCsvRows[x - 1][column])
-                                  ]),
+                                dotData: const FlDotData(show: false),
+                                preventCurveOverShooting: true,
+                                isCurved: true,
+                                show: true,
+                                color: getColor(column),
+                                spots: [
+                                  for (
+                                    int x = 1;
+                                    x < newCsvRows.length + 1;
+                                    x++
+                                  )
+                                    FlSpot(
+                                      x.toDouble(),
+                                      newCsvRows[x - 1][column],
+                                    ),
+                                ],
+                              ),
                           ],
                           maxY: maxY,
-                          minY: minY),
+                          minY: minY,
+                        ),
 
-                      // swapAnimationDuration: const Duration(milliseconds: 150), // Optional
-                      // swapAnimationCurve: Curves.linear, // Optional
+                        // swapAnimationDuration: const Duration(milliseconds: 150), // Optional
+                        // swapAnimationCurve: Curves.linear, // Optional
+                      ),
                     ),
                   ),
-                )
-            ],
-          );
-        default:
-          return const LoadingIndicator();
-      }
-    });
+              ],
+            );
+          default:
+            return const LoadingIndicator();
+        }
+      },
+    );
   }
 
   // Helper method to extract year from period name

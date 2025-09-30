@@ -134,136 +134,89 @@
   "select": "เลือก",
   "type": "ประเภท",
   "itemOrCustomerRequired": "ต้องมี {companyRole} และรายการ {docType} อย่างน้อยหนึ่งรายการ",
+  "glAccountUpDown": "อัปโหลด/ดาวน์โหลดบัญชีแยกประเภท",
+  "downloadFirst": "ดาวน์โหลดก่อนเพื่อรับรูปแบบ",
+  "uploadCsv": "อัปโหลดไฟล์ CSV",
+  "downloadEmail": "ดาวน์โหลดผ่านอีเมล",
+  "dataFileSendEmail": "ไฟล์ข้อมูลจะถูกส่งทางอีเมล",
+  "glAccountFiles": "ไฟล์บัญชีแยกประเภท",
+  "totalAssets": "สินทรัพย์รวม",
+  "totalEquityAndDistribution": "ส่วนของผู้ถือหุ้นและการจ่ายเงินปันผลรวม",
+  "totalLiabilityAndEquity": "หนี้สินและส่วนของผู้ถือหุ้นรวม",
+  "totalUnbookedNetIncome": "รายได้สุทธิที่ยังไม่ลงบัญชีรวม",
+  "liabilityEquityUnbookedNetIncome": "หนี้สิน + ส่วนของผู้ถือหุ้น + รายได้สุทธิที่ยังไม่ลงบัญชี",
+  "previousYear": "ปีก่อนหน้า",
+  "nextYear": "ปีถัดไป",
+  "year": "ปี: ",
+  "period": "ช่วงเวลา: ",
+  "expand": "ขยาย",
+  "collapse": "ย่อ",
+  "glAccountIdAndName": "รหัสบัญชีแยกประเภท ชื่อบัญชีแยกประเภท",
+  "postedHeader": "ลงรายการแล้ว",
+  "dataForYearNotAvailable": "ไม่มีข้อมูลสำหรับปี {year}",
+  "yearLetter": "Y",
+  "quarterLetter": "Q",
+  "monthLetter": "M",
+  "getBalanceSheetFail": "ไม่สามารถดึงข้อมูลงบดุลได้",
+  "noBalanceSummaryFound": "ไม่พบสรุปยอดคงเหลือ",
+  "getBalanceSummaryFail": "ไม่สามารถดึงข้อมูลสรุปยอดคงเหลือได้",
+  "expandAll": "ขยายทั้งหมด",
+  "collapseAll": "ย่อทั้งหมด",
+  "recalculate": "คำนวณใหม่",
+  "thisAccount": "บัญชีนี้",
+  "totalTree": "แผนภูมิทั้งหมด",
+  "getLedgerTreeFail": "ไม่สามารถโหลดแผนภูมิบัญชีแยกประเภทได้!",
+  "jan": "ม.ค.",
+  "feb": "ก.พ.",
+  "mar": "มี.ค.",
+  "apr": "เม.ย.",
+  "may": "พ.ค.",
+  "jun": "มิ.ย.",
+  "jul": "ก.ค.",
+  "aug": "ส.ค.",
+  "sep": "ก.ย.",
+  "oct": "ต.ค.",
+  "nov": "พ.ย.",
+  "dec": "ธ.ค.",
+  "byMonth": "รายเดือน",
+  "noDataForPeriod": "ไม่พบข้อมูลสำหรับช่วงเวลา ",
+  "ledgerJournal": "สมุดรายวัน #",
+  "ledgerJournalName": "ชื่อสมุดรายวัน",
+  "ledgerJournalNameNull": "กรุณาป้อนชื่อสมุดรายวัน",
+  "updateHeaderShort": "อัปเดตส่วนหัว",
+  "getLedgerJournalFail": "ไม่สามารถดึงข้อมูลสมุดรายวันได้: ",
+  "noLedgerJournalFound": "ไม่พบสมุดรายวันที่ใช้งานอยู่",
   "request": "คำขอ",
-  "@request": {
-    "description": "ป้ายกำกับคำขอ"
-  },
   "requester": "ผู้ขอ",
-  "@requester": {
-    "description": "ป้ายกำกับผู้ขอ"
-  },
   "selectRequester": "เลือกผู้ขอ",
-  "@selectRequester": {
-    "description": "คำแนะนำสำหรับเลือกผู้ขอ"
-  },
-  "postalCodeCare": "คุณกำลังมองหาการดูแลในรหัสไปรษณีย์ใด",
-  "@postalCodeCare": {
-    "description": "ป้ายกำกับสำหรับคำถามรหัสไปรษณีย์"
-  },
-  "telephoneNumberQuestion": "หมายเลขโทรศัพท์ของคุณคืออะไร",
-  "@telephoneNumberQuestion": {
-    "description": "ป้ายกำกับสำหรับคำถามหมายเลขโทรศัพท์"
-  },
-  "careTypeQuestion": "คุณกำลังมองหาการดูแลประเภทใด",
-  "@careTypeQuestion": {
-    "description": "ป้ายกำกับสำหรับคำถามประเภทการดูแล"
-  },
-  "residentialCare": "การดูแลที่อยู่อาศัย",
-  "@residentialCare": {
-    "description": "ตัวเลือกการดูแลที่อยู่อาศัย"
-  },
+  "postalCodeCare": "คุณกำลังมองหาการดูแลในรหัสไปรษณีย์ใด?",
+  "telephoneNumberQuestion": "หมายเลขโทรศัพท์ของคุณคือ?",
+  "careTypeQuestion": "คุณกำลังมองหาการดูแลประเภทใด?",
+  "residentialCare": "การดูแลในที่พักอาศัย",
   "homeCare": "การดูแลที่บ้าน",
-  "@homeCare": {
-    "description": "ตัวเลือกการดูแลที่บ้าน"
-  },
   "shortTermCare": "การดูแลระยะสั้น",
-  "@shortTermCare": {
-    "description": "ตัวเลือกการดูแลระยะสั้น"
-  },
-  "retirementLiving": "การใช้ชีวิตวัยเกษียณ",
-  "@retirementLiving": {
-    "description": "ตัวเลือกการใช้ชีวิตวัยเกษียณ"
-  },
-  "careForWhomQuestion": "การดูแลนี้สำหรับใคร",
-  "@careForWhomQuestion": {
-    "description": "ป้ายกำกับสำหรับคำถามว่าการดูแลสำหรับใคร"
-  },
-  "myself": "ตัวเอง",
-  "@myself": {
-    "description": "ตัวเลือกตัวเอง"
-  },
+  "retirementLiving": "บ้านพักผู้สูงอายุ",
+  "careForWhomQuestion": "การดูแลนี้สำหรับใคร?",
+  "myself": "ตัวฉันเอง",
   "myParent": "พ่อแม่ของฉัน",
-  "@myParent": {
-    "description": "ตัวเลือกพ่อแม่ของฉัน"
-  },
   "myPartner": "คู่ของฉัน",
-  "@myPartner": {
-    "description": "ตัวเลือกคู่ของฉัน"
-  },
   "myChild": "ลูกของฉัน",
-  "@myChild": {
-    "description": "ตัวเลือกลูกของฉัน"
-  },
   "myClient": "ลูกค้าของฉัน",
-  "@myClient": {
-    "description": "ตัวเลือกลูกค้าของฉัน"
-  },
-  "other": "อื่น ๆ",
-  "@other": {
-    "description": "ตัวเลือกอื่น ๆ"
-  },
-  "timeframeQuestion": "คุณกำลังมองหากรอบเวลาแบบไหน",
-  "@timeframeQuestion": {
-    "description": "ป้ายกำกับสำหรับคำถามกรอบเวลา"
-  },
+  "other": "อื่นๆ",
+  "timeframeQuestion": "คุณกำลังมองหากรอบเวลาแบบใด?",
   "notSure": "ฉันไม่แน่ใจ",
-  "@notSure": {
-    "description": "ตัวเลือกไม่แน่ใจ"
-  },
   "shortTerm": "ระยะสั้น",
-  "@shortTerm": {
-    "description": "ตัวเลือกระยะสั้น"
-  },
   "longTerm": "ระยะยาว",
-  "@longTerm": {
-    "description": "ตัวเลือกระยะยาว"
-  },
-  "howSoonCareQuestion": "คุณอาจต้องการการดูแลเร็วแค่ไหน",
-  "@howSoonCareQuestion": {
-    "description": "ป้ายกำกับสำหรับคำถามว่าต้องการการดูแลเร็วแค่ไหน"
-  },
-  "asap": "เร็วที่สุดเท่าที่จะทำได้",
-  "@asap": {
-    "description": "ตัวเลือกเร็วที่สุดเท่าที่จะทำได้"
-  },
+  "howSoonCareQuestion": "คุณต้องการการดูแลเร็วแค่ไหน?",
+  "asap": "เร็วที่สุดเท่าที่เป็นไปได้",
   "withinThreeMonths": "ภายในสามเดือน",
-  "@withinThreeMonths": {
-    "description": "ตัวเลือกภายในสามเดือน"
-  },
   "withinSixMonths": "ภายในหกเดือน",
-  "@withinSixMonths": {
-    "description": "ตัวเลือกภายในหกเดือน"
-  },
   "moreThanSixMonths": "มากกว่า 6 เดือน",
-  "@moreThanSixMonths": {
-    "description": "ตัวเลือกมากกว่า 6 เดือน"
-  },
-  "acatStatusQuestion": "สถานะการประเมิน ACAT ของคุณเป็นอย่างไร",
-  "@acatStatusQuestion": {
-    "description": "ป้ายกำกับสำหรับคำถามสถานะ ACAT"
-  },
+  "acatStatusQuestion": "สถานะการประเมิน ACAT ของคุณเป็นอย่างไร?",
   "acatNotStarted": "ยังไม่ได้เริ่มการประเมิน",
-  "@acatNotStarted": {
-    "description": "ตัวเลือกยังไม่ได้เริ่ม ACAT"
-  },
-  "acatInProgress": "กำลังดำเนินการประเมิน",
-  "@acatInProgress": {
-    "description": "ตัวเลือกกำลังดำเนินการ ACAT"
-  },
+  "acatInProgress": "การประเมินอยู่ระหว่างดำเนินการ",
   "acatComplete": "การประเมินเสร็จสมบูรณ์",
-  "@acatComplete": {
-    "description": "ตัวเลือกการประเมิน ACAT เสร็จสมบูรณ์"
-  },
   "cancelRequest": "ยกเลิกคำขอ",
-  "@cancelRequest": {
-    "description": "ข้อความปุ่มเพื่อยกเลิกคำขอ"
-  },
   "requestType": "ประเภทคำขอ",
-  "@requestType": {
-    "description": "ป้ายกำกับสำหรับประเภทคำขอ"
-  },
-  "company": "บริษัท",
-  "@company": {
-    "description": "ป้ายกำกับบริษัท"
-  }
+  "company": "บริษัท"
 }

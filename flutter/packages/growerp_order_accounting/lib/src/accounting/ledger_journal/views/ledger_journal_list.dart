@@ -18,7 +18,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import '../../accounting.dart';
 
 class LedgerJournalList extends StatefulWidget {
   const LedgerJournalList({super.key});
@@ -32,6 +31,7 @@ class LedgerJournalsState extends State<LedgerJournalList> {
   late LedgerJournalBloc _ledgerJournalBloc;
   late double bottom;
   double? right;
+  late OrderAccountingLocalizations _local;
 
   @override
   void initState() {
@@ -44,94 +44,114 @@ class LedgerJournalsState extends State<LedgerJournalList> {
 
   @override
   Widget build(BuildContext context) {
+    _local = OrderAccountingLocalizations.of(context)!;
     final isPhone = ResponsiveBreakpoints.of(context).isMobile;
     right = right ?? (isPhone ? 20 : 50);
     return BlocConsumer<LedgerJournalBloc, LedgerJournalState>(
-        listener: (context, state) {
-      if (state.status == LedgerJournalStatus.failure) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-      }
-      if (state.status == LedgerJournalStatus.success) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
-      }
-    }, builder: (context, state) {
-      switch (state.status) {
-        case LedgerJournalStatus.failure:
-          return Center(
-              child: Text('failed to fetch ledgerJournals: ${state.message}'));
-        case LedgerJournalStatus.success:
-          return Stack(
-            children: [
-              Column(children: [
-                const LedgerJournalListHeader(),
-                Expanded(
-                    child: RefreshIndicator(
-                        onRefresh: (() async => _ledgerJournalBloc
-                            .add(const LedgerJournalFetch(refresh: true))),
+      listener: (context, state) {
+        if (state.status == LedgerJournalStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+        if (state.status == LedgerJournalStatus.success) {
+          HelperFunctions.showMessage(
+            context,
+            '${state.message}',
+            Colors.green,
+          );
+        }
+      },
+      builder: (context, state) {
+        switch (state.status) {
+          case LedgerJournalStatus.failure:
+            return Center(
+              child: Text('${_local.getLedgerJournalFail} ${state.message}'),
+            );
+          case LedgerJournalStatus.success:
+            return Stack(
+              children: [
+                Column(
+                  children: [
+                    const LedgerJournalListHeader(),
+                    Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: (() async => _ledgerJournalBloc.add(
+                          const LedgerJournalFetch(refresh: true),
+                        )),
                         child: ListView.builder(
-                            key: const Key('listView'),
-                            shrinkWrap: true,
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            itemCount: state.hasReachedMax
-                                ? state.ledgerJournals.length + 1
-                                : state.ledgerJournals.length + 2,
-                            controller: _scrollController,
-                            itemBuilder: (BuildContext context, int index) {
-                              if (index == 0) {
-                                return Visibility(
-                                    visible: state.ledgerJournals.isEmpty,
-                                    child: const Center(
-                                        heightFactor: 20,
-                                        child: Text(
-                                            'No active ledgerJournals found',
-                                            key: Key('empty'),
-                                            textAlign: TextAlign.center)));
-                              }
-                              index--;
-                              return index >= state.ledgerJournals.length
-                                  ? const BottomLoader()
-                                  : Dismissible(
-                                      key: const Key('ledgerJournalItem'),
-                                      direction: DismissDirection.startToEnd,
-                                      child: LedgerJournalListItem(
-                                          ledgerJournal:
-                                              state.ledgerJournals[index],
-                                          index: index));
-                            })))
-              ]),
-              Positioned(
-                right: right,
-                bottom: bottom,
-                child: GestureDetector(
-                  onPanUpdate: (details) {
-                    setState(() {
-                      right = right! - details.delta.dx;
-                      bottom -= details.delta.dy;
-                    });
-                  },
-                  child: FloatingActionButton(
+                          key: const Key('listView'),
+                          shrinkWrap: true,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: state.hasReachedMax
+                              ? state.ledgerJournals.length + 1
+                              : state.ledgerJournals.length + 2,
+                          controller: _scrollController,
+                          itemBuilder: (BuildContext context, int index) {
+                            if (index == 0) {
+                              return Visibility(
+                                visible: state.ledgerJournals.isEmpty,
+                                child: Center(
+                                  heightFactor: 20,
+                                  child: Text(
+                                    _local.noLedgerJournalFound,
+                                    key: const Key('empty'),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              );
+                            }
+                            index--;
+                            return index >= state.ledgerJournals.length
+                                ? const BottomLoader()
+                                : Dismissible(
+                                    key: const Key('ledgerJournalItem'),
+                                    direction: DismissDirection.startToEnd,
+                                    child: LedgerJournalListItem(
+                                      ledgerJournal:
+                                          state.ledgerJournals[index],
+                                      index: index,
+                                    ),
+                                  );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Positioned(
+                  right: right,
+                  bottom: bottom,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        right = right! - details.delta.dx;
+                        bottom -= details.delta.dy;
+                      });
+                    },
+                    child: FloatingActionButton(
                       key: const Key("addNew"),
                       heroTag: "ledgerJournalAdd",
                       onPressed: () async {
                         await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) =>
-                                BlocProvider.value(
-                                    value: _ledgerJournalBloc,
-                                    child:
-                                        LedgerJournalDialog(LedgerJournal())));
+                          barrierDismissible: true,
+                          context: context,
+                          builder: (BuildContext context) => BlocProvider.value(
+                            value: _ledgerJournalBloc,
+                            child: LedgerJournalDialog(LedgerJournal()),
+                          ),
+                        );
                       },
-                      tooltip: 'Add New',
-                      child: const Icon(Icons.add)),
+                      tooltip: _local.addNew,
+                      child: const Icon(Icons.add),
+                    ),
+                  ),
                 ),
-              ),
-            ],
-          );
-        default:
-          return const Center(child: LoadingIndicator());
-      }
-    });
+              ],
+            );
+          default:
+            return const Center(child: LoadingIndicator());
+        }
+      },
+    );
   }
 
   @override
