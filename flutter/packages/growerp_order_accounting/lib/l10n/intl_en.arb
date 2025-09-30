@@ -539,5 +539,137 @@
       "companyRole": {},
       "docType": {}
     }
+  },
+  "request": "Request",
+  "@request": {
+    "description": "Request label"
+  },
+  "requester": "Requester",
+  "@requester": {
+    "description": "Requester label"
+  },
+  "selectRequester": "Select Requester",
+  "@selectRequester": {
+    "description": "Dropdown hint for selecting a requester"
+  },
+  "postalCodeCare": "In which Post Code are you looking for care?",
+  "@postalCodeCare": {
+    "description": "Label for postal code care question"
+  },
+  "telephoneNumberQuestion": "What is your telephone number?",
+  "@telephoneNumberQuestion": {
+    "description": "Label for telephone number question"
+  },
+  "careTypeQuestion": "What type of care are you looking for?",
+  "@careTypeQuestion": {
+    "description": "Label for care type question"
+  },
+  "residentialCare": "Residential Care",
+  "@residentialCare": {
+    "description": "Residential Care option"
+  },
+  "homeCare": "Home Care",
+  "@homeCare": {
+    "description": "Home Care option"
+  },
+  "shortTermCare": "Short term Care",
+  "@shortTermCare": {
+    "description": "Short term Care option"
+  },
+  "retirementLiving": "Retirement Living",
+  "@retirementLiving": {
+    "description": "Retirement Living option"
+  },
+  "careForWhomQuestion": "Who is the care for?",
+  "@careForWhomQuestion": {
+    "description": "Label for care for whom question"
+  },
+  "myself": "Myself",
+  "@myself": {
+    "description": "Myself option"
+  },
+  "myParent": "My parent",
+  "@myParent": {
+    "description": "My parent option"
+  },
+  "myPartner": "My partner",
+  "@myPartner": {
+    "description": "My partner option"
+  },
+  "myChild": "My child",
+  "@myChild": {
+    "description": "My child option"
+  },
+  "myClient": "My client",
+  "@myClient": {
+    "description": "My client option"
+  },
+  "other": "Other",
+  "@other": {
+    "description": "Other option"
+  },
+  "timeframeQuestion": "What sort of timeframe are you looking for?",
+  "@timeframeQuestion": {
+    "description": "Label for timeframe question"
+  },
+  "notSure": "I am not sure",
+  "@notSure": {
+    "description": "Not sure option"
+  },
+  "shortTerm": "Short-term",
+  "@shortTerm": {
+    "description": "Short-term option"
+  },
+  "longTerm": "Long-term",
+  "@longTerm": {
+    "description": "Long-term option"
+  },
+  "howSoonCareQuestion": "How soon may you require care?",
+  "@howSoonCareQuestion": {
+    "description": "Label for how soon care question"
+  },
+  "asap": "As soon as possible",
+  "@asap": {
+    "description": "As soon as possible option"
+  },
+  "withinThreeMonths": "Within three months",
+  "@withinThreeMonths": {
+    "description": "Within three months option"
+  },
+  "withinSixMonths": "Within six months",
+  "@withinSixMonths": {
+    "description": "Within six months option"
+  },
+  "moreThanSixMonths": "More than 6 months",
+  "@moreThanSixMonths": {
+    "description": "More than 6 months option"
+  },
+  "acatStatusQuestion": "What is the status of your ACAT assessment?",
+  "@acatStatusQuestion": {
+    "description": "Label for ACAT status question"
+  },
+  "acatNotStarted": "Have not started the assessment",
+  "@acatNotStarted": {
+    "description": "ACAT not started option"
+  },
+  "acatInProgress": "Assessment in progress",
+  "@acatInProgress": {
+    "description": "ACAT in progress option"
+  },
+  "acatComplete": "Assessment complete",
+  "@acatComplete": {
+    "description": "ACAT complete option"
+  },
+  "cancelRequest": "Cancel Request",
+  "@cancelRequest": {
+    "description": "Button text to cancel a request"
+  },
+  "requestType": "Request Type",
+  "@requestType": {
+    "description": "Label for request type"
+  },
+  "company": "Company",
+  "@company": {
+    "description": "Company label"
   }
 }
