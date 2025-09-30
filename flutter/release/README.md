@@ -64,7 +64,7 @@ cd release && dart release_tool.dart
   "repositoryUrl": "git@github.com:growerp/growerp.git",
   "tempWorkspaceDir": "/tmp/growerp",
   "defaultPushToDockerHub": true,
-  "defaultPushToTestServer": false,
+  "defaultPushToGitHub": false,
   "versionTagPrefix": "",
   "dockerBuildArgs": {
     "progress": "plain",
@@ -92,7 +92,7 @@ cd release && dart release_tool.dart
 | `repositoryUrl` | Git repository URL | GrowERP GitHub repo |
 | `tempWorkspaceDir` | Temporary directory for repository mode | `/tmp/growerp` |
 | `defaultPushToDockerHub` | Push images to Docker Hub by default | `true` |
-| `defaultPushToTestServer` | Use repository mode by default | `false` |
+| `defaultPushToGitHub` | Use repository mode by default | `false` |
 | `versionTagPrefix` | Prefix for version tags | `` (none) |
 
 ## 🎯 Usage Scenarios

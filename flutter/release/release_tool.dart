@@ -38,7 +38,7 @@ void main() async {
 
   // Determine workspace (local vs repository)
   var workspaceDir = await determineWorkspace(
-    pushConfig['pushToTestServer'] ?? false,
+    pushConfig['pushToGitHub'] ?? false,
   );
 
   // Calculate version information
@@ -83,7 +83,7 @@ Future<void> loadConfiguration() async {
       ],
       'dockerRegistry': 'growerp',
       'defaultPushToDockerHub': true,
-      'defaultPushToTestServer': false,
+      'defaultPushToGitHub': false,
     };
     return;
   }
@@ -202,24 +202,21 @@ Future<Map<String, bool>> getPushConfiguration() async {
       ).toUpperCase() ==
       'Y';
 
-  var pushToTestServer = false;
+  var pushToGitHub = false;
   if (pushToDockerHub) {
-    pushToTestServer =
+    pushToGitHub =
         ask(
-          'Push to test server (uses repository workspace)? (y/N)',
-          defaultValue: config['defaultPushToTestServer'] ? 'Y' : 'N',
+          'Commit version update to GitHub? (y/N)',
+          defaultValue: config['defaultPushToGitHub'] ? 'Y' : 'N',
         ).toUpperCase() ==
         'Y';
   }
 
-  return {
-    'pushToDockerHub': pushToDockerHub,
-    'pushToTestServer': pushToTestServer,
-  };
+  return {'pushToDockerHub': pushToDockerHub, 'pushToGitHub': pushToGitHub};
 }
 
-Future<String> determineWorkspace(bool pushToTestServer) async {
-  if (!pushToTestServer) {
+Future<String> determineWorkspace(bool pushToGitHub) async {
+  if (!pushToGitHub) {
     var currentDir = Directory.current.path;
     print("📁 Using local workspace: $currentDir");
     return currentDir;
@@ -339,7 +336,7 @@ Future<void> displaySummaryAndConfirm(
     "   Push to Docker Hub: ${pushConfig['pushToDockerHub'] == true ? 'Yes' : 'No'}",
   );
   print(
-    "   Push to test server: ${pushConfig['pushToTestServer'] == true ? 'Yes' : 'No'}",
+    "   Push to GitHub: ${pushConfig['pushToGitHub'] == true ? 'Yes' : 'No'}",
   );
 
   var confirm = ask('\nProceed with release? (y/N)', defaultValue: 'N');
@@ -372,7 +369,7 @@ Future<void> executeRelease(
     newVersions[app] = newVersion;
 
     // Update version file
-    if (pushConfig['pushToTestServer'] == true) {
+    if (pushConfig['pushToGitHub'] == true) {
       await updateVersionFile(app, currentVersion, newVersion, workspaceDir);
     }
 
@@ -389,7 +386,7 @@ Future<void> executeRelease(
   }
 
   // Commit version changes and create git tag
-  if (pushConfig['pushToTestServer'] == true) {
+  if (pushConfig['pushToGitHub'] == true) {
     await commitAndTag(
       selectedApps,
       newVersions,

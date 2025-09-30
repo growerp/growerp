@@ -11,7 +11,7 @@
   "repositoryUrl": "git@github.com:growerp/growerp.git",
   "tempWorkspaceDir": "/tmp/growerp",
   "defaultPushToDockerHub": true,
-  "defaultPushToTestServer": false,
+  "defaultPushToGitHub": false,
   "versionTagPrefix": "",
   "dockerBuildArgs": {
     "progress": "plain",

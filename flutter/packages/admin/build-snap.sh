@@ -39,6 +39,17 @@ if [ -n "$SNAP_FILE" ]; then
     echo ""
     echo "To uninstall:"
     echo "sudo snap remove growerp-admin"
+    echo ""
+    echo "To publish to Snap Store, use:"
+    echo "snapcraft upload $SNAP_FILE --release=stable|beta|edge"
+    echo "(You need to have an account on https://snapcraft.io/ and be logged in with 'snapcraft login')"
+    echo ""
+    echo "To install locally from snap store:"
+    echo "sudo snap install growerp-admin --beta|stable|edge"
+    echo ""
+    echo "To remove to change version:"
+    echo "sudo snap remove growerp-admin [--force]"
+    echo ""
 else
     echo "❌ Failed to create snap package"
     exit 1
