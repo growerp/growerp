@@ -18,6 +18,7 @@ import 'package:growerp_order_accounting/src/findoc/views/views.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 import '../ledger_journal.dart';
 
@@ -34,6 +35,7 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
   final _descriptionController = TextEditingController();
 
   late LedgerJournalBloc _ledgerJournalBloc;
+  late OrderAccountingLocalizations _local;
 
   @override
   void initState() {
@@ -47,76 +49,93 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
 
   @override
   Widget build(BuildContext context) {
+    _local = OrderAccountingLocalizations.of(context)!;
     int columns = ResponsiveBreakpoints.of(context).isMobile ? 1 : 2;
     return BlocListener<LedgerJournalBloc, LedgerJournalState>(
-        listener: (context, state) async {
-          switch (state.status) {
-            case LedgerJournalStatus.success:
-              Navigator.of(context).pop();
-              break;
-            case LedgerJournalStatus.failure:
-              HelperFunctions.showMessage(
-                  context, 'Error: ${state.message}', Colors.red);
-              break;
-            default:
-              const Text("????");
-          }
-        },
-        child: Dialog(
-            key: const Key('LedgerJournalDialog'),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: popUp(
-                context: context,
-                title:
-                    "LedgerJournal #${widget.ledgerJournal.journalId.isEmpty ? " New" : widget.ledgerJournal.journalId}",
-                width: columns.toDouble() * 400,
-                height: 1 / columns.toDouble() * 1200,
-                child: _ledgerJournalForm())));
+      listener: (context, state) async {
+        switch (state.status) {
+          case LedgerJournalStatus.success:
+            Navigator.of(context).pop();
+            break;
+          case LedgerJournalStatus.failure:
+            HelperFunctions.showMessage(
+              context,
+              'Error: ${state.message}',
+              Colors.red,
+            );
+            break;
+          default:
+            const Text("????");
+        }
+      },
+      child: Dialog(
+        key: const Key('LedgerJournalDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: popUp(
+          context: context,
+          title:
+              "${_local.ledgerJournal} #${widget.ledgerJournal.journalId.isEmpty ? " New" : widget.ledgerJournal.journalId}",
+          width: columns.toDouble() * 400,
+          height: 1 / columns.toDouble() * 1200,
+          child: _ledgerJournalForm(),
+        ),
+      ),
+    );
   }
 
   Widget _ledgerJournalForm() {
     List<Widget> widgets = [
       TextFormField(
         key: const Key('name'),
-        decoration: const InputDecoration(labelText: 'LedgerJournal Name'),
+        decoration: InputDecoration(labelText: _local.ledgerJournalName),
         controller: _nameController,
         validator: (value) {
-          return value!.isEmpty ? 'Please enter a ledgerJournal name?' : null;
+          return value!.isEmpty ? _local.ledgerJournalNameNull : null;
         },
       ),
       Row(
         children: [
           if (widget.ledgerJournal.journalId.isNotEmpty)
             OutlinedButton(
-                key: const Key('post'),
-                child: const Text('Upd.Header'),
-                onPressed: () {
-                  if (_formKeyLedgerJournal.currentState!.validate()) {
-                    _ledgerJournalBloc.add(LedgerJournalUpdate(LedgerJournal(
-                      journalId: widget.ledgerJournal.journalId,
-                      journalName: _nameController.text,
-                      isPosted: true,
-                    )));
-                  }
-                }),
+              key: const Key('post'),
+              child: Text(_local.updateHeaderShort),
+              onPressed: () {
+                if (_formKeyLedgerJournal.currentState!.validate()) {
+                  _ledgerJournalBloc.add(
+                    LedgerJournalUpdate(
+                      LedgerJournal(
+                        journalId: widget.ledgerJournal.journalId,
+                        journalName: _nameController.text,
+                        isPosted: true,
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
           const SizedBox(width: 10),
           Expanded(
             child: OutlinedButton(
-                key: const Key('update'),
-                child: Text(widget.ledgerJournal.journalId.isEmpty
-                    ? 'Create'
-                    : 'Update'),
-                onPressed: () {
-                  if (_formKeyLedgerJournal.currentState!.validate()) {
-                    _ledgerJournalBloc.add(LedgerJournalUpdate(LedgerJournal(
-                      journalId: widget.ledgerJournal.journalId,
-                      journalName: _nameController.text,
-                    )));
-                  }
-                }),
+              key: const Key('update'),
+              child: Text(
+                widget.ledgerJournal.journalId.isEmpty
+                    ? _local.create
+                    : _local.update,
+              ),
+              onPressed: () {
+                if (_formKeyLedgerJournal.currentState!.validate()) {
+                  _ledgerJournalBloc.add(
+                    LedgerJournalUpdate(
+                      LedgerJournal(
+                        journalId: widget.ledgerJournal.journalId,
+                        journalName: _nameController.text,
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
           ),
         ],
       ),
@@ -126,17 +145,24 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
     if (!ResponsiveBreakpoints.of(context).isMobile) {
       // change list in two columns
       for (var i = 0; i < widgets.length; i++) {
-        rows.add(Row(
-          children: [
-            Expanded(
+        rows.add(
+          Row(
+            children: [
+              Expanded(
                 child: Padding(
-                    padding: const EdgeInsets.all(10), child: widgets[i++])),
-            Expanded(
+                  padding: const EdgeInsets.all(10),
+                  child: widgets[i++],
+                ),
+              ),
+              Expanded(
                 child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: i < widgets.length ? widgets[i] : Container()))
-          ],
-        ));
+                  padding: const EdgeInsets.all(10),
+                  child: i < widgets.length ? widgets[i] : Container(),
+                ),
+              ),
+            ],
+          ),
+        );
       }
     }
     List<Widget> column = [];
@@ -146,22 +172,25 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
       if (i < widgets.length - 1) column.add(const SizedBox(height: 10));
     }
 
-    return Column(children: [
-      Form(
+    return Column(
+      children: [
+        Form(
           key: _formKeyLedgerJournal,
           child: SingleChildScrollView(
             key: const Key('listView'),
             padding: const EdgeInsets.all(20),
             child: Column(children: (rows.isEmpty ? column : rows)),
-          )),
-      if (widget.ledgerJournal.journalId.isNotEmpty)
-        Flexible(
-          child: FinDocList(
-            sales: true,
-            docType: FinDocType.transaction,
-            journalId: widget.ledgerJournal.journalId,
           ),
-        )
-    ]);
+        ),
+        if (widget.ledgerJournal.journalId.isNotEmpty)
+          Flexible(
+            child: FinDocList(
+              sales: true,
+              docType: FinDocType.transaction,
+              journalId: widget.ledgerJournal.journalId,
+            ),
+          ),
+      ],
+    );
   }
 }
