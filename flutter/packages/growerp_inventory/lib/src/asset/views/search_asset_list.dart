@@ -92,7 +92,7 @@ class AssetSearchDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final InventoryLocalizations _localizations = InventoryLocalizations.of(
+    final InventoryLocalizations localizations = InventoryLocalizations.of(
       context,
     )!;
     final ScrollController scrollController = ScrollController();
@@ -102,7 +102,7 @@ class AssetSearchDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: _localizations.assetSearch,
+        title: localizations.assetSearch,
         height: 500,
         width: 350,
         child: Column(
@@ -111,10 +111,10 @@ class AssetSearchDialog extends StatelessWidget {
               key: const Key('searchField'),
               textInputAction: TextInputAction.search,
               autofocus: true,
-              decoration: InputDecoration(labelText: _localizations.searchInput),
+              decoration: InputDecoration(labelText: localizations.searchInput),
               validator: (value) {
                 if (value!.isEmpty) {
-                  return _localizations.enterSearchValue;
+                  return localizations.enterSearchValue;
                 }
                 return null;
               },
@@ -128,7 +128,7 @@ class AssetSearchDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Text(_localizations.searchResults),
+            Text(localizations.searchResults),
             Expanded(
               child: ListView.builder(
                 key: const Key('listView'),
@@ -143,7 +143,7 @@ class AssetSearchDialog extends StatelessWidget {
                       child: Center(
                         heightFactor: 20,
                         child: Text(
-                          _localizations.noSearchItemsFound,
+                          localizations.noSearchItemsFound,
                           key: const Key('empty'),
                           textAlign: TextAlign.center,
                         ),
@@ -158,8 +158,8 @@ class AssetSearchDialog extends StatelessWidget {
                           direction: DismissDirection.startToEnd,
                           child: ListTile(
                             title: Text(
-                              "${_localizations.id}${assets[index].pseudoId}\n"
-                              "${_localizations.name}${assets[index].assetName}",
+                              "${localizations.id}${assets[index].pseudoId}\n"
+                              "${localizations.name}${assets[index].assetName}",
                               key: Key("searchResult$index"),
                             ),
                             onTap: () =>

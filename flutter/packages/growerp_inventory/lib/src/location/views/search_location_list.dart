@@ -94,7 +94,7 @@ class LocationSearchDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final InventoryLocalizations _localizations = InventoryLocalizations.of(
+    final InventoryLocalizations localizations = InventoryLocalizations.of(
       context,
     )!;
     final ScrollController scrollController = ScrollController();
@@ -104,7 +104,7 @@ class LocationSearchDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: _localizations.locationSearch,
+        title: localizations.locationSearch,
         height: 500,
         width: 350,
         child: Column(
@@ -113,10 +113,10 @@ class LocationSearchDialog extends StatelessWidget {
               key: const Key('searchField'),
               textInputAction: TextInputAction.search,
               autofocus: true,
-              decoration: InputDecoration(labelText: _localizations.searchInput),
+              decoration: InputDecoration(labelText: localizations.searchInput),
               validator: (value) {
                 if (value!.isEmpty) {
-                  return _localizations.enterSearchValue;
+                  return localizations.enterSearchValue;
                 }
                 return null;
               },
@@ -130,7 +130,7 @@ class LocationSearchDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Text(_localizations.searchResults),
+            Text(localizations.searchResults),
             Expanded(
               child: ListView.builder(
                 key: const Key('listView'),
@@ -145,7 +145,7 @@ class LocationSearchDialog extends StatelessWidget {
                       child: Center(
                         heightFactor: 20,
                         child: Text(
-                          _localizations.noSearchItemsFound,
+                          localizations.noSearchItemsFound,
                           key: const Key('empty'),
                           textAlign: TextAlign.center,
                         ),
@@ -160,9 +160,9 @@ class LocationSearchDialog extends StatelessWidget {
                           direction: DismissDirection.startToEnd,
                           child: ListTile(
                             title: Text(
-                              "${_localizations.id}"
+                              "${localizations.id}"
                               "${locations[index].pseudoId}\n"
-                              "${_localizations.name}"
+                              "${localizations.name}"
                               "${locations[index].locationName}",
                               key: Key("searchResult$index"),
                             ),
