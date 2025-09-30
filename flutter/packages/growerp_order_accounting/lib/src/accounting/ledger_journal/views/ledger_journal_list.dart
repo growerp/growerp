@@ -58,7 +58,8 @@ class LedgerJournalsState extends State<LedgerJournalList> {
       switch (state.status) {
         case LedgerJournalStatus.failure:
           return Center(
-              child: Text('failed to fetch ledgerJournals: ${state.message}'));
+              child: Text(
+                  '${_local.getLedgerJournalFail} ${state.message}'));
         case LedgerJournalStatus.success:
           return Stack(
             children: [
@@ -80,11 +81,11 @@ class LedgerJournalsState extends State<LedgerJournalList> {
                               if (index == 0) {
                                 return Visibility(
                                     visible: state.ledgerJournals.isEmpty,
-                                    child: const Center(
+                                    child: Center(
                                         heightFactor: 20,
                                         child: Text(
-                                            'No active ledgerJournals found',
-                                            key: Key('empty'),
+                                            _local.noLedgerJournalFound,
+                                            key: const Key('empty'),
                                             textAlign: TextAlign.center)));
                               }
                               index--;
@@ -122,7 +123,7 @@ class LedgerJournalsState extends State<LedgerJournalList> {
                                     child:
                                         LedgerJournalDialog(LedgerJournal())));
                       },
-                      tooltip: 'Add New',
+                      tooltip: _local.addNew,
                       child: const Icon(Icons.add)),
                 ),
               ),

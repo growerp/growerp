@@ -153,18 +153,18 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
             _selectedPeriod = state.ledgerReport!.period!;
             _nodes = convert(state.ledgerReport!.glAccounts);
             List totals = [
-              {"text": "Total Assets", "amount": assets},
+              {"text": _local.totalAssets, "amount": assets},
               {
-                "text": "Total Equity + Distribution",
+                "text": _local.totalEquityAndDistribution,
                 "amount": equity + distribution,
               },
               {
-                "text": "Total Liability + Equity",
+                "text": _local.totalLiabilityAndEquity,
                 "amount": liability + equity,
               },
-              {"text": "Total Unbooked net income", "amount": income},
+              {"text": _local.totalUnbookedNetIncome, "amount": income},
               {
-                "text": "Liability + Equity + Unbd. Net Income",
+                "text": _local.liabilityEquityUnbookedNetIncome,
                 "amount": liability + equity + income,
               },
             ];
@@ -172,11 +172,11 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
               children: [
                 RefreshIndicator(
                   onRefresh: (() async => context.read<LedgerBloc>().add(
-                    LedgerFetch(
-                      ReportType.sheet,
-                      periodName: _selectedPeriod.periodName,
-                    ),
-                  )),
+                        LedgerFetch(
+                          ReportType.sheet,
+                          periodName: _selectedPeriod.periodName,
+                        ),
+                      )),
                   child: ListView(
                     children: <Widget>[
                       const SizedBox(height: 10),
@@ -192,7 +192,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.arrow_back),
-                                  tooltip: 'Previous Year',
+                                  tooltip: _local.previousYear,
                                   onPressed: () {
                                     // Extract the year from the period name
                                     String currentPeriodName =
@@ -243,7 +243,8 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                                       // Show message if year doesn't exist
                                       HelperFunctions.showMessage(
                                         context,
-                                        'Data for year $previousYear is not available',
+                                        _local.dataForYearNotAvailable(
+                                            previousYear.toString()),
                                         Colors.orange,
                                       );
                                       return;
@@ -283,14 +284,14 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                                   },
                                 ),
                                 Text(
-                                  'Year: ${_getYearFromPeriod(_selectedPeriod.periodName)}',
+                                  '${_local.year} ${_getYearFromPeriod(_selectedPeriod.periodName)}',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.arrow_forward),
-                                  tooltip: 'Next Year',
+                                  tooltip: _local.nextYear,
                                   onPressed: () {
                                     // Extract the year from the period name
                                     String currentPeriodName =
@@ -345,7 +346,8 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                                       // Show message if year doesn't exist
                                       HelperFunctions.showMessage(
                                         context,
-                                        'Data for year $nextYear is not available',
+                                        _local.dataForYearNotAvailable(
+                                            nextYear.toString()),
                                         Colors.orange,
                                       );
                                       return;
@@ -388,7 +390,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                             Row(
                               children: [
                                 Text(
-                                  'Period: ${_selectedPeriod.periodName}',
+                                  '${_local.period} ${_selectedPeriod.periodName}',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -397,7 +399,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                                 const SizedBox(width: 10),
                                 if (!expanded)
                                   OutlinedButton(
-                                    child: const Text('Exp.'),
+                                    child: Text(_local.expand),
                                     onPressed: () => setState(() {
                                       expanded = !expanded;
                                       _controller!.expandAll();
@@ -405,7 +407,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                                   ),
                                 if (expanded)
                                   OutlinedButton(
-                                    child: const Text('Col.'),
+                                    child: Text(_local.collapse),
                                     onPressed: () => setState(() {
                                       expanded = !expanded;
                                       _controller!.collapseAll();
@@ -422,11 +424,12 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                           const SizedBox(width: 20),
                           SizedBox(
                             width: isPhone ? 220 : 410,
-                            child: const Text('Gl Account ID  GL Account Name'),
+                            child: Text(_local.glAccountIdAndName),
                           ),
-                          const SizedBox(
+                          SizedBox(
                             width: 100,
-                            child: Text('Posted', textAlign: TextAlign.right),
+                            child: Text(_local.postedHeader,
+                                textAlign: TextAlign.right),
                           ),
                         ],
                       ),
@@ -489,9 +492,9 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                               heroTag: 'yearButton',
                               mini: true,
                               backgroundColor: Colors.blue,
-                              child: const Text(
-                                'Y',
-                                style: TextStyle(
+                              child: Text(
+                                _local.yearLetter,
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -513,9 +516,9 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                               heroTag: 'quarterButton',
                               mini: true,
                               backgroundColor: Colors.green,
-                              child: const Text(
-                                'Q',
-                                style: TextStyle(
+                              child: Text(
+                                _local.quarterLetter,
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -541,9 +544,9 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                             heroTag: 'monthButton',
                             mini: true,
                             backgroundColor: Colors.orange,
-                            child: const Text(
-                              'M',
-                              style: TextStyle(
+                            child: Text(
+                              _local.monthLetter,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -564,7 +567,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
               ],
             );
           case LedgerStatus.failure:
-            return const FatalErrorForm(message: 'failed to get balance sheet');
+            return FatalErrorForm(message: _local.getBalanceSheetFail);
           default:
             return const LoadingIndicator();
         }

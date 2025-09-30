@@ -71,7 +71,7 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
             child: popUp(
                 context: context,
                 title:
-                    "LedgerJournal #${widget.ledgerJournal.journalId.isEmpty ? " New" : widget.ledgerJournal.journalId}",
+                    "${_local.ledgerJournal} #${widget.ledgerJournal.journalId.isEmpty ? " New" : widget.ledgerJournal.journalId}",
                 width: columns.toDouble() * 400,
                 height: 1 / columns.toDouble() * 1200,
                 child: _ledgerJournalForm())));
@@ -81,10 +81,10 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
     List<Widget> widgets = [
       TextFormField(
         key: const Key('name'),
-        decoration: const InputDecoration(labelText: 'LedgerJournal Name'),
+        decoration: InputDecoration(labelText: _local.ledgerJournalName),
         controller: _nameController,
         validator: (value) {
-          return value!.isEmpty ? 'Please enter a ledgerJournal name?' : null;
+          return value!.isEmpty ? _local.ledgerJournalNameNull : null;
         },
       ),
       Row(
@@ -92,7 +92,7 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
           if (widget.ledgerJournal.journalId.isNotEmpty)
             OutlinedButton(
                 key: const Key('post'),
-                child: const Text('Upd.Header'),
+                child: Text(_local.updateHeaderShort),
                 onPressed: () {
                   if (_formKeyLedgerJournal.currentState!.validate()) {
                     _ledgerJournalBloc.add(LedgerJournalUpdate(LedgerJournal(
@@ -107,8 +107,8 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
             child: OutlinedButton(
                 key: const Key('update'),
                 child: Text(widget.ledgerJournal.journalId.isEmpty
-                    ? 'Create'
-                    : 'Update'),
+                    ? _local.create
+                    : _local.update),
                 onPressed: () {
                   if (_formKeyLedgerJournal.currentState!.validate()) {
                     _ledgerJournalBloc.add(LedgerJournalUpdate(LedgerJournal(
