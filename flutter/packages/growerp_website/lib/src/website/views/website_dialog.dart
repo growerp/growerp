@@ -54,7 +54,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
   ScrollController myScrollController = ScrollController();
   late String classificationId;
   late RestClient restClient;
-  late WebsiteLocalizations l10n;
+  late WebsiteLocalizations _localizations;
 
   @override
   void initState() {
@@ -72,7 +72,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
 
   @override
   void didChangeDependencies() {
-    l10n = WebsiteLocalizations.of(context)!;
+    _localizations = WebsiteLocalizations.of(context)!;
     super.didChangeDependencies();
   }
 
@@ -104,7 +104,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
               List.of(websiteState.website!.productCategories);
           return _showForm(websiteState);
         case WebsiteStatus.failure:
-          return Center(child: Text(l10n.errorTitle));
+          return Center(child: Text(_localizations.errorTitle));
         default:
           return const LoadingIndicator();
       }
@@ -140,7 +140,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
           ),
           onDeleted: () async {
             bool? result = await confirmDialog(
-                context, l10n.areYouSure, l10n.websiteContentDelete);
+                context, _localizations.areYouSure, _localizations.websiteContentDelete);
             if (result == true) {
               _websiteBloc.add(WebsiteUpdate(Website(
                   id: state.website!.id,
@@ -198,7 +198,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
           ),
           onDeleted: () async {
             bool? result = await confirmDialog(
-                context, l10n.areYouSure, l10n.websiteContentDelete);
+                context, _localizations.areYouSure, _localizations.websiteContentDelete);
             if (result == true) {
               setState(() {
                 _websiteBloc.add(WebsiteUpdate(Website(
@@ -270,7 +270,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
         ),
         onDeleted: () async {
           bool? result =
-              await confirmDialog(context, l10n.areYouSure, l10n.remove);
+              await confirmDialog(context, _localizations.areYouSure, _localizations.remove);
           if (result == true) {
             setState(() {
               _selectedCategories.removeAt(index);
@@ -312,7 +312,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
               builder: (BuildContext context) {
                 String cssColor = '';
                 return AlertDialog(
-                  title: Text(l10n.websiteColor),
+                  title: Text(_localizations.websiteColor),
                   content: SingleChildScrollView(
                     child: MaterialPicker(
                       pickerColor: fromCssColor(value), //default color
@@ -325,13 +325,13 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                   ),
                   actions: <Widget>[
                     OutlinedButton(
-                      child: Text(l10n.cancel),
+                      child: Text(_localizations.cancel),
                       onPressed: () {
                         Navigator.of(context).pop(); //dismiss the color picker
                       },
                     ),
                     OutlinedButton(
-                      child: Text(l10n.save),
+                      child: Text(_localizations.save),
                       onPressed: () {
                         Navigator.of(context)
                             .pop(cssColor); //dismiss the color picker
@@ -360,7 +360,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
     List<Widget> widgets = [
       InputDecorator(
           decoration: InputDecoration(
-              labelText: l10n.websiteUrl,
+              labelText: _localizations.websiteUrl,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(25.0),
               )),
@@ -384,10 +384,10 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                     child: TextFormField(
                       key: const Key('urlInput'),
                       controller: _urlController,
-                      decoration: InputDecoration(labelText: l10n.websiteUrl),
+                      decoration: InputDecoration(labelText: _localizations.websiteUrl),
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return '${l10n.websiteUrl} ${l10n.errorTitle}';
+                          return '${_localizations.websiteUrl} ${_localizations.errorTitle}';
                         }
                         return null;
                       },
@@ -403,7 +403,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                   const SizedBox(width: 10),
                   OutlinedButton(
                       key: const Key('updateHost'),
-                      child: Text(l10n.update),
+                      child: Text(_localizations.update),
                       onPressed: () async {
                         if (_websiteFormKey1.currentState!.validate()) {
                           _websiteBloc.add(WebsiteUpdate(Website(
@@ -417,7 +417,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
           key: _websiteFormKey2,
           child: InputDecorator(
               decoration: InputDecoration(
-                  labelText: l10n.websiteTitle,
+                  labelText: _localizations.websiteTitle,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25.0),
                   )),
@@ -426,12 +426,12 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                   child: TextFormField(
                       key: const Key('title'),
                       controller: _titleController,
-                      decoration: InputDecoration(labelText: l10n.title)),
+                      decoration: InputDecoration(labelText: _localizations.title)),
                 ),
                 const SizedBox(width: 10),
                 OutlinedButton(
                     key: const Key('updateTitle'),
-                    child: Text(l10n.update),
+                    child: Text(_localizations.update),
                     onPressed: () async {
                       if (_websiteFormKey2.currentState!.validate()) {
                         _websiteBloc.add(WebsiteUpdate(Website(
@@ -442,13 +442,13 @@ class WebsiteDialogState extends State<WebsiteDialog> {
               ]))),
       InputDecorator(
           decoration: InputDecoration(
-              labelText: l10n.content,
+              labelText: _localizations.content,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(25.0),
               )),
           child: Column(children: [
             Text(
-              l10n.page,
+              _localizations.page,
               style: const TextStyle(fontSize: 10),
             ),
             PrimaryScrollController(
@@ -475,7 +475,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
           ])),
       InputDecorator(
           decoration: InputDecoration(
-              labelText: l10n.images,
+              labelText: _localizations.images,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(25.0),
               )),
@@ -485,7 +485,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
             builder: (context, productState) {
           switch (productState.status) {
             case DataFetchStatus.failure:
-              return FatalErrorForm(message: l10n.errorTitle);
+              return FatalErrorForm(message: _localizations.errorTitle);
             case DataFetchStatus.loading:
               return const LoadingIndicator();
             case DataFetchStatus.success:
@@ -499,7 +499,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                             borderRadius: BorderRadius.circular(25.0)))),
                 dropdownBuilder: (context, selectedItems) =>
                     selectedItems.isEmpty
-                        ? Text(l10n.noRecords)
+                        ? Text(_localizations.noRecords)
                         : Wrap(
                             spacing: 10,
                             children: catButtons.firstWhere((element) =>
@@ -511,12 +511,12 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                   showSearchBox: true,
                   searchFieldProps: TextFieldProps(
                     autofocus: true,
-                    decoration: InputDecoration(labelText: l10n.select),
+                    decoration: InputDecoration(labelText: _localizations.select),
                     controller: _productSearchBoxController,
                   ),
                   title: popUp(
                     context: context,
-                    title: l10n.select,
+                    title: _localizations.select,
                     height: 50,
                     width: 500,
                   ),
@@ -557,7 +557,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
           builder: (context, categoryState) {
         switch (categoryState.status) {
           case DataFetchStatus.failure:
-            return FatalErrorForm(message: l10n.errorTitle);
+            return FatalErrorForm(message: _localizations.errorTitle);
           case DataFetchStatus.loading:
             return const LoadingIndicator();
           case DataFetchStatus.success:
@@ -566,11 +566,11 @@ class WebsiteDialogState extends State<WebsiteDialog> {
               dropdownDecoratorProps: DropDownDecoratorProps(
                   dropdownSearchDecoration: InputDecoration(
                       isDense: true,
-                      labelText: l10n.websiteProductCategories,
+                      labelText: _localizations.websiteProductCategories,
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25.0)))),
               dropdownBuilder: (context, selectedItems) => selectedItems.isEmpty
-                  ? Text(l10n.noRecords)
+                  ? Text(_localizations.noRecords)
                   : Wrap(spacing: 10, children: browseCatButtons),
               dropdownButtonProps: const DropdownButtonProps(
                   // for autom test
@@ -583,13 +583,13 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                 searchFieldProps: TextFieldProps(
                   autofocus: true,
                   decoration: InputDecoration(
-                    labelText: l10n.select,
+                    labelText: _localizations.select,
                   ),
                   controller: _categorySearchBoxController,
                 ),
                 title: popUp(
                   context: context,
-                  title: l10n.select,
+                  title: _localizations.select,
                   height: 50,
                   width: 400,
                 ),
@@ -619,7 +619,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
       }),
       InputDecorator(
           decoration: InputDecoration(
-              labelText: l10n.websiteColor,
+              labelText: _localizations.websiteColor,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(25.0),
               )),
@@ -627,7 +627,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
               Column(children: [Wrap(spacing: 10, children: colorCatButtons)])),
       InputDecorator(
           decoration: InputDecoration(
-              labelText: l10n.websiteObsidian,
+              labelText: _localizations.websiteObsidian,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(25.0),
               )),
@@ -636,11 +636,11 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                 child: TextField(
                     key: const Key('obsTitle'),
                     controller: _obsidianController,
-                    decoration: InputDecoration(labelText: l10n.title))),
+                    decoration: InputDecoration(labelText: _localizations.title))),
             const SizedBox(width: 10),
             OutlinedButton(
                 key: const Key('upload'),
-                child: Text(l10n.upload),
+                child: Text(_localizations.upload),
                 onPressed: () async {
                   FilePickerResult? result;
                   String? path;
@@ -670,13 +670,13 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                       _websiteBloc.add(WebsiteObsUpload(
                           Obsidian(title: _obsidianController.text), null));
                     },
-                    child: Text(l10n.deleteButton)))
+                    child: Text(_localizations.deleteButton)))
           ])),
       Form(
           key: _websiteFormKey3,
           child: InputDecorator(
               decoration: InputDecoration(
-                  labelText: l10n.websiteMeasurementId,
+                  labelText: _localizations.websiteMeasurementId,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25.0),
                   )),
@@ -685,12 +685,12 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                   child: TextFormField(
                       key: const Key('measurementId'),
                       controller: _measurementIdController,
-                      decoration: InputDecoration(labelText: l10n.id)),
+                      decoration: InputDecoration(labelText: _localizations.id)),
                 ),
                 const SizedBox(width: 10),
                 OutlinedButton(
                     key: const Key('measurementId'),
-                    child: Text(l10n.update),
+                    child: Text(_localizations.update),
                     onPressed: () async {
                       if (_websiteFormKey3.currentState!.validate()) {
                         _websiteBloc.add(WebsiteUpdate(Website(
@@ -703,7 +703,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
           key: _websiteFormKey4,
           child: InputDecorator(
               decoration: InputDecoration(
-                  labelText: l10n.websiteStripeApiKey,
+                  labelText: _localizations.websiteStripeApiKey,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25.0),
                   )),
@@ -712,12 +712,12 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                   child: TextFormField(
                       key: const Key('stripeApi'),
                       controller: _stripeApiKeyController,
-                      decoration: InputDecoration(labelText: l10n.key)),
+                      decoration: InputDecoration(labelText: _localizations.key)),
                 ),
                 const SizedBox(width: 10),
                 OutlinedButton(
                     key: const Key('stripeApiButton'),
-                    child: Text(l10n.update),
+                    child: Text(_localizations.update),
                     onPressed: () async {
                       if (_websiteFormKey4.currentState!.validate()) {
                         _websiteBloc.add(WebsiteUpdate(Website(
@@ -757,7 +757,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
             child: Column(children: [
               Center(
                   child: Text(
-                '${l10n.id}:#${state.website?.id}',
+                '${_localizations.id}:#${state.website?.id}',
                 style:
                     const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
                 key: const Key('header'),

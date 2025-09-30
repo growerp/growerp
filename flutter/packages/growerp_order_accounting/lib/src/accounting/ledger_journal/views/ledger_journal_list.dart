@@ -31,7 +31,7 @@ class LedgerJournalsState extends State<LedgerJournalList> {
   late LedgerJournalBloc _ledgerJournalBloc;
   late double bottom;
   double? right;
-  late OrderAccountingLocalizations _local;
+  late OrderAccountingLocalizations _localizations;
 
   @override
   void initState() {
@@ -44,7 +44,7 @@ class LedgerJournalsState extends State<LedgerJournalList> {
 
   @override
   Widget build(BuildContext context) {
-    _local = OrderAccountingLocalizations.of(context)!;
+    _localizations = OrderAccountingLocalizations.of(context)!;
     final isPhone = ResponsiveBreakpoints.of(context).isMobile;
     right = right ?? (isPhone ? 20 : 50);
     return BlocConsumer<LedgerJournalBloc, LedgerJournalState>(
@@ -64,7 +64,7 @@ class LedgerJournalsState extends State<LedgerJournalList> {
         switch (state.status) {
           case LedgerJournalStatus.failure:
             return Center(
-              child: Text('${_local.getLedgerJournalFail} ${state.message}'),
+              child: Text('${_localizations.getLedgerJournalFail} ${state.message}'),
             );
           case LedgerJournalStatus.success:
             return Stack(
@@ -92,7 +92,7 @@ class LedgerJournalsState extends State<LedgerJournalList> {
                                 child: Center(
                                   heightFactor: 20,
                                   child: Text(
-                                    _local.noLedgerJournalFound,
+                                    _localizations.noLedgerJournalFound,
                                     key: const Key('empty'),
                                     textAlign: TextAlign.center,
                                   ),
@@ -140,7 +140,7 @@ class LedgerJournalsState extends State<LedgerJournalList> {
                           ),
                         );
                       },
-                      tooltip: _local.addNew,
+                      tooltip: _localizations.addNew,
                       child: const Icon(Icons.add),
                     ),
                   ),

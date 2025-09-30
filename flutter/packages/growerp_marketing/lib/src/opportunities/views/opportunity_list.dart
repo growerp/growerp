@@ -37,7 +37,7 @@ class OpportunitiesState extends State<OpportunityList> {
   late List<Opportunity> opportunities;
   late double bottom;
   double? right;
-  late MarketingLocalizations localizations;
+  late MarketingLocalizations _localizations;
 
   @override
   void initState() {
@@ -50,7 +50,7 @@ class OpportunitiesState extends State<OpportunityList> {
 
   @override
   Widget build(BuildContext context) {
-    localizations = MarketingLocalizations.of(context)!;
+    _localizations = MarketingLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
     return BlocConsumer<OpportunityBloc, OpportunityState>(
       listener: (context, state) {
@@ -69,7 +69,7 @@ class OpportunitiesState extends State<OpportunityList> {
         switch (state.status) {
           case OpportunityStatus.failure:
             return Center(
-              child: Text(localizations.fetchError(state.message!)),
+              child: Text(_localizations.fetchError(state.message!)),
             );
           case OpportunityStatus.success:
             opportunities = state.opportunities;
@@ -79,7 +79,7 @@ class OpportunitiesState extends State<OpportunityList> {
                 return Center(
                   heightFactor: 20,
                   child: Text(
-                    localizations.noOpportunities,
+                    _localizations.noOpportunities,
                     style: const TextStyle(fontSize: 20.0),
                   ),
                 );
@@ -217,7 +217,7 @@ class OpportunitiesState extends State<OpportunityList> {
                                   ),
                             );
                           },
-                          tooltip: localizations.addNew,
+                          tooltip: _localizations.addNew,
                           child: const Icon(Icons.add),
                         ),
                       ],

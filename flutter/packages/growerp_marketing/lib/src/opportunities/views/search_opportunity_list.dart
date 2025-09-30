@@ -29,7 +29,7 @@ class SearchOpportunityList extends StatefulWidget {
 class SearchOpportunityState extends State<SearchOpportunityList> {
   late OpportunityBloc _opportunityBloc;
   List<Opportunity> opportunities = [];
-  late MarketingLocalizations localizations;
+  late MarketingLocalizations _localizations;
 
   @override
   void initState() {
@@ -40,7 +40,7 @@ class SearchOpportunityState extends State<SearchOpportunityList> {
 
   @override
   Widget build(BuildContext context) {
-    localizations = MarketingLocalizations.of(context)!;
+    _localizations = MarketingLocalizations.of(context)!;
     return BlocConsumer<OpportunityBloc, OpportunityState>(
       listener: (context, state) {
         if (state.status == OpportunityStatus.failure) {
@@ -50,7 +50,7 @@ class SearchOpportunityState extends State<SearchOpportunityList> {
       builder: (context, state) {
         if (state.status == OpportunityStatus.failure) {
           return Center(
-            child: Text(localizations.fetchSearchError(state.message!)),
+            child: Text(_localizations.fetchSearchError(state.message!)),
           );
         }
         if (state.status == OpportunityStatus.success) {
@@ -86,15 +86,15 @@ class OpportunitySearchDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _localizations = MarketingLocalizations.of(context)!;
     final ScrollController scrollController = ScrollController();
-    final localizations = MarketingLocalizations.of(context)!;
     return Dialog(
       key: const Key('SearchDialog'),
       insetPadding: const EdgeInsets.all(10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: localizations.opportunitySearch,
+        title: _localizations.opportunitySearch,
         height: 500,
         width: 350,
         child: Column(
@@ -103,10 +103,10 @@ class OpportunitySearchDialog extends StatelessWidget {
               key: const Key('searchField'),
               textInputAction: TextInputAction.search,
               autofocus: true,
-              decoration: InputDecoration(labelText: localizations.searchInput),
+              decoration: InputDecoration(labelText: _localizations.searchInput),
               validator: (value) {
                 if (value!.isEmpty) {
-                  return localizations.enterSearchValue;
+                  return _localizations.enterSearchValue;
                 }
                 return null;
               },
@@ -115,7 +115,7 @@ class OpportunitySearchDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Text(localizations.searchResults),
+            Text(_localizations.searchResults),
             Expanded(
               child: ListView.builder(
                 key: const Key('listView'),
@@ -130,7 +130,7 @@ class OpportunitySearchDialog extends StatelessWidget {
                       child: Center(
                         heightFactor: 20,
                         child: Text(
-                          localizations.noSearchItems,
+                          _localizations.noSearchItems,
                           key: const Key('empty'),
                           textAlign: TextAlign.center,
                         ),
@@ -145,7 +145,7 @@ class OpportunitySearchDialog extends StatelessWidget {
                           direction: DismissDirection.startToEnd,
                           child: ListTile(
                             title: Text(
-                              localizations.searchResult(
+                              _localizations.searchResult(
                                 opportunities[index].pseudoId,
                                 opportunities[index].opportunityName ?? '',
                               ),

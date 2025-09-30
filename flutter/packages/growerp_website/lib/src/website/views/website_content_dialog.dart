@@ -43,7 +43,7 @@ class WebsiteContentState extends State<WebsiteContent> {
   late bool isMarkDown;
   late ContentBloc _contentBloc;
   late ThemeBloc _themeBloc;
-  late WebsiteLocalizations l10n;
+  late WebsiteLocalizations _localizations;
 
   MethodChannel channel = const MethodChannel(
     'plugins.flutter.io/url_launcher',
@@ -68,7 +68,7 @@ class WebsiteContentState extends State<WebsiteContent> {
 
   @override
   void didChangeDependencies() {
-    l10n = WebsiteLocalizations.of(context)!;
+    _localizations = WebsiteLocalizations.of(context)!;
     super.didChangeDependencies();
   }
 
@@ -96,7 +96,7 @@ class WebsiteContentState extends State<WebsiteContent> {
           case ContentStatus.failure:
             HelperFunctions.showMessage(
               context,
-              '${l10n.errorTitle}: ${state.message}',
+              '${_localizations.errorTitle}: ${state.message}',
               Colors.red,
             );
             break;
@@ -109,7 +109,7 @@ class WebsiteContentState extends State<WebsiteContent> {
             return Center(
               child: OutlinedButton(
                 onPressed: () => Navigator.of(context).pop(newContent),
-                child: Text(l10n.continueButton),
+                child: Text(_localizations.continueButton),
               ),
             );
           case ContentStatus.success:
@@ -128,7 +128,7 @@ class WebsiteContentState extends State<WebsiteContent> {
                   width: isPhone ? 400 : 800,
                   height: 600,
                   title:
-                      '${l10n.update} ${l10n.content} ${widget.content.title}',
+                      '${_localizations.update} ${_localizations.content} ${widget.content.title}',
                   child: _showMdTextForm(isPhone),
                 ),
               );
@@ -148,7 +148,7 @@ class WebsiteContentState extends State<WebsiteContent> {
                   context: context,
                   width: isPhone ? 350 : 800,
                   height: 500,
-                  title: l10n.imageInformation(widget.content.title),
+                  title: _localizations.imageInformation(widget.content.title),
                   child: Stack(
                     children: [
                       imageChild(isPhone),
@@ -220,7 +220,7 @@ class WebsiteContentState extends State<WebsiteContent> {
                 builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
                   if (snapshot.hasError) {
                     return Text(
-                      '${l10n.errorTitle}: ${snapshot.error}}',
+                      '${_localizations.errorTitle}: ${snapshot.error}}',
                       textAlign: TextAlign.center,
                     );
                   }
@@ -248,7 +248,7 @@ class WebsiteContentState extends State<WebsiteContent> {
     }
     if (_pickImageError != null) {
       return Text(
-        '${l10n.errorTitle}: $_pickImageError',
+        '${_localizations.errorTitle}: $_pickImageError',
         textAlign: TextAlign.center,
       );
     }
@@ -272,11 +272,11 @@ class WebsiteContentState extends State<WebsiteContent> {
             const SizedBox(height: 30),
             TextFormField(
               key: const Key('imageName'),
-              decoration: InputDecoration(labelText: l10n.name),
+              decoration: InputDecoration(labelText: _localizations.name),
               controller: _nameController,
               validator: (value) {
                 return value!.isEmpty
-                    ? '${l10n.name} ${l10n.errorTitle}'
+                    ? '${_localizations.name} ${_localizations.errorTitle}'
                     : null;
               },
             ),
@@ -287,7 +287,7 @@ class WebsiteContentState extends State<WebsiteContent> {
                   child: OutlinedButton(
                     key: const Key('update'),
                     child: Text(
-                      widget.content.path.isEmpty ? l10n.create : l10n.update,
+                      widget.content.path.isEmpty ? _localizations.create : _localizations.update,
                     ),
                     onPressed: () async {
                       if (_websiteContFormKey.currentState!.validate()) {
@@ -299,7 +299,7 @@ class WebsiteContentState extends State<WebsiteContent> {
                         if (_imageFile?.path != null && image == null) {
                           HelperFunctions.showMessage(
                             context,
-                            l10n.errorTitle,
+                            _localizations.errorTitle,
                             Colors.red,
                           );
                         } else {
@@ -329,7 +329,7 @@ class WebsiteContentState extends State<WebsiteContent> {
     Widget input = TextFormField(
       key: const Key('mdInput'),
       autofocus: true,
-      decoration: InputDecoration(labelText: l10n.description),
+      decoration: InputDecoration(labelText: _localizations.description),
       expands: true,
       maxLines: null,
       textAlignVertical: TextAlignVertical.top,
@@ -389,7 +389,7 @@ class WebsiteContentState extends State<WebsiteContent> {
         const SizedBox(height: 10),
         OutlinedButton(
           key: const Key('update'),
-          child: Text(widget.content.path.isEmpty ? l10n.create : l10n.update),
+          child: Text(widget.content.path.isEmpty ? _localizations.create : _localizations.update),
           onPressed: () async {
             if (newData != '') {
               _contentBloc.add(

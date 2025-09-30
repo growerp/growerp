@@ -47,7 +47,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
   late OpportunityBloc _opportunityBloc;
   late DataFetchBloc<Users> _employeeBloc;
   late DataFetchBlocOther<Users> _leadBloc;
-  late MarketingLocalizations localizations;
+  late MarketingLocalizations _localizations;
 
   @override
   void initState() {
@@ -89,7 +89,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
 
   @override
   Widget build(BuildContext context) {
-    localizations = MarketingLocalizations.of(context)!;
+    _localizations = MarketingLocalizations.of(context)!;
     int columns = ResponsiveBreakpoints.of(context).isMobile ? 1 : 2;
     return BlocListener<OpportunityBloc, OpportunityState>(
       listener: (context, state) async {
@@ -100,12 +100,12 @@ class OpportunityDialogState extends State<OpportunityDialog> {
           case OpportunityStatus.failure:
             HelperFunctions.showMessage(
               context,
-              localizations.error(state.message ?? ''),
+              _localizations.error(state.message ?? ''),
               Colors.red,
             );
             break;
           default:
-            Text(localizations.unknown);
+            Text(_localizations.unknown);
         }
       },
       child: Dialog(
@@ -115,8 +115,8 @@ class OpportunityDialogState extends State<OpportunityDialog> {
         child: popUp(
           context: context,
           title: widget.opportunity.pseudoId.isEmpty
-              ? localizations.opportunityNew
-              : localizations.opportunityWithMessage(
+              ? _localizations.opportunityNew
+              : _localizations.opportunityWithMessage(
                   widget.opportunity.pseudoId,
                 ),
           width: columns.toDouble() * 400,
@@ -131,21 +131,21 @@ class OpportunityDialogState extends State<OpportunityDialog> {
     List<Widget> widgets = [
       TextFormField(
         key: const Key('pseudoId'),
-        decoration: InputDecoration(labelText: localizations.id),
+        decoration: InputDecoration(labelText: _localizations.id),
         controller: _pseudoIdController,
       ),
       TextFormField(
         key: const Key('name'),
-        decoration: InputDecoration(labelText: localizations.opportunityName),
+        decoration: InputDecoration(labelText: _localizations.opportunityName),
         controller: _nameController,
         validator: (value) {
-          return value!.isEmpty ? localizations.enterOppName : null;
+          return value!.isEmpty ? _localizations.enterOppName : null;
         },
       ),
       TextFormField(
         key: const Key('description'),
         maxLines: 3,
-        decoration: InputDecoration(labelText: localizations.description),
+        decoration: InputDecoration(labelText: _localizations.description),
         controller: _descriptionController,
       ),
       TextFormField(
@@ -154,10 +154,10 @@ class OpportunityDialogState extends State<OpportunityDialog> {
         inputFormatters: <TextInputFormatter>[
           FilteringTextInputFormatter.allow(RegExp('[0-9.,]+')),
         ],
-        decoration: InputDecoration(labelText: localizations.expRevenue),
+        decoration: InputDecoration(labelText: _localizations.expRevenue),
         controller: _estAmountController,
         validator: (value) {
-          return value!.isEmpty ? localizations.enterAmount : null;
+          return value!.isEmpty ? _localizations.enterAmount : null;
         },
       ),
       TextFormField(
@@ -166,26 +166,26 @@ class OpportunityDialogState extends State<OpportunityDialog> {
         inputFormatters: [
           FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
         ],
-        decoration: InputDecoration(labelText: localizations.estProbability),
+        decoration: InputDecoration(labelText: _localizations.estProbability),
         controller: _estProbabilityController,
         validator: (value) {
-          return value!.isEmpty ? localizations.enterProbability : null;
+          return value!.isEmpty ? _localizations.enterProbability : null;
         },
       ),
       TextFormField(
         key: const Key('nextStep'),
-        decoration: InputDecoration(labelText: localizations.nextStep),
+        decoration: InputDecoration(labelText: _localizations.nextStep),
         controller: _estNextStepController,
         validator: (value) {
-          return value!.isEmpty ? localizations.enterNextStep : null;
+          return value!.isEmpty ? _localizations.enterNextStep : null;
         },
       ),
       DropdownButtonFormField<String>(
         key: const Key('stageId'),
         initialValue: _selectedStageId,
-        decoration: InputDecoration(labelText: localizations.stage),
+        decoration: InputDecoration(labelText: _localizations.stage),
         validator: (value) =>
-            value == null ? localizations.fieldRequired : null,
+            value == null ? _localizations.fieldRequired : null,
         items: opportunityStages.map((item) {
           return DropdownMenuItem<String>(value: item, child: Text(item));
         }).toList(),
@@ -198,7 +198,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
         builder: (context, state) {
           switch (state.status) {
             case DataFetchStatus.failure:
-              return FatalErrorForm(message: localizations.serverProblem);
+              return FatalErrorForm(message: _localizations.serverProblem);
             case DataFetchStatus.loading:
               return const LoadingIndicator();
             case DataFetchStatus.success:
@@ -210,7 +210,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                   searchFieldProps: TextFieldProps(
                     autofocus: true,
                     decoration: InputDecoration(
-                      labelText: localizations.leadSearch,
+                      labelText: _localizations.leadSearch,
                     ),
                     controller: _leadSearchBoxController,
                   ),
@@ -219,13 +219,13 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                   ),
                   title: popUp(
                     context: context,
-                    title: localizations.selectLead,
+                    title: _localizations.selectLead,
                     height: 50,
                   ),
                 ),
                 dropdownDecoratorProps: DropDownDecoratorProps(
                   dropdownSearchDecoration: InputDecoration(
-                    labelText: localizations.lead,
+                    labelText: _localizations.lead,
                   ),
                 ),
                 key: const Key('lead'),
@@ -263,7 +263,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
         builder: (context, state) {
           switch (state.status) {
             case DataFetchStatus.failure:
-              return FatalErrorForm(message: localizations.serverProblem);
+              return FatalErrorForm(message: _localizations.serverProblem);
             case DataFetchStatus.loading:
               return const LoadingIndicator();
             case DataFetchStatus.success:
@@ -275,7 +275,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                   searchFieldProps: TextFieldProps(
                     autofocus: true,
                     decoration: InputDecoration(
-                      labelText: localizations.employeeSearch,
+                      labelText: _localizations.employeeSearch,
                     ),
                     controller: _accountSearchBoxController,
                   ),
@@ -284,13 +284,13 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                   ),
                   title: popUp(
                     context: context,
-                    title: localizations.selectEmployee,
+                    title: _localizations.selectEmployee,
                     height: 50,
                   ),
                 ),
                 dropdownDecoratorProps: DropDownDecoratorProps(
                   dropdownSearchDecoration: InputDecoration(
-                    labelText: localizations.accountEmployee,
+                    labelText: _localizations.accountEmployee,
                   ),
                 ),
                 key: const Key('employee'),
@@ -333,8 +333,8 @@ class OpportunityDialogState extends State<OpportunityDialog> {
               key: const Key('update'),
               child: Text(
                 widget.opportunity.opportunityId.isEmpty
-                    ? localizations.create
-                    : localizations.update,
+                    ? _localizations.create
+                    : _localizations.update,
               ),
               onPressed: () {
                 if (_formKeyOpportunity.currentState!.validate()) {

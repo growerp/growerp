@@ -52,7 +52,7 @@ class ReservationDialogState extends State<ReservationDialog> {
   final TextEditingController _productSearchBoxController =
       TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  late OrderAccountingLocalizations _local;
+  late OrderAccountingLocalizations _localizations;
 
   @override
   void initState() {
@@ -104,7 +104,7 @@ class ReservationDialogState extends State<ReservationDialog> {
 
   @override
   Widget build(BuildContext context) {
-    _local = OrderAccountingLocalizations.of(context)!;
+    _localizations = OrderAccountingLocalizations.of(context)!;
     return BlocConsumer<SalesOrderBloc, FinDocState>(
       listener: (context, salesOrderState) {
         if (salesOrderState.status == FinDocStatus.failure) {
@@ -183,11 +183,11 @@ class ReservationDialogState extends State<ReservationDialog> {
         width: 400,
         title: widget.finDoc.orderId == null
             ? (classificationId == 'AppHotel'
-                  ? _local.newRental
-                  : _local.newOrder)
+                  ? _localizations.newRental
+                  : _localizations.newOrder)
             : (classificationId == 'AppHotel'
-                      ? _local.reservationId
-                      : _local.orderId) +
+                      ? _localizations.reservationId
+                      : _localizations.orderId) +
                   widget.finDoc.pseudoId!,
         child: Form(
           key: _formKey,
@@ -212,7 +212,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                           searchFieldProps: TextFieldProps(
                             autofocus: true,
                             decoration: InputDecoration(
-                              labelText: _local.customerSearch,
+                              labelText: _localizations.customerSearch,
                             ),
                             controller: _userSearchBoxController,
                           ),
@@ -221,13 +221,13 @@ class ReservationDialogState extends State<ReservationDialog> {
                           ),
                           title: popUp(
                             context: context,
-                            title: _local.selectCustomer,
+                            title: _localizations.selectCustomer,
                             height: 50,
                           ),
                         ),
                         dropdownDecoratorProps: DropDownDecoratorProps(
                           dropdownSearchDecoration: InputDecoration(
-                            labelText: _local.customer,
+                            labelText: _localizations.customer,
                           ),
                         ),
                         key: const Key('customer'),
@@ -280,8 +280,8 @@ class ReservationDialogState extends State<ReservationDialog> {
                     autofocus: true,
                     decoration: InputDecoration(
                       labelText: classificationId == 'AppHotel'
-                          ? _local.roomType
-                          : _local.product,
+                          ? _localizations.roomType
+                          : _localizations.product,
                     ),
                     controller: _productSearchBoxController,
                   ),
@@ -290,13 +290,13 @@ class ReservationDialogState extends State<ReservationDialog> {
                   ),
                   title: popUp(
                     context: context,
-                    title: _local.selectProduct,
+                    title: _localizations.selectProduct,
                     height: 50,
                   ),
                 ),
                 dropdownDecoratorProps: DropDownDecoratorProps(
                   dropdownSearchDecoration: InputDecoration(
-                    labelText: _local.product,
+                    labelText: _localizations.product,
                   ),
                 ),
                 key: const Key('product'),
@@ -343,10 +343,10 @@ class ReservationDialogState extends State<ReservationDialog> {
               ),
               TextFormField(
                 key: const Key('price'),
-                decoration: InputDecoration(labelText: _local.priceAmount),
+                decoration: InputDecoration(labelText: _localizations.priceAmount),
                 controller: _priceController,
                 validator: (value) {
-                  if (value!.isEmpty) return _local.enterPriceAmount;
+                  if (value!.isEmpty) return _localizations.enterPriceAmount;
                   return null;
                 },
               ),
@@ -358,7 +358,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                       key: const Key('setDate'),
                       initialValue: _selectedDate,
                       validator: (value) =>
-                          value == null ? _local.selectStartDate : null,
+                          value == null ? _localizations.selectStartDate : null,
                       builder: (field) => InkWell(
                         onTap: () async {
                           await selectDate(context);
@@ -366,7 +366,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                         },
                         child: InputDecorator(
                           decoration: InputDecoration(
-                            labelText: _local.startDate,
+                            labelText: _localizations.startDate,
                             errorText: field.errorText,
                             suffixIcon: const Icon(Icons.arrow_drop_down),
                           ),
@@ -382,7 +382,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                     child: TextFormField(
                       key: const Key('quantity'),
                       decoration: InputDecoration(
-                        labelText: _local.numberOfDays,
+                        labelText: _localizations.numberOfDays,
                       ),
                       controller: _daysController,
                     ),
@@ -394,7 +394,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                 children: [
                   OutlinedButton(
                     key: const Key('cancel'),
-                    child: Text(_local.cancel),
+                    child: Text(_localizations.cancel),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -405,8 +405,8 @@ class ReservationDialogState extends State<ReservationDialog> {
                       key: const Key('update'),
                       child: Text(
                         widget.finDoc.orderId == null
-                            ? _local.create
-                            : _local.update,
+                            ? _localizations.create
+                            : _localizations.update,
                       ),
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {

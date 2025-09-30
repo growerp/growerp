@@ -74,7 +74,7 @@ class FinDocListState extends State<FinDocList> {
   late AuthBloc _authBloc;
   late double bottom;
   double? right;
-  late OrderAccountingLocalizations _local;
+  late OrderAccountingLocalizations _localizations;
 
   @override
   void initState() {
@@ -85,7 +85,7 @@ class FinDocListState extends State<FinDocList> {
     myFocusNode = FocusNode();
     entityName =
         classificationId == 'AppHotel' && widget.docType == FinDocType.order
-        ? _local.reservation
+        ? _localizations.reservation
         : widget.docType.toString();
     _scrollController.addListener(_onScroll);
     switch (widget.docType) {
@@ -119,7 +119,7 @@ class FinDocListState extends State<FinDocList> {
 
   @override
   Widget build(BuildContext context) {
-    _local = OrderAccountingLocalizations.of(context)!;
+    _localizations = OrderAccountingLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
     limit = (MediaQuery.of(context).size.height / 100).round();
     isPhone = isAPhone(context);
@@ -129,24 +129,24 @@ class FinDocListState extends State<FinDocList> {
           heightFactor: 20,
           child: Text(
             widget.journalId != null
-                ? _local.noJournalEntries
+                ? _localizations.noJournalEntries
                 : widget.docType == FinDocType.transaction
-                ? _local.noOpenTransactions
+                ? _localizations.noOpenTransactions
                 : widget.docType == FinDocType.order
-                ? (widget.sales ? _local.noOpenOrders : _local.noPurchaseOrders)
+                ? (widget.sales ? _localizations.noOpenOrders : _localizations.noPurchaseOrders)
                 : widget.docType == FinDocType.invoice
                 ? (widget.sales
-                      ? _local.noOpenInvoices
-                      : _local.noPurchaseInvoices)
+                      ? _localizations.noOpenInvoices
+                      : _localizations.noPurchaseInvoices)
                 : widget.docType == FinDocType.payment
                 ? (widget.sales
-                      ? _local.noOpenPayments
-                      : _local.noPurchasePayments)
+                      ? _localizations.noOpenPayments
+                      : _localizations.noPurchasePayments)
                 : widget.docType == FinDocType.shipment
                 ? (widget.sales
-                      ? _local.noOpenShipments
-                      : _local.noIncomingShipments)
-                : _local.noOpenRequests,
+                      ? _localizations.noOpenShipments
+                      : _localizations.noIncomingShipments)
+                : _localizations.noOpenRequests,
             style: const TextStyle(fontSize: 20.0),
           ),
         );
@@ -375,7 +375,7 @@ class FinDocListState extends State<FinDocList> {
                                               ),
                                       ),
                                 ),
-                                tooltip: _local.addNew,
+                                tooltip: _localizations.addNew,
                                 child: const Icon(Icons.add),
                               ),
                             ),
@@ -387,7 +387,7 @@ class FinDocListState extends State<FinDocList> {
                               onPressed: () async => _finDocBloc.add(
                                 const FinDocFetch(refresh: true),
                               ),
-                              tooltip: _local.refresh,
+                              tooltip: _localizations.refresh,
                               child: const Icon(Icons.refresh),
                             ),
                           ),

@@ -31,7 +31,7 @@ class GlAccountFilesDialog extends StatefulWidget {
 
 class _FilesHeaderState extends State<GlAccountFilesDialog> {
   late GlAccountBloc glAccountBloc;
-  late OrderAccountingLocalizations _local;
+  late OrderAccountingLocalizations _localizations;
 
   @override
   void initState() {
@@ -41,7 +41,7 @@ class _FilesHeaderState extends State<GlAccountFilesDialog> {
 
   @override
   Widget build(BuildContext context) {
-    _local = OrderAccountingLocalizations.of(context)!;
+    _localizations = OrderAccountingLocalizations.of(context)!;
     return BlocConsumer<GlAccountBloc, GlAccountState>(
         listener: (context, state) async {
       if (state.status == GlAccountStatus.failure) {
@@ -55,14 +55,14 @@ class _FilesHeaderState extends State<GlAccountFilesDialog> {
       return Stack(children: [
         popUpDialog(
             context: context,
-            title: _local.glAccountUpDown,
+            title: _localizations.glAccountUpDown,
             children: [
               const SizedBox(height: 40),
-              Text(_local.downloadFirst),
+              Text(_localizations.downloadFirst),
               const SizedBox(height: 10),
               OutlinedButton(
                   key: const Key('upload'),
-                  child: Text(_local.uploadCsv),
+                  child: Text(_localizations.uploadCsv),
                   onPressed: () async {
                     FilePickerResult? result = await FilePicker.platform
                         .pickFiles(
@@ -82,12 +82,12 @@ class _FilesHeaderState extends State<GlAccountFilesDialog> {
               const SizedBox(height: 20),
               OutlinedButton(
                   key: const Key('download'),
-                  child: Text(_local.downloadEmail),
+                  child: Text(_localizations.downloadEmail),
                   onPressed: () {
                     glAccountBloc.add(GlAccountDownload());
                   }),
               const SizedBox(height: 20),
-              Text(_local.dataFileSendEmail),
+              Text(_localizations.dataFileSendEmail),
             ]),
         if (state.status == GlAccountStatus.loading) const LoadingIndicator(),
       ]);

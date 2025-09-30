@@ -35,7 +35,7 @@ class LocationDialogState extends State<LocationDialog> {
   final TextEditingController _pseudoIdController = TextEditingController();
   final TextEditingController _qohController = TextEditingController();
   Decimal qohTotal = Decimal.zero;
-  late InventoryLocalizations localizations;
+  late InventoryLocalizations _localizations;
 
   @override
   void initState() {
@@ -51,7 +51,7 @@ class LocationDialogState extends State<LocationDialog> {
 
   @override
   Widget build(BuildContext context) {
-    localizations = InventoryLocalizations.of(context)!;
+    _localizations = InventoryLocalizations.of(context)!;
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return Dialog(
       key: const Key('LocationDialog'),
@@ -64,8 +64,8 @@ class LocationDialogState extends State<LocationDialog> {
               HelperFunctions.showMessage(
                 context,
                 location.locationId == null
-                    ? localizations.addSuccess
-                    : localizations.updateSuccess,
+                    ? _localizations.addSuccess
+                    : _localizations.updateSuccess,
                 Colors.green,
               );
               Navigator.of(context).pop();
@@ -73,7 +73,7 @@ class LocationDialogState extends State<LocationDialog> {
             case LocationStatus.failure:
               HelperFunctions.showMessage(
                 context,
-                localizations.error(state.message ?? ''),
+                _localizations.error(state.message ?? ''),
                 Colors.red,
               );
               break;
@@ -84,8 +84,8 @@ class LocationDialogState extends State<LocationDialog> {
         child: popUp(
           context: context,
           child: _showForm(isPhone),
-          title: localizations.locationInfo(
-            location.pseudoId ?? localizations.newLabel,
+          title: _localizations.locationInfo(
+            location.pseudoId ?? _localizations.newLabel,
           ),
           height: 400,
           width: 400,
@@ -103,19 +103,19 @@ class LocationDialogState extends State<LocationDialog> {
           children: <Widget>[
             TextFormField(
               key: const Key('id'),
-              decoration: InputDecoration(labelText: localizations.locationId),
+              decoration: InputDecoration(labelText: _localizations.locationId),
               controller: _pseudoIdController,
             ),
             const SizedBox(height: 20),
             TextFormField(
               key: const Key('name'),
               decoration: InputDecoration(
-                labelText: localizations.locationName,
+                labelText: _localizations.locationName,
               ),
               controller: _nameController,
               validator: (value) {
                 if (value!.isEmpty) {
-                  return localizations.enterLocationName;
+                  return _localizations.enterLocationName;
                 }
                 return null;
               },
@@ -128,7 +128,7 @@ class LocationDialogState extends State<LocationDialog> {
                   controller: _qohController,
                   key: const Key('qoh'),
                   decoration: InputDecoration(
-                    labelText: localizations.quantityOnHand,
+                    labelText: _localizations.quantityOnHand,
                     enabled: false,
                   ),
                 ),
@@ -138,8 +138,8 @@ class LocationDialogState extends State<LocationDialog> {
               key: const Key('update'),
               child: Text(
                 location.locationId == null
-                    ? localizations.create
-                    : localizations.update,
+                    ? _localizations.create
+                    : _localizations.update,
               ),
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {

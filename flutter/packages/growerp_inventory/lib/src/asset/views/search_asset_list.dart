@@ -29,7 +29,7 @@ class SearchAssetList extends StatefulWidget {
 class SearchAssetState extends State<SearchAssetList> {
   late DataFetchBloc<Assets> _assetBloc;
   List<Asset> assets = [];
-  late InventoryLocalizations localizations;
+  late InventoryLocalizations _localizations;
 
   @override
   void initState() {
@@ -40,13 +40,13 @@ class SearchAssetState extends State<SearchAssetList> {
 
   @override
   Widget build(BuildContext context) {
-    localizations = InventoryLocalizations.of(context)!;
+    _localizations = InventoryLocalizations.of(context)!;
     return BlocConsumer<DataFetchBloc<Assets>, DataFetchState<Assets>>(
       listener: (context, state) {
         if (state.status == DataFetchStatus.failure) {
           HelperFunctions.showMessage(
             context,
-            localizations.error(state.message ?? ''),
+            _localizations.error(state.message ?? ''),
             Colors.red,
           );
         }
@@ -55,7 +55,7 @@ class SearchAssetState extends State<SearchAssetList> {
         if (state.status == DataFetchStatus.failure) {
           return Center(
             child: Text(
-              localizations.failedToFetchSearchItems(state.message ?? ''),
+              _localizations.failedToFetchSearchItems(state.message ?? ''),
             ),
           );
         }
@@ -92,7 +92,7 @@ class AssetSearchDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final InventoryLocalizations localizations = InventoryLocalizations.of(
+    final InventoryLocalizations _localizations = InventoryLocalizations.of(
       context,
     )!;
     final ScrollController scrollController = ScrollController();
@@ -102,7 +102,7 @@ class AssetSearchDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: localizations.assetSearch,
+        title: _localizations.assetSearch,
         height: 500,
         width: 350,
         child: Column(
@@ -111,10 +111,10 @@ class AssetSearchDialog extends StatelessWidget {
               key: const Key('searchField'),
               textInputAction: TextInputAction.search,
               autofocus: true,
-              decoration: InputDecoration(labelText: localizations.searchInput),
+              decoration: InputDecoration(labelText: _localizations.searchInput),
               validator: (value) {
                 if (value!.isEmpty) {
-                  return localizations.enterSearchValue;
+                  return _localizations.enterSearchValue;
                 }
                 return null;
               },
@@ -128,7 +128,7 @@ class AssetSearchDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Text(localizations.searchResults),
+            Text(_localizations.searchResults),
             Expanded(
               child: ListView.builder(
                 key: const Key('listView'),
@@ -143,7 +143,7 @@ class AssetSearchDialog extends StatelessWidget {
                       child: Center(
                         heightFactor: 20,
                         child: Text(
-                          localizations.noSearchItemsFound,
+                          _localizations.noSearchItemsFound,
                           key: const Key('empty'),
                           textAlign: TextAlign.center,
                         ),
@@ -158,8 +158,8 @@ class AssetSearchDialog extends StatelessWidget {
                           direction: DismissDirection.startToEnd,
                           child: ListTile(
                             title: Text(
-                              "${localizations.id}${assets[index].pseudoId}\n"
-                              "${localizations.name}${assets[index].assetName}",
+                              "${_localizations.id}${assets[index].pseudoId}\n"
+                              "${_localizations.name}${assets[index].assetName}",
                               key: Key("searchResult$index"),
                             ),
                             onTap: () =>

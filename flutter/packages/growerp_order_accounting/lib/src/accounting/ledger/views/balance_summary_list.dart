@@ -40,7 +40,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
   late TimePeriod _selectedPeriod;
   late double bottom;
   double? right;
-  late OrderAccountingLocalizations _local;
+  late OrderAccountingLocalizations _localizations;
 
   @override
   void initState() {
@@ -64,7 +64,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
 
   @override
   Widget build(BuildContext context) {
-    _local = OrderAccountingLocalizations.of(context)!;
+    _localizations = OrderAccountingLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
     return BlocConsumer<LedgerBloc, LedgerState>(
       listenWhen: (previous, current) =>
@@ -141,7 +141,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                                 // Show message if year doesn't exist
                                 HelperFunctions.showMessage(
                                   context,
-                                  _local.dataForYearNotAvailable(
+                                  _localizations.dataForYearNotAvailable(
                                     previousYear.toString(),
                                   ),
                                   Colors.orange,
@@ -181,12 +181,12 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                             },
                           ),
                           Text(
-                            '${_local.year} ${_getYearFromPeriod(_selectedPeriod.periodName)}',
+                            '${_localizations.year} ${_getYearFromPeriod(_selectedPeriod.periodName)}',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           IconButton(
                             icon: const Icon(Icons.arrow_forward),
-                            tooltip: _local.nextYear,
+                            tooltip: _localizations.nextYear,
                             onPressed: () {
                               // Extract the year from the period name
                               String currentPeriodName =
@@ -231,7 +231,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                                 // Show message if year doesn't exist
                                 HelperFunctions.showMessage(
                                   context,
-                                  _local.dataForYearNotAvailable(
+                                  _localizations.dataForYearNotAvailable(
                                     nextYear.toString(),
                                   ),
                                   Colors.orange,
@@ -273,7 +273,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                         ],
                       ),
                       Text(
-                        '${_local.period} ${_selectedPeriod.periodName}',
+                        '${_localizations.period} ${_selectedPeriod.periodName}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -314,7 +314,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                                       heightFactor: 20,
                                       child: Text(
                                         started
-                                            ? _local.noBalanceSummaryFound
+                                            ? _localizations.noBalanceSummaryFound
                                             : '',
                                         key: const Key('empty'),
                                         textAlign: TextAlign.center,
@@ -355,7 +355,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                                     mini: true,
                                     backgroundColor: Colors.blue,
                                     child: Text(
-                                      _local.yearLetter,
+                                      _localizations.yearLetter,
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -379,7 +379,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                                     mini: true,
                                     backgroundColor: Colors.green,
                                     child: Text(
-                                      _local.quarterLetter,
+                                      _localizations.quarterLetter,
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -407,7 +407,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                                   mini: true,
                                   backgroundColor: Colors.orange,
                                   child: Text(
-                                    _local.monthLetter,
+                                    _localizations.monthLetter,
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -432,7 +432,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
               ],
             );
           case LedgerStatus.failure:
-            return FatalErrorForm(message: _local.getBalanceSummaryFail);
+            return FatalErrorForm(message: _localizations.getBalanceSummaryFail);
           default:
             return const LoadingIndicator();
         }

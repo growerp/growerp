@@ -29,7 +29,9 @@ TableData getTableData(
   int index, {
   dynamic extra,
 }) {
-  final localizations = MarketingLocalizations.of(context)!;
+      final MarketingLocalizations localizations = MarketingLocalizations.of(
+      context,
+    )!;
   List<TableRowContent> rowContent = [];
   bool isPhone = isAPhone(context);
   if (isPhone) {

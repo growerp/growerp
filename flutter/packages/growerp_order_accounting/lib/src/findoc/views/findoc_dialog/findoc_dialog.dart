@@ -124,7 +124,7 @@ class MyFinDocState extends State<FinDocPage> {
   late FinDocStatusVal _updatedStatus;
   late String currencyId;
   late double screenWidth;
-  late OrderAccountingLocalizations _local;
+  late OrderAccountingLocalizations _localizations;
 
   @override
   void initState() {
@@ -184,7 +184,7 @@ class MyFinDocState extends State<FinDocPage> {
   Widget build(BuildContext context) {
     isPhone = isAPhone(context);
     screenWidth = isPhone ? 400 : 900;
-    _local = OrderAccountingLocalizations.of(context)!;
+    _localizations = OrderAccountingLocalizations.of(context)!;
     blocConsumerListener(
       BuildContext context,
       CartState state, [
@@ -253,8 +253,8 @@ class MyFinDocState extends State<FinDocPage> {
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: popUp(
           title:
-              "${finDoc.sales ? _local.sales : _local.purchase} ${finDoc.docType} "
-              "#${finDoc.pseudoId ?? _local.newItem}",
+              "${finDoc.sales ? _localizations.sales : _localizations.purchase} ${finDoc.docType} "
+              "#${finDoc.pseudoId ?? _localizations.newItem}",
           height: 650,
           width: screenWidth,
           context: context,
@@ -293,7 +293,7 @@ class MyFinDocState extends State<FinDocPage> {
                 child: TextFormField(
                   key: const Key('pseudoId'),
                   enabled: !readOnly,
-                  decoration: InputDecoration(labelText: _local.finDocId),
+                  decoration: InputDecoration(labelText: _localizations.finDocId),
                   controller: _pseudoIdController,
                   keyboardType: TextInputType.number,
                 ),
@@ -318,7 +318,7 @@ class MyFinDocState extends State<FinDocPage> {
                               autofocus: true,
                               decoration: InputDecoration(
                                 labelText:
-                                    "${finDocUpdated.sales ? _local.customer : _local.supplier} ${_local.name}",
+                                    "${finDocUpdated.sales ? _localizations.customer : _localizations.supplier} ${_localizations.name}",
                               ),
                               controller: _companySearchBoxController,
                             ),
@@ -328,15 +328,15 @@ class MyFinDocState extends State<FinDocPage> {
                             title: popUp(
                               context: context,
                               title:
-                                  "${_local.select} ${finDocUpdated.sales ? _local.customer : _local.supplier}",
+                                  "${_localizations.select} ${finDocUpdated.sales ? _localizations.customer : _localizations.supplier}",
                               height: 50,
                             ),
                           ),
                           dropdownDecoratorProps: DropDownDecoratorProps(
                             dropdownSearchDecoration: InputDecoration(
                               labelText: finDocUpdated.sales
-                                  ? _local.customer
-                                  : _local.supplier,
+                                  ? _localizations.customer
+                                  : _localizations.supplier,
                             ),
                           ),
                           key: Key(
@@ -376,7 +376,7 @@ class MyFinDocState extends State<FinDocPage> {
                             });
                           },
                           validator: (value) => value == null
-                              ? "${_local.select} ${finDocUpdated.sales ? _local.customer : _local.supplier}!"
+                              ? "${_localizations.select} ${finDocUpdated.sales ? _localizations.customer : _localizations.supplier}!"
                               : null,
                         ),
                       );
@@ -394,9 +394,9 @@ class MyFinDocState extends State<FinDocPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("${_local.created}: ${finDoc.creationDate.dateOnly()}"),
+                  Text("${_localizations.created}: ${finDoc.creationDate.dateOnly()}"),
                   const SizedBox(width: 10),
-                  Text("${_local.placed}: ${finDoc.placedDate!.dateOnly()}"),
+                  Text("${_localizations.placed}: ${finDoc.placedDate!.dateOnly()}"),
                 ],
               ),
             ),
@@ -412,12 +412,12 @@ class MyFinDocState extends State<FinDocPage> {
               child: DropdownButtonFormField<FinDocStatusVal>(
                 key: const Key('statusDropDown'),
                 decoration: InputDecoration(
-                  labelText: _local.status,
+                  labelText: _localizations.status,
                   enabled: !readOnly,
                 ),
                 initialValue: _updatedStatus,
                 validator: (value) =>
-                    value == null ? _local.fieldRequired : null,
+                    value == null ? _localizations.fieldRequired : null,
                 items: FinDocStatusVal.validStatusList(_updatedStatus)
                     .map(
                       (label) => DropdownMenuItem<FinDocStatusVal>(
@@ -445,7 +445,7 @@ class MyFinDocState extends State<FinDocPage> {
                 key: const Key('description'),
                 readOnly: readOnly,
                 decoration: InputDecoration(
-                  labelText: '${finDoc.docType} ${_local.description}',
+                  labelText: '${finDoc.docType} ${_localizations.description}',
                   enabled: !readOnly,
                 ),
                 controller: _descriptionController,
@@ -486,18 +486,18 @@ class MyFinDocState extends State<FinDocPage> {
                   child: TextFormField(
                     key: const Key('pseudoId'),
                     enabled: !readOnly,
-                    decoration: InputDecoration(labelText: _local.id),
+                    decoration: InputDecoration(labelText: _localizations.id),
                     controller: _pseudoIdController,
                     keyboardType: TextInputType.number,
                   ),
                 ),
 
-                Text(_local.posted),
+                Text(_localizations.posted),
                 const SizedBox(width: 20),
                 Expanded(
                   child: Row(
                     children: [
-                      Text(_local.no),
+                      Text(_localizations.no),
                       Switch(
                         key: const Key('isPosted'),
                         value: _isPosted ?? false,
@@ -509,7 +509,7 @@ class MyFinDocState extends State<FinDocPage> {
                                 });
                               },
                       ),
-                      Text(_local.yes),
+                      Text(_localizations.yes),
                     ],
                   ),
                 ),
@@ -520,7 +520,7 @@ class MyFinDocState extends State<FinDocPage> {
                 Expanded(
                   child: InputDecorator(
                     decoration: InputDecoration(
-                      labelText: '${finDoc.docType} ${_local.type}',
+                      labelText: '${finDoc.docType} ${_localizations.type}',
                     ),
                     child: Text(finDoc.docSubType ?? ''),
                   ),
@@ -531,7 +531,7 @@ class MyFinDocState extends State<FinDocPage> {
                     key: const Key('description'),
                     readOnly: readOnly,
                     decoration: InputDecoration(
-                      labelText: '${finDoc.docType} ${_local.description}',
+                      labelText: '${finDoc.docType} ${_localizations.description}',
                       enabled: !readOnly,
                     ),
                     controller: _descriptionController,
@@ -549,7 +549,7 @@ class MyFinDocState extends State<FinDocPage> {
     List<Widget> buttons = [
       OutlinedButton(
         key: const Key('header'),
-        child: Text(_local.updateHeader),
+        child: Text(_localizations.updateHeader),
         onPressed: () {
           _cartBloc.add(
             CartHeader(
@@ -567,8 +567,8 @@ class MyFinDocState extends State<FinDocPage> {
         key: const Key('addItem'),
         child: Text(
           widget.finDoc.docType == FinDocType.transaction
-              ? _local.addTransactionItem
-              : _local.addOtherItem,
+              ? _localizations.addTransactionItem
+              : _localizations.addOtherItem,
         ),
         onPressed: () async {
           final dynamic finDocItem;
@@ -603,7 +603,7 @@ class MyFinDocState extends State<FinDocPage> {
       if (widget.finDoc.docType == FinDocType.order)
         OutlinedButton(
           key: const Key('itemRental'),
-          child: Text(_local.addRental),
+          child: Text(_localizations.addRental),
           onPressed: () async {
             final dynamic finDocItem = await addRentalItemDialog(
               context,
@@ -627,7 +627,7 @@ class MyFinDocState extends State<FinDocPage> {
       if (widget.finDoc.docType != FinDocType.transaction)
         OutlinedButton(
           key: const Key('addProduct'),
-          child: Text(_local.addProduct),
+          child: Text(_localizations.addProduct),
           onPressed: () async {
             final dynamic finDocItem = await addProductItemDialog(context);
             if (finDocItem != null) {
@@ -685,7 +685,7 @@ class MyFinDocState extends State<FinDocPage> {
           visible: !finDoc.idIsNull(),
           child: OutlinedButton(
             key: const Key('cancelFinDoc'),
-            child: Text(_local.cancelFinDoc),
+            child: Text(_localizations.cancelFinDoc),
             onPressed: () {
               _cartBloc.add(CartCancelFinDoc(finDocUpdated));
             },
@@ -694,7 +694,7 @@ class MyFinDocState extends State<FinDocPage> {
         const SizedBox(width: 5),
         OutlinedButton(
           key: const Key('clear'),
-          child: Text(_local.clearCart),
+          child: Text(_localizations.clearCart),
           onPressed: () {
             if (finDocUpdated.items.isNotEmpty) {
               _cartBloc.add(CartClear());
@@ -706,7 +706,7 @@ class MyFinDocState extends State<FinDocPage> {
           child: OutlinedButton(
             key: const Key('update'),
             child: Text(
-              "${finDoc.idIsNull() ? _local.create : _local.update} "
+              "${finDoc.idIsNull() ? _localizations.create : _localizations.update} "
               "${finDocUpdated.docType!}",
             ),
             onPressed: () {
@@ -727,8 +727,8 @@ class MyFinDocState extends State<FinDocPage> {
               } else {
                 HelperFunctions.showMessage(
                   context,
-                  _local.itemOrCustomerRequired(
-                    (finDocUpdated.sales ? _local.customer : _local.supplier),
+                  _localizations.itemOrCustomerRequired(
+                    (finDocUpdated.sales ? _localizations.customer : _localizations.supplier),
                     finDocUpdated.docType.toString(),
                   ),
                   Colors.red,
@@ -778,7 +778,7 @@ class MyFinDocState extends State<FinDocPage> {
       rowContent.add(
         TableRowContent(
           width: isPhone ? 14 : 8,
-          name: _local.productId,
+          name: _localizations.productId,
           value: Text(
             "${item.product?.pseudoId}",
             textAlign: TextAlign.center,
@@ -789,7 +789,7 @@ class MyFinDocState extends State<FinDocPage> {
       rowContent.add(
         TableRowContent(
           width: isPhone ? 15 : 27,
-          name: _local.description,
+          name: _localizations.description,
           value: Text(
             item.description ?? '',
             key: Key('itemDescription$index'),
@@ -801,7 +801,7 @@ class MyFinDocState extends State<FinDocPage> {
         rowContent.add(
           TableRowContent(
             width: 8,
-            name: _local.item,
+            name: _localizations.item,
             value: Text(
               itemType.itemTypeName,
               textAlign: TextAlign.left,
@@ -813,7 +813,7 @@ class MyFinDocState extends State<FinDocPage> {
       rowContent.add(
         TableRowContent(
           width: 5,
-          name: Text(_local.quantity, textAlign: TextAlign.right),
+          name: Text(_localizations.quantity, textAlign: TextAlign.right),
           value: Text(
             item.quantity == null
                 ? Decimal.zero.toString()
@@ -827,7 +827,7 @@ class MyFinDocState extends State<FinDocPage> {
         rowContent.add(
           TableRowContent(
             width: 12,
-            name: Text(_local.price, textAlign: TextAlign.right),
+            name: Text(_localizations.price, textAlign: TextAlign.right),
             value: Text(
               item.price == null
                   ? Decimal.fromInt(0).currency(currencyId: currencyId)
@@ -842,7 +842,7 @@ class MyFinDocState extends State<FinDocPage> {
         rowContent.add(
           TableRowContent(
             width: 20,
-            name: _local.date,
+            name: _localizations.date,
             value: Text(
               item.rentalFromDate.dateOnly(),
               textAlign: TextAlign.right,
@@ -855,7 +855,7 @@ class MyFinDocState extends State<FinDocPage> {
         rowContent.add(
           TableRowContent(
             width: 10,
-            name: Text(_local.subTotal, textAlign: TextAlign.right),
+            name: Text(_localizations.subTotal, textAlign: TextAlign.right),
             value: Text(
               item.price == null
                   ? Decimal.zero.currency(currencyId: currencyId).toString()
@@ -912,7 +912,7 @@ class MyFinDocState extends State<FinDocPage> {
     );
     return Flexible(
       child: items.isEmpty
-          ? Text(_local.noItems)
+          ? Text(_localizations.noItems)
           : TableView.builder(
               diagonalDragBehavior: DiagonalDragBehavior.free,
               verticalDetails: ScrollableDetails.vertical(
@@ -969,7 +969,7 @@ class MyFinDocState extends State<FinDocPage> {
       );
       rowContent.add(
         TableRowContent(
-          name: _local.productId,
+          name: _localizations.productId,
           width: isPhone ? 14 : 8,
           value: Text(
             "${item.product?.pseudoId}",
@@ -980,7 +980,7 @@ class MyFinDocState extends State<FinDocPage> {
       );
       rowContent.add(
         TableRowContent(
-          name: _local.description,
+          name: _localizations.description,
           width: isPhone ? 25 : 28,
           value: Text(
             item.description ?? '',
@@ -991,7 +991,7 @@ class MyFinDocState extends State<FinDocPage> {
       );
       rowContent.add(
         TableRowContent(
-          name: _local.quantity,
+          name: _localizations.quantity,
           width: isPhone ? 15 : 10,
           value: Text(
             item.quantity == null
@@ -1005,7 +1005,7 @@ class MyFinDocState extends State<FinDocPage> {
       if (finDoc.status == FinDocStatusVal.completed) {
         rowContent.add(
           TableRowContent(
-            name: _local.location,
+            name: _localizations.location,
             width: isPhone ? 20 : 20,
             value: Text(
               "${item.asset?.location?.locationName}",
@@ -1059,7 +1059,7 @@ class MyFinDocState extends State<FinDocPage> {
     );
     return Flexible(
       child: items.isEmpty
-          ? Text(_local.noItems)
+          ? Text(_localizations.noItems)
           : TableView.builder(
               diagonalDragBehavior: DiagonalDragBehavior.free,
               verticalDetails: ScrollableDetails.vertical(
@@ -1108,7 +1108,7 @@ class MyFinDocState extends State<FinDocPage> {
       List<TableRowContent> rowContent = [];
       rowContent.add(
         TableRowContent(
-          name: _local.glAccount,
+          name: _localizations.glAccount,
           width: 12,
           value: Text(
             item.glAccount!.accountCode ?? '??',
@@ -1118,7 +1118,7 @@ class MyFinDocState extends State<FinDocPage> {
       );
       rowContent.add(
         TableRowContent(
-          name: _local.debit,
+          name: _localizations.debit,
           width: 15,
           value: Text(
             (item.isDebit! ? item.price.currency(currencyId: currencyId) : ''),
@@ -1128,7 +1128,7 @@ class MyFinDocState extends State<FinDocPage> {
       );
       rowContent.add(
         TableRowContent(
-          name: _local.credit,
+          name: _localizations.credit,
           width: 15,
           value: Text(
             !item.isDebit! ? item.price.currency(currencyId: currencyId) : '',
@@ -1138,7 +1138,7 @@ class MyFinDocState extends State<FinDocPage> {
       );
       rowContent.add(
         TableRowContent(
-          name: _local.productId,
+          name: _localizations.productId,
           width: 10,
           value: Text(
             item.product?.pseudoId ?? '',
@@ -1188,7 +1188,7 @@ class MyFinDocState extends State<FinDocPage> {
       screenWidth: screenWidth,
     );
     return items.isEmpty
-        ? Text(_local.noItems)
+        ? Text(_localizations.noItems)
         : Flexible(
             child: Padding(
               padding: const EdgeInsets.only(left: 10.0),
@@ -1250,7 +1250,7 @@ class MyFinDocState extends State<FinDocPage> {
             child: popUp(
               context: context,
               height: 400,
-              title: _local.addTransactionItemTitle,
+              title: _localizations.addTransactionItemTitle,
               child: Form(
                 key: addOtherFormKey,
                 child: SingleChildScrollView(
@@ -1262,7 +1262,7 @@ class MyFinDocState extends State<FinDocPage> {
                           switch (state.status) {
                             case GlAccountStatus.failure:
                               return FatalErrorForm(
-                                message: _local.serverProblem,
+                                message: _localizations.serverProblem,
                               );
                             case GlAccountStatus.success:
                               return DropdownSearch<GlAccount>(
@@ -1274,7 +1274,7 @@ class MyFinDocState extends State<FinDocPage> {
                                   searchFieldProps: TextFieldProps(
                                     autofocus: true,
                                     decoration: InputDecoration(
-                                      labelText: _local.glAccount,
+                                      labelText: _localizations.glAccount,
                                     ),
                                   ),
                                   menuProps: MenuProps(
@@ -1282,13 +1282,13 @@ class MyFinDocState extends State<FinDocPage> {
                                   ),
                                   title: popUp(
                                     context: context,
-                                    title: _local.selectGlAccount,
+                                    title: _localizations.selectGlAccount,
                                     height: 50,
                                   ),
                                 ),
                                 dropdownDecoratorProps: DropDownDecoratorProps(
                                   dropdownSearchDecoration: InputDecoration(
-                                    labelText: _local.glAccount,
+                                    labelText: _localizations.glAccount,
                                   ),
                                 ),
                                 key: const Key('glAccount'),
@@ -1328,19 +1328,19 @@ class MyFinDocState extends State<FinDocPage> {
                             child: TextFormField(
                               key: const Key('price'),
                               decoration: InputDecoration(
-                                labelText: _local.amount,
+                                labelText: _localizations.amount,
                               ),
                               controller: priceController,
                               keyboardType: TextInputType.number,
                               validator: (value) {
                                 if (value!.isEmpty) {
-                                  return _local.enterAmount;
+                                  return _localizations.enterAmount;
                                 }
                                 return null;
                               },
                             ),
                           ),
-                          Text(_local.credit),
+                          Text(_localizations.credit),
                           StatefulBuilder(
                             builder: (context, setState) {
                               return Switch(
@@ -1354,14 +1354,14 @@ class MyFinDocState extends State<FinDocPage> {
                               );
                             },
                           ),
-                          Text(_local.debit),
+                          Text(_localizations.debit),
                         ],
                       ),
 
                       const SizedBox(height: 20),
                       OutlinedButton(
                         key: const Key('ok'),
-                        child: Text(_local.ok),
+                        child: Text(_localizations.ok),
                         onPressed: () {
                           if (addOtherFormKey.currentState!.validate()) {
                             Navigator.of(context).pop(

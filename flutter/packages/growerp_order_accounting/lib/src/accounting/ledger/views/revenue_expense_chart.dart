@@ -48,7 +48,7 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
   late LedgerBloc _ledgerBloc;
   late bool expanded;
   late TimePeriod _selectedPeriod;
-  late OrderAccountingLocalizations _local;
+  late OrderAccountingLocalizations _localizations;
 
   @override
   void initState() {
@@ -70,7 +70,7 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
 
   @override
   Widget build(BuildContext context) {
-    _local = OrderAccountingLocalizations.of(context)!;
+    _localizations = OrderAccountingLocalizations.of(context)!;
     Color getColor(int line) {
       switch (line) {
         case 1:
@@ -101,18 +101,18 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
             _selectedPeriod = state.ledgerReport!.period!;
 
             var months = [
-              _local.jan,
-              _local.feb,
-              _local.mar,
-              _local.apr,
-              _local.may,
-              _local.jun,
-              _local.jul,
-              _local.aug,
-              _local.sep,
-              _local.oct,
-              _local.nov,
-              _local.dec,
+              _localizations.jan,
+              _localizations.feb,
+              _localizations.mar,
+              _localizations.apr,
+              _localizations.may,
+              _localizations.jun,
+              _localizations.jul,
+              _localizations.aug,
+              _localizations.sep,
+              _localizations.oct,
+              _localizations.nov,
+              _localizations.dec,
             ];
             // calculate maxY and minY
             double maxY = 0.0, minY = 0.0;
@@ -169,7 +169,7 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.arrow_back),
-                            tooltip: _local.previousYear,
+                            tooltip: _localizations.previousYear,
                             onPressed: () {
                               // Extract the year from the period name
                               String currentPeriodName =

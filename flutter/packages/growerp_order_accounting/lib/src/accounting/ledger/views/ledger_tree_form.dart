@@ -47,7 +47,7 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
   late LedgerBloc _ledgerBloc;
   late bool expanded;
   late String currencyId;
-  late OrderAccountingLocalizations _local;
+  late OrderAccountingLocalizations _localizations;
 
   @override
   void initState() {
@@ -67,7 +67,7 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
 
   @override
   Widget build(BuildContext context) {
-    _local = OrderAccountingLocalizations.of(context)!;
+    _localizations = OrderAccountingLocalizations.of(context)!;
     //convert glAccount list into TreeNodes
     Iterable<TreeNode> convert(List<GlAccount> glAccounts) {
       // convert single leaf/glAccount
@@ -133,7 +133,7 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
       },
       builder: (context, state) {
         if (state.status == LedgerStatus.failure) {
-          return FatalErrorForm(message: _local.getLedgerTreeFail);
+          return FatalErrorForm(message: _localizations.getLedgerTreeFail);
         }
         if (state.status == LedgerStatus.loading) {
           return const LoadingIndicator();
@@ -151,7 +151,7 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
               children: [
                 if (!expanded)
                   OutlinedButton(
-                    child: Text(_local.expandAll),
+                    child: Text(_localizations.expandAll),
                     onPressed: () => setState(() {
                       _controller!.expandAll();
                       expanded = !expanded;
@@ -160,14 +160,14 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
                 const SizedBox(width: 10),
                 if (expanded)
                   OutlinedButton(
-                    child: Text(_local.collapseAll),
+                    child: Text(_localizations.collapseAll),
                     onPressed: () => setState(() {
                       _controller!.collapseAll();
                       expanded = !expanded;
                     }),
                   ),
                 OutlinedButton(
-                  child: Text(_local.recalculate),
+                  child: Text(_localizations.recalculate),
                   onPressed: () => _ledgerBloc.add(LedgerCalculate()),
                 ),
               ],
@@ -178,16 +178,16 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
                 const SizedBox(width: 20),
                 SizedBox(
                   width: isPhone(context) ? 220 : 410,
-                  child: Text(_local.glAccountIdAndName),
+                  child: Text(_localizations.glAccountIdAndName),
                 ),
                 SizedBox(
                   width: 100,
-                  child: Text(_local.thisAccount, textAlign: TextAlign.right),
+                  child: Text(_localizations.thisAccount, textAlign: TextAlign.right),
                 ),
                 if (isLargerThanPhone(context))
                   SizedBox(
                     width: 100,
-                    child: Text(_local.totalTree, textAlign: TextAlign.right),
+                    child: Text(_localizations.totalTree, textAlign: TextAlign.right),
                   ),
               ],
             ),

@@ -35,7 +35,7 @@ class PaymentTypeListState extends State<PaymentTypeList> {
   late bool showAll;
   double? top;
   double? left;
-  late OrderAccountingLocalizations _local;
+  late OrderAccountingLocalizations _localizations;
 
   @override
   void initState() {
@@ -49,7 +49,7 @@ class PaymentTypeListState extends State<PaymentTypeList> {
 
   @override
   Widget build(BuildContext context) {
-    _local = OrderAccountingLocalizations.of(context)!;
+    _localizations = OrderAccountingLocalizations.of(context)!;
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     top = top ?? (isAPhone(context) ? 500 : height - 200);
@@ -73,7 +73,7 @@ class PaymentTypeListState extends State<PaymentTypeList> {
         switch (state.status) {
           case FinDocStatus.failure:
             return Center(
-              child: Text('${_local.fetchPaymentTypesFail} ${state.message}'),
+              child: Text('${_localizations.fetchPaymentTypesFail} ${state.message}'),
             );
           case FinDocStatus.success:
             var newList = [];
@@ -129,8 +129,8 @@ class PaymentTypeListState extends State<PaymentTypeList> {
                           showAll = !showAll;
                         });
                       },
-                      tooltip: _local.showAllUsed,
-                      label: showAll ? Text(_local.all) : Text(_local.onlyUsed),
+                      tooltip: _localizations.showAllUsed,
+                      label: showAll ? Text(_localizations.all) : Text(_localizations.onlyUsed),
                     ),
                   ),
                 ),
