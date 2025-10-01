@@ -117,7 +117,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
           title: widget.opportunity.pseudoId.isEmpty
               ? _localizations.opportunityNew
               : _localizations.opportunityWithMessage(
-                  widget.opportunity.pseudoId,
+                  '#${widget.opportunity.pseudoId}',
                 ),
           width: columns.toDouble() * 400,
           height: 1 / columns.toDouble() * 1000,
