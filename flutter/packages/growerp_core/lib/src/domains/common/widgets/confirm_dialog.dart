@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_core/l10n/generated/core_localizations.dart';
 
 import 'popup.dart';
 
@@ -24,13 +25,19 @@ Future<bool?> confirmDialog(
 ) {
   // set up the buttons
   Widget cancelButton = OutlinedButton(
-    child: const Text("Cancel", key: Key('cancel')),
+    child: Text(
+      CoreLocalizations.of(context)!.cancel,
+      key: const Key('cancel'),
+    ),
     onPressed: () {
       Navigator.of(context).pop(false);
     },
   );
   Widget continueButton = OutlinedButton(
-    child: const Text("Continue", key: Key('continue')),
+    child: Text(
+      CoreLocalizations.of(context)!.continueButton,
+      key: const Key('continue'),
+    ),
     onPressed: () {
       Navigator.of(context).pop(true);
     },

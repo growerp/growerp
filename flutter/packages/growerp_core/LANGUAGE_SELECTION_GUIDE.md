@@ -75,8 +75,8 @@ The following UI elements are now localized:
 
 ### Adding New Translatable Strings
 
-1. Add the key-value pair to `intl_en.arb`
-2. Add translations to all other language files (`intl_th.arb`, etc.)
+1. Add the key-value pair to `lib/l10n/core_en.arb`
+2. Add translations to all other language files (`lib/l10n/core_th.arb`, etc.)
 3. Run `melos l10n` to regenerate localization classes
 4. Use `CoreLocalizations.of(context)!.yourKey` in your widgets
 

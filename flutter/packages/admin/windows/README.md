@@ -1,6 +1,8 @@
 
 All submission directions: https://pub.dev/packages/msix
 
+one time:
+  dart run msix:create
 quick:
   dart run msix:publish
 goto submit:
