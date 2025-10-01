@@ -195,5 +195,6 @@
   "clients": "ลูกค้า",
   "staff": "พนักงาน",
   "applications": "แอปพลิเคชัน",
-  "restRequests": "คำขอ REST"
+  "restRequests": "คำขอ REST",
+  "userRequestStatus": "ผู้ใช้\nคำขอ\nสถานะ"
 }

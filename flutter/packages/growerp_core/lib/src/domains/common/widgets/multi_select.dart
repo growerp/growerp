@@ -14,6 +14,7 @@
 // original article:
 // https://www.kindacode.com/article/flutter-making-a-dropdown-multiselect-with-checkboxes/
 import 'package:flutter/material.dart';
+import 'package:growerp_core/l10n/generated/core_localizations.dart';
 import 'popup_dialog_no_scaf.dart';
 
 class MultiSelect<T> extends StatefulWidget {
@@ -87,7 +88,7 @@ class MultiSelectState<T> extends State<MultiSelect> {
                 onPressed: (() {
                   return Navigator.pop(context, selectedItems);
                 }),
-                child: const Text('OK'),
+                child: Text(CoreLocalizations.of(context)!.ok),
               ),
             ),
           ],

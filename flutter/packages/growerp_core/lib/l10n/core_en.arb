@@ -811,5 +811,9 @@
   "restRequests": "REST Requests",
   "@restRequests": {
     "description": "REST requests menu item"
+  },
+  "userRequestStatus": "User\nRequest\nStatus",
+  "@userRequestStatus": {
+    "description": "REST request list column header for user/request/status"
   }
 }

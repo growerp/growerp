@@ -46,7 +46,10 @@ TableData getRestRequestListTableData(
     );
     rowContent.add(
       TableRowContent(
-        name: const Text('User\nRequest\nStatus', textAlign: TextAlign.start),
+        name: Text(
+          CoreLocalizations.of(context)!.userRequestStatus,
+          textAlign: TextAlign.start,
+        ),
         width: 55,
         value: Column(
           key: Key('item$index'),
@@ -106,7 +109,10 @@ TableData getRestRequestListTableData(
   } else {
     rowContent.add(
       TableRowContent(
-        name: const Text('Date/Time', textAlign: TextAlign.start),
+        name: Text(
+          CoreLocalizations.of(context)!.dateTime,
+          textAlign: TextAlign.start,
+        ),
         width: 12,
         value: Text(
           item.dateTime != null
@@ -118,7 +124,10 @@ TableData getRestRequestListTableData(
     );
     rowContent.add(
       TableRowContent(
-        name: const Text('User', textAlign: TextAlign.start),
+        name: Text(
+          CoreLocalizations.of(context)!.user,
+          textAlign: TextAlign.start,
+        ),
         width: 15,
         value: Text(
           '${item.user?.firstName ?? ''} ${item.user?.lastName ?? ''}',
