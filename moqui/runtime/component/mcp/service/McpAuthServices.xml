@@ -34,6 +34,11 @@
         </if>
       </if>
 
+      <!-- Also check for X-API-Key header (common alternative) -->
+      <if condition="!apiKey">
+        <set field="apiKey" from="ec.web?.request?.getHeader('X-API-Key')" />
+      </if>
+
       <!-- If still no API key, check current user -->
       <if condition="!apiKey &amp;&amp; ec.user.userId">
         <set field="apiKey" from="ec.user.getLoginKey()" />
@@ -286,9 +291,11 @@
   <service verb="handle" noun="OauthToken">
     <description>OAuth 2.0 token endpoint - handle password grant</description>
     <in-parameters>
-      <parameter name="grantType" type="String" required="true" />
+      <parameter name="grant_type" type="String" required="false" />
+      <parameter name="grantType" type="String" required="false" />
       <parameter name="username" type="String" required="false" />
       <parameter name="password" type="String" required="false" />
+      <parameter name="client_id" type="String" required="false" />
       <parameter name="clientId" type="String" required="false" />
       <parameter name="classificationId" type="String" default-value="AppSupport" />
       <parameter name="scope" type="String" required="false" />
@@ -304,10 +311,14 @@
     <actions>
       <script><![CDATA[
         try {
+          // Normalize parameter names (handle both snake_case and camelCase)
+          def actualGrantType = grant_type ?: grantType
+          def actualClientId = client_id ?: clientId
+          
           // Validate grant type
-          if (grantType != "password") {
+          if (actualGrantType != "password") {
             error = "unsupported_grant_type"
-            error_description = "Only 'password' grant type is supported"
+            error_description = "Only 'password' grant type is supported (received: ${actualGrantType})"
             return
           }
           
@@ -329,7 +340,7 @@
           if (loginResult.success && loginResult.apiKey) {
             // Return OAuth-compliant token response
             access_token = loginResult.apiKey
-            token_type = "api_key"
+            token_type = "Bearer"
             expires_in = 3600 // 1 hour
             scope = scope ?: "MCP_VIEW MCP_EXECUTE"
           } else {

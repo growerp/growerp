@@ -4,13 +4,14 @@ mcpServers:
     args:
       - mcp-server
       - --experimental-mcp-server
-  
+
   growerp-system:
     httpUrl: http://localhost:8080/rest/s1/mcp/protocol
     auth:
       type: oauth2
-      tokenUrl: http://localhost:8080/rest/s1/mcp/auth/login
+      tokenUrl: http://localhost:8080/rest/s1/mcp/auth/token
       grantType: password
+      clientId: mcp-client
       credentials:
         username: test@example.com
         password: qqqqqq9!
@@ -20,5 +21,22 @@ mcpServers:
         - MCP_VIEW
         - MCP_EXECUTE
       # Optional: Token refresh settings
+      refreshToken: false
+      tokenStorage: memory # or file
+
+  growerp:
+    httpUrl: http://localhost:8080/rest/s1/mcp/protocol
+    auth:
+      type: oauth2
+      tokenUrl: http://localhost:8080/rest/s1/mcp/auth/token
+      grantType: password
+      clientId: mcp-client
+      credentials:
+        username: test@example.com
+        password: qqqqqq9!
+        classificationId: AppSupport
+      scopes:
+        - MCP_VIEW
+        - MCP_EXECUTE
       refreshToken: true
-      tokenStorage: memory  # or file
+      tokenStorage: file
