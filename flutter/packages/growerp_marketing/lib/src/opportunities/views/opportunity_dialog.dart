@@ -231,7 +231,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                 key: const Key('lead'),
                 itemAsString: (User? u) =>
                     " ${u?.firstName} ${u?.lastName} "
-                    "${u?.company!.name}",
+                    "${u?.company?.name ?? ''}",
                 asyncItems: (String filter) {
                   _leadBloc.add(
                     GetDataEvent(
@@ -296,7 +296,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                 key: const Key('employee'),
                 itemAsString: (User? u) =>
                     " ${u?.firstName} ${u?.lastName} "
-                    "${u?.company!.name}",
+                    "${u?.company?.name ?? ''}",
                 asyncItems: (String filter) {
                   _employeeBloc.add(
                     GetDataEvent(
