@@ -1771,6 +1771,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="orderId" />
         </out-parameters>
         <actions>
+            <log message="========create order: ${order}" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="order.sales == true">
@@ -1837,6 +1838,26 @@ along with this software (see the LICENSE.md file). If not, see
                         partyId:order.otherUser.partyId, roleTypeId: contactRole]" />
             </if>
             <!-- create items -->
+            <!-- check item info missing, when missing provide defaults -->
+            <set field="itemIndex" value="0" type="Integer" />
+            <iterate list="order.items" entry="item">
+                <if condition="!item.itemType">
+                    <set field="item.itemType" from="[:]" />
+                </if>
+                <if condition="!item.itemType || !item.itemType.itemTypeId">
+                    <set field="item.itemType.itemTypeId"
+                        from="order.sales == true ? 'ItemProduct' : 'ItemProduct'" />
+                </if>
+                <if condition="!item.quantity || item.quantity == 0">
+                    <set field="item.quantity" value="1" type="BigDecimal" />
+                </if>
+                <if condition="!item.price || item.price == 0">
+                    <set field="item.price" value="0" type="BigDecimal" />
+                </if>
+                <if condition="!item.itemSeqId || item.itemSeqId == ''">
+                    <set field="item.itemSeqId" from="(itemIndex + 1).toString()" />
+                </if>
+            </iterate>
             <service-call name="growerp.100.FinDocServices100.replace#OrderItems"
                 in-map="[orderId: orderId,
                              orderPartSeqId: orderPartSeqId,
@@ -2085,17 +2106,17 @@ along with this software (see the LICENSE.md file). If not, see
             <iterate list="orderItems" entry="item">
                 <if
                     condition="item.itemType.itemTypeId == 'ItemProduct'
-                        &amp;&amp; !item.product.productId.isEmpty()">
+                        &amp;&amp; !item.product?.productId">
                     <service-call name="mantle.order.OrderServices.add#OrderProductQuantity"
                         in-map="context + [ itemTypeId: item.itemType.itemTypeId,
-                                            productId: item.product.productId,
+                                            productId: item.product?.productId,
                                             quantity: item.quantity,
                                             unitAmount: item.price]"
                         out-map="context" />
                     <else-if condition="item.itemType.itemTypeId == 'ItemRental'">
                         <service-call name="mantle.order.OrderServices.create#OrderItem"
                             in-map="context + [ itemTypeEnumId: item.itemType.itemTypeId,
-                                            productId: item.product.productId,
+                                            productId: item.product?.productId,
                                             itemDescription: item.description,
                                             quantity: item.quantity,
                                             requireInventory: false,
@@ -2104,7 +2125,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <!-- settime for all dates otherwise ma5tching will fail in
                         AssetsAvailableForProduct-->
                         <service-call name="create#growerp.product.AssetRental"
-                            in-map="[   productId: item.product.productId,
+                            in-map="[   productId: item.product?.productId,
                                     assetId: item.asset?.assetId,
                                     orderId: orderId,
                                     orderItemSeqId: orderItemSeqId,
@@ -2115,7 +2136,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <else>
                         <service-call name="mantle.order.OrderServices.create#OrderItem"
                             in-map="context + [itemTypeEnumId: item.itemType.itemTypeId,
-                                            productId: item.product.productId,
+                                            productId: item.product?.productId,
                                             itemDescription: item.description,
                                             quantity: item.quantity,
                                             unitAmount: item.price,

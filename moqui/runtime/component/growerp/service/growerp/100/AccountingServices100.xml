@@ -378,7 +378,18 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="periodName" from="periodName" />
             </entity-find>
             <if condition="!periods">
-                <return error="true" message="Period $periodName not found!" />
+                <log message="Period $periodName not found!" />
+                <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
+                    <econdition field-name="partyId" from="companyPartyId" />
+                    <order-by field-name="-periodName" />
+                </entity-find>
+                <if condition="!periods">
+                    <return error="true" message="Balance summary: no periods found" />
+                    <else>
+                        <set field="periodName" from="periods[0].periodName" />
+                        <log message="Using most recent period: $periodName" />
+                    </else>
+                </if>
             </if>
             <entity-find entity-name="mantle.ledger.report.GlAccountOrgTimePeriodDetail"
                 list="postedBalanceSummary" limit="150">

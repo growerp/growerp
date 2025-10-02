@@ -148,7 +148,8 @@ USER_DATA_TEMPLATE='{
   "lastName": "Doe",
   "email": "testXXX@example.com",
   "username": "testuser",
-  "userGroup": "Admin"
+  "userGroup": "Admin",
+  "role": "Customer"
 }'
 
 # Product test data (no email needed)
@@ -427,15 +428,17 @@ test_create_company() {
     # Generate unique company data with unique email
     local COMPANY_DATA=$(get_unique_email "$COMPANY_DATA_TEMPLATE")
     
-    # Build JSON payload using jq to ensure proper JSON formatting
+    # Build JSON payload using jq to ensure proper JSON formatting with nested company object
     local payload=$(jq -n \
-        --argjson args "$COMPANY_DATA" \
+        --argjson companyData "$COMPANY_DATA" \
         '{
             "jsonrpc": "2.0",
             "method": "tools/call",
             "params": {
                 "name": "create_company",
-                "arguments": $args
+                "arguments": {
+                    "company": $companyData
+                }
             },
             "id": 21
         }')
@@ -443,7 +446,7 @@ test_create_company() {
     local response=$(http_request POST "${MCP_BASE}/protocol" "$payload" "api_key: $API_KEY")
     
     if check_response '.result'; then
-        CREATED_COMPANY_ID=$(echo "$response" | jq -r '.result.data.partyId // .result.partyId // ""')
+        CREATED_COMPANY_ID=$(echo "$response" | jq -r '.result.data.company.partyId // .result.data.partyId // .result.partyId // ""')
         print_success "Create company successful"
         print_info "Company ID: $CREATED_COMPANY_ID"
         print_info "Email used: $(echo "$COMPANY_DATA" | jq -r '.email')"
@@ -523,15 +526,17 @@ test_create_user() {
     # Generate unique user data with unique email
     local USER_DATA=$(get_unique_email "$USER_DATA_TEMPLATE")
     
-    # Build JSON payload using jq to ensure proper JSON formatting
+    # Build JSON payload using jq to ensure proper JSON formatting with nested user object
     local payload=$(jq -n \
-        --argjson args "$USER_DATA" \
+        --argjson userData "$USER_DATA" \
         '{
             "jsonrpc": "2.0",
             "method": "tools/call",
             "params": {
                 "name": "create_user",
-                "arguments": $args
+                "arguments": {
+                    "user": $userData
+                }
             },
             "id": 31
         }')
@@ -539,7 +544,7 @@ test_create_user() {
     local response=$(http_request POST "${MCP_BASE}/protocol" "$payload" "api_key: $API_KEY")
     
     if check_response '.result'; then
-        CREATED_USER_ID=$(echo "$response" | jq -r '.result.data.userId // .result.userId // ""')
+        CREATED_USER_ID=$(echo "$response" | jq -r '.result.data.user.partyId // .result.data.userId // .result.userId // ""')
         print_success "Create user successful"
         print_info "User ID: $CREATED_USER_ID"
         print_info "Email used: $(echo "$USER_DATA" | jq -r '.email')"
@@ -580,15 +585,17 @@ test_create_product() {
     
     print_test "Create new product"
     
-    # Build JSON payload using jq to ensure proper JSON formatting
+    # Build JSON payload using jq to ensure proper JSON formatting with nested product object
     local payload=$(jq -n \
-        --argjson args "$PRODUCT_DATA" \
+        --argjson productData "$PRODUCT_DATA" \
         '{
             "jsonrpc": "2.0",
             "method": "tools/call",
             "params": {
                 "name": "create_product",
-                "arguments": $args
+                "arguments": {
+                    "product": $productData
+                }
             },
             "id": 41
         }')
@@ -596,7 +603,7 @@ test_create_product() {
     local response=$(http_request POST "${MCP_BASE}/protocol" "$payload" "api_key: $API_KEY")
     
     if check_response '.result'; then
-        CREATED_PRODUCT_ID=$(echo "$response" | jq -r '.result.data.productId // .result.productId // ""')
+        CREATED_PRODUCT_ID=$(echo "$response" | jq -r '.result.data.product.productId // .result.data.productId // .result.productId // ""')
         print_success "Create product successful"
         print_info "Product ID: $CREATED_PRODUCT_ID"
     else
@@ -634,30 +641,103 @@ test_get_orders() {
 test_create_sales_order() {
     print_header "ORDER MANAGEMENT - CREATE SALES ORDER"
     
-    print_test "Create sales order"
-    local response=$(http_request POST "${MCP_BASE}/protocol" '{
-        "jsonrpc": "2.0",
-        "method": "tools/call",
-        "params": {
-            "name": "create_sales_order",
-            "arguments": {
-                "customerPartyId": "DEMO_CUSTOMER",
-                "items": [
-                    {
-                        "productId": "DEMO_PRODUCT",
-                        "quantity": 2,
-                        "price": 23.99
+    # Check if we have required IDs from previous tests
+    if [ -z "$CREATED_COMPANY_ID" ]; then
+        print_info "No company ID available - creating a customer company first"
+        # Create a customer company for the order
+        local CUSTOMER_DATA=$(get_unique_email "$CUSTOMER_DATA_TEMPLATE")
+        local customer_payload=$(jq -n \
+            --argjson companyData "$CUSTOMER_DATA" \
+            '{
+                "jsonrpc": "2.0",
+                "method": "tools/call",
+                "params": {
+                    "name": "create_company",
+                    "arguments": {
+                        "company": $companyData
                     }
-                ]
-            }
-        },
-        "id": 51
-    }' "api_key: $API_KEY")
+                },
+                "id": 50
+            }')
+        
+        local customer_response=$(http_request POST "${MCP_BASE}/protocol" "$customer_payload" "api_key: $API_KEY")
+        CREATED_COMPANY_ID=$(echo "$customer_response" | jq -r '.result.data.company.partyId // .result.data.partyId // .result.partyId // ""')
+        
+        if [ -n "$CREATED_COMPANY_ID" ]; then
+            print_info "Customer company created: $CREATED_COMPANY_ID"
+        else
+            print_failure "Failed to create customer company" "$customer_response"
+            return
+        fi
+    fi
+    
+    if [ -z "$CREATED_PRODUCT_ID" ]; then
+        print_info "No product ID available - creating a product first"
+        # Create a product for the order
+        local product_payload=$(jq -n \
+            --argjson productData "$PRODUCT_DATA" \
+            '{
+                "jsonrpc": "2.0",
+                "method": "tools/call",
+                "params": {
+                    "name": "create_product",
+                    "arguments": {
+                        "product": $productData
+                    }
+                },
+                "id": 50
+            }')
+        
+        local product_response=$(http_request POST "${MCP_BASE}/protocol" "$product_payload" "api_key: $API_KEY")
+        CREATED_PRODUCT_ID=$(echo "$product_response" | jq -r '.result.data.product.productId // .result.data.productId // .result.productId // ""')
+        
+        if [ -n "$CREATED_PRODUCT_ID" ]; then
+            print_info "Product created: $CREATED_PRODUCT_ID"
+        else
+            print_failure "Failed to create product" "$product_response"
+            return
+        fi
+    fi
+    
+    print_test "Create sales order using company ID: $CREATED_COMPANY_ID and product ID: $CREATED_PRODUCT_ID"
+    
+    # Build the order with dynamic IDs
+    local payload=$(jq -n \
+        --arg companyId "$CREATED_COMPANY_ID" \
+        --arg productId "$CREATED_PRODUCT_ID" \
+        '{
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+                "name": "create_sales_order",
+                "arguments": {
+                    "finDoc": {
+                        "docType": "order",
+                        "sales": true,
+                        "otherCompany": {
+                            "partyId": $companyId
+                        },
+                        "items": [
+                            {
+                                "productId": $productId,
+                                "quantity": 2,
+                                "price": 23.99
+                            }
+                        ]
+                    }
+                }
+            },
+            "id": 51
+        }')
+    
+    local response=$(http_request POST "${MCP_BASE}/protocol" "$payload" "api_key: $API_KEY")
     
     if check_response '.result'; then
-        CREATED_ORDER_ID=$(echo "$response" | jq -r '.result.data.orderId // .result.orderId // ""')
+        CREATED_ORDER_ID=$(echo "$response" | jq -r '.result.data.finDoc.orderId // .result.data.orderId // .result.orderId // ""')
         print_success "Create sales order successful"
         print_info "Order ID: $CREATED_ORDER_ID"
+        print_info "Customer: $CREATED_COMPANY_ID"
+        print_info "Product: $CREATED_PRODUCT_ID"
     else
         print_failure "Create sales order failed" "$response"
     fi
@@ -670,14 +750,14 @@ test_create_sales_order() {
 test_get_balance_summary() {
     print_header "FINANCIAL MANAGEMENT - BALANCE SUMMARY"
     
-    print_test "Get balance summary (month)"
+    print_test "Get balance summary for period 2024-Q1"
     local response=$(http_request POST "${MCP_BASE}/protocol" '{
         "jsonrpc": "2.0",
         "method": "tools/call",
         "params": {
             "name": "get_balance_summary",
             "arguments": {
-                "period": "month"
+                "periodName": "2024-Q1"
             }
         },
         "id": 60
@@ -727,15 +807,17 @@ test_create_category() {
         "params": {
             "name": "create_category",
             "arguments": {
-                "categoryName": "Test Category 1",
-                "description": "Test category description"
+                "category": {
+                    "categoryName": "Test Category 1",
+                    "description": "Test category description"
+                }
             }
         },
         "id": 71
     }' "api_key: $API_KEY")
     
     if check_response '.result'; then
-        CREATED_CATEGORY_ID=$(echo "$response" | jq -r '.result.data.categoryId // .result.categoryId // ""')
+        CREATED_CATEGORY_ID=$(echo "$response" | jq -r '.result.data.category.categoryId // .result.data.categoryId // .result.categoryId // ""')
         print_success "Create category successful"
         print_info "Category ID: $CREATED_CATEGORY_ID"
     else

@@ -109,37 +109,69 @@ class McpToolManager {
                             type: "object",
                             description: "Company information object",
                             properties: [
-                                name: [type: "string", description: "Company name"],
-                                role: [type: "string", description: "Company role (Customer, Supplier, Internal)"],
+                                partyId: [type: "string", description: "Party ID (optional, auto-generated if not provided)"],
+                                pseudoId: [type: "string", description: "Pseudo ID (optional, auto-generated if not provided)"],
+                                name: [type: "string", description: "Company name", required: true],
+                                role: [type: "string", description: "Company role (Customer, Supplier, Internal, Lead)", required: true],
                                 email: [type: "string", description: "Company email address"],
                                 url: [type: "string", description: "Company website URL"],
                                 currency: [
                                     type: "object",
+                                    description: "Currency information",
                                     properties: [
                                         currencyId: [type: "string", description: "Currency ID (USD, EUR, etc.)"]
                                     ]
                                 ],
+                                currencyName: [type: "string", description: "Currency name"],
+                                vatPerc: [type: "string", description: "Percentage used for VAT if applicable"],
+                                salesPerc: [type: "string", description: "Percentage used for sales tax"],
                                 address: [
                                     type: "object",
+                                    description: "Postal address information",
                                     properties: [
+                                        addressId: [type: "string", description: "Address ID"],
                                         address1: [type: "string", description: "Primary address line"],
+                                        address2: [type: "string", description: "Secondary address line"],
                                         city: [type: "string", description: "City"],
-                                        country: [type: "string", description: "Country"]
+                                        postalCode: [type: "string", description: "Postal/ZIP code"],
+                                        province: [type: "string", description: "State/Province name"],
+                                        provinceId: [type: "string", description: "State/Province ID"],
+                                        country: [type: "string", description: "Country name"],
+                                        countryId: [type: "string", description: "Country ID"]
                                     ]
                                 ],
-                                telephoneNr: [type: "string", description: "Telephone number"]
+                                image: [type: "string", description: "Company image (base64 encoded)"],
+                                paymentMethod: [
+                                    type: "object",
+                                    description: "Payment method information",
+                                    properties: [
+                                        creditCardType: [type: "string", description: "Credit card type (Visa, MasterCard, etc.)"],
+                                        creditCardNumber: [type: "string", description: "Credit card number"],
+                                        expireMonth: [type: "string", description: "Expiration month (MM)"],
+                                        expireYear: [type: "string", description: "Expiration year (YYYY)"]
+                                    ]
+                                ],
+                                telephoneNr: [type: "string", description: "Telephone number"],
+                                hostName: [type: "string", description: "Host name for the company"],
+                                secondaryBackend: [type: "string", description: "Secondary backend URL"]
                             ],
-                            required: ["name"]
+                            required: ["name", "role"]
                         ],
+                        ownerPartyId: [type: "string", description: "Owner party ID (needed in initial registration)"],
                         // Flat parameters (alternative)
                         name: [type: "string", description: "Company name (alternative to company.name)"],
                         companyName: [type: "string", description: "Company name (alias for name)"],
-                        role: [type: "string", description: "Company role (Customer, Supplier, Internal)"],
+                        role: [type: "string", description: "Company role (Customer, Supplier, Internal, Lead)"],
                         email: [type: "string", description: "Company email address"],
                         emailAddress: [type: "string", description: "Company email address (alias for email)"],
                         url: [type: "string", description: "Company website URL"],
                         currencyUomId: [type: "string", description: "Currency ID (USD, EUR, etc.)"],
-                        telephoneNr: [type: "string", description: "Telephone number"]
+                        vatPerc: [type: "string", description: "Percentage used for VAT if applicable"],
+                        salesPerc: [type: "string", description: "Percentage used for sales tax"],
+                        telephoneNr: [type: "string", description: "Telephone number"],
+                        hostName: [type: "string", description: "Host name for the company"],
+                        secondaryBackend: [type: "string", description: "Secondary backend URL"],
+                        image: [type: "string", description: "Company image (base64 encoded)"]
                     ],
                     // Either company object OR name is required
                     anyOf: [
@@ -151,17 +183,127 @@ class McpToolManager {
             ],
             [
                 name: "create_user",
-                description: "Create a new user account",
+                description: "Create a new user account. You can either provide a 'user' object with nested properties, or use flat parameters like 'firstName', 'email', etc.",
                 inputSchema: [
                     type: "object",
                     properties: [
-                        username: [type: "string", description: "Login username"],
-                        firstName: [type: "string", description: "First name"],
+                        // Nested user object (preferred)
+                        user: [
+                            type: "object",
+                            description: "User information object",
+                            properties: [
+                                partyId: [type: "string", description: "Party ID"],
+                                pseudoId: [type: "string", description: "User pseudo ID"],
+                                email: [type: "string", description: "Email address"],
+                                url: [type: "string", description: "User website URL"],
+                                role: [type: "string", description: "User role"],
+                                firstName: [type: "string", description: "First name"],
+                                lastName: [type: "string", description: "Last name"],
+                                loginDisabled: [type: "boolean", description: "Whether login is disabled"],
+                                loginName: [type: "string", description: "Login username"],
+                                userGroupId: [type: "string", description: "User group ID"],
+                                groupDescription: [type: "string", description: "Group description"],
+                                language: [type: "string", description: "Language preference"],
+                                image: [type: "string", description: "User image (base64 encoded)"],
+                                userId: [type: "string", description: "User ID"],
+                                locale: [type: "string", description: "Locale setting"],
+                                timeZoneOffset: [type: "string", description: "Time zone offset"],
+                                telephoneNr: [type: "string", description: "Telephone number"],
+                                address: [
+                                    type: "object",
+                                    description: "User address information",
+                                    properties: [
+                                        addressId: [type: "string", description: "Address ID"],
+                                        address1: [type: "string", description: "Primary address line"],
+                                        address2: [type: "string", description: "Secondary address line"],
+                                        city: [type: "string", description: "City"],
+                                        postalCode: [type: "string", description: "Postal/ZIP code"],
+                                        province: [type: "string", description: "Province/State"],
+                                        provinceId: [type: "string", description: "Province ID"],
+                                        country: [type: "string", description: "Country"],
+                                        countryId: [type: "string", description: "Country ID"]
+                                    ]
+                                ],
+                                paymentMethod: [
+                                    type: "object",
+                                    description: "Payment method information",
+                                    properties: [
+                                        creditCardType: [type: "string", description: "Credit card type"],
+                                        creditCardNumber: [type: "string", description: "Credit card number"],
+                                        expireMonth: [type: "string", description: "Expiration month"],
+                                        expireYear: [type: "string", description: "Expiration year"]
+                                    ]
+                                ],
+                                company: [
+                                    type: "object",
+                                    description: "Associated company information",
+                                    properties: [
+                                        partyId: [type: "string", description: "Company party ID"],
+                                        pseudoId: [type: "string", description: "Company pseudo ID"],
+                                        name: [type: "string", description: "Company name"],
+                                        role: [type: "string", description: "Company role"],
+                                        email: [type: "string", description: "Company email"],
+                                        url: [type: "string", description: "Company URL"],
+                                        currency: [
+                                            type: "object",
+                                            properties: [
+                                                currencyId: [type: "string", description: "Currency ID"]
+                                            ]
+                                        ],
+                                        currencyName: [type: "string", description: "Currency name"],
+                                        vatPerc: [type: "string", description: "VAT percentage"],
+                                        salesPerc: [type: "string", description: "Sales tax percentage"],
+                                        telephoneNr: [type: "string", description: "Company telephone"],
+                                        address: [
+                                            type: "object",
+                                            description: "Company address",
+                                            properties: [
+                                                addressId: [type: "string", description: "Address ID"],
+                                                address1: [type: "string", description: "Primary address line"],
+                                                address2: [type: "string", description: "Secondary address line"],
+                                                city: [type: "string", description: "City"],
+                                                postalCode: [type: "string", description: "Postal/ZIP code"],
+                                                province: [type: "string", description: "Province/State"],
+                                                provinceId: [type: "string", description: "Province ID"],
+                                                country: [type: "string", description: "Country"],
+                                                countryId: [type: "string", description: "Country ID"]
+                                            ]
+                                        ]
+                                    ]
+                                ],
+                                appsUsed: [
+                                    type: "array",
+                                    description: "Applications used by this user",
+                                    items: [
+                                        type: "object",
+                                        properties: [
+                                            partyClassificationId: [type: "string", description: "Party classification ID"]
+                                        ]
+                                    ]
+                                ]
+                            ],
+                            required: ["firstName", "email"]
+                        ],
+                        password: [type: "string", description: "User password (auto-generated if not provided)"],
+                        ownerPartyId: [type: "string", description: "Owner party ID (needed in initial registration)"],
+                        classificationId: [type: "string", description: "Classification ID"],
+                        // Flat parameters (alternative)
+                        firstName: [type: "string", description: "First name (alternative to user.firstName)"],
                         lastName: [type: "string", description: "Last name"],
-                        emailAddress: [type: "string", description: "Email address"],
-                        companyPartyId: [type: "string", description: "Company to associate with"]
+                        email: [type: "string", description: "Email address (alternative to user.email)"],
+                        emailAddress: [type: "string", description: "Email address (alias for email)"],
+                        loginName: [type: "string", description: "Login username"],
+                        username: [type: "string", description: "Login username (alias for loginName)"],
+                        companyPartyId: [type: "string", description: "Company party ID to associate with"],
+                        telephoneNr: [type: "string", description: "Telephone number"],
+                        image: [type: "string", description: "User image (base64 encoded)"]
                     ],
-                    required: ["username", "firstName", "emailAddress"]
+                    // Either user object OR firstName+email is required
+                    anyOf: [
+                        [required: ["user"]],
+                        [required: ["firstName", "email"]],
+                        [required: ["firstName", "emailAddress"]]
+                    ]
                 ]
             ],
             [
@@ -309,50 +451,218 @@ class McpToolManager {
         return [
             [
                 name: "create_sales_order",
-                description: "Create a sales order",
+                description: "Create a sales order. You can either provide a 'finDoc' object with nested properties, or use flat parameters like 'customerPartyId', 'items', etc.",
                 inputSchema: [
                     type: "object",
                     properties: [
-                        customerPartyId: [type: "string", description: "Customer party ID"],
+                        // Nested finDoc object (preferred)
+                        finDoc: [
+                            type: "object",
+                            description: "Financial document information object for order",
+                            properties: [
+                                docType: [type: "string", description: "Document type (should be 'order')", default: "order"],
+                                sales: [type: "boolean", description: "Whether this is a sales order (true) or purchase order (false)", default: true],
+                                pseudoId: [type: "string", description: "Order pseudo ID (optional, auto-generated if not provided)"],
+                                reference: [type: "string", description: "Order reference/number"],
+                                statusId: [type: "string", description: "Order status ID (OrderOpen, OrderPlaced, OrderApproved, OrderCompleted, OrderCancelled)"],
+                                description: [type: "string", description: "Order description"],
+                                otherUser: [
+                                    type: "object",
+                                    description: "Customer contact person information",
+                                    properties: [
+                                        partyId: [type: "string", description: "User party ID"],
+                                        pseudoId: [type: "string", description: "User pseudo ID"]
+                                    ]
+                                ],
+                                otherCompany: [
+                                    type: "object",
+                                    description: "Customer company information",
+                                    properties: [
+                                        partyId: [type: "string", description: "Company party ID"],
+                                        pseudoId: [type: "string", description: "Company pseudo ID"]
+                                    ]
+                                ],
+                                items: [
+                                    type: "array",
+                                    description: "Order line items",
+                                    items: [
+                                        type: "object",
+                                        properties: [
+                                            itemSeqId: [type: "string", description: "Item sequence ID"],
+                                            productId: [type: "string", description: "Product ID"],
+                                            pseudoProductId: [type: "string", description: "Product pseudo ID"],
+                                            description: [type: "string", description: "Item description"],
+                                            quantity: [type: "number", description: "Item quantity"],
+                                            price: [type: "number", description: "Item unit price"],
+                                            asset: [
+                                                type: "object",
+                                                description: "Asset information for rentals",
+                                                properties: [
+                                                    assetId: [type: "string", description: "Asset ID"],
+                                                    assetName: [type: "string", description: "Asset name"],
+                                                    location: [
+                                                        type: "object",
+                                                        properties: [
+                                                            locationId: [type: "string", description: "Location ID"],
+                                                            locationName: [type: "string", description: "Location name"]
+                                                        ]
+                                                    ]
+                                                ]
+                                            ],
+                                            rentalFromDate: [type: "string", description: "Rental start date"],
+                                            rentalThruDate: [type: "string", description: "Rental end date"]
+                                        ],
+                                        required: ["quantity"]
+                                    ]
+                                ]
+                            ],
+                            required: ["items"]
+                        ],
+                        // Flat parameters (alternative)
+                        docType: [type: "string", description: "Document type (should be 'order')", default: "order"],
+                        sales: [type: "boolean", description: "Whether this is a sales order (true) or purchase order (false)", default: true],
+                        pseudoId: [type: "string", description: "Order pseudo ID (optional, auto-generated if not provided)"],
+                        reference: [type: "string", description: "Order reference/number"],
+                        statusId: [type: "string", description: "Order status ID (OrderOpen, OrderPlaced, OrderApproved, OrderCompleted, OrderCancelled)"],
+                        description: [type: "string", description: "Order description"],
+                        customerPartyId: [type: "string", description: "Customer party ID (alternative to finDoc.otherCompany.partyId)"],
+                        customerPseudoId: [type: "string", description: "Customer pseudo ID"],
+                        customerUserPartyId: [type: "string", description: "Customer contact person party ID"],
+                        customerUserPseudoId: [type: "string", description: "Customer contact person pseudo ID"],
                         items: [
                             type: "array",
-                            description: "Order items",
+                            description: "Order line items",
                             items: [
                                 type: "object",
                                 properties: [
+                                    itemSeqId: [type: "string", description: "Item sequence ID"],
                                     productId: [type: "string", description: "Product ID"],
+                                    pseudoProductId: [type: "string", description: "Product pseudo ID"],
+                                    description: [type: "string", description: "Item description"],
                                     quantity: [type: "number", description: "Quantity"],
-                                    price: [type: "number", description: "Unit price"]
+                                    price: [type: "number", description: "Unit price"],
+                                    assetId: [type: "string", description: "Asset ID for rentals"],
+                                    assetName: [type: "string", description: "Asset name for rentals"],
+                                    rentalFromDate: [type: "string", description: "Rental start date"],
+                                    rentalThruDate: [type: "string", description: "Rental end date"]
                                 ],
-                                required: ["productId", "quantity"]
+                                required: ["quantity"]
                             ]
                         ]
                     ],
-                    required: ["customerPartyId", "items"]
+                    // Either finDoc object OR customerPartyId with items is required
+                    anyOf: [
+                        [required: ["finDoc"]],
+                        [required: ["customerPartyId", "items"]]
+                    ]
                 ]
             ],
             [
                 name: "create_purchase_order",
-                description: "Create a purchase order",
+                description: "Create a purchase order. You can either provide a 'finDoc' object with nested properties, or use flat parameters like 'supplierPartyId', 'items', etc.",
                 inputSchema: [
                     type: "object",
                     properties: [
-                        supplierPartyId: [type: "string", description: "Supplier party ID"],
+                        // Nested finDoc object (preferred)
+                        finDoc: [
+                            type: "object",
+                            description: "Financial document information object for order",
+                            properties: [
+                                docType: [type: "string", description: "Document type (should be 'order')", default: "order"],
+                                sales: [type: "boolean", description: "Whether this is a sales order (true) or purchase order (false)", default: false],
+                                pseudoId: [type: "string", description: "Order pseudo ID (optional, auto-generated if not provided)"],
+                                reference: [type: "string", description: "Order reference/number"],
+                                statusId: [type: "string", description: "Order status ID (OrderOpen, OrderPlaced, OrderApproved, OrderCompleted, OrderCancelled)"],
+                                description: [type: "string", description: "Order description"],
+                                otherUser: [
+                                    type: "object",
+                                    description: "Supplier contact person information",
+                                    properties: [
+                                        partyId: [type: "string", description: "User party ID"],
+                                        pseudoId: [type: "string", description: "User pseudo ID"]
+                                    ]
+                                ],
+                                otherCompany: [
+                                    type: "object",
+                                    description: "Supplier company information",
+                                    properties: [
+                                        partyId: [type: "string", description: "Company party ID"],
+                                        pseudoId: [type: "string", description: "Company pseudo ID"]
+                                    ]
+                                ],
+                                items: [
+                                    type: "array",
+                                    description: "Order line items",
+                                    items: [
+                                        type: "object",
+                                        properties: [
+                                            itemSeqId: [type: "string", description: "Item sequence ID"],
+                                            productId: [type: "string", description: "Product ID"],
+                                            pseudoProductId: [type: "string", description: "Product pseudo ID"],
+                                            description: [type: "string", description: "Item description"],
+                                            quantity: [type: "number", description: "Item quantity"],
+                                            price: [type: "number", description: "Item unit price"],
+                                            asset: [
+                                                type: "object",
+                                                description: "Asset information for rentals",
+                                                properties: [
+                                                    assetId: [type: "string", description: "Asset ID"],
+                                                    assetName: [type: "string", description: "Asset name"],
+                                                    location: [
+                                                        type: "object",
+                                                        properties: [
+                                                            locationId: [type: "string", description: "Location ID"],
+                                                            locationName: [type: "string", description: "Location name"]
+                                                        ]
+                                                    ]
+                                                ]
+                                            ],
+                                            rentalFromDate: [type: "string", description: "Rental start date"],
+                                            rentalThruDate: [type: "string", description: "Rental end date"]
+                                        ],
+                                        required: ["quantity"]
+                                    ]
+                                ]
+                            ],
+                            required: ["items"]
+                        ],
+                        // Flat parameters (alternative)
+                        docType: [type: "string", description: "Document type (should be 'order')", default: "order"],
+                        sales: [type: "boolean", description: "Whether this is a sales order (true) or purchase order (false)", default: false],
+                        pseudoId: [type: "string", description: "Order pseudo ID (optional, auto-generated if not provided)"],
+                        reference: [type: "string", description: "Order reference/number"],
+                        statusId: [type: "string", description: "Order status ID (OrderOpen, OrderPlaced, OrderApproved, OrderCompleted, OrderCancelled)"],
+                        description: [type: "string", description: "Order description"],
+                        supplierPartyId: [type: "string", description: "Supplier party ID (alternative to finDoc.otherCompany.partyId)"],
+                        supplierPseudoId: [type: "string", description: "Supplier pseudo ID"],
+                        supplierUserPartyId: [type: "string", description: "Supplier contact person party ID"],
+                        supplierUserPseudoId: [type: "string", description: "Supplier contact person pseudo ID"],
                         items: [
                             type: "array",
-                            description: "Order items",
+                            description: "Order line items",
                             items: [
                                 type: "object",
                                 properties: [
+                                    itemSeqId: [type: "string", description: "Item sequence ID"],
                                     productId: [type: "string", description: "Product ID"],
+                                    pseudoProductId: [type: "string", description: "Product pseudo ID"],
+                                    description: [type: "string", description: "Item description"],
                                     quantity: [type: "number", description: "Quantity"],
-                                    price: [type: "number", description: "Unit price"]
+                                    price: [type: "number", description: "Unit price"],
+                                    assetId: [type: "string", description: "Asset ID for rentals"],
+                                    assetName: [type: "string", description: "Asset name for rentals"],
+                                    rentalFromDate: [type: "string", description: "Rental start date"],
+                                    rentalThruDate: [type: "string", description: "Rental end date"]
                                 ],
-                                required: ["productId", "quantity"]
+                                required: ["quantity"]
                             ]
                         ]
                     ],
-                    required: ["supplierPartyId", "items"]
+                    // Either finDoc object OR supplierPartyId with items is required
+                    anyOf: [
+                        [required: ["finDoc"]],
+                        [required: ["supplierPartyId", "items"]]
+                    ]
                 ]
             ],
             [
@@ -590,14 +900,13 @@ class McpToolManager {
             ],
             [
                 name: "get_balance_summary",
-                description: "Get balance summary and reports",
+                description: "Get balance summary report for a specific accounting period. Returns GL account balances including beginning balance, posted debits/credits, and ending balance.",
                 inputSchema: [
                     type: "object",
                     properties: [
-                        period: [type: "string", description: "Time period (month/quarter/year)", default: "month"],
-                        docType: [type: "string", description: "Document type filter"],
-                        partyId: [type: "string", description: "Party filter"]
-                    ]
+                        periodName: [type: "string", description: "Period name (e.g., '2024-Q1', '2024-01', '2024') - required to retrieve the balance summary for a specific fiscal period", required: true]
+                    ],
+                    required: ["periodName"]
                 ]
             ]
         ]
@@ -754,30 +1063,61 @@ class McpToolManager {
     }
     
     private Map<String, Object> executeCreateUser(Map<String, Object> arguments) {
-        String username = arguments.username as String
-        String firstName = arguments.firstName as String
-        String lastName = arguments.lastName as String
-        String emailAddress = arguments.emailAddress as String
-        String companyPartyId = arguments.companyPartyId as String
+        logger.info("executeCreateUser called with arguments: ${arguments}")
         
-        Map<String, Object> serviceParams = [
-            username: username,
-            firstName: firstName,
-            lastName: lastName,
-            emailAddress: emailAddress
-        ]
+        Map<String, Object> user = null
         
-        if (companyPartyId) serviceParams.companyPartyId = companyPartyId
+        // Try to get user parameter first (nested structure)
+        if (arguments.user instanceof Map) {
+            user = arguments.user as Map<String, Object>
+        }
+        // If no nested user, treat arguments as flat user data
+        else if (arguments.firstName || arguments.email || arguments.emailAddress) {
+            user = arguments.clone() as Map<String, Object>
+            // Handle common flat parameter mappings
+            if (arguments.emailAddress && !user.email) {
+                user.email = arguments.emailAddress
+            }
+            if (arguments.username && !user.loginName) {
+                user.loginName = arguments.username
+            }
+            if (arguments.companyPartyId && !user.company) {
+                user.company = [partyId: arguments.companyPartyId]
+            }
+        }
+        
+        if (!user || !user.firstName || !(user.email || user.emailAddress)) {
+            throw new IllegalArgumentException("User firstName and email are required. Received arguments: ${arguments}")
+        }
+        
+        // Ensure email field is set correctly
+        if (user.emailAddress && !user.email) {
+            user.email = user.emailAddress
+        }
+        
+        logger.info("Processed user parameter: ${user}")
+        
+        // Build service parameters
+        Map<String, Object> serviceParams = [user: user]
+        
+        // Add optional top-level parameters
+        if (arguments.password) serviceParams.password = arguments.password
+        if (arguments.ownerPartyId) serviceParams.ownerPartyId = arguments.ownerPartyId
+        if (arguments.classificationId) serviceParams.classificationId = arguments.classificationId
         
         try {
             Map<String, Object> result = ec.service.sync().name("growerp.100.PartyServices100.create#User")
                 .parameters(serviceParams).call()
+
+            String userName = user.loginName ?: user.firstName ?: "Unknown"
+            String partyId = result.user?.pseudoId ?: result.user?.partyId ?: result.partyId
             
             return [
-                text: "Successfully created user '${username}' with partyId: ${result.partyId}",
+                text: "Successfully created user '${userName}' with partyId: ${partyId}",
                 data: result
             ]
         } catch (Exception e) {
+            logger.error("Service call failed with user: ${user}", e)
             throw new RuntimeException("Failed to create user: ${e.message}", e)
         }
     }
@@ -955,49 +1295,129 @@ class McpToolManager {
     
     // Additional business operation implementations would go here...
     private Map<String, Object> executeCreateSalesOrder(Map<String, Object> arguments) {
-        // Implementation for creating sales orders
-        String customerPartyId = arguments.customerPartyId as String
-        List<Map> items = arguments.items as List<Map>
+        logger.info("executeCreateSalesOrder called with arguments: ${arguments}")
         
-        Map<String, Object> serviceParams = [
-            salesOrderType: "sales",
-            otherCompanyPartyId: customerPartyId,
-            items: items
-        ]
+        Map<String, Object> finDoc = null
+        
+        // Try to get finDoc parameter first (nested structure)
+        if (arguments.finDoc instanceof Map) {
+            finDoc = arguments.finDoc as Map<String, Object>
+        }
+        // If no nested finDoc, treat arguments as flat order data
+        else if (arguments.customerPartyId || arguments.items) {
+            finDoc = [:]
+            finDoc.docType = "order"
+            finDoc.sales = true
+            finDoc.items = arguments.items as List<Map>
+            
+            // Handle party ID mapping
+            String partyId = arguments.customerPartyId
+            String pseudoId = arguments.customerPseudoId
+            if (partyId || pseudoId) {
+                finDoc.otherCompany = [:]
+                if (partyId) finDoc.otherCompany.partyId = partyId
+                if (pseudoId) finDoc.otherCompany.pseudoId = pseudoId
+            }
+            
+            // Handle other flat parameters
+            if (arguments.description) finDoc.description = arguments.description
+            if (arguments.statusId) finDoc.statusId = arguments.statusId
+            if (arguments.reference) finDoc.reference = arguments.reference
+        }
+        
+        if (!finDoc || !finDoc.items) {
+            throw new IllegalArgumentException("Sales order requires items. Received arguments: ${arguments}")
+        }
+        
+        // Ensure required fields have defaults
+        if (!finDoc.docType) {
+            finDoc.docType = "order"
+        }
+        if (finDoc.sales == null) {
+            finDoc.sales = true
+        }
+        
+        logger.info("Processed finDoc parameter: ${finDoc}")
+        
+        // The service expects the finDoc parameter directly
+        Map<String, Object> serviceParams = [finDoc: finDoc]
         
         try {
             Map<String, Object> result = ec.service.sync().name("growerp.100.FinDocServices100.create#FinDoc")
                 .parameters(serviceParams).call()
+
+            String orderId = result.finDoc?.orderId ?: result.finDoc?.pseudoId ?: "Unknown"
             
             return [
-                text: "Successfully created sales order with orderId: ${result.finDocId}",
+                text: "Successfully created sales order with orderId: ${orderId}",
                 data: result
             ]
         } catch (Exception e) {
+            logger.error("Service call failed with finDoc: ${finDoc}", e)
             throw new RuntimeException("Failed to create sales order: ${e.message}", e)
         }
     }
     
     private Map<String, Object> executeCreatePurchaseOrder(Map<String, Object> arguments) {
-        // Implementation for creating purchase orders
-        String supplierPartyId = arguments.supplierPartyId as String
-        List<Map> items = arguments.items as List<Map>
+        logger.info("executeCreatePurchaseOrder called with arguments: ${arguments}")
         
-        Map<String, Object> serviceParams = [
-            salesOrderType: "purchase",
-            otherCompanyPartyId: supplierPartyId,
-            items: items
-        ]
+        Map<String, Object> finDoc = null
+        
+        // Try to get finDoc parameter first (nested structure)
+        if (arguments.finDoc instanceof Map) {
+            finDoc = arguments.finDoc as Map<String, Object>
+        }
+        // If no nested finDoc, treat arguments as flat order data
+        else if (arguments.supplierPartyId || arguments.items) {
+            finDoc = [:]
+            finDoc.docType = "order"
+            finDoc.sales = false
+            finDoc.items = arguments.items as List<Map>
+            
+            // Handle party ID mapping
+            String partyId = arguments.supplierPartyId
+            String pseudoId = arguments.supplierPseudoId
+            if (partyId || pseudoId) {
+                finDoc.otherCompany = [:]
+                if (partyId) finDoc.otherCompany.partyId = partyId
+                if (pseudoId) finDoc.otherCompany.pseudoId = pseudoId
+            }
+            
+            // Handle other flat parameters
+            if (arguments.description) finDoc.description = arguments.description
+            if (arguments.statusId) finDoc.statusId = arguments.statusId
+            if (arguments.reference) finDoc.reference = arguments.reference
+        }
+        
+        if (!finDoc || !finDoc.items) {
+            throw new IllegalArgumentException("Purchase order requires items. Received arguments: ${arguments}")
+        }
+        
+        // Ensure required fields have defaults
+        if (!finDoc.docType) {
+            finDoc.docType = "order"
+        }
+        if (finDoc.sales == null) {
+            finDoc.sales = false
+        }
+        
+        logger.info("Processed finDoc parameter: ${finDoc}")
+        
+        // The service expects the finDoc parameter directly
+        Map<String, Object> serviceParams = [finDoc: finDoc]
         
         try {
             Map<String, Object> result = ec.service.sync().name("growerp.100.FinDocServices100.create#FinDoc")
                 .parameters(serviceParams).call()
+
+            String orderId = result.finDoc?.orderId ?: result.finDoc?.pseudoId ?: "Unknown"
             
             return [
-                text: "Successfully created purchase order with orderId: ${result.finDocId}",
+                text: "Successfully created purchase order with orderId: ${orderId}",
                 data: result
             ]
         } catch (Exception e) {
+            logger.error("Service call failed with finDoc: ${finDoc}", e)
             throw new RuntimeException("Failed to create purchase order: ${e.message}", e)
         }
     }

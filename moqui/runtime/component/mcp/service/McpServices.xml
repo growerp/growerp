@@ -141,6 +141,9 @@
                 
                 def handler = new McpProtocolHandlerSimple(ec)
                 
+                // Log incoming request for debugging
+                ec.logger.info("MCP Request - jsonrpc: ${jsonrpc}, method: ${method}, params: ${params}, id: ${id}, request: ${request}")
+                
                 // Check if we have a wrapped request or direct JSON-RPC
                 Map mcpRequest
                 if (request != null) {
@@ -156,8 +159,34 @@
                     ]
                 }
                 
+                // Validate JSON-RPC request format
                 def response
-                if (mcpRequest.method == "prompts/list") {
+                if (!mcpRequest.jsonrpc || mcpRequest.jsonrpc != "2.0") {
+                    response = [
+                        jsonrpc: "2.0",
+                        id: mcpRequest.id,
+                        error: [
+                            code: -32600,
+                            message: "Invalid JSON-RPC version. Expected '2.0', got: ${mcpRequest.jsonrpc}"
+                        ]
+                    ]
+                } else if (!mcpRequest.method) {
+                    response = [
+                        jsonrpc: "2.0", 
+                        id: mcpRequest.id,
+                        error: [
+                            code: -32600,
+                            message: "Missing required 'method' field"
+                        ]
+                    ]
+                } else if (mcpRequest.method == "notifications/initialized") {
+                    // Handle initialized notification - return simple acknowledgment
+                    response = [
+                        jsonrpc: "2.0",
+                        id: mcpRequest.id,
+                        result: [status: "acknowledged"]
+                    ]
+                } else if (mcpRequest.method == "prompts/list") {
                     // Handle prompts/list directly in the service
                     response = [
                         jsonrpc: "2.0",

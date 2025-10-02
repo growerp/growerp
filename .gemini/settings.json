@@ -8,22 +8,7 @@
       ]
     },
     "growerp-system": {
-      "httpUrl": "http://localhost:8080/rest/s1/mcp/protocol",
-      "oauth": {
-        "discoveryUrl": "http://localhost:8080/rest/s1/mcp/auth/discovery",
-        "tokenEndpoint": "http://localhost:8080/rest/s1/mcp/auth/token",
-        "grantType": "password",
-        "username": "test@example.com",
-        "password": "qqqqqq9!",
-        "clientId": "mcp-client",
-        "additionalParams": {
-          "classificationId": "AppSupport"
-        },
-        "scopes": [
-          "MCP_VIEW",
-          "MCP_EXECUTE"
-        ]
-      }
+      "httpUrl": "http://localhost:8080/rest/s1/mcp/protocol"
     }
   }
 }

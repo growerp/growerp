@@ -33,6 +33,9 @@ class McpProtocolHandlerSimple {
                 case "initialize":
                     result = handleInitialize(params)
                     break
+                case "notifications/initialized":
+                    // Handle initialized notification - no response needed for notifications
+                    return handleNotification(method, params, id)
                 case "resources/list":
                     result = resourceManager.listResources()
                     break
@@ -96,5 +99,28 @@ class McpProtocolHandlerSimple {
         return [
             prompts: []
         ]
+    }
+    
+    /**
+     * Handle notifications (don't require responses)
+     */
+    private Map handleNotification(String method, Map params, def id) {
+        ec.logger.info("Received notification: ${method}")
+        
+        // For notifications, we should not return a response according to JSON-RPC
+        // But if there's an ID, the client expects a response
+        if (id != null) {
+            return [
+                jsonrpc: "2.0",
+                id: id,
+                result: [
+                    status: "acknowledged",
+                    method: method
+                ]
+            ]
+        } else {
+            // No response for true notifications
+            return null
+        }
     }
 }

@@ -576,6 +576,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <else-if condition="company.role == 'Customer'">
                     <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
                 </else-if>
+                <else-if condition="company.role == 'Company'">
+                    <set field="company.role" value="OrgInternal" />
+                </else-if>
             </if>
             <if condition="!company.pseudoId || company.pseudoId == ''">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
