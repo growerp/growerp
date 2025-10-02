@@ -287,7 +287,7 @@ class ActivityDialogState extends State<ActivityDialog> {
                         key: const Key('assignee'),
                         itemAsString: (User? u) =>
                             " ${u?.firstName} ${u?.lastName} "
-                            "${u?.company!.name}",
+                            "${u?.company?.name ?? ''}",
                         asyncItems: (String filter) {
                           _assigneeBloc.add(
                             GetDataEvent(
@@ -375,7 +375,7 @@ class ActivityDialogState extends State<ActivityDialog> {
                         key: const Key('thirdParty'),
                         itemAsString: (User? u) =>
                             " ${u?.firstName} ${u?.lastName} "
-                            "${u?.company!.name}",
+                            "${u?.company?.name ?? ''}",
                         asyncItems: (String filter) {
                           _thirdPartyBloc.add(
                             GetDataEvent(
