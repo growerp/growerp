@@ -1,887 +1,192 @@
 {
-  "@@locale": "fr",
-  "acctSales": "Comptabilité des ventes",
-  "@acctSales": {
-    "description": "Élément de menu pour la comptabilité des ventes"
-  },
-  "acctPurchase": "Comptabilité des achats",
-  "@acctPurchase": {
-    "description": "Élément de menu pour la comptabilité des achats"
-  },
-  "address": "Adresse",
-  "@address": {
-    "description": "Informations sur l'adresse"
-  },
-  "addressDelete": "Adresse supprimée",
-  "@addressDelete": {
-    "description": "Message de confirmation qu'une adresse a été supprimée"
-  },
-  "addressReplace": "Adresse remplacée.",
-  "@addressReplace": {
-    "description": "Message de confirmation qu'une adresse a été remplacée"
-  },
-  "address1": "Ligne d'adresse 1",
-  "@address1": {
-    "description": "Étiquette du champ de saisie pour la première ligne d'une adresse"
-  },
-  "address1Error": "Veuillez saisir un nom de rue",
-  "@address1Error": {
-    "description": "Message d'erreur lorsque la ligne d'adresse 1 est vide"
-  },
-  "address2": "Ligne d'adresse 2",
-  "@address2": {
-    "description": "Étiquette du champ de saisie pour la deuxième ligne d'une adresse"
-  },
-  "addressNew": "Nouvelle adresse",
-  "@addressNew": {
-    "description": "Titre pour la création d'une nouvelle adresse"
-  },
-  "addressDetail": "Adresse #{addressId}",
-  "@addressDetail": {
-    "description": "Titre de la vue détaillée de l'adresse",
-    "placeholders": {
-      "addressId": {
-        "type": "String",
-        "example": "123"
-      }
-    }
-  },
-  "administrator": "Administrateur",
-  "@administrator": {
-    "description": "Nom du rôle d'un administrateur"
-  },
-  "admins": "Admins",
-  "@admins": {
-    "description": "Pluriel d'Admin"
-  },
-  "add": "Ajouter",
-  "@add": {
-    "description": "Texte court du bouton d'action"
-  },
-  "addNew": "Ajouter nouveau",
-  "@addNew": {
-    "description": "Texte du bouton d'action pour ajouter un nouvel élément"
-  },
-  "addNewRelatedCompany": "Ajouter une nouvelle société liée",
-  "@addNewRelatedCompany": {
-    "description": "Texte du bouton d'action pour ajouter une nouvelle société liée"
-  },
-  "adminNeedsUsername": "Un administrateur a besoin d'un nom d'utilisateur !",
-  "@adminNeedsUsername": {
-    "description": "Message d'erreur lorsqu'un utilisateur administrateur est créé sans nom d'utilisateur"
-  },
-  "appAdmin": "Admin",
-  "@appAdmin": {
-    "description": "Administrateur de l'application"
-  },
-  "appCompany": "Société",
-  "@appCompany": {
-    "description": "Entité de la société"
-  },
-  "city": "Ville",
-  "@city": {
-    "description": "Étiquette du champ de saisie pour la ville"
-  },
-  "cityError": "Veuillez saisir une ville",
-  "@cityError": {
-    "description": "Message d'erreur lorsque la ville est vide"
-  },
-  "company": "Société",
-  "@company": {
-    "description": "Une entité commerciale"
-  },
-  "companyAddress": "Adresse de la société",
-  "@companyAddress": {
-    "description": "L'adresse d'une société"
-  },
-  "newCompanyAddress": "Nouvelle adresse de la société",
-  "@newCompanyAddress": {
-    "description": "Titre pour la création d'une nouvelle adresse de société"
-  },
-  "companyAddressDetail": "Adresse de la société #{addressId}",
-  "@companyAddressDetail": {
-    "description": "Titre de la vue détaillée de l'adresse de la société",
-    "placeholders": {
-      "addressId": {
-        "type": "String"
-      }
-    }
-  },
-  "companyDelete": "Société {name} supprimée",
-  "@companyDelete": {
-    "description": "Message de confirmation qu'une société a été supprimée",
-    "placeholders": {
-      "name": {
-        "type": "String",
-        "example": "ABC Corp"
-      }
-    }
-  },
-  "companyDetail": "Détail de la société",
-  "@companyDetail": {
-    "description": "Titre de la vue détaillée de la société"
-  },
-  "companyName": "Nom de la société",
-  "@companyName": {
-    "description": "Étiquette du champ de saisie pour le nom de la société"
-  },
-  "companyNameEmail": "Nom de la société\nEmail",
-  "@companyNameEmail": {
-    "description": "Étiquette d'un champ qui affiche à la fois le nom de la société et l'e-mail"
-  },
-  "companyNameError": "Veuillez saisir le nom de la société",
-  "@companyNameError": {
-    "description": "Message d'erreur lorsque le nom de la société est vide"
-  },
-  "companyNone": "Aucune société trouvée.",
-  "@companyNone": {
-    "description": "Message lorsqu'aucune société n'est trouvée dans une recherche"
-  },
-  "companyRoleDetail": "Société {role} #{id}",
-  "@companyRoleDetail": {
-    "description": "Détail d'une société avec un rôle spécifique",
-    "placeholders": {
-      "role": {
-        "type": "String",
-        "example": "Client"
-      },
-      "id": {
-        "type": "String",
-        "example": "123"
-      }
-    }
-  },
-  "companySearch": "Recherche de société",
-  "@companySearch": {
-    "description": "Titre de la page de recherche de société"
-  },
-  "companyUpdate": "Société {name} mise à jour",
-  "@companyUpdate": {
-    "description": "Message de confirmation qu'une société a été mise à jour",
-    "placeholders": {
-      "name": {
-        "type": "String",
-        "example": "ABC Corp"
-      }
-    }
-  },
-  "companyUserUpDown": "Téléchargement/téléchargement de société/utilisateur",
-  "@companyUserUpDown": {
-    "description": "Élément de menu pour le téléchargement/téléchargement des données de la société et de l'utilisateur"
-  },
-  "couldNotLoad": "Impossible de charger les {role}s !",
-  "@couldNotLoad": {
-    "description": "Message d'erreur lorsqu'une liste d'éléments pour un certain rôle n'a pas pu être chargée",
-    "placeholders": {
-      "role": {
-        "type": "String",
-        "example": "Client"
-      }
-    }
-  },
-  "country": "Pays",
-  "@country": {
-    "description": "Étiquette du champ de saisie pour le pays"
-  },
-  "countryError": "Veuillez sélectionner un pays",
-  "@countryError": {
-    "description": "Message d'erreur lorsqu'aucun pays n'est sélectionné"
-  },
-  "create": "Créer",
-  "@create": {
-    "description": "Texte du bouton d'action pour créer un élément"
-  },
-  "currency": "Devise",
-  "@currency": {
-    "description": "Étiquette du champ de saisie pour la devise"
-  },
-  "currencyError": "Champ de devise requis !",
-  "@currencyError": {
-    "description": "Message d'erreur lorsque la devise n'est pas sélectionnée"
-  },
-  "customer": "Client",
-  "@customer": {
-    "description": "Une personne ou une société qui achète des biens ou des services"
-  },
-  "customers": "Clients",
-  "@customers": {
-    "description": "Pluriel de client"
-  },
-  "database": "Base de données",
-  "@database": {
-    "description": "Un ensemble structuré de données"
-  },
-  "dataFileSent": "Un fichier de données sera envoyé par e-mail",
-  "@dataFileSent": {
-    "description": "Message de confirmation qu'un fichier de données a été envoyé"
-  },
-  "deleteUser": "Supprimer l'utilisateur",
-  "@deleteUser": {
-    "description": "Texte du bouton d'action pour supprimer un utilisateur"
-  },
-  "disabled": "Désactivé",
-  "@disabled": {
-    "description": "État indiquant que quelque chose n'est pas activé"
-  },
-  "downloadEmail": "Télécharger par e-mail",
-  "@downloadEmail": {
-    "description": "Texte du bouton d'action pour télécharger des données et les recevoir par e-mail"
-  },
-  "downloadFormat": "Téléchargez d'abord pour obtenir le format",
-  "@downloadFormat": {
-    "description": "Texte d'instructions pour l'importation de données"
-  },
-  "email": "E-mail",
-  "@email": {
-    "description": "Étiquette du champ de saisie pour l'adresse e-mail"
-  },
-  "emailAddress": "Adresse e-mail",
-  "@emailAddress": {
-    "description": "Étiquette complète pour l'adresse e-mail"
-  },
-  "emailInvalid": "Ceci n'est pas un e-mail valide",
-  "@emailInvalid": {
-    "description": "Message d'erreur pour un format d'e-mail non valide"
-  },
-  "emailLoginRequired": "E-mail pour la connexion requis !",
-  "@emailLoginRequired": {
-    "description": "Message d'erreur lorsque l'e-mail est requis pour la connexion"
-  },
-  "employee": "Employé",
-  "@employee": {
-    "description": "Une personne employée pour un salaire"
-  },
-  "employees": "Employés",
-  "@employees": {
-    "description": "Pluriel d'employé"
-  },
-  "failedToFetchSearchItems": "échec de la récupération des éléments de recherche : {message}",
-  "@failedToFetchSearchItems": {
-    "description": "Message d'erreur lorsque la récupération des éléments de recherche échoue",
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
-  "fieldRequired": "Champ requis",
-  "@fieldRequired": {
-    "description": "Message d'erreur générique pour un champ requis"
-  },
-  "firstName": "Prénom",
-  "@firstName": {
-    "description": "Étiquette du champ de saisie pour le prénom"
-  },
-  "firstNameError": "Veuillez saisir un prénom",
-  "@firstNameError": {
-    "description": "Message d'erreur lorsque le prénom est vide"
-  },
-  "hostName": "Nom d'hôte",
-  "@hostName": {
-    "description": "Le nom d'hôte d'un serveur"
-  },
-  "id": "ID",
-  "@id": {
-    "description": "Identifiant"
-  },
-  "lastName": "Nom de famille",
-  "@lastName": {
-    "description": "Étiquette du champ de saisie pour le nom de famille"
-  },
-  "lastNameError": "Veuillez saisir un nom de famille",
-  "@lastNameError": {
-    "description": "Message d'erreur lorsque le nom de famille est vide"
-  },
-  "lead": "Piste",
-  "@lead": {
-    "description": "Un contact commercial potentiel"
-  },
-  "leads": "Pistes",
-  "@leads": {
-    "description": "Pluriel de piste"
-  },
-  "leadUser": "Utilisateur de piste",
-  "@leadUser": {
-    "description": "Un utilisateur qui est une piste"
-  },
-  "location": "Emplacement",
-  "@location": {
-    "description": "Un lieu ou une position particulière"
-  },
-  "login": "Connexion",
-  "@login": {
-    "description": "Action de se connecter à un système"
-  },
-  "loginDisabled": "Connexion désactivée",
-  "@loginDisabled": {
-    "description": "Message d'état indiquant que la connexion est désactivée"
-  },
-  "name": "Nom",
-  "@name": {
-    "description": "Le nom d'une personne ou d'une chose"
-  },
-  "needPostalAddress": "Besoin d'une adresse postale pour ajouter",
-  "@needPostalAddress": {
-    "description": "Message indiquant qu'une adresse postale est requise"
-  },
-  "noAddress": "Pas encore d'adresse",
-  "@noAddress": {
-    "description": "Message lorsqu'aucune adresse n'est disponible"
-  },
-  "noAddressAdd": "Pas encore d'adresse, besoin d'une adresse postale pour ajouter",
-  "@noAddressAdd": {
-    "description": "Message lorsqu'aucune adresse n'est disponible et qu'elle doit être ajoutée"
-  },
-  "noCompaniesFound": "aucune société trouvée",
-  "@noCompaniesFound": {
-    "description": "Message lorsqu'une recherche de sociétés ne renvoie aucun résultat"
-  },
-  "noCompaniesUsersFound": "aucune société/utilisateur trouvé",
-  "@noCompaniesUsersFound": {
-    "description": "Message lorsqu'une recherche de sociétés et d'utilisateurs ne renvoie aucun résultat"
-  },
-  "noCustomer": "Aucun client trouvé",
-  "@noCustomer": {
-    "description": "Message lorsqu'aucun client n'est trouvé"
-  },
-  "noEmployee": "Aucun employé trouvé",
-  "@noEmployee": {
-    "description": "Message lorsqu'aucun employé n'est trouvé"
-  },
-  "noLead": "Aucune piste trouvée",
-  "@noLead": {
-    "description": "Message lorsqu'aucune piste n'est trouvée"
-  },
-  "noPaymentMethod": "Pas encore de modes de paiement",
-  "@noPaymentMethod": {
-    "description": "Message lorsqu'aucun mode de paiement n'est disponible"
-  },
-  "noPaymentMethodAdd": "Pas encore de modes de paiement, besoin d'une adresse postale pour ajouter",
-  "@noPaymentMethodAdd": {
-    "description": "Message lorsqu'aucun mode de paiement n'est disponible et doit être ajouté"
-  },
-  "noPostalAddress": "Pas encore d'adresse postale",
-  "@noPostalAddress": {
-    "description": "Message lorsqu'aucune adresse postale n'est disponible"
-  },
-  "noSearchItems": "Aucun élément de recherche trouvé (pour l'instant)",
-  "@noSearchItems": {
-    "description": "Message lorsqu'une recherche ne renvoie aucun élément"
-  },
-  "noSupplier": "Aucun fournisseur trouvé",
-  "@noSupplier": {
-    "description": "Message lorsqu'aucun fournisseur n'est trouvé"
-  },
-  "numberOfEmployees": "Nb. d'employés",
-  "@numberOfEmployees": {
-    "description": "Étiquette pour le nombre d'employés"
-  },
-  "org": "Org",
-  "@org": {
-    "description": "Abréviation pour Organisation"
-  },
-  "partyId": "PartyId",
-  "@partyId": {
-    "description": "Identifiant pour une partie (personne ou organisation)"
-  },
-  "paymentMethod": "Mode de paiement",
-  "@paymentMethod": {
-    "description": "Mode de paiement (par exemple, carte de crédit)"
-  },
-  "paymentMethodCardNumber": "Numéro de carte",
-  "@paymentMethodCardNumber": {
-    "description": "Étiquette du champ de saisie pour le numéro de carte de crédit"
-  },
-  "paymentMethodCardNumberError": "Veuillez saisir un numéro de carte de crédit",
-  "@paymentMethodCardNumberError": {
-    "description": "Message d'erreur pour un numéro de carte de crédit vide"
-  },
-  "paymentMethodCardNumberInvalid": "Le numéro de carte n'est pas un numéro valide !",
-  "@paymentMethodCardNumberInvalid": {
-    "description": "Message d'erreur pour un numéro de carte de crédit non valide"
-  },
-  "paymentMethodCardType": "Type de carte",
-  "@paymentMethodCardType": {
-    "description": "Étiquette du champ de saisie pour le type de carte de crédit (par exemple, Visa)"
-  },
-  "paymentMethodDelete": "Mode de paiement supprimé",
-  "@paymentMethodDelete": {
-    "description": "Confirmation qu'un mode de paiement a été supprimé"
-  },
-  "paymentMethodExpireMonth": "Mois d'expiration",
-  "@paymentMethodExpireMonth": {
-    "description": "Étiquette du champ de saisie pour le mois d'expiration de la carte de crédit"
-  },
-  "paymentMethodExpireMonthError": "Veuillez saisir le mois d'expiration",
-  "@paymentMethodExpireMonthError": {
-    "description": "Message d'erreur pour un mois d'expiration vide"
-  },
-  "paymentMethodExpireYear": "Année d'expiration",
-  "@paymentMethodExpireYear": {
-    "description": "Étiquette du champ de saisie pour l'année d'expiration de la carte de crédit"
-  },
-  "paymentMethodExpireYearError": "Veuillez saisir une année d'expiration",
-  "@paymentMethodExpireYearError": {
-    "description": "Message d'erreur pour une année d'expiration vide"
-  },
-  "paymentMethodNewCard": "Nouvelle carte :",
-  "@paymentMethodNewCard": {
-    "description": "Étiquette pour l'ajout d'une nouvelle carte de crédit"
-  },
-  "paymentMethodReplace": "Mode de paiement remplacé",
-  "@paymentMethodReplace": {
-    "description": "Confirmation qu'un mode de paiement a été remplacé"
-  },
-  "person": "Personne",
-  "@person": {
-    "description": "Un être humain individuel"
-  },
-  "pickImageError": "Erreur de sélection d'image : {error}",
-  "@pickImageError": {
-    "description": "Message d'erreur lorsque la sélection d'une image échoue",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "postalCode": "Code postal",
-  "@postalCode": {
-    "description": "Étiquette du champ de saisie pour le code postal"
-  },
-  "postalCodeError": "Veuillez saisir un code postal",
-  "@postalCodeError": {
-    "description": "Message d'erreur pour un code postal vide"
-  },
-  "postalAddress": "Adresse postale",
-  "@postalAddress": {
-    "description": "Une adresse pour l'envoi de courrier"
-  },
-  "province": "Province/État",
-  "@province": {
-    "description": "Étiquette du champ de saisie pour la province ou l'État"
-  },
-  "provinceError": "Veuillez saisir une province ou un État",
-  "@provinceError": {
-    "description": "Message d'erreur pour une province/un État vide"
-  },
-  "refresh": "actualiser",
-  "@refresh": {
-    "description": "Action pour recharger les données"
-  },
-  "relatedCompanyInfo": "Informations sur la société liée",
-  "@relatedCompanyInfo": {
-    "description": "Titre de la section avec les informations sur la société liée"
-  },
-  "remove": "Supprimer",
-  "@remove": {
-    "description": "Action pour supprimer un élément"
-  },
-  "removeEmployee": "Supprimer {firstName} {lastName} ?",
-  "@removeEmployee": {
-    "description": "Boîte de dialogue de confirmation pour supprimer un employé",
-    "placeholders": {
-      "firstName": {
-        "type": "String"
-      },
-      "lastName": {
-        "type": "String"
-      }
-    }
-  },
-  "role": "Rôle",
-  "@role": {
-    "description": "Une fonction assumée ou un rôle joué par une personne ou une chose"
-  },
-  "roleError": "Sélectionnez un rôle valide !",
-  "@roleError": {
-    "description": "Message d'erreur lorsqu'un rôle non valide est sélectionné"
-  },
-  "sales": "Ventes",
-  "@sales": {
-    "description": "L'échange d'une marchandise contre de l'argent"
-  },
-  "salesAgent": "Agent commercial",
-  "@salesAgent": {
-    "description": "Une personne qui vend des biens ou des services pour le compte d'une société"
-  },
-  "salesTaxPercentage": "Pourcentage de la taxe de vente",
-  "@salesTaxPercentage": {
-    "description": "Étiquette du champ de saisie pour le pourcentage de la taxe de vente"
-  },
-  "search": "Rechercher",
-  "@search": {
-    "description": "Action pour rechercher quelque chose"
-  },
-  "searchInput": "Saisie de recherche",
-  "@searchInput": {
-    "description": "Texte de remplacement pour un champ de saisie de recherche"
-  },
-  "searchResult": "Résultats de la recherche",
-  "@searchResult": {
-    "description": "Titre de la vue des résultats de la recherche"
-  },
-  "searchResultIdName": "ID : {id}\nNom : {name}",
-  "@searchResultIdName": {
-    "description": "Format d'affichage d'un élément de résultat de recherche",
-    "placeholders": {
-      "id": {
-        "type": "String"
-      },
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "searchResultOrgRep": "Représentant de l'organisation :\n{id}\n{name}",
-  "@searchResultOrgRep": {
-    "description": "Format d'affichage d'un résultat de recherche de représentant d'organisation",
-    "placeholders": {
-      "id": {
-        "type": "String"
-      },
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "searchValueError": "Veuillez saisir une valeur de recherche",
-  "@searchValueError": {
-    "description": "Message d'erreur lorsque la valeur de recherche est vide"
-  },
-  "secondaryBackend": "Backend secondaire",
-  "@secondaryBackend": {
-    "description": "Un serveur backend alternatif"
-  },
-  "securityUserGroup": "Groupe d'utilisateurs de sécurité",
-  "@securityUserGroup": {
-    "description": "Un groupe d'utilisateurs à des fins de sécurité"
-  },
-  "selectCompany": "Sélectionner une société",
-  "@selectCompany": {
-    "description": "Instruction pour sélectionner une société"
-  },
-  "selectCountry": "Sélectionner un pays",
-  "@selectCountry": {
-    "description": "Instruction pour sélectionner un pays"
-  },
-  "selectOrCreateCompany": "Sélectionnez une société existante ou créez-en une nouvelle",
-  "@selectOrCreateCompany": {
-    "description": "Instruction pour l'utilisateur de sélectionner une société existante ou d'en créer une nouvelle"
-  },
-  "shortId": "ShortId",
-  "@shortId": {
-    "description": "Un identifiant raccourci"
-  },
-  "supplier": "Fournisseur",
-  "@supplier": {
-    "description": "Une personne ou une organisation qui fournit quelque chose de nécessaire"
-  },
-  "suppliers": "Fournisseurs",
-  "@suppliers": {
-    "description": "Pluriel de fournisseur"
-  },
-  "telephone": "Téléphone",
-  "@telephone": {
-    "description": "Un système de transmission de la voix à distance"
-  },
-  "telephoneNr": "Numéro de téléphone",
-  "@telephoneNr": {
-    "description": "Abréviation de Numéro de téléphone"
-  },
-  "type": "Type",
-  "@type": {
-    "description": "Une catégorie de personnes ou de choses ayant des caractéristiques communes"
-  },
-  "update": "Mettre à jour",
-  "@update": {
-    "description": "Action pour mettre à jour un élément"
-  },
-  "uploadCsv": "Télécharger un fichier CSV",
-  "@uploadCsv": {
-    "description": "Action pour télécharger un fichier CSV"
-  },
-  "user": "Utilisateur",
-  "@user": {
-    "description": "Une personne qui utilise un ordinateur ou un service réseau"
-  },
-  "userDelete": "Utilisateur {name} supprimé",
-  "@userDelete": {
-    "description": "Confirmation qu'un utilisateur a été supprimé",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "userDetail": "Détail de l'utilisateur",
-  "@userDetail": {
-    "description": "Titre de la vue détaillée de l'utilisateur"
-  },
-  "userEvents": "Événements de l'utilisateur",
-  "@userEvents": {
-    "description": "Une liste d'événements liés à un utilisateur"
-  },
-  "userGroup": "Groupe d'utilisateurs",
-  "@userGroup": {
-    "description": "Un groupe d'utilisateurs"
-  },
-  "userHelp": "Sélectionnez un utilisateur existant ou créez-en un nouveau",
-  "@userHelp": {
-    "description": "Texte d'aide pour la sélection de l'utilisateur"
-  },
-  "userInfo": "Informations sur l'utilisateur",
-  "@userInfo": {
-    "description": "Titre de la section des informations sur l'utilisateur"
-  },
-  "userLogin": "Connexion de l'utilisateur",
-  "@userLogin": {
-    "description": "Le processus de connexion d'un utilisateur"
-  },
-  "userName": "Nom d'utilisateur",
-  "@userName": {
-    "description": "Étiquette du champ de saisie pour le nom d'utilisateur"
-  },
-  "userNone": "Aucun utilisateur trouvé",
-  "@userNone": {
-    "description": "Message lorsqu'aucun utilisateur n'est trouvé"
-  },
-  "noClientFound": "Aucun client trouvé",
-  "@noClientFound": {
-    "description": "Message lorsqu'aucun client n'est trouvé"
-  },
-  "noUsersFound": "aucun utilisateur {role} trouvé",
-  "@noUsersFound": {
-    "description": "Message lorsqu'aucun utilisateur n'est trouvé pour un rôle",
-    "placeholders": {
-      "role": {
-        "type": "String"
-      }
-    }
-  },
-  "addNewUser": "Ajouter un nouvel utilisateur",
-  "@addNewUser": {
-    "description": "Texte du bouton d'action pour ajouter un nouvel utilisateur"
-  },
-  "userUpDownload": "Téléchargement/téléchargement d'utilisateurs",
-  "@userUpDownload": {
-    "description": "Info-bulle pour le bouton de téléchargement/téléchargement d'utilisateurs"
-  },
-  "userUpdate": "Utilisateur {name} mis à jour",
-  "@userUpdate": {
-    "description": "Confirmation qu'un utilisateur a été mis à jour",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "userNewCompany": "Créez d'abord une nouvelle société",
-  "@userNewCompany": {
-    "description": "Instruction pour créer une nouvelle société avant d'ajouter un utilisateur"
-  },
-  "vatSls": "TVA/SLS",
-  "@vatSls": {
-    "description": "Abréviation de Taxe sur la valeur ajoutée / Ventes"
-  },
-  "vatPercentage": "Pourcentage de TVA",
-  "@vatPercentage": {
-    "description": "Étiquette du champ de saisie pour le pourcentage de TVA"
-  },
-  "webAddress": "Adresse Web",
-  "@webAddress": {
-    "description": "L'adresse d'un site Web"
-  },
-  "website": "Site Web",
-  "@website": {
-    "description": "Un emplacement connecté à Internet qui gère une ou plusieurs pages sur le World Wide Web"
-  },
-  "websiteAddress": "Adresse du site Web",
-  "@websiteAddress": {
-    "description": "Étiquette complète pour une adresse de site Web"
-  },
-  "newCompany": "Nouvelle société",
-  "@newCompany": {
-    "description": "Titre pour la création d'une nouvelle société"
-  },
-  "newItem": "Nouveau",
-  "@newItem": {
-    "description": "Texte court pour un nouvel élément"
-  },
-  "paymentMethodDetail": "Détail du mode de paiement",
-  "@paymentMethodDetail": {
-    "description": "Titre de la vue détaillée du mode de paiement"
-  },
-  "noUsers": "Aucun utilisateur trouvé",
-  "@noUsers": {
-    "description": "Message lorsqu'aucun utilisateur n'est trouvé"
-  },
-  "noLeads": "Aucune piste trouvée",
-  "@noLeads": {
-    "description": "Message lorsqu'aucune piste n'est trouvée"
-  },
-  "noCustomers": "Aucun client trouvé",
-  "@noCustomers": {
-    "description": "Message lorsqu'aucun client n'est trouvé"
-  },
-  "noSuppliers": "Aucun fournisseur trouvé",
-  "@noSuppliers": {
-    "description": "Message lorsqu'aucun fournisseur n'est trouvé"
-  },
-  "noEmployees": "Aucun employé trouvé",
-  "@noEmployees": {
-    "description": "Message lorsqu'aucun employé n'est trouvé"
-  },
-  "noAdmins": "Aucun administrateur trouvé",
-  "@noAdmins": {
-    "description": "Message lorsqu'aucun administrateur n'est trouvé"
-  },
-  "noClients": "Aucun client trouvé",
-  "@noClients": {
-    "description": "Message lorsqu'aucun client n'est trouvé"
-  },
-  "client": "Client",
-  "@client": {
-    "description": "Une personne ou une organisation qui utilise les services d'un avocat ou d'un autre professionnel ou d'une autre société."
-  },
-  "clients": "Clients",
-  "@clients": {
-    "description": "Pluriel de client"
-  },
-  "companyNotFound": "Société {companyId} non trouvée",
-  "@companyNotFound": {
-    "description": "Message d'erreur lorsqu'une société n'est pas trouvée",
-    "placeholders": {
-      "companyId": {
-        "type": "String"
-      }
-    }
-  },
-  "userNotFound": "Utilisateur {userId} non trouvé",
-  "@userNotFound": {
-    "description": "Message d'erreur lorsqu'un utilisateur n'est pas trouvé",
-    "placeholders": {
-      "userId": {
-        "type": "String"
-      }
-    }
-  },
-  "serverConnectionProblem": "Problème de connexion au serveur",
-  "@serverConnectionProblem": {
-    "description": "Message d'erreur pour les problèmes de connectivité du serveur"
-  },
-  "companyPersonNameEmail": "Nom de la société/personne\nEmail",
-  "@companyPersonNameEmail": {
-    "description": "En-tête de colonne pour le nom de la société/personne et l'e-mail"
-  },
-  "companyUserSearch": "Recherche de société/utilisateur",
-  "@companyUserSearch": {
-    "description": "Titre de la page de recherche de société/utilisateur"
-  },
-  "searchResults": "Résultats de la recherche",
-  "@searchResults": {
-    "description": "Titre de la section des résultats de la recherche"
-  },
-  "showUserEvents": "Afficher les événements de l'utilisateur",
-  "@showUserEvents": {
-    "description": "Info-bulle pour afficher les événements de l'utilisateur"
-  },
-  "telephoneNumber": "Numéro de téléphone",
-  "@telephoneNumber": {
-    "description": "Étiquette pour le numéro de téléphone"
-  },
-  "roleCompanyInfo": "Informations sur la société {role}",
-  "@roleCompanyInfo": {
-    "description": "Titre de la section d'informations sur la société avec un rôle",
-    "placeholders": {
-      "role": {
-        "type": "String"
-      }
-    }
-  },
-  "companyId": "Nom de la société[id]",
-  "@companyId": {
-    "description": "Étiquette pour le nom de la société avec id"
-  },
-  "updateCompany": "Mettre à jour",
-  "@updateCompany": {
-    "description": "Texte du bouton pour mettre à jour une société"
-  },
-  "removeCompany": "Supprimer",
-  "@removeCompany": {
-    "description": "Texte du bouton pour supprimer une société"
-  },
-  "addNewRelatedComp": "Ajouter une nouvelle société liée",
-  "@addNewRelatedComp": {
-    "description": "Texte du bouton pour ajouter une nouvelle société liée"
-  },
-  "userLoginName": "Nom de connexion de l'utilisateur",
-  "@userLoginName": {
-    "description": "Étiquette pour le nom de connexion de l'utilisateur"
-  },
-  "delete": "Supprimer",
-  "@delete": {
-    "description": "Texte du bouton pour supprimer"
-  },
-  "imageUploadError": "Erreur de téléchargement de l'image !",
-  "@imageUploadError": {
-    "description": "Message d'erreur lorsque le téléchargement de l'image échoue"
-  },
-  "companyUpdated": "Société {name} mise à jour...",
-  "@companyUpdated": {
-    "description": "Message de confirmation lorsqu'une société est mise à jour",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "companyAdded": "Société {name} ajoutée",
-  "@companyAdded": {
-    "description": "Message de confirmation lorsqu'une société est ajoutée",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "userUpdated": "Utilisateur {name} mis à jour...",
-  "@userUpdated": {
-    "description": "Message de confirmation lorsqu'un utilisateur est mis à jour",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "userAdded": "Utilisateur {name} ajouté en haut de la liste...",
-  "@userAdded": {
-    "description": "Message de confirmation lorsqu'un utilisateur est ajouté",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "asCompany": "Cependant, maintenant affiché comme une société",
-  "@asCompany": {
-    "description": "Message indiquant qu'un utilisateur est maintenant affiché comme une société"
-  },
-  "compUserUploadSuccess": "Le téléchargement des sociétés/utilisateurs s'est terminé avec succès",
-  "@compUserUploadSuccess": {
-    "description": "Message de succès pour le téléchargement de sociétés/utilisateurs"
-  },
-  "compUserDownloadSuccess": "La demande est programmée et l'e-mail sera envoyé sous peu",
-  "@compUserDownloadSuccess": {
-    "description": "Message de succès pour le téléchargement de sociétés/utilisateurs"
-  },
-  "userDeleted": "L'utilisateur {name} est maintenant supprimé..",
-  "@userDeleted": {
-    "description": "Message de confirmation lorsqu'un utilisateur est supprimé",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  }
+    "@@locale": "fr",
+    "acctSales": "Comptabilité des ventes",
+    "acctPurchase": "Comptabilité des achats",
+    "address": "Adresse",
+    "addressDelete": "Adresse supprimée",
+    "addressReplace": "Adresse remplacée.",
+    "address1": "Ligne d'adresse 1",
+    "address1Error": "Veuillez saisir un nom de rue",
+    "address2": "Ligne d'adresse 2",
+    "addressNew": "Nouvelle adresse",
+    "addressDetail": "Adresse #{addressId}",
+    "administrator": "Administrateur",
+    "admins": "Admins",
+    "add": "Ajouter",
+    "addNew": "Ajouter nouveau",
+    "addNewRelatedCompany": "Ajouter une nouvelle société liée",
+    "adminNeedsUsername": "Un administrateur a besoin d'un nom d'utilisateur !",
+    "appAdmin": "Admin",
+    "appCompany": "Société",
+    "city": "Ville",
+    "cityError": "Veuillez saisir une ville",
+    "company": "Société",
+    "companyAddress": "Adresse de la société",
+    "newCompanyAddress": "Nouvelle adresse de la société",
+    "companyAddressDetail": "Adresse de la société #{addressId}",
+    "companyDelete": "Société {name} supprimée",
+    "companyDetail": "Détail de la société",
+    "companyName": "Nom de la société",
+    "companyNameEmail": "Nom de la société\nEmail",
+    "companyNameError": "Veuillez saisir le nom de la société",
+    "companyNone": "Aucune société trouvée.",
+    "companyRoleDetail": "Société {role} #{id}",
+    "companySearch": "Recherche de société",
+    "companyUpdate": "Société {name} mise à jour",
+    "companyUserUpDown": "Téléchargement/téléchargement de société/utilisateur",
+    "couldNotLoad": "Impossible de charger les {role}s !",
+    "country": "Pays",
+    "countryError": "Veuillez sélectionner un pays",
+    "create": "Créer",
+    "currency": "Devise",
+    "currencyError": "Champ de devise requis !",
+    "customer": "Client",
+    "customers": "Clients",
+    "database": "Base de données",
+    "dataFileSent": "Un fichier de données sera envoyé par e-mail",
+    "deleteUser": "Supprimer l'utilisateur",
+    "disabled": "Désactivé",
+    "downloadEmail": "Télécharger par e-mail",
+    "downloadFormat": "Téléchargez d'abord pour obtenir le format",
+    "email": "E-mail",
+    "emailAddress": "Adresse e-mail",
+    "emailInvalid": "Ceci n'est pas un e-mail valide",
+    "emailLoginRequired": "E-mail pour la connexion requis !",
+    "employee": "Employé",
+    "employees": "Employés",
+    "failedToFetchSearchItems": "échec de la récupération des éléments de recherche : {message}",
+    "fieldRequired": "Champ requis",
+    "firstName": "Prénom",
+    "firstNameError": "Veuillez saisir un prénom",
+    "hostName": "Nom d'hôte",
+    "id": "ID",
+    "lastName": "Nom de famille",
+    "lastNameError": "Veuillez saisir un nom de famille",
+    "lead": "Piste",
+    "leads": "Pistes",
+    "leadUser": "Utilisateur de piste",
+    "location": "Emplacement",
+    "login": "Connexion",
+    "loginDisabled": "Connexion désactivée",
+    "name": "Nom",
+    "needPostalAddress": "Besoin d'une adresse postale pour ajouter",
+    "noAddress": "Pas encore d'adresse",
+    "noAddressAdd": "Pas encore d'adresse, besoin d'une adresse postale pour ajouter",
+    "noCompaniesFound": "aucune société trouvée",
+    "noCompaniesUsersFound": "aucune société/utilisateur trouvé",
+    "noCustomer": "Aucun client trouvé",
+    "noEmployee": "Aucun employé trouvé",
+    "noLead": "Aucune piste trouvée",
+    "noPaymentMethod": "Pas encore de modes de paiement",
+    "noPaymentMethodAdd": "Pas encore de modes de paiement, besoin d'une adresse postale pour ajouter",
+    "noPostalAddress": "Pas encore d'adresse postale",
+    "noSearchItems": "Aucun élément de recherche trouvé (pour l'instant)",
+    "noSupplier": "Aucun fournisseur trouvé",
+    "numberOfEmployees": "Nb. d'employés",
+    "org": "Org",
+    "partyId": "PartyId",
+    "paymentMethod": "Mode de paiement",
+    "paymentMethodCardNumber": "Numéro de carte",
+    "paymentMethodCardNumberError": "Veuillez saisir un numéro de carte de crédit",
+    "paymentMethodCardNumberInvalid": "Le numéro de carte n'est pas un numéro valide !",
+    "paymentMethodCardType": "Type de carte",
+    "paymentMethodDelete": "Mode de paiement supprimé",
+    "paymentMethodExpireMonth": "Mois d'expiration",
+    "paymentMethodExpireMonthError": "Veuillez saisir le mois d'expiration",
+    "paymentMethodExpireYear": "Année d'expiration",
+    "paymentMethodExpireYearError": "Veuillez saisir une année d'expiration",
+    "paymentMethodNewCard": "Nouvelle carte :",
+    "paymentMethodReplace": "Mode de paiement remplacé",
+    "person": "Personne",
+    "pickImageError": "Erreur de sélection d'image : {error}",
+    "postalCode": "Code postal",
+    "postalCodeError": "Veuillez saisir un code postal",
+    "postalAddress": "Adresse postale",
+    "province": "Province/État",
+    "provinceError": "Veuillez saisir une province ou un État",
+    "refresh": "actualiser",
+    "relatedCompanyInfo": "Informations sur la société liée",
+    "remove": "Supprimer",
+    "removeEmployee": "Supprimer {firstName} {lastName} ?",
+    "role": "Rôle",
+    "roleError": "Sélectionnez un rôle valide !",
+    "sales": "Ventes",
+    "salesAgent": "Agent commercial",
+    "salesTaxPercentage": "Pourcentage de la taxe de vente",
+    "search": "Rechercher",
+    "searchInput": "Saisie de recherche",
+    "searchResult": "Résultats de la recherche",
+    "searchResultIdName": "ID : {id}\nNom : {name}",
+    "searchResultOrgRep": "Représentant de l'organisation :\n{id}\n{name}",
+    "searchValueError": "Veuillez saisir une valeur de recherche",
+    "secondaryBackend": "Backend secondaire",
+    "securityUserGroup": "Groupe d'utilisateurs de sécurité",
+    "selectCompany": "Sélectionner une société",
+    "selectCountry": "Sélectionner un pays",
+    "selectOrCreateCompany": "Sélectionnez une société existante ou créez-en une nouvelle",
+    "shortId": "ShortId",
+    "supplier": "Fournisseur",
+    "suppliers": "Fournisseurs",
+    "telephone": "Téléphone",
+    "telephoneNr": "Numéro de téléphone",
+    "type": "Type",
+    "update": "Mettre à jour",
+    "uploadCsv": "Télécharger un fichier CSV",
+    "user": "Utilisateur",
+    "userDelete": "Utilisateur {name} supprimé",
+    "userDetail": "Détail de l'utilisateur",
+    "userEvents": "Événements de l'utilisateur",
+    "userGroup": "Groupe d'utilisateurs",
+    "userHelp": "Sélectionnez un utilisateur existant ou créez-en un nouveau",
+    "userInfo": "Informations sur l'utilisateur",
+    "userLogin": "Connexion de l'utilisateur",
+    "userName": "Nom d'utilisateur",
+    "userNone": "Aucun utilisateur trouvé",
+    "noClientFound": "Aucun client trouvé",
+    "noUsersFound": "aucun utilisateur {role} trouvé",
+    "addNewUser": "Ajouter un nouvel utilisateur",
+    "userUpDownload": "Téléchargement/téléchargement d'utilisateurs",
+    "userUpdate": "Utilisateur {name} mis à jour",
+    "userNewCompany": "Créez d'abord une nouvelle société",
+    "vatSls": "TVA/SLS",
+    "vatPercentage": "Pourcentage de TVA",
+    "webAddress": "Adresse Web",
+    "website": "Site Web",
+    "websiteAddress": "Adresse du site Web",
+    "newCompany": "Nouvelle société",
+    "newItem": "Nouveau",
+    "paymentMethodDetail": "Détail du mode de paiement",
+    "noUsers": "Aucun utilisateur trouvé",
+    "noLeads": "Aucune piste trouvée",
+    "noCustomers": "Aucun client trouvé",
+    "noSuppliers": "Aucun fournisseur trouvé",
+    "noEmployees": "Aucun employé trouvé",
+    "noAdmins": "Aucun administrateur trouvé",
+    "noClients": "Aucun client trouvé",
+    "client": "Client",
+    "clients": "Clients",
+    "companyNotFound": "Société {companyId} non trouvée",
+    "userNotFound": "Utilisateur {userId} non trouvé",
+    "serverConnectionProblem": "Problème de connexion au serveur",
+    "companyPersonNameEmail": "Nom de la société/personne\nEmail",
+    "companyUserSearch": "Recherche de société/utilisateur",
+    "searchResults": "Résultats de la recherche",
+    "showUserEvents": "Afficher les événements de l'utilisateur",
+    "telephoneNumber": "Numéro de téléphone",
+    "roleCompanyInfo": "Informations sur la société {role}",
+    "companyId": "Nom de la société[id]",
+    "updateCompany": "Mettre à jour",
+    "removeCompany": "Supprimer",
+    "addNewRelatedComp": "Ajouter une nouvelle société liée",
+    "userLoginName": "Nom de connexion de l'utilisateur",
+    "delete": "Supprimer",
+    "imageUploadError": "Erreur de téléchargement de l'image !",
+    "companyUpdated": "Société {name} mise à jour...",
+    "companyAdded": "Société {name} ajoutée",
+    "userUpdated": "Utilisateur {name} mis à jour...",
+    "userAdded": "Utilisateur {name} ajouté en haut de la liste...",
+    "asCompany": "Cependant, maintenant affiché comme une société",
+    "compUserUploadSuccess": "Le téléchargement des sociétés/utilisateurs s'est terminé avec succès",
+    "compUserDownloadSuccess": "La demande est programmée et l'e-mail sera envoyé sous peu",
+    "userDeleted": "L'utilisateur {name} est maintenant supprimé.."
 }

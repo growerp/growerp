@@ -1,103 +1,28 @@
 {
-  "@@locale": "fr",
-  "chatNotActive": "Chat non actif !",
-  "@chatNotActive": {
-    "description": "Message d'erreur lorsque le chat n'est pas actif"
-  },
-  "messageText": "Texte du message..",
-  "@messageText": {
-    "description": "Texte de l'espace réservé pour le champ de saisie du message"
-  },
-  "send": "Envoyer",
-  "@send": {
-    "description": "Texte du bouton d'envoi"
-  },
-  "addPartner": "Ajouter un partenaire",
-  "@addPartner": {
-    "description": "Texte du bouton pour ajouter un partenaire de chat"
-  },
-  "chat": "Chat #",
-  "@chat": {
-    "description": "En-tête de chat avec le symbole du numéro"
-  },
-  "newChat": "Nouveau",
-  "@newChat": {
-    "description": "Texte du bouton pour créer un nouveau chat"
-  },
-  "selectChatPartner": "Sélectionnez un partenaire de chat",
-  "@selectChatPartner": {
-    "description": "Instruction pour sélectionner un partenaire de chat"
-  },
-  "chatPartner": "Partenaire de chat",
-  "@chatPartner": {
-    "description": "Étiquette pour le champ du partenaire de chat"
-  },
-  "fieldRequired": "Champ obligatoire",
-  "@fieldRequired": {
-    "description": "Message d'erreur générique de champ obligatoire"
-  },
-  "create": "Créer",
-  "@create": {
-    "description": "Texte du bouton Créer"
-  },
-  "update": "Mettre à jour",
-  "@update": {
-    "description": "Texte du bouton Mettre à jour"
-  },
-  "room": "Salle",
-  "@room": {
-    "description": "Étiquette pour la salle"
-  },
-  "chatRoom": "Salle de chat",
-  "@chatRoom": {
-    "description": "Étiquette ou en-tête de la salle de chat"
-  },
-  "chatUsersAndGroups": "Utilisateurs et groupes de chat",
-  "@chatUsersAndGroups": {
-    "description": "En-tête de section pour les utilisateurs et groupes de chat"
-  },
-  "addNew": "Ajouter nouveau",
-  "@addNew": {
-    "description": "Texte du bouton Ajouter un nouvel élément"
-  },
-  "no": "aucun ",
-  "@no": {
-    "description": "Texte partiel pour les messages 'aucun élément trouvé'"
-  },
-  "sFound": "s trouvé(s) !",
-  "@sFound": {
-    "description": "Texte partiel pour les messages 'éléments trouvés'"
-  },
-  "searchInName": "rechercher dans le nom ..",
-  "@searchInName": {
-    "description": "Texte de l'espace réservé pour le champ de recherche de nom"
-  },
-  "search": "Rechercher",
-  "@search": {
-    "description": "Texte du bouton de recherche"
-  },
-  "name": "Nom",
-  "@name": {
-    "description": "Étiquette du champ Nom"
-  },
-  "status": "Statut",
-  "@status": {
-    "description": "Étiquette du champ Statut"
-  },
-  "pvt": "Privé",
-  "@pvt": {
-    "description": "Abréviation pour Privé"
-  },
-  "nroMembers": "#Memb.",
-  "@nroMembers": {
-    "description": "Abréviation pour nombre de membres"
-  },
-  "allMessagesRead": "Tous les messages lus",
-  "@allMessagesRead": {
-    "description": "Message d'état lorsque tous les messages sont lus"
-  },
-  "unreadMessages": "messages non lus",
-  "@unreadMessages": {
-    "description": "Étiquette pour le nombre de messages non lus"
-  }
+    "@@locale": "fr",
+    "chatNotActive": "Chat non actif !",
+    "messageText": "Texte du message..",
+    "send": "Envoyer",
+    "addPartner": "Ajouter un partenaire",
+    "chat": "Chat #",
+    "newChat": "Nouveau",
+    "selectChatPartner": "Sélectionnez un partenaire de chat",
+    "chatPartner": "Partenaire de chat",
+    "fieldRequired": "Champ obligatoire",
+    "create": "Créer",
+    "update": "Mettre à jour",
+    "room": "Salle",
+    "chatRoom": "Salle de chat",
+    "chatUsersAndGroups": "Utilisateurs et groupes de chat",
+    "addNew": "Ajouter nouveau",
+    "no": "aucun ",
+    "sFound": "s trouvé(s) !",
+    "searchInName": "rechercher dans le nom ..",
+    "search": "Rechercher",
+    "name": "Nom",
+    "status": "Statut",
+    "pvt": "Privé",
+    "nroMembers": "#Memb.",
+    "allMessagesRead": "Tous les messages lus",
+    "unreadMessages": "messages non lus"
 }

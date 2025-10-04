@@ -1,4 +1,5 @@
 {
+    "@@locale": "de",
     "website": "Webseite",
     "websites": "Websites",
     "websiteNew": "Neue Webseite",
@@ -64,13 +65,5 @@
     "shopDropdownCategories": "Shop-Dropdown-Kategorien",
     "create": "Erstellen",
     "update": "Aktualisieren",
-    "imageInformation": "Bildinformationen für {title}",
-    "@imageInformation": {
-        "description": "Bildinformationstitel",
-        "placeholders": {
-            "title": {
-                "type": "String"
-            }
-        }
-    }
+    "imageInformation": "Bildinformationen für {title}"
 }

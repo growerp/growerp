@@ -1,471 +1,91 @@
 {
     "@@locale": "th",
     "category": "หมวดหมู่",
-    "@category": {
-        "description": "Category menu item"
-    },
     "categoryList": "รายการหมวดหมู่",
-    "@categoryList": {
-        "description": "Title of the category list screen"
-    },
     "products": "สินค้า",
-    "@products": {
-        "description": "Products menu item"
-    },
     "productList": "รายการสินค้า",
-    "@productList": {
-        "description": "Title of the product list screen"
-    },
     "subscriptions": "การสมัครสมาชิก",
-    "@subscriptions": {
-        "description": "Subscriptions menu item"
-    },
     "subscriptionList": "รายการการสมัครสมาชิก",
-    "@subscriptionList": {
-        "description": "Title of the subscription list screen"
-    },
     "categoryNumber": "หมวดหมู่ #{number}",
-    "@categoryNumber": {
-        "description": "Category number",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
     "newItem": "ใหม่",
-    "@newItem": {
-        "description": "new item"
-    },
     "pickImageError": "เกิดข้อผิดพลาดในการเลือกรูปภาพ: {error}",
-    "@pickImageError": {
-        "description": "Error message when picking an image",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "selectProducts": "เลือกสินค้าอย่างน้อยหนึ่งรายการ",
-    "@selectProducts": {
-        "description": "Title of the product selection dialog"
-    },
     "categoryId": "รหัสหมวดหมู่",
-    "@categoryId": {
-        "description": "Label for the category id field"
-    },
     "categoryName": "ชื่อหมวดหมู่",
-    "@categoryName": {
-        "description": "Label for the category name field"
-    },
     "enterCategoryName": "กรุณาใส่ชื่อหมวดหมู่",
-    "@enterCategoryName": {
-        "description": "Validation message for the category name field"
-    },
     "description": "คำอธิบาย",
-    "@description": {
-        "description": "Label for the description field"
-    },
     "enterCategoryDescription": "กรุณาใส่คำอธิบายหมวดหมู่",
-    "@enterCategoryDescription": {
-        "description": "Validation message for the category description field"
-    },
     "relatedProducts": "สินค้าที่เกี่ยวข้อง",
-    "@relatedProducts": {
-        "description": "Label for the related products field"
-    },
     "totalShown": " ทั้งหมด: {total}, แสดง {shown} แรก",
-    "@totalShown": {
-        "description": "Label for the total number of items shown",
-        "placeholders": {
-            "total": {
-                "type": "int"
-            },
-            "shown": {
-                "type": "int"
-            }
-        }
-    },
     "create": "สร้าง",
-    "@create": {
-        "description": "Create button"
-    },
     "update": "อัปเดต",
-    "@update": {
-        "description": "Update button"
-    },
     "imageUploadError": "เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ!",
-    "@imageUploadError": {
-        "description": "Error message when uploading an image"
-    },
     "categoryFiles": "อัปโหลด/ดาวน์โหลดหมวดหมู่",
-    "@categoryFiles": {
-        "description": "Title of the category files dialog"
-    },
     "downloadFormat": "ดาวน์โหลดก่อนเพื่อรับรูปแบบ",
-    "@downloadFormat": {
-        "description": "Instruction to download the format first"
-    },
     "uploadCsv": "อัปโหลดไฟล์ CSV",
-    "@uploadCsv": {
-        "description": "Button to upload a CSV file"
-    },
     "downloadEmail": "ดาวน์โหลดผ่านอีเมล",
-    "@downloadEmail": {
-        "description": "Button to download via email"
-    },
     "emailData": "ไฟล์ข้อมูลจะถูกส่งทางอีเมล",
-    "@emailData": {
-        "description": "Information about the data file being sent by email"
-    },
     "noCategories": "ยังไม่มีหมวดหมู่ เพิ่มโดยใช้ '+'",
-    "@noCategories": {
-        "description": "Message when there are no categories"
-    },
     "fetchCategoriesError": "ไม่สามารถดึงข้อมูลหมวดหมู่ได้: {error}",
-    "@fetchCategoriesError": {
-        "description": "Error message when fetching categories",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "categoryUpDown": "อัปโหลด/ดาวน์โหลดหมวดหมู่",
-    "@categoryUpDown": {
-        "description": "Tooltip for the category up/download button"
-    },
     "addNew": "เพิ่มใหม่",
-    "@addNew": {
-        "description": "Tooltip for the add new button"
-    },
     "fetchSearchError": "ไม่สามารถดึงข้อมูลรายการค้นหาได้: {error}",
-    "@fetchSearchError": {
-        "description": "Error message when fetching search items",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "categorySearch": "ค้นหาหมวดหมู่",
-    "@categorySearch": {
-        "description": "Title of the category search dialog"
-    },
     "searchInput": "ข้อมูลสำหรับการค้นหา",
-    "@searchInput": {
-        "description": "Label for the search input field"
-    },
     "enterSearch": "กรุณาใส่ค่าสำหรับการค้นหา",
-    "@enterSearch": {
-        "description": "Validation message for the search input field"
-    },
     "searchResults": "ผลการค้นหา",
-    "@searchResults": {
-        "description": "Label for the search results"
-    },
     "noSearchItems": "ไม่พบรายการค้นหา (ยัง)",
-    "@noSearchItems": {
-        "description": "Message when no search items are found"
-    },
     "id": "รหัส: {id}",
-    "@id": {
-        "description": "Label for the ID",
-        "placeholders": {
-            "id": {
-                "type": "String"
-            }
-        }
-    },
     "name": "ชื่อ: {name}",
-    "@name": {
-        "description": "Label for the name",
-        "placeholders": {
-            "name": {
-                "type": "String"
-            }
-        }
-    },
     "productNumber": "สินค้า #{number}",
-    "@productNumber": {
-        "description": "Product number",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
     "roomTypeNumber": "ประเภทห้อง #{number}",
-    "@roomTypeNumber": {
-        "description": "Room type number",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
     "rental": "เช่า",
-    "@rental": {
-        "description": "Rental product type"
-    },
     "selectCategories": "เลือกหมวดหมู่อย่างน้อยหนึ่งรายการ",
-    "@selectCategories": {
-        "description": "Title of the category selection dialog"
-    },
     "productId": "รหัสสินค้า",
-    "@productId": {
-        "description": "Label for the product id field"
-    },
     "roomTypeId": "รหัสประเภทห้อง",
-    "@roomTypeId": {
-        "description": "Label for the room type id field"
-    },
     "productType": "ประเภทสินค้า",
-    "@productType": {
-        "description": "Label for the product type field"
-    },
     "productName": "ชื่อสินค้า",
-    "@productName": {
-        "description": "Label for the product name field"
-    },
     "roomTypeName": "ชื่อประเภทห้อง",
-    "@roomTypeName": {
-        "description": "Label for the room type name field"
-    },
     "prices": "ราคา",
-    "@prices": {
-        "description": "Label for the prices section"
-    },
     "listPrice": "ราคาปลีก({symbol})",
-    "@listPrice": {
-        "description": "Label for the list price field",
-        "placeholders": {
-            "symbol": {
-                "type": "String"
-            }
-        }
-    },
     "currentPrice": "ราคาปัจจุบัน({symbol})",
-    "@currentPrice": {
-        "description": "Label for the current price field",
-        "placeholders": {
-            "symbol": {
-                "type": "String"
-            }
-        }
-    },
     "currency": "สกุลเงิน",
-    "@currency": {
-        "description": "Label for the currency field"
-    },
     "currencyRequired": "ต้องระบุช่องสกุลเงิน!",
-    "@currencyRequired": {
-        "description": "Validation message for the currency field"
-    },
     "relatedCategories": "หมวดหมู่ที่เกี่ยวข้อง",
-    "@relatedCategories": {
-        "description": "Label for the related categories field"
-    },
     "warehouseInventory": "คลังสินค้า/สินค้าคงคลัง",
-    "@warehouseInventory": {
-        "description": "Label for the warehouse/inventory section"
-    },
     "useWarehouse": "ใช้คลังสินค้า?",
-    "@useWarehouse": {
-        "description": "Label for the use warehouse checkbox"
-    },
     "assetsInWarehouse": "สินทรัพย์ในคลังสินค้า",
-    "@assetsInWarehouse": {
-        "description": "Label for the assets in warehouse field"
-    },
     "typeAmount": "ประเภท/จำนวน",
-    "@typeAmount": {
-        "description": "Label for the type/amount section"
-    },
     "uomType": "ประเภทหน่วยวัด",
-    "@uomType": {
-        "description": "Label for the UOM type field"
-    },
     "uom": "หน่วยวัด",
-    "@uom": {
-        "description": "Label for the unit of measure field"
-    },
     "uomRequired": "กรุณาเลือกหน่วยวัด",
-    "@uomRequired": {
-        "description": "Validation message for the unit of measure field"
-    },
     "amountQuantity": "จำนวน",
-    "@amountQuantity": {
-        "description": "Label for the amount/quantity field"
-    },
     "hotelRoom": "ห้องพักโรงแรม",
-    "@hotelRoom": {
-        "description": "Hotel room asset class"
-    },
     "inventoryFin": "AsClsInventoryFin",
-    "@inventoryFin": {
-        "description": "Inventory finished good asset class"
-    },
     "productFiles": "อัปโหลด/ดาวน์โหลดสินค้า",
-    "@productFiles": {
-        "description": "Title of the product files dialog"
-    },
     "noProducts": "ไม่พบ {entityName} เพิ่มโดยใช้ '+'",
-    "@noProducts": {
-        "description": "Message when no products are found",
-        "placeholders": {
-            "entityName": {
-                "type": "String"
-            }
-        }
-    },
     "fetchProductError": "ไม่สามารถดึงข้อมูลสินค้าได้: {error}",
-    "@fetchProductError": {
-        "description": "Error message when fetching products",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "productUpDown": "อัปโหลด/ดาวน์โหลดสินค้า",
-    "@productUpDown": {
-        "description": "Tooltip for the product up/download button"
-    },
     "productSearch": "ค้นหาสินค้า",
-    "@productSearch": {
-        "description": "Title of the product search dialog"
-    },
     "subscriptionSearch": "ค้นหาการสมัครสมาชิก",
-    "@subscriptionSearch": {
-        "description": "Title of the subscription search dialog"
-    },
     "subscriber": "ผู้สมัคร: {name}",
-    "@subscriber": {
-        "description": "Label for the subscriber",
-        "placeholders": {
-            "name": {
-                "type": "String"
-            }
-        }
-    },
     "subscriptionNumber": "การสมัครสมาชิก #{number}",
-    "@subscriptionNumber": {
-        "description": "Subscription number",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
     "question": "????",
-    "@question": {
-        "description": "question marks"
-    },
     "subscriberName": "ผู้สมัคร,ชื่อ",
-    "@subscriberName": {
-        "description": "Label for the subscriber name search field"
-    },
     "selectSubscriber": "เลือกผู้สมัคร",
-    "@selectSubscriber": {
-        "description": "Title of the subscriber selection dialog"
-    },
     "subscriberLabel": "ผู้สมัคร",
-    "@subscriberLabel": {
-        "description": "Label for the subscriber field"
-    },
     "subscriberRequired": "กรุณาเลือกผู้สมัคร",
-    "@subscriberRequired": {
-        "description": "Validation message for the subscriber field"
-    },
     "purchased": "ซื้อเมื่อ: {date}",
-    "@purchased": {
-        "description": "Label for the purchased date",
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
-        }
-    },
     "cancelled": "ยกเลิกเมื่อ: {date}",
-    "@cancelled": {
-        "description": "Label for the cancelled date",
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
-        }
-    },
     "fromDate": "จากวันที่",
-    "@fromDate": {
-        "description": "Label for the from date field"
-    },
     "thruDate": "ถึงวันที่",
-    "@thruDate": {
-        "description": "Label for the thru date field"
-    },
     "searchProducts": "ค้นหาสินค้า...",
-    "@searchProducts": {
-        "description": "Label for the search products field"
-    },
     "selectProduct": "เลือกสินค้า",
-    "@selectProduct": {
-        "description": "Title of the product selection dialog"
-    },
     "product": "สินค้า",
-    "@product": {
-        "description": "Label for the product field"
-    },
     "productRequired": "กรุณาเลือกสินค้า",
-    "@productRequired": {
-        "description": "Validation message for the product field"
-    },
     "noSubscriptions": "ไม่พบ {entityName} เพิ่มโดยใช้ '+'",
-    "@noSubscriptions": {
-        "description": "Message when no subscriptions are found",
-        "placeholders": {
-            "entityName": {
-                "type": "String"
-            }
-        }
-    },
     "fetchSubscriptionError": "ไม่สามารถดึงข้อมูลการสมัครสมาชิกได้: {error}",
-    "@fetchSubscriptionError": {
-        "description": "Error message when fetching subscriptions",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "error": "ข้อผิดพลาด: {message}",
-    "@error": {
-        "description": "generic error",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
     "errorGettingProducts": "เกิดข้อผิดพลาดในการรับสินค้า: {message}",
-    "@errorGettingProducts": {
-        "description": "error getting products",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
-    "idLabel": "รหัส: {id}\nชื่อ: {name}",
-    "@idLabel": {
-        "description": "label for id",
-        "placeholders": {
-            "id": {
-                "type": "String"
-            },
-            "name": {
-                "type": "String"
-            }
-        }
-    }
+    "idLabel": "รหัส: {id}\nชื่อ: {name}"
 }

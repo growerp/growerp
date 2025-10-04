@@ -1,4 +1,5 @@
 {
+    "@@locale": "th",
     "website": "เว็บไซต์",
     "websites": "เว็บไซต์",
     "websiteNew": "เว็บไซต์ใหม่",
@@ -64,13 +65,5 @@
     "shopDropdownCategories": "หมวดหมู่ดรอปดาวน์ของร้านค้า",
     "create": "สร้าง",
     "update": "อัปเดต",
-    "imageInformation": "ข้อมูลรูปภาพสำหรับ {title}",
-    "@imageInformation": {
-        "description": "Image information title",
-        "placeholders": {
-            "title": {
-                "type": "String"
-            }
-        }
-    }
+    "imageInformation": "ข้อมูลรูปภาพสำหรับ {title}"
 }

@@ -1,4 +1,5 @@
 {
+    "@@locale": "zh",
     "website": "网站",
     "websites": "网站",
     "websiteNew": "新建网站",
@@ -64,13 +65,5 @@
     "shopDropdownCategories": "商店下拉类别",
     "create": "创建",
     "update": "更新",
-    "imageInformation": "图片信息 {title}",
-    "@imageInformation": {
-        "description": "图片信息标题",
-        "placeholders": {
-            "title": {
-                "type": "String"
-            }
-        }
-    }
+    "imageInformation": "图片信息 {title}"
 }

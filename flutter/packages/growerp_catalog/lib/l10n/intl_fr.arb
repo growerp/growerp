@@ -1,471 +1,91 @@
 {
     "@@locale": "fr",
     "category": "Catégorie",
-    "@category": {
-        "description": "Élément de menu Catégorie"
-    },
     "categoryList": "Liste des catégories",
-    "@categoryList": {
-        "description": "Titre de l'écran de la liste des catégories"
-    },
     "products": "Produits",
-    "@products": {
-        "description": "Élément de menu Produits"
-    },
     "productList": "Liste des produits",
-    "@productList": {
-        "description": "Titre de l'écran de la liste des produits"
-    },
     "subscriptions": "Abonnements",
-    "@subscriptions": {
-        "description": "Élément de menu Abonnements"
-    },
     "subscriptionList": "Liste des abonnements",
-    "@subscriptionList": {
-        "description": "Titre de l'écran de la liste des abonnements"
-    },
     "categoryNumber": "Catégorie #{number}",
-    "@categoryNumber": {
-        "description": "Numéro de catégorie",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
     "newItem": "Nouveau",
-    "@newItem": {
-        "description": "nouvel article"
-    },
     "pickImageError": "Erreur de sélection d'image : {error}",
-    "@pickImageError": {
-        "description": "Message d'erreur lors de la sélection d'une image",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "selectProducts": "Sélectionnez un ou plusieurs produits",
-    "@selectProducts": {
-        "description": "Titre de la boîte de dialogue de sélection de produits"
-    },
     "categoryId": "ID de catégorie",
-    "@categoryId": {
-        "description": "Étiquette pour le champ ID de catégorie"
-    },
     "categoryName": "Nom de la catégorie",
-    "@categoryName": {
-        "description": "Étiquette pour le champ Nom de la catégorie"
-    },
     "enterCategoryName": "Veuillez saisir un nom de catégorie ?",
-    "@enterCategoryName": {
-        "description": "Message de validation pour le champ Nom de la catégorie"
-    },
     "description": "Description",
-    "@description": {
-        "description": "Étiquette pour le champ de description"
-    },
     "enterCategoryDescription": "Veuillez saisir une description de catégorie ?",
-    "@enterCategoryDescription": {
-        "description": "Message de validation pour le champ de description de la catégorie"
-    },
     "relatedProducts": "Produits associés",
-    "@relatedProducts": {
-        "description": "Étiquette pour le champ des produits associés"
-    },
     "totalShown": " total : {total}, affichés en premier {shown}",
-    "@totalShown": {
-        "description": "Étiquette pour le nombre total d'articles affichés",
-        "placeholders": {
-            "total": {
-                "type": "int"
-            },
-            "shown": {
-                "type": "int"
-            }
-        }
-    },
     "create": "Créer",
-    "@create": {
-        "description": "Bouton Créer"
-    },
     "update": "Mettre à jour",
-    "@update": {
-        "description": "Bouton Mettre à jour"
-    },
     "imageUploadError": "Erreur de téléchargement de l'image !",
-    "@imageUploadError": {
-        "description": "Message d'erreur lors du téléchargement d'une image"
-    },
     "categoryFiles": "Téléchargement/téléchargement de catégories",
-    "@categoryFiles": {
-        "description": "Titre de la boîte de dialogue des fichiers de catégories"
-    },
     "downloadFormat": "Téléchargez d'abord pour obtenir le format",
-    "@downloadFormat": {
-        "description": "Instruction pour télécharger le format en premier"
-    },
     "uploadCsv": "Télécharger un fichier CSV",
-    "@uploadCsv": {
-        "description": "Bouton pour télécharger un fichier CSV"
-    },
     "downloadEmail": "Télécharger par e-mail",
-    "@downloadEmail": {
-        "description": "Bouton pour télécharger par e-mail"
-    },
     "emailData": "Un fichier de données sera envoyé par e-mail",
-    "@emailData": {
-        "description": "Informations sur le fichier de données envoyé par e-mail"
-    },
     "noCategories": "Aucune catégorie pour le moment, ajoutez-en une avec '+'",
-    "@noCategories": {
-        "description": "Message lorsqu'il n'y a pas de catégories"
-    },
     "fetchCategoriesError": "échec de la récupération des catégories : {error}",
-    "@fetchCategoriesError": {
-        "description": "Message d'erreur lors de la récupération des catégories",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "categoryUpDown": "téléchargement/téléchargement de catégories",
-    "@categoryUpDown": {
-        "description": "Info-bulle pour le bouton de téléchargement/téléchargement de catégories"
-    },
     "addNew": "Ajouter nouveau",
-    "@addNew": {
-        "description": "Info-bulle pour le bouton Ajouter nouveau"
-    },
     "fetchSearchError": "échec de la récupération des éléments de recherche : {error}",
-    "@fetchSearchError": {
-        "description": "Message d'erreur lors de la récupération des éléments de recherche",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "categorySearch": "Recherche de catégories",
-    "@categorySearch": {
-        "description": "Titre de la boîte de dialogue de recherche de catégories"
-    },
     "searchInput": "Saisie de recherche",
-    "@searchInput": {
-        "description": "Étiquette pour le champ de saisie de recherche"
-    },
     "enterSearch": "Veuillez saisir une valeur de recherche ?",
-    "@enterSearch": {
-        "description": "Message de validation pour le champ de saisie de recherche"
-    },
     "searchResults": "Résultats de la recherche",
-    "@searchResults": {
-        "description": "Étiquette pour les résultats de la recherche"
-    },
     "noSearchItems": "Aucun élément de recherche trouvé (pour l'instant)",
-    "@noSearchItems": {
-        "description": "Message lorsqu'aucun élément de recherche n'est trouvé"
-    },
     "id": "ID : {id}",
-    "@id": {
-        "description": "Étiquette pour l'ID",
-        "placeholders": {
-            "id": {
-                "type": "String"
-            }
-        }
-    },
     "name": "Nom : {name}",
-    "@name": {
-        "description": "Étiquette pour le nom",
-        "placeholders": {
-            "name": {
-                "type": "String"
-            }
-        }
-    },
     "productNumber": "Produit #{number}",
-    "@productNumber": {
-        "description": "Numéro de produit",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
     "roomTypeNumber": "Type de chambre #{number}",
-    "@roomTypeNumber": {
-        "description": "Numéro de type de chambre",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
     "rental": "Location",
-    "@rental": {
-        "description": "Type de produit de location"
-    },
     "selectCategories": "Sélectionnez une ou plusieurs catégories",
-    "@selectCategories": {
-        "description": "Titre de la boîte de dialogue de sélection de catégories"
-    },
     "productId": "ID de produit",
-    "@productId": {
-        "description": "Étiquette pour le champ ID de produit"
-    },
     "roomTypeId": "ID de type de chambre",
-    "@roomTypeId": {
-        "description": "Étiquette pour le champ ID de type de chambre"
-    },
     "productType": "Type de produit",
-    "@productType": {
-        "description": "Étiquette pour le champ Type de produit"
-    },
     "productName": "Nom du produit",
-    "@productName": {
-        "description": "Étiquette pour le champ Nom du produit"
-    },
     "roomTypeName": "Nom du type de chambre",
-    "@roomTypeName": {
-        "description": "Étiquette pour le champ Nom du type de chambre"
-    },
     "prices": "Prix",
-    "@prices": {
-        "description": "Étiquette pour la section des prix"
-    },
     "listPrice": "Prix de liste ({symbol})",
-    "@listPrice": {
-        "description": "Étiquette pour le champ du prix de liste",
-        "placeholders": {
-            "symbol": {
-                "type": "String"
-            }
-        }
-    },
     "currentPrice": "Prix actuel ({symbol})",
-    "@currentPrice": {
-        "description": "Étiquette pour le champ du prix actuel",
-        "placeholders": {
-            "symbol": {
-                "type": "String"
-            }
-        }
-    },
     "currency": "Devise",
-    "@currency": {
-        "description": "Étiquette pour le champ de la devise"
-    },
     "currencyRequired": "Champ de devise obligatoire !",
-    "@currencyRequired": {
-        "description": "Message de validation pour le champ de la devise"
-    },
     "relatedCategories": "Catégories associées",
-    "@relatedCategories": {
-        "description": "Étiquette pour le champ des catégories associées"
-    },
     "warehouseInventory": "Entrepôt/Inventaire",
-    "@warehouseInventory": {
-        "description": "Étiquette pour la section entrepôt/inventaire"
-    },
     "useWarehouse": "Utiliser l'entrepôt ?",
-    "@useWarehouse": {
-        "description": "Étiquette pour la case à cocher Utiliser l'entrepôt"
-    },
     "assetsInWarehouse": "Actifs en entrepôt",
-    "@assetsInWarehouse": {
-        "description": "Étiquette pour le champ des actifs en entrepôt"
-    },
     "typeAmount": "Type/Montant",
-    "@typeAmount": {
-        "description": "Étiquette pour la section type/montant"
-    },
     "uomType": "Type d'UdM",
-    "@uomType": {
-        "description": "Étiquette pour le champ Type d'UdM"
-    },
     "uom": "Unité de mesure",
-    "@uom": {
-        "description": "Étiquette pour le champ Unité de mesure"
-    },
     "uomRequired": "Veuillez sélectionner une unité de mesure",
-    "@uomRequired": {
-        "description": "Message de validation pour le champ Unité de mesure"
-    },
     "amountQuantity": "Montant/Quantité",
-    "@amountQuantity": {
-        "description": "Étiquette pour le champ Montant/Quantité"
-    },
     "hotelRoom": "Chambre d'hôtel",
-    "@hotelRoom": {
-        "description": "Classe d'actifs de chambre d'hôtel"
-    },
     "inventoryFin": "AsClsInventoryFin",
-    "@inventoryFin": {
-        "description": "Classe d'actifs de produit fini d'inventaire"
-    },
     "productFiles": "Téléchargement/téléchargement de produits",
-    "@productFiles": {
-        "description": "Titre de la boîte de dialogue des fichiers de produits"
-    },
     "noProducts": "Aucun {entityName} trouvé, ajoutez-en un avec '+'",
-    "@noProducts": {
-        "description": "Message lorsqu'aucun produit n'est trouvé",
-        "placeholders": {
-            "entityName": {
-                "type": "String"
-            }
-        }
-    },
     "fetchProductError": "échec de la récupération du produit : {error}",
-    "@fetchProductError": {
-        "description": "Message d'erreur lors de la récupération des produits",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "productUpDown": "téléchargement/téléchargement de produits",
-    "@productUpDown": {
-        "description": "Info-bulle pour le bouton de téléchargement/téléchargement de produits"
-    },
     "productSearch": "Recherche de produits",
-    "@productSearch": {
-        "description": "Titre de la boîte de dialogue de recherche de produits"
-    },
     "subscriptionSearch": "Recherche d'abonnements",
-    "@subscriptionSearch": {
-        "description": "Titre de la boîte de dialogue de recherche d'abonnements"
-    },
     "subscriber": "Abonné : {name}",
-    "@subscriber": {
-        "description": "Étiquette pour l'abonné",
-        "placeholders": {
-            "name": {
-                "type": "String"
-            }
-        }
-    },
     "subscriptionNumber": "Abonnement #{number}",
-    "@subscriptionNumber": {
-        "description": "Numéro d'abonnement",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
     "question": "????",
-    "@question": {
-        "description": "points d'interrogation"
-    },
     "subscriberName": "abonné,nom",
-    "@subscriberName": {
-        "description": "Étiquette pour le champ de recherche du nom de l'abonné"
-    },
     "selectSubscriber": "Sélectionner un abonné",
-    "@selectSubscriber": {
-        "description": "Titre de la boîte de dialogue de sélection d'abonné"
-    },
     "subscriberLabel": "Abonné",
-    "@subscriberLabel": {
-        "description": "Étiquette pour le champ de l'abonné"
-    },
     "subscriberRequired": "Veuillez sélectionner un abonné",
-    "@subscriberRequired": {
-        "description": "Message de validation pour le champ de l'abonné"
-    },
     "purchased": "Acheté le : {date}",
-    "@purchased": {
-        "description": "Étiquette pour la date d'achat",
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
-        }
-    },
     "cancelled": "Annulé le : {date}",
-    "@cancelled": {
-        "description": "Étiquette pour la date d'annulation",
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
-        }
-    },
     "fromDate": "Date de début",
-    "@fromDate": {
-        "description": "Étiquette pour le champ de la date de début"
-    },
     "thruDate": "Date de fin",
-    "@thruDate": {
-        "description": "Étiquette pour le champ de la date de fin"
-    },
     "searchProducts": "Rechercher des produits...",
-    "@searchProducts": {
-        "description": "Étiquette pour le champ de recherche de produits"
-    },
     "selectProduct": "Sélectionner un produit",
-    "@selectProduct": {
-        "description": "Titre de la boîte de dialogue de sélection de produits"
-    },
     "product": "Produit",
-    "@product": {
-        "description": "Étiquette pour le champ du produit"
-    },
     "productRequired": "Veuillez sélectionner un produit",
-    "@productRequired": {
-        "description": "Message de validation pour le champ du produit"
-    },
     "noSubscriptions": "Aucun {entityName} trouvé, ajoutez-en un avec '+'",
-    "@noSubscriptions": {
-        "description": "Message lorsqu'aucun abonnement n'est trouvé",
-        "placeholders": {
-            "entityName": {
-                "type": "String"
-            }
-        }
-    },
     "fetchSubscriptionError": "échec de la récupération de l'abonnement : {error}",
-    "@fetchSubscriptionError": {
-        "description": "Message d'erreur lors de la récupération de l'abonnement",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "error": "Erreur : {message}",
-    "@error": {
-        "description": "erreur générique",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
     "errorGettingProducts": "Erreur lors de l'obtention des produits : {message}",
-    "@errorGettingProducts": {
-        "description": "erreur lors de l'obtention des produits",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
-    "idLabel": "ID : {id}\nNom : {name}",
-    "@idLabel": {
-        "description": "étiquette pour l'identifiant",
-        "placeholders": {
-            "id": {
-                "type": "String"
-            },
-            "name": {
-                "type": "String"
-            }
-        }
-    }
+    "idLabel": "ID : {id}\nNom : {name}"
 }

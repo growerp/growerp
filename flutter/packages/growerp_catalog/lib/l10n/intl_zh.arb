@@ -1,471 +1,91 @@
 {
     "@@locale": "zh",
     "category": "类别",
-    "@category": {
-        "description": "类别菜单项"
-    },
     "categoryList": "类别列表",
-    "@categoryList": {
-        "description": "类别列表屏幕标题"
-    },
     "products": "产品",
-    "@products": {
-        "description": "产品菜单项"
-    },
     "productList": "产品列表",
-    "@productList": {
-        "description": "产品列表屏幕标题"
-    },
     "subscriptions": "订阅",
-    "@subscriptions": {
-        "description": "订阅菜单项"
-    },
     "subscriptionList": "订阅列表",
-    "@subscriptionList": {
-        "description": "订阅列表屏幕标题"
-    },
     "categoryNumber": "类别 #{number}",
-    "@categoryNumber": {
-        "description": "类别编号",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
     "newItem": "新建",
-    "@newItem": {
-        "description": "新项目"
-    },
     "pickImageError": "选择图片错误：{error}",
-    "@pickImageError": {
-        "description": "选择图片时的错误消息",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "selectProducts": "选择一个或多个产品",
-    "@selectProducts": {
-        "description": "产品选择对话框标题"
-    },
     "categoryId": "类别ID",
-    "@categoryId": {
-        "description": "类别ID字段标签"
-    },
     "categoryName": "类别名称",
-    "@categoryName": {
-        "description": "类别名称字段标签"
-    },
     "enterCategoryName": "请输入类别名称？",
-    "@enterCategoryName": {
-        "description": "类别名称字段的验证消息"
-    },
     "description": "描述",
-    "@description": {
-        "description": "描述字段标签"
-    },
     "enterCategoryDescription": "请输入类别描述？",
-    "@enterCategoryDescription": {
-        "description": "类别描述字段的验证消息"
-    },
     "relatedProducts": "相关产品",
-    "@relatedProducts": {
-        "description": "相关产品字段标签"
-    },
     "totalShown": " 总计：{total}，首先显示 {shown}",
-    "@totalShown": {
-        "description": "显示项目总数的标签",
-        "placeholders": {
-            "total": {
-                "type": "int"
-            },
-            "shown": {
-                "type": "int"
-            }
-        }
-    },
     "create": "创建",
-    "@create": {
-        "description": "创建按钮"
-    },
     "update": "更新",
-    "@update": {
-        "description": "更新按钮"
-    },
     "imageUploadError": "图片上传错误！",
-    "@imageUploadError": {
-        "description": "上传图片时的错误消息"
-    },
     "categoryFiles": "类别上传/下载",
-    "@categoryFiles": {
-        "description": "类别文件对话框标题"
-    },
     "downloadFormat": "首先下载以获取格式",
-    "@downloadFormat": {
-        "description": "首先下载格式的说明"
-    },
     "uploadCsv": "上传CSV文件",
-    "@uploadCsv": {
-        "description": "上传CSV文件的按钮"
-    },
     "downloadEmail": "通过电子邮件下载",
-    "@downloadEmail": {
-        "description": "通过电子邮件下载的按钮"
-    },
     "emailData": "数据文件将通过电子邮件发送",
-    "@emailData": {
-        "description": "有关通过电子邮件发送数据文件的信息"
-    },
     "noCategories": "尚无类别，使用“+”添加一个",
-    "@noCategories": {
-        "description": "没有类别时的消息"
-    },
     "fetchCategoriesError": "获取类别失败：{error}",
-    "@fetchCategoriesError": {
-        "description": "获取类别时的错误消息",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "categoryUpDown": "类别上传/下载",
-    "@categoryUpDown": {
-        "description": "类别上传/下载按钮的工具提示"
-    },
     "addNew": "添新",
-    "@addNew": {
-        "description": "“添新”按钮的工具提示"
-    },
     "fetchSearchError": "获取搜索项失败：{error}",
-    "@fetchSearchError": {
-        "description": "获取搜索项时的错误消息",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "categorySearch": "类别搜索",
-    "@categorySearch": {
-        "description": "类别搜索对话框标题"
-    },
     "searchInput": "搜索输入",
-    "@searchInput": {
-        "description": "搜索输入字段标签"
-    },
     "enterSearch": "请输入搜索值？",
-    "@enterSearch": {
-        "description": "搜索输入字段的验证消息"
-    },
     "searchResults": "搜索结果",
-    "@searchResults": {
-        "description": "搜索结果标签"
-    },
     "noSearchItems": "未找到搜索项（尚未）",
-    "@noSearchItems": {
-        "description": "未找到搜索项时的消息"
-    },
     "id": "ID：{id}",
-    "@id": {
-        "description": "ID标签",
-        "placeholders": {
-            "id": {
-                "type": "String"
-            }
-        }
-    },
     "name": "名称：{name}",
-    "@name": {
-        "description": "名称标签",
-        "placeholders": {
-            "name": {
-                "type": "String"
-            }
-        }
-    },
     "productNumber": "产品 #{number}",
-    "@productNumber": {
-        "description": "产品编号",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
     "roomTypeNumber": "房型 #{number}",
-    "@roomTypeNumber": {
-        "description": "房型编号",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
     "rental": "租赁",
-    "@rental": {
-        "description": "租赁产品类型"
-    },
     "selectCategories": "选择一个或多个类别",
-    "@selectCategories": {
-        "description": "类别选择对话框标题"
-    },
     "productId": "产品ID",
-    "@productId": {
-        "description": "产品ID字段标签"
-    },
     "roomTypeId": "房型ID",
-    "@roomTypeId": {
-        "description": "房型ID字段标签"
-    },
     "productType": "产品类型",
-    "@productType": {
-        "description": "产品类型字段标签"
-    },
     "productName": "产品名称",
-    "@productName": {
-        "description": "产品名称字段标签"
-    },
     "roomTypeName": "房型名称",
-    "@roomTypeName": {
-        "description": "房型名称字段标签"
-    },
     "prices": "价格",
-    "@prices": {
-        "description": "价格部分标签"
-    },
     "listPrice": "标价({symbol})",
-    "@listPrice": {
-        "description": "标价字段标签",
-        "placeholders": {
-            "symbol": {
-                "type": "String"
-            }
-        }
-    },
     "currentPrice": "当前价格({symbol})",
-    "@currentPrice": {
-        "description": "当前价格字段标签",
-        "placeholders": {
-            "symbol": {
-                "type": "String"
-            }
-        }
-    },
     "currency": "货币",
-    "@currency": {
-        "description": "货币字段标签"
-    },
     "currencyRequired": "货币字段为必填项！",
-    "@currencyRequired": {
-        "description": "货币字段的验证消息"
-    },
     "relatedCategories": "相关类别",
-    "@relatedCategories": {
-        "description": "相关类别字段标签"
-    },
     "warehouseInventory": "仓库/库存",
-    "@warehouseInventory": {
-        "description": "仓库/库存部分标签"
-    },
     "useWarehouse": "使用仓库？",
-    "@useWarehouse": {
-        "description": "使用仓库复选框标签"
-    },
     "assetsInWarehouse": "仓库中的资产",
-    "@assetsInWarehouse": {
-        "description": "仓库中资产字段标签"
-    },
     "typeAmount": "类型/数量",
-    "@typeAmount": {
-        "description": "类型/数量部分标签"
-    },
     "uomType": "计量单位类型",
-    "@uomType": {
-        "description": "计量单位类型字段标签"
-    },
     "uom": "计量单位",
-    "@uom": {
-        "description": "计量单位字段标签"
-    },
     "uomRequired": "请选择一个计量单位",
-    "@uomRequired": {
-        "description": "计量单位字段的验证消息"
-    },
     "amountQuantity": "金额/数量",
-    "@amountQuantity": {
-        "description": "金额/数量字段标签"
-    },
     "hotelRoom": "酒店房间",
-    "@hotelRoom": {
-        "description": "酒店房间资产类别"
-    },
     "inventoryFin": "库存成品资产类别",
-    "@inventoryFin": {
-        "description": "库存成品资产类别"
-    },
     "productFiles": "产品上传/下载",
-    "@productFiles": {
-        "description": "产品文件对话框标题"
-    },
     "noProducts": "未找到{entityName}，使用“+”添加一个",
-    "@noProducts": {
-        "description": "未找到产品时的消息",
-        "placeholders": {
-            "entityName": {
-                "type": "String"
-            }
-        }
-    },
     "fetchProductError": "获取产品失败：{error}",
-    "@fetchProductError": {
-        "description": "获取产品时的错误消息",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "productUpDown": "产品上传/下载",
-    "@productUpDown": {
-        "description": "产品上传/下载按钮的工具提示"
-    },
     "productSearch": "产品搜索",
-    "@productSearch": {
-        "description": "产品搜索对话框标题"
-    },
     "subscriptionSearch": "订阅搜索",
-    "@subscriptionSearch": {
-        "description": "订阅搜索对话框标题"
-    },
     "subscriber": "订阅者：{name}",
-    "@subscriber": {
-        "description": "订阅者标签",
-        "placeholders": {
-            "name": {
-                "type": "String"
-            }
-        }
-    },
     "subscriptionNumber": "订阅 #{number}",
-    "@subscriptionNumber": {
-        "description": "订阅编号",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
     "question": "????",
-    "@question": {
-        "description": "问号"
-    },
     "subscriberName": "订阅者姓名",
-    "@subscriberName": {
-        "description": "订阅者姓名搜索字段标签"
-    },
     "selectSubscriber": "选择订阅者",
-    "@selectSubscriber": {
-        "description": "订阅者选择对话框标题"
-    },
     "subscriberLabel": "订阅者",
-    "@subscriberLabel": {
-        "description": "订阅者字段标签"
-    },
     "subscriberRequired": "请选择一个订阅者",
-    "@subscriberRequired": {
-        "description": "订阅者字段的验证消息"
-    },
     "purchased": "购买日期：{date}",
-    "@purchased": {
-        "description": "购买日期标签",
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
-        }
-    },
     "cancelled": "取消日期：{date}",
-    "@cancelled": {
-        "description": "取消日期标签",
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
-        }
-    },
     "fromDate": "开始日期",
-    "@fromDate": {
-        "description": "开始日期字段标签"
-    },
     "thruDate": "结束日期",
-    "@thruDate": {
-        "description": "结束日期字段标签"
-    },
     "searchProducts": "搜索产品...",
-    "@searchProducts": {
-        "description": "搜索产品字段标签"
-    },
     "selectProduct": "选择产品",
-    "@selectProduct": {
-        "description": "产品选择对话框标题"
-    },
     "product": "产品",
-    "@product": {
-        "description": "产品字段标签"
-    },
     "productRequired": "请选择一个产品",
-    "@productRequired": {
-        "description": "产品字段的验证消息"
-    },
     "noSubscriptions": "未找到{entityName}，使用“+”添加一个",
-    "@noSubscriptions": {
-        "description": "未找到订阅时的消息",
-        "placeholders": {
-            "entityName": {
-                "type": "String"
-            }
-        }
-    },
     "fetchSubscriptionError": "获取订阅失败：{error}",
-    "@fetchSubscriptionError": {
-        "description": "获取订阅时的错误消息",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "error": "错误：{message}",
-    "@error": {
-        "description": "通用错误",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
     "errorGettingProducts": "获取产品时出错：{message}",
-    "@errorGettingProducts": {
-        "description": "获取产品时出错",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
-    "idLabel": "ID：{id}\n名称：{name}",
-    "@idLabel": {
-        "description": "ID标签",
-        "placeholders": {
-            "id": {
-                "type": "String"
-            },
-            "name": {
-                "type": "String"
-            }
-        }
-    }
+    "idLabel": "ID：{id}\n名称：{name}"
 }

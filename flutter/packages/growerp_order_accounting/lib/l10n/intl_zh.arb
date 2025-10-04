@@ -1,961 +1,240 @@
 {
-  "@@locale": "zh",
-  "nameAndCompany": "姓名和公司",
-  "@nameAndCompany": {
-    "description": "显示姓名和公司的标签"
-  },
-  "glAccount": "总账科目 #",
-  "@glAccount": {
-    "description": "带编号的总账科目页眉或标签"
-  },
-  "newGlAccount": " 新建",
-  "@newGlAccount": {
-    "description": "创建新总账科目的按钮或标签"
-  },
-  "serverProblem": "服务器连接问题",
-  "@serverProblem": {
-    "description": "服务器连接问题的错误消息"
-  },
-  "glAccountId": "总账科目ID",
-  "@glAccountId": {
-    "description": "总账科目ID字段标签"
-  },
-  "glAccountIdNull": "请输入总账科目ID？",
-  "@glAccountIdNull": {
-    "description": "总账科目ID字段为空的错误消息"
-  },
-  "glAccountName": "总账科目名称",
-  "@glAccountName": {
-    "description": "总账科目名称字段标签"
-  },
-  "glAccountNameNull": "请输入总账科目名称？",
-  "@glAccountNameNull": {
-    "description": "总账科目名称字段为空的错误消息"
-  },
-  "accountClass": "账户类别",
-  "@accountClass": {
-    "description": "账户类别字段标签"
-  },
-  "selectGlAccountClass": "选择总账账户类别",
-  "@selectGlAccountClass": {
-    "description": "选择总账账户类别的下拉提示"
-  },
-  "fieldRequired": "必填字段",
-  "@fieldRequired": {
-    "description": "通用必填字段错误消息"
-  },
-  "accountType": "账户类型",
-  "@accountType": {
-    "description": "账户类型字段标签"
-  },
-  "selectGlAccountType": "选择总账账户类型",
-  "@selectGlAccountType": {
-    "description": "选择总账账户类型的下拉提示"
-  },
-  "postedBalance": "已过账余额",
-  "@postedBalance": {
-    "description": "显示账户余额的已过账余额字段标签"
-  },
-  "create": "创建",
-  "@create": {
-    "description": "创建按钮文本"
-  },
-  "update": "更新",
-  "@update": {
-    "description": "更新按钮文本"
-  },
-  "fetchGlAccountFail": "获取总账科目失败：",
-  "@fetchGlAccountFail": {
-    "description": "总账科目加载失败时的错误消息"
-  },
-  "noGlAccounts": "未找到活动的总账科目",
-  "@noGlAccounts": {
-    "description": "未找到总账科目时的消息"
-  },
-  "glAccountFile": "总账科目上传/下载",
-  "@glAccountFile": {
-    "description": "总账科目文件上传/下载部分标题"
-  },
-  "trialBalance": "试算平衡表",
-  "@trialBalance": {
-    "description": "试算平衡表报告标题"
-  },
-  "tb": "试算平衡",
-  "@tb": {
-    "description": "试算平衡表的缩写"
-  },
-  "reservation": "预订",
-  "@reservation": {
-    "description": "预订部分或标签"
-  },
-  "noJournalEntries": "未找到日记账分录",
-  "@noJournalEntries": {
-    "description": "未找到日记账分录时的消息"
-  },
-  "noOpenTransactions": "未找到（未过账）交易！",
-  "@noOpenTransactions": {
-    "description": "未找到未过账交易时的消息"
-  },
-  "noOpenOrders": "未找到（未结）销售订单！",
-  "@noOpenOrders": {
-    "description": "未找到未结销售订单时的消息"
-  },
-  "noOpenInvoices": "未找到（未结）销售发票！",
-  "@noOpenInvoices": {
-    "description": "未找到未结销售发票时的消息"
-  },
-  "noOpenPayments": "未找到（未结）销售付款！",
-  "@noOpenPayments": {
-    "description": "未找到未结销售付款时的消息"
-  },
-  "noOpenShipments": "未找到（未结）出库装运！",
-  "@noOpenShipments": {
-    "description": "未找到未结出库装运时的消息"
-  },
-  "noOpenRequests": "未找到（未结）请求！",
-  "@noOpenRequests": {
-    "description": "未找到未结请求时的消息"
-  },
-  "noPurchaseOrders": "未找到（未结）采购订单！",
-  "@noPurchaseOrders": {
-    "description": "未找到未结采购订单时的消息"
-  },
-  "noPurchaseInvoices": "未找到（未结）采购发票！",
-  "@noPurchaseInvoices": {
-    "description": "未找到未结采购发票时的消息"
-  },
-  "noPurchasePayments": "未找到（未结）采购付款！",
-  "@noPurchasePayments": {
-    "description": "未找到未结采购付款时的消息"
-  },
-  "noIncomingShipments": "未找到（未结）入库装运！",
-  "@noIncomingShipments": {
-    "description": "未找到未结入库装运时的消息"
-  },
-  "addNew": "添新",
-  "@addNew": {
-    "description": "添加新项目按钮文本"
-  },
-  "refresh": "刷新",
-  "@refresh": {
-    "description": "刷新按钮文本"
-  },
-  "fetchItemTypesFail": "获取项目类型失败：",
-  "@fetchItemTypesFail": {
-    "description": "项目类型加载失败时的错误消息"
-  },
-  "noItemTypes": "没有活动的物料类型",
-  "@noItemTypes": {
-    "description": "未找到活动的物料类型时的消息"
-  },
-  "showAllUsed": "显示全部/已用",
-  "@showAllUsed": {
-    "description": "显示全部或已用项目的切换按钮文本"
-  },
-  "all": "全部",
-  "@all": {
-    "description": "显示所有项目的筛选选项"
-  },
-  "onlyUsed": "仅已用",
-  "@onlyUsed": {
-    "description": "仅显示已用项目的筛选选项"
-  },
-  "fetchPaymentTypesFail": "获取支付类型失败：",
-  "@fetchPaymentTypesFail": {
-    "description": "支付类型加载失败时的错误消息"
-  },
-  "search": "搜索",
-  "@search": {
-    "description": "搜索按钮文本"
-  },
-  "searchFinDoc": "搜索财务单据",
-  "@searchFinDoc": {
-    "description": "财务单据搜索对话框的标题"
-  },
-  "newRental": "新建预订",
-  "@newRental": {
-    "description": "创建新预订的按钮或标签"
-  },
-  "sales": "销售",
-  "@sales": {
-    "description": "销售单据标签"
-  },
-  "purchase": "采购",
-  "@purchase": {
-    "description": "采购单据标签"
-  },
-  "fetchSearchItemsFail": "获取搜索项失败：",
-  "@fetchSearchItemsFail": {
-    "description": "搜索项加载失败时的错误消息"
-  },
-  "searchInput": "搜索输入",
-  "@searchInput": {
-    "description": "搜索输入字段标签"
-  },
-  "enterSearchValue": "请输入搜索值？",
-  "@enterSearchValue": {
-    "description": "搜索字段为空的错误消息"
-  },
-  "searchResults": "搜索结果",
-  "@searchResults": {
-    "description": "搜索结果标题"
-  },
-  "noSearchItems": "未找到搜索项（尚未）",
-  "@noSearchItems": {
-    "description": "未找到搜索项时的消息"
-  },
-  "id": "ID",
-  "@id": {
-    "description": "标识符的缩写"
-  },
-  "date": "日期",
-  "@date": {
-    "description": "日期标签"
-  },
-  "finDocId": "财务单据ID",
-  "@finDocId": {
-    "description": "财务单据ID字段标签"
-  },
-  "customer": "客户",
-  "@customer": {
-    "description": "客户标签"
-  },
-  "supplier": "供应商",
-  "@supplier": {
-    "description": "供应商标签"
-  },
-  "selectCustomer": "选择客户",
-  "@selectCustomer": {
-    "description": "选择客户的下拉提示"
-  },
-  "selectSupplier": "选择供应商",
-  "@selectSupplier": {
-    "description": "选择供应商的下拉提示"
-  },
-  "status": "状态",
-  "@status": {
-    "description": "状态标签"
-  },
-  "description": "描述",
-  "@description": {
-    "description": "描述标签"
-  },
-  "created": "已创建",
-  "@created": {
-    "description": "创建日期标签"
-  },
-  "placed": "已下单",
-  "@placed": {
-    "description": "下单日期标签"
-  },
-  "posted": "已过账？",
-  "@posted": {
-    "description": "已过账状态标签"
-  },
-  "no": "否",
-  "@no": {
-    "description": "否定回答"
-  },
-  "yes": "是",
-  "@yes": {
-    "description": "肯定回答"
-  },
-  "updateHeader": "更新标题",
-  "@updateHeader": {
-    "description": "更新标题按钮文本"
-  },
-  "addTransactionItem": "添加\n交易项",
-  "@addTransactionItem": {
-    "description": "添加交易项按钮文本"
-  },
-  "addOtherItem": "添加其他项目",
-  "@addOtherItem": {
-    "description": "添加其他项目按钮文本"
-  },
-  "addRental": "添加租赁",
-  "@addRental": {
-    "description": "添加租赁项目按钮文本"
-  },
-  "addProduct": "添加产品",
-  "@addProduct": {
-    "description": "添加产品按钮文本"
-  },
-  "cancelFinDoc": "取消",
-  "@cancelFinDoc": {
-    "description": "取消财务单据按钮文本"
-  },
-  "clearCart": "清空购物车",
-  "@clearCart": {
-    "description": "清空购物车按钮文本"
-  },
-  "noItems": "尚无项目",
-  "@noItems": {
-    "description": "没有项目时的消息"
-  },
-  "item": "项目",
-  "@item": {
-    "description": "项目标签"
-  },
-  "glAccountLabel": "总账科目",
-  "@glAccountLabel": {
-    "description": "总账科目标签"
-  },
-  "debit": "借方",
-  "@debit": {
-    "description": "借方金额标签"
-  },
-  "credit": "贷方",
-  "@credit": {
-    "description": "贷方金额标签"
-  },
-  "productId": "产品ID",
-  "@productId": {
-    "description": "产品ID标签"
-  },
-  "quantity": "数量",
-  "@quantity": {
-    "description": "数量的缩写"
-  },
-  "price": "价格",
-  "@price": {
-    "description": "价格标签"
-  },
-  "subTotal": "小计",
-  "@subTotal": {
-    "description": "小计的缩写"
-  },
-  "location": "位置",
-  "@location": {
-    "description": "位置标签"
-  },
-  "addTransactionItemTitle": "添加交易项",
-  "@addTransactionItemTitle": {
-    "description": "添加交易项对话框的标题"
-  },
-  "amount": "金额",
-  "@amount": {
-    "description": "金额标签"
-  },
-  "enterAmount": "输入金额？",
-  "@enterAmount": {
-    "description": "金额字段为空的错误消息"
-  },
-  "ok": "确定",
-  "@ok": {
-    "description": "确认按钮文本"
-  },
-  "newOrder": "新建订单",
-  "@newOrder": {
-    "description": "创建新订单的按钮或标签"
-  },
-  "orderId": "订单 #",
-  "@orderId": {
-    "description": "带编号的订单ID标题或标签"
-  },
-  "reservationId": "预订 #",
-  "@reservationId": {
-    "description": "带编号的预订ID标题或标签"
-  },
-  "customerSearch": "客户姓名",
-  "@customerSearch": {
-    "description": "客户搜索字段标签"
-  },
-  "roomType": "房型",
-  "@roomType": {
-    "description": "房型标签"
-  },
-  "product": "产品",
-  "@product": {
-    "description": "产品标签"
-  },
-  "selectProduct": "选择产品",
-  "@selectProduct": {
-    "description": "选择产品的下拉提示"
-  },
-  "priceAmount": "价格/金额",
-  "@priceAmount": {
-    "description": "价格或金额标签"
-  },
-  "enterPriceAmount": "输入价格或金额？",
-  "@enterPriceAmount": {
-    "description": "价格或金额字段为空的错误消息"
-  },
-  "selectStartDate": "选择开始日期",
-  "@selectStartDate": {
-    "description": "开始日期字段为空的错误消息"
-  },
-  "startDate": "开始日期",
-  "@startDate": {
-    "description": "开始日期标签"
-  },
-  "numberOfDays": "天数",
-  "@numberOfDays": {
-    "description": "天数标签"
-  },
-  "cancel": "取消",
-  "@cancel": {
-    "description": "取消按钮文本"
-  },
-  "incomingShipment": "入库装运 #",
-  "@incomingShipment": {
-    "description": "入库装运标题"
-  },
-  "itemLocationInstructions": "对于每个项目，请选择：\n- 选择现有位置\n- 输入新位置\n- 留空以创建新位置，\n   名称为项目名称和接收日期",
-  "@itemLocationInstructions": {
-    "description": "项目位置说明"
-  },
-  "toLocation": "至位置：",
-  "@toLocation": {
-    "description": "目标位置标签"
-  },
-  "locationName": "位置名称",
-  "@locationName": {
-    "description": "位置名称标签"
-  },
-  "selectLocation": "选择位置",
-  "@selectLocation": {
-    "description": "选择位置的下拉提示"
-  },
-  "newLocation": "新位置",
-  "@newLocation": {
-    "description": "新位置标签"
-  },
-  "goBack": "返回",
-  "@goBack": {
-    "description": "返回按钮文本"
-  },
-  "confirm": "确认 ",
-  "@confirm": {
-    "description": "确认按钮文本"
-  },
-  "receiveShipment": "接收装运",
-  "@receiveShipment": {
-    "description": "接收装运按钮文本"
-  },
-  "incoming": "入库",
-  "@incoming": {
-    "description": "入库单据标签"
-  },
-  "outgoing": "出库",
-  "@outgoing": {
-    "description": "出库单据标签"
-  },
-  "paymentId": "付款 #",
-  "@paymentId": {
-    "description": "带编号的付款ID标题或标签"
-  },
-  "newItem": "新建",
-  "@newItem": {
-    "description": "新项目标签"
-  },
-  "selectGlAccount": "选择总账科目",
-  "@selectGlAccount": {
-    "description": "选择总账科目的下拉提示"
-  },
-  "finDocs": "财务单据",
-  "@finDocs": {
-    "description": "财务单据标签"
-  },
-  "paymentType": "付款类型",
-  "@paymentType": {
-    "description": "付款类型标签"
-  },
-  "enterPaymentType": "输入用于过账的项目类型？",
-  "@enterPaymentType": {
-    "description": "付款类型字段为空的错误消息"
-  },
-  "apply": "应用：",
-  "@apply": {
-    "description": "应用标签"
-  },
-  "paymentMethods": "付款方式",
-  "@paymentMethods": {
-    "description": "付款方式标题"
-  },
-  "creditCard": "信用卡",
-  "@creditCard": {
-    "description": "信用卡标签"
-  },
-  "cash": "现金",
-  "@cash": {
-    "description": "现金标签"
-  },
-  "check": "支票",
-  "@check": {
-    "description": "支票标签"
-  },
-  "bank": "银行",
-  "@bank": {
-    "description": "银行标签"
-  },
-  "gatewayResponses": "网关响应",
-  "@gatewayResponses": {
-    "description": "网关响应标题"
-  },
-  "operation": "操作",
-  "@operation": {
-    "description": "操作标签"
-  },
-  "method": "方法",
-  "@method": {
-    "description": "方法标签"
-  },
-  "result": "确定？",
-  "@result": {
-    "description": "结果标签"
-  },
-  "message": "消息：",
-  "@message": {
-    "description": "消息标签"
-  },
-  "release": "释放",
-  "@release": {
-    "description": "释放付款按钮文本"
-  },
-  "capture": "捕获",
-  "@capture": {
-    "description": "捕获付款按钮文本"
-  },
-  "authorize": "授权",
-  "@authorize": {
-    "description": "授权付款按钮文本"
-  },
-  "name": "名称",
-  "@name": {
-    "description": "通用名称标签"
-  },
-  "select": "选择",
-  "@select": {
-    "description": "选择操作的前缀"
-  },
-  "type": "类型",
-  "@type": {
-    "description": "通用类型标签"
-  },
-  "itemOrCustomerRequired": "需要一个{companyRole}和至少一个{docType}项目",
-  "@itemOrCustomerRequired": {
-    "description": "创建单据时的验证错误",
-    "placeholders": {
-      "companyRole": {},
-      "docType": {}
-    }
-  },
-  "request": "请求",
-  "@request": {
-    "description": "请求标签"
-  },
-  "requester": "请求者",
-  "@requester": {
-    "description": "请求者标签"
-  },
-  "selectRequester": "选择请求者",
-  "@selectRequester": {
-    "description": "选择请求者的下拉提示"
-  },
-  "postalCodeCare": "您正在哪个邮政编码区域寻找护理？",
-  "@postalCodeCare": {
-    "description": "邮政编码护理问题标签"
-  },
-  "telephoneNumberQuestion": "您的电话号码是多少？",
-  "@telephoneNumberQuestion": {
-    "description": "电话号码问题标签"
-  },
-  "careTypeQuestion": "您在寻找哪种类型的护理？",
-  "@careTypeQuestion": {
-    "description": "护理类型问题标签"
-  },
-  "residentialCare": "住宿护理",
-  "@residentialCare": {
-    "description": "住宿护理选项"
-  },
-  "homeCare": "家庭护理",
-  "@homeCare": {
-    "description": "家庭护理选项"
-  },
-  "shortTermCare": "短期护理",
-  "@shortTermCare": {
-    "description": "短期护理选项"
-  },
-  "retirementLiving": "退休生活",
-  "@retirementLiving": {
-    "description": "退休生活选项"
-  },
-  "careForWhomQuestion": "护理对象是谁？",
-  "@careForWhomQuestion": {
-    "description": "护理对象问题标签"
-  },
-  "myself": "我自己",
-  "@myself": {
-    "description": "我自己选项"
-  },
-  "myParent": "我的父母",
-  "@myParent": {
-    "description": "我的父母选项"
-  },
-  "myPartner": "我的伴侣",
-  "@myPartner": {
-    "description": "我的伴侣选项"
-  },
-  "myChild": "我的孩子",
-  "@myChild": {
-    "description": "我的孩子选项"
-  },
-  "myClient": "我的客户",
-  "@myClient": {
-    "description": "我的客户选项"
-  },
-  "other": "其他",
-  "@other": {
-    "description": "其他选项"
-  },
-  "timeframeQuestion": "您希望的时间范围是怎样的？",
-  "@timeframeQuestion": {
-    "description": "时间范围问题标签"
-  },
-  "notSure": "我不确定",
-  "@notSure": {
-    "description": "不确定选项"
-  },
-  "shortTerm": "短期",
-  "@shortTerm": {
-    "description": "短期选项"
-  },
-  "longTerm": "长期",
-  "@longTerm": {
-    "description": "长期选项"
-  },
-  "howSoonCareQuestion": "您可能多快需要护理？",
-  "@howSoonCareQuestion": {
-    "description": "多快需要护理问题标签"
-  },
-  "asap": "尽快",
-  "@asap": {
-    "description": "尽快选项"
-  },
-  "withinThreeMonths": "三个月内",
-  "@withinThreeMonths": {
-    "description": "三个月内选项"
-  },
-  "withinSixMonths": "六个月内",
-  "@withinSixMonths": {
-    "description": "六个月内选项"
-  },
-  "moreThanSixMonths": "超过六个月",
-  "@moreThanSixMonths": {
-    "description": "超过六个月选项"
-  },
-  "acatStatusQuestion": "您的ACAT评估状态如何？",
-  "@acatStatusQuestion": {
-    "description": "ACAT状态问题标签"
-  },
-  "acatNotStarted": "尚未开始评估",
-  "@acatNotStarted": {
-    "description": "ACAT尚未开始选项"
-  },
-  "acatInProgress": "评估进行中",
-  "@acatInProgress": {
-    "description": "ACAT进行中选项"
-  },
-  "acatComplete": "评估完成",
-  "@acatComplete": {
-    "description": "ACAT完成选项"
-  },
-  "cancelRequest": "取消请求",
-  "@cancelRequest": {
-    "description": "取消请求按钮文本"
-  },
-  "requestType": "请求类型",
-  "@requestType": {
-    "description": "请求类型标签"
-  },
-  "company": "公司",
-  "@company": {
-    "description": "公司标签"
-  },
-  "glAccountUpDown": "总账科目上传/下载",
-  "@glAccountUpDown": {
-    "description": "总账科目上传/下载标签"
-  },
-  "downloadFirst": "首先下载以获取格式",
-  "@downloadFirst": {
-    "description": "首先下载格式的说明"
-  },
-  "uploadCsv": "上传CSV文件",
-  "@uploadCsv": {
-    "description": "上传CSV文件按钮"
-  },
-  "downloadEmail": "通过电子邮件下载",
-  "@downloadEmail": {
-    "description": "通过电子邮件下载按钮"
-  },
-  "dataFileSendEmail": "数据文件将通过电子邮件发送",
-  "@dataFileSendEmail": {
-    "description": "关于通过电子邮件发送数据文件的信息消息"
-  },
-  "glAccountFiles": "总账科目文件",
-  "@glAccountFiles": {
-    "description": "总账科目文件标签"
-  },
-  "totalAssets": "总资产",
-  "@totalAssets": {
-    "description": "总资产标签"
-  },
-  "totalEquityAndDistribution": "总权益+分配",
-  "@totalEquityAndDistribution": {
-    "description": "总权益和分配标签"
-  },
-  "totalLiabilityAndEquity": "总负债+权益",
-  "@totalLiabilityAndEquity": {
-    "description": "总负债和权益标签"
-  },
-  "totalUnbookedNetIncome": "总未入账净收入",
-  "@totalUnbookedNetIncome": {
-    "description": "总未入账净收入标签"
-  },
-  "liabilityEquityUnbookedNetIncome": "负债+权益+未入账净收入",
-  "@liabilityEquityUnbookedNetIncome": {
-    "description": "负债、权益和未入账净收入标签"
-  },
-  "previousYear": "上一年",
-  "@previousYear": {
-    "description": "转到上一年按钮"
-  },
-  "nextYear": "下一年",
-  "@nextYear": {
-    "description": "转到下一年按钮"
-  },
-  "year": "年份：",
-  "@year": {
-    "description": "年份标签"
-  },
-  "period": "期间：",
-  "@period": {
-    "description": "期间标签"
-  },
-  "expand": "展开",
-  "@expand": {
-    "description": "展开的缩写"
-  },
-  "collapse": "折叠",
-  "@collapse": {
-    "description": "折叠的缩写"
-  },
-  "glAccountIdAndName": "总账科目ID 总账科目名称",
-  "@glAccountIdAndName": {
-    "description": "总账科目ID和名称标题"
-  },
-  "postedHeader": "已过账",
-  "@postedHeader": {
-    "description": "已过账金额标题"
-  },
-  "dataForYearNotAvailable": "{year}年的数据不可用",
-  "@dataForYearNotAvailable": {
-    "description": "某年数据不可用时的消息",
-    "placeholders": {
-      "year": {}
-    }
-  },
-  "yearLetter": "年",
-  "@yearLetter": {
-    "description": "年份字母"
-  },
-  "quarterLetter": "季",
-  "@quarterLetter": {
-    "description": "季度字母"
-  },
-  "monthLetter": "月",
-  "@monthLetter": {
-    "description": "月份字母"
-  },
-  "getBalanceSheetFail": "获取资产负债表失败",
-  "@getBalanceSheetFail": {
-    "description": "资产负债表加载失败时的错误消息"
-  },
-  "noBalanceSummaryFound": "未找到余额摘要",
-  "@noBalanceSummaryFound": {
-    "description": "未找到余额摘要时的消息"
-  },
-  "getBalanceSummaryFail": "获取余额摘要失败",
-  "@getBalanceSummaryFail": {
-    "description": "余额摘要加载失败时的错误消息"
-  },
-  "expandAll": "全部展开",
-  "@expandAll": {
-    "description": "全部展开项目按钮"
-  },
-  "collapseAll": "全部折叠",
-  "@collapseAll": {
-    "description": "全部折叠项目按钮"
-  },
-  "recalculate": "重新计算",
-  "@recalculate": {
-    "description": "重新计算按钮"
-  },
-  "thisAccount": "此账户",
-  "@thisAccount": {
-    "description": "此账户标题"
-  },
-  "totalTree": "总树",
-  "@totalTree": {
-    "description": "总树标题"
-  },
-  "getLedgerTreeFail": "无法加载总账树！",
-  "@getLedgerTreeFail": {
-    "description": "总账树加载失败时的错误消息"
-  },
-  "jan": "一月",
-  "@jan": {
-    "description": "一月的缩写"
-  },
-  "feb": "二月",
-  "@feb": {
-    "description": "二月的缩写"
-  },
-  "mar": "三月",
-  "@mar": {
-    "description": "三月的缩写"
-  },
-  "apr": "四月",
-  "@apr": {
-    "description": "四月的缩写"
-  },
-  "may": "五月",
-  "@may": {
-    "description": "五月的缩写"
-  },
-  "jun": "六月",
-  "@jun": {
-    "description": "六月的缩写"
-  },
-  "jul": "七月",
-  "@jul": {
-    "description": "七月的缩写"
-  },
-  "aug": "八月",
-  "@aug": {
-    "description": "八月的缩写"
-  },
-  "sep": "九月",
-  "@sep": {
-    "description": "九月的缩写"
-  },
-  "oct": "十月",
-  "@oct": {
-    "description": "十月的缩写"
-  },
-  "nov": "十一月",
-  "@nov": {
-    "description": "十一月的缩写"
-  },
-  "dec": "十二月",
-  "@dec": {
-    "description": "十二月的缩写"
-  },
-  "byMonth": "按月",
-  "@byMonth": {
-    "description": "按月标签"
-  },
-  "noDataForPeriod": "期间内未找到数据 ",
-  "@noDataForPeriod": {
-    "description": "期间内未找到数据时的消息"
-  },
-  "ledgerJournal": "总账日记账 #",
-  "@ledgerJournal": {
-    "description": "带编号的总账日记账标题或标签"
-  },
-  "ledgerJournalName": "总账日记账名称",
-  "@ledgerJournalName": {
-    "description": "总账日记账名称字段标签"
-  },
-  "ledgerJournalNameNull": "请输入总账日记账名称？",
-  "@ledgerJournalNameNull": {
-    "description": "总账日记账名称字段为空的错误消息"
-  },
-  "updateHeaderShort": "更新标题",
-  "@updateHeaderShort": {
-    "description": "更新标题的缩写"
-  },
-  "getLedgerJournalFail": "获取总账日记账失败：",
-  "@getLedgerJournalFail": {
-    "description": "总账日记账加载失败时的错误消息"
-  },
-  "noLedgerJournalFound": "未找到活动的总账日记账",
-  "@noLedgerJournalFound": {
-    "description": "未找到活动的总账日记账时的消息"
-  },
-  "postedDebit": "已过账\n借方",
-  "@postedDebit": {
-    "description": "已过账借方"
-  },
-  "postedCredit": "已过账\n贷方",
-  "@postedCredit": {
-    "description": "已过账贷方"
-  },
-  "endBalance": "期末余额",
-  "@endBalance": {
-    "description": "期末余额"
-  },
-  "codeName": "代码/名称",
-  "@codeName": {
-    "description": "代码和名称"
-  },
-  "beginningBalance": "期初余额",
-  "@beginningBalance": {
-    "description": "期初余额"
-  },
-  "postedDebits": "已过账借方",
-  "@postedDebits": {
-    "description": "已过账借方"
-  },
-  "postedCredits": "已过账贷方",
-  "@postedCredits": {
-    "description": "已过账贷方"
-  },
-  "endingBalance": "期末余额",
-  "@endingBalance": {
-    "description": "期末余额"
-  },
-  "from": "从",
-  "@from": {
-    "description": "开始日期"
-  },
-  "to": "至",
-  "@to": {
-    "description": "结束日期"
-  },
-  "closed": "已关闭",
-  "@closed": {
-    "description": "已关闭状态"
-  },
-  "begin": "开始",
-  "@begin": {
-    "description": "期初余额"
-  },
-  "code": "代码",
-  "@code": {
-    "description": "代码"
-  },
-  "deletePeriod": "删除期间",
-  "@deletePeriod": {
-    "description": "删除期间工具提示"
-  },
-  "createNextPeriod": "创建下一期间",
-  "@createNextPeriod": {
-    "description": "创建下一期间工具提示"
-  },
-  "closeTimePeriod": "关闭时间段",
-  "@closeTimePeriod": {
-    "description": "关闭时间段工具提示"
-  },
-  "closeTimePeriodConfirmation": "关闭时间段 {periodName}？",
-  "@closeTimePeriodConfirmation": {
-    "description": "关闭时间段确认",
-    "placeholders": {
-      "periodName": {}
-    }
-  },
-  "cannotBeUndone": "无法撤销！",
-  "@cannotBeUndone": {
-    "description": "无法撤销警告"
-  }
+    "@@locale": "zh",
+    "nameAndCompany": "姓名和公司",
+    "glAccount": "总账科目 #",
+    "newGlAccount": " 新建",
+    "serverProblem": "服务器连接问题",
+    "glAccountId": "总账科目ID",
+    "glAccountIdNull": "请输入总账科目ID？",
+    "glAccountName": "总账科目名称",
+    "glAccountNameNull": "请输入总账科目名称？",
+    "accountClass": "账户类别",
+    "selectGlAccountClass": "选择总账账户类别",
+    "fieldRequired": "必填字段",
+    "accountType": "账户类型",
+    "selectGlAccountType": "选择总账账户类型",
+    "postedBalance": "已过账余额",
+    "create": "创建",
+    "update": "更新",
+    "fetchGlAccountFail": "获取总账科目失败：",
+    "noGlAccounts": "未找到活动的总账科目",
+    "glAccountFile": "总账科目上传/下载",
+    "trialBalance": "试算平衡表",
+    "tb": "试算平衡",
+    "reservation": "预订",
+    "noJournalEntries": "未找到日记账分录",
+    "noOpenTransactions": "未找到（未过账）交易！",
+    "noOpenOrders": "未找到（未结）销售订单！",
+    "noOpenInvoices": "未找到（未结）销售发票！",
+    "noOpenPayments": "未找到（未结）销售付款！",
+    "noOpenShipments": "未找到（未结）出库装运！",
+    "noOpenRequests": "未找到（未结）请求！",
+    "noPurchaseOrders": "未找到（未结）采购订单！",
+    "noPurchaseInvoices": "未找到（未结）采购发票！",
+    "noPurchasePayments": "未找到（未结）采购付款！",
+    "noIncomingShipments": "未找到（未结）入库装运！",
+    "addNew": "添新",
+    "refresh": "刷新",
+    "fetchItemTypesFail": "获取项目类型失败：",
+    "noItemTypes": "没有活动的物料类型",
+    "showAllUsed": "显示全部/已用",
+    "all": "全部",
+    "onlyUsed": "仅已用",
+    "fetchPaymentTypesFail": "获取支付类型失败：",
+    "search": "搜索",
+    "searchFinDoc": "搜索财务单据",
+    "newRental": "新建预订",
+    "sales": "销售",
+    "purchase": "采购",
+    "fetchSearchItemsFail": "获取搜索项失败：",
+    "searchInput": "搜索输入",
+    "enterSearchValue": "请输入搜索值？",
+    "searchResults": "搜索结果",
+    "noSearchItems": "未找到搜索项（尚未）",
+    "id": "ID",
+    "date": "日期",
+    "finDocId": "财务单据ID",
+    "customer": "客户",
+    "supplier": "供应商",
+    "selectCustomer": "选择客户",
+    "selectSupplier": "选择供应商",
+    "status": "状态",
+    "description": "描述",
+    "created": "已创建",
+    "placed": "已下单",
+    "posted": "已过账？",
+    "no": "否",
+    "yes": "是",
+    "updateHeader": "更新标题",
+    "addTransactionItem": "添加\n交易项",
+    "addOtherItem": "添加其他项目",
+    "addRental": "添加租赁",
+    "addProduct": "添加产品",
+    "cancelFinDoc": "取消",
+    "clearCart": "清空购物车",
+    "noItems": "尚无项目",
+    "item": "项目",
+    "glAccountLabel": "总账科目",
+    "debit": "借方",
+    "credit": "贷方",
+    "productId": "产品ID",
+    "quantity": "数量",
+    "price": "价格",
+    "subTotal": "小计",
+    "location": "位置",
+    "addTransactionItemTitle": "添加交易项",
+    "amount": "金额",
+    "enterAmount": "输入金额？",
+    "ok": "确定",
+    "newOrder": "新建订单",
+    "orderId": "订单 #",
+    "reservationId": "预订 #",
+    "customerSearch": "客户姓名",
+    "roomType": "房型",
+    "product": "产品",
+    "selectProduct": "选择产品",
+    "priceAmount": "价格/金额",
+    "enterPriceAmount": "输入价格或金额？",
+    "selectStartDate": "选择开始日期",
+    "startDate": "开始日期",
+    "numberOfDays": "天数",
+    "cancel": "取消",
+    "incomingShipment": "入库装运 #",
+    "itemLocationInstructions": "对于每个项目，请选择：\n- 选择现有位置\n- 输入新位置\n- 留空以创建新位置，\n   名称为项目名称和接收日期",
+    "toLocation": "至位置：",
+    "locationName": "位置名称",
+    "selectLocation": "选择位置",
+    "newLocation": "新位置",
+    "goBack": "返回",
+    "confirm": "确认 ",
+    "receiveShipment": "接收装运",
+    "incoming": "入库",
+    "outgoing": "出库",
+    "paymentId": "付款 #",
+    "newItem": "新建",
+    "selectGlAccount": "选择总账科目",
+    "finDocs": "财务单据",
+    "paymentType": "付款类型",
+    "enterPaymentType": "输入用于过账的项目类型？",
+    "apply": "应用：",
+    "paymentMethods": "付款方式",
+    "creditCard": "信用卡",
+    "cash": "现金",
+    "check": "支票",
+    "bank": "银行",
+    "gatewayResponses": "网关响应",
+    "operation": "操作",
+    "method": "方法",
+    "result": "确定？",
+    "message": "消息：",
+    "release": "释放",
+    "capture": "捕获",
+    "authorize": "授权",
+    "name": "名称",
+    "select": "选择",
+    "type": "类型",
+    "itemOrCustomerRequired": "需要一个{companyRole}和至少一个{docType}项目",
+    "request": "请求",
+    "requester": "请求者",
+    "selectRequester": "选择请求者",
+    "postalCodeCare": "您正在哪个邮政编码区域寻找护理？",
+    "telephoneNumberQuestion": "您的电话号码是多少？",
+    "careTypeQuestion": "您在寻找哪种类型的护理？",
+    "residentialCare": "住宿护理",
+    "homeCare": "家庭护理",
+    "shortTermCare": "短期护理",
+    "retirementLiving": "退休生活",
+    "careForWhomQuestion": "护理对象是谁？",
+    "myself": "我自己",
+    "myParent": "我的父母",
+    "myPartner": "我的伴侣",
+    "myChild": "我的孩子",
+    "myClient": "我的客户",
+    "other": "其他",
+    "timeframeQuestion": "您希望的时间范围是怎样的？",
+    "notSure": "我不确定",
+    "shortTerm": "短期",
+    "longTerm": "长期",
+    "howSoonCareQuestion": "您可能多快需要护理？",
+    "asap": "尽快",
+    "withinThreeMonths": "三个月内",
+    "withinSixMonths": "六个月内",
+    "moreThanSixMonths": "超过六个月",
+    "acatStatusQuestion": "您的ACAT评估状态如何？",
+    "acatNotStarted": "尚未开始评估",
+    "acatInProgress": "评估进行中",
+    "acatComplete": "评估完成",
+    "cancelRequest": "取消请求",
+    "requestType": "请求类型",
+    "company": "公司",
+    "glAccountUpDown": "总账科目上传/下载",
+    "downloadFirst": "首先下载以获取格式",
+    "uploadCsv": "上传CSV文件",
+    "downloadEmail": "通过电子邮件下载",
+    "dataFileSendEmail": "数据文件将通过电子邮件发送",
+    "glAccountFiles": "总账科目文件",
+    "totalAssets": "总资产",
+    "totalEquityAndDistribution": "总权益+分配",
+    "totalLiabilityAndEquity": "总负债+权益",
+    "totalUnbookedNetIncome": "总未入账净收入",
+    "liabilityEquityUnbookedNetIncome": "负债+权益+未入账净收入",
+    "previousYear": "上一年",
+    "nextYear": "下一年",
+    "year": "年份：",
+    "period": "期间：",
+    "expand": "展开",
+    "collapse": "折叠",
+    "glAccountIdAndName": "总账科目ID 总账科目名称",
+    "postedHeader": "已过账",
+    "dataForYearNotAvailable": "{year}年的数据不可用",
+    "yearLetter": "年",
+    "quarterLetter": "季",
+    "monthLetter": "月",
+    "getBalanceSheetFail": "获取资产负债表失败",
+    "noBalanceSummaryFound": "未找到余额摘要",
+    "getBalanceSummaryFail": "获取余额摘要失败",
+    "expandAll": "全部展开",
+    "collapseAll": "全部折叠",
+    "recalculate": "重新计算",
+    "thisAccount": "此账户",
+    "totalTree": "总树",
+    "getLedgerTreeFail": "无法加载总账树！",
+    "jan": "一月",
+    "feb": "二月",
+    "mar": "三月",
+    "apr": "四月",
+    "may": "五月",
+    "jun": "六月",
+    "jul": "七月",
+    "aug": "八月",
+    "sep": "九月",
+    "oct": "十月",
+    "nov": "十一月",
+    "dec": "十二月",
+    "byMonth": "按月",
+    "noDataForPeriod": "期间内未找到数据 ",
+    "ledgerJournal": "总账日记账 #",
+    "ledgerJournalName": "总账日记账名称",
+    "ledgerJournalNameNull": "请输入总账日记账名称？",
+    "updateHeaderShort": "更新标题",
+    "getLedgerJournalFail": "获取总账日记账失败：",
+    "noLedgerJournalFound": "未找到活动的总账日记账",
+    "postedDebit": "已过账\n借方",
+    "postedCredit": "已过账\n贷方",
+    "endBalance": "期末余额",
+    "codeName": "代码/名称",
+    "beginningBalance": "期初余额",
+    "postedDebits": "已过账借方",
+    "postedCredits": "已过账贷方",
+    "endingBalance": "期末余额",
+    "from": "从",
+    "to": "至",
+    "closed": "已关闭",
+    "begin": "开始",
+    "code": "代码",
+    "deletePeriod": "删除期间",
+    "createNextPeriod": "创建下一期间",
+    "closeTimePeriod": "关闭时间段",
+    "closeTimePeriodConfirmation": "关闭时间段 {periodName}？",
+    "cannotBeUndone": "无法撤销！"
 }
