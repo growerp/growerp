@@ -9,32 +9,16 @@ List<BlocProvider> getUserCompanyBlocProviders(
 ) {
   List<BlocProvider> blocProviders = [
     BlocProvider<CompanyUserBloc>(
-      create: (context) => CompanyUserBloc(
-        restClient,
-        Role.unknown,
-        UserCompanyLocalizations.of(context)!,
-      ),
+      create: (context) => CompanyUserBloc(restClient, Role.unknown),
     ),
     BlocProvider<CompanyUserCustomerBloc>(
-      create: (context) => CompanyUserBloc(
-        restClient,
-        Role.customer,
-        UserCompanyLocalizations.of(context)!,
-      ),
+      create: (context) => CompanyUserBloc(restClient, Role.customer),
     ),
     BlocProvider<CompanyUserSupplierBloc>(
-      create: (context) => CompanyUserBloc(
-        restClient,
-        Role.supplier,
-        UserCompanyLocalizations.of(context)!,
-      ),
+      create: (context) => CompanyUserBloc(restClient, Role.supplier),
     ),
     BlocProvider<CompanyUserLeadBloc>(
-      create: (context) => CompanyUserBloc(
-        restClient,
-        Role.lead,
-        UserCompanyLocalizations.of(context)!,
-      ),
+      create: (context) => CompanyUserBloc(restClient, Role.lead),
     ),
     BlocProvider<CompanyBloc>(
       create: (context) => CompanyBloc(restClient, Role.unknown),
