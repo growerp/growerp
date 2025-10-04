@@ -1,0 +1,961 @@
+{
+  "@@locale": "fr",
+  "nameAndCompany": "nom & Société",
+  "@nameAndCompany": {
+    "description": "Étiquette affichant le nom et la société ensemble"
+  },
+  "glAccount": "Compte GL #",
+  "@glAccount": {
+    "description": "En-tête ou étiquette de compte GL avec le symbole du numéro"
+  },
+  "newGlAccount": " Nouveau",
+  "@newGlAccount": {
+    "description": "Bouton ou étiquette pour créer un nouveau compte GL"
+  },
+  "serverProblem": "Problème de connexion au serveur",
+  "@serverProblem": {
+    "description": "Message d'erreur pour les problèmes de connectivité du serveur"
+  },
+  "glAccountId": "ID de compte GL",
+  "@glAccountId": {
+    "description": "Étiquette du champ ID de compte GL"
+  },
+  "glAccountIdNull": "Veuillez saisir un ID de compte GL ?",
+  "@glAccountIdNull": {
+    "description": "Message d'erreur pour le champ ID de compte GL vide"
+  },
+  "glAccountName": "Nom du compte GL",
+  "@glAccountName": {
+    "description": "Étiquette du champ Nom du compte GL"
+  },
+  "glAccountNameNull": "Veuillez saisir un nom de compte GL ?",
+  "@glAccountNameNull": {
+    "description": "Message d'erreur pour le champ Nom du compte GL vide"
+  },
+  "accountClass": "Classe de compte",
+  "@accountClass": {
+    "description": "Étiquette du champ Classe de compte"
+  },
+  "selectGlAccountClass": "Sélectionner la classe de compte GL",
+  "@selectGlAccountClass": {
+    "description": "Indication de la liste déroulante pour la sélection de la classe de compte GL"
+  },
+  "fieldRequired": "Champ obligatoire",
+  "@fieldRequired": {
+    "description": "Message d'erreur générique de champ obligatoire"
+  },
+  "accountType": "Type de compte",
+  "@accountType": {
+    "description": "Étiquette du champ Type de compte"
+  },
+  "selectGlAccountType": "Sélectionner le type de compte GL",
+  "@selectGlAccountType": {
+    "description": "Indication de la liste déroulante pour la sélection du type de compte GL"
+  },
+  "postedBalance": "Solde comptabilisé",
+  "@postedBalance": {
+    "description": "Étiquette du champ Solde comptabilisé affichant le solde du compte"
+  },
+  "create": "Créer",
+  "@create": {
+    "description": "Texte du bouton Créer"
+  },
+  "update": "Mettre à jour",
+  "@update": {
+    "description": "Texte du bouton Mettre à jour"
+  },
+  "fetchGlAccountFail": "échec de la récupération des comptes GL : ",
+  "@fetchGlAccountFail": {
+    "description": "Message d'erreur lorsque les comptes GL ne parviennent pas à se charger"
+  },
+  "noGlAccounts": "Aucun compte GL actif trouvé",
+  "@noGlAccounts": {
+    "description": "Message lorsqu'aucun compte GL n'est trouvé"
+  },
+  "glAccountFile": "Téléchargement/téléchargement de comptes GL",
+  "@glAccountFile": {
+    "description": "En-tête de la section de téléchargement/téléchargement de fichiers de comptes GL"
+  },
+  "trialBalance": "Balance de vérification",
+  "@trialBalance": {
+    "description": "En-tête du rapport de la balance de vérification"
+  },
+  "tb": "BV",
+  "@tb": {
+    "description": "Abréviation de Balance de vérification"
+  },
+  "reservation": "Réservation",
+  "@reservation": {
+    "description": "Section ou étiquette de réservation"
+  },
+  "noJournalEntries": "aucune écriture de journal trouvée",
+  "@noJournalEntries": {
+    "description": "Message lorsqu'aucune écriture de journal n'est trouvée"
+  },
+  "noOpenTransactions": "aucune transaction (non comptabilisée) trouvée !",
+  "@noOpenTransactions": {
+    "description": "Message lorsqu'aucune transaction non comptabilisée n'est trouvée"
+  },
+  "noOpenOrders": "aucune commande client (ouverte) trouvée !",
+  "@noOpenOrders": {
+    "description": "Message lorsqu'aucune commande client ouverte n'est trouvée"
+  },
+  "noOpenInvoices": "aucune facture client (ouverte) trouvée !",
+  "@noOpenInvoices": {
+    "description": "Message lorsqu'aucune facture client ouverte n'est trouvée"
+  },
+  "noOpenPayments": "aucun paiement client (ouvert) trouvé !",
+  "@noOpenPayments": {
+    "description": "Message lorsqu'aucun paiement client ouvert n'est trouvé"
+  },
+  "noOpenShipments": "aucune expédition sortante (ouverte) trouvée !",
+  "@noOpenShipments": {
+    "description": "Message lorsqu'aucune expédition sortante ouverte n'est trouvée"
+  },
+  "noOpenRequests": "aucune demande (ouverte) trouvée !",
+  "@noOpenRequests": {
+    "description": "Message lorsqu'aucune demande ouverte n'est trouvée"
+  },
+  "noPurchaseOrders": "aucun bon de commande (ouvert) trouvé !",
+  "@noPurchaseOrders": {
+    "description": "Message lorsqu'aucun bon de commande ouvert n'est trouvé"
+  },
+  "noPurchaseInvoices": "aucune facture d'achat (ouverte) trouvée !",
+  "@noPurchaseInvoices": {
+    "description": "Message lorsqu'aucune facture d'achat ouverte n'est trouvée"
+  },
+  "noPurchasePayments": "aucun paiement d'achat (ouvert) trouvé !",
+  "@noPurchasePayments": {
+    "description": "Message lorsqu'aucun paiement d'achat ouvert n'est trouvé"
+  },
+  "noIncomingShipments": "aucune expédition entrante (ouverte) trouvée !",
+  "@noIncomingShipments": {
+    "description": "Message lorsqu'aucune expédition entrante ouverte n'est trouvée"
+  },
+  "addNew": "Ajouter nouveau",
+  "@addNew": {
+    "description": "Texte du bouton Ajouter un nouvel élément"
+  },
+  "refresh": "Actualiser",
+  "@refresh": {
+    "description": "Texte du bouton Actualiser"
+  },
+  "fetchItemTypesFail": "échec de la récupération des types d'articles : ",
+  "@fetchItemTypesFail": {
+    "description": "Message d'erreur lorsque les types d'articles ne parviennent pas à se charger"
+  },
+  "noItemTypes": "Aucun type d'article actif",
+  "@noItemTypes": {
+    "description": "Message lorsqu'aucun type d'article actif n'est trouvé"
+  },
+  "showAllUsed": "Afficher tout/utilisé",
+  "@showAllUsed": {
+    "description": "Texte du bouton bascule pour afficher tous les articles ou les articles utilisés"
+  },
+  "all": "Tout",
+  "@all": {
+    "description": "Option de filtre pour afficher tous les articles"
+  },
+  "onlyUsed": "uniquement utilisé",
+  "@onlyUsed": {
+    "description": "Option de filtre pour afficher uniquement les articles utilisés"
+  },
+  "fetchPaymentTypesFail": "échec de la récupération des types de paiement : ",
+  "@fetchPaymentTypesFail": {
+    "description": "Message d'erreur lorsque les types de paiement ne parviennent pas à se charger"
+  },
+  "search": "Rechercher",
+  "@search": {
+    "description": "Texte du bouton de recherche"
+  },
+  "searchFinDoc": "Rechercher un document financier",
+  "@searchFinDoc": {
+    "description": "Titre de la boîte de dialogue de recherche de documents financiers"
+  },
+  "newRental": "Nouvelle réservation",
+  "@newRental": {
+    "description": "Bouton ou étiquette pour créer une nouvelle réservation"
+  },
+  "sales": "Ventes",
+  "@sales": {
+    "description": "Étiquette pour les documents de vente"
+  },
+  "purchase": "Achat",
+  "@purchase": {
+    "description": "Étiquette pour les documents d'achat"
+  },
+  "fetchSearchItemsFail": "échec de la récupération des éléments de recherche : ",
+  "@fetchSearchItemsFail": {
+    "description": "Message d'erreur lorsque les éléments de recherche ne parviennent pas à se charger"
+  },
+  "searchInput": "Saisie de recherche",
+  "@searchInput": {
+    "description": "Étiquette pour le champ de saisie de recherche"
+  },
+  "enterSearchValue": "Veuillez saisir une valeur de recherche ?",
+  "@enterSearchValue": {
+    "description": "Message d'erreur pour le champ de recherche vide"
+  },
+  "searchResults": "Résultats de la recherche",
+  "@searchResults": {
+    "description": "En-tête des résultats de la recherche"
+  },
+  "noSearchItems": "Aucun élément de recherche trouvé (pour l'instant)",
+  "@noSearchItems": {
+    "description": "Message lorsqu'aucun élément de recherche n'est trouvé"
+  },
+  "id": "ID",
+  "@id": {
+    "description": "Abréviation d'Identifiant"
+  },
+  "date": "Date",
+  "@date": {
+    "description": "Étiquette de date"
+  },
+  "finDocId": "ID de document financier",
+  "@finDocId": {
+    "description": "Étiquette du champ ID de document financier"
+  },
+  "customer": "Client",
+  "@customer": {
+    "description": "Étiquette pour le client"
+  },
+  "supplier": "Fournisseur",
+  "@supplier": {
+    "description": "Étiquette pour le fournisseur"
+  },
+  "selectCustomer": "Sélectionner un client",
+  "@selectCustomer": {
+    "description": "Indication de la liste déroulante pour la sélection d'un client"
+  },
+  "selectSupplier": "Sélectionner un fournisseur",
+  "@selectSupplier": {
+    "description": "Indication de la liste déroulante pour la sélection d'un fournisseur"
+  },
+  "status": "Statut",
+  "@status": {
+    "description": "Étiquette pour le statut"
+  },
+  "description": "Description",
+  "@description": {
+    "description": "Étiquette pour la description"
+  },
+  "created": "Créé",
+  "@created": {
+    "description": "Étiquette pour la date de création"
+  },
+  "placed": "Passé",
+  "@placed": {
+    "description": "Étiquette pour la date de passation"
+  },
+  "posted": "Comptabilisé ?",
+  "@posted": {
+    "description": "Étiquette pour le statut comptabilisé"
+  },
+  "no": "Non",
+  "@no": {
+    "description": "Réponse négative"
+  },
+  "yes": "Oui",
+  "@yes": {
+    "description": "Réponse positive"
+  },
+  "updateHeader": "Mettre à jour l'en-tête",
+  "@updateHeader": {
+    "description": "Texte du bouton pour mettre à jour l'en-tête"
+  },
+  "addTransactionItem": "Ajouter\n un article de transaction",
+  "@addTransactionItem": {
+    "description": "Texte du bouton pour ajouter un article de transaction"
+  },
+  "addOtherItem": "Ajouter un autre article",
+  "@addOtherItem": {
+    "description": "Texte du bouton pour ajouter un autre article"
+  },
+  "addRental": "Ajouter une location",
+  "@addRental": {
+    "description": "Texte du bouton pour ajouter un article de location"
+  },
+  "addProduct": "Ajouter un produit",
+  "@addProduct": {
+    "description": "Texte du bouton pour ajouter un produit"
+  },
+  "cancelFinDoc": "Annuler",
+  "@cancelFinDoc": {
+    "description": "Texte du bouton pour annuler un document financier"
+  },
+  "clearCart": "Vider le panier",
+  "@clearCart": {
+    "description": "Texte du bouton pour vider le panier"
+  },
+  "noItems": "aucun article pour le moment",
+  "@noItems": {
+    "description": "Message lorsqu'il n'y a aucun article"
+  },
+  "item": "Article",
+  "@item": {
+    "description": "Étiquette pour un article"
+  },
+  "glAccountLabel": "Compte GL",
+  "@glAccountLabel": {
+    "description": "Étiquette pour le compte GL"
+  },
+  "debit": "Débit",
+  "@debit": {
+    "description": "Étiquette pour le montant du débit"
+  },
+  "credit": "Crédit",
+  "@credit": {
+    "description": "Étiquette pour le montant du crédit"
+  },
+  "productId": "ID de produit",
+  "@productId": {
+    "description": "Étiquette pour l'ID de produit"
+  },
+  "quantity": "Q",
+  "@quantity": {
+    "description": "Abréviation de Quantité"
+  },
+  "price": "Prix",
+  "@price": {
+    "description": "Étiquette pour le prix"
+  },
+  "subTotal": "S-Tot.",
+  "@subTotal": {
+    "description": "Abréviation de Sous-total"
+  },
+  "location": "Emplacement",
+  "@location": {
+    "description": "Étiquette pour l'emplacement"
+  },
+  "addTransactionItemTitle": "Ajouter un article de transaction",
+  "@addTransactionItemTitle": {
+    "description": "Titre de la boîte de dialogue d'ajout d'article de transaction"
+  },
+  "amount": "Montant",
+  "@amount": {
+    "description": "Étiquette pour le montant"
+  },
+  "enterAmount": "Saisir le montant ?",
+  "@enterAmount": {
+    "description": "Message d'erreur pour le champ de montant vide"
+  },
+  "ok": "Ok",
+  "@ok": {
+    "description": "Texte du bouton de confirmation"
+  },
+  "newOrder": "Nouvelle commande",
+  "@newOrder": {
+    "description": "Bouton ou étiquette pour créer une nouvelle commande"
+  },
+  "orderId": "Commande #",
+  "@orderId": {
+    "description": "En-tête ou étiquette d'ID de commande avec le symbole du numéro"
+  },
+  "reservationId": "Réservation #",
+  "@reservationId": {
+    "description": "En-tête ou étiquette d'ID de réservation avec le symbole du numéro"
+  },
+  "customerSearch": "client,nom",
+  "@customerSearch": {
+    "description": "Étiquette pour le champ de recherche de client"
+  },
+  "roomType": "Type de chambre",
+  "@roomType": {
+    "description": "Étiquette pour le type de chambre"
+  },
+  "product": "Produit",
+  "@product": {
+    "description": "Étiquette pour le produit"
+  },
+  "selectProduct": "Sélectionner un produit",
+  "@selectProduct": {
+    "description": "Indication de la liste déroulante pour la sélection d'un produit"
+  },
+  "priceAmount": "Prix/Montant",
+  "@priceAmount": {
+    "description": "Étiquette pour le prix ou le montant"
+  },
+  "enterPriceAmount": "Saisir le prix ou le montant ?",
+  "@enterPriceAmount": {
+    "description": "Message d'erreur pour le champ de prix ou de montant vide"
+  },
+  "selectStartDate": "Sélectionner une date de début",
+  "@selectStartDate": {
+    "description": "Message d'erreur pour le champ de date de début vide"
+  },
+  "startDate": "Date de début",
+  "@startDate": {
+    "description": "Étiquette pour la date de début"
+  },
+  "numberOfDays": "Nombre de jours",
+  "@numberOfDays": {
+    "description": "Étiquette pour le nombre de jours"
+  },
+  "cancel": "Annuler",
+  "@cancel": {
+    "description": "Texte du bouton Annuler"
+  },
+  "incomingShipment": "Expédition entrante #",
+  "@incomingShipment": {
+    "description": "En-tête pour l'expédition entrante"
+  },
+  "itemLocationInstructions": "Pour chaque article, soit :\n- Sélectionnez un emplacement existant\n- Saisissez un nouvel emplacement\n- laissez vide pour un nouvel emplacement avec\n   le nom de l'article et la date de réception",
+  "@itemLocationInstructions": {
+    "description": "Instructions pour l'emplacement de l'article"
+  },
+  "toLocation": "Vers l'emplacement : ",
+  "@toLocation": {
+    "description": "Étiquette pour l'emplacement de destination"
+  },
+  "locationName": "nom de l'emplacement",
+  "@locationName": {
+    "description": "Étiquette pour le nom de l'emplacement"
+  },
+  "selectLocation": "Sélectionner l'emplacement",
+  "@selectLocation": {
+    "description": "Indication de la liste déroulante pour la sélection d'un emplacement"
+  },
+  "newLocation": "Nouvel emplacement",
+  "@newLocation": {
+    "description": "Étiquette pour le nouvel emplacement"
+  },
+  "goBack": "Retour",
+  "@goBack": {
+    "description": "Texte du bouton pour revenir en arrière"
+  },
+  "confirm": "Confirmer ",
+  "@confirm": {
+    "description": "Texte du bouton de confirmation"
+  },
+  "receiveShipment": "Recevoir l'expédition",
+  "@receiveShipment": {
+    "description": "Texte du bouton pour recevoir une expédition"
+  },
+  "incoming": "Entrant",
+  "@incoming": {
+    "description": "Étiquette pour les documents entrants"
+  },
+  "outgoing": "Sortant",
+  "@outgoing": {
+    "description": "Étiquette pour les documents sortants"
+  },
+  "paymentId": "Paiement #",
+  "@paymentId": {
+    "description": "En-tête ou étiquette d'ID de paiement avec le symbole du numéro"
+  },
+  "newItem": "Nouveau",
+  "@newItem": {
+    "description": "Étiquette pour les nouveaux articles"
+  },
+  "selectGlAccount": "Sélectionner un compte GL",
+  "@selectGlAccount": {
+    "description": "Indication de la liste déroulante pour la sélection d'un compte GL"
+  },
+  "finDocs": "Documents financiers",
+  "@finDocs": {
+    "description": "Étiquette pour les documents financiers"
+  },
+  "paymentType": "Type de paiement",
+  "@paymentType": {
+    "description": "Étiquette pour le type de paiement"
+  },
+  "enterPaymentType": "Saisir un type d'article pour la comptabilisation ?",
+  "@enterPaymentType": {
+    "description": "Message d'erreur pour le champ de type de paiement vide"
+  },
+  "apply": "Appliquer :",
+  "@apply": {
+    "description": "Étiquette pour appliquer"
+  },
+  "paymentMethods": "Modes de paiement",
+  "@paymentMethods": {
+    "description": "En-tête pour les modes de paiement"
+  },
+  "creditCard": "Carte de crédit",
+  "@creditCard": {
+    "description": "Étiquette pour la carte de crédit"
+  },
+  "cash": "Espèces",
+  "@cash": {
+    "description": "Étiquette pour les espèces"
+  },
+  "check": "Chèque",
+  "@check": {
+    "description": "Étiquette pour le chèque"
+  },
+  "bank": "Banque",
+  "@bank": {
+    "description": "Étiquette pour la banque"
+  },
+  "gatewayResponses": "Réponses de la passerelle",
+  "@gatewayResponses": {
+    "description": "En-tête pour les réponses de la passerelle"
+  },
+  "operation": "Opération",
+  "@operation": {
+    "description": "Étiquette pour l'opération"
+  },
+  "method": "Méthode",
+  "@method": {
+    "description": "Étiquette pour la méthode"
+  },
+  "result": "OK ?",
+  "@result": {
+    "description": "Étiquette pour le résultat"
+  },
+  "message": "Message :",
+  "@message": {
+    "description": "Étiquette pour le message"
+  },
+  "release": "Libérer",
+  "@release": {
+    "description": "Texte du bouton pour libérer un paiement"
+  },
+  "capture": "Capturer",
+  "@capture": {
+    "description": "Texte du bouton pour capturer un paiement"
+  },
+  "authorize": "Autoriser",
+  "@authorize": {
+    "description": "Texte du bouton pour autoriser un paiement"
+  },
+  "name": "Nom",
+  "@name": {
+    "description": "Étiquette de nom générique"
+  },
+  "select": "Sélectionner",
+  "@select": {
+    "description": "Préfixe pour les actions de sélection"
+  },
+  "type": "Type",
+  "@type": {
+    "description": "Étiquette de type générique"
+  },
+  "itemOrCustomerRequired": "Un {companyRole} et au moins un article {docType} sont requis",
+  "@itemOrCustomerRequired": {
+    "description": "Erreur de validation lors de la création d'un document",
+    "placeholders": {
+      "companyRole": {},
+      "docType": {}
+    }
+  },
+  "request": "Demande",
+  "@request": {
+    "description": "Étiquette de demande"
+  },
+  "requester": "Demandeur",
+  "@requester": {
+    "description": "Étiquette du demandeur"
+  },
+  "selectRequester": "Sélectionner le demandeur",
+  "@selectRequester": {
+    "description": "Indication de la liste déroulante pour la sélection d'un demandeur"
+  },
+  "postalCodeCare": "Dans quel code postal cherchez-vous des soins ?",
+  "@postalCodeCare": {
+    "description": "Étiquette pour la question sur le code postal des soins"
+  },
+  "telephoneNumberQuestion": "Quel est votre numéro de téléphone ?",
+  "@telephoneNumberQuestion": {
+    "description": "Étiquette pour la question sur le numéro de téléphone"
+  },
+  "careTypeQuestion": "Quel type de soins recherchez-vous ?",
+  "@careTypeQuestion": {
+    "description": "Étiquette pour la question sur le type de soins"
+  },
+  "residentialCare": "Soins en établissement",
+  "@residentialCare": {
+    "description": "Option Soins en établissement"
+  },
+  "homeCare": "Soins à domicile",
+  "@homeCare": {
+    "description": "Option Soins à domicile"
+  },
+  "shortTermCare": "Soins de courte durée",
+  "@shortTermCare": {
+    "description": "Option Soins de courte durée"
+  },
+  "retirementLiving": "Vie en résidence pour retraités",
+  "@retirementLiving": {
+    "description": "Option Vie en résidence pour retraités"
+  },
+  "careForWhomQuestion": "Pour qui sont les soins ?",
+  "@careForWhomQuestion": {
+    "description": "Étiquette pour la question Pour qui sont les soins"
+  },
+  "myself": "Moi-même",
+  "@myself": {
+    "description": "Option Moi-même"
+  },
+  "myParent": "Mon parent",
+  "@myParent": {
+    "description": "Option Mon parent"
+  },
+  "myPartner": "Mon partenaire",
+  "@myPartner": {
+    "description": "Option Mon partenaire"
+  },
+  "myChild": "Mon enfant",
+  "@myChild": {
+    "description": "Option Mon enfant"
+  },
+  "myClient": "Mon client",
+  "@myClient": {
+    "description": "Option Mon client"
+  },
+  "other": "Autre",
+  "@other": {
+    "description": "Option Autre"
+  },
+  "timeframeQuestion": "Quel est le délai que vous recherchez ?",
+  "@timeframeQuestion": {
+    "description": "Étiquette pour la question sur le délai"
+  },
+  "notSure": "Je ne suis pas sûr",
+  "@notSure": {
+    "description": "Option Je ne suis pas sûr"
+  },
+  "shortTerm": "Court terme",
+  "@shortTerm": {
+    "description": "Option Court terme"
+  },
+  "longTerm": "Long terme",
+  "@longTerm": {
+    "description": "Option Long terme"
+  },
+  "howSoonCareQuestion": "Dans combien de temps aurez-vous besoin de soins ?",
+  "@howSoonCareQuestion": {
+    "description": "Étiquette pour la question sur le délai des soins"
+  },
+  "asap": "Dès que possible",
+  "@asap": {
+    "description": "Option Dès que possible"
+  },
+  "withinThreeMonths": "Dans les trois mois",
+  "@withinThreeMonths": {
+    "description": "Option Dans les trois mois"
+  },
+  "withinSixMonths": "Dans les six mois",
+  "@withinSixMonths": {
+    "description": "Option Dans les six mois"
+  },
+  "moreThanSixMonths": "Plus de 6 mois",
+  "@moreThanSixMonths": {
+    "description": "Option Plus de 6 mois"
+  },
+  "acatStatusQuestion": "Quel est le statut de votre évaluation ACAT ?",
+  "@acatStatusQuestion": {
+    "description": "Étiquette pour la question sur le statut ACAT"
+  },
+  "acatNotStarted": "Je n'ai pas commencé l'évaluation",
+  "@acatNotStarted": {
+    "description": "Option ACAT non commencée"
+  },
+  "acatInProgress": "Évaluation en cours",
+  "@acatInProgress": {
+    "description": "Option ACAT en cours"
+  },
+  "acatComplete": "Évaluation terminée",
+  "@acatComplete": {
+    "description": "Option ACAT terminée"
+  },
+  "cancelRequest": "Annuler la demande",
+  "@cancelRequest": {
+    "description": "Texte du bouton pour annuler une demande"
+  },
+  "requestType": "Type de demande",
+  "@requestType": {
+    "description": "Étiquette pour le type de demande"
+  },
+  "company": "Société",
+  "@company": {
+    "description": "Étiquette de la société"
+  },
+  "glAccountUpDown": "Téléchargement/téléchargement de compte GL",
+  "@glAccountUpDown": {
+    "description": "Étiquette pour le téléchargement/téléchargement de compte GL"
+  },
+  "downloadFirst": "Téléchargez d'abord pour obtenir le format",
+  "@downloadFirst": {
+    "description": "Instruction pour télécharger le format en premier"
+  },
+  "uploadCsv": "Télécharger un fichier CSV",
+  "@uploadCsv": {
+    "description": "Bouton pour télécharger un fichier CSV"
+  },
+  "downloadEmail": "Télécharger par e-mail",
+  "@downloadEmail": {
+    "description": "Bouton pour télécharger par e-mail"
+  },
+  "dataFileSendEmail": "Un fichier de données sera envoyé par e-mail",
+  "@dataFileSendEmail": {
+    "description": "Message d'information sur l'envoi d'un fichier de données par e-mail"
+  },
+  "glAccountFiles": "fichiers de compte GL",
+  "@glAccountFiles": {
+    "description": "Étiquette pour les fichiers de compte GL"
+  },
+  "totalAssets": "Total des actifs",
+  "@totalAssets": {
+    "description": "Étiquette pour le total des actifs"
+  },
+  "totalEquityAndDistribution": "Total des capitaux propres + distribution",
+  "@totalEquityAndDistribution": {
+    "description": "Étiquette pour le total des capitaux propres et de la distribution"
+  },
+  "totalLiabilityAndEquity": "Total du passif + capitaux propres",
+  "@totalLiabilityAndEquity": {
+    "description": "Étiquette pour le total du passif et des capitaux propres"
+  },
+  "totalUnbookedNetIncome": "Total du résultat net non comptabilisé",
+  "@totalUnbookedNetIncome": {
+    "description": "Étiquette pour le total du résultat net non comptabilisé"
+  },
+  "liabilityEquityUnbookedNetIncome": "Passif + capitaux propres + résultat net non comptabilisé",
+  "@liabilityEquityUnbookedNetIncome": {
+    "description": "Étiquette pour le passif, les capitaux propres et le résultat net non comptabilisé"
+  },
+  "previousYear": "Année précédente",
+  "@previousYear": {
+    "description": "Bouton pour aller à l'année précédente"
+  },
+  "nextYear": "Année suivante",
+  "@nextYear": {
+    "description": "Bouton pour aller à l'année suivante"
+  },
+  "year": "Année : ",
+  "@year": {
+    "description": "Étiquette pour l'année"
+  },
+  "period": "Période : ",
+  "@period": {
+    "description": "Étiquette pour la période"
+  },
+  "expand": "Dév.",
+  "@expand": {
+    "description": "Abréviation de développer"
+  },
+  "collapse": "Réd.",
+  "@collapse": {
+    "description": "Abréviation de réduire"
+  },
+  "glAccountIdAndName": "ID de compte GL Nom du compte GL",
+  "@glAccountIdAndName": {
+    "description": "En-tête pour l'ID et le nom du compte GL"
+  },
+  "postedHeader": "Comptabilisé",
+  "@postedHeader": {
+    "description": "En-tête pour les montants comptabilisés"
+  },
+  "dataForYearNotAvailable": "Les données pour l'année {year} ne sont pas disponibles",
+  "@dataForYearNotAvailable": {
+    "description": "Message lorsque les données d'une année ne sont pas disponibles",
+    "placeholders": {
+      "year": {}
+    }
+  },
+  "yearLetter": "A",
+  "@yearLetter": {
+    "description": "Lettre pour l'année"
+  },
+  "quarterLetter": "T",
+  "@quarterLetter": {
+    "description": "Lettre pour le trimestre"
+  },
+  "monthLetter": "M",
+  "@monthLetter": {
+    "description": "Lettre pour le mois"
+  },
+  "getBalanceSheetFail": "échec de l'obtention du bilan",
+  "@getBalanceSheetFail": {
+    "description": "Message d'erreur lorsque le bilan ne parvient pas à se charger"
+  },
+  "noBalanceSummaryFound": "Aucun résumé de solde trouvé",
+  "@noBalanceSummaryFound": {
+    "description": "Message lorsqu'aucun résumé de solde n'est trouvé"
+  },
+  "getBalanceSummaryFail": "échec de l'obtention du résumé du solde",
+  "@getBalanceSummaryFail": {
+    "description": "Message d'erreur lorsque le résumé du solde ne parvient pas à se charger"
+  },
+  "expandAll": "Développer tout",
+  "@expandAll": {
+    "description": "Bouton pour développer tous les éléments"
+  },
+  "collapseAll": "Réduire tout",
+  "@collapseAll": {
+    "description": "Bouton pour réduire tous les éléments"
+  },
+  "recalculate": "Recalculer",
+  "@recalculate": {
+    "description": "Bouton pour recalculer"
+  },
+  "thisAccount": "Ce compte",
+  "@thisAccount": {
+    "description": "En-tête pour ce compte"
+  },
+  "totalTree": "Arborescence totale",
+  "@totalTree": {
+    "description": "En-tête pour l'arborescence totale"
+  },
+  "getLedgerTreeFail": "Impossible de charger l'arborescence du grand livre !",
+  "@getLedgerTreeFail": {
+    "description": "Message d'erreur lorsque l'arborescence du grand livre ne parvient pas à se charger"
+  },
+  "jan": "Janv.",
+  "@jan": {
+    "description": "Abréviation de Janvier"
+  },
+  "feb": "Févr.",
+  "@feb": {
+    "description": "Abréviation de Février"
+  },
+  "mar": "Mars",
+  "@mar": {
+    "description": "Abréviation de Mars"
+  },
+  "apr": "Avr.",
+  "@apr": {
+    "description": "Abréviation d'Avril"
+  },
+  "may": "Mai",
+  "@may": {
+    "description": "Abréviation de Mai"
+  },
+  "jun": "Juin",
+  "@jun": {
+    "description": "Abréviation de Juin"
+  },
+  "jul": "Juil.",
+  "@jul": {
+    "description": "Abréviation de Juillet"
+  },
+  "aug": "Août",
+  "@aug": {
+    "description": "Abréviation d'Août"
+  },
+  "sep": "Sept.",
+  "@sep": {
+    "description": "Abréviation de Septembre"
+  },
+  "oct": "Oct.",
+  "@oct": {
+    "description": "Abréviation d'Octobre"
+  },
+  "nov": "Nov.",
+  "@nov": {
+    "description": "Abréviation de Novembre"
+  },
+  "dec": "Déc.",
+  "@dec": {
+    "description": "Abréviation de Décembre"
+  },
+  "byMonth": "Par mois",
+  "@byMonth": {
+    "description": "Étiquette pour par mois"
+  },
+  "noDataForPeriod": "aucune donnée trouvée pour la période ",
+  "@noDataForPeriod": {
+    "description": "Message lorsqu'aucune donnée n'est trouvée pour une période"
+  },
+  "ledgerJournal": "Journal du grand livre #",
+  "@ledgerJournal": {
+    "description": "En-tête ou étiquette du journal du grand livre avec le symbole du numéro"
+  },
+  "ledgerJournalName": "Nom du journal du grand livre",
+  "@ledgerJournalName": {
+    "description": "Étiquette du champ Nom du journal du grand livre"
+  },
+  "ledgerJournalNameNull": "Veuillez saisir un nom de journal du grand livre ?",
+  "@ledgerJournalNameNull": {
+    "description": "Message d'erreur pour le champ Nom du journal du grand livre vide"
+  },
+  "updateHeaderShort": "M.à.j. en-tête",
+  "@updateHeaderShort": {
+    "description": "Abréviation de Mettre à jour l'en-tête"
+  },
+  "getLedgerJournalFail": "échec de la récupération des journaux du grand livre : ",
+  "@getLedgerJournalFail": {
+    "description": "Message d'erreur lorsque les journaux du grand livre ne parviennent pas à se charger"
+  },
+  "noLedgerJournalFound": "Aucun journal du grand livre actif trouvé",
+  "@noLedgerJournalFound": {
+    "description": "Message lorsqu'aucun journal du grand livre actif n'est trouvé"
+  },
+  "postedDebit": "Compt.\\nDébit",
+  "@postedDebit": {
+    "description": "Débit comptabilisé"
+  },
+  "postedCredit": "Compt.\\nCrédit",
+  "@postedCredit": {
+    "description": "Crédit comptabilisé"
+  },
+  "endBalance": "Solde fin",
+  "@endBalance": {
+    "description": "Solde final"
+  },
+  "codeName": "Code/Nom",
+  "@codeName": {
+    "description": "Code et nom"
+  },
+  "beginningBalance": "Solde de début",
+  "@beginningBalance": {
+    "description": "Solde de début"
+  },
+  "postedDebits": "Débits comptabilisés",
+  "@postedDebits": {
+    "description": "Débits comptabilisés"
+  },
+  "postedCredits": "Crédits comptabilisés",
+  "@postedCredits": {
+    "description": "Crédits comptabilisés"
+  },
+  "endingBalance": "Solde de fin",
+  "@endingBalance": {
+    "description": "Solde final"
+  },
+  "from": "De",
+  "@from": {
+    "description": "Date de début"
+  },
+  "to": "À",
+  "@to": {
+    "description": "Date de fin"
+  },
+  "closed": "Fermé",
+  "@closed": {
+    "description": "Statut fermé"
+  },
+  "begin": "Début",
+  "@begin": {
+    "description": "Solde de début"
+  },
+  "code": "Code",
+  "@code": {
+    "description": "Code"
+  },
+  "deletePeriod": "supprimer la période",
+  "@deletePeriod": {
+    "description": "info-bulle de suppression de la période"
+  },
+  "createNextPeriod": "créer la période suivante",
+  "@createNextPeriod": {
+    "description": "info-bulle de création de la période suivante"
+  },
+  "closeTimePeriod": "fermer la période",
+  "@closeTimePeriod": {
+    "description": "info-bulle de fermeture de la période"
+  },
+  "closeTimePeriodConfirmation": "Fermer la période {periodName} ?",
+  "@closeTimePeriodConfirmation": {
+    "description": "Confirmation de fermeture de la période",
+    "placeholders": {
+      "periodName": {}
+    }
+  },
+  "cannotBeUndone": "ne peut pas être annulé !",
+  "@cannotBeUndone": {
+    "description": "avertissement ne peut pas être annulé"
+  }
+}

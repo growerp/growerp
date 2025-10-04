@@ -1,0 +1,227 @@
+{
+    "@@locale": "fr",
+    "@@last_modified": "2025-09-30T00:00:00Z",
+    "@@author": "Communauté GrowERP",
+    "@@context": "Localisation du package marketing pour le système de gestion d'entreprise GrowERP",
+    "@@x-template": "intl_fr.arb",
+    "tableHdrShortId": "ID court",
+    "@tableHdrShortId": {
+        "description": "En-tête de tableau pour l'ID court"
+    },
+    "tableHdrId": "ID",
+    "@tableHdrId": {
+        "description": "En-tête de tableau pour l'ID"
+    },
+    "tableHdrName": "Nom",
+    "@tableHdrName": {
+        "description": "En-tête de tableau pour le nom"
+    },
+    "tableHdrAmount": "Montant",
+    "@tableHdrAmount": {
+        "description": "En-tête de tableau pour le montant"
+    },
+    "tableHdrProbability": "Probabilité",
+    "@tableHdrProbability": {
+        "description": "En-tête de tableau pour la probabilité"
+    },
+    "tableHdrLead": "Nom/société du prospect",
+    "@tableHdrLead": {
+        "description": "En-tête de tableau pour le prospect"
+    },
+    "tableHdrLeadEmail": "E-mail du prospect",
+    "@tableHdrLeadEmail": {
+        "description": "En-tête de tableau pour l'e-mail du prospect"
+    },
+    "tableHdrStage": "Étape",
+    "@tableHdrStage": {
+        "description": "En-tête de tableau pour l'étape"
+    },
+    "tableHdrNextStep": "Étape suivante",
+    "@tableHdrNextStep": {
+        "description": "En-tête de tableau pour l'étape suivante"
+    },
+    "tableHdrDelete": " ",
+    "@tableHdrDelete": {
+        "description": "En-tête de tableau pour l'action de suppression"
+    },
+    "removeItemTooltip": "Supprimer l'élément",
+    "@removeItemTooltip": {
+        "description": "Info-bulle pour le bouton de suppression d'élément"
+    },
+    "deleteItemConfirm": "Supprimer {id} ?",
+    "@deleteItemConfirm": {
+        "description": "Boîte de dialogue de confirmation pour la suppression d'un élément",
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "cannotBeUndone": "Cette action ne peut pas être annulée !",
+    "@cannotBeUndone": {
+        "description": "Avertissement qu'une action ne peut pas être annulée"
+    },
+    "error": "Erreur : {message}",
+    "@error": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "unknown": "Inconnu",
+    "@unknown": {
+        "description": "Texte générique 'Inconnu'"
+    },
+    "opportunityNew": "Nouvelle opportunité",
+    "@opportunityNew": {
+        "description": "Titre de la page de nouvelle opportunité"
+    },
+    "opportunityWithMessage": "Opportunité {id}",
+    "@opportunityWithMessage": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "id": "ID",
+    "@id": {
+        "description": "Étiquette pour le champ ID"
+    },
+    "opportunityName": "Nom de l'opportunité",
+    "@opportunityName": {
+        "description": "Étiquette pour le champ Nom de l'opportunité"
+    },
+    "enterOppName": "Saisir le nom de l'opportunité",
+    "@enterOppName": {
+        "description": "Espace réservé pour la saisie du nom de l'opportunité"
+    },
+    "description": "Description",
+    "@description": {
+        "description": "Étiquette pour le champ Description"
+    },
+    "expRevenue": "Revenu attendu",
+    "@expRevenue": {
+        "description": "Étiquette pour le champ Revenu attendu"
+    },
+    "enterAmount": "Saisir le montant",
+    "@enterAmount": {
+        "description": "Espace réservé pour la saisie du montant"
+    },
+    "estProbability": "Probabilité estimée",
+    "@estProbability": {
+        "description": "Étiquette pour le champ Probabilité estimée"
+    },
+    "enterProbability": "Saisir la probabilité",
+    "@enterProbability": {
+        "description": "Espace réservé pour la saisie de la probabilité"
+    },
+    "nextStep": "Étape suivante",
+    "@nextStep": {
+        "description": "Étiquette pour le champ Étape suivante"
+    },
+    "enterNextStep": "Saisir l'étape suivante",
+    "@enterNextStep": {
+        "description": "Espace réservé pour la saisie de l'étape suivante"
+    },
+    "stage": "Étape",
+    "@stage": {
+        "description": "Étiquette pour le champ Étape"
+    },
+    "fieldRequired": "Le champ est obligatoire",
+    "@fieldRequired": {
+        "description": "Erreur de validation pour un champ obligatoire"
+    },
+    "leadSearch": "Recherche de prospect",
+    "@leadSearch": {
+        "description": "Titre de la boîte de dialogue Recherche de prospect"
+    },
+    "selectLead": "Sélectionner un prospect",
+    "@selectLead": {
+        "description": "Instruction pour sélectionner un prospect"
+    },
+    "lead": "Prospect",
+    "@lead": {
+        "description": "Étiquette pour le champ Prospect"
+    },
+    "employeeSearch": "Recherche d'employé",
+    "@employeeSearch": {
+        "description": "Titre de la boîte de dialogue Recherche d'employé"
+    },
+    "selectEmployee": "Sélectionner un employé",
+    "@selectEmployee": {
+        "description": "Instruction pour sélectionner un employé"
+    },
+    "accountEmployee": "Employé du compte",
+    "@accountEmployee": {
+        "description": "Étiquette pour le champ Employé du compte"
+    },
+    "create": "Créer",
+    "@create": {
+        "description": "Texte du bouton Créer"
+    },
+    "update": "Mettre à jour",
+    "@update": {
+        "description": "Texte du bouton Mettre à jour"
+    },
+    "serverProblem": "Problème de serveur",
+    "@serverProblem": {
+        "description": "Message d'erreur pour les problèmes de serveur"
+    },
+    "fetchError": "Erreur de récupération : {message}",
+    "@fetchError": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "noOpportunities": "Aucune opportunité trouvée",
+    "@noOpportunities": {
+        "description": "Message lorsqu'aucune opportunité n'est trouvée"
+    },
+    "addNew": "Ajouter nouveau",
+    "@addNew": {
+        "description": "Bouton pour ajouter un nouvel élément"
+    },
+    "fetchSearchError": "Erreur de recherche : {message}",
+    "@fetchSearchError": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "opportunitySearch": "Recherche d'opportunité",
+    "@opportunitySearch": {
+        "description": "Titre de la boîte de dialogue Recherche d'opportunité"
+    },
+    "searchInput": "Saisie de recherche",
+    "@searchInput": {
+        "description": "Étiquette pour le champ de saisie de recherche"
+    },
+    "enterSearchValue": "Saisir la valeur de recherche",
+    "@enterSearchValue": {
+        "description": "Espace réservé pour la saisie de recherche"
+    },
+    "searchResults": "Résultats de la recherche",
+    "@searchResults": {
+        "description": "En-tête des résultats de la recherche"
+    },
+    "noSearchItems": "Aucun élément de recherche",
+    "@noSearchItems": {
+        "description": "Message lorsqu'aucun élément de recherche n'est trouvé"
+    },
+    "searchResult": "ID : {id}, Nom : {name}",
+    "@searchResult": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            },
+            "name": {
+                "type": "String"
+            }
+        }
+    }
+}
