@@ -1,0 +1,819 @@
+{
+  "@@locale": "zh",
+  "aboutApp": "关于 {appName}",
+  "@aboutApp": {
+    "description": "关于应用对话框标题",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutGrowERP": "关于 GrowERP",
+  "@aboutGrowERP": {
+    "description": "关于 GrowERP 菜单项"
+  },
+  "accounts": "账户",
+  "@accounts": {
+    "description": "账户菜单项或节标题"
+  },
+  "addNew": "添新",
+  "@addNew": {
+    "description": "添加新项目按钮文本"
+  },
+  "andAtLeastOne": "并且至少一个 ",
+  "@andAtLeastOne": {
+    "description": "表示最低要求的部分验证消息"
+  },
+  "backendServer": "后端服务器",
+  "@backendServer": {
+    "description": "后端服务器输入标签"
+  },
+  "balanceSheet": "资产负债表",
+  "@balanceSheet": {
+    "description": "资产负债表报告菜单项"
+  },
+  "balanceSummary": "余额摘要",
+  "@balanceSummary": {
+    "description": "余额摘要报告菜单项"
+  },
+  "businessCompanyName": "需要公司名称！",
+  "@businessCompanyName": {
+    "description": "公司名称验证错误消息"
+  },
+  "businessNameError": "公司名称为必填项！",
+  "@businessNameError": {
+    "description": "公司名称验证错误消息"
+  },
+  "cancel": "取消",
+  "@cancel": {
+    "description": "取消按钮文本"
+  },
+  "cannotLoadRestRequests": "无法加载其余请求！",
+  "@cannotLoadRestRequests": {
+    "description": "REST 请求加载失败时的错误消息"
+  },
+  "chat": "聊天",
+  "@chat": {
+    "description": "聊天菜单项"
+  },
+  "chatServer": "聊天服务器",
+  "@chatServer": {
+    "description": "聊天服务器输入标签"
+  },
+  "completeRegistration": "完成注册",
+  "@completeRegistration": {
+    "description": "完成注册对话框标题"
+  },
+  "companyPartyId": "公司方ID",
+  "@companyPartyId": {
+    "description": "公司方ID输入标签"
+  },
+  "continueButton": "继续",
+  "@continueButton": {
+    "description": "继续按钮文本"
+  },
+  "contributing": "贡献",
+  "@contributing": {
+    "description": "贡献菜单项"
+  },
+  "copyright": "© {year} GrowERP.com",
+  "@copyright": {
+    "description": "带年份的版权文本",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "create": "创建",
+  "@create": {
+    "description": "创建按钮文本"
+  },
+  "createPassword": "创建密码",
+  "@createPassword": {
+    "description": "创建密码对话框标题"
+  },
+  "creditCardDetails": "信用卡详细信息",
+  "@creditCardDetails": {
+    "description": "信用卡详细信息提示文本"
+  },
+  "creditCardInfo": "信用卡信息",
+  "@creditCardInfo": {
+    "description": "信用卡信息标签"
+  },
+  "currency": "货币",
+  "@currency": {
+    "description": "货币输入标签"
+  },
+  "currencyError": "货币为必填项！",
+  "@currencyError": {
+    "description": "货币验证错误消息"
+  },
+  "currentPaymentMethod": "当前支付方式：{method}",
+  "@currentPaymentMethod": {
+    "description": "当前支付方式显示文本",
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "customer": "客户",
+  "@customer": {
+    "description": "客户标签"
+  },
+  "cvvCode": "CVV",
+  "@cvvCode": {
+    "description": "CVV码输入标签"
+  },
+  "cvvHint": "123",
+  "@cvvHint": {
+    "description": "CVV码输入提示"
+  },
+  "dateTime": "日期/时间",
+  "@dateTime": {
+    "description": "日期和时间标签"
+  },
+  "deleteWarning": "删除警告",
+  "@deleteWarning": {
+    "description": "删除警告对话框标题"
+  },
+  "deleteYourself": "删除自己",
+  "@deleteYourself": {
+    "description": "删除自己按钮文本"
+  },
+  "deleteYourselfAndCompany": "删除自己和公司",
+  "@deleteYourselfAndCompany": {
+    "description": "删除自己和公司按钮文本"
+  },
+  "demoData": "演示数据",
+  "@demoData": {
+    "description": "演示数据复选框标签"
+  },
+  "email": "电子邮件",
+  "@email": {
+    "description": "电子邮件输入标签"
+  },
+  "emailAddress": "电子邮件地址",
+  "@emailAddress": {
+    "description": "电子邮件地址输入标签"
+  },
+  "emailAddressError": "电子邮件地址为必填项！",
+  "@emailAddressError": {
+    "description": "电子邮件地址验证错误消息"
+  },
+  "emailAddressError2": "电子邮件地址格式不正确！",
+  "@emailAddressError2": {
+    "description": "电子邮件地址格式验证错误消息"
+  },
+  "enterBackendUrl": "输入后端URL",
+  "@enterBackendUrl": {
+    "description": "输入后端URL对话框标题"
+  },
+  "enterCompanyAndCurrency": "请输入您的公司名称和货币",
+  "@enterCompanyAndCurrency": {
+    "description": "公司和货币输入说明"
+  },
+  "enterCompanyName": "输入公司名称",
+  "@enterCompanyName": {
+    "description": "公司名称输入说明"
+  },
+  "error": "错误",
+  "@error": {
+    "description": "错误状态文本"
+  },
+  "errorMessage": "错误信息",
+  "@errorMessage": {
+    "description": "错误信息标签"
+  },
+  "expiryDate": "MM/YY",
+  "@expiryDate": {
+    "description": "到期日期输入标签"
+  },
+  "expiryDateHint": "12/25",
+  "@expiryDateHint": {
+    "description": "到期日期输入提示"
+  },
+  "fieldRequired": "字段为必填项！",
+  "@fieldRequired": {
+    "description": "必填字段验证错误消息"
+  },
+  "firstName": "名",
+  "@firstName": {
+    "description": "名输入标签"
+  },
+  "firstNameError": "名为必填项！",
+  "@firstNameError": {
+    "description": "名验证错误消息"
+  },
+  "forgotPassword": "忘记密码？",
+  "@forgotPassword": {
+    "description": "忘记密码链接文本"
+  },
+  "generateDemoData": "生成演示数据？",
+  "@generateDemoData": {
+    "description": "生成演示数据复选框文本"
+  },
+  "goHome": "回家",
+  "@goHome": {
+    "description": "回家按钮工具提示"
+  },
+  "invoice": "发票",
+  "@invoice": {
+    "description": "发票标签"
+  },
+  "itemIsRequired": "项目为必填项",
+  "@itemIsRequired": {
+    "description": "表示必填项目的验证消息"
+  },
+  "itemTypes": "项目类型",
+  "@itemTypes": {
+    "description": "项目类型菜单项或节标题"
+  },
+  "journal": "日记",
+  "@journal": {
+    "description": "日记菜单项或节标题"
+  },
+  "lastName": "姓",
+  "@lastName": {
+    "description": "姓输入标签"
+  },
+  "lastNameError": "姓为必填项！",
+  "@lastNameError": {
+    "description": "姓验证错误消息"
+  },
+  "login": "登录",
+  "@login": {
+    "description": "登录按钮文本"
+  },
+  "loginName": "登录名",
+  "@loginName": {
+    "description": "登录名标签"
+  },
+  "loginWithExistingUserName": "使用现有用户名登录",
+  "@loginWithExistingUserName": {
+    "description": "现有用户登录表单标题文本"
+  },
+  "logout": "登出",
+  "@logout": {
+    "description": "登出按钮文本"
+  },
+  "main": "主要",
+  "@main": {
+    "description": "主要菜单项"
+  },
+  "mainDashboard": "主仪表板",
+  "@mainDashboard": {
+    "description": "主仪表板菜单项或导航链接"
+  },
+  "ms": "毫秒",
+  "@ms": {
+    "description": "毫秒缩写"
+  },
+  "nameOnCard": "卡上姓名",
+  "@nameOnCard": {
+    "description": "卡上姓名输入标签"
+  },
+  "no": "否",
+  "@no": {
+    "description": "否答案文本"
+  },
+  "noAccess": "无权访问此页面！",
+  "@noAccess": {
+    "description": "无访问权限错误消息"
+  },
+  "noAccessHere": "此处无权限！",
+  "@noAccessHere": {
+    "description": "此处无权限错误消息"
+  },
+  "noRestRequests": "未找到REST请求...",
+  "@noRestRequests": {
+    "description": "无REST请求消息"
+  },
+  "notAvailable": "不可用",
+  "@notAvailable": {
+    "description": "不可用占位符文本"
+  },
+  "number": "号码",
+  "@number": {
+    "description": "号码输入标签"
+  },
+  "numberHint": "1234 5678 9012 3456",
+  "@numberHint": {
+    "description": "卡号输入提示"
+  },
+  "ok": "确定",
+  "@ok": {
+    "description": "确定按钮文本"
+  },
+  "onlyUserDelete": "仅删除用户，不删除公司",
+  "@onlyUserDelete": {
+    "description": "仅删除用户选项文本"
+  },
+  "openInvoices": "未结发票：",
+  "@openInvoices": {
+    "description": "未结发票仪表板项目标签"
+  },
+  "openSourceLicenses": "开源许可证",
+  "@openSourceLicenses": {
+    "description": "开源许可证菜单项"
+  },
+  "order": "订单",
+  "@order": {
+    "description": "订单标签"
+  },
+  "parameters": "参数",
+  "@parameters": {
+    "description": "参数标签"
+  },
+  "password": "密码",
+  "@password": {
+    "description": "密码输入标签"
+  },
+  "passwordError": "密码为必填项！",
+  "@passwordError": {
+    "description": "密码验证错误消息"
+  },
+  "passwordError2": "密码为必填项！",
+  "@passwordError2": {
+    "description": "密码验证错误消息变体"
+  },
+  "passwordHelper": "最少5个字符",
+  "@passwordHelper": {
+    "description": "密码帮助文本"
+  },
+  "passwordMismatch": "密码不匹配！",
+  "@passwordMismatch": {
+    "description": "密码不匹配验证错误"
+  },
+  "passwordValidationError": "密码应至少为5个字符",
+  "@passwordValidationError": {
+    "description": "密码验证错误消息"
+  },
+  "payment": "支付",
+  "@payment": {
+    "description": "支付标签"
+  },
+  "paymentPlan": "支付计划",
+  "@paymentPlan": {
+    "description": "支付计划输入标签"
+  },
+  "paymentTypes": "支付类型",
+  "@paymentTypes": {
+    "description": "支付类型菜单项或节标题"
+  },
+  "payWithinWeek": "一周内付款",
+  "@payWithinWeek": {
+    "description": "一周内付款复选框文本"
+  },
+  "privacyCodeOfConduct": "隐私/行为准则",
+  "@privacyCodeOfConduct": {
+    "description": "隐私和行为准则菜单项"
+  },
+  "referrerUrl": "引荐来源网址",
+  "@referrerUrl": {
+    "description": "引荐来源网址标签"
+  },
+  "refresh": "刷新",
+  "@refresh": {
+    "description": "刷新按钮文本"
+  },
+  "register": "注册",
+  "@register": {
+    "description": "注册按钮文本"
+  },
+  "registerAndCharge": "注册并收费",
+  "@registerAndCharge": {
+    "description": "注册并收费按钮文本"
+  },
+  "registerNewCompanyAndAdmin": "注册新公司和管理员",
+  "@registerNewCompanyAndAdmin": {
+    "description": "注册新公司链接文本"
+  },
+  "registration": "注册",
+  "@registration": {
+    "description": "注册对话框标题"
+  },
+  "requestName": "请求名称",
+  "@requestName": {
+    "description": "请求名称标签"
+  },
+  "requestUrl": "请求URL",
+  "@requestUrl": {
+    "description": "请求URL标签"
+  },
+  "restart": "重启",
+  "@restart": {
+    "description": "重启按钮文本"
+  },
+  "restRequestDetails": "Rest请求详细信息",
+  "@restRequestDetails": {
+    "description": "REST请求详细信息标题"
+  },
+  "revenueExpense": "收入/支出",
+  "@revenueExpense": {
+    "description": "收入和支出报告菜单项"
+  },
+  "runningTime": "运行时间",
+  "@runningTime": {
+    "description": "运行时间标签"
+  },
+  "selectLanguage": "选择语言",
+  "@selectLanguage": {
+    "description": "选择语言说明"
+  },
+  "selectPlanError": "请选择一个计划！",
+  "@selectPlanError": {
+    "description": "选择计划验证错误消息"
+  },
+  "sendNewPassword": "发送新密码",
+  "@sendNewPassword": {
+    "description": "发送新密码对话框标题"
+  },
+  "serverHost": "服务器主机",
+  "@serverHost": {
+    "description": "服务器主机标签"
+  },
+  "serverIp": "服务器IP",
+  "@serverIp": {
+    "description": "服务器IP标签"
+  },
+  "shipment": "装运",
+  "@shipment": {
+    "description": "装运标签"
+  },
+  "slowHit": "慢命中",
+  "@slowHit": {
+    "description": "慢命中标签"
+  },
+  "status": "状态",
+  "@status": {
+    "description": "状态标签"
+  },
+  "submitNewPassword": "提交新密码",
+  "@submitNewPassword": {
+    "description": "提交新密码按钮文本"
+  },
+  "subscription": "订阅",
+  "@subscription": {
+    "description": "订阅对话框标题"
+  },
+  "success": "成功",
+  "@success": {
+    "description": "成功状态文本"
+  },
+  "supplier": "供应商",
+  "@supplier": {
+    "description": "供应商标签"
+  },
+  "tempPassword": "临时密码将通过电子邮件发送",
+  "@tempPassword": {
+    "description": "临时密码信息文本"
+  },
+  "test": "测试",
+  "@test": {
+    "description": "测试菜单项"
+  },
+  "testSystem": "测试系统",
+  "@testSystem": {
+    "description": "测试系统文本"
+  },
+  "theme": "主题",
+  "@theme": {
+    "description": "主题菜单项"
+  },
+  "timePeriods": "时间段",
+  "@timePeriods": {
+    "description": "时间段菜单项或节标题"
+  },
+  "transaction": "交易",
+  "@transaction": {
+    "description": "交易标签"
+  },
+  "transactions": "交易",
+  "@transactions": {
+    "description": "交易菜单项或节标题"
+  },
+  "trialPeriod": "试用期",
+  "@trialPeriod": {
+    "description": "试用期文本"
+  },
+  "unknown": "未知",
+  "@unknown": {
+    "description": "未知值占位符文本"
+  },
+  "update": "更新",
+  "@update": {
+    "description": "更新按钮文本"
+  },
+  "user": "用户",
+  "@user": {
+    "description": "用户标签"
+  },
+  "userAndCompanyDelete": "删除用户和公司",
+  "@userAndCompanyDelete": {
+    "description": "删除用户和公司选项文本"
+  },
+  "username": "用户名：{username}",
+  "@username": {
+    "description": "用户名显示文本",
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "usernameEmail": "用户名/电子邮件",
+  "@usernameEmail": {
+    "description": "用户名或电子邮件输入标签"
+  },
+  "usernameEmailError": "用户名/电子邮件为必填项！",
+  "@usernameEmailError": {
+    "description": "用户名/电子邮件验证错误消息"
+  },
+  "verifyPassword": "验证密码",
+  "@verifyPassword": {
+    "description": "验证密码输入标签"
+  },
+  "verifyPasswordError": "验证密码为必填项！",
+  "@verifyPasswordError": {
+    "description": "验证密码验证错误消息"
+  },
+  "verifyPasswordHelper": "重新输入密码",
+  "@verifyPasswordHelper": {
+    "description": "验证密码帮助文本"
+  },
+  "version": "版本：{version} 构建：{build}",
+  "@version": {
+    "description": "版本显示文本",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
+  },
+  "viewLicense": "查看许可证",
+  "@viewLicense": {
+    "description": "查看许可证菜单项"
+  },
+  "viewReadme": "查看自述文件",
+  "@viewReadme": {
+    "description": "查看自述文件菜单项"
+  },
+  "welcome": "欢迎！",
+  "@welcome": {
+    "description": "欢迎消息"
+  },
+  "welcomeToGrowERPBusinessSystem": "欢迎来到GrowERP业务系统！",
+  "@welcomeToGrowERPBusinessSystem": {
+    "description": "主页上的欢迎消息"
+  },
+  "yes": "是",
+  "@yes": {
+    "description": "是答案文本"
+  },
+  "about": "关于",
+  "@about": {
+    "description": "关于菜单项"
+  },
+  "accounting": "会计",
+  "@accounting": {
+    "description": "会计菜单项"
+  },
+  "accountingDashboard": "会计仪表板",
+  "@accountingDashboard": {
+    "description": "会计仪表板菜单项"
+  },
+  "accountingLedger": "会计分类帐",
+  "@accountingLedger": {
+    "description": "会计分类帐菜单项"
+  },
+  "accountingPurch": "会计采购",
+  "@accountingPurch": {
+    "description": "会计采购菜单项"
+  },
+  "accountingSales": "会计销售",
+  "@accountingSales": {
+    "description": "会计销售菜单项"
+  },
+  "administrators": "管理员",
+  "@administrators": {
+    "description": "管理员标签"
+  },
+  "allOpportunities": "所有机会",
+  "@allOpportunities": {
+    "description": "所有机会标签"
+  },
+  "assets": "资产",
+  "@assets": {
+    "description": "资产菜单项"
+  },
+  "catalog": "目录",
+  "@catalog": {
+    "description": "目录菜单项"
+  },
+  "categories": "类别",
+  "@categories": {
+    "description": "类别菜单项"
+  },
+  "company": "公司",
+  "@company": {
+    "description": "公司菜单项"
+  },
+  "crm": "客户关系管理",
+  "@crm": {
+    "description": "客户关系管理菜单项"
+  },
+  "customers": "客户",
+  "@customers": {
+    "description": "客户菜单项"
+  },
+  "employees": "员工",
+  "@employees": {
+    "description": "员工菜单项"
+  },
+  "incomingInvoices": "收到的发票",
+  "@incomingInvoices": {
+    "description": "收到的发票菜单项"
+  },
+  "incomingPayments": "收到的付款",
+  "@incomingPayments": {
+    "description": "收到的付款菜单项"
+  },
+  "incomingShipments": "收到的装运",
+  "@incomingShipments": {
+    "description": "收到的装运菜单项"
+  },
+  "inventory": "库存",
+  "@inventory": {
+    "description": "库存菜单项"
+  },
+  "leads": "潜在客户",
+  "@leads": {
+    "description": "潜在客户菜单项"
+  },
+  "ledgerAccnt": "总账科目",
+  "@ledgerAccnt": {
+    "description": "总账科目菜单项"
+  },
+  "ledgerJournals": "总账日记账",
+  "@ledgerJournals": {
+    "description": "总账日记账菜单项"
+  },
+  "ledgerTransaction": "总账交易",
+  "@ledgerTransaction": {
+    "description": "总账交易菜单项"
+  },
+  "ledgerTree": "总账树",
+  "@ledgerTree": {
+    "description": "总账树菜单项"
+  },
+  "myTodoTasks": "我的待办任务",
+  "@myTodoTasks": {
+    "description": "我的待办任务菜单项"
+  },
+  "opportunities": "机会",
+  "@opportunities": {
+    "description": "机会菜单项"
+  },
+  "orders": "订单",
+  "@orders": {
+    "description": "订单菜单项"
+  },
+  "organization": "组织",
+  "@organization": {
+    "description": "组织菜单项"
+  },
+  "otherEmployees": "其他员工",
+  "@otherEmployees": {
+    "description": "其他员工标签"
+  },
+  "outgoingInvoices": "发出的发票",
+  "@outgoingInvoices": {
+    "description": "发出的发票菜单项"
+  },
+  "outgoingPayments": "发出的付款",
+  "@outgoingPayments": {
+    "description": "发出的付款菜单项"
+  },
+  "outgoingShipments": "发出的装运",
+  "@outgoingShipments": {
+    "description": "发出的装运菜单项"
+  },
+  "paymtTypes": "付款类型",
+  "@paymtTypes": {
+    "description": "付款类型菜单项"
+  },
+  "planSelection": "计划选择",
+  "@planSelection": {
+    "description": "计划选择菜单项"
+  },
+  "products": "产品",
+  "@products": {
+    "description": "产品菜单项"
+  },
+  "purchaseOrders": "采购订单",
+  "@purchaseOrders": {
+    "description": "采购订单菜单项"
+  },
+  "purchaseUnpaidInvoices": "采购未付发票",
+  "@purchaseUnpaidInvoices": {
+    "description": "采购未付发票标签"
+  },
+  "reports": "报告",
+  "@reports": {
+    "description": "报告菜单项"
+  },
+  "requests": "请求",
+  "@requests": {
+    "description": "请求菜单项"
+  },
+  "salesOpenInvoices": "销售未结发票",
+  "@salesOpenInvoices": {
+    "description": "销售未结发票标签"
+  },
+  "salesOrders": "销售订单",
+  "@salesOrders": {
+    "description": "销售订单菜单项"
+  },
+  "setUp": "设置",
+  "@setUp": {
+    "description": "设置菜单项"
+  },
+  "subscriptions": "订阅",
+  "@subscriptions": {
+    "description": "订阅菜单项"
+  },
+  "suppliers": "供应商",
+  "@suppliers": {
+    "description": "供应商菜单项"
+  },
+  "website": "网站",
+  "@website": {
+    "description": "网站菜单项"
+  },
+  "whLocations": "仓库位置",
+  "@whLocations": {
+    "description": "仓库位置菜单项"
+  },
+  "checkIn": "入住",
+  "@checkIn": {
+    "description": "入住菜单项"
+  },
+  "checkOut": "退房",
+  "@checkOut": {
+    "description": "退房菜单项"
+  },
+  "inOut": "进/出",
+  "@inOut": {
+    "description": "进/出菜单项"
+  },
+  "myHotel": "我的酒店",
+  "@myHotel": {
+    "description": "我的酒店菜单项"
+  },
+  "reservations": "预订",
+  "@reservations": {
+    "description": "预订菜单项"
+  },
+  "rooms": "房间",
+  "@rooms": {
+    "description": "房间菜单项"
+  },
+  "roomTypes": "房型",
+  "@roomTypes": {
+    "description": "房型菜单项"
+  },
+  "tasks": "任务",
+  "@tasks": {
+    "description": "任务菜单项"
+  },
+  "myOpportunities": "我的机会",
+  "@myOpportunities": {
+    "description": "我的机会菜单项"
+  },
+  "clients": "客户",
+  "@clients": {
+    "description": "客户菜单项"
+  },
+  "staff": "员工",
+  "@staff": {
+    "description": "员工菜单项"
+  },
+  "applications": "申请",
+  "@applications": {
+    "description": "申请菜单项"
+  },
+  "restRequests": "REST请求",
+  "@restRequests": {
+    "description": "REST请求菜单项"
+  },
+  "userRequestStatus": "用户\n请求\n状态",
+  "@userRequestStatus": {
+    "description": "用户/请求/状态的REST请求列表列标题"
+  }
+}
