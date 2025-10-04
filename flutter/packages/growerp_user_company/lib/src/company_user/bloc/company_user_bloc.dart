@@ -21,7 +21,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 import 'package:stream_transform/stream_transform.dart';
 
@@ -41,7 +40,7 @@ EventTransformer<E> companyUserDroppable<E>(Duration duration) {
 
 class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
     with CompanyUserLeadBloc, CompanyUserCustomerBloc, CompanyUserSupplierBloc {
-  CompanyUserBloc(this.restClient, this.role, this.localizations)
+  CompanyUserBloc(this.restClient, this.role)
     : super(const CompanyUserState()) {
     on<CompanyUserFetch>(
       _onCompanyUserFetch,
@@ -54,7 +53,6 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
   }
 
   final RestClient restClient;
-  final UserCompanyLocalizations localizations;
   Role role = Role.unknown;
   int start = 0;
 
@@ -147,7 +145,7 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
           } else {
             companiesUsers.removeAt(index);
             companiesUsers.insert(0, CompanyUser.tryParse(result)!);
-            message = localizations.companyUpdated(result.name!);
+            message = 'Company ${result.name!} has been updated';
           }
         } else {
           // add company
@@ -155,7 +153,7 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
             company: event.companyUser!.getCompany()!,
           );
           companiesUsers.insert(0, CompanyUser.tryParse(result)!);
-          message = localizations.companyAdded(result.name!);
+          message = 'Company ${result.name!} has been added';
         }
       } else {
         if (event.companyUser?.company?.name != null) {
@@ -196,17 +194,17 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
             );
           } else {
             companiesUsers.removeAt(index);
-            message = localizations.userUpdated(companyUser.name!);
+            message = 'User ${companyUser.name!} has been updated';
           }
         } else {
           // add user
           result = await restClient.createUser(
             user: event.companyUser!.getUser()!,
           );
-          message = localizations.userAdded(companyUser.name!);
+          message = 'User ${companyUser.name!} has been added';
         }
         if (event.companyUser?.company?.name != null) {
-          message += "\n${localizations.asCompany}";
+          message += "\nas company";
         }
         // now depending if the company/user is reversed pick the correct id.
         if (event.companyUser?.company?.name == null) {
@@ -292,7 +290,7 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
         state.copyWith(
           status: CompanyUserStatus.success,
           companiesUsers: state.companiesUsers,
-          message: localizations.compUserUploadSuccess,
+          message: 'Company/User upload success',
         ),
       );
     } on DioException catch (e) {
@@ -316,7 +314,7 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
         state.copyWith(
           status: CompanyUserStatus.success,
           companiesUsers: state.companiesUsers,
-          message: localizations.compUserDownloadSuccess,
+          message: 'Company/User download success',
         ),
       );
     } on DioException catch (e) {
@@ -350,7 +348,7 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
           searchString: '',
           status: CompanyUserStatus.success,
           companiesUsers: companiesUsers,
-          message: localizations.userDeleted(event.user!.getName()),
+          message: 'User ${event.user!.getName()} has been deleted',
         ),
       );
     } on DioException catch (e) {
