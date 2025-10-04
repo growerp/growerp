@@ -3,4 +3,4 @@ template-arb-file: intl_en.arb
 output-dir: lib/l10n/generated
 output-localization-file: activity_localizations.dart
 output-class: ActivityLocalizations
-preferred-supported-locales: [en, th, zh, de, fr]
+preferred-supported-locales: [en, th, zh, de, fr, nl]

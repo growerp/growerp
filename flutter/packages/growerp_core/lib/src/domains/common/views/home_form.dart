@@ -212,6 +212,16 @@ class HomeFormState extends State<HomeForm> {
                                   ],
                                 ),
                               ),
+                              const PopupMenuItem<Locale>(
+                                value: Locale('nl'),
+                                child: Row(
+                                  children: [
+                                    Text('🇳🇱'),
+                                    SizedBox(width: 8),
+                                    Text('Nederlands'),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                         ],
