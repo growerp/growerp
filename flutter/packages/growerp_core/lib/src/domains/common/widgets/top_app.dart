@@ -104,6 +104,7 @@ class TopApp extends StatelessWidget {
                     supportedLocales: const [
                       Locale('en'),
                       Locale('th'),
+                      Locale('fr'),
                       Locale('en', 'CA'),
                     ],
                     scrollBehavior: const MaterialScrollBehavior().copyWith(

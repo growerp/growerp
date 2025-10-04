@@ -1,0 +1,241 @@
+{
+  "@@locale": "fr",
+  "productName": "Nom du produit",
+  "@productName": {
+    "description": "Le nom d'un produit"
+  },
+  "failedToFetchLocations": "échec de la récupération des emplacements : {message}",
+  "@failedToFetchLocations": {
+    "description": "Message d'erreur lorsque l'application ne parvient pas à récupérer les emplacements",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "noLocationsFound": "aucun emplacement trouvé",
+  "@noLocationsFound": {
+    "description": "Message affiché lorsqu'aucun emplacement n'est trouvé"
+  },
+  "addNew": "Ajouter nouveau",
+  "@addNew": {
+    "description": "Info-bulle pour un bouton qui ajoute un nouvel élément"
+  },
+  "addSuccess": "Ajout réussi",
+  "@addSuccess": {
+    "description": "Message de succès lorsqu'un élément est ajouté"
+  },
+  "updateSuccess": "Mise à jour réussie",
+  "@updateSuccess": {
+    "description": "Message de succès lorsqu'un élément est mis à jour"
+  },
+  "error": "Erreur : {message}",
+  "@error": {
+    "description": "Message d'erreur générique",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "locationInfo": "Informations sur l'emplacement #{pseudoId}",
+  "@locationInfo": {
+    "description": "Titre de la boîte de dialogue d'informations sur l'emplacement",
+    "placeholders": {
+      "pseudoId": {
+        "type": "String"
+      }
+    }
+  },
+  "newLabel": "Nouveau",
+  "@newLabel": {
+    "description": "Étiquette pour un nouvel élément"
+  },
+  "locationId": "ID d'emplacement",
+  "@locationId": {
+    "description": "Étiquette pour le champ ID d'emplacement"
+  },
+  "locationName": "Nom de l'emplacement",
+  "@locationName": {
+    "description": "Étiquette pour le champ Nom de l'emplacement"
+  },
+  "enterLocationName": "Veuillez saisir un nom d'emplacement ?",
+  "@enterLocationName": {
+    "description": "Message de validation pour le champ Nom de l'emplacement"
+  },
+  "quantityOnHand": "Quantité en stock",
+  "@quantityOnHand": {
+    "description": "Étiquette pour le champ Quantité en stock"
+  },
+  "create": "Créer",
+  "@create": {
+    "description": "Étiquette pour le bouton Créer"
+  },
+  "update": "Mettre à jour",
+  "@update": {
+    "description": "Étiquette pour le bouton Mettre à jour"
+  },
+  "failedToFetchSearchItems": "échec de la récupération des éléments de recherche : {message}",
+  "@failedToFetchSearchItems": {
+    "description": "Message d'erreur lorsque l'application ne parvient pas à récupérer les éléments de recherche",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "locationSearch": "Recherche d'emplacement",
+  "@locationSearch": {
+    "description": "Titre de la boîte de dialogue de recherche d'emplacement"
+  },
+  "searchInput": "Saisie de recherche",
+  "@searchInput": {
+    "description": "Étiquette pour le champ de saisie de recherche"
+  },
+  "enterSearchValue": "Veuillez saisir une valeur de recherche ?",
+  "@enterSearchValue": {
+    "description": "Message de validation pour le champ de saisie de recherche"
+  },
+  "searchResults": "Résultats de la recherche",
+  "@searchResults": {
+    "description": "Étiquette pour la section des résultats de la recherche"
+  },
+  "noSearchItemsFound": "Aucun élément de recherche trouvé (pour l'instant)",
+  "@noSearchItemsFound": {
+    "description": "Message affiché lorsqu'aucun élément de recherche n'est trouvé"
+  },
+  "id": "ID : ",
+  "@id": {
+    "description": "Étiquette pour l'ID dans un résultat de recherche"
+  },
+  "name": "Nom : ",
+  "@name": {
+    "description": "Étiquette pour le nom dans un résultat de recherche"
+  },
+  "roomNumber": "Numéro de chambre",
+  "@roomNumber": {
+    "description": "Étiquette pour le champ Numéro de chambre"
+  },
+  "assetNumber": "Numéro d'actif",
+  "@assetNumber": {
+    "description": "Étiquette pour le champ Numéro d'actif"
+  },
+  "assetLoadProblem": "Problème de chargement de l'actif",
+  "@assetLoadProblem": {
+    "description": "Message d'erreur en cas de problème de chargement des actifs"
+  },
+  "idLabel": "ID",
+  "@idLabel": {
+    "description": "Étiquette pour le champ ID"
+  },
+  "roomNameLabel": "Nom de la chambre",
+  "@roomNameLabel": {
+    "description": "Étiquette pour le champ Nom de la chambre"
+  },
+  "assetNameLabel": "Nom de l'actif",
+  "@assetNameLabel": {
+    "description": "Étiquette pour le champ Nom de l'actif"
+  },
+  "enterAssetName": "Veuillez saisir le nom de l'actif ?",
+  "@enterAssetName": {
+    "description": "Message de validation pour le champ Nom de l'actif"
+  },
+  "qtyOnHand": "Quantité en stock",
+  "@qtyOnHand": {
+    "description": "Étiquette pour le champ Quantité en stock"
+  },
+  "enterQtyOnHand": "Veuillez saisir la quantité en stock ?",
+  "@enterQtyOnHand": {
+    "description": "Message de validation pour le champ Quantité en stock"
+  },
+  "qtyPromise": "Quantité promise",
+  "@qtyPromise": {
+    "description": "Étiquette pour le champ Quantité promise"
+  },
+  "enterQtyPromise": "Veuillez saisir la quantité promise ?",
+  "@enterQtyPromise": {
+    "description": "Message de validation pour le champ Quantité promise"
+  },
+  "enterAquiredCost": "Veuillez saisir le coût d'acquisition ?",
+  "@enterAquiredCost": {
+    "description": "Message de validation pour le champ Coût d'acquisition"
+  },
+  "serverProblem": "Problème de serveur",
+  "@serverProblem": {
+    "description": "Message d'erreur en cas de problème de serveur"
+  },
+  "roomTypeName": "Nom du type de chambre",
+  "@roomTypeName": {
+    "description": "Étiquette pour le champ Nom du type de chambre"
+  },
+  "productIdName": "Nom de l'ID du produit",
+  "@productIdName": {
+    "description": "Étiquette pour le champ Nom de l'ID du produit"
+  },
+  "select": "Sélectionner",
+  "@select": {
+    "description": "Étiquette pour le bouton de sélection ou la liste déroulante"
+  },
+  "product": "Produit",
+  "@product": {
+    "description": "Étiquette pour le produit"
+  },
+  "roomTypeId": "ID du type de chambre",
+  "@roomTypeId": {
+    "description": "Étiquette pour le champ ID du type de chambre"
+  },
+  "productId": "ID du produit",
+  "@productId": {
+    "description": "Étiquette pour le champ ID du produit"
+  },
+  "fieldRequired": "Champ obligatoire",
+  "@fieldRequired": {
+    "description": "Message de validation pour les champs obligatoires"
+  },
+  "status": "Statut",
+  "@status": {
+    "description": "Étiquette pour le champ de statut"
+  },
+  "selectLocation": "Sélectionner un emplacement",
+  "@selectLocation": {
+    "description": "Étiquette pour la liste déroulante ou le bouton de sélection d'emplacement"
+  },
+  "location": "Emplacement",
+  "@location": {
+    "description": "Étiquette pour l'emplacement"
+  },
+  "noRoomsFound": "Aucune chambre trouvée",
+  "@noRoomsFound": {
+    "description": "Message affiché lorsqu'aucune chambre n'est trouvée"
+  },
+  "noAssetsFound": "Aucun actif trouvé",
+  "@noAssetsFound": {
+    "description": "Message affiché lorsqu'aucun actif n'est trouvé"
+  },
+  "assetSearch": "Recherche d'actifs",
+  "@assetSearch": {
+    "description": "Titre de la boîte de dialogue de recherche d'actifs"
+  },
+  "locations": "Emplacements",
+  "@locations": {
+    "description": "Étiquette pour les emplacements"
+  },
+  "aqrdCosts": "Coût d'acquisition : {cost}",
+  "@aqrdCosts": {
+    "description": "Étiquette pour le coût d'acquisition avec valeur",
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToFetchAssets": "Échec de la récupération des actifs : {message}",
+  "@failedToFetchAssets": {
+    "description": "Message d'erreur lorsque l'application ne parvient pas à récupérer les actifs",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  }
+}
