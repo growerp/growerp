@@ -218,5 +218,80 @@
   "acatComplete": "การประเมินเสร็จสมบูรณ์",
   "cancelRequest": "ยกเลิกคำขอ",
   "requestType": "ประเภทคำขอ",
-  "company": "บริษัท"
+  "company": "บริษัท",
+  "postedDebit": "เดบิต\\nที่ลงรายการ",
+  "@postedDebit": {
+    "description": "เดบิตที่ลงรายการ"
+  },
+  "postedCredit": "เครดิต\\nที่ลงรายการ",
+  "@postedCredit": {
+    "description": "เครดิตที่ลงรายการ"
+  },
+  "endBalance": "ยอดคงเหลือสิ้นสุด",
+  "@endBalance": {
+    "description": "ยอดคงเหลือสิ้นสุด"
+  },
+  "codeName": "รหัส/ชื่อ",
+  "@codeName": {
+    "description": "รหัสและชื่อ"
+  },
+  "beginningBalance": "ยอดคงเหลือเริ่มต้น",
+  "@beginningBalance": {
+    "description": "ยอดคงเหลือเริ่มต้น"
+  },
+  "postedDebits": "เดบิตที่ลงรายการ",
+  "@postedDebits": {
+    "description": "เดบิตที่ลงรายการ"
+  },
+  "postedCredits": "เครดิตที่ลงรายการ",
+  "@postedCredits": {
+    "description": "เครดิตที่ลงรายการ"
+  },
+  "endingBalance": "ยอดคงเหลือสิ้นสุด",
+  "@endingBalance": {
+    "description": "ยอดคงเหลือสิ้นสุด"
+  },
+  "from": "จาก",
+  "@from": {
+    "description": "จากวันที่"
+  },
+  "to": "ถึง",
+  "@to": {
+    "description": "ถึงวันที่"
+  },
+  "closed": "ปิด",
+  "@closed": {
+    "description": "สถานะปิด"
+  },
+  "begin": "เริ่มต้น",
+  "@begin": {
+    "description": "ยอดคงเหลือเริ่มต้น"
+  },
+  "code": "รหัส",
+  "@code": {
+    "description": "รหัส"
+  },
+  "deletePeriod": "ลบช่วงเวลา",
+  "@deletePeriod": {
+    "description": "คำแนะนำเครื่องมือลบช่วงเวลา"
+  },
+  "createNextPeriod": "สร้างช่วงเวลาถัดไป",
+  "@createNextPeriod": {
+    "description": "คำแนะนำเครื่องมือสร้างช่วงเวลาถัดไป"
+  },
+  "closeTimePeriod": "ปิดช่วงเวลา",
+  "@closeTimePeriod": {
+    "description": "คำแนะนำเครื่องมือปิดช่วงเวลา"
+  },
+  "closeTimePeriodConfirmation": "ปิดช่วงเวลา {periodName}?",
+  "@closeTimePeriodConfirmation": {
+    "description": "ยืนยันการปิดช่วงเวลา",
+    "placeholders": {
+      "periodName": {}
+    }
+  },
+  "cannotBeUndone": "ไม่สามารถยกเลิกได้!",
+  "@cannotBeUndone": {
+    "description": "คำเตือนไม่สามารถยกเลิกได้"
+  }
 }
