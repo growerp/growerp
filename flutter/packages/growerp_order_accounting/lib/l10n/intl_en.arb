@@ -882,5 +882,80 @@
   "noLedgerJournalFound": "No active ledgerJournals found",
   "@noLedgerJournalFound": {
     "description": "Message when no active ledger journals are found"
+  },
+  "postedDebit": "Post.\\nDebit",
+  "@postedDebit": {
+    "description": "Posted Debit"
+  },
+  "postedCredit": "Post.\\nCredit",
+  "@postedCredit": {
+    "description": "Posted Credit"
+  },
+  "endBalance": "End Bal.",
+  "@endBalance": {
+    "description": "End Balance"
+  },
+  "codeName": "Code/Name",
+  "@codeName": {
+    "description": "Code and Name"
+  },
+  "beginningBalance": "Beginning Balance",
+  "@beginningBalance": {
+    "description": "Beginning Balance"
+  },
+  "postedDebits": "Posted Debits",
+  "@postedDebits": {
+    "description": "Posted Debits"
+  },
+  "postedCredits": "Posted Credits",
+  "@postedCredits": {
+    "description": "Posted Credits"
+  },
+  "endingBalance": "Ending Balance",
+  "@endingBalance": {
+    "description": "Ending Balance"
+  },
+  "from": "From",
+  "@from": {
+    "description": "From date"
+  },
+  "to": "To",
+  "@to": {
+    "description": "To date"
+  },
+  "closed": "Closed",
+  "@closed": {
+    "description": "Closed status"
+  },
+  "begin": "Begin",
+  "@begin": {
+    "description": "Beginning balance"
+  },
+  "code": "Code",
+  "@code": {
+    "description": "Code"
+  },
+  "deletePeriod": "delete period",
+  "@deletePeriod": {
+    "description": "delete period tooltip"
+  },
+  "createNextPeriod": "create next period",
+  "@createNextPeriod": {
+    "description": "create next period tooltip"
+  },
+  "closeTimePeriod": "close Timeperiod",
+  "@closeTimePeriod": {
+    "description": "close Timeperiod tooltip"
+  },
+  "closeTimePeriodConfirmation": "Close Time period {periodName}?",
+  "@closeTimePeriodConfirmation": {
+    "description": "Close Time period confirmation",
+    "placeholders": {
+      "periodName": {}
+    }
+  },
+  "cannotBeUndone": "cannot be undone!",
+  "@cannotBeUndone": {
+    "description": "cannot be undone warning"
   }
 }

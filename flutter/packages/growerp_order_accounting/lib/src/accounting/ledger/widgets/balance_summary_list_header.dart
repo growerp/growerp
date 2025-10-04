@@ -17,6 +17,7 @@
 import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 class BalanceSummaryListHeader extends StatefulWidget {
   const BalanceSummaryListHeader(
@@ -39,6 +40,7 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = OrderAccountingLocalizations.of(context)!;
     return ListTile(
       leading: GestureDetector(
         key: const Key('search'),
@@ -52,11 +54,11 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
                   child: TextField(
                     key: const Key('searchField'),
                     autofocus: true,
-                    decoration: const InputDecoration(
-                      focusedBorder: OutlineInputBorder(
+                    decoration: InputDecoration(
+                      focusedBorder: const OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.transparent),
                       ),
-                      hintText: "search in account code and name...",
+                      hintText: localizations.search,
                     ),
                     onChanged: ((value) =>
                         setState(() => searchString = value)),
@@ -64,7 +66,7 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
                 ),
                 OutlinedButton(
                   key: const Key('searchButton'),
-                  child: const Text('Search'),
+                  child: Text(localizations.search),
                   onPressed: () async {
                     int index = 0;
                     for (var el in widget.ledgerReport.glAccounts) {
@@ -86,32 +88,50 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
           : Column(
               children: [
                 if (widget.isPhone)
-                  const Text("Account Name", textAlign: TextAlign.center),
+                  Text(
+                    localizations.glAccountName,
+                    textAlign: TextAlign.center,
+                  ),
                 Row(
                   children: <Widget>[
-                    const Expanded(
-                      child: Text("Code", textAlign: TextAlign.center),
+                    Expanded(
+                      child: Text(
+                        localizations.code,
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                     if (!widget.isPhone)
-                      const Expanded(
-                        child: Text("Name", textAlign: TextAlign.center),
-                      ),
-                    const Expanded(
-                      child: Text("Begin", textAlign: TextAlign.right),
-                    ),
-                    if (!widget.isPhone)
-                      const Expanded(
-                        child: Text("Post.\nDebit", textAlign: TextAlign.right),
-                      ),
-                    if (!widget.isPhone)
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          "Post.\nCredit",
+                          localizations.name,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    Expanded(
+                      child: Text(
+                        localizations.begin,
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                    if (!widget.isPhone)
+                      Expanded(
+                        child: Text(
+                          localizations.postedDebit,
                           textAlign: TextAlign.right,
                         ),
                       ),
-                    const Expanded(
-                      child: Text("End Bal.", textAlign: TextAlign.right),
+                    if (!widget.isPhone)
+                      Expanded(
+                        child: Text(
+                          localizations.postedCredit,
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    Expanded(
+                      child: Text(
+                        localizations.endBalance,
+                        textAlign: TextAlign.right,
+                      ),
                     ),
                   ],
                 ),
