@@ -1,241 +1,55 @@
 {
   "@@locale": "nl",
-  "productName": "Product name",
-  "@productName": {
-    "description": "The name of a product"
-  },
-  "failedToFetchLocations": "failed to fetch locations: {message}",
-  "@failedToFetchLocations": {
-    "description": "Error message when the app fails to fetch locations",
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
-  "noLocationsFound": "no locations found",
-  "@noLocationsFound": {
-    "description": "Message displayed when no locations are found"
-  },
-  "addNew": "Add New",
-  "@addNew": {
-    "description": "Tooltip for a button that adds a new item"
-  },
-  "addSuccess": "Add successful",
-  "@addSuccess": {
-    "description": "Success message when an item is added"
-  },
-  "updateSuccess": "Update successful",
-  "@updateSuccess": {
-    "description": "Success message when an item is updated"
-  },
-  "error": "Error: {message}",
-  "@error": {
-    "description": "Generic error message",
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
-  "locationInfo": "Location Information #{pseudoId}",
-  "@locationInfo": {
-    "description": "Title for the location information dialog",
-    "placeholders": {
-      "pseudoId": {
-        "type": "String"
-      }
-    }
-  },
-  "newLabel": "New",
-  "@newLabel": {
-    "description": "Label for a new item"
-  },
-  "locationId": "Location Id",
-  "@locationId": {
-    "description": "Label for the location ID field"
-  },
-  "locationName": "Location Name",
-  "@locationName": {
-    "description": "Label for the location name field"
-  },
-  "enterLocationName": "Please enter a location name?",
-  "@enterLocationName": {
-    "description": "Validation message for the location name field"
-  },
-  "quantityOnHand": "Quantity on Hand",
-  "@quantityOnHand": {
-    "description": "Label for the quantity on hand field"
-  },
-  "create": "Create",
-  "@create": {
-    "description": "Label for the create button"
-  },
+  "productName": "Productnaam",
+  "failedToFetchLocations": "locaties ophalen mislukt: {message}",
+  "noLocationsFound": "geen locaties gevonden",
+  "addNew": "Nieuwe toevoegen",
+  "addSuccess": "Toevoegen gelukt",
+  "updateSuccess": "Update gelukt",
+  "error": "Fout: {message}",
+  "locationInfo": "Locatie-informatie #{pseudoId}",
+  "newLabel": "Nieuw",
+  "locationId": "Locatie-ID",
+  "locationName": "Locatienaam",
+  "enterLocationName": "Voer een locatienaam in",
+  "quantityOnHand": "Aantal op voorraad",
+  "create": "Creëer",
   "update": "Update",
-  "@update": {
-    "description": "Label for the update button"
-  },
-  "failedToFetchSearchItems": "failed to fetch search items: {message}",
-  "@failedToFetchSearchItems": {
-    "description": "Error message when the app fails to fetch search items",
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
-  "locationSearch": "Location Search",
-  "@locationSearch": {
-    "description": "Title for the location search dialog"
-  },
-  "searchInput": "Search input",
-  "@searchInput": {
-    "description": "Label for the search input field"
-  },
-  "enterSearchValue": "Please enter a search value?",
-  "@enterSearchValue": {
-    "description": "Validation message for the search input field"
-  },
-  "searchResults": "Search results",
-  "@searchResults": {
-    "description": "Label for the search results section"
-  },
-  "noSearchItemsFound": "No search items found (yet)",
-  "@noSearchItemsFound": {
-    "description": "Message displayed when no search items are found"
-  },
+  "failedToFetchSearchItems": "ophalen van zoekitems mislukt: {message}",
+  "locationSearch": "Locatie zoeken",
+  "searchInput": "Zoekinvoer",
+  "enterSearchValue": "Voer een zoekwaarde in",
+  "searchResults": "Zoekresultaten",
+  "noSearchItemsFound": "Geen zoekitems gevonden (nog)",
   "id": "ID: ",
-  "@id": {
-    "description": "Label for the ID in a search result"
-  },
-  "name": "Name: ",
-  "@name": {
-    "description": "Label for the name in a search result"
-  },
-  "roomNumber": "Room Number",
-  "@roomNumber": {
-    "description": "Label for the room number field"
-  },
-  "assetNumber": "Asset Number",
-  "@assetNumber": {
-    "description": "Label for the asset number field"
-  },
-  "assetLoadProblem": "Asset load problem",
-  "@assetLoadProblem": {
-    "description": "Error message when there's a problem loading assets"
-  },
+  "name": "Naam: ",
+  "roomNumber": "Kamernummer",
+  "assetNumber": "Activumnummer",
+  "assetLoadProblem": "Probleem met laden van activum",
   "idLabel": "ID",
-  "@idLabel": {
-    "description": "Label for ID field"
-  },
-  "roomNameLabel": "Room Name",
-  "@roomNameLabel": {
-    "description": "Label for the room name field"
-  },
-  "assetNameLabel": "Asset Name",
-  "@assetNameLabel": {
-    "description": "Label for the asset name field"
-  },
-  "enterAssetName": "Please enter asset name?",
-  "@enterAssetName": {
-    "description": "Validation message for the asset name field"
-  },
-  "qtyOnHand": "Quantity on Hand",
-  "@qtyOnHand": {
-    "description": "Label for the quantity on hand field"
-  },
-  "enterQtyOnHand": "Please enter quantity on hand?",
-  "@enterQtyOnHand": {
-    "description": "Validation message for the quantity on hand field"
-  },
-  "qtyPromise": "Quantity Promise",
-  "@qtyPromise": {
-    "description": "Label for the quantity promise field"
-  },
-  "enterQtyPromise": "Please enter quantity promise?",
-  "@enterQtyPromise": {
-    "description": "Validation message for the quantity promise field"
-  },
-  "enterAquiredCost": "Please enter acquired cost?",
-  "@enterAquiredCost": {
-    "description": "Validation message for the acquired cost field"
-  },
-  "serverProblem": "Server problem",
-  "@serverProblem": {
-    "description": "Error message when there's a server problem"
-  },
-  "roomTypeName": "Room Type Name",
-  "@roomTypeName": {
-    "description": "Label for the room type name field"
-  },
-  "productIdName": "Product ID Name",
-  "@productIdName": {
-    "description": "Label for the product ID name field"
-  },
-  "select": "Select",
-  "@select": {
-    "description": "Label for select button or dropdown"
-  },
+  "roomNameLabel": "Kamernaam",
+  "assetNameLabel": "Activanaam",
+  "enterAssetName": "Voer de naam van het activum in",
+  "qtyOnHand": "Aantal op voorraad",
+  "enterQtyOnHand": "Voer het aantal op voorraad in",
+  "qtyPromise": "Beloofde hoeveelheid",
+  "enterQtyPromise": "Voer de beloofde hoeveelheid in",
+  "enterAquiredCost": "Voer de verworven kosten in",
+  "serverProblem": "Serverprobleem",
+  "roomTypeName": "Naam kamertype",
+  "productIdName": "Product-ID Naam",
+  "select": "Selecteer",
   "product": "Product",
-  "@product": {
-    "description": "Label for product"
-  },
-  "roomTypeId": "Room Type ID",
-  "@roomTypeId": {
-    "description": "Label for the room type ID field"
-  },
-  "productId": "Product ID",
-  "@productId": {
-    "description": "Label for the product ID field"
-  },
-  "fieldRequired": "Field required",
-  "@fieldRequired": {
-    "description": "Validation message for required fields"
-  },
+  "roomTypeId": "Kamertype-ID",
+  "productId": "Product-ID",
+  "fieldRequired": "Veld vereist",
   "status": "Status",
-  "@status": {
-    "description": "Label for status field"
-  },
-  "selectLocation": "Select Location",
-  "@selectLocation": {
-    "description": "Label for select location dropdown or button"
-  },
-  "location": "Location",
-  "@location": {
-    "description": "Label for location"
-  },
-  "noRoomsFound": "No rooms found",
-  "@noRoomsFound": {
-    "description": "Message displayed when no rooms are found"
-  },
-  "noAssetsFound": "No assets found",
-  "@noAssetsFound": {
-    "description": "Message displayed when no assets are found"
-  },
-  "assetSearch": "Asset Search",
-  "@assetSearch": {
-    "description": "Title for the asset search dialog"
-  },
-  "locations": "Locations",
-  "@locations": {
-    "description": "Label for locations"
-  },
-  "aqrdCosts": "Acquired Cost: {cost}",
-  "@aqrdCosts": {
-    "description": "Label for acquired cost with value",
-    "placeholders": {
-      "cost": {
-        "type": "String"
-      }
-    }
-  },
-  "failedToFetchAssets": "Failed to fetch assets: {message}",
-  "@failedToFetchAssets": {
-    "description": "Error message when the app fails to fetch assets",
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  }
+  "selectLocation": "Selecteer locatie",
+  "location": "Locatie",
+  "noRoomsFound": "Geen kamers gevonden",
+  "noAssetsFound": "Geen activa gevonden",
+  "assetSearch": "Activum zoeken",
+  "locations": "Locaties",
+  "aqrdCosts": "Verworven kosten: {cost}",
+  "failedToFetchAssets": "Activa ophalen mislukt: {message}"
 }

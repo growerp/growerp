@@ -1,6 +1,6 @@
 {
     "@@locale": "nl",
-    "pageHomeWelcome": "Welcome {name}",
+    "pageHomeWelcome": "Welkom {name}",
     "@pageHomeWelcome": {
         "description": "Welcome message on home page with user name",
         "placeholders": {
@@ -10,7 +10,7 @@
             }
         }
     },
-    "screenNotFound": "Screen {screen} not found",
+    "screenNotFound": "Scherm {screen} niet gevonden",
     "@screenNotFound": {
         "description": "Error message when a screen is not found",
         "placeholders": {
@@ -20,7 +20,7 @@
             }
         }
     },
-    "classificationNotDefined": "No {classificationId} company found in system\n Go to the admin app to create one!",
+    "classificationNotDefined": "Geen {classificationId} bedrijf gevonden in systeem\n Ga naar de admin app om er een aan te maken!",
     "@classificationNotDefined": {
         "description": "Error message when no company is found for a classification",
         "placeholders": {
