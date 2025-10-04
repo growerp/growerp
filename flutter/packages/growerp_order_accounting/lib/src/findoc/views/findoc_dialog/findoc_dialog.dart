@@ -293,7 +293,9 @@ class MyFinDocState extends State<FinDocPage> {
                 child: TextFormField(
                   key: const Key('pseudoId'),
                   enabled: !readOnly,
-                  decoration: InputDecoration(labelText: _localizations.finDocId),
+                  decoration: InputDecoration(
+                    labelText: _localizations.finDocId,
+                  ),
                   controller: _pseudoIdController,
                   keyboardType: TextInputType.number,
                 ),
@@ -394,9 +396,13 @@ class MyFinDocState extends State<FinDocPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("${_localizations.created}: ${finDoc.creationDate.dateOnly()}"),
+                  Text(
+                    "${_localizations.created}: ${finDoc.creationDate.toLocalizedDateOnly(context)}",
+                  ),
                   const SizedBox(width: 10),
-                  Text("${_localizations.placed}: ${finDoc.placedDate!.dateOnly()}"),
+                  Text(
+                    "${_localizations.placed}: ${finDoc.placedDate!.toLocalizedDateOnly(context)}",
+                  ),
                 ],
               ),
             ),
@@ -531,7 +537,8 @@ class MyFinDocState extends State<FinDocPage> {
                     key: const Key('description'),
                     readOnly: readOnly,
                     decoration: InputDecoration(
-                      labelText: '${finDoc.docType} ${_localizations.description}',
+                      labelText:
+                          '${finDoc.docType} ${_localizations.description}',
                       enabled: !readOnly,
                     ),
                     controller: _descriptionController,
@@ -728,7 +735,9 @@ class MyFinDocState extends State<FinDocPage> {
                 HelperFunctions.showMessage(
                   context,
                   _localizations.itemOrCustomerRequired(
-                    (finDocUpdated.sales ? _localizations.customer : _localizations.supplier),
+                    (finDocUpdated.sales
+                        ? _localizations.customer
+                        : _localizations.supplier),
                     finDocUpdated.docType.toString(),
                   ),
                   Colors.red,
@@ -844,7 +853,7 @@ class MyFinDocState extends State<FinDocPage> {
             width: 20,
             name: _localizations.date,
             value: Text(
-              item.rentalFromDate.dateOnly(),
+              item.rentalFromDate.toLocalizedDateOnly(context),
               textAlign: TextAlign.right,
               key: Key('fromDate$index'),
             ),

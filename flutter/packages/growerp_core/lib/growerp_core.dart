@@ -5,6 +5,7 @@ export 'src/domains/integration_test.dart';
 export 'src/core_router.dart';
 export 'src/styles/color_schemes.dart';
 export 'src/extensions.dart';
+export 'src/date_format_extensions.dart';
 export 'l10n/generated/core_localizations.dart';
 export 'src/services/ws_client.dart';
 export 'src/services/build_dio_client.dart';

@@ -19,9 +19,14 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
-TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
-    FinDoc item, int index,
-    {dynamic extra}) {
+TableData getTableData(
+  Bloc bloc,
+  String classificationId,
+  BuildContext context,
+  FinDoc item,
+  int index, {
+  dynamic extra,
+}) {
   String currencyId = context
       .read<AuthBloc>()
       .state
@@ -32,7 +37,8 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
 
   List<TableRowContent> rowContent = [];
   if (isPhone(context)) {
-    rowContent.add(TableRowContent(
+    rowContent.add(
+      TableRowContent(
         width: 10,
         name: const Padding(
           padding: EdgeInsets.fromLTRB(3, 3, 0, 0),
@@ -44,160 +50,211 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             item.pseudoId == null ? '' : item.pseudoId!.lastChar(3),
             style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
           ),
-        )));
+        ),
+      ),
+    );
 
-    rowContent.add(TableRowContent(
+    rowContent.add(
+      TableRowContent(
         width: 65,
-        name: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Text('${item.docType} Id'),
-            const SizedBox(width: 10),
-            Text(classificationId == 'AppHotel' ? 'RsvDate' : 'CrDate'),
-          ]),
-          Text(item.sales ? 'Customer' : 'Supplier'),
-          Row(
-            children: [
-              const Text('Status'),
-              const SizedBox(width: 5),
-              if (item.docType != FinDocType.shipment &&
-                  item.docType != FinDocType.request)
-                const Text('Total'),
-              const SizedBox(width: 5),
-              const Text('#Items'),
-              const SizedBox(width: 5),
-              Text(classificationId == 'AppHotel' ? '#Room' : ''),
-            ],
-          ),
-        ]),
-        value: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(
-            children: [
-              Text(item.pseudoId ?? '', key: Key('id$index')),
-              const SizedBox(width: 10),
-              Text(
-                classificationId == 'AppHotel'
-                    ? (item.items[0].rentalFromDate != null
-                        ? item.items[0].rentalFromDate.dateOnly()
-                        : '??')
-                    : item.placedDate != null
-                        ? '${item.placedDate?.dateOnly()}'
-                        : item.creationDate != null
-                            ? item.creationDate.dateOnly()
-                            : '??',
-                key: const Key('date'),
-              ),
-            ],
-          ),
-          Text(
+        name: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text('${item.docType} Id'),
+                const SizedBox(width: 10),
+                Text(classificationId == 'AppHotel' ? 'RsvDate' : 'CrDate'),
+              ],
+            ),
+            Text(item.sales ? 'Customer' : 'Supplier'),
+            Row(
+              children: [
+                const Text('Status'),
+                const SizedBox(width: 5),
+                if (item.docType != FinDocType.shipment &&
+                    item.docType != FinDocType.request)
+                  const Text('Total'),
+                const SizedBox(width: 5),
+                const Text('#Items'),
+                const SizedBox(width: 5),
+                Text(classificationId == 'AppHotel' ? '#Room' : ''),
+              ],
+            ),
+          ],
+        ),
+        value: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(item.pseudoId ?? '', key: Key('id$index')),
+                const SizedBox(width: 10),
+                Text(
+                  classificationId == 'AppHotel'
+                      ? (item.items[0].rentalFromDate != null
+                            ? item.items[0].rentalFromDate.toLocalizedDateOnly(
+                                context,
+                              )
+                            : '??')
+                      : item.placedDate != null
+                      ? '${item.placedDate?.toLocalizedDateOnly(context)}'
+                      : item.creationDate != null
+                      ? item.creationDate.toLocalizedDateOnly(context)
+                      : '??',
+                  key: const Key('date'),
+                ),
+              ],
+            ),
+            Text(
               item.otherCompany?.name.truncate(20) ??
                   item.otherUser?.getName().truncate(20) ??
                   '',
-              key: Key("otherUser$index")),
-          Row(
-            children: [
-              Text(
+              key: Key("otherUser$index"),
+            ),
+            Row(
+              children: [
+                Text(
                   item.status == null
                       ? '?'
                       : classificationId == 'AppHotel' &&
-                              item.docType == FinDocType.order
-                          ? item.status!.hotel
-                          : item.status!.name,
-                  key: Key("status$index")),
-              const SizedBox(width: 5),
-              if (item.docType != FinDocType.shipment &&
-                  item.docType != FinDocType.request)
-                Text(item.grandTotal.currency(currencyId: currencyId),
-                    key: Key("grandTotal$index")),
-              if (item.docType != FinDocType.shipment) const SizedBox(width: 5),
-              Text(item.items.length.toString(), key: Key("itemsLength$index")),
-              const SizedBox(width: 10),
-              Text(classificationId == 'AppHotel' && item.items[0].asset != null
-                  ? item.items[0].asset!.assetName ?? '??'
-                  : '')
-            ],
-          ),
-        ])));
+                            item.docType == FinDocType.order
+                      ? item.status!.hotel
+                      : item.status!.name,
+                  key: Key("status$index"),
+                ),
+                const SizedBox(width: 5),
+                if (item.docType != FinDocType.shipment &&
+                    item.docType != FinDocType.request)
+                  Text(
+                    item.grandTotal.currency(currencyId: currencyId),
+                    key: Key("grandTotal$index"),
+                  ),
+                if (item.docType != FinDocType.shipment)
+                  const SizedBox(width: 5),
+                Text(
+                  item.items.length.toString(),
+                  key: Key("itemsLength$index"),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  classificationId == 'AppHotel' && item.items[0].asset != null
+                      ? item.items[0].asset!.assetName ?? '??'
+                      : '',
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   } else {
-    rowContent.add(TableRowContent(
+    rowContent.add(
+      TableRowContent(
         width: 8,
         name: Text('${item.docType} Id'),
-        value: Text(item.pseudoId ?? '', key: Key('id$index'))));
-    if (item.docType == FinDocType.transaction) {
-      rowContent.add(TableRowContent(
-        width: 12,
-        name: const Text('Type'),
-        value: Text(item.docSubType ?? ''),
-      ));
-    }
-    rowContent.add(TableRowContent(
-      width: 8,
-      name: Text(
-          classificationId == 'AppHotel' ? 'Reserv. Date' : 'Creation Date'),
-      value: Text(
-        classificationId == 'AppHotel'
-            ? (item.items[0].rentalFromDate != null
-                ? item.items[0].rentalFromDate.dateOnly()
-                : '??')
-            : item.placedDate != null
-                ? item.placedDate.dateOnly()
-                : item.creationDate != null
-                    ? item.creationDate.dateOnly()
-                    : '??',
-        key: const Key('date'),
+        value: Text(item.pseudoId ?? '', key: Key('id$index')),
       ),
-    ));
-    rowContent.add(TableRowContent(
+    );
+    if (item.docType == FinDocType.transaction) {
+      rowContent.add(
+        TableRowContent(
+          width: 12,
+          name: const Text('Type'),
+          value: Text(item.docSubType ?? ''),
+        ),
+      );
+    }
+    rowContent.add(
+      TableRowContent(
+        width: 8,
+        name: Text(
+          classificationId == 'AppHotel' ? 'Reserv. Date' : 'Creation Date',
+        ),
+        value: Text(
+          classificationId == 'AppHotel'
+              ? (item.items[0].rentalFromDate != null
+                    ? item.items[0].rentalFromDate.toLocalizedDateOnly(context)
+                    : '??')
+              : item.placedDate != null
+              ? item.placedDate.toLocalizedDateOnly(context)
+              : item.creationDate != null
+              ? item.creationDate.toLocalizedDateOnly(context)
+              : '??',
+          key: const Key('date'),
+        ),
+      ),
+    );
+    rowContent.add(
+      TableRowContent(
         width: 20,
         name: Text(item.sales ? 'Customer' : 'Supplier'),
         value: Text(
-            item.otherCompany?.name.truncate(30) ??
-                item.otherUser?.getName().truncate(30) ??
-                '',
-            key: Key("otherUser$index"))));
+          item.otherCompany?.name.truncate(30) ??
+              item.otherUser?.getName().truncate(30) ??
+              '',
+          key: Key("otherUser$index"),
+        ),
+      ),
+    );
     if (item.docType != FinDocType.shipment) {
-      rowContent.add(TableRowContent(
+      rowContent.add(
+        TableRowContent(
           width: 10,
-          name: const Text(
-            "Total",
+          name: const Text("Total", textAlign: TextAlign.right),
+          value: Text(
+            item.grandTotal.currency(currencyId: currencyId),
             textAlign: TextAlign.right,
+            key: Key("grandTotal$index"),
           ),
-          value: Text(item.grandTotal.currency(currencyId: currencyId),
-              textAlign: TextAlign.right, key: Key("grandTotal$index"))));
+        ),
+      );
     }
-    rowContent.add(TableRowContent(
+    rowContent.add(
+      TableRowContent(
         width: 10,
         name: const Text("Status"),
         value: Text(
-            classificationId == 'AppHotel' && item.docType == FinDocType.order
-                ? item.status!.hotel
-                : item.status!.name,
-            key: Key("status$index"))));
-    rowContent.add(TableRowContent(
+          classificationId == 'AppHotel' && item.docType == FinDocType.order
+              ? item.status!.hotel
+              : item.status!.name,
+          key: Key("status$index"),
+        ),
+      ),
+    );
+    rowContent.add(
+      TableRowContent(
         width: 10,
         name: const Text("Email Address"),
-        value: Text(item.otherCompany?.email ?? item.otherUser?.email ?? '',
-            key: Key("emailstatus$index"))));
+        value: Text(
+          item.otherCompany?.email ?? item.otherUser?.email ?? '',
+          key: Key("emailstatus$index"),
+        ),
+      ),
+    );
   }
 
-  rowContent.add(TableRowContent(
+  rowContent.add(
+    TableRowContent(
       width: 25,
       name: '',
-      value: Row(children: [
-        if (item.docType == FinDocType.order ||
-            item.docType == FinDocType.invoice)
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            key: Key('print$index'),
-            icon: const Icon(Icons.print),
-            tooltip: 'PDF/Print ${item.docType}',
-            onPressed: () async {
-              await Navigator.pushNamed(context, '/printer', arguments: item);
-            },
-          ),
-        if (item.status != FinDocStatusVal.cancelled &&
-            item.status != FinDocStatusVal.completed)
-          IconButton(
+      value: Row(
+        children: [
+          if (item.docType == FinDocType.order ||
+              item.docType == FinDocType.invoice)
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              key: Key('print$index'),
+              icon: const Icon(Icons.print),
+              tooltip: 'PDF/Print ${item.docType}',
+              onPressed: () async {
+                await Navigator.pushNamed(context, '/printer', arguments: item);
+              },
+            ),
+          if (item.status != FinDocStatusVal.cancelled &&
+              item.status != FinDocStatusVal.completed)
+            IconButton(
               visualDensity: VisualDensity.compact,
               padding: EdgeInsets.zero,
               key: Key('delete$index'),
@@ -205,15 +262,27 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
               tooltip: 'remove item',
               onPressed: () async {
                 bool? result = await confirmDialog(
-                    context, "delete ${item.pseudoId}?", "cannot be undone!");
+                  context,
+                  "delete ${item.pseudoId}?",
+                  "cannot be undone!",
+                );
                 if (result == true) {
-                  bloc.add(FinDocUpdate(
-                      item.copyWith(status: FinDocStatusVal.cancelled)));
+                  bloc.add(
+                    FinDocUpdate(
+                      item.copyWith(status: FinDocStatusVal.cancelled),
+                    ),
+                  );
                 }
-              })
-      ])));
+              },
+            ),
+        ],
+      ),
+    ),
+  );
   return TableData(
-      rowHeight: isPhone(context) ? 65 : 20, rowContent: rowContent);
+    rowHeight: isPhone(context) ? 65 : 20,
+    rowContent: rowContent,
+  );
 }
 
 // general settings

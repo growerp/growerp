@@ -215,7 +215,8 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                     Expanded(
                       child: Text(
                         catalogLocalizations.purchased(
-                          widget.subscription.purchaseFromDate!.dateOnly(),
+                          widget.subscription.purchaseFromDate!
+                              .toLocalizedDateOnly(context),
                         ),
                       ),
                     ),
@@ -223,7 +224,8 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                     Expanded(
                       child: Text(
                         catalogLocalizations.cancelled(
-                          widget.subscription.purchaseThruDate.dateOnly(),
+                          widget.subscription.purchaseThruDate
+                              .toLocalizedDateOnly(context),
                         ),
                       ),
                     ),

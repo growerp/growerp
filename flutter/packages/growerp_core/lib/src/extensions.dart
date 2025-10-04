@@ -58,6 +58,11 @@ extension DateOnlyCompare on DateTime {
 }
 
 extension DateOnly on DateTime? {
+  /// Get date-only string in yyyy-MM-dd format
+  ///
+  /// **Note**: This method uses Gregorian calendar only.
+  /// For locale-aware formatting with Buddhist Era support for Thai,
+  /// use `toLocalizedDateOnly(context)` from date_format_extensions.dart
   String dateOnly() {
     if (this == null) return '';
     // Always format in local time for display
@@ -81,12 +86,14 @@ extension DateTimeUtc on DateTime {
   /// Convert from server time (assumed UTC) to local time
   static DateTime fromServerTime(String serverTimeString) {
     try {
-      DateTime utcTime = DateTime.parse(serverTimeString +
-          (serverTimeString.contains('Z') ||
-                  serverTimeString.contains('+') ||
-                  serverTimeString.contains('-', 10)
-              ? ''
-              : 'Z'));
+      DateTime utcTime = DateTime.parse(
+        serverTimeString +
+            (serverTimeString.contains('Z') ||
+                    serverTimeString.contains('+') ||
+                    serverTimeString.contains('-', 10)
+                ? ''
+                : 'Z'),
+      );
       return utcTime.toLocal();
     } catch (e) {
       return DateTime.now();
@@ -120,7 +127,9 @@ extension UsCurrency on Decimal? {
   String currency({String currencyId = "USD"}) {
     if (this == null) return ('');
     var format = NumberFormat.simpleCurrency(
-        locale: Platform.localeName, name: currencyId);
+      locale: Platform.localeName,
+      name: currencyId,
+    );
     String usFormat = currencyId == '' ? "###0.00#" : "#,##0.00#";
 
     return '${format.currencySymbol}'

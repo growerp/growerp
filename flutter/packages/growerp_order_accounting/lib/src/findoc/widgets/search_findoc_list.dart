@@ -55,7 +55,9 @@ class SearchFinDocState extends State<SearchFinDocList> {
       builder: (context, state) {
         if (state.status == DataFetchStatus.failure) {
           return Center(
-            child: Text('${_localizations.fetchSearchItemsFail} ${state.message}'),
+            child: Text(
+              '${_localizations.fetchSearchItemsFail} ${state.message}',
+            ),
           );
         }
         if (state.status == DataFetchStatus.success) {
@@ -165,7 +167,7 @@ class FinDocSearchDialog extends StatelessWidget {
                       child: ListTile(
                         title: Text(
                           "${local.id}: ${finDocs[index].pseudoId}  "
-                          "${local.date}: ${finDocs[index].creationDate.dateOnly()}",
+                          "${local.date}: ${finDocs[index].creationDate.toLocalizedDateOnly(context)}",
                           key: Key("searchResult$index"),
                         ),
                         subtitle: Column(
