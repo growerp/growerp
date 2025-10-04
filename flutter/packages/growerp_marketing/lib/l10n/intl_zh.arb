@@ -1,0 +1,227 @@
+{
+    "@@locale": "zh",
+    "@@last_modified": "2025-09-30T00:00:00Z",
+    "@@author": "GrowERP Community",
+    "@@context": "GrowERP业务管理系统营销包本地化",
+    "@@x-template": "intl_en.arb",
+    "tableHdrShortId": "短ID",
+    "@tableHdrShortId": {
+        "description": "短ID的表头"
+    },
+    "tableHdrId": "ID",
+    "@tableHdrId": {
+        "description": "ID的表头"
+    },
+    "tableHdrName": "名称",
+    "@tableHdrName": {
+        "description": "名称的表头"
+    },
+    "tableHdrAmount": "金额",
+    "@tableHdrAmount": {
+        "description": "金额的表头"
+    },
+    "tableHdrProbability": "概率",
+    "@tableHdrProbability": {
+        "description": "概率的表头"
+    },
+    "tableHdrLead": "潜在客户名称/公司",
+    "@tableHdrLead": {
+        "description": "潜在客户的表头"
+    },
+    "tableHdrLeadEmail": "潜在客户电子邮件",
+    "@tableHdrLeadEmail": {
+        "description": "潜在客户电子邮件的表头"
+    },
+    "tableHdrStage": "阶段",
+    "@tableHdrStage": {
+        "description": "阶段的表头"
+    },
+    "tableHdrNextStep": "下一步",
+    "@tableHdrNextStep": {
+        "description": "下一步的表头"
+    },
+    "tableHdrDelete": " ",
+    "@tableHdrDelete": {
+        "description": "删除操作的表头"
+    },
+    "removeItemTooltip": "移除项目",
+    "@removeItemTooltip": {
+        "description": "移除项目按钮的工具提示"
+    },
+    "deleteItemConfirm": "删除 {id}？",
+    "@deleteItemConfirm": {
+        "description": "删除项目的确认对话框",
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "cannotBeUndone": "此操作无法撤销！",
+    "@cannotBeUndone": {
+        "description": "一个操作无法撤销的警告"
+    },
+    "error": "错误：{message}",
+    "@error": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "unknown": "未知",
+    "@unknown": {
+        "description": "通用的“未知”文本"
+    },
+    "opportunityNew": "新机会",
+    "@opportunityNew": {
+        "description": "新机会页面的标题"
+    },
+    "opportunityWithMessage": "机会 {id}",
+    "@opportunityWithMessage": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "id": "ID",
+    "@id": {
+        "description": "ID字段的标签"
+    },
+    "opportunityName": "机会名称",
+    "@opportunityName": {
+        "description": "机会名称字段的标签"
+    },
+    "enterOppName": "输入机会名称",
+    "@enterOppName": {
+        "description": "机会名称输入的占位符"
+    },
+    "description": "描述",
+    "@description": {
+        "description": "描述字段的标签"
+    },
+    "expRevenue": "预期收入",
+    "@expRevenue": {
+        "description": "预期收入字段的标签"
+    },
+    "enterAmount": "输入金额",
+    "@enterAmount": {
+        "description": "金额输入的占位符"
+    },
+    "estProbability": "估计概率",
+    "@estProbability": {
+        "description": "估计概率字段的标签"
+    },
+    "enterProbability": "输入概率",
+    "@enterProbability": {
+        "description": "概率输入的占位符"
+    },
+    "nextStep": "下一步",
+    "@nextStep": {
+        "description": "下一步字段的标签"
+    },
+    "enterNextStep": "输入下一步",
+    "@enterNextStep": {
+        "description": "下一步输入的占位符"
+    },
+    "stage": "阶段",
+    "@stage": {
+        "description": "阶段字段的标签"
+    },
+    "fieldRequired": "必填字段",
+    "@fieldRequired": {
+        "description": "必填字段的验证错误"
+    },
+    "leadSearch": "潜在客户搜索",
+    "@leadSearch": {
+        "description": "潜在客户搜索对话框的标题"
+    },
+    "selectLead": "选择潜在客户",
+    "@selectLead": {
+        "description": "选择潜在客户的说明"
+    },
+    "lead": "潜在客户",
+    "@lead": {
+        "description": "潜在客户字段的标签"
+    },
+    "employeeSearch": "员工搜索",
+    "@employeeSearch": {
+        "description": "员工搜索对话框的标题"
+    },
+    "selectEmployee": "选择员工",
+    "@selectEmployee": {
+        "description": "选择员工的说明"
+    },
+    "accountEmployee": "客户经理",
+    "@accountEmployee": {
+        "description": "客户经理字段的标签"
+    },
+    "create": "创建",
+    "@create": {
+        "description": "创建按钮文本"
+    },
+    "update": "更新",
+    "@update": {
+        "description": "更新按钮文本"
+    },
+    "serverProblem": "服务器问题",
+    "@serverProblem": {
+        "description": "服务器问题的错误消息"
+    },
+    "fetchError": "获取错误：{message}",
+    "@fetchError": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "noOpportunities": "未找到机会",
+    "@noOpportunities": {
+        "description": "未找到机会时的消息"
+    },
+    "addNew": "添新",
+    "@addNew": {
+        "description": "添加新项目的按钮"
+    },
+    "fetchSearchError": "搜索错误：{message}",
+    "@fetchSearchError": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "opportunitySearch": "机会搜索",
+    "@opportunitySearch": {
+        "description": "机会搜索对话框的标题"
+    },
+    "searchInput": "搜索输入",
+    "@searchInput": {
+        "description": "搜索输入字段的标签"
+    },
+    "enterSearchValue": "输入搜索值",
+    "@enterSearchValue": {
+        "description": "搜索输入的占位符"
+    },
+    "searchResults": "搜索结果",
+    "@searchResults": {
+        "description": "搜索结果的标题"
+    },
+    "noSearchItems": "无搜索项",
+    "@noSearchItems": {
+        "description": "未找到搜索项时的消息"
+    },
+    "searchResult": "ID：{id}，名称：{name}",
+    "@searchResult": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            },
+            "name": {
+                "type": "String"
+            }
+        }
+    }
+}
