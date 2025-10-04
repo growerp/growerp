@@ -1,0 +1,103 @@
+{
+  "@@locale": "nl",
+  "chatNotActive": "Chat not active!",
+  "@chatNotActive": {
+    "description": "Error message when chat is not active"
+  },
+  "messageText": "Message text..",
+  "@messageText": {
+    "description": "Placeholder text for message input field"
+  },
+  "send": "Send",
+  "@send": {
+    "description": "Send button text"
+  },
+  "addPartner": "Add partner",
+  "@addPartner": {
+    "description": "Button text to add chat partner"
+  },
+  "chat": "Chat #",
+  "@chat": {
+    "description": "Chat header with number symbol"
+  },
+  "newChat": "New",
+  "@newChat": {
+    "description": "Button text for creating new chat"
+  },
+  "selectChatPartner": "Select chat partner",
+  "@selectChatPartner": {
+    "description": "Instruction to select a chat partner"
+  },
+  "chatPartner": "Chat partner",
+  "@chatPartner": {
+    "description": "Label for chat partner field"
+  },
+  "fieldRequired": "Field required",
+  "@fieldRequired": {
+    "description": "Generic required field error message"
+  },
+  "create": "Create",
+  "@create": {
+    "description": "Create button text"
+  },
+  "update": "Update",
+  "@update": {
+    "description": "Update button text"
+  },
+  "room": "Room",
+  "@room": {
+    "description": "Label for room"
+  },
+  "chatRoom": "ChatRoom",
+  "@chatRoom": {
+    "description": "Chat room label or header"
+  },
+  "chatUsersAndGroups": "Chat users and groups",
+  "@chatUsersAndGroups": {
+    "description": "Section header for chat users and groups"
+  },
+  "addNew": "Add New",
+  "@addNew": {
+    "description": "Add new item button text"
+  },
+  "no": "no ",
+  "@no": {
+    "description": "Partial text for 'no items found' messages"
+  },
+  "sFound": "s found!",
+  "@sFound": {
+    "description": "Partial text for 'items found' messages"
+  },
+  "searchInName": "search in name ..",
+  "@searchInName": {
+    "description": "Placeholder text for name search field"
+  },
+  "search": "Search",
+  "@search": {
+    "description": "Search button text"
+  },
+  "name": "Name",
+  "@name": {
+    "description": "Name field label"
+  },
+  "status": "Status",
+  "@status": {
+    "description": "Status field label"
+  },
+  "pvt": "Pvt.",
+  "@pvt": {
+    "description": "Abbreviation for Private"
+  },
+  "nroMembers": "#Mem.",
+  "@nroMembers": {
+    "description": "Abbreviation for number of members"
+  },
+  "allMessagesRead": "All messages read",
+  "@allMessagesRead": {
+    "description": "Status message when all messages are read"
+  },
+  "unreadMessages": "unread messages",
+  "@unreadMessages": {
+    "description": "Label for unread messages count"
+  }
+}

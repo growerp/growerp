@@ -1,0 +1,33 @@
+{
+    "@@locale": "nl",
+    "pageHomeWelcome": "Welcome {name}",
+    "@pageHomeWelcome": {
+        "description": "Welcome message on home page with user name",
+        "placeholders": {
+            "name": {
+                "type": "String",
+                "description": "User's name"
+            }
+        }
+    },
+    "screenNotFound": "Screen {screen} not found",
+    "@screenNotFound": {
+        "description": "Error message when a screen is not found",
+        "placeholders": {
+            "screen": {
+                "type": "String",
+                "description": "Name of the screen that was not found"
+            }
+        }
+    },
+    "classificationNotDefined": "No {classificationId} company found in system\n Go to the admin app to create one!",
+    "@classificationNotDefined": {
+        "description": "Error message when no company is found for a classification",
+        "placeholders": {
+            "classificationId": {
+                "type": "String",
+                "description": "Classification ID that was not found"
+            }
+        }
+    }
+}

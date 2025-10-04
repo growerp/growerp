@@ -107,7 +107,7 @@ class TopApp extends StatelessWidget {
                       Locale('zh'),
                       Locale('de'),
                       Locale('fr'),
-                      Locale('en', 'CA'),
+                      Locale('nl'),
                     ],
                     scrollBehavior: const MaterialScrollBehavior().copyWith(
                       dragDevices: {

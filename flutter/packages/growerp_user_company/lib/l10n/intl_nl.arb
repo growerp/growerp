@@ -1,0 +1,887 @@
+{
+  "@@locale": "nl",
+  "acctSales": "Accounting Sales",
+  "@acctSales": {
+    "description": "Menu item for Sales Accounting"
+  },
+  "acctPurchase": "Accounting Purchase",
+  "@acctPurchase": {
+    "description": "Menu item for Purchase Accounting"
+  },
+  "address": "Address",
+  "@address": {
+    "description": "Address information"
+  },
+  "addressDelete": "Address deleted",
+  "@addressDelete": {
+    "description": "Confirmation message that an address has been deleted"
+  },
+  "addressReplace": "Address replaced.",
+  "@addressReplace": {
+    "description": "Confirmation message that an address has been replaced"
+  },
+  "address1": "Address line 1",
+  "@address1": {
+    "description": "Input field label for the first line of an address"
+  },
+  "address1Error": "Please enter a Street name",
+  "@address1Error": {
+    "description": "Error message when address line 1 is empty"
+  },
+  "address2": "Address line 2",
+  "@address2": {
+    "description": "Input field label for the second line of an address"
+  },
+  "addressNew": "New Address",
+  "@addressNew": {
+    "description": "Title for creating a new address"
+  },
+  "addressDetail": "Address #{addressId}",
+  "@addressDetail": {
+    "description": "Title for the address detail view",
+    "placeholders": {
+      "addressId": {
+        "type": "String",
+        "example": "123"
+      }
+    }
+  },
+  "administrator": "Administrator",
+  "@administrator": {
+    "description": "Role name for an administrator"
+  },
+  "admins": "Admins",
+  "@admins": {
+    "description": "Plural of Admin"
+  },
+  "add": "Add",
+  "@add": {
+    "description": "Short action button text"
+  },
+  "addNew": "Add New",
+  "@addNew": {
+    "description": "Action button text to add a new item"
+  },
+  "addNewRelatedCompany": "Add new related company",
+  "@addNewRelatedCompany": {
+    "description": "Action button text to add a new related company"
+  },
+  "adminNeedsUsername": "An administrator needs a username!",
+  "@adminNeedsUsername": {
+    "description": "Error message when an admin user is created without a username"
+  },
+  "appAdmin": "Admin",
+  "@appAdmin": {
+    "description": "Application administrator"
+  },
+  "appCompany": "Company",
+  "@appCompany": {
+    "description": "Company entity"
+  },
+  "city": "City",
+  "@city": {
+    "description": "Input field label for city"
+  },
+  "cityError": "Please enter a City",
+  "@cityError": {
+    "description": "Error message when city is empty"
+  },
+  "company": "Company",
+  "@company": {
+    "description": "A business entity"
+  },
+  "companyAddress": "Company Address",
+  "@companyAddress": {
+    "description": "The address of a company"
+  },
+  "newCompanyAddress": "New Company Address",
+  "@newCompanyAddress": {
+    "description": "Title for creating a new company address"
+  },
+  "companyAddressDetail": "Company Address #{addressId}",
+  "@companyAddressDetail": {
+    "description": "Title for the company address detail view",
+    "placeholders": {
+      "addressId": {
+        "type": "String"
+      }
+    }
+  },
+  "companyDelete": "Company {name} deleted",
+  "@companyDelete": {
+    "description": "Confirmation message that a company has been deleted",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "ABC Corp"
+      }
+    }
+  },
+  "companyDetail": "Company Detail",
+  "@companyDetail": {
+    "description": "Title for the company detail view"
+  },
+  "companyName": "Company Name",
+  "@companyName": {
+    "description": "Input field label for the company name"
+  },
+  "companyNameEmail": "Company Name\nEmail",
+  "@companyNameEmail": {
+    "description": "Label for a field that shows both company name and email"
+  },
+  "companyNameError": "Please enter the company name",
+  "@companyNameError": {
+    "description": "Error message when company name is empty"
+  },
+  "companyNone": "No companies found.",
+  "@companyNone": {
+    "description": "Message when no companies are found in a search"
+  },
+  "companyRoleDetail": "{role} Company #{id}",
+  "@companyRoleDetail": {
+    "description": "Detail of a company with a specific role",
+    "placeholders": {
+      "role": {
+        "type": "String",
+        "example": "Customer"
+      },
+      "id": {
+        "type": "String",
+        "example": "123"
+      }
+    }
+  },
+  "companySearch": "Company Search",
+  "@companySearch": {
+    "description": "Title for the company search page"
+  },
+  "companyUpdate": "Company {name} updated",
+  "@companyUpdate": {
+    "description": "Confirmation message that a company has been updated",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "ABC Corp"
+      }
+    }
+  },
+  "companyUserUpDown": "Company/User Up/Download",
+  "@companyUserUpDown": {
+    "description": "Menu item for uploading/downloading company and user data"
+  },
+  "couldNotLoad": "Could not load {role}s!",
+  "@couldNotLoad": {
+    "description": "Error message when a list of items for a certain role could not be loaded",
+    "placeholders": {
+      "role": {
+        "type": "String",
+        "example": "Customer"
+      }
+    }
+  },
+  "country": "Country",
+  "@country": {
+    "description": "Input field label for country"
+  },
+  "countryError": "Please select a country",
+  "@countryError": {
+    "description": "Error message when no country is selected"
+  },
+  "create": "Create",
+  "@create": {
+    "description": "Action button text to create an item"
+  },
+  "currency": "Currency",
+  "@currency": {
+    "description": "Input field label for currency"
+  },
+  "currencyError": "Currency field required!",
+  "@currencyError": {
+    "description": "Error message when currency is not selected"
+  },
+  "customer": "Customer",
+  "@customer": {
+    "description": "A person or company that buys goods or services"
+  },
+  "customers": "Customers",
+  "@customers": {
+    "description": "Plural of customer"
+  },
+  "database": "Database",
+  "@database": {
+    "description": "A structured set of data"
+  },
+  "dataFileSent": "A data file will be sent by email",
+  "@dataFileSent": {
+    "description": "Confirmation message that a data file has been sent"
+  },
+  "deleteUser": "Delete User",
+  "@deleteUser": {
+    "description": "Action button text to delete a user"
+  },
+  "disabled": "Disabled",
+  "@disabled": {
+    "description": "Status indicating something is not enabled"
+  },
+  "downloadEmail": "Download via email",
+  "@downloadEmail": {
+    "description": "Action button text to download data and receive it by email"
+  },
+  "downloadFormat": "Download first to obtain the format",
+  "@downloadFormat": {
+    "description": "Instructional text for data import"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Input field label for email address"
+  },
+  "emailAddress": "Email address",
+  "@emailAddress": {
+    "description": "Full label for email address"
+  },
+  "emailInvalid": "This is not a valid email",
+  "@emailInvalid": {
+    "description": "Error message for an invalid email format"
+  },
+  "emailLoginRequired": "Email for login required!",
+  "@emailLoginRequired": {
+    "description": "Error message when email is required for login"
+  },
+  "employee": "Employee",
+  "@employee": {
+    "description": "A person employed for wages or salary"
+  },
+  "employees": "Employees",
+  "@employees": {
+    "description": "Plural of employee"
+  },
+  "failedToFetchSearchItems": "failed to fetch search items: {message}",
+  "@failedToFetchSearchItems": {
+    "description": "Error message when fetching search items fails",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldRequired": "Field required",
+  "@fieldRequired": {
+    "description": "Generic error message for a required field"
+  },
+  "firstName": "First Name",
+  "@firstName": {
+    "description": "Input field label for first name"
+  },
+  "firstNameError": "Please enter a first name",
+  "@firstNameError": {
+    "description": "Error message when first name is empty"
+  },
+  "hostName": "HostName",
+  "@hostName": {
+    "description": "The hostname of a server"
+  },
+  "id": "ID",
+  "@id": {
+    "description": "Identifier"
+  },
+  "lastName": "Last Name",
+  "@lastName": {
+    "description": "Input field label for last name"
+  },
+  "lastNameError": "Please enter a last name",
+  "@lastNameError": {
+    "description": "Error message when last name is empty"
+  },
+  "lead": "Lead",
+  "@lead": {
+    "description": "A potential sales contact"
+  },
+  "leads": "Leads",
+  "@leads": {
+    "description": "Plural of lead"
+  },
+  "leadUser": "Lead User",
+  "@leadUser": {
+    "description": "A user who is a lead"
+  },
+  "location": "Location",
+  "@location": {
+    "description": "A particular place or position"
+  },
+  "login": "Login",
+  "@login": {
+    "description": "Action of logging into a system"
+  },
+  "loginDisabled": "Login disabled",
+  "@loginDisabled": {
+    "description": "Status message indicating that login is disabled"
+  },
+  "name": "Name",
+  "@name": {
+    "description": "A person's or thing's name"
+  },
+  "needPostalAddress": "Need postal address to add",
+  "@needPostalAddress": {
+    "description": "Message indicating a postal address is required"
+  },
+  "noAddress": "No address yet",
+  "@noAddress": {
+    "description": "Message when no address is available"
+  },
+  "noAddressAdd": "No address yet, need postal address to add",
+  "@noAddressAdd": {
+    "description": "Message when no address is available and it needs to be added"
+  },
+  "noCompaniesFound": "no companies found",
+  "@noCompaniesFound": {
+    "description": "Message when a search for companies returns no results"
+  },
+  "noCompaniesUsersFound": "no companies/users found",
+  "@noCompaniesUsersFound": {
+    "description": "Message when a search for companies and users returns no results"
+  },
+  "noCustomer": "No customers found",
+  "@noCustomer": {
+    "description": "Message when no customers are found"
+  },
+  "noEmployee": "No employees found",
+  "@noEmployee": {
+    "description": "Message when no employees are found"
+  },
+  "noLead": "No leads found",
+  "@noLead": {
+    "description": "Message when no leads are found"
+  },
+  "noPaymentMethod": "No payment methods yet",
+  "@noPaymentMethod": {
+    "description": "Message when no payment methods are available"
+  },
+  "noPaymentMethodAdd": "No payment methods yet, need postal address to add",
+  "@noPaymentMethodAdd": {
+    "description": "Message when no payment methods are available and need to be added"
+  },
+  "noPostalAddress": "No postal address yet",
+  "@noPostalAddress": {
+    "description": "Message when no postal address is available"
+  },
+  "noSearchItems": "No search items found (yet)",
+  "@noSearchItems": {
+    "description": "Message when a search returns no items"
+  },
+  "noSupplier": "No suppliers found",
+  "@noSupplier": {
+    "description": "Message when no suppliers are found"
+  },
+  "numberOfEmployees": "Nr.Employees",
+  "@numberOfEmployees": {
+    "description": "Label for the number of employees"
+  },
+  "org": "Org",
+  "@org": {
+    "description": "Abbreviation for Organization"
+  },
+  "partyId": "PartyId",
+  "@partyId": {
+    "description": "Identifier for a party (person or organization)"
+  },
+  "paymentMethod": "Payment Method",
+  "@paymentMethod": {
+    "description": "Method of payment (e.g., credit card)"
+  },
+  "paymentMethodCardNumber": "Card Number",
+  "@paymentMethodCardNumber": {
+    "description": "Input field label for credit card number"
+  },
+  "paymentMethodCardNumberError": "Please enter a Credit Card Number",
+  "@paymentMethodCardNumberError": {
+    "description": "Error message for empty credit card number"
+  },
+  "paymentMethodCardNumberInvalid": "Card Number not a valid number!",
+  "@paymentMethodCardNumberInvalid": {
+    "description": "Error message for invalid credit card number"
+  },
+  "paymentMethodCardType": "Card Type",
+  "@paymentMethodCardType": {
+    "description": "Input field label for credit card type (e.g., Visa)"
+  },
+  "paymentMethodDelete": "Payment Method deleted",
+  "@paymentMethodDelete": {
+    "description": "Confirmation that a payment method has been deleted"
+  },
+  "paymentMethodExpireMonth": "Expire Month",
+  "@paymentMethodExpireMonth": {
+    "description": "Input field label for credit card expiration month"
+  },
+  "paymentMethodExpireMonthError": "Please enter expiration month",
+  "@paymentMethodExpireMonthError": {
+    "description": "Error message for empty expiration month"
+  },
+  "paymentMethodExpireYear": "Expire Year",
+  "@paymentMethodExpireYear": {
+    "description": "Input field label for credit card expiration year"
+  },
+  "paymentMethodExpireYearError": "Please enter a expiration year",
+  "@paymentMethodExpireYearError": {
+    "description": "Error message for empty expiration year"
+  },
+  "paymentMethodNewCard": "New Card:",
+  "@paymentMethodNewCard": {
+    "description": "Label for adding a new credit card"
+  },
+  "paymentMethodReplace": "Payment Method replaced",
+  "@paymentMethodReplace": {
+    "description": "Confirmation that a payment method has been replaced"
+  },
+  "person": "Person",
+  "@person": {
+    "description": "An individual human being"
+  },
+  "pickImageError": "Pick image error: {error}",
+  "@pickImageError": {
+    "description": "Error message when picking an image fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "postalCode": "PostalCode",
+  "@postalCode": {
+    "description": "Input field label for postal code"
+  },
+  "postalCodeError": "Please enter a Postal Code",
+  "@postalCodeError": {
+    "description": "Error message for empty postal code"
+  },
+  "postalAddress": "Postal Address",
+  "@postalAddress": {
+    "description": "An address for sending mail"
+  },
+  "province": "Province/State",
+  "@province": {
+    "description": "Input field label for province or state"
+  },
+  "provinceError": "Please enter a Province or State",
+  "@provinceError": {
+    "description": "Error message for empty province/state"
+  },
+  "refresh": "refresh",
+  "@refresh": {
+    "description": "Action to reload data"
+  },
+  "relatedCompanyInfo": "Related Company information",
+  "@relatedCompanyInfo": {
+    "description": "Title for section with related company information"
+  },
+  "remove": "Remove",
+  "@remove": {
+    "description": "Action to remove an item"
+  },
+  "removeEmployee": "Remove {firstName} {lastName}?",
+  "@removeEmployee": {
+    "description": "Confirmation dialog to remove an employee",
+    "placeholders": {
+      "firstName": {
+        "type": "String"
+      },
+      "lastName": {
+        "type": "String"
+      }
+    }
+  },
+  "role": "Role",
+  "@role": {
+    "description": "A function assumed or part played by a person or thing"
+  },
+  "roleError": "Select a valid role!",
+  "@roleError": {
+    "description": "Error message when an invalid role is selected"
+  },
+  "sales": "Sales",
+  "@sales": {
+    "description": "The exchange of a commodity for money"
+  },
+  "salesAgent": "Sales Agent",
+  "@salesAgent": {
+    "description": "A person who sells goods or services on behalf of a company"
+  },
+  "salesTaxPercentage": "Sales Tax percentage",
+  "@salesTaxPercentage": {
+    "description": "Input field label for sales tax percentage"
+  },
+  "search": "Search",
+  "@search": {
+    "description": "Action to search for something"
+  },
+  "searchInput": "Search input",
+  "@searchInput": {
+    "description": "Placeholder text for a search input field"
+  },
+  "searchResult": "Search results",
+  "@searchResult": {
+    "description": "Title for the search results view"
+  },
+  "searchResultIdName": "ID: {id}\nName: {name}",
+  "@searchResultIdName": {
+    "description": "Display format for a search result item",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "searchResultOrgRep": "Organization representative:\n{id}\n{name}",
+  "@searchResultOrgRep": {
+    "description": "Display format for an organization representative search result",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "searchValueError": "Please enter a search value",
+  "@searchValueError": {
+    "description": "Error message when search value is empty"
+  },
+  "secondaryBackend": "Secondary Backend",
+  "@secondaryBackend": {
+    "description": "An alternative backend server"
+  },
+  "securityUserGroup": "Security User Group",
+  "@securityUserGroup": {
+    "description": "A group of users for security purposes"
+  },
+  "selectCompany": "Select company",
+  "@selectCompany": {
+    "description": "Instruction to select a company"
+  },
+  "selectCountry": "Select country",
+  "@selectCountry": {
+    "description": "Instruction to select a country"
+  },
+  "selectOrCreateCompany": "Select an existing or Create a new company",
+  "@selectOrCreateCompany": {
+    "description": "Instruction for user to either select an existing company or create a new one"
+  },
+  "shortId": "ShortId",
+  "@shortId": {
+    "description": "A shortened identifier"
+  },
+  "supplier": "Supplier",
+  "@supplier": {
+    "description": "A person or organization that provides something needed"
+  },
+  "suppliers": "Suppliers",
+  "@suppliers": {
+    "description": "Plural of supplier"
+  },
+  "telephone": "Telephone",
+  "@telephone": {
+    "description": "A system for transmitting voices over a distance"
+  },
+  "telephoneNr": "TelephoneNr",
+  "@telephoneNr": {
+    "description": "Abbreviation for Telephone Number"
+  },
+  "type": "Type",
+  "@type": {
+    "description": "A category of people or things having common characteristics"
+  },
+  "update": "Update",
+  "@update": {
+    "description": "Action to update an item"
+  },
+  "uploadCsv": "Upload CSV file",
+  "@uploadCsv": {
+    "description": "Action to upload a CSV file"
+  },
+  "user": "User",
+  "@user": {
+    "description": "A person who uses a computer or network service"
+  },
+  "userDelete": "User {name} deleted",
+  "@userDelete": {
+    "description": "Confirmation that a user has been deleted",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userDetail": "User Detail",
+  "@userDetail": {
+    "description": "Title for the user detail view"
+  },
+  "userEvents": "User events",
+  "@userEvents": {
+    "description": "A list of events related to a user"
+  },
+  "userGroup": "User Group",
+  "@userGroup": {
+    "description": "A group of users"
+  },
+  "userHelp": "Select an existing user or create a new one",
+  "@userHelp": {
+    "description": "Help text for user selection"
+  },
+  "userInfo": "User information",
+  "@userInfo": {
+    "description": "Title for the user information section"
+  },
+  "userLogin": "User Login",
+  "@userLogin": {
+    "description": "The process of a user logging in"
+  },
+  "userName": "User Name",
+  "@userName": {
+    "description": "Input field label for username"
+  },
+  "userNone": "No users found",
+  "@userNone": {
+    "description": "Message when no users are found"
+  },
+  "noClientFound": "No clients found",
+  "@noClientFound": {
+    "description": "Message when no clients are found"
+  },
+  "noUsersFound": "no {role} users found",
+  "@noUsersFound": {
+    "description": "Message when no users are found for a role",
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "addNewUser": "Add New User",
+  "@addNewUser": {
+    "description": "Action button text to add a new user"
+  },
+  "userUpDownload": "Users up/download",
+  "@userUpDownload": {
+    "description": "Tooltip for user up/download button"
+  },
+  "userUpdate": "User {name} updated",
+  "@userUpdate": {
+    "description": "Confirmation that a user has been updated",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userNewCompany": "Create a new company first",
+  "@userNewCompany": {
+    "description": "Instruction to create a new company before adding a user"
+  },
+  "vatSls": "VAT/SLS",
+  "@vatSls": {
+    "description": "Abbreviation for Value Added Tax / Sales"
+  },
+  "vatPercentage": "VAT. percentage",
+  "@vatPercentage": {
+    "description": "Input field label for VAT percentage"
+  },
+  "webAddress": "Web address",
+  "@webAddress": {
+    "description": "The address of a website"
+  },
+  "website": "Website",
+  "@website": {
+    "description": "A location connected to the Internet that maintains one or more pages on the World Wide Web"
+  },
+  "websiteAddress": "Website Address",
+  "@websiteAddress": {
+    "description": "Full label for a website address"
+  },
+  "newCompany": "New Company",
+  "@newCompany": {
+    "description": "Title for creating a new company"
+  },
+  "newItem": "New",
+  "@newItem": {
+    "description": "Short text for new item"
+  },
+  "paymentMethodDetail": "Payment Method Detail",
+  "@paymentMethodDetail": {
+    "description": "Title for the payment method detail view"
+  },
+  "noUsers": "No users found",
+  "@noUsers": {
+    "description": "Message when no users are found"
+  },
+  "noLeads": "No leads found",
+  "@noLeads": {
+    "description": "Message when no leads are found"
+  },
+  "noCustomers": "No customers found",
+  "@noCustomers": {
+    "description": "Message when no customers are found"
+  },
+  "noSuppliers": "No suppliers found",
+  "@noSuppliers": {
+    "description": "Message when no suppliers are found"
+  },
+  "noEmployees": "No employees found",
+  "@noEmployees": {
+    "description": "Message when no employees are found"
+  },
+  "noAdmins": "No admins found",
+  "@noAdmins": {
+    "description": "Message when no admins are found"
+  },
+  "noClients": "No clients found",
+  "@noClients": {
+    "description": "Message when no clients are found"
+  },
+  "client": "Client",
+  "@client": {
+    "description": "A person or organization using the services of a lawyer or other professional person or company."
+  },
+  "clients": "Clients",
+  "@clients": {
+    "description": "Plural of client"
+  },
+  "companyNotFound": "Company {companyId} not found",
+  "@companyNotFound": {
+    "description": "Error message when a company is not found",
+    "placeholders": {
+      "companyId": {
+        "type": "String"
+      }
+    }
+  },
+  "userNotFound": "User {userId} not found",
+  "@userNotFound": {
+    "description": "Error message when user is not found",
+    "placeholders": {
+      "userId": {
+        "type": "String"
+      }
+    }
+  },
+  "serverConnectionProblem": "Server connection problem",
+  "@serverConnectionProblem": {
+    "description": "Error message for server connectivity issues"
+  },
+  "companyPersonNameEmail": "Company/Person Name\nEmail",
+  "@companyPersonNameEmail": {
+    "description": "Column header for company/person name and email"
+  },
+  "companyUserSearch": "Company/User Search",
+  "@companyUserSearch": {
+    "description": "Title for company/user search page"
+  },
+  "searchResults": "Search results",
+  "@searchResults": {
+    "description": "Title for search results section"
+  },
+  "showUserEvents": "Show user events",
+  "@showUserEvents": {
+    "description": "Tooltip for showing user events"
+  },
+  "telephoneNumber": "Telephone number",
+  "@telephoneNumber": {
+    "description": "Label for telephone number"
+  },
+  "roleCompanyInfo": "{role} Company information",
+  "@roleCompanyInfo": {
+    "description": "Title for company information section with a role",
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "companyId": "Company name[id]",
+  "@companyId": {
+    "description": "Label for company name with id"
+  },
+  "updateCompany": "Update",
+  "@updateCompany": {
+    "description": "Button text to update a company"
+  },
+  "removeCompany": "Remove",
+  "@removeCompany": {
+    "description": "Button text to remove a company"
+  },
+  "addNewRelatedComp": "Add new related company",
+  "@addNewRelatedComp": {
+    "description": "Button text to add a new related company"
+  },
+  "userLoginName": "User Login Name",
+  "@userLoginName": {
+    "description": "Label for user login name"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Button text to delete"
+  },
+  "imageUploadError": "Image upload error!",
+  "@imageUploadError": {
+    "description": "Error message when image upload fails"
+  },
+  "companyUpdated": "Company {name} updated...",
+  "@companyUpdated": {
+    "description": "Confirmation message when a company is updated",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "companyAdded": "Company {name} added",
+  "@companyAdded": {
+    "description": "Confirmation message when a company is added",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUpdated": "User {name} updated...",
+  "@userUpdated": {
+    "description": "Confirmation message when a user is updated",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userAdded": "User {name} added at top of list...",
+  "@userAdded": {
+    "description": "Confirmation message when a user is added",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "asCompany": "However now displayed as a company",
+  "@asCompany": {
+    "description": "Message indicating that a user is now displayed as a company"
+  },
+  "compUserUploadSuccess": "Companies/Users upload ended successfully",
+  "@compUserUploadSuccess": {
+    "description": "Success message for company/user upload"
+  },
+  "compUserDownloadSuccess": "The request is scheduled and the email will be sent shortly",
+  "@compUserDownloadSuccess": {
+    "description": "Success message for company/user download"
+  },
+  "userDeleted": "User {name} is deleted now..",
+  "@userDeleted": {
+    "description": "Confirmation message when a user is deleted",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
+}

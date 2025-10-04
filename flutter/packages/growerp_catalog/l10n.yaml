@@ -1,4 +1,4 @@
-preferred-supported-locales: [en, th, zh, de, fr]
+preferred-supported-locales: [en, th, zh, de, fr, nl]
 output-dir: ./lib/l10n/generated
 arb-dir: ./lib/l10n
 template-arb-file: intl_en.arb

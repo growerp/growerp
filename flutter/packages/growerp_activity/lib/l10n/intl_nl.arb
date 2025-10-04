@@ -1,0 +1,199 @@
+{
+  "@@locale": "nl",
+  "@@last_modified": "2024-09-28T14:00:00.000Z",
+  "activity_price": "Price",
+  "@activity_price": {
+    "description": "Price of a product or service",
+    "type": "text"
+  },
+  "activity_id": "Id",
+  "@activity_id": {
+    "description": "Label for activity ID field"
+  },
+  "activity_status": "Status",
+  "@activity_status": {
+    "description": "Label for activity status field"
+  },
+  "activity_fieldRequired": "Field required",
+  "@activity_fieldRequired": {
+    "description": "Generic required field error message"
+  },
+  "activity_name": "Name",
+  "@activity_name": {
+    "description": "Label for activity name field"
+  },
+  "activity_nameError": "Please enter a {activityType} name?",
+  "@activity_nameError": {
+    "description": "Error message for empty activity name field",
+    "placeholders": {
+      "activityType": {
+        "type": "String",
+        "description": "Type of activity being created"
+      }
+    }
+  },
+  "activity_description": "Description",
+  "@activity_description": {
+    "description": "Label for activity description field"
+  },
+  "activity_employeeName": "employee,name",
+  "@activity_employeeName": {
+    "description": "Label for employee name field"
+  },
+  "activity_selectEmployee": "Select employee",
+  "@activity_selectEmployee": {
+    "description": "Dropdown hint for selecting an employee"
+  },
+  "activity_assignee": "Assignee Employee",
+  "@activity_assignee": {
+    "description": "Label for assigned employee field"
+  },
+  "activity_thirdPartyName": "third party,name",
+  "@activity_thirdPartyName": {
+    "description": "Label for third party name field"
+  },
+  "activity_selectThirdParty": "Select third party",
+  "@activity_selectThirdParty": {
+    "description": "Dropdown hint for selecting a third party"
+  },
+  "activity_thirdParty": "ThirdParty",
+  "@activity_thirdParty": {
+    "description": "Label for third party field"
+  },
+  "activity_startDate": "Estimated start date",
+  "@activity_startDate": {
+    "description": "Label for activity estimated start date field"
+  },
+  "activity_update": "Update",
+  "@activity_update": {
+    "description": "Update button text for activities"
+  },
+  "activity_timeEntries": "TimeEntries",
+  "@activity_timeEntries": {
+    "description": "Label for time entries section"
+  },
+  "activity_create": "Create",
+  "@activity_create": {
+    "description": "Create button text for activities"
+  },
+  "activity_new": "New",
+  "@activity_new": {
+    "description": "New activity button text"
+  },
+  "activity_title": "{activityType} #{pseudoId}",
+  "@activity_title": {
+    "description": "Title format for activity with type and ID",
+    "placeholders": {
+      "activityType": {
+        "type": "String",
+        "description": "Type of activity"
+      },
+      "pseudoId": {
+        "type": "String",
+        "description": "Activity pseudo ID"
+      }
+    }
+  },
+  "activity_loadError": "{activityType} load problem",
+  "@activity_loadError": {
+    "description": "Error message when activity fails to load",
+    "placeholders": {
+      "activityType": {
+        "type": "String",
+        "description": "Type of activity that failed to load"
+      }
+    }
+  },
+  "activity_serverError": "server connection problem",
+  "@activity_serverError": {
+    "description": "Error message for server connectivity issues"
+  },
+  "activity_error": "Error: {message}",
+  "@activity_error": {
+    "description": "Generic error message with details",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "description": "Error message details"
+      }
+    }
+  },
+  "activity_notFound": "No {activityType}'s found, add one with '+'",
+  "@activity_notFound": {
+    "description": "Message when no activities are found",
+    "placeholders": {
+      "activityType": {
+        "type": "String",
+        "description": "Type of activity not found"
+      }
+    }
+  },
+  "activity_fetchError": "failed to fetch {activityType}'s {message}",
+  "@activity_fetchError": {
+    "description": "Error message when fetching activities fails",
+    "placeholders": {
+      "activityType": {
+        "type": "String",
+        "description": "Type of activity that failed to fetch"
+      },
+      "message": {
+        "type": "String",
+        "description": "Error message details"
+      }
+    }
+  },
+  "activity_addNew": "Add New",
+  "@activity_addNew": {
+    "description": "Add new activity button text"
+  },
+  "timeEntry_title": "Enter Time Entries",
+  "@timeEntry_title": {
+    "description": "Header for time entry form"
+  },
+  "timeEntry_new": "TimeEntryNew",
+  "@timeEntry_new": {
+    "description": "Label for new time entry"
+  },
+  "timeEntry_id": "TimeEntry#{timeEntryId}",
+  "@timeEntry_id": {
+    "description": "Time entry ID format",
+    "placeholders": {
+      "timeEntryId": {
+        "type": "String",
+        "description": "Time entry identifier"
+      }
+    }
+  },
+  "timeEntry_updateDate": "Update\ndate",
+  "@timeEntry_updateDate": {
+    "description": "Label for time entry update date field"
+  },
+  "timeEntry_hours": "# hours",
+  "@timeEntry_hours": {
+    "description": "Label for number of hours field"
+  },
+  "timeEntry_hoursError": "Please enter a number of hours?",
+  "@timeEntry_hoursError": {
+    "description": "Error message for empty hours field"
+  },
+  "timeEntry_comments": "Comments",
+  "@timeEntry_comments": {
+    "description": "Label for time entry comments field"
+  },
+  "timeEntry_addSuccess": "Add successfull",
+  "@timeEntry_addSuccess": {
+    "description": "Success message for adding time entry"
+  },
+  "timeEntry_updateSuccess": "Update successfull",
+  "@timeEntry_updateSuccess": {
+    "description": "Success message for updating time entry"
+  },
+  "timeEntry_listTitle": "Time Entry Information",
+  "@timeEntry_listTitle": {
+    "description": "Header for time entry information list"
+  },
+  "timeEntry_notFound": "No time entries found",
+  "@timeEntry_notFound": {
+    "description": "Message when no time entries are available"
+  }
+}
