@@ -229,7 +229,7 @@ class PaymentDialogState extends State<PaymentDialog> {
             if (!isPhone)
               DataCell(Text(resp.paymentMethod?.ccDescription! ?? '')),
             DataCell(Text(resp.amount != null ? resp.amount.toString() : "")),
-            DataCell(Text(resp.transactionDate.dateOnly())),
+            DataCell(Text(resp.transactionDate.toLocalizedDateOnly(context))),
             DataCell(Text(resp.resultSuccess ? 'Y' : 'N')),
           ],
         ),
