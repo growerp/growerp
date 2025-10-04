@@ -1,0 +1,199 @@
+{
+  "@@locale": "fr",
+  "@@last_modified": "2024-09-28T14:00:00.000Z",
+  "activity_price": "Prix",
+  "@activity_price": {
+    "description": "Prix d'un produit ou d'un service",
+    "type": "text"
+  },
+  "activity_id": "ID",
+  "@activity_id": {
+    "description": "Étiquette du champ ID d'activité"
+  },
+  "activity_status": "Statut",
+  "@activity_status": {
+    "description": "Étiquette du champ de statut de l'activité"
+  },
+  "activity_fieldRequired": "Champ obligatoire",
+  "@activity_fieldRequired": {
+    "description": "Message d'erreur générique de champ obligatoire"
+  },
+  "activity_name": "Nom",
+  "@activity_name": {
+    "description": "Étiquette du champ de nom d'activité"
+  },
+  "activity_nameError": "Veuillez saisir un nom de {activityType} ?",
+  "@activity_nameError": {
+    "description": "Message d'erreur pour le champ de nom d'activité vide",
+    "placeholders": {
+      "activityType": {
+        "type": "String",
+        "description": "Type d'activité en cours de création"
+      }
+    }
+  },
+  "activity_description": "Description",
+  "@activity_description": {
+    "description": "Étiquette du champ de description de l'activité"
+  },
+  "activity_employeeName": "employé,nom",
+  "@activity_employeeName": {
+    "description": "Étiquette du champ de nom d'employé"
+  },
+  "activity_selectEmployee": "Sélectionner un employé",
+  "@activity_selectEmployee": {
+    "description": "Indication de la liste déroulante pour la sélection d'un employé"
+  },
+  "activity_assignee": "Employé assigné",
+  "@activity_assignee": {
+    "description": "Étiquette du champ de l'employé assigné"
+  },
+  "activity_thirdPartyName": "tiers,nom",
+  "@activity_thirdPartyName": {
+    "description": "Étiquette du champ de nom de tiers"
+  },
+  "activity_selectThirdParty": "Sélectionner un tiers",
+  "@activity_selectThirdParty": {
+    "description": "Indication de la liste déroulante pour la sélection d'un tiers"
+  },
+  "activity_thirdParty": "Tiers",
+  "@activity_thirdParty": {
+    "description": "Étiquette du champ de tiers"
+  },
+  "activity_startDate": "Date de début estimée",
+  "@activity_startDate": {
+    "description": "Étiquette du champ de la date de début estimée de l'activité"
+  },
+  "activity_update": "Mettre à jour",
+  "@activity_update": {
+    "description": "Texte du bouton Mettre à jour pour les activités"
+  },
+  "activity_timeEntries": "Saisies de temps",
+  "@activity_timeEntries": {
+    "description": "Étiquette de la section des saisies de temps"
+  },
+  "activity_create": "Créer",
+  "@activity_create": {
+    "description": "Texte du bouton Créer pour les activités"
+  },
+  "activity_new": "Nouveau",
+  "@activity_new": {
+    "description": "Texte du bouton Nouvelle activité"
+  },
+  "activity_title": "{activityType} #{pseudoId}",
+  "@activity_title": {
+    "description": "Format du titre pour l'activité avec type et ID",
+    "placeholders": {
+      "activityType": {
+        "type": "String",
+        "description": "Type d'activité"
+      },
+      "pseudoId": {
+        "type": "String",
+        "description": "Pseudo ID de l'activité"
+      }
+    }
+  },
+  "activity_loadError": "Problème de chargement de {activityType}",
+  "@activity_loadError": {
+    "description": "Message d'erreur lorsque l'activité ne parvient pas à se charger",
+    "placeholders": {
+      "activityType": {
+        "type": "String",
+        "description": "Type d'activité qui n'a pas pu être chargé"
+      }
+    }
+  },
+  "activity_serverError": "problème de connexion au serveur",
+  "@activity_serverError": {
+    "description": "Message d'erreur pour les problèmes de connectivité du serveur"
+  },
+  "activity_error": "Erreur : {message}",
+  "@activity_error": {
+    "description": "Message d'erreur générique avec détails",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "description": "Détails du message d'erreur"
+      }
+    }
+  },
+  "activity_notFound": "Aucun(e) {activityType} trouvé(e), ajoutez-en un(e) avec '+'",
+  "@activity_notFound": {
+    "description": "Message lorsqu'aucune activité n'est trouvée",
+    "placeholders": {
+      "activityType": {
+        "type": "String",
+        "description": "Type d'activité non trouvé"
+      }
+    }
+  },
+  "activity_fetchError": "échec de la récupération des {activityType}s {message}",
+  "@activity_fetchError": {
+    "description": "Message d'erreur lorsque la récupération des activités échoue",
+    "placeholders": {
+      "activityType": {
+        "type": "String",
+        "description": "Type d'activité qui n'a pas pu être récupéré"
+      },
+      "message": {
+        "type": "String",
+        "description": "Détails du message d'erreur"
+      }
+    }
+  },
+  "activity_addNew": "Ajouter nouveau",
+  "@activity_addNew": {
+    "description": "Texte du bouton Ajouter une nouvelle activité"
+  },
+  "timeEntry_title": "Saisir les saisies de temps",
+  "@timeEntry_title": {
+    "description": "En-tête du formulaire de saisie de temps"
+  },
+  "timeEntry_new": "Nouvelle saisie de temps",
+  "@timeEntry_new": {
+    "description": "Étiquette pour une nouvelle saisie de temps"
+  },
+  "timeEntry_id": "Saisie de temps#{timeEntryId}",
+  "@timeEntry_id": {
+    "description": "Format de l'ID de saisie de temps",
+    "placeholders": {
+      "timeEntryId": {
+        "type": "String",
+        "description": "Identifiant de la saisie de temps"
+      }
+    }
+  },
+  "timeEntry_updateDate": "Mettre à jour\nla date",
+  "@timeEntry_updateDate": {
+    "description": "Étiquette du champ de la date de mise à jour de la saisie de temps"
+  },
+  "timeEntry_hours": "# heures",
+  "@timeEntry_hours": {
+    "description": "Étiquette du champ du nombre d'heures"
+  },
+  "timeEntry_hoursError": "Veuillez saisir un nombre d'heures ?",
+  "@timeEntry_hoursError": {
+    "description": "Message d'erreur pour le champ des heures vide"
+  },
+  "timeEntry_comments": "Commentaires",
+  "@timeEntry_comments": {
+    "description": "Étiquette du champ des commentaires de la saisie de temps"
+  },
+  "timeEntry_addSuccess": "Ajout réussi",
+  "@timeEntry_addSuccess": {
+    "description": "Message de succès pour l'ajout d'une saisie de temps"
+  },
+  "timeEntry_updateSuccess": "Mise à jour réussie",
+  "@timeEntry_updateSuccess": {
+    "description": "Message de succès pour la mise à jour d'une saisie de temps"
+  },
+  "timeEntry_listTitle": "Informations sur la saisie de temps",
+  "@timeEntry_listTitle": {
+    "description": "En-tête de la liste d'informations sur la saisie de temps"
+  },
+  "timeEntry_notFound": "Aucune saisie de temps trouvée",
+  "@timeEntry_notFound": {
+    "description": "Message lorsqu'aucune saisie de temps n'est disponible"
+  }
+}
