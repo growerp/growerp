@@ -314,10 +314,7 @@ class MenuOptionState extends State<DisplayMenuOption>
             List<Widget> tabChildren = [
               Expanded(
                 child: isPhone
-                    ? Center(
-                        key: Key(displayMOFormKey),
-                        child: tabList[tabIndex],
-                      )
+                    ? Center(child: tabList[tabIndex])
                     : TabBarView(
                         physics: const NeverScrollableScrollPhysics(),
                         key: Key(displayMOFormKey),
