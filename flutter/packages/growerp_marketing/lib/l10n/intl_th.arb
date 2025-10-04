@@ -12,33 +12,11 @@
     "tableHdrDelete": " ",
     "removeItemTooltip": "ลบรายการ",
     "deleteItemConfirm": "ลบ {id}?",
-    "@deleteItemConfirm": {
-        "description": "กล่องโต้ตอบการยืนยันเพื่อลบรายการ",
-        "placeholders": {
-            "id": {
-                "type": "String"
-            }
-        }
-    },
     "cannotBeUndone": "การกระทำนี้ไม่สามารถยกเลิกได้!",
     "error": "ข้อผิดพลาด: {message}",
-    "@error": {
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
     "unknown": "ไม่ทราบ",
     "opportunityNew": "โอกาสใหม่",
     "opportunityWithMessage": "โอกาส {id}",
-    "@opportunityWithMessage": {
-        "placeholders": {
-            "id": {
-                "type": "String"
-            }
-        }
-    },
     "id": "รหัส",
     "opportunityName": "ชื่อโอกาส",
     "enterOppName": "ป้อนชื่อโอกาส",
@@ -61,37 +39,13 @@
     "update": "อัปเดต",
     "serverProblem": "ปัญหาเกี่ยวกับเซิร์ฟเวอร์",
     "fetchError": "ข้อผิดพลาดในการดึงข้อมูล: {message}",
-    "@fetchError": {
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
     "noOpportunities": "ไม่พบโอกาส",
     "addNew": "เพิ่มใหม่",
     "fetchSearchError": "ข้อผิดพลาดในการค้นหา: {message}",
-    "@fetchSearchError": {
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
     "opportunitySearch": "ค้นหาโอกาส",
     "searchInput": "ข้อมูลสำหรับการค้นหา",
     "enterSearchValue": "ป้อนค่าสำหรับการค้นหา",
     "searchResults": "ผลการค้นหา",
     "noSearchItems": "ไม่พบรายการที่ค้นหา",
-    "searchResult": "รหัส: {id}, ชื่อ: {name}",
-    "@searchResult": {
-        "placeholders": {
-            "id": {
-                "type": "String"
-            },
-            "name": {
-                "type": "String"
-            }
-        }
-    }
+    "searchResult": "รหัส: {id}, ชื่อ: {name}"
 }

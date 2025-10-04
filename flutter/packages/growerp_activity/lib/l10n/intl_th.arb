@@ -1,199 +1,39 @@
 {
     "@@locale": "th",
-    "@@last_modified": "2024-09-28T14:00:00.000Z",
     "activity_price": "ราคา",
-    "@activity_price": {
-        "description": "ราคาของสินค้าหรือบริการ",
-        "type": "text"
-    },
     "activity_id": "รหัส",
-    "@activity_id": {
-        "description": "ป้ายชื่อสำหรับฟิลด์รหัสกิจกรรม"
-    },
     "activity_status": "สถานะ",
-    "@activity_status": {
-        "description": "ป้ายชื่อสำหรับฟิลด์สถานะกิจกรรม"
-    },
     "activity_fieldRequired": "ต้องระบุข้อมูล",
-    "@activity_fieldRequired": {
-        "description": "ข้อความแสดงข้อผิดพลาดสำหรับฟิลด์ที่จำเป็น"
-    },
     "activity_name": "ชื่อ",
-    "@activity_name": {
-        "description": "ป้ายชื่อสำหรับฟิลด์ชื่อกิจกรรม"
-    },
     "activity_nameError": "กรุณาใส่ชื่อ {activityType}?",
-    "@activity_nameError": {
-        "description": "ข้อความแสดงข้อผิดพลาดสำหรับฟิลด์ชื่อกิจกรรมที่ว่าง",
-        "placeholders": {
-            "activityType": {
-                "type": "String",
-                "description": "ประเภทของกิจกรรมที่กำลังสร้าง"
-            }
-        }
-    },
     "activity_description": "คำอธิบาย",
-    "@activity_description": {
-        "description": "ป้ายชื่อสำหรับฟิลด์คำอธิบายกิจกรรม"
-    },
     "activity_employeeName": "พนักงาน,ชื่อ",
-    "@activity_employeeName": {
-        "description": "ป้ายชื่อสำหรับฟิลด์ชื่อพนักงาน"
-    },
     "activity_selectEmployee": "เลือกพนักงาน",
-    "@activity_selectEmployee": {
-        "description": "คำแนะนำดรอปดาวน์สำหรับการเลือกพนักงาน"
-    },
     "activity_assignee": "พนักงานที่ได้รับมอบหมาย",
-    "@activity_assignee": {
-        "description": "ป้ายชื่อสำหรับฟิลด์พนักงานที่ได้รับมอบหมาย"
-    },
     "activity_thirdPartyName": "บุคคลที่สาม,ชื่อ",
-    "@activity_thirdPartyName": {
-        "description": "ป้ายชื่อสำหรับฟิลด์ชื่อบุคคลที่สาม"
-    },
     "activity_selectThirdParty": "เลือกบุคคลที่สาม",
-    "@activity_selectThirdParty": {
-        "description": "คำแนะนำดรอปดาวน์สำหรับการเลือกบุคคลที่สาม"
-    },
     "activity_thirdParty": "บุคคลที่สาม",
-    "@activity_thirdParty": {
-        "description": "ป้ายชื่อสำหรับฟิลด์บุคคลที่สาม"
-    },
     "activity_startDate": "วันที่คาดว่าจะเริ่ม",
-    "@activity_startDate": {
-        "description": "ป้ายชื่อสำหรับฟิลด์วันที่คาดว่าจะเริ่มกิจกรรม"
-    },
     "activity_update": "อัปเดต",
-    "@activity_update": {
-        "description": "ข้อความปุ่มอัปเดตสำหรับกิจกรรม"
-    },
     "activity_timeEntries": "รายการเวลา",
-    "@activity_timeEntries": {
-        "description": "ป้ายชื่อสำหรับส่วนรายการเวลา"
-    },
     "activity_create": "สร้าง",
-    "@activity_create": {
-        "description": "ข้อความปุ่มสร้างสำหรับกิจกรรม"
-    },
     "activity_new": "ใหม่",
-    "@activity_new": {
-        "description": "ข้อความปุ่มกิจกรรมใหม่"
-    },
     "activity_title": "{activityType} #{pseudoId}",
-    "@activity_title": {
-        "description": "รูปแบบหัวเรื่องสำหรับกิจกรรมที่มีประเภทและรหัส",
-        "placeholders": {
-            "activityType": {
-                "type": "String",
-                "description": "ประเภทของกิจกรรม"
-            },
-            "pseudoId": {
-                "type": "String",
-                "description": "รหัสกิจกรรมสำรอง"
-            }
-        }
-    },
     "activity_loadError": "เกิดปัญหาในการโหลด {activityType}",
-    "@activity_loadError": {
-        "description": "ข้อความแสดงข้อผิดพลาดเมื่อกิจกรรมโหลดไม่สำเร็จ",
-        "placeholders": {
-            "activityType": {
-                "type": "String",
-                "description": "ประเภทของกิจกรรมที่โหลดไม่สำเร็จ"
-            }
-        }
-    },
     "activity_serverError": "ปัญหาการเชื่อมต่อเซิร์ฟเวอร์",
-    "@activity_serverError": {
-        "description": "ข้อความแสดงข้อผิดพลาดสำหรับปัญหาการเชื่อมต่อเซิร์ฟเวอร์"
-    },
     "activity_error": "ข้อผิดพลาด: {message}",
-    "@activity_error": {
-        "description": "ข้อความแสดงข้อผิดพลาดทั่วไปพร้อมรายละเอียด",
-        "placeholders": {
-            "message": {
-                "type": "String",
-                "description": "รายละเอียดข้อความแสดงข้อผิดพลาด"
-            }
-        }
-    },
     "activity_notFound": "ไม่พบ {activityType} เพิ่มโดยใช้ '+'",
-    "@activity_notFound": {
-        "description": "ข้อความเมื่อไม่พบกิจกรรม",
-        "placeholders": {
-            "activityType": {
-                "type": "String",
-                "description": "ประเภทของกิจกรรมที่ไม่พบ"
-            }
-        }
-    },
     "activity_fetchError": "ดึงข้อมูล {activityType} ไม่สำเร็จ {message}",
-    "@activity_fetchError": {
-        "description": "ข้อความแสดงข้อผิดพลาดเมื่อดึงข้อมูลกิจกรรมไม่สำเร็จ",
-        "placeholders": {
-            "activityType": {
-                "type": "String",
-                "description": "ประเภทของกิจกรรมที่ดึงข้อมูลไม่สำเร็จ"
-            },
-            "message": {
-                "type": "String",
-                "description": "รายละเอียดข้อความแสดงข้อผิดพลาด"
-            }
-        }
-    },
     "activity_addNew": "เพิ่มใหม่",
-    "@activity_addNew": {
-        "description": "ข้อความปุ่มเพิ่มกิจกรรมใหม่"
-    },
     "timeEntry_title": "ป้อนรายการเวลา",
-    "@timeEntry_title": {
-        "description": "หัวเรื่องสำหรับฟอร์มรายการเวลา"
-    },
     "timeEntry_new": "รายการเวลาใหม่",
-    "@timeEntry_new": {
-        "description": "ป้ายชื่อสำหรับรายการเวลาใหม่"
-    },
     "timeEntry_id": "รายการเวลา#{timeEntryId}",
-    "@timeEntry_id": {
-        "description": "รูปแบบรหัสรายการเวลา",
-        "placeholders": {
-            "timeEntryId": {
-                "type": "String",
-                "description": "ตัวระบุรายการเวลา"
-            }
-        }
-    },
     "timeEntry_updateDate": "อัปเดต\nวันที่",
-    "@timeEntry_updateDate": {
-        "description": "ป้ายชื่อสำหรับฟิลด์วันที่อัปเดตรายการเวลา"
-    },
     "timeEntry_hours": "จำนวนชั่วโมง",
-    "@timeEntry_hours": {
-        "description": "ป้ายชื่อสำหรับฟิลด์จำนวนชั่วโมง"
-    },
     "timeEntry_hoursError": "กรุณาใส่จำนวนชั่วโมง?",
-    "@timeEntry_hoursError": {
-        "description": "ข้อความแสดงข้อผิดพลาดสำหรับฟิลด์ชั่วโมงที่ว่าง"
-    },
     "timeEntry_comments": "ความคิดเห็น",
-    "@timeEntry_comments": {
-        "description": "ป้ายชื่อสำหรับฟิลด์ความคิดเห็นรายการเวลา"
-    },
     "timeEntry_addSuccess": "เพิ่มสำเร็จ",
-    "@timeEntry_addSuccess": {
-        "description": "ข้อความแสดงความสำเร็จสำหรับการเพิ่มรายการเวลา"
-    },
     "timeEntry_updateSuccess": "อัปเดตสำเร็จ",
-    "@timeEntry_updateSuccess": {
-        "description": "ข้อความแสดงความสำเร็จสำหรับการอัปเดตรายการเวลา"
-    },
     "timeEntry_listTitle": "ข้อมูลรายการเวลา",
-    "@timeEntry_listTitle": {
-        "description": "หัวเรื่องสำหรับรายการข้อมูลเวลา"
-    },
-    "timeEntry_notFound": "ไม่พบรายการเวลา",
-    "@timeEntry_notFound": {
-        "description": "ข้อความเมื่อไม่มีรายการเวลา"
-    }
+    "timeEntry_notFound": "ไม่พบรายการเวลา"
 }

@@ -1,33 +1,6 @@
 {
     "@@locale": "th_TH",
     "pageHomeWelcome": "ยินดีต้อนรับ {name}",
-    "@pageHomeWelcome": {
-        "description": "Welcome message on home page with user name",
-        "placeholders": {
-            "name": {
-                "type": "String",
-                "description": "User's name"
-            }
-        }
-    },
     "screenNotFound": "ไม่พบหน้าจอ {screen}",
-    "@screenNotFound": {
-        "description": "Error message when a screen is not found",
-        "placeholders": {
-            "screen": {
-                "type": "String",
-                "description": "Name of the screen that was not found"
-            }
-        }
-    },
-    "classificationNotDefined": "ไม่พบบริษัท {classificationId} ในระบบ\n ไปที่แอปผู้ดูแลระบบเพื่อสร้าง!",
-    "@classificationNotDefined": {
-        "description": "Error message when no company is found for a classification",
-        "placeholders": {
-            "classificationId": {
-                "type": "String",
-                "description": "Classification ID that was not found"
-            }
-        }
-    }
+    "classificationNotDefined": "ไม่พบบริษัท {classificationId} ในระบบ\n ไปที่แอปผู้ดูแลระบบเพื่อสร้าง!"
 }

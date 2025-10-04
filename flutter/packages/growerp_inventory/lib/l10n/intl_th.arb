@@ -1,241 +1,55 @@
 {
-  "@@locale": "th",
-  "productName": "ชื่อสินค้า",
-  "@productName": {
-    "description": "The name of a product"
-  },
-  "failedToFetchLocations": "ดึงข้อมูลตำแหน่งที่ตั้งล้มเหลว: {message}",
-  "@failedToFetchLocations": {
-    "description": "Error message when the app fails to fetch locations",
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
-  "noLocationsFound": "ไม่พบตำแหน่งที่ตั้ง",
-  "@noLocationsFound": {
-    "description": "Message displayed when no locations are found"
-  },
-  "addNew": "เพิ่มใหม่",
-  "@addNew": {
-    "description": "Tooltip for a button that adds a new item"
-  },
-  "addSuccess": "เพิ่มสำเร็จ",
-  "@addSuccess": {
-    "description": "Success message when an item is added"
-  },
-  "updateSuccess": "อัปเดตสำเร็จ",
-  "@updateSuccess": {
-    "description": "Success message when an item is updated"
-  },
-  "error": "ข้อผิดพลาด: {message}",
-  "@error": {
-    "description": "Generic error message",
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
-  "locationInfo": "ข้อมูลตำแหน่งที่ตั้ง #{pseudoId}",
-  "@locationInfo": {
-    "description": "Title for the location information dialog",
-    "placeholders": {
-      "pseudoId": {
-        "type": "String"
-      }
-    }
-  },
-  "newLabel": "ใหม่",
-  "@newLabel": {
-    "description": "Label for a new item"
-  },
-  "locationId": "รหัสตำแหน่งที่ตั้ง",
-  "@locationId": {
-    "description": "Label for the location ID field"
-  },
-  "locationName": "ชื่อตำแหน่งที่ตั้ง",
-  "@locationName": {
-    "description": "Label for the location name field"
-  },
-  "enterLocationName": "กรุณาใส่ชื่อสถานที่?",
-  "@enterLocationName": {
-    "description": "Validation message for the location name field"
-  },
-  "quantityOnHand": "ปริมาณในมือ",
-  "@quantityOnHand": {
-    "description": "Label for the quantity on hand field"
-  },
-  "create": "สร้าง",
-  "@create": {
-    "description": "Label for the create button"
-  },
-  "update": "อัปเดต",
-  "@update": {
-    "description": "Label for the update button"
-  },
-  "failedToFetchSearchItems": "ดึงรายการค้นหาไม่สำเร็จ: {message}",
-  "@failedToFetchSearchItems": {
-    "description": "Error message when the app fails to fetch search items",
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
-  "locationSearch": "ค้นหาสถานที่",
-  "@locationSearch": {
-    "description": "Title for the location search dialog"
-  },
-  "searchInput": "ข้อมูลการค้นหา",
-  "@searchInput": {
-    "description": "Label for the search input field"
-  },
-  "enterSearchValue": "กรุณาใส่ค่าที่ต้องการค้นหา?",
-  "@enterSearchValue": {
-    "description": "Validation message for the search input field"
-  },
-  "searchResults": "ผลการค้นหา",
-  "@searchResults": {
-    "description": "Label for the search results section"
-  },
-  "noSearchItemsFound": "ไม่พบรายการค้นหา (ยัง)",
-  "@noSearchItemsFound": {
-    "description": "Message displayed when no search items are found"
-  },
-  "id": "รหัส: ",
-  "@id": {
-    "description": "Label for the ID in a search result"
-  },
-  "name": "ชื่อ: ",
-  "@name": {
-    "description": "Label for the name in a search result"
-  },
-  "roomNumber": "หมายเลขห้อง",
-  "@roomNumber": {
-    "description": "Label for the room number field"
-  },
-  "assetNumber": "หมายเลขทรัพย์สิน",
-  "@assetNumber": {
-    "description": "Label for the asset number field"
-  },
-  "assetLoadProblem": "ปัญหาการโหลดทรัพย์สิน",
-  "@assetLoadProblem": {
-    "description": "Error message when there's a problem loading assets"
-  },
-  "idLabel": "รหัส",
-  "@idLabel": {
-    "description": "Label for ID field"
-  },
-  "roomNameLabel": "ชื่อห้อง",
-  "@roomNameLabel": {
-    "description": "Label for the room name field"
-  },
-  "assetNameLabel": "ชื่อทรัพย์สิน",
-  "@assetNameLabel": {
-    "description": "Label for the asset name field"
-  },
-  "enterAssetName": "กรุณาใส่ชื่อทรัพย์สิน?",
-  "@enterAssetName": {
-    "description": "Validation message for the asset name field"
-  },
-  "qtyOnHand": "ปริมาณในมือ",
-  "@qtyOnHand": {
-    "description": "Label for the quantity on hand field"
-  },
-  "enterQtyOnHand": "กรุณาใส่ปริมาณในมือ?",
-  "@enterQtyOnHand": {
-    "description": "Validation message for the quantity on hand field"
-  },
-  "qtyPromise": "ปริมาณที่สัญญา",
-  "@qtyPromise": {
-    "description": "Label for the quantity promise field"
-  },
-  "enterQtyPromise": "กรุณาใส่ปริมาณที่สัญญา?",
-  "@enterQtyPromise": {
-    "description": "Validation message for the quantity promise field"
-  },
-  "enterAquiredCost": "กรุณาใส่ต้นทุนการได้มา?",
-  "@enterAquiredCost": {
-    "description": "Validation message for the acquired cost field"
-  },
-  "serverProblem": "ปัญหาเซิร์ฟเวอร์",
-  "@serverProblem": {
-    "description": "Error message when there's a server problem"
-  },
-  "roomTypeName": "ชื่อประเภทห้อง",
-  "@roomTypeName": {
-    "description": "Label for the room type name field"
-  },
-  "productIdName": "ชื่อรหัสสินค้า",
-  "@productIdName": {
-    "description": "Label for the product ID name field"
-  },
-  "select": "เลือก",
-  "@select": {
-    "description": "Label for select button or dropdown"
-  },
-  "product": "สินค้า",
-  "@product": {
-    "description": "Label for product"
-  },
-  "roomTypeId": "รหัสประเภทห้อง",
-  "@roomTypeId": {
-    "description": "Label for the room type ID field"
-  },
-  "productId": "รหัสสินค้า",
-  "@productId": {
-    "description": "Label for the product ID field"
-  },
-  "fieldRequired": "ฟิลด์จำเป็น",
-  "@fieldRequired": {
-    "description": "Validation message for required fields"
-  },
-  "status": "สถานะ",
-  "@status": {
-    "description": "Label for status field"
-  },
-  "selectLocation": "เลือกตำแหน่งที่ตั้ง",
-  "@selectLocation": {
-    "description": "Label for select location dropdown or button"
-  },
-  "location": "ตำแหน่งที่ตั้ง",
-  "@location": {
-    "description": "Label for location"
-  },
-  "noRoomsFound": "ไม่พบห้อง",
-  "@noRoomsFound": {
-    "description": "Message displayed when no rooms are found"
-  },
-  "noAssetsFound": "ไม่พบทรัพย์สิน",
-  "@noAssetsFound": {
-    "description": "Message displayed when no assets are found"
-  },
-  "assetSearch": "ค้นหาทรัพย์สิน",
-  "@assetSearch": {
-    "description": "Title for the asset search dialog"
-  },
-  "locations": "ตำแหน่งที่ตั้ง",
-  "@locations": {
-    "description": "Label for locations"
-  },
-  "aqrdCosts": "ต้นทุนการได้มา: {cost}",
-  "@aqrdCosts": {
-    "description": "Label for acquired cost with value",
-    "placeholders": {
-      "cost": {
-        "type": "String"
-      }
-    }
-  },
-  "failedToFetchAssets": "ดึงข้อมูลทรัพย์สินไม่สำเร็จ: {message}",
-  "@failedToFetchAssets": {
-    "description": "Error message when the app fails to fetch assets",
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  }
+    "@@locale": "th",
+    "productName": "ชื่อสินค้า",
+    "failedToFetchLocations": "ดึงข้อมูลตำแหน่งที่ตั้งล้มเหลว: {message}",
+    "noLocationsFound": "ไม่พบตำแหน่งที่ตั้ง",
+    "addNew": "เพิ่มใหม่",
+    "addSuccess": "เพิ่มสำเร็จ",
+    "updateSuccess": "อัปเดตสำเร็จ",
+    "error": "ข้อผิดพลาด: {message}",
+    "locationInfo": "ข้อมูลตำแหน่งที่ตั้ง #{pseudoId}",
+    "newLabel": "ใหม่",
+    "locationId": "รหัสตำแหน่งที่ตั้ง",
+    "locationName": "ชื่อตำแหน่งที่ตั้ง",
+    "enterLocationName": "กรุณาใส่ชื่อสถานที่?",
+    "quantityOnHand": "ปริมาณในมือ",
+    "create": "สร้าง",
+    "update": "อัปเดต",
+    "failedToFetchSearchItems": "ดึงรายการค้นหาไม่สำเร็จ: {message}",
+    "locationSearch": "ค้นหาสถานที่",
+    "searchInput": "ข้อมูลการค้นหา",
+    "enterSearchValue": "กรุณาใส่ค่าที่ต้องการค้นหา?",
+    "searchResults": "ผลการค้นหา",
+    "noSearchItemsFound": "ไม่พบรายการค้นหา (ยัง)",
+    "id": "รหัส: ",
+    "name": "ชื่อ: ",
+    "roomNumber": "หมายเลขห้อง",
+    "assetNumber": "หมายเลขทรัพย์สิน",
+    "assetLoadProblem": "ปัญหาการโหลดทรัพย์สิน",
+    "idLabel": "รหัส",
+    "roomNameLabel": "ชื่อห้อง",
+    "assetNameLabel": "ชื่อทรัพย์สิน",
+    "enterAssetName": "กรุณาใส่ชื่อทรัพย์สิน?",
+    "qtyOnHand": "ปริมาณในมือ",
+    "enterQtyOnHand": "กรุณาใส่ปริมาณในมือ?",
+    "qtyPromise": "ปริมาณที่สัญญา",
+    "enterQtyPromise": "กรุณาใส่ปริมาณที่สัญญา?",
+    "enterAquiredCost": "กรุณาใส่ต้นทุนการได้มา?",
+    "serverProblem": "ปัญหาเซิร์ฟเวอร์",
+    "roomTypeName": "ชื่อประเภทห้อง",
+    "productIdName": "ชื่อรหัสสินค้า",
+    "select": "เลือก",
+    "product": "สินค้า",
+    "roomTypeId": "รหัสประเภทห้อง",
+    "productId": "รหัสสินค้า",
+    "fieldRequired": "ฟิลด์จำเป็น",
+    "status": "สถานะ",
+    "selectLocation": "เลือกตำแหน่งที่ตั้ง",
+    "location": "ตำแหน่งที่ตั้ง",
+    "noRoomsFound": "ไม่พบห้อง",
+    "noAssetsFound": "ไม่พบทรัพย์สิน",
+    "assetSearch": "ค้นหาทรัพย์สิน",
+    "locations": "ตำแหน่งที่ตั้ง",
+    "aqrdCosts": "ต้นทุนการได้มา: {cost}",
+    "failedToFetchAssets": "ดึงข้อมูลทรัพย์สินไม่สำเร็จ: {message}"
 }

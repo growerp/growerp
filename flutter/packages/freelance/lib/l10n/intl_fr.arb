@@ -1,33 +1,6 @@
 {
     "@@locale": "fr",
     "pageHomeWelcome": "Bienvenue {name}",
-    "@pageHomeWelcome": {
-        "description": "Message de bienvenue sur la page d'accueil avec le nom de l'utilisateur",
-        "placeholders": {
-            "name": {
-                "type": "String",
-                "description": "Nom de l'utilisateur"
-            }
-        }
-    },
     "screenNotFound": "Écran {screen} non trouvé",
-    "@screenNotFound": {
-        "description": "Message d'erreur lorsqu'un écran n'est pas trouvé",
-        "placeholders": {
-            "screen": {
-                "type": "String",
-                "description": "Nom de l'écran qui n'a pas été trouvé"
-            }
-        }
-    },
-    "classificationNotDefined": "Aucune entreprise de classification {classificationId} trouvée dans le système\nAllez dans l'application d'administration pour en créer une !",
-    "@classificationNotDefined": {
-        "description": "Message d'erreur lorsqu'aucune entreprise n'est trouvée pour une classification",
-        "placeholders": {
-            "classificationId": {
-                "type": "String",
-                "description": "ID de classification qui n'a pas été trouvé"
-            }
-        }
-    }
+    "classificationNotDefined": "Aucune entreprise de classification {classificationId} trouvée dans le système\nAllez dans l'application d'administration pour en créer une !"
 }

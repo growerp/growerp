@@ -1,199 +1,39 @@
 {
-  "@@locale": "zh",
-  "@@last_modified": "2024-09-28T14:00:00.000Z",
-  "activity_price": "价格",
-  "@activity_price": {
-    "description": "产品或服务的价格",
-    "type": "text"
-  },
-  "activity_id": "编号",
-  "@activity_id": {
-    "description": "活动编号字段的标签"
-  },
-  "activity_status": "状态",
-  "@activity_status": {
-    "description": "活动状态字段的标签"
-  },
-  "activity_fieldRequired": "必填字段",
-  "@activity_fieldRequired": {
-    "description": "通用必填字段错误消息"
-  },
-  "activity_name": "名称",
-  "@activity_name": {
-    "description": "活动名称字段的标签"
-  },
-  "activity_nameError": "请输入{activityType}名称？",
-  "@activity_nameError": {
-    "description": "活动名称字段为空的错误消息",
-    "placeholders": {
-      "activityType": {
-        "type": "String",
-        "description": "正在创建的活动类型"
-      }
-    }
-  },
-  "activity_description": "描述",
-  "@activity_description": {
-    "description": "活动描述字段的标签"
-  },
-  "activity_employeeName": "员工姓名",
-  "@activity_employeeName": {
-    "description": "员工姓名字段的标签"
-  },
-  "activity_selectEmployee": "选择员工",
-  "@activity_selectEmployee": {
-    "description": "选择员工的下拉提示"
-  },
-  "activity_assignee": "指派员工",
-  "@activity_assignee": {
-    "description": "指派员工字段的标签"
-  },
-  "activity_thirdPartyName": "第三方名称",
-  "@activity_thirdPartyName": {
-    "description": "第三方名称字段的标签"
-  },
-  "activity_selectThirdParty": "选择第三方",
-  "@activity_selectThirdParty": {
-    "description": "选择第三方的下拉提示"
-  },
-  "activity_thirdParty": "第三方",
-  "@activity_thirdParty": {
-    "description": "第三方字段的标签"
-  },
-  "activity_startDate": "预计开始日期",
-  "@activity_startDate": {
-    "description": "活动预计开始日期字段的标签"
-  },
-  "activity_update": "更新",
-  "@activity_update": {
-    "description": "活动的更新按钮文本"
-  },
-  "activity_timeEntries": "工时记录",
-  "@activity_timeEntries": {
-    "description": "工时记录部分的标签"
-  },
-  "activity_create": "创建",
-  "@activity_create": {
-    "description": "活动的创建按钮文本"
-  },
-  "activity_new": "新建",
-  "@activity_new": {
-    "description": "新活动按钮文本"
-  },
-  "activity_title": "{activityType} #{pseudoId}",
-  "@activity_title": {
-    "description": "带类型和编号的活动标题格式",
-    "placeholders": {
-      "activityType": {
-        "type": "String",
-        "description": "活动类型"
-      },
-      "pseudoId": {
-        "type": "String",
-        "description": "活动伪编号"
-      }
-    }
-  },
-  "activity_loadError": "{activityType}加载问题",
-  "@activity_loadError": {
-    "description": "活动加载失败时的错误消息",
-    "placeholders": {
-      "activityType": {
-        "type": "String",
-        "description": "加载失败的活动类型"
-      }
-    }
-  },
-  "activity_serverError": "服务器连接问题",
-  "@activity_serverError": {
-    "description": "服务器连接问题的错误消息"
-  },
-  "activity_error": "错误：{message}",
-  "@activity_error": {
-    "description": "带详细信息的通用错误消息",
-    "placeholders": {
-      "message": {
-        "type": "String",
-        "description": "错误消息详情"
-      }
-    }
-  },
-  "activity_notFound": "未找到{activityType}，请使用“+”添加一个",
-  "@activity_notFound": {
-    "description": "未找到活动时的消息",
-    "placeholders": {
-      "activityType": {
-        "type": "String",
-        "description": "未找到的活动类型"
-      }
-    }
-  },
-  "activity_fetchError": "获取{activityType}失败 {message}",
-  "@activity_fetchError": {
-    "description": "获取活动失败时的错误消息",
-    "placeholders": {
-      "activityType": {
-        "type": "String",
-        "description": "获取失败的活动类型"
-      },
-      "message": {
-        "type": "String",
-        "description": "错误消息详情"
-      }
-    }
-  },
-  "activity_addNew": "添新",
-  "@activity_addNew": {
-    "description": "添加新活动按钮文本"
-  },
-  "timeEntry_title": "输入工时记录",
-  "@timeEntry_title": {
-    "description": "工时记录表单的标题"
-  },
-  "timeEntry_new": "新工时记录",
-  "@timeEntry_new": {
-    "description": "新工时记录的标签"
-  },
-  "timeEntry_id": "工时记录#{timeEntryId}",
-  "@timeEntry_id": {
-    "description": "工时记录编号格式",
-    "placeholders": {
-      "timeEntryId": {
-        "type": "String",
-        "description": "工时记录标识符"
-      }
-    }
-  },
-  "timeEntry_updateDate": "更新\n日期",
-  "@timeEntry_updateDate": {
-    "description": "工时记录更新日期字段的标签"
-  },
-  "timeEntry_hours": "# 小时",
-  "@timeEntry_hours": {
-    "description": "小时数字段的标签"
-  },
-  "timeEntry_hoursError": "请输入小时数？",
-  "@timeEntry_hoursError": {
-    "description": "小时数字段为空的错误消息"
-  },
-  "timeEntry_comments": "评论",
-  "@timeEntry_comments": {
-    "description": "工时记录评论字段的标签"
-  },
-  "timeEntry_addSuccess": "添加成功",
-  "@timeEntry_addSuccess": {
-    "description": "添加工时记录的成功消息"
-  },
-  "timeEntry_updateSuccess": "更新成功",
-  "@timeEntry_updateSuccess": {
-    "description": "更新工时记录的成功消息"
-  },
-  "timeEntry_listTitle": "工时记录信息",
-  "@timeEntry_listTitle": {
-    "description": "工时记录信息列表的标题"
-  },
-  "timeEntry_notFound": "未找到工时记录",
-  "@timeEntry_notFound": {
-    "description": "没有可用工时记录时的消息"
-  }
+    "@@locale": "zh",
+    "activity_price": "价格",
+    "activity_id": "编号",
+    "activity_status": "状态",
+    "activity_fieldRequired": "必填字段",
+    "activity_name": "名称",
+    "activity_nameError": "请输入{activityType}名称？",
+    "activity_description": "描述",
+    "activity_employeeName": "员工姓名",
+    "activity_selectEmployee": "选择员工",
+    "activity_assignee": "指派员工",
+    "activity_thirdPartyName": "第三方名称",
+    "activity_selectThirdParty": "选择第三方",
+    "activity_thirdParty": "第三方",
+    "activity_startDate": "预计开始日期",
+    "activity_update": "更新",
+    "activity_timeEntries": "工时记录",
+    "activity_create": "创建",
+    "activity_new": "新建",
+    "activity_title": "{activityType} #{pseudoId}",
+    "activity_loadError": "{activityType}加载问题",
+    "activity_serverError": "服务器连接问题",
+    "activity_error": "错误：{message}",
+    "activity_notFound": "未找到{activityType}，请使用“+”添加一个",
+    "activity_fetchError": "获取{activityType}失败 {message}",
+    "activity_addNew": "添新",
+    "timeEntry_title": "输入工时记录",
+    "timeEntry_new": "新工时记录",
+    "timeEntry_id": "工时记录#{timeEntryId}",
+    "timeEntry_updateDate": "更新\n日期",
+    "timeEntry_hours": "# 小时",
+    "timeEntry_hoursError": "请输入小时数？",
+    "timeEntry_comments": "评论",
+    "timeEntry_addSuccess": "添加成功",
+    "timeEntry_updateSuccess": "更新成功",
+    "timeEntry_listTitle": "工时记录信息",
+    "timeEntry_notFound": "未找到工时记录"
 }

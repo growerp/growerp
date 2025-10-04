@@ -1,103 +1,28 @@
 {
-  "@@locale": "zh",
-  "chatNotActive": "聊天未激活！",
-  "@chatNotActive": {
-    "description": "聊天未激活时的错误消息"
-  },
-  "messageText": "消息文本..",
-  "@messageText": {
-    "description": "消息输入字段的占位符文本"
-  },
-  "send": "发送",
-  "@send": {
-    "description": "发送按钮文本"
-  },
-  "addPartner": "添加伙伴",
-  "@addPartner": {
-    "description": "添加聊天伙伴的按钮文本"
-  },
-  "chat": "聊天 #",
-  "@chat": {
-    "description": "带编号符号的聊天标题"
-  },
-  "newChat": "新建",
-  "@newChat": {
-    "description": "创建新聊天的按钮文本"
-  },
-  "selectChatPartner": "选择聊天伙伴",
-  "@selectChatPartner": {
-    "description": "选择聊天伙伴的说明"
-  },
-  "chatPartner": "聊天伙伴",
-  "@chatPartner": {
-    "description": "聊天伙伴字段的标签"
-  },
-  "fieldRequired": "必填字段",
-  "@fieldRequired": {
-    "description": "通用必填字段错误消息"
-  },
-  "create": "创建",
-  "@create": {
-    "description": "创建按钮文本"
-  },
-  "update": "更新",
-  "@update": {
-    "description": "更新按钮文本"
-  },
-  "room": "房间",
-  "@room": {
-    "description": "房间标签"
-  },
-  "chatRoom": "聊天室",
-  "@chatRoom": {
-    "description": "聊天室标签或标题"
-  },
-  "chatUsersAndGroups": "聊天用户和群组",
-  "@chatUsersAndGroups": {
-    "description": "聊天用户和群组的节标题"
-  },
-  "addNew": "添新",
-  "@addNew": {
-    "description": "添加新项目的按钮文本"
-  },
-  "no": "没有 ",
-  "@no": {
-    "description": "“未找到项目”消息的部分文本"
-  },
-  "sFound": "找到！",
-  "@sFound": {
-    "description": "“找到项目”消息的部分文本"
-  },
-  "searchInName": "在名称中搜索..",
-  "@searchInName": {
-    "description": "名称搜索字段的占位符文本"
-  },
-  "search": "搜索",
-  "@search": {
-    "description": "搜索按钮文本"
-  },
-  "name": "名称",
-  "@name": {
-    "description": "名称字段标签"
-  },
-  "status": "状态",
-  "@status": {
-    "description": "状态字段标签"
-  },
-  "pvt": "私人",
-  "@pvt": {
-    "description": "“私人”的缩写"
-  },
-  "nroMembers": "#成员",
-  "@nroMembers": {
-    "description": "成员数量的缩写"
-  },
-  "allMessagesRead": "所有消息已读",
-  "@allMessagesRead": {
-    "description": "所有消息已读时的状态消息"
-  },
-  "unreadMessages": "未读消息",
-  "@unreadMessages": {
-    "description": "未读消息计数的标签"
-  }
+    "@@locale": "zh",
+    "chatNotActive": "聊天未激活！",
+    "messageText": "消息文本..",
+    "send": "发送",
+    "addPartner": "添加伙伴",
+    "chat": "聊天 #",
+    "newChat": "新建",
+    "selectChatPartner": "选择聊天伙伴",
+    "chatPartner": "聊天伙伴",
+    "fieldRequired": "必填字段",
+    "create": "创建",
+    "update": "更新",
+    "room": "房间",
+    "chatRoom": "聊天室",
+    "chatUsersAndGroups": "聊天用户和群组",
+    "addNew": "添新",
+    "no": "没有 ",
+    "sFound": "找到！",
+    "searchInName": "在名称中搜索..",
+    "search": "搜索",
+    "name": "名称",
+    "status": "状态",
+    "pvt": "私人",
+    "nroMembers": "#成员",
+    "allMessagesRead": "所有消息已读",
+    "unreadMessages": "未读消息"
 }
