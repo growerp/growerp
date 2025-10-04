@@ -1,0 +1,887 @@
+{
+  "@@locale": "zh",
+  "acctSales": "销售会计",
+  "@acctSales": {
+    "description": "销售会计菜单项"
+  },
+  "acctPurchase": "采购会计",
+  "@acctPurchase": {
+    "description": "采购会计菜单项"
+  },
+  "address": "地址",
+  "@address": {
+    "description": "地址信息"
+  },
+  "addressDelete": "地址已删除",
+  "@addressDelete": {
+    "description": "地址已删除的确认消息"
+  },
+  "addressReplace": "地址已替换。",
+  "@addressReplace": {
+    "description": "地址已替换的确认消息"
+  },
+  "address1": "地址行 1",
+  "@address1": {
+    "description": "地址第一行的输入字段标签"
+  },
+  "address1Error": "请输入街道名称",
+  "@address1Error": {
+    "description": "地址行 1 为空时的错误消息"
+  },
+  "address2": "地址行 2",
+  "@address2": {
+    "description": "地址第二行的输入字段标签"
+  },
+  "addressNew": "新地址",
+  "@addressNew": {
+    "description": "创建新地址的标题"
+  },
+  "addressDetail": "地址 #{addressId}",
+  "@addressDetail": {
+    "description": "地址详细信息视图的标题",
+    "placeholders": {
+      "addressId": {
+        "type": "String",
+        "example": "123"
+      }
+    }
+  },
+  "administrator": "管理员",
+  "@administrator": {
+    "description": "管理员的角色名称"
+  },
+  "admins": "管理员",
+  "@admins": {
+    "description": "管理员的复数形式"
+  },
+  "add": "添加",
+  "@add": {
+    "description": "简短的操作按钮文本"
+  },
+  "addNew": "添新",
+  "@addNew": {
+    "description": "添加新项目的操作按钮文本"
+  },
+  "addNewRelatedCompany": "添加新的相关公司",
+  "@addNewRelatedCompany": {
+    "description": "添加新的相关公司的操作按钮文本"
+  },
+  "adminNeedsUsername": "管理员需要用户名！",
+  "@adminNeedsUsername": {
+    "description": "在没有用户名的情况下创建管理员用户时的错误消息"
+  },
+  "appAdmin": "管理员",
+  "@appAdmin": {
+    "description": "应用程序管理员"
+  },
+  "appCompany": "公司",
+  "@appCompany": {
+    "description": "公司实体"
+  },
+  "city": "城市",
+  "@city": {
+    "description": "城市的输入字段标签"
+  },
+  "cityError": "请输入城市",
+  "@cityError": {
+    "description": "城市为空时的错误消息"
+  },
+  "company": "公司",
+  "@company": {
+    "description": "商业实体"
+  },
+  "companyAddress": "公司地址",
+  "@companyAddress": {
+    "description": "公司的地址"
+  },
+  "newCompanyAddress": "新公司地址",
+  "@newCompanyAddress": {
+    "description": "创建新公司地址的标题"
+  },
+  "companyAddressDetail": "公司地址 #{addressId}",
+  "@companyAddressDetail": {
+    "description": "公司地址详细信息视图的标题",
+    "placeholders": {
+      "addressId": {
+        "type": "String"
+      }
+    }
+  },
+  "companyDelete": "公司 {name} 已删除",
+  "@companyDelete": {
+    "description": "公司已删除的确认消息",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "ABC Corp"
+      }
+    }
+  },
+  "companyDetail": "公司详情",
+  "@companyDetail": {
+    "description": "公司详细信息视图的标题"
+  },
+  "companyName": "公司名称",
+  "@companyName": {
+    "description": "公司名称的输入字段标签"
+  },
+  "companyNameEmail": "公司名称\n电子邮件",
+  "@companyNameEmail": {
+    "description": "同时显示公司名称和电子邮件的字段标签"
+  },
+  "companyNameError": "请输入公司名称",
+  "@companyNameError": {
+    "description": "公司名称为空时的错误消息"
+  },
+  "companyNone": "未找到公司。",
+  "@companyNone": {
+    "description": "搜索中未找到公司时的消息"
+  },
+  "companyRoleDetail": "{role} 公司 #{id}",
+  "@companyRoleDetail": {
+    "description": "具有特定角色的公司的详细信息",
+    "placeholders": {
+      "role": {
+        "type": "String",
+        "example": "Customer"
+      },
+      "id": {
+        "type": "String",
+        "example": "123"
+      }
+    }
+  },
+  "companySearch": "公司搜索",
+  "@companySearch": {
+    "description": "公司搜索页面的标题"
+  },
+  "companyUpdate": "公司 {name} 已更新",
+  "@companyUpdate": {
+    "description": "公司已更新的确认消息",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "ABC Corp"
+      }
+    }
+  },
+  "companyUserUpDown": "公司/用户上传/下载",
+  "@companyUserUpDown": {
+    "description": "用于上传/下载公司和用户数据的菜单项"
+  },
+  "couldNotLoad": "无法加载 {role}！",
+  "@couldNotLoad": {
+    "description": "无法加载某个角色的项目列表时的错误消息",
+    "placeholders": {
+      "role": {
+        "type": "String",
+        "example": "Customer"
+      }
+    }
+  },
+  "country": "国家",
+  "@country": {
+    "description": "国家的输入字段标签"
+  },
+  "countryError": "请选择一个国家",
+  "@countryError": {
+    "description": "未选择国家时的错误消息"
+  },
+  "create": "创建",
+  "@create": {
+    "description": "创建项目的操作按钮文本"
+  },
+  "currency": "货币",
+  "@currency": {
+    "description": "货币的输入字段标签"
+  },
+  "currencyError": "货币字段为必填项！",
+  "@currencyError": {
+    "description": "未选择货币时的错误消息"
+  },
+  "customer": "客户",
+  "@customer": {
+    "description": "购买商品或服务的个人或公司"
+  },
+  "customers": "客户",
+  "@customers": {
+    "description": "客户的复数形式"
+  },
+  "database": "数据库",
+  "@database": {
+    "description": "结构化的数据集"
+  },
+  "dataFileSent": "数据文件将通过电子邮件发送",
+  "@dataFileSent": {
+    "description": "数据文件已发送的确认消息"
+  },
+  "deleteUser": "删除用户",
+  "@deleteUser": {
+    "description": "删除用户的操作按钮文本"
+  },
+  "disabled": "已禁用",
+  "@disabled": {
+    "description": "表示未启用的状态"
+  },
+  "downloadEmail": "通过电子邮件下载",
+  "@downloadEmail": {
+    "description": "下载数据并通过电子邮件接收的操作按钮文本"
+  },
+  "downloadFormat": "首先下载以获取格式",
+  "@downloadFormat": {
+    "description": "数据导入的说明文本"
+  },
+  "email": "电子邮件",
+  "@email": {
+    "description": "电子邮件地址的输入字段标签"
+  },
+  "emailAddress": "电子邮件地址",
+  "@emailAddress": {
+    "description": "电子邮件地址的完整标签"
+  },
+  "emailInvalid": "这不是一个有效的电子邮件",
+  "@emailInvalid": {
+    "description": "无效电子邮件格式的错误消息"
+  },
+  "emailLoginRequired": "需要电子邮件才能登录！",
+  "@emailLoginRequired": {
+    "description": "登录需要电子邮件时的错误消息"
+  },
+  "employee": "员工",
+  "@employee": {
+    "description": "受雇于工资或薪水的人"
+  },
+  "employees": "员工",
+  "@employees": {
+    "description": "员工的复数形式"
+  },
+  "failedToFetchSearchItems": "获取搜索项失败：{message}",
+  "@failedToFetchSearchItems": {
+    "description": "获取搜索项失败时的错误消息",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldRequired": "必填字段",
+  "@fieldRequired": {
+    "description": "必填字段的通用错误消息"
+  },
+  "firstName": "名",
+  "@firstName": {
+    "description": "名的输入字段标签"
+  },
+  "firstNameError": "请输入名",
+  "@firstNameError": {
+    "description": "名为空时的错误消息"
+  },
+  "hostName": "主机名",
+  "@hostName": {
+    "description": "服务器的主机名"
+  },
+  "id": "ID",
+  "@id": {
+    "description": "标识符"
+  },
+  "lastName": "姓",
+  "@lastName": {
+    "description": "姓的输入字段标签"
+  },
+  "lastNameError": "请输入姓",
+  "@lastNameError": {
+    "description": "姓为空时的错误消息"
+  },
+  "lead": "潜在客户",
+  "@lead": {
+    "description": "潜在的销售联系人"
+  },
+  "leads": "潜在客户",
+  "@leads": {
+    "description": "潜在客户的复数形式"
+  },
+  "leadUser": "潜在客户用户",
+  "@leadUser": {
+    "description": "作为潜在客户的用户"
+  },
+  "location": "位置",
+  "@location": {
+    "description": "特定的地点或位置"
+  },
+  "login": "登录",
+  "@login": {
+    "description": "登录系统的操作"
+  },
+  "loginDisabled": "登录已禁用",
+  "@loginDisabled": {
+    "description": "表示登录已禁用的状态消息"
+  },
+  "name": "名称",
+  "@name": {
+    "description": "人或物的名称"
+  },
+  "needPostalAddress": "需要邮政地址才能添加",
+  "@needPostalAddress": {
+    "description": "表示需要邮政地址的消息"
+  },
+  "noAddress": "尚无地址",
+  "@noAddress": {
+    "description": "没有可用地址时的消息"
+  },
+  "noAddressAdd": "尚无地址，需要邮政地址才能添加",
+  "@noAddressAdd": {
+    "description": "没有可用地址且需要添加时的消息"
+  },
+  "noCompaniesFound": "未找到公司",
+  "@noCompaniesFound": {
+    "description": "搜索公司无结果时的消息"
+  },
+  "noCompaniesUsersFound": "未找到公司/用户",
+  "@noCompaniesUsersFound": {
+    "description": "搜索公司和用户无结果时的消息"
+  },
+  "noCustomer": "未找到客户",
+  "@noCustomer": {
+    "description": "未找到客户时的消息"
+  },
+  "noEmployee": "未找到员工",
+  "@noEmployee": {
+    "description": "未找到员工时的消息"
+  },
+  "noLead": "未找到潜在客户",
+  "@noLead": {
+    "description": "未找到潜在客户时的消息"
+  },
+  "noPaymentMethod": "尚无支付方式",
+  "@noPaymentMethod": {
+    "description": "没有可用支付方式时的消息"
+  },
+  "noPaymentMethodAdd": "尚无支付方式，需要邮政地址才能添加",
+  "@noPaymentMethodAdd": {
+    "description": "没有可用支付方式且需要添加时的消息"
+  },
+  "noPostalAddress": "尚无邮政地址",
+  "@noPostalAddress": {
+    "description": "没有可用邮政地址时的消息"
+  },
+  "noSearchItems": "未找到搜索项（尚未）",
+  "@noSearchItems": {
+    "description": "搜索无项目时的消息"
+  },
+  "noSupplier": "未找到供应商",
+  "@noSupplier": {
+    "description": "未找到供应商时的消息"
+  },
+  "numberOfEmployees": "员工人数",
+  "@numberOfEmployees": {
+    "description": "员工人数的标签"
+  },
+  "org": "组织",
+  "@org": {
+    "description": "组织的缩写"
+  },
+  "partyId": "方ID",
+  "@partyId": {
+    "description": "一方（个人或组织）的标识符"
+  },
+  "paymentMethod": "支付方式",
+  "@paymentMethod": {
+    "description": "支付方式（例如，信用卡）"
+  },
+  "paymentMethodCardNumber": "卡号",
+  "@paymentMethodCardNumber": {
+    "description": "信用卡号的输入字段标签"
+  },
+  "paymentMethodCardNumberError": "请输入信用卡号",
+  "@paymentMethodCardNumberError": {
+    "description": "信用卡号为空的错误消息"
+  },
+  "paymentMethodCardNumberInvalid": "卡号不是有效数字！",
+  "@paymentMethodCardNumberInvalid": {
+    "description": "无效信用卡号的错误消息"
+  },
+  "paymentMethodCardType": "卡类型",
+  "@paymentMethodCardType": {
+    "description": "信用卡类型的输入字段标签（例如，Visa）"
+  },
+  "paymentMethodDelete": "支付方式已删除",
+  "@paymentMethodDelete": {
+    "description": "支付方式已删除的确认"
+  },
+  "paymentMethodExpireMonth": "到期月份",
+  "@paymentMethodExpireMonth": {
+    "description": "信用卡到期月份的输入字段标签"
+  },
+  "paymentMethodExpireMonthError": "请输入到期月份",
+  "@paymentMethodExpireMonthError": {
+    "description": "到期月份为空的错误消息"
+  },
+  "paymentMethodExpireYear": "到期年份",
+  "@paymentMethodExpireYear": {
+    "description": "信用卡到期年份的输入字段标签"
+  },
+  "paymentMethodExpireYearError": "请输入到期年份",
+  "@paymentMethodExpireYearError": {
+    "description": "到期年份为空的错误消息"
+  },
+  "paymentMethodNewCard": "新卡：",
+  "@paymentMethodNewCard": {
+    "description": "添加新信用卡的标签"
+  },
+  "paymentMethodReplace": "支付方式已替换",
+  "@paymentMethodReplace": {
+    "description": "支付方式已替换的确认"
+  },
+  "person": "个人",
+  "@person": {
+    "description": "个体人类"
+  },
+  "pickImageError": "选择图片错误：{error}",
+  "@pickImageError": {
+    "description": "选择图片失败时的错误消息",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "postalCode": "邮政编码",
+  "@postalCode": {
+    "description": "邮政编码的输入字段标签"
+  },
+  "postalCodeError": "请输入邮政编码",
+  "@postalCodeError": {
+    "description": "邮政编码为空的错误消息"
+  },
+  "postalAddress": "邮政地址",
+  "@postalAddress": {
+    "description": "用于发送邮件的地址"
+  },
+  "province": "省/州",
+  "@province": {
+    "description": "省或州的输入字段标签"
+  },
+  "provinceError": "请输入省或州",
+  "@provinceError": {
+    "description": "省/州为空的错误消息"
+  },
+  "refresh": "刷新",
+  "@refresh": {
+    "description": "重新加载数据的操作"
+  },
+  "relatedCompanyInfo": "相关公司信息",
+  "@relatedCompanyInfo": {
+    "description": "相关公司信息部分的标题"
+  },
+  "remove": "移除",
+  "@remove": {
+    "description": "移除项目的操作"
+  },
+  "removeEmployee": "移除 {firstName} {lastName}？",
+  "@removeEmployee": {
+    "description": "移除员工的确认对话框",
+    "placeholders": {
+      "firstName": {
+        "type": "String"
+      },
+      "lastName": {
+        "type": "String"
+      }
+    }
+  },
+  "role": "角色",
+  "@role": {
+    "description": "人或物承担的职能或扮演的角色"
+  },
+  "roleError": "选择一个有效角色！",
+  "@roleError": {
+    "description": "选择无效角色时的错误消息"
+  },
+  "sales": "销售",
+  "@sales": {
+    "description": "用货币交换商品"
+  },
+  "salesAgent": "销售代理",
+  "@salesAgent": {
+    "description": "代表公司销售商品或服务的人"
+  },
+  "salesTaxPercentage": "销售税百分比",
+  "@salesTaxPercentage": {
+    "description": "销售税百分比的输入字段标签"
+  },
+  "search": "搜索",
+  "@search": {
+    "description": "搜索某物的操作"
+  },
+  "searchInput": "搜索输入",
+  "@searchInput": {
+    "description": "搜索输入字段的占位符文本"
+  },
+  "searchResult": "搜索结果",
+  "@searchResult": {
+    "description": "搜索结果视图的标题"
+  },
+  "searchResultIdName": "ID：{id}\n名称：{name}",
+  "@searchResultIdName": {
+    "description": "搜索结果项的显示格式",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "searchResultOrgRep": "组织代表：\n{id}\n{name}",
+  "@searchResultOrgRep": {
+    "description": "组织代表搜索结果的显示格式",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "searchValueError": "请输入搜索值",
+  "@searchValueError": {
+    "description": "搜索值为空时的错误消息"
+  },
+  "secondaryBackend": "辅助后端",
+  "@secondaryBackend": {
+    "description": "备用后端服务器"
+  },
+  "securityUserGroup": "安全用户组",
+  "@securityUserGroup": {
+    "description": "用于安全目的的用户组"
+  },
+  "selectCompany": "选择公司",
+  "@selectCompany": {
+    "description": "选择公司的说明"
+  },
+  "selectCountry": "选择国家",
+  "@selectCountry": {
+    "description": "选择国家的说明"
+  },
+  "selectOrCreateCompany": "选择现有公司或创建新公司",
+  "@selectOrCreateCompany": {
+    "description": "用户选择现有公司或创建新公司的说明"
+  },
+  "shortId": "短ID",
+  "@shortId": {
+    "description": "缩短的标识符"
+  },
+  "supplier": "供应商",
+  "@supplier": {
+    "description": "提供所需物品的个人或组织"
+  },
+  "suppliers": "供应商",
+  "@suppliers": {
+    "description": "供应商的复数形式"
+  },
+  "telephone": "电话",
+  "@telephone": {
+    "description": "远距离传输语音的系统"
+  },
+  "telephoneNr": "电话号码",
+  "@telephoneNr": {
+    "description": "电话号码的缩写"
+  },
+  "type": "类型",
+  "@type": {
+    "description": "具有共同特征的人或物的类别"
+  },
+  "update": "更新",
+  "@update": {
+    "description": "更新项目的操作"
+  },
+  "uploadCsv": "上传CSV文件",
+  "@uploadCsv": {
+    "description": "上传CSV文件的操作"
+  },
+  "user": "用户",
+  "@user": {
+    "description": "使用计算机或网络服务的人"
+  },
+  "userDelete": "用户 {name} 已删除",
+  "@userDelete": {
+    "description": "用户已删除的确认",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userDetail": "用户详情",
+  "@userDetail": {
+    "description": "用户详细信息视图的标题"
+  },
+  "userEvents": "用户事件",
+  "@userEvents": {
+    "description": "与用户相关的事件列表"
+  },
+  "userGroup": "用户组",
+  "@userGroup": {
+    "description": "用户组"
+  },
+  "userHelp": "选择现有用户或创建新用户",
+  "@userHelp": {
+    "description": "用户选择的帮助文本"
+  },
+  "userInfo": "用户信息",
+  "@userInfo": {
+    "description": "用户信息部分的标题"
+  },
+  "userLogin": "用户登录",
+  "@userLogin": {
+    "description": "用户登录的过程"
+  },
+  "userName": "用户名",
+  "@userName": {
+    "description": "用户名的输入字段标签"
+  },
+  "userNone": "未找到用户",
+  "@userNone": {
+    "description": "未找到用户时的消息"
+  },
+  "noClientFound": "未找到客户",
+  "@noClientFound": {
+    "description": "未找到客户时的消息"
+  },
+  "noUsersFound": "未找到 {role} 用户",
+  "@noUsersFound": {
+    "description": "未找到某个角色的用户时的消息",
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "addNewUser": "添加新用户",
+  "@addNewUser": {
+    "description": "添加新用户的操作按钮文本"
+  },
+  "userUpDownload": "用户上传/下载",
+  "@userUpDownload": {
+    "description": "用户上传/下载按钮的工具提示"
+  },
+  "userUpdate": "用户 {name} 已更新",
+  "@userUpdate": {
+    "description": "用户已更新的确认",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userNewCompany": "首先创建新公司",
+  "@userNewCompany": {
+    "description": "在添加用户之前创建新公司的说明"
+  },
+  "vatSls": "增值税/销售",
+  "@vatSls": {
+    "description": "增值税/销售的缩写"
+  },
+  "vatPercentage": "增值税百分比",
+  "@vatPercentage": {
+    "description": "增值税百分比的输入字段标签"
+  },
+  "webAddress": "网址",
+  "@webAddress": {
+    "description": "网站的地址"
+  },
+  "website": "网站",
+  "@website": {
+    "description": "连接到互联网的位置，维护万维网上的一个或多个页面"
+  },
+  "websiteAddress": "网站地址",
+  "@websiteAddress": {
+    "description": "网站地址的完整标签"
+  },
+  "newCompany": "新公司",
+  "@newCompany": {
+    "description": "创建新公司的标题"
+  },
+  "newItem": "新建",
+  "@newItem": {
+    "description": "新项目的简短文本"
+  },
+  "paymentMethodDetail": "支付方式详情",
+  "@paymentMethodDetail": {
+    "description": "支付方式详细信息视图的标题"
+  },
+  "noUsers": "未找到用户",
+  "@noUsers": {
+    "description": "未找到用户时的消息"
+  },
+  "noLeads": "未找到潜在客户",
+  "@noLeads": {
+    "description": "未找到潜在客户时的消息"
+  },
+  "noCustomers": "未找到客户",
+  "@noCustomers": {
+    "description": "未找到客户时的消息"
+  },
+  "noSuppliers": "未找到供应商",
+  "@noSuppliers": {
+    "description": "未找到供应商时的消息"
+  },
+  "noEmployees": "未找到员工",
+  "@noEmployees": {
+    "description": "未找到员工时的消息"
+  },
+  "noAdmins": "未找到管理员",
+  "@noAdmins": {
+    "description": "未找到管理员时的消息"
+  },
+  "noClients": "未找到客户",
+  "@noClients": {
+    "description": "未找到客户时的消息"
+  },
+  "client": "客户",
+  "@client": {
+    "description": "使用律师或其他专业人士或公司服务的个人或组织。"
+  },
+  "clients": "客户",
+  "@clients": {
+    "description": "客户的复数形式"
+  },
+  "companyNotFound": "未找到公司 {companyId}",
+  "@companyNotFound": {
+    "description": "未找到公司时的错误消息",
+    "placeholders": {
+      "companyId": {
+        "type": "String"
+      }
+    }
+  },
+  "userNotFound": "未找到用户 {userId}",
+  "@userNotFound": {
+    "description": "未找到用户时的错误消息",
+    "placeholders": {
+      "userId": {
+        "type": "String"
+      }
+    }
+  },
+  "serverConnectionProblem": "服务器连接问题",
+  "@serverConnectionProblem": {
+    "description": "服务器连接问题的错误消息"
+  },
+  "companyPersonNameEmail": "公司/个人名称\n电子邮件",
+  "@companyPersonNameEmail": {
+    "description": "公司/个人名称和电子邮件的列标题"
+  },
+  "companyUserSearch": "公司/用户搜索",
+  "@companyUserSearch": {
+    "description": "公司/用户搜索页面的标题"
+  },
+  "searchResults": "搜索结果",
+  "@searchResults": {
+    "description": "搜索结果部分的标题"
+  },
+  "showUserEvents": "显示用户事件",
+  "@showUserEvents": {
+    "description": "显示用户事件的工具提示"
+  },
+  "telephoneNumber": "电话号码",
+  "@telephoneNumber": {
+    "description": "电话号码的标签"
+  },
+  "roleCompanyInfo": "{role} 公司信息",
+  "@roleCompanyInfo": {
+    "description": "具有角色的公司信息部分的标题",
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "companyId": "公司名称[id]",
+  "@companyId": {
+    "description": "带id的公司名称标签"
+  },
+  "updateCompany": "更新",
+  "@updateCompany": {
+    "description": "更新公司的按钮文本"
+  },
+  "removeCompany": "移除",
+  "@removeCompany": {
+    "description": "移除公司的按钮文本"
+  },
+  "addNewRelatedComp": "添加新的相关公司",
+  "@addNewRelatedComp": {
+    "description": "添加新的相关公司的按钮文本"
+  },
+  "userLoginName": "用户登录名",
+  "@userLoginName": {
+    "description": "用户登录名的标签"
+  },
+  "delete": "删除",
+  "@delete": {
+    "description": "删除的按钮文本"
+  },
+  "imageUploadError": "图片上传错误！",
+  "@imageUploadError": {
+    "description": "图片上传失败时的错误消息"
+  },
+  "companyUpdated": "公司 {name} 已更新...",
+  "@companyUpdated": {
+    "description": "公司更新时的确认消息",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "companyAdded": "公司 {name} 已添加",
+  "@companyAdded": {
+    "description": "添加公司时的确认消息",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUpdated": "用户 {name} 已更新...",
+  "@userUpdated": {
+    "description": "用户更新时的确认消息",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userAdded": "用户 {name} 已添加到列表顶部...",
+  "@userAdded": {
+    "description": "添加用户时的确认消息",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "asCompany": "但是现在显示为公司",
+  "@asCompany": {
+    "description": "表示用户现在显示为公司的消息"
+  },
+  "compUserUploadSuccess": "公司/用户上传成功结束",
+  "@compUserUploadSuccess": {
+    "description": "公司/用户上传成功的消息"
+  },
+  "compUserDownloadSuccess": "请求已安排，电子邮件将很快发送",
+  "@compUserDownloadSuccess": {
+    "description": "公司/用户下载成功的消息"
+  },
+  "userDeleted": "用户 {name} 现已删除..",
+  "@userDeleted": {
+    "description": "删除用户时的确认消息",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
+}
