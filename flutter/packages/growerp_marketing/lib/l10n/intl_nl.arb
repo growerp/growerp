@@ -1,0 +1,227 @@
+{
+    "@@locale": "nl",
+    "@@last_modified": "2025-09-30T00:00:00Z",
+    "@@author": "GrowERP Community",
+    "@@context": "Marketing package localization for GrowERP business management system",
+    "@@x-template": "intl_en.arb",
+    "tableHdrShortId": "ShortId",
+    "@tableHdrShortId": {
+        "description": "Table header for Short ID"
+    },
+    "tableHdrId": "Id",
+    "@tableHdrId": {
+        "description": "Table header for ID"
+    },
+    "tableHdrName": "Name",
+    "@tableHdrName": {
+        "description": "Table header for Name"
+    },
+    "tableHdrAmount": "Amount",
+    "@tableHdrAmount": {
+        "description": "Table header for Amount"
+    },
+    "tableHdrProbability": "Probability",
+    "@tableHdrProbability": {
+        "description": "Table header for Probability"
+    },
+    "tableHdrLead": "Lead name/company",
+    "@tableHdrLead": {
+        "description": "Table header for Lead"
+    },
+    "tableHdrLeadEmail": "Lead Email",
+    "@tableHdrLeadEmail": {
+        "description": "Table header for Lead Email"
+    },
+    "tableHdrStage": "Stage",
+    "@tableHdrStage": {
+        "description": "Table header for Stage"
+    },
+    "tableHdrNextStep": "Next Step",
+    "@tableHdrNextStep": {
+        "description": "Table header for Next Step"
+    },
+    "tableHdrDelete": " ",
+    "@tableHdrDelete": {
+        "description": "Table header for Delete action"
+    },
+    "removeItemTooltip": "Remove Item",
+    "@removeItemTooltip": {
+        "description": "Tooltip for remove item button"
+    },
+    "deleteItemConfirm": "Delete {id}?",
+    "@deleteItemConfirm": {
+        "description": "Confirmation dialog for deleting an item",
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "cannotBeUndone": "This action cannot be undone!",
+    "@cannotBeUndone": {
+        "description": "Warning that an action cannot be undone"
+    },
+    "error": "Error: {message}",
+    "@error": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "unknown": "Unknown",
+    "@unknown": {
+        "description": "Generic 'Unknown' text"
+    },
+    "opportunityNew": "New Opportunity",
+    "@opportunityNew": {
+        "description": "Title for new opportunity page"
+    },
+    "opportunityWithMessage": "Opportunity {id}",
+    "@opportunityWithMessage": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "id": "ID",
+    "@id": {
+        "description": "Label for ID field"
+    },
+    "opportunityName": "Opportunity Name",
+    "@opportunityName": {
+        "description": "Label for Opportunity Name field"
+    },
+    "enterOppName": "Enter Opportunity Name",
+    "@enterOppName": {
+        "description": "Placeholder for Opportunity Name input"
+    },
+    "description": "Description",
+    "@description": {
+        "description": "Label for Description field"
+    },
+    "expRevenue": "Expected Revenue",
+    "@expRevenue": {
+        "description": "Label for Expected Revenue field"
+    },
+    "enterAmount": "Enter Amount",
+    "@enterAmount": {
+        "description": "Placeholder for Amount input"
+    },
+    "estProbability": "Estimated Probability",
+    "@estProbability": {
+        "description": "Label for Estimated Probability field"
+    },
+    "enterProbability": "Enter Probability",
+    "@enterProbability": {
+        "description": "Placeholder for Probability input"
+    },
+    "nextStep": "Next Step",
+    "@nextStep": {
+        "description": "Label for Next Step field"
+    },
+    "enterNextStep": "Enter Next Step",
+    "@enterNextStep": {
+        "description": "Placeholder for Next Step input"
+    },
+    "stage": "Stage",
+    "@stage": {
+        "description": "Label for Stage field"
+    },
+    "fieldRequired": "Field is required",
+    "@fieldRequired": {
+        "description": "Validation error for required field"
+    },
+    "leadSearch": "Lead Search",
+    "@leadSearch": {
+        "description": "Title for Lead Search dialog"
+    },
+    "selectLead": "Select Lead",
+    "@selectLead": {
+        "description": "Instruction to select a lead"
+    },
+    "lead": "Lead",
+    "@lead": {
+        "description": "Label for Lead field"
+    },
+    "employeeSearch": "Employee Search",
+    "@employeeSearch": {
+        "description": "Title for Employee Search dialog"
+    },
+    "selectEmployee": "Select Employee",
+    "@selectEmployee": {
+        "description": "Instruction to select an employee"
+    },
+    "accountEmployee": "Account Employee",
+    "@accountEmployee": {
+        "description": "Label for Account Employee field"
+    },
+    "create": "Create",
+    "@create": {
+        "description": "Create button text"
+    },
+    "update": "Update",
+    "@update": {
+        "description": "Update button text"
+    },
+    "serverProblem": "Server problem",
+    "@serverProblem": {
+        "description": "Error message for server problems"
+    },
+    "fetchError": "Fetch error: {message}",
+    "@fetchError": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "noOpportunities": "No opportunities found",
+    "@noOpportunities": {
+        "description": "Message when no opportunities are found"
+    },
+    "addNew": "Add New",
+    "@addNew": {
+        "description": "Button to add a new item"
+    },
+    "fetchSearchError": "Search error: {message}",
+    "@fetchSearchError": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "opportunitySearch": "Opportunity Search",
+    "@opportunitySearch": {
+        "description": "Title for Opportunity Search dialog"
+    },
+    "searchInput": "Search Input",
+    "@searchInput": {
+        "description": "Label for search input field"
+    },
+    "enterSearchValue": "Enter Search Value",
+    "@enterSearchValue": {
+        "description": "Placeholder for search input"
+    },
+    "searchResults": "Search Results",
+    "@searchResults": {
+        "description": "Header for search results"
+    },
+    "noSearchItems": "No search items",
+    "@noSearchItems": {
+        "description": "Message when no search items are found"
+    },
+    "searchResult": "ID: {id}, Name: {name}",
+    "@searchResult": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            },
+            "name": {
+                "type": "String"
+            }
+        }
+    }
+}

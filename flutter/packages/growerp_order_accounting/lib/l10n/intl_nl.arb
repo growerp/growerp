@@ -1,0 +1,961 @@
+{
+  "@@locale": "nl",
+  "nameAndCompany": "name & Company",
+  "@nameAndCompany": {
+    "description": "Label showing name and company together"
+  },
+  "glAccount": "GlAccount #",
+  "@glAccount": {
+    "description": "GL Account header or label with number symbol"
+  },
+  "newGlAccount": " New",
+  "@newGlAccount": {
+    "description": "Button or label for creating a new GL account"
+  },
+  "serverProblem": "Server connection problem",
+  "@serverProblem": {
+    "description": "Error message for server connectivity issues"
+  },
+  "glAccountId": "GlAccount Id",
+  "@glAccountId": {
+    "description": "GL Account ID field label"
+  },
+  "glAccountIdNull": "Please enter a glAccount Id?",
+  "@glAccountIdNull": {
+    "description": "Error message for empty GL Account ID field"
+  },
+  "glAccountName": "GlAccount Name",
+  "@glAccountName": {
+    "description": "GL Account name field label"
+  },
+  "glAccountNameNull": "Please enter a glAccount name?",
+  "@glAccountNameNull": {
+    "description": "Error message for empty GL Account name field"
+  },
+  "accountClass": "Account Class",
+  "@accountClass": {
+    "description": "Account class field label"
+  },
+  "selectGlAccountClass": "Select GL Account Class",
+  "@selectGlAccountClass": {
+    "description": "Dropdown hint for selecting GL account class"
+  },
+  "fieldRequired": "Field required",
+  "@fieldRequired": {
+    "description": "Generic required field error message"
+  },
+  "accountType": "Account Type",
+  "@accountType": {
+    "description": "Account type field label"
+  },
+  "selectGlAccountType": "Select GL Account Type",
+  "@selectGlAccountType": {
+    "description": "Dropdown hint for selecting GL account type"
+  },
+  "postedBalance": "Posted Balance",
+  "@postedBalance": {
+    "description": "Posted balance field label showing account balance"
+  },
+  "create": "Create",
+  "@create": {
+    "description": "Create button text"
+  },
+  "update": "Update",
+  "@update": {
+    "description": "Update button text"
+  },
+  "fetchGlAccountFail": "failed to fetch glAccounts: ",
+  "@fetchGlAccountFail": {
+    "description": "Error message when GL accounts fail to load"
+  },
+  "noGlAccounts": "No active glAccounts found",
+  "@noGlAccounts": {
+    "description": "Message when no GL accounts are found"
+  },
+  "glAccountFile": "GL Accounts up/download",
+  "@glAccountFile": {
+    "description": "GL Accounts file upload/download section header"
+  },
+  "trialBalance": "Trial Balance",
+  "@trialBalance": {
+    "description": "Trial balance report header"
+  },
+  "tb": "TB",
+  "@tb": {
+    "description": "Abbreviation for Trial Balance"
+  },
+  "reservation": "Reservation",
+  "@reservation": {
+    "description": "Reservation section or label"
+  },
+  "noJournalEntries": "no journal entries found",
+  "@noJournalEntries": {
+    "description": "Message when no journal entries are found"
+  },
+  "noOpenTransactions": "no (unposted) transactions found!",
+  "@noOpenTransactions": {
+    "description": "Message when no unposted transactions are found"
+  },
+  "noOpenOrders": "no (open) sales orders found!",
+  "@noOpenOrders": {
+    "description": "Message when no open sales orders are found"
+  },
+  "noOpenInvoices": "no (open) sales invoices found!",
+  "@noOpenInvoices": {
+    "description": "Message when no open sales invoices are found"
+  },
+  "noOpenPayments": "no (open) sales payments found!",
+  "@noOpenPayments": {
+    "description": "Message when no open sales payments are found"
+  },
+  "noOpenShipments": "no (open) outgoing shipments found!",
+  "@noOpenShipments": {
+    "description": "Message when no open outgoing shipments are found"
+  },
+  "noOpenRequests": "no (open) requests found!",
+  "@noOpenRequests": {
+    "description": "Message when no open requests are found"
+  },
+  "noPurchaseOrders": "no (open) purchase orders found!",
+  "@noPurchaseOrders": {
+    "description": "Message when no open purchase orders are found"
+  },
+  "noPurchaseInvoices": "no (open) purchase invoices found!",
+  "@noPurchaseInvoices": {
+    "description": "Message when no open purchase invoices are found"
+  },
+  "noPurchasePayments": "no (open) purchase payments found!",
+  "@noPurchasePayments": {
+    "description": "Message when no open purchase payments are found"
+  },
+  "noIncomingShipments": "no (open) incoming shipments found!",
+  "@noIncomingShipments": {
+    "description": "Message when no open incoming shipments are found"
+  },
+  "addNew": "Add New",
+  "@addNew": {
+    "description": "Add new item button text"
+  },
+  "refresh": "Refresh",
+  "@refresh": {
+    "description": "Refresh button text"
+  },
+  "fetchItemTypesFail": "failed to fetch itemTypes: ",
+  "@fetchItemTypesFail": {
+    "description": "Error message when item types fail to load"
+  },
+  "noItemTypes": "No Item Types Active",
+  "@noItemTypes": {
+    "description": "Message when no active item types are found"
+  },
+  "showAllUsed": "Show all/used",
+  "@showAllUsed": {
+    "description": "Toggle button text for showing all or used items"
+  },
+  "all": "All",
+  "@all": {
+    "description": "Filter option to show all items"
+  },
+  "onlyUsed": "only used",
+  "@onlyUsed": {
+    "description": "Filter option to show only used items"
+  },
+  "fetchPaymentTypesFail": "failed to fetch paymentTypes: ",
+  "@fetchPaymentTypesFail": {
+    "description": "Error message when payment types fail to load"
+  },
+  "search": "Search",
+  "@search": {
+    "description": "Search button text"
+  },
+  "searchFinDoc": "Search Financial Document",
+  "@searchFinDoc": {
+    "description": "Title for the financial document search dialog"
+  },
+  "newRental": "New Reservation",
+  "@newRental": {
+    "description": "Button or label for creating a new reservation"
+  },
+  "sales": "Sales",
+  "@sales": {
+    "description": "Label for sales documents"
+  },
+  "purchase": "Purchase",
+  "@purchase": {
+    "description": "Label for purchase documents"
+  },
+  "fetchSearchItemsFail": "failed to fetch search items: ",
+  "@fetchSearchItemsFail": {
+    "description": "Error message when search items fail to load"
+  },
+  "searchInput": "Search input",
+  "@searchInput": {
+    "description": "Label for search input field"
+  },
+  "enterSearchValue": "Please enter a search value?",
+  "@enterSearchValue": {
+    "description": "Error message for empty search field"
+  },
+  "searchResults": "Search results",
+  "@searchResults": {
+    "description": "Header for search results"
+  },
+  "noSearchItems": "No search items found (yet)",
+  "@noSearchItems": {
+    "description": "Message when no search items are found"
+  },
+  "id": "ID",
+  "@id": {
+    "description": "Abbreviation for Identifier"
+  },
+  "date": "Date",
+  "@date": {
+    "description": "Date label"
+  },
+  "finDocId": "FinDoc Id",
+  "@finDocId": {
+    "description": "Financial Document ID field label"
+  },
+  "customer": "Customer",
+  "@customer": {
+    "description": "Label for customer"
+  },
+  "supplier": "Supplier",
+  "@supplier": {
+    "description": "Label for supplier"
+  },
+  "selectCustomer": "Select Customer",
+  "@selectCustomer": {
+    "description": "Dropdown hint for selecting a customer"
+  },
+  "selectSupplier": "Select Supplier",
+  "@selectSupplier": {
+    "description": "Dropdown hint for selecting a supplier"
+  },
+  "status": "Status",
+  "@status": {
+    "description": "Label for status"
+  },
+  "description": "Description",
+  "@description": {
+    "description": "Label for description"
+  },
+  "created": "Created",
+  "@created": {
+    "description": "Label for creation date"
+  },
+  "placed": "Placed",
+  "@placed": {
+    "description": "Label for placed date"
+  },
+  "posted": "Posted?",
+  "@posted": {
+    "description": "Label for posted status"
+  },
+  "no": "No",
+  "@no": {
+    "description": "Negative response"
+  },
+  "yes": "Yes",
+  "@yes": {
+    "description": "Positive response"
+  },
+  "updateHeader": "Update Header",
+  "@updateHeader": {
+    "description": "Button text to update header"
+  },
+  "addTransactionItem": "Add\n transaction item",
+  "@addTransactionItem": {
+    "description": "Button text to add a transaction item"
+  },
+  "addOtherItem": "Add other item",
+  "@addOtherItem": {
+    "description": "Button text to add another item"
+  },
+  "addRental": "Add Rental",
+  "@addRental": {
+    "description": "Button text to add a rental item"
+  },
+  "addProduct": "Add Product",
+  "@addProduct": {
+    "description": "Button text to add a product"
+  },
+  "cancelFinDoc": "Cancel",
+  "@cancelFinDoc": {
+    "description": "Button text to cancel a financial document"
+  },
+  "clearCart": "Clear Cart",
+  "@clearCart": {
+    "description": "Button text to clear the cart"
+  },
+  "noItems": "no items yet",
+  "@noItems": {
+    "description": "Message when there are no items"
+  },
+  "item": "Item",
+  "@item": {
+    "description": "Label for an item"
+  },
+  "glAccountLabel": "Gl Account",
+  "@glAccountLabel": {
+    "description": "Label for GL Account"
+  },
+  "debit": "Debit",
+  "@debit": {
+    "description": "Label for debit amount"
+  },
+  "credit": "Credit",
+  "@credit": {
+    "description": "Label for credit amount"
+  },
+  "productId": "ProdId",
+  "@productId": {
+    "description": "Label for product ID"
+  },
+  "quantity": "Q",
+  "@quantity": {
+    "description": "Abbreviation for Quantity"
+  },
+  "price": "Price",
+  "@price": {
+    "description": "Label for price"
+  },
+  "subTotal": "SubTot.",
+  "@subTotal": {
+    "description": "Abbreviation for Subtotal"
+  },
+  "location": "Location",
+  "@location": {
+    "description": "Label for location"
+  },
+  "addTransactionItemTitle": "Add Transaction Item",
+  "@addTransactionItemTitle": {
+    "description": "Title for the add transaction item dialog"
+  },
+  "amount": "Amount",
+  "@amount": {
+    "description": "Label for amount"
+  },
+  "enterAmount": "Enter Amount?",
+  "@enterAmount": {
+    "description": "Error message for empty amount field"
+  },
+  "ok": "Ok",
+  "@ok": {
+    "description": "Confirmation button text"
+  },
+  "newOrder": "New order",
+  "@newOrder": {
+    "description": "Button or label for creating a new order"
+  },
+  "orderId": "Order #",
+  "@orderId": {
+    "description": "Order ID header or label with number symbol"
+  },
+  "reservationId": "Reservation #",
+  "@reservationId": {
+    "description": "Reservation ID header or label with number symbol"
+  },
+  "customerSearch": "customer,name",
+  "@customerSearch": {
+    "description": "Label for customer search field"
+  },
+  "roomType": "Room Type",
+  "@roomType": {
+    "description": "Label for room type"
+  },
+  "product": "Product",
+  "@product": {
+    "description": "Label for product"
+  },
+  "selectProduct": "Select product",
+  "@selectProduct": {
+    "description": "Dropdown hint for selecting a product"
+  },
+  "priceAmount": "Price/Amount",
+  "@priceAmount": {
+    "description": "Label for price or amount"
+  },
+  "enterPriceAmount": "Enter Price or Amount?",
+  "@enterPriceAmount": {
+    "description": "Error message for empty price or amount field"
+  },
+  "selectStartDate": "Select a start date",
+  "@selectStartDate": {
+    "description": "Error message for empty start date field"
+  },
+  "startDate": "Start Date",
+  "@startDate": {
+    "description": "Label for start date"
+  },
+  "numberOfDays": "Number of days",
+  "@numberOfDays": {
+    "description": "Label for number of days"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "incomingShipment": "Incoming Shipment #",
+  "@incomingShipment": {
+    "description": "Header for incoming shipment"
+  },
+  "itemLocationInstructions": "For every Item either:\n- Select an existing location\n- Enter a new location\n- leave empty for a new location with\n   the name of the item and received date",
+  "@itemLocationInstructions": {
+    "description": "Instructions for item location"
+  },
+  "toLocation": "To location: ",
+  "@toLocation": {
+    "description": "Label for destination location"
+  },
+  "locationName": "location name",
+  "@locationName": {
+    "description": "Label for location name"
+  },
+  "selectLocation": "Select location",
+  "@selectLocation": {
+    "description": "Dropdown hint for selecting a location"
+  },
+  "newLocation": "New Location",
+  "@newLocation": {
+    "description": "Label for new location"
+  },
+  "goBack": "Go back",
+  "@goBack": {
+    "description": "Button text to go back"
+  },
+  "confirm": "Confirm ",
+  "@confirm": {
+    "description": "Confirmation button text"
+  },
+  "receiveShipment": "Receive shipment",
+  "@receiveShipment": {
+    "description": "Button text to receive a shipment"
+  },
+  "incoming": "Incoming",
+  "@incoming": {
+    "description": "Label for incoming documents"
+  },
+  "outgoing": "Outgoing",
+  "@outgoing": {
+    "description": "Label for outgoing documents"
+  },
+  "paymentId": "Payment #",
+  "@paymentId": {
+    "description": "Payment ID header or label with number symbol"
+  },
+  "newItem": "New",
+  "@newItem": {
+    "description": "Label for new items"
+  },
+  "selectGlAccount": "Select GL Account",
+  "@selectGlAccount": {
+    "description": "Dropdown hint for selecting a GL account"
+  },
+  "finDocs": "Financial Documents",
+  "@finDocs": {
+    "description": "Label for financial documents"
+  },
+  "paymentType": "Payment Type",
+  "@paymentType": {
+    "description": "Label for payment type"
+  },
+  "enterPaymentType": "Enter a item type for posting?",
+  "@enterPaymentType": {
+    "description": "Error message for empty payment type field"
+  },
+  "apply": "Apply:",
+  "@apply": {
+    "description": "Label for apply"
+  },
+  "paymentMethods": "Payment Methods",
+  "@paymentMethods": {
+    "description": "Header for payment methods"
+  },
+  "creditCard": "Credit Card",
+  "@creditCard": {
+    "description": "Label for credit card"
+  },
+  "cash": "Cash",
+  "@cash": {
+    "description": "Label for cash"
+  },
+  "check": "Check",
+  "@check": {
+    "description": "Label for check"
+  },
+  "bank": "Bank",
+  "@bank": {
+    "description": "Label for bank"
+  },
+  "gatewayResponses": "Gateway Responses",
+  "@gatewayResponses": {
+    "description": "Header for gateway responses"
+  },
+  "operation": "Operation",
+  "@operation": {
+    "description": "Label for operation"
+  },
+  "method": "Method",
+  "@method": {
+    "description": "Label for method"
+  },
+  "result": "OK?",
+  "@result": {
+    "description": "Label for result"
+  },
+  "message": "Message:",
+  "@message": {
+    "description": "Label for message"
+  },
+  "release": "Release",
+  "@release": {
+    "description": "Button text to release a payment"
+  },
+  "capture": "Capture",
+  "@capture": {
+    "description": "Button text to capture a payment"
+  },
+  "authorize": "Authorize",
+  "@authorize": {
+    "description": "Button text to authorize a payment"
+  },
+  "name": "Name",
+  "@name": {
+    "description": "Generic name label"
+  },
+  "select": "Select",
+  "@select": {
+    "description": "Prefix for selection actions"
+  },
+  "type": "Type",
+  "@type": {
+    "description": "Generic type label"
+  },
+  "itemOrCustomerRequired": "A {companyRole} and at least one {docType} item is required",
+  "@itemOrCustomerRequired": {
+    "description": "Validation error when creating a document",
+    "placeholders": {
+      "companyRole": {},
+      "docType": {}
+    }
+  },
+  "request": "Request",
+  "@request": {
+    "description": "Request label"
+  },
+  "requester": "Requester",
+  "@requester": {
+    "description": "Requester label"
+  },
+  "selectRequester": "Select Requester",
+  "@selectRequester": {
+    "description": "Dropdown hint for selecting a requester"
+  },
+  "postalCodeCare": "In which Post Code are you looking for care?",
+  "@postalCodeCare": {
+    "description": "Label for postal code care question"
+  },
+  "telephoneNumberQuestion": "What is your telephone number?",
+  "@telephoneNumberQuestion": {
+    "description": "Label for telephone number question"
+  },
+  "careTypeQuestion": "What type of care are you looking for?",
+  "@careTypeQuestion": {
+    "description": "Label for care type question"
+  },
+  "residentialCare": "Residential Care",
+  "@residentialCare": {
+    "description": "Residential Care option"
+  },
+  "homeCare": "Home Care",
+  "@homeCare": {
+    "description": "Home Care option"
+  },
+  "shortTermCare": "Short term Care",
+  "@shortTermCare": {
+    "description": "Short term Care option"
+  },
+  "retirementLiving": "Retirement Living",
+  "@retirementLiving": {
+    "description": "Retirement Living option"
+  },
+  "careForWhomQuestion": "Who is the care for?",
+  "@careForWhomQuestion": {
+    "description": "Label for care for whom question"
+  },
+  "myself": "Myself",
+  "@myself": {
+    "description": "Myself option"
+  },
+  "myParent": "My parent",
+  "@myParent": {
+    "description": "My parent option"
+  },
+  "myPartner": "My partner",
+  "@myPartner": {
+    "description": "My partner option"
+  },
+  "myChild": "My child",
+  "@myChild": {
+    "description": "My child option"
+  },
+  "myClient": "My client",
+  "@myClient": {
+    "description": "My client option"
+  },
+  "other": "Other",
+  "@other": {
+    "description": "Other option"
+  },
+  "timeframeQuestion": "What sort of timeframe are you looking for?",
+  "@timeframeQuestion": {
+    "description": "Label for timeframe question"
+  },
+  "notSure": "I am not sure",
+  "@notSure": {
+    "description": "Not sure option"
+  },
+  "shortTerm": "Short-term",
+  "@shortTerm": {
+    "description": "Short-term option"
+  },
+  "longTerm": "Long-term",
+  "@longTerm": {
+    "description": "Long-term option"
+  },
+  "howSoonCareQuestion": "How soon may you require care?",
+  "@howSoonCareQuestion": {
+    "description": "Label for how soon care question"
+  },
+  "asap": "As soon as possible",
+  "@asap": {
+    "description": "As soon as possible option"
+  },
+  "withinThreeMonths": "Within three months",
+  "@withinThreeMonths": {
+    "description": "Within three months option"
+  },
+  "withinSixMonths": "Within six months",
+  "@withinSixMonths": {
+    "description": "Within six months option"
+  },
+  "moreThanSixMonths": "More than 6 months",
+  "@moreThanSixMonths": {
+    "description": "More than 6 months option"
+  },
+  "acatStatusQuestion": "What is the status of your ACAT assessment?",
+  "@acatStatusQuestion": {
+    "description": "Label for ACAT status question"
+  },
+  "acatNotStarted": "Have not started the assessment",
+  "@acatNotStarted": {
+    "description": "ACAT not started option"
+  },
+  "acatInProgress": "Assessment in progress",
+  "@acatInProgress": {
+    "description": "ACAT in progress option"
+  },
+  "acatComplete": "Assessment complete",
+  "@acatComplete": {
+    "description": "ACAT complete option"
+  },
+  "cancelRequest": "Cancel Request",
+  "@cancelRequest": {
+    "description": "Button text to cancel a request"
+  },
+  "requestType": "Request Type",
+  "@requestType": {
+    "description": "Label for request type"
+  },
+  "company": "Company",
+  "@company": {
+    "description": "Company label"
+  },
+  "glAccountUpDown": "GlAccount Up/Download",
+  "@glAccountUpDown": {
+    "description": "Label for GL Account Up/Download"
+  },
+  "downloadFirst": "Download first to obtain the format",
+  "@downloadFirst": {
+    "description": "Instruction to download format first"
+  },
+  "uploadCsv": "Upload CSV file",
+  "@uploadCsv": {
+    "description": "Button to upload CSV file"
+  },
+  "downloadEmail": "Download via email",
+  "@downloadEmail": {
+    "description": "Button to download via email"
+  },
+  "dataFileSendEmail": "A data file will be send by email",
+  "@dataFileSendEmail": {
+    "description": "Info message about data file being sent by email"
+  },
+  "glAccountFiles": "glAccount Files",
+  "@glAccountFiles": {
+    "description": "Label for GL Account files"
+  },
+  "totalAssets": "Total Assets",
+  "@totalAssets": {
+    "description": "Label for total assets"
+  },
+  "totalEquityAndDistribution": "Total Equity + Distribution",
+  "@totalEquityAndDistribution": {
+    "description": "Label for total equity and distribution"
+  },
+  "totalLiabilityAndEquity": "Total Liability + Equity",
+  "@totalLiabilityAndEquity": {
+    "description": "Label for total liability and equity"
+  },
+  "totalUnbookedNetIncome": "Total Unbooked net income",
+  "@totalUnbookedNetIncome": {
+    "description": "Label for total unbooked net income"
+  },
+  "liabilityEquityUnbookedNetIncome": "Liability + Equity + Unbd. Net Income",
+  "@liabilityEquityUnbookedNetIncome": {
+    "description": "Label for liability, equity and unbooked net income"
+  },
+  "previousYear": "Previous Year",
+  "@previousYear": {
+    "description": "Button to go to previous year"
+  },
+  "nextYear": "Next Year",
+  "@nextYear": {
+    "description": "Button to go to next year"
+  },
+  "year": "Year: ",
+  "@year": {
+    "description": "Label for year"
+  },
+  "period": "Period: ",
+  "@period": {
+    "description": "Label for period"
+  },
+  "expand": "Exp.",
+  "@expand": {
+    "description": "Abbreviation for expand"
+  },
+  "collapse": "Col.",
+  "@collapse": {
+    "description": "Abbreviation for collapse"
+  },
+  "glAccountIdAndName": "Gl Account ID GL Account Name",
+  "@glAccountIdAndName": {
+    "description": "Header for GL Account ID and Name"
+  },
+  "postedHeader": "Posted",
+  "@postedHeader": {
+    "description": "Header for posted amounts"
+  },
+  "dataForYearNotAvailable": "Data for year {year} is not available",
+  "@dataForYearNotAvailable": {
+    "description": "Message when data for a year is not available",
+    "placeholders": {
+      "year": {}
+    }
+  },
+  "yearLetter": "Y",
+  "@yearLetter": {
+    "description": "Letter for year"
+  },
+  "quarterLetter": "Q",
+  "@quarterLetter": {
+    "description": "Letter for quarter"
+  },
+  "monthLetter": "M",
+  "@monthLetter": {
+    "description": "Letter for month"
+  },
+  "getBalanceSheetFail": "failed to get balance sheet",
+  "@getBalanceSheetFail": {
+    "description": "Error message when balance sheet fails to load"
+  },
+  "noBalanceSummaryFound": "No balance summary found",
+  "@noBalanceSummaryFound": {
+    "description": "Message when no balance summary is found"
+  },
+  "getBalanceSummaryFail": "failed to get Balance Summary",
+  "@getBalanceSummaryFail": {
+    "description": "Error message when balance summary fails to load"
+  },
+  "expandAll": "Expand All",
+  "@expandAll": {
+    "description": "Button to expand all items"
+  },
+  "collapseAll": "Collapse All",
+  "@collapseAll": {
+    "description": "Button to collapse all items"
+  },
+  "recalculate": "Recalculate",
+  "@recalculate": {
+    "description": "Button to recalculate"
+  },
+  "thisAccount": "This Account",
+  "@thisAccount": {
+    "description": "Header for this account"
+  },
+  "totalTree": "Total Tree",
+  "@totalTree": {
+    "description": "Header for total tree"
+  },
+  "getLedgerTreeFail": "Could not load Ledger tree!",
+  "@getLedgerTreeFail": {
+    "description": "Error message when ledger tree fails to load"
+  },
+  "jan": "Jan",
+  "@jan": {
+    "description": "Abbreviation for January"
+  },
+  "feb": "Feb",
+  "@feb": {
+    "description": "Abbreviation for February"
+  },
+  "mar": "Mar",
+  "@mar": {
+    "description": "Abbreviation for March"
+  },
+  "apr": "Apr",
+  "@apr": {
+    "description": "Abbreviation for April"
+  },
+  "may": "May",
+  "@may": {
+    "description": "Abbreviation for May"
+  },
+  "jun": "Jun",
+  "@jun": {
+    "description": "Abbreviation for June"
+  },
+  "jul": "Jul",
+  "@jul": {
+    "description": "Abbreviation for July"
+  },
+  "aug": "Aug",
+  "@aug": {
+    "description": "Abbreviation for August"
+  },
+  "sep": "Sep",
+  "@sep": {
+    "description": "Abbreviation for September"
+  },
+  "oct": "Oct",
+  "@oct": {
+    "description": "Abbreviation for October"
+  },
+  "nov": "Nov",
+  "@nov": {
+    "description": "Abbreviation for November"
+  },
+  "dec": "Dec",
+  "@dec": {
+    "description": "Abbreviation for December"
+  },
+  "byMonth": "By Month",
+  "@byMonth": {
+    "description": "Label for by month"
+  },
+  "noDataForPeriod": "no data found for period ",
+  "@noDataForPeriod": {
+    "description": "Message when no data is found for a period"
+  },
+  "ledgerJournal": "LedgerJournal #",
+  "@ledgerJournal": {
+    "description": "Ledger Journal header or label with number symbol"
+  },
+  "ledgerJournalName": "LedgerJournal Name",
+  "@ledgerJournalName": {
+    "description": "Ledger Journal name field label"
+  },
+  "ledgerJournalNameNull": "Please enter a ledgerJournal name?",
+  "@ledgerJournalNameNull": {
+    "description": "Error message for empty Ledger Journal name field"
+  },
+  "updateHeaderShort": "Upd.Header",
+  "@updateHeaderShort": {
+    "description": "Abbreviation for Update Header"
+  },
+  "getLedgerJournalFail": "failed to fetch ledgerJournals: ",
+  "@getLedgerJournalFail": {
+    "description": "Error message when ledger journals fail to load"
+  },
+  "noLedgerJournalFound": "No active ledgerJournals found",
+  "@noLedgerJournalFound": {
+    "description": "Message when no active ledger journals are found"
+  },
+  "postedDebit": "Post.\\nDebit",
+  "@postedDebit": {
+    "description": "Posted Debit"
+  },
+  "postedCredit": "Post.\\nCredit",
+  "@postedCredit": {
+    "description": "Posted Credit"
+  },
+  "endBalance": "End Bal.",
+  "@endBalance": {
+    "description": "End Balance"
+  },
+  "codeName": "Code/Name",
+  "@codeName": {
+    "description": "Code and Name"
+  },
+  "beginningBalance": "Beginning Balance",
+  "@beginningBalance": {
+    "description": "Beginning Balance"
+  },
+  "postedDebits": "Posted Debits",
+  "@postedDebits": {
+    "description": "Posted Debits"
+  },
+  "postedCredits": "Posted Credits",
+  "@postedCredits": {
+    "description": "Posted Credits"
+  },
+  "endingBalance": "Ending Balance",
+  "@endingBalance": {
+    "description": "Ending Balance"
+  },
+  "from": "From",
+  "@from": {
+    "description": "From date"
+  },
+  "to": "To",
+  "@to": {
+    "description": "To date"
+  },
+  "closed": "Closed",
+  "@closed": {
+    "description": "Closed status"
+  },
+  "begin": "Begin",
+  "@begin": {
+    "description": "Beginning balance"
+  },
+  "code": "Code",
+  "@code": {
+    "description": "Code"
+  },
+  "deletePeriod": "delete period",
+  "@deletePeriod": {
+    "description": "delete period tooltip"
+  },
+  "createNextPeriod": "create next period",
+  "@createNextPeriod": {
+    "description": "create next period tooltip"
+  },
+  "closeTimePeriod": "close Timeperiod",
+  "@closeTimePeriod": {
+    "description": "close Timeperiod tooltip"
+  },
+  "closeTimePeriodConfirmation": "Close Time period {periodName}?",
+  "@closeTimePeriodConfirmation": {
+    "description": "Close Time period confirmation",
+    "placeholders": {
+      "periodName": {}
+    }
+  },
+  "cannotBeUndone": "cannot be undone!",
+  "@cannotBeUndone": {
+    "description": "cannot be undone warning"
+  }
+}
