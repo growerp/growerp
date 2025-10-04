@@ -1,819 +1,200 @@
 {
   "@@locale": "nl",
   "aboutApp": "Over {appName}",
-  "@aboutApp": {
-    "description": "About app dialog title",
-    "placeholders": {
-      "appName": {
-        "type": "String"
-      }
-    }
-  },
   "aboutGrowERP": "Over GrowERP",
-  "@aboutGrowERP": {
-    "description": "About GrowERP menu item"
-  },
   "accounts": "Accounts",
-  "@accounts": {
-    "description": "Accounts menu item or section header"
-  },
   "addNew": "Nieuwe toevoegen",
-  "@addNew": {
-    "description": "Add new item button text"
-  },
-  "andAtLeastOne": "en ten minste één ",
-  "@andAtLeastOne": {
-    "description": "Partial validation message indicating minimum requirement"
-  },
+  "andAtLeastOne": "en ten minste één",
   "backendServer": "Backend Server",
-  "@backendServer": {
-    "description": "Backend server input label"
-  },
   "balanceSheet": "Balans",
-  "@balanceSheet": {
-    "description": "Balance sheet report menu item"
-  },
   "balanceSummary": "Balans Samenvatting",
-  "@balanceSummary": {
-    "description": "Balance summary report menu item"
-  },
-  "businessCompanyName": "Bedrijfsnaam is verplicht!",
-  "@businessCompanyName": {
-    "description": "Business name validation error message"
-  },
-  "businessNameError": "Bedrijfsnaam is verplicht!",
-  "@businessNameError": {
-    "description": "Business name validation error message"
-  },
+  "businessCompanyName": "Bedrijfsnaam vereist!",
+  "businessNameError": "Bedrijfsnaam is vereist!",
   "cancel": "Annuleren",
-  "@cancel": {
-    "description": "Cancel button text"
-  },
   "cannotLoadRestRequests": "Kan rest requests niet laden!",
-  "@cannotLoadRestRequests": {
-    "description": "Error message when REST requests fail to load"
-  },
   "chat": "Chat",
-  "@chat": {
-    "description": "Chat menu item"
-  },
   "chatServer": "Chat Server",
-  "@chatServer": {
-    "description": "Chat server input label"
-  },
   "completeRegistration": "Registratie voltooien",
-  "@completeRegistration": {
-    "description": "Complete registration dialog title"
-  },
   "companyPartyId": "Bedrijf Partij Id",
-  "@companyPartyId": {
-    "description": "Company party ID input label"
-  },
   "continueButton": "Doorgaan",
-  "@continueButton": {
-    "description": "Continue button text"
-  },
   "contributing": "Bijdragen",
-  "@contributing": {
-    "description": "Contributing menu item"
-  },
   "copyright": "© {year} GrowERP.com",
-  "@copyright": {
-    "description": "Copyright text with year",
-    "placeholders": {
-      "year": {
-        "type": "String"
-      }
-    }
-  },
   "create": "Creëren",
-  "@create": {
-    "description": "Create button text"
-  },
   "createPassword": "Wachtwoord aanmaken",
-  "@createPassword": {
-    "description": "Create password dialog title"
-  },
   "creditCardDetails": "Creditcardgegevens",
-  "@creditCardDetails": {
-    "description": "Credit card details hint text"
-  },
   "creditCardInfo": "Creditcard info",
-  "@creditCardInfo": {
-    "description": "Credit card info label"
-  },
   "currency": "Valuta",
-  "@currency": {
-    "description": "Currency input label"
-  },
-  "currencyError": "Valuta is verplicht!",
-  "@currencyError": {
-    "description": "Currency validation error message"
-  },
+  "currencyError": "Valuta is vereist!",
   "currentPaymentMethod": "Huidige betaalmethode: {method}",
-  "@currentPaymentMethod": {
-    "description": "Current payment method display text",
-    "placeholders": {
-      "method": {
-        "type": "String"
-      }
-    }
-  },
   "customer": "Klant",
-  "@customer": {
-    "description": "Label for customer"
-  },
   "cvvCode": "CVV",
-  "@cvvCode": {
-    "description": "CVV code input label"
-  },
   "cvvHint": "123",
-  "@cvvHint": {
-    "description": "CVV code input hint"
-  },
   "dateTime": "Datum/Tijd",
-  "@dateTime": {
-    "description": "Date and time label"
-  },
   "deleteWarning": "Verwijder Waarschuwing",
-  "@deleteWarning": {
-    "description": "Delete warning dialog title"
-  },
   "deleteYourself": "Verwijder uzelf",
-  "@deleteYourself": {
-    "description": "Delete yourself button text"
-  },
   "deleteYourselfAndCompany": "Verwijder uzelf en bedrijf",
-  "@deleteYourselfAndCompany": {
-    "description": "Delete yourself and company button text"
-  },
-  "demoData": "Demo data",
-  "@demoData": {
-    "description": "Demo data checkbox label"
-  },
+  "demoData": "Demo gegevens",
   "email": "Email",
-  "@email": {
-    "description": "Email input label"
-  },
   "emailAddress": "Email Adres",
-  "@emailAddress": {
-    "description": "Email address input label"
-  },
-  "emailAddressError": "Emailadres is verplicht!",
-  "@emailAddressError": {
-    "description": "Email address validation error message"
-  },
-  "emailAddressError2": "Emailadres formaat incorrect!",
-  "@emailAddressError2": {
-    "description": "Email address format validation error message"
-  },
+  "emailAddressError": "Emailadres is vereist!",
+  "emailAddressError2": "Emailadres formaat onjuist!",
   "enterBackendUrl": "Voer backend URL in",
-  "@enterBackendUrl": {
-    "description": "Enter backend URL dialog title"
-  },
   "enterCompanyAndCurrency": "Voer uw bedrijfsnaam en valuta in",
-  "@enterCompanyAndCurrency": {
-    "description": "Company and currency input instruction"
-  },
   "enterCompanyName": "Voer bedrijfsnaam in",
-  "@enterCompanyName": {
-    "description": "Company name input instruction"
-  },
   "error": "Fout",
-  "@error": {
-    "description": "Error status text"
-  },
   "errorMessage": "Foutmelding",
-  "@errorMessage": {
-    "description": "Error message label"
-  },
   "expiryDate": "MM/JJ",
-  "@expiryDate": {
-    "description": "Expiry date input label"
-  },
   "expiryDateHint": "12/25",
-  "@expiryDateHint": {
-    "description": "Expiry date input hint"
-  },
-  "fieldRequired": "Veld is verplicht!",
-  "@fieldRequired": {
-    "description": "Field required validation error message"
-  },
+  "fieldRequired": "Veld is vereist!",
   "firstName": "Voornaam",
-  "@firstName": {
-    "description": "First name input label"
-  },
-  "firstNameError": "Voornaam is verplicht!",
-  "@firstNameError": {
-    "description": "First name validation error message"
-  },
+  "firstNameError": "Voornaam is vereist!",
   "forgotPassword": "Wachtwoord vergeten?",
-  "@forgotPassword": {
-    "description": "Forgot password link text"
-  },
-  "generateDemoData": "Demo data genereren?",
-  "@generateDemoData": {
-    "description": "Generate demo data checkbox text"
-  },
-  "goHome": "Ga naar Home",
-  "@goHome": {
-    "description": "Go home button tooltip"
-  },
+  "generateDemoData": "Demo gegevens genereren?",
+  "goHome": "Ga naar huis",
   "invoice": "Factuur",
-  "@invoice": {
-    "description": "Label for invoice"
-  },
-  "itemIsRequired": "item is verplicht",
-  "@itemIsRequired": {
-    "description": "Validation message indicating a required item"
-  },
+  "itemIsRequired": "item is vereist",
   "itemTypes": "Item Types",
-  "@itemTypes": {
-    "description": "Item types menu item or section header"
-  },
   "journal": "Journaal",
-  "@journal": {
-    "description": "Journal menu item or section header"
-  },
   "lastName": "Achternaam",
-  "@lastName": {
-    "description": "Last name input label"
-  },
-  "lastNameError": "Achternaam is verplicht!",
-  "@lastNameError": {
-    "description": "Last name validation error message"
-  },
+  "lastNameError": "Achternaam is vereist!",
   "login": "Inloggen",
-  "@login": {
-    "description": "Login button text"
-  },
-  "loginName": "Inlognaam",
-  "@loginName": {
-    "description": "Login name label"
-  },
+  "loginName": "Login naam",
   "loginWithExistingUserName": "Inloggen met bestaande gebruikersnaam",
-  "@loginWithExistingUserName": {
-    "description": "Login form header text for existing users"
-  },
   "logout": "Uitloggen",
-  "@logout": {
-    "description": "Logout button text"
-  },
   "main": "Hoofd",
-  "@main": {
-    "description": "Main menu item"
-  },
   "mainDashboard": "Hoofddashboard",
-  "@mainDashboard": {
-    "description": "Main dashboard menu item or navigation link"
-  },
   "ms": "ms",
-  "@ms": {
-    "description": "Milliseconds abbreviation"
-  },
   "nameOnCard": "Naam op kaart",
-  "@nameOnCard": {
-    "description": "Name on card input label"
-  },
   "no": "Nee",
-  "@no": {
-    "description": "No answer text"
-  },
   "noAccess": "Geen toegang tot deze pagina!",
-  "@noAccess": {
-    "description": "No access error message"
-  },
   "noAccessHere": "Geen toegang hier!",
-  "@noAccessHere": {
-    "description": "No access here error message"
-  },
-  "noRestRequests": "Geen REST requests gevonden...",
-  "@noRestRequests": {
-    "description": "No REST requests message"
-  },
+  "noRestRequests": "Geen REST-verzoeken gevonden...",
   "notAvailable": "Niet beschikbaar",
-  "@notAvailable": {
-    "description": "Not available placeholder text"
-  },
   "number": "Nummer",
-  "@number": {
-    "description": "Number input label"
-  },
   "numberHint": "1234 5678 9012 3456",
-  "@numberHint": {
-    "description": "Card number input hint"
-  },
   "ok": "OK",
-  "@ok": {
-    "description": "OK button text"
-  },
   "onlyUserDelete": "Alleen gebruiker verwijderen, niet bedrijf",
-  "@onlyUserDelete": {
-    "description": "Only delete user option text"
-  },
   "openInvoices": "Openstaande facturen:",
-  "@openInvoices": {
-    "description": "Label for open invoices dashboard item"
-  },
   "openSourceLicenses": "Open Source Licenties",
-  "@openSourceLicenses": {
-    "description": "Open source licenses menu item"
-  },
   "order": "Bestelling",
-  "@order": {
-    "description": "Label for order"
-  },
   "parameters": "Parameters",
-  "@parameters": {
-    "description": "Parameters label"
-  },
   "password": "Wachtwoord",
-  "@password": {
-    "description": "Password input label"
-  },
-  "passwordError": "Wachtwoord is verplicht!",
-  "@passwordError": {
-    "description": "Password validation error message"
-  },
-  "passwordError2": "Wachtwoord is verplicht!",
-  "@passwordError2": {
-    "description": "Password validation error message variant"
-  },
+  "passwordError": "Wachtwoord is vereist!",
+  "passwordError2": "Wachtwoord is vereist!",
   "passwordHelper": "Minimaal 5 karakters",
-  "@passwordHelper": {
-    "description": "Password helper text"
-  },
   "passwordMismatch": "Wachtwoorden komen niet overeen!",
-  "@passwordMismatch": {
-    "description": "Password mismatch validation error"
-  },
-  "passwordValidationError": "Wachtwoord moet minimaal 5 karakters lang zijn",
-  "@passwordValidationError": {
-    "description": "Password validation error message"
-  },
+  "passwordValidationError": "Wachtwoord moet minimaal 5 tekens lang zijn",
   "payment": "Betaling",
-  "@payment": {
-    "description": "Label for payment"
-  },
   "paymentPlan": "Betaalplan",
-  "@paymentPlan": {
-    "description": "Payment plan input label"
-  },
   "paymentTypes": "Betaalmethoden",
-  "@paymentTypes": {
-    "description": "Payment types menu item or section header"
-  },
   "payWithinWeek": "Betaal binnen een week",
-  "@payWithinWeek": {
-    "description": "Pay within week checkbox text"
-  },
   "privacyCodeOfConduct": "Privacy/Gedragscode",
-  "@privacyCodeOfConduct": {
-    "description": "Privacy and code of conduct menu item"
-  },
   "referrerUrl": "Verwijzende URL",
-  "@referrerUrl": {
-    "description": "Referrer URL label"
-  },
   "refresh": "Vernieuwen",
-  "@refresh": {
-    "description": "Refresh button text"
-  },
   "register": "Registreren",
-  "@register": {
-    "description": "Register button text"
-  },
-  "registerAndCharge": "Registreren en afrekenen",
-  "@registerAndCharge": {
-    "description": "Register and charge button text"
-  },
-  "registerNewCompanyAndAdmin": "Registreer nieuw bedrijf en admin",
-  "@registerNewCompanyAndAdmin": {
-    "description": "Register new company link text"
-  },
+  "registerAndCharge": "Registreren en in rekening brengen",
+  "registerNewCompanyAndAdmin": "Nieuw bedrijf en beheerder registreren",
   "registration": "Registratie",
-  "@registration": {
-    "description": "Registration dialog title"
-  },
-  "requestName": "Request naam",
-  "@requestName": {
-    "description": "Request name label"
-  },
-  "requestUrl": "Request URL",
-  "@requestUrl": {
-    "description": "Request URL label"
-  },
+  "requestName": "Naam van verzoek",
+  "requestUrl": "URL van verzoek",
   "restart": "Herstarten",
-  "@restart": {
-    "description": "Restart button text"
-  },
-  "restRequestDetails": "Rest Request Details",
-  "@restRequestDetails": {
-    "description": "REST request details title"
-  },
+  "restRequestDetails": "Details van Rest Request",
   "revenueExpense": "Inkomsten/Uitgaven",
-  "@revenueExpense": {
-    "description": "Revenue and expense report menu item"
-  },
-  "runningTime": "Draaitijd",
-  "@runningTime": {
-    "description": "Running time label"
-  },
+  "runningTime": "Looptijd",
   "selectLanguage": "Selecteer taal",
-  "@selectLanguage": {
-    "description": "Select language instruction"
-  },
   "selectPlanError": "Selecteer een plan!",
-  "@selectPlanError": {
-    "description": "Select plan validation error message"
-  },
   "sendNewPassword": "Stuur nieuw wachtwoord",
-  "@sendNewPassword": {
-    "description": "Send new password dialog title"
-  },
   "serverHost": "Server host",
-  "@serverHost": {
-    "description": "Server host label"
-  },
   "serverIp": "Server IP",
-  "@serverIp": {
-    "description": "Server IP label"
-  },
   "shipment": "Zending",
-  "@shipment": {
-    "description": "Label for shipment"
-  },
   "slowHit": "Trage hit",
-  "@slowHit": {
-    "description": "Slow hit label"
-  },
   "status": "Status",
-  "@status": {
-    "description": "Status label"
-  },
-  "submitNewPassword": "Nieuw wachtwoord insturen",
-  "@submitNewPassword": {
-    "description": "Submit new password button text"
-  },
+  "submitNewPassword": "Nieuw wachtwoord instellen",
   "subscription": "Abonnement",
-  "@subscription": {
-    "description": "Subscription dialog title"
-  },
   "success": "Succes",
-  "@success": {
-    "description": "Success status text"
-  },
   "supplier": "Leverancier",
-  "@supplier": {
-    "description": "Label for supplier"
-  },
   "tempPassword": "Een tijdelijk wachtwoord wordt per e-mail verzonden",
-  "@tempPassword": {
-    "description": "Temporary password information text"
-  },
   "test": "Test",
-  "@test": {
-    "description": "Test menu item"
-  },
   "testSystem": "Test systeem",
-  "@testSystem": {
-    "description": "Test system text"
-  },
   "theme": "Thema",
-  "@theme": {
-    "description": "Theme menu item"
-  },
   "timePeriods": "Tijdsperioden",
-  "@timePeriods": {
-    "description": "Time periods menu item or section header"
-  },
   "transaction": "Transactie",
-  "@transaction": {
-    "description": "Label for transaction"
-  },
   "transactions": "Transacties",
-  "@transactions": {
-    "description": "Transactions menu item or section header"
-  },
   "trialPeriod": "Proefperiode",
-  "@trialPeriod": {
-    "description": "Trial period text"
-  },
   "unknown": "Onbekend",
-  "@unknown": {
-    "description": "Placeholder text for unknown values"
-  },
-  "update": "bijwerken",
-  "@update": {
-    "description": "Update button text"
-  },
+  "update": "update",
   "user": "Gebruiker",
-  "@user": {
-    "description": "User label"
-  },
-  "userAndCompanyDelete": "Verwijder gebruiker en bedrijf",
-  "@userAndCompanyDelete": {
-    "description": "Delete user and company option text"
-  },
+  "userAndCompanyDelete": "Gebruiker en bedrijf verwijderen",
   "username": "Gebruikersnaam: {username}",
-  "@username": {
-    "description": "Username display text",
-    "placeholders": {
-      "username": {
-        "type": "String"
-      }
-    }
-  },
-  "usernameEmail": "Gebruikersnaam/Email",
-  "@usernameEmail": {
-    "description": "Username or email input label"
-  },
-  "usernameEmailError": "Gebruikersnaam/email is verplicht!",
-  "@usernameEmailError": {
-    "description": "Username/email validation error message"
-  },
+  "usernameEmail": "Gebruikersnaam/E-mail",
+  "usernameEmailError": "Gebruikersnaam/e-mail is vereist!",
   "verifyPassword": "Verifieer Wachtwoord",
-  "@verifyPassword": {
-    "description": "Verify password input label"
-  },
-  "verifyPasswordError": "Verifieer wachtwoord is verplicht!",
-  "@verifyPasswordError": {
-    "description": "Verify password validation error message"
-  },
+  "verifyPasswordError": "Verifieer wachtwoord is vereist!",
   "verifyPasswordHelper": "Voer wachtwoord opnieuw in",
-  "@verifyPasswordHelper": {
-    "description": "Verify password helper text"
-  },
   "version": "Versie: {version} build: {build}",
-  "@version": {
-    "description": "Version display text",
-    "placeholders": {
-      "version": {
-        "type": "String"
-      },
-      "build": {
-        "type": "String"
-      }
-    }
-  },
   "viewLicense": "Licentie bekijken",
-  "@viewLicense": {
-    "description": "View license menu item"
-  },
-  "viewReadme": "Readme bekijken",
-  "@viewReadme": {
-    "description": "View readme menu item"
-  },
+  "viewReadme": "Leesmij bekijken",
   "welcome": "Welkom!",
-  "@welcome": {
-    "description": "Welcome message"
-  },
   "welcomeToGrowERPBusinessSystem": "Welkom bij het GrowERP bedrijfssysteem!",
-  "@welcomeToGrowERPBusinessSystem": {
-    "description": "Welcome message on home page"
-  },
   "yes": "Ja",
-  "@yes": {
-    "description": "Yes answer text"
-  },
   "about": "Over",
-  "@about": {
-    "description": "About menu item"
-  },
   "accounting": "Boekhouding",
-  "@accounting": {
-    "description": "Accounting menu item"
-  },
   "accountingDashboard": "Boekhouding Dashboard",
-  "@accountingDashboard": {
-    "description": "Accounting dashboard menu item"
-  },
   "accountingLedger": "Grootboek",
-  "@accountingLedger": {
-    "description": "Accounting ledger menu item"
-  },
-  "accountingPurch": "Inkoop Boekhouding",
-  "@accountingPurch": {
-    "description": "Accounting purchase menu item"
-  },
-  "accountingSales": "Verkoop Boekhouding",
-  "@accountingSales": {
-    "description": "Accounting sales menu item"
-  },
+  "accountingPurch": "Inkoopboek",
+  "accountingSales": "Verkoopboek",
   "administrators": "Beheerders",
-  "@administrators": {
-    "description": "Administrators label"
-  },
   "allOpportunities": "Alle Opportunities",
-  "@allOpportunities": {
-    "description": "All opportunities label"
-  },
   "assets": "Activa",
-  "@assets": {
-    "description": "Assets menu item"
-  },
   "catalog": "Catalogus",
-  "@catalog": {
-    "description": "Catalog menu item"
-  },
   "categories": "Categorieën",
-  "@categories": {
-    "description": "Categories menu item"
-  },
   "company": "Bedrijf",
-  "@company": {
-    "description": "Company menu item"
-  },
   "crm": "CRM",
-  "@crm": {
-    "description": "CRM menu item"
-  },
   "customers": "Klanten",
-  "@customers": {
-    "description": "Customers menu item"
-  },
   "employees": "Medewerkers",
-  "@employees": {
-    "description": "Employees menu item"
-  },
-  "incomingInvoices": "Inkomende Facturen",
-  "@incomingInvoices": {
-    "description": "Incoming invoices menu item"
-  },
-  "incomingPayments": "Inkomende Betalingen",
-  "@incomingPayments": {
-    "description": "Incoming payments menu item"
-  },
-  "incomingShipments": "Inkomende Zendingen",
-  "@incomingShipments": {
-    "description": "Incoming shipments menu item"
-  },
+  "incomingInvoices": "Inkomende facturen",
+  "incomingPayments": "Inkomende betalingen",
+  "incomingShipments": "Inkomende zendingen",
   "inventory": "Inventaris",
-  "@inventory": {
-    "description": "Inventory menu item"
-  },
   "leads": "Leads",
-  "@leads": {
-    "description": "Leads menu item"
-  },
   "ledgerAccnt": "Grootboekrekening",
-  "@ledgerAccnt": {
-    "description": "Ledger account menu item"
-  },
   "ledgerJournals": "Grootboekjournalen",
-  "@ledgerJournals": {
-    "description": "Ledger journals menu item"
-  },
   "ledgerTransaction": "Grootboektransactie",
-  "@ledgerTransaction": {
-    "description": "Ledger transaction menu item"
-  },
   "ledgerTree": "Grootboekboom",
-  "@ledgerTree": {
-    "description": "Ledger tree menu item"
-  },
-  "myTodoTasks": "Mijn Todo Taken",
-  "@myTodoTasks": {
-    "description": "My todo tasks menu item"
-  },
+  "myTodoTasks": "Mijn Todo-taken",
   "opportunities": "Opportunities",
-  "@opportunities": {
-    "description": "Opportunities menu item"
-  },
   "orders": "Bestellingen",
-  "@orders": {
-    "description": "Orders menu item"
-  },
   "organization": "Organisatie",
-  "@organization": {
-    "description": "Organization menu item"
-  },
-  "otherEmployees": "Andere Medewerkers",
-  "@otherEmployees": {
-    "description": "Other employees label"
-  },
-  "outgoingInvoices": "Uitgaande Facturen",
-  "@outgoingInvoices": {
-    "description": "Outgoing invoices menu item"
-  },
-  "outgoingPayments": "Uitgaande Betalingen",
-  "@outgoingPayments": {
-    "description": "Outgoing payments menu item"
-  },
-  "outgoingShipments": "Uitgaande Zendingen",
-  "@outgoingShipments": {
-    "description": "Outgoing shipments menu item"
-  },
+  "otherEmployees": "Andere medewerkers",
+  "outgoingInvoices": "Uitgaande facturen",
+  "outgoingPayments": "Uitgaande betalingen",
+  "outgoingShipments": "Uitgaande zendingen",
   "paymtTypes": "Betaalmethoden",
-  "@paymtTypes": {
-    "description": "Payment types menu item"
-  },
-  "planSelection": "Plan Selectie",
-  "@planSelection": {
-    "description": "Plan selection menu item"
-  },
+  "planSelection": "Planselectie",
   "products": "Producten",
-  "@products": {
-    "description": "Products menu item"
-  },
   "purchaseOrders": "Inkooporders",
-  "@purchaseOrders": {
-    "description": "Purchase orders menu item"
-  },
-  "purchaseUnpaidInvoices": "Onbetaalde Inkoopfacturen",
-  "@purchaseUnpaidInvoices": {
-    "description": "Purchase unpaid invoices label"
-  },
+  "purchaseUnpaidInvoices": "Onbetaalde inkoopfacturen",
   "reports": "Rapporten",
-  "@reports": {
-    "description": "Reports menu item"
-  },
   "requests": "Verzoeken",
-  "@requests": {
-    "description": "Requests menu item"
-  },
-  "salesOpenInvoices": "Openstaande Verkoopfacturen",
-  "@salesOpenInvoices": {
-    "description": "Sales open invoices label"
-  },
+  "salesOpenInvoices": "Openstaande verkoopfacturen",
   "salesOrders": "Verkooporders",
-  "@salesOrders": {
-    "description": "Sales orders menu item"
-  },
   "setUp": "Instellen",
-  "@setUp": {
-    "description": "Set up menu item"
-  },
   "subscriptions": "Abonnementen",
-  "@subscriptions": {
-    "description": "Subscriptions menu item"
-  },
   "suppliers": "Leveranciers",
-  "@suppliers": {
-    "description": "Suppliers menu item"
-  },
   "website": "Website",
-  "@website": {
-    "description": "Website menu item"
-  },
   "whLocations": "Magazijnlocaties",
-  "@whLocations": {
-    "description": "Warehouse locations menu item"
-  },
   "checkIn": "Check In",
-  "@checkIn": {
-    "description": "Check in menu item"
-  },
   "checkOut": "Check Out",
-  "@checkOut": {
-    "description": "Check out menu item"
-  },
   "inOut": "In/Uit",
-  "@inOut": {
-    "description": "In/out menu item"
-  },
   "myHotel": "Mijn Hotel",
-  "@myHotel": {
-    "description": "My hotel menu item"
-  },
   "reservations": "Reserveringen",
-  "@reservations": {
-    "description": "Reservations menu item"
-  },
   "rooms": "Kamers",
-  "@rooms": {
-    "description": "Rooms menu item"
-  },
   "roomTypes": "Kamertypes",
-  "@roomTypes": {
-    "description": "Room types menu item"
-  },
   "tasks": "Taken",
-  "@tasks": {
-    "description": "Tasks menu item"
-  },
   "myOpportunities": "Mijn Opportunities",
-  "@myOpportunities": {
-    "description": "My opportunities menu item"
-  },
   "clients": "Klanten",
-  "@clients": {
-    "description": "Clients menu item"
-  },
   "staff": "Personeel",
-  "@staff": {
-    "description": "Staff menu item"
-  },
   "applications": "Applicaties",
-  "@applications": {
-    "description": "Applications menu item"
-  },
-  "restRequests": "REST Requests",
-  "@restRequests": {
-    "description": "REST requests menu item"
-  },
-  "userRequestStatus": "Gebruiker\nVerzoek\nStatus",
-  "@userRequestStatus": {
-    "description": "REST request list column header for user/request/status"
-  }
+  "restRequests": "REST-verzoeken",
+  "userRequestStatus": "Gebruiker\nVerzoek\nStatus"
 }
