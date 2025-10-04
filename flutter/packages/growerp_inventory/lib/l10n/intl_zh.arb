@@ -1,0 +1,241 @@
+{
+  "@@locale": "zh",
+  "productName": "产品名称",
+  "@productName": {
+    "description": "产品的名称"
+  },
+  "failedToFetchLocations": "获取位置失败：{message}",
+  "@failedToFetchLocations": {
+    "description": "应用获取位置失败时的错误消息",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "noLocationsFound": "未找到位置",
+  "@noLocationsFound": {
+    "description": "未找到位置时显示的消息"
+  },
+  "addNew": "添新",
+  "@addNew": {
+    "description": "添加新项目的按钮工具提示"
+  },
+  "addSuccess": "添加成功",
+  "@addSuccess": {
+    "description": "添加项目时的成功消息"
+  },
+  "updateSuccess": "更新成功",
+  "@updateSuccess": {
+    "description": "更新项目时的成功消息"
+  },
+  "error": "错误：{message}",
+  "@error": {
+    "description": "通用错误消息",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "locationInfo": "位置信息 #{pseudoId}",
+  "@locationInfo": {
+    "description": "位置信息对话框的标题",
+    "placeholders": {
+      "pseudoId": {
+        "type": "String"
+      }
+    }
+  },
+  "newLabel": "新建",
+  "@newLabel": {
+    "description": "新项目的标签"
+  },
+  "locationId": "位置ID",
+  "@locationId": {
+    "description": "位置ID字段的标签"
+  },
+  "locationName": "位置名称",
+  "@locationName": {
+    "description": "位置名称字段的标签"
+  },
+  "enterLocationName": "请输入位置名称？",
+  "@enterLocationName": {
+    "description": "位置名称字段的验证消息"
+  },
+  "quantityOnHand": "现有数量",
+  "@quantityOnHand": {
+    "description": "现有数量字段的标签"
+  },
+  "create": "创建",
+  "@create": {
+    "description": "创建按钮的标签"
+  },
+  "update": "更新",
+  "@update": {
+    "description": "更新按钮的标签"
+  },
+  "failedToFetchSearchItems": "获取搜索项失败：{message}",
+  "@failedToFetchSearchItems": {
+    "description": "应用获取搜索项失败时的错误消息",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "locationSearch": "位置搜索",
+  "@locationSearch": {
+    "description": "位置搜索对话框的标题"
+  },
+  "searchInput": "搜索输入",
+  "@searchInput": {
+    "description": "搜索输入字段的标签"
+  },
+  "enterSearchValue": "请输入搜索值？",
+  "@enterSearchValue": {
+    "description": "搜索输入字段的验证消息"
+  },
+  "searchResults": "搜索结果",
+  "@searchResults": {
+    "description": "搜索结果部分的标签"
+  },
+  "noSearchItemsFound": "未找到搜索项（尚未）",
+  "@noSearchItemsFound": {
+    "description": "未找到搜索项时显示的消息"
+  },
+  "id": "ID：",
+  "@id": {
+    "description": "搜索结果中ID的标签"
+  },
+  "name": "名称：",
+  "@name": {
+    "description": "搜索结果中名称的标签"
+  },
+  "roomNumber": "房间号",
+  "@roomNumber": {
+    "description": "房间号字段的标签"
+  },
+  "assetNumber": "资产编号",
+  "@assetNumber": {
+    "description": "资产编号字段的标签"
+  },
+  "assetLoadProblem": "资产加载问题",
+  "@assetLoadProblem": {
+    "description": "加载资产时出现问题时的错误消息"
+  },
+  "idLabel": "ID",
+  "@idLabel": {
+    "description": "ID字段的标签"
+  },
+  "roomNameLabel": "房间名称",
+  "@roomNameLabel": {
+    "description": "房间名称字段的标签"
+  },
+  "assetNameLabel": "资产名称",
+  "@assetNameLabel": {
+    "description": "资产名称字段的标签"
+  },
+  "enterAssetName": "请输入资产名称？",
+  "@enterAssetName": {
+    "description": "资产名称字段的验证消息"
+  },
+  "qtyOnHand": "现有数量",
+  "@qtyOnHand": {
+    "description": "现有数量字段的标签"
+  },
+  "enterQtyOnHand": "请输入现有数量？",
+  "@enterQtyOnHand": {
+    "description": "现有数量字段的验证消息"
+  },
+  "qtyPromise": "承诺数量",
+  "@qtyPromise": {
+    "description": "承诺数量字段的标签"
+  },
+  "enterQtyPromise": "请输入承诺数量？",
+  "@enterQtyPromise": {
+    "description": "承诺数量字段的验证消息"
+  },
+  "enterAquiredCost": "请输入购置成本？",
+  "@enterAquiredCost": {
+    "description": "购置成本字段的验证消息"
+  },
+  "serverProblem": "服务器问题",
+  "@serverProblem": {
+    "description": "出现服务器问题时的错误消息"
+  },
+  "roomTypeName": "房型名称",
+  "@roomTypeName": {
+    "description": "房型名称字段的标签"
+  },
+  "productIdName": "产品ID名称",
+  "@productIdName": {
+    "description": "产品ID名称字段的标签"
+  },
+  "select": "选择",
+  "@select": {
+    "description": "选择按钮或下拉菜单的标签"
+  },
+  "product": "产品",
+  "@product": {
+    "description": "产品标签"
+  },
+  "roomTypeId": "房型ID",
+  "@roomTypeId": {
+    "description": "房型ID字段的标签"
+  },
+  "productId": "产品ID",
+  "@productId": {
+    "description": "产品ID字段的标签"
+  },
+  "fieldRequired": "必填字段",
+  "@fieldRequired": {
+    "description": "必填字段的验证消息"
+  },
+  "status": "状态",
+  "@status": {
+    "description": "状态字段的标签"
+  },
+  "selectLocation": "选择位置",
+  "@selectLocation": {
+    "description": "选择位置下拉菜单或按钮的标签"
+  },
+  "location": "位置",
+  "@location": {
+    "description": "位置标签"
+  },
+  "noRoomsFound": "未找到房间",
+  "@noRoomsFound": {
+    "description": "未找到房间时显示的消息"
+  },
+  "noAssetsFound": "未找到资产",
+  "@noAssetsFound": {
+    "description": "未找到资产时显示的消息"
+  },
+  "assetSearch": "资产搜索",
+  "@assetSearch": {
+    "description": "资产搜索对话框的标题"
+  },
+  "locations": "位置",
+  "@locations": {
+    "description": "位置标签"
+  },
+  "aqrdCosts": "购置成本：{cost}",
+  "@aqrdCosts": {
+    "description": "带值的购置成本标签",
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToFetchAssets": "获取资产失败：{message}",
+  "@failedToFetchAssets": {
+    "description": "应用获取资产失败时的错误消息",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  }
+}
