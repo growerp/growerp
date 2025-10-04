@@ -3,4 +3,4 @@ template-arb-file: core_en.arb
 output-localization-file: core_localizations.dart
 output-class: CoreLocalizations
 output-dir: lib/l10n/generated
-preferred-supported-locales: [en, th, zh]
+preferred-supported-locales: [en, th, zh, de]
