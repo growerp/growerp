@@ -1,0 +1,241 @@
+{
+  "@@locale": "es",
+  "productName": "Nombre del producto",
+  "@productName": {
+    "description": "The name of a product"
+  },
+  "failedToFetchLocations": "error al obtener ubicaciones: {message}",
+  "@failedToFetchLocations": {
+    "description": "Error message when the app fails to fetch locations",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "noLocationsFound": "no se encontraron ubicaciones",
+  "@noLocationsFound": {
+    "description": "Message displayed when no locations are found"
+  },
+  "addNew": "Añadir nuevo",
+  "@addNew": {
+    "description": "Tooltip for a button that adds a new item"
+  },
+  "addSuccess": "Agregado con éxito",
+  "@addSuccess": {
+    "description": "Success message when an item is added"
+  },
+  "updateSuccess": "Actualización exitosa",
+  "@updateSuccess": {
+    "description": "Success message when an item is updated"
+  },
+  "error": "Error: {message}",
+  "@error": {
+    "description": "Generic error message",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "locationInfo": "Información de ubicación #{pseudoId}",
+  "@locationInfo": {
+    "description": "Title for the location information dialog",
+    "placeholders": {
+      "pseudoId": {
+        "type": "String"
+      }
+    }
+  },
+  "newLabel": "Nuevo",
+  "@newLabel": {
+    "description": "Label for a new item"
+  },
+  "locationId": "ID de ubicación",
+  "@locationId": {
+    "description": "Label for the location ID field"
+  },
+  "locationName": "Nombre de la ubicación",
+  "@locationName": {
+    "description": "Label for the location name field"
+  },
+  "enterLocationName": "¿Por favor, ingrese un nombre de ubicación?",
+  "@enterLocationName": {
+    "description": "Validation message for the location name field"
+  },
+  "quantityOnHand": "Cantidad en stock",
+  "@quantityOnHand": {
+    "description": "Label for the quantity on hand field"
+  },
+  "create": "Crear",
+  "@create": {
+    "description": "Label for the create button"
+  },
+  "update": "Actualizar",
+  "@update": {
+    "description": "Label for the update button"
+  },
+  "failedToFetchSearchItems": "error al obtener elementos de búsqueda: {message}",
+  "@failedToFetchSearchItems": {
+    "description": "Error message when the app fails to fetch search items",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "locationSearch": "Búsqueda de ubicación",
+  "@locationSearch": {
+    "description": "Title for the location search dialog"
+  },
+  "searchInput": "Entrada de búsqueda",
+  "@searchInput": {
+    "description": "Label for the search input field"
+  },
+  "enterSearchValue": "¿Por favor, ingrese un valor de búsqueda?",
+  "@enterSearchValue": {
+    "description": "Validation message for the search input field"
+  },
+  "searchResults": "Resultados de la búsqueda",
+  "@searchResults": {
+    "description": "Label for the search results section"
+  },
+  "noSearchItemsFound": "No se encontraron elementos de búsqueda (todavía)",
+  "@noSearchItemsFound": {
+    "description": "Message displayed when no search items are found"
+  },
+  "id": "ID: ",
+  "@id": {
+    "description": "Label for the ID in a search result"
+  },
+  "name": "Nombre: ",
+  "@name": {
+    "description": "Label for the name in a search result"
+  },
+  "roomNumber": "Número de habitación",
+  "@roomNumber": {
+    "description": "Label for the room number field"
+  },
+  "assetNumber": "Número de activo",
+  "@assetNumber": {
+    "description": "Label for the asset number field"
+  },
+  "assetLoadProblem": "Problema de carga de activos",
+  "@assetLoadProblem": {
+    "description": "Error message when there's a problem loading assets"
+  },
+  "idLabel": "ID",
+  "@idLabel": {
+    "description": "Label for ID field"
+  },
+  "roomNameLabel": "Nombre de la habitación",
+  "@roomNameLabel": {
+    "description": "Label for the room name field"
+  },
+  "assetNameLabel": "Nombre del activo",
+  "@assetNameLabel": {
+    "description": "Label for the asset name field"
+  },
+  "enterAssetName": "¿Por favor, ingrese el nombre del activo?",
+  "@enterAssetName": {
+    "description": "Validation message for the asset name field"
+  },
+  "qtyOnHand": "Cantidad en stock",
+  "@qtyOnHand": {
+    "description": "Label for the quantity on hand field"
+  },
+  "enterQtyOnHand": "¿Por favor, ingrese la cantidad en stock?",
+  "@enterQtyOnHand": {
+    "description": "Validation message for the quantity on hand field"
+  },
+  "qtyPromise": "Cantidad prometida",
+  "@qtyPromise": {
+    "description": "Label for the quantity promise field"
+  },
+  "enterQtyPromise": "¿Por favor, ingrese la cantidad prometida?",
+  "@enterQtyPromise": {
+    "description": "Validation message for the quantity promise field"
+  },
+  "enterAquiredCost": "¿Por favor, ingrese el costo adquirido?",
+  "@enterAquiredCost": {
+    "description": "Validation message for the acquired cost field"
+  },
+  "serverProblem": "Problema del servidor",
+  "@serverProblem": {
+    "description": "Error message when there's a server problem"
+  },
+  "roomTypeName": "Nombre del tipo de habitación",
+  "@roomTypeName": {
+    "description": "Label for the room type name field"
+  },
+  "productIdName": "Nombre del ID del producto",
+  "@productIdName": {
+    "description": "Label for the product ID name field"
+  },
+  "select": "Seleccionar",
+  "@select": {
+    "description": "Label for select button or dropdown"
+  },
+  "product": "Producto",
+  "@product": {
+    "description": "Label for product"
+  },
+  "roomTypeId": "ID de tipo de habitación",
+  "@roomTypeId": {
+    "description": "Label for the room type ID field"
+  },
+  "productId": "ID de producto",
+  "@productId": {
+    "description": "Label for the product ID field"
+  },
+  "fieldRequired": "Campo requerido",
+  "@fieldRequired": {
+    "description": "Validation message for required fields"
+  },
+  "status": "Estado",
+  "@status": {
+    "description": "Label for status field"
+  },
+  "selectLocation": "Seleccionar ubicación",
+  "@selectLocation": {
+    "description": "Label for select location dropdown or button"
+  },
+  "location": "Ubicación",
+  "@location": {
+    "description": "Label for location"
+  },
+  "noRoomsFound": "No se encontraron habitaciones",
+  "@noRoomsFound": {
+    "description": "Message displayed when no rooms are found"
+  },
+  "noAssetsFound": "No se encontraron activos",
+  "@noAssetsFound": {
+    "description": "Message displayed when no assets are found"
+  },
+  "assetSearch": "Búsqueda de activos",
+  "@assetSearch": {
+    "description": "Title for the asset search dialog"
+  },
+  "locations": "Ubicaciones",
+  "@locations": {
+    "description": "Label for locations"
+  },
+  "aqrdCosts": "Costo adquirido: {cost}",
+  "@aqrdCosts": {
+    "description": "Label for acquired cost with value",
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToFetchAssets": "Error al obtener activos: {message}",
+  "@failedToFetchAssets": {
+    "description": "Error message when the app fails to fetch assets",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  }
+}

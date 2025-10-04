@@ -1,0 +1,199 @@
+{
+  "@@locale": "es",
+  "@@last_modified": "2024-09-28T14:00:00.000Z",
+  "activity_price": "Precio",
+  "@activity_price": {
+    "description": "Precio de un producto o servicio",
+    "type": "text"
+  },
+  "activity_id": "Id",
+  "@activity_id": {
+    "description": "Label for activity ID field"
+  },
+  "activity_status": "Estado",
+  "@activity_status": {
+    "description": "Label for activity status field"
+  },
+  "activity_fieldRequired": "Campo requerido",
+  "@activity_fieldRequired": {
+    "description": "Generic required field error message"
+  },
+  "activity_name": "Nombre",
+  "@activity_name": {
+    "description": "Label for activity name field"
+  },
+  "activity_nameError": "¿Por favor, ingrese un nombre de {activityType}?",
+  "@activity_nameError": {
+    "description": "Error message for empty activity name field",
+    "placeholders": {
+      "activityType": {
+        "type": "String",
+        "description": "Type of activity being created"
+      }
+    }
+  },
+  "activity_description": "Descripción",
+  "@activity_description": {
+    "description": "Label for activity description field"
+  },
+  "activity_employeeName": "nombre de empleado",
+  "@activity_employeeName": {
+    "description": "Label for employee name field"
+  },
+  "activity_selectEmployee": "Seleccionar empleado",
+  "@activity_selectEmployee": {
+    "description": "Dropdown hint for selecting an employee"
+  },
+  "activity_assignee": "Empleado Asignado",
+  "@activity_assignee": {
+    "description": "Label for assigned employee field"
+  },
+  "activity_thirdPartyName": "nombre de tercero",
+  "@activity_thirdPartyName": {
+    "description": "Label for third party name field"
+  },
+  "activity_selectThirdParty": "Seleccionar tercero",
+  "@activity_selectThirdParty": {
+    "description": "Dropdown hint for selecting a third party"
+  },
+  "activity_thirdParty": "Tercero",
+  "@activity_thirdParty": {
+    "description": "Label for third party field"
+  },
+  "activity_startDate": "Fecha de inicio estimada",
+  "@activity_startDate": {
+    "description": "Label for activity estimated start date field"
+  },
+  "activity_update": "Actualizar",
+  "@activity_update": {
+    "description": "Update button text for activities"
+  },
+  "activity_timeEntries": "EntradasDeTiempo",
+  "@activity_timeEntries": {
+    "description": "Label for time entries section"
+  },
+  "activity_create": "Crear",
+  "@activity_create": {
+    "description": "Create button text for activities"
+  },
+  "activity_new": "Nuevo",
+  "@activity_new": {
+    "description": "New activity button text"
+  },
+  "activity_title": "{activityType} #{pseudoId}",
+  "@activity_title": {
+    "description": "Title format for activity with type and ID",
+    "placeholders": {
+      "activityType": {
+        "type": "String",
+        "description": "Type of activity"
+      },
+      "pseudoId": {
+        "type": "String",
+        "description": "Activity pseudo ID"
+      }
+    }
+  },
+  "activity_loadError": "Problema de carga de {activityType}",
+  "@activity_loadError": {
+    "description": "Error message when activity fails to load",
+    "placeholders": {
+      "activityType": {
+        "type": "String",
+        "description": "Type of activity that failed to load"
+      }
+    }
+  },
+  "activity_serverError": "problema de conexión con el servidor",
+  "@activity_serverError": {
+    "description": "Error message for server connectivity issues"
+  },
+  "activity_error": "Error: {message}",
+  "@activity_error": {
+    "description": "Generic error message with details",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "description": "Error message details"
+      }
+    }
+  },
+  "activity_notFound": "No se encontraron {activityType}, agregue uno con '+'",
+  "@activity_notFound": {
+    "description": "Message when no activities are found",
+    "placeholders": {
+      "activityType": {
+        "type": "String",
+        "description": "Type of activity not found"
+      }
+    }
+  },
+  "activity_fetchError": "no se pudo obtener {activityType} {message}",
+  "@activity_fetchError": {
+    "description": "Error message when fetching activities fails",
+    "placeholders": {
+      "activityType": {
+        "type": "String",
+        "description": "Type of activity that failed to fetch"
+      },
+      "message": {
+        "type": "String",
+        "description": "Error message details"
+      }
+    }
+  },
+  "activity_addNew": "Añadir nuevo",
+  "@activity_addNew": {
+    "description": "Add new activity button text"
+  },
+  "timeEntry_title": "Ingresar Entradas de Tiempo",
+  "@timeEntry_title": {
+    "description": "Header for time entry form"
+  },
+  "timeEntry_new": "NuevaEntradaDeTiempo",
+  "@timeEntry_new": {
+    "description": "Label for new time entry"
+  },
+  "timeEntry_id": "EntradaDeTiempo#{timeEntryId}",
+  "@timeEntry_id": {
+    "description": "Time entry ID format",
+    "placeholders": {
+      "timeEntryId": {
+        "type": "String",
+        "description": "Time entry identifier"
+      }
+    }
+  },
+  "timeEntry_updateDate": "Actualizar\nfecha",
+  "@timeEntry_updateDate": {
+    "description": "Label for time entry update date field"
+  },
+  "timeEntry_hours": "# horas",
+  "@timeEntry_hours": {
+    "description": "Label for number of hours field"
+  },
+  "timeEntry_hoursError": "¿Por favor, ingrese un número de horas?",
+  "@timeEntry_hoursError": {
+    "description": "Error message for empty hours field"
+  },
+  "timeEntry_comments": "Comentarios",
+  "@timeEntry_comments": {
+    "description": "Label for time entry comments field"
+  },
+  "timeEntry_addSuccess": "Agregado con éxito",
+  "@timeEntry_addSuccess": {
+    "description": "Success message for adding time entry"
+  },
+  "timeEntry_updateSuccess": "Actualización exitosa",
+  "@timeEntry_updateSuccess": {
+    "description": "Success message for updating time entry"
+  },
+  "timeEntry_listTitle": "Información de Entrada de Tiempo",
+  "@timeEntry_listTitle": {
+    "description": "Header for time entry information list"
+  },
+  "timeEntry_notFound": "No se encontraron entradas de tiempo",
+  "@timeEntry_notFound": {
+    "description": "Message when no time entries are available"
+  }
+}

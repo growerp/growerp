@@ -1,0 +1,819 @@
+{
+  "@@locale": "es",
+  "aboutApp": "Acerca de {appName}",
+  "@aboutApp": {
+    "description": "About app dialog title",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutGrowERP": "Acerca de GrowERP",
+  "@aboutGrowERP": {
+    "description": "About GrowERP menu item"
+  },
+  "accounts": "Cuentas",
+  "@accounts": {
+    "description": "Accounts menu item or section header"
+  },
+  "addNew": "Añadir nuevo",
+  "@addNew": {
+    "description": "Add new item button text"
+  },
+  "andAtLeastOne": "y al menos uno ",
+  "@andAtLeastOne": {
+    "description": "Partial validation message indicating minimum requirement"
+  },
+  "backendServer": "Servidor backend",
+  "@backendServer": {
+    "description": "Backend server input label"
+  },
+  "balanceSheet": "Balance general",
+  "@balanceSheet": {
+    "description": "Balance sheet report menu item"
+  },
+  "balanceSummary": "Resumen de saldos",
+  "@balanceSummary": {
+    "description": "Balance summary report menu item"
+  },
+  "businessCompanyName": "¡Se requiere el nombre de la empresa!",
+  "@businessCompanyName": {
+    "description": "Business name validation error message"
+  },
+  "businessNameError": "¡El nombre de la empresa es obligatorio!",
+  "@businessNameError": {
+    "description": "Business name validation error message"
+  },
+  "cancel": "Cancelar",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "cannotLoadRestRequests": "¡No se pueden cargar las solicitudes de descanso!",
+  "@cannotLoadRestRequests": {
+    "description": "Error message when REST requests fail to load"
+  },
+  "chat": "Chat",
+  "@chat": {
+    "description": "Chat menu item"
+  },
+  "chatServer": "Servidor de chat",
+  "@chatServer": {
+    "description": "Chat server input label"
+  },
+  "completeRegistration": "Completar registro",
+  "@completeRegistration": {
+    "description": "Complete registration dialog title"
+  },
+  "companyPartyId": "ID de la parte de la empresa",
+  "@companyPartyId": {
+    "description": "Company party ID input label"
+  },
+  "continueButton": "Continuar",
+  "@continueButton": {
+    "description": "Continue button text"
+  },
+  "contributing": "Contribuyendo",
+  "@contributing": {
+    "description": "Contributing menu item"
+  },
+  "copyright": "© {year} GrowERP.com",
+  "@copyright": {
+    "description": "Copyright text with year",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "create": "Crear",
+  "@create": {
+    "description": "Create button text"
+  },
+  "createPassword": "Crear contraseña",
+  "@createPassword": {
+    "description": "Create password dialog title"
+  },
+  "creditCardDetails": "Detalles de la tarjeta de crédito",
+  "@creditCardDetails": {
+    "description": "Credit card details hint text"
+  },
+  "creditCardInfo": "Información de la tarjeta de crédito",
+  "@creditCardInfo": {
+    "description": "Credit card info label"
+  },
+  "currency": "Moneda",
+  "@currency": {
+    "description": "Currency input label"
+  },
+  "currencyError": "¡La moneda es obligatoria!",
+  "@currencyError": {
+    "description": "Currency validation error message"
+  },
+  "currentPaymentMethod": "Método de pago actual: {method}",
+  "@currentPaymentMethod": {
+    "description": "Current payment method display text",
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "customer": "Cliente",
+  "@customer": {
+    "description": "Label for customer"
+  },
+  "cvvCode": "CVV",
+  "@cvvCode": {
+    "description": "CVV code input label"
+  },
+  "cvvHint": "123",
+  "@cvvHint": {
+    "description": "CVV code input hint"
+  },
+  "dateTime": "Fecha y hora",
+  "@dateTime": {
+    "description": "Date and time label"
+  },
+  "deleteWarning": "Advertencia de eliminación",
+  "@deleteWarning": {
+    "description": "Delete warning dialog title"
+  },
+  "deleteYourself": "Eliminarte a ti mismo",
+  "@deleteYourself": {
+    "description": "Delete yourself button text"
+  },
+  "deleteYourselfAndCompany": "Eliminarte a ti mismo y a la empresa",
+  "@deleteYourselfAndCompany": {
+    "description": "Delete yourself and company button text"
+  },
+  "demoData": "Datos de demostración",
+  "@demoData": {
+    "description": "Demo data checkbox label"
+  },
+  "email": "Correo electrónico",
+  "@email": {
+    "description": "Email input label"
+  },
+  "emailAddress": "Dirección de correo electrónico",
+  "@emailAddress": {
+    "description": "Email address input label"
+  },
+  "emailAddressError": "¡La dirección de correo electrónico es obligatoria!",
+  "@emailAddressError": {
+    "description": "Email address validation error message"
+  },
+  "emailAddressError2": "¡El formato de la dirección de correo electrónico es incorrecto!",
+  "@emailAddressError2": {
+    "description": "Email address format validation error message"
+  },
+  "enterBackendUrl": "Introducir URL de backend",
+  "@enterBackendUrl": {
+    "description": "Enter backend URL dialog title"
+  },
+  "enterCompanyAndCurrency": "Introduzca el nombre de su empresa y la moneda",
+  "@enterCompanyAndCurrency": {
+    "description": "Company and currency input instruction"
+  },
+  "enterCompanyName": "Introducir el nombre de la empresa",
+  "@enterCompanyName": {
+    "description": "Company name input instruction"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Error status text"
+  },
+  "errorMessage": "Mensaje de error",
+  "@errorMessage": {
+    "description": "Error message label"
+  },
+  "expiryDate": "MM/AA",
+  "@expiryDate": {
+    "description": "Expiry date input label"
+  },
+  "expiryDateHint": "12/25",
+  "@expiryDateHint": {
+    "description": "Expiry date input hint"
+  },
+  "fieldRequired": "¡El campo es obligatorio!",
+  "@fieldRequired": {
+    "description": "Field required validation error message"
+  },
+  "firstName": "Nombre",
+  "@firstName": {
+    "description": "First name input label"
+  },
+  "firstNameError": "¡El nombre es obligatorio!",
+  "@firstNameError": {
+    "description": "First name validation error message"
+  },
+  "forgotPassword": "¿Olvidaste tu contraseña?",
+  "@forgotPassword": {
+    "description": "Forgot password link text"
+  },
+  "generateDemoData": "¿Generar datos de demostración?",
+  "@generateDemoData": {
+    "description": "Generate demo data checkbox text"
+  },
+  "goHome": "Ir a casa",
+  "@goHome": {
+    "description": "Go home button tooltip"
+  },
+  "invoice": "Factura",
+  "@invoice": {
+    "description": "Label for invoice"
+  },
+  "itemIsRequired": "se requiere el artículo",
+  "@itemIsRequired": {
+    "description": "Validation message indicating a required item"
+  },
+  "itemTypes": "Tipos de artículos",
+  "@itemTypes": {
+    "description": "Item types menu item or section header"
+  },
+  "journal": "Diario",
+  "@journal": {
+    "description": "Journal menu item or section header"
+  },
+  "lastName": "Apellido",
+  "@lastName": {
+    "description": "Last name input label"
+  },
+  "lastNameError": "¡El apellido es obligatorio!",
+  "@lastNameError": {
+    "description": "Last name validation error message"
+  },
+  "login": "Iniciar sesión",
+  "@login": {
+    "description": "Login button text"
+  },
+  "loginName": "Nombre de inicio de sesión",
+  "@loginName": {
+    "description": "Login name label"
+  },
+  "loginWithExistingUserName": "Iniciar sesión con nombre de usuario existente",
+  "@loginWithExistingUserName": {
+    "description": "Login form header text for existing users"
+  },
+  "logout": "Cerrar sesión",
+  "@logout": {
+    "description": "Logout button text"
+  },
+  "main": "Principal",
+  "@main": {
+    "description": "Main menu item"
+  },
+  "mainDashboard": "Panel principal",
+  "@mainDashboard": {
+    "description": "Main dashboard menu item or navigation link"
+  },
+  "ms": "ms",
+  "@ms": {
+    "description": "Milliseconds abbreviation"
+  },
+  "nameOnCard": "Nombre en la tarjeta",
+  "@nameOnCard": {
+    "description": "Name on card input label"
+  },
+  "no": "No",
+  "@no": {
+    "description": "No answer text"
+  },
+  "noAccess": "¡No tienes acceso a esta página!",
+  "@noAccess": {
+    "description": "No access error message"
+  },
+  "noAccessHere": "¡No hay acceso aquí!",
+  "@noAccessHere": {
+    "description": "No access here error message"
+  },
+  "noRestRequests": "No se han encontrado solicitudes REST...",
+  "@noRestRequests": {
+    "description": "No REST requests message"
+  },
+  "notAvailable": "No disponible",
+  "@notAvailable": {
+    "description": "Not available placeholder text"
+  },
+  "number": "Número",
+  "@number": {
+    "description": "Number input label"
+  },
+  "numberHint": "1234 5678 9012 3456",
+  "@numberHint": {
+    "description": "Card number input hint"
+  },
+  "ok": "Aceptar",
+  "@ok": {
+    "description": "OK button text"
+  },
+  "onlyUserDelete": "Eliminar solo el usuario, no la empresa",
+  "@onlyUserDelete": {
+    "description": "Only delete user option text"
+  },
+  "openInvoices": "Facturas abiertas:",
+  "@openInvoices": {
+    "description": "Label for open invoices dashboard item"
+  },
+  "openSourceLicenses": "Licencias de código abierto",
+  "@openSourceLicenses": {
+    "description": "Open source licenses menu item"
+  },
+  "order": "Pedido",
+  "@order": {
+    "description": "Label for order"
+  },
+  "parameters": "Parámetros",
+  "@parameters": {
+    "description": "Parameters label"
+  },
+  "password": "Contraseña",
+  "@password": {
+    "description": "Password input label"
+  },
+  "passwordError": "¡La contraseña es obligatoria!",
+  "@passwordError": {
+    "description": "Password validation error message"
+  },
+  "passwordError2": "¡La contraseña es obligatoria!",
+  "@passwordError2": {
+    "description": "Password validation error message variant"
+  },
+  "passwordHelper": "Mínimo 5 caracteres",
+  "@passwordHelper": {
+    "description": "Password helper text"
+  },
+  "passwordMismatch": "¡Las contraseñas no coinciden!",
+  "@passwordMismatch": {
+    "description": "Password mismatch validation error"
+  },
+  "passwordValidationError": "La contraseña debe tener al menos 5 caracteres",
+  "@passwordValidationError": {
+    "description": "Password validation error message"
+  },
+  "payment": "Pago",
+  "@payment": {
+    "description": "Label for payment"
+  },
+  "paymentPlan": "Plan de pago",
+  "@paymentPlan": {
+    "description": "Payment plan input label"
+  },
+  "paymentTypes": "Tipos de pago",
+  "@paymentTypes": {
+    "description": "Payment types menu item or section header"
+  },
+  "payWithinWeek": "Pagar en una semana",
+  "@payWithinWeek": {
+    "description": "Pay within week checkbox text"
+  },
+  "privacyCodeOfConduct": "Privacidad/Código de conducta",
+  "@privacyCodeOfConduct": {
+    "description": "Privacy and code of conduct menu item"
+  },
+  "referrerUrl": "URL de referencia",
+  "@referrerUrl": {
+    "description": "Referrer URL label"
+  },
+  "refresh": "Actualizar",
+  "@refresh": {
+    "description": "Refresh button text"
+  },
+  "register": "Registrarse",
+  "@register": {
+    "description": "Register button text"
+  },
+  "registerAndCharge": "Registrar y cobrar",
+  "@registerAndCharge": {
+    "description": "Register and charge button text"
+  },
+  "registerNewCompanyAndAdmin": "Registrar nueva empresa y administrador",
+  "@registerNewCompanyAndAdmin": {
+    "description": "Register new company link text"
+  },
+  "registration": "Registro",
+  "@registration": {
+    "description": "Registration dialog title"
+  },
+  "requestName": "Nombre de la solicitud",
+  "@requestName": {
+    "description": "Request name label"
+  },
+  "requestUrl": "URL de la solicitud",
+  "@requestUrl": {
+    "description": "Request URL label"
+  },
+  "restart": "Reiniciar",
+  "@restart": {
+    "description": "Restart button text"
+  },
+  "restRequestDetails": "Detalles de la solicitud Rest",
+  "@restRequestDetails": {
+    "description": "REST request details title"
+  },
+  "revenueExpense": "Ingresos/Gastos",
+  "@revenueExpense": {
+    "description": "Revenue and expense report menu item"
+  },
+  "runningTime": "Tiempo de ejecución",
+  "@runningTime": {
+    "description": "Running time label"
+  },
+  "selectLanguage": "Seleccionar idioma",
+  "@selectLanguage": {
+    "description": "Select language instruction"
+  },
+  "selectPlanError": "¡Por favor, seleccione un plan!",
+  "@selectPlanError": {
+    "description": "Select plan validation error message"
+  },
+  "sendNewPassword": "Enviar nueva contraseña",
+  "@sendNewPassword": {
+    "description": "Send new password dialog title"
+  },
+  "serverHost": "Host del servidor",
+  "@serverHost": {
+    "description": "Server host label"
+  },
+  "serverIp": "IP del servidor",
+  "@serverIp": {
+    "description": "Server IP label"
+  },
+  "shipment": "Envío",
+  "@shipment": {
+    "description": "Label for shipment"
+  },
+  "slowHit": "Golpe lento",
+  "@slowHit": {
+    "description": "Slow hit label"
+  },
+  "status": "Estado",
+  "@status": {
+    "description": "Status label"
+  },
+  "submitNewPassword": "Enviar nueva contraseña",
+  "@submitNewPassword": {
+    "description": "Submit new password button text"
+  },
+  "subscription": "Suscripción",
+  "@subscription": {
+    "description": "Subscription dialog title"
+  },
+  "success": "Éxito",
+  "@success": {
+    "description": "Success status text"
+  },
+  "supplier": "Proveedor",
+  "@supplier": {
+    "description": "Label for supplier"
+  },
+  "tempPassword": "Se enviará una contraseña temporal por correo electrónico",
+  "@tempPassword": {
+    "description": "Temporary password information text"
+  },
+  "test": "Prueba",
+  "@test": {
+    "description": "Test menu item"
+  },
+  "testSystem": "Sistema de prueba",
+  "@testSystem": {
+    "description": "Test system text"
+  },
+  "theme": "Tema",
+  "@theme": {
+    "description": "Theme menu item"
+  },
+  "timePeriods": "Períodos de tiempo",
+  "@timePeriods": {
+    "description": "Time periods menu item or section header"
+  },
+  "transaction": "Transacción",
+  "@transaction": {
+    "description": "Label for transaction"
+  },
+  "transactions": "Transacciones",
+  "@transactions": {
+    "description": "Transactions menu item or section header"
+  },
+  "trialPeriod": "Período de prueba",
+  "@trialPeriod": {
+    "description": "Trial period text"
+  },
+  "unknown": "Desconocido",
+  "@unknown": {
+    "description": "Placeholder text for unknown values"
+  },
+  "update": "actualizar",
+  "@update": {
+    "description": "Update button text"
+  },
+  "user": "Usuario",
+  "@user": {
+    "description": "User label"
+  },
+  "userAndCompanyDelete": "Eliminar usuario y empresa",
+  "@userAndCompanyDelete": {
+    "description": "Delete user and company option text"
+  },
+  "username": "Nombre de usuario: {username}",
+  "@username": {
+    "description": "Username display text",
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "usernameEmail": "Nombre de usuario/Correo electrónico",
+  "@usernameEmail": {
+    "description": "Username or email input label"
+  },
+  "usernameEmailError": "¡Se requiere nombre de usuario/correo electrónico!",
+  "@usernameEmailError": {
+    "description": "Username/email validation error message"
+  },
+  "verifyPassword": "Verificar contraseña",
+  "@verifyPassword": {
+    "description": "Verify password input label"
+  },
+  "verifyPasswordError": "¡Es necesario verificar la contraseña!",
+  "@verifyPasswordError": {
+    "description": "Verify password validation error message"
+  },
+  "verifyPasswordHelper": "Re-ingrese la contraseña",
+  "@verifyPasswordHelper": {
+    "description": "Verify password helper text"
+  },
+  "version": "Versión: {version} compilación: {build}",
+  "@version": {
+    "description": "Version display text",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
+  },
+  "viewLicense": "Ver licencia",
+  "@viewLicense": {
+    "description": "View license menu item"
+  },
+  "viewReadme": "Ver léame",
+  "@viewReadme": {
+    "description": "View readme menu item"
+  },
+  "welcome": "¡Bienvenido!",
+  "@welcome": {
+    "description": "Welcome message"
+  },
+  "welcomeToGrowERPBusinessSystem": "¡Bienvenido al sistema empresarial GrowERP!",
+  "@welcomeToGrowERPBusinessSystem": {
+    "description": "Welcome message on home page"
+  },
+  "yes": "Sí",
+  "@yes": {
+    "description": "Yes answer text"
+  },
+  "about": "Acerca de",
+  "@about": {
+    "description": "About menu item"
+  },
+  "accounting": "Contabilidad",
+  "@accounting": {
+    "description": "Accounting menu item"
+  },
+  "accountingDashboard": "Panel de contabilidad",
+  "@accountingDashboard": {
+    "description": "Accounting dashboard menu item"
+  },
+  "accountingLedger": "Libro mayor de contabilidad",
+  "@accountingLedger": {
+    "description": "Accounting ledger menu item"
+  },
+  "accountingPurch": "Compra de contabilidad",
+  "@accountingPurch": {
+    "description": "Accounting purchase menu item"
+  },
+  "accountingSales": "Ventas de contabilidad",
+  "@accountingSales": {
+    "description": "Accounting sales menu item"
+  },
+  "administrators": "Administradores",
+  "@administrators": {
+    "description": "Administrators label"
+  },
+  "allOpportunities": "Todas las oportunidades",
+  "@allOpportunities": {
+    "description": "All opportunities label"
+  },
+  "assets": "Activos",
+  "@assets": {
+    "description": "Assets menu item"
+  },
+  "catalog": "Catálogo",
+  "@catalog": {
+    "description": "Catalog menu item"
+  },
+  "categories": "Categorías",
+  "@categories": {
+    "description": "Categories menu item"
+  },
+  "company": "Empresa",
+  "@company": {
+    "description": "Company menu item"
+  },
+  "crm": "CRM",
+  "@crm": {
+    "description": "CRM menu item"
+  },
+  "customers": "Clientes",
+  "@customers": {
+    "description": "Customers menu item"
+  },
+  "employees": "Empleados",
+  "@employees": {
+    "description": "Employees menu item"
+  },
+  "incomingInvoices": "Facturas entrantes",
+  "@incomingInvoices": {
+    "description": "Incoming invoices menu item"
+  },
+  "incomingPayments": "Pagos entrantes",
+  "@incomingPayments": {
+    "description": "Incoming payments menu item"
+  },
+  "incomingShipments": "Envíos entrantes",
+  "@incomingShipments": {
+    "description": "Incoming shipments menu item"
+  },
+  "inventory": "Inventario",
+  "@inventory": {
+    "description": "Inventory menu item"
+  },
+  "leads": "Clientes potenciales",
+  "@leads": {
+    "description": "Leads menu item"
+  },
+  "ledgerAccnt": "Cuenta del libro mayor",
+  "@ledgerAccnt": {
+    "description": "Ledger account menu item"
+  },
+  "ledgerJournals": "Diarios del libro mayor",
+  "@ledgerJournals": {
+    "description": "Ledger journals menu item"
+  },
+  "ledgerTransaction": "Transacción del libro mayor",
+  "@ledgerTransaction": {
+    "description": "Ledger transaction menu item"
+  },
+  "ledgerTree": "Árbol del libro mayor",
+  "@ledgerTree": {
+    "description": "Ledger tree menu item"
+  },
+  "myTodoTasks": "Mis tareas pendientes",
+  "@myTodoTasks": {
+    "description": "My todo tasks menu item"
+  },
+  "opportunities": "Oportunidades",
+  "@opportunities": {
+    "description": "Opportunities menu item"
+  },
+  "orders": "Pedidos",
+  "@orders": {
+    "description": "Orders menu item"
+  },
+  "organization": "Organización",
+  "@organization": {
+    "description": "Organization menu item"
+  },
+  "otherEmployees": "Otros empleados",
+  "@otherEmployees": {
+    "description": "Other employees label"
+  },
+  "outgoingInvoices": "Facturas salientes",
+  "@outgoingInvoices": {
+    "description": "Outgoing invoices menu item"
+  },
+  "outgoingPayments": "Pagos salientes",
+  "@outgoingPayments": {
+    "description": "Outgoing payments menu item"
+  },
+  "outgoingShipments": "Envíos salientes",
+  "@outgoingShipments": {
+    "description": "Outgoing shipments menu item"
+  },
+  "paymtTypes": "Tipos de pago",
+  "@paymtTypes": {
+    "description": "Payment types menu item"
+  },
+  "planSelection": "Selección de plan",
+  "@planSelection": {
+    "description": "Plan selection menu item"
+  },
+  "products": "Productos",
+  "@products": {
+    "description": "Products menu item"
+  },
+  "purchaseOrders": "Órdenes de compra",
+  "@purchaseOrders": {
+    "description": "Purchase orders menu item"
+  },
+  "purchaseUnpaidInvoices": "Comprar facturas impagas",
+  "@purchaseUnpaidInvoices": {
+    "description": "Purchase unpaid invoices label"
+  },
+  "reports": "Informes",
+  "@reports": {
+    "description": "Reports menu item"
+  },
+  "requests": "Solicitudes",
+  "@requests": {
+    "description": "Requests menu item"
+  },
+  "salesOpenInvoices": "Facturas abiertas de ventas",
+  "@salesOpenInvoices": {
+    "description": "Sales open invoices label"
+  },
+  "salesOrders": "Órdenes de venta",
+  "@salesOrders": {
+    "description": "Sales orders menu item"
+  },
+  "setUp": "Configurar",
+  "@setUp": {
+    "description": "Set up menu item"
+  },
+  "subscriptions": "Suscripciones",
+  "@subscriptions": {
+    "description": "Subscriptions menu item"
+  },
+  "suppliers": "Proveedores",
+  "@suppliers": {
+    "description": "Suppliers menu item"
+  },
+  "website": "Sitio web",
+  "@website": {
+    "description": "Website menu item"
+  },
+  "whLocations": "Ubicaciones de almacén",
+  "@whLocations": {
+    "description": "Warehouse locations menu item"
+  },
+  "checkIn": "Registrarse",
+  "@checkIn": {
+    "description": "Check in menu item"
+  },
+  "checkOut": "Revisa",
+  "@checkOut": {
+    "description": "Check out menu item"
+  },
+  "inOut": "Adentro/Afuera",
+  "@inOut": {
+    "description": "In/out menu item"
+  },
+  "myHotel": "Mi hotel",
+  "@myHotel": {
+    "description": "My hotel menu item"
+  },
+  "reservations": "Reservas",
+  "@reservations": {
+    "description": "Reservations menu item"
+  },
+  "rooms": "Habitaciones",
+  "@rooms": {
+    "description": "Rooms menu item"
+  },
+  "roomTypes": "Tipos de habitación",
+  "@roomTypes": {
+    "description": "Room types menu item"
+  },
+  "tasks": "Tareas",
+  "@tasks": {
+    "description": "Tasks menu item"
+  },
+  "myOpportunities": "Mis oportunidades",
+  "@myOpportunities": {
+    "description": "My opportunities menu item"
+  },
+  "clients": "Clientas",
+  "@clients": {
+    "description": "Clients menu item"
+  },
+  "staff": "Personal",
+  "@staff": {
+    "description": "Staff menu item"
+  },
+  "applications": "Aplicaciones",
+  "@applications": {
+    "description": "Applications menu item"
+  },
+  "restRequests": "Solicitudes REST",
+  "@restRequests": {
+    "description": "REST requests menu item"
+  },
+  "userRequestStatus": "Usuario\nSolicitud\nEstado",
+  "@userRequestStatus": {
+    "description": "REST request list column header for user/request/status"
+  }
+}

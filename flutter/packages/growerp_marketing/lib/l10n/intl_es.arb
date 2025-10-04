@@ -1,0 +1,227 @@
+{
+    "@@locale": "es",
+    "@@last_modified": "2025-09-30T00:00:00Z",
+    "@@author": "Comunidad GrowERP",
+    "@@context": "Paquete de marketing de localización para el sistema de gestión empresarial GrowERP",
+    "@@x-template": "intl_en.arb",
+    "tableHdrShortId": "ID corto",
+    "@tableHdrShortId": {
+        "description": "Table header for Short ID"
+    },
+    "tableHdrId": "Id",
+    "@tableHdrId": {
+        "description": "Table header for ID"
+    },
+    "tableHdrName": "Nombre",
+    "@tableHdrName": {
+        "description": "Table header for Name"
+    },
+    "tableHdrAmount": "Cantidad",
+    "@tableHdrAmount": {
+        "description": "Table header for Amount"
+    },
+    "tableHdrProbability": "Probabilidad",
+    "@tableHdrProbability": {
+        "description": "Table header for Probability"
+    },
+    "tableHdrLead": "Nombre/empresa del cliente potencial",
+    "@tableHdrLead": {
+        "description": "Table header for Lead"
+    },
+    "tableHdrLeadEmail": "Correo electrónico del cliente potencial",
+    "@tableHdrLeadEmail": {
+        "description": "Table header for Lead Email"
+    },
+    "tableHdrStage": "Etapa",
+    "@tableHdrStage": {
+        "description": "Table header for Stage"
+    },
+    "tableHdrNextStep": "Próximo paso",
+    "@tableHdrNextStep": {
+        "description": "Table header for Next Step"
+    },
+    "tableHdrDelete": " ",
+    "@tableHdrDelete": {
+        "description": "Table header for Delete action"
+    },
+    "removeItemTooltip": "Quitar elemento",
+    "@removeItemTooltip": {
+        "description": "Tooltip for remove item button"
+    },
+    "deleteItemConfirm": "¿Eliminar {id}?",
+    "@deleteItemConfirm": {
+        "description": "Confirmation dialog for deleting an item",
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "cannotBeUndone": "¡Esta acción no se puede deshacer!",
+    "@cannotBeUndone": {
+        "description": "Warning that an action cannot be undone"
+    },
+    "error": "Error: {message}",
+    "@error": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "unknown": "Desconocido",
+    "@unknown": {
+        "description": "Generic 'Unknown' text"
+    },
+    "opportunityNew": "Nueva oportunidad",
+    "@opportunityNew": {
+        "description": "Title for new opportunity page"
+    },
+    "opportunityWithMessage": "Oportunidad {id}",
+    "@opportunityWithMessage": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "id": "ID",
+    "@id": {
+        "description": "Label for ID field"
+    },
+    "opportunityName": "Nombre de la oportunidad",
+    "@opportunityName": {
+        "description": "Label for Opportunity Name field"
+    },
+    "enterOppName": "Ingrese el nombre de la oportunidad",
+    "@enterOppName": {
+        "description": "Placeholder for Opportunity Name input"
+    },
+    "description": "Descripción",
+    "@description": {
+        "description": "Label for Description field"
+    },
+    "expRevenue": "Ingresos esperados",
+    "@expRevenue": {
+        "description": "Label for Expected Revenue field"
+    },
+    "enterAmount": "Ingresar cantidad",
+    "@enterAmount": {
+        "description": "Placeholder for Amount input"
+    },
+    "estProbability": "Probabilidad estimada",
+    "@estProbability": {
+        "description": "Label for Estimated Probability field"
+    },
+    "enterProbability": "Ingresar probabilidad",
+    "@enterProbability": {
+        "description": "Placeholder for Probability input"
+    },
+    "nextStep": "Próximo paso",
+    "@nextStep": {
+        "description": "Label for Next Step field"
+    },
+    "enterNextStep": "Ingrese el siguiente paso",
+    "@enterNextStep": {
+        "description": "Placeholder for Next Step input"
+    },
+    "stage": "Etapa",
+    "@stage": {
+        "description": "Label for Stage field"
+    },
+    "fieldRequired": "Se requiere campo",
+    "@fieldRequired": {
+        "description": "Validation error for required field"
+    },
+    "leadSearch": "Búsqueda de clientes potenciales",
+    "@leadSearch": {
+        "description": "Title for Lead Search dialog"
+    },
+    "selectLead": "Seleccionar cliente potencial",
+    "@selectLead": {
+        "description": "Instruction to select a lead"
+    },
+    "lead": "Dirigir",
+    "@lead": {
+        "description": "Label for Lead field"
+    },
+    "employeeSearch": "Búsqueda de empleados",
+    "@employeeSearch": {
+        "description": "Title for Employee Search dialog"
+    },
+    "selectEmployee": "Seleccionar empleado",
+    "@selectEmployee": {
+        "description": "Instruction to select an employee"
+    },
+    "accountEmployee": "Empleado de cuenta",
+    "@accountEmployee": {
+        "description": "Label for Account Employee field"
+    },
+    "create": "Crear",
+    "@create": {
+        "description": "Create button text"
+    },
+    "update": "Actualizar",
+    "@update": {
+        "description": "Update button text"
+    },
+    "serverProblem": "Problema del servidor",
+    "@serverProblem": {
+        "description": "Error message for server problems"
+    },
+    "fetchError": "Error de recuperación: {message}",
+    "@fetchError": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "noOpportunities": "No se encontraron oportunidades",
+    "@noOpportunities": {
+        "description": "Message when no opportunities are found"
+    },
+    "addNew": "Añadir nuevo",
+    "@addNew": {
+        "description": "Button to add a new item"
+    },
+    "fetchSearchError": "Error de búsqueda: {message}",
+    "@fetchSearchError": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "opportunitySearch": "Búsqueda de oportunidades",
+    "@opportunitySearch": {
+        "description": "Title for Opportunity Search dialog"
+    },
+    "searchInput": "Entrada de búsqueda",
+    "@searchInput": {
+        "description": "Label for search input field"
+    },
+    "enterSearchValue": "Introduzca el valor de búsqueda",
+    "@enterSearchValue": {
+        "description": "Placeholder for search input"
+    },
+    "searchResults": "Resultados de la búsqueda",
+    "@searchResults": {
+        "description": "Header for search results"
+    },
+    "noSearchItems": "No hay elementos de búsqueda",
+    "@noSearchItems": {
+        "description": "Message when no search items are found"
+    },
+    "searchResult": "ID: {id}, Nombre: {name}",
+    "@searchResult": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            },
+            "name": {
+                "type": "String"
+            }
+        }
+    }
+}

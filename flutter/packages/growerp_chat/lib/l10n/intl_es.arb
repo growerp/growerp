@@ -1,0 +1,103 @@
+{
+  "@@locale": "es",
+  "chatNotActive": "¡Chat no activo!",
+  "@chatNotActive": {
+    "description": "Error message when chat is not active"
+  },
+  "messageText": "Texto del mensaje..",
+  "@messageText": {
+    "description": "Placeholder text for message input field"
+  },
+  "send": "Enviar",
+  "@send": {
+    "description": "Send button text"
+  },
+  "addPartner": "Añadir compañero",
+  "@addPartner": {
+    "description": "Button text to add chat partner"
+  },
+  "chat": "Chat #",
+  "@chat": {
+    "description": "Chat header with number symbol"
+  },
+  "newChat": "Nuevo",
+  "@newChat": {
+    "description": "Button text for creating new chat"
+  },
+  "selectChatPartner": "Seleccionar compañero de chat",
+  "@selectChatPartner": {
+    "description": "Instruction to select a chat partner"
+  },
+  "chatPartner": "Compañero de chat",
+  "@chatPartner": {
+    "description": "Label for chat partner field"
+  },
+  "fieldRequired": "Campo requerido",
+  "@fieldRequired": {
+    "description": "Generic required field error message"
+  },
+  "create": "Crear",
+  "@create": {
+    "description": "Create button text"
+  },
+  "update": "Actualizar",
+  "@update": {
+    "description": "Update button text"
+  },
+  "room": "Sala",
+  "@room": {
+    "description": "Label for room"
+  },
+  "chatRoom": "Sala de chat",
+  "@chatRoom": {
+    "description": "Chat room label or header"
+  },
+  "chatUsersAndGroups": "Usuarios y grupos de chat",
+  "@chatUsersAndGroups": {
+    "description": "Section header for chat users and groups"
+  },
+  "addNew": "Añadir nuevo",
+  "@addNew": {
+    "description": "Add new item button text"
+  },
+  "no": "no ",
+  "@no": {
+    "description": "Partial text for 'no items found' messages"
+  },
+  "sFound": "s encontrados!",
+  "@sFound": {
+    "description": "Partial text for 'items found' messages"
+  },
+  "searchInName": "buscar en nombre ..",
+  "@searchInName": {
+    "description": "Placeholder text for name search field"
+  },
+  "search": "Buscar",
+  "@search": {
+    "description": "Search button text"
+  },
+  "name": "Nombre",
+  "@name": {
+    "description": "Name field label"
+  },
+  "status": "Estado",
+  "@status": {
+    "description": "Status field label"
+  },
+  "pvt": "Priv.",
+  "@pvt": {
+    "description": "Abbreviation for Private"
+  },
+  "nroMembers": "#Miem.",
+  "@nroMembers": {
+    "description": "Abbreviation for number of members"
+  },
+  "allMessagesRead": "Todos los mensajes leídos",
+  "@allMessagesRead": {
+    "description": "Status message when all messages are read"
+  },
+  "unreadMessages": "mensajes no leídos",
+  "@unreadMessages": {
+    "description": "Label for unread messages count"
+  }
+}
