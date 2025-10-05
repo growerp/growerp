@@ -18,19 +18,18 @@ along with this software (see the LICENSE.md file). If not, see
         <render-mode>
             <text type="html"><![CDATA[
                 <html><body>
-                Welcome to the GrowERP ${classification} system, ${firstName!} ${lastName!}<br/><br/>
+                ${ec.resource.expand(ec.l10n.localize('GrowerpEmailWelcomeGreeting'), '')}<br/><br/>
 
-                Please note that you are now going to use our test system with limited availability and is cleared regularly?<br/><br/>
+                ${ec.resource.expand(ec.l10n.localize('GrowerpEmailWelcomeTestNote'), '')}<br/><br/>
                 
-                <b>Your password to login is ${newPassword}</b><br/><br/>
+                <b>${ec.resource.expand(ec.l10n.localize('GrowerpEmailWelcomePasswordInfo'), '')}</b><br/><br/>
                 
-                When you need any support, please let us know at
+                ${ec.resource.expand(ec.l10n.localize('GrowerpEmailWelcomeSupportInfo'), '')}
                 <a href="mailto:support@growerp.com?subject=Question%20about%20Growerp-${classification}%20on%20the%20test%20system">support@growerp.com</a><br/><br/>
 
-                We will send you weekly an email with tips about the system.
-                But for now, look around and let us know your comments!
+                ${ec.resource.expand(ec.l10n.localize('GrowerpEmailWelcomeTipsInfo'), '')}
                 <br/><br/>
-                Regards, <br/> The Growerp-${classification} Team!
+                ${ec.resource.expand(ec.l10n.localize('GrowerpEmailWelcomeRegards'), '')} <br/> ${ec.resource.expand(ec.l10n.localize('GrowerpEmailWelcomeTeam'), '')}
                 </body></html>
             ]]></text></render-mode>
     </widgets>

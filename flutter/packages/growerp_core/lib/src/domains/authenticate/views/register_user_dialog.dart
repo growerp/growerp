@@ -180,6 +180,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                         email: _emailController.text,
                         userGroup: widget.admin ? UserGroup.admin : null,
                       ),
+                      locale: context.read<LocaleBloc>().state.locale,
                     ),
                   );
                 }

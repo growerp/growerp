@@ -31,7 +31,8 @@ class AuthUpdateLocal extends AuthEvent {
 
 class AuthRegister extends AuthEvent {
   final User user;
-  const AuthRegister(this.user);
+  final Locale? locale;
+  const AuthRegister(this.user, {this.locale});
   @override
   List<Object> get props => [user];
 }
@@ -49,16 +50,19 @@ class AuthLogin extends AuthEvent {
   final String? expireMonth;
   final String? expireYear;
   final bool? demoData;
-  const AuthLogin(this.username, this.password,
-      {this.companyName,
-      this.currency,
-      this.demoData,
-      this.creditCardNumber,
-      this.nameOnCard,
-      this.cVC,
-      this.plan,
-      this.expireMonth,
-      this.expireYear});
+  const AuthLogin(
+    this.username,
+    this.password, {
+    this.companyName,
+    this.currency,
+    this.demoData,
+    this.creditCardNumber,
+    this.nameOnCard,
+    this.cVC,
+    this.plan,
+    this.expireMonth,
+    this.expireYear,
+  });
 }
 
 class AuthResetPassword extends AuthEvent {

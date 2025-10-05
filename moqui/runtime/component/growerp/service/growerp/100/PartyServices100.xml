@@ -1568,6 +1568,10 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- create account with or without login-->
             <!-- create#Account will always create a login even if username == null-->
+            <!-- Set the locale in the execution context so error messages are localized -->
+            <if condition="user.locale">
+                <script>ec.user.setLocale(new Locale(user.locale))</script>
+            </if>
             <set field="inMap"
                 from="[ roleTypeId: user.role,
                     pseudoId: user.pseudoId,  loginAfterCreate: login,
@@ -2715,6 +2719,11 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <log message="====register with locale: $locale and timeZoneOffset: $timeZoneOffset" />
+            <!-- Set the locale in the execution context so error messages are localized -->
+            <if condition="locale">
+                <script>ec.user.setLocale(new Locale(locale))</script>
+            </if>
             <!-- check input parameters because anonymous access -->
             <if condition="companyPartyId">
                 <!-- check if a 'main' company -->

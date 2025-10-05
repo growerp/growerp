@@ -106,4 +106,292 @@ along with this software (see the LICENSE.md file). If not, see
 
         <moqui.basic.LocalizedMessage locale="default" original="UserAuthcOtpMessage"
                 localized="Your single use code is ${code}" />
+
+        <!-- User Services Messages -->
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiUsernameAlreadyInUse"
+                localized="Username [${username}] is already in use. Please choose another." />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiUsernameAlreadyInUse"
+                localized="ชื่อผู้ใช้ [${username}] ถูกใช้งานแล้ว กรุณาเลือกชื่ออื่น" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiUsernameAlreadyInUse"
+                localized="Gebruikersnaam [${username}] is al in gebruik. Kies alstublieft een andere." />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiEmailAlreadyInUse"
+                localized="Email ${emailAddress} is already in use. Login with username ${existingUsername}" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiEmailAlreadyInUse"
+                localized="อีเมล ${emailAddress} ถูกใช้งานแล้ว เข้าสู่ระบบด้วยชื่อผู้ใช้ ${existingUsername}" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiEmailAlreadyInUse"
+                localized="E-mail ${emailAddress} is al in gebruik. Log in met gebruikersnaam ${existingUsername}" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiAccountCreatedSuccess"
+                localized="Account created with username ${username}" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiAccountCreatedSuccess"
+                localized="สร้างบัญชีด้วยชื่อผู้ใช้ ${username} แล้ว" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiAccountCreatedSuccess"
+                localized="Account aangemaakt met gebruikersnaam ${username}" />
+
+        <moqui.basic.LocalizedMessage locale="default"
+                original="MoquiAccountNotCreatedPasswordIssues"
+                localized="Because of password issues not creating account with username ${username}" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiAccountNotCreatedPasswordIssues"
+                localized="เนื่องจากปัญหารหัสผ่าน ไม่สามารถสร้างบัญชีด้วยชื่อผู้ใช้ ${username}" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiAccountNotCreatedPasswordIssues"
+                localized="Vanwege wachtwoordproblemen geen account aangemaakt met gebruikersnaam ${username}" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiAccountRemovedPasswordIssues"
+                localized="Removed temporary account with username ${username} for password issues" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiAccountRemovedPasswordIssues"
+                localized="ลบบัญชีชั่วคราวด้วยชื่อผู้ใช้ ${username} เนื่องจากปัญหารหัสผ่าน" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiAccountRemovedPasswordIssues"
+                localized="Tijdelijk account met gebruikersnaam ${username} verwijderd vanwege wachtwoordproblemen" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiUserAccountNotFound"
+                localized="User Account not found for User ID ${userId}" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiUserAccountNotFound"
+                localized="ไม่พบบัญชีผู้ใช้สำหรับ User ID ${userId}" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiUserAccountNotFound"
+                localized="Gebruikersaccount niet gevonden voor gebruikers-ID ${userId}" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiCouldNotFindUserWithName"
+                localized="Could not find user with name ${username}" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiCouldNotFindUserWithName"
+                localized="ไม่พบผู้ใช้ที่มีชื่อ ${username}" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiCouldNotFindUserWithName"
+                localized="Kon gebruiker met naam ${username} niet vinden" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiCannotUpdatePasswordOtherUser"
+                localized="Cannot update the password of another user without password admin permission" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiCannotUpdatePasswordOtherUser"
+                localized="ไม่สามารถอัปเดตรหัสผ่านของผู้ใช้รายอื่นได้โดยไม่มีสิทธิ์ผู้ดูแลระบบรหัสผ่าน" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiCannotUpdatePasswordOtherUser"
+                localized="Kan het wachtwoord van een andere gebruiker niet bijwerken zonder wachtwoordbeheerdersrechten" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiAuthcCodeRequired"
+                localized="Authentication code required for user ${username}" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiAuthcCodeRequired"
+                localized="ต้องใช้รหัสยืนยันตัวตนสำหรับผู้ใช้ ${username}" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiAuthcCodeRequired"
+                localized="Authenticatiecode vereist voor gebruiker ${username}" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiAuthcCodeNotValid"
+                localized="Authentication code not valid" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiAuthcCodeNotValid"
+                localized="รหัสยืนยันตัวตนไม่ถูกต้อง" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiAuthcCodeNotValid"
+                localized="Authenticatiecode niet geldig" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiPleaseEnterCurrentPassword"
+                localized="Please enter current password" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiPleaseEnterCurrentPassword"
+                localized="กรุณากรอกรหัสผ่านปัจจุบัน" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiPleaseEnterCurrentPassword"
+                localized="Voer alstublieft het huidige wachtwoord in" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiPasswordIncorrect"
+                localized="Password incorrect for user ${username}" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiPasswordIncorrect"
+                localized="รหัสผ่านไม่ถูกต้องสำหรับผู้ใช้ ${username}" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiPasswordIncorrect"
+                localized="Wachtwoord onjuist voor gebruiker ${username}" />
+
+        <moqui.basic.LocalizedMessage locale="default"
+                original="MoquiPasswordNotMatchCurrentOrReset"
+                localized="Password did not match current password or reset password for user ${username}" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiPasswordNotMatchCurrentOrReset"
+                localized="รหัสผ่านไม่ตรงกับรหัสผ่านปัจจุบันหรือรหัสผ่านรีเซ็ตสำหรับผู้ใช้ ${username}" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiPasswordNotMatchCurrentOrReset"
+                localized="Wachtwoord komt niet overeen met huidig wachtwoord of resetwachtwoord voor gebruiker ${username}" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiPasswordUpdatedSuccess"
+                localized="Password updated for user ${username}" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiPasswordUpdatedSuccess"
+                localized="อัปเดตรหัสผ่านสำหรับผู้ใช้ ${username} แล้ว" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiPasswordUpdatedSuccess"
+                localized="Wachtwoord bijgewerkt voor gebruiker ${username}" />
+
+        <moqui.basic.LocalizedMessage locale="default"
+                original="MoquiCannotUpdatePasswordAccountNotFound"
+                localized="Cannot update password, Account not found with ID ${userId}" />
+        <moqui.basic.LocalizedMessage locale="th"
+                original="MoquiCannotUpdatePasswordAccountNotFound"
+                localized="ไม่สามารถอัปเดตรหัสผ่าน ไม่พบบัญชีที่มี ID ${userId}" />
+        <moqui.basic.LocalizedMessage locale="nl"
+                original="MoquiCannotUpdatePasswordAccountNotFound"
+                localized="Kan wachtwoord niet bijwerken, Account niet gevonden met ID ${userId}" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiPasswordsDoNotMatch"
+                localized="New Password and New Password Verify do not match" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiPasswordsDoNotMatch"
+                localized="รหัสผ่านใหม่และการยืนยันรหัสผ่านใหม่ไม่ตรงกัน" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiPasswordsDoNotMatch"
+                localized="Nieuw wachtwoord en verificatie van nieuw wachtwoord komen niet overeen" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiPasswordShorterThanMinLength"
+                localized="Password shorter than ${minLength} characters" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiPasswordShorterThanMinLength"
+                localized="รหัสผ่านสั้นกว่า ${minLength} ตัวอักษร" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiPasswordShorterThanMinLength"
+                localized="Wachtwoord korter dan ${minLength} tekens" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiPasswordNeedsMinDigits"
+                localized="Password needs ${minDigits} digit/number characters" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiPasswordNeedsMinDigits"
+                localized="รหัสผ่านต้องมีตัวเลข ${minDigits} ตัว" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiPasswordNeedsMinDigits"
+                localized="Wachtwoord heeft ${minDigits} cijfer/nummertekens nodig" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiPasswordNeedsMinOthers"
+                localized="Password needs ${minOthers} other characters (not letter or digit)" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiPasswordNeedsMinOthers"
+                localized="รหัสผ่านต้องมีตัวอักขระพิเศษ ${minOthers} ตัว (ไม่ใช่ตัวอักษรหรือตัวเลข)" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiPasswordNeedsMinOthers"
+                localized="Wachtwoord heeft ${minOthers} andere tekens nodig (geen letter of cijfer)" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiPasswordSameAsCurrent"
+                localized="New password is same as current password" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiPasswordSameAsCurrent"
+                localized="รหัสผ่านใหม่เหมือนกับรหัสผ่านปัจจุบัน" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiPasswordSameAsCurrent"
+                localized="Nieuw wachtwoord is hetzelfde als huidig wachtwoord" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiPasswordUsedInHistory"
+                localized="Password was used in last ${historyLimit} passwords" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiPasswordUsedInHistory"
+                localized="รหัสผ่านถูกใช้ในรหัสผ่าน ${historyLimit} ตัวล่าสุด" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiPasswordUsedInHistory"
+                localized="Wachtwoord werd gebruikt in laatste ${historyLimit} wachtwoorden" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiPasswordIssuesNotUpdating"
+                localized="Found issues with password so not updating" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiPasswordIssuesNotUpdating"
+                localized="พบปัญหากับรหัสผ่าน จึงไม่ทำการอัปเดต" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiPasswordIssuesNotUpdating"
+                localized="Problemen met wachtwoord gevonden, dus niet bijwerken" />
+
+        <moqui.basic.LocalizedMessage locale="default"
+                original="MoquiCouldNotFindAccountWithUsernameOrEmail"
+                localized="Could not find account with username or email address ${username}" />
+        <moqui.basic.LocalizedMessage locale="th"
+                original="MoquiCouldNotFindAccountWithUsernameOrEmail"
+                localized="ไม่พบบัญชีที่มีชื่อผู้ใช้หรือที่อยู่อีเมล ${username}" />
+        <moqui.basic.LocalizedMessage locale="nl"
+                original="MoquiCouldNotFindAccountWithUsernameOrEmail"
+                localized="Kon geen account vinden met gebruikersnaam of e-mailadres ${username}" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiAccountNoEmailAddress"
+                localized="Account with username ${username} does not have an email address" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiAccountNoEmailAddress"
+                localized="บัญชีที่มีชื่อผู้ใช้ ${username} ไม่มีที่อยู่อีเมล" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiAccountNoEmailAddress"
+                localized="Account met gebruikersnaam ${username} heeft geen e-mailadres" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiAccountNotFound"
+                localized="Account not found" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiAccountNotFound"
+                localized="ไม่พบบัญชี" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiAccountNotFound"
+                localized="Account niet gevonden" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiAccountHasNoEmailAddress"
+                localized="Account has no email address" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiAccountHasNoEmailAddress"
+                localized="บัญชีไม่มีที่อยู่อีเมล" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiAccountHasNoEmailAddress"
+                localized="Account heeft geen e-mailadres" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiResetPasswordSentByEmail"
+                localized="A reset password was sent by email to ${emailAddress}. This password may only be used to change your password. Your current password is still valid." />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiResetPasswordSentByEmail"
+                localized="รหัสผ่านรีเซ็ตถูกส่งทางอีเมลไปที่ ${emailAddress} แล้ว รหัสผ่านนี้สามารถใช้เพื่อเปลี่ยนรหัสผ่านของคุณเท่านั้น รหัสผ่านปัจจุบันของคุณยังใช้งานได้อยู่" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiResetPasswordSentByEmail"
+                localized="Een resetwachtwoord is per e-mail verzonden naar ${emailAddress}. Dit wachtwoord mag alleen worden gebruikt om uw wachtwoord te wijzigen. Uw huidige wachtwoord is nog steeds geldig." />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiMustChangePasswordBeforeLogin"
+                localized="You must change your password before login." />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiMustChangePasswordBeforeLogin"
+                localized="คุณต้องเปลี่ยนรหัสผ่านก่อนเข้าสู่ระบบ" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiMustChangePasswordBeforeLogin"
+                localized="U moet uw wachtwoord wijzigen voordat u inlogt." />
+
+        <moqui.basic.LocalizedMessage locale="default"
+                original="MoquiCannotCreateInitialAdminOnlyWhenNoUsers"
+                localized="Can only create initial admin account if there are no UserAccount records" />
+        <moqui.basic.LocalizedMessage locale="th"
+                original="MoquiCannotCreateInitialAdminOnlyWhenNoUsers"
+                localized="สามารถสร้างบัญชีผู้ดูแลระบบเริ่มต้นได้เฉพาะเมื่อไม่มีระเบียน UserAccount" />
+        <moqui.basic.LocalizedMessage locale="nl"
+                original="MoquiCannotCreateInitialAdminOnlyWhenNoUsers"
+                localized="Kan alleen een initieel beheerdersaccount aanmaken als er geen UserAccount-records zijn" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiNoUserPreAuthenticated"
+                localized="No user pre-authenticated" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiNoUserPreAuthenticated"
+                localized="ไม่มีผู้ใช้ที่ยืนยันตัวตนล่วงหน้า" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiNoUserPreAuthenticated"
+                localized="Geen gebruiker vooraf geverifieerd" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiNoUserPreAuthCannotSendCode"
+                localized="No user pre-authenticated, cannot send code" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiNoUserPreAuthCannotSendCode"
+                localized="ไม่มีผู้ใช้ที่ยืนยันตัวตนล่วงหน้า ไม่สามารถส่งรหัสได้" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiNoUserPreAuthCannotSendCode"
+                localized="Geen gebruiker vooraf geverifieerd, kan code niet verzenden" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiUserNotFound"
+                localized="User ${username} not found" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiUserNotFound"
+                localized="ไม่พบผู้ใช้ ${username}" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiUserNotFound"
+                localized="Gebruiker ${username} niet gevonden" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiAuthcFactorNotFound"
+                localized="Authentication factor ${factorId} not found" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiAuthcFactorNotFound"
+                localized="ไม่พบปัจจัยยืนยันตัวตน ${factorId}" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiAuthcFactorNotFound"
+                localized="Authenticatiefactor ${factorId} niet gevonden" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiAuthcFactorNotValidForUser"
+                localized="Authentication Factor ${factorId} is not valid for ${username}" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiAuthcFactorNotValidForUser"
+                localized="ปัจจัยยืนยันตัวตน ${factorId} ไม่ถูกต้องสำหรับ ${username}" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiAuthcFactorNotValidForUser"
+                localized="Authenticatiefactor ${factorId} is niet geldig voor ${username}" />
+
+        <moqui.basic.LocalizedMessage locale="default"
+                original="MoquiSendCodeNotSupportedForFactorType"
+                localized="Send code not supported for authc factor type ${factorTypeEnumId}" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiSendCodeNotSupportedForFactorType"
+                localized="ไม่รองรับการส่งรหัสสำหรับประเภทปัจจัยยืนยันตัวตน ${factorTypeEnumId}" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiSendCodeNotSupportedForFactorType"
+                localized="Verzenden van code niet ondersteund voor authenticatiefactortype ${factorTypeEnumId}" />
+
+        <moqui.basic.LocalizedMessage locale="default"
+                original="MoquiUserHasOtherAuthcFactorsConfigured"
+                localized="User has other authentication factors configured, cannot use account email address" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiUserHasOtherAuthcFactorsConfigured"
+                localized="ผู้ใช้มีการกำหนดค่าปัจจัยยืนยันตัวตนอื่น ไม่สามารถใช้ที่อยู่อีเมลของบัญชีได้" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiUserHasOtherAuthcFactorsConfigured"
+                localized="Gebruiker heeft andere authenticatiefactoren geconfigureerd, kan account e-mailadres niet gebruiken" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiAuthcCodeSentTo"
+                localized="Authentication code sent to ${destination}" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiAuthcCodeSentTo"
+                localized="ส่งรหัสยืนยันตัวตนไปที่ ${destination} แล้ว" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiAuthcCodeSentTo"
+                localized="Authenticatiecode verzonden naar ${destination}" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiCannotCreateMoreThan21Codes"
+                localized="Cannot create more than 21 codes at a time" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiCannotCreateMoreThan21Codes"
+                localized="ไม่สามารถสร้างรหัสมากกว่า 21 รหัสในคครั้งเดียวได้" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiCannotCreateMoreThan21Codes"
+                localized="Kan niet meer dan 21 codes tegelijk aanmaken" />
+
+        <moqui.basic.LocalizedMessage locale="default" original="MoquiEntryAlreadyExistsFor"
+                localized="Entry already exists for ${factorOption}" />
+        <moqui.basic.LocalizedMessage locale="th" original="MoquiEntryAlreadyExistsFor"
+                localized="มีรายการอยู่แล้วสำหรับ ${factorOption}" />
+        <moqui.basic.LocalizedMessage locale="nl" original="MoquiEntryAlreadyExistsFor"
+                localized="Invoer bestaat al voor ${factorOption}" />
+
 </entity-facade-xml>
