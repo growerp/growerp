@@ -132,19 +132,26 @@ class ProductListState extends State<ProductList> {
     }
 
     return BlocConsumer<ProductBloc, ProductState>(
-      listenWhen: (previous, current) =>
-          previous.status == ProductStatus.loading,
       listener: (context, state) {
         if (state.status == ProductStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
         }
         if (state.status == ProductStatus.success) {
           started = true;
-          HelperFunctions.showMessage(
-            context,
-            '${state.message}',
-            Colors.green,
-          );
+          final catalogLocalizations = CatalogLocalizations.of(context)!;
+          final translatedMessage = state.message != null
+              ? translateProductBlocMessage(
+                  state.message!,
+                  catalogLocalizations,
+                )
+              : '';
+          if (translatedMessage.isNotEmpty) {
+            HelperFunctions.showMessage(
+              context,
+              translatedMessage,
+              Colors.green,
+            );
+          }
         }
       },
       builder: (context, state) {

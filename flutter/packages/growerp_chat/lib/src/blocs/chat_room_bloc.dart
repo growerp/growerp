@@ -40,10 +40,12 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
   int start = 0;
 
   ChatRoomBloc(this.restClient, this.chatClient, this.authBloc)
-      : super(const ChatRoomState()) {
+    : super(const ChatRoomState()) {
     on<ChatRoomUpdateLocal>(_onChatRoomUpdateLocal);
-    on<ChatRoomFetch>(_onChatRoomFetch,
-        transformer: chatRoomDroppable(const Duration(milliseconds: 100)));
+    on<ChatRoomFetch>(
+      _onChatRoomFetch,
+      transformer: chatRoomDroppable(const Duration(milliseconds: 100)),
+    );
     on<ChatRoomUpdate>(_onChatRoomUpdate);
     on<ChatRoomDelete>(_onChatRoomDelete);
     on<ChatRoomReceiveWsChatMessage>(_onChatRoomReceiveWsChatMessage);
@@ -55,9 +57,11 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
   ) {
     emit(state.copyWith(status: ChatRoomStatus.loading));
     var chatRooms = List.of(state.chatRooms);
-    int index = chatRooms.indexWhere((element) =>
-        element.chatRoomId ==
-        (event.addNotReadChatRoomId ?? event.delNotReadChatRoomId));
+    int index = chatRooms.indexWhere(
+      (element) =>
+          element.chatRoomId ==
+          (event.addNotReadChatRoomId ?? event.delNotReadChatRoomId),
+    );
     if (index != -1) {
       if (event.addNotReadChatRoomId != null) {
         chatRooms[index] = chatRooms[index].copyWith(hasRead: false);
@@ -66,7 +70,8 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
       }
     }
     return emit(
-        state.copyWith(status: ChatRoomStatus.success, chatRooms: chatRooms));
+      state.copyWith(status: ChatRoomStatus.success, chatRooms: chatRooms),
+    );
   }
 
   Future<void> _onChatRoomFetch(
@@ -82,27 +87,37 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     }
     if (state.status == ChatRoomStatus.initial) {
       final myStream = chatClient.stream();
-      myStream.listen((data) => add(ChatRoomReceiveWsChatMessage(
-          ChatMessage.fromJson(jsonDecode(data)))));
+      myStream.listen(
+        (data) => add(
+          ChatRoomReceiveWsChatMessage(ChatMessage.fromJson(jsonDecode(data))),
+        ),
+      );
     }
     try {
       // start from record zero for initial and refresh
-      ChatRooms compResult =
-          await restClient.getChatRooms(searchString: event.searchString);
-      return emit(state.copyWith(
-        status: ChatRoomStatus.success,
-        chatRooms: start == 0
-            ? compResult.chatRooms
-            : (List.of(state.chatRooms)..addAll(compResult.chatRooms)),
-        hasReachedMax:
-            compResult.chatRooms.length < _chatRoomLimit ? true : false,
-        searchString: '',
-      ));
+      ChatRooms compResult = await restClient.getChatRooms(
+        searchString: event.searchString,
+      );
+      return emit(
+        state.copyWith(
+          status: ChatRoomStatus.success,
+          chatRooms: start == 0
+              ? compResult.chatRooms
+              : (List.of(state.chatRooms)..addAll(compResult.chatRooms)),
+          hasReachedMax: compResult.chatRooms.length < _chatRoomLimit
+              ? true
+              : false,
+          searchString: '',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: ChatRoomStatus.failure,
           chatRooms: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -114,13 +129,19 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
       List<ChatRoom> chatRooms = List.from(state.chatRooms);
       if (event.chatRoom.chatRoomId.isNotEmpty) {
         // update
-        ChatRoom compResult =
-            await restClient.updateChatRoom(chatRoom: event.chatRoom);
+        ChatRoom compResult = await restClient.updateChatRoom(
+          chatRoom: event.chatRoom,
+        );
         int index = chatRooms.indexWhere(
-            (element) => element.chatRoomId == event.chatRoom.chatRoomId);
+          (element) => element.chatRoomId == event.chatRoom.chatRoomId,
+        );
         chatRooms[index] = compResult;
         return emit(
-            state.copyWith(chatRooms: chatRooms, message: "Chat room updated"));
+          state.copyWith(
+            chatRooms: chatRooms,
+            message: 'chatRoomUpdateSuccess',
+          ),
+        );
       } else {
         // add
         List<ChatRoomMember> members = List.of(event.chatRoom.members);
@@ -128,9 +149,11 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
         if (event.chatRoom.chatRoomName == null) {
           // get chatroom where current user and toUserId are members, name is null
           ChatRooms result = await restClient.getChatRooms(
-              chatRoomName: ' ', // server should interprete as null
-              userId: event.chatRoom.getToUserId(
-                  authBloc.state.authenticate?.user?.loginName ?? ''));
+            chatRoomName: ' ', // server should interprete as null
+            userId: event.chatRoom.getToUserId(
+              authBloc.state.authenticate?.user?.loginName ?? '',
+            ),
+          );
           dynamic dbRooms = result.chatRooms;
           if (dbRooms is ChatRoomState) return emit(dbRooms);
           if (dbRooms.isNotEmpty) {
@@ -140,41 +163,61 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
               members.add(member.copyWith(isActive: true));
             }
             await restClient.updateChatRoom(
-                chatRoom: dbRooms[0].copyWith(members: members));
+              chatRoom: dbRooms[0].copyWith(members: members),
+            );
             chatRooms.insert(0, dbRooms[0].copyWith(members: members));
-            return emit(state.copyWith(
-                chatRooms: chatRooms, message: "Chat room added"));
+            return emit(
+              state.copyWith(
+                chatRooms: chatRooms,
+                message: 'chatRoomAddSuccess',
+              ),
+            );
           } else {
             // not found so create new
             // add logged user to members
-            members.add(ChatRoomMember(
+            members.add(
+              ChatRoomMember(
                 user: authBloc.state.authenticate?.user,
                 hasRead: true,
-                isActive: true));
+                isActive: true,
+              ),
+            );
             ChatRoom compResult = await restClient.createChatRoom(
-                chatRoom: event.chatRoom.copyWith(members: members));
+              chatRoom: event.chatRoom.copyWith(members: members),
+            );
             chatRooms.insert(0, compResult);
             return emit(state.copyWith(chatRooms: chatRooms));
           }
         } else {
           // add new multiperson room
           List<ChatRoomMember> members = List.of(event.chatRoom.members);
-          members.add(ChatRoomMember(
+          members.add(
+            ChatRoomMember(
               user: authBloc.state.authenticate?.user,
               hasRead: true,
-              isActive: true));
+              isActive: true,
+            ),
+          );
           ChatRoom compResult = await restClient.createChatRoom(
-              chatRoom: event.chatRoom.copyWith(members: members));
+            chatRoom: event.chatRoom.copyWith(members: members),
+          );
           chatRooms.insert(0, compResult);
-          return emit(state.copyWith(
-              status: ChatRoomStatus.success, chatRooms: chatRooms));
+          return emit(
+            state.copyWith(
+              status: ChatRoomStatus.success,
+              chatRooms: chatRooms,
+            ),
+          );
         }
       }
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: ChatRoomStatus.failure,
           chatRooms: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -185,23 +228,31 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     try {
       List<ChatRoom> chatRooms = List.of(state.chatRooms);
       ChatRoom result = await restClient.deleteChatRoom(
-          chatRoomId: event.chatRoom.chatRoomId);
-      int chatRoomIndex = chatRooms
-          .indexWhere((cr) => cr.chatRoomId == event.chatRoom.chatRoomId);
+        chatRoomId: event.chatRoom.chatRoomId,
+      );
+      int chatRoomIndex = chatRooms.indexWhere(
+        (cr) => cr.chatRoomId == event.chatRoom.chatRoomId,
+      );
       chatRooms.removeAt(chatRoomIndex);
-      return emit(state.copyWith(
+      return emit(
+        state.copyWith(
           chatRooms: chatRooms,
           status: ChatRoomStatus.success,
-          message: "left chatroom ${result.chatRoomName}"));
+          message: "left chatroom ${result.chatRoomName}",
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: ChatRoomStatus.failure,
           chatRooms: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
-/*
+  /*
   Future<void> _onChatRoomCreate(
     ChatRoomCreate event,
     Emitter<ChatRoomState> emit,
@@ -272,20 +323,28 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     try {
       List<ChatRoom> chatRooms = List.from(state.chatRooms);
       // check if room exist for message, when not, get new unread active list
-      if (!state.chatRooms.any((element) =>
-          element.chatRoomId == event.chatMessage.chatRoom?.chatRoomId)) {
+      if (!state.chatRooms.any(
+        (element) =>
+            element.chatRoomId == event.chatMessage.chatRoom?.chatRoomId,
+      )) {
         ChatRooms roomResult = await restClient.getChatRooms();
         chatRooms = roomResult.chatRooms;
       }
       // set badge om roomlist
-      add(ChatRoomUpdateLocal(
-          addNotReadChatRoomId: event.chatMessage.chatRoom?.chatRoomId));
+      add(
+        ChatRoomUpdateLocal(
+          addNotReadChatRoomId: event.chatMessage.chatRoom?.chatRoomId,
+        ),
+      );
       return emit(state.copyWith(chatRooms: chatRooms));
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: ChatRoomStatus.failure,
           chatRooms: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

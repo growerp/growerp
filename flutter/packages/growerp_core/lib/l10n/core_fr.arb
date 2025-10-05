@@ -1,819 +1,214 @@
 {
   "@@locale": "fr",
   "aboutApp": "À propos de {appName}",
-  "@aboutApp": {
-    "description": "Titre de la boîte de dialogue À propos de l'application",
-    "placeholders": {
-      "appName": {
-        "type": "String"
-      }
-    }
-  },
   "aboutGrowERP": "À propos de GrowERP",
-  "@aboutGrowERP": {
-    "description": "Élément de menu À propos de GrowERP"
-  },
   "accounts": "Comptes",
-  "@accounts": {
-    "description": "Élément de menu ou en-tête de section Comptes"
-  },
   "addNew": "Ajouter nouveau",
-  "@addNew": {
-    "description": "Texte du bouton Ajouter un nouvel élément"
-  },
   "andAtLeastOne": "et au moins un ",
-  "@andAtLeastOne": {
-    "description": "Message de validation partiel indiquant l'exigence minimale"
-  },
   "backendServer": "Serveur backend",
-  "@backendServer": {
-    "description": "Étiquette de saisie du serveur backend"
-  },
   "balanceSheet": "Bilan",
-  "@balanceSheet": {
-    "description": "Élément de menu du rapport de bilan"
-  },
   "balanceSummary": "Résumé du solde",
-  "@balanceSummary": {
-    "description": "Élément de menu du rapport de résumé du solde"
-  },
   "businessCompanyName": "Nom de l'entreprise commerciale requis !",
-  "@businessCompanyName": {
-    "description": "Message d'erreur de validation du nom de l'entreprise"
-  },
   "businessNameError": "Le nom de l'entreprise est requis !",
-  "@businessNameError": {
-    "description": "Message d'erreur de validation du nom de l'entreprise"
-  },
   "cancel": "Annuler",
-  "@cancel": {
-    "description": "Texte du bouton Annuler"
-  },
   "cannotLoadRestRequests": "Impossible de charger les requêtes REST !",
-  "@cannotLoadRestRequests": {
-    "description": "Message d'erreur lorsque les requêtes REST ne parviennent pas à se charger"
-  },
   "chat": "Chat",
-  "@chat": {
-    "description": "Élément de menu Chat"
-  },
   "chatServer": "Serveur de chat",
-  "@chatServer": {
-    "description": "Étiquette de saisie du serveur de chat"
-  },
   "completeRegistration": "Finaliser l'inscription",
-  "@completeRegistration": {
-    "description": "Titre de la boîte de dialogue Finaliser l'inscription"
-  },
   "companyPartyId": "ID de partie de l'entreprise",
-  "@companyPartyId": {
-    "description": "Étiquette de saisie de l'ID de partie de l'entreprise"
-  },
   "continueButton": "Continuer",
-  "@continueButton": {
-    "description": "Texte du bouton Continuer"
-  },
   "contributing": "Contribuer",
-  "@contributing": {
-    "description": "Élément de menu Contribuer"
-  },
   "copyright": "© {year} GrowERP.com",
-  "@copyright": {
-    "description": "Texte de copyright avec l'année",
-    "placeholders": {
-      "year": {
-        "type": "String"
-      }
-    }
-  },
   "create": "Créer",
-  "@create": {
-    "description": "Texte du bouton Créer"
-  },
   "createPassword": "Créer un mot de passe",
-  "@createPassword": {
-    "description": "Titre de la boîte de dialogue Créer un mot de passe"
-  },
   "creditCardDetails": "Détails de la carte de crédit",
-  "@creditCardDetails": {
-    "description": "Texte d'aide pour les détails de la carte de crédit"
-  },
   "creditCardInfo": "Informations sur la carte de crédit",
-  "@creditCardInfo": {
-    "description": "Étiquette des informations sur la carte de crédit"
-  },
   "currency": "Devise",
-  "@currency": {
-    "description": "Étiquette de saisie de la devise"
-  },
   "currencyError": "La devise est requise !",
-  "@currencyError": {
-    "description": "Message d'erreur de validation de la devise"
-  },
   "currentPaymentMethod": "Mode de paiement actuel : {method}",
-  "@currentPaymentMethod": {
-    "description": "Texte d'affichage du mode de paiement actuel",
-    "placeholders": {
-      "method": {
-        "type": "String"
-      }
-    }
-  },
   "customer": "Client",
-  "@customer": {
-    "description": "Étiquette pour le client"
-  },
   "cvvCode": "CVV",
-  "@cvvCode": {
-    "description": "Étiquette de saisie du code CVV"
-  },
   "cvvHint": "123",
-  "@cvvHint": {
-    "description": "Indication de saisie du code CVV"
-  },
   "dateTime": "Date/Heure",
-  "@dateTime": {
-    "description": "Étiquette de date et d'heure"
-  },
   "deleteWarning": "Avertissement de suppression",
-  "@deleteWarning": {
-    "description": "Titre de la boîte de dialogue d'avertissement de suppression"
-  },
   "deleteYourself": "Supprimez-vous",
-  "@deleteYourself": {
-    "description": "Texte du bouton Supprimez-vous"
-  },
   "deleteYourselfAndCompany": "Supprimez-vous et votre entreprise",
-  "@deleteYourselfAndCompany": {
-    "description": "Texte du bouton Supprimez-vous et votre entreprise"
-  },
   "demoData": "Données de démonstration",
-  "@demoData": {
-    "description": "Étiquette de la case à cocher des données de démonstration"
-  },
   "email": "E-mail",
-  "@email": {
-    "description": "Étiquette de saisie de l'e-mail"
-  },
   "emailAddress": "Adresse e-mail",
-  "@emailAddress": {
-    "description": "Étiquette de saisie de l'adresse e-mail"
-  },
   "emailAddressError": "L'adresse e-mail est requise !",
-  "@emailAddressError": {
-    "description": "Message d'erreur de validation de l'adresse e-mail"
-  },
   "emailAddressError2": "Format de l'adresse e-mail incorrect !",
-  "@emailAddressError2": {
-    "description": "Message d'erreur de validation du format de l'adresse e-mail"
-  },
   "enterBackendUrl": "Saisir l'URL du backend",
-  "@enterBackendUrl": {
-    "description": "Titre de la boîte de dialogue Saisir l'URL du backend"
-  },
   "enterCompanyAndCurrency": "Veuillez saisir le nom de votre entreprise et la devise",
-  "@enterCompanyAndCurrency": {
-    "description": "Instruction de saisie de l'entreprise et de la devise"
-  },
   "enterCompanyName": "Saisir le nom de l'entreprise",
-  "@enterCompanyName": {
-    "description": "Instruction de saisie du nom de l'entreprise"
-  },
   "error": "Erreur",
-  "@error": {
-    "description": "Texte d'état d'erreur"
-  },
   "errorMessage": "Message d'erreur",
-  "@errorMessage": {
-    "description": "Étiquette du message d'erreur"
-  },
   "expiryDate": "MM/AA",
-  "@expiryDate": {
-    "description": "Étiquette de saisie de la date d'expiration"
-  },
   "expiryDateHint": "12/25",
-  "@expiryDateHint": {
-    "description": "Indication de saisie de la date d'expiration"
-  },
   "fieldRequired": "Le champ est requis !",
-  "@fieldRequired": {
-    "description": "Message d'erreur de validation de champ obligatoire"
-  },
   "firstName": "Prénom",
-  "@firstName": {
-    "description": "Étiquette de saisie du prénom"
-  },
   "firstNameError": "Le prénom est requis !",
-  "@firstNameError": {
-    "description": "Message d'erreur de validation du prénom"
-  },
   "forgotPassword": "Mot de passe oublié ?",
-  "@forgotPassword": {
-    "description": "Texte du lien Mot de passe oublié"
-  },
   "generateDemoData": "Générer des données de démonstration ?",
-  "@generateDemoData": {
-    "description": "Texte de la case à cocher Générer des données de démonstration"
-  },
   "goHome": "Aller à l'accueil",
-  "@goHome": {
-    "description": "Info-bulle du bouton Aller à l'accueil"
-  },
   "invoice": "Facture",
-  "@invoice": {
-    "description": "Étiquette pour la facture"
-  },
   "itemIsRequired": "l'article est requis",
-  "@itemIsRequired": {
-    "description": "Message de validation indiquant un article obligatoire"
-  },
   "itemTypes": "Types d'articles",
-  "@itemTypes": {
-    "description": "Élément de menu ou en-tête de section Types d'articles"
-  },
   "journal": "Journal",
-  "@journal": {
-    "description": "Élément de menu ou en-tête de section Journal"
-  },
   "lastName": "Nom de famille",
-  "@lastName": {
-    "description": "Étiquette de saisie du nom de famille"
-  },
   "lastNameError": "Le nom de famille est requis !",
-  "@lastNameError": {
-    "description": "Message d'erreur de validation du nom de famille"
-  },
   "login": "Connexion",
-  "@login": {
-    "description": "Texte du bouton de connexion"
-  },
   "loginName": "Nom de connexion",
-  "@loginName": {
-    "description": "Étiquette du nom de connexion"
-  },
   "loginWithExistingUserName": "Se connecter avec un nom d'utilisateur existant",
-  "@loginWithExistingUserName": {
-    "description": "Texte d'en-tête du formulaire de connexion pour les utilisateurs existants"
-  },
   "logout": "Déconnexion",
-  "@logout": {
-    "description": "Texte du bouton de déconnexion"
-  },
   "main": "Principal",
-  "@main": {
-    "description": "Élément de menu principal"
-  },
   "mainDashboard": "Tableau de bord principal",
-  "@mainDashboard": {
-    "description": "Élément de menu ou lien de navigation du tableau de bord principal"
-  },
   "ms": "ms",
-  "@ms": {
-    "description": "Abréviation des millisecondes"
-  },
   "nameOnCard": "Nom sur la carte",
-  "@nameOnCard": {
-    "description": "Étiquette de saisie du nom sur la carte"
-  },
   "no": "Non",
-  "@no": {
-    "description": "Texte de réponse Non"
-  },
   "noAccess": "Pas d'accès à cette page !",
-  "@noAccess": {
-    "description": "Message d'erreur Pas d'accès"
-  },
   "noAccessHere": "Pas d'accès ici !",
-  "@noAccessHere": {
-    "description": "Message d'erreur Pas d'accès ici"
-  },
   "noRestRequests": "Aucune requête REST trouvée...",
-  "@noRestRequests": {
-    "description": "Message Aucune requête REST"
-  },
   "notAvailable": "Non disponible",
-  "@notAvailable": {
-    "description": "Texte de remplacement pour Non disponible"
-  },
   "number": "Numéro",
-  "@number": {
-    "description": "Étiquette de saisie du numéro"
-  },
   "numberHint": "1234 5678 9012 3456",
-  "@numberHint": {
-    "description": "Indication de saisie du numéro de carte"
-  },
   "ok": "OK",
-  "@ok": {
-    "description": "Texte du bouton OK"
-  },
   "onlyUserDelete": "Supprimer uniquement l'utilisateur, pas l'entreprise",
-  "@onlyUserDelete": {
-    "description": "Texte de l'option Supprimer uniquement l'utilisateur"
-  },
   "openInvoices": "Factures ouvertes :",
-  "@openInvoices": {
-    "description": "Étiquette de l'élément du tableau de bord des factures ouvertes"
-  },
   "openSourceLicenses": "Licences Open Source",
-  "@openSourceLicenses": {
-    "description": "Élément de menu Licences Open Source"
-  },
   "order": "Commande",
-  "@order": {
-    "description": "Étiquette pour la commande"
-  },
   "parameters": "Paramètres",
-  "@parameters": {
-    "description": "Étiquette des paramètres"
-  },
   "password": "Mot de passe",
-  "@password": {
-    "description": "Étiquette de saisie du mot de passe"
-  },
   "passwordError": "Le mot de passe est requis !",
-  "@passwordError": {
-    "description": "Message d'erreur de validation du mot de passe"
-  },
   "passwordError2": "Le mot de passe est requis !",
-  "@passwordError2": {
-    "description": "Variante du message d'erreur de validation du mot de passe"
-  },
   "passwordHelper": "Minimum 5 caractères",
-  "@passwordHelper": {
-    "description": "Texte d'aide du mot de passe"
-  },
   "passwordMismatch": "Les mots de passe ne correspondent pas !",
-  "@passwordMismatch": {
-    "description": "Erreur de validation de la non-concordance des mots de passe"
-  },
   "passwordValidationError": "Le mot de passe doit comporter au moins 5 caractères",
-  "@passwordValidationError": {
-    "description": "Message d'erreur de validation du mot de passe"
-  },
   "payment": "Paiement",
-  "@payment": {
-    "description": "Étiquette pour le paiement"
-  },
   "paymentPlan": "Plan de paiement",
-  "@paymentPlan": {
-    "description": "Étiquette de saisie du plan de paiement"
-  },
   "paymentTypes": "Types de paiement",
-  "@paymentTypes": {
-    "description": "Élément de menu ou en-tête de section Types de paiement"
-  },
   "payWithinWeek": "Payer dans la semaine",
-  "@payWithinWeek": {
-    "description": "Texte de la case à cocher Payer dans la semaine"
-  },
   "privacyCodeOfConduct": "Confidentialité/Code de conduite",
-  "@privacyCodeOfConduct": {
-    "description": "Élément de menu Confidentialité et code de conduite"
-  },
   "referrerUrl": "URL de référence",
-  "@referrerUrl": {
-    "description": "Étiquette de l'URL de référence"
-  },
   "refresh": "Actualiser",
-  "@refresh": {
-    "description": "Texte du bouton Actualiser"
-  },
   "register": "S'inscrire",
-  "@register": {
-    "description": "Texte du bouton S'inscrire"
-  },
   "registerAndCharge": "S'inscrire et facturer",
-  "@registerAndCharge": {
-    "description": "Texte du bouton S'inscrire et facturer"
-  },
   "registerNewCompanyAndAdmin": "Inscrire une nouvelle entreprise et un nouvel administrateur",
-  "@registerNewCompanyAndAdmin": {
-    "description": "Texte du lien Inscrire une nouvelle entreprise"
-  },
   "registration": "Inscription",
-  "@registration": {
-    "description": "Titre de la boîte de dialogue d'inscription"
-  },
   "requestName": "Nom de la requête",
-  "@requestName": {
-    "description": "Étiquette du nom de la requête"
-  },
   "requestUrl": "URL de la requête",
-  "@requestUrl": {
-    "description": "Étiquette de l'URL de la requête"
-  },
   "restart": "Redémarrer",
-  "@restart": {
-    "description": "Texte du bouton Redémarrer"
-  },
   "restRequestDetails": "Détails de la requête REST",
-  "@restRequestDetails": {
-    "description": "Titre des détails de la requête REST"
-  },
   "revenueExpense": "Revenus/Dépenses",
-  "@revenueExpense": {
-    "description": "Élément de menu du rapport sur les revenus et les dépenses"
-  },
   "runningTime": "Temps d'exécution",
-  "@runningTime": {
-    "description": "Étiquette du temps d'exécution"
-  },
   "selectLanguage": "Sélectionner la langue",
-  "@selectLanguage": {
-    "description": "Instruction de sélection de la langue"
-  },
   "selectPlanError": "Veuillez sélectionner un plan !",
-  "@selectPlanError": {
-    "description": "Message d'erreur de validation de la sélection du plan"
-  },
   "sendNewPassword": "Envoyer un nouveau mot de passe",
-  "@sendNewPassword": {
-    "description": "Titre de la boîte de dialogue Envoyer un nouveau mot de passe"
-  },
   "serverHost": "Hôte du serveur",
-  "@serverHost": {
-    "description": "Étiquette de l'hôte du serveur"
-  },
   "serverIp": "IP du serveur",
-  "@serverIp": {
-    "description": "Étiquette de l'IP du serveur"
-  },
   "shipment": "Expédition",
-  "@shipment": {
-    "description": "Étiquette pour l'expédition"
-  },
   "slowHit": "Accès lent",
-  "@slowHit": {
-    "description": "Étiquette d'accès lent"
-  },
   "status": "Statut",
-  "@status": {
-    "description": "Étiquette du statut"
-  },
   "submitNewPassword": "Soumettre le nouveau mot de passe",
-  "@submitNewPassword": {
-    "description": "Texte du bouton Soumettre le nouveau mot de passe"
-  },
   "subscription": "Abonnement",
-  "@subscription": {
-    "description": "Titre de la boîte de dialogue d'abonnement"
-  },
   "success": "Succès",
-  "@success": {
-    "description": "Texte d'état de succès"
-  },
   "supplier": "Fournisseur",
-  "@supplier": {
-    "description": "Étiquette pour le fournisseur"
-  },
   "tempPassword": "Un mot de passe temporaire sera envoyé par e-mail",
-  "@tempPassword": {
-    "description": "Texte d'information sur le mot de passe temporaire"
-  },
   "test": "Test",
-  "@test": {
-    "description": "Élément de menu Test"
-  },
   "testSystem": "Système de test",
-  "@testSystem": {
-    "description": "Texte du système de test"
-  },
   "theme": "Thème",
-  "@theme": {
-    "description": "Élément de menu Thème"
-  },
   "timePeriods": "Périodes",
-  "@timePeriods": {
-    "description": "Élément de menu ou en-tête de section Périodes"
-  },
   "transaction": "Transaction",
-  "@transaction": {
-    "description": "Étiquette pour la transaction"
-  },
   "transactions": "Transactions",
-  "@transactions": {
-    "description": "Élément de menu ou en-tête de section Transactions"
-  },
   "trialPeriod": "Période d'essai",
-  "@trialPeriod": {
-    "description": "Texte de la période d'essai"
-  },
   "unknown": "Inconnu",
-  "@unknown": {
-    "description": "Texte de remplacement pour les valeurs inconnues"
-  },
   "update": "mettre à jour",
-  "@update": {
-    "description": "Texte du bouton Mettre à jour"
-  },
   "user": "Utilisateur",
-  "@user": {
-    "description": "Étiquette de l'utilisateur"
-  },
   "userAndCompanyDelete": "Supprimer l'utilisateur et l'entreprise",
-  "@userAndCompanyDelete": {
-    "description": "Texte de l'option Supprimer l'utilisateur et l'entreprise"
-  },
   "username": "Nom d'utilisateur : {username}",
-  "@username": {
-    "description": "Texte d'affichage du nom d'utilisateur",
-    "placeholders": {
-      "username": {
-        "type": "String"
-      }
-    }
-  },
   "usernameEmail": "Nom d'utilisateur/E-mail",
-  "@usernameEmail": {
-    "description": "Étiquette de saisie du nom d'utilisateur ou de l'e-mail"
-  },
   "usernameEmailError": "Le nom d'utilisateur/l'e-mail est requis !",
-  "@usernameEmailError": {
-    "description": "Message d'erreur de validation du nom d'utilisateur/de l'e-mail"
-  },
   "verifyPassword": "Vérifier le mot de passe",
-  "@verifyPassword": {
-    "description": "Étiquette de saisie de la vérification du mot de passe"
-  },
   "verifyPasswordError": "La vérification du mot de passe est requise !",
-  "@verifyPasswordError": {
-    "description": "Message d'erreur de validation de la vérification du mot de passe"
-  },
   "verifyPasswordHelper": "Ressaisir le mot de passe",
-  "@verifyPasswordHelper": {
-    "description": "Texte d'aide de la vérification du mot de passe"
-  },
   "version": "Version : {version} build : {build}",
-  "@version": {
-    "description": "Texte d'affichage de la version",
-    "placeholders": {
-      "version": {
-        "type": "String"
-      },
-      "build": {
-        "type": "String"
-      }
-    }
-  },
   "viewLicense": "Voir la licence",
-  "@viewLicense": {
-    "description": "Élément de menu Voir la licence"
-  },
   "viewReadme": "Voir le fichier Lisezmoi",
-  "@viewReadme": {
-    "description": "Élément de menu Voir le fichier Lisezmoi"
-  },
   "welcome": "Bienvenue !",
-  "@welcome": {
-    "description": "Message de bienvenue"
-  },
   "welcomeToGrowERPBusinessSystem": "Bienvenue dans le système commercial GrowERP !",
-  "@welcomeToGrowERPBusinessSystem": {
-    "description": "Message de bienvenue sur la page d'accueil"
-  },
   "yes": "Oui",
-  "@yes": {
-    "description": "Texte de réponse Oui"
-  },
   "about": "À propos",
-  "@about": {
-    "description": "Élément de menu À propos"
-  },
   "accounting": "Comptabilité",
-  "@accounting": {
-    "description": "Élément de menu Comptabilité"
-  },
   "accountingDashboard": "Tableau de bord de la comptabilité",
-  "@accountingDashboard": {
-    "description": "Élément de menu du tableau de bord de la comptabilité"
-  },
   "accountingLedger": "Grand livre comptable",
-  "@accountingLedger": {
-    "description": "Élément de menu du grand livre comptable"
-  },
   "accountingPurch": "Achat comptable",
-  "@accountingPurch": {
-    "description": "Élément de menu Achat comptable"
-  },
   "accountingSales": "Vente comptable",
-  "@accountingSales": {
-    "description": "Élément de menu Vente comptable"
-  },
   "administrators": "Administrateurs",
-  "@administrators": {
-    "description": "Étiquette des administrateurs"
-  },
   "allOpportunities": "Toutes les opportunités",
-  "@allOpportunities": {
-    "description": "Étiquette de toutes les opportunités"
-  },
   "assets": "Actifs",
-  "@assets": {
-    "description": "Élément de menu Actifs"
-  },
   "catalog": "Catalogue",
-  "@catalog": {
-    "description": "Élément de menu Catalogue"
-  },
   "categories": "Catégories",
-  "@categories": {
-    "description": "Élément de menu Catégories"
-  },
   "company": "Entreprise",
-  "@company": {
-    "description": "Élément de menu Entreprise"
-  },
   "crm": "CRM",
-  "@crm": {
-    "description": "Élément de menu CRM"
-  },
   "customers": "Clients",
-  "@customers": {
-    "description": "Élément de menu Clients"
-  },
   "employees": "Employés",
-  "@employees": {
-    "description": "Élément de menu Employés"
-  },
   "incomingInvoices": "Factures entrantes",
-  "@incomingInvoices": {
-    "description": "Élément de menu Factures entrantes"
-  },
   "incomingPayments": "Paiements entrants",
-  "@incomingPayments": {
-    "description": "Élément de menu Paiements entrants"
-  },
   "incomingShipments": "Expéditions entrantes",
-  "@incomingShipments": {
-    "description": "Élément de menu Expéditions entrantes"
-  },
   "inventory": "Inventaire",
-  "@inventory": {
-    "description": "Élément de menu Inventaire"
-  },
   "leads": "Pistes",
-  "@leads": {
-    "description": "Élément de menu Pistes"
-  },
   "ledgerAccnt": "Compte du grand livre",
-  "@ledgerAccnt": {
-    "description": "Élément de menu Compte du grand livre"
-  },
   "ledgerJournals": "Journaux du grand livre",
-  "@ledgerJournals": {
-    "description": "Élément de menu Journaux du grand livre"
-  },
   "ledgerTransaction": "Transaction du grand livre",
-  "@ledgerTransaction": {
-    "description": "Élément de menu Transaction du grand livre"
-  },
   "ledgerTree": "Arborescence du grand livre",
-  "@ledgerTree": {
-    "description": "Élément de menu Arborescence du grand livre"
-  },
   "myTodoTasks": "Mes tâches à faire",
-  "@myTodoTasks": {
-    "description": "Élément de menu Mes tâches à faire"
-  },
   "opportunities": "Opportunités",
-  "@opportunities": {
-    "description": "Élément de menu Opportunités"
-  },
   "orders": "Commandes",
-  "@orders": {
-    "description": "Élément de menu Commandes"
-  },
   "organization": "Organisation",
-  "@organization": {
-    "description": "Élément de menu Organisation"
-  },
   "otherEmployees": "Autres employés",
-  "@otherEmployees": {
-    "description": "Étiquette Autres employés"
-  },
   "outgoingInvoices": "Factures sortantes",
-  "@outgoingInvoices": {
-    "description": "Élément de menu Factures sortantes"
-  },
   "outgoingPayments": "Paiements sortants",
-  "@outgoingPayments": {
-    "description": "Élément de menu Paiements sortants"
-  },
   "outgoingShipments": "Expéditions sortantes",
-  "@outgoingShipments": {
-    "description": "Élément de menu Expéditions sortantes"
-  },
   "paymtTypes": "Types de paiement",
-  "@paymtTypes": {
-    "description": "Élément de menu Types de paiement"
-  },
   "planSelection": "Sélection du plan",
-  "@planSelection": {
-    "description": "Élément de menu Sélection du plan"
-  },
   "products": "Produits",
-  "@products": {
-    "description": "Élément de menu Produits"
-  },
   "purchaseOrders": "Bons de commande",
-  "@purchaseOrders": {
-    "description": "Élément de menu Bons de commande"
-  },
   "purchaseUnpaidInvoices": "Acheter des factures impayées",
-  "@purchaseUnpaidInvoices": {
-    "description": "Étiquette Acheter des factures impayées"
-  },
   "reports": "Rapports",
-  "@reports": {
-    "description": "Élément de menu Rapports"
-  },
   "requests": "Demandes",
-  "@requests": {
-    "description": "Élément de menu Demandes"
-  },
   "salesOpenInvoices": "Ventes de factures ouvertes",
-  "@salesOpenInvoices": {
-    "description": "Étiquette Ventes de factures ouvertes"
-  },
   "salesOrders": "Commandes de vente",
-  "@salesOrders": {
-    "description": "Élément de menu Commandes de vente"
-  },
   "setUp": "Configurer",
-  "@setUp": {
-    "description": "Élément de menu Configurer"
-  },
   "subscriptions": "Abonnements",
-  "@subscriptions": {
-    "description": "Élément de menu Abonnements"
-  },
   "suppliers": "Fournisseurs",
-  "@suppliers": {
-    "description": "Élément de menu Fournisseurs"
-  },
   "website": "Site Web",
-  "@website": {
-    "description": "Élément de menu Site Web"
-  },
   "whLocations": "Emplacements d'entrepôt",
-  "@whLocations": {
-    "description": "Élément de menu Emplacements d'entrepôt"
-  },
   "checkIn": "Arrivée",
-  "@checkIn": {
-    "description": "Élément de menu Arrivée"
-  },
   "checkOut": "Départ",
-  "@checkOut": {
-    "description": "Élément de menu Départ"
-  },
   "inOut": "Entrée/Sortie",
-  "@inOut": {
-    "description": "Élément de menu Entrée/Sortie"
-  },
   "myHotel": "Mon hôtel",
-  "@myHotel": {
-    "description": "Élément de menu Mon hôtel"
-  },
   "reservations": "Réservations",
-  "@reservations": {
-    "description": "Élément de menu Réservations"
-  },
   "rooms": "Chambres",
-  "@rooms": {
-    "description": "Élément de menu Chambres"
-  },
   "roomTypes": "Types de chambres",
-  "@roomTypes": {
-    "description": "Élément de menu Types de chambres"
-  },
   "tasks": "Tâches",
-  "@tasks": {
-    "description": "Élément de menu Tâches"
-  },
   "myOpportunities": "Mes opportunités",
-  "@myOpportunities": {
-    "description": "Élément de menu Mes opportunités"
-  },
   "clients": "Clients",
-  "@clients": {
-    "description": "Élément de menu Clients"
-  },
   "staff": "Personnel",
-  "@staff": {
-    "description": "Élément de menu Personnel"
-  },
   "applications": "Applications",
-  "@applications": {
-    "description": "Élément de menu Applications"
-  },
   "restRequests": "Requêtes REST",
-  "@restRequests": {
-    "description": "Élément de menu Requêtes REST"
-  },
   "userRequestStatus": "Utilisateur\nRequête\nStatut",
-  "@userRequestStatus": {
-    "description": "En-tête de colonne de la liste des requêtes REST pour l'utilisateur/la requête/le statut"
-  }
+  "authLoginSuccess": "Connexion réussie",
+  "authLoginFailure": "Échec de la connexion",
+  "authLogoutSuccess": "Déconnexion réussie",
+  "authRegisterSuccess": "Inscription réussie. Vous pouvez maintenant vous connecter avec le mot de passe envoyé par email",
+  "authRegisterFailure": "Échec de l'inscription",
+  "authPasswordResetSuccess": "Réinitialisation du mot de passe réussie",
+  "authPasswordResetFailure": "Échec de la réinitialisation du mot de passe",
+  "authUpdateSuccess": "Authentification mise à jour avec succès",
+  "authUpdateFailure": "Échec de la mise à jour de l'authentification",
+  "notificationFetchSuccess": "Notifications récupérées avec succès",
+  "notificationFetchFailure": "Échec de la récupération des notifications",
+  "notificationMarkReadSuccess": "Notification marquée comme lue",
+  "notificationMarkReadFailure": "Échec du marquage de la notification comme lue",
+  "passwordChangeSuccess": "Mot de passe modifié avec succès pour l'utilisateur: {username}"
 }

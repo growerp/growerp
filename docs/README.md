@@ -1,461 +1,248 @@
-# GrowERP Extensibility Documentation
+# GrowERP Documentation Index
 
-This directory contai8. **[WebSocket No10. # GrowERP Extensibility Documentation
+This directory contains comprehensive documentation for extending and developing with GrowERP. GrowERP is designed with extensibility at its core, allowing developers to create custom applications and extend functionality through well-defined building blocks and configuration systems.
 
-This directory contains comprehensive documentation for extending GrowERP through its modular architecture. GrowERP is designed with extensibility at its core, allowing developers to create custom applications and extend functionality through well-defined building blocks and configuration systems.
+## 📖 Quick Navigation
 
-## Documentation Overview
+### 🚀 Getting Started
 
-### 📚 Main Guides
+- **[GrowERP Extensibility Guide](./GrowERP_Extensibility_Guide.md)** - Start here for complete overview
+- **[Building Blocks Development Guide](./Building_Blocks_Development_Guide.md)** - Create Flutter packages
+- **[Backend Components Development Guide](./Backend_Components_Development_Guide.md)** - Develop Moqui components
 
-1. **[GrowERP Extensibility Guide](./GrowERP_Extensibility_Guide.md)**
-   - Complete overview of GrowERP's extensibility architecture
-   - Frontend and backend extensibility patterns
-   - Integration patterns and security
-   - Examples and best practices
+### 🎨 Design & Patterns
 
-2. **[Building Blocks Development Guide](./Building_Blocks_Development_Guide.md)**
-   - Detailed guide for creating Flutter packages (growerp_* packages)
-   - Package structure and development patterns
-   - State management with BLoC
-   - UI components and testing strategies
+- **[GrowERP Design Patterns](./GrowERP_Design_Patterns.md)** - Comprehensive design patterns
+- **[GrowERP Code Templates](./GrowERP_Code_Templates.md)** - Ready-to-use templates
+- **[BLoC Message Translation - Quick Reference](./QUICK_REFERENCE_BLOC_MESSAGES.md)** ⭐ **NEW!** Complete guide for direct l10n keys pattern
 
-### 🚀 Release & Version Management
+### 🔧 Technical Guides
 
-3. **[Version Management and Release Process](./GrowERP_Version_Management_and_Release_Process.md)**
-   - Comprehensive guide to GrowERP's release strategy and version management
-   - Standard release process with master branch as single source of truth
-   - Hotfix procedure for urgent production fixes
-   - Trunk-based development methodology and best practices
-   - Enhanced release tooling: [Release Tool Documentation](../flutter/release/README.md)
+- **[Data Model Basic Guide](./basic_explanation_of_the_frontend_REST_Backend_data_models.md)** - Frontend/Backend data models
+- **[Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md)** - Handle timezone differences
+- **[Timezone Quick Reference](./GrowERP_Timezone_Quick_Reference.md)** - Quick timezone guide
+- **[Stripe Payment Processing](./Stripe_Payment_Processing_Documentation.md)** - Payment integration
+- **[WebSocket Notification System](./WebSocket_Notification_System.md)** - Real-time notifications
+- **[Backend URL Selection System](./Backend_URL_Selection_System_Documentation.md)** - Backend configuration
 
-### 🎨 Design & Development Patterns
+### 🌍 Internationalization
 
-4. **[GrowERP Design Patterns](./GrowERP_Design_Patterns.md)**
-   - Comprehensive design patterns for consistent development
-   - BLoC state management patterns
-   - UI component patterns and form handling
-   - Testing patterns and data model conventions
+- **[Buddhist Era Documentation](./Buddhist_Era_README.md)** - Buddhist calendar support
+- **[Buddhist Era Quick Reference](./Buddhist_Era_Quick_Reference.md)** - Quick reference
+- **[Buddhist Era Testing Checklist](./Buddhist_Era_Testing_Checklist.md)** - Testing guide
+- **[BLoC Message Translation - Quick Reference](./QUICK_REFERENCE_BLOC_MESSAGES.md)** ⭐ **NEW!** Multi-language BLoC messages with direct l10n keys
 
-5. **[GrowERP Code Templates](./GrowERP_Code_Templates.md)**
-   - Ready-to-use code templates for rapid development
-   - BLoC, UI component, and test templates
-   - Model and API integration templates
-   - Quick generation commands and examples
+### 🚀 Release & Operations
 
-6. **[GrowERP AI Development Instructions](./GrowERP_AI_Instructions.md)**
-   - Comprehensive guide for AI-assisted development
-   - Code quality standards and best practices
-   - Anti-patterns to avoid and quality checklists
-   - Integration guidelines for AI coding tools
+- **[Version Management and Release Process](./GrowERP_Version_Management_and_Release_Process.md)** - Release strategy
+- **[Snap Linux Distribution Guide](./snap_linux_distribution.md)** - Package for Linux
+- **[GrowERP Timeout Fix Documentation](./GrowERP_Timeout_Fix_Documentation.md)** - Timeout handling
 
-### 🔧 Backend & Integration
+### 🤖 AI Integration
 
-7. **[Backend Components Development Guide](./Backend_Components_Development_Guide.md)**
-   - Comprehensive guide for Moqui component development
-   - Entity, service, and API development
-   - Data management and security
-   - Testing and deployment strategies
+- **[GrowERP AI Development Instructions](./GrowERP_AI_Instructions.md)** - AI-assisted development
+- **[Model Context Protocol (MCP) Server](../moqui/runtime/component/growerp/docs/README.md)** - AI integration system
 
-8. **[Data Model Basic Guide](./basic_explanation_of_the_frontend_REST_Backend_data_models.md)**
-   - Flutter Data Model (growerp_models package)
-   - Moqui Data Model (mantle-udm component)
-   - REST Interface (e.g., https://test.growerp.org/rest/service.swagger/growerp)
+### 📊 Business Processes
 
-9. **[Stripe Payment Processing](./Stripe_Payment_Processing_Documentation.md)**
-   - Complete integration guide for Stripe payment processing
-   - Setup, configuration, and best practices
+- **[Leads Upload Process](./leads_upload_process.md)** - Import lead data
+- **[Leads Download Process](./leads_download_process.md)** - Export lead data
+- **[Moqui Subscription Function](./Moqui_Subscription_Function.md)** - Subscription management
 
-10. **[Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md)**
-    - Comprehensive guide for handling timezone differences between server and client
-    - Implementation details and usage patterns
-    - Quick reference: [Timezone Quick Reference](./GrowERP_Timezone_Quick_Reference.md)
+### 📚 Examples & References
 
-11. **[WebSocket Notification System](./WebSocket_Notification_System.md)**
-    - Real-time notification system implementation
-    - Moqui NotificationMessage framework integration
-    - Topic-based subscriptions and user preferences
-    - WebSocket connection management and error handling
+- **[Management Summary: Open Source Extensibility](./Management_Summary_Open_Source_Extensibility.md)** - Executive overview
+- **[Examples](./examples/)** - Code examples and use cases
 
-12. **[Model Context Protocol (MCP) Server](../moqui/runtime/component/growerp/docs/README.md)**
-    - AI integration system for business automation
-    - Model Context Protocol server implementation
-    - Business tools and operations integration
-    - Multi-language client examples and authentication
+## 🔥 What's New
 
-13. **[Snap Linux Distribution Guide](./snap_linux_distribution.md)**
-    - Guide for packaging GrowERP as a Snap package for Linux distribution
-    - Guide for packaging GrowERP as a Snap package for Linux distribution
+### BLoC Message Translation with Direct L10n Keys (Current Pattern)
 
-11. **[Version Management and Release Process](./GrowERP_Version_Management_and_Release_Process.md)**
-    - Comprehensive guide to GrowERP's release strategy and version management
-    - Standard release process with master branch as single source of truth
-    - Hotfix procedure for urgent production fixes
-    - Trunk-based development methodology and best practices
+A streamlined pattern for handling multi-language messages from BLoCs using direct l10n keys:
 
+- **Direct l10n keys** - No MessageKeys constants needed
+- **Simple parameter passing** - Using colon delimiter (e.g., `'userAddSuccess:John'`)
+- **Type-safe** - Compile-time checks via generated l10n methods
+- **Easy to debug** - Messages are readable strings, not constants
+- **Complete examples** - Implemented across all 8 GrowERP packages
 
-## Quick Startcation System](./WebSocket_Notification_System.md)**
-   - Real-time notification system implementation
-   - Moqui NotificationMessage framework integration
-   - Topic-based subscriptions and user preferences
-   - WebSocket connection management and error handling
+**Quick Start:**
+1. Read: [BLoC Message Translation Quick Reference](./QUICK_REFERENCE_BLOC_MESSAGES.md) ⭐ **Complete guide**
+2. See live examples in all `growerp_*` packages (e.g., `flutter/packages/growerp_user_company/`)
 
-9. **[Model Context Protocol (MCP) Server](../moqui/runtime/component/growerp/docs/README.md)**
-   - AI integration system for business automation
-   - Model Context Protocol server implementation
-   - Business tools and operations integration
-   - Multi-language client examples and authentication
+**Pattern at a glance:**
+```dart
+// In BLoC - emit direct l10n key with parameter
+message = 'userAddSuccess:${user.name}';
 
-10. **[Snap Linux distribition Guide](./snap_linux_distribution.md)**rehensive documentation for extending GrowERP through its modular architecture. GrowERP is designed with extensibility at its core, allowing developers to create custom applications and extend functionality through well-defined building blocks and configuration systems.
+// In Translator - parse and translate
+final parts = messageKey.split(':');
+final key = parts[0];  // 'userAddSuccess'
+final param = parts[1]; // user name
+return l10n.userAddSuccess(param);
 
-## Documentation Overview
+// In UI - display translated message (no changes needed)
+BlocListener<UserBloc, UserState>(
+  listener: (context, state) {
+    if (state.message != null) {
+      final translated = translateUserBlocMessage(l10n, state.message!);
+      HelperFunctions.showMessage(context, translated, Colors.green);
+    }
+  },
+  // ...
+)
+```
 
-### 📚 Main Guides
-
-1. **[GrowERP Extensibility Guide](./GrowERP_Extensibility_Guide.md)**
-   - Complete overview of GrowERP's extensibility architecture
-   - Frontend and backend extensibility patterns
-   - Integration patterns and security
-   - Examples and best practices
-
-2. **[Building Blocks Development Guide](./Building_Blocks_Development_Guide.md)**
-   - Detailed guide for creating Flutter packages (growerp_* packages)
-   - Package structure and development patterns
-   - State management with BLoC
-   - UI components and testing strategies
-
-### 🏗️ Design & Development Patterns
-
-3. **[GrowERP Design Patterns](./GrowERP_Design_Patterns.md)**
-   - Comprehensive design patterns for consistent development
-   - BLoC state management patterns
-   - UI component patterns and form handling
-   - Testing patterns and data model conventions
-
-4. **[GrowERP Code Templates](./GrowERP_Code_Templates.md)**
-   - Ready-to-use code templates for rapid development
-   - BLoC, UI component, and test templates
-   - Model and API integration templates
-   - Quick generation commands and examples
-
-5. **[GrowERP AI Development Instructions](./GrowERP_AI_Instructions.md)**
-   - Comprehensive guide for AI-assisted development
-   - Code quality standards and best practices
-   - Anti-patterns to avoid and quality checklists
-   - Integration guidelines for AI coding tools
-
-3. **[Backend Components Development Guide](./Backend_Components_Development_Guide.md)**
-   - Comprehensive guide for Moqui component development
-   - Entity, service, and API development
-   - Data management and security
-   - Testing and deployment strategies
-
-4. **[Data model basic Guide](./basic_explanation_of_the_frontend_REST_Backend_data_models.md)**
-   - Flutter Data Model (growerp_models package)
-   - Moqui Data Model (mantle-udm component)
-   - REST Interface (e.g., https://test.growerp.org/rest/service.swagger/growerp)
-
-5. **[Stripe Payment processing](./Stripe_Payment_Processing_Documentation.md)**
-   - Complete integration guide for Stripe payment processing
-   - Setup, configuration, and best practices
-
-6. **[Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md)**
-   - Comprehensive guide for handling timezone differences between server and client
-   - Implementation details and usage patterns
-   - Quick reference: [Timezone Quick Reference](./GrowERP_Timezone_Quick_Reference.md)
-
-7. **[WebSocket Notification System](./WebSocket_Notification_System.md)**
-   - Real-time notification system implementation
-   - Moqui NotificationMessage framework integration
-   - Topic-based subscriptions and user preferences
-   - WebSocket connection management and error handling
-
-8. **[Snap Linux distribition Guide](./snap_linux_distribution.md)**
-
-
-## Quick Start
+## 📋 Documentation by Role
 
 ### For Frontend Developers
 
-If you want to create a new Flutter building block:
-
-1. Read the [Building Blocks Development Guide](./Building_Blocks_Development_Guide.md)
-2. Follow the package creation steps
-3. Implement your domain-specific functionality
-4. Test and integrate with existing applications
+1. [Building Blocks Development Guide](./Building_Blocks_Development_Guide.md)
+2. [GrowERP Design Patterns](./GrowERP_Design_Patterns.md)
+3. [BLoC Message Translation Quick Reference](./QUICK_REFERENCE_BLOC_MESSAGES.md) ⭐ **New Pattern!**
+4. [Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md)
 
 ### For Backend Developers
 
-If you want to create a new Moqui component:
+1. [Backend Components Development Guide](./Backend_Components_Development_Guide.md)
+2. [Data Model Basic Guide](./basic_explanation_of_the_frontend_REST_Backend_data_models.md)
+3. [Moqui Subscription Function](./Moqui_Subscription_Function.md)
 
-1. Read the [Backend Components Development Guide](./Backend_Components_Development_Guide.md)
-2. Set up your component structure
-3. Define entities, services, and APIs
-4. Implement security and testing
+### For Full-Stack Developers
 
-### For Application Developers
+1. [GrowERP Extensibility Guide](./GrowERP_Extensibility_Guide.md)
+2. [GrowERP Code Templates](./GrowERP_Code_Templates.md)
+3. [WebSocket Notification System](./WebSocket_Notification_System.md)
 
-If you want to create a complete application:
+### For DevOps/Release Managers
 
-1. Start with the [GrowERP Extensibility Guide](./GrowERP_Extensibility_Guide.md)
-2. Choose the building blocks you need
-3. Configure your menu system
-4. Customize templates as needed
+1. [Version Management and Release Process](./GrowERP_Version_Management_and_Release_Process.md)
+2. [Snap Linux Distribution Guide](./snap_linux_distribution.md)
 
-### For AI Integration
+### For AI/ML Developers
 
-If you want to integrate AI agents with GrowERP:
+1. [GrowERP AI Development Instructions](./GrowERP_AI_Instructions.md)
+2. [Model Context Protocol (MCP) Server](../moqui/runtime/component/growerp/docs/README.md)
 
-1. Read the [MCP Server Documentation](../moqui/runtime/component/growerp/docs/README.md)
-2. Set up API key authentication
-3. Choose from 25+ available business tools
-4. Implement your AI client using provided examples
+### For Localization/Translation Teams
 
-## Architecture Overview
+1. [BLoC Message Translation Quick Reference](./QUICK_REFERENCE_BLOC_MESSAGES.md) ⭐ **Complete guide**
+2. [Buddhist Era Documentation](./Buddhist_Era_README.md)
 
-GrowERP uses a layered architecture that promotes modularity and reusability:
+## 🏗️ Architecture Overview
 
-```mermaid
-graph TB
-    subgraph "Application Layer"
-        A1[Admin App]
-        A2[Hotel App]
-        A3[Freelance App]
-        A4[Custom Apps]
-    end
-    
-    subgraph "Building Blocks Layer"
-        B1[growerp_core]
-        B2[growerp_models]
-        B3[growerp_catalog]
-        B4[growerp_inventory]
-        B5[growerp_order_accounting]
-        B6[growerp_user_company]
-        B7[growerp_marketing]
-        B8[growerp_website]
-        B9[growerp_activity]
-        B10[growerp_chat]
-    end
-    
-    subgraph "Backend Layer"
-        C1[GrowERP Component]
-        C2[Custom Components]
-        C3[Mantle UDM]
-        C4[Mantle USL]
-        C5[Moqui Framework]
-    end
-    
-    A1 --> B1
-    A1 --> B2
-    A1 --> B3
-    A1 --> B4
-    A1 --> B5
-    A1 --> B6
-    A1 --> B7
-    A1 --> B8
-    A1 --> B9
-    A1 --> B10
-    
-    A2 --> B1
-    A2 --> B2
-    A2 --> B6
-    A2 --> B9
-    
-    A3 --> B1
-    A3 --> B2
-    A3 --> B5
-    A3 --> B6
-    A3 --> B9
-    
-    A4 --> B1
-    A4 --> B2
-    
-    B1 --> C1
-    B2 --> C1
-    B3 --> C1
-    B4 --> C1
-    B5 --> C1
-    B6 --> C1
-    B7 --> C1
-    B8 --> C1
-    B9 --> C1
-    B10 --> C1
-    
-    C1 --> C3
-    C1 --> C4
-    C2 --> C3
-    C2 --> C4
-    C3 --> C5
-    C4 --> C5
-    
-    style A1 fill:#e1f5fe
-    style A2 fill:#e1f5fe
-    style A3 fill:#e1f5fe
-    style A4 fill:#e1f5fe
-    style B1 fill:#f3e5f5
-    style B2 fill:#f3e5f5
-    style C1 fill:#e8f5e8
-    style C5 fill:#fff3e0
+```
+┌─────────────────────────────────────────────────────────┐
+│            Application Layer (Apps)                      │
+│  Admin • Hotel • Freelance • Health • Custom Apps      │
+└──────────────────┬──────────────────────────────────────┘
+                   │
+┌──────────────────▼──────────────────────────────────────┐
+│         Building Blocks Layer (Packages)                 │
+│  growerp_core • growerp_models • growerp_catalog         │
+│  growerp_inventory • growerp_order_accounting            │
+│  growerp_user_company • growerp_marketing • ...          │
+└──────────────────┬──────────────────────────────────────┘
+                   │
+┌──────────────────▼──────────────────────────────────────┐
+│           Backend Layer (Moqui)                          │
+│  GrowERP Component • Custom Components                   │
+│  Mantle UDM • Mantle USL • Moqui Framework              │
+└─────────────────────────────────────────────────────────┘
 ```
 
-## Key Concepts
+## 🎯 Common Tasks
 
-### Frontend Extensibility
+### Add a New Feature
 
-- **Building Blocks**: Reusable Flutter packages that encapsulate specific business functionality
-- **Menu System**: Configurable navigation with role-based access control
-- **Templates**: Consistent UI patterns and responsive layouts
-- **Applications**: Composed by combining building blocks and configuring menus
+1. Design: Read [Design Patterns](./GrowERP_Design_Patterns.md)
+2. Frontend: Follow [Building Blocks Guide](./Building_Blocks_Development_Guide.md)
+3. Backend: Follow [Backend Components Guide](./Backend_Components_Development_Guide.md)
+4. Test: Use [Code Templates](./GrowERP_Code_Templates.md)
 
-### Backend Extensibility
+### Internationalize Your Feature
 
-- **Components**: Self-contained Moqui modules that extend backend functionality
-- **Entities**: Data model definitions with relationships and constraints
-- **Services**: Business logic with validation, transactions, and error handling
-- **APIs**: REST endpoints with automatic JSON serialization and authentication
+1. Add translations to `.arb` files
+2. Follow [BLoC Message Translation Quick Reference](./QUICK_REFERENCE_BLOC_MESSAGES.md) ⭐ **New pattern!**
+3. Handle timezones with [Timezone Guide](./GrowERP_Timezone_Management_Guide.md)
+4. Support Buddhist Era with [Buddhist Era Guide](./Buddhist_Era_README.md)
 
-### AI Integration
+### Release Your Changes
 
-- **MCP Server**: Model Context Protocol server for AI-powered business automation
-- **Business Tools**: 25+ integrated business operations accessible to AI agents
-- **Authentication**: Secure API key-based access with user classification
-- **Multi-language Support**: Client examples in Python, Node.js, JavaScript, and more
+1. Follow [Version Management](./GrowERP_Version_Management_and_Release_Process.md)
+2. Run tests
+3. Update documentation
+4. Create release
 
-### Integration Patterns
+## 🛠️ Development Tools
 
-- **State Management**: BLoC pattern for consistent frontend state management
-- **API Communication**: Standardized REST API patterns with error handling
-- **AI Integration**: Model Context Protocol (MCP) server for AI-powered business automation
-- **Security**: Role-based access control at both frontend and backend levels
-- **Testing**: Comprehensive testing strategies for both layers
+### Code Generation
 
-## Examples
+```bash
+# Generate localizations
+melos l10n --no-select
 
-### Real-world Applications
+# Run all tests
+melos test
 
-1. **Admin Application**
-   - Full-featured ERP application
-   - Uses all available building blocks
-   - Comprehensive menu system
-   - Role-based access control
+# Clean and bootstrap
+melos clean && melos bootstrap
 
-2. **Hotel Application**
-   - Specialized for hotel management
-   - Uses core, user management, and activity building blocks
-   - Custom room management functionality
-   - Booking workflow
+# Build all packages
+melos build
+```
 
-3. **Freelance Application**
-   - Focused on freelance project management
-   - Uses core, user management, and accounting building blocks
-   - Time tracking and invoicing
-   - Client management
+### Quick References
 
-### Building Block Examples
+- [BLoC Message Translation Quick Reference](./QUICK_REFERENCE_BLOC_MESSAGES.md) ⭐ **New pattern!**
+- [Timezone Quick Reference](./GrowERP_Timezone_Quick_Reference.md)
+- [Buddhist Era Quick Reference](./Buddhist_Era_Quick_Reference.md)
 
-1. **growerp_catalog**
-   - Product and category management
-   - Asset tracking
-   - Image handling
-   - Search and filtering
-
-2. **growerp_inventory**
-   - Warehouse management
-   - Stock tracking
-   - Location management
-   - Shipment processing
-
-3. **growerp_order_accounting**
-   - Order processing
-   - Invoice generation
-   - Payment tracking
-   - Financial reporting
-
-## Development Workflow
-
-### 1. Planning Phase
-- Identify business requirements
-- Choose appropriate building blocks
-- Design data model extensions
-- Plan integration points
-
-### 2. Development Phase
-- Create backend components
-- Develop frontend building blocks
-- Implement business logic
-- Create user interfaces
-
-### 3. Integration Phase
-- Configure menu systems
-- Set up security permissions
-- Test integration points
-- Validate workflows
-
-### 4. Testing Phase
-- Unit tests for components
-- Integration tests for workflows
-- UI tests for user interactions
-- Performance testing
-
-### 5. Deployment Phase
-- Package applications
-- Configure production environment
-- Deploy and monitor
-- Maintain and update
-
-## Best Practices
-
-### Code Organization
-- Follow established naming conventions
-- Maintain clear separation of concerns
-- Document public APIs
-- Use consistent coding standards
-
-### Performance
-- Implement proper pagination
-- Use caching where appropriate
-- Optimize database queries
-- Monitor resource usage
-
-### Security
-- Implement role-based access control
-- Validate all user inputs
-- Use secure communication protocols
-- Regular security audits
-
-### Maintainability
-- Write comprehensive tests
-- Maintain backward compatibility
-- Version components properly
-- Document changes and migrations
-
-## Getting Help
+## 📞 Getting Help
 
 ### Resources
+
 - [GrowERP GitHub Repository](https://github.com/growerp/growerp)
+- [GrowERP Website](https://www.growerp.com)
 - [Moqui Framework Documentation](https://www.moqui.org/docs)
 - [Flutter Documentation](https://flutter.dev/docs)
-- [BLoC Library Documentation](https://bloclibrary.dev/)
 
 ### Community
-- GitHub Issues for bug reports and feature requests
-- Discussions for questions and ideas
-- Contributing guidelines for code contributions
 
-## Contributing
+- GitHub Issues for bug reports
+- GitHub Discussions for questions
+- Contributing guidelines in repository
 
-We welcome contributions to GrowERP's extensibility documentation and codebase. Please:
+## 🤝 Contributing
+
+Contributions are welcome! Please:
 
 1. Read the contributing guidelines
-2. Follow the established patterns
-3. Write tests for new functionality
-4. Update documentation as needed
-5. Submit pull requests for review
+2. Follow established patterns (especially the [BLoC Message Translation pattern](./QUICK_REFERENCE_BLOC_MESSAGES.md))
+3. Write tests
+4. Update documentation
+5. Submit pull requests
 
-## License
+## 📄 License
 
-GrowERP is released under the CC0 1.0 Universal license, making it freely available for use, modification, and distribution.
+GrowERP is released under the CC0 1.0 Universal license.
 
 ---
 
-*This documentation is maintained by the GrowERP community. For updates and improvements, please contribute to the GitHub repository.*
+**Last Updated:** October 2025  
+**Maintained by:** GrowERP Community
+
+---
+
+## 📝 Documentation Standards
+
+All documentation in this directory follows these standards:
+
+- **Markdown format** for consistency
+- **Clear headings** for easy navigation
+- **Code examples** for practical understanding
+- **Diagrams** where appropriate
+- **Cross-references** to related documents
+- **Version history** where relevant
+
+For questions or improvements to this documentation, please create an issue or submit a pull request.

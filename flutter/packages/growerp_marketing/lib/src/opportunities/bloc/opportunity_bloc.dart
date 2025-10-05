@@ -33,8 +33,10 @@ EventTransformer<E> opportunityDroppable<E>(Duration duration) {
 
 class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
   OpportunityBloc(this.restClient) : super(const OpportunityState()) {
-    on<OpportunityFetch>(_onOpportunityFetch,
-        transformer: opportunityDroppable(const Duration(milliseconds: 100)));
+    on<OpportunityFetch>(
+      _onOpportunityFetch,
+      transformer: opportunityDroppable(const Duration(milliseconds: 100)),
+    );
     on<OpportunityUpdate>(_onOpportunityUpdate);
     on<OpportunityDelete>(_onOpportunityDelete);
   }
@@ -58,28 +60,41 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
       emit(state.copyWith(status: OpportunityStatus.loading));
 
       Opportunities compResult = await restClient.getOpportunity(
-          start: start, searchString: event.searchString, limit: event.limit);
+        start: start,
+        searchString: event.searchString,
+        limit: event.limit,
+      );
 
       if (event.searchString.isEmpty) {
-        return emit(state.copyWith(
+        return emit(
+          state.copyWith(
             status: OpportunityStatus.success,
             opportunities: start == 0
                 ? compResult.opportunities
                 : (List.of(state.opportunities)
-                  ..addAll(compResult.opportunities)),
+                    ..addAll(compResult.opportunities)),
             hasReachedMax: compResult.opportunities.length < _opportunityLimit
                 ? true
                 : false,
-            searchString: ''));
+            searchString: '',
+          ),
+        );
       } else {
-        return emit(state.copyWith(
+        return emit(
+          state.copyWith(
             status: OpportunityStatus.success,
             searchResults: compResult.opportunities,
-            searchString: ''));
+            searchString: '',
+          ),
+        );
       }
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: OpportunityStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: OpportunityStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -91,31 +106,43 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
       emit(state.copyWith(status: OpportunityStatus.loading));
       List<Opportunity> opportunities = List.from(state.opportunities);
       if (event.opportunity.opportunityId.isNotEmpty) {
-        Opportunity compResult =
-            await restClient.updateOpportunity(opportunity: event.opportunity);
-        int index = opportunities.indexWhere((element) =>
-            element.opportunityId == event.opportunity.opportunityId);
+        Opportunity compResult = await restClient.updateOpportunity(
+          opportunity: event.opportunity,
+        );
+        int index = opportunities.indexWhere(
+          (element) => element.opportunityId == event.opportunity.opportunityId,
+        );
         opportunities[index] = compResult;
-        return emit(state.copyWith(
+        return emit(
+          state.copyWith(
+            status: OpportunityStatus.success,
+            opportunities: opportunities,
+            message: "opportunity ${event.opportunity.opportunityName} updated",
+          ),
+        );
+      } else {
+        // add
+        Opportunity compResult = await restClient.createOpportunity(
+          opportunity: event.opportunity,
+        );
+        opportunities.insert(0, compResult);
+        return emit(
+          state.copyWith(
             status: OpportunityStatus.success,
             opportunities: opportunities,
             message:
-                "opportunity ${event.opportunity.opportunityName} updated"));
-      } else {
-        // add
-        Opportunity compResult =
-            await restClient.createOpportunity(opportunity: event.opportunity);
-        opportunities.insert(0, compResult);
-        return emit(state.copyWith(
-            status: OpportunityStatus.success,
-            opportunities: opportunities,
-            message: "opportunity ${event.opportunity.opportunityName} added"));
+                'opportunityAddSuccess:${event.opportunity.opportunityName}',
+          ),
+        );
       }
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: OpportunityStatus.failure,
           opportunities: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -127,18 +154,26 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
       emit(state.copyWith(status: OpportunityStatus.loading));
       List<Opportunity> opportunities = List.from(state.opportunities);
       await restClient.deleteOpportunity(opportunity: event.opportunity);
-      int index = opportunities.indexWhere((element) =>
-          element.opportunityId == event.opportunity.opportunityId);
+      int index = opportunities.indexWhere(
+        (element) => element.opportunityId == event.opportunity.opportunityId,
+      );
       opportunities.removeAt(index);
-      return emit(state.copyWith(
+      return emit(
+        state.copyWith(
           status: OpportunityStatus.success,
           opportunities: opportunities,
-          message: "opportunity ${event.opportunity.opportunityName} deleted"));
+          message:
+              'opportunityDeleteSuccess:${event.opportunity.opportunityName}',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: OpportunityStatus.failure,
           opportunities: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

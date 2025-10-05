@@ -60,25 +60,32 @@ class SubscriptionListState extends State<SubscriptionList> {
     Widget tableView() {
       if (subscriptions.isEmpty) {
         return Center(
-            child: Text(catalogLocalizations.noSubscriptions(entityName),
-                style: const TextStyle(fontSize: 20.0)));
+          child: Text(
+            catalogLocalizations.noSubscriptions(entityName),
+            style: const TextStyle(fontSize: 20.0),
+          ),
+        );
       }
       // get table data formatted for tableView
       var (
         List<List<TableViewCell>> tableViewCells,
         List<double> fieldWidths,
-        double? rowHeight
-      ) = get2dTableData<Subscription>(getSubscriptionTableData,
-          bloc: _subscriptionBloc,
-          classificationId: classificationId,
-          context: context,
-          items: subscriptions);
+        double? rowHeight,
+      ) = get2dTableData<Subscription>(
+        getSubscriptionTableData,
+        bloc: _subscriptionBloc,
+        classificationId: classificationId,
+        context: context,
+        items: subscriptions,
+      );
       return TableView.builder(
         diagonalDragBehavior: DiagonalDragBehavior.free,
-        verticalDetails:
-            ScrollableDetails.vertical(controller: _scrollController),
-        horizontalDetails:
-            ScrollableDetails.horizontal(controller: _horizontalController),
+        verticalDetails: ScrollableDetails.vertical(
+          controller: _scrollController,
+        ),
+        horizontalDetails: ScrollableDetails.horizontal(
+          controller: _horizontalController,
+        ),
         cellBuilder: (context, vicinity) =>
             tableViewCells[vicinity.row][vicinity.column],
         columnBuilder: (index) => index >= tableViewCells[0].length
@@ -96,117 +103,146 @@ class SubscriptionListState extends State<SubscriptionList> {
                 backgroundDecoration: getBackGround(context, index),
                 extent: FixedTableSpanExtent(rowHeight!),
                 recognizerFactories: <Type, GestureRecognizerFactory>{
-                    TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-                            TapGestureRecognizer>(
+                  TapGestureRecognizer:
+                      GestureRecognizerFactoryWithHandlers<
+                        TapGestureRecognizer
+                      >(
                         () => TapGestureRecognizer(),
                         (TapGestureRecognizer t) => t.onTap = () => showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return index > subscriptions.length
-                                  ? const BottomLoader()
-                                  : Dismissible(
-                                      key: const Key('subscriptionItem'),
-                                      direction: DismissDirection.startToEnd,
-                                      child: BlocProvider.value(
-                                          value: _subscriptionBloc,
-                                          child: SubscriptionDialog(
-                                              subscriptions[index - 1])));
-                            }))
-                  }),
+                          barrierDismissible: true,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return index > subscriptions.length
+                                ? const BottomLoader()
+                                : Dismissible(
+                                    key: const Key('subscriptionItem'),
+                                    direction: DismissDirection.startToEnd,
+                                    child: BlocProvider.value(
+                                      value: _subscriptionBloc,
+                                      child: SubscriptionDialog(
+                                        subscriptions[index - 1],
+                                      ),
+                                    ),
+                                  );
+                          },
+                        ),
+                      ),
+                },
+              ),
         pinnedRowCount: 1,
       );
     }
 
     return BlocConsumer<SubscriptionBloc, SubscriptionState>(
-        listenWhen: (previous, current) =>
-            previous.status == SubscriptionStatus.loading,
-        listener: (context, state) {
-          if (state.status == SubscriptionStatus.failure) {
+      listener: (context, state) {
+        if (state.status == SubscriptionStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+        if (state.status == SubscriptionStatus.success) {
+          started = true;
+          final catalogLocalizations = CatalogLocalizations.of(context)!;
+          final translatedMessage = state.message != null
+              ? translateSubscriptionBlocMessage(
+                  state.message!,
+                  catalogLocalizations,
+                )
+              : '';
+          if (translatedMessage.isNotEmpty) {
             HelperFunctions.showMessage(
-                context, '${state.message}', Colors.red);
+              context,
+              translatedMessage,
+              Colors.green,
+            );
           }
-          if (state.status == SubscriptionStatus.success) {
-            started = true;
-            HelperFunctions.showMessage(
-                context, '${state.message}', Colors.green);
-          }
-        },
-        builder: (context, state) {
-          switch (state.status) {
-            case SubscriptionStatus.failure:
-              return Center(
-                  child: Text(catalogLocalizations
-                      .fetchSubscriptionError(state.message ?? '')));
-            case SubscriptionStatus.success:
-              subscriptions = state.subscriptions;
-              return Stack(
-                children: [
-                  tableView(),
-                  Positioned(
-                    right: right,
-                    bottom: bottom,
-                    child: GestureDetector(
-                      onPanUpdate: (details) {
-                        setState(() {
-                          right = right! - details.delta.dx;
-                          bottom -= details.delta.dy;
-                        });
-                      },
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          FloatingActionButton(
-                              key: const Key("search"),
-                              heroTag: "searchSubscription",
-                              onPressed: () async {
-                                await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return const SearchSubscriptionList();
-                                    }).then((value) async => value != null &&
-                                        context.mounted
-                                    ?
+        }
+      },
+      builder: (context, state) {
+        switch (state.status) {
+          case SubscriptionStatus.failure:
+            return Center(
+              child: Text(
+                catalogLocalizations.fetchSubscriptionError(
+                  state.message ?? '',
+                ),
+              ),
+            );
+          case SubscriptionStatus.success:
+            subscriptions = state.subscriptions;
+            return Stack(
+              children: [
+                tableView(),
+                Positioned(
+                  right: right,
+                  bottom: bottom,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        right = right! - details.delta.dx;
+                        bottom -= details.delta.dy;
+                      });
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FloatingActionButton(
+                          key: const Key("search"),
+                          heroTag: "searchSubscription",
+                          onPressed: () async {
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return const SearchSubscriptionList();
+                              },
+                            ).then(
+                              (value) async => value != null && context.mounted
+                                  ?
                                     // show detail page
                                     await showDialog(
-                                        barrierDismissible: true,
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return BlocProvider.value(
-                                              value: _subscriptionBloc,
-                                              child: SubscriptionDialog(value));
-                                        })
-                                    : const SizedBox.shrink());
-                              },
-                              child: const Icon(Icons.search)),
-                          const SizedBox(height: 10),
-                          FloatingActionButton(
-                              heroTag: 'subscriptionNew',
-                              key: const Key("addNew"),
-                              onPressed: () async {
-                                await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return BlocProvider.value(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return BlocProvider.value(
                                           value: _subscriptionBloc,
-                                          child: SubscriptionDialog(
-                                              Subscription()));
-                                    });
+                                          child: SubscriptionDialog(value),
+                                        );
+                                      },
+                                    )
+                                  : const SizedBox.shrink(),
+                            );
+                          },
+                          child: const Icon(Icons.search),
+                        ),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
+                          heroTag: 'subscriptionNew',
+                          key: const Key("addNew"),
+                          onPressed: () async {
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BlocProvider.value(
+                                  value: _subscriptionBloc,
+                                  child: SubscriptionDialog(Subscription()),
+                                );
                               },
-                              tooltip: CoreLocalizations.of(context)!.addNew,
-                              child: const Icon(Icons.add))
-                        ],
-                      ),
+                            );
+                          },
+                          tooltip: CoreLocalizations.of(context)!.addNew,
+                          child: const Icon(Icons.add),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              );
-            default:
-              return const Center(child: LoadingIndicator());
-          }
-        });
+                ),
+              ],
+            );
+          default:
+            return const Center(child: LoadingIndicator());
+        }
+      },
+    );
   }
 
   @override

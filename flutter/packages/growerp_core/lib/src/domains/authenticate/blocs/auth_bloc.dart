@@ -364,7 +364,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         state.copyWith(
           status: AuthStatus.authenticated,
           authenticate: result,
-          message: 'password successfully changed for user: ${event.username}',
+          message: 'passwordChangeSuccess:${event.username}',
         ),
       );
       PersistFunctions.persistKeyValue('apiKey', result.apiKey ?? '');

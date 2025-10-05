@@ -255,7 +255,19 @@ class CompanyFormState extends State<CompanyDialog> {
               if (widget.dialog == true && _nameController.text != '') {
                 Navigator.of(context).pop(companyBloc.state.companies[0]);
               }
-              HelperFunctions.showMessage(context, state.message, Colors.green);
+              final translatedMessage = state.message != null
+                  ? translateUserCompanyBlocMessage(
+                      localizations,
+                      state.message!,
+                    )
+                  : '';
+              if (translatedMessage.isNotEmpty) {
+                HelperFunctions.showMessage(
+                  context,
+                  translatedMessage,
+                  Colors.green,
+                );
+              }
             }
           },
           builder: (context, state) {

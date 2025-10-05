@@ -192,14 +192,20 @@ class CompanyUserListState extends State<CompanyUserList> {
             );
           }
           if (state.status == CompanyUserStatus.success) {
-            HelperFunctions.showMessage(
-              context,
-              '${state.message}',
-              state.message != null && state.message.contains('However')
-                  ? Colors.yellow
-                  : Colors.green,
-              seconds: 5,
-            );
+            final localizations = UserCompanyLocalizations.of(context)!;
+            final translatedMessage = state.message != null
+                ? translateUserCompanyBlocMessage(localizations, state.message!)
+                : '';
+            if (translatedMessage.isNotEmpty) {
+              HelperFunctions.showMessage(
+                context,
+                translatedMessage,
+                state.message != null && state.message!.contains('However')
+                    ? Colors.yellow
+                    : Colors.green,
+                seconds: 5,
+              );
+            }
           }
         }
 

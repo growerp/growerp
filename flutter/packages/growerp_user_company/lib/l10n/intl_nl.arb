@@ -188,5 +188,22 @@
   "asCompany": "Echter nu weergegeven als een bedrijf",
   "compUserUploadSuccess": "Uploaden van bedrijven/gebruikers succesvol beëindigd",
   "compUserDownloadSuccess": "Het verzoek is ingepland en de e-mail wordt binnenkort verzonden",
-  "userDeleted": "Gebruiker {name} is nu verwijderd.."
+  "userDeleted": "Gebruiker {name} is nu verwijderd..",
+  "userUpdateSuccess": "Gebruiker {name} succesvol bijgewerkt",
+  "userUpdateFailure": "Bijwerken van gebruiker mislukt",
+  "userDeleteSuccess": "Gebruiker {name} succesvol verwijderd",
+  "userDeleteFailure": "Verwijderen van gebruiker mislukt",
+  "userAddSuccess": "Gebruiker {name} succesvol toegevoegd",
+  "userAddFailure": "Toevoegen van gebruiker mislukt",
+  "userFetchFailure": "Ophalen van gebruikers mislukt",
+  "userValidationError": "Validatiefout gebruiker",
+  "companyUpdateSuccess": "Bedrijf {name} succesvol bijgewerkt",
+  "companyUpdateFailure": "Bijwerken van bedrijf mislukt",
+  "companyDeleteSuccess": "Bedrijf succesvol verwijderd",
+  "companyDeleteFailure": "Verwijderen van bedrijf mislukt",
+  "companyAddSuccess": "Bedrijf {name} succesvol toegevoegd",
+  "companyAddFailure": "Toevoegen van bedrijf mislukt",
+  "companyFetchFailure": "Ophalen van bedrijven mislukt",
+  "compUserUploadFailure": "Uploaden van bedrijven/gebruikers mislukt",
+  "compUserDownloadFailure": "Downloaden van bedrijven/gebruikers mislukt"
 }

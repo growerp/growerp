@@ -31,9 +31,10 @@ EventTransformer<E> websiteContentDroppable<E>(Duration duration) {
 
 class ContentBloc extends Bloc<ContentEvent, ContentState> {
   ContentBloc(this.restClient) : super(const ContentState()) {
-    on<ContentFetch>(_onContentFetch,
-        transformer:
-            websiteContentDroppable(const Duration(milliseconds: 100)));
+    on<ContentFetch>(
+      _onContentFetch,
+      transformer: websiteContentDroppable(const Duration(milliseconds: 100)),
+    );
     on<ContentUpdate>(_onContentUpdate);
   }
 
@@ -46,18 +47,22 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
     try {
       emit(state.copyWith(status: ContentStatus.loading));
       if (event.content.path.isEmpty) {
-        return emit(state.copyWith(
-            status: ContentStatus.success, content: event.content));
+        return emit(
+          state.copyWith(status: ContentStatus.success, content: event.content),
+        );
       }
       final result = await restClient.getWebsiteContent(
-          path: event.content.path, text: event.content.text);
-      emit(state.copyWith(
-        status: ContentStatus.success,
-        content: result,
-      ));
+        path: event.content.path,
+        text: event.content.text,
+      );
+      emit(state.copyWith(status: ContentStatus.success, content: result));
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: ContentStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: ContentStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -67,15 +72,23 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
   ) async {
     try {
       emit(state.copyWith(status: ContentStatus.updating));
-      final Content result =
-          await restClient.uploadWebsiteContent(content: event.content);
-      emit(state.copyWith(
+      final Content result = await restClient.uploadWebsiteContent(
+        content: event.content,
+      );
+      emit(
+        state.copyWith(
           content: result,
           status: ContentStatus.success,
-          message: 'Content ${event.content.title} updated'));
+          message: 'contentUpdateSuccess:${event.content.title}',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: ContentStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: ContentStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

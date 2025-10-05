@@ -1,76 +1,333 @@
 {
-    "website": "Website",
-    "websites": "Websites",
-    "websiteNew": "New Website",
-    "websiteDelete": "Delete Website",
-    "websiteUpdate": "Update Website",
-    "websiteContent": "Website Content",
-    "websiteContentNew": "New Website Content",
-    "websiteContentDelete": "Delete Website Content",
-    "websiteContentUpdate": "Update Website Content",
-    "websiteColor": "Website Colors",
-    "websiteColorNew": "New Website Colors",
-    "websiteColorDelete": "Delete Website Colors",
-    "websiteColorUpdate": "Update Website Colors",
-    "websiteUrl": "Website URL",
-    "websiteTitle": "Website Title",
-    "websiteObsidian": "Obsidian Vault",
-    "websiteObsidianUrl": "Obsidian URL",
-    "websiteObsidianSynch": "Synch Obsidian",
-    "websiteObsidianZip": "Obsidian Zip File",
-    "websiteMeasurementId": "Measurement ID",
-    "websiteStripeApiKey": "Stripe API Key",
-    "websiteProductCategories": "Product Categories",
-    "websiteWebsiteContent": "Website Content",
-    "websiteWebsiteCategories": "Website Categories",
-    "websiteSave": "Save",
-    "websiteCancel": "Cancel",
-    "areYouSure": "Are you sure you want to delete this?",
-    "yes": "Yes",
-    "no": "No",
-    "continueButton": "Continue",
-    "search": "Search",
-    "loading": "Loading...",
-    "page": "Page",
-    "ofTotal": "of",
-    "noRecords": "No records found.",
-    "select": "Select",
-    "name": "Name",
-    "description": "Description",
-    "newButton": "New",
-    "deleteButton": "Delete",
-    "updateButton": "Update",
-    "edit": "Edit",
-    "view": "View",
-    "save": "Save",
-    "cancel": "Cancel",
-    "close": "Close",
-    "ok": "OK",
-    "errorTitle": "Error",
-    "success": "Success",
-    "info": "Info",
-    "warning": "Warning",
-    "confirm": "Confirm",
-    "id": "ID",
-    "actions": "Actions",
-    "content": "Content",
-    "path": "Path",
-    "title": "Title",
-    "add": "Add",
-    "remove": "Remove",
-    "key": "Key",
-    "images": "Images",
-    "upload": "Upload",
-    "shopDropdownCategories": "Shop dropdown categories",
-    "create": "Create",
-    "update": "Update",
-    "imageInformation": "Image Information for {title}",
-    "@imageInformation": {
-        "description": "Image information title",
-        "placeholders": {
-            "title": {
-                "type": "String"
-            }
-        }
+  "@@locale": "en",
+  "website": "Website",
+  "@website": {
+    "description": "Website label"
+  },
+  "websites": "Websites",
+  "@websites": {
+    "description": "Websites label"
+  },
+  "websiteNew": "New Website",
+  "@websiteNew": {
+    "description": "New website label"
+  },
+  "websiteDelete": "Delete Website",
+  "@websiteDelete": {
+    "description": "Delete website label"
+  },
+  "websiteUpdate": "Update Website",
+  "@websiteUpdate": {
+    "description": "Update website label"
+  },
+  "websiteContent": "Website Content",
+  "@websiteContent": {
+    "description": "Website content label"
+  },
+  "websiteContentNew": "New Website Content",
+  "@websiteContentNew": {
+    "description": "New website content label"
+  },
+  "websiteContentDelete": "Delete Website Content",
+  "@websiteContentDelete": {
+    "description": "Delete website content label"
+  },
+  "websiteContentUpdate": "Update Website Content",
+  "@websiteContentUpdate": {
+    "description": "Update website content label"
+  },
+  "websiteColor": "Website Colors",
+  "@websiteColor": {
+    "description": "Website colors label"
+  },
+  "websiteColorNew": "New Website Colors",
+  "@websiteColorNew": {
+    "description": "New website colors label"
+  },
+  "websiteColorDelete": "Delete Website Colors",
+  "@websiteColorDelete": {
+    "description": "Delete website colors label"
+  },
+  "websiteColorUpdate": "Update Website Colors",
+  "@websiteColorUpdate": {
+    "description": "Update website colors label"
+  },
+  "websiteUrl": "Website URL",
+  "@websiteUrl": {
+    "description": "Website URL label"
+  },
+  "websiteTitle": "Website Title",
+  "@websiteTitle": {
+    "description": "Website title label"
+  },
+  "websiteObsidian": "Obsidian Vault",
+  "@websiteObsidian": {
+    "description": "Obsidian vault label"
+  },
+  "websiteObsidianUrl": "Obsidian URL",
+  "@websiteObsidianUrl": {
+    "description": "Obsidian URL label"
+  },
+  "websiteObsidianSynch": "Synch Obsidian",
+  "@websiteObsidianSynch": {
+    "description": "Synch Obsidian label"
+  },
+  "websiteObsidianZip": "Obsidian Zip File",
+  "@websiteObsidianZip": {
+    "description": "Obsidian zip file label"
+  },
+  "websiteMeasurementId": "Measurement ID",
+  "@websiteMeasurementId": {
+    "description": "Measurement ID label"
+  },
+  "websiteStripeApiKey": "Stripe API Key",
+  "@websiteStripeApiKey": {
+    "description": "Stripe API key label"
+  },
+  "websiteProductCategories": "Product Categories",
+  "@websiteProductCategories": {
+    "description": "Product categories label"
+  },
+  "websiteWebsiteContent": "Website Content",
+  "@websiteWebsiteContent": {
+    "description": "Website content label"
+  },
+  "websiteWebsiteCategories": "Website Categories",
+  "@websiteWebsiteCategories": {
+    "description": "Website categories label"
+  },
+  "websiteSave": "Save",
+  "@websiteSave": {
+    "description": "Save button label"
+  },
+  "websiteCancel": "Cancel",
+  "@websiteCancel": {
+    "description": "Cancel button label"
+  },
+  "areYouSure": "Are you sure you want to delete this?",
+  "@areYouSure": {
+    "description": "Confirmation message"
+  },
+  "yes": "Yes",
+  "@yes": {
+    "description": "Yes button label"
+  },
+  "no": "No",
+  "@no": {
+    "description": "No button label"
+  },
+  "continueButton": "Continue",
+  "@continueButton": {
+    "description": "Continue button label"
+  },
+  "search": "Search",
+  "@search": {
+    "description": "Search label"
+  },
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Loading message"
+  },
+  "page": "Page",
+  "@page": {
+    "description": "Page label"
+  },
+  "ofTotal": "of",
+  "@ofTotal": {
+    "description": "Of total label"
+  },
+  "noRecords": "No records found.",
+  "@noRecords": {
+    "description": "No records message"
+  },
+  "select": "Select",
+  "@select": {
+    "description": "Select label"
+  },
+  "name": "Name",
+  "@name": {
+    "description": "Name label"
+  },
+  "description": "Description",
+  "@description": {
+    "description": "Description label"
+  },
+  "newButton": "New",
+  "@newButton": {
+    "description": "New button label"
+  },
+  "deleteButton": "Delete",
+  "@deleteButton": {
+    "description": "Delete button label"
+  },
+  "updateButton": "Update",
+  "@updateButton": {
+    "description": "Update button label"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit label"
+  },
+  "view": "View",
+  "@view": {
+    "description": "View label"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save button label"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Close button label"
+  },
+  "ok": "OK",
+  "@ok": {
+    "description": "OK button label"
+  },
+  "errorTitle": "Error",
+  "@errorTitle": {
+    "description": "Error title"
+  },
+  "success": "Success",
+  "@success": {
+    "description": "Success message"
+  },
+  "info": "Info",
+  "@info": {
+    "description": "Info message"
+  },
+  "warning": "Warning",
+  "@warning": {
+    "description": "Warning message"
+  },
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Confirm button label"
+  },
+  "id": "ID",
+  "@id": {
+    "description": "ID label"
+  },
+  "actions": "Actions",
+  "@actions": {
+    "description": "Actions label"
+  },
+  "content": "Content",
+  "@content": {
+    "description": "Content label"
+  },
+  "path": "Path",
+  "@path": {
+    "description": "Path label"
+  },
+  "title": "Title",
+  "@title": {
+    "description": "Title label"
+  },
+  "add": "Add",
+  "@add": {
+    "description": "Add button label"
+  },
+  "remove": "Remove",
+  "@remove": {
+    "description": "Remove button label"
+  },
+  "key": "Key",
+  "@key": {
+    "description": "Key label"
+  },
+  "images": "Images",
+  "@images": {
+    "description": "Images label"
+  },
+  "upload": "Upload",
+  "@upload": {
+    "description": "Upload button label"
+  },
+  "shopDropdownCategories": "Shop dropdown categories",
+  "@shopDropdownCategories": {
+    "description": "Shop dropdown categories label"
+  },
+  "create": "Create",
+  "@create": {
+    "description": "Create button label"
+  },
+  "update": "Update",
+  "@update": {
+    "description": "Update button label"
+  },
+  "imageInformation": "Image Information for {title}",
+  "@imageInformation": {
+    "description": "Image information title",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
     }
+  },
+  "websiteUpdateSuccess": "Website updated successfully",
+  "@websiteUpdateSuccess": {
+    "description": "BLoC message: Website updated successfully"
+  },
+  "websiteUpdateFailure": "Failed to update website",
+  "@websiteUpdateFailure": {
+    "description": "BLoC message: Failed to update website"
+  },
+  "websiteDeleteSuccess": "Website deleted successfully",
+  "@websiteDeleteSuccess": {
+    "description": "BLoC message: Website deleted successfully"
+  },
+  "websiteDeleteFailure": "Failed to delete website",
+  "@websiteDeleteFailure": {
+    "description": "BLoC message: Failed to delete website"
+  },
+  "websiteAddSuccess": "Website added successfully",
+  "@websiteAddSuccess": {
+    "description": "BLoC message: Website added successfully"
+  },
+  "websiteAddFailure": "Failed to add website",
+  "@websiteAddFailure": {
+    "description": "BLoC message: Failed to add website"
+  },
+  "websiteFetchFailure": "Failed to fetch website data",
+  "@websiteFetchFailure": {
+    "description": "BLoC message: Failed to fetch website data"
+  },
+  "contentUpdateSuccess": "Content {title} updated successfully",
+  "@contentUpdateSuccess": {
+    "description": "BLoC message: Content updated successfully",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "contentUpdateFailure": "Failed to update content",
+  "@contentUpdateFailure": {
+    "description": "BLoC message: Failed to update content"
+  },
+  "contentDeleteSuccess": "Content deleted successfully",
+  "@contentDeleteSuccess": {
+    "description": "BLoC message: Content deleted successfully"
+  },
+  "contentDeleteFailure": "Failed to delete content",
+  "@contentDeleteFailure": {
+    "description": "BLoC message: Failed to delete content"
+  },
+  "contentAddSuccess": "Content added successfully",
+  "@contentAddSuccess": {
+    "description": "BLoC message: Content added successfully"
+  },
+  "contentAddFailure": "Failed to add content",
+  "@contentAddFailure": {
+    "description": "BLoC message: Failed to add content"
+  },
+  "contentFetchFailure": "Failed to fetch content",
+  "@contentFetchFailure": {
+    "description": "BLoC message: Failed to fetch content"
+  }
 }

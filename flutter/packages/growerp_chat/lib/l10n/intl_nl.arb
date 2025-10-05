@@ -24,5 +24,17 @@
   "pvt": "Pvt.",
   "nroMembers": "#Leden.",
   "allMessagesRead": "Alle berichten gelezen",
-  "unreadMessages": "onbekende berichten"
+  "unreadMessages": "onbekende berichten",
+  "chatRoomUpdateSuccess": "Chatruimte succesvol bijgewerkt",
+  "chatRoomUpdateFailure": "Bijwerken van chatruimte mislukt",
+  "chatRoomDeleteSuccess": "Chatruimte succesvol verwijderd",
+  "chatRoomDeleteFailure": "Verwijderen van chatruimte mislukt",
+  "chatRoomAddSuccess": "Chatruimte succesvol toegevoegd",
+  "chatRoomAddFailure": "Toevoegen van chatruimte mislukt",
+  "chatRoomFetchFailure": "Ophalen van chatruimtes mislukt",
+  "chatMessageSendSuccess": "Bericht succesvol verzonden",
+  "chatMessageSendFailure": "Verzenden van bericht mislukt",
+  "chatMessageDeleteSuccess": "Bericht succesvol verwijderd",
+  "chatMessageDeleteFailure": "Verwijderen van bericht mislukt",
+  "chatMessageFetchFailure": "Ophalen van berichten mislukt"
 }

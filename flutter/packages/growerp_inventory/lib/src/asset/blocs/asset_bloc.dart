@@ -32,37 +32,41 @@ EventTransformer<E> assetDroppable<E>(Duration duration) {
 }
 
 class AssetBloc extends Bloc<AssetEvent, AssetState> {
-  AssetBloc(
-    this.restClient,
-    this.classificationId,
-  ) : super(const AssetState()) {
-    on<AssetFetch>(_onAssetFetch,
-        transformer: assetDroppable(const Duration(milliseconds: 100)));
+  AssetBloc(this.restClient, this.classificationId)
+    : super(const AssetState()) {
+    on<AssetFetch>(
+      _onAssetFetch,
+      transformer: assetDroppable(const Duration(milliseconds: 100)),
+    );
     on<AssetUpdate>(_onAssetUpdate);
   }
 
   final RestClient restClient;
   final String classificationId;
 
-  Future<void> _onAssetFetch(
-    AssetFetch event,
-    Emitter<AssetState> emit,
-  ) async {
+  Future<void> _onAssetFetch(AssetFetch event, Emitter<AssetState> emit) async {
     try {
       emit(state.copyWith(status: AssetStatus.loading));
       Assets compResult = await restClient.getAsset(
-          searchString: event.searchString, assetClassId: event.assetClassId);
-      emit(state.copyWith(
-        status: AssetStatus.success,
-        assets: compResult.assets,
-        hasReachedMax: compResult.assets.length < _assetLimit ? true : false,
         searchString: event.searchString,
-      ));
+        assetClassId: event.assetClassId,
+      );
+      emit(
+        state.copyWith(
+          status: AssetStatus.success,
+          assets: compResult.assets,
+          hasReachedMax: compResult.assets.length < _assetLimit ? true : false,
+          searchString: event.searchString,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: AssetStatus.failure,
           assets: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -76,29 +80,43 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
       if (event.asset.assetId.isNotEmpty) {
         // update
         Asset compResult = await restClient.updateAsset(
-            asset: event.asset, classificationId: classificationId);
-        int index = assets
-            .indexWhere((element) => element.assetId == event.asset.assetId);
+          asset: event.asset,
+          classificationId: classificationId,
+        );
+        int index = assets.indexWhere(
+          (element) => element.assetId == event.asset.assetId,
+        );
         assets[index] = compResult;
-        emit(state.copyWith(
+        emit(
+          state.copyWith(
             status: AssetStatus.success,
             assets: assets,
-            message: "Asset ${event.asset.assetName} updated"));
+            message: 'assetUpdateSuccess:${event.asset.assetName}',
+          ),
+        );
       } else {
         // add
         Asset compResult = await restClient.createAsset(
-            asset: event.asset, classificationId: classificationId);
+          asset: event.asset,
+          classificationId: classificationId,
+        );
         assets.insert(0, compResult);
-        emit(state.copyWith(
+        emit(
+          state.copyWith(
             status: AssetStatus.success,
             assets: assets,
-            message: "Asset ${event.asset.assetName} added"));
+            message: 'assetAddSuccess:${event.asset.assetName}',
+          ),
+        );
       }
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: AssetStatus.failure,
           assets: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

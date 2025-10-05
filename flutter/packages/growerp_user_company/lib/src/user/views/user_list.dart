@@ -63,8 +63,9 @@ class UserListState extends State<UserList> {
           ..add(const UserFetch(refresh: true));
         break;
       case Role.lead:
-        (_userBloc = context.read<LeadBloc>() as UserBloc)
-            .add(const UserFetch(refresh: true));
+        (_userBloc = context.read<LeadBloc>() as UserBloc).add(
+          const UserFetch(refresh: true),
+        );
         break;
       default:
         _userBloc = (context.read<UserBloc>())
@@ -77,213 +78,268 @@ class UserListState extends State<UserList> {
   Widget build(BuildContext context) {
     final isPhone = ResponsiveBreakpoints.of(context).isMobile;
     right = right ?? (isPhone ? 20 : 50);
-    return Builder(builder: (BuildContext context) {
-      Widget tableView() {
-        if (users.isEmpty) {
-          return Center(
-            child: Text(
+    return Builder(
+      builder: (BuildContext context) {
+        Widget tableView() {
+          if (users.isEmpty) {
+            return Center(
+              child: Text(
                 context.read<String>() == 'AppHealth'
                     ? 'No clients found'
                     : 'no ${widget.role?.name ?? ''} users found',
-                style: const TextStyle(fontSize: 20.0)),
-          );
-        }
-        // get table data formatted for tableView
-        var (
-          List<List<TableViewCell>> tableViewCells,
-          List<double> fieldWidths,
-          double? rowHeight
-        ) = get2dTableData<User>(getUserListTableData,
+                style: const TextStyle(fontSize: 20.0),
+              ),
+            );
+          }
+          // get table data formatted for tableView
+          var (
+            List<List<TableViewCell>> tableViewCells,
+            List<double> fieldWidths,
+            double? rowHeight,
+          ) = get2dTableData<User>(
+            getUserListTableData,
             bloc: _userBloc,
             classificationId: 'AppAdmin',
             context: context,
             items: users,
-            extra: widget.role);
-        return TableView.builder(
-          diagonalDragBehavior: DiagonalDragBehavior.free,
-          verticalDetails:
-              ScrollableDetails.vertical(controller: _scrollController),
-          horizontalDetails:
-              ScrollableDetails.horizontal(controller: _horizontalController),
-          cellBuilder: (context, vicinity) =>
-              tableViewCells[vicinity.row][vicinity.column],
-          columnBuilder: (index) => index >= tableViewCells[0].length
-              ? null
-              : TableSpan(
-                  padding: companyUserPadding,
-                  backgroundDecoration:
-                      getCompanyUserBackGround(context, index),
-                  extent: FixedTableSpanExtent(fieldWidths[index]),
-                ),
-          pinnedColumnCount: 1,
-          rowBuilder: (index) => index >= tableViewCells.length
-              ? null
-              : TableSpan(
-                  padding: companyUserPadding,
-                  backgroundDecoration:
-                      getCompanyUserBackGround(context, index),
-                  extent: FixedTableSpanExtent(rowHeight!),
-                  recognizerFactories: <Type, GestureRecognizerFactory>{
+            extra: widget.role,
+          );
+          return TableView.builder(
+            diagonalDragBehavior: DiagonalDragBehavior.free,
+            verticalDetails: ScrollableDetails.vertical(
+              controller: _scrollController,
+            ),
+            horizontalDetails: ScrollableDetails.horizontal(
+              controller: _horizontalController,
+            ),
+            cellBuilder: (context, vicinity) =>
+                tableViewCells[vicinity.row][vicinity.column],
+            columnBuilder: (index) => index >= tableViewCells[0].length
+                ? null
+                : TableSpan(
+                    padding: companyUserPadding,
+                    backgroundDecoration: getCompanyUserBackGround(
+                      context,
+                      index,
+                    ),
+                    extent: FixedTableSpanExtent(fieldWidths[index]),
+                  ),
+            pinnedColumnCount: 1,
+            rowBuilder: (index) => index >= tableViewCells.length
+                ? null
+                : TableSpan(
+                    padding: companyUserPadding,
+                    backgroundDecoration: getCompanyUserBackGround(
+                      context,
+                      index,
+                    ),
+                    extent: FixedTableSpanExtent(rowHeight!),
+                    recognizerFactories: <Type, GestureRecognizerFactory>{
                       TapGestureRecognizer:
                           GestureRecognizerFactoryWithHandlers<
-                                  TapGestureRecognizer>(
-                              () => TapGestureRecognizer(),
-                              (TapGestureRecognizer t) =>
-                                  t.onTap = () => showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return index > users.length
-                                            ? const BottomLoader()
-                                            : Dismissible(
-                                                key: const Key('xxxxxx'),
-                                                direction:
-                                                    DismissDirection.startToEnd,
-                                                child: BlocProvider.value(
-                                                    value: _userBloc,
-                                                    child: UserDialogStateFull(
-                                                        user:
-                                                            users[index - 1])));
-                                      }))
-                    }),
-          pinnedRowCount: 1,
-        );
-      }
-
-      blocListener(context, state) {
-        if (state.status == UserStatus.failure) {
-          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+                            TapGestureRecognizer
+                          >(
+                            () => TapGestureRecognizer(),
+                            (TapGestureRecognizer t) => t.onTap = () =>
+                                showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return index > users.length
+                                        ? const BottomLoader()
+                                        : Dismissible(
+                                            key: const Key('xxxxxx'),
+                                            direction:
+                                                DismissDirection.startToEnd,
+                                            child: BlocProvider.value(
+                                              value: _userBloc,
+                                              child: UserDialogStateFull(
+                                                user: users[index - 1],
+                                              ),
+                                            ),
+                                          );
+                                  },
+                                ),
+                          ),
+                    },
+                  ),
+            pinnedRowCount: 1,
+          );
         }
-        if (state.status == UserStatus.success) {
-          HelperFunctions.showMessage(
-              context, '${state.message}', Colors.green);
-        }
-      }
 
-      blocBuilder(context, state) {
-        if (state.status == UserStatus.failure) {
-          return FatalErrorForm(
-              message: "Could not load ${widget.role.toString()}s!");
-        } else {
-          users = state.users;
-          if (users.isNotEmpty) {
-            Future.delayed(const Duration(milliseconds: 100), () {
-              WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => _scrollController.jumpTo(currentScroll));
-            });
+        blocListener(context, state) {
+          if (state.status == UserStatus.failure) {
+            HelperFunctions.showMessage(
+              context,
+              '${state.message}',
+              Colors.red,
+            );
           }
-          hasReachedMax = state.hasReachedMax;
-          return Stack(
-            children: [
-              tableView(),
-              Positioned(
-                right: right,
-                bottom: bottom,
-                child: GestureDetector(
-                  onPanUpdate: (details) {
-                    setState(() {
-                      right = right! - details.delta.dx;
-                      bottom -= details.delta.dy;
-                    });
-                  },
-                  child: Column(
-                    children: [
-                      FloatingActionButton(
+          if (state.status == UserStatus.success) {
+            final localizations = UserCompanyLocalizations.of(context)!;
+            final translatedMessage = state.message != null
+                ? translateUserCompanyBlocMessage(localizations, state.message!)
+                : '';
+            if (translatedMessage.isNotEmpty) {
+              HelperFunctions.showMessage(
+                context,
+                translatedMessage,
+                Colors.green,
+              );
+            }
+          }
+        }
+
+        blocBuilder(context, state) {
+          if (state.status == UserStatus.failure) {
+            return FatalErrorForm(
+              message: "Could not load ${widget.role.toString()}s!",
+            );
+          } else {
+            users = state.users;
+            if (users.isNotEmpty) {
+              Future.delayed(const Duration(milliseconds: 100), () {
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => _scrollController.jumpTo(currentScroll),
+                );
+              });
+            }
+            hasReachedMax = state.hasReachedMax;
+            return Stack(
+              children: [
+                tableView(),
+                Positioned(
+                  right: right,
+                  bottom: bottom,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        right = right! - details.delta.dx;
+                        bottom -= details.delta.dy;
+                      });
+                    },
+                    child: Column(
+                      children: [
+                        FloatingActionButton(
                           key: const Key("search"),
                           heroTag: "userBtn1",
                           onPressed: () async {
                             // find findoc id to show
                             await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  // search separate from finDocBloc
-                                  return BlocProvider.value(
-                                      value:
-                                          context.read<DataFetchBloc<Users>>(),
-                                      child: const SearchUserList());
-                                }).then((value) async => value != null
-                                ?
-                                // show detail page
-                                await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return BlocProvider.value(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                // search separate from finDocBloc
+                                return BlocProvider.value(
+                                  value: context.read<DataFetchBloc<Users>>(),
+                                  child: const SearchUserList(),
+                                );
+                              },
+                            ).then(
+                              (value) async => value != null
+                                  ?
+                                    // show detail page
+                                    await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return BlocProvider.value(
                                           value: _userBloc,
-                                          child: UserDialog(value));
-                                    })
-                                : const SizedBox.shrink());
+                                          child: UserDialog(value),
+                                        );
+                                      },
+                                    )
+                                  : const SizedBox.shrink(),
+                            );
                           },
-                          child: const Icon(Icons.search)),
-                      const SizedBox(height: 10),
-                      FloatingActionButton(
+                          child: const Icon(Icons.search),
+                        ),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
                           key: const Key("addNewUser"),
                           heroTag: "userBtn2",
                           onPressed: () async {
                             await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return BlocProvider.value(
-                                      value: _userBloc,
-                                      child: UserDialogStateFull(
-                                          user: User(
-                                              role: widget.role,
-                                              company:
-                                                  widget.role == Role.company
-                                                      ? _authBloc.state
-                                                          .authenticate!.company
-                                                      : Company(
-                                                          role: widget.role,
-                                                        ))));
-                                });
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BlocProvider.value(
+                                  value: _userBloc,
+                                  child: UserDialogStateFull(
+                                    user: User(
+                                      role: widget.role,
+                                      company: widget.role == Role.company
+                                          ? _authBloc
+                                                .state
+                                                .authenticate!
+                                                .company
+                                          : Company(role: widget.role),
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
                           },
                           tooltip: 'Add New',
-                          child: const Icon(Icons.add)),
-                      const SizedBox(height: 10),
-                      FloatingActionButton(
+                          child: const Icon(Icons.add),
+                        ),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
                           heroTag: 'companyUserFiles',
                           key: const Key("upDownload"),
                           onPressed: () async {
                             await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return BlocProvider.value(
-                                      value: _userBloc,
-                                      child: const CompanyUserFilesDialog());
-                                });
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BlocProvider.value(
+                                  value: _userBloc,
+                                  child: const CompanyUserFilesDialog(),
+                                );
+                              },
+                            );
                           },
                           tooltip: 'companies/users up/download',
-                          child: const Icon(Icons.file_copy)),
-                    ],
+                          child: const Icon(Icons.file_copy),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          );
+              ],
+            );
+          }
         }
-      }
 
-      switch (widget.role) {
-        case Role.lead:
-          return BlocConsumer<LeadBloc, UserState>(
-              listener: blocListener, builder: blocBuilder);
-        case Role.customer:
-          return BlocConsumer<CustomerBloc, UserState>(
-              listener: blocListener, builder: blocBuilder);
-        case Role.company:
-          return BlocConsumer<EmployeeBloc, UserState>(
-              listener: blocListener, builder: blocBuilder);
-        case Role.supplier:
-          return BlocConsumer<SupplierBloc, UserState>(
-              listener: blocListener, builder: blocBuilder);
-        default:
-          return BlocConsumer<UserBloc, UserState>(
-              listener: blocListener, builder: blocBuilder);
-      }
-    });
+        switch (widget.role) {
+          case Role.lead:
+            return BlocConsumer<LeadBloc, UserState>(
+              listener: blocListener,
+              builder: blocBuilder,
+            );
+          case Role.customer:
+            return BlocConsumer<CustomerBloc, UserState>(
+              listener: blocListener,
+              builder: blocBuilder,
+            );
+          case Role.company:
+            return BlocConsumer<EmployeeBloc, UserState>(
+              listener: blocListener,
+              builder: blocBuilder,
+            );
+          case Role.supplier:
+            return BlocConsumer<SupplierBloc, UserState>(
+              listener: blocListener,
+              builder: blocBuilder,
+            );
+          default:
+            return BlocConsumer<UserBloc, UserState>(
+              listener: blocListener,
+              builder: blocBuilder,
+            );
+        }
+      },
+    );
   }
 
   @override

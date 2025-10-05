@@ -35,5 +35,12 @@
   "timeEntry_addSuccess": "Toevoegen gelukt",
   "timeEntry_updateSuccess": "Update gelukt",
   "timeEntry_listTitle": "Informatie over tijdregistratie",
-  "timeEntry_notFound": "Geen tijdregistraties gevonden"
+  "timeEntry_notFound": "Geen tijdregistraties gevonden",
+  "activityUpdateSuccess": "Activiteit succesvol bijgewerkt",
+  "activityUpdateFailure": "Bijwerken van activiteit mislukt",
+  "activityDeleteSuccess": "Activiteit succesvol verwijderd",
+  "activityDeleteFailure": "Verwijderen van activiteit mislukt",
+  "activityAddSuccess": "Activiteit succesvol toegevoegd",
+  "activityAddFailure": "Toevoegen van activiteit mislukt",
+  "activityFetchFailure": "Ophalen van activiteiten mislukt"
 }

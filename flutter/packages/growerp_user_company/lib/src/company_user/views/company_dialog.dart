@@ -261,7 +261,19 @@ class CompanyFormState extends State<CompanyDialog> {
                   context,
                 ).pop(companyUserBloc.state.companiesUsers[0].getCompany());
               }
-              HelperFunctions.showMessage(context, state.message, Colors.green);
+              final translatedMessage = state.message != null
+                  ? translateUserCompanyBlocMessage(
+                      localizations,
+                      state.message!,
+                    )
+                  : '';
+              if (translatedMessage.isNotEmpty) {
+                HelperFunctions.showMessage(
+                  context,
+                  translatedMessage,
+                  Colors.green,
+                );
+              }
             }
           },
           builder: (context, state) {

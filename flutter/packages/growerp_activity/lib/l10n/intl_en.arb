@@ -195,5 +195,33 @@
   "timeEntry_notFound": "No time entries found",
   "@timeEntry_notFound": {
     "description": "Message when no time entries are available"
+  },
+  "activityUpdateSuccess": "Activity updated successfully",
+  "@activityUpdateSuccess": {
+    "description": "BLoC message: Activity updated successfully"
+  },
+  "activityUpdateFailure": "Failed to update activity",
+  "@activityUpdateFailure": {
+    "description": "BLoC message: Failed to update activity"
+  },
+  "activityDeleteSuccess": "Activity deleted successfully",
+  "@activityDeleteSuccess": {
+    "description": "BLoC message: Activity deleted successfully"
+  },
+  "activityDeleteFailure": "Failed to delete activity",
+  "@activityDeleteFailure": {
+    "description": "BLoC message: Failed to delete activity"
+  },
+  "activityAddSuccess": "Activity added successfully",
+  "@activityAddSuccess": {
+    "description": "BLoC message: Activity added successfully"
+  },
+  "activityAddFailure": "Failed to add activity",
+  "@activityAddFailure": {
+    "description": "BLoC message: Failed to add activity"
+  },
+  "activityFetchFailure": "Failed to fetch activities",
+  "@activityFetchFailure": {
+    "description": "BLoC message: Failed to fetch activities"
   }
 }

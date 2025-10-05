@@ -145,7 +145,7 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
           } else {
             companiesUsers.removeAt(index);
             companiesUsers.insert(0, CompanyUser.tryParse(result)!);
-            message = 'Company ${result.name!} has been updated';
+            message = 'companyUpdateSuccess:${result.name}';
           }
         } else {
           // add company
@@ -153,7 +153,7 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
             company: event.companyUser!.getCompany()!,
           );
           companiesUsers.insert(0, CompanyUser.tryParse(result)!);
-          message = 'Company ${result.name!} has been added';
+          message = 'companyAddSuccess:${result.name}';
         }
       } else {
         if (event.companyUser?.company?.name != null) {
@@ -194,17 +194,14 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
             );
           } else {
             companiesUsers.removeAt(index);
-            message = 'User ${companyUser.name!} has been updated';
+            message = 'userUpdateSuccess:${companyUser.name}';
           }
         } else {
           // add user
           result = await restClient.createUser(
             user: event.companyUser!.getUser()!,
           );
-          message = 'User ${companyUser.name!} has been added';
-        }
-        if (event.companyUser?.company?.name != null) {
-          message += "\nas company";
+          message = 'userAddSuccess:${companyUser.name}';
         }
         // now depending if the company/user is reversed pick the correct id.
         if (event.companyUser?.company?.name == null) {
@@ -290,7 +287,7 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
         state.copyWith(
           status: CompanyUserStatus.success,
           companiesUsers: state.companiesUsers,
-          message: 'Company/User upload success',
+          message: 'compUserUploadSuccess',
         ),
       );
     } on DioException catch (e) {
@@ -314,7 +311,7 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
         state.copyWith(
           status: CompanyUserStatus.success,
           companiesUsers: state.companiesUsers,
-          message: 'Company/User download success',
+          message: 'compUserDownloadSuccess',
         ),
       );
     } on DioException catch (e) {
@@ -348,7 +345,7 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
           searchString: '',
           status: CompanyUserStatus.success,
           companiesUsers: companiesUsers,
-          message: 'User ${event.user!.getName()} has been deleted',
+          message: 'userDeleteSuccess:${event.user!.getName()}',
         ),
       );
     } on DioException catch (e) {

@@ -196,5 +196,19 @@
   "staff": "พนักงาน",
   "applications": "แอปพลิเคชัน",
   "restRequests": "คำขอ REST",
-  "userRequestStatus": "ผู้ใช้\nคำขอ\nสถานะ"
+  "userRequestStatus": "ผู้ใช้\nคำขอ\nสถานะ",
+  "authLoginSuccess": "เข้าสู่ระบบสำเร็จ",
+  "authLoginFailure": "เข้าสู่ระบบล้มเหลว",
+  "authLogoutSuccess": "ออกจากระบบสำเร็จ",
+  "authRegisterSuccess": "ลงทะเบียนสำเร็จ คุณสามารถเข้าสู่ระบบด้วยรหัสผ่านที่ส่งทางอีเมล",
+  "authRegisterFailure": "ลงทะเบียนล้มเหลว",
+  "authPasswordResetSuccess": "รีเซ็ตรหัสผ่านสำเร็จ",
+  "authPasswordResetFailure": "รีเซ็ตรหัสผ่านล้มเหลว",
+  "authUpdateSuccess": "อัปเดตการรับรองความถูกต้องสำเร็จ",
+  "authUpdateFailure": "การอัปเดตการรับรองความถูกต้องล้มเหลว",
+  "notificationFetchSuccess": "ดึงข้อมูลการแจ้งเตือนสำเร็จ",
+  "notificationFetchFailure": "การดึงข้อมูลการแจ้งเตือนล้มเหลว",
+  "notificationMarkReadSuccess": "ทำเครื่องหมายการแจ้งเตือนว่าอ่านแล้ว",
+  "notificationMarkReadFailure": "การทำเครื่องหมายการแจ้งเตือนว่าอ่านแล้วล้มเหลว",
+  "passwordChangeSuccess": "เปลี่ยนรหัสผ่านสำเร็จสำหรับผู้ใช้: {username}"
 }
