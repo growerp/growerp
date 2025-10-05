@@ -12,4 +12,5 @@ export FLUTTER_ROOT="$FLUTTER_DIR/flutter"
 export PATH="$FLUTTER_ROOT/bin:$PATH"
 cd /app
 flutter pub get
-flutter gen-l10n
+melos l10n --no-select
+melos build --no-select

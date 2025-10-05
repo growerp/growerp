@@ -12,165 +12,248 @@ You should have received a copy of the CC0 Public Domain Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
     <service verb="find" noun="Party" type="script"
-             location="component://mantle-usl/service/mantle/party/PartyServices/findParty.groovy">
+        location="component://mantle-usl/service/mantle/party/PartyServices/findParty.groovy">
         <in-parameters>
-            <parameter name="partyId"/>
-            <parameter name="pseudoId"/>
-            <parameter name="partyTypeEnumId"/>
-            <parameter name="disabled"/>
-            <parameter name="hasDuplicates"/>
-            <parameter name="roleTypeId"/>
-            <parameter name="username"/>
+            <parameter name="partyId" />
+            <parameter name="pseudoId" />
+            <parameter name="partyTypeEnumId" />
+            <parameter name="disabled" />
+            <parameter name="hasDuplicates" />
+            <parameter name="roleTypeId" />
+            <parameter name="username" />
 
-            <parameter name="combinedName"/>
-            <parameter name="organizationName"/>
-            <parameter name="firstName"/><parameter name="lastName"/><parameter name="suffix"/>
+            <parameter name="combinedName" />
+            <parameter name="organizationName" />
+            <parameter name="firstName" />
+            <parameter name="lastName" />
+            <parameter name="suffix" />
 
-            <parameter name="address1"/><parameter name="address2"/>
-            <parameter name="city"/><parameter name="stateProvinceGeoId"/><parameter name="postalCode"/>
-            <parameter name="countryCode"/><parameter name="areaCode"/><parameter name="contactNumber"/>
-            <parameter name="emailAddress"/>
-            <parameter name="assetSerialNumber"/>
+            <parameter name="address1" />
+            <parameter name="address2" />
+            <parameter name="city" />
+            <parameter name="stateProvinceGeoId" />
+            <parameter name="postalCode" />
+            <parameter name="countryCode" />
+            <parameter name="areaCode" />
+            <parameter name="contactNumber" />
+            <parameter name="emailAddress" />
+            <parameter name="assetSerialNumber" />
 
-            <parameter name="orderByField" default-value="firstName,organizationName"/>
-            <parameter name="pageIndex" type="Integer" default="0"/>
-            <parameter name="pageSize" type="Integer" default="20"/>
-            <parameter name="pageNoLimit" type="Boolean" default="false"/>
-            <parameter name="leadingWildcard" type="Boolean" default="false"><description>Defaults for false for DB query performance reasons.</description></parameter>
+            <parameter name="orderByField" default-value="firstName,organizationName" />
+            <parameter name="pageIndex" type="Integer" default="0" />
+            <parameter name="pageSize" type="Integer" default="20" />
+            <parameter name="pageNoLimit" type="Boolean" default="false" />
+            <parameter name="leadingWildcard" type="Boolean" default="false">
+                <description>Defaults for false for DB query performance reasons.</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="partyIdList" type="List"><parameter name="partyId"/></parameter>
-            <parameter name="partyIdListCount" type="Integer"/>
-            <parameter name="partyIdListPageIndex" type="Integer"/>
-            <parameter name="partyIdListPageSize" type="Integer"/>
-            <parameter name="partyIdListPageMaxIndex" type="Integer"/>
-            <parameter name="partyIdListPageRangeLow" type="Integer"/>
-            <parameter name="partyIdListPageRangeHigh" type="Integer"/>
+            <parameter name="partyIdList" type="List">
+                <parameter name="partyId" />
+            </parameter>
+            <parameter name="partyIdListCount" type="Integer" />
+            <parameter name="partyIdListPageIndex" type="Integer" />
+            <parameter name="partyIdListPageSize" type="Integer" />
+            <parameter name="partyIdListPageMaxIndex" type="Integer" />
+            <parameter name="partyIdListPageRangeLow" type="Integer" />
+            <parameter name="partyIdListPageRangeHigh" type="Integer" />
         </out-parameters>
     </service>
     <service verb="search" noun="Party">
         <in-parameters>
-            <parameter name="searchPartyIndexName" default-value="mantle_party"/>
-            <parameter name="searchPartyDocType" default-value="MantleParty"/>
-            <parameter name="anyField"/>
+            <parameter name="searchPartyIndexName" default-value="mantle_party" />
+            <parameter name="searchPartyDocType" default-value="MantleParty" />
+            <parameter name="anyField" />
 
-            <parameter name="roleTypeId"/><parameter name="partyClassificationId"/>
-            <parameter name="pseudoId"/><parameter name="idValue"/><parameter name="gatewayCimId"/>
-            <parameter name="disabled"/><parameter name="hasDuplicates"/>
-            <parameter name="customerStatusId"/><parameter name="partyTypeEnumId"/>
-            <parameter name="username"/>
+            <parameter name="roleTypeId" />
+            <parameter name="partyClassificationId" />
+            <parameter name="pseudoId" />
+            <parameter name="idValue" />
+            <parameter name="gatewayCimId" />
+            <parameter name="disabled" />
+            <parameter name="hasDuplicates" />
+            <parameter name="customerStatusId" />
+            <parameter name="partyTypeEnumId" />
+            <parameter name="username" />
 
-            <parameter name="combinedName"/><parameter name="organizationName"/>
-            <parameter name="firstName"/><parameter name="lastName"/>
+            <parameter name="combinedName" />
+            <parameter name="organizationName" />
+            <parameter name="firstName" />
+            <parameter name="lastName" />
 
-            <parameter name="infoString"/>
-            <parameter name="areaCode"/><parameter name="contactNumber"/>
-            <parameter name="address1"/><parameter name="address2"/><parameter name="unitNumber"/>
-            <parameter name="city"/><parameter name="stateProvinceGeoId"/><parameter name="postalCode"/>
+            <parameter name="infoString" />
+            <parameter name="areaCode" />
+            <parameter name="contactNumber" />
+            <parameter name="address1" />
+            <parameter name="address2" />
+            <parameter name="unitNumber" />
+            <parameter name="city" />
+            <parameter name="stateProvinceGeoId" />
+            <parameter name="postalCode" />
 
-            <parameter name="orderByField"/>
-            <parameter name="pageIndex" type="Integer" default="0"/>
-            <parameter name="pageSize" type="Integer" default="20"/>
-            <parameter name="pageNoLimit" type="Boolean" default="false"/>
+            <parameter name="orderByField" />
+            <parameter name="pageIndex" type="Integer" default="0" />
+            <parameter name="pageSize" type="Integer" default="20" />
+            <parameter name="pageNoLimit" type="Boolean" default="false" />
         </in-parameters>
         <out-parameters>
-            <parameter name="queryString"/>
-            <parameter name="documentList" type="List"><parameter name="document" type="Map"/></parameter>
-            <parameter name="documentListCount" type="Integer"/>
-            <parameter name="documentListPageIndex" type="Integer"/>
-            <parameter name="documentListPageSize" type="Integer"/>
-            <parameter name="documentListPageMaxIndex" type="Integer"/>
-            <parameter name="documentListPageRangeLow" type="Integer"/>
-            <parameter name="documentListPageRangeHigh" type="Integer"/>
+            <parameter name="queryString" />
+            <parameter name="documentList" type="List">
+                <parameter name="document" type="Map" />
+            </parameter>
+            <parameter name="documentListCount" type="Integer" />
+            <parameter name="documentListPageIndex" type="Integer" />
+            <parameter name="documentListPageSize" type="Integer" />
+            <parameter name="documentListPageMaxIndex" type="Integer" />
+            <parameter name="documentListPageRangeLow" type="Integer" />
+            <parameter name="documentListPageRangeHigh" type="Integer" />
         </out-parameters>
         <actions>
-            <set field="indexName" from="searchPartyIndexName ?: 'mantle_party'"/>
-            <set field="documentType" from="searchPartyDocType ?: 'MantleParty'"/>
+            <set field="indexName" from="searchPartyIndexName ?: 'mantle_party'" />
+            <set field="documentType" from="searchPartyDocType ?: 'MantleParty'" />
             <!-- <set field="orderByField" from="orderByField ?: 'combinedName'"/> -->
-            <set field="nestedQueryMap" from="[:]"/>
-            <set field="nowTimeLong" from="System.currentTimeMillis()"/>
+            <set field="nestedQueryMap" from="[:]" />
+            <set field="nowTimeLong" from="System.currentTimeMillis()" />
 
             <!-- auto prefix with '*:' so that highlighting works -->
-            <set field="queryString" from="anyField ? elasticQueryAutoWildcard(anyField, true) : ''"/>
+            <set field="queryString" from="anyField ? elasticQueryAutoWildcard(anyField, true) : ''" />
 
-            <if condition="queryString"><set field="queryString" from="'(' + queryString + ')'"/></if>
+            <if condition="queryString">
+                <set field="queryString" from="'(' + queryString + ')'" />
+            </if>
 
             <if condition="roleTypeId">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'roles.roleTypeId:' + roleTypeId"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'roles.roleTypeId:' + roleTypeId" />
+            </if>
             <if condition="partyClassificationId">
-                <set field="nestedQueryMap.classifications" from="[bool:[filter:[
+                <set field="nestedQueryMap.classifications"
+                    from="[bool:[filter:[
                         [term:['classifications.partyClassificationId':partyClassificationId]],
                         [range:['classifications.classFromDate':[lte:nowTimeLong]]]
                     ], should:[
                         [range:['classifications.classThruDate':[gte:nowTimeLong]]],
                         [bool:[must_not:[exists:[field:'classifications.classThruDate']]]]
-                    ], minimum_should_match:1]]"/>
-                <if condition="!queryString"><set field="queryString" value="*:*"/></if>
-                <!-- <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'classifications.partyClassificationId:' + partyClassificationId"/> -->
+                    ], minimum_should_match:1]]" />
+                <if condition="!queryString">
+                    <set field="queryString" value="*:*" />
+                </if>
+                <!-- <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) +
+                'classifications.partyClassificationId:' + partyClassificationId"/> -->
             </if>
 
             <if condition="pseudoId">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'pseudoId:' + pseudoId + '*'"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'pseudoId:' + pseudoId + '*'" />
+            </if>
             <if condition="idValue">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'identifications.idValue:' + idValue + '*'"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'identifications.idValue:' + idValue + '*'" />
+            </if>
             <if condition="gatewayCimId">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'gatewayCimId:' + gatewayCimId + '*'"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'gatewayCimId:' + gatewayCimId + '*'" />
+            </if>
 
             <if condition="username">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'userAccounts.username:' + username + '*'"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'userAccounts.username:' + username + '*'" />
+            </if>
             <if condition="disabled">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'disabled:' + disabled"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'disabled:' + disabled" />
+            </if>
             <if condition="hasDuplicates">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'hasDuplicates:' + hasDuplicates"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'hasDuplicates:' + hasDuplicates" />
+            </if>
 
             <if condition="combinedName">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'combinedName:*' + combinedName + '*'"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'combinedName:*' + combinedName + '*'" />
+            </if>
             <if condition="organizationName">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'organizationName:' + organizationName + '*'"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'organizationName:' + organizationName + '*'" />
+            </if>
             <if condition="firstName">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'firstName:' + firstName + '*'"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'firstName:' + firstName + '*'" />
+            </if>
             <if condition="lastName">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'lastName:' + lastName + '*'"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'lastName:' + lastName + '*'" />
+            </if>
 
             <if condition="infoString">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.infoString:' + infoString + '*'"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.infoString:' + infoString + '*'" />
+            </if>
             <if condition="areaCode">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.areaCode:' + areaCode + '*'"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.areaCode:' + areaCode + '*'" />
+            </if>
             <if condition="contactNumber">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.contactNumber:' + contactNumber + '*'"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.contactNumber:' + contactNumber + '*'" />
+            </if>
 
             <if condition="address1">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.address1:*' + address1 + '*'"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.address1:*' + address1 + '*'" />
+            </if>
             <if condition="address2">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.address2:*' + address2 + '*'"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.address2:*' + address2 + '*'" />
+            </if>
             <if condition="unitNumber">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.unitNumber:*' + unitNumber + '*'"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.unitNumber:*' + unitNumber + '*'" />
+            </if>
             <if condition="city">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.city:' + city + '*'"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.city:' + city + '*'" />
+            </if>
             <if condition="stateProvinceGeoId">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.stateProvinceGeoId:' + stateProvinceGeoId"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.stateProvinceGeoId:' + stateProvinceGeoId" />
+            </if>
             <if condition="postalCode">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.postalCode:' + postalCode + '*'"/></if>
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'contactMechs.postalCode:' + postalCode + '*'" />
+            </if>
             <if condition="customerStatusId">
                 <if condition="customerStatusId == '_exists_'">
-                    <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + '_exists_:customerStatusId'"/>
-                    <else> 
-                        <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'customerStatusId:' + customerStatusId + '*'"/>
+                    <set field="queryString"
+                        from="(queryString ? queryString + ' AND ' : '' ) + '_exists_:customerStatusId'" />
+                    <else>
+                        <set field="queryString"
+                            from="(queryString ? queryString + ' AND ' : '' ) + 'customerStatusId:' + customerStatusId + '*'" />
                     </else>
                 </if>
             </if>
             <if condition="partyTypeEnumId">
-                <set field="queryString" from="(queryString ? queryString + ' AND ' : '' ) + 'partyTypeEnumId:' + partyTypeEnumId + '*'"/></if>
-            <!-- if we have activeOrgId or filterOrgIds see if user has active org or user org filters -->
-            <set field="activeOrgId" from="ec.user.context?.activeOrgId"/>
-            <set field="filterOrgIds" from="ec.user.context?.filterOrgIds"/>
-            <!-- NOTE: using entityFilterSetId is a hack that only works for these 'standard' filter sets, would be
-                better to pick apart filterMap to see what's used, but this is specific to activeOrgId and filterOrgIds anyway -->
-            <set field="findFilters" from="ec.artifactExecution.getFindFiltersForUser('mantle.party.Party')"/>
-            <if condition="findFilters"><set field="entityFilterSetId" from="findFilters[0].entityFilterSetId"/></if>
-            <!-- <log level="warn" message="Doing party search with activeOrgId ${activeOrgId} filterOrgIds ${filterOrgIds} entityFilterSetId ${entityFilterSetId}"/> -->
+                <set field="queryString"
+                    from="(queryString ? queryString + ' AND ' : '' ) + 'partyTypeEnumId:' + partyTypeEnumId + '*'" />
+            </if>
+            <!-- if we have activeOrgId or filterOrgIds see if user has active org or user org
+            filters -->
+            <set field="activeOrgId" from="ec.user.context?.activeOrgId" />
+            <set field="filterOrgIds" from="ec.user.context?.filterOrgIds" />
+            <!-- NOTE: using entityFilterSetId is a hack that only works for these 'standard' filter
+            sets, would be
+                better to pick apart filterMap to see what's used, but this is specific to activeOrgId and
+            filterOrgIds anyway -->
+            <set field="findFilters"
+                from="ec.artifactExecution.getFindFiltersForUser('mantle.party.Party')" />
+            <if condition="findFilters">
+                <set field="entityFilterSetId" from="findFilters[0].entityFilterSetId" />
+            </if>
+            <!-- <log level="warn" message="Doing party search with activeOrgId ${activeOrgId}
+            filterOrgIds ${filterOrgIds} entityFilterSetId ${entityFilterSetId}"/> -->
             <script><![CDATA[
                 if (queryString) {
                     if ('MANTLE_USER_ORG'.equals(entityFilterSetId)) {
@@ -181,33 +264,43 @@ along with this software (see the LICENSE.md file). If not, see
                 }
             ]]></script>
 
-            <set field="orderByFields" from="orderByField ? [orderByField.replace('combinedName', 'combinedName.keyword').replace('username', 'userAccounts.username.keyword')] : null"/>
-            <set field="highlightFields" from="['roles.roleTypeId', 'classifications.class', 'pseudoId',
+            <set field="orderByFields"
+                from="orderByField ? [orderByField.replace('combinedName', 'combinedName.keyword').replace('username', 'userAccounts.username.keyword')] : null" />
+            <set field="highlightFields"
+                from="['roles.roleTypeId', 'classifications.class', 'pseudoId',
                     'identifications.idValue', 'combinedName', 'firstName', 'lastName', 'organizationName', 'userAccounts.username',
                     'contactMech.infoString', 'contactMechs.address1', 'contactMechs.unitNumber', 'contactMechs.postalCode',
-                    'contactMechs.city', 'contactMechs.state', 'contactMechs.areaCode', 'contactMechs.contactNumber', 'contactMechs.city']"/>
+                    'contactMechs.city', 'contactMechs.state', 'contactMechs.areaCode', 'contactMechs.contactNumber', 'contactMechs.city']" />
             <!-- <log level="warn" message="Product search queryString: ${queryString}"/> -->
             <if condition="queryString">
-                <service-call name="org.moqui.search.SearchServices.search#DataDocuments" out-map="context"
-                        in-map="[indexName:indexName, documentType:documentType, queryString:queryString, flattenDocument:false,
+                <service-call name="org.moqui.search.SearchServices.search#DataDocuments"
+                    out-map="context"
+                    in-map="[indexName:indexName, documentType:documentType, queryString:queryString, flattenDocument:false,
                              orderByFields:orderByFields, highlightFields:highlightFields, nestedQueryMap:nestedQueryMap,
-                             pageIndex:pageIndex, pageSize:pageSize, pageNoLimit:pageNoLimit]"/>
+                             pageIndex:pageIndex, pageSize:pageSize, pageNoLimit:pageNoLimit]" />
             </if>
         </actions>
     </service>
 
 
     <service verb="search" noun="Person">
-        <in-parameters><parameter name="term"/></in-parameters>
-        <out-parameters><parameter name="outList" type="List"/></out-parameters>
+        <in-parameters>
+            <parameter name="term" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="outList" type="List" />
+        </out-parameters>
         <actions>
             <entity-find entity-name="mantle.party.PersonAndUserAccount" list="pauList" limit="20">
                 <econditions combine="or">
-                    <econdition field-name="firstName" operator="like" value="%${term}%" ignore-case="true"/>
-                    <econdition field-name="lastName" operator="like" value="%${term}%" ignore-case="true"/>
-                    <econdition field-name="username" operator="like" value="%${term}%" ignore-case="true"/>
+                    <econdition field-name="firstName" operator="like" value="%${term}%"
+                        ignore-case="true" />
+                    <econdition field-name="lastName" operator="like" value="%${term}%"
+                        ignore-case="true" />
+                    <econdition field-name="username" operator="like" value="%${term}%"
+                        ignore-case="true" />
                 </econditions>
-                <order-by field-name="^firstName,^lastName,^username"/>
+                <order-by field-name="^firstName,^lastName,^username" />
             </entity-find>
             <script>outList = []; for (def pau in pauList) outList.add([value:pau.partyId, label:ec.resource.expand('UsernameTemplate','',pau)])</script>
         </actions>
@@ -215,11 +308,14 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="UserNoticeCounts">
         <out-parameters>
-            <parameter name="partyId"/>
-            <parameter name="notificationCount" type="Long"/><parameter name="messageCount" type="Long"/>
-            <parameter name="eventCount" type="Long"/><parameter name="taskCount" type="Long"/>
+            <parameter name="partyId" />
+            <parameter name="notificationCount" type="Long" />
+            <parameter name="messageCount" type="Long" />
+            <parameter name="eventCount" type="Long" />
+            <parameter name="taskCount" type="Long" />
         </out-parameters>
-        <actions><script>
+        <actions>
+            <script>
             def curWeekRange = ec.user.getPeriodRange("week", "")
             partyId = ec.user.userAccount.partyId
             notificationCount = ec.entity.find("moqui.security.user.NotificationMessageUser").condition("userId", ec.user.userId)
@@ -233,7 +329,8 @@ along with this software (see the LICENSE.md file). If not, see
             taskCount = ec.entity.find("mantle.work.effort.WorkEffortAndParty").condition("partyId", partyId)
                     .condition("statusId", "not-in", "WeClosed,WeCancelled").condition("workEffortTypeEnumId", "WetTask")
                     .conditionDate("", "", ec.user.nowTimestamp).count()
-        </script></actions>
+        </script>
+        </actions>
     </service>
     <service verb="setup" noun="UserOrganizationInfo" authenticate="anonymous-view">
         <description>
@@ -245,36 +342,52 @@ along with this software (see the LICENSE.md file). If not, see
             records so returns results limited to the organizations a user is directly related to.
         </description>
         <out-parameters>
-            <parameter name="userOrgList" type="List"><parameter name="userOrg" type="Map">
-                <auto-parameters entity-name="mantle.party.PartyDetail"/></parameter></parameter>
-            <parameter name="userOrgIds" type="List"><parameter name="userOrgId"/></parameter>
+            <parameter name="userOrgList" type="List">
+                <parameter name="userOrg" type="Map">
+                    <auto-parameters entity-name="mantle.party.PartyDetail" />
+                </parameter>
+            </parameter>
+            <parameter name="userOrgIds" type="List">
+                <parameter name="userOrgId" />
+            </parameter>
 
-            <parameter name="activeOrgId"/>
-            <parameter name="activeOrg" type="Map"><auto-parameters entity-name="mantle.party.PartyDetail"/></parameter>
+            <parameter name="activeOrgId" />
+            <parameter name="activeOrg" type="Map">
+                <auto-parameters entity-name="mantle.party.PartyDetail" />
+            </parameter>
 
-            <parameter name="filterOrgIds" type="List"><parameter name="userOrgId"/></parameter>
+            <parameter name="filterOrgIds" type="List">
+                <parameter name="userOrgId" />
+            </parameter>
         </out-parameters>
         <actions>
-            <set field="partyId" from="ec.user.userAccount?.partyId"/>
+            <set field="partyId" from="ec.user.userAccount?.partyId" />
             <if condition="!partyId">
-                <log level="warn" message="Cannot setup#UserOrganizationInfo, no user with partyId logged in"/>
-                <return/>
+                <log level="warn"
+                    message="Cannot setup#UserOrganizationInfo, no user with partyId logged in" />
+                <return />
             </if>
 
             <!-- get activeOrgId, userOrgIds, filterOrgIds -->
-            <service-call name="mantle.party.PartyServices.get#PartyOrganizationInfo" out-map="context" in-map="[partyId:partyId]"/>
+            <service-call name="mantle.party.PartyServices.get#PartyOrganizationInfo"
+                out-map="context" in-map="[partyId:partyId]" />
 
             <!-- get userOrgList with userOrgIds -->
             <entity-find entity-name="mantle.party.PartyDetail" list="userOrgList">
-                <econdition field-name="partyId" operator="in" from="userOrgIds"/>
-                <order-by field-name="pseudoId"/>
+                <econdition field-name="partyId" operator="in" from="userOrgIds" />
+                <order-by field-name="pseudoId" />
             </entity-find>
 
             <!-- get the active org detail for display, etc -->
-            <if condition="activeOrgId"><entity-find-one entity-name="mantle.party.PartyDetail" value-field="activeOrg" cache="true">
-                <field-map field-name="partyId" from="activeOrgId"/></entity-find-one></if>
+            <if condition="activeOrgId">
+                <entity-find-one entity-name="mantle.party.PartyDetail" value-field="activeOrg"
+                    cache="true">
+                    <field-map field-name="partyId" from="activeOrgId" />
+                </entity-find-one>
+            </if>
 
-            <!-- <log level="warn" message="activeOrgId ${activeOrgId} (${activeOrgId?.class?.name}) filterOrgIds ${filterOrgIds}"/> -->
+            <!-- <log level="warn" message="activeOrgId ${activeOrgId} (${activeOrgId?.class?.name})
+            filterOrgIds ${filterOrgIds}"/> -->
 
             <!-- set userOrgIds, filterOrgIds, and activeOrgId in user context -->
             <script>
@@ -285,41 +398,55 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
     <service verb="get" noun="PartyOrganizationInfo">
-        <in-parameters><parameter name="partyId" default="ec.user.userAccount?.partyId"/></in-parameters>
+        <in-parameters>
+            <parameter name="partyId" default="ec.user.userAccount?.partyId" />
+        </in-parameters>
         <out-parameters>
-            <parameter name="activeOrgId"/>
-            <parameter name="userOrgIds" type="List"><parameter name="userOrgId"/></parameter>
-            <parameter name="filterOrgIds" type="List"><parameter name="userOrgId"/></parameter>
+            <parameter name="activeOrgId" />
+            <parameter name="userOrgIds" type="List">
+                <parameter name="userOrgId" />
+            </parameter>
+            <parameter name="filterOrgIds" type="List">
+                <parameter name="userOrgId" />
+            </parameter>
         </out-parameters>
         <actions>
             <if condition="!partyId">
-                <set field="userOrgIds" from="[]"/><set field="filterOrgIds" from="[]"/>
-                <return/>
+                <set field="userOrgIds" from="[]" />
+                <set field="filterOrgIds" from="[]" />
+                <return />
             </if>
 
             <!-- get user organizations data (agent/employee/member rel from member to org) -->
-            <entity-find entity-name="mantle.party.PartyRelationship" list="userOrgRelList" cache="true">
-                <date-filter/>
-                <econdition field-name="relationshipTypeEnumId" operator="in" value="PrtAgent,PrtEmployee,PrtMember"/>
-                <econdition field-name="toRoleTypeId" value="OrgInternal"/>
-                <econdition field-name="fromPartyId" from="partyId"/>
+            <entity-find entity-name="mantle.party.PartyRelationship" list="userOrgRelList"
+                cache="true">
+                <date-filter />
+                <econdition field-name="relationshipTypeEnumId" operator="in"
+                    value="PrtAgent,PrtEmployee,PrtMember" />
+                <econdition field-name="toRoleTypeId" value="OrgInternal" />
+                <econdition field-name="fromPartyId" from="partyId" />
             </entity-find>
-            <set field="userOrgIds" from="[]"/>
+            <set field="userOrgIds" from="[]" />
             <iterate list="userOrgRelList" entry="userOrgRel">
                 <if condition="!userOrgIds.contains(userOrgRel.toPartyId)">
                     <script>userOrgIds.add(userOrgRel.toPartyId)</script>
-                    <!-- look for direct child orgs and allow them too (rollup rel from child to parent) -->
-                    <!-- NOTE: consider making this recursive (inline method or other service) to walk down multiple levels -->
-                    <entity-find entity-name="mantle.party.PartyRelationship" list="childRelList" cache="true">
-                        <date-filter/>
-                        <econdition field-name="relationshipTypeEnumId" value="PrtOrgRollup"/>
-                        <econdition field-name="toPartyId" from="userOrgRel.toPartyId"/>
-                        <econdition field-name="fromPartyId" operator="is-not-null"/>
+                    <!-- look for direct child orgs and allow them too (rollup rel from child to
+                    parent) -->
+                    <!-- NOTE: consider making this recursive (inline method or other service) to
+                    walk down multiple levels -->
+                    <entity-find entity-name="mantle.party.PartyRelationship" list="childRelList"
+                        cache="true">
+                        <date-filter />
+                        <econdition field-name="relationshipTypeEnumId" value="PrtOrgRollup" />
+                        <econdition field-name="toPartyId" from="userOrgRel.toPartyId" />
+                        <econdition field-name="fromPartyId" operator="is-not-null" />
                     </entity-find>
                     <iterate list="childRelList" entry="childRel">
                         <if condition="!userOrgIds.contains(childRel.fromPartyId)">
-                            <entity-find-one entity-name="mantle.party.PartyDetail" value-field="childOrg" cache="true">
-                                <field-map field-name="partyId" from="childRel.fromPartyId"/></entity-find-one>
+                            <entity-find-one entity-name="mantle.party.PartyDetail"
+                                value-field="childOrg" cache="true">
+                                <field-map field-name="partyId" from="childRel.fromPartyId" />
+                            </entity-find-one>
                             <script>userOrgIds.add(childRel.fromPartyId)</script>
                         </if>
                     </iterate>
@@ -327,16 +454,18 @@ along with this software (see the LICENSE.md file). If not, see
             </iterate>
 
             <!-- active org -->
-            <set field="activeOrgId" from="ec.user.getPreference('ACTIVE_ORGANIZATION')"/>
-            <if condition="activeOrgId != null &amp;&amp; activeOrgId.length() == 0"><set field="activeOrgId" from="null"/></if>
+            <set field="activeOrgId" from="ec.user.getPreference('ACTIVE_ORGANIZATION')" />
+            <if condition="activeOrgId != null &amp;&amp; activeOrgId.length() == 0">
+                <set field="activeOrgId" from="null" />
+            </if>
             <!-- if active org is not valid for the user ignore it -->
             <if condition="activeOrgId &amp;&amp; !userOrgIds.contains(activeOrgId)">
-                <set field="activeOrgId" from="null"/>
+                <set field="activeOrgId" from="null" />
                 <script>ec.user.setPreference('ACTIVE_ORGANIZATION', null)</script>
             </if>
 
             <!-- get org ids to filter by (for queries, etc) -->
-            <set field="filterOrgIds" from="activeOrgId ? [activeOrgId] : userOrgIds"/>
+            <set field="filterOrgIds" from="activeOrgId ? [activeOrgId] : userOrgIds" />
         </actions>
     </service>
 
@@ -354,144 +483,194 @@ along with this software (see the LICENSE.md file). If not, see
             At the end this optionally logs in the user (for this to work it must be run locally).
         </description>
         <in-parameters>
-            <auto-parameters entity-name="mantle.party.Person" include="nonpk"/>
-            <parameter name="firstName" required="true"/>
-            <parameter name="lastName" required="true"/>
+            <auto-parameters entity-name="mantle.party.Person" include="nonpk" />
+            <parameter name="firstName" required="true" />
+            <parameter name="lastName" required="true" />
 
             <!-- Party fields -->
-            <parameter name="pseudoId"/>
-            <parameter name="ownerPartyId"/>
-            <parameter name="externalId"/>
-            <parameter name="dataSourceId"/>
-            <parameter name="disabled" default-value="N"/>
+            <parameter name="pseudoId" />
+            <parameter name="ownerPartyId" />
+            <parameter name="externalId" />
+            <parameter name="dataSourceId" />
+            <parameter name="disabled" default-value="N" />
 
-            <parameter name="requirePasswordChange" default-value="N"/>
-            <parameter name="emailAddress"><text-email/></parameter>
+            <parameter name="requirePasswordChange" default-value="N" />
+            <parameter name="emailAddress">
+                <text-email />
+            </parameter>
 
             <!-- UserAccount fields -->
-            <parameter name="username" default="emailAddress"/>
-            <parameter name="newPassword"><description>If empty won't set a password, user will have to change or reset.</description></parameter>
-            <parameter name="newPasswordVerify"/>
-            <parameter name="currencyUomId"/>
-            <parameter name="locale"/>
-            <parameter name="timeZone"/>
+            <parameter name="username" default="emailAddress" />
+            <parameter name="newPassword">
+                <description>If empty won't set a password, user will have to change or reset.</description>
+            </parameter>
+            <parameter name="newPasswordVerify" />
+            <parameter name="currencyUomId" />
+            <parameter name="locale" />
+            <parameter name="timeZone" />
 
-            <!-- removed because creates a security hole as any open access to this service that doesn't restrict this parameter could be used to get admin access to system: <parameter name="userGroupId"/> -->
-            <parameter name="roleTypeId"/>
-            <parameter name="loginAfterCreate" type="Boolean" default="true"/>
+            <!-- removed because creates a security hole as any open access to this service that
+            doesn't restrict this parameter could be used to get admin access to system: <parameter
+            name="userGroupId"/> -->
+            <parameter name="roleTypeId" />
+            <parameter name="loginAfterCreate" type="Boolean" default="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="userId"/>
-            <parameter name="partyId" required="true"/>
-            <parameter name="emailContactMechId"/>
+            <parameter name="userId" />
+            <parameter name="partyId" required="true" />
+            <parameter name="emailContactMechId" />
         </out-parameters>
         <actions>
             <!-- create Party and Person -->
-            <service-call name="create#mantle.party.Party" in-map="context + [partyTypeEnumId:'PtyPerson']" out-map="newPartyOut"/>
-            <set field="partyId" from="newPartyOut.partyId"/>
-            <service-call name="create#mantle.party.Person" in-map="context"/>
+            <service-call name="create#mantle.party.Party"
+                in-map="context + [partyTypeEnumId:'PtyPerson']" out-map="newPartyOut" />
+            <set field="partyId" from="newPartyOut.partyId" />
+            <service-call name="create#mantle.party.Person" in-map="context" />
             <if condition="roleTypeId">
-                <service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:roleTypeId]"/></if>
+                <service-call name="create#mantle.party.PartyRole"
+                    in-map="[partyId:partyId, roleTypeId:roleTypeId]" />
+            </if>
 
             <!-- add the emailAddress -->
             <if condition="emailAddress">
-                <service-call name="mantle.party.ContactServices.create#EmailAddress" out-map="emailOut"
-                              in-map="[emailAddress:emailAddress, partyId:partyId, contactMechPurposeId:'EmailPrimary']"/>
-                <set field="emailContactMechId" from="emailOut.contactMechId"/>
+                <service-call name="mantle.party.ContactServices.create#EmailAddress"
+                    out-map="emailOut"
+                    in-map="[emailAddress:emailAddress, partyId:partyId, contactMechPurposeId:'EmailPrimary']" />
+                <set field="emailContactMechId" from="emailOut.contactMechId" />
             </if>
 
             <if condition="username">
                 <!-- see if username already in use (instead of catching on unique index) -->
                 <entity-find entity-name="moqui.security.UserAccount" list="existingUaList">
-                    <econdition field-name="username" ignore-case="true"/></entity-find>
-                <if condition="existingUaList"><return error="true" message="Username [${username}] is already in use. Please choose another."/></if>
+                    <econdition field-name="username" ignore-case="true" />
+                </entity-find>
+                <if condition="existingUaList">
+                    <return error="true"
+                        message="${ec.resource.expand('MoquiUsernameAlreadyInUse', null, [username:username])}" />
+                </if>
                 <!-- see if emailAddress already in use (instead of catching on unique index) -->
                 <if condition="emailAddress">
                     <entity-find entity-name="moqui.security.UserAccount" list="existingUaList">
-                        <econdition field-name="emailAddress" ignore-case="true"/></entity-find>
-                    <if condition="existingUaList"><return error="true" message="Email ${emailAddress} is already in use. Login with username ${existingUaList[0].username}"/></if>
+                        <econdition field-name="emailAddress" ignore-case="true" />
+                    </entity-find>
+                    <if condition="existingUaList">
+                        <return error="true"
+                            message="${ec.resource.expand('MoquiEmailAlreadyInUse', null, [emailAddress:emailAddress, existingUsername:existingUaList[0].username])}" />
+                    </if>
                 </if>
 
-                <set field="userFullName" value="${ec.resource.expand('PartyFullNameTemplate','')}"/>
-                <if condition="newPassword"><then>
-                    <!-- NOTE: SECA rule on UserServices.create#UserAccount will create a Party for UserAccount if no partyId, so must call with the partyId after create Party -->
-                    <service-call name="org.moqui.impl.UserServices.create#UserAccount" in-map="context" out-map="newUaOut"/>
-                </then><else>
-                    <service-call name="create#moqui.security.UserAccount" in-map="context" out-map="newUaOut"/>
-                </else></if>
-                <set field="userId" from="newUaOut.userId"/>
+                <set field="userFullName" value="${ec.resource.expand('PartyFullNameTemplate','')}" />
+                <if condition="newPassword">
+                    <then>
+                        <!-- NOTE: SECA rule on UserServices.create#UserAccount will create a Party
+                        for UserAccount if no partyId, so must call with the partyId after create
+                        Party -->
+                        <service-call name="org.moqui.impl.UserServices.create#UserAccount"
+                            in-map="context" out-map="newUaOut" />
+                    </then>
+                    <else>
+                        <service-call name="create#moqui.security.UserAccount" in-map="context"
+                            out-map="newUaOut" />
+                    </else>
+                </if>
+                <set field="userId" from="newUaOut.userId" />
 
                 <!-- login the user -->
                 <if condition="loginAfterCreate &amp;&amp; newPassword">
-                    <script>ec.user.loginUser(username, newPassword)</script></if>
+                    <script>ec.user.loginUser(username, newPassword)</script>
+                </if>
             </if>
         </actions>
     </service>
     <service verb="update" noun="Account">
         <description>Update Person, UserAccount, and EmailPrimary.</description>
         <in-parameters>
-            <parameter name="userId"/>
-            <parameter name="partyId"/>
-            <auto-parameters entity-name="mantle.party.Person" include="nonpk"/>
+            <parameter name="userId" />
+            <parameter name="partyId" />
+            <auto-parameters entity-name="mantle.party.Person" include="nonpk" />
 
-            <parameter name="disabled"/>
-            <parameter name="requirePasswordChange"/>
+            <parameter name="disabled" />
+            <parameter name="requirePasswordChange" />
 
-            <parameter name="emailAddress"><text-email/></parameter>
-            <parameter name="username"/>
+            <parameter name="emailAddress">
+                <text-email />
+            </parameter>
+            <parameter name="username" />
 
-            <parameter name="currencyUomId"/>
-            <parameter name="locale"/>
-            <parameter name="timeZone"/>
+            <parameter name="currencyUomId" />
+            <parameter name="locale" />
+            <parameter name="timeZone" />
         </in-parameters>
         <actions>
-            <if condition="!userId &amp;&amp; !partyId"><return error="true" message="To update account must specify either userId or partyId"/></if>
-            <if condition="!userId"><then>
-                <entity-find entity-name="moqui.security.UserAccount" list="userAccountList"><econdition field-name="partyId"/></entity-find>
-                <set field="userId" from="userAccountList?.first?.userId"/>
-            </then><else-if condition="!partyId">
-                <entity-find-one entity-name="moqui.security.UserAccount" value-field="userAccount"/>
-                <set field="partyId" from="userAccount.partyId"/>
-            </else-if></if>
-            <if condition="userId"><service-call name="org.moqui.impl.UserServices.update#UserAccount" in-map="context"/></if>
-            <set field="prePartyId" from="partyId"/>
-            <service-call name="store#mantle.party.Party" in-map="context" out-map="context"/>
-            <service-call name="store#mantle.party.Person" in-map="context"/>
-            <if condition="!prePartyId"><service-call name="store#moqui.security.UserAccount"
-                    in-map="[userId:userId, partyId:partyId]"/></if>
-            <if condition="emailAddress"><service-call name="mantle.party.ContactServices.store#PartyContactInfo"
-                    in-map="[partyId:partyId, emailAddress:emailAddress, emailContactMechPurposeId:'EmailPrimary', replaceByPurpose:true]"/></if>
+            <if condition="!userId &amp;&amp; !partyId">
+                <return error="true"
+                    message="To update account must specify either userId or partyId" />
+            </if>
+            <if condition="!userId">
+                <then>
+                    <entity-find entity-name="moqui.security.UserAccount" list="userAccountList">
+                        <econdition field-name="partyId" />
+                    </entity-find>
+                    <set field="userId" from="userAccountList?.first?.userId" />
+                </then>
+                <else-if condition="!partyId">
+                    <entity-find-one entity-name="moqui.security.UserAccount"
+                        value-field="userAccount" />
+                    <set field="partyId" from="userAccount.partyId" />
+                </else-if>
+            </if>
+            <if condition="userId">
+                <service-call name="org.moqui.impl.UserServices.update#UserAccount" in-map="context" />
+            </if>
+            <set field="prePartyId" from="partyId" />
+            <service-call name="store#mantle.party.Party" in-map="context" out-map="context" />
+            <service-call name="store#mantle.party.Person" in-map="context" />
+            <if condition="!prePartyId">
+                <service-call name="store#moqui.security.UserAccount"
+                    in-map="[userId:userId, partyId:partyId]" />
+            </if>
+            <if condition="emailAddress">
+                <service-call name="mantle.party.ContactServices.store#PartyContactInfo"
+                    in-map="[partyId:partyId, emailAddress:emailAddress, emailContactMechPurposeId:'EmailPrimary', replaceByPurpose:true]" />
+            </if>
         </actions>
     </service>
     <service verb="create" noun="UserAccountPerson" authenticate="anonymous-all">
         <description>Create a Person type Party from the data in a UserAccount record</description>
-        <in-parameters><parameter name="userId" required="true"/></in-parameters>
+        <in-parameters>
+            <parameter name="userId" required="true" />
+        </in-parameters>
         <out-parameters>
-            <parameter name="partyId"/>
-            <parameter name="emailContactMechId"/>
+            <parameter name="partyId" />
+            <parameter name="emailContactMechId" />
         </out-parameters>
         <actions>
-            <entity-find-one entity-name="moqui.security.UserAccount" value-field="userAccount"/>
-            <if condition="userAccount.partyId"><return/></if>
-            <!-- create Party and set id on UserAccount -->
-            <service-call name="create#mantle.party.Party" in-map="[partyTypeEnumId:'PtyPerson', disabled:'N']" out-map="newPartyOut"/>
-            <set field="partyId" from="newPartyOut.partyId"/>
-            <!-- add the partyId to the UserAccount -->
-            <set field="userAccount.partyId" from="partyId"/>
-            <entity-update value-field="userAccount"/>
-            <!-- create the Person, split the full name -->
-            <set field="firstName" from="userAccount.userFullName ?: userAccount.username"/>
-            <set field="lastName" from="null"/>
-            <if condition="firstName?.contains(' ')">
-                <set field="lastName" from="firstName.substring(firstName.lastIndexOf(' ')+1)"/>
-                <set field="firstName" from="firstName.substring(0, firstName.lastIndexOf(' '))"/>
+            <entity-find-one entity-name="moqui.security.UserAccount" value-field="userAccount" />
+            <if condition="userAccount.partyId">
+                <return />
             </if>
-            <service-call name="create#mantle.party.Person" in-map="[partyId:partyId, firstName:firstName, lastName:lastName]"/>
+            <!-- create Party and set id on UserAccount -->
+            <service-call name="create#mantle.party.Party"
+                in-map="[partyTypeEnumId:'PtyPerson', disabled:'N']" out-map="newPartyOut" />
+            <set field="partyId" from="newPartyOut.partyId" />
+            <!-- add the partyId to the UserAccount -->
+            <set field="userAccount.partyId" from="partyId" />
+            <entity-update value-field="userAccount" />
+            <!-- create the Person, split the full name -->
+            <set field="firstName" from="userAccount.userFullName ?: userAccount.username" />
+            <set field="lastName" from="null" />
+            <if condition="firstName?.contains(' ')">
+                <set field="lastName" from="firstName.substring(firstName.lastIndexOf(' ')+1)" />
+                <set field="firstName" from="firstName.substring(0, firstName.lastIndexOf(' '))" />
+            </if>
+            <service-call name="create#mantle.party.Person"
+                in-map="[partyId:partyId, firstName:firstName, lastName:lastName]" />
             <!-- add the emailAddress -->
             <if condition="userAccount.emailAddress">
-                <service-call name="mantle.party.ContactServices.create#EmailAddress" out-map="emailOut"
-                        in-map="[emailAddress:userAccount.emailAddress, partyId:partyId, contactMechPurposeId:'EmailPrimary']"/>
-                <set field="emailContactMechId" from="emailOut.contactMechId"/>
+                <service-call name="mantle.party.ContactServices.create#EmailAddress"
+                    out-map="emailOut"
+                    in-map="[emailAddress:userAccount.emailAddress, partyId:partyId, contactMechPurposeId:'EmailPrimary']" />
+                <set field="emailContactMechId" from="emailOut.contactMechId" />
             </if>
         </actions>
     </service>
@@ -500,79 +679,120 @@ along with this software (see the LICENSE.md file). If not, see
         <description>Create a UserAccount for a Party, and set EmailPrimary if applicable.</description>
         <in-parameters>
             <!-- NOTE: these are the same excludes as org.moqui.impl.UserServices.create#UserAccount -->
-            <auto-parameters entity-name="moqui.security.UserAccount" include="nonpk"><exclude field-name="currentPassword"/>
-                <exclude field-name="resetPassword"/><exclude field-name="passwordSalt"/><exclude field-name="passwordHashType"/>
-                <exclude field-name="passwordBase64"/><exclude field-name="passwordSetDate"/><exclude field-name="hasLoggedOut"/>
-                <exclude field-name="disabledDateTime"/><exclude field-name="successiveFailedLogins"/>
+            <auto-parameters entity-name="moqui.security.UserAccount" include="nonpk">
+                <exclude field-name="currentPassword" />
+                <exclude field-name="resetPassword" />
+                <exclude field-name="passwordSalt" />
+                <exclude field-name="passwordHashType" />
+                <exclude field-name="passwordBase64" />
+                <exclude field-name="passwordSetDate" />
+                <exclude field-name="hasLoggedOut" />
+                <exclude field-name="disabledDateTime" />
+                <exclude field-name="successiveFailedLogins" />
             </auto-parameters>
 
-            <parameter name="partyId" required="true"/>
+            <parameter name="partyId" required="true" />
 
-            <parameter name="emailAddress" required="true"><text-email/></parameter>
-            <parameter name="username" default="emailAddress" required="true"/>
+            <parameter name="emailAddress" required="true">
+                <text-email />
+            </parameter>
+            <parameter name="username" default="emailAddress" required="true" />
 
-            <parameter name="newPassword"><description>If empty won't set a password, user will have to change or reset.</description></parameter>
-            <parameter name="newPasswordVerify"/>
-            <parameter name="disabled" default-value="N"/>
-            <parameter name="requirePasswordChange" default-value="N"/>
+            <parameter name="newPassword">
+                <description>If empty won't set a password, user will have to change or reset.</description>
+            </parameter>
+            <parameter name="newPasswordVerify" />
+            <parameter name="disabled" default-value="N" />
+            <parameter name="requirePasswordChange" default-value="N" />
 
-            <parameter name="userGroupId"/>
+            <parameter name="userGroupId" />
             <parameter name="groupTypeEnumIdList" type="List">
                 <description>User group types allowed, set server-side to make sure userGroupId is of a type allowed</description>
-                <parameter name="groupTypeEnumId"/>
+                <parameter name="groupTypeEnumId" />
             </parameter>
         </in-parameters>
-        <out-parameters><parameter name="userId"/></out-parameters>
+        <out-parameters>
+            <parameter name="userId" />
+        </out-parameters>
         <actions>
             <!-- see if username already in use (instead of catching on unique index) -->
             <entity-find entity-name="moqui.security.UserAccount" list="existingUaList">
-                <econdition field-name="username" ignore-case="true"/></entity-find>
-            <if condition="existingUaList"><return error="true" message="Username [${username}] is already in use. Please choose another."/></if>
+                <econdition field-name="username" ignore-case="true" />
+            </entity-find>
+            <if condition="existingUaList">
+                <return error="true"
+                    message="Username [${username}] is already in use. Please choose another." />
+            </if>
             <!-- see if emailAddress already in use (instead of catching on unique index) -->
             <entity-find entity-name="moqui.security.UserAccount" list="existingUaList">
-                <econdition field-name="emailAddress" ignore-case="true"/></entity-find>
-            <if condition="existingUaList"><return error="true" message="Email ${emailAddress} is already in use. Login with username ${existingUaList[0].username}"/></if>
+                <econdition field-name="emailAddress" ignore-case="true" />
+            </entity-find>
+            <if condition="existingUaList">
+                <return error="true"
+                    message="Email ${emailAddress} is already in use. Login with username ${existingUaList[0].username}" />
+            </if>
 
             <!-- handle emailAddress, EmailPrimary -->
             <entity-find entity-name="mantle.party.contact.PartyContactMech" list="primaryEmailList">
-                <date-filter/><econdition field-name="partyId"/>
-                <econdition field-name="contactMechPurposeId" value="EmailPrimary"/>
-                <order-by field-name="-fromDate"/>
+                <date-filter />
+                <econdition field-name="partyId" />
+                <econdition field-name="contactMechPurposeId" value="EmailPrimary" />
+                <order-by field-name="-fromDate" />
             </entity-find>
-            <if condition="emailAddress"><then>
-                <if condition="primaryEmailList"><then>
-                    <service-call name="mantle.party.ContactServices.update#PartyContactOther"
-                            in-map="[infoString:emailAddress, partyId:partyId, contactMechId:primaryEmailList[0].contactMechId,
-                                contactMechPurposeId:'EmailPrimary']"/>
-                </then><else>
-                    <service-call name="mantle.party.ContactServices.create#EmailAddress" out-map="emailOut"
-                            in-map="[emailAddress:emailAddress, partyId:partyId, contactMechPurposeId:'EmailPrimary']"/>
-                </else></if>
-            </then><else>
-                <!-- no email address passed? use the EmailPrimary -->
-                <set field="emailAddress" from="primaryEmailList ? primaryEmailList[0].infoString : null"/>
-            </else></if>
+            <if condition="emailAddress">
+                <then>
+                    <if condition="primaryEmailList">
+                        <then>
+                            <service-call
+                                name="mantle.party.ContactServices.update#PartyContactOther"
+                                in-map="[infoString:emailAddress, partyId:partyId, contactMechId:primaryEmailList[0].contactMechId,
+                                contactMechPurposeId:'EmailPrimary']" />
+                        </then>
+                        <else>
+                            <service-call name="mantle.party.ContactServices.create#EmailAddress"
+                                out-map="emailOut"
+                                in-map="[emailAddress:emailAddress, partyId:partyId, contactMechPurposeId:'EmailPrimary']" />
+                        </else>
+                    </if>
+                </then>
+                <else>
+                    <!-- no email address passed? use the EmailPrimary -->
+                    <set field="emailAddress"
+                        from="primaryEmailList ? primaryEmailList[0].infoString : null" />
+                </else>
+            </if>
 
-            <entity-find-one entity-name="mantle.party.Person" value-field="person"/>
-            <if condition="!person"><return error="true" message="Party [${partyId}] is not a person, not creating user account."/></if>
-            <set field="userFullName" value="${ec.resource.expand('PartyFullNameTemplate','',person?:[:])}"/>
+            <entity-find-one entity-name="mantle.party.Person" value-field="person" />
+            <if condition="!person">
+                <return error="true"
+                    message="Party [${partyId}] is not a person, not creating user account." />
+            </if>
+            <set field="userFullName"
+                value="${ec.resource.expand('PartyFullNameTemplate','',person?:[:])}" />
 
-            <if condition="newPassword"><then>
-                <service-call name="org.moqui.impl.UserServices.create#UserAccount" in-map="context" out-map="context"/>
-                <service-call name="update#moqui.security.UserAccount" in-map="[userId:userId, partyId:partyId]"/>
-            </then><else>
-                <service-call name="create#moqui.security.UserAccount" in-map="context" out-map="context"/>
-            </else></if>
+            <if condition="newPassword">
+                <then>
+                    <service-call name="org.moqui.impl.UserServices.create#UserAccount"
+                        in-map="context" out-map="context" />
+                    <service-call name="update#moqui.security.UserAccount"
+                        in-map="[userId:userId, partyId:partyId]" />
+                </then>
+                <else>
+                    <service-call name="create#moqui.security.UserAccount" in-map="context"
+                        out-map="context" />
+                </else>
+            </if>
 
             <if condition="userGroupId">
-                <set field="groupValid" from="true"/>
+                <set field="groupValid" from="true" />
                 <if condition="groupTypeEnumIdList">
-                    <entity-find-one entity-name="moqui.security.UserGroup" value-field="userGroup"/>
-                    <set field="groupValid" from="groupTypeEnumIdList.contains(userGroup.groupTypeEnumId)"/>
+                    <entity-find-one entity-name="moqui.security.UserGroup" value-field="userGroup" />
+                    <set field="groupValid"
+                        from="groupTypeEnumIdList.contains(userGroup.groupTypeEnumId)" />
                 </if>
                 <if condition="groupValid">
                     <service-call name="create#moqui.security.UserGroupMember"
-                            in-map="[userGroupId:userGroupId, userId:userId, fromDate:ec.user.nowTimestamp]"/>
+                        in-map="[userGroupId:userGroupId, userId:userId, fromDate:ec.user.nowTimestamp]" />
                 </if>
             </if>
         </actions>
@@ -582,128 +802,172 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <!-- NOTE: these are the same excludes as org.moqui.impl.UserServices.update#UserAccount -->
             <auto-parameters entity-name="moqui.security.UserAccount" include="nonpk">
-                <exclude field-name="currentPassword"/><exclude field-name="resetPassword"/><exclude field-name="passwordSalt"/>
-                <exclude field-name="passwordHashType"/><exclude field-name="passwordBase64"/><exclude field-name="passwordSetDate"/>
-                <exclude field-name="hasLoggedOut"/><exclude field-name="disabledDateTime"/><exclude field-name="successiveFailedLogins"/>
+                <exclude field-name="currentPassword" />
+                <exclude field-name="resetPassword" />
+                <exclude field-name="passwordSalt" />
+                <exclude field-name="passwordHashType" />
+                <exclude field-name="passwordBase64" />
+                <exclude field-name="passwordSetDate" />
+                <exclude field-name="hasLoggedOut" />
+                <exclude field-name="disabledDateTime" />
+                <exclude field-name="successiveFailedLogins" />
             </auto-parameters>
 
-            <parameter name="userId"/>
-            <parameter name="partyId" required="true"/>
+            <parameter name="userId" />
+            <parameter name="partyId" required="true" />
 
-            <parameter name="emailAddress"><text-email/></parameter>
-            <parameter name="username"/>
+            <parameter name="emailAddress">
+                <text-email />
+            </parameter>
+            <parameter name="username" />
         </in-parameters>
         <actions>
             <if condition="!userId">
                 <entity-find entity-name="moqui.security.UserAccount" list="userAccountList">
-                    <econdition field-name="partyId"/>
-                    <order-by field-name="userId"/>
+                    <econdition field-name="partyId" />
+                    <order-by field-name="userId" />
                 </entity-find>
-                <set field="userId" from="userAccountList?.first?.userId"/>
+                <set field="userId" from="userAccountList?.first?.userId" />
             </if>
 
-            <if condition="userId"><service-call name="org.moqui.impl.UserServices.update#UserAccount" in-map="context"/></if>
+            <if condition="userId">
+                <service-call name="org.moqui.impl.UserServices.update#UserAccount" in-map="context" />
+            </if>
 
-            <if condition="emailAddress"><service-call name="mantle.party.ContactServices.store#PartyContactInfo"
-                    in-map="[partyId:partyId, emailAddress:emailAddress, emailContactMechPurposeId:'EmailPrimary', replaceByPurpose:true]"/></if>
+            <if condition="emailAddress">
+                <service-call name="mantle.party.ContactServices.store#PartyContactInfo"
+                    in-map="[partyId:partyId, emailAddress:emailAddress, emailContactMechPurposeId:'EmailPrimary', replaceByPurpose:true]" />
+            </if>
         </actions>
     </service>
 
     <service verb="create" noun="Person">
         <in-parameters>
-            <auto-parameters entity-name="mantle.party.Party"/>
-            <auto-parameters entity-name="mantle.party.Person" include="nonpk"/>
-            <parameter name="firstName" required="true"/>
-            <parameter name="lastName" required="true"/>
-            <parameter name="roleTypeId"/>
-            <parameter name="partyClassificationId"/>
+            <auto-parameters entity-name="mantle.party.Party" />
+            <auto-parameters entity-name="mantle.party.Person" include="nonpk" />
+            <parameter name="firstName" required="true" />
+            <parameter name="lastName" required="true" />
+            <parameter name="roleTypeId" />
+            <parameter name="partyClassificationId" />
         </in-parameters>
-        <out-parameters><parameter name="partyId"/></out-parameters>
+        <out-parameters>
+            <parameter name="partyId" />
+        </out-parameters>
         <actions>
-            <service-call name="create#mantle.party.Party" in-map="context + [partyTypeEnumId:'PtyPerson']" out-map="context"/>
-            <service-call name="create#mantle.party.Person" in-map="context"/>
-            <if condition="roleTypeId"><service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:roleTypeId]"/></if>
-            <if condition="partyClassificationId"><service-call name="mantle.party.PartyServices.set#PartyClassification"
-                    in-map="[partyId:partyId, partyClassificationId:partyClassificationId]"/></if>
+            <service-call name="create#mantle.party.Party"
+                in-map="context + [partyTypeEnumId:'PtyPerson']" out-map="context" />
+            <service-call name="create#mantle.party.Person" in-map="context" />
+            <if condition="roleTypeId">
+                <service-call name="create#mantle.party.PartyRole"
+                    in-map="[partyId:partyId, roleTypeId:roleTypeId]" />
+            </if>
+            <if condition="partyClassificationId">
+                <service-call name="mantle.party.PartyServices.set#PartyClassification"
+                    in-map="[partyId:partyId, partyClassificationId:partyClassificationId]" />
+            </if>
         </actions>
     </service>
     <service verb="create" noun="PersonCustomer">
         <in-parameters>
             <!-- create#Person fields -->
-            <parameter name="partyId"/>
-            <parameter name="accountPartyId"/>
-            <auto-parameters entity-name="mantle.party.Person" include="nonpk"/>
-            <parameter name="firstName" required="true"/>
-            <parameter name="lastName" required="true"/>
-            <parameter name="roleTypeId" default-value="Customer"/>
-            <parameter name="partyClassificationId"/>
+            <parameter name="partyId" />
+            <parameter name="accountPartyId" />
+            <auto-parameters entity-name="mantle.party.Person" include="nonpk" />
+            <parameter name="firstName" required="true" />
+            <parameter name="lastName" required="true" />
+            <parameter name="roleTypeId" default-value="Customer" />
+            <parameter name="partyClassificationId" />
 
             <!-- store#PartyContactInfo fields -->
-            <parameter name="postalContactMechPurposeId" default-value="PostalPrimary"/>
-            <auto-parameters entity-name="mantle.party.contact.PostalAddress" include="nonpk"/>
+            <parameter name="postalContactMechPurposeId" default-value="PostalPrimary" />
+            <auto-parameters entity-name="mantle.party.contact.PostalAddress" include="nonpk" />
 
-            <parameter name="telecomContactMechPurposeId" default-value="PhonePrimary"/>
-            <auto-parameters entity-name="mantle.party.contact.TelecomNumber" include="nonpk"/>
-            <parameter name="countryCode"><text-digits/></parameter>
-            <parameter name="areaCode"><text-digits/></parameter>
-            <parameter name="contactNumber"><matches regexp="^\d\d[-\. \d]*\d\d$" message="Please enter a valid phone number"/></parameter>
-            <parameter name="telecomExtension"><text-digits/></parameter>
-            <parameter name="telecomAllowSolicitation"/>
+            <parameter name="telecomContactMechPurposeId" default-value="PhonePrimary" />
+            <auto-parameters entity-name="mantle.party.contact.TelecomNumber" include="nonpk" />
+            <parameter name="countryCode">
+                <text-digits />
+            </parameter>
+            <parameter name="areaCode">
+                <text-digits />
+            </parameter>
+            <parameter name="contactNumber">
+                <matches regexp="^\d\d[-\. \d]*\d\d$" message="Please enter a valid phone number" />
+            </parameter>
+            <parameter name="telecomExtension">
+                <text-digits />
+            </parameter>
+            <parameter name="telecomAllowSolicitation" />
 
-            <parameter name="emailContactMechPurposeId" default-value="EmailPrimary"/>
-            <parameter name="emailAddress"><text-email/></parameter>
+            <parameter name="emailContactMechPurposeId" default-value="EmailPrimary" />
+            <parameter name="emailAddress">
+                <text-email />
+            </parameter>
 
             <!-- create#CreditCard fields -->
-            <auto-parameters entity-name="mantle.account.method.PaymentMethod" include="nonpk"/>
-            <auto-parameters entity-name="mantle.account.method.CreditCard" include="nonpk"/>
+            <auto-parameters entity-name="mantle.account.method.PaymentMethod" include="nonpk" />
+            <auto-parameters entity-name="mantle.account.method.CreditCard" include="nonpk" />
             <parameter name="expireDate" default-value="${expireMonth?:''}/${expireYear?:''}">
-                <time-range after="now" format="MM/yyyy"/></parameter>
-            <parameter name="cardNumber"><credit-card/></parameter>
-            <parameter name="validateSecurityCode"/>
+                <time-range after="now" format="MM/yyyy" />
+            </parameter>
+            <parameter name="cardNumber">
+                <credit-card />
+            </parameter>
+            <parameter name="validateSecurityCode" />
 
             <!-- create#PartyUserAccount fields -->
-            <parameter name="createUserAccount" type="Boolean"><description>If true create UserAccount, if false do not,
-                if not specified (null) create UserAccount if emailAddress and newPassword are specified</description></parameter>
-            <parameter name="username" default="emailAddress"/>
-            <parameter name="newPassword"><description>If empty won't set a password, user will have to change or reset.</description></parameter>
-            <parameter name="newPasswordVerify"/>
-            <parameter name="disabled" default-value="N"/>
-            <parameter name="requirePasswordChange" default-value="N"/>
-            <parameter name="currencyUomId"/>
-            <parameter name="locale"/>
-            <parameter name="timeZone"/>
+            <parameter name="createUserAccount" type="Boolean">
+                <description>If true create UserAccount, if false do not,
+                if not specified (null) create UserAccount if emailAddress and newPassword are specified</description>
+            </parameter>
+            <parameter name="username" default="emailAddress" />
+            <parameter name="newPassword">
+                <description>If empty won't set a password, user will have to change or reset.</description>
+            </parameter>
+            <parameter name="newPasswordVerify" />
+            <parameter name="disabled" default-value="N" />
+            <parameter name="requirePasswordChange" default-value="N" />
+            <parameter name="currencyUomId" />
+            <parameter name="locale" />
+            <parameter name="timeZone" />
 
-            <parameter name="userGroupId"/>
+            <parameter name="userGroupId" />
             <parameter name="groupTypeEnumIdList" type="List">
                 <description>User group types allowed, set server-side to make sure userGroupId is of a type allowed</description>
-                <parameter name="groupTypeEnumId"/>
+                <parameter name="groupTypeEnumId" />
             </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="partyId"/>
-            <parameter name="postalContactMechId"/>
-            <parameter name="telecomContactMechId"/>
-            <parameter name="emailContactMechId"/>
-            <parameter name="paymentMethodId"/>
-            <parameter name="userId"/>
+            <parameter name="partyId" />
+            <parameter name="postalContactMechId" />
+            <parameter name="telecomContactMechId" />
+            <parameter name="emailContactMechId" />
+            <parameter name="paymentMethodId" />
+            <parameter name="userId" />
         </out-parameters>
         <actions>
-            <service-call name="mantle.party.PartyServices.create#Person" in-map="context" out-map="context"/>
-            <service-call name="mantle.party.ContactServices.store#PartyContactInfo" in-map="context" out-map="context"/>
+            <service-call name="mantle.party.PartyServices.create#Person" in-map="context"
+                out-map="context" />
+            <service-call name="mantle.party.ContactServices.store#PartyContactInfo"
+                in-map="context" out-map="context" />
             <if condition="cardNumber">
-                <set field="ownerPartyId" from="partyId"/>
-                <set field="firstNameOnAccount" from="firstNameOnAccount ?: firstName"/>
-                <set field="lastNameOnAccount" from="lastNameOnAccount ?: lastName"/>
-                <service-call name="mantle.account.PaymentMethodServices.create#CreditCard" in-map="context" out-map="context"/>
+                <set field="ownerPartyId" from="partyId" />
+                <set field="firstNameOnAccount" from="firstNameOnAccount ?: firstName" />
+                <set field="lastNameOnAccount" from="lastNameOnAccount ?: lastName" />
+                <service-call name="mantle.account.PaymentMethodServices.create#CreditCard"
+                    in-map="context" out-map="context" />
             </if>
             <if condition="accountPartyId">
-                <service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:'Contact']"/>
-                <service-call name="create#mantle.party.PartyRelationship" in-map="[fromDate:ec.user.nowTimestamp,
+                <service-call name="create#mantle.party.PartyRole"
+                    in-map="[partyId:partyId, roleTypeId:'Contact']" />
+                <service-call name="create#mantle.party.PartyRelationship"
+                    in-map="[fromDate:ec.user.nowTimestamp,
                         relationshipTypeEnumId:'PrtContact', fromPartyId:partyId, toPartyId:accountPartyId,
-                        fromRoleTypeId:'Contact', toRoleTypeId:'Account']"/>
+                        fromRoleTypeId:'Contact', toRoleTypeId:'Account']" />
             </if>
-            <if condition="createUserAccount || (createUserAccount == null &amp;&amp; emailAddress &amp;&amp; newPassword)">
-                <service-call name="mantle.party.PartyServices.create#PartyUserAccount" in-map="context" out-map="context"/>
+            <if
+                condition="createUserAccount || (createUserAccount == null &amp;&amp; emailAddress &amp;&amp; newPassword)">
+                <service-call name="mantle.party.PartyServices.create#PartyUserAccount"
+                    in-map="context" out-map="context" />
             </if>
         </actions>
     </service>
@@ -711,98 +975,125 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="create" noun="PersonEmployee">
         <in-parameters>
             <!-- create#Person fields -->
-            <parameter name="pseudoId"/>
-            <auto-parameters entity-name="mantle.party.Person" include="nonpk"/>
-            <parameter name="firstName" required="true"/>
-            <parameter name="lastName" required="true"/>
-            <parameter name="roleTypeId" default-value="Employee"/>
-            <parameter name="partyClassificationId"/>
+            <parameter name="pseudoId" />
+            <auto-parameters entity-name="mantle.party.Person" include="nonpk" />
+            <parameter name="firstName" required="true" />
+            <parameter name="lastName" required="true" />
+            <parameter name="roleTypeId" default-value="Employee" />
+            <parameter name="partyClassificationId" />
 
             <!-- store#PartyContactInfo fields -->
-            <parameter name="postalContactMechPurposeId" default-value="PostalPrimary"/>
-            <auto-parameters entity-name="mantle.party.contact.PostalAddress" include="nonpk"/>
+            <parameter name="postalContactMechPurposeId" default-value="PostalPrimary" />
+            <auto-parameters entity-name="mantle.party.contact.PostalAddress" include="nonpk" />
 
-            <parameter name="telecomContactMechPurposeId" default-value="PhonePrimary"/>
-            <auto-parameters entity-name="mantle.party.contact.TelecomNumber" include="nonpk"/>
-            <parameter name="countryCode"><text-digits/></parameter>
-            <parameter name="areaCode"><text-digits/></parameter>
-            <parameter name="contactNumber"><matches regexp="^\d\d[-\. \d]*\d\d$" message="Please enter a valid phone number"/></parameter>
-            <parameter name="telecomExtension"><text-digits/></parameter>
-            <parameter name="telecomAllowSolicitation"/>
+            <parameter name="telecomContactMechPurposeId" default-value="PhonePrimary" />
+            <auto-parameters entity-name="mantle.party.contact.TelecomNumber" include="nonpk" />
+            <parameter name="countryCode">
+                <text-digits />
+            </parameter>
+            <parameter name="areaCode">
+                <text-digits />
+            </parameter>
+            <parameter name="contactNumber">
+                <matches regexp="^\d\d[-\. \d]*\d\d$" message="Please enter a valid phone number" />
+            </parameter>
+            <parameter name="telecomExtension">
+                <text-digits />
+            </parameter>
+            <parameter name="telecomAllowSolicitation" />
 
-            <parameter name="emailContactMechPurposeId" default-value="EmailPrimary"/>
-            <parameter name="emailAddress"><text-email/></parameter>
-
-            <!-- create#PartyUserAccount fields -->
-            <parameter name="createUserAccount" type="Boolean"><description>If true create UserAccount, if false do not,
-                if not specified (null) create UserAccount if emailAddress and userGroupId are specified</description></parameter>
-            <parameter name="username" default="emailAddress"/>
-            <parameter name="newPassword"><description>If empty won't set a password, user will have to change or reset.</description></parameter>
-            <parameter name="newPasswordVerify"/>
-            <parameter name="disabled" default-value="N"/>
-            <parameter name="requirePasswordChange" default-value="N"/>
-            <parameter name="currencyUomId"/>
-            <parameter name="locale"/>
-            <parameter name="timeZone"/>
-
-            <parameter name="userGroupId"/>
-            <parameter name="groupTypeEnumIdList" type="List">
-                <description>User group types allowed, set server-side to make sure userGroupId is of a type allowed</description>
-                <parameter name="groupTypeEnumId"/>
+            <parameter name="emailContactMechPurposeId" default-value="EmailPrimary" />
+            <parameter name="emailAddress">
+                <text-email />
             </parameter>
 
-            <parameter name="employerPartyId"/>
-            <parameter name="employFromDate" default="ec.user.nowTimestamp"/>
+            <!-- create#PartyUserAccount fields -->
+            <parameter name="createUserAccount" type="Boolean">
+                <description>If true create UserAccount, if false do not,
+                if not specified (null) create UserAccount if emailAddress and userGroupId are specified</description>
+            </parameter>
+            <parameter name="username" default="emailAddress" />
+            <parameter name="newPassword">
+                <description>If empty won't set a password, user will have to change or reset.</description>
+            </parameter>
+            <parameter name="newPasswordVerify" />
+            <parameter name="disabled" default-value="N" />
+            <parameter name="requirePasswordChange" default-value="N" />
+            <parameter name="currencyUomId" />
+            <parameter name="locale" />
+            <parameter name="timeZone" />
+
+            <parameter name="userGroupId" />
+            <parameter name="groupTypeEnumIdList" type="List">
+                <description>User group types allowed, set server-side to make sure userGroupId is of a type allowed</description>
+                <parameter name="groupTypeEnumId" />
+            </parameter>
+
+            <parameter name="employerPartyId" />
+            <parameter name="employFromDate" default="ec.user.nowTimestamp" />
         </in-parameters>
         <out-parameters>
-            <parameter name="partyId"/>
-            <parameter name="postalContactMechId"/>
-            <parameter name="telecomContactMechId"/>
-            <parameter name="emailContactMechId"/>
-            <parameter name="userId"/>
+            <parameter name="partyId" />
+            <parameter name="postalContactMechId" />
+            <parameter name="telecomContactMechId" />
+            <parameter name="emailContactMechId" />
+            <parameter name="userId" />
         </out-parameters>
         <actions>
-            <service-call name="mantle.party.PartyServices.create#Person" in-map="context" out-map="context"/>
-            <service-call name="mantle.party.ContactServices.store#PartyContactInfo" in-map="context" out-map="context"/>
-            <if condition="createUserAccount || (createUserAccount == null &amp;&amp; emailAddress &amp;&amp; userGroupId)">
-                <service-call name="mantle.party.PartyServices.create#PartyUserAccount" in-map="context" out-map="context"/>
+            <service-call name="mantle.party.PartyServices.create#Person" in-map="context"
+                out-map="context" />
+            <service-call name="mantle.party.ContactServices.store#PartyContactInfo"
+                in-map="context" out-map="context" />
+            <if
+                condition="createUserAccount || (createUserAccount == null &amp;&amp; emailAddress &amp;&amp; userGroupId)">
+                <service-call name="mantle.party.PartyServices.create#PartyUserAccount"
+                    in-map="context" out-map="context" />
             </if>
             <if condition="employerPartyId">
                 <service-call name="create#mantle.party.PartyRelationship"
-                        in-map="[relationshipTypeEnumId:'PrtEmployee', fromPartyId:partyId, fromRoleTypeId:'Employee',
-                            toPartyId:employerPartyId, toRoleTypeId:'OrgEmployer', fromDate:employFromDate]"/>
+                    in-map="[relationshipTypeEnumId:'PrtEmployee', fromPartyId:partyId, fromRoleTypeId:'Employee',
+                            toPartyId:employerPartyId, toRoleTypeId:'OrgEmployer', fromDate:employFromDate]" />
             </if>
         </actions>
     </service>
 
     <service verb="create" noun="Organization">
         <in-parameters>
-            <auto-parameters entity-name="mantle.party.Party"/>
-            <auto-parameters entity-name="mantle.party.Organization" include="nonpk"/>
-            <parameter name="organizationName" required="true"/>
-            <parameter name="roleTypeId"/>
+            <auto-parameters entity-name="mantle.party.Party" />
+            <auto-parameters entity-name="mantle.party.Organization" include="nonpk" />
+            <parameter name="organizationName" required="true" />
+            <parameter name="roleTypeId" />
         </in-parameters>
-        <out-parameters><parameter name="partyId"/></out-parameters>
+        <out-parameters>
+            <parameter name="partyId" />
+        </out-parameters>
         <actions>
-            <service-call name="create#mantle.party.Party" in-map="context + [partyTypeEnumId:'PtyOrganization']" out-map="context"/>
-            <service-call name="create#mantle.party.Organization" in-map="context"/>
-            <if condition="roleTypeId"><service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:roleTypeId]"/></if></actions>
+            <service-call name="create#mantle.party.Party"
+                in-map="context + [partyTypeEnumId:'PtyOrganization']" out-map="context" />
+            <service-call name="create#mantle.party.Organization" in-map="context" />
+            <if condition="roleTypeId">
+                <service-call name="create#mantle.party.PartyRole"
+                    in-map="[partyId:partyId, roleTypeId:roleTypeId]" />
+            </if>
+        </actions>
     </service>
     <service verb="update" noun="PartyDetail">
         <in-parameters>
-            <auto-parameters entity-name="mantle.party.Party" include="nonpk"/>
-            <auto-parameters entity-name="mantle.party.Person" include="nonpk"/>
-            <auto-parameters entity-name="mantle.party.Organization" include="nonpk"/>
-            <parameter name="partyId" required="true"/>
+            <auto-parameters entity-name="mantle.party.Party" include="nonpk" />
+            <auto-parameters entity-name="mantle.party.Person" include="nonpk" />
+            <auto-parameters entity-name="mantle.party.Organization" include="nonpk" />
+            <parameter name="partyId" required="true" />
         </in-parameters>
         <actions>
-            <entity-find-one entity-name="mantle.party.Party" value-field="party"/>
-            <entity-set value-field="party" include="nonpk" set-if-empty="true"/>
-            <entity-update value-field="party"/>
+            <entity-find-one entity-name="mantle.party.Party" value-field="party" />
+            <entity-set value-field="party" include="nonpk" set-if-empty="true" />
+            <entity-update value-field="party" />
             <if condition="party.partyTypeEnumId == 'PtyPerson'">
-                <service-call name="update#mantle.party.Person" in-map="context"/></if>
+                <service-call name="update#mantle.party.Person" in-map="context" />
+            </if>
             <if condition="party.partyTypeEnumId == 'PtyOrganization'">
-                <service-call name="update#mantle.party.Organization" in-map="context"/></if>
+                <service-call name="update#mantle.party.Organization" in-map="context" />
+            </if>
         </actions>
     </service>
 
@@ -810,90 +1101,113 @@ along with this software (see the LICENSE.md file). If not, see
         <description>Convert another type Party to an Organization type.
             If organizationName not specified is generated from Person firstName, middleName, and lastName.</description>
         <in-parameters>
-            <parameter name="partyId" required="true"/>
-            <auto-parameters entity-name="mantle.party.Organization" include="nonpk"/>
+            <parameter name="partyId" required="true" />
+            <auto-parameters entity-name="mantle.party.Organization" include="nonpk" />
         </in-parameters>
         <actions>
-            <entity-find-one entity-name="mantle.party.Party" value-field="party" for-update="true"/>
+            <entity-find-one entity-name="mantle.party.Party" value-field="party" for-update="true" />
             <if condition="party.partyTypeEnumId == 'PtyOrganization'">
-                <return message="Party ${party.pseudoId} is already an organization"/></if>
-            <entity-find-one entity-name="mantle.party.Person" value-field="person"/>
-            <if condition="person != null">
-                <if condition="!organizationName"><set field="organizationName"
-                        value="${person.firstName?:''}${person.middleName ? ' ' + person.middleName : ''}${person.lastName ? ' ' + person.lastName : ''}"/></if>
-                <entity-delete value-field="person"/>
+                <return message="Party ${party.pseudoId} is already an organization" />
             </if>
-            <set field="party.partyTypeEnumId" value="PtyOrganization"/>
-            <entity-update value-field="party"/>
-            <service-call name="store#mantle.party.Organization" in-map="context"/>
+            <entity-find-one entity-name="mantle.party.Person" value-field="person" />
+            <if condition="person != null">
+                <if condition="!organizationName">
+                    <set field="organizationName"
+                        value="${person.firstName?:''}${person.middleName ? ' ' + person.middleName : ''}${person.lastName ? ' ' + person.lastName : ''}" />
+                </if>
+                <entity-delete value-field="person" />
+            </if>
+            <set field="party.partyTypeEnumId" value="PtyOrganization" />
+            <entity-update value-field="party" />
+            <service-call name="store#mantle.party.Organization" in-map="context" />
         </actions>
     </service>
     <service verb="convert" noun="PartyToPerson">
         <description>Convert another type Party to a Person type.
             If firstName, lastName are not specified tries to split organizationName.</description>
         <in-parameters>
-            <parameter name="partyId" required="true"/>
-            <auto-parameters entity-name="mantle.party.Person" include="nonpk"/>
+            <parameter name="partyId" required="true" />
+            <auto-parameters entity-name="mantle.party.Person" include="nonpk" />
         </in-parameters>
         <actions>
-            <entity-find-one entity-name="mantle.party.Party" value-field="party" for-update="true"/>
+            <entity-find-one entity-name="mantle.party.Party" value-field="party" for-update="true" />
             <if condition="party.partyTypeEnumId == 'PtyPerson'">
-                <return message="Party ${party.pseudoId} is already a person"/></if>
-            <entity-find-one entity-name="mantle.party.Organization" value-field="organization"/>
-            <if condition="organization != null">
-                <set field="orgName" from="organization.organizationName"/>
-                <if condition="!firstName &amp;&amp; !lastName">
-                    <set field="firstName" from="orgName.contains(' ') ? orgName.substring(0, orgName.lastIndexOf(' ')) : orgName"/>
-                    <set field="lastName" from="orgName.contains(' ') ? orgName.substring(orgName.lastIndexOf(' ') + 1) : ''"/>
-                </if>
-                <entity-delete value-field="organization"/>
+                <return message="Party ${party.pseudoId} is already a person" />
             </if>
-            <set field="party.partyTypeEnumId" value="PtyPerson"/>
-            <entity-update value-field="party"/>
-            <service-call name="store#mantle.party.Person" in-map="context"/>
+            <entity-find-one entity-name="mantle.party.Organization" value-field="organization" />
+            <if condition="organization != null">
+                <set field="orgName" from="organization.organizationName" />
+                <if condition="!firstName &amp;&amp; !lastName">
+                    <set field="firstName"
+                        from="orgName.contains(' ') ? orgName.substring(0, orgName.lastIndexOf(' ')) : orgName" />
+                    <set field="lastName"
+                        from="orgName.contains(' ') ? orgName.substring(orgName.lastIndexOf(' ') + 1) : ''" />
+                </if>
+                <entity-delete value-field="organization" />
+            </if>
+            <set field="party.partyTypeEnumId" value="PtyPerson" />
+            <entity-update value-field="party" />
+            <service-call name="store#mantle.party.Person" in-map="context" />
         </actions>
     </service>
 
     <service verb="ensure" noun="PartyRole">
-        <in-parameters><parameter name="partyId" required="true"/><parameter name="roleTypeId" required="true"/></in-parameters>
+        <in-parameters>
+            <parameter name="partyId" required="true" />
+            <parameter name="roleTypeId" required="true" />
+        </in-parameters>
         <actions>
-            <entity-find-one entity-name="mantle.party.PartyRole" value-field="partyRole"/>
-            <if condition="!partyRole"><service-call name="create#mantle.party.PartyRole"
-                    in-map="[partyId:partyId, roleTypeId:roleTypeId]"/></if>
+            <entity-find-one entity-name="mantle.party.PartyRole" value-field="partyRole" />
+            <if condition="!partyRole">
+                <service-call name="create#mantle.party.PartyRole"
+                    in-map="[partyId:partyId, roleTypeId:roleTypeId]" />
+            </if>
         </actions>
     </service>
 
     <service verb="set" noun="PartyClassification">
         <in-parameters>
-            <parameter name="partyId" required="true"/>
-            <parameter name="partyClassificationId" required="true"/>
+            <parameter name="partyId" required="true" />
+            <parameter name="partyClassificationId" required="true" />
         </in-parameters>
         <actions>
-            <entity-find-one entity-name="mantle.party.PartyClassification" value-field="partyClass" cache="true"/>
-            <set field="classificationTypeEnumId" from="partyClass.classificationTypeEnumId"/>
+            <entity-find-one entity-name="mantle.party.PartyClassification" value-field="partyClass"
+                cache="true" />
+            <set field="classificationTypeEnumId" from="partyClass.classificationTypeEnumId" />
             <!-- find/expire classes of the same type for the party -->
             <entity-find entity-name="mantle.party.PartyClassificationAndAppl" list="pcaaList">
-                <date-filter/><econdition field-name="partyId"/><econdition field-name="classificationTypeEnumId"/></entity-find>
-            <if condition="pcaaList.find({ it.partyClassificationId == partyClassificationId })"><return message="Classification already set on party"/></if>
+                <date-filter />
+                <econdition field-name="partyId" />
+                <econdition field-name="classificationTypeEnumId" />
+            </entity-find>
+            <if condition="pcaaList.find({ it.partyClassificationId == partyClassificationId })">
+                <return message="Classification already set on party" />
+            </if>
             <iterate list="pcaaList" entry="pcaa">
-                <service-call name="update#mantle.party.PartyClassificationAppl" in-map="[partyId:partyId,
-                        partyClassificationId:pcaa.partyClassificationId, fromDate:pcaa.fromDate, thruDate:ec.user.nowTimestamp]"/>
+                <service-call name="update#mantle.party.PartyClassificationAppl"
+                    in-map="[partyId:partyId,
+                        partyClassificationId:pcaa.partyClassificationId, fromDate:pcaa.fromDate, thruDate:ec.user.nowTimestamp]" />
             </iterate>
             <!-- create the new PartyClassificationAppl -->
-            <service-call name="create#mantle.party.PartyClassificationAppl" in-map="[partyId:partyId, partyClassificationId:partyClassificationId]"/>
+            <service-call name="create#mantle.party.PartyClassificationAppl"
+                in-map="[partyId:partyId, partyClassificationId:partyClassificationId]" />
         </actions>
     </service>
     <service verb="remove" noun="PartyClassification">
         <in-parameters>
-            <parameter name="partyId" required="true"/>
-            <parameter name="partyClassificationId" required="true"/>
+            <parameter name="partyId" required="true" />
+            <parameter name="partyClassificationId" required="true" />
         </in-parameters>
         <actions>
             <entity-find entity-name="mantle.party.PartyClassificationAppl" list="pcaaList">
-                <date-filter/><econdition field-name="partyId"/><econdition field-name="partyClassificationId"/></entity-find>
+                <date-filter />
+                <econdition field-name="partyId" />
+                <econdition field-name="partyClassificationId" />
+            </entity-find>
             <iterate list="pcaaList" entry="pcaa">
-                <service-call name="update#mantle.party.PartyClassificationAppl" in-map="[partyId:partyId,
-                        partyClassificationId:pcaa.partyClassificationId, fromDate:pcaa.fromDate, thruDate:ec.user.nowTimestamp]"/>
+                <service-call name="update#mantle.party.PartyClassificationAppl"
+                    in-map="[partyId:partyId,
+                        partyClassificationId:pcaa.partyClassificationId, fromDate:pcaa.fromDate, thruDate:ec.user.nowTimestamp]" />
             </iterate>
         </actions>
     </service>
@@ -903,135 +1217,165 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ========================================= -->
 
     <service verb="get" noun="PartyBadgeInfo">
-        <in-parameters><parameter name="partyBadgeId"/></in-parameters>
+        <in-parameters>
+            <parameter name="partyBadgeId" />
+        </in-parameters>
         <out-parameters>
-            <parameter name="partyBadge" type="Map"/>
-            <parameter name="person" type="Map"/>
-            <parameter name="faceImageLocation"/>
-            <parameter name="logoImageLocation"/>
+            <parameter name="partyBadge" type="Map" />
+            <parameter name="person" type="Map" />
+            <parameter name="faceImageLocation" />
+            <parameter name="logoImageLocation" />
         </out-parameters>
         <actions>
-            <entity-find-one entity-name="mantle.party.PartyBadge" value-field="partyBadge"/>
+            <entity-find-one entity-name="mantle.party.PartyBadge" value-field="partyBadge" />
             <if condition="partyBadge.partyId">
                 <entity-find-one entity-name="mantle.party.Person" value-field="person">
-                    <field-map field-name="partyId" from="partyBadge.partyId"/></entity-find-one>
+                    <field-map field-name="partyId" from="partyBadge.partyId" />
+                </entity-find-one>
 
-                <service-call name="mantle.party.PartyServices.get#PartyContentLocation" out-map="faceOut"
-                    in-map="[partyId:partyBadge.partyId, partyContentTypeEnumIdList:['PcntFaceImage', 'PcntPrimaryImage']]"/>
-                <set field="faceImageLocation" from="faceOut.contentLocation"/>
+                <service-call name="mantle.party.PartyServices.get#PartyContentLocation"
+                    out-map="faceOut"
+                    in-map="[partyId:partyBadge.partyId, partyContentTypeEnumIdList:['PcntFaceImage', 'PcntPrimaryImage']]" />
+                <set field="faceImageLocation" from="faceOut.contentLocation" />
             </if>
             <if condition="partyBadge.organizationPartyId">
-                <service-call name="mantle.party.PartyServices.get#PartyContentLocation" out-map="logoOut"
-                    in-map="[partyId:partyBadge.organizationPartyId, partyContentTypeEnumIdList:['PcntLogoImage', 'PcntPrimaryImage']]"/>
-                <set field="logoImageLocation" from="logoOut.contentLocation"/>
+                <service-call name="mantle.party.PartyServices.get#PartyContentLocation"
+                    out-map="logoOut"
+                    in-map="[partyId:partyBadge.organizationPartyId, partyContentTypeEnumIdList:['PcntLogoImage', 'PcntPrimaryImage']]" />
+                <set field="logoImageLocation" from="logoOut.contentLocation" />
             </if>
         </actions>
     </service>
     <service verb="lookup" noun="PartyBadge">
-        <in-parameters><parameter name="scanValue"/></in-parameters>
+        <in-parameters>
+            <parameter name="scanValue" />
+        </in-parameters>
         <out-parameters>
-            <parameter name="partyBadge" type="Map"/>
+            <parameter name="partyBadge" type="Map" />
         </out-parameters>
         <actions>
             <!-- look up by partyBadgeId, serialNumber, or storedValue -->
             <entity-find-one entity-name="mantle.party.PartyBadge" value-field="partyBadge">
-                <field-map field-name="partyBadgeId" from="scanValue"/></entity-find-one>
+                <field-map field-name="partyBadgeId" from="scanValue" />
+            </entity-find-one>
             <if condition="!partyBadge">
                 <entity-find-one entity-name="mantle.party.PartyBadge" value-field="partyBadge">
-                    <field-map field-name="serialNumber" from="scanValue"/></entity-find-one>
+                    <field-map field-name="serialNumber" from="scanValue" />
+                </entity-find-one>
             </if>
             <if condition="!partyBadge">
                 <entity-find-one entity-name="mantle.party.PartyBadge" value-field="partyBadge">
-                    <field-map field-name="storedValue" from="scanValue"/></entity-find-one>
+                    <field-map field-name="storedValue" from="scanValue" />
+                </entity-find-one>
             </if>
         </actions>
     </service>
     <service verb="scan" noun="PartyBadge">
         <in-parameters>
             <auto-parameters entity-name="mantle.party.PartyBadgeScan" include="nonpk">
-                <exclude field-name="scanResultEnumId"/><exclude field-name="timeEntryId"/></auto-parameters>
-            <parameter name="scanValue" required="true"/>
-            <parameter name="scanPurposeEnumId" default-value="PbspAccess"/>
-            <parameter name="scanDate" default="ec.user.nowTimestamp"/>
+                <exclude field-name="scanResultEnumId" />
+                <exclude field-name="timeEntryId" />
+            </auto-parameters>
+            <parameter name="scanValue" required="true" />
+            <parameter name="scanPurposeEnumId" default-value="PbspAccess" />
+            <parameter name="scanDate" default="ec.user.nowTimestamp" />
 
             <!-- parameters for clock in -->
-            <parameter name="rateTypeEnumId" default-value="RatpStandard"/>
-            <parameter name="workTypeEnumId"/>
-            <parameter name="workEffortId"/>
+            <parameter name="rateTypeEnumId" default-value="RatpStandard" />
+            <parameter name="workTypeEnumId" />
+            <parameter name="workEffortId" />
             <!-- parameters for clock out -->
-            <parameter name="breakHours" type="BigDecimal"/>
-            <parameter name="breakMinutes" type="BigDecimal"/>
-            <parameter name="pieceCount" type="BigDecimal"/>
+            <parameter name="breakHours" type="BigDecimal" />
+            <parameter name="breakMinutes" type="BigDecimal" />
+            <parameter name="pieceCount" type="BigDecimal" />
         </in-parameters>
         <out-parameters>
-            <parameter name="partyBadgeId"/>
-            <parameter name="partyId"/>
-            <parameter name="organizationPartyId"/>
-            <parameter name="scanResultEnumId"/>
-            <parameter name="timeEntryId"/>
-            <parameter name="closedTimeEntryId"/>
+            <parameter name="partyBadgeId" />
+            <parameter name="partyId" />
+            <parameter name="organizationPartyId" />
+            <parameter name="scanResultEnumId" />
+            <parameter name="timeEntryId" />
+            <parameter name="closedTimeEntryId" />
         </out-parameters>
         <actions>
-            <service-call name="mantle.party.PartyServices.lookup#PartyBadge" in-map="context" out-map="context"/>
+            <service-call name="mantle.party.PartyServices.lookup#PartyBadge" in-map="context"
+                out-map="context" />
 
             <if condition="!partyBadge">
-                <return error="true" message="No badge found for scan value [${scanValue}]"/></if>
-            <set field="partyBadgeId" from="partyBadge.partyBadgeId"/>
-            <set field="partyId" from="partyBadge.partyId"/>
-            <set field="organizationPartyId" from="partyBadge.organizationPartyId"/>
+                <return error="true" message="No badge found for scan value [${scanValue}]" />
+            </if>
+            <set field="partyBadgeId" from="partyBadge.partyBadgeId" />
+            <set field="partyId" from="partyBadge.partyId" />
+            <set field="organizationPartyId" from="partyBadge.organizationPartyId" />
 
             <!-- check valid dates -->
-            <if condition="partyBadge.fromDate &amp;&amp; partyBadge.fromDate &gt; ec.user.nowTimestamp">
-                <set field="scanResultEnumId" value="PbsrNotYetValid"/>
-                <service-call name="create#mantle.party.PartyBadgeScan" in-map="context" transaction="force-new"/>
-                <return error="true" message="Badge not yet valid"/>
+            <if
+                condition="partyBadge.fromDate &amp;&amp; partyBadge.fromDate &gt; ec.user.nowTimestamp">
+                <set field="scanResultEnumId" value="PbsrNotYetValid" />
+                <service-call name="create#mantle.party.PartyBadgeScan" in-map="context"
+                    transaction="force-new" />
+                <return error="true" message="Badge not yet valid" />
             </if>
-            <if condition="partyBadge.thruDate &amp;&amp; partyBadge.thruDate &lt; ec.user.nowTimestamp">
-                <set field="scanResultEnumId" value="PbsrExpired"/>
-                <service-call name="create#mantle.party.PartyBadgeScan" in-map="context" transaction="force-new"/>
-                <return error="true" message="Badge expired"/>
+            <if
+                condition="partyBadge.thruDate &amp;&amp; partyBadge.thruDate &lt; ec.user.nowTimestamp">
+                <set field="scanResultEnumId" value="PbsrExpired" />
+                <service-call name="create#mantle.party.PartyBadgeScan" in-map="context"
+                    transaction="force-new" />
+                <return error="true" message="Badge expired" />
             </if>
 
             <!-- create the PartyBadgeScan record -->
-            <set field="scanResultEnumId" value="PbsrSuccess"/>
-            <service-call name="create#mantle.party.PartyBadgeScan" in-map="context"/>
+            <set field="scanResultEnumId" value="PbsrSuccess" />
+            <service-call name="create#mantle.party.PartyBadgeScan" in-map="context" />
 
             <!-- handle TimeEntry for clock in and clock out -->
-            <if condition="breakMinutes"><set field="breakHours" from="(breakHours ?: 0) + (breakMinutes / 60)"/></if>
-            <if condition="scanPurposeEnumId in ['PbspClockIn', 'PbspClockOut']">
-                <set field="clientPartyId" from="partyBadge.organizationPartyId"/>
-                <entity-find entity-name="mantle.work.time.TimeEntry" list="openTimeEntryList">
-                    <econdition field-name="partyId"/>
-                    <econdition field-name="thruDate" from="null"/>
-                    <order-by field-name="-fromDate"/>
-                </entity-find>
-                <set field="openTimeEntry" from="openTimeEntryList ? openTimeEntryList[0] : null"/>
+            <if condition="breakMinutes">
+                <set field="breakHours" from="(breakHours ?: 0) + (breakMinutes / 60)" />
             </if>
-            <if condition="scanPurposeEnumId == 'PbspClockIn'"><then>
-                <!-- If scanPurposeEnumId=PbspClockIn call mantle.work.TimeServices.create#TimeEntryClockIn
+            <if condition="scanPurposeEnumId in ['PbspClockIn', 'PbspClockOut']">
+                <set field="clientPartyId" from="partyBadge.organizationPartyId" />
+                <entity-find entity-name="mantle.work.time.TimeEntry" list="openTimeEntryList">
+                    <econdition field-name="partyId" />
+                    <econdition field-name="thruDate" from="null" />
+                    <order-by field-name="-fromDate" />
+                </entity-find>
+                <set field="openTimeEntry" from="openTimeEntryList ? openTimeEntryList[0] : null" />
+            </if>
+            <if condition="scanPurposeEnumId == 'PbspClockIn'">
+                <then>
+                    <!-- If scanPurposeEnumId=PbspClockIn call
+                    mantle.work.TimeServices.create#TimeEntryClockIn
                     If there is an open TimeEntry call mantle.work.TimeServices.store#TimeEntry first -->
-                <if condition="openTimeEntry">
-                    <service-call name="mantle.work.TimeServices.store#TimeEntry"
-                            in-map="openTimeEntry + [thruDate:scanDate, breakHours:breakHours, pieceCount:pieceCount]"/>
-                    <set field="closedTimeEntryId" from="openTimeEntry.timeEntryId"/>
-                </if>
+                    <if condition="openTimeEntry">
+                        <service-call name="mantle.work.TimeServices.store#TimeEntry"
+                            in-map="openTimeEntry + [thruDate:scanDate, breakHours:breakHours, pieceCount:pieceCount]" />
+                        <set field="closedTimeEntryId" from="openTimeEntry.timeEntryId" />
+                    </if>
 
-                <set field="fromDate" from="scanDate"/>
-                <service-call name="mantle.work.TimeServices.create#TimeEntryClockIn" in-map="context" out-map="context"/>
-                <service-call name="update#mantle.party.PartyBadgeScan"
-                        in-map="[partyBadgeId:partyBadgeId, scanDate:scanDate, timeEntryId:timeEntryId]"/>
-            </then><else-if condition="scanPurposeEnumId == 'PbspClockOut'">
-                <!-- If scanPurposeEnumId=PbspClockOut call mantle.work.TimeServices.store#TimeEntry -->
-                <if condition="openTimeEntry"><then>
-                    <service-call name="mantle.work.TimeServices.store#TimeEntry"
-                            in-map="openTimeEntry + [thruDate:scanDate, breakHours:breakHours, pieceCount:pieceCount]"/>
-                    <set field="closedTimeEntryId" from="openTimeEntry.timeEntryId"/>
+                    <set field="fromDate" from="scanDate" />
+                    <service-call name="mantle.work.TimeServices.create#TimeEntryClockIn"
+                        in-map="context" out-map="context" />
                     <service-call name="update#mantle.party.PartyBadgeScan"
-                            in-map="[partyBadgeId:partyBadgeId, scanDate:scanDate, timeEntryId:closedTimeEntryId]"/>
-                </then><else>
-                    <return message="Scan succeeded but cannot clock out, no open time entry found"/>
-                </else></if>
-            </else-if></if>
+                        in-map="[partyBadgeId:partyBadgeId, scanDate:scanDate, timeEntryId:timeEntryId]" />
+                </then>
+                <else-if condition="scanPurposeEnumId == 'PbspClockOut'">
+                    <!-- If scanPurposeEnumId=PbspClockOut call
+                    mantle.work.TimeServices.store#TimeEntry -->
+                    <if condition="openTimeEntry">
+                        <then>
+                            <service-call name="mantle.work.TimeServices.store#TimeEntry"
+                                in-map="openTimeEntry + [thruDate:scanDate, breakHours:breakHours, pieceCount:pieceCount]" />
+                            <set field="closedTimeEntryId" from="openTimeEntry.timeEntryId" />
+                            <service-call name="update#mantle.party.PartyBadgeScan"
+                                in-map="[partyBadgeId:partyBadgeId, scanDate:scanDate, timeEntryId:closedTimeEntryId]" />
+                        </then>
+                        <else>
+                            <return
+                                message="Scan succeeded but cannot clock out, no open time entry found" />
+                        </else>
+                    </if>
+                </else-if>
+            </if>
         </actions>
     </service>
 
@@ -1041,82 +1385,102 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="PartyContentLocation">
         <in-parameters>
-            <parameter name="partyId" required="true"/>
-            <parameter name="partyContentTypeEnumIdList" type="List" required="true"/>
+            <parameter name="partyId" required="true" />
+            <parameter name="partyContentTypeEnumIdList" type="List" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="contentLocation"/>
-            <parameter name="partyContent"/>
+            <parameter name="contentLocation" />
+            <parameter name="partyContent" />
         </out-parameters>
         <actions>
             <iterate list="partyContentTypeEnumIdList" entry="partyContentTypeEnumId">
                 <entity-find entity-name="mantle.party.PartyContent" list="partyContentList">
-                    <econdition field-name="partyId"/><econdition field-name="partyContentTypeEnumId"/>
-                    <order-by field-name="-contentDate"/></entity-find>
+                    <econdition field-name="partyId" />
+                    <econdition field-name="partyContentTypeEnumId" />
+                    <order-by field-name="-contentDate" />
+                </entity-find>
                 <if condition="partyContentList">
-                    <set field="partyContent" from="partyContentList[0]"/>
-                    <break/>
+                    <set field="partyContent" from="partyContentList[0]" />
+                    <break />
                 </if>
             </iterate>
-            <set field="contentLocation" from="partyContent ? partyContent.contentLocation : null"/>
+            <set field="contentLocation" from="partyContent ? partyContent.contentLocation : null" />
         </actions>
     </service>
 
     <service verb="create" noun="PartyContent">
         <in-parameters>
             <auto-parameters entity-name="mantle.party.PartyContent" include="nonpk">
-                <exclude field-name="contentLocation"/></auto-parameters>
-            <parameter name="partyId" required="true"/>
-            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+                <exclude field-name="contentLocation" />
+            </auto-parameters>
+            <parameter name="partyId" required="true" />
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem" />
         </in-parameters>
-        <out-parameters><parameter name="partyContentId"/></out-parameters>
+        <out-parameters>
+            <parameter name="partyContentId" />
+        </out-parameters>
         <actions>
-            <service-call name="create#mantle.party.PartyContent" in-map="context" out-map="context"/>
+            <service-call name="create#mantle.party.PartyContent" in-map="context" out-map="context" />
             <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0">
-                <service-call name="mantle.party.PartyServices.save#PartyContentFile" in-map="context"/></if>
+                <service-call name="mantle.party.PartyServices.save#PartyContentFile"
+                    in-map="context" />
+            </if>
         </actions>
     </service>
     <service verb="update" noun="PartyContent">
         <in-parameters>
-            <parameter name="partyContentId" required="true"/>
+            <parameter name="partyContentId" required="true" />
             <auto-parameters entity-name="mantle.party.PartyContent" include="nonpk">
-                <exclude field-name="contentLocation"/></auto-parameters>
-            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+                <exclude field-name="contentLocation" />
+            </auto-parameters>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem" />
         </in-parameters>
         <actions>
             <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0">
-                <entity-find-one entity-name="mantle.party.PartyContent" value-field="partyContent"/>
-                <service-call name="mantle.party.PartyServices.save#PartyContentFile" out-map="context"
-                        in-map="context + [partyId:partyContent.partyId, saveContentLocation:false]"/>
+                <entity-find-one entity-name="mantle.party.PartyContent" value-field="partyContent" />
+                <service-call name="mantle.party.PartyServices.save#PartyContentFile"
+                    out-map="context"
+                    in-map="context + [partyId:partyContent.partyId, saveContentLocation:false]" />
             </if>
-            <service-call name="update#mantle.party.PartyContent" in-map="context"/>
+            <service-call name="update#mantle.party.PartyContent" in-map="context" />
         </actions>
     </service>
     <service verb="save" noun="PartyContentFile">
         <in-parameters>
-            <parameter name="partyContentId" required="true"/>
-            <parameter name="partyId" required="true"/>
-            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem" required="true"/>
-            <parameter name="saveContentLocation" type="Boolean" default="true"/>
+            <parameter name="partyContentId" required="true" />
+            <parameter name="partyId" required="true" />
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"
+                required="true" />
+            <parameter name="saveContentLocation" type="Boolean" default="true" />
         </in-parameters>
-        <out-parameters><parameter name="contentLocation"/></out-parameters>
+        <out-parameters>
+            <parameter name="contentLocation" />
+        </out-parameters>
         <actions>
-            <set field="filename" from="contentFile.getName()"/>
-            <if condition="org.moqui.resource.ResourceReference.isTextFilename(filename)"><then>
-                <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
-            </then><else>
-                <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
-            </else></if>
-            <set field="contentLocation" value="${contentRoot}/party/${partyId}/content_${partyContentId}/${filename}"/>
+            <set field="filename" from="contentFile.getName()" />
+            <if condition="org.moqui.resource.ResourceReference.isTextFilename(filename)">
+                <then>
+                    <set field="contentRoot"
+                        from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'" />
+                </then>
+                <else>
+                    <set field="contentRoot"
+                        from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'" />
+                </else>
+            </if>
+            <set field="contentLocation"
+                value="${contentRoot}/party/${partyId}/content_${partyContentId}/${filename}" />
 
-            <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
+            <set field="docRr" from="ec.resource.getLocationReference(contentLocation)" />
             <script>
                 fileStream = contentFile.getInputStream()
                 try { docRr.putStream(fileStream) } finally { fileStream.close() }
             </script>
 
-            <if condition="saveContentLocation"><service-call name="update#mantle.party.PartyContent"
-                    in-map="[partyContentId:partyContentId, contentLocation:contentLocation]"/></if>
+            <if condition="saveContentLocation">
+                <service-call name="update#mantle.party.PartyContent"
+                    in-map="[partyContentId:partyContentId, contentLocation:contentLocation]" />
+            </if>
         </actions>
     </service>
 
@@ -1128,67 +1492,84 @@ along with this software (see the LICENSE.md file). If not, see
         <description>Checks PartyRelationshipSetting first, if a partyRelationshipId is specified, then PartySetting if partyId is
             specified, then the defaultValue on the PartySettingType.</description>
         <in-parameters>
-            <parameter name="partySettingTypeId" required="true"/>
-            <parameter name="partyId"/>
-            <parameter name="partyRelationshipId"/>
+            <parameter name="partySettingTypeId" required="true" />
+            <parameter name="partyId" />
+            <parameter name="partyRelationshipId" />
         </in-parameters>
-        <out-parameters><parameter name="settingValue"/></out-parameters>
+        <out-parameters>
+            <parameter name="settingValue" />
+        </out-parameters>
         <actions>
             <if condition="partyRelationshipId">
-                <entity-find-one entity-name="mantle.party.PartyRelationshipSetting" value-field="setting">
-                    <field-map field-name="partyRelationshipId"/><field-map field-name="partySettingTypeId"/></entity-find-one>
+                <entity-find-one entity-name="mantle.party.PartyRelationshipSetting"
+                    value-field="setting">
+                    <field-map field-name="partyRelationshipId" />
+                    <field-map field-name="partySettingTypeId" />
+                </entity-find-one>
             </if>
             <if condition="partyId &amp;&amp; setting == null">
                 <entity-find-one entity-name="mantle.party.PartySetting" value-field="setting">
-                    <field-map field-name="partyId"/><field-map field-name="partySettingTypeId"/></entity-find-one>
+                    <field-map field-name="partyId" />
+                    <field-map field-name="partySettingTypeId" />
+                </entity-find-one>
             </if>
-            <set field="settingValue" from="setting?.settingValue"/>
+            <set field="settingValue" from="setting?.settingValue" />
             <if condition="!settingValue">
-                <entity-find-one entity-name="mantle.party.PartySettingType" value-field="partySettingType"/>
-                <set field="settingValue" from="partySettingType?.defaultValue"/>
+                <entity-find-one entity-name="mantle.party.PartySettingType"
+                    value-field="partySettingType" />
+                <set field="settingValue" from="partySettingType?.defaultValue" />
             </if>
         </actions>
     </service>
     <service verb="store" noun="PartySetting">
         <in-parameters>
-            <parameter name="partySettingTypeId" required="true"/>
-            <parameter name="partyId" required="true"/>
-            <parameter name="settingValue" required="true"/>
+            <parameter name="partySettingTypeId" required="true" />
+            <parameter name="partyId" required="true" />
+            <parameter name="settingValue" required="true" />
         </in-parameters>
         <actions>
-            <service-call name="mantle.party.PartyServices.validate#PartySetting" in-map="context"/>
-            <service-call name="store#mantle.party.PartySetting" in-map="context"/>
+            <service-call name="mantle.party.PartyServices.validate#PartySetting" in-map="context" />
+            <service-call name="store#mantle.party.PartySetting" in-map="context" />
         </actions>
     </service>
     <service verb="store" noun="PartyRelationshipSetting">
         <in-parameters>
-            <parameter name="partySettingTypeId" required="true"/>
-            <parameter name="partyRelationshipId" required="true"/>
-            <parameter name="settingValue" required="true"/>
+            <parameter name="partySettingTypeId" required="true" />
+            <parameter name="partyRelationshipId" required="true" />
+            <parameter name="settingValue" required="true" />
         </in-parameters>
         <actions>
-            <service-call name="mantle.party.PartyServices.validate#PartySetting" in-map="context"/>
-            <service-call name="store#mantle.party.PartyRelationshipSetting" in-map="context"/>
+            <service-call name="mantle.party.PartyServices.validate#PartySetting" in-map="context" />
+            <service-call name="store#mantle.party.PartyRelationshipSetting" in-map="context" />
         </actions>
     </service>
     <service verb="validate" noun="PartySetting">
         <in-parameters>
-            <parameter name="partySettingTypeId" required="true"/>
-            <parameter name="settingValue" required="true"/>
-            <parameter name="partyId"/>
-            <parameter name="partyRelationshipId"/>
+            <parameter name="partySettingTypeId" required="true" />
+            <parameter name="settingValue" required="true" />
+            <parameter name="partyId" />
+            <parameter name="partyRelationshipId" />
         </in-parameters>
         <actions>
-            <entity-find-one entity-name="mantle.party.PartySettingType" value-field="partySettingType"/>
-            <if condition="partySettingType.enumTypeId"><then>
-                <entity-find-one entity-name="moqui.basic.Enumeration" value-field="valEnum">
-                    <field-map field-name="enumId" from="settingValue"/></entity-find-one>
-                <if condition="valEnum == null || valEnum.enumTypeId != partySettingType.enumTypeId">
-                    <return error="true" message="Selected value ${valEnum.description?:''} is not valid"/></if>
-            </then><else-if condition="partySettingType.validRegexp">
-                <if condition="!settingValue.matches(partySettingType.validRegexp)">
-                    <return error="true" message="Value ${settingValue} is not valid"/></if>
-            </else-if></if>
+            <entity-find-one entity-name="mantle.party.PartySettingType"
+                value-field="partySettingType" />
+            <if condition="partySettingType.enumTypeId">
+                <then>
+                    <entity-find-one entity-name="moqui.basic.Enumeration" value-field="valEnum">
+                        <field-map field-name="enumId" from="settingValue" />
+                    </entity-find-one>
+                    <if
+                        condition="valEnum == null || valEnum.enumTypeId != partySettingType.enumTypeId">
+                        <return error="true"
+                            message="Selected value ${valEnum.description?:''} is not valid" />
+                    </if>
+                </then>
+                <else-if condition="partySettingType.validRegexp">
+                    <if condition="!settingValue.matches(partySettingType.validRegexp)">
+                        <return error="true" message="Value ${settingValue} is not valid" />
+                    </if>
+                </else-if>
+            </if>
         </actions>
     </service>
 
@@ -1201,28 +1582,35 @@ along with this software (see the LICENSE.md file). If not, see
             Like the 'org.moqui.impl.EntityServices.send#DataDocumentNotifications' but also looks for partyId/fromPartyId/toPartyId
             fields in the DataDocument and looks up their UserAccount.userId values if there are any to notify those users.
         </description>
-        <implements service="org.moqui.EntityServices.receive#DataFeed"/>
+        <implements service="org.moqui.EntityServices.receive#DataFeed" />
         <actions>
             <iterate list="documentList" entry="document">
-                <set field="userIdSet" from="new HashSet()"/>
+                <set field="userIdSet" from="new HashSet()" />
                 <script>findAllFieldsNestedMap("userId", document, userIdSet)</script>
                 <script>findAllFieldsNestedMap("fromUserId", document, userIdSet)</script>
                 <script>findAllFieldsNestedMap("toUserId", document, userIdSet)</script>
 
-                <set field="partyIdSet" from="new HashSet()"/>
+                <set field="partyIdSet" from="new HashSet()" />
                 <script>findAllFieldsNestedMap("partyId", document, partyIdSet)</script>
                 <script>findAllFieldsNestedMap("fromPartyId", document, partyIdSet)</script>
                 <script>findAllFieldsNestedMap("toPartyId", document, partyIdSet)</script>
                 <iterate list="partyIdSet" entry="partyId">
-                    <if condition="!partyId"><continue/></if>
+                    <if condition="!partyId">
+                        <continue />
+                    </if>
                     <entity-find entity-name="moqui.security.UserAccount" list="userAccountList">
-                        <econdition field-name="partyId"/></entity-find>
-                    <iterate list="userAccountList" entry="userAccount"><script>userIdSet.add(userAccount.userId)</script></iterate>
+                        <econdition field-name="partyId" />
+                    </entity-find>
+                    <iterate list="userAccountList" entry="userAccount">
+                        <script>userIdSet.add(userAccount.userId)</script>
+                    </iterate>
                 </iterate>
 
-                <!-- don't do this, send notifications even if no user IDs so that subscribers to all notifications on the topic still get them:
+                <!-- don't do this, send notifications even if no user IDs so that subscribers to
+                all notifications on the topic still get them:
                 <if condition="!userIdSet">
-                    <log level="info" message="Not sending ${document._type} DataDocument notification, no userIds found"/>
+                    <log level="info" message="Not sending ${document._type} DataDocument notification, no userIds
+                found"/>
                     <continue/>
                 </if>
                 -->

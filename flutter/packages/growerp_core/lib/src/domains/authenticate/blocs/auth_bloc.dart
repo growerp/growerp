@@ -13,6 +13,7 @@
  */
 
 import 'dart:async';
+import 'dart:ui' show Locale;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -171,7 +172,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // when debug mode password is always qqqqqq9!
         newPassword: kReleaseMode ? null : 'qqqqqq9!',
         timeZoneOffset: DateTime.now().timeZoneOffset.toString(),
-        locale: PlatformDispatcher.instance.locale,
+        locale: event.locale ?? PlatformDispatcher.instance.locale,
       );
       await PersistFunctions.persistAuthenticate(result);
       emit(
