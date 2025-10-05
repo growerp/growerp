@@ -15,39 +15,55 @@
 import 'package:flutter/material.dart';
 import '../../../../growerp_core.dart';
 
-Widget popUp(
-    {Widget? child,
-    String title = '',
-    double height = 400,
-    double? width,
-    double padding = 10,
-    bool? closeButton = true,
-    required BuildContext context}) {
+Widget popUp({
+  Widget? child,
+  String title = '',
+  double height = 400,
+  double? width,
+  double padding = 10,
+  bool? closeButton = true,
+  required BuildContext context,
+}) {
   if (width == null) {
     isPhone(context) ? width = 450 : width = 700;
   }
-  return Stack(clipBehavior: Clip.none, children: [
-    SizedBox(
+  return Stack(
+    clipBehavior: Clip.none,
+    children: [
+      SizedBox(
         width: width,
         height: height,
-        child: Column(children: [
-          Container(
-              height: 50,
+        child: Column(
+          children: [
+            Container(
+              height: 60,
               decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondaryContainer,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  )),
+                color: Theme.of(context).colorScheme.secondaryContainer,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
               child: Center(
-                  child: Text(title,
-                      key: const Key('topHeader'),
-                      style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold)))),
-          Expanded(
-              child: Padding(padding: EdgeInsets.all(padding), child: child)),
-        ])),
-    if (closeButton == true)
-      const Positioned(top: 15, right: 15, child: DialogCloseButton())
-  ]);
+                child: Text(
+                  title,
+                  key: const Key('topHeader'),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(padding: EdgeInsets.all(padding), child: child),
+            ),
+          ],
+        ),
+      ),
+      if (closeButton == true)
+        const Positioned(top: 15, right: 15, child: DialogCloseButton()),
+    ],
+  );
 }
