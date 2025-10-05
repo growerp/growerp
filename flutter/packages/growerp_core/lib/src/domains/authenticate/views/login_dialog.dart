@@ -383,7 +383,7 @@ class LoginDialogState extends State<LoginDialog> {
 
     return popUp(
       height: isPhone(context) ? 300 : 280,
-      width: 400,
+      width: isPhone(context) ? 400 : 600,
       context: context,
       title: CoreLocalizations.of(context)!.loginWithExistingUserName,
       child: FormBuilder(

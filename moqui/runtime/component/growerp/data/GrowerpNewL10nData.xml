@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml type="seed">
+    <!-- Force load of new language translations that weren't in the original seed-initial data -->
+    <!-- These will update existing records or create new ones -->
+    
+    <!-- German (de) translations -->
+    <moqui.basic.LocalizedMessage locale="de" original="MoquiUsernameAlreadyInUse"
+        localized="Benutzername [${username}] ist bereits vergeben. Bitte wählen Sie einen anderen." />
+    <moqui.basic.LocalizedMessage locale="de" original="MoquiEmailAlreadyInUse"
+        localized="E-Mail ${emailAddress} wird bereits verwendet. Melden Sie sich mit Benutzername ${existingUsername} an" />
+    <moqui.basic.LocalizedMessage locale="de" original="MoquiAccountCreatedSuccess"
+        localized="Konto mit Benutzername ${username} erstellt" />
+    <moqui.basic.LocalizedMessage locale="de" original="MoquiPasswordIncorrect"
+        localized="Passwort für Benutzer ${username} falsch" />
+    
+    <!-- French (fr) translations -->
+    <moqui.basic.LocalizedMessage locale="fr" original="MoquiUsernameAlreadyInUse"
+        localized="Le nom d'utilisateur [${username}] est déjà utilisé. Veuillez en choisir un autre." />
+    <moqui.basic.LocalizedMessage locale="fr" original="MoquiEmailAlreadyInUse"
+        localized="L'email ${emailAddress} est déjà utilisé. Connectez-vous avec le nom d'utilisateur ${existingUsername}" />
+    <moqui.basic.LocalizedMessage locale="fr" original="MoquiAccountCreatedSuccess"
+        localized="Compte créé avec le nom d'utilisateur ${username}" />
+    <moqui.basic.LocalizedMessage locale="fr" original="MoquiPasswordIncorrect"
+        localized="Mot de passe incorrect pour l'utilisateur ${username}" />
+    
+    <!-- Chinese (zh) translations -->
+    <moqui.basic.LocalizedMessage locale="zh" original="MoquiUsernameAlreadyInUse"
+        localized="用户名 [${username}] 已被使用。请选择另一个。" />
+    <moqui.basic.LocalizedMessage locale="zh" original="MoquiEmailAlreadyInUse"
+        localized="电子邮件 ${emailAddress} 已被使用。请使用用户名 ${existingUsername} 登录" />
+    <moqui.basic.LocalizedMessage locale="zh" original="MoquiAccountCreatedSuccess"
+        localized="已创建用户名为 ${username} 的账户" />
+    <moqui.basic.LocalizedMessage locale="zh" original="MoquiPasswordIncorrect"
+        localized="用户 ${username} 的密码不正确" />
+</entity-facade-xml>
