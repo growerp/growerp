@@ -196,5 +196,19 @@
   "staff": "Mitarbeiter",
   "applications": "Anwendungen",
   "restRequests": "REST-Anfragen",
-  "userRequestStatus": "Benutzer\nAnfrage\nStatus"
+  "userRequestStatus": "Benutzer\nAnfrage\nStatus",
+  "authLoginSuccess": "Anmeldung erfolgreich",
+  "authLoginFailure": "Anmeldung fehlgeschlagen",
+  "authLogoutSuccess": "Abmeldung erfolgreich",
+  "authRegisterSuccess": "Registrierung erfolgreich. Sie können sich jetzt mit dem per E-Mail gesendeten Passwort anmelden",
+  "authRegisterFailure": "Registrierung fehlgeschlagen",
+  "authPasswordResetSuccess": "Passwort erfolgreich zurückgesetzt",
+  "authPasswordResetFailure": "Passwort zurücksetzen fehlgeschlagen",
+  "authUpdateSuccess": "Authentifizierung erfolgreich aktualisiert",
+  "authUpdateFailure": "Authentifizierung konnte nicht aktualisiert werden",
+  "notificationFetchSuccess": "Benachrichtigungen erfolgreich abgerufen",
+  "notificationFetchFailure": "Benachrichtigungen konnten nicht abgerufen werden",
+  "notificationMarkReadSuccess": "Benachrichtigung als gelesen markiert",
+  "notificationMarkReadFailure": "Benachrichtigung konnte nicht als gelesen markiert werden",
+  "passwordChangeSuccess": "Passwort erfolgreich geändert für Benutzer: {username}"
 }

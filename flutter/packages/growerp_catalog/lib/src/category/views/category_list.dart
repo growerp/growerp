@@ -127,19 +127,26 @@ class CategoriesListState extends State<CategoryList> {
     var catalogLocalizations = CatalogLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
     return BlocConsumer<CategoryBloc, CategoryState>(
-      listenWhen: (previous, current) =>
-          previous.status == CategoryStatus.loading,
       listener: (context, state) {
         if (state.status == CategoryStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
         }
         if (state.status == CategoryStatus.success) {
           started = true;
-          HelperFunctions.showMessage(
-            context,
-            '${state.message}',
-            Colors.green,
-          );
+          final catalogLocalizations = CatalogLocalizations.of(context)!;
+          final translatedMessage = state.message != null
+              ? translateCategoryBlocMessage(
+                  state.message!,
+                  catalogLocalizations,
+                )
+              : '';
+          if (translatedMessage.isNotEmpty) {
+            HelperFunctions.showMessage(
+              context,
+              translatedMessage,
+              Colors.green,
+            );
+          }
         }
       },
       builder: (context, state) {

@@ -883,5 +883,98 @@
         "type": "String"
       }
     }
+  },
+  "userUpdateSuccess": "User {name} updated successfully",
+  "@userUpdateSuccess": {
+    "description": "BLoC message: Success when user is updated",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUpdateFailure": "Failed to update user",
+  "@userUpdateFailure": {
+    "description": "BLoC message: Failure when updating user"
+  },
+  "userDeleteSuccess": "User {name} deleted successfully",
+  "@userDeleteSuccess": {
+    "description": "BLoC message: Success when user is deleted",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userDeleteFailure": "Failed to delete user",
+  "@userDeleteFailure": {
+    "description": "BLoC message: Failure when deleting user"
+  },
+  "userAddSuccess": "User {name} added successfully",
+  "@userAddSuccess": {
+    "description": "BLoC message: Success when user is added",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userAddFailure": "Failed to add user",
+  "@userAddFailure": {
+    "description": "BLoC message: Failure when adding user"
+  },
+  "userFetchFailure": "Failed to fetch users",
+  "@userFetchFailure": {
+    "description": "BLoC message: Failure when fetching users"
+  },
+  "userValidationError": "User validation error",
+  "@userValidationError": {
+    "description": "BLoC message: User validation error"
+  },
+  "companyUpdateSuccess": "Company {name} updated successfully",
+  "@companyUpdateSuccess": {
+    "description": "BLoC message: Success when company is updated",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "companyUpdateFailure": "Failed to update company",
+  "@companyUpdateFailure": {
+    "description": "BLoC message: Failure when updating company"
+  },
+  "companyDeleteSuccess": "Company deleted successfully",
+  "@companyDeleteSuccess": {
+    "description": "BLoC message: Success when company is deleted"
+  },
+  "companyDeleteFailure": "Failed to delete company",
+  "@companyDeleteFailure": {
+    "description": "BLoC message: Failure when deleting company"
+  },
+  "companyAddSuccess": "Company {name} added successfully",
+  "@companyAddSuccess": {
+    "description": "BLoC message: Success when company is added",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "companyAddFailure": "Failed to add company",
+  "@companyAddFailure": {
+    "description": "BLoC message: Failure when adding company"
+  },
+  "companyFetchFailure": "Failed to fetch companies",
+  "@companyFetchFailure": {
+    "description": "BLoC message: Failure when fetching companies"
+  },
+  "compUserUploadFailure": "Failed to upload companies/users",
+  "@compUserUploadFailure": {
+    "description": "BLoC message: Failure when uploading company/user data"
+  },
+  "compUserDownloadFailure": "Failed to download companies/users",
+  "@compUserDownloadFailure": {
+    "description": "BLoC message: Failure when downloading company/user data"
   }
 }

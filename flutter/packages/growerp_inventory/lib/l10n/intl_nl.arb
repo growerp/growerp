@@ -51,5 +51,19 @@
   "assetSearch": "Activum zoeken",
   "locations": "Locaties",
   "aqrdCosts": "Verworven kosten: {cost}",
-  "failedToFetchAssets": "Activa ophalen mislukt: {message}"
+  "failedToFetchAssets": "Activa ophalen mislukt: {message}",
+  "assetUpdateSuccess": "Activum {name} succesvol bijgewerkt",
+  "assetUpdateFailure": "Bijwerken van asset mislukt",
+  "assetDeleteSuccess": "Asset succesvol verwijderd",
+  "assetDeleteFailure": "Verwijderen van asset mislukt",
+  "assetAddSuccess": "Activum {name} succesvol toegevoegd",
+  "assetAddFailure": "Toevoegen van asset mislukt",
+  "assetFetchFailure": "Ophalen van assets mislukt",
+  "locationUpdateSuccess": "Locatie succesvol bijgewerkt",
+  "locationUpdateFailure": "Bijwerken van locatie mislukt",
+  "locationDeleteSuccess": "Locatie succesvol verwijderd",
+  "locationDeleteFailure": "Verwijderen van locatie mislukt",
+  "locationAddSuccess": "Locatie succesvol toegevoegd",
+  "locationAddFailure": "Toevoegen van locatie mislukt",
+  "locationFetchFailure": "Ophalen van locaties mislukt"
 }

@@ -13,3 +13,4 @@ export 'src/services/timezone_helper.dart';
 export 'src/get_core_bloc_providers.dart';
 export 'src/domains/authenticate/authenticate.dart';
 export 'src/rest_request/rest_request.dart';
+export 'src/common/translate_bloc_messages.dart';

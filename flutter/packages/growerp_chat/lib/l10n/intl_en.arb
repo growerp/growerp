@@ -99,5 +99,53 @@
   "unreadMessages": "unread messages",
   "@unreadMessages": {
     "description": "Label for unread messages count"
+  },
+  "chatRoomUpdateSuccess": "Chat room updated successfully",
+  "@chatRoomUpdateSuccess": {
+    "description": "BLoC message: Chat room updated successfully"
+  },
+  "chatRoomUpdateFailure": "Failed to update chat room",
+  "@chatRoomUpdateFailure": {
+    "description": "BLoC message: Failed to update chat room"
+  },
+  "chatRoomDeleteSuccess": "Chat room deleted successfully",
+  "@chatRoomDeleteSuccess": {
+    "description": "BLoC message: Chat room deleted successfully"
+  },
+  "chatRoomDeleteFailure": "Failed to delete chat room",
+  "@chatRoomDeleteFailure": {
+    "description": "BLoC message: Failed to delete chat room"
+  },
+  "chatRoomAddSuccess": "Chat room added successfully",
+  "@chatRoomAddSuccess": {
+    "description": "BLoC message: Chat room added successfully"
+  },
+  "chatRoomAddFailure": "Failed to add chat room",
+  "@chatRoomAddFailure": {
+    "description": "BLoC message: Failed to add chat room"
+  },
+  "chatRoomFetchFailure": "Failed to fetch chat rooms",
+  "@chatRoomFetchFailure": {
+    "description": "BLoC message: Failed to fetch chat rooms"
+  },
+  "chatMessageSendSuccess": "Message sent successfully",
+  "@chatMessageSendSuccess": {
+    "description": "BLoC message: Message sent successfully"
+  },
+  "chatMessageSendFailure": "Failed to send message",
+  "@chatMessageSendFailure": {
+    "description": "BLoC message: Failed to send message"
+  },
+  "chatMessageDeleteSuccess": "Message deleted successfully",
+  "@chatMessageDeleteSuccess": {
+    "description": "BLoC message: Message deleted successfully"
+  },
+  "chatMessageDeleteFailure": "Failed to delete message",
+  "@chatMessageDeleteFailure": {
+    "description": "BLoC message: Failed to delete message"
+  },
+  "chatMessageFetchFailure": "Failed to fetch messages",
+  "@chatMessageFetchFailure": {
+    "description": "BLoC message: Failed to fetch messages"
   }
 }

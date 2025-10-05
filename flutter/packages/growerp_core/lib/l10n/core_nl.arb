@@ -196,5 +196,19 @@
   "staff": "Personeel",
   "applications": "Applicaties",
   "restRequests": "REST-verzoeken",
-  "userRequestStatus": "Gebruiker\nVerzoek\nStatus"
+  "userRequestStatus": "Gebruiker\nVerzoek\nStatus",
+  "authLoginSuccess": "Inloggen geslaagd",
+  "authLoginFailure": "Inloggen mislukt",
+  "authLogoutSuccess": "Uitloggen geslaagd",
+  "authRegisterSuccess": "Registratie geslaagd. U kunt nu inloggen met het wachtwoord dat per e-mail is verzonden",
+  "authRegisterFailure": "Registratie mislukt",
+  "authPasswordResetSuccess": "Wachtwoord reset geslaagd",
+  "authPasswordResetFailure": "Wachtwoord reset mislukt",
+  "authUpdateSuccess": "Authenticatie succesvol bijgewerkt",
+  "authUpdateFailure": "Bijwerken van authenticatie mislukt",
+  "notificationFetchSuccess": "Meldingen succesvol opgehaald",
+  "notificationFetchFailure": "Ophalen van meldingen mislukt",
+  "notificationMarkReadSuccess": "Melding gemarkeerd als gelezen",
+  "notificationMarkReadFailure": "Markeren van melding als gelezen mislukt",
+  "passwordChangeSuccess": "Wachtwoord succesvol gewijzigd voor gebruiker: {username}"
 }

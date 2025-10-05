@@ -34,8 +34,10 @@ EventTransformer<E> websiteDroppable<E>(Duration duration) {
 
 class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
   WebsiteBloc(this.restClient) : super(const WebsiteState()) {
-    on<WebsiteFetch>(_onWebsiteFetch,
-        transformer: websiteDroppable(const Duration(milliseconds: 100)));
+    on<WebsiteFetch>(
+      _onWebsiteFetch,
+      transformer: websiteDroppable(const Duration(milliseconds: 100)),
+    );
     on<WebsiteUpdate>(_onWebsiteUpdate);
     on<WebsiteObsUpload>(_onWebsiteObsUpload);
   }
@@ -49,13 +51,14 @@ class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
     try {
       emit(state.copyWith(status: WebsiteStatus.loading));
       final Website result = await restClient.getWebsite();
-      emit(state.copyWith(
-        status: WebsiteStatus.success,
-        website: result,
-      ));
+      emit(state.copyWith(status: WebsiteStatus.success, website: result));
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: WebsiteStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: WebsiteStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -65,16 +68,23 @@ class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
   ) async {
     try {
       emit(state.copyWith(status: WebsiteStatus.loading));
-      final Website result =
-          await restClient.updateWebsite(website: event.website);
-      emit(state.copyWith(
-        status: WebsiteStatus.success,
-        message: "Website updated",
-        website: result,
-      ));
+      final Website result = await restClient.updateWebsite(
+        website: event.website,
+      );
+      emit(
+        state.copyWith(
+          status: WebsiteStatus.success,
+          message: 'websiteUpdateSuccess',
+          website: result,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: WebsiteStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: WebsiteStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -91,11 +101,15 @@ class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
         var inputDir = Directory(event.path!);
         var encoder = ZipFileEncoder();
         encoder.create(zipFile);
-        for (FileSystemEntity entity
-            in inputDir.listSync(recursive: true, followLinks: false)) {
+        for (FileSystemEntity entity in inputDir.listSync(
+          recursive: true,
+          followLinks: false,
+        )) {
           if (entity is File && !entity.path.contains('.obsidian')) {
-            encoder.addFile(File(entity.path),
-                entity.path.substring(event.path!.length + 1));
+            encoder.addFile(
+              File(entity.path),
+              entity.path.substring(event.path!.length + 1),
+            );
           }
         }
         encoder.close();
@@ -105,15 +119,22 @@ class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
       }
       final result = await restClient.obsUpload(obsidian: input);
 
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: WebsiteStatus.success,
           website: result,
           message: input.zip != null
               ? 'obsidian zip file uploaded..'
-              : 'obsidian removed'));
+              : 'obsidian removed',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: WebsiteStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: WebsiteStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

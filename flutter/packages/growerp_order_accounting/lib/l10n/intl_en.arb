@@ -957,5 +957,182 @@
   "cannotBeUndone": "cannot be undone!",
   "@cannotBeUndone": {
     "description": "cannot be undone warning"
+  },
+  "finDocUpdateSuccess": "Document updated successfully",
+  "@finDocUpdateSuccess": {
+    "description": "BLoC message: Document updated successfully"
+  },
+  "finDocUpdateFailure": "Failed to update document",
+  "@finDocUpdateFailure": {
+    "description": "BLoC message: Failed to update document"
+  },
+  "finDocDeleteSuccess": "Document deleted successfully",
+  "@finDocDeleteSuccess": {
+    "description": "BLoC message: Document deleted successfully"
+  },
+  "finDocDeleteFailure": "Failed to delete document",
+  "@finDocDeleteFailure": {
+    "description": "BLoC message: Failed to delete document"
+  },
+  "finDocAddSuccess": "{docType} {pseudoId} added successfully",
+  "@finDocAddSuccess": {
+    "description": "BLoC message: Document added successfully",
+    "placeholders": {
+      "docType": {
+        "type": "String"
+      },
+      "pseudoId": {
+        "type": "String"
+      }
+    }
+  },
+  "finDocAddFailure": "Failed to add document",
+  "@finDocAddFailure": {
+    "description": "BLoC message: Failed to add document"
+  },
+  "finDocFetchFailure": "Failed to fetch documents",
+  "@finDocFetchFailure": {
+    "description": "BLoC message: Failed to fetch documents"
+  },
+  "finDocApproveSuccess": "Document approved successfully",
+  "@finDocApproveSuccess": {
+    "description": "BLoC message: Document approved successfully"
+  },
+  "finDocApproveFailure": "Failed to approve document",
+  "@finDocApproveFailure": {
+    "description": "BLoC message: Failed to approve document"
+  },
+  "finDocSendSuccess": "Document sent successfully",
+  "@finDocSendSuccess": {
+    "description": "BLoC message: Document sent successfully"
+  },
+  "finDocSendFailure": "Failed to send document",
+  "@finDocSendFailure": {
+    "description": "BLoC message: Failed to send document"
+  },
+  "paymentRefundSuccess": "Payment {pseudoId} {grandTotal} refunded successfully",
+  "@paymentRefundSuccess": {
+    "description": "BLoC message: Payment refunded successfully",
+    "placeholders": {
+      "pseudoId": {
+        "type": "String"
+      },
+      "grandTotal": {
+        "type": "String"
+      }
+    }
+  },
+  "timePeriodUpdateSuccess": "Time Period {name} updated successfully",
+  "@timePeriodUpdateSuccess": {
+    "description": "BLoC message: Time Period updated successfully",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "timePeriodCloseSuccess": "Time Period {name} closed successfully",
+  "@timePeriodCloseSuccess": {
+    "description": "BLoC message: Time Period closed successfully",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "glAccountUpdateSuccess": "GL Account {name} updated successfully",
+  "@glAccountUpdateSuccess": {
+    "description": "BLoC message: GL Account updated successfully",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "glAccountUpdateFailure": "Failed to update GL Account",
+  "@glAccountUpdateFailure": {
+    "description": "BLoC message: Failed to update GL Account"
+  },
+  "glAccountDeleteSuccess": "GL Account deleted successfully",
+  "@glAccountDeleteSuccess": {
+    "description": "BLoC message: GL Account deleted successfully"
+  },
+  "glAccountDeleteFailure": "Failed to delete GL Account",
+  "@glAccountDeleteFailure": {
+    "description": "BLoC message: Failed to delete GL Account"
+  },
+  "glAccountAddSuccess": "GL Account {name} added successfully",
+  "@glAccountAddSuccess": {
+    "description": "BLoC message: GL Account added successfully",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "glAccountAddFailure": "Failed to add GL Account",
+  "@glAccountAddFailure": {
+    "description": "BLoC message: Failed to add GL Account"
+  },
+  "glAccountFetchFailure": "Failed to fetch GL Accounts",
+  "@glAccountFetchFailure": {
+    "description": "BLoC message: Failed to fetch GL Accounts"
+  },
+  "glAccountUploadSuccess": "GL Accounts uploaded successfully",
+  "@glAccountUploadSuccess": {
+    "description": "BLoC message: GL Accounts uploaded successfully"
+  },
+  "glAccountUploadFailure": "Failed to upload GL Accounts",
+  "@glAccountUploadFailure": {
+    "description": "BLoC message: Failed to upload GL Accounts"
+  },
+  "glAccountDownloadSuccess": "GL Account download scheduled, email will be sent shortly",
+  "@glAccountDownloadSuccess": {
+    "description": "BLoC message: GL Account download scheduled, email will be sent shortly"
+  },
+  "glAccountDownloadFailure": "Failed to download GL Accounts",
+  "@glAccountDownloadFailure": {
+    "description": "BLoC message: Failed to download GL Accounts"
+  },
+  "ledgerFetchSuccess": "Ledger data fetched successfully",
+  "@ledgerFetchSuccess": {
+    "description": "BLoC message: Ledger data fetched successfully"
+  },
+  "ledgerFetchFailure": "Failed to fetch ledger data",
+  "@ledgerFetchFailure": {
+    "description": "BLoC message: Failed to fetch ledger data"
+  },
+  "ledgerJournalUpdateSuccess": "Ledger journal updated successfully",
+  "@ledgerJournalUpdateSuccess": {
+    "description": "BLoC message: Ledger journal updated successfully"
+  },
+  "ledgerJournalUpdateFailure": "Failed to update ledger journal",
+  "@ledgerJournalUpdateFailure": {
+    "description": "BLoC message: Failed to update ledger journal"
+  },
+  "ledgerJournalDeleteSuccess": "Ledger journal deleted successfully",
+  "@ledgerJournalDeleteSuccess": {
+    "description": "BLoC message: Ledger journal deleted successfully"
+  },
+  "ledgerJournalDeleteFailure": "Failed to delete ledger journal",
+  "@ledgerJournalDeleteFailure": {
+    "description": "BLoC message: Failed to delete ledger journal"
+  },
+  "ledgerJournalAddSuccess": "Ledger journal {name} added successfully",
+  "@ledgerJournalAddSuccess": {
+    "description": "BLoC message: Ledger journal added successfully",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ledgerJournalAddFailure": "Failed to add ledger journal",
+  "@ledgerJournalAddFailure": {
+    "description": "BLoC message: Failed to add ledger journal"
+  },
+  "ledgerJournalFetchFailure": "Failed to fetch ledger journals",
+  "@ledgerJournalFetchFailure": {
+    "description": "BLoC message: Failed to fetch ledger journals"
   }
 }

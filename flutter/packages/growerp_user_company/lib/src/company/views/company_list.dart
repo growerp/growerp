@@ -169,11 +169,16 @@ class CompanyListState extends State<CompanyList> {
 
         blocListener(context, state) {
           if (state.status == CompanyStatus.success) {
-            HelperFunctions.showMessage(
-              context,
-              '${state.message}',
-              Colors.green,
-            );
+            final translatedMessage = state.message != null
+                ? translateUserCompanyBlocMessage(localizations, state.message!)
+                : '';
+            if (translatedMessage.isNotEmpty) {
+              HelperFunctions.showMessage(
+                context,
+                translatedMessage,
+                Colors.green,
+              );
+            }
           }
         }
 

@@ -34,12 +34,12 @@ EventTransformer<E> productDroppable<E>(Duration duration) {
 
 /// Bloc to access [Product] information
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
-  ProductBloc(
-    this.restClient,
-    this.classificationId,
-  ) : super(const ProductState()) {
-    on<ProductFetch>(_onProductFetch,
-        transformer: productDroppable(const Duration(milliseconds: 100)));
+  ProductBloc(this.restClient, this.classificationId)
+    : super(const ProductState()) {
+    on<ProductFetch>(
+      _onProductFetch,
+      transformer: productDroppable(const Duration(milliseconds: 100)),
+    );
     on<ProductUpdate>(_onProductUpdate);
     on<ProductDelete>(_onProductDelete);
     on<ProductUpload>(_onProductUpload);
@@ -61,37 +61,45 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         event.searchString.isNotEmpty) {
       start = 0;
       current = [];
-      add(const ProductUom([
-        'UT_WEIGHT_MEASURE',
-        'UT_VOLUME_DRY_MEAS',
-        'UT_VOLUME_LIQ_MEAS',
-        'UT_TIME_FREQ_MEASURE',
-        'UT_LENGTH_MEASURE',
-        'UT_OTHER_MEASURE',
-      ]));
+      add(
+        const ProductUom([
+          'UT_WEIGHT_MEASURE',
+          'UT_VOLUME_DRY_MEAS',
+          'UT_VOLUME_LIQ_MEAS',
+          'UT_TIME_FREQ_MEASURE',
+          'UT_LENGTH_MEASURE',
+          'UT_OTHER_MEASURE',
+        ]),
+      );
     } else {
       start = state.products.length;
       current = List.of(state.products);
     }
     try {
       Products compResult = await restClient.getProduct(
-          searchString: event.searchString,
-          isForDropDown: event.isForDropDown,
-          assetClassId: event.assetClassId,
-          start: start,
-          limit: event.limit,
-          classificationId: classificationId);
-      emit(state.copyWith(
-        status: ProductStatus.success,
-        products: current..addAll(compResult.products),
-        hasReachedMax: compResult.products.length < event.limit,
         searchString: event.searchString,
-      ));
+        isForDropDown: event.isForDropDown,
+        assetClassId: event.assetClassId,
+        start: start,
+        limit: event.limit,
+        classificationId: classificationId,
+      );
+      emit(
+        state.copyWith(
+          status: ProductStatus.success,
+          products: current..addAll(compResult.products),
+          hasReachedMax: compResult.products.length < event.limit,
+          searchString: event.searchString,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: ProductStatus.failure,
           products: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -105,29 +113,43 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       if (event.product.productId.isNotEmpty) {
         // update
         Product compResult = await restClient.updateProduct(
-            product: event.product, classificationId: classificationId);
+          product: event.product,
+          classificationId: classificationId,
+        );
         int index = products.indexWhere(
-            (element) => element.productId == event.product.productId);
+          (element) => element.productId == event.product.productId,
+        );
         products[index] = compResult;
-        emit(state.copyWith(
+        emit(
+          state.copyWith(
             status: ProductStatus.success,
             products: products,
-            message: "Product ${event.product.productName} updated"));
+            message: 'productUpdateSuccess:${event.product.productName}',
+          ),
+        );
       } else {
         // add
         Product compResult = await restClient.createProduct(
-            product: event.product, classificationId: classificationId);
+          product: event.product,
+          classificationId: classificationId,
+        );
         products.insert(0, compResult);
-        emit(state.copyWith(
+        emit(
+          state.copyWith(
             status: ProductStatus.success,
             products: products,
-            message: "Product ${event.product.productName} added"));
+            message: 'productAddSuccess:${event.product.productName}',
+          ),
+        );
       }
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: ProductStatus.failure,
           products: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -140,17 +162,24 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       List<Product> products = List.from(state.products);
       await restClient.deleteProduct(product: event.product);
       int index = products.indexWhere(
-          (element) => element.productId == event.product.productId);
+        (element) => element.productId == event.product.productId,
+      );
       products.removeAt(index);
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: ProductStatus.success,
           products: products,
-          message: 'product ${event.product.productName} deleted'));
+          message: 'productDeleteSuccess:${event.product.productName}',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: ProductStatus.failure,
           products: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -171,28 +200,37 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         if (row[10].isNotEmpty) categories.add(Category(categoryName: row[10]));
         if (row[11].isNotEmpty) categories.add(Category(categoryName: row[11]));
 
-        products.add(Product(
-          productName: row[0],
-          description: row[1],
-          productTypeId: row[2],
-          image: const Base64Decoder().convert(row[3]),
-          assetClassId: row[4],
-          listPrice: Decimal.tryParse(row[5]),
-          price: Decimal.tryParse(row[6]),
-          useWarehouse: row[7] == 'true' ? true : false,
-          assetCount: row[8] != '' ? int.parse(row[8]) : 0,
-          categories: categories,
-        ));
+        products.add(
+          Product(
+            productName: row[0],
+            description: row[1],
+            productTypeId: row[2],
+            image: const Base64Decoder().convert(row[3]),
+            assetClassId: row[4],
+            listPrice: Decimal.tryParse(row[5]),
+            price: Decimal.tryParse(row[6]),
+            useWarehouse: row[7] == 'true' ? true : false,
+            assetCount: row[8] != '' ? int.parse(row[8]) : 0,
+            categories: categories,
+          ),
+        );
       }
 
       await restClient.importProducts(products, classificationId);
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: ProductStatus.success,
           products: state.products,
-          message: 'Products imported.'));
+          message: 'Products imported.',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: ProductStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: ProductStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -203,16 +241,22 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       emit(state.copyWith(status: ProductStatus.loading));
       await restClient.exportScreenProducts(classificationId: classificationId);
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: ProductStatus.success,
           products: state.products,
           message:
-              "The request is scheduled and the email will be sent shortly"));
+              "The request is scheduled and the email will be sent shortly",
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: ProductStatus.failure,
           products: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -226,10 +270,13 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       List<Uom> uomList = uoms.uoms;
       emit(state.copyWith(status: ProductStatus.success, uoms: uomList));
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: ProductStatus.failure,
           products: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

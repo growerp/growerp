@@ -815,5 +815,66 @@
   "userRequestStatus": "User\nRequest\nStatus",
   "@userRequestStatus": {
     "description": "REST request list column header for user/request/status"
+  },
+  "authLoginSuccess": "Login successful",
+  "@authLoginSuccess": {
+    "description": "BLoC message: Login successful"
+  },
+  "authLoginFailure": "Login failed",
+  "@authLoginFailure": {
+    "description": "BLoC message: Login failed"
+  },
+  "authLogoutSuccess": "Logout successful",
+  "@authLogoutSuccess": {
+    "description": "BLoC message: Logout successful"
+  },
+  "authRegisterSuccess": "Registration successful. You can now login with the password sent by email",
+  "@authRegisterSuccess": {
+    "description": "BLoC message: Registration successful. You can now login with the password sent by email"
+  },
+  "authRegisterFailure": "Registration failed",
+  "@authRegisterFailure": {
+    "description": "BLoC message: Registration failed"
+  },
+  "authPasswordResetSuccess": "Password reset successful",
+  "@authPasswordResetSuccess": {
+    "description": "BLoC message: Password reset successful"
+  },
+  "authPasswordResetFailure": "Password reset failed",
+  "@authPasswordResetFailure": {
+    "description": "BLoC message: Password reset failed"
+  },
+  "authUpdateSuccess": "Authentication updated successfully",
+  "@authUpdateSuccess": {
+    "description": "BLoC message: Authentication updated successfully"
+  },
+  "authUpdateFailure": "Failed to update authentication",
+  "@authUpdateFailure": {
+    "description": "BLoC message: Failed to update authentication"
+  },
+  "notificationFetchSuccess": "Notifications fetched successfully",
+  "@notificationFetchSuccess": {
+    "description": "BLoC message: Notifications fetched successfully"
+  },
+  "notificationFetchFailure": "Failed to fetch notifications",
+  "@notificationFetchFailure": {
+    "description": "BLoC message: Failed to fetch notifications"
+  },
+  "notificationMarkReadSuccess": "Notification marked as read",
+  "@notificationMarkReadSuccess": {
+    "description": "BLoC message: Notification marked as read"
+  },
+  "notificationMarkReadFailure": "Failed to mark notification as read",
+  "@notificationMarkReadFailure": {
+    "description": "BLoC message: Failed to mark notification as read"
+  },
+  "passwordChangeSuccess": "Password successfully changed for user: {username}",
+  "@passwordChangeSuccess": {
+    "description": "BLoC message: Password changed successfully",
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
   }
 }

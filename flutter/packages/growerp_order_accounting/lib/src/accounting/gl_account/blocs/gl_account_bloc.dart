@@ -21,8 +21,10 @@ EventTransformer<E> glAccountDroppable<E>(Duration duration) {
 
 class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
   GlAccountBloc(this.restClient) : super(const GlAccountState()) {
-    on<GlAccountFetch>(_onGlAccountFetch,
-        transformer: glAccountDroppable(throttleDuration));
+    on<GlAccountFetch>(
+      _onGlAccountFetch,
+      transformer: glAccountDroppable(throttleDuration),
+    );
     on<GlAccountUpdate>(_onGlAccountUpdate);
     on<GlAccountClassesFetch>(_onGlAccountClassesFetch);
     on<GlAccountTypesFetch>(_onGlAccountTypesFetch);
@@ -51,13 +53,18 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
 
     try {
       final glAccounts = await restClient.getGlAccount(
-          start: start,
-          limit: event.limit,
-          searchString: event.searchString,
-          trialBalance: event.trialBalance);
+        start: start,
+        limit: event.limit,
+        searchString: event.searchString,
+        trialBalance: event.trialBalance,
+      );
       glAccounts.glAccounts.isEmpty
-          ? emit(state.copyWith(
-              hasReachedMax: true, status: GlAccountStatus.success))
+          ? emit(
+              state.copyWith(
+                hasReachedMax: true,
+                status: GlAccountStatus.success,
+              ),
+            )
           : emit(
               state.copyWith(
                 status: GlAccountStatus.success,
@@ -66,8 +73,12 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
               ),
             );
     } catch (e) {
-      emit(state.copyWith(
-          status: GlAccountStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: GlAccountStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -79,30 +90,42 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
       emit(state.copyWith(status: GlAccountStatus.glAccountLoading));
       List<GlAccount> glAccounts = List.from(state.glAccounts);
       if (event.glAccount.glAccountId != null) {
-        GlAccount compResult =
-            await restClient.updateGlAccount(glAccount: event.glAccount);
+        GlAccount compResult = await restClient.updateGlAccount(
+          glAccount: event.glAccount,
+        );
         int index = glAccounts.indexWhere(
-            (element) => element.glAccountId == event.glAccount.glAccountId);
+          (element) => element.glAccountId == event.glAccount.glAccountId,
+        );
         glAccounts[index] = compResult;
-        return emit(state.copyWith(
+        return emit(
+          state.copyWith(
             status: GlAccountStatus.success,
             glAccounts: glAccounts,
-            message: "glAccount ${event.glAccount.accountName} updated"));
+            message: 'glAccountUpdateSuccess:${event.glAccount.accountName}',
+          ),
+        );
       } else {
         // add
-        GlAccount compResult =
-            await restClient.createGlAccount(glAccount: event.glAccount);
+        GlAccount compResult = await restClient.createGlAccount(
+          glAccount: event.glAccount,
+        );
         glAccounts.insert(0, compResult);
-        return emit(state.copyWith(
+        return emit(
+          state.copyWith(
             status: GlAccountStatus.success,
             glAccounts: glAccounts,
-            message: "glAccount ${event.glAccount.accountName} added"));
+            message: 'glAccountAddSuccess:${event.glAccount.accountName}',
+          ),
+        );
       }
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: GlAccountStatus.failure,
           glAccounts: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -112,13 +135,22 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
   ) async {
     try {
       AccountClasses result = await restClient.getAccountClass(
-          searchString: event.searchString, limit: event.limit);
-      return emit(state.copyWith(
+        searchString: event.searchString,
+        limit: event.limit,
+      );
+      return emit(
+        state.copyWith(
           accountClasses: List.of(result.accountClasses),
-          status: GlAccountStatus.success));
+          status: GlAccountStatus.success,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: GlAccountStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: GlAccountStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -128,15 +160,23 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
   ) async {
     try {
       AccountTypes result = await restClient.getAccountType(
-          searchString: event.searchString, limit: event.limit);
-      return emit(state.copyWith(
+        searchString: event.searchString,
+        limit: event.limit,
+      );
+      return emit(
+        state.copyWith(
           accountTypes: List.of(result.accountTypes),
-          status: GlAccountStatus.success));
+          status: GlAccountStatus.success,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: GlAccountStatus.failure,
           glAccounts: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -151,24 +191,35 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
       // import csv into glAccounts
       for (final row in result) {
         if (row == result.first || row[0] == "        ") continue;
-        glAccounts.add(GlAccount(
+        glAccounts.add(
+          GlAccount(
             accountCode: row[0],
             accountName: row[1],
             isDebit: row[2] == 'true' ? true : false,
-            accountClass:
-                row[3] != '' ? AccountClass(description: row[3]) : null,
+            accountClass: row[3] != ''
+                ? AccountClass(description: row[3])
+                : null,
             accountType: row[4] != '' ? AccountType(description: row[4]) : null,
-            postedBalance: row[5].isNotEmpty ? Decimal.parse(row[5]) : null));
+            postedBalance: row[5].isNotEmpty ? Decimal.parse(row[5]) : null,
+          ),
+        );
       }
 
       await restClient.importGlAccounts(glAccounts);
-      return emit(state.copyWith(
+      return emit(
+        state.copyWith(
           status: GlAccountStatus.success,
           glAccounts: state.glAccounts,
-          message: "Gl account upload ended successfully"));
+          message: 'glAccountUploadSuccess',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: GlAccountStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: GlAccountStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -179,16 +230,22 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
     try {
       emit(state.copyWith(status: GlAccountStatus.loading));
       await restClient.exportGlAccounts();
-      return emit(state.copyWith(
+      return emit(
+        state.copyWith(
           status: GlAccountStatus.success,
           glAccounts: state.glAccounts,
           message:
-              "The request is scheduled and the email will be sent shortly"));
+              "The request is scheduled and the email will be sent shortly",
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: GlAccountStatus.failure,
           glAccounts: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

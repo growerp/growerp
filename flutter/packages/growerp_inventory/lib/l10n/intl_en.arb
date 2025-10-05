@@ -237,5 +237,71 @@
         "type": "String"
       }
     }
+  },
+  "assetUpdateSuccess": "Asset {name} updated successfully",
+  "@assetUpdateSuccess": {
+    "description": "BLoC message: Asset updated successfully",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "assetUpdateFailure": "Failed to update asset",
+  "@assetUpdateFailure": {
+    "description": "BLoC message: Failed to update asset"
+  },
+  "assetDeleteSuccess": "Asset deleted successfully",
+  "@assetDeleteSuccess": {
+    "description": "BLoC message: Asset deleted successfully"
+  },
+  "assetDeleteFailure": "Failed to delete asset",
+  "@assetDeleteFailure": {
+    "description": "BLoC message: Failed to delete asset"
+  },
+  "assetAddSuccess": "Asset {name} added successfully",
+  "@assetAddSuccess": {
+    "description": "BLoC message: Asset added successfully",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "assetAddFailure": "Failed to add asset",
+  "@assetAddFailure": {
+    "description": "BLoC message: Failed to add asset"
+  },
+  "assetFetchFailure": "Failed to fetch assets",
+  "@assetFetchFailure": {
+    "description": "BLoC message: Failed to fetch assets"
+  },
+  "locationUpdateSuccess": "Location updated successfully",
+  "@locationUpdateSuccess": {
+    "description": "BLoC message: Location updated successfully"
+  },
+  "locationUpdateFailure": "Failed to update location",
+  "@locationUpdateFailure": {
+    "description": "BLoC message: Failed to update location"
+  },
+  "locationDeleteSuccess": "Location deleted successfully",
+  "@locationDeleteSuccess": {
+    "description": "BLoC message: Location deleted successfully"
+  },
+  "locationDeleteFailure": "Failed to delete location",
+  "@locationDeleteFailure": {
+    "description": "BLoC message: Failed to delete location"
+  },
+  "locationAddSuccess": "Location added successfully",
+  "@locationAddSuccess": {
+    "description": "BLoC message: Location added successfully"
+  },
+  "locationAddFailure": "Failed to add location",
+  "@locationAddFailure": {
+    "description": "BLoC message: Failed to add location"
+  },
+  "locationFetchFailure": "Failed to fetch locations",
+  "@locationFetchFailure": {
+    "description": "BLoC message: Failed to fetch locations"
   }
 }

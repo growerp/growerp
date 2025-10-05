@@ -33,8 +33,10 @@ EventTransformer<E> ledgerJournalDroppable<E>(Duration duration) {
 
 class LedgerJournalBloc extends Bloc<LedgerJournalEvent, LedgerJournalState> {
   LedgerJournalBloc(this.restClient) : super(const LedgerJournalState()) {
-    on<LedgerJournalFetch>(_onLedgerJournalFetch,
-        transformer: ledgerJournalDroppable(const Duration(milliseconds: 100)));
+    on<LedgerJournalFetch>(
+      _onLedgerJournalFetch,
+      transformer: ledgerJournalDroppable(const Duration(milliseconds: 100)),
+    );
     on<LedgerJournalUpdate>(_onLedgerJournalUpdate);
   }
 
@@ -54,21 +56,30 @@ class LedgerJournalBloc extends Bloc<LedgerJournalEvent, LedgerJournalState> {
     }
     try {
       LedgerJournals result = await restClient.getLedgerJournal(
-          start: start, searchString: event.searchString, limit: event.limit);
-      return emit(state.copyWith(
-        status: LedgerJournalStatus.success,
-        ledgerJournals: start == 0
-            ? result.ledgerJournals
-            : (List.of(state.ledgerJournals)..addAll(result.ledgerJournals)),
-        hasReachedMax:
-            result.ledgerJournals.length < _ledgerJournalLimit ? true : false,
-        searchString: '',
-      ));
+        start: start,
+        searchString: event.searchString,
+        limit: event.limit,
+      );
+      return emit(
+        state.copyWith(
+          status: LedgerJournalStatus.success,
+          ledgerJournals: start == 0
+              ? result.ledgerJournals
+              : (List.of(state.ledgerJournals)..addAll(result.ledgerJournals)),
+          hasReachedMax: result.ledgerJournals.length < _ledgerJournalLimit
+              ? true
+              : false,
+          searchString: '',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: LedgerJournalStatus.failure,
           ledgerJournals: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -80,30 +91,42 @@ class LedgerJournalBloc extends Bloc<LedgerJournalEvent, LedgerJournalState> {
       List<LedgerJournal> ledgerJournals = List.from(state.ledgerJournals);
       if (event.ledgerJournal.journalId.isNotEmpty) {
         LedgerJournal compResult = await restClient.updateLedgerJournal(
-            ledgerJournal: event.ledgerJournal);
+          ledgerJournal: event.ledgerJournal,
+        );
         int index = ledgerJournals.indexWhere(
-            (element) => element.journalId == event.ledgerJournal.journalId);
+          (element) => element.journalId == event.ledgerJournal.journalId,
+        );
         ledgerJournals[index] = compResult;
-        return emit(state.copyWith(
+        return emit(
+          state.copyWith(
             status: LedgerJournalStatus.success,
             ledgerJournals: ledgerJournals,
-            message:
-                "ledgerJournal ${event.ledgerJournal.journalName} updated"));
+            message: "ledgerJournal ${event.ledgerJournal.journalName} updated",
+          ),
+        );
       } else {
         // add
         LedgerJournal compResult = await restClient.createLedgerJournal(
-            ledgerJournal: event.ledgerJournal);
+          ledgerJournal: event.ledgerJournal,
+        );
         ledgerJournals.insert(0, compResult);
-        return emit(state.copyWith(
+        return emit(
+          state.copyWith(
             status: LedgerJournalStatus.success,
             ledgerJournals: ledgerJournals,
-            message: "ledgerJournal ${event.ledgerJournal.journalName} added"));
+            message:
+                'ledgerJournalAddSuccess:${event.ledgerJournal.journalName}',
+          ),
+        );
       }
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: LedgerJournalStatus.failure,
           ledgerJournals: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

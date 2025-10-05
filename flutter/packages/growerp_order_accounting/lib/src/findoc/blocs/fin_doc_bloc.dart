@@ -174,7 +174,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
           state.copyWith(
             status: FinDocStatus.success,
             finDocs: finDocs,
-            message: '${event.finDoc.docType} ${compResult.pseudoId} added',
+            message:
+                'finDocAddSuccess:${event.finDoc.docType}:${compResult.pseudoId}',
           ),
         );
       } else {
@@ -571,7 +572,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         state.copyWith(
           status: FinDocStatus.success,
           finDoc: result,
-          message: 'Payment ${result.pseudoId} ${result.grandTotal} refunded',
+          message:
+              'paymentRefundSuccess:${result.pseudoId}:${result.grandTotal}',
         ),
       );
     } on DioException catch (e) {

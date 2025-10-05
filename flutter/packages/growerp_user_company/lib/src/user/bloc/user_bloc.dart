@@ -37,8 +37,10 @@ EventTransformer<E> userDroppable<E>(Duration duration) {
 class UserBloc extends Bloc<UserEvent, UserState>
     with LeadBloc, CustomerBloc, EmployeeBloc, SupplierBloc {
   UserBloc(this.restClient, this.role) : super(const UserState()) {
-    on<UserFetch>(_onUserFetch,
-        transformer: userDroppable(const Duration(milliseconds: 100)));
+    on<UserFetch>(
+      _onUserFetch,
+      transformer: userDroppable(const Duration(milliseconds: 100)),
+    );
     on<UserUpdate>(_onUserUpdate);
     on<UserDelete>(_onUserDelete);
   }
@@ -47,10 +49,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
   final Role role;
   int start = 0;
 
-  Future<void> _onUserFetch(
-    UserFetch event,
-    Emitter<UserState> emit,
-  ) async {
+  Future<void> _onUserFetch(UserFetch event, Emitter<UserState> emit) async {
     if (state.status == UserStatus.initial ||
         event.refresh ||
         event.searchString != '') {
@@ -63,32 +62,35 @@ class UserBloc extends Bloc<UserEvent, UserState>
       emit(state.copyWith(status: UserStatus.loading));
 
       Users compResult = await restClient.getUser(
-          start: start,
-          limit: event.limit,
-          role: role,
-          partyId: event.partyId,
-          searchString: event.searchString);
+        start: start,
+        limit: event.limit,
+        role: role,
+        partyId: event.partyId,
+        searchString: event.searchString,
+      );
 
-      return emit(state.copyWith(
-        status: UserStatus.success,
-        users: start == 0
-            ? compResult.users
-            : (List.of(state.users)..addAll(compResult.users)),
-        hasReachedMax: compResult.users.length < event.limit ? true : false,
-        searchString: '',
-      ));
+      return emit(
+        state.copyWith(
+          status: UserStatus.success,
+          users: start == 0
+              ? compResult.users
+              : (List.of(state.users)..addAll(compResult.users)),
+          hasReachedMax: compResult.users.length < event.limit ? true : false,
+          searchString: '',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: UserStatus.failure,
           users: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
-  Future<void> _onUserUpdate(
-    UserUpdate event,
-    Emitter<UserState> emit,
-  ) async {
+  Future<void> _onUserUpdate(UserUpdate event, Emitter<UserState> emit) async {
     try {
       emit(state.copyWith(status: UserStatus.loading));
       List<User> users = List.from(state.users);
@@ -96,56 +98,75 @@ class UserBloc extends Bloc<UserEvent, UserState>
         // update
         User compResult = await restClient.updateUser(user: event.user);
         if (users.isNotEmpty) {
-          int index = users
-              .indexWhere((element) => element.partyId == event.user.partyId);
+          int index = users.indexWhere(
+            (element) => element.partyId == event.user.partyId,
+          );
           users.removeAt(index);
           users.insert(0, compResult);
         } else {
           users.add(compResult);
         }
-        return emit(state.copyWith(
+        return emit(
+          state.copyWith(
             searchString: '',
             status: UserStatus.success,
             users: users,
             message:
-                'user ${compResult.firstName} ${compResult.lastName} updated...'));
+                'userUpdateSuccess:${compResult.firstName} ${compResult.lastName}',
+          ),
+        );
       } else {
         // add
         User compResult = await restClient.createUser(user: event.user);
         users.insert(0, compResult);
-        return emit(state.copyWith(
+        return emit(
+          state.copyWith(
             searchString: '',
             status: UserStatus.success,
             users: users,
             message:
-                'user ${compResult.firstName} ${compResult.lastName} added...'));
+                'userAddSuccess:${compResult.firstName} ${compResult.lastName}',
+          ),
+        );
       }
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: UserStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: UserStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
-  Future<void> _onUserDelete(
-    UserDelete event,
-    Emitter<UserState> emit,
-  ) async {
+  Future<void> _onUserDelete(UserDelete event, Emitter<UserState> emit) async {
     try {
       emit(state.copyWith(status: UserStatus.loading));
       List<User> users = List.from(state.users);
       await restClient.deleteUser(
-          partyId: event.user.partyId!, deleteCompanyToo: false);
-      int index =
-          users.indexWhere((element) => element.partyId == event.user.partyId);
+        partyId: event.user.partyId!,
+        deleteCompanyToo: false,
+      );
+      int index = users.indexWhere(
+        (element) => element.partyId == event.user.partyId,
+      );
       users.removeAt(index);
-      return emit(state.copyWith(
+      return emit(
+        state.copyWith(
           searchString: '',
           status: UserStatus.success,
           users: users,
-          message: 'User ${event.user.firstName} is deleted now..'));
+          message:
+              'userDeleteSuccess:${event.user.firstName} ${event.user.lastName}',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: UserStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: UserStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

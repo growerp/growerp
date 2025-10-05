@@ -36,25 +36,33 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
       );
 
       if (event.searchString.isEmpty) {
-        return emit(state.copyWith(
-          status: SubscriptionStatus.success,
-          subscriptions: start == 0
-              ? subscriptions.subscriptions
-              : (List.of(state.subscriptions)
-                ..addAll(subscriptions.subscriptions)),
-          hasReachedMax: subscriptions.subscriptions.length < 20,
-          searchString: '',
-        ));
+        return emit(
+          state.copyWith(
+            status: SubscriptionStatus.success,
+            subscriptions: start == 0
+                ? subscriptions.subscriptions
+                : (List.of(state.subscriptions)
+                    ..addAll(subscriptions.subscriptions)),
+            hasReachedMax: subscriptions.subscriptions.length < 20,
+            searchString: '',
+          ),
+        );
       } else {
-        return emit(state.copyWith(
-          status: SubscriptionStatus.success,
-          searchResults: subscriptions.subscriptions,
-          hasReachedMax: false,
-        ));
+        return emit(
+          state.copyWith(
+            status: SubscriptionStatus.success,
+            searchResults: subscriptions.subscriptions,
+            hasReachedMax: false,
+          ),
+        );
       }
     } catch (e) {
-      emit(state.copyWith(
-          status: SubscriptionStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: SubscriptionStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -68,28 +76,39 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
       if (event.subscription.subscriptionId != null &&
           event.subscription.subscriptionId!.isNotEmpty) {
         Subscription updated = await restClient.updateSubscription(
-            subscription: event.subscription);
+          subscription: event.subscription,
+        );
         int index = subscriptions.indexWhere(
-            (s) => s.subscriptionId == event.subscription.subscriptionId);
+          (s) => s.subscriptionId == event.subscription.subscriptionId,
+        );
         if (index != -1) subscriptions[index] = updated;
-        emit(state.copyWith(
-          status: SubscriptionStatus.success,
-          subscriptions: subscriptions,
-          message: "Subscription updated",
-        ));
+        emit(
+          state.copyWith(
+            status: SubscriptionStatus.success,
+            subscriptions: subscriptions,
+            message: 'subscriptionUpdateSuccess',
+          ),
+        );
       } else {
         Subscription created = await restClient.createSubscription(
-            subscription: event.subscription);
+          subscription: event.subscription,
+        );
         subscriptions.insert(0, created);
-        emit(state.copyWith(
-          status: SubscriptionStatus.success,
-          subscriptions: subscriptions,
-          message: "Subscription added",
-        ));
+        emit(
+          state.copyWith(
+            status: SubscriptionStatus.success,
+            subscriptions: subscriptions,
+            message: 'subscriptionAddSuccess',
+          ),
+        );
       }
     } catch (e) {
-      emit(state.copyWith(
-          status: SubscriptionStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: SubscriptionStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -100,19 +119,27 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
     try {
       emit(state.copyWith(status: SubscriptionStatus.loading));
       List<Subscription> subscriptions = List.from(state.subscriptions);
-      Subscription updated =
-          await restClient.deleteSubscription(subscription: event.subscription);
+      Subscription updated = await restClient.deleteSubscription(
+        subscription: event.subscription,
+      );
       int index = subscriptions.indexWhere(
-          (s) => s.subscriptionId == event.subscription.subscriptionId);
+        (s) => s.subscriptionId == event.subscription.subscriptionId,
+      );
       if (index != -1) subscriptions[index] = updated;
-      emit(state.copyWith(
-        status: SubscriptionStatus.success,
-        subscriptions: subscriptions,
-        message: "Subscription deleted",
-      ));
+      emit(
+        state.copyWith(
+          status: SubscriptionStatus.success,
+          subscriptions: subscriptions,
+          message: 'subscriptionDeleteSuccess',
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-          status: SubscriptionStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: SubscriptionStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

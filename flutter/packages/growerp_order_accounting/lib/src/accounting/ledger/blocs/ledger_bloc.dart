@@ -53,32 +53,43 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
       } else {
         year = ''; // get all years
       }
-      final TimePeriods timePeriods =
-          await restClient.getTimePeriod(year: year, periodType: periodType);
+      final TimePeriods timePeriods = await restClient.getTimePeriod(
+        year: year,
+        periodType: periodType,
+      );
 
       late final LedgerReport result;
       switch (event.reportType) {
         case ReportType.ledger:
           result = await restClient.getLedger();
         case ReportType.sheet:
-          result =
-              await restClient.getBalanceSheet(periodName: event.periodName);
+          result = await restClient.getBalanceSheet(
+            periodName: event.periodName,
+          );
         case ReportType.summary:
-          result =
-              await restClient.getBalanceSummary(periodName: event.periodName);
+          result = await restClient.getBalanceSummary(
+            periodName: event.periodName,
+          );
         case ReportType.revenueExpense:
           result = await restClient.getOperatingRevenueExpenseChart(
-              periodName: event.periodName);
+            periodName: event.periodName,
+          );
       }
 
-      return emit(state.copyWith(
-        status: LedgerStatus.success,
-        ledgerReport: result,
-        timePeriods: timePeriods.timePeriods,
-      ));
+      return emit(
+        state.copyWith(
+          status: LedgerStatus.success,
+          ledgerReport: result,
+          timePeriods: timePeriods.timePeriods,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: LedgerStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: LedgerStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -87,15 +98,22 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
     Emitter<LedgerState> emit,
   ) async {
     try {
-      TimePeriods result =
-          await restClient.getTimePeriod(periodType: event.periodType);
-      return emit(state.copyWith(
-        timePeriods: result.timePeriods,
-        status: LedgerStatus.success,
-      ));
+      TimePeriods result = await restClient.getTimePeriod(
+        periodType: event.periodType,
+      );
+      return emit(
+        state.copyWith(
+          timePeriods: result.timePeriods,
+          status: LedgerStatus.success,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: LedgerStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: LedgerStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -105,17 +123,25 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
   ) async {
     try {
       TimePeriods result = await restClient.updateTimePeriod(
-          timePeriodId: event.timePeriodId,
-          createNext: event.createNext,
-          createPrevious: event.createPrevious,
-          delete: event.delete);
-      return emit(state.copyWith(
+        timePeriodId: event.timePeriodId,
+        createNext: event.createNext,
+        createPrevious: event.createPrevious,
+        delete: event.delete,
+      );
+      return emit(
+        state.copyWith(
           timePeriods: result.timePeriods,
           status: LedgerStatus.success,
-          message: "Time Period ${event.timePeriodName ?? ''} updated"));
+          message: 'timePeriodUpdateSuccess:${event.timePeriodName ?? ''}',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: LedgerStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: LedgerStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -124,15 +150,23 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
     Emitter<LedgerState> emit,
   ) async {
     try {
-      TimePeriods result =
-          await restClient.closeTimePeriod(timePeriodId: event.timePeriodId);
-      return emit(state.copyWith(
+      TimePeriods result = await restClient.closeTimePeriod(
+        timePeriodId: event.timePeriodId,
+      );
+      return emit(
+        state.copyWith(
           timePeriods: result.timePeriods,
           status: LedgerStatus.success,
-          message: "Time Period ${event.timePeriodName ?? ''} Closed!"));
+          message: 'timePeriodCloseSuccess:${event.timePeriodName ?? ''}',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: LedgerStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: LedgerStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -143,13 +177,20 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
     try {
       emit(state.copyWith(status: LedgerStatus.loading));
       await restClient.calculateLedger();
-      return emit(state.copyWith(
+      return emit(
+        state.copyWith(
           status: LedgerStatus.success,
           message:
-              "Re-calculation ledger summaries started in the background...."));
+              "Re-calculation ledger summaries started in the background....",
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: LedgerStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: LedgerStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

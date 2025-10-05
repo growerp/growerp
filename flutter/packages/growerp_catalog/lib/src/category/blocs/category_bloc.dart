@@ -32,12 +32,12 @@ EventTransformer<E> categoryDroppable<E>(Duration duration) {
 }
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
-  CategoryBloc(
-    this.restClient,
-    this.classificationId,
-  ) : super(const CategoryState()) {
-    on<CategoryFetch>(_onCategoryFetch,
-        transformer: categoryDroppable(const Duration(milliseconds: 100)));
+  CategoryBloc(this.restClient, this.classificationId)
+    : super(const CategoryState()) {
+    on<CategoryFetch>(
+      _onCategoryFetch,
+      transformer: categoryDroppable(const Duration(milliseconds: 100)),
+    );
     on<CategoryUpdate>(_onCategoryUpdate);
     on<CategoryDelete>(_onCategoryDelete);
     on<CategoryUpload>(_onCategoryUpload);
@@ -64,20 +64,27 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     }
     try {
       Categories compResult = await restClient.getCategory(
-          companyPartyId: event.companyPartyId,
-          searchString: event.searchString,
-          start: start,
-          limit: event.limit,
-          isForDropDown: event.isForDropDown);
-      emit(state.copyWith(
-        status: CategoryStatus.success,
-        categories: current..addAll(compResult.categories),
-        hasReachedMax: compResult.categories.length < event.limit,
-        searchString: '',
-      ));
+        companyPartyId: event.companyPartyId,
+        searchString: event.searchString,
+        start: start,
+        limit: event.limit,
+        isForDropDown: event.isForDropDown,
+      );
+      emit(
+        state.copyWith(
+          status: CategoryStatus.success,
+          categories: current..addAll(compResult.categories),
+          hasReachedMax: compResult.categories.length < event.limit,
+          searchString: '',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: CategoryStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: CategoryStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -91,32 +98,46 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       List<Category> categories = List.from(state.categories);
       if (event.category.categoryId.isNotEmpty) {
         Category compResult = await restClient.updateCategory(
-            category: event.category, classificationId: classificationId);
+          category: event.category,
+          classificationId: classificationId,
+        );
 
         int index = categories.indexWhere(
-            (element) => element.categoryId == event.category.categoryId);
+          (element) => element.categoryId == event.category.categoryId,
+        );
         categories[index] = compResult;
 
-        emit(state.copyWith(
+        emit(
+          state.copyWith(
             status: CategoryStatus.success,
             categories: categories,
-            message: 'Category ${event.category.categoryName} updated!'));
+            message: 'categoryUpdateSuccess:${event.category.categoryName}',
+          ),
+        );
       } else {
         // add
         Category compResult = await restClient.createCategory(
-            category: event.category, classificationId: classificationId);
+          category: event.category,
+          classificationId: classificationId,
+        );
 
         categories.insert(0, compResult);
-        emit(state.copyWith(
+        emit(
+          state.copyWith(
             status: CategoryStatus.success,
             categories: categories,
-            message: 'Category ${event.category.categoryName} added!'));
+            message: 'categoryAddSuccess:${event.category.categoryName}',
+          ),
+        );
       }
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: CategoryStatus.failure,
           categories: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -130,17 +151,24 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
 
       await restClient.deleteCategory(category: event.category);
       int index = categories.indexWhere(
-          (element) => element.categoryId == event.category.categoryId);
+        (element) => element.categoryId == event.category.categoryId,
+      );
       categories.removeAt(index);
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: CategoryStatus.success,
           categories: categories,
-          message: 'Category ${event.category.categoryName} deleted!'));
+          message: 'categoryDeleteSuccess:${event.category.categoryName}',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: CategoryStatus.failure,
           categories: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -157,19 +185,30 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       for (final row in result) {
         if (line++ < 2) continue;
         if (row.length > 1) {
-          categories.add(Category(
+          categories.add(
+            Category(
               categoryName: row[0],
               description: row[1],
-              image: const Base64Decoder().convert(row[2])));
+              image: const Base64Decoder().convert(row[2]),
+            ),
+          );
         }
       }
       await restClient.importCategories(categories);
 
-      emit(state.copyWith(
-          status: CategoryStatus.success, message: 'Categories imported'));
+      emit(
+        state.copyWith(
+          status: CategoryStatus.success,
+          message: 'Categories imported',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: CategoryStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: CategoryStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -181,17 +220,23 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       emit(state.copyWith(status: CategoryStatus.loading));
 
       await restClient.exportScreenCategories(
-          classificationId: classificationId);
+        classificationId: classificationId,
+      );
 
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: CategoryStatus.success,
-          message:
-              "The request is scheduled and the email be be sent shortly"));
+          message: "The request is scheduled and the email be be sent shortly",
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: CategoryStatus.failure,
           categories: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

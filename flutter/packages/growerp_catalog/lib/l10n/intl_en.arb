@@ -1,471 +1,617 @@
 {
-    "@@locale": "en",
-    "category": "Category",
-    "@category": {
-        "description": "Category menu item"
-    },
-    "categoryList": "Category List",
-    "@categoryList": {
-        "description": "Title of the category list screen"
-    },
-    "products": "Products",
-    "@products": {
-        "description": "Products menu item"
-    },
-    "productList": "Product List",
-    "@productList": {
-        "description": "Title of the product list screen"
-    },
-    "subscriptions": "Subscriptions",
-    "@subscriptions": {
-        "description": "Subscriptions menu item"
-    },
-    "subscriptionList": "Subscription List",
-    "@subscriptionList": {
-        "description": "Title of the subscription list screen"
-    },
-    "categoryNumber": "Category #{number}",
-    "@categoryNumber": {
-        "description": "Category number",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
-    "newItem": "New",
-    "@newItem": {
-        "description": "new item"
-    },
-    "pickImageError": "Pick image error: {error}",
-    "@pickImageError": {
-        "description": "Error message when picking an image",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
-    "selectProducts": "Select one or more products",
-    "@selectProducts": {
-        "description": "Title of the product selection dialog"
-    },
-    "categoryId": "Category Id",
-    "@categoryId": {
-        "description": "Label for the category id field"
-    },
-    "categoryName": "Category Name",
-    "@categoryName": {
-        "description": "Label for the category name field"
-    },
-    "enterCategoryName": "Please enter a category name?",
-    "@enterCategoryName": {
-        "description": "Validation message for the category name field"
-    },
-    "description": "Description",
-    "@description": {
-        "description": "Label for the description field"
-    },
-    "enterCategoryDescription": "Please enter a category description?",
-    "@enterCategoryDescription": {
-        "description": "Validation message for the category description field"
-    },
-    "relatedProducts": "Related Products",
-    "@relatedProducts": {
-        "description": "Label for the related products field"
-    },
-    "totalShown": " total: {total}, shown first {shown}",
-    "@totalShown": {
-        "description": "Label for the total number of items shown",
-        "placeholders": {
-            "total": {
-                "type": "int"
-            },
-            "shown": {
-                "type": "int"
-            }
-        }
-    },
-    "create": "Create",
-    "@create": {
-        "description": "Create button"
-    },
-    "update": "Update",
-    "@update": {
-        "description": "Update button"
-    },
-    "imageUploadError": "Image upload error!",
-    "@imageUploadError": {
-        "description": "Error message when uploading an image"
-    },
-    "categoryFiles": "Category Up/Download",
-    "@categoryFiles": {
-        "description": "Title of the category files dialog"
-    },
-    "downloadFormat": "Download first to obtain the format",
-    "@downloadFormat": {
-        "description": "Instruction to download the format first"
-    },
-    "uploadCsv": "Upload CSV file",
-    "@uploadCsv": {
-        "description": "Button to upload a CSV file"
-    },
-    "downloadEmail": "Download via email",
-    "@downloadEmail": {
-        "description": "Button to download via email"
-    },
-    "emailData": "A data file will be send by email",
-    "@emailData": {
-        "description": "Information about the data file being sent by email"
-    },
-    "noCategories": "No categories yet, add one with '+'",
-    "@noCategories": {
-        "description": "Message when there are no categories"
-    },
-    "fetchCategoriesError": "failed to fetch categories: {error}",
-    "@fetchCategoriesError": {
-        "description": "Error message when fetching categories",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
-    "categoryUpDown": "category up/download",
-    "@categoryUpDown": {
-        "description": "Tooltip for the category up/download button"
-    },
-    "addNew": "Add New",
-    "@addNew": {
-        "description": "Tooltip for the add new button"
-    },
-    "fetchSearchError": "failed to fetch search items: {error}",
-    "@fetchSearchError": {
-        "description": "Error message when fetching search items",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
-    "categorySearch": "Category Search",
-    "@categorySearch": {
-        "description": "Title of the category search dialog"
-    },
-    "searchInput": "Search input",
-    "@searchInput": {
-        "description": "Label for the search input field"
-    },
-    "enterSearch": "Please enter a search value?",
-    "@enterSearch": {
-        "description": "Validation message for the search input field"
-    },
-    "searchResults": "Search results",
-    "@searchResults": {
-        "description": "Label for the search results"
-    },
-    "noSearchItems": "No search items found (yet)",
-    "@noSearchItems": {
-        "description": "Message when no search items are found"
-    },
-    "id": "ID: {id}",
-    "@id": {
-        "description": "Label for the ID",
-        "placeholders": {
-            "id": {
-                "type": "String"
-            }
-        }
-    },
-    "name": "Name: {name}",
-    "@name": {
-        "description": "Label for the name",
-        "placeholders": {
-            "name": {
-                "type": "String"
-            }
-        }
-    },
-    "productNumber": "Product #{number}",
-    "@productNumber": {
-        "description": "Product number",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
-    "roomTypeNumber": "Room Type #{number}",
-    "@roomTypeNumber": {
-        "description": "Room type number",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
-    "rental": "Rental",
-    "@rental": {
-        "description": "Rental product type"
-    },
-    "selectCategories": "Select one or more categories",
-    "@selectCategories": {
-        "description": "Title of the category selection dialog"
-    },
-    "productId": "Product Id",
-    "@productId": {
-        "description": "Label for the product id field"
-    },
-    "roomTypeId": "Room Type Id",
-    "@roomTypeId": {
-        "description": "Label for the room type id field"
-    },
-    "productType": "Product Type",
-    "@productType": {
-        "description": "Label for the product type field"
-    },
-    "productName": "Product Name",
-    "@productName": {
-        "description": "Label for the product name field"
-    },
-    "roomTypeName": "Room Type Name",
-    "@roomTypeName": {
-        "description": "Label for the room type name field"
-    },
-    "prices": "Prices",
-    "@prices": {
-        "description": "Label for the prices section"
-    },
-    "listPrice": "List Price({symbol})",
-    "@listPrice": {
-        "description": "Label for the list price field",
-        "placeholders": {
-            "symbol": {
-                "type": "String"
-            }
-        }
-    },
-    "currentPrice": "Current Price({symbol})",
-    "@currentPrice": {
-        "description": "Label for the current price field",
-        "placeholders": {
-            "symbol": {
-                "type": "String"
-            }
-        }
-    },
-    "currency": "Currency",
-    "@currency": {
-        "description": "Label for the currency field"
-    },
-    "currencyRequired": "Currency field required!",
-    "@currencyRequired": {
-        "description": "Validation message for the currency field"
-    },
-    "relatedCategories": "Related categories",
-    "@relatedCategories": {
-        "description": "Label for the related categories field"
-    },
-    "warehouseInventory": "Warehouse/Inventory",
-    "@warehouseInventory": {
-        "description": "Label for the warehouse/inventory section"
-    },
-    "useWarehouse": "Use Warehouse?",
-    "@useWarehouse": {
-        "description": "Label for the use warehouse checkbox"
-    },
-    "assetsInWarehouse": "Assets in warehouse",
-    "@assetsInWarehouse": {
-        "description": "Label for the assets in warehouse field"
-    },
-    "typeAmount": "Type/Amount",
-    "@typeAmount": {
-        "description": "Label for the type/amount section"
-    },
-    "uomType": "UOM Type",
-    "@uomType": {
-        "description": "Label for the UOM type field"
-    },
-    "uom": "Unit of Measure",
-    "@uom": {
-        "description": "Label for the unit of measure field"
-    },
-    "uomRequired": "Please select a unit of measure",
-    "@uomRequired": {
-        "description": "Validation message for the unit of measure field"
-    },
-    "amountQuantity": "Amount/Quantity",
-    "@amountQuantity": {
-        "description": "Label for the amount/quantity field"
-    },
-    "hotelRoom": "Hotel Room",
-    "@hotelRoom": {
-        "description": "Hotel room asset class"
-    },
-    "inventoryFin": "AsClsInventoryFin",
-    "@inventoryFin": {
-        "description": "Inventory finished good asset class"
-    },
-    "productFiles": "Product Up/Download",
-    "@productFiles": {
-        "description": "Title of the product files dialog"
-    },
-    "noProducts": "No {entityName}s found, add one with '+'",
-    "@noProducts": {
-        "description": "Message when no products are found",
-        "placeholders": {
-            "entityName": {
-                "type": "String"
-            }
-        }
-    },
-    "fetchProductError": "failed to fetch product: {error}",
-    "@fetchProductError": {
-        "description": "Error message when fetching products",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
-    "productUpDown": "products up/download",
-    "@productUpDown": {
-        "description": "Tooltip for the product up/download button"
-    },
-    "productSearch": "Product Search",
-    "@productSearch": {
-        "description": "Title of the product search dialog"
-    },
-    "subscriptionSearch": "Subscription Search",
-    "@subscriptionSearch": {
-        "description": "Title of the subscription search dialog"
-    },
-    "subscriber": "Subscriber: {name}",
-    "@subscriber": {
-        "description": "Label for the subscriber",
-        "placeholders": {
-            "name": {
-                "type": "String"
-            }
-        }
-    },
-    "subscriptionNumber": "Subscription #{number}",
-    "@subscriptionNumber": {
-        "description": "Subscription number",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
-    "question": "????",
-    "@question": {
-        "description": "question marks"
-    },
-    "subscriberName": "subscriber,name",
-    "@subscriberName": {
-        "description": "Label for the subscriber name search field"
-    },
-    "selectSubscriber": "Select Subscriber",
-    "@selectSubscriber": {
-        "description": "Title of the subscriber selection dialog"
-    },
-    "subscriberLabel": "Subscriber",
-    "@subscriberLabel": {
-        "description": "Label for the subscriber field"
-    },
-    "subscriberRequired": "Please select a subscriber",
-    "@subscriberRequired": {
-        "description": "Validation message for the subscriber field"
-    },
-    "purchased": "Purchased: {date}",
-    "@purchased": {
-        "description": "Label for the purchased date",
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
-        }
-    },
-    "cancelled": "Cancelled: {date}",
-    "@cancelled": {
-        "description": "Label for the cancelled date",
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
-        }
-    },
-    "fromDate": "From Date",
-    "@fromDate": {
-        "description": "Label for the from date field"
-    },
-    "thruDate": "Thru Date",
-    "@thruDate": {
-        "description": "Label for the thru date field"
-    },
-    "searchProducts": "Search products...",
-    "@searchProducts": {
-        "description": "Label for the search products field"
-    },
-    "selectProduct": "Select Product",
-    "@selectProduct": {
-        "description": "Title of the product selection dialog"
-    },
-    "product": "Product",
-    "@product": {
-        "description": "Label for the product field"
-    },
-    "productRequired": "Please select a product",
-    "@productRequired": {
-        "description": "Validation message for the product field"
-    },
-    "noSubscriptions": "No {entityName}s found, add one with '+'",
-    "@noSubscriptions": {
-        "description": "Message when no subscriptions are found",
-        "placeholders": {
-            "entityName": {
-                "type": "String"
-            }
-        }
-    },
-    "fetchSubscriptionError": "failed to fetch subscription: {error}",
-    "@fetchSubscriptionError": {
-        "description": "Error message when fetching subscriptions",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
-    "error": "Error: {message}",
-    "@error": {
-        "description": "generic error",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
-    "errorGettingProducts": "Error getting products: {message}",
-    "@errorGettingProducts": {
-        "description": "error getting products",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
-    "idLabel": "ID: {id}\nName: {name}",
-    "@idLabel": {
-        "description": "label for id",
-        "placeholders": {
-            "id": {
-                "type": "String"
-            },
-            "name": {
-                "type": "String"
-            }
-        }
+  "@@locale": "en",
+  "category": "Category",
+  "@category": {
+    "description": "Category menu item"
+  },
+  "categoryList": "Category List",
+  "@categoryList": {
+    "description": "Title of the category list screen"
+  },
+  "products": "Products",
+  "@products": {
+    "description": "Products menu item"
+  },
+  "productList": "Product List",
+  "@productList": {
+    "description": "Title of the product list screen"
+  },
+  "subscriptions": "Subscriptions",
+  "@subscriptions": {
+    "description": "Subscriptions menu item"
+  },
+  "subscriptionList": "Subscription List",
+  "@subscriptionList": {
+    "description": "Title of the subscription list screen"
+  },
+  "categoryNumber": "Category #{number}",
+  "@categoryNumber": {
+    "description": "Category number",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
     }
+  },
+  "newItem": "New",
+  "@newItem": {
+    "description": "new item"
+  },
+  "pickImageError": "Pick image error: {error}",
+  "@pickImageError": {
+    "description": "Error message when picking an image",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "selectProducts": "Select one or more products",
+  "@selectProducts": {
+    "description": "Title of the product selection dialog"
+  },
+  "categoryId": "Category Id",
+  "@categoryId": {
+    "description": "Label for the category id field"
+  },
+  "categoryName": "Category Name",
+  "@categoryName": {
+    "description": "Label for the category name field"
+  },
+  "enterCategoryName": "Please enter a category name?",
+  "@enterCategoryName": {
+    "description": "Validation message for the category name field"
+  },
+  "description": "Description",
+  "@description": {
+    "description": "Label for the description field"
+  },
+  "enterCategoryDescription": "Please enter a category description?",
+  "@enterCategoryDescription": {
+    "description": "Validation message for the category description field"
+  },
+  "relatedProducts": "Related Products",
+  "@relatedProducts": {
+    "description": "Label for the related products field"
+  },
+  "totalShown": " total: {total}, shown first {shown}",
+  "@totalShown": {
+    "description": "Label for the total number of items shown",
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "shown": {
+        "type": "int"
+      }
+    }
+  },
+  "create": "Create",
+  "@create": {
+    "description": "Create button"
+  },
+  "update": "Update",
+  "@update": {
+    "description": "Update button"
+  },
+  "imageUploadError": "Image upload error!",
+  "@imageUploadError": {
+    "description": "Error message when uploading an image"
+  },
+  "categoryFiles": "Category Up/Download",
+  "@categoryFiles": {
+    "description": "Title of the category files dialog"
+  },
+  "downloadFormat": "Download first to obtain the format",
+  "@downloadFormat": {
+    "description": "Instruction to download the format first"
+  },
+  "uploadCsv": "Upload CSV file",
+  "@uploadCsv": {
+    "description": "Button to upload a CSV file"
+  },
+  "downloadEmail": "Download via email",
+  "@downloadEmail": {
+    "description": "Button to download via email"
+  },
+  "emailData": "A data file will be send by email",
+  "@emailData": {
+    "description": "Information about the data file being sent by email"
+  },
+  "noCategories": "No categories yet, add one with '+'",
+  "@noCategories": {
+    "description": "Message when there are no categories"
+  },
+  "fetchCategoriesError": "failed to fetch categories: {error}",
+  "@fetchCategoriesError": {
+    "description": "Error message when fetching categories",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryUpDown": "category up/download",
+  "@categoryUpDown": {
+    "description": "Tooltip for the category up/download button"
+  },
+  "addNew": "Add New",
+  "@addNew": {
+    "description": "Tooltip for the add new button"
+  },
+  "fetchSearchError": "failed to fetch search items: {error}",
+  "@fetchSearchError": {
+    "description": "Error message when fetching search items",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "categorySearch": "Category Search",
+  "@categorySearch": {
+    "description": "Title of the category search dialog"
+  },
+  "searchInput": "Search input",
+  "@searchInput": {
+    "description": "Label for the search input field"
+  },
+  "enterSearch": "Please enter a search value?",
+  "@enterSearch": {
+    "description": "Validation message for the search input field"
+  },
+  "searchResults": "Search results",
+  "@searchResults": {
+    "description": "Label for the search results"
+  },
+  "noSearchItems": "No search items found (yet)",
+  "@noSearchItems": {
+    "description": "Message when no search items are found"
+  },
+  "id": "ID: {id}",
+  "@id": {
+    "description": "Label for the ID",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "name": "Name: {name}",
+  "@name": {
+    "description": "Label for the name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productNumber": "Product #{number}",
+  "@productNumber": {
+    "description": "Product number",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "roomTypeNumber": "Room Type #{number}",
+  "@roomTypeNumber": {
+    "description": "Room type number",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "rental": "Rental",
+  "@rental": {
+    "description": "Rental product type"
+  },
+  "selectCategories": "Select one or more categories",
+  "@selectCategories": {
+    "description": "Title of the category selection dialog"
+  },
+  "productId": "Product Id",
+  "@productId": {
+    "description": "Label for the product id field"
+  },
+  "roomTypeId": "Room Type Id",
+  "@roomTypeId": {
+    "description": "Label for the room type id field"
+  },
+  "productType": "Product Type",
+  "@productType": {
+    "description": "Label for the product type field"
+  },
+  "productName": "Product Name",
+  "@productName": {
+    "description": "Label for the product name field"
+  },
+  "roomTypeName": "Room Type Name",
+  "@roomTypeName": {
+    "description": "Label for the room type name field"
+  },
+  "prices": "Prices",
+  "@prices": {
+    "description": "Label for the prices section"
+  },
+  "listPrice": "List Price({symbol})",
+  "@listPrice": {
+    "description": "Label for the list price field",
+    "placeholders": {
+      "symbol": {
+        "type": "String"
+      }
+    }
+  },
+  "currentPrice": "Current Price({symbol})",
+  "@currentPrice": {
+    "description": "Label for the current price field",
+    "placeholders": {
+      "symbol": {
+        "type": "String"
+      }
+    }
+  },
+  "currency": "Currency",
+  "@currency": {
+    "description": "Label for the currency field"
+  },
+  "currencyRequired": "Currency field required!",
+  "@currencyRequired": {
+    "description": "Validation message for the currency field"
+  },
+  "relatedCategories": "Related categories",
+  "@relatedCategories": {
+    "description": "Label for the related categories field"
+  },
+  "warehouseInventory": "Warehouse/Inventory",
+  "@warehouseInventory": {
+    "description": "Label for the warehouse/inventory section"
+  },
+  "useWarehouse": "Use Warehouse?",
+  "@useWarehouse": {
+    "description": "Label for the use warehouse checkbox"
+  },
+  "assetsInWarehouse": "Assets in warehouse",
+  "@assetsInWarehouse": {
+    "description": "Label for the assets in warehouse field"
+  },
+  "typeAmount": "Type/Amount",
+  "@typeAmount": {
+    "description": "Label for the type/amount section"
+  },
+  "uomType": "UOM Type",
+  "@uomType": {
+    "description": "Label for the UOM type field"
+  },
+  "uom": "Unit of Measure",
+  "@uom": {
+    "description": "Label for the unit of measure field"
+  },
+  "uomRequired": "Please select a unit of measure",
+  "@uomRequired": {
+    "description": "Validation message for the unit of measure field"
+  },
+  "amountQuantity": "Amount/Quantity",
+  "@amountQuantity": {
+    "description": "Label for the amount/quantity field"
+  },
+  "hotelRoom": "Hotel Room",
+  "@hotelRoom": {
+    "description": "Hotel room asset class"
+  },
+  "inventoryFin": "AsClsInventoryFin",
+  "@inventoryFin": {
+    "description": "Inventory finished good asset class"
+  },
+  "productFiles": "Product Up/Download",
+  "@productFiles": {
+    "description": "Title of the product files dialog"
+  },
+  "noProducts": "No {entityName}s found, add one with '+'",
+  "@noProducts": {
+    "description": "Message when no products are found",
+    "placeholders": {
+      "entityName": {
+        "type": "String"
+      }
+    }
+  },
+  "fetchProductError": "failed to fetch product: {error}",
+  "@fetchProductError": {
+    "description": "Error message when fetching products",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "productUpDown": "products up/download",
+  "@productUpDown": {
+    "description": "Tooltip for the product up/download button"
+  },
+  "productSearch": "Product Search",
+  "@productSearch": {
+    "description": "Title of the product search dialog"
+  },
+  "subscriptionSearch": "Subscription Search",
+  "@subscriptionSearch": {
+    "description": "Title of the subscription search dialog"
+  },
+  "subscriber": "Subscriber: {name}",
+  "@subscriber": {
+    "description": "Label for the subscriber",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionNumber": "Subscription #{number}",
+  "@subscriptionNumber": {
+    "description": "Subscription number",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "question": "????",
+  "@question": {
+    "description": "question marks"
+  },
+  "subscriberName": "subscriber,name",
+  "@subscriberName": {
+    "description": "Label for the subscriber name search field"
+  },
+  "selectSubscriber": "Select Subscriber",
+  "@selectSubscriber": {
+    "description": "Title of the subscriber selection dialog"
+  },
+  "subscriberLabel": "Subscriber",
+  "@subscriberLabel": {
+    "description": "Label for the subscriber field"
+  },
+  "subscriberRequired": "Please select a subscriber",
+  "@subscriberRequired": {
+    "description": "Validation message for the subscriber field"
+  },
+  "purchased": "Purchased: {date}",
+  "@purchased": {
+    "description": "Label for the purchased date",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelled": "Cancelled: {date}",
+  "@cancelled": {
+    "description": "Label for the cancelled date",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "fromDate": "From Date",
+  "@fromDate": {
+    "description": "Label for the from date field"
+  },
+  "thruDate": "Thru Date",
+  "@thruDate": {
+    "description": "Label for the thru date field"
+  },
+  "searchProducts": "Search products...",
+  "@searchProducts": {
+    "description": "Label for the search products field"
+  },
+  "selectProduct": "Select Product",
+  "@selectProduct": {
+    "description": "Title of the product selection dialog"
+  },
+  "product": "Product",
+  "@product": {
+    "description": "Label for the product field"
+  },
+  "productRequired": "Please select a product",
+  "@productRequired": {
+    "description": "Validation message for the product field"
+  },
+  "noSubscriptions": "No {entityName}s found, add one with '+'",
+  "@noSubscriptions": {
+    "description": "Message when no subscriptions are found",
+    "placeholders": {
+      "entityName": {
+        "type": "String"
+      }
+    }
+  },
+  "fetchSubscriptionError": "failed to fetch subscription: {error}",
+  "@fetchSubscriptionError": {
+    "description": "Error message when fetching subscriptions",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "error": "Error: {message}",
+  "@error": {
+    "description": "generic error",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "errorGettingProducts": "Error getting products: {message}",
+  "@errorGettingProducts": {
+    "description": "error getting products",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "idLabel": "ID: {id}\nName: {name}",
+  "@idLabel": {
+    "description": "label for id",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryFetchFailure": "Failed to fetch categories",
+  "@categoryFetchFailure": {
+    "description": "BLoC message: Failed to fetch categories"
+  },
+  "productUpdateFailure": "Failed to update product",
+  "@productUpdateFailure": {
+    "description": "BLoC message: Failed to update product"
+  },
+  "subscriptionAddSuccess": "Subscription added successfully",
+  "@subscriptionAddSuccess": {
+    "description": "BLoC message: Subscription added successfully"
+  },
+  "productAddSuccess": "Product {name} added successfully",
+  "@productAddSuccess": {
+    "description": "BLoC message: Product added successfully",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionFetchFailure": "Failed to fetch subscriptions",
+  "@subscriptionFetchFailure": {
+    "description": "BLoC message: Failed to fetch subscriptions"
+  },
+  "productUploadSuccess": "Products uploaded successfully",
+  "@productUploadSuccess": {
+    "description": "BLoC message: Products uploaded successfully"
+  },
+  "categoryUploadFailure": "Failed to upload categories",
+  "@categoryUploadFailure": {
+    "description": "BLoC message: Failed to upload categories"
+  },
+  "categoryAddSuccess": "Category {name} added successfully",
+  "@categoryAddSuccess": {
+    "description": "BLoC message: Category added successfully",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryUploadSuccess": "Categories uploaded successfully",
+  "@categoryUploadSuccess": {
+    "description": "BLoC message: Categories uploaded successfully"
+  },
+  "categoryDeleteSuccess": "Category {name} deleted successfully",
+  "@categoryDeleteSuccess": {
+    "description": "BLoC message: Category deleted successfully",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productDownloadSuccess": "Product download scheduled, email will be sent shortly",
+  "@productDownloadSuccess": {
+    "description": "BLoC message: Product download scheduled, email will be sent shortly"
+  },
+  "subscriptionDeleteSuccess": "Subscription deleted successfully",
+  "@subscriptionDeleteSuccess": {
+    "description": "BLoC message: Subscription deleted successfully"
+  },
+  "productDeleteFailure": "Failed to delete product",
+  "@productDeleteFailure": {
+    "description": "BLoC message: Failed to delete product"
+  },
+  "subscriptionAddFailure": "Failed to add subscription",
+  "@subscriptionAddFailure": {
+    "description": "BLoC message: Failed to add subscription"
+  },
+  "categoryDownloadSuccess": "Category download scheduled, email will be sent shortly",
+  "@categoryDownloadSuccess": {
+    "description": "BLoC message: Category download scheduled, email will be sent shortly"
+  },
+  "productUpdateSuccess": "Product {name} updated successfully",
+  "@productUpdateSuccess": {
+    "description": "BLoC message: Product updated successfully",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionDeleteFailure": "Failed to delete subscription",
+  "@subscriptionDeleteFailure": {
+    "description": "BLoC message: Failed to delete subscription"
+  },
+  "productFetchFailure": "Failed to fetch products",
+  "@productFetchFailure": {
+    "description": "BLoC message: Failed to fetch products"
+  },
+  "categoryUpdateSuccess": "Category {name} updated successfully",
+  "@categoryUpdateSuccess": {
+    "description": "BLoC message: Category updated successfully",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productDeleteSuccess": "Product {name} deleted successfully",
+  "@productDeleteSuccess": {
+    "description": "BLoC message: Product deleted successfully",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryUpdateFailure": "Failed to update category",
+  "@categoryUpdateFailure": {
+    "description": "BLoC message: Failed to update category"
+  },
+  "subscriptionUpdateFailure": "Failed to update subscription",
+  "@subscriptionUpdateFailure": {
+    "description": "BLoC message: Failed to update subscription"
+  },
+  "productDownloadFailure": "Failed to download products",
+  "@productDownloadFailure": {
+    "description": "BLoC message: Failed to download products"
+  },
+  "categoryDownloadFailure": "Failed to download categories",
+  "@categoryDownloadFailure": {
+    "description": "BLoC message: Failed to download categories"
+  },
+  "productAddFailure": "Failed to add product",
+  "@productAddFailure": {
+    "description": "BLoC message: Failed to add product"
+  },
+  "categoryAddFailure": "Failed to add category",
+  "@categoryAddFailure": {
+    "description": "BLoC message: Failed to add category"
+  },
+  "subscriptionUpdateSuccess": "Subscription updated successfully",
+  "@subscriptionUpdateSuccess": {
+    "description": "BLoC message: Subscription updated successfully"
+  },
+  "productUploadFailure": "Failed to upload products",
+  "@productUploadFailure": {
+    "description": "BLoC message: Failed to upload products"
+  },
+  "categoryDeleteFailure": "Failed to delete category",
+  "@categoryDeleteFailure": {
+    "description": "BLoC message: Failed to delete category"
+  }
 }
