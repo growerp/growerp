@@ -1134,5 +1134,37 @@
   "ledgerJournalFetchFailure": "Failed to fetch ledger journals",
   "@ledgerJournalFetchFailure": {
     "description": "BLoC message: Failed to fetch ledger journals"
+  },
+  "uploadInvoice": "Upload Invoice",
+  "@uploadInvoice": {
+    "description": "Title for the invoice upload dialog"
+  },
+  "pickImage": "Pick Image",
+  "@pickImage": {
+    "description": "Button text to pick an image"
+  },
+  "changeImage": "Change Image",
+  "@changeImage": {
+    "description": "Button text to change an image"
+  },
+  "uploadAndProcess": "Upload and Process",
+  "@uploadAndProcess": {
+    "description": "Button text to upload and process an image"
+  },
+  "extractedData": "Extracted Data:",
+  "@extractedData": {
+    "description": "Label for extracted data"
+  },
+  "createInvoice": "Create Invoice",
+  "@createInvoice": {
+    "description": "Button text to create an invoice"
+  },
+  "imageProcessed": "Image processed successfully!",
+  "@imageProcessed": {
+    "description": "Snackbar message when image is processed successfully"
+  },
+  "invoiceCreated": "Invoice created successfully!",
+  "@invoiceCreated": {
+    "description": "Snackbar message when invoice is created successfully"
   }
 }

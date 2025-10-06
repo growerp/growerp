@@ -270,5 +270,13 @@
   "ledgerJournalFetchFailure": "Échec de la récupération des journaux du grand livre",
   "paymentRefundSuccess": "Paiement {pseudoId} {grandTotal} remboursé avec succès",
   "timePeriodUpdateSuccess": "Période {name} mise à jour avec succès",
-  "timePeriodCloseSuccess": "Période {name} clôturée avec succès"
+  "timePeriodCloseSuccess": "Période {name} clôturée avec succès",
+  "uploadInvoice": "Télécharger la facture",
+  "pickImage": "Choisir une image",
+  "changeImage": "Changer d'image",
+  "uploadAndProcess": "Télécharger et traiter",
+  "extractedData": "Données extraites :",
+  "createInvoice": "Créer une facture",
+  "imageProcessed": "Image traitée avec succès !",
+  "invoiceCreated": "Facture créée avec succès !"
 }

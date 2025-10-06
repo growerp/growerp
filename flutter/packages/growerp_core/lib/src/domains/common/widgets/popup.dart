@@ -57,7 +57,16 @@ Widget popUp({
               ),
             ),
             Expanded(
-              child: Padding(padding: EdgeInsets.all(padding), child: child),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  ),
+                ),
+                child: Padding(padding: EdgeInsets.all(padding), child: child),
+              ),
             ),
           ],
         ),

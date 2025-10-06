@@ -270,5 +270,13 @@
   "ledgerJournalFetchFailure": "分类账日记账获取失败",
   "paymentRefundSuccess": "付款 {pseudoId} {grandTotal} 退款成功",
   "timePeriodUpdateSuccess": "时间段 {name} 更新成功",
-  "timePeriodCloseSuccess": "时间段 {name} 关闭成功"
+  "timePeriodCloseSuccess": "时间段 {name} 关闭成功",
+  "uploadInvoice": "上传发票",
+  "pickImage": "选择图片",
+  "changeImage": "更换图片",
+  "uploadAndProcess": "上传并处理",
+  "extractedData": "提取数据：",
+  "createInvoice": "创建发票",
+  "imageProcessed": "图片处理成功！",
+  "invoiceCreated": "发票创建成功！"
 }

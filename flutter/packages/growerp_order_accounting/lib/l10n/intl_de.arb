@@ -270,5 +270,13 @@
   "ledgerJournalFetchFailure": "Hauptbuchjournale konnten nicht abgerufen werden",
   "paymentRefundSuccess": "Zahlung {pseudoId} {grandTotal} erfolgreich erstattet",
   "timePeriodUpdateSuccess": "Zeitraum {name} erfolgreich aktualisiert",
-  "timePeriodCloseSuccess": "Zeitraum {name} erfolgreich geschlossen"
+  "timePeriodCloseSuccess": "Zeitraum {name} erfolgreich geschlossen",
+  "uploadInvoice": "Rechnung hochladen",
+  "pickImage": "Bild auswählen",
+  "changeImage": "Bild ändern",
+  "uploadAndProcess": "Hochladen und verarbeiten",
+  "extractedData": "Extrahierte Daten:",
+  "createInvoice": "Rechnung erstellen",
+  "imageProcessed": "Bild erfolgreich verarbeitet!",
+  "invoiceCreated": "Rechnung erfolgreich erstellt!"
 }

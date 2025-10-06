@@ -270,5 +270,13 @@
   "ledgerJournalFetchFailure": "Ophalen van grootboekjournalen mislukt",
   "paymentRefundSuccess": "Betaling {pseudoId} {grandTotal} succesvol terugbetaald",
   "timePeriodUpdateSuccess": "Tijdsperiode {name} succesvol bijgewerkt",
-  "timePeriodCloseSuccess": "Tijdsperiode {name} succesvol gesloten"
+  "timePeriodCloseSuccess": "Tijdsperiode {name} succesvol gesloten",
+  "uploadInvoice": "Factuur uploaden",
+  "pickImage": "Kies afbeelding",
+  "changeImage": "Afbeelding wijzigen",
+  "uploadAndProcess": "Uploaden en verwerken",
+  "extractedData": "Geëxtraheerde gegevens:",
+  "createInvoice": "Factuur aanmaken",
+  "imageProcessed": "Afbeelding succesvol verwerkt!",
+  "invoiceCreated": "Factuur succesvol aangemaakt!"
 }

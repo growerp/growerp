@@ -672,7 +672,7 @@ abstract class RestClient {
     @Field() required Subscription subscription,
   });
 
-  @POST("rest/s1/growerp/100/ProcessInvoiceImage")
+  @POST("rest/s1/mcp/ProcessInvoiceImage")
   @FormUrlEncoded()
   Future<String> processInvoiceImage({
     @Field() required String imageData,
@@ -680,7 +680,7 @@ abstract class RestClient {
     @Field() required String mimeType,
   });
 
-  @POST("rest/s1/growerp/100/CreateInvoiceFromData")
+  @POST("rest/s1/mcp/CreateInvoiceFromData")
   @FormUrlEncoded()
   Future<String> createInvoiceFromData({
     @Field() required Map<String, dynamic> invoiceData,
