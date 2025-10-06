@@ -1,7 +1,8 @@
 import org.moqui.context.ExecutionContext
 import groovy.json.JsonOutput
 
-def ec = context.getExecutionContext()
+// Get ExecutionContext from context - it's directly available in Moqui service scripts
+ExecutionContext ec = context.ec ?: context
 
 try {
     def invoiceData = context.get("invoiceData")
@@ -9,7 +10,7 @@ try {
     // 1. Get the company of the current user
     def sessionCompanyResult = ec.service.sync().name("growerp.userCompany.get#SessionCompany").call()
     if (sessionCompanyResult.get("company") == null) {
-        ec.getMessage().addError("Could not determine the company for the current user.")
+        ec.message.addError("Could not determine the company for the current user.")
         return
     }
     def companyPartyId = sessionCompanyResult.get("company").partyId
@@ -20,7 +21,7 @@ try {
             .condition("groupName", supplierName)
             .list()
     if (partyList.isEmpty()) {
-        ec.getMessage().addError("Supplier not found: " + supplierName)
+        ec.message.addError("Supplier not found: " + supplierName)
         return
     }
     def supplierPartyId = partyList.get(0).partyId
@@ -50,7 +51,7 @@ try {
         .call()
 
     if (createInvoiceResult.get("invoiceId") == null) {
-        ec.getMessage().addError("Failed to create invoice: " + createInvoiceResult.get("errors"))
+        ec.message.addError("Failed to create invoice: " + createInvoiceResult.get("errors"))
         return
     }
 
@@ -68,5 +69,5 @@ try {
     context.put("stringResult", JsonOutput.toJson(invoiceMap))
 
 } catch (Exception e) {
-    ec.getMessage().addError("An error occurred while creating the invoice: " + e.getMessage())
+    ec.message.addError("An error occurred while creating the invoice: " + e.getMessage())
 }

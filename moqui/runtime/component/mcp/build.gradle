@@ -28,8 +28,7 @@ dependencies {
     implementation project(':framework')
     testImplementation project(':framework').configurations.testImplementation.allDependencies
     
-    // Additional dependencies for MCP server functionality
-    // Note: Most dependencies are provided by the Moqui framework
+    // No additional dependencies needed - using direct HTTP calls to Gemini API
 }
 
 task cleanLib(type: Delete) { delete fileTree(dir: projectDir.absolutePath+'/lib', include: '*') }
