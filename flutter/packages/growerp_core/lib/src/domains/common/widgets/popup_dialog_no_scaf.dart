@@ -35,35 +35,49 @@ Widget popUpDialogNoScaffold({
   Key key = const Key('popUp'),
 }) {
   return Dialog(
-      insetPadding: const EdgeInsets.all(10),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Stack(clipBehavior: Clip.none, children: [
+    insetPadding: const EdgeInsets.all(10),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    child: Stack(
+      clipBehavior: Clip.none,
+      children: [
         SizedBox(
-            width: width,
-            height: height,
-            child: Column(children: [
+          width: width,
+          height: height,
+          child: Column(
+            children: [
               Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondaryContainer,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20),
-                      )),
-                  child: Center(
-                      child: Text(title,
-                          style: const TextStyle(
-                              fontSize: 20,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold)))),
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
               Expanded(
-                  child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: SingleChildScrollView(child: Column(children: children)),
-              ))
-            ])),
-        const Positioned(top: 10, right: 10, child: DialogCloseButton())
-      ]));
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: SingleChildScrollView(
+                    child: Column(children: children),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Positioned(top: 10, right: 10, child: DialogCloseButton()),
+      ],
+    ),
+  );
 }
