@@ -270,5 +270,13 @@
   "ledgerJournalFetchFailure": "การดึงข้อมูลสมุดรายวันล้มเหลว",
   "paymentRefundSuccess": "การชำระเงิน {pseudoId} {grandTotal} คืนเงินสำเร็จ",
   "timePeriodUpdateSuccess": "อัปเดตช่วงเวลา {name} สำเร็จ",
-  "timePeriodCloseSuccess": "ปิดช่วงเวลา {name} สำเร็จ"
+  "timePeriodCloseSuccess": "ปิดช่วงเวลา {name} สำเร็จ",
+  "uploadInvoice": "อัปโหลดใบแจ้งหนี้",
+  "pickImage": "เลือกรูปภาพ",
+  "changeImage": "เปลี่ยนรูปภาพ",
+  "uploadAndProcess": "อัปโหลดและประมวลผล",
+  "extractedData": "ข้อมูลที่แยกออกมา:",
+  "createInvoice": "สร้างใบแจ้งหนี้",
+  "imageProcessed": "ประมวลผลรูปภาพสำเร็จ!",
+  "invoiceCreated": "สร้างใบแจ้งหนี้สำเร็จ!"
 }

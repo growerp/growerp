@@ -23,6 +23,7 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import '../findoc.dart';
 import 'findoc_dialog/request_dialog.dart';
+import 'invoice_upload_view.dart';
 
 class FinDocList extends StatefulWidget {
   const FinDocList({
@@ -133,7 +134,9 @@ class FinDocListState extends State<FinDocList> {
                 : widget.docType == FinDocType.transaction
                 ? _localizations.noOpenTransactions
                 : widget.docType == FinDocType.order
-                ? (widget.sales ? _localizations.noOpenOrders : _localizations.noPurchaseOrders)
+                ? (widget.sales
+                      ? _localizations.noOpenOrders
+                      : _localizations.noPurchaseOrders)
                 : widget.docType == FinDocType.invoice
                 ? (widget.sales
                       ? _localizations.noOpenInvoices
@@ -346,10 +349,12 @@ class FinDocListState extends State<FinDocList> {
                               child: FloatingActionButton(
                                 key: const Key("upload"),
                                 heroTag: "btn4",
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                      context, '/findoc/upload');
-                                },
+                                onPressed: () async => showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      const InvoiceUploadView(),
+                                ),
                                 tooltip: 'Upload Invoice',
                                 child: const Icon(Icons.upload_file),
                               ),

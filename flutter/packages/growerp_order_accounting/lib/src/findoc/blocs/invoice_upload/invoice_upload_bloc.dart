@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:bloc/bloc.dart';
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:image_picker/image_picker.dart';
@@ -31,15 +32,26 @@ class InvoiceUploadBloc extends Bloc<InvoiceUploadEvent, InvoiceUploadState> {
       );
 
       final decodedResult = jsonDecode(result);
-      emit(state.copyWith(
-        status: InvoiceUploadStatus.success,
-        extractedData: decodedResult as Map<String, dynamic>?,
-      ));
+      emit(
+        state.copyWith(
+          status: InvoiceUploadStatus.success,
+          extractedData: decodedResult as Map<String, dynamic>?,
+        ),
+      );
+    } on DioException catch (e) {
+      emit(
+        state.copyWith(
+          status: InvoiceUploadStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: InvoiceUploadStatus.failure,
-        message: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          status: InvoiceUploadStatus.failure,
+          message: e.toString(),
+        ),
+      );
     }
   }
 
@@ -53,15 +65,26 @@ class InvoiceUploadBloc extends Bloc<InvoiceUploadEvent, InvoiceUploadState> {
         invoiceData: event.invoiceData,
       );
       final decodedResult = jsonDecode(result);
-      emit(state.copyWith(
-        status: InvoiceUploadStatus.success,
-        invoice: FinDoc.fromJson(decodedResult),
-      ));
+      emit(
+        state.copyWith(
+          status: InvoiceUploadStatus.success,
+          invoice: FinDoc.fromJson(decodedResult),
+        ),
+      );
+    } on DioException catch (e) {
+      emit(
+        state.copyWith(
+          status: InvoiceUploadStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: InvoiceUploadStatus.failure,
-        message: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          status: InvoiceUploadStatus.failure,
+          message: e.toString(),
+        ),
+      );
     }
   }
 }
