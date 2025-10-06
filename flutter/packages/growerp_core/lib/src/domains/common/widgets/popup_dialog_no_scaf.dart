@@ -1,5 +1,16 @@
 /*
- * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * This GrowERP software is in the public doma              Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Theme.of(context).colorScheme.surfaceContainerHighest
+                          : Theme.of(context).colorScheme.surface,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: SingleChildScrollView(child: Column(children: children)),
+                    ),
+                  )),der CC0 1.0 Universal plus a
  * Grant of Patent License.
  * 
  * To the extent possible under law, the author(s) have dedicated all

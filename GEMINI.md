@@ -37,3 +37,8 @@ In this system, companies can be assigned different roles. The role determines h
 *   **Customer:** A client purchasing goods or services.
 *   **Lead:** A potential customer or supplier.
 *   **Company:** The company itself.
+
+## Development Note
+Every time something changes in the system, the localizations are updated.
+To update l10n run: `melos l10n --no-select`
+```

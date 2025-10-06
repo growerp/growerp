@@ -134,7 +134,7 @@ class TopApp extends StatelessWidget {
                     theme: FlexThemeData.light(
                       scheme: FlexScheme.jungle,
                       subThemesData: const FlexSubThemesData(
-                        dialogBackgroundSchemeColor: SchemeColor.outlineVariant,
+                        dialogBackgroundSchemeColor: SchemeColor.surface,
                         inputDecoratorBorderType: FlexInputBorderType.underline,
                       ),
                       useMaterial3: true,
@@ -142,7 +142,7 @@ class TopApp extends StatelessWidget {
                     darkTheme: FlexThemeData.dark(
                       scheme: FlexScheme.jungle,
                       subThemesData: const FlexSubThemesData(
-                        dialogBackgroundSchemeColor: SchemeColor.outlineVariant,
+                        dialogBackgroundSchemeColor: SchemeColor.surface,
                         inputDecoratorBorderType: FlexInputBorderType.underline,
                       ),
                       useMaterial3: true,

@@ -48,9 +48,16 @@ Widget popUpDialog({
                               color: Colors.white,
                               fontWeight: FontWeight.bold)))),
               Expanded(
-                  child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(children: children))),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Theme.of(context).colorScheme.surfaceContainerHighest
+                          : Theme.of(context).colorScheme.surface,
+                    ),
+                    child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(children: children)),
+                  )),
             ])),
         const Positioned(top: 10, right: 10, child: DialogCloseButton())
       ]));
