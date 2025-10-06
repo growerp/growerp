@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/src/findoc/blocs/invoice_upload/invoice_upload_bloc.dart';
 
 import '../growerp_order_accounting.dart';
 
@@ -8,6 +9,8 @@ List<BlocProvider> getOrderAccountingBlocProviders(
   List<BlocProvider> blocProviders = [
     BlocProvider<LedgerBloc>(create: (context) => LedgerBloc(restClient)),
     BlocProvider<GlAccountBloc>(create: (context) => GlAccountBloc(restClient)),
+    BlocProvider<InvoiceUploadBloc>(
+        create: (context) => InvoiceUploadBloc(restClient)),
     // sales order used in hotel
     BlocProvider<FinDocBloc>(
         create: (context) =>

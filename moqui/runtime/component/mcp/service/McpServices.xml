@@ -451,4 +451,31 @@
     </actions>
   </service>
 
+  <service verb="process" noun="InvoiceImage">
+    <description>Process an invoice image with Gemini to extract data.</description>
+    <in-parameters>
+      <parameter name="imageData" type="String" required="true"/>
+      <parameter name="prompt" type="String" required="true"/>
+      <parameter name="mimeType" type="String" default="image/jpeg"/>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="extractedData" type="Map"/>
+    </out-parameters>
+    <actions>
+      <script location="component://mcp/service/processInvoiceImage.groovy"/>
+    </actions>
+  </service>
+
+  <service verb="create" noun="InvoiceFromData">
+    <description>Create a new invoice from extracted data.</description>
+    <in-parameters>
+      <parameter name="invoiceData" type="Map" required="true"/>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="invoice" type="Map"/>
+    </out-parameters>
+    <actions>
+      <script location="component://mcp/service/createInvoiceFromData.groovy"/>
+    </actions>
+  </service>
 </services>
