@@ -31,6 +31,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           'with: ${settings.arguments.toString()} }');
     }
   }
+  final finDocDynamicRoute = orderAccountingRoute(settings);
+  if (finDocDynamicRoute != null) return finDocDynamicRoute;
+
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(

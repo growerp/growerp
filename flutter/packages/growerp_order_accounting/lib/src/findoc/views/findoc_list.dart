@@ -339,6 +339,21 @@ class FinDocListState extends State<FinDocList> {
                               child: const Icon(Icons.search),
                             ),
                           ),
+                          if (widget.docType == FinDocType.invoice &&
+                              !widget.sales)
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                              child: FloatingActionButton(
+                                key: const Key("upload"),
+                                heroTag: "btn4",
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                      context, '/findoc/upload');
+                                },
+                                tooltip: 'Upload Invoice',
+                                child: const Icon(Icons.upload_file),
+                              ),
+                            ),
                           if (widget.docType != FinDocType.shipment)
                             Padding(
                               padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
