@@ -168,16 +168,11 @@ class _InvoiceUploadViewState extends State<InvoiceUploadView> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: Text(
                     const JsonEncoder.withIndent('  ').convert(_extractedData),
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
-                      fontSize: 12,
-                    ),
                   ),
                 ),
                 const SizedBox(height: 20),

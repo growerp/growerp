@@ -27,6 +27,7 @@ Widget popUp({
   if (width == null) {
     isPhone(context) ? width = 450 : width = 700;
   }
+  double headerHeight = height > 100 ? 60 : height * 0.4;
   return Stack(
     clipBehavior: Clip.none,
     children: [
@@ -36,7 +37,7 @@ Widget popUp({
         child: Column(
           children: [
             Container(
-              height: 60,
+              height: headerHeight,
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.secondaryContainer,
                 borderRadius: const BorderRadius.only(
@@ -48,8 +49,8 @@ Widget popUp({
                 child: Text(
                   title,
                   key: const Key('topHeader'),
-                  style: const TextStyle(
-                    fontSize: 20,
+                  style: TextStyle(
+                    fontSize: headerHeight > 30 ? 20 : 14,
                     fontWeight: FontWeight.bold,
                   ),
                   textAlign: TextAlign.center,
