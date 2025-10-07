@@ -74,6 +74,7 @@ class RequestDialogState extends State<RequestDialog> {
   final _postalController = TextEditingController();
   final _telephoneController = TextEditingController();
   late User user;
+  late OrderAccountingLocalizations _localizations;
   String? selectedCare;
   String? selectedForWhom;
   String? selectedTimeframe;
@@ -164,10 +165,7 @@ class RequestDialogState extends State<RequestDialog> {
                       isPhone,
                       user,
                     )
-                  : requestForm(
-                      state,
-                      requestDialogFormKey,
-                    );
+                  : requestForm(state, requestDialogFormKey);
             },
           ),
         ),
@@ -266,12 +264,13 @@ class RequestDialogState extends State<RequestDialog> {
                             _selectedCompanyUser = newValue;
                           });
                         },
-                        validator: (value) =>
-                              value == null ? _localizations.selectRequester : null,
+                        validator: (value) => value == null
+                            ? _localizations.selectRequester
+                            : null,
                       );
                     case DataFetchStatus.failure:
                       return FatalErrorForm(
-                          message: _localizations.serverProblem,
+                        message: _localizations.serverProblem,
                       );
                     default:
                       return const Center(child: LoadingIndicator());
@@ -287,7 +286,7 @@ class RequestDialogState extends State<RequestDialog> {
                     child: TextFormField(
                       key: const Key('pseudoId'),
                       enabled: !readOnly,
-                        decoration: InputDecoration(labelText: _localizations.id),
+                      decoration: InputDecoration(labelText: _localizations.id),
                       controller: _pseudoIdController,
                       keyboardType: TextInputType.number,
                     ),
@@ -296,10 +295,12 @@ class RequestDialogState extends State<RequestDialog> {
                     flex: 2,
                     child: DropdownButtonFormField<FinDocStatusVal>(
                       key: const Key('statusDropDown'),
-                        decoration: InputDecoration(labelText: _localizations.status),
+                      decoration: InputDecoration(
+                        labelText: _localizations.status,
+                      ),
                       initialValue: _updatedStatus,
                       validator: (value) =>
-                            value == null ? _localizations.fieldRequired : null,
+                          value == null ? _localizations.fieldRequired : null,
                       items:
                           FinDocStatusVal.validStatusList(
                                 finDoc.status ?? FinDocStatusVal.created,
@@ -326,7 +327,7 @@ class RequestDialogState extends State<RequestDialog> {
               key: const Key('postalCode'),
               enabled: !readOnly,
               decoration: InputDecoration(
-                  labelText: _localizations.postalCodeCare,
+                labelText: _localizations.postalCodeCare,
               ),
               controller: _postalController,
               //keyboardType: TextInputType.number,
@@ -336,7 +337,7 @@ class RequestDialogState extends State<RequestDialog> {
               key: const Key('telephone'),
               enabled: !readOnly,
               decoration: InputDecoration(
-                  labelText: _localizations.telephoneNumberQuestion,
+                labelText: _localizations.telephoneNumberQuestion,
               ),
               controller: _telephoneController,
               //keyboardType: _telephoneController.number,
@@ -349,26 +350,26 @@ class RequestDialogState extends State<RequestDialog> {
                     key: const Key('care'),
                     initialValue: selectedCare,
                     decoration: InputDecoration(
-                        labelText: _localizations.careTypeQuestion,
+                      labelText: _localizations.careTypeQuestion,
                     ),
                     validator: (value) =>
-                          value == null ? _localizations.fieldRequired : null,
+                        value == null ? _localizations.fieldRequired : null,
                     items: [
                       DropdownMenuItem<String>(
                         value: 'resCare',
-                          child: Text(_localizations.residentialCare),
+                        child: Text(_localizations.residentialCare),
                       ),
                       DropdownMenuItem<String>(
                         value: 'homeCare',
-                          child: Text(_localizations.homeCare),
+                        child: Text(_localizations.homeCare),
                       ),
                       DropdownMenuItem<String>(
                         value: 'stCare',
-                          child: Text(_localizations.shortTermCare),
+                        child: Text(_localizations.shortTermCare),
                       ),
                       DropdownMenuItem<String>(
                         value: 'retLiving',
-                          child: Text(_localizations.retirementLiving),
+                        child: Text(_localizations.retirementLiving),
                       ),
                     ],
                     autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -384,34 +385,34 @@ class RequestDialogState extends State<RequestDialog> {
                     key: const Key('forWhom'),
                     initialValue: selectedForWhom,
                     decoration: InputDecoration(
-                        labelText: _localizations.careForWhomQuestion,
+                      labelText: _localizations.careForWhomQuestion,
                     ),
                     validator: (value) =>
-                          value == null ? _localizations.fieldRequired : null,
+                        value == null ? _localizations.fieldRequired : null,
                     items: [
                       DropdownMenuItem<String>(
                         value: 'mySelf',
-                          child: Text(_localizations.myself),
+                        child: Text(_localizations.myself),
                       ),
                       DropdownMenuItem<String>(
                         value: 'myParent',
-                          child: Text(_localizations.myParent),
+                        child: Text(_localizations.myParent),
                       ),
                       DropdownMenuItem<String>(
                         value: 'myPartner',
-                          child: Text(_localizations.myPartner),
+                        child: Text(_localizations.myPartner),
                       ),
                       DropdownMenuItem<String>(
                         value: 'myChild',
-                          child: Text(_localizations.myChild),
+                        child: Text(_localizations.myChild),
                       ),
                       DropdownMenuItem<String>(
                         value: 'myClient',
-                          child: Text(_localizations.myClient),
+                        child: Text(_localizations.myClient),
                       ),
                       DropdownMenuItem<String>(
                         value: 'Other',
-                          child: Text(_localizations.other),
+                        child: Text(_localizations.other),
                       ),
                     ],
                     autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -431,22 +432,22 @@ class RequestDialogState extends State<RequestDialog> {
                     key: const Key('timeframe'),
                     initialValue: selectedTimeframe,
                     decoration: InputDecoration(
-                        labelText: _localizations.timeframeQuestion,
+                      labelText: _localizations.timeframeQuestion,
                     ),
                     validator: (value) =>
-                          value == null ? _localizations.fieldRequired : null,
+                        value == null ? _localizations.fieldRequired : null,
                     items: [
                       DropdownMenuItem<String>(
                         value: 'unSure',
-                          child: Text(_localizations.notSure),
+                        child: Text(_localizations.notSure),
                       ),
                       DropdownMenuItem<String>(
                         value: 'shortTerm',
-                          child: Text(_localizations.shortTerm),
+                        child: Text(_localizations.shortTerm),
                       ),
                       DropdownMenuItem<String>(
                         value: 'longTerm',
-                          child: Text(_localizations.longTerm),
+                        child: Text(_localizations.longTerm),
                       ),
                     ],
                     autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -462,26 +463,26 @@ class RequestDialogState extends State<RequestDialog> {
                     key: const Key('howSoon'),
                     initialValue: selectedHowSoon,
                     decoration: InputDecoration(
-                        labelText: _localizations.howSoonCareQuestion,
+                      labelText: _localizations.howSoonCareQuestion,
                     ),
                     validator: (value) =>
-                          value == null ? _localizations.fieldRequired : null,
+                        value == null ? _localizations.fieldRequired : null,
                     items: [
                       DropdownMenuItem<String>(
                         value: 'asap',
-                          child: Text(_localizations.asap),
+                        child: Text(_localizations.asap),
                       ),
                       DropdownMenuItem<String>(
                         value: '3Months',
-                          child: Text(_localizations.withinThreeMonths),
+                        child: Text(_localizations.withinThreeMonths),
                       ),
                       DropdownMenuItem<String>(
                         value: '6Months',
-                          child: Text(_localizations.withinSixMonths),
+                        child: Text(_localizations.withinSixMonths),
                       ),
                       DropdownMenuItem<String>(
                         value: 'moreMonths',
-                          child: Text(_localizations.moreThanSixMonths),
+                        child: Text(_localizations.moreThanSixMonths),
                       ),
                     ],
                     autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -498,25 +499,26 @@ class RequestDialogState extends State<RequestDialog> {
               key: const Key('status'),
               initialValue: selectedStatus,
               decoration: InputDecoration(
-                  labelText: _localizations.acatStatusQuestion,
+                labelText: _localizations.acatStatusQuestion,
               ),
-                validator: (value) => value == null ? _localizations.fieldRequired : null,
+              validator: (value) =>
+                  value == null ? _localizations.fieldRequired : null,
               items: [
                 DropdownMenuItem<String>(
                   value: 'unSure',
-                    child: Text(_localizations.notSure),
+                  child: Text(_localizations.notSure),
                 ),
                 DropdownMenuItem<String>(
                   value: 'yettobestarted',
-                    child: Text(_localizations.acatNotStarted),
+                  child: Text(_localizations.acatNotStarted),
                 ),
                 DropdownMenuItem<String>(
                   value: 'inProgress',
-                    child: Text(_localizations.acatInProgress),
+                  child: Text(_localizations.acatInProgress),
                 ),
                 DropdownMenuItem<String>(
                   value: 'complete',
-                    child: Text(_localizations.acatComplete),
+                  child: Text(_localizations.acatComplete),
                 ),
               ],
               autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -529,7 +531,7 @@ class RequestDialogState extends State<RequestDialog> {
             OutlinedButton(
               key: const Key('update'),
               child: Text(
-                  '${finDoc.idIsNull() ? _localizations.create : _localizations.update} '
+                '${finDoc.idIsNull() ? _localizations.create : _localizations.update} '
                 '${finDocUpdated.docType}',
               ),
               onPressed: () {
@@ -570,7 +572,7 @@ class RequestDialogState extends State<RequestDialog> {
     FinDocState state,
     GlobalKey<FormState> requestDialogFormKey,
   ) {
-      final companyLabel = _localizations.requester;
+    final companyLabel = _localizations.requester;
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
       child: Form(
@@ -584,7 +586,7 @@ class RequestDialogState extends State<RequestDialog> {
                   child: TextFormField(
                     key: const Key('pseudoId'),
                     enabled: !readOnly,
-                      decoration: InputDecoration(labelText: _localizations.id),
+                    decoration: InputDecoration(labelText: _localizations.id),
                     controller: _pseudoIdController,
                     keyboardType: TextInputType.number,
                   ),
@@ -593,10 +595,12 @@ class RequestDialogState extends State<RequestDialog> {
                   flex: 2,
                   child: DropdownButtonFormField<FinDocStatusVal>(
                     key: const Key('statusDropDown'),
-                      decoration: InputDecoration(labelText: _localizations.status),
+                    decoration: InputDecoration(
+                      labelText: _localizations.status,
+                    ),
                     initialValue: _updatedStatus,
                     validator: (value) =>
-                          value == null ? _localizations.fieldRequired : null,
+                        value == null ? _localizations.fieldRequired : null,
                     items:
                         FinDocStatusVal.validStatusList(
                               finDoc.status ?? FinDocStatusVal.created,
@@ -683,11 +687,11 @@ class RequestDialogState extends State<RequestDialog> {
                         });
                       },
                       validator: (value) =>
-                            value == null ? _localizations.selectRequester : null,
+                          value == null ? _localizations.selectRequester : null,
                     );
                   case DataFetchStatus.failure:
                     return FatalErrorForm(
-                        message: _localizations.serverProblem,
+                      message: _localizations.serverProblem,
                     );
                   default:
                     return const Center(child: LoadingIndicator());
@@ -698,7 +702,9 @@ class RequestDialogState extends State<RequestDialog> {
             IgnorePointer(
               ignoring: readOnly,
               child: DropdownButtonFormField<RequestType>(
-                  decoration: InputDecoration(labelText: _localizations.requestType),
+                decoration: InputDecoration(
+                  labelText: _localizations.requestType,
+                ),
                 key: const Key('requestType'),
                 initialValue: _selectedRequestType,
                 items: RequestType.values.map((item) {
@@ -720,7 +726,9 @@ class RequestDialogState extends State<RequestDialog> {
               key: const Key('description'),
               minLines: 5,
               maxLines: 8,
-                decoration: InputDecoration(labelText: _localizations.description),
+              decoration: InputDecoration(
+                labelText: _localizations.description,
+              ),
               controller: _descriptionController,
             ),
             const SizedBox(height: 10),
@@ -728,7 +736,7 @@ class RequestDialogState extends State<RequestDialog> {
               children: [
                 OutlinedButton(
                   key: const Key('cancelFinDoc'),
-                    child: Text(_localizations.cancelRequest),
+                  child: Text(_localizations.cancelRequest),
                   onPressed: () {
                     _finDocBloc.add(
                       FinDocUpdate(
@@ -744,7 +752,7 @@ class RequestDialogState extends State<RequestDialog> {
                   child: OutlinedButton(
                     key: const Key('update'),
                     child: Text(
-                        '${finDoc.idIsNull() ? _localizations.create : _localizations.update} '
+                      '${finDoc.idIsNull() ? _localizations.create : _localizations.update} '
                       '${finDocUpdated.docType}',
                     ),
                     onPressed: () {

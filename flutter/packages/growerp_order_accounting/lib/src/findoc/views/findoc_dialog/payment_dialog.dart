@@ -385,7 +385,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                               });
                             },
                             validator: (value) => value == null
-                                ? "Select ${finDocUpdated.sales ? _localizations.customer : _localizations.supplier}!"
+                                ? "Select ${finDocUpdated.sales ? _localizations!.customer : _localizations!.supplier}"
                                 : null,
                           );
                         case DataFetchStatus.failure:
@@ -478,7 +478,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                   initialValue: _selectedPaymentType,
                   validator: (value) =>
                       value == null && _selectedGlAccount == null
-                          ? _localizations!.enterPaymentType
+                      ? _localizations!.enterPaymentType
                       : null,
                   items: state.paymentTypes.map((item) {
                     return DropdownMenuItem<PaymentType>(

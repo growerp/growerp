@@ -78,7 +78,7 @@ Future main() async {
       notificationClient: notificationClient,
       title: 'GrowERP Health.',
       router: router.generateRoute,
-      menuOptions: getMenuOptions,
+      menuOptions: menuOptions,
       extraDelegates: delegates,
       extraBlocProviders: getAdminBlocProviders(restClient, classificationId),
       company: company,
@@ -100,6 +100,7 @@ List<BlocProvider> getAdminBlocProviders(
   return [
     ...getUserCompanyBlocProviders(restClient, classificationId),
     ...getMarketingBlocProviders(restClient),
+    ...getOrderAccountingBlocProviders(restClient, classificationId),
     ...getWebsiteBlocProviders(restClient),
   ];
 }

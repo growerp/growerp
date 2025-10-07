@@ -4,58 +4,101 @@ This guide provides essential knowledge for AI coding agents working in the Grow
 
 ## 🏛️ Big Picture Architecture
 GrowERP is an open-source, multi-platform ERP system designed to streamline business operations. It runs on Android, iOS, Web, Linux, and Windows, using Flutter for the frontend and Moqui for the backend. Comprehensive documentation and support are available at [https://www.growerp.com](https://www.growerp.com).
-  1. Packages starting with `growerp_` are domain-related building blocks (e.g., `growerp_core`, `growerp_models`, `growerp_user_company`). These implement business logic and can be composed into applications.
-  2. Other packages are complete applications for end users, built by composing building blocks. These can be built and deployed directly.
-  State management uses BLoC (`flutter_bloc`).
-**Backend**: Backend components are located in `moqui/runtime/component/`. This includes the `growerp` component, which contains GrowERP-specific functions and provides multi-company functionality. Other Moqui components in this directory provide entities, services, and REST APIs. Data flows via REST between frontend and backend.
-**Integration**: Communication is via REST APIs (see `docs/basic_explanation_of_the_frontend_REST_Backend_data_models.md`).
+
+**Frontend Architecture** (Layered Building Blocks):
+  1. **Building Blocks** (`growerp_*`): Domain-specific packages (`growerp_core`, `growerp_models`, `growerp_user_company`, `growerp_catalog`, etc.) that implement business logic and can be composed into applications
+  2. **Applications**: Complete end-user apps (`admin`, `hotel`, `freelance`, `health`, `support`) built by composing building blocks
+  3. **Package Dependencies**: Strict hierarchy - `growerp_models` (lowest) → `growerp_core` → domain packages → applications
+  4. **State Management**: BLoC pattern (`flutter_bloc`) with centralized providers via `getCoreBlocProviders()` and domain-specific providers
+
+**Backend Architecture** (Moqui Framework):
+  - **Components**: Located in `moqui/runtime/component/` - `growerp` (core business logic), `mantle-udm` (universal data model), `mantle-usl` (universal service library)
+  - **Multi-tenancy**: Built-in support for multi-company operations
+  - **Data Flow**: REST APIs between Flutter frontend and Moqui backend services
+  - **Integration**: Services defined in XML, entities in component definitions
 
 ## 🛠️ Developer Workflows
+
+**Frontend (Melos Monorepo Management)**:
   ```bash
   dart pub global activate melos # one-time setup
-  melos clean
-  melos bootstrap
-  melos build
-  melos l10n
+  melos clean && melos bootstrap  # reset dependencies
+  melos build                     # run build_runner on packages with build dependencies
+  melos l10n                      # generate localizations for all packages
+  melos watch                     # continuous build_runner watch
   ```
-  - Locally: `melos test`
-  - Headless (Docker): `./build_run_all_tests.sh`
-  - Emulator and backend services are started via Docker Compose for headless runs.
-**Backend (Moqui)**: All commands run from the `moqui` directory:
-  - Initial setup:
-    ```bash
-    ./gradlew build
-    java -jar moqui.war load types=seed,seed-initial,install no-run-es
-    ```
-  - Clean and rebuild database:
-    ```bash
-    ./gradlew cleandb
-    java -jar moqui.war load types=seed,seed-initial,install no-run-es
-    ```
-  - Start backend:
-    ```bash
-    java -jar moqui.war no-run-es
-    ```
+
+**Testing**:
+  - **Local**: `melos test` (runs integration tests in dependency order)
+  - **Headless CI**: `./flutter/build_run_all_tests.sh` (Docker + emulator)
+  - **Package Order**: Tests run in dependency order as defined in `melos.yaml`
+  - **Test Structure**: Integration tests in `packages/*/example/integration_test/`
+
+**Backend (Moqui Framework)** - All commands from `moqui/` directory:
+  ```bash
+  # Initial setup
+  ./gradlew build
+  java -jar moqui.war load types=seed,seed-initial,install no-run-es
+  
+  # Clean rebuild
+  ./gradlew cleandb
+  java -jar moqui.war load types=seed,seed-initial,install no-run-es
+  
+  # Start server
+  java -jar moqui.war no-run-es  # port 8080 by default
+  ```
 
 ## 📦 Project-Specific Conventions
-- **Package Hierarchy**: Lower-level packages (e.g., `growerp_models`) are dependencies for higher-level domain packages.
-- **State Management**: Use BLoC for all business logic and UI state. Events and states are defined per domain.
-- **UI Composition**: Use shared templates/components from `growerp_core`.
-- **Testing**: Integration tests are in each package's `example/integration_test/` directory. Emulator setup is standardized.
-- **Configuration**: App-wide config via `global_configuration` package and JSON files.
-- **Menu System**: Menus are configured per app via building block composition (see `GrowERP_Extensibility_Guide.md`).
+
+**Package Architecture**:
+  - **Strict Dependency Hierarchy**: `growerp_models` → `growerp_core` → domain packages (`growerp_catalog`, `growerp_user_company`, etc.) → applications (`admin`, `hotel`, etc.)
+  - **Version Synchronization**: All `growerp_*` packages maintain synchronized versions (currently v1.9.0)
+  - **Publishing Order**: Models/Core first, then domain packages, finally applications
+
+**State Management (BLoC Pattern)**:
+  - **Core Providers**: `getCoreBlocProviders()` in `growerp_core` sets up shared BLoCs (Auth, Chat, Theme, Locale, DataFetch, etc.)
+  - **Domain Providers**: Each domain package provides additional BLoCs via functions like `getUserCompanyBlocProviders()`
+  - **Message Pattern**: Use direct l10n keys with colon-delimited parameters (`'userAddSuccess:${user.name}'`) - see `QUICK_REFERENCE_BLOC_MESSAGES.md`
+
+**Development Patterns**:
+  - **Integration Testing**: Standardized setup in `example/integration_test/` with Docker emulator support
+  - **Localization**: `flutter gen-l10n` generates type-safe l10n methods from `.arb` files
+  - **Build Generation**: Uses `build_runner` for JSON serialization, Retrofit API clients, etc.
+  - **Configuration**: `global_configuration` package loads from `app_settings.json`
 
 ## 🔗 Integration Points & External Dependencies
-- **REST API**: All frontend-backend communication is via REST. Data models are defined in `growerp_models` and mapped to backend entities.
-- **Stripe**: Payment integration documented in `docs/Stripe_Payment_Processing_Documentation.md`.
-- **Chat/Notification**: Integrated via dedicated packages and backend services.
+
+**API Communication**:
+  - **REST Client**: Type-safe Retrofit client in `growerp_models` with Dio HTTP client
+  - **WebSocket**: Real-time chat/notifications via `WsClient` (`web_socket_channel`)
+  - **Authentication**: JWT tokens managed by `AuthBloc` across all requests
+  - **Error Handling**: Centralized Dio error parsing with user-friendly messages
+
+**Key Integrations**:
+  - **Stripe**: Payment processing documented in `docs/Stripe_Payment_Processing_Documentation.md`
+  - **Chat System**: WebSocket-based real-time messaging with `growerp_chat` package
+  - **File Handling**: Image picker, file picker, PDF generation (`printing`, `pdf` packages)
+  - **Localization**: Built-in support for multiple locales including Buddhist Era calendars
 
 ## 📚 Key Files & Directories
-- `README.md`, `docs/README.md`: High-level and extensibility documentation
-- `flutter/packages/`: All Flutter building blocks
-- `moqui/`: Backend components and configuration
-- `docker/`: Docker Compose files for local/dev/test environments
-- `docs/`: Architecture, extensibility, and integration guides
+
+**Critical Configuration**:
+  - `flutter/melos.yaml`: Monorepo configuration, package order, test execution order
+  - `flutter/packages/*/pubspec.yaml`: Individual package dependencies and versions
+  - `moqui/runtime/component/growerp/`: Core business logic services and entities
+  - `docker/app_settings.json`: Environment-specific backend URLs and configuration
+
+**Development Structure**:
+  - `flutter/packages/growerp_core/lib/src/get_core_bloc_providers.dart`: Central BLoC setup
+  - `flutter/packages/*/example/integration_test/`: Standardized test suites
+  - `flutter/build_run_all_tests.sh`: Headless CI test runner with Docker
+  - `docs/QUICK_REFERENCE_BLOC_MESSAGES.md`: Current l10n message pattern guide
+
+**Documentation Hub**:
+  - `docs/README.md`: Complete navigation index with role-based guides
+  - `docs/GrowERP_Extensibility_Guide.md`: Architecture and extension patterns
+  - `docs/Building_Blocks_Development_Guide.md`: Package creation guide
+  - `GrowERPObs/`: Obsidian knowledge vault
 
 ## 📝 Example Patterns
 - **Adding a Domain Package**: Create in `flutter/packages/`, depend on `growerp_core` and `growerp_models`, implement BLoC, UI, and tests.
