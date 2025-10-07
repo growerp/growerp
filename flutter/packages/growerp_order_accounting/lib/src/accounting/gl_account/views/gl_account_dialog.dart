@@ -54,6 +54,8 @@ class GlAccountDialogState extends State<GlAccountDialog> {
       debitSelected = widget.glAccount.isDebit;
       classSelected = widget.glAccount.accountClass;
       typeSelected = widget.glAccount.accountType;
+    } else {
+      debitSelected = true; // default to debit for new accounts
     }
   }
 
@@ -87,7 +89,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
         child: popUp(
           context: context,
           title:
-              "${_localizations.glAccount} #${widget.glAccount.accountCode ?? _localizations.newGlAccount}",
+              "${_localizations.glAccount}${widget.glAccount.accountCode ?? _localizations.newGlAccount}",
           width: columns.toDouble() * 400,
           height: columns == 1
               ? 1 / columns.toDouble() * 650
@@ -127,19 +129,42 @@ class GlAccountDialogState extends State<GlAccountDialog> {
           return value!.isEmpty ? _localizations.glAccountNameNull : null;
         },
       ),
-      if (widget.glAccount.glAccountId != null)
-        RadioGroup<bool>(
-          key: const Key('debit'),
-          groupValue: debitSelected,
-          onChanged: (bool? value) {
-            setState(() {
-              debitSelected = value!;
-            });
-          },
-          child: const Row(
-            children: [Radio<bool>(value: true), Radio<bool>(value: false)],
+      Row(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                const Text('Debit account'),
+                Radio<bool>(
+                  value: true,
+                  groupValue: debitSelected,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      debitSelected = value;
+                    });
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
+          Expanded(
+            child: Row(
+              children: [
+                const Text('Credit account'),
+                Radio<bool>(
+                  value: false,
+                  groupValue: debitSelected,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      debitSelected = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
       DropdownSearch<AccountClass>(
         key: const Key('class'),
         selectedItem: classSelected,
@@ -182,7 +207,8 @@ class GlAccountDialogState extends State<GlAccountDialog> {
         onChanged: (AccountClass? newValue) {
           classSelected = newValue!;
         },
-        validator: (value) => value == null ? _localizations.fieldRequired : null,
+        validator: (value) =>
+            value == null ? _localizations.fieldRequired : null,
       ),
       DropdownSearch<AccountType>(
         key: const Key('type'),
@@ -229,7 +255,9 @@ class GlAccountDialogState extends State<GlAccountDialog> {
       OutlinedButton(
         key: const Key('update'),
         child: Text(
-          widget.glAccount.glAccountId == null ? _localizations.create : _localizations.update,
+          widget.glAccount.glAccountId == null
+              ? _localizations.create
+              : _localizations.update,
         ),
         onPressed: () {
           if (_formKeyGlAccount.currentState!.validate()) {
@@ -239,6 +267,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
                   glAccountId: widget.glAccount.glAccountId,
                   accountName: _accountNameController.text,
                   accountCode: _accountCodeController.text,
+                  isDebit: debitSelected,
                   accountClass: AccountClass(
                     description: classSelected!.detailDescription!.isNotEmpty
                         ? classSelected?.detailDescription
