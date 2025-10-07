@@ -996,7 +996,6 @@ class UserDialogState extends State<UserDialogStateFull> {
         const SizedBox(width: 10),
         Expanded(
           child: OutlinedButton(
-            key: const Key('updateUser'),
             child: Text(
               updatedUser.partyId == null
                   ? localizations.create
