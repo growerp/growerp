@@ -29,6 +29,7 @@ class ChatState extends State<ChatDialog> {
   String? searchString;
   List<ChatMessage> messages = [];
   TextEditingController messageController = TextEditingController();
+  ChatLocalizations? _localizations;
 
   @override
   void initState() {
@@ -47,11 +48,12 @@ class ChatState extends State<ChatDialog> {
 
   @override
   Widget build(BuildContext context) {
+    _localizations = ChatLocalizations.of(context);
     chat = context.read<WsClient>();
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     if (chat == null) {
       return (Center(
-        child: Text(ChatLocalizations.of(context)!.chatNotActive),
+        child: Text(_localizations?.chatNotActive ?? 'Chat not active'),
       ));
     }
     return BlocBuilder<AuthBloc, AuthState>(
@@ -155,14 +157,14 @@ class ChatState extends State<ChatDialog> {
                 autofocus: true,
                 controller: messageController,
                 decoration: InputDecoration(
-                  labelText: ChatLocalizations.of(context)!.messageText,
+                  labelText: _localizations?.messageText ?? 'Message text',
                 ),
               ),
             ),
             const SizedBox(width: 16),
             OutlinedButton(
               key: const Key('send'),
-              child: Text(ChatLocalizations.of(context)!.send),
+              child: Text(_localizations?.send ?? 'Send'),
               onPressed: () {
                 messageController.text.isEmpty
                     ? null

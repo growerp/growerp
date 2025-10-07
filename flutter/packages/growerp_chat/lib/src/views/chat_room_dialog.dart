@@ -38,6 +38,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
   bool loading = false;
   User? _selectedUser;
   late DataFetchBloc<Users> _userBloc;
+  ChatLocalizations? _localizations;
 
   @override
   void initState() {
@@ -57,6 +58,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
 
   @override
   Widget build(BuildContext context) {
+    _localizations = ChatLocalizations.of(context);
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocConsumer<ChatRoomBloc, ChatRoomState>(
       listener: (context, state) {
@@ -82,7 +84,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
           ),
           child: popUp(
             context: context,
-            title: ChatLocalizations.of(context)!.addPartner,
+            title: _localizations?.addPartner ?? 'Add Partner',
             height: 600,
             width: isPhone ? 300 : 800,
             child: _showForm(isPhone),
@@ -101,7 +103,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
           children: <Widget>[
             Center(
               child: Text(
-                "${ChatLocalizations.of(context)!.chat} #${widget.chatRoom.chatRoomId.isEmpty ? ChatLocalizations.of(context)!.newChat : widget.chatRoom.chatRoomId}",
+                "${_localizations?.chat ?? 'Chat'} #${widget.chatRoom.chatRoomId.isEmpty ? _localizations?.newChat ?? 'New Chat' : widget.chatRoom.chatRoomId}",
                 style: const TextStyle(
                   fontSize: 10,
                   color: Colors.black,
@@ -118,21 +120,25 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
                 searchFieldProps: TextFieldProps(
                   autofocus: true,
                   decoration: InputDecoration(
-                    labelText: ChatLocalizations.of(context)!.selectChatPartner,
+                    labelText:
+                        _localizations?.selectChatPartner ??
+                        'Select Chat Partner',
                   ),
                   controller: _userSearchBoxController,
                 ),
                 menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
                 title: popUp(
                   context: context,
-                  title: ChatLocalizations.of(context)!.selectChatPartner,
+                  title:
+                      _localizations?.selectChatPartner ??
+                      'Select Chat Partner',
                   height: 50,
                 ),
               ),
               selectedItem: _selectedUser,
               dropdownDecoratorProps: DropDownDecoratorProps(
                 dropdownSearchDecoration: InputDecoration(
-                  labelText: ChatLocalizations.of(context)!.chatPartner,
+                  labelText: _localizations?.chatPartner ?? 'Chat Partner',
                 ),
               ),
               itemAsString: (User? u) => " ${u!.firstName} ${u.lastName}",
@@ -154,7 +160,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
               compareFn: (item, sItem) => item.partyId == sItem.partyId,
               validator: (value) =>
                   _nameController.text.isEmpty && value == null
-                  ? ChatLocalizations.of(context)!.fieldRequired
+                  ? _localizations?.fieldRequired ?? 'Field required'
                   : null,
               onChanged: (User? newValue) {
                 _selectedUser = newValue;
@@ -165,8 +171,8 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
               key: const Key('update'),
               child: Text(
                 widget.chatRoom.chatRoomId.isEmpty
-                    ? ChatLocalizations.of(context)!.create
-                    : ChatLocalizations.of(context)!.update,
+                    ? _localizations?.create ?? 'Create'
+                    : _localizations?.update ?? 'Update',
               ),
               onPressed: () async {
                 if (_formKey.currentState!.validate() && !loading) {
