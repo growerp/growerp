@@ -179,7 +179,10 @@ class UserListState extends State<UserList> {
           }
           if (state.status == UserStatus.success) {
             final translatedMessage = state.message != null
-                ? translateUserCompanyBlocMessage(_localizations, state.message!)
+                ? translateUserCompanyBlocMessage(
+                    _localizations,
+                    state.message!,
+                  )
                 : '';
             if (translatedMessage.isNotEmpty) {
               HelperFunctions.showMessage(
@@ -300,7 +303,7 @@ class UserListState extends State<UserList> {
                               },
                             );
                           },
-                          tooltip: _localizations.compUserUpDownload,
+                          tooltip: 'companies/users up/download',
                           child: const Icon(Icons.file_copy),
                         ),
                       ],

@@ -805,7 +805,9 @@ class CompanyForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _localizations = UserCompanyLocalizations.of(context)!;
+    UserCompanyLocalizations localizations = UserCompanyLocalizations.of(
+      context,
+    )!;
     return Form(
       key: _companyDialogFormKey,
       child: SingleChildScrollView(
@@ -840,7 +842,7 @@ class CompanyForm extends StatelessWidget {
               if (widget.dialog)
                 InputDecorator(
                   decoration: InputDecoration(
-                    labelText: _localizations.employees,
+                    labelText: localizations.employees,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25.0),
                     ),

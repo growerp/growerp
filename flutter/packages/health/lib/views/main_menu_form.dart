@@ -23,29 +23,33 @@ class AdminDbForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
     final localizations = CoreLocalizations.of(context)!;
-    List<Widget> dashboardItems = [];
-
-    for (final option in getMenuOptions(context, localizations)) {
-      if (option.userGroups!.contains(authenticate.user?.userGroup!) &&
-          option.title != localizations.main) {
-        dashboardItems.add(
-          makeDashboardItem(option.key ?? '', context, option, [
-            if (option.key == 'dbRequests')
-              "#: ${authenticate.stats?.requests ?? 0}",
-            if (option.key == 'dbCustomers')
-              "#: ${authenticate.stats?.customers}",
-            if (option.key == 'dbEmployees')
-              "#: ${authenticate.stats?.employees ?? 0}",
-          ]),
-        );
-      }
-    }
+    Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Expanded(child: DashBoardForm(dashboardItems: dashboardItems)),
+        Expanded(
+          child: DashBoardForm(
+            dashboardItems: [
+              makeDashboardItem('dbRequests', context, menuOptions(context)[1], [
+                "${localizations.requests}: ${authenticate.stats?.requests ?? 0}",
+              ]),
+              makeDashboardItem('dbCustomers', context, menuOptions(context)[2], [
+                "${localizations.clients}: ${authenticate.stats?.customers ?? 0}",
+              ]),
+              makeDashboardItem('dbEmployees', context, menuOptions(context)[3], [
+                "${localizations.staff}: ${authenticate.stats?.employees ?? 0}",
+              ]),
+              makeDashboardItem('dbCompany', context, menuOptions(context)[4], [
+                authenticate.company!.name!.length > 20
+                    ? "${authenticate.company!.name!.substring(0, 20)}..."
+                    : "${authenticate.company!.name}",
+                "${localizations.administrators}: ${authenticate.stats?.admins ?? 0}",
+                "${localizations.otherEmployees}: ${authenticate.stats?.employees ?? 0}",
+              ]),
+            ],
+          ),
+        ),
       ],
     );
   }
