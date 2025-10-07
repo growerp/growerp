@@ -29,6 +29,7 @@ class TimeEntryListDialog extends StatefulWidget {
 
 class TimeEntryListState extends State<TimeEntryListDialog> {
   late ActivityBloc activityBloc;
+  late ActivityLocalizations _localizations;
   late double bottom;
   double? right;
 
@@ -41,6 +42,7 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
 
   @override
   Widget build(BuildContext context) {
+    _localizations = ActivityLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
 
     return Dialog(
@@ -50,7 +52,7 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
       child: popUp(
         context: context,
         child: _showList(isPhone(context)),
-        title: ActivityLocalizations.of(context)!.timeEntry_listTitle,
+        title: _localizations.timeEntry_listTitle,
         height: 400,
         width: 400,
       ),
@@ -69,9 +71,7 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
                   case ActivityBlocStatus.success:
                     HelperFunctions.showMessage(
                       context,
-                      ActivityLocalizations.of(
-                        context,
-                      )!.timeEntry_updateSuccess,
+                      _localizations.timeEntry_updateSuccess,
                       Colors.green,
                     );
                     Navigator.of(context).pop();
@@ -79,9 +79,7 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
                   case ActivityBlocStatus.failure:
                     HelperFunctions.showMessage(
                       context,
-                      ActivityLocalizations.of(
-                        context,
-                      )!.activity_error(state.message ?? 'unknown'),
+                      _localizations.activity_error(state.message ?? 'unknown'),
                       Colors.red,
                     );
                     break;
@@ -99,9 +97,7 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
                         return Center(
                           heightFactor: 20,
                           child: Text(
-                            ActivityLocalizations.of(
-                              context,
-                            )!.timeEntry_notFound,
+                            _localizations.timeEntry_notFound,
                             key: const Key('empty'),
                             textAlign: TextAlign.center,
                           ),
@@ -152,7 +148,7 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
                   },
                 );
               },
-              tooltip: ActivityLocalizations.of(context)!.activity_addNew,
+              tooltip: _localizations.activity_addNew,
               child: const Icon(Icons.add),
             ),
           ),

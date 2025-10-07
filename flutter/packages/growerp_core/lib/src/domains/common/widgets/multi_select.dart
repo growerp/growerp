@@ -35,6 +35,7 @@ class MultiSelect<T> extends StatefulWidget {
 class MultiSelectState<T> extends State<MultiSelect> {
   late List<T> selectedItems;
   String message = '';
+  CoreLocalizations? _localizations;
 
   // This function is triggered when a checkbox is checked or unchecked
   void _itemChange(dynamic itemValue, bool isSelected) {
@@ -55,6 +56,7 @@ class MultiSelectState<T> extends State<MultiSelect> {
 
   @override
   Widget build(BuildContext context) {
+    _localizations = CoreLocalizations.of(context);
     return popUpDialogNoScaffold(
       key: const Key('multiSelect'),
       width: 350,
@@ -88,7 +90,7 @@ class MultiSelectState<T> extends State<MultiSelect> {
                 onPressed: (() {
                   return Navigator.pop(context, selectedItems);
                 }),
-                child: Text(CoreLocalizations.of(context)!.ok),
+                child: Text(_localizations!.ok),
               ),
             ),
           ],

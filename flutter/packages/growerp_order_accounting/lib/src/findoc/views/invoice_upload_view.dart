@@ -18,13 +18,7 @@ class _InvoiceUploadViewState extends State<InvoiceUploadView> {
   final ImagePicker _picker = ImagePicker();
   XFile? _imageFile;
   Map<String, dynamic>? _extractedData;
-  late OrderAccountingLocalizations localizations;
-
-  @override
-  void didChangeDependencies() {
-    localizations = OrderAccountingLocalizations.of(context)!;
-    super.didChangeDependencies();
-  }
+  OrderAccountingLocalizations? _localizations;
 
   Future<void> _pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(
@@ -58,6 +52,7 @@ class _InvoiceUploadViewState extends State<InvoiceUploadView> {
 
   @override
   Widget build(BuildContext context) {
+    _localizations = OrderAccountingLocalizations.of(context)!;
     return ScaffoldMessenger(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -77,7 +72,7 @@ class _InvoiceUploadViewState extends State<InvoiceUploadView> {
                 });
                 HelperFunctions.showMessage(
                   context,
-                  localizations.imageProcessed,
+                  _localizations!.imageProcessed,
                   Colors.green,
                 );
               }
@@ -85,7 +80,7 @@ class _InvoiceUploadViewState extends State<InvoiceUploadView> {
                 Navigator.of(context).pop();
                 HelperFunctions.showMessage(
                   context,
-                  localizations.invoiceCreated,
+                  _localizations!.invoiceCreated,
                   Colors.green,
                 );
               }
@@ -99,7 +94,7 @@ class _InvoiceUploadViewState extends State<InvoiceUploadView> {
             ),
             child: popUp(
               context: context,
-              title: localizations.uploadInvoice,
+              title: _localizations!.uploadInvoice,
               height: 600,
               width: 500,
               child: _buildForm(),
@@ -143,8 +138,8 @@ class _InvoiceUploadViewState extends State<InvoiceUploadView> {
                 icon: const Icon(Icons.image),
                 label: Text(
                   _imageFile == null
-                      ? localizations.pickImage
-                      : localizations.changeImage,
+                      ? _localizations!.pickImage
+                      : _localizations!.changeImage,
                 ),
               ),
               const SizedBox(height: 16),
@@ -152,14 +147,14 @@ class _InvoiceUploadViewState extends State<InvoiceUploadView> {
                 key: const Key('processImage'),
                 onPressed: _imageFile != null ? _uploadImage : null,
                 icon: const Icon(Icons.cloud_upload),
-                label: Text(localizations.uploadAndProcess),
+                label: Text(_localizations!.uploadAndProcess),
               ),
               if (_extractedData != null) ...[
                 const SizedBox(height: 20),
                 const Divider(),
                 const SizedBox(height: 10),
                 Text(
-                  localizations.extractedData,
+                  _localizations!.extractedData,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -180,7 +175,7 @@ class _InvoiceUploadViewState extends State<InvoiceUploadView> {
                   key: const Key('createInvoice'),
                   onPressed: _createInvoice,
                   icon: const Icon(Icons.check),
-                  label: Text(localizations.createInvoice),
+                  label: Text(_localizations!.createInvoice),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,

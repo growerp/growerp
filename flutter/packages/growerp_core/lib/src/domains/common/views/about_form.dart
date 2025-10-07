@@ -28,8 +28,10 @@ class AboutForm extends StatefulWidget {
 }
 
 class _AboutFormState extends State<AboutForm> {
+  CoreLocalizations? _localizations;
   @override
   Widget build(BuildContext context) {
+    _localizations = CoreLocalizations.of(context);
     String version = GlobalConfiguration().get("version") ?? '';
     String build = GlobalConfiguration().get("build") ?? '';
     String databaseUrl = GlobalConfiguration().get("databaseUrl") ?? '';
@@ -42,15 +44,13 @@ class _AboutFormState extends State<AboutForm> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: CoreLocalizations.of(context)!.aboutGrowERP,
+        title: _localizations!.aboutGrowERP,
         width: isAPhone(context) ? 400 : 800,
         height: isPhone(context) ? 700 : 600,
         child: AboutPage(
           dialog: false,
-          title: Text(CoreLocalizations.of(context)!.aboutApp(appName)),
-          applicationVersion: CoreLocalizations.of(
-            context,
-          )!.version(version, build),
+          title: Text(_localizations!.aboutApp(appName)),
+          applicationVersion: _localizations!.version(version, build),
           applicationName: packageName,
           applicationDescription: Center(child: Text(databaseUrl)),
           applicationIcon: Image.asset(
@@ -58,9 +58,7 @@ class _AboutFormState extends State<AboutForm> {
             height: 100,
             width: 200,
           ),
-          applicationLegalese: CoreLocalizations.of(
-            context,
-          )!.copyright(year.toString()),
+          applicationLegalese: _localizations!.copyright(year.toString()),
           children: <Widget>[
             Center(
               child: SizedBox(
@@ -70,19 +68,19 @@ class _AboutFormState extends State<AboutForm> {
                     children: <Widget>[
                       MarkdownPageListTile(
                         filename: '../../../../../../../../../../README.md',
-                        title: Text(CoreLocalizations.of(context)!.viewReadme),
+                        title: Text(_localizations!.viewReadme),
                         icon: const Icon(Icons.all_inclusive),
                       ),
                       MarkdownPageListTile(
                         filename: '../../../../../../../../../../LICENSE',
-                        title: Text(CoreLocalizations.of(context)!.viewLicense),
+                        title: Text(_localizations!.viewLicense),
                         icon: const Icon(Icons.description),
                       ),
                       MarkdownPageListTile(
                         filename:
                             '../../../../../../../../../../CONTRIBUTING.md',
                         title: Text(
-                          CoreLocalizations.of(context)!.contributing,
+                          _localizations!.contributing,
                         ),
                         icon: const Icon(Icons.share),
                       ),
@@ -90,13 +88,13 @@ class _AboutFormState extends State<AboutForm> {
                         filename:
                             '../../../../../../../../../../CODE_OF_CONDUCT.md',
                         title: Text(
-                          CoreLocalizations.of(context)!.privacyCodeOfConduct,
+                          _localizations!.privacyCodeOfConduct,
                         ),
                         icon: const Icon(Icons.sentiment_satisfied),
                       ),
                       LicensesPageListTile(
                         title: Text(
-                          CoreLocalizations.of(context)!.openSourceLicenses,
+                          _localizations!.openSourceLicenses,
                         ),
                         icon: const Icon(Icons.favorite),
                       ),

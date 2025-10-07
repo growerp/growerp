@@ -48,6 +48,7 @@ class CategoryDialogState extends State<CategoryDialog> {
   final ScrollController _scrollController = ScrollController();
   late double top;
   double? right;
+  CatalogLocalizations? _localizations;
 
   @override
   void initState() {
@@ -108,7 +109,7 @@ class CategoryDialogState extends State<CategoryDialog> {
 
   @override
   Widget build(BuildContext context) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+    _localizations = CatalogLocalizations.of(context);
     return BlocConsumer<CategoryBloc, CategoryState>(
       listener: (context, state) async {
         switch (state.status) {
@@ -118,7 +119,7 @@ class CategoryDialogState extends State<CategoryDialog> {
           case CategoryStatus.failure:
             HelperFunctions.showMessage(
               context,
-              catalogLocalizations.error(state.message ?? ''),
+              _localizations!.error(state.message ?? ''),
               Colors.red,
             );
             break;
@@ -132,7 +133,7 @@ class CategoryDialogState extends State<CategoryDialog> {
               case ProductStatus.failure:
                 HelperFunctions.showMessage(
                   context,
-                  catalogLocalizations.errorGettingProducts(
+                  _localizations!.errorGettingProducts(
                     state.message ?? '',
                   ),
                   Colors.red,
@@ -155,9 +156,9 @@ class CategoryDialogState extends State<CategoryDialog> {
                 child: popUp(
                   context: context,
                   child: listChild(productState),
-                  title: catalogLocalizations.categoryNumber(
+                  title: _localizations!.categoryNumber(
                     widget.category.categoryId.isEmpty
-                        ? catalogLocalizations.newItem
+                        ? _localizations!.newItem
                         : widget.category.pseudoId,
                   ),
                   height: 650,
@@ -181,9 +182,8 @@ class CategoryDialogState extends State<CategoryDialog> {
                 builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
                   if (snapshot.hasError) {
                     return Text(
-                      CatalogLocalizations.of(
-                        context,
-                      )!.pickImageError(snapshot.error.toString()),
+                      _localizations!
+                          .pickImageError(snapshot.error.toString()),
                       textAlign: TextAlign.center,
                     );
                   }
@@ -205,14 +205,13 @@ class CategoryDialogState extends State<CategoryDialog> {
   }
 
   Widget _showForm(ProductState state) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
     final Text? retrieveError = _getRetrieveErrorWidget();
     if (retrieveError != null) {
       return retrieveError;
     }
     if (_pickImageError != null) {
       return Text(
-        catalogLocalizations.pickImageError(_pickImageError.toString()),
+        _localizations!.pickImageError(_pickImageError.toString()),
         textAlign: TextAlign.center,
       );
     }
@@ -243,7 +242,7 @@ class CategoryDialogState extends State<CategoryDialog> {
             context: context,
             builder: (BuildContext context) {
               return MultiSelect<Product>(
-                title: catalogLocalizations.selectProducts,
+                title: _localizations!.selectProducts,
                 items: state.products,
                 selectedItems: _selectedProducts,
               );
@@ -286,32 +285,32 @@ class CategoryDialogState extends State<CategoryDialog> {
                 TextFormField(
                   key: const Key('Id'),
                   decoration: InputDecoration(
-                    labelText: catalogLocalizations.categoryId,
+                    labelText: _localizations!.categoryId,
                   ),
                   controller: _idController,
                 ),
                 TextFormField(
                   key: const Key('name'),
                   decoration: InputDecoration(
-                    labelText: catalogLocalizations.categoryName,
+                    labelText: _localizations!.categoryName,
                   ),
                   controller: _nameController,
                   validator: (value) {
                     return value!.isEmpty
-                        ? catalogLocalizations.enterCategoryName
+                        ? _localizations!.enterCategoryName
                         : null;
                   },
                 ),
                 TextFormField(
                   key: const Key('description'),
                   decoration: InputDecoration(
-                    labelText: catalogLocalizations.description,
+                    labelText: _localizations!.description,
                   ),
                   controller: _descrController,
                   maxLines: 3,
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return catalogLocalizations.enterCategoryDescription;
+                      return _localizations!.enterCategoryDescription;
                     }
                     return null;
                   },
@@ -320,7 +319,7 @@ class CategoryDialogState extends State<CategoryDialog> {
                 InputDecorator(
                   decoration: InputDecoration(
                     labelText:
-                        '${catalogLocalizations.relatedProducts}${widget.category.nbrOfProducts > widget.category.products.length ? catalogLocalizations.totalShown(widget.category.nbrOfProducts, widget.category.products.length) : ''}',
+                        '${_localizations!.relatedProducts}${widget.category.nbrOfProducts > widget.category.products.length ? _localizations!.totalShown(widget.category.nbrOfProducts, widget.category.products.length) : ''}',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25.0),
                     ),
@@ -332,8 +331,8 @@ class CategoryDialogState extends State<CategoryDialog> {
                   key: const Key('update'),
                   child: Text(
                     widget.category.categoryId.isEmpty
-                        ? catalogLocalizations.create
-                        : catalogLocalizations.update,
+                        ? _localizations!.create
+                        : _localizations!.update,
                   ),
                   onPressed: () async {
                     if (_categoryDialogFormKey.currentState!.validate()) {

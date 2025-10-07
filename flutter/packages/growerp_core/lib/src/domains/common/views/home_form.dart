@@ -41,6 +41,7 @@ class HomeFormState extends State<HomeForm> {
   late AuthBloc _authBloc;
   Company? company;
   late String classificationId;
+  CoreLocalizations? _localizations;
 
   @override
   void initState() {
@@ -52,6 +53,7 @@ class HomeFormState extends State<HomeForm> {
 
   @override
   Widget build(BuildContext context) {
+    _localizations = CoreLocalizations.of(context);
     bool isPhone = isAPhone(context);
 
     Widget appInfo = Center(
@@ -104,7 +106,7 @@ class HomeFormState extends State<HomeForm> {
                             Icons.do_not_disturb,
                             key: Key('HomeFormAuth'),
                           ),
-                          tooltip: CoreLocalizations.of(context)!.logout,
+                          tooltip: _localizations!.logout,
                           onPressed: () => {
                             _authBloc.add(const AuthLoggedOut()),
                           },
@@ -143,9 +145,7 @@ class HomeFormState extends State<HomeForm> {
                         key: const Key('HomeFormUnAuth'),
                         title: Center(
                           child: Text(
-                            CoreLocalizations.of(
-                              context,
-                            )!.welcomeToGrowERPBusinessSystem,
+                            _localizations!.welcomeToGrowERPBusinessSystem,
                             style: const TextStyle(fontSize: 15),
                           ),
                         ),
@@ -153,9 +153,7 @@ class HomeFormState extends State<HomeForm> {
                           PopupMenuButton<Locale>(
                             key: const Key('languageSelector'),
                             icon: const Icon(Icons.language),
-                            tooltip: CoreLocalizations.of(
-                              context,
-                            )!.selectLanguage,
+                            tooltip: _localizations!.selectLanguage,
                             onSelected: (Locale locale) {
                               context.read<LocaleBloc>().add(
                                 LocaleChanged(locale),
@@ -256,7 +254,7 @@ class HomeFormState extends State<HomeForm> {
                             const SizedBox(height: 20),
                             OutlinedButton(
                               key: const Key('loginButton'),
-                              child: Text(CoreLocalizations.of(context)!.login),
+                              child: Text(_localizations!.login),
                               onPressed: () {
                                 // start with login again....even login process interupted
                                 _authBloc.add(
@@ -281,9 +279,7 @@ class HomeFormState extends State<HomeForm> {
                               OutlinedButton(
                                 key: const Key('newUserButton'),
                                 child: Text(
-                                  CoreLocalizations.of(
-                                    context,
-                                  )!.registerNewCompanyAndAdmin,
+                                  _localizations!.registerNewCompanyAndAdmin,
                                 ),
                                 onPressed: () {
                                   showDialog(

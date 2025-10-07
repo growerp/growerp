@@ -24,11 +24,12 @@ class AdminDbForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
+    final localizations = CoreLocalizations.of(context)!;
     List<Widget> dashboardItems = [];
 
-    for (final option in getMenuOptions(context)) {
+    for (final option in getMenuOptions(context, localizations)) {
       if (option.userGroups!.contains(authenticate.user?.userGroup!) &&
-          option.title != 'Main') {
+          option.title != localizations.main) {
         dashboardItems.add(
           makeDashboardItem(option.key ?? '', context, option, [
             if (option.key == 'dbRequests')

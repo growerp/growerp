@@ -26,6 +26,7 @@ TableData getRestRequestListTableData(
   int index, {
   dynamic extra,
 }) {
+  final localizations = CoreLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
   List<TableRowContent> rowContent = [];
 
@@ -47,7 +48,7 @@ TableData getRestRequestListTableData(
     rowContent.add(
       TableRowContent(
         name: Text(
-          CoreLocalizations.of(context)!.userRequestStatus,
+          localizations.userRequestStatus,
           textAlign: TextAlign.start,
         ),
         width: 55,
@@ -110,7 +111,7 @@ TableData getRestRequestListTableData(
     rowContent.add(
       TableRowContent(
         name: Text(
-          CoreLocalizations.of(context)!.dateTime,
+          localizations.dateTime,
           textAlign: TextAlign.start,
         ),
         width: 12,
@@ -125,7 +126,7 @@ TableData getRestRequestListTableData(
     rowContent.add(
       TableRowContent(
         name: Text(
-          CoreLocalizations.of(context)!.user,
+          localizations.user,
           textAlign: TextAlign.start,
         ),
         width: 15,

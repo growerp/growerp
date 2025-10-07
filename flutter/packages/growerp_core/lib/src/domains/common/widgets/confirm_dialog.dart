@@ -23,10 +23,11 @@ Future<bool?> confirmDialog(
   String title,
   String content,
 ) {
+  final localizations = CoreLocalizations.of(context)!;
   // set up the buttons
   Widget cancelButton = OutlinedButton(
     child: Text(
-      CoreLocalizations.of(context)!.cancel,
+      localizations.cancel,
       key: const Key('cancel'),
     ),
     onPressed: () {
@@ -35,7 +36,7 @@ Future<bool?> confirmDialog(
   );
   Widget continueButton = OutlinedButton(
     child: Text(
-      CoreLocalizations.of(context)!.continueButton,
+      localizations.continueButton,
       key: const Key('continue'),
     ),
     onPressed: () {

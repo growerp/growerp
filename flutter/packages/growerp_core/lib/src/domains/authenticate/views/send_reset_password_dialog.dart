@@ -33,6 +33,7 @@ class _SendResetPasswordDialogState extends State<SendResetPasswordDialog> {
   late AuthBloc _authBloc;
   final _formKeyResetPassword = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
+  CoreLocalizations? _localizations;
 
   @override
   void initState() {
@@ -45,6 +46,7 @@ class _SendResetPasswordDialogState extends State<SendResetPasswordDialog> {
 
   @override
   Widget build(BuildContext context) {
+    _localizations = CoreLocalizations.of(context);
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state.status == AuthStatus.unAuthenticated) {
@@ -63,7 +65,7 @@ class _SendResetPasswordDialogState extends State<SendResetPasswordDialog> {
             child: popUp(
               height: 300,
               context: context,
-              title: CoreLocalizations.of(context)!.sendNewPassword,
+              title: _localizations!.sendNewPassword,
               child: Form(
                 key: _formKeyResetPassword,
                 child: SingleChildScrollView(
@@ -75,12 +77,12 @@ class _SendResetPasswordDialogState extends State<SendResetPasswordDialog> {
                         controller: _usernameController,
                         autofocus: true,
                         decoration: InputDecoration(
-                          labelText: CoreLocalizations.of(context)!.email,
+                          labelText: _localizations!.email,
                         ),
                       ),
                       const SizedBox(height: 20),
                       OutlinedButton(
-                        child: Text(CoreLocalizations.of(context)!.ok),
+                        child: Text(_localizations!.ok),
                         onPressed: () {
                           _authBloc.add(
                             AuthResetPassword(
