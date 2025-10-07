@@ -40,6 +40,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
   late double top, left;
+  ChatLocalizations? _localizations;
 
   @override
   void initState() {
@@ -55,6 +56,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
 
   @override
   Widget build(BuildContext context) {
+    _localizations = ChatLocalizations.of(context);
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     left = isPhone ? 250 : 700;
     limit = (MediaQuery.of(context).size.height / 35).round();
@@ -77,7 +79,8 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
             message: 'Error processing ChatRoom: ${state.message}',
           );
         }
-        if (state.status == ChatRoomStatus.success) {
+        if (state.status == ChatRoomStatus.success ||
+            state.status == ChatRoomStatus.loading) {
           chatRooms = state.chatRooms;
           return Dialog(
             key: const Key('ChatRoomListDialog'),
@@ -87,7 +90,8 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
             ),
             child: popUp(
               context: context,
-              title: ChatLocalizations.of(context)!.chatUsersAndGroups,
+              title:
+                  _localizations?.chatUsersAndGroups ?? 'Chat Users and Groups',
               height: classificationId == 'AppAdmin' ? 550 : 600,
               width: isPhone ? 450 : 800,
               child: Stack(
@@ -115,7 +119,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                             },
                           );
                         },
-                        tooltip: ChatLocalizations.of(context)!.addNew,
+                        tooltip: _localizations?.addNew ?? 'Add New',
                         child: const Icon(Icons.add),
                       ),
                     ),
@@ -144,7 +148,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
           return Center(
             heightFactor: 20,
             child: Text(
-              "${ChatLocalizations.of(context)!.no} $entityName${ChatLocalizations.of(context)!.sFound}",
+              "${_localizations?.no ?? 'No'} $entityName${_localizations?.sFound ?? ' found'}",
               key: const Key('empty'),
               textAlign: TextAlign.center,
             ),
@@ -184,7 +188,8 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                       focusedBorder: const OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.transparent),
                       ),
-                      hintText: ChatLocalizations.of(context)!.searchInName,
+                      hintText:
+                          _localizations?.searchInName ?? 'Search in name',
                     ),
                     onChanged: ((value) {
                       searchString = value;
@@ -200,7 +205,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                   ),
                 ),
                 OutlinedButton(
-                  child: Text(ChatLocalizations.of(context)!.search),
+                  child: Text(_localizations?.search ?? 'Search'),
                   onPressed: () {
                     _chatRoomBloc.add(
                       ChatRoomFetch(searchString: searchString, limit: limit),
@@ -215,21 +220,21 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                   children: <Widget>[
                     Expanded(
                       child: Text(
-                        ChatLocalizations.of(context)!.name,
+                        _localizations?.name ?? 'Name',
                         textAlign: TextAlign.center,
                       ),
                     ),
                     if (!ResponsiveBreakpoints.of(context).isMobile)
                       Text(
-                        ChatLocalizations.of(context)!.status,
+                        _localizations?.status ?? 'Status',
                         textAlign: TextAlign.center,
                       ),
                     Text(
-                      ChatLocalizations.of(context)!.pvt,
+                      _localizations?.pvt ?? 'Pvt',
                       textAlign: TextAlign.center,
                     ),
                     Text(
-                      ChatLocalizations.of(context)!.nroMembers,
+                      _localizations?.nroMembers ?? '# Members',
                       textAlign: TextAlign.center,
                     ),
                     const Text("    ", textAlign: TextAlign.center),
@@ -267,6 +272,7 @@ class ListDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = ChatLocalizations.of(context);
     return ListTile(
       leading: Badge(
         label: chatRoom.hasRead ? null : const Text('!'),
@@ -285,8 +291,8 @@ class ListDetail extends StatelessWidget {
           if (!ResponsiveBreakpoints.of(context).isMobile)
             Text(
               chatRoom.hasRead
-                  ? ChatLocalizations.of(context)!.allMessagesRead
-                  : ChatLocalizations.of(context)!.unreadMessages,
+                  ? localizations?.allMessagesRead ?? 'All messages read'
+                  : localizations?.unreadMessages ?? 'Unread messages',
               key: Key('unRead$index'),
             ),
           Text(
