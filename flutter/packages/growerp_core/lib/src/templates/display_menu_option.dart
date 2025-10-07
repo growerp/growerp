@@ -54,8 +54,8 @@ class MenuOptionState extends State<DisplayMenuOption>
   FloatingActionButton? floatingActionButton;
   List<BottomNavigationBarItem> bottomItems = [];
   TabController? _controller;
-  late String displayMOFormKey;
-  late String currentRoute = '';
+  String displayMOFormKey = 'DefaultPage';
+  String currentRoute = '';
   late bool isPhone;
   late AuthBloc authBloc;
   List<MenuOption> menuList = [];
@@ -72,13 +72,20 @@ class MenuOptionState extends State<DisplayMenuOption>
     authBloc = context.read<AuthBloc>();
     // apply security
     int newIndex = 0;
+    String? targetRoute;
+
+    // Safely get the target route
+    if (widget.menuIndex >= 0 && widget.menuIndex < widget.menuList.length) {
+      targetRoute = widget.menuList[widget.menuIndex].route;
+    }
+
     for (final option in widget.menuList) {
       if (option.userGroups != null &&
           option.userGroups!.contains(
             authBloc.state.authenticate?.user?.userGroup,
           )) {
         menuList.add(option);
-        if (option.route == widget.menuList[widget.menuIndex].route) {
+        if (targetRoute != null && option.route == targetRoute) {
           menuIndex = newIndex;
         }
         newIndex++;
@@ -115,32 +122,49 @@ class MenuOptionState extends State<DisplayMenuOption>
       menuIndex = 0;
     }
 
+    // Ensure menuIndex is within bounds
+    if (menuIndex >= menuList.length) {
+      menuIndex = 0;
+    }
+
     MenuOption menuOption = menuList[menuIndex];
     tabItems = menuOption.tabItems ?? [];
     title = menuOption.title;
     child = menuOption.child;
     tabIndex = widget.tabIndex ?? 0;
+
+    // Initialize displayMOFormKey early to prevent null casting errors
+    displayMOFormKey = 'DefaultPage';
+
     if (tabItems.isEmpty) {
-      displayMOFormKey = child.toString().replaceAll(
+      displayMOFormKey = (child?.toString() ?? '').replaceAll(
         RegExp(r'[^(a-z,A-Z)]'),
         '',
       );
+      // Ensure displayMOFormKey is never empty to avoid key conflicts
+      if (displayMOFormKey.isEmpty) {
+        displayMOFormKey = 'SimplePage';
+      }
       // debugPrint("==1== current form key: $displayMOFormKey");
     }
     for (var i = 0; i < tabItems.length; i++) {
       // form key for testing
-      displayMOFormKey = tabItems[i].form.toString().replaceAll(
+      String tabFormKey = (tabItems[i].form.toString()).replaceAll(
         RegExp(r'[^(a-z,A-Z)]'),
         '',
       );
-      //debugPrint("==1== current form key: $displayMOFormKey");
+      // Ensure tabFormKey is never empty to avoid key conflicts
+      if (tabFormKey.isEmpty) {
+        tabFormKey = 'Tab$i';
+      }
+      //debugPrint("==1== current form key: $tabFormKey");
       // form to display
       tabList.add(tabItems[i].form);
       // text of tabs at top of screen (tablet, web)
       tabText.add(
         Align(
           alignment: Alignment.center,
-          child: Text(tabItems[i].label, key: Key('tap$displayMOFormKey')),
+          child: Text(tabItems[i].label, key: Key('tap$tabFormKey')),
         ),
       );
       // tabs at bottom of screen : phone
@@ -267,11 +291,15 @@ class MenuOptionState extends State<DisplayMenuOption>
           }
 
           Widget simplePage(bool isPhone) {
-            displayMOFormKey = child.toString().replaceAll(
+            String simplePageFormKey = (child?.toString() ?? '').replaceAll(
               RegExp(r'[^(a-z,A-Z)]'),
               '',
             );
-            // debugPrint("==2-simple= current form key: $displayMOFormKey");
+            // Ensure simplePageFormKey is never empty to avoid key conflicts
+            if (simplePageFormKey.isEmpty) {
+              simplePageFormKey = 'SimplePageChild';
+            }
+            // debugPrint("==2-simple= current form key: $simplePageFormKey");
 
             return ScaffoldMessenger(
               child: Scaffold(
@@ -280,7 +308,7 @@ class MenuOptionState extends State<DisplayMenuOption>
                   backgroundColor: Theme.of(
                     context,
                   ).colorScheme.primaryContainer,
-                  key: Key(displayMOFormKey),
+                  key: Key(simplePageFormKey),
                   automaticallyImplyLeading: isPhone,
                   leading: leadAction,
                   title: appBarTitle(context, title, isPhone),
@@ -313,21 +341,23 @@ class MenuOptionState extends State<DisplayMenuOption>
           }
 
           Widget tabPage(bool isPhone) {
-            displayMOFormKey = tabList[tabIndex].toString().replaceAll(
-              RegExp(r'[^(a-z,A-Z)]'),
-              '',
-            );
+            String tabPageFormKey =
+                (tabList.isNotEmpty && tabIndex < tabList.length
+                        ? tabList[tabIndex].toString()
+                        : '')
+                    .replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
+            // Ensure tabPageFormKey is never empty to avoid key conflicts
+            if (tabPageFormKey.isEmpty) {
+              tabPageFormKey = 'TabPage$tabIndex';
+            }
             Color tabSelectedBackground = Theme.of(
               context,
             ).colorScheme.onSecondary;
-            //debugPrint("==3-tab= current form key: $displayMOFormKey");
+            //debugPrint("==3-tab= current form key: $tabPageFormKey");
             List<Widget> tabChildren = [
               Expanded(
                 child: isPhone
-                    ? Center(
-                        key: Key(displayMOFormKey),
-                        child: tabList[tabIndex],
-                      )
+                    ? Center(key: Key(tabPageFormKey), child: tabList[tabIndex])
                     : TabBarView(
                         physics: const NeverScrollableScrollPhysics(),
                         controller: _controller,
