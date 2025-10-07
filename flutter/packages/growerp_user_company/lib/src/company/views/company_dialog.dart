@@ -107,6 +107,7 @@ class CompanyFormState extends State<CompanyDialog> {
   final ScrollController _scrollController = ScrollController();
   late CompanyBloc companyBloc;
   late AuthBloc authBloc;
+  late UserCompanyLocalizations _localizations;
   late double top;
   double? right;
 
@@ -201,7 +202,7 @@ class CompanyFormState extends State<CompanyDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = UserCompanyLocalizations.of(context)!;
+    _localizations = UserCompanyLocalizations.of(context)!;
     isPhone = isAPhone(context);
     right = right ?? (isPhone ? 20 : 150);
     return Dialog(
@@ -214,16 +215,16 @@ class CompanyFormState extends State<CompanyDialog> {
               ? popUp(
                   context: context,
                   title: company.partyId == null
-                      ? localizations.newCompany
-                      : localizations.companyRoleDetail(
+                      ? _localizations.newCompany
+                      : _localizations.companyRoleDetail(
                           _selectedRole.value,
                           company.pseudoId ?? '',
                         ),
                   width: isPhone ? 400 : 900,
                   height: isPhone ? 700 : 750,
-                  child: listChild(localizations),
+                  child: listChild(),
                 )
-              : listChild(localizations),
+              : listChild(),
           Positioned(
             right: right,
             top: top,
@@ -242,7 +243,7 @@ class CompanyFormState extends State<CompanyDialog> {
     );
   }
 
-  Widget listChild(UserCompanyLocalizations localizations) {
+  Widget listChild() {
     return ScaffoldMessenger(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -257,7 +258,7 @@ class CompanyFormState extends State<CompanyDialog> {
               }
               final translatedMessage = state.message != null
                   ? translateUserCompanyBlocMessage(
-                      localizations,
+                      _localizations,
                       state.message!,
                     )
                   : '';
@@ -281,16 +282,16 @@ class CompanyFormState extends State<CompanyDialog> {
                         (BuildContext context, AsyncSnapshot<void> snapshot) {
                           if (snapshot.hasError) {
                             return Text(
-                              localizations.pickImageError(
+                              _localizations.pickImageError(
                                 snapshot.error.toString(),
                               ),
                               textAlign: TextAlign.center,
                             );
                           }
-                          return showForm(localizations);
+                          return showForm();
                         },
                   )
-                : showForm(localizations);
+                : showForm();
           },
         ),
       ),
@@ -306,14 +307,14 @@ class CompanyFormState extends State<CompanyDialog> {
     return null;
   }
 
-  Widget showForm(UserCompanyLocalizations localizations) {
+  Widget showForm() {
     final Text? retrieveError = getRetrieveErrorWidget();
     if (retrieveError != null) {
       return retrieveError;
     }
     if (_pickImageError != null) {
       return Text(
-        localizations.pickImageError(_pickImageError.toString()),
+        _localizations.pickImageError(_pickImageError.toString()),
         textAlign: TextAlign.center,
       );
     }
@@ -344,7 +345,7 @@ class CompanyFormState extends State<CompanyDialog> {
           onDeleted: () async {
             bool? result = await confirmDialog(
               context,
-              localizations.removeEmployee(
+              _localizations.removeEmployee(
                 employee.firstName!,
                 employee.lastName!,
               ),
@@ -385,7 +386,7 @@ class CompanyFormState extends State<CompanyDialog> {
           Expanded(
             child: TextFormField(
               key: const Key('id'),
-              decoration: InputDecoration(labelText: localizations.id),
+              decoration: InputDecoration(labelText: _localizations.id),
               controller: _idController,
             ),
           ),
@@ -395,11 +396,11 @@ class CompanyFormState extends State<CompanyDialog> {
             Expanded(
               child: DropdownButtonFormField<Role>(
                 key: const Key('role'),
-                decoration: InputDecoration(labelText: localizations.role),
-                hint: Text(localizations.role),
+                decoration: InputDecoration(labelText: _localizations.role),
+                hint: Text(_localizations.role),
                 initialValue: _selectedRole,
                 validator: (value) =>
-                    value == Role.unknown ? localizations.roleError : null,
+                    value == Role.unknown ? _localizations.roleError : null,
                 items: Role.values.map((item) {
                   return DropdownMenuItem<Role>(
                     value: item,
@@ -421,10 +422,10 @@ class CompanyFormState extends State<CompanyDialog> {
       TextFormField(
         readOnly: !isAdmin,
         key: const Key('companyName'),
-        decoration: InputDecoration(labelText: localizations.companyName),
+        decoration: InputDecoration(labelText: _localizations.companyName),
         controller: _nameController,
         validator: (value) {
-          if (value!.isEmpty) return localizations.companyNameError;
+          if (value!.isEmpty) return _localizations.companyNameError;
           return null;
         },
       ),
@@ -433,7 +434,7 @@ class CompanyFormState extends State<CompanyDialog> {
           Expanded(
             child: TextFormField(
               key: const Key('telephoneNr'),
-              decoration: InputDecoration(labelText: localizations.telephone),
+              decoration: InputDecoration(labelText: _localizations.telephone),
               controller: _telephoneController,
             ),
           ),
@@ -441,11 +442,11 @@ class CompanyFormState extends State<CompanyDialog> {
           Expanded(
             child: DropdownButtonFormField<Currency>(
               key: const Key('currency'),
-              decoration: InputDecoration(labelText: localizations.currency),
-              hint: Text(localizations.currency),
+              decoration: InputDecoration(labelText: _localizations.currency),
+              hint: Text(_localizations.currency),
               initialValue: _selectedCurrency,
               validator: (value) =>
-                  value == null ? localizations.currencyError : null,
+                  value == null ? _localizations.currencyError : null,
               items: currencies.map((item) {
                 return DropdownMenuItem<Currency>(
                   value: item,
@@ -465,7 +466,7 @@ class CompanyFormState extends State<CompanyDialog> {
       TextFormField(
         readOnly: !isAdmin,
         key: const Key('email'),
-        decoration: InputDecoration(labelText: localizations.emailAddress),
+        decoration: InputDecoration(labelText: _localizations.emailAddress),
         controller: _emailController,
         validator: (value) {
           if (value != null &&
@@ -473,7 +474,7 @@ class CompanyFormState extends State<CompanyDialog> {
               !RegExp(
                 r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
               ).hasMatch(value)) {
-            return localizations.emailInvalid;
+            return _localizations.emailInvalid;
           }
           return null;
         },
@@ -481,7 +482,7 @@ class CompanyFormState extends State<CompanyDialog> {
       TextFormField(
         readOnly: !isAdmin,
         key: const Key('url'),
-        decoration: InputDecoration(labelText: localizations.webAddress),
+        decoration: InputDecoration(labelText: _localizations.webAddress),
         controller: _urlController,
       ),
       if (company.role == Role.company)
@@ -496,7 +497,7 @@ class CompanyFormState extends State<CompanyDialog> {
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
                 decoration: InputDecoration(
-                  labelText: localizations.vatPercentage,
+                  labelText: _localizations.vatPercentage,
                 ),
                 controller: _vatPercController,
               ),
@@ -511,7 +512,7 @@ class CompanyFormState extends State<CompanyDialog> {
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
                 decoration: InputDecoration(
-                  labelText: localizations.salesTaxPercentage,
+                  labelText: _localizations.salesTaxPercentage,
                 ),
                 controller: _salesPercController,
               ),
@@ -519,7 +520,7 @@ class CompanyFormState extends State<CompanyDialog> {
           ],
         ),
       InputDecorator(
-        decoration: InputDecoration(labelText: localizations.postalAddress),
+        decoration: InputDecoration(labelText: _localizations.postalAddress),
         child: Row(
           children: [
             Expanded(
@@ -548,7 +549,7 @@ class CompanyFormState extends State<CompanyDialog> {
                                 company.address?.address2 != "_DELETE_"
                             ? "${company.address?.city} "
                                   "${company.address?.country ?? ''}"
-                            : localizations.noPostalAddress,
+                            : _localizations.noPostalAddress,
                         key: const Key('addressLabel'),
                       ),
                     ),
@@ -581,7 +582,7 @@ class CompanyFormState extends State<CompanyDialog> {
         ),
       ),
       InputDecorator(
-        decoration: InputDecoration(labelText: localizations.paymentMethod),
+        decoration: InputDecoration(labelText: _localizations.paymentMethod),
         child: Row(
           children: [
             Expanded(
@@ -614,8 +615,8 @@ class CompanyFormState extends State<CompanyDialog> {
                                 company.paymentMethod?.ccDescription !=
                                     "_DELETE_"
                             ? "${company.paymentMethod?.ccDescription}"
-                            : "${localizations.noPaymentMethod}"
-                                  "${company.address == null ? ", \n${localizations.needPostalAddress}" : ""}",
+                            : "${_localizations.noPaymentMethod}"
+                                  "${company.address == null ? ", \n${_localizations.needPostalAddress}" : ""}",
                         key: const Key('paymentMethodLabel'),
                       ),
                     ),
@@ -653,7 +654,7 @@ class CompanyFormState extends State<CompanyDialog> {
               child: TextFormField(
                 readOnly: !isAdmin,
                 key: const Key('hostName'),
-                decoration: InputDecoration(labelText: localizations.hostName),
+                decoration: InputDecoration(labelText: _localizations.hostName),
                 controller: _hostNameController,
               ),
             ),
@@ -663,7 +664,7 @@ class CompanyFormState extends State<CompanyDialog> {
                 readOnly: !isAdmin,
                 key: const Key('secondaryBackend'),
                 decoration: InputDecoration(
-                  labelText: localizations.secondaryBackend,
+                  labelText: _localizations.secondaryBackend,
                 ),
                 controller: _backendController,
               ),
@@ -724,8 +725,8 @@ class CompanyFormState extends State<CompanyDialog> {
                   : null,
               child: Text(
                 company.partyId == null
-                    ? localizations.create
-                    : localizations.update,
+                    ? _localizations.create
+                    : _localizations.update,
               ),
             ),
           ),
@@ -804,7 +805,7 @@ class CompanyForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var localizations = UserCompanyLocalizations.of(context)!;
+    _localizations = UserCompanyLocalizations.of(context)!;
     return Form(
       key: _companyDialogFormKey,
       child: SingleChildScrollView(
@@ -839,7 +840,7 @@ class CompanyForm extends StatelessWidget {
               if (widget.dialog)
                 InputDecorator(
                   decoration: InputDecoration(
-                    labelText: localizations.employees,
+                    labelText: _localizations.employees,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25.0),
                     ),

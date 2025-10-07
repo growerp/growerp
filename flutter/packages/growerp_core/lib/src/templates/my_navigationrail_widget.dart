@@ -25,6 +25,7 @@ Widget myNavigationRail(
   int menuIndex,
   List<MenuOption> menu,
 ) {
+  final localizations = CoreLocalizations.of(context)!;
   List<NavigationRailDestination> items = [];
   ThemeBloc themeBloc = context.read<ThemeBloc>();
   AuthBloc authBloc = context.read<AuthBloc>();
@@ -45,7 +46,7 @@ Widget myNavigationRail(
     );
   }
   if (items.isEmpty) {
-    return FatalErrorForm(message: CoreLocalizations.of(context)!.noAccessHere);
+    return FatalErrorForm(message: localizations.noAccessHere);
   }
 
   return Row(
@@ -125,7 +126,7 @@ Widget myNavigationRail(
                               : Icons.dark_mode,
                         ),
                         Text(
-                          CoreLocalizations.of(context)!.theme,
+                          localizations.theme,
                           style: const TextStyle(fontSize: 16),
                         ),
                       ],

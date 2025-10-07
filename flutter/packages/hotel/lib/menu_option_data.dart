@@ -23,136 +23,139 @@ import 'package:growerp_models/growerp_models.dart';
 
 import 'views/gantt_form.dart';
 
-List<MenuOption> getMenuOptions(BuildContext context) => [
-  MenuOption(
-    image: "packages/growerp_core/images/dashBoardGrey.png",
-    selectedImage: "packages/growerp_core/images/dashBoard.png",
-    title: CoreLocalizations.of(context)!.main,
-    route: '/',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const GanttForm(),
-  ),
-  MenuOption(
-    image: "packages/growerp_core/images/companyGrey.png",
-    selectedImage: "packages/growerp_core/images/company.png",
-    title: CoreLocalizations.of(context)!.myHotel,
-    route: '/myHotel',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    tabItems: [
-      TabItem(
-        form: ShowCompanyDialog(
-          Company(role: Role.company),
-          key: const Key('CompanyForm'),
-          dialog: false,
+List<MenuOption> getMenuOptions(BuildContext context) {
+  final localizations = CoreLocalizations.of(context)!;
+  return [
+    MenuOption(
+      image: "packages/growerp_core/images/dashBoardGrey.png",
+      selectedImage: "packages/growerp_core/images/dashBoard.png",
+      title: localizations.main,
+      route: '/',
+      userGroups: [UserGroup.admin, UserGroup.employee],
+      child: const GanttForm(),
+    ),
+    MenuOption(
+      image: "packages/growerp_core/images/companyGrey.png",
+      selectedImage: "packages/growerp_core/images/company.png",
+      title: localizations.myHotel,
+      route: '/myHotel',
+      userGroups: [UserGroup.admin, UserGroup.employee],
+      tabItems: [
+        TabItem(
+          form: ShowCompanyDialog(
+            Company(role: Role.company),
+            key: const Key('CompanyForm'),
+            dialog: false,
+      ),
+          label: localizations.company,
+          icon: const Icon(Icons.home),
         ),
-        label: CoreLocalizations.of(context)!.company,
-        icon: const Icon(Icons.home),
-      ),
-      TabItem(
-        form: const UserList(key: Key('Employee'), role: Role.company),
-        label: CoreLocalizations.of(context)!.employees,
-        icon: const Icon(Icons.school),
-      ),
-      TabItem(
-        form: const WebsiteDialog(),
-        label: CoreLocalizations.of(context)!.website,
-        icon: const Icon(Icons.webhook),
-      ),
-    ],
-  ),
-  MenuOption(
-    image: "packages/growerp_core/images/single-bedGrey.png",
-    selectedImage: "packages/growerp_core/images/single-bed.png",
-    title: CoreLocalizations.of(context)!.rooms,
-    route: '/rooms',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    tabItems: [
-      TabItem(
-        form: const AssetList(),
-        label: CoreLocalizations.of(context)!.rooms,
-        icon: const Icon(Icons.home),
-      ),
-      TabItem(
-        form: const ProductList(),
-        label: CoreLocalizations.of(context)!.roomTypes,
-        icon: const Icon(Icons.home),
-      ),
-    ],
-  ),
-  MenuOption(
-    image: "packages/growerp_core/images/reservationGrey.png",
-    selectedImage: "packages/growerp_core/images/reservation.png",
-    title: CoreLocalizations.of(context)!.reservations,
-    route: '/reservations',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    tabItems: [
-      TabItem(
-        form: const FinDocList(
-          key: Key("SalesOrder"),
-          sales: true,
-          docType: FinDocType.order,
-          onlyRental: true,
+        TabItem(
+          form: const UserList(key: Key('Employee'), role: Role.company),
+          label: localizations.employees,
+          icon: const Icon(Icons.school),
         ),
-        label: CoreLocalizations.of(context)!.reservations,
-        icon: const Icon(Icons.home),
-      ),
-      TabItem(
-        form: const CompanyUserList(key: Key('Customer'), role: Role.customer),
-        label: CoreLocalizations.of(context)!.customers,
-        icon: const Icon(Icons.school),
-      ),
-      TabItem(
-        form: const FinDocList(
-          key: Key('PurchaseOrder'),
-          sales: false,
-          docType: FinDocType.order,
+        TabItem(
+          form: const WebsiteDialog(),
+          label: localizations.website,
+          icon: const Icon(Icons.webhook),
         ),
-        label: CoreLocalizations.of(context)!.purchaseOrders,
-        icon: const Icon(Icons.home),
-      ),
-      TabItem(
-        form: const CompanyUserList(key: Key('Supplier'), role: Role.supplier),
-        label: CoreLocalizations.of(context)!.suppliers,
-        icon: const Icon(Icons.business),
-      ),
-    ],
-  ),
-  MenuOption(
-    image: "packages/growerp_core/images/check-in-outGrey.png",
-    selectedImage: "packages/growerp_core/images/check-in-out.png",
-    title: CoreLocalizations.of(context)!.inOut,
-    route: '/checkInOut',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    tabItems: [
-      TabItem(
-        form: const FinDocList(
-          key: Key("Check-In"),
-          sales: true,
-          docType: FinDocType.order,
-          onlyRental: true,
-          status: FinDocStatusVal.created,
+      ],
+    ),
+    MenuOption(
+      image: "packages/growerp_core/images/single-bedGrey.png",
+      selectedImage: "packages/growerp_core/images/single-bed.png",
+      title: localizations.rooms,
+      route: '/rooms',
+      userGroups: [UserGroup.admin, UserGroup.employee],
+      tabItems: [
+        TabItem(
+          form: const AssetList(),
+          label: localizations.rooms,
+          icon: const Icon(Icons.home),
         ),
-        label: CoreLocalizations.of(context)!.checkIn,
-        icon: const Icon(Icons.home),
-      ),
-      TabItem(
-        form: const FinDocList(
-          key: Key("Check-Out"),
-          sales: true,
-          docType: FinDocType.order,
-          onlyRental: true,
-          status: FinDocStatusVal.approved,
+        TabItem(
+          form: const ProductList(),
+          label: localizations.roomTypes,
+          icon: const Icon(Icons.home),
         ),
-        label: CoreLocalizations.of(context)!.checkOut,
-        icon: const Icon(Icons.home),
+      ],
+    ),
+    MenuOption(
+      image: "packages/growerp_core/images/reservationGrey.png",
+      selectedImage: "packages/growerp_core/images/reservation.png",
+      title: localizations.reservations,
+      route: '/reservations',
+      userGroups: [UserGroup.admin, UserGroup.employee],
+      tabItems: [
+        TabItem(
+          form: const FinDocList(
+            key: Key("SalesOrder"),
+            sales: true,
+            docType: FinDocType.order,
+            onlyRental: true,
       ),
-    ],
-  ),
-  MenuOption(
-    image: "packages/growerp_core/images/accountingGrey.png",
-    selectedImage: "packages/growerp_core/images/accounting.png",
-    title: CoreLocalizations.of(context)!.accounting,
-    route: '/accounting',
-    userGroups: [UserGroup.admin],
-  ),
-];
+          label: localizations.reservations,
+          icon: const Icon(Icons.home),
+        ),
+        TabItem(
+          form: const CompanyUserList(key: Key('Customer'), role: Role.customer),
+          label: localizations.customers,
+          icon: const Icon(Icons.school),
+        ),
+        TabItem(
+          form: const FinDocList(
+            key: Key('PurchaseOrder'),
+            sales: false,
+            docType: FinDocType.order,
+      ),
+          label: localizations.purchaseOrders,
+          icon: const Icon(Icons.home),
+        ),
+        TabItem(
+          form: const CompanyUserList(key: Key('Supplier'), role: Role.supplier),
+          label: localizations.suppliers,
+          icon: const Icon(Icons.business),
+        ),
+      ],
+    ),
+    MenuOption(
+      image: "packages/growerp_core/images/check-in-outGrey.png",
+      selectedImage: "packages/growerp_core/images/check-in-out.png",
+      title: localizations.inOut,
+      route: '/checkInOut',
+      userGroups: [UserGroup.admin, UserGroup.employee],
+      tabItems: [
+        TabItem(
+          form: const FinDocList(
+            key: Key("Check-In"),
+            sales: true,
+            docType: FinDocType.order,
+            onlyRental: true,
+            status: FinDocStatusVal.created,
+      ),
+          label: localizations.checkIn,
+          icon: const Icon(Icons.home),
+        ),
+        TabItem(
+          form: const FinDocList(
+            key: Key("Check-Out"),
+            sales: true,
+            docType: FinDocType.order,
+            onlyRental: true,
+            status: FinDocStatusVal.approved,
+      ),
+          label: localizations.checkOut,
+          icon: const Icon(Icons.home),
+        ),
+      ],
+    ),
+    MenuOption(
+      image: "packages/growerp_core/images/accountingGrey.png",
+      selectedImage: "packages/growerp_core/images/accounting.png",
+      title: localizations.accounting,
+      route: '/accounting',
+      userGroups: [UserGroup.admin],
+    ),
+  ];
+}

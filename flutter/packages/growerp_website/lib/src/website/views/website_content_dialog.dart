@@ -67,12 +67,6 @@ class WebsiteContentState extends State<WebsiteContent> {
   }
 
   @override
-  void didChangeDependencies() {
-    _localizations = WebsiteLocalizations.of(context)!;
-    super.didChangeDependencies();
-  }
-
-  @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
@@ -80,6 +74,7 @@ class WebsiteContentState extends State<WebsiteContent> {
 
   @override
   Widget build(BuildContext context) {
+    _localizations = WebsiteLocalizations.of(context)!;
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocConsumer<ContentBloc, ContentState>(
       listenWhen: ((previous, current) =>

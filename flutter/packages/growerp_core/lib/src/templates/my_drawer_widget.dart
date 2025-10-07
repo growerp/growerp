@@ -19,6 +19,7 @@ import 'package:growerp_models/growerp_models.dart';
 import '../domains/domains.dart';
 
 Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
+  final localizations = CoreLocalizations.of(context)!;
   ThemeBloc themeBloc = context.read<ThemeBloc>();
   AuthBloc authBloc = context.read<AuthBloc>();
   Authenticate? auth = authBloc.state.authenticate;
@@ -31,7 +32,7 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
   options.add(
     MenuOption(
       route: 'theme',
-      title: CoreLocalizations.of(context)!.theme,
+      title: localizations.theme,
       userGroups: [],
     ),
   );
@@ -96,7 +97,7 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
                     ),
                     const SizedBox(width: 20),
                     Text(
-                      CoreLocalizations.of(context)!.theme,
+                      localizations.theme,
                       style: const TextStyle(fontSize: 16),
                     ),
                   ],
@@ -135,5 +136,5 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
       ),
     );
   }
-  return Text(CoreLocalizations.of(context)!.error);
+  return Text(localizations.error);
 }

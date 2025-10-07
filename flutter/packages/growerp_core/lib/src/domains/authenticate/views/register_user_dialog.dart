@@ -39,6 +39,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
   late AuthBloc _authBloc;
   Company? _presetCompany;
   Company? _selectedCompany;
+  CoreLocalizations? _localizations;
 
   @override
   void initState() {
@@ -54,6 +55,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
 
   @override
   Widget build(BuildContext context) {
+    _localizations = CoreLocalizations.of(context);
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -84,7 +86,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
               ),
               child: popUp(
                 context: context,
-                title: CoreLocalizations.of(context)!.registration,
+                title: _localizations!.registration,
                 height: isPhone ? 350 : 300,
                 child: _registerForm(_authBloc.state.authenticate!),
               ),
@@ -110,12 +112,12 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                   child: TextFormField(
                     key: const Key('firstName'),
                     decoration: InputDecoration(
-                      labelText: CoreLocalizations.of(context)!.firstName,
+                      labelText: _localizations!.firstName,
                     ),
                     controller: _firstNameController,
                     validator: (value) {
                       if (value!.isEmpty) {
-                        return CoreLocalizations.of(context)!.firstNameError;
+                        return _localizations!.firstNameError;
                       }
                       return null;
                     },
@@ -126,12 +128,11 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                   child: TextFormField(
                     key: const Key('lastName'),
                     decoration: InputDecoration(
-                      labelText: CoreLocalizations.of(context)!.lastName,
+                      labelText: _localizations!.lastName,
                     ),
                     controller: _lastNameController,
                     validator: (value) {
-                      if (value!.isEmpty)
-                        return CoreLocalizations.of(context)!.lastNameError;
+                      if (value!.isEmpty) return _localizations!.lastNameError;
                       return null;
                     },
                   ),
@@ -140,7 +141,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
             ),
             const SizedBox(height: 10),
             Text(
-              CoreLocalizations.of(context)!.tempPassword,
+              _localizations!.tempPassword,
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.orange),
             ),
@@ -148,16 +149,15 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
             TextFormField(
               key: const Key('email'),
               decoration: InputDecoration(
-                labelText: CoreLocalizations.of(context)!.emailAddress,
+                labelText: _localizations!.emailAddress,
               ),
               controller: _emailController,
               validator: (String? value) {
-                if (value!.isEmpty)
-                  return CoreLocalizations.of(context)!.emailAddressError;
+                if (value!.isEmpty) return _localizations!.emailAddressError;
                 if (!RegExp(
                   r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
                 ).hasMatch(value)) {
-                  return CoreLocalizations.of(context)!.emailAddressError2;
+                  return _localizations!.emailAddressError2;
                 }
                 return null;
               },
@@ -166,7 +166,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
             const SizedBox(height: 10),
             OutlinedButton(
               key: const Key('newUserButton'),
-              child: Text(CoreLocalizations.of(context)!.register),
+              child: Text(_localizations!.register),
               onPressed: () async {
                 if (_registerFormKey.currentState!.validate()) {
                   _authBloc.add(

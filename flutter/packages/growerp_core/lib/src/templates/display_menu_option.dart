@@ -60,10 +60,15 @@ class MenuOptionState extends State<DisplayMenuOption>
   late AuthBloc authBloc;
   List<MenuOption> menuList = [];
   int menuIndex = 0;
+  CoreLocalizations? _localizations;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
+  }
+
+  void _initialize(BuildContext context) {
     authBloc = context.read<AuthBloc>();
     // apply security
     int newIndex = 0;
@@ -85,14 +90,14 @@ class MenuOptionState extends State<DisplayMenuOption>
         MenuOption(
           image: 'packages/growerp_core/images/dashBoardGrey.png',
           selectedImage: 'packages/growerp_core/images/dashBoard.png',
-          title: CoreLocalizations.of(context)!.main,
+          title: _localizations!.main,
           route: '/',
           child: Container(
             height: 45,
             color: Colors.black,
             child: Center(
               child: Text(
-                CoreLocalizations.of(context)!.noAccess,
+                _localizations!.noAccess,
                 style: const TextStyle(color: Colors.red, fontSize: 25),
               ),
             ),
@@ -158,7 +163,7 @@ class MenuOptionState extends State<DisplayMenuOption>
               arguments: tabItems[tabIndex].floatButtonArgs,
             );
           },
-          tooltip: CoreLocalizations.of(context)!.addNew,
+          tooltip: _localizations!.addNew,
           child: const Icon(Icons.add),
         );
       }
@@ -175,7 +180,7 @@ class MenuOptionState extends State<DisplayMenuOption>
               },
             );
           },
-          tooltip: CoreLocalizations.of(context)!.addNew,
+          tooltip: _localizations!.addNew,
           child: const Icon(Icons.add),
         );
       }
@@ -194,12 +199,17 @@ class MenuOptionState extends State<DisplayMenuOption>
 
   @override
   void dispose() {
-    _controller!.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      _localizations = CoreLocalizations.of(context)!;
+      _initialize(context);
+      _isInitialized = true;
+    }
     currentRoute = ModalRoute.of(context)?.settings.name ?? '';
     isPhone = isAPhone(context);
     return BlocBuilder<ChatRoomBloc, ChatRoomState>(
@@ -225,7 +235,7 @@ class MenuOptionState extends State<DisplayMenuOption>
               ),
               padding: EdgeInsets.zero,
               tooltip: unReadRooms.isEmpty
-                  ? CoreLocalizations.of(context)!.chat
+                  ? _localizations!.chat
                   : unReadRooms.toString(),
               onPressed: () async => {
                 await showDialog(
@@ -244,7 +254,7 @@ class MenuOptionState extends State<DisplayMenuOption>
               IconButton(
                 key: const Key('homeButton'),
                 icon: const Icon(Icons.home),
-                tooltip: CoreLocalizations.of(context)!.goHome,
+                tooltip: _localizations!.goHome,
                 onPressed: () {
                   if (currentRoute.startsWith('/acct')) {
                     Navigator.pushNamed(context, '/accounting');
@@ -401,7 +411,7 @@ class MenuOptionState extends State<DisplayMenuOption>
                   !Platform.isIOS &&
                   !Platform.isMacOS)) {
             return Banner(
-              message: CoreLocalizations.of(context)!.test,
+              message: _localizations!.test,
               color: Colors.red,
               location: BannerLocation.topStart,
               child: showPage(simplePage, context, tabPage),

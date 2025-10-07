@@ -37,6 +37,7 @@ class CategoriesListState extends State<CategoryList> {
   late List<Category> categories;
   late double bottom;
   double? right;
+  CatalogLocalizations? _localizations;
 
   @override
   void initState() {
@@ -49,11 +50,10 @@ class CategoriesListState extends State<CategoryList> {
   }
 
   Widget tableView() {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
     if (categories.isEmpty) {
       return Center(
         child: Text(
-          catalogLocalizations.noCategories,
+          _localizations!.noCategories,
           style: const TextStyle(fontSize: 20.0),
         ),
       );
@@ -124,7 +124,7 @@ class CategoriesListState extends State<CategoryList> {
 
   @override
   Widget build(BuildContext context) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+    _localizations = CatalogLocalizations.of(context);
     right = right ?? (isAPhone(context) ? 20 : 50);
     return BlocConsumer<CategoryBloc, CategoryState>(
       listener: (context, state) {
@@ -133,11 +133,10 @@ class CategoriesListState extends State<CategoryList> {
         }
         if (state.status == CategoryStatus.success) {
           started = true;
-          final catalogLocalizations = CatalogLocalizations.of(context)!;
           final translatedMessage = state.message != null
               ? translateCategoryBlocMessage(
                   state.message!,
-                  catalogLocalizations,
+                  _localizations!,
                 )
               : '';
           if (translatedMessage.isNotEmpty) {
@@ -154,7 +153,7 @@ class CategoriesListState extends State<CategoryList> {
           case CategoryStatus.failure:
             return Center(
               child: Text(
-                catalogLocalizations.fetchCategoriesError(state.message ?? ''),
+                _localizations!.fetchCategoriesError(state.message ?? ''),
               ),
             );
           case CategoryStatus.success:
@@ -225,7 +224,7 @@ class CategoriesListState extends State<CategoryList> {
                                   ),
                             );
                           },
-                          tooltip: catalogLocalizations.categoryUpDown,
+                          tooltip: _localizations!.categoryUpDown,
                           child: const Icon(Icons.file_copy),
                         ),
                         const SizedBox(height: 10),
@@ -244,7 +243,7 @@ class CategoriesListState extends State<CategoryList> {
                               },
                             );
                           },
-                          tooltip: catalogLocalizations.addNew,
+                          tooltip: _localizations!.addNew,
                           child: const Icon(Icons.add),
                         ),
                       ],

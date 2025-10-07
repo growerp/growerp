@@ -35,6 +35,7 @@ class ActivityListState extends State<ActivityList> {
   final _scrollController = ScrollController();
   final _horizontalController = ScrollController();
   late ActivityBloc _activityBloc;
+  late ActivityLocalizations _localizations;
   late List<Activity> activities = [];
   late double bottom;
   double? right;
@@ -56,15 +57,14 @@ class ActivityListState extends State<ActivityList> {
 
   @override
   Widget build(BuildContext context) {
+    _localizations = ActivityLocalizations.of(context)!;
     right = right ?? (isAPhone(context) ? 20 : 50);
 
     Widget tableView() {
       if (activities.isEmpty) {
         return Center(
           child: Text(
-            ActivityLocalizations.of(
-              context,
-            )!.activity_notFound(widget.activityType.toString()),
+            _localizations.activity_notFound(widget.activityType.toString()),
             style: const TextStyle(fontSize: 20.0),
           ),
         );
@@ -142,9 +142,7 @@ class ActivityListState extends State<ActivityList> {
         if (state.status == ActivityBlocStatus.failure) {
           HelperFunctions.showMessage(
             context,
-            ActivityLocalizations.of(
-              context,
-            )!.activity_error(state.message ?? 'unknown'),
+            _localizations.activity_error(state.message ?? 'unknown'),
             Colors.red,
           );
         }
@@ -153,7 +151,7 @@ class ActivityListState extends State<ActivityList> {
         if (state.status == ActivityBlocStatus.failure) {
           return Center(
             child: Text(
-              ActivityLocalizations.of(context)!.activity_fetchError(
+              _localizations.activity_fetchError(
                 widget.activityType.toString(),
                 state.message ?? '',
               ),
@@ -231,7 +229,7 @@ class ActivityListState extends State<ActivityList> {
                             },
                           );
                         },
-                        tooltip: CoreLocalizations.of(context)!.addNew,
+                        tooltip: _localizations.activity_addNew,
                         child: const Icon(Icons.add),
                       ),
                     ],

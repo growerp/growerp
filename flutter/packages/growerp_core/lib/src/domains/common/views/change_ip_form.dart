@@ -28,9 +28,11 @@ class ChangeIpForm extends StatefulWidget {
 
 class _ChangeIpFormState extends State<ChangeIpForm> {
   final _formKey = GlobalKey<FormState>();
+  CoreLocalizations? _localizations;
 
   @override
   Widget build(BuildContext context) {
+    _localizations = CoreLocalizations.of(context);
     String ip = '', companyPartyId = '', chat = '';
     return Center(
       child: AlertDialog(
@@ -38,7 +40,7 @@ class _ChangeIpFormState extends State<ChangeIpForm> {
           borderRadius: BorderRadius.all(Radius.circular(20.0)),
         ),
         title: Text(
-          CoreLocalizations.of(context)!.enterBackendUrl,
+          _localizations!.enterBackendUrl,
           textAlign: TextAlign.center,
         ),
         content: Form(
@@ -50,11 +52,10 @@ class _ChangeIpFormState extends State<ChangeIpForm> {
                 TextFormField(
                   autofocus: true,
                   decoration: InputDecoration(
-                    labelText: CoreLocalizations.of(context)!.backendServer,
+                    labelText: _localizations!.backendServer,
                   ),
-                  validator: (value) => value == null
-                      ? CoreLocalizations.of(context)!.fieldRequired
-                      : null,
+                  validator: (value) =>
+                      value == null ? _localizations!.fieldRequired : null,
                   onChanged: (value) {
                     setState(() {
                       ip = value;
@@ -65,11 +66,10 @@ class _ChangeIpFormState extends State<ChangeIpForm> {
                 TextFormField(
                   autofocus: true,
                   decoration: InputDecoration(
-                    labelText: CoreLocalizations.of(context)!.chatServer,
+                    labelText: _localizations!.chatServer,
                   ),
-                  validator: (value) => value == null
-                      ? CoreLocalizations.of(context)!.fieldRequired
-                      : null,
+                  validator: (value) =>
+                      value == null ? _localizations!.fieldRequired : null,
                   onChanged: (value) {
                     setState(() {
                       chat = value;
@@ -80,7 +80,7 @@ class _ChangeIpFormState extends State<ChangeIpForm> {
                 TextFormField(
                   autofocus: true,
                   decoration: InputDecoration(
-                    labelText: CoreLocalizations.of(context)!.companyPartyId,
+                    labelText: _localizations!.companyPartyId,
                   ),
                   onChanged: (value) {
                     companyPartyId = value;
@@ -90,7 +90,7 @@ class _ChangeIpFormState extends State<ChangeIpForm> {
                 Row(
                   children: [
                     OutlinedButton(
-                      child: Text(CoreLocalizations.of(context)!.cancel),
+                      child: Text(_localizations!.cancel),
                       onPressed: () {
                         context.read<AuthBloc>().add(AuthLoad());
                       },
@@ -98,7 +98,7 @@ class _ChangeIpFormState extends State<ChangeIpForm> {
                     const SizedBox(width: 20),
                     Expanded(
                       child: OutlinedButton(
-                        child: Text(CoreLocalizations.of(context)!.ok),
+                        child: Text(_localizations!.ok),
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
                             if (!ip.startsWith('https://')) {

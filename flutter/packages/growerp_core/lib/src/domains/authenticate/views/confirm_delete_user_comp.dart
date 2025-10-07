@@ -25,11 +25,12 @@ Future<bool?> confirmDeleteUserComp(
   BuildContext context,
   UserGroup? userGroup,
 ) {
+  final localizations = CoreLocalizations.of(context)!;
   List<Widget> actions = [
-    Text(CoreLocalizations.of(context)!.deleteWarning),
+    Text(localizations.deleteWarning),
     const SizedBox(height: 20),
     OutlinedButton(
-      child: Text(CoreLocalizations.of(context)!.onlyUserDelete),
+      child: Text(localizations.onlyUserDelete),
       onPressed: () {
         Navigator.of(context).pop(false);
       },
@@ -39,7 +40,7 @@ Future<bool?> confirmDeleteUserComp(
     actions.add(const SizedBox(height: 10));
     actions.add(
       OutlinedButton(
-        child: Text(CoreLocalizations.of(context)!.userAndCompanyDelete),
+        child: Text(localizations.userAndCompanyDelete),
         onPressed: () {
           Navigator.of(context).pop(true);
         },
@@ -60,8 +61,8 @@ Future<bool?> confirmDeleteUserComp(
           height: 300,
           context: context,
           title: userGroup == UserGroup.admin
-              ? CoreLocalizations.of(context)!.deleteYourselfAndCompany
-              : CoreLocalizations.of(context)!.deleteYourself,
+              ? localizations.deleteYourselfAndCompany
+              : localizations.deleteYourself,
           child: Column(children: actions),
         ),
       );

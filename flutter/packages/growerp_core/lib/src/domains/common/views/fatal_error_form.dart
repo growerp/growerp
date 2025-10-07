@@ -28,6 +28,7 @@ class FatalErrorForm extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
+    final localizations = CoreLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -42,7 +43,7 @@ class FatalErrorForm extends StatelessWidget {
             ),
           ),
           OutlinedButton(
-            child: Text(CoreLocalizations.of(context)!.restart),
+            child: Text(localizations.restart),
             onPressed: () => Navigator.pushNamed(context, '/'),
           ),
         ],

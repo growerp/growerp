@@ -30,6 +30,7 @@ class CategoryFilesDialog extends StatefulWidget {
 
 class _FilesHeaderState extends State<CategoryFilesDialog> {
   late CategoryBloc _categoryBloc;
+  CatalogLocalizations? _localizations;
   @override
   void initState() {
     _categoryBloc = BlocProvider.of<CategoryBloc>(context);
@@ -38,13 +39,13 @@ class _FilesHeaderState extends State<CategoryFilesDialog> {
 
   @override
   Widget build(BuildContext context) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+    _localizations = CatalogLocalizations.of(context);
     return BlocConsumer<CategoryBloc, CategoryState>(
       listener: (context, state) async {
         if (state.status == CategoryStatus.failure) {
           HelperFunctions.showMessage(
             context,
-            catalogLocalizations.error(state.message ?? ''),
+            _localizations!.error(state.message ?? ''),
             Colors.red,
           );
         }
@@ -62,14 +63,14 @@ class _FilesHeaderState extends State<CategoryFilesDialog> {
           children: [
             popUpDialog(
               context: context,
-              title: catalogLocalizations.categoryFiles,
+              title: _localizations!.categoryFiles,
               children: [
                 const SizedBox(height: 40),
-                Text(catalogLocalizations.downloadFormat),
+                Text(_localizations!.downloadFormat),
                 const SizedBox(height: 10),
                 OutlinedButton(
                   key: const Key('upload'),
-                  child: Text(catalogLocalizations.uploadCsv),
+                  child: Text(_localizations!.uploadCsv),
                   onPressed: () async {
                     FilePickerResult? result = await FilePicker.platform
                         .pickFiles(
@@ -92,13 +93,13 @@ class _FilesHeaderState extends State<CategoryFilesDialog> {
                 const SizedBox(height: 20),
                 OutlinedButton(
                   key: const Key('download'),
-                  child: Text(catalogLocalizations.downloadEmail),
+                  child: Text(_localizations!.downloadEmail),
                   onPressed: () {
                     _categoryBloc.add(CategoryDownload());
                   },
                 ),
                 const SizedBox(height: 20),
-                Text(catalogLocalizations.emailData),
+                Text(_localizations!.emailData),
               ],
             ),
             if (state.status == CategoryStatus.loading)

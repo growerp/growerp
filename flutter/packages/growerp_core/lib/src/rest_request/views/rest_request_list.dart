@@ -38,6 +38,7 @@ class RestRequestListState extends State<RestRequestList> {
   late double bottom;
   double? right;
   double currentScroll = 0;
+  CoreLocalizations? _localizations;
 
   @override
   void initState() {
@@ -50,6 +51,7 @@ class RestRequestListState extends State<RestRequestList> {
 
   @override
   Widget build(BuildContext context) {
+    _localizations = CoreLocalizations.of(context);
     final isPhone = ResponsiveBreakpoints.of(context).isMobile;
     right = right ?? (isPhone ? 20 : 50);
     return Builder(
@@ -58,7 +60,7 @@ class RestRequestListState extends State<RestRequestList> {
           if (restRequests.isEmpty) {
             return Center(
               child: Text(
-                CoreLocalizations.of(context)!.noRestRequests,
+                _localizations!.noRestRequests,
                 style: const TextStyle(fontSize: 20.0),
               ),
             );
@@ -145,7 +147,7 @@ class RestRequestListState extends State<RestRequestList> {
           builder: (context, state) {
             if (state.status == RestRequestStatus.failure) {
               return FatalErrorForm(
-                message: CoreLocalizations.of(context)!.cannotLoadRestRequests,
+                message: _localizations!.cannotLoadRestRequests,
               );
             } else {
               restRequests = state.restRequests;
@@ -178,7 +180,7 @@ class RestRequestListState extends State<RestRequestList> {
                             const RestRequestFetch(refresh: true),
                           );
                         },
-                        tooltip: CoreLocalizations.of(context)!.refresh,
+                        tooltip: _localizations!.refresh,
                         child: const Icon(Icons.refresh),
                       ),
                     ),

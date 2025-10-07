@@ -29,6 +29,7 @@ class SearchCategoryList extends StatefulWidget {
 class SearchCategoryState extends State<SearchCategoryList> {
   late DataFetchBloc _categoryBloc;
   List<Category> categories = [];
+  CatalogLocalizations? _localizations;
 
   @override
   void initState() {
@@ -40,6 +41,7 @@ class SearchCategoryState extends State<SearchCategoryList> {
 
   @override
   Widget build(BuildContext context) {
+    _localizations = CatalogLocalizations.of(context);
     return BlocConsumer<DataFetchBloc<Categories>, DataFetchState<Categories>>(
         listener: (context, state) {
       if (state.status == DataFetchStatus.failure) {
@@ -48,8 +50,8 @@ class SearchCategoryState extends State<SearchCategoryList> {
     }, builder: (context, state) {
       if (state.status == DataFetchStatus.failure) {
         return Center(
-            child: Text(CatalogLocalizations.of(context)!
-                .fetchSearchError(state.message ?? '')));
+            child: Text(
+                _localizations!.fetchSearchError(state.message ?? '')));
       }
       if (state.status == DataFetchStatus.success) {
         categories = (state.data as Categories).categories;

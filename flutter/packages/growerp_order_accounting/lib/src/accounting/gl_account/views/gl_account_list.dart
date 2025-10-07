@@ -33,6 +33,7 @@ class GlAccountsState extends State<GlAccountList> {
   late double bottom;
   double? right;
   late OrderAccountingLocalizations _localizations;
+  CoreLocalizations? _coreLocalizations;
 
   @override
   void initState() {
@@ -48,6 +49,7 @@ class GlAccountsState extends State<GlAccountList> {
   @override
   Widget build(BuildContext context) {
     _localizations = OrderAccountingLocalizations.of(context)!;
+    _coreLocalizations = CoreLocalizations.of(context);
     right = right ?? (isAPhone(context) ? 20 : 50);
     limit = (MediaQuery.of(context).size.height / 100).round();
     return BlocConsumer<GlAccountBloc, GlAccountState>(
@@ -202,7 +204,7 @@ class GlAccountsState extends State<GlAccountList> {
                               },
                             );
                           },
-                          tooltip: CoreLocalizations.of(context)!.addNew,
+                          tooltip: _coreLocalizations!.addNew,
                           child: const Icon(Icons.add),
                         ),
                       ],

@@ -72,6 +72,7 @@ class UserDialog extends StatefulWidget {
 
 class UserDialogState extends State<UserDialog> {
   late final GlobalKey<FormState> _userDialogFormKey;
+  late UserCompanyLocalizations _localizations;
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _idController = TextEditingController();
@@ -214,7 +215,7 @@ class UserDialogState extends State<UserDialog> {
 
   @override
   Widget build(BuildContext context) {
-    var localizations = UserCompanyLocalizations.of(context)!;
+    _localizations = UserCompanyLocalizations.of(context)!;
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
     right = right ?? (isPhone ? 20 : 40);
     String title = '';
@@ -222,8 +223,8 @@ class UserDialogState extends State<UserDialog> {
       title =
           widget.user.userGroup != null &&
               widget.user.userGroup == UserGroup.admin
-          ? 'Admininistrator'
-          : 'Employee';
+          ? _localizations.administrator
+          : _localizations.employee;
     } else {
       title = _selectedRole.name;
     }
@@ -233,7 +234,7 @@ class UserDialogState extends State<UserDialog> {
       insetPadding: const EdgeInsets.all(10),
       child: popUp(
         context: context,
-        title: "$title #${widget.user.pseudoId ?? localizations.newItem}",
+        title: "$title #${widget.user.pseudoId ?? _localizations.newItem}",
         width: isPhone ? 400 : 800,
         height: isPhone ? 700 : 600,
         child: ScaffoldMessenger(
@@ -294,7 +295,7 @@ class UserDialogState extends State<UserDialog> {
                                 return Dialog(
                                   child: popUp(
                                     context: context,
-                                    title: ('User events'),
+                                title: (_localizations.userEvents),
                                     child: ActivityList(
                                       ActivityType.event,
                                       companyUser: CompanyUser.tryParse(
@@ -412,7 +413,7 @@ class UserDialogState extends State<UserDialog> {
     List<Widget> widgets = [
       InputDecorator(
         decoration: InputDecoration(
-          labelText: 'User information',
+          labelText: _localizations.userInfo,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
         ),
         child: Column(
@@ -422,18 +423,18 @@ class UserDialogState extends State<UserDialog> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('id'),
-                    decoration: const InputDecoration(labelText: 'ID'),
+                    decoration: InputDecoration(labelText: _localizations.id),
                     controller: _idController,
                   ),
                 ),
                 Expanded(
                   child: DropdownButtonFormField<Role>(
                     key: const Key('role'),
-                    decoration: const InputDecoration(labelText: 'Role'),
-                    hint: const Text('Role'),
+                    decoration: InputDecoration(labelText: _localizations.role),
+                    hint: Text(_localizations.role),
                     initialValue: _selectedRole,
                     validator: (value) =>
-                        value == Role.unknown ? 'Select a valid role!' : null,
+                        value == Role.unknown ? _localizations.roleError : null,
                     items: Role.values.map((item) {
                       return DropdownMenuItem<Role>(
                         value: item,
@@ -457,10 +458,11 @@ class UserDialogState extends State<UserDialog> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('firstName'),
-                    decoration: const InputDecoration(labelText: 'First Name'),
+                    decoration:
+                        InputDecoration(labelText: _localizations.firstName),
                     controller: _firstNameController,
                     validator: (value) {
-                      if (value!.isEmpty) return 'Please enter a first name?';
+                      if (value!.isEmpty) return _localizations.firstNameError;
                       return null;
                     },
                   ),
@@ -469,10 +471,11 @@ class UserDialogState extends State<UserDialog> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('lastName'),
-                    decoration: const InputDecoration(labelText: 'Last Name'),
+                    decoration:
+                        InputDecoration(labelText: _localizations.lastName),
                     controller: _lastNameController,
                     validator: (value) {
-                      if (value!.isEmpty) return 'Please enter a last name?';
+                      if (value!.isEmpty) return _localizations.lastNameError;
                       return null;
                     },
                   ),
@@ -484,8 +487,8 @@ class UserDialogState extends State<UserDialog> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('userEmail'),
-                    decoration: const InputDecoration(
-                      labelText: 'Email address',
+                    decoration: InputDecoration(
+                      labelText: _localizations.emailAddress,
                     ),
                     controller: _emailController,
                     validator: (String? value) {
@@ -493,11 +496,11 @@ class UserDialogState extends State<UserDialog> {
                           !RegExp(
                             r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
                           ).hasMatch(value)) {
-                        return 'This is not a valid email';
+                        return _localizations.emailInvalid;
                       }
                       if (value.isEmpty &&
                           _loginNameController.text.isNotEmpty) {
-                        return 'Email for login required!';
+                        return _localizations.emailLoginRequired;
                       }
                       return null;
                     },
@@ -507,7 +510,8 @@ class UserDialogState extends State<UserDialog> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('userUrl'),
-                    decoration: const InputDecoration(labelText: 'Web address'),
+                    decoration:
+                        InputDecoration(labelText: _localizations.webAddress),
                     controller: _urlController,
                   ),
                 ),
@@ -515,8 +519,8 @@ class UserDialogState extends State<UserDialog> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('userTelephoneNr'),
-                    decoration: const InputDecoration(
-                      labelText: 'Telephone number',
+                    decoration: InputDecoration(
+                      labelText: _localizations.telephoneNumber,
                     ),
                     controller: _telephoneController,
                   ),
@@ -528,7 +532,7 @@ class UserDialogState extends State<UserDialog> {
       ),
       InputDecorator(
         decoration: InputDecoration(
-          labelText: 'Postal Address',
+          labelText: _localizations.postalAddress,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
         ),
         child: Row(
@@ -559,7 +563,7 @@ class UserDialogState extends State<UserDialog> {
                                 updatedUser.address?.address2 != "_DELETE_"
                             ? "${updatedUser.address?.city} "
                                   "${updatedUser.address?.country ?? ''}"
-                            : "No postal address yet",
+                            : _localizations.noPostalAddress,
                         key: const Key('addressLabel'),
                       ),
                     ),
@@ -593,7 +597,7 @@ class UserDialogState extends State<UserDialog> {
       ),
       InputDecorator(
         decoration: InputDecoration(
-          labelText: 'Payment method',
+          labelText: _localizations.paymentMethod,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
         ),
         child: Row(
@@ -630,8 +634,8 @@ class UserDialogState extends State<UserDialog> {
                                 updatedUser.paymentMethod?.ccDescription !=
                                     "_DELETE_"
                             ? "${updatedUser.paymentMethod?.ccDescription}"
-                            : "No payment methods yet"
-                                  "${updatedUser.address == null ? ",\nneed postal address to add" : ""}",
+                            : "${_localizations.noPaymentMethod}"
+                                  "${updatedUser.address == null ? ",\n${_localizations.needPostalAddress}" : ""}",
                         key: const Key('paymentMethodLabel'),
                       ),
                     ),
@@ -667,9 +671,8 @@ class UserDialogState extends State<UserDialog> {
       if (_selectedRole != Role.company)
         InputDecorator(
           decoration: InputDecoration(
-            labelText:
-                "${_selectedCompany.role?.value ?? Role.unknown}"
-                " Related Company information",
+            labelText: _localizations.roleCompanyInfo(
+                _selectedCompany.role?.value ?? Role.unknown.toString()),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(25.0),
             ),
@@ -698,8 +701,8 @@ class UserDialogState extends State<UserDialog> {
                                 showSearchBox: true,
                                 searchFieldProps: TextFieldProps(
                                   autofocus: true,
-                                  decoration: const InputDecoration(
-                                    labelText: "company,name",
+                                  decoration: InputDecoration(
+                                    labelText: _localizations.companyName,
                                   ),
                                   controller: _companySearchBoxController,
                                 ),
@@ -708,15 +711,14 @@ class UserDialogState extends State<UserDialog> {
                                 ),
                                 title: popUp(
                                   context: context,
-                                  title: 'Select company',
+                                  title: _localizations.selectCompany,
                                   height: 50,
                                   width: 450,
                                 ),
                               ),
-                              dropdownDecoratorProps:
-                                  const DropDownDecoratorProps(
+                              dropdownDecoratorProps: DropDownDecoratorProps(
                                     dropdownSearchDecoration: InputDecoration(
-                                      labelText: 'Company name[id]',
+                                  labelText: _localizations.companyId,
                                     ),
                                   ),
                               itemAsString: (Company? u) => u?.pseudoId == null
@@ -750,9 +752,9 @@ class UserDialogState extends State<UserDialog> {
                                   _selectedCompany = newValue ?? Company();
                                 });
                               },
-                              validator: (value) =>
-                                  value == null && _companyController.text == ''
-                                  ? "Select an existing or Create a new company"
+                              validator: (value) => value == null &&
+                                      _companyController.text == ''
+                                  ? _localizations.selectOrCreateCompany
                                   : null,
                             );
                           default:
@@ -788,7 +790,7 @@ class UserDialogState extends State<UserDialog> {
                             });
                           }
                         },
-                        child: const Text('Update'),
+                        child: Text(_localizations.update),
                       ),
                     ),
                   const SizedBox(width: 5),
@@ -801,7 +803,7 @@ class UserDialogState extends State<UserDialog> {
                             _selectedCompany = Company();
                           });
                         },
-                        child: const Text('Remove'),
+                        child: Text(_localizations.remove),
                       ),
                     ),
                   const SizedBox(width: 5),
@@ -828,8 +830,8 @@ class UserDialogState extends State<UserDialog> {
                       },
                       child: Text(
                         _selectedCompany.name != null
-                            ? 'Add new'
-                            : 'Add new related compamy',
+                            ? _localizations.addNew
+                            : _localizations.addNewRelatedCompany,
                       ),
                     ),
                   ),
@@ -840,7 +842,7 @@ class UserDialogState extends State<UserDialog> {
         ),
       InputDecorator(
         decoration: InputDecoration(
-          labelText: 'User Login',
+          labelText: _localizations.userLogin,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
         ),
         child: Column(
@@ -848,7 +850,8 @@ class UserDialogState extends State<UserDialog> {
             TextFormField(
               readOnly: !(currentUser.userGroup == UserGroup.admin),
               key: const Key('loginName'),
-              decoration: const InputDecoration(labelText: 'User Login Name '),
+              decoration:
+                  InputDecoration(labelText: _localizations.userLoginName),
               controller: _loginNameController,
               onChanged: (value) {
                 if (value.isNotEmpty != _hasLogin) {
@@ -860,7 +863,7 @@ class UserDialogState extends State<UserDialog> {
               validator: (value) {
                 if (widget.user.userGroup == UserGroup.admin &&
                     value!.isEmpty) {
-                  return 'An administrator needs a username!';
+                  return _localizations.adminNeedsUsername;
                 }
                 return null;
               },
@@ -874,14 +877,14 @@ class UserDialogState extends State<UserDialog> {
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<UserGroup>(
-                          decoration: const InputDecoration(
-                            labelText: 'Security User Group',
+                          decoration: InputDecoration(
+                            labelText: _localizations.securityUserGroup,
                           ),
                           key: const Key('userGroup'),
-                          hint: const Text('Security User Group'),
+                          hint: Text(_localizations.securityUserGroup),
                           initialValue: _selectedUserGroup,
                           validator: (value) =>
-                              value == null ? 'field required' : null,
+                              value == null ? _localizations.fieldRequired : null,
                           items: localUserGroups.map((item) {
                             return DropdownMenuItem<UserGroup>(
                               value: item,
@@ -902,7 +905,7 @@ class UserDialogState extends State<UserDialog> {
                         height: 60,
                         child: InputDecorator(
                           decoration: InputDecoration(
-                            labelText: 'Disabled',
+                            labelText: _localizations.disabled,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(25.0),
                             ),
@@ -934,7 +937,7 @@ class UserDialogState extends State<UserDialog> {
               backgroundColor: WidgetStateProperty.all(Colors.red),
             ),
             key: const Key('deleteUser'),
-            child: const Text('Delete User'),
+            child: Text(_localizations.deleteUser),
             onPressed: () async {
               if (widget.user.partyId != null &&
                   currentUser.partyId == widget.user.partyId) {
@@ -962,11 +965,11 @@ class UserDialogState extends State<UserDialog> {
         Expanded(
           child: OutlinedButton(
             key: const Key('updateUser'),
-            child: Text(updatedUser.partyId == null ? 'Create' : 'Update'),
+            child: Text(
+                updatedUser.partyId == null ? _localizations.create : _localizations.update),
             onPressed: () async {
               if (_userDialogFormKey.currentState!.validate()) {
                 updatedUser = updatedUser.copyWith(
-                  pseudoId: _idController.text,
                   firstName: _firstNameController.text,
                   lastName: _lastNameController.text,
                   email: _emailController.text,

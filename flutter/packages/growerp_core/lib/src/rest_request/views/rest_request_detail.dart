@@ -26,6 +26,7 @@ class RestRequestDetailDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = CoreLocalizations.of(context)!;
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
 
     return Dialog(
@@ -34,7 +35,7 @@ class RestRequestDetailDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: CoreLocalizations.of(context)!.restRequestDetails,
+        title: localizations.restRequestDetails,
         width: isPhone ? 400 : 800,
         height: isPhone ? 700 : 600,
         child: SingleChildScrollView(
@@ -42,68 +43,61 @@ class RestRequestDetailDialog extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildDetailRow(
-                CoreLocalizations.of(context)!.dateTime,
+                localizations.dateTime,
                 restRequest.dateTime != null
                     ? DateFormat(
                         'dd/MM/yyyy HH:mm:ss',
                       ).format(restRequest.dateTime!)
-                    : CoreLocalizations.of(context)!.unknown,
+                    : localizations.unknown,
               ),
               _buildDetailRow(
-                CoreLocalizations.of(context)!.user,
+                localizations.user,
                 '${restRequest.user?.firstName ?? ''} ${restRequest.user?.lastName ?? ''}',
               ),
               _buildDetailRow(
-                CoreLocalizations.of(context)!.email,
-                restRequest.user?.email ??
-                    CoreLocalizations.of(context)!.notAvailable,
+                localizations.email,
+                restRequest.user?.email ?? localizations.notAvailable,
               ),
               _buildDetailRow(
-                CoreLocalizations.of(context)!.loginName,
-                restRequest.user?.loginName ??
-                    CoreLocalizations.of(context)!.notAvailable,
+                localizations.loginName,
+                restRequest.user?.loginName ?? localizations.notAvailable,
               ),
               _buildDetailRow(
-                CoreLocalizations.of(context)!.requestName,
-                restRequest.restRequestName ??
-                    CoreLocalizations.of(context)!.notAvailable,
+                localizations.requestName,
+                restRequest.restRequestName ?? localizations.notAvailable,
               ),
               _buildDetailRow(
-                CoreLocalizations.of(context)!.serverIp,
-                restRequest.serverIp ??
-                    CoreLocalizations.of(context)!.notAvailable,
+                localizations.serverIp,
+                restRequest.serverIp ?? localizations.notAvailable,
               ),
               _buildDetailRow(
-                CoreLocalizations.of(context)!.serverHost,
-                restRequest.serverHostName ??
-                    CoreLocalizations.of(context)!.notAvailable,
+                localizations.serverHost,
+                restRequest.serverHostName ?? localizations.notAvailable,
               ),
               _buildDetailRow(
-                CoreLocalizations.of(context)!.runningTime,
-                '${restRequest.runningTimeMillis ?? 0}${CoreLocalizations.of(context)!.ms}',
+                localizations.runningTime,
+                '${restRequest.runningTimeMillis ?? 0}${localizations.ms}',
               ),
               _buildDetailRow(
-                CoreLocalizations.of(context)!.status,
+                localizations.status,
                 restRequest.wasError == true
-                    ? CoreLocalizations.of(context)!.error
-                    : CoreLocalizations.of(context)!.success,
-                valueColor: restRequest.wasError == true
-                    ? Colors.red
-                    : Colors.green,
+                    ? localizations.error
+                    : localizations.success,
+                valueColor:
+                    restRequest.wasError == true ? Colors.red : Colors.green,
               ),
               _buildDetailRow(
-                CoreLocalizations.of(context)!.slowHit,
+                localizations.slowHit,
                 restRequest.isSlowHit == true
-                    ? CoreLocalizations.of(context)!.yes
-                    : CoreLocalizations.of(context)!.no,
-                valueColor: restRequest.isSlowHit == true
-                    ? Colors.orange
-                    : Colors.green,
+                    ? localizations.yes
+                    : localizations.no,
+                valueColor:
+                    restRequest.isSlowHit == true ? Colors.orange : Colors.green,
               ),
               if (restRequest.errorMessage?.isNotEmpty == true) ...[
                 const SizedBox(height: 10),
                 Text(
-                  CoreLocalizations.of(context)!.errorMessage,
+                  localizations.errorMessage,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.red,
@@ -129,7 +123,7 @@ class RestRequestDetailDialog extends StatelessWidget {
               if (restRequest.requestUrl?.isNotEmpty == true) ...[
                 const SizedBox(height: 10),
                 Text(
-                  CoreLocalizations.of(context)!.requestUrl,
+                  localizations.requestUrl,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 5),
@@ -149,7 +143,7 @@ class RestRequestDetailDialog extends StatelessWidget {
               if (restRequest.referrerUrl?.isNotEmpty == true) ...[
                 const SizedBox(height: 10),
                 Text(
-                  CoreLocalizations.of(context)!.referrerUrl,
+                  localizations.referrerUrl,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 5),
@@ -169,7 +163,7 @@ class RestRequestDetailDialog extends StatelessWidget {
               if (restRequest.parameterString?.isNotEmpty == true) ...[
                 const SizedBox(height: 10),
                 Text(
-                  CoreLocalizations.of(context)!.parameters,
+                  localizations.parameters,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 5),

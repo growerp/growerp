@@ -37,6 +37,7 @@ class CompanyListState extends State<CompanyList> {
   final _horizontalController = ScrollController();
   final double _scrollThreshold = 200.0;
   late CompanyBloc _companyBloc;
+  late UserCompanyLocalizations _localizations;
   List<Company> companies = const <Company>[];
   bool showSearchField = false;
   String searchString = '';
@@ -77,7 +78,7 @@ class CompanyListState extends State<CompanyList> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = UserCompanyLocalizations.of(context)!;
+    _localizations = UserCompanyLocalizations.of(context)!;
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
     right = right ?? (isAPhone(context) ? 20 : 50);
     return Builder(
@@ -87,7 +88,7 @@ class CompanyListState extends State<CompanyList> {
             return Center(
               heightFactor: 20,
               child: Text(
-                localizations.companyNone,
+                _localizations.companyNone,
                 style: const TextStyle(fontSize: 20.0),
               ),
             );
@@ -170,7 +171,8 @@ class CompanyListState extends State<CompanyList> {
         blocListener(context, state) {
           if (state.status == CompanyStatus.success) {
             final translatedMessage = state.message != null
-                ? translateUserCompanyBlocMessage(localizations, state.message!)
+                ? translateUserCompanyBlocMessage(
+                    _localizations, state.message!)
                 : '';
             if (translatedMessage.isNotEmpty) {
               HelperFunctions.showMessage(
@@ -185,7 +187,7 @@ class CompanyListState extends State<CompanyList> {
         blocBuilder(context, state) {
           if (state.status == CompanyStatus.failure) {
             return FatalErrorForm(
-              message: localizations.couldNotLoad(widget.role.toString()),
+              message: _localizations.couldNotLoad(widget.role.toString()),
             );
           } else {
             companies = state.companies;
@@ -269,7 +271,7 @@ class CompanyListState extends State<CompanyList> {
                               },
                             );
                           },
-                          tooltip: localizations.addNew,
+                          tooltip: _localizations.addNew,
                           child: const Icon(Icons.add),
                         ),
                         const SizedBox(height: 10),
@@ -283,7 +285,7 @@ class CompanyListState extends State<CompanyList> {
                                 mainOnly: widget.mainOnly,
                               ),
                             ),
-                            tooltip: localizations.refresh,
+                            tooltip: _localizations.refresh,
                             child: const Icon(Icons.refresh),
                           ),
                       ],

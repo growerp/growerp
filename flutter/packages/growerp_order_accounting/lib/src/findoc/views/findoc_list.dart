@@ -61,7 +61,6 @@ class FinDocListState extends State<FinDocList> {
   List<FinDoc> finDocs = <FinDoc>[];
   int? tab;
   late int limit;
-  late String entityName;
   late bool isPhone;
   bool hasReachedMax = false;
   late FinDocBloc _finDocBloc;
@@ -84,10 +83,6 @@ class FinDocListState extends State<FinDocList> {
     my = _authBloc.state.authenticate?.user?.userGroup == UserGroup.other;
     classificationId = context.read<String>();
     myFocusNode = FocusNode();
-    entityName =
-        classificationId == 'AppHotel' && widget.docType == FinDocType.order
-        ? _localizations.reservation
-        : widget.docType.toString();
     _scrollController.addListener(_onScroll);
     switch (widget.docType) {
       case FinDocType.order:

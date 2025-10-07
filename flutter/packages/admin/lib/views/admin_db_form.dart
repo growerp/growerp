@@ -25,6 +25,7 @@ class AdminDbForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = CoreLocalizations.of(context)!;
     String currencyId = context
         .read<AuthBloc>()
         .state
@@ -47,36 +48,36 @@ class AdminDbForm extends StatelessWidget {
                 authenticate.company!.name!.length > 20
                     ? "${authenticate.company!.name!.substring(0, 20)}..."
                     : "${authenticate.company!.name}",
-                "${CoreLocalizations.of(context)!.administrators}: ${authenticate.stats?.admins ?? 0}",
-                "${CoreLocalizations.of(context)!.otherEmployees}: ${authenticate.stats?.employees ?? 0}",
+                "${localizations.administrators}: ${authenticate.stats?.admins ?? 0}",
+                "${localizations.otherEmployees}: ${authenticate.stats?.employees ?? 0}",
               ]),
               makeDashboardItem('dbCrm', context, menuOptions(context)[2], [
-                "${CoreLocalizations.of(context)!.allOpportunities}: ${authenticate.stats?.opportunities ?? 0}",
-                "${CoreLocalizations.of(context)!.leads}: ${authenticate.stats?.leads ?? 0}",
-                "${CoreLocalizations.of(context)!.customers}: ${authenticate.stats?.customers ?? 0}",
+                "${localizations.allOpportunities}: ${authenticate.stats?.opportunities ?? 0}",
+                "${localizations.leads}: ${authenticate.stats?.leads ?? 0}",
+                "${localizations.customers}: ${authenticate.stats?.customers ?? 0}",
               ]),
               makeDashboardItem('dbCatalog', context, menuOptions(context)[3], [
-                "${CoreLocalizations.of(context)!.categories}: ${authenticate.stats?.categories ?? 0}",
-                "${CoreLocalizations.of(context)!.products}: ${authenticate.stats?.products ?? 0}",
-                "${CoreLocalizations.of(context)!.assets}: ${authenticate.stats?.assets ?? 0}",
+                "${localizations.categories}: ${authenticate.stats?.categories ?? 0}",
+                "${localizations.products}: ${authenticate.stats?.products ?? 0}",
+                "${localizations.assets}: ${authenticate.stats?.assets ?? 0}",
               ]),
               makeDashboardItem('dbOrders', context, menuOptions(context)[4], [
-                "${CoreLocalizations.of(context)!.salesOrders}: ${authenticate.stats?.openSlsOrders ?? 0}",
-                "${CoreLocalizations.of(context)!.customers}: ${authenticate.stats?.customers ?? 0}",
-                "${CoreLocalizations.of(context)!.purchaseOrders}: ${authenticate.stats?.openPurOrders ?? 0}",
-                "${CoreLocalizations.of(context)!.suppliers}: ${authenticate.stats?.suppliers ?? 0}",
+                "${localizations.salesOrders}: ${authenticate.stats?.openSlsOrders ?? 0}",
+                "${localizations.customers}: ${authenticate.stats?.customers ?? 0}",
+                "${localizations.purchaseOrders}: ${authenticate.stats?.openPurOrders ?? 0}",
+                "${localizations.suppliers}: ${authenticate.stats?.suppliers ?? 0}",
               ]),
               makeDashboardItem('dbInventory', context, menuOptions(context)[5], [
-                "${CoreLocalizations.of(context)!.incomingShipments}: ${authenticate.stats?.incomingShipments ?? 0}",
-                "${CoreLocalizations.of(context)!.outgoingShipments}: ${authenticate.stats?.outgoingShipments ?? 0}",
-                "${CoreLocalizations.of(context)!.whLocations}: ${authenticate.stats?.whLocations ?? 0}",
+                "${localizations.incomingShipments}: ${authenticate.stats?.incomingShipments ?? 0}",
+                "${localizations.outgoingShipments}: ${authenticate.stats?.outgoingShipments ?? 0}",
+                "${localizations.whLocations}: ${authenticate.stats?.whLocations ?? 0}",
               ]),
               makeDashboardItem('dbAccounting', context, menuOptions(context)[6], [
-                "${CoreLocalizations.of(context)!.salesOpenInvoices}:",
+                "${localizations.salesOpenInvoices}:",
                 "$currencySymbol "
                     "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
                     "(${authenticate.stats?.salesInvoicesNotPaidCount ?? 0})",
-                "${CoreLocalizations.of(context)!.purchaseUnpaidInvoices}:",
+                "${localizations.purchaseUnpaidInvoices}:",
                 "$currencySymbol "
                     "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
                     "(${authenticate.stats?.purchInvoicesNotPaidCount ?? 0})",

@@ -36,6 +36,7 @@ class UserListState extends State<UserList> {
   final double _scrollThreshold = 100.0;
   late UserBloc _userBloc;
   late AuthBloc _authBloc;
+  late UserCompanyLocalizations _localizations;
   List<User> users = const <User>[];
   bool showSearchField = false;
   String searchString = '';
@@ -76,6 +77,7 @@ class UserListState extends State<UserList> {
 
   @override
   Widget build(BuildContext context) {
+    _localizations = UserCompanyLocalizations.of(context)!;
     final isPhone = ResponsiveBreakpoints.of(context).isMobile;
     right = right ?? (isPhone ? 20 : 50);
     return Builder(
@@ -176,9 +178,8 @@ class UserListState extends State<UserList> {
             );
           }
           if (state.status == UserStatus.success) {
-            final localizations = UserCompanyLocalizations.of(context)!;
             final translatedMessage = state.message != null
-                ? translateUserCompanyBlocMessage(localizations, state.message!)
+                ? translateUserCompanyBlocMessage(_localizations, state.message!)
                 : '';
             if (translatedMessage.isNotEmpty) {
               HelperFunctions.showMessage(
@@ -280,7 +281,7 @@ class UserListState extends State<UserList> {
                               },
                             );
                           },
-                          tooltip: 'Add New',
+                          tooltip: _localizations.addNew,
                           child: const Icon(Icons.add),
                         ),
                         const SizedBox(height: 10),
@@ -299,7 +300,7 @@ class UserListState extends State<UserList> {
                               },
                             );
                           },
-                          tooltip: 'companies/users up/download',
+                          tooltip: _localizations.compUserUpDownload,
                           child: const Icon(Icons.file_copy),
                         ),
                       ],

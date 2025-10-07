@@ -33,6 +33,7 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
   final TextEditingController _hoursController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   late ActivityBloc activityBloc;
+  late ActivityLocalizations _localizations;
 
   @override
   void initState() {
@@ -46,6 +47,7 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
 
   @override
   Widget build(BuildContext context) {
+    _localizations = ActivityLocalizations.of(context)!;
     return GestureDetector(
       onTap: () => Navigator.of(context).pop(),
       child: GestureDetector(
@@ -63,12 +65,8 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
                   HelperFunctions.showMessage(
                     context,
                     widget.timeEntry.timeEntryId == null
-                        ? ActivityLocalizations.of(
-                            context,
-                          )!.timeEntry_addSuccess
-                        : ActivityLocalizations.of(
-                            context,
-                          )!.timeEntry_updateSuccess,
+                        ? _localizations.timeEntry_addSuccess
+                        : _localizations.timeEntry_updateSuccess,
                     Colors.green,
                   );
                   Navigator.of(context).pop();
@@ -76,9 +74,7 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
                 case ActivityBlocStatus.failure:
                   HelperFunctions.showMessage(
                     context,
-                    ActivityLocalizations.of(
-                      context,
-                    )!.activity_error(state.message ?? 'unknown'),
+                    _localizations.activity_error(state.message ?? 'unknown'),
                     Colors.red,
                   );
                   break;
@@ -89,7 +85,7 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
             child: popUp(
               context: context,
               child: _showForm(),
-              title: ActivityLocalizations.of(context)!.timeEntry_title,
+              title: _localizations.timeEntry_title,
               height: 400,
               width: 400,
             ),
@@ -129,10 +125,9 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
             Center(
               child: Text(
                 widget.timeEntry.timeEntryId == null
-                    ? ActivityLocalizations.of(context)!.timeEntry_new
-                    : ActivityLocalizations.of(
-                        context,
-                      )!.timeEntry_id(widget.timeEntry.timeEntryId!),
+                    ? _localizations.timeEntry_new
+                    : _localizations
+                        .timeEntry_id(widget.timeEntry.timeEntryId!),
                 style: const TextStyle(
                   fontSize: 10,
                   color: Colors.black,
@@ -157,7 +152,7 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
                     key: const Key('setDate'),
                     onPressed: () => selectDate(context),
                     child: Text(
-                      ActivityLocalizations.of(context)!.timeEntry_updateDate,
+                      _localizations.timeEntry_updateDate,
                     ),
                   ),
                 ),
@@ -167,15 +162,13 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
             TextFormField(
               key: const Key('hours'),
               decoration: InputDecoration(
-                labelText: ActivityLocalizations.of(context)!.timeEntry_hours,
+                labelText: _localizations.timeEntry_hours,
               ),
               controller: _hoursController,
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value!.isEmpty) {
-                  return ActivityLocalizations.of(
-                    context,
-                  )!.timeEntry_hoursError;
+                  return _localizations.timeEntry_hoursError;
                 }
                 return null;
               },
@@ -184,9 +177,7 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
             TextFormField(
               key: const Key('comments'),
               decoration: InputDecoration(
-                labelText: ActivityLocalizations.of(
-                  context,
-                )!.timeEntry_comments,
+                labelText: _localizations.timeEntry_comments,
               ),
               controller: _commentsController,
             ),
@@ -195,8 +186,8 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
               key: const Key('update'),
               child: Text(
                 widget.timeEntry.timeEntryId == null
-                    ? ActivityLocalizations.of(context)!.activity_create
-                    : ActivityLocalizations.of(context)!.activity_update,
+                    ? _localizations.activity_create
+                    : _localizations.activity_update,
               ),
               onPressed: () async {
                 activityBloc.add(

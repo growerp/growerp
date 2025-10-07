@@ -71,13 +71,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
   }
 
   @override
-  void didChangeDependencies() {
-    _localizations = WebsiteLocalizations.of(context)!;
-    super.didChangeDependencies();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    _localizations = WebsiteLocalizations.of(context)!;
     return BlocConsumer<WebsiteBloc, WebsiteState>(
         listener: (context, websiteState) {
       switch (websiteState.status) {

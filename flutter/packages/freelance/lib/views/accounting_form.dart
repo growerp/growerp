@@ -26,6 +26,7 @@ class AccountingForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = CoreLocalizations.of(context)!;
     String currencyId = context
         .read<AuthBloc>()
         .state
@@ -43,34 +44,34 @@ class AccountingForm extends StatelessWidget {
       key: const Key('AcctDashBoard'),
       dashboardItems: [
         makeDashboardItem('acctSales', context, acctOptions[1], [
-          CoreLocalizations.of(context)!.openInvoices,
+          localizations.openInvoices,
           "$currencySymbol "
               "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.salesInvoicesNotPaidCount})",
         ]),
         makeDashboardItem('acctPurchase', context, acctOptions[2], [
-          CoreLocalizations.of(context)!.openInvoices,
+          localizations.openInvoices,
           "$currencySymbol "
               "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.purchInvoicesNotPaidCount})",
         ]),
         makeDashboardItem('acctLedger', context, acctOptions[3], [
-          CoreLocalizations.of(context)!.accounts,
-          CoreLocalizations.of(context)!.transactions,
-          CoreLocalizations.of(context)!.journal,
+          localizations.accounts,
+          localizations.transactions,
+          localizations.journal,
         ]),
         makeDashboardItem('acctReports', context, acctOptions[4], [
-          CoreLocalizations.of(context)!.revenueExpense,
-          CoreLocalizations.of(context)!.balanceSheet,
-          CoreLocalizations.of(context)!.balanceSummary,
+          localizations.revenueExpense,
+          localizations.balanceSheet,
+          localizations.balanceSummary,
         ]),
         makeDashboardItem('AcctSetup', context, acctOptions[5], [
-          CoreLocalizations.of(context)!.timePeriods,
-          CoreLocalizations.of(context)!.itemTypes,
-          CoreLocalizations.of(context)!.paymentTypes,
+          localizations.timePeriods,
+          localizations.itemTypes,
+          localizations.paymentTypes,
         ]),
         makeDashboardItem(
-          CoreLocalizations.of(context)!.mainDashboard,
+          localizations.mainDashboard,
           context,
           acctOptions[6],
           [],
