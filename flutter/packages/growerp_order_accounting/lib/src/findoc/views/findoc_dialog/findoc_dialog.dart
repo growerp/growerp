@@ -797,7 +797,7 @@ class MyFinDocState extends State<FinDocPage> {
       );
       rowContent.add(
         TableRowContent(
-          width: isPhone ? 15 : 27,
+          width: isPhone ? 35 : 27,
           name: _localizations.description,
           value: Text(
             item.description ?? '',
@@ -821,7 +821,7 @@ class MyFinDocState extends State<FinDocPage> {
       }
       rowContent.add(
         TableRowContent(
-          width: 5,
+          width: 12,
           name: Text(_localizations.quantity, textAlign: TextAlign.right),
           value: Text(
             item.quantity == null

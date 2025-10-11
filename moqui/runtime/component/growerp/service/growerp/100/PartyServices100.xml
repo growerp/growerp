@@ -2719,7 +2719,6 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <log message="====register with locale: $locale and timeZoneOffset: $timeZoneOffset" />
             <!-- Set the locale in the execution context so error messages are localized -->
             <if condition="locale">
                 <script>ec.user.setLocale(new Locale(locale))</script>
