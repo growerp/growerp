@@ -341,7 +341,7 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[chatRoomId: chatRoom.chatRoomId,
                             isActive: member.isActive == true ? 'Y' : 'N',
                             hasRead: member.hasRead == true ? 'Y' : 'N',
-                            userId: member.member.userId]" />
+                            userId: member.userId]" />
             </iterate>
             <service-call name="growerp.100.ChatServices100.get#ChatRoom"
                 in-map="[chatRoomId: chatRoom.chatRoomId]" out-map="context" />

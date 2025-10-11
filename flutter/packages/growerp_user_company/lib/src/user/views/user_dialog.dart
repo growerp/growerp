@@ -330,7 +330,7 @@ class UserDialogState extends State<UserDialogStateFull> {
     return Visibility(
       visible: isVisible,
       child: FloatingActionButton(
-        key: const Key("updateFloat"),
+        key: const Key("updateUser"),
         heroTag: "userUpdate",
         onPressed: () {
           update(localizations);
