@@ -36,8 +36,12 @@ class UserTest {
     await selectUsers(tester, 'dbOrders', 'UserListSupplier', '4');
   }
 
-  static Future<void> selectUsers(WidgetTester tester, String option,
-      String formName, String tabNumber) async {
+  static Future<void> selectUsers(
+    WidgetTester tester,
+    String option,
+    String formName,
+    String tabNumber,
+  ) async {
     if (find
         .byKey(const Key('HomeFormAuth'))
         .toString()
@@ -47,23 +51,30 @@ class UserTest {
     await CommonTest.selectOption(tester, option, formName, tabNumber);
   }
 
-  static Future<void> addUsers(WidgetTester tester, List<User> users,
-      {bool check = true, bool companyUser = false}) async {
+  static Future<void> addUsers(
+    WidgetTester tester,
+    List<User> users, {
+    bool check = true,
+    bool companyUser = false,
+  }) async {
     SaveTest test = await PersistFunctions.getTest();
     await PersistFunctions.persistTest(test.copyWith(users: users));
     await enterUserData(tester, companyUser: companyUser);
   }
 
-  static Future<void> updateUsers(WidgetTester tester, List<User> newUsers,
-      {bool companyUser = false}) async {
+  static Future<void> updateUsers(
+    WidgetTester tester,
+    List<User> newUsers, {
+    bool companyUser = false,
+  }) async {
     SaveTest old = await PersistFunctions.getTest();
     // copy pseudo id to new data
     for (int x = 0; x < newUsers.length; x++) {
       newUsers[x] = newUsers[x].copyWith(pseudoId: old.users[x].pseudoId);
       if (newUsers[x].company != null) {
-        Company newCompany = newUsers[x]
-            .company!
-            .copyWith(pseudoId: old.users[x].company?.pseudoId);
+        Company newCompany = newUsers[x].company!.copyWith(
+          pseudoId: old.users[x].company?.pseudoId,
+        );
         newUsers[x] = newUsers[x].copyWith(company: newCompany);
       }
     }
@@ -78,19 +89,29 @@ class UserTest {
     if (test.users.last.role == Role.company) {
       count++;
     }
-    expect(find.byKey(const Key('userItem'), skipOffstage: false),
-        findsNWidgets(count));
-    await CommonTest.tapByKey(tester, 'delete${count - 1}',
-        seconds: CommonTest.waitTime);
-    expect(find.byKey(const Key('userItem'), skipOffstage: false),
-        findsNWidgets(count - 1));
+    expect(
+      find.byKey(const Key('userItem'), skipOffstage: false),
+      findsNWidgets(count),
+    );
+    await CommonTest.tapByKey(
+      tester,
+      'delete${count - 1}',
+      seconds: CommonTest.waitTime,
+    );
+    expect(
+      find.byKey(const Key('userItem'), skipOffstage: false),
+      findsNWidgets(count - 1),
+    );
     PersistFunctions.persistTest(
-        test.copyWith(users: test.users.sublist(0, count - 2)));
+      test.copyWith(users: test.users.sublist(0, count - 2)),
+    );
   }
 
-  static Future<void> enterUserData(WidgetTester tester,
-      // if called from companyUser list
-      {bool companyUser = false}) async {
+  static Future<void> enterUserData(
+    WidgetTester tester, {
+    // if called from companyUser list
+    bool companyUser = false,
+  }) async {
     SaveTest test = await PersistFunctions.getTest();
     int seq = test.sequence;
     List<User> newUsers = [];
@@ -100,15 +121,18 @@ class UserTest {
       } else {
         await CommonTest.doNewSearch(tester, searchString: user.pseudoId!);
         expect(
-            CommonTest.getTextField('topHeader').split('#')[1], user.pseudoId);
+          CommonTest.getTextField('topHeader').split('#')[1],
+          user.pseudoId,
+        );
       }
       expect(find.byKey(Key('UserDialog${user.role!.name}')), findsOneWidget);
       await CommonTest.enterText(tester, 'firstName', user.firstName!);
       await CommonTest.enterText(tester, 'lastName', user.lastName!);
 
       if (user.email != null) {
-        user =
-            user.copyWith(email: user.email!.replaceFirst('XXX', '${seq++}'));
+        user = user.copyWith(
+          email: user.email!.replaceFirst('XXX', '${seq++}'),
+        );
       }
       await CommonTest.enterText(tester, 'userEmail', user.email ?? '');
 
@@ -118,7 +142,10 @@ class UserTest {
       await CommonTest.enterText(tester, 'userUrl', user.url ?? '');
 
       await CommonTest.enterText(
-          tester, 'userTelephoneNr', user.telephoneNr ?? '');
+        tester,
+        'userTelephoneNr',
+        user.telephoneNr ?? '',
+      );
 
       // if required add address and payment
       await CommonTest.dragUntil(tester, key: 'addressLabel');
@@ -134,8 +161,9 @@ class UserTest {
       if (user.paymentMethod != null) {
         await CompanyTest.updatePaymentMethod(tester, user.paymentMethod!);
       } else {
-        if (!CommonTest.getTextField('paymentMethodLabel')
-            .startsWith('No payment methods yet')) {
+        if (!CommonTest.getTextField(
+          'paymentMethodLabel',
+        ).startsWith('No payment methods yet')) {
           await CommonTest.tapByKey(tester, 'deletePaymentMethod');
         }
       }
@@ -143,59 +171,91 @@ class UserTest {
       // company info fixed for employees will not show for update
       bool companyAssigned = false;
       if (user.role != Role.company) {
-        if (user.company?.name == null) {
+        await CommonTest.drag(tester);
+        if (user.company?.name == null &&
+            await CommonTest.doesExistKey(tester, 'removeCompany')) {
           // remove existing company
-          if (CommonTest.doesExistKey(tester, 'removeCompany')) {
-            await CommonTest.tapByKey(tester, 'removeCompany');
-          }
+          await CommonTest.tapByKey(tester, 'removeCompany');
         } else {
           // check company buttons if company assigned
-          if (CommonTest.doesExistKey(tester, 'newCompany')) {
+          if (await CommonTest.doesExistKey(tester, 'newCompany')) {
             await CommonTest.tapByKey(tester, 'newCompany');
             companyAssigned = true;
           } else {
             await CommonTest.tapByKey(tester, 'editCompany');
-            expect(CommonTest.getTextField('topHeader').split('#')[1],
-                user.company!.pseudoId);
+            expect(
+              CommonTest.getTextField('topHeader').split('#')[1],
+              user.company!.pseudoId,
+            );
           }
           await CommonTest.enterText(
-              tester, 'companyName', user.company!.name!); // required!
+            tester,
+            'companyName',
+            user.company!.name!,
+          ); // required!
           await CommonTest.enterText(
-              tester, 'telephoneNr', user.company!.telephoneNr ?? '');
+            tester,
+            'telephoneNr',
+            user.company!.telephoneNr ?? '',
+          );
           if (user.company?.email != null) {
             user = user.copyWith(
-                company: user.company!.copyWith(
-                    email:
-                        user.company!.email!.replaceFirst('XXX', '${seq++}')));
+              company: user.company!.copyWith(
+                email: user.company!.email!.replaceFirst('XXX', '${seq++}'),
+              ),
+            );
           }
           if (user.company?.url != null) {
             user = user.copyWith(
-                company: user.company!.copyWith(
-                    url: user.company!.url!.replaceFirst('XXX', '${seq++}')));
+              company: user.company!.copyWith(
+                url: user.company!.url!.replaceFirst('XXX', '${seq++}'),
+              ),
+            );
           }
           await CommonTest.dragUntil(tester, key: 'email');
           await CommonTest.enterText(
-              tester, 'email', user.company?.email ?? '');
+            tester,
+            'email',
+            user.company?.email ?? '',
+          );
           await CommonTest.enterText(tester, 'url', user.company?.url ?? '');
-          await CommonTest.dragUntil(tester, key: 'update');
-          await CommonTest.tapByKey(tester, 'update');
+          await CommonTest.dragUntil(
+            tester,
+            key: 'companyDialogUpdate',
+            listViewName: 'companyDialogListView',
+          );
+          await CommonTest.tapByKey(tester, 'companyDialogUpdate');
+          await CommonTest.dragUntil(
+            tester,
+            key: 'userDialogUpdate',
+            listViewName: 'userDialogListView',
+          );
+          await CommonTest.tapByKey(tester, 'userDialogUpdate');
         }
       }
 
-      await CommonTest.dragUntil(tester, key: 'loginName');
       if (user.loginName != null) {
+        await CommonTest.dragUntil(tester, key: 'loginName');
         user = user.copyWith(
-            loginName: user.loginName!.replaceFirst('XXX', '${seq++}'));
+          loginName: user.loginName!.replaceFirst('XXX', '${seq++}'),
+        );
         await CommonTest.enterText(tester, 'loginName', user.loginName!);
         await CommonTest.enterDropDown(
-            tester, 'userGroup', user.userGroup!.name);
+          tester,
+          'userGroup',
+          user.userGroup!.name,
+        );
         if (user.loginDisabled != null &&
             CommonTest.getCheckbox('loginDisabled') != user.loginDisabled) {
           await CommonTest.tapByKey(tester, 'loginDisabled');
         }
       }
       await CommonTest.dragUntil(tester, key: 'updateUser');
-      await CommonTest.tapByKey(tester, 'updateUser');
+      await CommonTest.tapByKey(
+        tester,
+        'updateUser',
+        seconds: CommonTest.waitTime,
+      );
       await CommonTest.waitForSnackbarToGo(tester);
 
       // get new user pseudoId when adding
@@ -210,9 +270,12 @@ class UserTest {
         if (companyAssigned) {
           if (companyUser) {
             expect(
-                CommonTest.doesExistKey(
-                    tester, 'CompanyDialog${user.company!.role!.name}'),
-                true);
+              CommonTest.doesExistKey(
+                tester,
+                'CompanyDialog${user.company!.role!.name}',
+              ),
+              true,
+            );
             // company pseudoId
             user = user.copyWith(company: user.company!.copyWith(pseudoId: id));
             var employeeId = CommonTest.getTextField('employee0').split('[')[1];
@@ -221,27 +284,40 @@ class UserTest {
             user = user.copyWith(pseudoId: employeeId);
           } else {
             expect(
-                CommonTest.doesExistKey(tester, 'UserDialog${user.role!.name}'),
-                true,
-                reason: "key: UserDialog${user.role!.name} not found");
-            var companyPseudoId =
-                CommonTest.getDropdownSearch('userCompanyName').split('[')[1];
+              await CommonTest.doesExistKey(
+                tester,
+                'UserDialog${user.role!.name}',
+              ),
+              true,
+              reason: "key: UserDialog${user.role!.name} not found",
+            );
+            var companyPseudoId = CommonTest.getDropdownSearch(
+              'userCompanyName',
+            ).split('[')[1];
             companyPseudoId = companyPseudoId.split(']')[0];
             user = user.copyWith(
-                company: user.company!.copyWith(pseudoId: companyPseudoId));
+              company: user.company!.copyWith(pseudoId: companyPseudoId),
+            );
           }
         }
         if (user.pseudoId == null) {
           if (companyAssigned && companyUser) {
             expect(
-                CommonTest.doesExistKey(
-                    tester, 'CompanyDialog${user.company!.role!.name}'),
-                true);
+              CommonTest.doesExistKey(
+                tester,
+                'CompanyDialog${user.company!.role!.name}',
+              ),
+              true,
+            );
           } else {
             expect(
-                CommonTest.doesExistKey(tester, 'UserDialog${user.role!.name}'),
-                true,
-                reason: "key: UserDialog${user.role!.name} not found");
+              await CommonTest.doesExistKey(
+                tester,
+                'UserDialog${user.role!.name}',
+              ),
+              true,
+              reason: "key: UserDialog${user.role!.name} not found",
+            );
           }
           // user pseudoId
           user = user.copyWith(pseudoId: id);
@@ -251,7 +327,8 @@ class UserTest {
       newUsers.add(user);
     }
     await PersistFunctions.persistTest(
-        test.copyWith(users: newUsers, sequence: seq));
+      test.copyWith(users: newUsers, sequence: seq),
+    );
   }
 
   static Future<void> checkUsers(WidgetTester tester) async {
@@ -263,27 +340,37 @@ class UserTest {
       expect(CommonTest.getTextFormField('firstName'), equals(user.firstName!));
       expect(CommonTest.getTextFormField('lastName'), equals(user.lastName!));
       expect(
-          CommonTest.getTextFormField('userEmail'), equals(user.email ?? ''));
+        CommonTest.getTextFormField('userEmail'),
+        equals(user.email ?? ''),
+      );
       expect(CommonTest.getTextFormField('userUrl'), equals(user.url ?? ''));
-      expect(CommonTest.getTextFormField('userTelephoneNr'),
-          equals(user.telephoneNr ?? ''));
+      expect(
+        CommonTest.getTextFormField('userTelephoneNr'),
+        equals(user.telephoneNr ?? ''),
+      );
 
       await CommonTest.dragUntil(tester, key: 'addressLabel');
       expect(
-          CommonTest.getTextField('addressLabel'),
-          equals(user.address == null
+        CommonTest.getTextField('addressLabel'),
+        equals(
+          user.address == null
               ? 'No postal address yet'
-              : "${user.address!.city} ${user.address!.country}"));
+              : "${user.address!.city} ${user.address!.country}",
+        ),
+      );
       if (user.address != null) {
         await CommonTest.tapByKey(tester, 'address');
         await CompanyTest.checkAddress(tester, user.address!);
       }
       await CommonTest.dragUntil(tester, key: 'paymentMethodLabel');
       expect(
-          CommonTest.getTextField('paymentMethodLabel'),
-          contains(user.paymentMethod == null
+        CommonTest.getTextField('paymentMethodLabel'),
+        contains(
+          user.paymentMethod == null
               ? 'No payment methods yet'
-              : "${user.paymentMethod!.ccDescription}"));
+              : "${user.paymentMethod!.ccDescription}",
+        ),
+      );
       if (user.paymentMethod != null) {
         await CompanyTest.checkPaymentMethod(tester, user.paymentMethod!);
       }
@@ -291,38 +378,62 @@ class UserTest {
       if (user.role != Role.company) {
         // employees not show company
         if (user.company?.name == null) {
-          expect(CommonTest.doesExistKey(tester, 'newCompany'), equals(true));
+          expect(
+            await CommonTest.doesExistKey(tester, 'newCompany'),
+            equals(true),
+          );
         } else {
-          expect(CommonTest.doesExistKey(tester, 'editCompany'), equals(true),
-              reason:
-                  'Company ${user.company!.name} not found on user ${user.firstName} ${user.lastName}');
+          expect(
+            await CommonTest.doesExistKey(tester, 'editCompany'),
+            equals(true),
+            reason:
+                'Company ${user.company!.name} not found on user ${user.firstName} ${user.lastName}',
+          );
           await CommonTest.dragUntil(tester, key: 'editCompany');
-          expect(CommonTest.getDropdownSearch('userCompanyName'),
-              contains(user.company!.name));
+          expect(
+            CommonTest.getDropdownSearch('userCompanyName'),
+            contains(user.company!.name),
+          );
           await CommonTest.tapByKey(tester, 'editCompany');
-          expect(CommonTest.getTextFormField('companyName'),
-              equals(user.company!.name!)); // required!
-          expect(CommonTest.getDropdown('role'),
-              equals(user.company!.role.toString()));
-          expect(CommonTest.getTextFormField('telephoneNr'),
-              equals(user.company!.telephoneNr ?? ''));
-          expect(CommonTest.getTextFormField('email'),
-              equals(user.company!.email ?? ''));
-          expect(CommonTest.getTextFormField('url'),
-              equals(user.company!.url ?? ''));
+          expect(
+            CommonTest.getTextFormField('companyName'),
+            equals(user.company!.name!),
+          ); // required!
+          expect(
+            CommonTest.getDropdown('role'),
+            equals(user.company!.role.toString()),
+          );
+          expect(
+            CommonTest.getTextFormField('telephoneNr'),
+            equals(user.company!.telephoneNr ?? ''),
+          );
+          expect(
+            CommonTest.getTextFormField('email'),
+            equals(user.company!.email ?? ''),
+          );
+          expect(
+            CommonTest.getTextFormField('url'),
+            equals(user.company!.url ?? ''),
+          );
           await CommonTest.tapByKey(tester, 'cancel');
         }
       }
       await CommonTest.dragUntil(tester, key: 'loginName');
       // login, check only when login name present, cannot delete userlogin
       if (user.loginName != null && user.loginName!.isNotEmpty) {
-        expect(CommonTest.getTextFormField('loginName'),
-            equals(user.loginName ?? ''));
-        expect(CommonTest.getDropdown('userGroup'),
-            equals(user.userGroup.toString()));
+        expect(
+          CommonTest.getTextFormField('loginName'),
+          equals(user.loginName ?? ''),
+        );
+        expect(
+          CommonTest.getDropdown('userGroup'),
+          equals(user.userGroup.toString()),
+        );
         if (user.loginDisabled != null) {
-          expect(CommonTest.getCheckbox('loginDisabled'),
-              equals(user.loginDisabled));
+          expect(
+            CommonTest.getCheckbox('loginDisabled'),
+            equals(user.loginDisabled),
+          );
         }
       }
       await CommonTest.tapByKey(tester, 'cancel');

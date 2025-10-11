@@ -192,7 +192,7 @@ class CommonTest {
       }
     }
     // check for credit card input (not shown for first registration)
-    if (doesExistKey(tester, 'paymentForm')) {
+    if (await doesExistKey(tester, 'paymentForm')) {
       await tapByKey(tester, 'pay');
     }
 
@@ -421,15 +421,13 @@ class CommonTest {
     );
   }
 
-  static bool doesExistKey(
+  static Future<bool> doesExistKey(
     WidgetTester tester,
     String widgetKey, [
     int count = 1,
-  ]) {
-    if (find
-        .byKey(Key(widgetKey))
-        .toString()
-        .startsWith('Found 0 widgets with key')) {
+  ]) async {
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    if (find.byKey(Key(widgetKey)).last.evaluate().isEmpty) {
       return false;
     }
     return true;
@@ -466,6 +464,8 @@ class CommonTest {
     await tester.pumpAndSettle();
   }
 
+  /// Drags a scrollable ListView until a widget with the given key is found.
+  /// Useful for finding widgets that are offscreen.
   static Future<void> dragUntil(
     WidgetTester tester, {
     String listViewName = 'listView',
@@ -473,15 +473,23 @@ class CommonTest {
   }) async {
     int times = 0;
     bool found = false;
+    // dismiss keyboard, if required because it may cover the listview
+    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
     do {
+      found = tester.any(find.byKey(Key(key)).last);
+      if (found) break;
       await tester.drag(
         find.byKey(Key(listViewName)).last,
         const Offset(0, -200),
       );
-      await tester.pumpAndSettle(const Duration(milliseconds: 50));
-      found = tester.any(find.byKey(Key(key)));
-    } while (times++ < 10 && found == false);
+      await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    } while (times++ < 10 && !found);
+    expect(
+      found,
+      true,
+      reason: 'Widget with key "$key" not found after scrolling.',
+    );
   }
 
   /// [lowLevel]
@@ -736,6 +744,11 @@ class CommonTest {
     String key, {
     int seconds = 1,
   }) async {
+    expect(
+      find.byKey(Key(key)).last,
+      findsOneWidget,
+      reason: "could not find key: $key to tap on",
+    );
     await tester.tap(find.byKey(Key(key)).last);
     await tester.pump();
     await tester.pumpAndSettle(Duration(seconds: seconds));

@@ -454,28 +454,118 @@
   <service verb="process" noun="InvoiceImage">
     <description>Process an invoice image with Gemini to extract data.</description>
     <in-parameters>
-      <parameter name="imageData" type="String" required="true"/>
-      <parameter name="prompt" type="String" required="true"/>
-      <parameter name="mimeType" type="String" default="image/jpeg"/>
+      <parameter name="imageData" type="String" required="true" />
+      <parameter name="prompt" type="String" required="true" />
+      <parameter name="mimeType" type="String" default="image/jpeg" />
     </in-parameters>
     <out-parameters>
-      <parameter name="extractedData" type="Map"/>
+      <parameter name="extractedData" type="Map" />
     </out-parameters>
     <actions>
-      <script location="component://mcp/service/processInvoiceImage.groovy"/>
+      <script location="component://mcp/service/processInvoiceImage.groovy" />
     </actions>
   </service>
 
   <service verb="create" noun="InvoiceFromData">
-    <description>Create a new invoice from extracted data.</description>
+    <description>Create a new invoice from extracted data using GrowERP services.</description>
     <in-parameters>
-      <parameter name="invoiceData" type="Map" required="true"/>
+      <parameter name="invoiceData" type="Map" required="true" />
     </in-parameters>
     <out-parameters>
-      <parameter name="invoice" type="Map"/>
+      <parameter name="invoice" type="Map" />
     </out-parameters>
     <actions>
-      <script location="component://mcp/service/createInvoiceFromData.groovy"/>
+      <!-- Validate required fields -->
+      <if condition="!invoiceData.supplier">
+        <return error="true" message="Supplier information is required" />
+      </if>
+      <if condition="!invoiceData.items || invoiceData.items.isEmpty()">
+        <return error="true" message="Invoice items are required" />
+      </if>
+
+      <!-- Extract supplier information -->
+      <set field="supplierName" from="invoiceData.supplier" />
+      <set field="invoiceDate" from="invoiceData.invoiceDate ?: ec.user.nowTimestamp" />
+
+      <!-- Find existing supplier using GrowERP company service -->
+      <service-call name="growerp.100.PartyServices100.get#Companies" out-map="companySearch">
+        <field-map field-name="searchString" from="supplierName" />
+        <field-map field-name="limit" value="1" />
+      </service-call>
+
+      <if condition="companySearch.companies &amp;&amp; !companySearch.companies.isEmpty()">
+        <set field="supplierPartyId" from="companySearch.companies[0].partyId" />
+        <else>
+          <!-- Create new supplier using GrowERP company service -->
+          <service-call name="growerp.100.PartyServices100.create#Company" out-map="supplierResult">
+            <field-map field-name="company"
+              from="[
+              name: supplierName,
+              role: 'Supplier',
+              currency: [currencyId: 'USD']
+            ]" />
+          </service-call>
+          <set field="supplierPartyId" from="supplierResult.company.partyId" />
+        </else>
+      </if>
+
+      <!-- Build invoice items for GrowERP -->
+      <set field="invoiceItems" from="[]" />
+      <iterate list="invoiceData.items" entry="item">
+        <set field="itemDescription" from="item.description ?: 'Scanned item'" />
+
+        <!-- Find existing product by name -->
+        <service-call name="growerp.100.CatalogServices100.get#Product" out-map="productSearch">
+          <field-map field-name="search" from="itemDescription" />
+          <field-map field-name="limit" value="1" />
+        </service-call>
+
+        <if condition="productSearch.products &amp;&amp; !productSearch.products.isEmpty()">
+          <set field="productId" from="productSearch.products[0].productId" />
+          <else>
+            <!-- Create new product using GrowERP product service -->
+            <set field="product"
+              from="[
+                productName: itemDescription,
+                description: itemDescription,
+                price: item.unitPrice ?: '0.0',
+                listPrice: item.unitPrice ?: '0.0',
+                productTypeId: 'Product'
+              ]" />
+            <service-call name="growerp.100.CatalogServices100.create#Product"
+              out-map="productResult"
+              in-map="[product: product, classificationId: 'AppAdmin']" />
+            <set field="productId" from="productResult.product.productId" />
+          </else>
+        </if>
+
+        <!-- Build invoice item for GrowERP with productId -->
+        <set field="invoiceItem"
+          from="[
+          product: [productId: productId],
+          description: itemDescription,
+          itemType: [itemTypeId: 'ItemInventory'],
+          quantity: item.quantity ?: '1.0',
+          price: item.unitPrice ?: '0.0'
+        ]" />
+        <script>invoiceItems.add(invoiceItem)</script>
+      </iterate>
+      <!-- Create the invoice using GrowERP FinDoc service -->
+      <service-call name="growerp.100.FinDocServices100.create#FinDoc" out-map="invoiceResult">
+        <field-map field-name="finDoc"
+          from="[
+            docType: 'invoice',
+            sales: false,
+            description: 'Invoice created from scanned data',
+            otherCompany: [partyId: supplierPartyId],
+            items: invoiceItems
+          ]" />
+      </service-call>
+
+      <!-- Build return invoice map -->
+      <set field="invoice" from="invoiceResult.finDoc" />
+      <log level="info"
+        message="Created GrowERP invoice ${invoiceResult.finDoc.pseudoId} from scanned data for supplier ${supplierName}" />
     </actions>
   </service>
 </services>

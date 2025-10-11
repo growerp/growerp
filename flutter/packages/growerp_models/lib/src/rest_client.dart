@@ -681,7 +681,6 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/mcp/CreateInvoiceFromData")
-  @FormUrlEncoded()
   Future<String> createInvoiceFromData({
     @Field() required Map<String, dynamic> invoiceData,
   });

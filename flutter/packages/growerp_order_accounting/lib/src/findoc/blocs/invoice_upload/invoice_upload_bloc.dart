@@ -62,7 +62,7 @@ class InvoiceUploadBloc extends Bloc<InvoiceUploadEvent, InvoiceUploadState> {
     emit(state.copyWith(status: InvoiceUploadStatus.loading));
     try {
       final result = await restClient.createInvoiceFromData(
-        invoiceData: event.invoiceData,
+        invoiceData: event.invoiceData['extractedData'],
       );
       final decodedResult = jsonDecode(result);
       emit(

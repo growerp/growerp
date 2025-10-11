@@ -679,7 +679,7 @@ class CompanyFormState extends State<CompanyDialog> {
           child: Visibility(
             visible: isAdmin,
             child: OutlinedButton(
-              key: const Key('update'),
+              key: const Key('companyDialogUpdate'),
               onPressed: isAdmin
                   ? () async {
                       Uint8List? convImage;
@@ -812,7 +812,7 @@ class CompanyForm extends StatelessWidget {
       key: _companyDialogFormKey,
       child: SingleChildScrollView(
         controller: _scrollController,
-        key: const Key('listView'),
+        key: const Key('companyDialogListView'),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(5, 10, 5, 5),
           child: Column(

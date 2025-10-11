@@ -14,7 +14,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:growerp_activity/growerp_activity.dart';
+// import 'package:growerp_activity/growerp_activity.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:universal_io/io.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -284,6 +284,7 @@ class UserDialogState extends State<UserDialog> {
                             _scrollController,
                             _onImageButtonPressed,
                           ),
+                          /*
                           SizedBox(height: isPhone ? 330 : 280),
                           FloatingActionButton(
                             key: const Key("events"),
@@ -308,6 +309,7 @@ class UserDialogState extends State<UserDialog> {
                             ),
                             child: const Icon(Icons.event_available),
                           ),
+*/
                           const SizedBox(height: 10),
                           if (isPhone)
                             Visibility(
@@ -458,8 +460,9 @@ class UserDialogState extends State<UserDialog> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('firstName'),
-                    decoration:
-                        InputDecoration(labelText: _localizations.firstName),
+                    decoration: InputDecoration(
+                      labelText: _localizations.firstName,
+                    ),
                     controller: _firstNameController,
                     validator: (value) {
                       if (value!.isEmpty) return _localizations.firstNameError;
@@ -471,8 +474,9 @@ class UserDialogState extends State<UserDialog> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('lastName'),
-                    decoration:
-                        InputDecoration(labelText: _localizations.lastName),
+                    decoration: InputDecoration(
+                      labelText: _localizations.lastName,
+                    ),
                     controller: _lastNameController,
                     validator: (value) {
                       if (value!.isEmpty) return _localizations.lastNameError;
@@ -510,8 +514,9 @@ class UserDialogState extends State<UserDialog> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('userUrl'),
-                    decoration:
-                        InputDecoration(labelText: _localizations.webAddress),
+                    decoration: InputDecoration(
+                      labelText: _localizations.webAddress,
+                    ),
                     controller: _urlController,
                   ),
                 ),
@@ -672,7 +677,8 @@ class UserDialogState extends State<UserDialog> {
         InputDecorator(
           decoration: InputDecoration(
             labelText: _localizations.roleCompanyInfo(
-                _selectedCompany.role?.value ?? Role.unknown.toString()),
+              _selectedCompany.role?.value ?? Role.unknown.toString(),
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(25.0),
             ),
@@ -717,10 +723,10 @@ class UserDialogState extends State<UserDialog> {
                                 ),
                               ),
                               dropdownDecoratorProps: DropDownDecoratorProps(
-                                    dropdownSearchDecoration: InputDecoration(
+                                dropdownSearchDecoration: InputDecoration(
                                   labelText: _localizations.companyId,
-                                    ),
-                                  ),
+                                ),
+                              ),
                               itemAsString: (Company? u) => u?.pseudoId == null
                                   ? ''
                                   : " ${u!.name}[${u.pseudoId ?? ''}]",
@@ -752,8 +758,8 @@ class UserDialogState extends State<UserDialog> {
                                   _selectedCompany = newValue ?? Company();
                                 });
                               },
-                              validator: (value) => value == null &&
-                                      _companyController.text == ''
+                              validator: (value) =>
+                                  value == null && _companyController.text == ''
                                   ? _localizations.selectOrCreateCompany
                                   : null,
                             );
@@ -850,8 +856,9 @@ class UserDialogState extends State<UserDialog> {
             TextFormField(
               readOnly: !(currentUser.userGroup == UserGroup.admin),
               key: const Key('loginName'),
-              decoration:
-                  InputDecoration(labelText: _localizations.userLoginName),
+              decoration: InputDecoration(
+                labelText: _localizations.userLoginName,
+              ),
               controller: _loginNameController,
               onChanged: (value) {
                 if (value.isNotEmpty != _hasLogin) {
@@ -883,8 +890,9 @@ class UserDialogState extends State<UserDialog> {
                           key: const Key('userGroup'),
                           hint: Text(_localizations.securityUserGroup),
                           initialValue: _selectedUserGroup,
-                          validator: (value) =>
-                              value == null ? _localizations.fieldRequired : null,
+                          validator: (value) => value == null
+                              ? _localizations.fieldRequired
+                              : null,
                           items: localUserGroups.map((item) {
                             return DropdownMenuItem<UserGroup>(
                               value: item,
@@ -964,9 +972,12 @@ class UserDialogState extends State<UserDialog> {
         const SizedBox(width: 10),
         Expanded(
           child: OutlinedButton(
-            key: const Key('updateUser'),
+            key: const Key('userDialogUpdate'),
             child: Text(
-                updatedUser.partyId == null ? _localizations.create : _localizations.update),
+              updatedUser.partyId == null
+                  ? _localizations.create
+                  : _localizations.update,
+            ),
             onPressed: () async {
               if (_userDialogFormKey.currentState!.validate()) {
                 updatedUser = updatedUser.copyWith(
@@ -1033,7 +1044,7 @@ class UserDialogState extends State<UserDialog> {
       key: _userDialogFormKey,
       child: SingleChildScrollView(
         controller: _scrollController,
-        key: const Key('listView'),
+        key: const Key('userDialogListView'),
         child: Column(
           children: <Widget>[
             const SizedBox(height: 10),
