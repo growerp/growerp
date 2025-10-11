@@ -25,7 +25,7 @@ import 'dart:io';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_activity/growerp_activity.dart';
+//import 'package:growerp_activity/growerp_activity.dart';
 import 'package:flutter/rendering.dart';
 import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
@@ -285,7 +285,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                     child: Column(
                       children: [
                         ImageButtons(_scrollController, _onImageButtonPressed),
-                        SizedBox(height: isPhone ? 330 : 280),
+                        /*                        SizedBox(height: isPhone ? 330 : 280),
                         Visibility(
                           visible: isVisible,
                           child: FloatingActionButton(
@@ -313,6 +313,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                             child: const Icon(Icons.event_available),
                           ),
                         ),
+*/
                         const SizedBox(height: 10),
                       ],
                     ),
@@ -330,7 +331,6 @@ class UserDialogState extends State<UserDialogStateFull> {
     return Visibility(
       visible: isVisible,
       child: FloatingActionButton(
-        key: const Key("updateUser"),
         heroTag: "userUpdate",
         onPressed: () {
           update(localizations);
@@ -936,7 +936,7 @@ class UserDialogState extends State<UserDialogStateFull> {
       key: _userDialogFormKey,
       child: SingleChildScrollView(
         controller: _scrollController,
-        key: const Key('listView'),
+        key: const Key('userDialogListView'),
         child: Column(
           children: <Widget>[
             const SizedBox(height: 10),
@@ -996,6 +996,7 @@ class UserDialogState extends State<UserDialogStateFull> {
         const SizedBox(width: 10),
         Expanded(
           child: OutlinedButton(
+            key: const Key("userDialogUpdate"),
             child: Text(
               updatedUser.partyId == null
                   ? localizations.create

@@ -129,41 +129,27 @@ class GlAccountDialogState extends State<GlAccountDialog> {
           return value!.isEmpty ? _localizations.glAccountNameNull : null;
         },
       ),
-      Row(
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                const Text('Debit account'),
-                Radio<bool>(
-                  value: true,
-                  groupValue: debitSelected,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      debitSelected = value;
-                    });
-                  },
-                ),
-              ],
+      RadioGroup<bool>(
+        groupValue: debitSelected,
+        onChanged: (bool? value) {
+          setState(() {
+            debitSelected = value;
+          });
+        },
+        child: const Row(
+          children: [
+            Expanded(
+              child: Row(
+                children: [Text('Debit account'), Radio<bool>(value: true)],
+              ),
             ),
-          ),
-          Expanded(
-            child: Row(
-              children: [
-                const Text('Credit account'),
-                Radio<bool>(
-                  value: false,
-                  groupValue: debitSelected,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      debitSelected = value;
-                    });
-                  },
-                ),
-              ],
+            Expanded(
+              child: Row(
+                children: [Text('Credit account'), Radio<bool>(value: false)],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       DropdownSearch<AccountClass>(
         key: const Key('class'),

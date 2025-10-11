@@ -19,6 +19,7 @@ This directory contains comprehensive documentation for extending and developing
 ### 🔧 Technical Guides
 
 - **[Data Model Basic Guide](./basic_explanation_of_the_frontend_REST_Backend_data_models.md)** - Frontend/Backend data models
+- **[Invoice Scan Documentation](./Invoice_Scan_Documentation.md)** - AI-powered invoice processing ⭐ **NEW!**
 - **[Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md)** - Handle timezone differences
 - **[Timezone Quick Reference](./GrowERP_Timezone_Quick_Reference.md)** - Quick timezone guide
 - **[Stripe Payment Processing](./Stripe_Payment_Processing_Documentation.md)** - Payment integration
@@ -42,6 +43,7 @@ This directory contains comprehensive documentation for extending and developing
 
 - **[GrowERP AI Development Instructions](./GrowERP_AI_Instructions.md)** - AI-assisted development
 - **[Model Context Protocol (MCP) Server](../moqui/runtime/component/growerp/docs/README.md)** - AI integration system
+- **[Invoice Scan Documentation](./Invoice_Scan_Documentation.md)** - AI-powered invoice processing ⭐ **NEW FEATURE!**
 
 ### 📊 Business Processes
 
@@ -99,14 +101,16 @@ BlocListener<UserBloc, UserState>(
 
 1. [Building Blocks Development Guide](./Building_Blocks_Development_Guide.md)
 2. [GrowERP Design Patterns](./GrowERP_Design_Patterns.md)
-3. [BLoC Message Translation Quick Reference](./QUICK_REFERENCE_BLOC_MESSAGES.md) ⭐ **New Pattern!**
-4. [Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md)
+3. [Invoice Scan Documentation](./Invoice_Scan_Documentation.md) ⭐ **NEW FEATURE!**
+4. [BLoC Message Translation Quick Reference](./QUICK_REFERENCE_BLOC_MESSAGES.md) ⭐ **New Pattern!**
+5. [Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md)
 
 ### For Backend Developers
 
 1. [Backend Components Development Guide](./Backend_Components_Development_Guide.md)
 2. [Data Model Basic Guide](./basic_explanation_of_the_frontend_REST_Backend_data_models.md)
-3. [Moqui Subscription Function](./Moqui_Subscription_Function.md)
+3. [Invoice Scan Documentation](./Invoice_Scan_Documentation.md) ⭐ **NEW FEATURE!**
+4. [Moqui Subscription Function](./Moqui_Subscription_Function.md)
 
 ### For Full-Stack Developers
 
@@ -122,7 +126,8 @@ BlocListener<UserBloc, UserState>(
 ### For AI/ML Developers
 
 1. [GrowERP AI Development Instructions](./GrowERP_AI_Instructions.md)
-2. [Model Context Protocol (MCP) Server](../moqui/runtime/component/growerp/docs/README.md)
+2. [Invoice Scan Documentation](./Invoice_Scan_Documentation.md) ⭐ **NEW FEATURE!**
+3. [Model Context Protocol (MCP) Server](../moqui/runtime/component/growerp/docs/README.md)
 
 ### For Localization/Translation Teams
 
