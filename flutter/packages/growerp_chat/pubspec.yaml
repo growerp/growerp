@@ -1,6 +1,6 @@
 name: growerp_chat
 description: "Internal chat within the growerp system."
-version: 1.9.0
+version: 1.10.5
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 environment:
