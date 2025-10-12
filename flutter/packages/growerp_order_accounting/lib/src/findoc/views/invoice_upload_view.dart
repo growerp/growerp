@@ -130,10 +130,7 @@ class _InvoiceUploadViewState extends State<InvoiceUploadView> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.memory(
-                      _imageBytes!,
-                      fit: BoxFit.contain,
-                    ),
+                    child: Image.memory(_imageBytes!, fit: BoxFit.contain),
                   ),
                 ),
               const SizedBox(height: 16),
