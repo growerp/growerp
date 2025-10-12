@@ -1,6 +1,6 @@
 name: growerp_activity
 description: "Activity, task and event management for the GrowERP project."
-version: 1.8.1
+version: 1.10.5
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 environment:
