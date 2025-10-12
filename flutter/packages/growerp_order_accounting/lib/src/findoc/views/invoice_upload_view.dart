@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -17,6 +17,7 @@ class InvoiceUploadView extends StatefulWidget {
 class _InvoiceUploadViewState extends State<InvoiceUploadView> {
   final ImagePicker _picker = ImagePicker();
   XFile? _imageFile;
+  Uint8List? _imageBytes;
   Map<String, dynamic>? _extractedData;
   OrderAccountingLocalizations? _localizations;
 
@@ -24,9 +25,13 @@ class _InvoiceUploadViewState extends State<InvoiceUploadView> {
     final XFile? pickedFile = await _picker.pickImage(
       source: ImageSource.gallery,
     );
-    setState(() {
-      _imageFile = pickedFile;
-    });
+    if (pickedFile != null) {
+      final imageBytes = await pickedFile.readAsBytes();
+      setState(() {
+        _imageFile = pickedFile;
+        _imageBytes = imageBytes;
+      });
+    }
   }
 
   void _uploadImage() {
@@ -116,7 +121,7 @@ class _InvoiceUploadViewState extends State<InvoiceUploadView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (_imageFile != null)
+              if (_imageFile != null && _imageBytes != null)
                 Container(
                   height: 200,
                   decoration: BoxDecoration(
@@ -125,8 +130,8 @@ class _InvoiceUploadViewState extends State<InvoiceUploadView> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.file(
-                      File(_imageFile!.path),
+                    child: Image.memory(
+                      _imageBytes!,
                       fit: BoxFit.contain,
                     ),
                   ),

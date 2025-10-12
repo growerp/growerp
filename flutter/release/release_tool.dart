@@ -292,13 +292,30 @@ Future<Map<String, dynamic>> calculateVersions(
 
 String getVersion(String appName, String workspaceDir) {
   if (appName == 'growerp-moqui') {
-    var componentFile =
-        '$workspaceDir/moqui/runtime/component/growerp/component.xml';
+    // For moqui, determine the correct path based on workspace structure
+    var componentFile = '';
+    if (workspaceDir.endsWith('/flutter')) {
+      // We're in the flutter directory, go up one level to find moqui
+      componentFile =
+          '$workspaceDir/../moqui/runtime/component/growerp/component.xml';
+    } else {
+      // We're in the root workspace directory
+      componentFile =
+          '$workspaceDir/moqui/runtime/component/growerp/component.xml';
+    }
     var content = File(componentFile).readAsStringSync();
     var start = content.indexOf('name="growerp" version=') + 24;
     return content.substring(start, content.indexOf('>', start) - 1);
   } else {
-    var pubspecFile = '$workspaceDir/flutter/packages/$appName/pubspec.yaml';
+    // For flutter apps, determine the correct path based on workspace structure
+    var pubspecFile = '';
+    if (workspaceDir.endsWith('/flutter')) {
+      // We're already in the flutter directory
+      pubspecFile = '$workspaceDir/packages/$appName/pubspec.yaml';
+    } else {
+      // We're in the root workspace directory
+      pubspecFile = '$workspaceDir/flutter/packages/$appName/pubspec.yaml';
+    }
     var content = File(pubspecFile).readAsStringSync();
     var lines = content.split('\n');
     for (var line in lines) {
@@ -408,14 +425,30 @@ Future<void> updateVersionFile(
   print("   Updating version file: $currentVersion → $newVersion");
 
   if (app == 'growerp-moqui') {
-    var file = '$workspaceDir/moqui/runtime/component/growerp/component.xml';
+    // For moqui, determine the correct path based on workspace structure
+    var file = '';
+    if (workspaceDir.endsWith('/flutter')) {
+      // We're in the flutter directory, go up one level to find moqui
+      file = '$workspaceDir/../moqui/runtime/component/growerp/component.xml';
+    } else {
+      // We're in the root workspace directory
+      file = '$workspaceDir/moqui/runtime/component/growerp/component.xml';
+    }
     replace(
       file,
       'name="growerp" version="$currentVersion',
       'name="growerp" version="$newVersion',
     );
   } else {
-    var file = '$workspaceDir/flutter/packages/$app/pubspec.yaml';
+    // For flutter apps, determine the correct path based on workspace structure
+    var file = '';
+    if (workspaceDir.endsWith('/flutter')) {
+      // We're already in the flutter directory
+      file = '$workspaceDir/packages/$app/pubspec.yaml';
+    } else {
+      // We're in the root workspace directory
+      file = '$workspaceDir/flutter/packages/$app/pubspec.yaml';
+    }
     replace(file, 'version: $currentVersion', 'version: $newVersion');
   }
 }
@@ -426,15 +459,36 @@ Future<String> buildDockerImage(String app, String workspaceDir) async {
 
   try {
     if (app == 'growerp-moqui') {
+      // For moqui, determine the correct path based on workspace structure
+      var moquiDir = '';
+      if (workspaceDir.endsWith('/flutter')) {
+        // We're in the flutter directory, go up one level to find moqui
+        moquiDir = '$workspaceDir/../moqui';
+      } else {
+        // We're in the root workspace directory
+        moquiDir = '$workspaceDir/moqui';
+      }
       run(
         'docker build --progress=plain -t $dockerImage:latest . --no-cache',
-        workingDirectory: '$workspaceDir/moqui',
+        workingDirectory: moquiDir,
       );
     } else {
+      // For flutter apps, determine the correct paths based on workspace structure
+      var dockerfilePath = '';
+      var buildContext = '';
+      if (workspaceDir.endsWith('/flutter')) {
+        // We're already in the flutter directory
+        dockerfilePath = '$workspaceDir/packages/$app/Dockerfile';
+        buildContext = workspaceDir;
+      } else {
+        // We're in the root workspace directory
+        dockerfilePath = '$workspaceDir/flutter/packages/$app/Dockerfile';
+        buildContext = '$workspaceDir/flutter';
+      }
       run(
-        'docker build --file $workspaceDir/flutter/packages/$app/Dockerfile '
+        'docker build --file $dockerfilePath '
         '--progress=plain -t $dockerImage:latest . --no-cache',
-        workingDirectory: '$workspaceDir/flutter',
+        workingDirectory: buildContext,
       );
     }
 
@@ -474,17 +528,24 @@ Future<void> commitAndTag(
   print("📝 Committing version changes and creating git tag...");
 
   try {
+    // Determine git working directory - should be the root workspace
+    var gitWorkingDir = workspaceDir;
+    if (workspaceDir.endsWith('/flutter')) {
+      // If we're in the flutter directory, go up one level for git operations
+      gitWorkingDir = '$workspaceDir/..';
+    }
+
     // Add version files to git
     for (var app in selectedApps) {
       if (app == 'growerp-moqui') {
         run(
           'git add moqui/runtime/component/growerp/component.xml',
-          workingDirectory: workspaceDir,
+          workingDirectory: gitWorkingDir,
         );
       } else {
         run(
           'git add flutter/packages/$app/pubspec.yaml',
-          workingDirectory: workspaceDir,
+          workingDirectory: gitWorkingDir,
         );
       }
     }
@@ -496,10 +557,10 @@ Future<void> commitAndTag(
     var commitMessage = 'build: Release $gitTag - $appVersions';
 
     // Commit and tag
-    run('git commit -m "$commitMessage"', workingDirectory: workspaceDir);
-    run('git tag $gitTag', workingDirectory: workspaceDir);
-    run('git push', workingDirectory: workspaceDir);
-    run('git push origin $gitTag', workingDirectory: workspaceDir);
+    run('git commit -m "$commitMessage"', workingDirectory: gitWorkingDir);
+    run('git tag $gitTag', workingDirectory: gitWorkingDir);
+    run('git push', workingDirectory: gitWorkingDir);
+    run('git push origin $gitTag', workingDirectory: gitWorkingDir);
 
     print("   ✓ Git tag $gitTag created and pushed");
   } catch (e) {
