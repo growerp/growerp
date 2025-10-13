@@ -147,13 +147,13 @@ snap list growerp-admin
 snap connections growerp-admin
 
 # Run with debug output
-SNAPD_DEBUG=1 growerp-admin.growerp-admin
+SNAPD_DEBUG=1 growerp-admin
 
 # Check snap logs
 snap logs growerp-admin
 
 # Run in shell mode for debugging
-snap run --shell growerp-admin.growerp-admin
+snap run --shell growerp-admin
 ```
 
 ## File Structure
