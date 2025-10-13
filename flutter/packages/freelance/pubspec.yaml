@@ -25,7 +25,7 @@ dependencies:
   global_configuration: ^2.0.0
   responsive_framework: ^1.4.0
   flutter_simple_treeview: ^3.0.2
-  printing: ^5.14.2
+  printing: ^5.14.0
   pdf: ^3.10.8
   bloc_concurrency: ^0.2.0
   package_info_plus: ^8.0.2

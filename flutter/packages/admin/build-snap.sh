@@ -35,7 +35,7 @@ if [ -n "$SNAP_FILE" ]; then
     echo "sudo snap install --dangerous $SNAP_FILE"
     echo ""
     echo "To test the installation:"
-    echo "growerp-admin.growerp-admin"
+    echo "growerp-admin"
     echo ""
     echo "To uninstall:"
     echo "sudo snap remove growerp-admin"
