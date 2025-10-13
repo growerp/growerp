@@ -75,6 +75,7 @@ void main() {
         },
       );
       await selectWebsite(tester);
+      await WebsiteTest.updateWeburl(tester);
       await WebsiteTest.updateTitle(tester);
       await WebsiteTest.updateTextSection(tester);
       await WebsiteTest.updateImages(tester);

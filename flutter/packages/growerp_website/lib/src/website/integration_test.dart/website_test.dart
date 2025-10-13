@@ -35,6 +35,76 @@ class WebsiteTest {
     expect(CommonTest.getTextField("url"), startsWith('testingurl.'));
   }
 
+  static Future<void> updateWeburl(WidgetTester tester) async {
+    // Comprehensive test for changing the website URL with multiple scenarios
+
+    // Test URL changes with different scenarios
+    await _testUrlChange(tester, 'mycompany', 'Basic URL change');
+    await _testUrlChange(tester, 'TestCompany', 'Uppercase URL change');
+    await _testUrlChange(tester, 'test-site', 'Hyphenated URL change');
+
+    print('✓ All URL change tests completed successfully');
+  }
+
+  // Helper function to test URL changes
+  static Future<void> _testUrlChange(
+    WidgetTester tester,
+    String url,
+    String description,
+  ) async {
+    print('Testing: $description with URL: $url');
+
+    // Enter the new URL
+    await CommonTest.enterText(tester, 'urlInput', url);
+    await CommonTest.tapByKey(
+      tester,
+      'updateHost',
+      seconds: CommonTest.waitTime,
+    );
+
+    // Get the expected result (URLs are typically converted to lowercase)
+    String expectedUrl = url.toLowerCase();
+
+    // Verify the URL was updated
+    String actualUrlInput = CommonTest.getTextFormField('urlInput');
+    String actualDisplayUrl = CommonTest.getTextField("url");
+
+    expect(
+      actualUrlInput,
+      equals(expectedUrl),
+      reason:
+          '$description: URL input should be updated to $expectedUrl, but got $actualUrlInput',
+    );
+
+    expect(
+      actualDisplayUrl,
+      startsWith('$expectedUrl.'),
+      reason:
+          '$description: Displayed URL should start with $expectedUrl., but got $actualDisplayUrl',
+    );
+
+    print(
+      '✓ $description passed - URL: $actualUrlInput, Display: $actualDisplayUrl',
+    );
+  }
+
+  // Standalone URL test method that can be called independently
+  static Future<void> runUrlChangeTest(WidgetTester tester) async {
+    // This method provides the same functionality as the standalone test
+    // but can be integrated into other test workflows
+
+    await _testUrlChange(tester, 'mycompany', 'Basic URL change');
+    await _testUrlChange(tester, 'TestCompany', 'Uppercase URL change');
+    await _testUrlChange(tester, 'test-site', 'Hyphenated URL change');
+    await _testUrlChange(
+      tester,
+      'new_company123',
+      'URL with numbers and underscore',
+    );
+
+    print('✓ Standalone URL change test completed successfully');
+  }
+
   static Future<void> updateTitle(WidgetTester tester) async {
     await CommonTest.enterText(tester, 'title', 'Test Company');
     await CommonTest.tapByKey(tester, 'updateTitle', seconds: 2);
