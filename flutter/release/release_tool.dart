@@ -385,13 +385,21 @@ Future<void> executeRelease(
     var newVersion = "${versionInfo['newBase']}$buildSuffix";
     newVersions[app] = newVersion;
 
-    // Update version file
-    if (pushConfig['pushToGitHub'] == true) {
+    // Always update version files locally (regardless of git save setting)
+    await updateVersionFile(
+      app,
+      currentVersion,
+      newVersion,
+      Directory.current.path,
+    );
+
+    // Also update version files in workspace if different from current directory
+    if (workspaceDir != Directory.current.path) {
       await updateVersionFile(app, currentVersion, newVersion, workspaceDir);
     }
 
-    // Build Docker image
-    var imageId = await buildDockerImage(app, workspaceDir);
+    // Build Docker image with version
+    var imageId = await buildDockerImage(app, workspaceDir, newVersion);
     imageIds[app] = imageId;
 
     // Push to Docker Hub
@@ -453,9 +461,13 @@ Future<void> updateVersionFile(
   }
 }
 
-Future<String> buildDockerImage(String app, String workspaceDir) async {
+Future<String> buildDockerImage(
+  String app,
+  String workspaceDir,
+  String version,
+) async {
   var dockerImage = '${config['dockerRegistry']}/$app';
-  print("   Building Docker image: $dockerImage:latest");
+  print("   Building Docker image: $dockerImage:latest with version $version");
 
   try {
     if (app == 'growerp-moqui') {
@@ -469,7 +481,7 @@ Future<String> buildDockerImage(String app, String workspaceDir) async {
         moquiDir = '$workspaceDir/moqui';
       }
       run(
-        'docker build --progress=plain -t $dockerImage:latest . --no-cache',
+        'docker build --build-arg DOCKER_TAG=$version --progress=plain -t $dockerImage:latest . --no-cache',
         workingDirectory: moquiDir,
       );
     } else {
@@ -486,7 +498,7 @@ Future<String> buildDockerImage(String app, String workspaceDir) async {
         buildContext = '$workspaceDir/flutter';
       }
       run(
-        'docker build --file $dockerfilePath '
+        'docker build --file $dockerfilePath --build-arg DOCKER_TAG=$version '
         '--progress=plain -t $dockerImage:latest . --no-cache',
         workingDirectory: buildContext,
       );
