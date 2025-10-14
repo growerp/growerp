@@ -180,7 +180,7 @@ class CompanyTest {
           CommonTest.getTextFormField('salesPerc'),
           equals(c.salesPerc != null ? c.salesPerc.toString() : '0'),
         );
-        await CommonTest.dragNew(tester, key: 'salesPerc');
+        await CommonTest.dragNew(tester, key: 'companyDialogListView');
       }
       expect(
         CommonTest.getTextField('addressLabel'),
@@ -221,10 +221,10 @@ class CompanyTest {
     await CommonTest.enterText(tester, 'address2', address.address2!);
     await CommonTest.enterText(tester, 'postalCode', address.postalCode!);
     await CommonTest.enterText(tester, 'city', address.city!);
-    await CommonTest.dragNew(tester, key: 'companyDialogListView');
+    await CommonTest.dragNew(tester, key: 'addressListView');
     await CommonTest.enterText(tester, 'province', address.province!);
     await CommonTest.enterDropDownSearch(tester, 'country', address.country!);
-    await CommonTest.dragNew(tester, key: 'companyDialogListView');
+    await CommonTest.dragNew(tester, key: 'addressListView');
     await CommonTest.tapByKey(tester, 'updateAddress');
     await CommonTest.waitForKey(tester, 'dismiss');
     await CommonTest.waitForSnackbarToGo(tester);

@@ -245,9 +245,9 @@ class UserDialogState extends State<UserDialogStateFull> {
         child: ScaffoldMessenger(
           child: Scaffold(
             backgroundColor: Colors.transparent,
-            floatingActionButton: isPhone
-                ? fab(localizations)
-                : updateButton(localizations),
+            floatingActionButton: isPhone ? null : updateButton(localizations),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
             body: Stack(
               children: [
                 BlocConsumer<UserBloc, UserState>(
@@ -322,22 +322,6 @@ class UserDialogState extends State<UserDialogStateFull> {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget fab(UserCompanyLocalizations localizations) {
-    return Visibility(
-      visible: isVisible,
-      child: FloatingActionButton(
-        heroTag: "userUpdate",
-        onPressed: () {
-          update(localizations);
-        },
-        child: Icon(
-          widget.user.partyId != null ? Icons.update : Icons.add,
-          size: 30,
         ),
       ),
     );
@@ -911,7 +895,10 @@ class UserDialogState extends State<UserDialogStateFull> {
     for (var i = 0; i < widgets.length; i++) {
       column.add(Padding(padding: const EdgeInsets.all(10), child: widgets[i]));
     }
-    if (isPhone) column.add(const SizedBox(height: 70));
+    if (isPhone) {
+      column.add(updateButton(localizations));
+      column.add(const SizedBox(height: 20));
+    }
 
     List<Widget> rows = [];
     if (!ResponsiveBreakpoints.of(context).isMobile) {
@@ -961,53 +948,58 @@ class UserDialogState extends State<UserDialogStateFull> {
   }
 
   Widget updateButton(UserCompanyLocalizations localizations) {
-    return Row(
-      children: [
-        if (widget.user.partyId != null)
-          OutlinedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.red),
-            ),
-            key: const Key('deleteUser'),
-            child: Text(localizations.deleteUser),
-            onPressed: () async {
-              if (widget.user.partyId != null &&
-                  currentUser.partyId == widget.user.partyId) {
-                var result = await confirmDeleteUserComp(
-                  context,
-                  widget.user.userGroup,
-                );
-                if (result != null) {
-                  if (!mounted) return;
-                  // delete company too?
-                  if (widget.user.partyId == currentUser.partyId!) {
-                    _userBloc.add(
-                      UserDelete(widget.user.copyWith(image: null)),
-                    );
-                    Navigator.of(context).pop(updatedUser);
-                    context.read<AuthBloc>().add(const AuthLoggedOut());
+    return Padding(
+      padding: isPhone
+          ? const EdgeInsets.all(10)
+          : const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 10),
+      child: Row(
+        children: [
+          if (widget.user.partyId != null)
+            OutlinedButton(
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(Colors.red),
+              ),
+              key: const Key('deleteUser'),
+              child: Text(localizations.deleteUser),
+              onPressed: () async {
+                if (widget.user.partyId != null &&
+                    currentUser.partyId == widget.user.partyId) {
+                  var result = await confirmDeleteUserComp(
+                    context,
+                    widget.user.userGroup,
+                  );
+                  if (result != null) {
+                    if (!mounted) return;
+                    // delete company too?
+                    if (widget.user.partyId == currentUser.partyId!) {
+                      _userBloc.add(
+                        UserDelete(widget.user.copyWith(image: null)),
+                      );
+                      Navigator.of(context).pop(updatedUser);
+                      context.read<AuthBloc>().add(const AuthLoggedOut());
+                    }
                   }
+                } else {
+                  _userBloc.add(UserDelete(widget.user.copyWith(image: null)));
                 }
-              } else {
-                _userBloc.add(UserDelete(widget.user.copyWith(image: null)));
-              }
-            },
-          ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: OutlinedButton(
-            key: const Key("userDialogUpdate"),
-            child: Text(
-              updatedUser.partyId == null
-                  ? localizations.create
-                  : localizations.update,
+              },
             ),
-            onPressed: () async {
-              update(localizations);
-            },
+          const SizedBox(width: 10),
+          Expanded(
+            child: OutlinedButton(
+              key: const Key("userDialogUpdate"),
+              child: Text(
+                updatedUser.partyId == null
+                    ? localizations.create
+                    : localizations.update,
+              ),
+              onPressed: () async {
+                update(localizations);
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
