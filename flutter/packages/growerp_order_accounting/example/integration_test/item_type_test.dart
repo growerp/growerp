@@ -49,5 +49,6 @@ void main() {
     await ItemTypeTest.addItemTypes(tester, itemTypes.sublist(0, 2));
     // modify
     await ItemTypeTest.addItemTypes(tester, itemTypes.sublist(2, 4));
+    await CommonTest.logout(tester);
   });
 }

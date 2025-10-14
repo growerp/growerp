@@ -50,5 +50,6 @@ void main() {
     await CommonTest.gotoMainMenu(tester);
     await PaymentTypeTest.selectPaymentType(tester);
     await PaymentTypeTest.addPaymentTypes(tester, paymentTypes.sublist(2, 4));
+    await CommonTest.logout(tester);
   });
 }

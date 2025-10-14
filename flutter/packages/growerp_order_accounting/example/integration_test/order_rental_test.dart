@@ -62,5 +62,6 @@ void main() {
     await OrderTest.selectSalesOrders(tester);
     await OrderTest.completeOrders(tester);
     await OrderTest.checkOrdersComplete(tester);
+    await CommonTest.logout(tester);
   });
 }

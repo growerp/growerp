@@ -80,5 +80,6 @@ void main() {
     await TransactionTest.selectTransactions(tester);
     await TransactionTest.checkTransactionsComplete(tester);
     await CommonTest.gotoMainMenu(tester);
+    await CommonTest.logout(tester);
   });
 }
