@@ -147,7 +147,8 @@ class RequestDialogState extends State<RequestDialog> {
                 previous.status == FinDocStatus.loading,
             listener: (context, state) {
               if (state.status == FinDocStatus.success) {
-                Navigator.of(context).pop();
+                // Return the updated finDoc to the parent so it can update the list
+                Navigator.of(context).pop(widget.finDoc);
               }
               if (state.status == FinDocStatus.failure) {
                 HelperFunctions.showMessage(
