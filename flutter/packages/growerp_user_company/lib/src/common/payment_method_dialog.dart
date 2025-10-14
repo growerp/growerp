@@ -68,7 +68,7 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
-        key: const Key('listView'),
+        key: const Key('paymentMethodListView'),
         child: Column(
           children: <Widget>[
             Visibility(

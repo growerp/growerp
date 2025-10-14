@@ -148,7 +148,11 @@ class UserTest {
       );
 
       // if required add address and payment
-      await CommonTest.dragUntil(tester, key: 'addressLabel');
+      await CommonTest.dragUntil(
+        tester,
+        key: 'addressLabel',
+        listViewName: 'userDialogListView',
+      );
       if (user.address != null) {
         await CompanyTest.updateAddress(tester, user.address!);
       } else {
@@ -157,7 +161,11 @@ class UserTest {
           await CommonTest.tapByKey(tester, 'deleteAddress');
         }
       }
-      await CommonTest.dragUntil(tester, key: 'paymentMethodLabel');
+      await CommonTest.dragUntil(
+        tester,
+        key: 'paymentMethodLabel',
+        listViewName: 'userDialogListView',
+      );
       if (user.paymentMethod != null) {
         await CompanyTest.updatePaymentMethod(tester, user.paymentMethod!);
       } else {
@@ -171,11 +179,11 @@ class UserTest {
       // company info fixed for employees will not show for update
       bool companyAssigned = false;
       if (user.role != Role.company) {
-        await CommonTest.drag(tester);
-        if (user.company?.name == null &&
-            await CommonTest.doesExistKey(tester, 'removeCompany')) {
-          // remove existing company
-          await CommonTest.tapByKey(tester, 'removeCompany');
+        await CommonTest.drag(tester, listViewName: 'userDialogListView');
+        if (user.company?.name == null) {
+          if (await CommonTest.doesExistKey(tester, 'removeCompany')) {
+            await CommonTest.tapByKey(tester, 'removeCompany');
+          }
         } else {
           // check company buttons if company assigned
           if (await CommonTest.doesExistKey(tester, 'newCompany')) {
@@ -212,7 +220,11 @@ class UserTest {
               ),
             );
           }
-          await CommonTest.dragUntil(tester, key: 'email');
+          await CommonTest.dragUntil(
+            tester,
+            key: 'email',
+            listViewName: 'companyDialogListView',
+          );
           await CommonTest.enterText(
             tester,
             'email',
@@ -225,17 +237,15 @@ class UserTest {
             listViewName: 'companyDialogListView',
           );
           await CommonTest.tapByKey(tester, 'companyDialogUpdate');
-          await CommonTest.dragUntil(
-            tester,
-            key: 'userDialogUpdate',
-            listViewName: 'userDialogListView',
-          );
-          await CommonTest.tapByKey(tester, 'userDialogUpdate');
         }
       }
 
       if (user.loginName != null) {
-        await CommonTest.dragUntil(tester, key: 'loginName');
+        await CommonTest.dragUntil(
+          tester,
+          key: 'loginName',
+          listViewName: 'userDialogListView',
+        );
         user = user.copyWith(
           loginName: user.loginName!.replaceFirst('XXX', '${seq++}'),
         );
@@ -250,10 +260,14 @@ class UserTest {
           await CommonTest.tapByKey(tester, 'loginDisabled');
         }
       }
-      await CommonTest.dragUntil(tester, key: 'updateUser');
+      await CommonTest.dragUntil(
+        tester,
+        key: 'userDialogUpdate',
+        listViewName: 'userDialogListView',
+      );
       await CommonTest.tapByKey(
         tester,
-        'updateUser',
+        'userDialogUpdate',
         seconds: CommonTest.waitTime,
       );
       await CommonTest.waitForSnackbarToGo(tester);
@@ -362,7 +376,11 @@ class UserTest {
         await CommonTest.tapByKey(tester, 'address');
         await CompanyTest.checkAddress(tester, user.address!);
       }
-      await CommonTest.dragUntil(tester, key: 'paymentMethodLabel');
+      await CommonTest.dragUntil(
+        tester,
+        key: 'paymentMethodLabel',
+        listViewName: 'userDialogListView',
+      );
       expect(
         CommonTest.getTextField('paymentMethodLabel'),
         contains(
@@ -389,7 +407,11 @@ class UserTest {
             reason:
                 'Company ${user.company!.name} not found on user ${user.firstName} ${user.lastName}',
           );
-          await CommonTest.dragUntil(tester, key: 'editCompany');
+          await CommonTest.dragUntil(
+            tester,
+            key: 'editCompany',
+            listViewName: 'userDialogListView',
+          );
           expect(
             CommonTest.getDropdownSearch('userCompanyName'),
             contains(user.company!.name),
@@ -418,7 +440,11 @@ class UserTest {
           await CommonTest.tapByKey(tester, 'cancel');
         }
       }
-      await CommonTest.dragUntil(tester, key: 'loginName');
+      await CommonTest.dragUntil(
+        tester,
+        key: 'loginName',
+        listViewName: 'userDialogListView',
+      );
       // login, check only when login name present, cannot delete userlogin
       if (user.loginName != null && user.loginName!.isNotEmpty) {
         expect(

@@ -81,7 +81,7 @@ class AddressDialogState extends State<AddressDialog> {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
-        key: const Key('listView'),
+        key: const Key('addressListView'),
         child: Column(
           children: <Widget>[
             const SizedBox(height: 20),
