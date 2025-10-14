@@ -42,8 +42,6 @@ class WebsiteTest {
     await _testUrlChange(tester, 'mycompany', 'Basic URL change');
     await _testUrlChange(tester, 'TestCompany', 'Uppercase URL change');
     await _testUrlChange(tester, 'test-site', 'Hyphenated URL change');
-
-    print('✓ All URL change tests completed successfully');
   }
 
   // Helper function to test URL changes
@@ -52,8 +50,6 @@ class WebsiteTest {
     String url,
     String description,
   ) async {
-    print('Testing: $description with URL: $url');
-
     // Enter the new URL
     await CommonTest.enterText(tester, 'urlInput', url);
     await CommonTest.tapByKey(
@@ -82,10 +78,6 @@ class WebsiteTest {
       reason:
           '$description: Displayed URL should start with $expectedUrl., but got $actualDisplayUrl',
     );
-
-    print(
-      '✓ $description passed - URL: $actualUrlInput, Display: $actualDisplayUrl',
-    );
   }
 
   // Standalone URL test method that can be called independently
@@ -101,8 +93,6 @@ class WebsiteTest {
       'new_company123',
       'URL with numbers and underscore',
     );
-
-    print('✓ Standalone URL change test completed successfully');
   }
 
   static Future<void> updateTitle(WidgetTester tester) async {

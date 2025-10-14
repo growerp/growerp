@@ -191,7 +191,7 @@ class CommonTest {
         ); // used in rental
       }
     }
-    // check for credit card input (not shown for first registration)
+    // check for credit card input (only shown for first registration)
     if (await doesExistKey(tester, 'paymentForm')) {
       await tapByKey(tester, 'pay');
     }
@@ -426,11 +426,9 @@ class CommonTest {
     String widgetKey, [
     int count = 1,
   ]) async {
+    // close keyboard, if open
     await tester.testTextInput.receiveAction(TextInputAction.done);
-    if (find.byKey(Key(widgetKey)).last.evaluate().isEmpty) {
-      return false;
-    }
-    return true;
+    return tester.any(find.byKey(Key(widgetKey)));
   }
 
   /// check if a particular text can be found on the page.
