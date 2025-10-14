@@ -56,6 +56,7 @@ void main() {
     await CompanyTest.addCompanies(tester, customerCompanies.sublist(0, 2));
     await CompanyTest.checkCompanies(tester);
     await CompanyTest.updateCompanies(tester, customerCompanies.sublist(2, 4));
+    await CompanyTest.checkCompanies(tester);
     await CommonTest.logout(tester);
   }, skip: false);
 }
