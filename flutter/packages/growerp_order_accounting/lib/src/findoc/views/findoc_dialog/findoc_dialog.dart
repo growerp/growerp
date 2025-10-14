@@ -125,6 +125,7 @@ class MyFinDocState extends State<FinDocPage> {
   late String currencyId;
   late double screenWidth;
   late OrderAccountingLocalizations _localizations;
+  bool _shouldCloseOnFinDocSuccess = false;
 
   @override
   void initState() {
@@ -185,16 +186,25 @@ class MyFinDocState extends State<FinDocPage> {
     isPhone = isAPhone(context);
     screenWidth = isPhone ? 400 : 900;
     _localizations = OrderAccountingLocalizations.of(context)!;
+
     blocConsumerListener(
       BuildContext context,
       CartState state, [
       bool mounted = true,
     ]) {
       switch (state.status) {
+        case CartStatus.saving:
+          // Mark that we should close when FinDocBloc succeeds
+          _shouldCloseOnFinDocSuccess = true;
+          break;
         case CartStatus.complete:
-          Navigator.of(context).pop();
+          // Only close immediately if we're not waiting for FinDocBloc update
+          if (!_shouldCloseOnFinDocSuccess) {
+            Navigator.of(context).pop(finDocUpdated);
+          }
           break;
         case CartStatus.failure:
+          _shouldCloseOnFinDocSuccess = false;
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
           break;
         default:
@@ -258,20 +268,30 @@ class MyFinDocState extends State<FinDocPage> {
           height: 650,
           width: screenWidth,
           context: context,
-          child: Builder(
-            builder: (BuildContext context) {
-              if (finDoc.sales) {
-                return BlocConsumer<SalesCartBloc, CartState>(
+          child: BlocListener<FinDocBloc, FinDocState>(
+            listener: (context, finDocState) {
+              // Close dialog when FinDocBloc successfully updates and we're waiting for it
+              if (finDocState.status == FinDocStatus.success &&
+                  _shouldCloseOnFinDocSuccess) {
+                _shouldCloseOnFinDocSuccess = false;
+                Navigator.of(context).pop(finDocUpdated);
+              }
+            },
+            child: Builder(
+              builder: (BuildContext context) {
+                if (finDoc.sales) {
+                  return BlocConsumer<SalesCartBloc, CartState>(
+                    listener: blocConsumerListener,
+                    builder: blocConsumerBuilder,
+                  );
+                }
+                // purchase from here
+                return BlocConsumer<PurchaseCartBloc, CartState>(
                   listener: blocConsumerListener,
                   builder: blocConsumerBuilder,
                 );
-              }
-              // purchase from here
-              return BlocConsumer<PurchaseCartBloc, CartState>(
-                listener: blocConsumerListener,
-                builder: blocConsumerBuilder,
-              );
-            },
+              },
+            ),
           ),
         ),
       ),

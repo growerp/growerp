@@ -163,7 +163,8 @@ class PaymentDialogState extends State<PaymentDialog> {
           child: BlocConsumer<FinDocBloc, FinDocState>(
             listener: (context, state) {
               if (state.status == FinDocStatus.success) {
-                Navigator.of(context).pop();
+                // Return the updated finDoc to the parent so it can update the list
+                Navigator.of(context).pop(finDocUpdated);
               }
               if (state.status == FinDocStatus.failure) {
                 HelperFunctions.showMessage(
@@ -735,73 +736,83 @@ class PaymentDialogState extends State<PaymentDialog> {
                 ),
                 child: SingleChildScrollView(child: _createGatewayTable()),
               ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (widget.finDoc.paymentId != null &&
-                    !readOnly &&
-                    finDoc.gatewayResponses.any(
-                      (e) =>
-                          e.paymentOperation == 'Authorize' && e.resultSuccess,
-                    ) &&
-                    !finDoc.gatewayResponses.any(
-                      (e) => e.paymentOperation == 'Release' && e.resultSuccess,
-                    ))
-                  Padding(
-                    padding: const EdgeInsetsGeometry.all(5),
-                    child: OutlinedButton(
-                      key: const Key('release'),
-                      child: Text(_localizations!.release, softWrap: false),
-                      onPressed: () {
-                        _finDocBloc.add(
-                          FinDocGatewayPaymentRelease(widget.finDoc.paymentId!),
-                        );
-                      },
+            if (finDoc.gatewayResponses.isNotEmpty)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (widget.finDoc.paymentId != null &&
+                      !readOnly &&
+                      finDoc.gatewayResponses.any(
+                        (e) =>
+                            e.paymentOperation == 'Authorize' &&
+                            e.resultSuccess,
+                      ) &&
+                      !finDoc.gatewayResponses.any(
+                        (e) =>
+                            e.paymentOperation == 'Release' && e.resultSuccess,
+                      ))
+                    Padding(
+                      padding: const EdgeInsetsGeometry.all(5),
+                      child: OutlinedButton(
+                        key: const Key('release'),
+                        child: Text(_localizations!.release, softWrap: false),
+                        onPressed: () {
+                          _finDocBloc.add(
+                            FinDocGatewayPaymentRelease(
+                              widget.finDoc.paymentId!,
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                if (widget.finDoc.paymentId != null &&
-                    !readOnly &&
-                    finDoc.gatewayResponses.any(
-                      (e) =>
-                          e.paymentOperation == 'Authorize' && e.resultSuccess,
-                    ) &&
-                    !finDoc.gatewayResponses.any(
-                      (e) => e.paymentOperation == 'Release' && e.resultSuccess,
-                    ))
-                  Padding(
-                    padding: const EdgeInsetsGeometry.all(5),
-                    child: OutlinedButton(
-                      key: const Key('capture'),
-                      child: Text(_localizations!.capture, softWrap: false),
-                      onPressed: () {
-                        _finDocBloc.add(
-                          FinDocGatewayPaymentCapture(widget.finDoc.paymentId!),
-                        );
-                      },
+                  if (widget.finDoc.paymentId != null &&
+                      !readOnly &&
+                      finDoc.gatewayResponses.any(
+                        (e) =>
+                            e.paymentOperation == 'Authorize' &&
+                            e.resultSuccess,
+                      ) &&
+                      !finDoc.gatewayResponses.any(
+                        (e) =>
+                            e.paymentOperation == 'Release' && e.resultSuccess,
+                      ))
+                    Padding(
+                      padding: const EdgeInsetsGeometry.all(5),
+                      child: OutlinedButton(
+                        key: const Key('capture'),
+                        child: Text(_localizations!.capture, softWrap: false),
+                        onPressed: () {
+                          _finDocBloc.add(
+                            FinDocGatewayPaymentCapture(
+                              widget.finDoc.paymentId!,
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                if (widget.finDoc.paymentId != null &&
-                    !readOnly &&
-                    !finDoc.gatewayResponses.any(
-                      (e) =>
-                          e.paymentOperation == 'Authorize' && e.resultSuccess,
-                    ))
-                  Padding(
-                    padding: const EdgeInsetsGeometry.all(5),
-                    child: OutlinedButton(
-                      key: const Key('authorize'),
-                      child: Text(_localizations!.authorize, softWrap: false),
-                      onPressed: () {
-                        _finDocBloc.add(
-                          FinDocGatewayPaymentAuthorize(
-                            widget.finDoc.paymentId!,
-                          ),
-                        );
-                      },
+                  if (widget.finDoc.paymentId != null &&
+                      !readOnly &&
+                      !finDoc.gatewayResponses.any(
+                        (e) =>
+                            e.paymentOperation == 'Authorize' &&
+                            e.resultSuccess,
+                      ))
+                    Padding(
+                      padding: const EdgeInsetsGeometry.all(5),
+                      child: OutlinedButton(
+                        key: const Key('authorize'),
+                        child: Text(_localizations!.authorize, softWrap: false),
+                        onPressed: () {
+                          _finDocBloc.add(
+                            FinDocGatewayPaymentAuthorize(
+                              widget.finDoc.paymentId!,
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-              ],
-            ),
+                ],
+              ),
           ],
         ),
       ),

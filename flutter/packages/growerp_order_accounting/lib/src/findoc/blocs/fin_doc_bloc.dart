@@ -215,7 +215,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
           default:
         }
         // only update the list when not empty and item found
-        if (finDocs != [] && index > 0) {
+        if (finDocs.isNotEmpty && index >= 0) {
           if (docType == FinDocType.transaction &&
               event.finDoc.status == FinDocStatusVal.cancelled) {
             finDocs.removeAt(index);
