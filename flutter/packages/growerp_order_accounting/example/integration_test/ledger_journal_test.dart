@@ -54,5 +54,6 @@ void main() {
       ledgerJournals.sublist(2, 4),
     );
     await LedgerJournalTest.deleteLastLedgerJournal(tester);
+    await CommonTest.logout(tester);
   });
 }

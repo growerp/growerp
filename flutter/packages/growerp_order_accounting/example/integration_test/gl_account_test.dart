@@ -55,5 +55,6 @@ void main() {
     await GlAccountTest.addGlAccounts(tester, glAccounts.sublist(0, 2));
     await GlAccountTest.updateGlAccounts(tester, glAccounts.sublist(2, 4));
     await GlAccountTest.deleteLastGlAccount(tester);
+    await CommonTest.logout(tester);
   });
 }
