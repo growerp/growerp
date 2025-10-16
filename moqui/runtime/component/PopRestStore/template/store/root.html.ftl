@@ -73,6 +73,19 @@
            for (i = 0; i < onStar; i++) { $(stars[i]).addClass('selected'); }
         });
     });
+    
+    // Register Flutter admin service worker early so it's ready when user navigates to /admin/
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/admin/flutter_service_worker.js', {
+                scope: '/admin/'
+            }).then(registration => {
+                console.log('✅ Flutter Admin Service Worker registered with scope:', registration.scope);
+            }).catch(error => {
+                console.log('ℹ️ Flutter Admin Service Worker registration failed (normal if /admin/ not deployed):', error.message);
+            });
+        });
+    }
 </script>
     <#-- for scripts/etc from d.xml or others, ie client rendered part of site that needs more JS -->
     <#if footerScriptText?has_content>${footerScriptText}</#if>

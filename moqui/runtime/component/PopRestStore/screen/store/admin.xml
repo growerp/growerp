@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Flutter Admin Web Application Screen
+Serves the Flutter admin app and its assets
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+  standalone="true" require-authentication="anonymous-view">
+
+    <widgets>
+        <render-mode>
+            <text type="html" location="component://PopRestStore/screen/store/admin/index.html"/>
+        </render-mode>
+    </widgets>
+</screen>

@@ -4,6 +4,9 @@ screen/store/components/styles/*
 screen/store/components/combined.*
 screen/store/components/*.min.js
 
+# Flutter web build artifacts
+screen/store/admin/
+
 # gradle/build files
 .gradle
 node_modules
