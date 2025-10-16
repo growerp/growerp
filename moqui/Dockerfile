@@ -10,46 +10,12 @@ RUN echo "DockerTag version: $DOCKER_TAG"
 RUN echo "Pat: $PAT"
 
 RUN apt-get update && \
-    apt-get install -y curl git wget zip unzip apt-transport-https xz-utils && \
+    apt-get install -y curl git wget zip unzip apt-transport-https && \
     apt-get clean
-
-# Install Flutter SDK
-ENV FLUTTER_VERSION=3.24.5
-ENV FLUTTER_HOME=/opt/flutter
-RUN wget -q https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz && \
-    tar xf flutter_linux_${FLUTTER_VERSION}-stable.tar.xz -C /opt && \
-    rm flutter_linux_${FLUTTER_VERSION}-stable.tar.xz
-ENV PATH="${FLUTTER_HOME}/bin:${PATH}"
-
-# Pre-download Flutter artifacts
-RUN flutter config --no-analytics && \
-    flutter precache --web && \
-    dart pub global activate melos
-#RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /root/growerp
-# build from the moqui directory instead of repository for debugging
-COPY . /root/growerp/moqui
-
-# Copy Flutter workspace for admin app build
-COPY ../flutter /root/growerp/flutter
-
-# delete debug user now replaced with system support
-# RUN rm /root/growerp/moqui/runtime/component/growerp/data/0-GrowerpDebug.xml
-RUN git clone --depth 1 https://$PAT@github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
-
-# Build Flutter Admin Web App
-WORKDIR /root/growerp/flutter
-ENV PATH="${PATH}:/root/.pub-cache/bin"
-RUN melos clean && \
-    melos bootstrap && \
-    melos l10n --no-select && \
-    melos build --no-select
-
-WORKDIR /root/growerp/flutter/packages/admin
-RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml && \
-    flutter build web --release
-
-# antwebsystems website TODO: need to be removed
+RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /root/growerp
 WORKDIR /root/growerp/moqui
+RUN git clone --depth 1 https://$PAT@github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
+# antwebsystems website TODO: need to be removed
 RUN cp /root/vueWebsite/AWSSetupAaaWebSiteData.xml runtime/component/growerp/data
 RUN mkdir runtime/component/growerp/service/growerp/website
 RUN cp /root/vueWebsite/WebSiteRestServices.xml runtime/component/growerp/service/growerp/website
@@ -59,13 +25,6 @@ RUN curl -L https://jdbc.postgresql.org/download/postgresql-42.2.9.jar -o runtim
 # RUN ./gradlew downloadel
 # build Moqui system
 RUN ./gradlew addRunTime
-
-# Deploy Flutter Admin Web App to Moqui
-COPY deploy-flutter-admin.sh /tmp/deploy-flutter-admin.sh
-RUN chmod +x /tmp/deploy-flutter-admin.sh && \
-    /tmp/deploy-flutter-admin.sh && \
-    rm /tmp/deploy-flutter-admin.sh
-
 # unzip war file
 WORKDIR /opt/moqui
 RUN unzip -q /root/growerp/moqui/moqui-plus-runtime.war
