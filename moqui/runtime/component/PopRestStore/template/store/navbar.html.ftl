@@ -114,6 +114,11 @@
                         Cart
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="/admin/" class="nav-link" title="Flutter Admin Application">
+                        <i class="fas fa-cog"></i> Admin
+                    </a>
+                </li>
                 <li class="nav-item d-block d-sm-block d-md-none">
                     <div class="search-input">
                         <input type="text" placeholder="Search...">
