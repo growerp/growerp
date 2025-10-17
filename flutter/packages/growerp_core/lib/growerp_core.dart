@@ -1,7 +1,6 @@
 export 'src/templates/templates.dart';
 export 'src/domains/common/functions/functions.dart';
 export 'src/domains/domains.dart';
-export 'src/domains/integration_test.dart';
 export 'src/core_router.dart';
 export 'src/styles/color_schemes.dart';
 export 'src/extensions.dart';
@@ -14,3 +13,4 @@ export 'src/get_core_bloc_providers.dart';
 export 'src/domains/authenticate/authenticate.dart';
 export 'src/rest_request/rest_request.dart';
 export 'src/common/translate_bloc_messages.dart';
+export 'src/domains/integration_test.dart';

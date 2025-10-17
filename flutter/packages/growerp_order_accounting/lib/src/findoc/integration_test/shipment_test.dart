@@ -21,17 +21,27 @@ class ShipmentTest {
   static Future<void> selectIncomingShipments(WidgetTester tester) async {
     await CommonTest.gotoMainMenu(tester);
     await CommonTest.selectOption(
-        tester, 'dbShipments', 'FinDocListShipmentsIn', '2');
+      tester,
+      'dbShipments',
+      'FinDocListShipmentsIn',
+      '2',
+    );
   }
 
   static Future<void> selectOutgoingShipments(WidgetTester tester) async {
     await CommonTest.gotoMainMenu(tester);
     await CommonTest.selectOption(
-        tester, 'dbShipments', 'FinDocListShipmentsOut', '1');
+      tester,
+      'dbShipments',
+      'FinDocListShipmentsOut',
+      '1',
+    );
   }
 
   static Future<void> receiveShipments(
-      WidgetTester tester, List<Location> locations) async {
+    WidgetTester tester,
+    List<Location> locations,
+  ) async {
     SaveTest test = await PersistFunctions.getTest();
     List<FinDoc> newOrders = [];
     for (final (index, order) in test.orders.indexed) {
@@ -42,17 +52,25 @@ class ShipmentTest {
         // find location where other products already located
         // if not found, use latest location in the list in test data
         final asset = assets.firstWhere(
-            // from test data
-            (el) => el.product?.productName == item.description,
-            orElse: () => Asset(
-                location: Location(locationName: locations.last.locationName)));
+          // from test data
+          (el) => el.product?.productName == item.description,
+          orElse: () => Asset(
+            location: Location(locationName: locations.last.locationName),
+          ),
+        );
         await CommonTest.enterDropDownSearch(
-            tester, 'locationDropDown$index', asset.location!.locationName!);
+          tester,
+          'locationDropDown$index',
+          asset.location!.locationName!,
+        );
         // save location to check later
-        newItems.add(item.copyWith(
+        newItems.add(
+          item.copyWith(
             asset: Asset(
-                location:
-                    Location(locationName: asset.location!.locationName!))));
+              location: Location(locationName: asset.location!.locationName!),
+            ),
+          ),
+        );
       }
       newOrders.add(order.copyWith(items: newItems));
     }

@@ -9,6 +9,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import 'package:growerp_marketing/src/opportunities/integration_test/data.dart';
+import 'package:growerp_marketing/src/opportunities/integration_test/opportunity_test.dart';
 
 // Static menuOptions for testing (no localization needed)
 List<MenuOption> testMenuOptions = [

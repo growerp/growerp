@@ -18,6 +18,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:website_example/main.dart';
 import 'package:growerp_website/growerp_website.dart';
+import 'package:growerp_website/src/website/integration_test.dart/website_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
