@@ -18,6 +18,8 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_order_accounting/src/findoc/integration_test/order_test.dart';
+import 'package:growerp_order_accounting/src/findoc/integration_test/payment_test.dart';
 import 'package:order_accounting_example/main.dart' as router;
 import 'package:order_accounting_example/main.dart';
 import 'package:growerp_core/test_data.dart';

@@ -20,6 +20,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_user_company/src/user/integration_test/user_test.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

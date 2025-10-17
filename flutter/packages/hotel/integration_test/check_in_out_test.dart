@@ -18,6 +18,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_order_accounting/src/findoc/integration_test/order_test.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';

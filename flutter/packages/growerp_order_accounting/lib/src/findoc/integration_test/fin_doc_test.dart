@@ -62,7 +62,8 @@ class FinDocTest {
         final totalTransactions = List.of(test.transactions);
         totalTransactions.addAll(finDocs);
         await PersistFunctions.persistTest(
-            test.copyWith(transactions: totalTransactions));
+          test.copyWith(transactions: totalTransactions),
+        );
         break;
 
       default:
@@ -70,7 +71,9 @@ class FinDocTest {
   }
 
   static Future<void> updateFinDocData(
-      WidgetTester tester, List<FinDoc> newFinDocs) async {
+    WidgetTester tester,
+    List<FinDoc> newFinDocs,
+  ) async {
     final oldFinDocs = await FinDocTest.getFinDocs(newFinDocs[0].docType!);
     // copy pseudoId
     for (int x = 0; x < oldFinDocs.length; x++) {
@@ -85,7 +88,9 @@ class FinDocTest {
   /// After add/update get the generated finDocId and productId's
   /// after finish save the input list.
   static Future<void> enterFinDocData(
-      WidgetTester tester, List<FinDoc> finDocs) async {
+    WidgetTester tester,
+    List<FinDoc> finDocs,
+  ) async {
     List<FinDoc> newFinDocs =
         []; // with pseudoId added (when new) and productId's
     for (final finDoc in finDocs) {
@@ -94,20 +99,25 @@ class FinDocTest {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
         await CommonTest.doNewSearch(tester, searchString: finDoc.pseudoId!);
-        expect(finDoc.pseudoId,
-            CommonTest.getTextField('topHeader').split('#')[1]);
+        expect(
+          finDoc.pseudoId,
+          CommonTest.getTextField('topHeader').split('#')[1],
+        );
       }
-      await CommonTest.checkWidgetKey(tester,
-          "FinDocDialog${finDoc.sales ? 'Sales' : 'Purchase'}${finDoc.docType!.toString()}");
+      await CommonTest.checkWidgetKey(
+        tester,
+        "FinDocDialog${finDoc.sales ? 'Sales' : 'Purchase'}${finDoc.docType!.toString()}",
+      );
       // enter supplier/customer
       await CommonTest.enterDropDownSearch(
-          tester,
-          finDoc.sales ? 'customer' : 'supplier',
-          // in the case of a person just use last name
-          CompanyUser.tryParse(finDoc.otherCompany ?? finDoc.otherUser)
-                  ?.name!
-                  .split(',')[0] ??
-              '');
+        tester,
+        finDoc.sales ? 'customer' : 'supplier',
+        // in the case of a person just use last name
+        CompanyUser.tryParse(
+              finDoc.otherCompany ?? finDoc.otherUser,
+            )?.name!.split(',')[0] ??
+            '',
+      );
       if (finDoc.docType == FinDocType.order ||
           finDoc.docType == FinDocType.invoice) {
         await CommonTest.enterText(tester, 'description', finDoc.description!);
@@ -124,60 +134,86 @@ class FinDocTest {
         await CommonTest.tapByKey(tester, 'addProduct', seconds: 1);
         await CommonTest.checkWidgetKey(tester, 'addProductItemDialog');
         await CommonTest.enterDropDownSearch(
-            tester, 'product', item.description!);
+          tester,
+          'product',
+          item.description!,
+        );
         await CommonTest.enterText(tester, 'itemPrice', item.price.toString());
         await CommonTest.enterText(
-            tester, 'itemQuantity', item.quantity.toString());
+          tester,
+          'itemQuantity',
+          item.quantity.toString(),
+        );
         await CommonTest.drag(tester);
         await CommonTest.tapByKey(tester, 'ok');
         // item added at the top, get productid
-        newItems.add(item.copyWith(
-            product:
-                Product(pseudoId: CommonTest.getTextField('itemProductId0'))));
+        newItems.add(
+          item.copyWith(
+            product: Product(
+              pseudoId: CommonTest.getTextField('itemProductId0'),
+            ),
+          ),
+        );
       }
       await CommonTest.drag(tester, seconds: 2);
       // update/create finDoc
       await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
       await CommonTest.waitForSnackbarToGo(tester);
       // create new findoc with pseudoId when adding
-      newFinDocs.add(finDoc.copyWith(
-          pseudoId: finDoc.pseudoId ??
+      newFinDocs.add(
+        finDoc.copyWith(
+          pseudoId:
+              finDoc.pseudoId ??
               CommonTest.getTextField('id0'), // Id always added at the top
-          items: newItems));
+          items: newItems,
+        ),
+      );
     }
     await FinDocTest.saveFinDocs(newFinDocs);
   }
 
   /// check the entered data of a finDoc, company and products
-  static Future<void> checkFinDocDetail(WidgetTester tester, FinDocType docType,
-      {bool rental = false, String classificationId = 'AppAdmin'}) async {
+  static Future<void> checkFinDocDetail(
+    WidgetTester tester,
+    FinDocType docType, {
+    bool rental = false,
+    String classificationId = 'AppAdmin',
+  }) async {
     List<FinDoc> finDocs = await FinDocTest.getFinDocs(docType);
     for (final finDoc in finDocs) {
       await CommonTest.doNewSearch(tester, searchString: finDoc.pseudoId!);
       expect(
-          CommonTest.getTextField('topHeader').split('#')[1], finDoc.pseudoId);
+        CommonTest.getTextField('topHeader').split('#')[1],
+        finDoc.pseudoId,
+      );
       if (classificationId != 'AppHotel') {
         // reservation for hotel is called from ganntChart
-        await CommonTest.checkWidgetKey(tester,
-            "FinDocDialog${finDoc.sales ? 'Sales' : 'Purchase'}${finDoc.docType!.toString()}");
+        await CommonTest.checkWidgetKey(
+          tester,
+          "FinDocDialog${finDoc.sales ? 'Sales' : 'Purchase'}${finDoc.docType!.toString()}",
+        );
       } // check supplier/customer
       if (finDoc.otherUser != null) {
         if (finDoc.otherUser?.company != null) {
           expect(
-              CommonTest.getDropdownSearch(
-                  finDoc.sales ? 'customer' : 'supplier'),
-              contains(finDoc.otherUser?.company!.name));
+            CommonTest.getDropdownSearch(
+              finDoc.sales ? 'customer' : 'supplier',
+            ),
+            contains(finDoc.otherUser?.company!.name),
+          );
         } else {
           expect(
-              CommonTest.getDropdownSearch(
-                  finDoc.sales ? 'customer' : 'supplier'),
-              contains(finDoc.otherUser?.lastName!));
+            CommonTest.getDropdownSearch(
+              finDoc.sales ? 'customer' : 'supplier',
+            ),
+            contains(finDoc.otherUser?.lastName!),
+          );
         }
       } else {
         expect(
-            CommonTest.getDropdownSearch(
-                finDoc.sales ? 'customer' : 'supplier'),
-            finDoc.otherCompany?.name!);
+          CommonTest.getDropdownSearch(finDoc.sales ? 'customer' : 'supplier'),
+          finDoc.otherCompany?.name!,
+        );
       }
       if ((finDoc.docType == FinDocType.order ||
               finDoc.docType == FinDocType.invoice) &&
@@ -185,20 +221,30 @@ class FinDocTest {
         expect(CommonTest.getTextFormField('description'), finDoc.description!);
       }
       for (final (index, item) in finDoc.items.indexed) {
-        expect(CommonTest.getTextField('itemProductId$index'),
-            item.product?.pseudoId ?? '');
-        expect(CommonTest.getTextField('itemDescription$index'),
-            item.description!);
+        expect(
+          CommonTest.getTextField('itemProductId$index'),
+          item.product?.pseudoId ?? '',
+        );
+        expect(
+          CommonTest.getTextField('itemDescription$index'),
+          item.description!,
+        );
         if (rental) {
-          expect(CommonTest.getTextField('fromDate$index'),
-              contains(item.rentalFromDate.dateOnly()));
+          expect(
+            CommonTest.getTextField('fromDate$index'),
+            contains(item.rentalFromDate.dateOnly()),
+          );
         } else {
           if (!CommonTest.isPhone()) {
-            expect(CommonTest.getTextField('itemPrice$index'),
-                item.price.currency());
+            expect(
+              CommonTest.getTextField('itemPrice$index'),
+              item.price.currency(),
+            );
           }
-          expect(CommonTest.getTextField('itemQuantity$index'),
-              item.quantity.toString());
+          expect(
+            CommonTest.getTextField('itemQuantity$index'),
+            item.quantity.toString(),
+          );
         }
       }
       await CommonTest.tapByKey(tester, 'cancel'); // cancel dialog
@@ -207,8 +253,11 @@ class FinDocTest {
 
   /// check if a finDoc is complete and copy the transaction numbers
   /// when it is a payment, invoice or shipment.
-  static Future<void> checkFinDocsComplete(WidgetTester tester, FinDocType type,
-      {FinDocType? subType}) async {
+  static Future<void> checkFinDocsComplete(
+    WidgetTester tester,
+    FinDocType type, {
+    FinDocType? subType,
+  }) async {
     List<FinDoc> oldFinDocs = await getFinDocs(type);
     List<FinDoc> newFinDocs = [];
 
@@ -229,8 +278,10 @@ class FinDocTest {
         default:
       }
 
-      await CommonTest.doNewSearch(tester,
-          searchString: id ?? finDoc.pseudoId!);
+      await CommonTest.doNewSearch(
+        tester,
+        searchString: id ?? finDoc.pseudoId!,
+      );
       // open detail
       expect(
         CommonTest.getDropdown('statusDropDown'),
@@ -239,39 +290,63 @@ class FinDocTest {
 
       // get transaction id's
       if (type == FinDocType.invoice || subType == FinDocType.invoice) {
-        String? pseudoId =
-            await CommonTest.getRelatedFindoc(tester, FinDocType.transaction);
-        expect(pseudoId, isNot(equals(isNull)),
-            reason: "pseudoId should not be null!");
-        newFinDocs.add(FinDoc(
+        String? pseudoId = await CommonTest.getRelatedFindoc(
+          tester,
+          FinDocType.transaction,
+        );
+        expect(
+          pseudoId,
+          isNot(equals(isNull)),
+          reason: "pseudoId should not be null!",
+        );
+        newFinDocs.add(
+          FinDoc(
             docType: FinDocType.transaction,
             pseudoId: pseudoId,
             invoiceId: finDoc.invoiceId,
-            sales: true));
+            sales: true,
+          ),
+        );
       }
 
       if (type == FinDocType.payment || subType == FinDocType.payment) {
-        String? pseudoId =
-            await CommonTest.getRelatedFindoc(tester, FinDocType.transaction);
-        expect(pseudoId, isNot(equals(isNull)),
-            reason: "pseudoId should not be null!");
-        newFinDocs.add(FinDoc(
+        String? pseudoId = await CommonTest.getRelatedFindoc(
+          tester,
+          FinDocType.transaction,
+        );
+        expect(
+          pseudoId,
+          isNot(equals(isNull)),
+          reason: "pseudoId should not be null!",
+        );
+        newFinDocs.add(
+          FinDoc(
             docType: FinDocType.transaction,
             pseudoId: pseudoId,
             paymentId: finDoc.paymentId,
-            sales: true));
+            sales: true,
+          ),
+        );
       }
 
       if (type == FinDocType.shipment || subType == FinDocType.shipment) {
-        String? pseudoId =
-            await CommonTest.getRelatedFindoc(tester, FinDocType.transaction);
-        expect(pseudoId, isNot(equals(isNull)),
-            reason: "shipment does not have a related transaction!");
-        newFinDocs.add(FinDoc(
+        String? pseudoId = await CommonTest.getRelatedFindoc(
+          tester,
+          FinDocType.transaction,
+        );
+        expect(
+          pseudoId,
+          isNot(equals(isNull)),
+          reason: "shipment does not have a related transaction!",
+        );
+        newFinDocs.add(
+          FinDoc(
             docType: FinDocType.transaction,
             pseudoId: pseudoId,
             shipmentId: finDoc.shipmentId,
-            sales: true));
+            sales: true,
+          ),
+        );
       }
 
       await CommonTest.tapByKey(tester, 'cancel');
@@ -280,17 +355,31 @@ class FinDocTest {
   }
 
   /// same as approve findocs with the difference to set the status to 'complete'
-  Future<void> completeFinDocs(WidgetTester tester, FinDocType type,
-      {FinDocType? subType}) async {
-    await changeStatusFinDocs(tester, type,
-        subType: subType, status: FinDocStatusVal.completed);
+  Future<void> completeFinDocs(
+    WidgetTester tester,
+    FinDocType type, {
+    FinDocType? subType,
+  }) async {
+    await changeStatusFinDocs(
+      tester,
+      type,
+      subType: subType,
+      status: FinDocStatusVal.completed,
+    );
   }
 
   /// cancel the last findoc in a list when more then a single record...
-  static Future<void> cancelLastFinDoc(WidgetTester tester, FinDocType type,
-      {FinDocType? subType}) async {
-    await changeStatusFinDocs(tester, type,
-        subType: subType, status: FinDocStatusVal.cancelled);
+  static Future<void> cancelLastFinDoc(
+    WidgetTester tester,
+    FinDocType type, {
+    FinDocType? subType,
+  }) async {
+    await changeStatusFinDocs(
+      tester,
+      type,
+      subType: subType,
+      status: FinDocStatusVal.cancelled,
+    );
   }
 
   /// Change status of all findocs for a specific type, however when a sub type
@@ -299,10 +388,13 @@ class FinDocTest {
   /// are stored with the order findoc.
   /// The default is approve.
   /// when cancelled just the last record is cancelled when there are at 2 records
-  static Future<void> changeStatusFinDocs(WidgetTester tester, FinDocType type,
-      {FinDocType? subType,
-      String classificationId = 'AppAdmin',
-      FinDocStatusVal status = FinDocStatusVal.approved}) async {
+  static Future<void> changeStatusFinDocs(
+    WidgetTester tester,
+    FinDocType type, {
+    FinDocType? subType,
+    String classificationId = 'AppAdmin',
+    FinDocStatusVal status = FinDocStatusVal.approved,
+  }) async {
     List<FinDoc> oldFinDocs = await getFinDocs(type);
     List<FinDoc> newFinDocs = [];
 
@@ -335,8 +427,11 @@ class FinDocTest {
       }
 
       // change status
-      await CommonTest.doNewSearch(tester,
-          searchString: id ?? finDoc.pseudoId!, seconds: CommonTest.waitTime);
+      await CommonTest.doNewSearch(
+        tester,
+        searchString: id ?? finDoc.pseudoId!,
+        seconds: CommonTest.waitTime,
+      );
       // statuschange on detail screen
       if (CommonTest.getDropdown('statusDropDown') ==
               FinDocStatusVal.inPreparation.name ||
@@ -344,40 +439,61 @@ class FinDocTest {
               FinDocStatusVal.created.name ||
           status != FinDocStatusVal.approved) {
         await CommonTest.tapByKey(tester, 'statusDropDown');
-        await CommonTest.tapByText(tester,
-            classificationId == 'AppHotel' ? status.hotel : status.name);
+        await CommonTest.tapByText(
+          tester,
+          classificationId == 'AppHotel' ? status.hotel : status.name,
+        );
         await CommonTest.drag(tester);
-        await CommonTest.tapByKey(tester, 'update',
-            seconds: CommonTest.waitTime);
+        await CommonTest.tapByKey(
+          tester,
+          'update',
+          seconds: CommonTest.waitTime,
+        );
         await CommonTest.waitForSnackbarToGo(tester);
       } else {
-        expect(true, false,
-            reason:
-                'Begin status: ${CommonTest.getDropdown('statusDropDown')} not valid');
+        expect(
+          true,
+          false,
+          reason:
+              'Begin status: ${CommonTest.getDropdown('statusDropDown')} not valid',
+        );
       }
 
       // not add cancelled record
       if (status != FinDocStatusVal.cancelled) {
         // get related document numbers just for order,
         // transactions are saved by check completed
-        await CommonTest.doNewSearch(tester,
-            searchString: id ?? finDoc.pseudoId!);
+        await CommonTest.doNewSearch(
+          tester,
+          searchString: id ?? finDoc.pseudoId!,
+        );
         // get order related documents
         if (type == FinDocType.order && subType == null) {
-          String? paymentId =
-              await CommonTest.getRelatedFindoc(tester, FinDocType.payment);
-          String? invoiceId =
-              await CommonTest.getRelatedFindoc(tester, FinDocType.invoice);
-          String? shipmentId =
-              await CommonTest.getRelatedFindoc(tester, FinDocType.shipment);
-          newFinDocs.add(finDoc.copyWith(
+          String? paymentId = await CommonTest.getRelatedFindoc(
+            tester,
+            FinDocType.payment,
+          );
+          String? invoiceId = await CommonTest.getRelatedFindoc(
+            tester,
+            FinDocType.invoice,
+          );
+          String? shipmentId = await CommonTest.getRelatedFindoc(
+            tester,
+            FinDocType.shipment,
+          );
+          newFinDocs.add(
+            finDoc.copyWith(
               paymentId: paymentId,
               invoiceId: invoiceId,
-              shipmentId: shipmentId));
+              shipmentId: shipmentId,
+            ),
+          );
         }
         if ((type == FinDocType.order && subType == FinDocType.payment)) {
-          expect(await CommonTest.getRelatedFindoc(tester, FinDocType.order),
-              finDoc.pseudoId);
+          expect(
+            await CommonTest.getRelatedFindoc(tester, FinDocType.order),
+            finDoc.pseudoId,
+          );
           expect(
             await CommonTest.getRelatedFindoc(tester, FinDocType.invoice),
             finDoc.invoiceId,
@@ -388,8 +504,10 @@ class FinDocTest {
             await CommonTest.getRelatedFindoc(tester, FinDocType.order),
             finDoc.pseudoId,
           );
-          expect(finDoc.paymentId,
-              await CommonTest.getRelatedFindoc(tester, FinDocType.payment));
+          expect(
+            finDoc.paymentId,
+            await CommonTest.getRelatedFindoc(tester, FinDocType.payment),
+          );
         }
         if ((type == FinDocType.order && subType == FinDocType.shipment)) {
           expect(
@@ -398,8 +516,10 @@ class FinDocTest {
           );
         }
         if (type == FinDocType.invoice && subType == null) {
-          String? paymentId =
-              await CommonTest.getRelatedFindoc(tester, FinDocType.payment);
+          String? paymentId = await CommonTest.getRelatedFindoc(
+            tester,
+            FinDocType.payment,
+          );
           newFinDocs.add(finDoc.copyWith(paymentId: paymentId));
         }
 

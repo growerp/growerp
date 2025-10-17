@@ -20,6 +20,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_activity/growerp_activity.dart';
+import 'package:growerp_activity/src/integration_test/activity_test.dart';
 import 'package:growerp_core/test_data.dart';
 
 // Static menuOptions for testing (no localization needed)
