@@ -1,18 +1,80 @@
-#stage 1 -get files and build
+#
+# This software is in the public domain under CC0 1.0 Universal plus a
+# Grant of Patent License.
+# 
+# To the extent possible under law, the author(s) have dedicated all
+# copyright and related and neighboring rights to this software to the
+# public domain worldwide. This software is distributed without any
+# warranty.
+# 
+# You should have received a copy of the CC0 Public Domain Dedication
+# along with this software (see the LICENSE.md file). If not, see
+# <http://creativecommons.org/publicdomain/zero/1.0/>.
+#
+# to be build from any directory
+
+#Stage 1 - Install dependencies and build the app
+FROM growerp/flutter-sdk-image:latest AS build-flutter
+
+ARG BRANCH=master # currently either master or development we need to add existing
+ARG DOCKER_TAG=1.0.0+1
+USER root
+# Install linux dependencies
+RUN apt-get update && \
+    apt-get install -y git zip libgconf-2-4 gdb libstdc++6 \
+    fonts-droid-fallback nano sed && \
+    apt-get clean
+
+# git security
+RUN git config --system --add safe.directory '*'
+RUN git config --global --add safe.directory /home/mobiledevops/.flutter-sdk
+
+# activate melos
+RUN dart pub global activate melos
+ENV PATH="$PATH":"$HOME/.pub-cache/bin"
+
+# get growerp repos
+USER mobiledevops
+WORKDIR /home/mobiledevops
+RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
+WORKDIR /home/mobiledevops/growerp/flutter
+RUN echo "pwd: $PWD"
+RUN sed -i 's\//webactivate \\' packages/admin/lib/main.dart
+RUN melos clean
+RUN melos bootstrap
+# localization
+RUN melos l10n --no-select
+# build
+RUN melos build --no-select
+# build flutter app
+WORKDIR /home/mobiledevops/growerp/flutter/packages/admin
+RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
+RUN flutter build web --release
+
+#stage 2 -get files and build
 ARG DOCKER_TAG=NOTSET1
 FROM openjdk:11-jdk AS build-env
-
-ARG BRANCH=development # currently either master or development we need to add existing
-ARG DOCKER_TAG=NOTSET1
-ARG PAT=NOTSET2
 
 RUN echo "DockerTag version: $DOCKER_TAG"
 RUN echo "Pat: $PAT"
 
 RUN apt-get update && \
-    apt-get install -y curl git wget zip unzip apt-transport-https && \
+    apt-get install -y curl git wget zip unzip apt-transport-https perl && \
     apt-get clean
-RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /root/growerp
+#RUN git clone --depth 1 https://github.com/growerp/growerp.git /root/growerp
+COPY --from=build-flutter /home/mobiledevops/growerp /root/growerp
+# install flutter admin files
+WORKDIR /root/growerp/moqui/runtime/component/PopRestStore/screen/store
+#get admin installed
+# Copy Flutter web build files
+RUN echo -e "Copying Flutter web files..."
+RUN cp -r /root/growerp/flutter/packages/admin/build/web admin
+# Fix the base href in index.html to work with /admin/ path
+RUN echo -e "Fixing base href in index.html..."
+RUN  sed -i 's|<base href="/">|<base href="/admin/">|g' "admin/index.html"
+# Remove service worker registration from index.html (it's registered in root.html.ftl)
+RUN perl -i -0pe 's/<script>\s*if \(.serviceWorker. in navigator\).*?<\/script>\s*//gs' "admin/index.html"
+
 WORKDIR /root/growerp/moqui
 RUN git clone --depth 1 https://$PAT@github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
 # antwebsystems website TODO: need to be removed
