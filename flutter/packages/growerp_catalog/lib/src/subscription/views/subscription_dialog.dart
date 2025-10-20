@@ -253,6 +253,7 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                     format: DateFormat('yyyy-MM-dd'),
                     decoration: InputDecoration(
                       labelText: catalogLocalizations.fromDate,
+                      hintText: 'yyyy-MM-dd',
                       suffixIcon: const Icon(Icons.calendar_today),
                     ),
                     validator: FormBuilderValidators.compose([
@@ -272,6 +273,7 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                     format: DateFormat('yyyy-MM-dd'),
                     decoration: InputDecoration(
                       labelText: catalogLocalizations.thruDate,
+                      hintText: 'yyyy-MM-dd',
                       suffixIcon: const Icon(Icons.calendar_today),
                     ),
                   ),
