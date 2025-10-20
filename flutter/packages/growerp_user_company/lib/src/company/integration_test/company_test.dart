@@ -280,7 +280,6 @@ class CompanyTest {
     PaymentMethod paymentMethod,
   ) async {
     int length = paymentMethod.creditCardNumber!.length;
-    await CommonTest.dragNew(tester, key: 'companyDialogListView');
     await CommonTest.tapByKey(tester, 'paymentMethodLabel');
     expect(
       CommonTest.getTextField('paymentMethodLabel'),

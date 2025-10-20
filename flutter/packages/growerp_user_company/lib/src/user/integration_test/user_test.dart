@@ -54,7 +54,7 @@ class UserTest {
     WidgetTester tester,
     List<User> users, {
     bool check = true,
-    bool companyUser = false,
+    bool companyUser = false, // if called from company user test
   }) async {
     SaveTest test = await PersistFunctions.getTest();
     await PersistFunctions.persistTest(test.copyWith(users: users));
@@ -184,10 +184,10 @@ class UserTest {
             await CommonTest.tapByKey(tester, 'removeCompany');
           }
         } else {
+          companyAssigned = true; // update or new company assigned
           // check company buttons if company assigned
           if (await CommonTest.doesExistKey(tester, 'newCompany')) {
             await CommonTest.tapByKey(tester, 'newCompany');
-            companyAssigned = true;
           } else {
             await CommonTest.tapByKey(tester, 'editCompany');
             expect(
@@ -264,7 +264,6 @@ class UserTest {
         key: 'userDialogUpdate',
         listViewName: 'userDialogListView',
       );
-      tester.pumpAndSettle(const Duration(milliseconds: 100));
       await CommonTest.tapByKey(
         tester,
         'userDialogUpdate',
@@ -273,9 +272,13 @@ class UserTest {
       await CommonTest.waitForSnackbarToGo(tester);
       // here the list is shown again
       // get new user pseudoId when adding
-      if (user.pseudoId == null || companyAssigned) {
+      if (user.pseudoId == null) {
         // new entry is at the top of the list, get allocated ID
-        await CommonTest.tapByKey(tester, 'item0');
+        await CommonTest.tapByKey(
+          tester,
+          'item0',
+          seconds: CommonTest.waitTime,
+        );
         var id = CommonTest.getTextField('topHeader').split('#')[1];
         // if this test is called from company_usertest.dart
         // companyUser = true
@@ -283,6 +286,7 @@ class UserTest {
         // and the user and employee are switched
         if (companyAssigned) {
           if (companyUser) {
+            // now display company with employee
             final dialogExists = await CommonTest.doesExistKey(
               tester,
               'CompanyDialog${user.company!.role!.name}',
@@ -299,6 +303,7 @@ class UserTest {
             employeeId = employeeId.split(']')[0];
             user = user.copyWith(pseudoId: employeeId);
           } else {
+            // now display user with related company
             expect(
               await CommonTest.doesExistKey(
                 tester,
@@ -367,7 +372,11 @@ class UserTest {
         equals(user.telephoneNr ?? ''),
       );
 
-      await CommonTest.dragUntil(tester, key: 'addressLabel');
+      await CommonTest.dragUntil(
+        tester,
+        key: 'addressLabel',
+        listViewName: 'userDialogListView',
+      );
       expect(
         CommonTest.getTextField('addressLabel'),
         equals(

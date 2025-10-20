@@ -471,8 +471,8 @@ class CommonTest {
   }) async {
     int times = 0;
     bool found = false;
-    // dismiss keyboard, if required because it may cover the listview
-    await tester.testTextInput.receiveAction(TextInputAction.done);
+    // dismiss keyboard if open
+    FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
     do {
       found = tester.any(find.byKey(Key(key)).last);
@@ -487,6 +487,11 @@ class CommonTest {
       found,
       true,
       reason: 'Widget with key "$key" not found after scrolling.',
+    );
+    // need sometimes a bit extra drag to make it fully visible
+    await tester.drag(
+      find.byKey(Key(listViewName)).last,
+      const Offset(0, -200),
     );
   }
 
