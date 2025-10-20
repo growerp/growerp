@@ -96,5 +96,6 @@ void main() {
     await LocationTest.addLocations(tester, locations.sublist(0, 2));
     await LocationTest.updateLocations(tester, locations.sublist(2, 4));
     await LocationTest.deleteLocations(tester, 2);
+    await CommonTest.logout(tester);
   });
 }

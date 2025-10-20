@@ -24,8 +24,12 @@ class AssetTest {
     await CommonTest.selectOption(tester, 'dbInventory', 'AssetList', '1');
   }
 
-  static Future<void> addAssets(WidgetTester tester, List<Asset> assets,
-      {bool check = true, String classificationId = 'AppAdmin'}) async {
+  static Future<void> addAssets(
+    WidgetTester tester,
+    List<Asset> assets, {
+    bool check = true,
+    String classificationId = 'AppAdmin',
+  }) async {
     SaveTest test = await PersistFunctions.getTest();
     int seq = test.sequence;
     if (test.assets.isEmpty) {
@@ -35,38 +39,62 @@ class AssetTest {
       await PersistFunctions.persistTest(test);
     }
     if (check && test.assets[0].assetId.isEmpty) {
-      await PersistFunctions.persistTest(test.copyWith(
-        assets: await checkAssetDetail(tester, test.assets,
-            classificationId: classificationId),
-        sequence: seq,
-      ));
+      await PersistFunctions.persistTest(
+        test.copyWith(
+          assets: await checkAssetDetail(
+            tester,
+            test.assets,
+            classificationId: classificationId,
+          ),
+          sequence: seq,
+        ),
+      );
     }
   }
 
-  static Future<void> enterAssetData(WidgetTester tester, List<Asset> assets,
-      {String classificationId = 'AppAdmin'}) async {
+  static Future<void> enterAssetData(
+    WidgetTester tester,
+    List<Asset> assets, {
+    String classificationId = 'AppAdmin',
+  }) async {
     for (Asset asset in assets) {
       if (asset.assetId.isEmpty) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
         await CommonTest.doNewSearch(tester, searchString: asset.assetId);
         expect(
-            CommonTest.getTextField('topHeader').split('#')[1], asset.assetId);
+          CommonTest.getTextField('topHeader').split('#')[1],
+          asset.assetId,
+        );
       }
       await CommonTest.checkWidgetKey(tester, 'AssetDialog');
       await CommonTest.tapByKey(
-          tester, 'name'); // required because keyboard come up
+        tester,
+        'name',
+      ); // required because keyboard come up
       await CommonTest.enterText(tester, 'name', asset.assetName!);
       if (classificationId == 'AppAdmin') {
         await CommonTest.enterText(
-            tester, 'quantityOnHand', asset.quantityOnHand.toString());
+          tester,
+          'quantityOnHand',
+          asset.quantityOnHand.toString(),
+        );
         await CommonTest.enterText(
-            tester, 'availableToPromise', asset.availableToPromise.toString());
+          tester,
+          'availableToPromise',
+          asset.availableToPromise.toString(),
+        );
         await CommonTest.enterText(
-            tester, 'acquireCost', asset.acquireCost.toString());
+          tester,
+          'acquireCost',
+          asset.acquireCost.toString(),
+        );
       }
       await CommonTest.enterDropDownSearch(
-          tester, 'productDropDown', asset.product!.productName!);
+        tester,
+        'productDropDown',
+        asset.product!.productName!,
+      );
       await CommonTest.enterDropDown(tester, 'statusDropDown', asset.statusId!);
       await CommonTest.tapByKey(tester, 'update');
       await CommonTest.waitForSnackbarToGo(tester);
@@ -74,8 +102,10 @@ class AssetTest {
   }
 
   static Future<List<Asset>> checkAssetDetail(
-      WidgetTester tester, List<Asset> assets,
-      {String classificationId = 'AppAdmin'}) async {
+    WidgetTester tester,
+    List<Asset> assets, {
+    String classificationId = 'AppAdmin',
+  }) async {
     List<Asset> newAssets = [];
     for (Asset asset in assets) {
       await CommonTest.doNewSearch(tester, searchString: asset.assetName!);
@@ -83,15 +113,23 @@ class AssetTest {
       expect(find.byKey(const Key('AssetDialog')), findsOneWidget);
       expect(CommonTest.getTextFormField('name'), equals(asset.assetName!));
       if (classificationId == 'AppAdmin') {
-        expect(CommonTest.getTextFormField('quantityOnHand'),
-            equals(asset.quantityOnHand.toString()));
-        expect(CommonTest.getTextFormField('availableToPromise'),
-            equals(asset.availableToPromise.toString()));
-        expect(CommonTest.getTextFormField('acquireCost'),
-            equals(asset.acquireCost.currency(currencyId: '')));
+        expect(
+          CommonTest.getTextFormField('quantityOnHand'),
+          equals(asset.quantityOnHand.toString()),
+        );
+        expect(
+          CommonTest.getTextFormField('availableToPromise'),
+          equals(asset.availableToPromise.toString()),
+        );
+        expect(
+          CommonTest.getTextFormField('acquireCost'),
+          equals(asset.acquireCost.currency(currencyId: '')),
+        );
       }
-      expect(CommonTest.getDropdownSearch('productDropDown'),
-          asset.product!.productName!);
+      expect(
+        CommonTest.getDropdownSearch('productDropDown'),
+        asset.product!.productName!,
+      );
       expect(CommonTest.getDropdown('statusDropDown'), asset.statusId);
       var id = CommonTest.getTextField('topHeader').split('#')[1];
       newAssets.add(asset.copyWith(assetId: id));
@@ -104,8 +142,11 @@ class AssetTest {
     SaveTest test = await PersistFunctions.getTest();
     // delete assets
     for (int x = 0; x < test.assets.length; x++) {
-      await CommonTest.tapByKey(tester, "delete$x",
-          seconds: CommonTest.waitTime);
+      await CommonTest.tapByKey(
+        tester,
+        "delete$x",
+        seconds: CommonTest.waitTime,
+      );
     }
 
     // check assets
@@ -120,11 +161,14 @@ class AssetTest {
     if (test.assets[0].assetName != test.assets[0].assetName) return;
     List<Asset> updAssets = [];
     for (Asset asset in test.assets) {
-      updAssets.add(asset.copyWith(
-        assetName: '${asset.assetName!}u',
-        quantityOnHand: Decimal.parse(asset.quantityOnHand.toString()) +
-            Decimal.parse('10'),
-      ));
+      updAssets.add(
+        asset.copyWith(
+          assetName: '${asset.assetName!}u',
+          quantityOnHand:
+              Decimal.parse(asset.quantityOnHand.toString()) +
+              Decimal.parse('10'),
+        ),
+      );
     }
     test = test.copyWith(assets: updAssets);
     await enterAssetData(tester, test.assets);
