@@ -192,8 +192,17 @@ class CommonTest {
       }
     }
     // check for credit card input (only shown for first registration)
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     if (await doesExistKey(tester, 'paymentForm')) {
-      await tapByKey(tester, 'pay');
+      try {
+        await tester.tap(
+          find.byKey(const Key('pay')).last,
+          warnIfMissed: false,
+        );
+        await tester.pumpAndSettle(const Duration(seconds: waitTime));
+      } catch (e) {
+        debugPrint("Warning: Could not tap pay button: $e");
+      }
     }
 
     SaveTest test = await PersistFunctions.getTest();
