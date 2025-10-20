@@ -136,13 +136,8 @@ class AssetDialogState extends State<AssetDialog> {
               child: popUp(
                 context: context,
                 title:
-                    (classificationId == 'AppHotel'
-                        ? _localizations.roomNumber
-                        : _localizations.assetNumber) +
-                    (widget.asset.pseudoId.isEmpty
-                        ? _localizations.newLabel
-                        : widget.asset.pseudoId),
-                height: 450,
+                    '${classificationId == 'AppHotel' ? _localizations.roomNumber : _localizations.assetNumber} #${widget.asset.pseudoId.isEmpty ? _localizations.newLabel : widget.asset.pseudoId}',
+                height: 480,
                 width: 350,
                 child: _showForm(isPhone),
               ),
@@ -252,7 +247,9 @@ class AssetDialogState extends State<AssetDialog> {
               builder: (context, state) {
                 switch (state.status) {
                   case DataFetchStatus.failure:
-                    return FatalErrorForm(message: _localizations.serverProblem);
+                    return FatalErrorForm(
+                      message: _localizations.serverProblem,
+                    );
                   case DataFetchStatus.success:
                     return DropdownSearch<Product>(
                       key: const Key('productDropDown'),
@@ -392,7 +389,8 @@ class AssetDialogState extends State<AssetDialog> {
                                       DropDownDecoratorProps(
                                         dropdownSearchDecoration:
                                             InputDecoration(
-                                              labelText: _localizations.location,
+                                              labelText:
+                                                  _localizations.location,
                                             ),
                                       ),
                                   itemAsString: (Location? u) =>
