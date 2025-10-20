@@ -45,8 +45,9 @@ This directory contains comprehensive documentation for extending and developing
 - **[Model Context Protocol (MCP) Server](../moqui/runtime/component/growerp/docs/README.md)** - AI integration system
 - **[Invoice Scan Documentation](./Invoice_Scan_Documentation.md)** - AI-powered invoice processing ⭐ **NEW FEATURE!**
 
-### 📊 Business Processes
+### 📊 Business Processes & Party Model
 
+- **[B2C and B2B Party Model Documentation](./B2C_B2B_Party_Model_Documentation.md)** ⭐ **NEW!** - Comprehensive guide to B2C/B2B support, person/company relationships, and accounting
 - **[Leads Upload Process](./leads_upload_process.md)** - Import lead data
 - **[Leads Download Process](./leads_download_process.md)** - Export lead data
 - **[Moqui Subscription Function](./Moqui_Subscription_Function.md)** - Subscription management
@@ -57,6 +58,30 @@ This directory contains comprehensive documentation for extending and developing
 - **[Examples](./examples/)** - Code examples and use cases
 
 ## 🔥 What's New
+
+### B2C and B2B Party Model Documentation (Latest)
+
+Comprehensive guide to GrowERP's flexible party model that elegantly handles both B2C (Business-to-Consumer) and B2B (Business-to-Business) relationships:
+
+- **B2C Support** - Standalone persons/individuals with direct transactions
+- **B2B Support** - Companies with employees as representatives
+- **Smart UI** - Shows UserDialog for standalone persons, CompanyDialog for persons representing companies
+- **Accounting** - All records posted to companies (not employees) in B2B scenarios
+- **Real-world use cases** - E-commerce, SaaS, Manufacturing, Hybrid platforms
+
+**Quick Start:**
+1. Read: [B2C and B2B Party Model Documentation](./B2C_B2B_Party_Model_Documentation.md) ⭐ **Latest documentation**
+2. Understand the core rule: When a person has a company, accounting goes to the company
+3. See implementation in `growerp_user_company` package
+
+**Key Decision Matrix:**
+| Scenario | Display | Accounting Posts To |
+|----------|---------|-------------------|
+| Person with no company | UserDialog | Individual person |
+| Person with company | CompanyDialog | Company (not individual) |
+| Pure company | CompanyDialog | Company |
+
+---
 
 ### BLoC Message Translation with Direct L10n Keys (Current Pattern)
 
@@ -101,22 +126,25 @@ BlocListener<UserBloc, UserState>(
 
 1. [Building Blocks Development Guide](./Building_Blocks_Development_Guide.md)
 2. [GrowERP Design Patterns](./GrowERP_Design_Patterns.md)
-3. [Invoice Scan Documentation](./Invoice_Scan_Documentation.md) ⭐ **NEW FEATURE!**
-4. [BLoC Message Translation Quick Reference](./QUICK_REFERENCE_BLOC_MESSAGES.md) ⭐ **New Pattern!**
-5. [Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md)
+3. [B2C and B2B Party Model Documentation](./B2C_B2B_Party_Model_Documentation.md) ⭐ **NEW!**
+4. [Invoice Scan Documentation](./Invoice_Scan_Documentation.md) ⭐ **NEW FEATURE!**
+5. [BLoC Message Translation Quick Reference](./QUICK_REFERENCE_BLOC_MESSAGES.md) ⭐ **New Pattern!**
+6. [Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md)
 
 ### For Backend Developers
 
 1. [Backend Components Development Guide](./Backend_Components_Development_Guide.md)
 2. [Data Model Basic Guide](./basic_explanation_of_the_frontend_REST_Backend_data_models.md)
-3. [Invoice Scan Documentation](./Invoice_Scan_Documentation.md) ⭐ **NEW FEATURE!**
-4. [Moqui Subscription Function](./Moqui_Subscription_Function.md)
+3. [B2C and B2B Party Model Documentation](./B2C_B2B_Party_Model_Documentation.md) ⭐ **NEW!**
+4. [Invoice Scan Documentation](./Invoice_Scan_Documentation.md) ⭐ **NEW FEATURE!**
+5. [Moqui Subscription Function](./Moqui_Subscription_Function.md)
 
 ### For Full-Stack Developers
 
 1. [GrowERP Extensibility Guide](./GrowERP_Extensibility_Guide.md)
-2. [GrowERP Code Templates](./GrowERP_Code_Templates.md)
-3. [WebSocket Notification System](./WebSocket_Notification_System.md)
+2. [B2C and B2B Party Model Documentation](./B2C_B2B_Party_Model_Documentation.md) ⭐ **NEW!**
+3. [GrowERP Code Templates](./GrowERP_Code_Templates.md)
+4. [WebSocket Notification System](./WebSocket_Notification_System.md)
 
 ### For DevOps/Release Managers
 
