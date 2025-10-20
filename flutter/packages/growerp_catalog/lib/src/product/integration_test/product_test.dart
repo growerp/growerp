@@ -24,15 +24,21 @@ class ProductTest {
     await CommonTest.selectOption(tester, 'dbCatalog', 'ProductList', '1');
   }
 
-  static Future<void> addProducts(WidgetTester tester, List<Product> products,
-      {bool check = true, String classificationId = "AppAdmin"}) async {
+  static Future<void> addProducts(
+    WidgetTester tester,
+    List<Product> products, {
+    bool check = true,
+    String classificationId = "AppAdmin",
+  }) async {
     await PersistFunctions.persistTest(SaveTest(products: products));
     await enterProductData(tester, classificationId: classificationId);
     await checkProduct(tester, classificationId: classificationId);
   }
 
-  static Future<void> enterProductData(WidgetTester tester,
-      {String classificationId = "AppAdmin"}) async {
+  static Future<void> enterProductData(
+    WidgetTester tester, {
+    String classificationId = "AppAdmin",
+  }) async {
     SaveTest test = await PersistFunctions.getTest();
     List<Product> products = test.products;
     List<Product> newProducts = [];
@@ -41,23 +47,32 @@ class ProductTest {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
         await CommonTest.doNewSearch(tester, searchString: product.pseudoId);
-        expect(CommonTest.getTextField('topHeader').split('#')[1],
-            product.pseudoId);
+        expect(
+          CommonTest.getTextField('topHeader').split('#')[1],
+          product.pseudoId,
+        );
       }
       // get formBuilder internal formState
-      final formState =
-          tester.state<FormBuilderState>(find.byType(FormBuilder));
+      final formState = tester.state<FormBuilderState>(
+        find.byType(FormBuilder),
+      );
       formState.save(); // save into the formbuilder internal value fields
 
       await CommonTest.checkWidgetKey(tester, 'ProductDialog');
       await CommonTest.enterDropDown(
-          tester, 'productTypeDropDown', product.productTypeId!);
+        tester,
+        'productTypeDropDown',
+        product.productTypeId!,
+      );
       await CommonTest.enterText(tester, 'name', product.productName!);
       await CommonTest.drag(tester);
       await CommonTest.enterText(tester, 'description', product.description!);
       await CommonTest.enterText(tester, 'price', product.price.toString());
       await CommonTest.enterText(
-          tester, 'listPrice', product.listPrice.toString());
+        tester,
+        'listPrice',
+        product.listPrice.toString(),
+      );
       if (classificationId == 'AppAdmin') {
         await CommonTest.dragUntil(tester, key: 'addCategories');
         // remove existing categories
@@ -72,13 +87,19 @@ class ProductTest {
         await CommonTest.dragUntil(tester, key: 'productTypeDropDown');
         // Uom and amount
         await CommonTest.enterDropDown(
-            tester, 'uomTypeDropDown', product.amountUom!.typeDescription);
+          tester,
+          'uomTypeDropDown',
+          product.amountUom!.typeDescription,
+        );
         await CommonTest.enterDropDown(
-            tester, 'uomDropDown', product.amountUom!.description);
+          tester,
+          'uomDropDown',
+          product.amountUom!.description,
+        );
         await CommonTest.enterText(tester, 'amount', product.amount.toString());
       }
-      await CommonTest.dragUntil(tester, key: 'useWarehouse');
       if (product.productTypeId != 'Service') {
+        await CommonTest.dragUntil(tester, key: 'useWarehouse');
         if ((product.useWarehouse == true &&
                 formState.value['useWarehouse'] == false) ||
             (product.useWarehouse == false &&
@@ -86,12 +107,14 @@ class ProductTest {
           await CommonTest.tapByKey(tester, 'useWarehouse');
         }
       }
+      await CommonTest.dragUntil(tester, key: 'update');
       await CommonTest.tapByKey(tester, 'update');
       await CommonTest.waitForSnackbarToGo(tester);
       // get pseudoId from list always at the top
       if (product.pseudoId.isEmpty) {
-        newProducts
-            .add(product.copyWith(pseudoId: CommonTest.getTextField('id0')));
+        newProducts.add(
+          product.copyWith(pseudoId: CommonTest.getTextField('id0')),
+        );
       } else {
         newProducts.add(product);
       }
@@ -99,8 +122,10 @@ class ProductTest {
     await PersistFunctions.persistTest(SaveTest(products: newProducts));
   }
 
-  static Future<void> checkProduct(WidgetTester tester,
-      {String classificationId = 'AppAdmin'}) async {
+  static Future<void> checkProduct(
+    WidgetTester tester, {
+    String classificationId = 'AppAdmin',
+  }) async {
     SaveTest test = await PersistFunctions.getTest();
     List<Product> products = test.products;
     List<Product> newProducts = [];
@@ -108,8 +133,9 @@ class ProductTest {
       await CommonTest.doNewSearch(tester, searchString: product.pseudoId);
       var id = CommonTest.getTextField('topHeader').split('#')[1];
       // get formBuilder internal formState
-      final formState =
-          tester.state<FormBuilderState>(find.byType(FormBuilder));
+      final formState = tester.state<FormBuilderState>(
+        find.byType(FormBuilder),
+      );
       formState.save(); // save into the formbuilder internal value fields
       var errors = CommonTest.checkFormBuilderTextfields(formState, {
         'name': product.productName,
@@ -131,10 +157,14 @@ class ProductTest {
         if (product.productTypeId != 'Service') {
           expect(formState.value['useWarehouse'], product.useWarehouse);
         }
-        expect((formState.value['uomType'] as Uom).typeDescription,
-            product.amountUom!.typeDescription);
-        expect((formState.value['uom'] as Uom).description,
-            product.amountUom!.description);
+        expect(
+          (formState.value['uomType'] as Uom).typeDescription,
+          product.amountUom!.typeDescription,
+        );
+        expect(
+          (formState.value['uom'] as Uom).description,
+          product.amountUom!.description,
+        );
       }
       newProducts.add(product.copyWith(pseudoId: id));
       await CommonTest.tapByKey(tester, 'cancel');
@@ -148,25 +178,35 @@ class ProductTest {
     await CommonTest.gotoMainMenu(tester);
     await ProductTest.selectProducts(tester);
     expect(find.byKey(const Key('productItem')), findsNWidgets(count));
-    await CommonTest.tapByKey(tester, 'delete${count - 2}',
-        seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'delete${count - 2}',
+      seconds: CommonTest.waitTime,
+    );
     await CommonTest.gotoMainMenu(tester);
     await ProductTest.selectProducts(tester);
     expect(find.byKey(const Key('productItem')), findsNWidgets(count - 1));
-    await PersistFunctions.persistTest(test.copyWith(
-        products: test.products.sublist(0, test.products.length - 1)));
+    await PersistFunctions.persistTest(
+      test.copyWith(
+        products: test.products.sublist(0, test.products.length - 1),
+      ),
+    );
   }
 
   static Future<void> updateProducts(
-      WidgetTester tester, List<Product> products,
-      {bool check = true, String classificationId = "AppAdmin"}) async {
+    WidgetTester tester,
+    List<Product> products, {
+    bool check = true,
+    String classificationId = "AppAdmin",
+  }) async {
     SaveTest test = await PersistFunctions.getTest();
     List<Product> oldProducts = test.products;
     List<Product> newProducts = List.of(products);
     // copy pseudoId to new products
     for (int x = 0; x < newProducts.length; x++) {
-      newProducts[x] =
-          newProducts[x].copyWith(pseudoId: oldProducts[x].pseudoId);
+      newProducts[x] = newProducts[x].copyWith(
+        pseudoId: oldProducts[x].pseudoId,
+      );
     }
     await PersistFunctions.persistTest(test.copyWith(products: newProducts));
     await enterProductData(tester, classificationId: classificationId);

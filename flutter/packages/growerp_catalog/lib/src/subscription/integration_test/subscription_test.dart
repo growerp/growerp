@@ -117,10 +117,20 @@ class SubscriptionTest {
         subscription.description ?? '',
       );
       if (subscription.fromDate != null) {
-        await CommonTest.enterDate(tester, 'fromDate', subscription.fromDate!);
+        await CommonTest.enterDate(
+          tester,
+          'fromDate',
+          subscription.fromDate!,
+          usDate: true,
+        );
       }
       if (subscription.thruDate != null) {
-        await CommonTest.enterDate(tester, 'thruDate', subscription.thruDate!);
+        await CommonTest.enterDate(
+          tester,
+          'thruDate',
+          subscription.thruDate!,
+          usDate: true,
+        );
       }
       await CommonTest.enterDropDownSearch(
         tester,

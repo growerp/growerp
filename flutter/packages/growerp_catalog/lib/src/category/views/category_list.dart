@@ -50,6 +50,7 @@ class CategoriesListState extends State<CategoryList> {
   }
 
   Widget tableView() {
+    const Key('listView');
     if (categories.isEmpty) {
       return Center(
         child: Text(
@@ -134,10 +135,7 @@ class CategoriesListState extends State<CategoryList> {
         if (state.status == CategoryStatus.success) {
           started = true;
           final translatedMessage = state.message != null
-              ? translateCategoryBlocMessage(
-                  state.message!,
-                  _localizations!,
-                )
+              ? translateCategoryBlocMessage(state.message!, _localizations!)
               : '';
           if (translatedMessage.isNotEmpty) {
             HelperFunctions.showMessage(

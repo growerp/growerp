@@ -475,12 +475,15 @@ class CommonTest {
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
     do {
-      found = tester.any(find.byKey(Key(key)).last);
+      found = tester.any(find.byKey(Key(key)));
       if (found) break;
-      await tester.drag(
-        find.byKey(Key(listViewName)).last,
-        const Offset(0, -200),
-      );
+      final listViewFinder = find.byKey(Key(listViewName));
+      if (tester.any(listViewFinder)) {
+        await tester.drag(listViewFinder.last, const Offset(0, -200));
+      } else {
+        // ListView not found, break to avoid repeated failures
+        break;
+      }
       await tester.pumpAndSettle(const Duration(milliseconds: 100));
     } while (times++ < 10 && !found);
     expect(
@@ -489,10 +492,10 @@ class CommonTest {
       reason: 'Widget with key "$key" not found after scrolling.',
     );
     // need sometimes a bit extra drag to make it fully visible
-    await tester.drag(
-      find.byKey(Key(listViewName)).last,
-      const Offset(0, -200),
-    );
+    final listViewFinder = find.byKey(Key(listViewName));
+    if (tester.any(listViewFinder)) {
+      await tester.drag(listViewFinder.last, const Offset(0, -200));
+    }
   }
 
   /// [lowLevel]
@@ -519,13 +522,18 @@ class CommonTest {
   static Future<void> enterDate(
     WidgetTester tester,
     String key,
-    DateTime date,
-  ) async {
+    DateTime date, {
+    bool usDate = false,
+  }) async {
     await tapByKey(tester, key);
-    await tapByTooltip(tester, 'Switch to input');
+    // Try to switch to input mode if the button exists
+    final switchButton = find.byTooltip('Switch to input');
+    if (tester.any(switchButton)) {
+      await tapByTooltip(tester, 'Switch to input');
+    }
     await tester.enterText(
       find.byType(TextField).last,
-      DateFormat('yyyy-MM-dd').format(date),
+      DateFormat(usDate ? 'MM/dd/yyyy' : 'yyyy-MM-dd').format(date),
     );
     await tester.pump();
     await CommonTest.tapByText(tester, 'OK');
