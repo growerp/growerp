@@ -205,35 +205,14 @@ class CommonTest {
       }
     }
 
-    // Wait for navigation to complete and apiKey field to be rendered
-    // In headless mode, this can take longer
-    await tester.pumpAndSettle(const Duration(seconds: 3));
-
-    // Try to find apiKey with retries in case it's not immediately available
-    int retries = 0;
-    late SaveTest test;
-    late int seq;
-    while (retries < 5) {
-      try {
-        test = await PersistFunctions.getTest();
-        String apiKey = getTextField('apiKey');
-        String moquiSessionToken = getTextField('moquiSessionToken');
-        await GlobalConfiguration().add({
-          "apiKey": apiKey,
-          "moquiSessionToken": moquiSessionToken,
-        });
-        seq = test.sequence;
-        break;
-      } catch (e) {
-        retries++;
-        if (retries >= 5) {
-          rethrow;
-        }
-        debugPrint("apiKey field not found (retry $retries/5), waiting...");
-        await tester.pumpAndSettle(const Duration(seconds: 1));
-      }
-    }
-
+    SaveTest test = await PersistFunctions.getTest();
+    String apiKey = getTextField('apiKey');
+    String moquiSessionToken = getTextField('moquiSessionToken');
+    await GlobalConfiguration().add({
+      "apiKey": apiKey,
+      "moquiSessionToken": moquiSessionToken,
+    });
+    int seq = test.sequence;
     if (!test.testDataLoaded && testData.isNotEmpty) {
       final restClient = RestClient(await buildDioClient());
       // replace XXX strings
