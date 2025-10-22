@@ -17,8 +17,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
-import '../gl_account.dart';
-
 class GlAccountListHeader extends StatefulWidget {
   const GlAccountListHeader({super.key});
 
@@ -31,71 +29,104 @@ class _GlAccountListHeaderState extends State<GlAccountListHeader> {
   bool search = false;
   @override
   Widget build(BuildContext context) {
+    final localizations = OrderAccountingLocalizations.of(context)!;
     return ListTile(
-        leading: GestureDetector(
-            key: const Key('search'),
-            onTap: (() =>
-                setState(() => search ? search = false : search = true)),
-            child: const Icon(Icons.search_sharp, size: 40)),
-        title: search
-            ? Row(children: <Widget>[
+      leading: GestureDetector(
+        key: const Key('search'),
+        onTap: (() => setState(() => search ? search = false : search = true)),
+        child: const Icon(Icons.search_sharp, size: 40),
+      ),
+      title: search
+          ? Row(
+              children: <Widget>[
                 SizedBox(
-                    width: isPhone(context)
-                        ? MediaQuery.of(context).size.width - 250
-                        : MediaQuery.of(context).size.width - 350,
-                    child: TextField(
-                      key: const Key('searchField'),
-                      textInputAction: TextInputAction.search,
-                      autofocus: true,
-                      decoration: const InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        hintText: "search in ID, name ...",
+                  width: isPhone(context)
+                      ? MediaQuery.of(context).size.width - 250
+                      : MediaQuery.of(context).size.width - 350,
+                  child: TextField(
+                    key: const Key('searchField'),
+                    textInputAction: TextInputAction.search,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      focusedBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent),
                       ),
-                      onChanged: ((value) => setState(() {
-                            searchString = value;
-                          })),
-                    )),
+                      hintText: localizations.searchGlAccountHint,
+                    ),
+                    onChanged: ((value) => setState(() {
+                      searchString = value;
+                    })),
+                  ),
+                ),
                 OutlinedButton(
-                    key: const Key('searchButton'),
-                    child: const Text('Search'),
-                    onPressed: () {
-                      context
-                          .read<GlAccountBloc>()
-                          .add(GlAccountFetch(searchString: searchString));
-                      searchString = '';
-                    })
-              ])
-            : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                if (isPhone(context)) const Text("Account name"),
-                Row(children: [
-                  const Expanded(child: Text("Account code")),
-                  if (isLargerThanPhone(context))
-                    const Expanded(child: Text("Account name")),
-                  if (isPhone(context))
-                    const Expanded(
-                        child: Text("debit", textAlign: TextAlign.right)),
-                  if (isLargerThanPhone(context))
-                    const Expanded(
-                        child:
-                            Text("Account class", textAlign: TextAlign.center)),
-                  if (isLargerThanPhone(context))
-                    const Expanded(
-                        child:
-                            Text("Account Type", textAlign: TextAlign.center)),
-                  if (isPhone(context))
-                    const Expanded(
-                        child: Text("Credit", textAlign: TextAlign.right)),
-                  if (isLargerThanPhone(context))
-                    const Expanded(
-                        child: Text("Debit", textAlign: TextAlign.right)),
-                  if (isLargerThanPhone(context))
-                    const Expanded(
-                        child: Text("Credit", textAlign: TextAlign.right)),
-                ]),
+                  key: const Key('searchButton'),
+                  child: Text(localizations.search),
+                  onPressed: () {
+                    context.read<GlAccountBloc>().add(
+                      GlAccountFetch(searchString: searchString),
+                    );
+                    searchString = '';
+                  },
+                ),
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (isPhone(context)) Text(localizations.accountName),
+                Row(
+                  children: [
+                    Expanded(child: Text(localizations.accountCode)),
+                    if (isLargerThanPhone(context))
+                      Expanded(child: Text(localizations.accountName)),
+                    if (isPhone(context))
+                      Expanded(
+                        child: Text(
+                          localizations.debit,
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    if (isLargerThanPhone(context))
+                      Expanded(
+                        child: Text(
+                          localizations.accountClass,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    if (isLargerThanPhone(context))
+                      Expanded(
+                        child: Text(
+                          localizations.accountType,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    if (isPhone(context))
+                      Expanded(
+                        child: Text(
+                          localizations.credit,
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    if (isLargerThanPhone(context))
+                      Expanded(
+                        child: Text(
+                          localizations.debit,
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    if (isLargerThanPhone(context))
+                      Expanded(
+                        child: Text(
+                          localizations.credit,
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                  ],
+                ),
                 const Divider(),
-              ]),
-        trailing: search ? null : const SizedBox(width: 20));
+              ],
+            ),
+      trailing: search ? null : const SizedBox(width: 20),
+    );
   }
 }

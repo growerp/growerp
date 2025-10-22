@@ -26,11 +26,11 @@ import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:intl/intl.dart';
 import 'package:hotel/router.dart' as router;
 import 'package:hotel/main.dart';
 import 'package:hotel/views/gantt_form.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Static menuOptions for testing (no localization needed)
 List<MenuOption> testMenuOptions = [
@@ -215,6 +215,9 @@ void main() {
 */
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
+    // Force English locale for tests to ensure consistent date picker behavior
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_locale', 'en');
   });
 
   testWidgets("test room reservation", (WidgetTester tester) async {
@@ -271,21 +274,18 @@ Future<void> createRoomReservation(
 ) async {
   SaveTest test = await PersistFunctions.getTest();
   List<FinDoc> newOrders = [];
-  var stdFormat = DateFormat('yyyy-MM-dd');
   for (FinDoc finDoc in finDocs) {
     await CommonTest.tapByKey(tester, 'addNew');
     await CommonTest.tapByKey(tester, 'customer');
     await CommonTest.tapByText(tester, finDoc.otherUser!.lastName!);
     await CommonTest.tapByKey(tester, 'product', seconds: CommonTest.waitTime);
     await CommonTest.tapByText(tester, finDoc.items[0].description!);
-    await CommonTest.tapByKey(tester, 'setDate');
-    await CommonTest.tapByTooltip(tester, 'Switch to input');
-    await tester.enterText(
-      find.byType(TextField).last,
-      stdFormat.format(finDoc.items[0].rentalFromDate!),
+    await CommonTest.enterDate(
+      tester,
+      'setDate',
+      finDoc.items[0].rentalFromDate!,
+      usDate: true,
     );
-    await tester.pump();
-    await CommonTest.tapByText(tester, 'OK');
     expect(
       CommonTest.getDateTimeFormField('setDate').dateOnly(),
       finDoc.items[0].rentalFromDate.dateOnly(),

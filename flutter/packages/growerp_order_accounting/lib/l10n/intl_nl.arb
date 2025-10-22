@@ -278,5 +278,16 @@
   "extractedData": "Geëxtraheerde gegevens:",
   "createInvoice": "Factuur aanmaken",
   "imageProcessed": "Afbeelding succesvol verwerkt!",
-  "invoiceCreated": "Factuur succesvol aangemaakt!"
+  "invoiceCreated": "Factuur succesvol aangemaakt!",
+  "docTypeRequest": "Aanvraag",
+  "docTypeOrder": "Bestelling",
+  "docTypeInvoice": "Factuur",
+  "docTypePayment": "Betaling",
+  "docTypeShipment": "Zending",
+  "docTypeTransaction": "Transactie",
+  "accountCode": "Rekeningcode",
+  "accountCodeNull": "Voer een rekeningcode in",
+  "accountName": "Rekeningnaam",
+  "accountNameNull": "Voer een rekeningnaam in",
+  "searchGlAccountHint": "Zoeken op code of naam"
 }

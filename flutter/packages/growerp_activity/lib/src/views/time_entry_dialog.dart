@@ -97,6 +97,9 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
 
   Widget _showForm() {
     Future<void> selectDate(BuildContext context) async {
+      // Get locale from LocaleBloc to respect user's language selection
+      final localeState = context.read<LocaleBloc>().state;
+
       final DateTime? picked = await showDatePicker(
         context: context,
         initialDate: _selectedDate,
@@ -104,10 +107,7 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
           const Duration(days: 31),
         ),
         lastDate: CustomizableDateTime.current.add(const Duration(days: 356)),
-        locale: const Locale(
-          'sv',
-          'SE',
-        ), // Swedish locale uses YYYY-MM-DD format
+        locale: localeState.locale,
       );
       if (picked != null && picked != _selectedDate) {
         setState(() {
@@ -126,8 +126,9 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
               child: Text(
                 widget.timeEntry.timeEntryId == null
                     ? _localizations.timeEntry_new
-                    : _localizations
-                        .timeEntry_id(widget.timeEntry.timeEntryId!),
+                    : _localizations.timeEntry_id(
+                        widget.timeEntry.timeEntryId!,
+                      ),
                 style: const TextStyle(
                   fontSize: 10,
                   color: Colors.black,
@@ -151,9 +152,7 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
                   child: OutlinedButton(
                     key: const Key('setDate'),
                     onPressed: () => selectDate(context),
-                    child: Text(
-                      _localizations.timeEntry_updateDate,
-                    ),
+                    child: Text(_localizations.timeEntry_updateDate),
                   ),
                 ),
               ],

@@ -127,6 +127,25 @@ class MyFinDocState extends State<FinDocPage> {
   late OrderAccountingLocalizations _localizations;
   bool _shouldCloseOnFinDocSuccess = false;
 
+  String _getDocTypeLabel(FinDocType docType) {
+    switch (docType) {
+      case FinDocType.request:
+        return _localizations.docTypeRequest;
+      case FinDocType.order:
+        return _localizations.docTypeOrder;
+      case FinDocType.invoice:
+        return _localizations.docTypeInvoice;
+      case FinDocType.payment:
+        return _localizations.docTypePayment;
+      case FinDocType.shipment:
+        return _localizations.docTypeShipment;
+      case FinDocType.transaction:
+        return _localizations.docTypeTransaction;
+      default:
+        return '';
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -262,9 +281,10 @@ class MyFinDocState extends State<FinDocPage> {
         key: const Key('listView'),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: popUp(
-          title:
-              "${finDoc.sales ? _localizations.sales : _localizations.purchase} ${finDoc.docType} "
-              "#${finDoc.pseudoId ?? _localizations.newItem}",
+          title: finDoc.docType == FinDocType.transaction
+              ? "${_getDocTypeLabel(finDoc.docType!)} #${finDoc.pseudoId ?? _localizations.newItem}"
+              : "${finDoc.sales ? _localizations.sales : _localizations.purchase} ${_getDocTypeLabel(finDoc.docType!)}"
+                    " #${finDoc.pseudoId ?? _localizations.newItem}",
           height: 650,
           width: screenWidth,
           context: context,
@@ -471,7 +491,8 @@ class MyFinDocState extends State<FinDocPage> {
                 key: const Key('description'),
                 readOnly: readOnly,
                 decoration: InputDecoration(
-                  labelText: '${finDoc.docType} ${_localizations.description}',
+                  labelText:
+                      '${_getDocTypeLabel(finDoc.docType!)} ${_localizations.description}',
                   enabled: !readOnly,
                 ),
                 controller: _descriptionController,
@@ -546,7 +567,8 @@ class MyFinDocState extends State<FinDocPage> {
                 Expanded(
                   child: InputDecorator(
                     decoration: InputDecoration(
-                      labelText: '${finDoc.docType} ${_localizations.type}',
+                      labelText:
+                          '${_getDocTypeLabel(finDoc.docType!)} ${_localizations.type}',
                     ),
                     child: Text(finDoc.docSubType ?? ''),
                   ),
@@ -734,7 +756,7 @@ class MyFinDocState extends State<FinDocPage> {
             key: const Key('update'),
             child: Text(
               "${finDoc.idIsNull() ? _localizations.create : _localizations.update} "
-              "${finDocUpdated.docType!}",
+              "${_getDocTypeLabel(finDocUpdated.docType!)}",
             ),
             onPressed: () {
               finDocUpdated = finDocUpdated.copyWith(
@@ -758,7 +780,7 @@ class MyFinDocState extends State<FinDocPage> {
                     (finDocUpdated.sales
                         ? _localizations.customer
                         : _localizations.supplier),
-                    finDocUpdated.docType.toString(),
+                    _getDocTypeLabel(finDocUpdated.docType!),
                   ),
                   Colors.red,
                 );

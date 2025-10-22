@@ -32,6 +32,22 @@
   "@glAccountNameNull": {
     "description": "Error message for empty GL Account name field"
   },
+  "accountCode": "Account Code",
+  "@accountCode": {
+    "description": "GL Account code"
+  },
+  "accountCodeNull": "Please enter a glAccount code?",
+  "@accountCodeNull": {
+    "description": "Error message for empty GL Account code field"
+  },
+  "accountName": "Account Name",
+  "@accountName": {
+    "description": "GL Account name"
+  },
+  "accountNameNull": "Please enter a glAccount name?",
+  "@accountNameNull": {
+    "description": "Error message for empty GL Account name field"
+  },
   "accountClass": "Account Class",
   "@accountClass": {
     "description": "Account class field label"
@@ -168,9 +184,13 @@
   "@search": {
     "description": "Search button text"
   },
-  "searchFinDoc": "Search Financial Document",
+  "searchGlAccountHint": "search in ID, name ...",
+  "@searchGlAccountHint": {
+    "description": "Search hint for GL Accounts"
+  },
+  "searchFinDoc": "Search Fin Doc",
   "@searchFinDoc": {
-    "description": "Title for the financial document search dialog"
+    "description": "button label"
   },
   "newRental": "New Reservation",
   "@newRental": {
@@ -1166,5 +1186,29 @@
   "invoiceCreated": "Invoice created successfully!",
   "@invoiceCreated": {
     "description": "Snackbar message when invoice is created successfully"
+  },
+  "docTypeRequest": "Request",
+  "@docTypeRequest": {
+    "description": "Document type: Request"
+  },
+  "docTypeOrder": "Order",
+  "@docTypeOrder": {
+    "description": "Document type: Order"
+  },
+  "docTypeInvoice": "Invoice",
+  "@docTypeInvoice": {
+    "description": "Document type: Invoice"
+  },
+  "docTypePayment": "Payment",
+  "@docTypePayment": {
+    "description": "Document type: Payment"
+  },
+  "docTypeShipment": "Shipment",
+  "@docTypeShipment": {
+    "description": "Document type: Shipment"
+  },
+  "docTypeTransaction": "Transaction",
+  "@docTypeTransaction": {
+    "description": "Document type: Transaction"
   }
 }
