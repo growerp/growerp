@@ -278,5 +278,11 @@
   "extractedData": "Données extraites :",
   "createInvoice": "Créer une facture",
   "imageProcessed": "Image traitée avec succès !",
-  "invoiceCreated": "Facture créée avec succès !"
+  "invoiceCreated": "Facture créée avec succès !",
+  "docTypeRequest": "Demande",
+  "docTypeOrder": "Commande",
+  "docTypeInvoice": "Facture",
+  "docTypePayment": "Paiement",
+  "docTypeShipment": "Expédition",
+  "docTypeTransaction": "Transaction"
 }

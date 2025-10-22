@@ -120,8 +120,9 @@ class ActivityDialogState extends State<ActivityDialog> {
             );
           case ActivityBlocStatus.failure:
             return FatalErrorForm(
-              message: _localizations
-                  .activity_loadError(widget.activity.activityType.toString()),
+              message: _localizations.activity_loadError(
+                widget.activity.activityType.toString(),
+              ),
             );
           default:
             return const Center(child: LoadingIndicator());
@@ -132,18 +133,41 @@ class ActivityDialogState extends State<ActivityDialog> {
 
   Widget _showForm(bool isPhone) {
     Future<void> selectDate(BuildContext context) async {
+      // Get locale from LocaleBloc to respect user's language selection
+      final localeState = context.read<LocaleBloc>().state;
+      final themeState = context.read<ThemeBloc>().state;
+
       final DateTime? picked = await showDatePicker(
         context: context,
         initialDate: CustomizableDateTime.current,
         firstDate: CustomizableDateTime.current,
         lastDate: CustomizableDateTime.current.add(const Duration(days: 356)),
-        locale: const Locale(
-          'sv',
-          'SE',
-        ), // Swedish locale uses YYYY-MM-DD format
+        locale: localeState.locale,
         builder: (BuildContext context, Widget? child) {
+          final isDark = themeState.themeMode == ThemeMode.dark;
+          final surfaceColor = isDark
+              ? Theme.of(context).colorScheme.surfaceContainerHighest
+              : Theme.of(context).colorScheme.surface;
+
           return Theme(
-            data: ThemeData(primarySwatch: Colors.green),
+            data: isDark
+                ? ThemeData.dark(useMaterial3: true).copyWith(
+                    primaryColor: Colors.green,
+                    colorScheme: ColorScheme.dark(
+                      primary: Colors.green,
+                      secondary: Colors.green,
+                      surface: surfaceColor,
+                    ),
+                    scaffoldBackgroundColor: surfaceColor,
+                  )
+                : ThemeData.light(useMaterial3: true).copyWith(
+                    primaryColor: Colors.green,
+                    colorScheme: ColorScheme.light(
+                      primary: Colors.green,
+                      secondary: Colors.green,
+                      surface: surfaceColor,
+                    ),
+                  ),
             child: child!,
           );
         },
@@ -182,8 +206,9 @@ class ActivityDialogState extends State<ActivityDialog> {
                         labelText: _localizations.activity_status,
                       ),
                       initialValue: _updatedStatus,
-                      validator: (value) =>
-                          value == null ? _localizations.activity_fieldRequired : null,
+                      validator: (value) => value == null
+                          ? _localizations.activity_fieldRequired
+                          : null,
                       items:
                           ActivityStatus.validActivityStatusList(_updatedStatus)
                               .map(
@@ -206,8 +231,9 @@ class ActivityDialogState extends State<ActivityDialog> {
             TextFormField(
               key: const Key('name'),
               decoration: InputDecoration(
-                labelText: _localizations
-                    .activity_nameError(widget.activity.activityType.toString()),
+                labelText: _localizations.activity_nameError(
+                  widget.activity.activityType.toString(),
+                ),
               ),
               controller: _nameController,
               validator: (value) {
@@ -405,9 +431,7 @@ class ActivityDialogState extends State<ActivityDialog> {
                   OutlinedButton(
                     key: const Key('setDate'),
                     onPressed: () => selectDate(context),
-                    child: Text(
-                      _localizations.activity_update,
-                    ),
+                    child: Text(_localizations.activity_update),
                   ),
                 ],
               ),
@@ -419,9 +443,7 @@ class ActivityDialogState extends State<ActivityDialog> {
                     widget.activity.activityType == ActivityType.todo)
                   OutlinedButton(
                     key: const Key('TimeEntries'),
-                    child: Text(
-                      _localizations.activity_timeEntries,
-                    ),
+                    child: Text(_localizations.activity_timeEntries),
                     onPressed: () async {
                       await showDialog(
                         barrierDismissible: true,

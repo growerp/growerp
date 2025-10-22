@@ -79,19 +79,44 @@ Future addRentalItemDialog(
                     finDocBloc.add(
                       FinDocProductRentalDates(selectedProduct?.productId),
                     );
+                    // Get locale from LocaleBloc to respect user's language selection
+                    final localeState = context.read<LocaleBloc>().state;
+                    final themeState = context.read<ThemeBloc>().state;
+
                     final DateTime? picked = await showDatePicker(
                       context: context,
                       initialDate: firstFreeDate(),
                       firstDate: CustomizableDateTime.current,
                       lastDate: DateTime(CustomizableDateTime.current.year + 1),
                       selectableDayPredicate: whichDayOk,
-                      locale: const Locale(
-                        'sv',
-                        'SE',
-                      ), // Swedish locale uses YYYY-MM-DD format
+                      locale: localeState.locale,
                       builder: (BuildContext context, Widget? child) {
+                        final isDark = themeState.themeMode == ThemeMode.dark;
+                        final surfaceColor = isDark
+                            ? Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHighest
+                            : Theme.of(context).colorScheme.surface;
+
                         return Theme(
-                          data: ThemeData(primarySwatch: Colors.green),
+                          data: isDark
+                              ? ThemeData.dark(useMaterial3: true).copyWith(
+                                  primaryColor: Colors.green,
+                                  colorScheme: ColorScheme.dark(
+                                    primary: Colors.green,
+                                    secondary: Colors.green,
+                                    surface: surfaceColor,
+                                  ),
+                                  scaffoldBackgroundColor: surfaceColor,
+                                )
+                              : ThemeData.light(useMaterial3: true).copyWith(
+                                  primaryColor: Colors.green,
+                                  colorScheme: ColorScheme.light(
+                                    primary: Colors.green,
+                                    secondary: Colors.green,
+                                    surface: surfaceColor,
+                                  ),
+                                ),
                           child: child!,
                         );
                       },

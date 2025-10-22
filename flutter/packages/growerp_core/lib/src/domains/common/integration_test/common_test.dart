@@ -651,13 +651,25 @@ class CommonTest {
 
   /// get the state of a switch field identified by a key
   static bool? getSwitchField(String key) {
-    Switch tff = find.byKey(Key(key)).last.evaluate().single.widget as Switch;
+    final finder = find.byKey(Key(key), skipOffstage: false);
+    expect(
+      finder,
+      findsWidgets,
+      reason: 'No Switch widget found with key "$key"',
+    );
+    Switch tff = finder.last.evaluate().single.widget as Switch;
     return tff.value;
   }
 
   /// get the content of a text field identified by a key
   static String getTextField(String key) {
-    Text tf = find.byKey(Key(key)).last.evaluate().single.widget as Text;
+    final finder = find.byKey(Key(key), skipOffstage: false);
+    expect(
+      finder,
+      findsWidgets,
+      reason: 'No Text widget found with key "$key")}',
+    );
+    Text tf = finder.last.evaluate().single.widget as Text;
     return tf.data!;
   }
 
@@ -765,8 +777,8 @@ class CommonTest {
     int seconds = 1,
   }) async {
     expect(
-      find.byKey(Key(key)).last,
-      findsOneWidget,
+      tester.any(find.byKey(Key(key))),
+      true,
       reason: "could not find key: $key to tap on",
     );
     await tester.tap(find.byKey(Key(key)).last);

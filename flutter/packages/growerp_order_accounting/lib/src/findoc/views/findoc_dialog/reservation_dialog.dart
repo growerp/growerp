@@ -149,19 +149,42 @@ class ReservationDialogState extends State<ReservationDialog> {
 
   Widget _addRentalItemDialog() {
     Future<void> selectDate(BuildContext context) async {
+      // Get locale from LocaleBloc to ensure it's always correct
+      final localeState = context.read<LocaleBloc>().state;
+      final themeState = context.read<ThemeBloc>().state;
+
       final DateTime? picked = await showDatePicker(
         context: context,
         initialDate: firstFreeDate(),
         firstDate: CustomizableDateTime.current,
         lastDate: CustomizableDateTime.current.add(const Duration(days: 356)),
         selectableDayPredicate: whichDayOk,
-        locale: const Locale(
-          'sv',
-          'SE',
-        ), // Swedish locale uses YYYY-MM-DD format
+        locale: localeState.locale,
         builder: (BuildContext context, Widget? child) {
+          final isDark = themeState.themeMode == ThemeMode.dark;
+          final surfaceColor = isDark
+              ? Theme.of(context).colorScheme.surfaceContainerHighest
+              : Theme.of(context).colorScheme.surface;
+
           return Theme(
-            data: ThemeData(primarySwatch: Colors.green),
+            data: isDark
+                ? ThemeData.dark(useMaterial3: true).copyWith(
+                    primaryColor: Colors.green,
+                    colorScheme: ColorScheme.dark(
+                      primary: Colors.green,
+                      secondary: Colors.green,
+                      surface: surfaceColor,
+                    ),
+                    scaffoldBackgroundColor: surfaceColor,
+                  )
+                : ThemeData.light(useMaterial3: true).copyWith(
+                    primaryColor: Colors.green,
+                    colorScheme: ColorScheme.light(
+                      primary: Colors.green,
+                      secondary: Colors.green,
+                      surface: surfaceColor,
+                    ),
+                  ),
             child: child!,
           );
         },
@@ -343,7 +366,9 @@ class ReservationDialogState extends State<ReservationDialog> {
               ),
               TextFormField(
                 key: const Key('price'),
-                decoration: InputDecoration(labelText: _localizations.priceAmount),
+                decoration: InputDecoration(
+                  labelText: _localizations.priceAmount,
+                ),
                 controller: _priceController,
                 validator: (value) {
                   if (value!.isEmpty) return _localizations.enterPriceAmount;

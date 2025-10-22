@@ -278,5 +278,16 @@
   "extractedData": "ข้อมูลที่แยกออกมา:",
   "createInvoice": "สร้างใบแจ้งหนี้",
   "imageProcessed": "ประมวลผลรูปภาพสำเร็จ!",
-  "invoiceCreated": "สร้างใบแจ้งหนี้สำเร็จ!"
+  "invoiceCreated": "สร้างใบแจ้งหนี้สำเร็จ!",
+  "accountCode": "รหัสบัญชี",
+  "accountCodeNull": "กรุณาป้อนรหัสบัญชี",
+  "accountName": "ชื่อบัญชี",
+  "accountNameNull": "กรุณาป้อนชื่อบัญชี",
+  "searchGlAccountHint": "ค้นหาบัญชีแยกประเภท",
+  "docTypeRequest": "คำขอ",
+  "docTypeOrder": "ใบสั่ง",
+  "docTypeInvoice": "ใบแจ้งหนี้",
+  "docTypePayment": "การชำระเงิน",
+  "docTypeShipment": "การจัดส่ง",
+  "docTypeTransaction": "ธุรกรรม"
 }

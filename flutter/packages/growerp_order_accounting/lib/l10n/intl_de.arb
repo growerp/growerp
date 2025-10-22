@@ -278,5 +278,11 @@
   "extractedData": "Extrahierte Daten:",
   "createInvoice": "Rechnung erstellen",
   "imageProcessed": "Bild erfolgreich verarbeitet!",
-  "invoiceCreated": "Rechnung erfolgreich erstellt!"
+  "invoiceCreated": "Rechnung erfolgreich erstellt!",
+  "docTypeRequest": "Anfrage",
+  "docTypeOrder": "Bestellung",
+  "docTypeInvoice": "Rechnung",
+  "docTypePayment": "Zahlung",
+  "docTypeShipment": "Sendung",
+  "docTypeTransaction": "Transaktion"
 }

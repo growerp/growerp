@@ -13,9 +13,7 @@
  */
 
 import 'package:growerp_core/growerp_core.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:intl/intl.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'integration_test.dart';
 
@@ -108,7 +106,6 @@ class OrderTest {
   ) async {
     SaveTest test = await PersistFunctions.getTest();
     List<FinDoc> newOrders = [];
-    var stdFormat = DateFormat('yyyy-MM-dd');
     for (FinDoc finDoc in finDocs) {
       await CommonTest.tapByKey(tester, 'addNew');
       await CommonTest.tapByKey(tester, 'customer');
@@ -121,14 +118,12 @@ class OrderTest {
         seconds: CommonTest.waitTime,
       );
       await CommonTest.tapByText(tester, finDoc.items[0].description!);
-      await CommonTest.tapByKey(tester, 'setDate');
-      await CommonTest.tapByTooltip(tester, 'Switch to input');
-      await tester.enterText(
-        find.byType(TextField).last,
-        stdFormat.format(finDoc.items[0].rentalFromDate!),
+      await CommonTest.enterDate(
+        tester,
+        'setDate',
+        finDoc.items[0].rentalFromDate!,
+        usDate: true,
       );
-      await tester.pump();
-      await CommonTest.tapByText(tester, 'OK');
       expect(
         CommonTest.getDateTimeFormField('setDate').dateOnly(),
         finDoc.items[0].rentalFromDate.dateOnly(),
@@ -174,19 +169,16 @@ class OrderTest {
     WidgetTester tester,
   ) async {
     SaveTest test = await PersistFunctions.getTest();
-    var stdFormat = DateFormat('yyyy-MM-dd');
     await CommonTest.tapByKey(tester, 'addNew');
     await CommonTest.tapByKey(tester, 'itemRental');
     await CommonTest.tapByKey(tester, 'product');
     await CommonTest.tapByText(tester, test.orders[0].items[0].description!);
-    await CommonTest.tapByKey(tester, 'setDate');
-    await CommonTest.tapByTooltip(tester, 'Switch to input');
-    await tester.enterText(
-      find.byType(TextField).last,
-      stdFormat.format(test.orders[0].items[0].rentalFromDate!),
+    await CommonTest.enterDate(
+      tester,
+      'setDate',
+      test.orders[0].items[0].rentalFromDate!,
+      usDate: true,
     );
-    await tester.pump();
-    await CommonTest.tapByText(tester, 'OK');
     expect(find.text('Out of range.'), findsOneWidget);
     await CommonTest.tapByText(tester, 'CANCEL');
     await CommonTest.tapByKey(tester, 'cancel');
