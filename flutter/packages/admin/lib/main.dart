@@ -23,6 +23,7 @@ import 'package:growerp_activity/growerp_activity.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_assessment/growerp_assessment.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -107,5 +108,6 @@ List<BlocProvider> getAdminBlocProviders(
     ...getOrderAccountingBlocProviders(restClient, classificationId),
     ...getMarketingBlocProviders(restClient),
     ...getWebsiteBlocProviders(restClient),
+    ...getAssessmentBlocProviders(restClient),
   ];
 }

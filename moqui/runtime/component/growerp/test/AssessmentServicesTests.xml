@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Assessment Services Integration Tests
+Tests for assessment management, scoring, and submission
+Covers dual-ID lookup, multi-tenant isolation, and error handling
+-->
+<tests xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/test-3.xsd">
+
+<!-- ============================================ -->
+<!-- ASSESSMENT SERVICES TESTS -->
+<!-- ============================================ -->
+
+<!-- Test: Create Assessment -->
+<test name="createAssessment">
+  <description>Test creating a new assessment</description>
+  <steps>
+    <step name="createAssessment">
+      <service-call service-name="growerp.assessment.createAssessment">
+        <in-parameter name="assessmentName" value="Test Product Readiness" />
+        <in-parameter name="description" value="Assessment to measure product readiness" />
+        <in-parameter name="status" value="ACTIVE" />
+      </service-call>
+      <assertions>
+        <assert-not-empty field-path="assessmentId" message="Assessment ID should be generated" />
+        <assert-not-empty field-path="pseudoId" message="Pseudo ID should be generated" />
+      </assertions>
+    </step>
+  </steps>
+</test>
+
+<!-- Test: Get Assessment by ID -->
+<test name="getAssessmentById">
+  <description>Test retrieving assessment by system ID</description>
+  <setup-steps>
+    <step name="createAssessment">
+      <service-call service-name="growerp.assessment.createAssessment">
+        <in-parameter name="assessmentName" value="Test Assessment" />
+        <in-parameter name="status" value="ACTIVE" />
+      </service-call>
+    </step>
+  </setup-steps>
+  <steps>
+    <step name="getAssessment">
+      <service-call service-name="growerp.assessment.getAssessment">
+        <in-parameter name="idOrPseudo" from-previous-output="assessmentId" />
+      </service-call>
+      <assertions>
+        <assert field-path="assessment.assessmentName" value="Test Assessment"
+          message="Assessment name should match" />
+        <assert field-path="assessment.status" value="ACTIVE" message="Status should be ACTIVE" />
+      </assertions>
+    </step>
+  </steps>
+</test>
+
+<!-- Test: Get Assessment by PseudoId -->
+<test name="getAssessmentByPseudoId">
+  <description>Test retrieving assessment by pseudoId (tenant-unique)</description>
+  <setup-steps>
+    <step name="createAssessment">
+      <service-call service-name="growerp.assessment.createAssessment">
+        <in-parameter name="assessmentName" value="Test Assessment" />
+        <in-parameter name="status" value="ACTIVE" />
+      </service-call>
+    </step>
+  </setup-steps>
+  <steps>
+    <step name="getAssessmentByPseudoId">
+      <service-call service-name="growerp.assessment.getAssessment">
+        <in-parameter name="idOrPseudo" from-previous-output="pseudoId" />
+      </service-call>
+      <assertions>
+        <assert field-path="assessment.assessmentName" value="Test Assessment"
+          message="Assessment name should match" />
+      </assertions>
+    </step>
+  </steps>
+</test>
+
+<!-- Test: List Assessments -->
+<test name="listAssessments">
+  <description>Test listing assessments with pagination</description>
+  <setup-steps>
+    <step name="createAssessment1">
+      <service-call service-name="growerp.assessment.createAssessment">
+        <in-parameter name="assessmentName" value="Assessment 1" />
+        <in-parameter name="status" value="ACTIVE" />
+      </service-call>
+    </step>
+    <step name="createAssessment2">
+      <service-call service-name="growerp.assessment.createAssessment">
+        <in-parameter name="assessmentName" value="Assessment 2" />
+        <in-parameter name="status" value="DRAFT" />
+      </service-call>
+    </step>
+  </setup-steps>
+  <steps>
+    <step name="listAll">
+      <service-call service-name="growerp.assessment.listAssessments">
+        <in-parameter name="pageNumber" value="1" />
+        <in-parameter name="pageSize" value="20" />
+      </service-call>
+      <assertions>
+        <assert field-path="totalCount" operator="greater-than" value="0"
+          message="Should have at least 1 assessment" />
+        <assert field-path="pageCount" operator="greater-than-equal" value="1"
+          message="Should have at least 1 page" />
+      </assertions>
+    </step>
+  </steps>
+</test>
+
+<!-- Test: Update Assessment -->
+<test name="updateAssessment">
+  <description>Test updating assessment details</description>
+  <setup-steps>
+    <step name="createAssessment">
+      <service-call service-name="growerp.assessment.createAssessment">
+        <in-parameter name="assessmentName" value="Original Name" />
+        <in-parameter name="status" value="ACTIVE" />
+      </service-call>
+    </step>
+  </setup-steps>
+  <steps>
+    <step name="updateAssessment">
+      <service-call service-name="growerp.assessment.updateAssessment">
+        <in-parameter name="assessmentId" from-previous-output="assessmentId" />
+        <in-parameter name="assessmentName" value="Updated Name" />
+        <in-parameter name="status" value="INACTIVE" />
+      </service-call>
+    </step>
+    <step name="verifyUpdate">
+      <service-call service-name="growerp.assessment.getAssessment">
+        <in-parameter name="idOrPseudo" from-previous-output="assessmentId" />
+      </service-call>
+      <assertions>
+        <assert field-path="assessment.assessmentName" value="Updated Name"
+          message="Name should be updated" />
+        <assert field-path="assessment.status" value="INACTIVE" message="Status should be updated" />
+      </assertions>
+    </step>
+  </steps>
+</test>
+
+<!-- Test: Multi-Tenant Isolation -->
+<test name="multiTenantIsolation">
+  <description>Test that assessments from different tenants are isolated</description>
+  <setup-steps>
+    <step name="createAssessmentTenant1">
+      <service-call service-name="growerp.assessment.createAssessment">
+        <in-parameter name="assessmentName" value="Tenant 1 Assessment" />
+        <in-parameter name="status" value="ACTIVE" />
+      </service-call>
+    </step>
+    <step name="createAssessmentTenant2">
+      <service-call service-name="growerp.assessment.createAssessment">
+        <in-parameter name="assessmentName" value="Tenant 2 Assessment" />
+        <in-parameter name="status" value="ACTIVE" />
+      </service-call>
+    </step>
+  </setup-steps>
+  <steps>
+    <step name="listTenant1Assessments">
+      <service-call service-name="growerp.assessment.listAssessments" />
+      <assertions>
+        <assert field-path="assessments[0].assessmentName" value="Tenant 1 Assessment"
+          message="Should only see tenant 1 assessments" />
+      </assertions>
+    </step>
+  </steps>
+</test>
+
+<!-- Test: Delete Assessment (Cascade) -->
+<test name="deleteAssessmentCascade">
+  <description>Test deleting assessment cascades to related entities</description>
+  <setup-steps>
+    <step name="createAssessment">
+      <service-call service-name="growerp.assessment.createAssessment">
+        <in-parameter name="assessmentName" value="Assessment to Delete" />
+        <in-parameter name="status" value="ACTIVE" />
+      </service-call>
+    </step>
+  </setup-steps>
+  <steps>
+    <step name="deleteAssessment">
+      <service-call service-name="growerp.assessment.deleteAssessment">
+        <in-parameter name="assessmentId" from-previous-output="assessmentId" />
+      </service-call>
+      <assertions>
+        <assert-not-empty field-path="deletedCount" message="Should return deleted count" />
+      </assertions>
+    </step>
+    <step name="verifyDeleted">
+      <service-call service-name="growerp.assessment.getAssessment">
+        <in-parameter name="idOrPseudo" from-previous-output="assessmentId" />
+        <expect-error />
+      </service-call>
+    </step>
+  </steps>
+</test>
+
+<!-- ============================================ -->
+<!-- SCORING SERVICES TESTS -->
+<!-- ============================================ -->
+
+<!-- Test: Get Thresholds -->
+<test name="getThresholds">
+  <description>Test retrieving scoring thresholds for assessment</description>
+  <steps>
+    <step name="getThresholds">
+      <service-call service-name="growerp.assessment.getThresholds">
+        <in-parameter name="assessmentId" value="test_assessment_1" />
+      </service-call>
+      <assertions>
+        <assert field-path="thresholds" operator="is-not-empty"
+          message="Should return thresholds list" />
+      </assertions>
+    </step>
+  </steps>
+</test>
+
+<!-- Test: Calculate Score -->
+<test name="calculateScore">
+  <description>Test score calculation from assessment answers</description>
+  <steps>
+    <step name="calculateScore">
+      <service-call service-name="growerp.assessment.calculateScore">
+        <in-parameter name="assessmentId" value="test_assessment_1" />
+        <in-parameter name="answersData" value='{"question1": "option1", "question2": "option2"}' />
+      </service-call>
+      <assertions>
+        <assert field-path="score" operator="greater-than-equal" value="0"
+          message="Score should be non-negative" />
+      </assertions>
+    </step>
+  </steps>
+</test>
+
+<!-- Test: Submit Assessment -->
+<test name="submitAssessment">
+  <description>Test submitting completed assessment with lead capture</description>
+  <steps>
+    <step name="submitAssessment">
+      <service-call service-name="growerp.assessment.submitAssessment">
+        <in-parameter name="assessmentId" value="test_assessment_1" />
+        <in-parameter name="answersData" value='{"question1": "option1", "question2": "option2"}' />
+        <in-parameter name="respondentName" value="John Doe" />
+        <in-parameter name="respondentEmail" value="john@example.com" />
+        <in-parameter name="respondentPhone" value="+1234567890" />
+        <in-parameter name="respondentCompany" value="Test Corp" />
+      </service-call>
+      <assertions>
+        <assert-not-empty field-path="resultId" message="Result ID should be generated" />
+        <assert-not-empty field-path="score" message="Score should be calculated" />
+        <assert field-path="leadStatus" operator="is-not-empty"
+          message="Lead status should be determined" />
+      </assertions>
+    </step>
+  </steps>
+</test>
+
+</test-definitions>

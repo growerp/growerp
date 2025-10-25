@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Assessment Entities for GrowERP Landing Page & Assessment System
+Includes: Assessment, AssessmentQuestion, AssessmentQuestionOption, 
+ScoringThreshold, and AssessmentResult entities
+Multi-tenant support via ownerPartyId
+Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- Assessment Entity: Main assessment/survey definition -->
+    <entity entity-name="Assessment" package="growerp.assessment" cache="true">
+        <field name="assessmentId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="ownerPartyId" type="id" />
+        <field name="assessmentName" type="text-medium" />
+        <field name="description" type="text-long" />
+        <field name="status" type="text-short" />
+        <field name="createdDate" type="date-time" />
+        <field name="createdByUserLogin" type="text-short" />
+        <field name="lastModifiedDate" type="date-time" />
+        <field name="lastModifiedByUserLogin" type="text-short" />
+
+        <!-- Indices -->
+        <index name="assessmentId_idx" unique="true">
+            <index-field name="assessmentId" />
+        </index>
+        <index name="pseudoId_idx">
+            <index-field name="pseudoId" />
+        </index>
+        <index name="pseudoId_ownerPartyId_idx" unique="true">
+            <index-field name="pseudoId" />
+            <index-field name="ownerPartyId" />
+        </index>
+        <index name="ownerPartyId_idx">
+            <index-field name="ownerPartyId" />
+        </index>
+    </entity>
+
+    <!-- AssessmentQuestion: Individual questions within an assessment -->
+    <entity entity-name="AssessmentQuestion" package="growerp.assessment" cache="true">
+        <field name="questionId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="assessmentId" type="id" is-pk="true" />
+        <field name="questionSequence" type="number-integer" />
+        <field name="questionType" type="text-short" />
+        <field name="questionText" type="text-long" />
+        <field name="questionDescription" type="text-long" />
+        <field name="isRequired" type="text-indicator" />
+        <field name="createdDate" type="date-time" />
+        <field name="createdByUserLogin" type="text-short" />
+
+        <!-- Indices -->
+        <index name="questionId_idx" unique="true">
+            <index-field name="questionId" />
+        </index>
+        <index name="pseudoId_idx">
+            <index-field name="pseudoId" />
+        </index>
+        <index name="pseudoId_assessmentId_idx" unique="true">
+            <index-field name="pseudoId" />
+            <index-field name="assessmentId" />
+        </index>
+        <index name="assessmentId_idx">
+            <index-field name="assessmentId" />
+        </index>
+    </entity>
+
+    <!-- AssessmentQuestionOption: Answer options for multiple choice questions -->
+    <entity entity-name="AssessmentQuestionOption" package="growerp.assessment" cache="true">
+        <field name="optionId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="questionId" type="id" is-pk="true" />
+        <field name="assessmentId" type="id" is-pk="true" />
+        <field name="optionSequence" type="number-integer" />
+        <field name="optionText" type="text-medium" />
+        <field name="optionScore" type="number-decimal" />
+        <field name="createdDate" type="date-time" />
+
+        <!-- Indices -->
+        <index name="optionId_idx" unique="true">
+            <index-field name="optionId" />
+        </index>
+        <index name="pseudoId_idx">
+            <index-field name="pseudoId" />
+        </index>
+        <index name="pseudoId_questionId_assessmentId_idx" unique="true">
+            <index-field name="pseudoId" />
+            <index-field name="questionId" />
+            <index-field name="assessmentId" />
+        </index>
+        <index name="questionId_idx">
+            <index-field name="questionId" />
+        </index>
+    </entity>
+
+    <!-- ScoringThreshold: Define score ranges and lead status -->
+    <entity entity-name="ScoringThreshold" package="growerp.assessment" cache="true">
+        <field name="thresholdId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="assessmentId" type="id" is-pk="true" />
+        <field name="minScore" type="number-decimal" />
+        <field name="maxScore" type="number-decimal" />
+        <field name="leadStatus" type="text-short" />
+        <field name="description" type="text-medium" />
+        <field name="createdDate" type="date-time" />
+        <field name="createdByUserLogin" type="text-short" />
+
+        <!-- Indices -->
+        <index name="thresholdId_idx" unique="true">
+            <index-field name="thresholdId" />
+        </index>
+        <index name="pseudoId_idx">
+            <index-field name="pseudoId" />
+        </index>
+        <index name="pseudoId_assessmentId_idx" unique="true">
+            <index-field name="pseudoId" />
+            <index-field name="assessmentId" />
+        </index>
+        <index name="assessmentId_idx">
+            <index-field name="assessmentId" />
+        </index>
+    </entity>
+
+    <!-- AssessmentResult: Stores assessment submission results -->
+    <entity entity-name="AssessmentResult" package="growerp.assessment" cache="false">
+        <field name="resultId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="assessmentId" type="id" />
+        <field name="ownerPartyId" type="id" />
+        <field name="score" type="number-decimal" />
+        <field name="leadStatus" type="text-short" />
+        <field name="respondentName" type="text-short" />
+        <field name="respondentEmail" type="text-medium" />
+        <field name="respondentPhone" type="text-short" />
+        <field name="respondentCompany" type="text-medium" />
+        <field name="capturedLeadId" type="id" />
+        <field name="resultData" type="text-very-long" />
+        <field name="answersData" type="text-very-long" />
+        <field name="createdDate" type="date-time" />
+        <field name="createdByUserLogin" type="text-short" />
+        <field name="lastModifiedDate" type="date-time" />
+
+        <!-- Indices -->
+        <index name="resultId_idx" unique="true">
+            <index-field name="resultId" />
+        </index>
+        <index name="pseudoId_idx">
+            <index-field name="pseudoId" />
+        </index>
+        <index name="pseudoId_ownerPartyId_idx" unique="true">
+            <index-field name="pseudoId" />
+            <index-field name="ownerPartyId" />
+        </index>
+        <index name="ownerPartyId_idx">
+            <index-field name="ownerPartyId" />
+        </index>
+        <index name="assessmentId_idx">
+            <index-field name="assessmentId" />
+        </index>
+        <index name="leadStatus_idx">
+            <index-field name="leadStatus" />
+        </index>
+        <index name="createdDate_idx">
+            <index-field name="createdDate" />
+        </index>
+    </entity>
+
+</entities>

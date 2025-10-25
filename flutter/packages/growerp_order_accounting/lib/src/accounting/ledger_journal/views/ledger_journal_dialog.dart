@@ -88,56 +88,33 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
     List<Widget> widgets = [
       TextFormField(
         key: const Key('name'),
-        decoration: InputDecoration(labelText: _localizations.ledgerJournalName),
+        decoration: InputDecoration(
+          labelText: _localizations.ledgerJournalName,
+        ),
         controller: _nameController,
         validator: (value) {
           return value!.isEmpty ? _localizations.ledgerJournalNameNull : null;
         },
       ),
-      Row(
-        children: [
-          if (widget.ledgerJournal.journalId.isNotEmpty)
-            OutlinedButton(
-              key: const Key('post'),
-              child: Text(_localizations.updateHeaderShort),
-              onPressed: () {
-                if (_formKeyLedgerJournal.currentState!.validate()) {
-                  _ledgerJournalBloc.add(
-                    LedgerJournalUpdate(
-                      LedgerJournal(
-                        journalId: widget.ledgerJournal.journalId,
-                        journalName: _nameController.text,
-                        isPosted: true,
-                      ),
-                    ),
-                  );
-                }
-              },
-            ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: OutlinedButton(
-              key: const Key('update'),
-              child: Text(
-                widget.ledgerJournal.journalId.isEmpty
-                    ? _localizations.create
-                    : _localizations.update,
+      OutlinedButton(
+        key: const Key('update'),
+        child: Text(
+          widget.ledgerJournal.journalId.isEmpty
+              ? _localizations.create
+              : _localizations.update,
+        ),
+        onPressed: () {
+          if (_formKeyLedgerJournal.currentState!.validate()) {
+            _ledgerJournalBloc.add(
+              LedgerJournalUpdate(
+                LedgerJournal(
+                  journalId: widget.ledgerJournal.journalId,
+                  journalName: _nameController.text,
+                ),
               ),
-              onPressed: () {
-                if (_formKeyLedgerJournal.currentState!.validate()) {
-                  _ledgerJournalBloc.add(
-                    LedgerJournalUpdate(
-                      LedgerJournal(
-                        journalId: widget.ledgerJournal.journalId,
-                        journalName: _nameController.text,
-                      ),
-                    ),
-                  );
-                }
-              },
-            ),
-          ),
-        ],
+            );
+          }
+        },
       ),
     ];
 

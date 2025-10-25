@@ -236,224 +236,261 @@ class MenuOptionState extends State<DisplayMenuOption>
     }
     currentRoute = ModalRoute.of(context)?.settings.name ?? '';
     isPhone = isAPhone(context);
-    return BlocBuilder<ChatRoomBloc, ChatRoomState>(
-      builder: (context, state) {
-        if (state.status == ChatRoomStatus.success) {
-          actions = List.of(widget.actions);
-          List<ChatRoom> unReadRooms = context
-              .read<ChatRoomBloc>()
-              .state
-              .chatRooms
-              .where((element) => element.hasRead == false)
-              .toList();
-          actions.insert(
-            0,
-            IconButton(
-              key: const Key('chatButton'), // causes a duplicate key?
-              icon: Badge(
-                label: unReadRooms.isNotEmpty
-                    ? Text(unReadRooms.length.toString())
-                    : null,
-                backgroundColor: Colors.red,
-                child: const Icon(Icons.chat),
-              ),
-              padding: EdgeInsets.zero,
-              tooltip: unReadRooms.isEmpty
-                  ? _localizations!.chat
-                  : unReadRooms.toString(),
-              onPressed: () async => {
-                await showDialog(
-                  barrierDismissible: true,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return const ChatRoomListDialog();
-                  },
-                ),
-              },
-            ),
-          );
 
-          if (currentRoute != '/') {
-            actions.add(
+    // Safely try to use BlocBuilder, but handle case where ChatRoomBloc is not available
+    try {
+      return BlocBuilder<ChatRoomBloc, ChatRoomState>(
+        builder: (context, state) {
+          if (state.status == ChatRoomStatus.success) {
+            actions = List.of(widget.actions);
+            List<ChatRoom> unReadRooms = state.chatRooms
+                .where((element) => element.hasRead == false)
+                .toList();
+            actions.insert(
+              0,
               IconButton(
-                key: const Key('homeButton'),
-                icon: const Icon(Icons.home),
-                tooltip: _localizations!.goHome,
-                onPressed: () {
-                  if (currentRoute.startsWith('/acct')) {
-                    Navigator.pushNamed(context, '/accounting');
-                  } else {
-                    Navigator.pushNamed(context, '/');
-                  }
+                key: const Key('chatButton'),
+                icon: Badge(
+                  label: unReadRooms.isNotEmpty
+                      ? Text(unReadRooms.length.toString())
+                      : null,
+                  backgroundColor: Colors.red,
+                  child: const Icon(Icons.chat),
+                ),
+                padding: EdgeInsets.zero,
+                tooltip: unReadRooms.isEmpty
+                    ? _localizations!.chat
+                    : unReadRooms.toString(),
+                onPressed: () async => {
+                  await showDialog(
+                    barrierDismissible: true,
+                    context: context,
+                    builder: (BuildContext context) {
+                      return const ChatRoomListDialog();
+                    },
+                  ),
                 },
               ),
             );
-          }
 
-          Widget simplePage(bool isPhone) {
-            String simplePageFormKey = (child?.toString() ?? '').replaceAll(
-              RegExp(r'[^(a-z,A-Z)]'),
-              '',
-            );
-            // Ensure simplePageFormKey is never empty to avoid key conflicts
-            if (simplePageFormKey.isEmpty) {
-              simplePageFormKey = 'SimplePageChild';
-            }
-            // debugPrint("==2-simple= current form key: $simplePageFormKey");
-
-            return ScaffoldMessenger(
-              child: Scaffold(
-                key: Key(currentRoute),
-                appBar: AppBar(
-                  backgroundColor: Theme.of(
-                    context,
-                  ).colorScheme.primaryContainer,
-                  key: Key(simplePageFormKey),
-                  automaticallyImplyLeading: isPhone,
-                  leading: leadAction,
-                  title: appBarTitle(context, title, isPhone),
-                  actions: actions,
-                ),
-                drawer: myDrawer(context, isPhone, menuList),
-                floatingActionButton: floatingActionButton,
-                body: BlocListener<NotificationBloc, NotificationState>(
-                  listener: (context, notiFicationState) {
-                    if (notiFicationState.status ==
-                            NotificationStatus.success &&
-                        notiFicationState.notifications.isNotEmpty) {
-                      String messages = '';
-                      for (final (index, note)
-                          in notiFicationState.notifications.indexed) {
-                        messages +=
-                            "${note.message!["message"]}${index < notiFicationState.notifications.length - 1 ? '\n' : ''}";
-                      }
-                      HelperFunctions.showMessage(
-                        context,
-                        messages,
-                        Colors.green,
-                      );
+            if (currentRoute != '/') {
+              actions.add(
+                IconButton(
+                  key: const Key('homeButton'),
+                  icon: const Icon(Icons.home),
+                  tooltip: _localizations!.goHome,
+                  onPressed: () {
+                    if (currentRoute.startsWith('/acct')) {
+                      Navigator.pushNamed(context, '/accounting');
+                    } else {
+                      Navigator.pushNamed(context, '/');
                     }
                   },
-                  child: child!,
                 ),
-              ),
-            );
-          }
-
-          Widget tabPage(bool isPhone) {
-            String tabPageFormKey =
-                (tabList.isNotEmpty && tabIndex < tabList.length
-                        ? tabList[tabIndex].toString()
-                        : '')
-                    .replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-            // Ensure tabPageFormKey is never empty to avoid key conflicts
-            if (tabPageFormKey.isEmpty) {
-              tabPageFormKey = 'TabPage$tabIndex';
+              );
             }
-            Color tabSelectedBackground = Theme.of(
-              context,
-            ).colorScheme.onSecondary;
-            //debugPrint("==3-tab= current form key: $tabPageFormKey");
-            List<Widget> tabChildren = [
-              Expanded(
-                child: isPhone
-                    ? Center(key: Key(tabPageFormKey), child: tabList[tabIndex])
-                    : TabBarView(
-                        physics: const NeverScrollableScrollPhysics(),
-                        controller: _controller,
-                        children: tabList,
-                      ),
-              ),
-            ];
 
-            return ScaffoldMessenger(
-              child: Scaffold(
-                key: Key(currentRoute),
-                appBar: AppBar(
-                  backgroundColor: Theme.of(
-                    context,
-                  ).colorScheme.primaryContainer,
-                  automaticallyImplyLeading: isPhone,
-                  bottom: isPhone
-                      ? null
-                      : TabBar(
-                          controller: _controller,
-                          labelPadding: const EdgeInsets.all(5.0),
-                          indicatorSize: TabBarIndicatorSize.label,
-                          indicator: BoxDecoration(
-                            color: tabSelectedBackground,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(10),
-                              topRight: Radius.circular(10),
-                            ),
-                          ),
-                          tabs: tabText,
-                        ),
-                  title: appBarTitle(
-                    context,
-                    '$title ${isPhone ? '\n' : ', '}${tabItems[tabIndex].label}',
-                    isPhone,
+            Widget simplePage(bool isPhone) {
+              String simplePageFormKey = (child?.toString() ?? '').replaceAll(
+                RegExp(r'[^(a-z,A-Z)]'),
+                '',
+              );
+              // Ensure simplePageFormKey is never empty to avoid key conflicts
+              if (simplePageFormKey.isEmpty) {
+                simplePageFormKey = 'SimplePageChild';
+              }
+              // debugPrint("==2-simple= current form key: $simplePageFormKey");
+
+              return ScaffoldMessenger(
+                child: Scaffold(
+                  key: Key(currentRoute),
+                  appBar: AppBar(
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
+                    key: Key(simplePageFormKey),
+                    automaticallyImplyLeading: isPhone,
+                    leading: leadAction,
+                    title: appBarTitle(context, title, isPhone),
+                    actions: actions,
                   ),
-                  actions: actions,
-                ),
-                drawer: myDrawer(context, isPhone, menuList),
-                floatingActionButton: floatingActionButtonList[tabIndex],
-                bottomNavigationBar: isPhone
-                    ? BottomNavigationBar(
-                        type: BottomNavigationBarType.fixed,
-                        items: bottomItems,
-                        currentIndex: tabIndex,
-                        selectedItemColor: Colors.amber[800],
-                        onTap: (index) {
-                          setState(() {
-                            tabIndex = index;
-                          });
-                        },
-                      )
-                    : null,
-                body: BlocListener<NotificationBloc, NotificationState>(
-                  listener: (context, notiFicationState) {
-                    if (notiFicationState.status ==
-                            NotificationStatus.success &&
-                        notiFicationState.notifications.isNotEmpty) {
-                      String messages = '';
-                      for (final (index, note)
-                          in notiFicationState.notifications.indexed) {
-                        messages +=
-                            "${note.message!["message"]}${index < notiFicationState.notifications.length - 1 ? '\n' : ''}";
+                  drawer: myDrawer(context, isPhone, menuList),
+                  floatingActionButton: floatingActionButton,
+                  body: BlocListener<NotificationBloc, NotificationState>(
+                    listener: (context, notiFicationState) {
+                      if (notiFicationState.status ==
+                              NotificationStatus.success &&
+                          notiFicationState.notifications.isNotEmpty) {
+                        String messages = '';
+                        for (final (index, note)
+                            in notiFicationState.notifications.indexed) {
+                          messages +=
+                              "${note.message!["message"]}${index < notiFicationState.notifications.length - 1 ? '\n' : ''}";
+                        }
+                        HelperFunctions.showMessage(
+                          context,
+                          messages,
+                          Colors.green,
+                        );
                       }
-                      HelperFunctions.showMessage(
-                        context,
-                        messages,
-                        Colors.green,
-                      );
-                    }
-                  },
-                  child: Column(children: tabChildren),
+                    },
+                    child: child ?? const SizedBox.shrink(),
+                  ),
                 ),
-              ),
-            );
-          }
+              );
+            }
 
-          if ((!kReleaseMode ||
-              GlobalConfiguration().get("test") &&
-                  // app store not accept banner
-                  !Platform.isIOS &&
-                  !Platform.isMacOS)) {
-            return Banner(
-              message: _localizations!.test,
-              color: Colors.red,
-              location: BannerLocation.topStart,
-              child: showPage(simplePage, context, tabPage),
-            );
+            Widget tabPage(bool isPhone) {
+              String tabPageFormKey =
+                  (tabList.isNotEmpty && tabIndex < tabList.length
+                          ? tabList[tabIndex].toString()
+                          : '')
+                      .replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
+              // Ensure tabPageFormKey is never empty to avoid key conflicts
+              if (tabPageFormKey.isEmpty) {
+                tabPageFormKey = 'TabPage$tabIndex';
+              }
+              Color tabSelectedBackground = Theme.of(
+                context,
+              ).colorScheme.onSecondary;
+              //debugPrint("==3-tab= current form key: $tabPageFormKey");
+              List<Widget> tabChildren = [
+                Expanded(
+                  child: isPhone
+                      ? Center(
+                          key: Key(tabPageFormKey),
+                          child: tabList[tabIndex],
+                        )
+                      : TabBarView(
+                          physics: const NeverScrollableScrollPhysics(),
+                          controller: _controller,
+                          children: tabList,
+                        ),
+                ),
+              ];
+
+              return ScaffoldMessenger(
+                child: Scaffold(
+                  key: Key(currentRoute),
+                  appBar: AppBar(
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
+                    automaticallyImplyLeading: isPhone,
+                    bottom: isPhone
+                        ? null
+                        : TabBar(
+                            controller: _controller,
+                            labelPadding: const EdgeInsets.all(5.0),
+                            indicatorSize: TabBarIndicatorSize.label,
+                            indicator: BoxDecoration(
+                              color: tabSelectedBackground,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                topRight: Radius.circular(10),
+                              ),
+                            ),
+                            tabs: tabText,
+                          ),
+                    title: appBarTitle(
+                      context,
+                      '$title ${isPhone ? '\n' : ', '}${tabItems[tabIndex].label}',
+                      isPhone,
+                    ),
+                    actions: actions,
+                  ),
+                  drawer: myDrawer(context, isPhone, menuList),
+                  floatingActionButton: floatingActionButtonList[tabIndex],
+                  bottomNavigationBar: isPhone
+                      ? BottomNavigationBar(
+                          type: BottomNavigationBarType.fixed,
+                          items: bottomItems,
+                          currentIndex: tabIndex,
+                          selectedItemColor: Colors.amber[800],
+                          onTap: (index) {
+                            setState(() {
+                              tabIndex = index;
+                            });
+                          },
+                        )
+                      : null,
+                  body: BlocListener<NotificationBloc, NotificationState>(
+                    listener: (context, notiFicationState) {
+                      if (notiFicationState.status ==
+                              NotificationStatus.success &&
+                          notiFicationState.notifications.isNotEmpty) {
+                        String messages = '';
+                        for (final (index, note)
+                            in notiFicationState.notifications.indexed) {
+                          messages +=
+                              "${note.message!["message"]}${index < notiFicationState.notifications.length - 1 ? '\n' : ''}";
+                        }
+                        HelperFunctions.showMessage(
+                          context,
+                          messages,
+                          Colors.green,
+                        );
+                      }
+                    },
+                    child: Column(children: tabChildren),
+                  ),
+                ),
+              );
+            }
+
+            if ((!kReleaseMode ||
+                GlobalConfiguration().get("test") &&
+                    // app store not accept banner
+                    !Platform.isIOS &&
+                    !Platform.isMacOS)) {
+              return Banner(
+                message: _localizations!.test,
+                color: Colors.red,
+                location: BannerLocation.topStart,
+                child: showPage(simplePage, context, tabPage),
+              );
+            } else {
+              return showPage(simplePage, context, tabPage);
+            }
           } else {
-            return showPage(simplePage, context, tabPage);
+            return const Center(child: LoadingIndicator());
           }
-        } else {
-          return const Center(child: LoadingIndicator());
-        }
-      },
-    );
+        },
+      );
+    } catch (e) {
+      // ChatRoomBloc not available, render without it
+      actions = List.of(widget.actions);
+      if (currentRoute != '/') {
+        actions.add(
+          IconButton(
+            key: const Key('homeButton'),
+            icon: const Icon(Icons.home),
+            tooltip: _localizations!.goHome,
+            onPressed: () {
+              if (currentRoute.startsWith('/acct')) {
+                Navigator.pushNamed(context, '/accounting');
+              } else {
+                Navigator.pushNamed(context, '/');
+              }
+            },
+          ),
+        );
+      }
+
+      // Return minimal content without chat
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          automaticallyImplyLeading: isPhone,
+          leading: leadAction,
+          title: appBarTitle(context, title, isPhone),
+          actions: actions,
+        ),
+        drawer: myDrawer(context, isPhone, menuList),
+        floatingActionButton: floatingActionButton,
+        body: child ?? const SizedBox(),
+      );
+    }
   }
 
   Widget showPage(

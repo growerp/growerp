@@ -16,6 +16,7 @@ dependencies:
   growerp_order_accounting: ^1.9.0
   growerp_user_company: ^1.9.0
   growerp_activity: ^1.8.1
+  growerp_assessment: ^1.9.0
   growerp_core: ^1.9.0
   growerp_models: ^1.9.0
   decimal: ^3.2.4
@@ -65,7 +66,7 @@ flutter_launcher_icons:
 msix_config:
   display_name: GrowERP
   publisher: CN=68EEF479-7015-49FC-9C60-33E5A2EB731C
-  publisher_display_name: 'AntWebsystems Co.,Ltd'
+  publisher_display_name: "AntWebsystems Co.,Ltd"
   identity_name: AntWebsystemsCo.LTD.GrowERP
   msix_version: 1.10.1.0
   logo_path: "assets/icon/icon.png"

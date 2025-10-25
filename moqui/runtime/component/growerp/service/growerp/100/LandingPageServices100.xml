@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Landing Page Services for GrowERP Landing Page System
+Service definitions for landing page, sections, credibility, and CTA management
+- Supports dual-ID lookup: pageId (system-wide) or pseudoId (tenant-unique)
+- All services enforce multi-tenant isolation via ownerPartyId
+- Implementation: Groovy service classes and REST controllers
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+  <!-- ============================================ -->
+  <!-- LANDING PAGE SERVICES (6 services) -->
+  <!-- ============================================ -->
+
+  <!-- getLandingPage: Retrieve single landing page -->
+  <service verb="get" noun="LandingPage" authenticate="false">
+    <description>Get landing page by ID (system-wide) or pseudoId (tenant-unique). Public access for display.</description>
+    <in-parameters>
+      <parameter name="idOrPseudo" type="String" required="true">
+        <description>pageId or pseudoId (prefixed with 'pseudo_')</description>
+      </parameter>
+      <parameter name="ownerPartyId" type="String">
+        <description>Optional owner party ID for authorized access (admin)</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="page" type="Map">
+        <description>Landing page object with all fields, sections, credibility, CTA</description>
+      </parameter>
+      <parameter name="sections" type="List">
+        <description>List of page sections ordered by sequence</description>
+      </parameter>
+      <parameter name="credibility" type="Map">
+        <description>Credibility info with statistics</description>
+      </parameter>
+      <parameter name="cta" type="Map">
+        <description>Primary CTA button configuration</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+  <!-- listLandingPages: Get all landing pages for tenant -->
+  <service verb="list" noun="LandingPages" authenticate="true">
+    <description>List all landing pages for tenant with pagination and optional filtering</description>
+    <in-parameters>
+      <parameter name="ownerPartyId" type="String" required="true">
+        <description>Owner party ID for multi-tenant filtering</description>
+      </parameter>
+      <parameter name="status" type="String">
+        <description>Optional status filter: ACTIVE, INACTIVE, DRAFT</description>
+      </parameter>
+      <parameter name="pageNumber" type="Integer" default-value="1">
+        <description>Page number (1-based)</description>
+      </parameter>
+      <parameter name="pageSize" type="Integer" default-value="20">
+        <description>Results per page</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="pages" type="List">
+        <description>List of landing page objects</description>
+      </parameter>
+      <parameter name="totalCount" type="Integer">
+        <description>Total number of landing pages matching filter</description>
+      </parameter>
+      <parameter name="pageCount" type="Integer">
+        <description>Total number of pages</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+  <!-- createLandingPage: Create new landing page -->
+  <service verb="create" noun="LandingPage" authenticate="true">
+    <description>Create new landing page within a tenant</description>
+    <in-parameters>
+      <parameter name="title" type="String" required="true">
+        <description>Landing page title</description>
+      </parameter>
+      <parameter name="hookType" type="String" required="true">
+        <description>Hook type: frustration, results, custom</description>
+      </parameter>
+      <parameter name="headline" type="String" required="true">
+        <description>Main headline for hero section</description>
+      </parameter>
+      <parameter name="subheading" type="String">
+        <description>Optional subheading</description>
+      </parameter>
+      <parameter name="assessmentId" type="String" required="true">
+        <description>Assessment ID to attach to this page</description>
+      </parameter>
+      <parameter name="privacyPolicyUrl" type="String">
+        <description>Optional privacy policy link</description>
+      </parameter>
+      <parameter name="status" type="String" default-value="DRAFT">
+        <description>Status: ACTIVE, INACTIVE, DRAFT</description>
+      </parameter>
+      <parameter name="ownerPartyId" type="String" required="true">
+        <description>Owner party ID (assigned from authenticated user's tenant)</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="pageId" type="String">
+        <description>Created landing page system-wide unique ID</description>
+      </parameter>
+      <parameter name="pseudoId" type="String">
+        <description>Created landing page tenant-unique ID (user-facing)</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+  <!-- updateLandingPage: Update existing landing page -->
+  <service verb="update" noun="LandingPage" authenticate="true">
+    <description>Update landing page (title, hook, headline, subheading, assessment, status)</description>
+    <in-parameters>
+      <parameter name="pageId" type="String" required="true">
+        <description>Landing page ID to update</description>
+      </parameter>
+      <parameter name="title" type="String">
+        <description>New landing page title</description>
+      </parameter>
+      <parameter name="hookType" type="String">
+        <description>New hook type: frustration, results, custom</description>
+      </parameter>
+      <parameter name="headline" type="String">
+        <description>New main headline</description>
+      </parameter>
+      <parameter name="subheading" type="String">
+        <description>New subheading</description>
+      </parameter>
+      <parameter name="assessmentId" type="String">
+        <description>New assessment ID</description>
+      </parameter>
+      <parameter name="privacyPolicyUrl" type="String">
+        <description>New privacy policy URL</description>
+      </parameter>
+      <parameter name="status" type="String">
+        <description>New status: ACTIVE, INACTIVE, DRAFT</description>
+      </parameter>
+      <parameter name="ownerPartyId" type="String" required="true">
+        <description>Owner party ID for authorization check</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="pageId" type="String">
+        <description>Updated landing page ID</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+  <!-- deleteLandingPage: Delete landing page and cascade -->
+  <service verb="delete" noun="LandingPage" authenticate="true">
+    <description>Delete landing page and all related sections, credibility, CTA, and statistics</description>
+    <in-parameters>
+      <parameter name="pageId" type="String" required="true">
+        <description>Landing page ID to delete</description>
+      </parameter>
+      <parameter name="ownerPartyId" type="String" required="true">
+        <description>Owner party ID for authorization check</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="deletedCount" type="Integer">
+        <description>Total number of records deleted (cascade)</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+  <!-- publishLandingPage: Publish page to make it publicly accessible -->
+  <service verb="publish" noun="LandingPage" authenticate="true">
+    <description>Publish landing page to make it publicly accessible via pseudoId URL</description>
+    <in-parameters>
+      <parameter name="pageId" type="String" required="true">
+        <description>Landing page ID to publish</description>
+      </parameter>
+      <parameter name="ownerPartyId" type="String" required="true">
+        <description>Owner party ID for authorization check</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="pageId" type="String">
+        <description>Published landing page ID</description>
+      </parameter>
+      <parameter name="pseudoId" type="String">
+        <description>Public URL pseudoId for this page</description>
+      </parameter>
+      <parameter name="publicUrl" type="String">
+        <description>Full public URL where page is accessible</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+  <!-- ============================================ -->
+  <!-- PAGE SECTION SERVICES (4 services) -->
+  <!-- ============================================ -->
+
+  <!-- createPageSection: Add section to landing page -->
+  <service verb="create" noun="PageSection" authenticate="true">
+    <description>Create new section on landing page</description>
+    <in-parameters>
+      <parameter name="pageId" type="String" required="true">
+        <description>Landing page ID</description>
+      </parameter>
+      <parameter name="sectionTitle" type="String" required="true">
+        <description>Section title</description>
+      </parameter>
+      <parameter name="sectionDescription" type="String">
+        <description>Section content/description</description>
+      </parameter>
+      <parameter name="sectionImageUrl" type="String">
+        <description>Optional section image URL</description>
+      </parameter>
+      <parameter name="sectionSequence" type="Integer">
+        <description>Display order (auto-incremented if not provided)</description>
+      </parameter>
+      <parameter name="ownerPartyId" type="String" required="true">
+        <description>Owner party ID for authorization check</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="sectionId" type="String">
+        <description>Created section ID</description>
+      </parameter>
+      <parameter name="pseudoId" type="String">
+        <description>Created section pseudoId</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+  <!-- updatePageSection: Update section content -->
+  <service verb="update" noun="PageSection" authenticate="true">
+    <description>Update page section content and display order</description>
+    <in-parameters>
+      <parameter name="sectionId" type="String" required="true">
+        <description>Section ID to update</description>
+      </parameter>
+      <parameter name="sectionTitle" type="String">
+        <description>New section title</description>
+      </parameter>
+      <parameter name="sectionDescription" type="String">
+        <description>New section content</description>
+      </parameter>
+      <parameter name="sectionImageUrl" type="String">
+        <description>New section image URL</description>
+      </parameter>
+      <parameter name="sectionSequence" type="Integer">
+        <description>New display order</description>
+      </parameter>
+      <parameter name="ownerPartyId" type="String" required="true">
+        <description>Owner party ID for authorization check</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="sectionId" type="String">
+        <description>Updated section ID</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+  <!-- deletePageSection: Delete section -->
+  <service verb="delete" noun="PageSection" authenticate="true">
+    <description>Delete page section</description>
+    <in-parameters>
+      <parameter name="sectionId" type="String" required="true">
+        <description>Section ID to delete</description>
+      </parameter>
+      <parameter name="ownerPartyId" type="String" required="true">
+        <description>Owner party ID for authorization check</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="deletedCount" type="Integer">
+        <description>Number of records deleted</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+  <!-- listPageSections: Get sections for a page -->
+  <service verb="list" noun="PageSections" authenticate="false">
+    <description>List all sections for a landing page, ordered by sequence</description>
+    <in-parameters>
+      <parameter name="pageId" type="String" required="true">
+        <description>Landing page ID</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="sections" type="List">
+        <description>List of page sections ordered by sequence</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+  <!-- ============================================ -->
+  <!-- CREDIBILITY SERVICES (3 services) -->
+  <!-- ============================================ -->
+
+  <!-- createCredibilityInfo: Add credibility section -->
+  <service verb="create" noun="CredibilityInfo" authenticate="true">
+    <description>Create credibility/bio section for landing page</description>
+    <in-parameters>
+      <parameter name="pageId" type="String" required="true">
+        <description>Landing page ID</description>
+      </parameter>
+      <parameter name="creatorBio" type="String" required="true">
+        <description>Creator bio text</description>
+      </parameter>
+      <parameter name="backgroundText" type="String">
+        <description>Background/experience text</description>
+      </parameter>
+      <parameter name="creatorImageUrl" type="String">
+        <description>Optional creator image URL</description>
+      </parameter>
+      <parameter name="ownerPartyId" type="String" required="true">
+        <description>Owner party ID for authorization check</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="credibilityId" type="String">
+        <description>Created credibility ID</description>
+      </parameter>
+      <parameter name="pseudoId" type="String">
+        <description>Created credibility pseudoId</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+  <!-- updateCredibilityInfo: Update credibility section -->
+  <service verb="update" noun="CredibilityInfo" authenticate="true">
+    <description>Update credibility/bio section content</description>
+    <in-parameters>
+      <parameter name="credibilityId" type="String" required="true">
+        <description>Credibility ID to update</description>
+      </parameter>
+      <parameter name="creatorBio" type="String">
+        <description>New creator bio</description>
+      </parameter>
+      <parameter name="backgroundText" type="String">
+        <description>New background text</description>
+      </parameter>
+      <parameter name="creatorImageUrl" type="String">
+        <description>New creator image URL</description>
+      </parameter>
+      <parameter name="ownerPartyId" type="String" required="true">
+        <description>Owner party ID for authorization check</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="credibilityId" type="String">
+        <description>Updated credibility ID</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+  <!-- deleteCredibilityInfo: Delete credibility section -->
+  <service verb="delete" noun="CredibilityInfo" authenticate="true">
+    <description>Delete credibility/bio section and all statistics</description>
+    <in-parameters>
+      <parameter name="credibilityId" type="String" required="true">
+        <description>Credibility ID to delete</description>
+      </parameter>
+      <parameter name="ownerPartyId" type="String" required="true">
+        <description>Owner party ID for authorization check</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="deletedCount" type="Integer">
+        <description>Total records deleted (credibility + statistics)</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+  <!-- ============================================ -->
+  <!-- CREDIBILITY STATISTIC SERVICES (2 services) -->
+  <!-- ============================================ -->
+
+  <!-- addCredibilityStatistic: Add supporting statistic -->
+  <service verb="add" noun="CredibilityStatistic" authenticate="true">
+    <description>Add a supporting statistic to credibility section</description>
+    <in-parameters>
+      <parameter name="credibilityId" type="String" required="true">
+        <description>Credibility ID</description>
+      </parameter>
+      <parameter name="statistic" type="String" required="true">
+        <description>Statistic text (e.g., "100+ customers")</description>
+      </parameter>
+      <parameter name="ownerPartyId" type="String" required="true">
+        <description>Owner party ID for authorization check</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="statisticId" type="String">
+        <description>Created statistic ID</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+  <!-- removeCredibilityStatistic: Remove statistic -->
+  <service verb="remove" noun="CredibilityStatistic" authenticate="true">
+    <description>Remove a credibility statistic</description>
+    <in-parameters>
+      <parameter name="statisticId" type="String" required="true">
+        <description>Statistic ID to delete</description>
+      </parameter>
+      <parameter name="ownerPartyId" type="String" required="true">
+        <description>Owner party ID for authorization check</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="deletedCount" type="Integer">
+        <description>Number of records deleted</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+  <!-- ============================================ -->
+  <!-- CTA SERVICES (2 services) -->
+  <!-- ============================================ -->
+
+  <!-- createPrimaryCTA: Set primary CTA button -->
+  <service verb="create" noun="PrimaryCTA" authenticate="true">
+    <description>Create primary CTA button configuration for landing page</description>
+    <in-parameters>
+      <parameter name="pageId" type="String" required="true">
+        <description>Landing page ID</description>
+      </parameter>
+      <parameter name="buttonText" type="String" required="true">
+        <description>Button text (e.g., "Start the Assessment")</description>
+      </parameter>
+      <parameter name="estimatedTime" type="String">
+        <description>Estimated time (e.g., "3 minutes")</description>
+      </parameter>
+      <parameter name="cost" type="String">
+        <description>Cost (e.g., "Free")</description>
+      </parameter>
+      <parameter name="valuePromise" type="String">
+        <description>Value promise (e.g., "Get your personalized report")</description>
+      </parameter>
+      <parameter name="ownerPartyId" type="String" required="true">
+        <description>Owner party ID for authorization check</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="ctaId" type="String">
+        <description>Created CTA ID</description>
+      </parameter>
+      <parameter name="pseudoId" type="String">
+        <description>Created CTA pseudoId</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+  <!-- updatePrimaryCTA: Update CTA button -->
+  <service verb="update" noun="PrimaryCTA" authenticate="true">
+    <description>Update primary CTA button configuration</description>
+    <in-parameters>
+      <parameter name="ctaId" type="String" required="true">
+        <description>CTA ID to update</description>
+      </parameter>
+      <parameter name="buttonText" type="String">
+        <description>New button text</description>
+      </parameter>
+      <parameter name="estimatedTime" type="String">
+        <description>New estimated time</description>
+      </parameter>
+      <parameter name="cost" type="String">
+        <description>New cost</description>
+      </parameter>
+      <parameter name="valuePromise" type="String">
+        <description>New value promise</description>
+      </parameter>
+      <parameter name="ownerPartyId" type="String" required="true">
+        <description>Owner party ID for authorization check</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="ctaId" type="String">
+        <description>Updated CTA ID</description>
+      </parameter>
+    </out-parameters>
+  </service>
+
+</services>

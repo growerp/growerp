@@ -326,6 +326,140 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.CrmServices100.delete#Opportunity" />
             </method>
         </resource>
+        <!-- assessment -->
+        <resource name="Assessment">
+            <method type="get">
+                <service name="growerp.100.AssessmentServices100.get#Assessment" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.AssessmentServices100.create#Assessment" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.AssessmentServices100.update#Assessment" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.AssessmentServices100.delete#Assessment" />
+            </method>
+            <id name="assessmentId">
+                <resource name="Question">
+                    <method type="get">
+                        <service name="growerp.100.AssessmentServices100.get#Question" />
+                    </method>
+                    <method type="post">
+                        <service name="growerp.100.AssessmentServices100.create#Question" />
+                    </method>
+                    <method type="patch">
+                        <service name="growerp.100.AssessmentServices100.update#Question" />
+                    </method>
+                    <method type="delete">
+                        <service name="growerp.100.AssessmentServices100.delete#Question" />
+                    </method>
+                    <id name="questionId">
+                        <resource name="Option">
+                            <method type="get">
+                                <service name="growerp.100.AssessmentServices100.get#Option" />
+                            </method>
+                            <method type="post">
+                                <service name="growerp.100.AssessmentServices100.create#Option" />
+                            </method>
+                            <method type="patch">
+                                <service name="growerp.100.AssessmentServices100.update#Option" />
+                            </method>
+                            <method type="delete">
+                                <service name="growerp.100.AssessmentServices100.delete#Option" />
+                            </method>
+                        </resource>
+                    </id>
+                </resource>
+                <resource name="Threshold">
+                    <method type="get">
+                        <service name="growerp.100.AssessmentServices100.get#Thresholds" />
+                    </method>
+                    <method type="patch">
+                        <service name="growerp.100.AssessmentServices100.update#Thresholds" />
+                    </method>
+                </resource>
+                <resource name="CalculateScore">
+                    <method type="post">
+                        <service name="growerp.100.AssessmentServices100.calculate#Score" />
+                    </method>
+                </resource>
+                <resource name="Result">
+                    <method type="get">
+                        <service name="growerp.100.AssessmentServices100.get#Result" />
+                    </method>
+                    <method type="post">
+                        <service name="growerp.100.AssessmentServices100.create#Result" />
+                    </method>
+                    <method type="delete">
+                        <service name="growerp.100.AssessmentServices100.delete#Result" />
+                    </method>
+                </resource>
+                <resource name="submit" require-authentication="anonymous-all">
+                    <method type="post">
+                        <service name="growerp.100.AssessmentServices100.submit#Assessment" />
+                    </method>
+                </resource>
+            </id>
+        </resource>
+
+        <!-- Direct Assessment endpoints for Flutter compatibility -->
+        <resource name="AssessmentQuestion">
+            <method type="get">
+                <service name="growerp.100.AssessmentServices100.get#AssessmentQuestions" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.AssessmentServices100.create#Question" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.AssessmentServices100.update#Question" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.AssessmentServices100.delete#Question" />
+            </method>
+        </resource>
+
+        <resource name="AssessmentQuestionOption">
+            <method type="get">
+                <service name="growerp.100.AssessmentServices100.get#AssessmentQuestionOptions" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.AssessmentServices100.create#Option" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.AssessmentServices100.update#Option" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.AssessmentServices100.delete#Option" />
+            </method>
+        </resource>
+
+        <resource name="AssessmentResult">
+            <method type="get">
+                <service name="growerp.100.AssessmentServices100.get#AssessmentResults" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.AssessmentServices100.submit#Assessment" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.AssessmentServices100.delete#Result" />
+            </method>
+        </resource>
+
+        <resource name="AllAssessmentResults">
+            <method type="get">
+                <service name="growerp.100.AssessmentServices100.get#AllAssessmentResults" />
+            </method>
+        </resource>
+
+        <resource name="AssessmentThreshold">
+            <method type="get">
+                <service name="growerp.100.AssessmentServices100.get#Thresholds" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.AssessmentServices100.update#Thresholds" />
+            </method>
+        </resource>
         <!-- Accounting -->
         <resource name="GlAccount">
             <method type="get">

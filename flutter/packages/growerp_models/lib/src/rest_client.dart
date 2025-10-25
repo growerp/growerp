@@ -684,4 +684,151 @@ abstract class RestClient {
   Future<String> createInvoiceFromData({
     @Field() required Map<String, dynamic> invoiceData,
   });
+
+  // Assessment endpoints
+  @GET("rest/s1/growerp/100/Assessment")
+  Future<Assessments> getAssessment({
+    @Query('assessmentId') String? assessmentId,
+    @Query('pseudoId') String? pseudoId,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('search') String? searchString,
+    @Query('statusId') String? statusId,
+  });
+
+  @POST("rest/s1/growerp/100/Assessment")
+  Future<Assessment> createAssessment({
+    @Field() required String assessmentName,
+    @Field() String? description,
+    @Field() String status = 'ACTIVE',
+  });
+
+  @PATCH("rest/s1/growerp/100/Assessment")
+  Future<Assessment> updateAssessment({
+    @Field() required String assessmentId,
+    @Field() String? assessmentName,
+    @Field() String? description,
+    @Field() String? status,
+  });
+
+  @DELETE("rest/s1/growerp/100/Assessment")
+  Future<void> deleteAssessment({@Field() required String assessmentId});
+
+  @POST("rest/s1/growerp/100/Assessment/submit")
+  Future<AssessmentResult> submitAssessment({
+    @Field() required String assessmentId,
+    @Field() required Map<String, dynamic> answers,
+    @Field() required String respondentName,
+    @Field() required String respondentEmail,
+    @Field() String? respondentPhone,
+    @Field() String? respondentCompany,
+  });
+
+  // Assessment Question endpoints
+  @GET("rest/s1/growerp/100/AssessmentQuestion")
+  Future<AssessmentQuestions> getAssessmentQuestions({
+    @Query('assessmentId') required String assessmentId,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/AssessmentQuestion")
+  Future<AssessmentQuestion> createAssessmentQuestion({
+    @Field() required String assessmentId,
+    @Field() required String questionText,
+    @Field() String? questionType,
+    @Field() int? questionSequence,
+    @Field() String? isRequired,
+  });
+
+  @PATCH("rest/s1/growerp/100/AssessmentQuestion")
+  Future<AssessmentQuestion> updateAssessmentQuestion({
+    @Field() required String assessmentId,
+    @Field() required String questionId,
+    @Field() String? questionText,
+    @Field() String? questionType,
+    @Field() int? questionSequence,
+    @Field() String? isRequired,
+  });
+
+  @DELETE("rest/s1/growerp/100/AssessmentQuestion")
+  Future<void> deleteAssessmentQuestion({
+    @Field() required String assessmentId,
+    @Field() required String questionId,
+  });
+
+  // Assessment Question Option endpoints
+  @GET("rest/s1/growerp/100/AssessmentQuestionOption")
+  Future<AssessmentQuestionOptions> getAssessmentQuestionOptions({
+    @Query('assessmentId') required String assessmentId,
+    @Query('questionId') required String questionId,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/AssessmentQuestionOption")
+  Future<AssessmentQuestionOption> createAssessmentQuestionOption({
+    @Field() required String assessmentId,
+    @Field() required String questionId,
+    @Field() required String optionText,
+    @Field() required double optionScore,
+    @Field() int? optionSequence,
+  });
+
+  @PATCH("rest/s1/growerp/100/AssessmentQuestionOption")
+  Future<AssessmentQuestionOption> updateAssessmentQuestionOption({
+    @Field() required String assessmentId,
+    @Field() required String questionId,
+    @Field() required String optionId,
+    @Field() String? optionText,
+    @Field() double? optionScore,
+    @Field() int? optionSequence,
+  });
+
+  @DELETE("rest/s1/growerp/100/AssessmentQuestionOption")
+  Future<void> deleteAssessmentQuestionOption({
+    @Field() required String assessmentId,
+    @Field() required String questionId,
+    @Field() required String optionId,
+  });
+
+  // Assessment Scoring Threshold endpoints
+  @GET("rest/s1/growerp/100/AssessmentThreshold")
+  Future<ScoringThresholds> getAssessmentThresholds({
+    @Query('assessmentId') required String assessmentId,
+  });
+
+  @PATCH("rest/s1/growerp/100/AssessmentThreshold")
+  Future<ScoringThresholds> updateAssessmentThresholds({
+    @Field() required String assessmentId,
+    @Field() required List<ScoringThreshold> thresholds,
+  });
+
+  @POST("rest/s1/growerp/100/Assessment/calculateScore")
+  Future<AssessmentScoreResponse> calculateAssessmentScore({
+    @Field() required String assessmentId,
+    @Field() required Map<String, dynamic> answers,
+  });
+
+  // Assessment Result endpoints
+  @GET("rest/s1/growerp/100/AssessmentResult")
+  Future<AssessmentResults> getAssessmentResults({
+    @Query('assessmentId') String? assessmentId,
+    @Query('resultId') String? resultId,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('statusId') String? statusId,
+  });
+
+  @GET("rest/s1/growerp/100/AllAssessmentResults")
+  Future<AssessmentResults> getAllAssessmentResults({
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @DELETE("rest/s1/growerp/100/AssessmentResult")
+  Future<void> deleteAssessmentResult({
+    @Field() required String assessmentId,
+    @Field() required String resultId,
+  });
 }

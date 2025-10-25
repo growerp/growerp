@@ -1,0 +1,109 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be committed to version control
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# iOS/macOS
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*.xcconfig
+**/ios/**/*.xcworkspace/contents.xcworkspacedata
+**/ios/**/*.xcworkspace/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vscode/
+**/ios/**/Flutter/Flutter.framework
+**/ios/**/Flutter/Flutter.podspec
+**/ios/**/Flutter/Generated.xcconfig
+**/ios/**/Flutter/ephemeral/
+**/ios/**/Flutter/app.flx
+**/ios/**/Flutter/app.zip
+**/ios/**/Flutter/flutter_assets/
+**/ios/**/Flutter/flutter_export_environment.sh
+**/ios/**/Flutter/local.properties
+**/ios/**/Flutter/plugins.json
+**/ios/**/GeneratedPluginRegistrant.h
+**/ios/**/GeneratedPluginRegistrant.m
+**/ios/**/GeneratedPluginRegistrant.swift
+**/ios/**/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+**/ios/**/Runner.xcworkspace/contents.xcworkspacedata
+**/ios/**/Runner.xcworkspace/
+**/ios/**/xcuser.xcuserdatad/
+
+# macOS
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Android
+**/android/**/GeneratedPluginRegistrant.java
+**/android/.gradle
+**/android/captures/
+**/android/gradle-wrapper.jar
+**/android/gradle-wrapper.properties
+**/android/gradlew
+**/android/gradlew.bat
+**/android/key.properties
+**/android/local.properties
+**/gradle/
+
+# Web platform
+lib/generated_plugins.dart
+
+# Windows
+windows/flutter/generated_plugins.cmake
+windows/flutter/generated_plugins.vcxproj
+windows/flutter/generated_plugins_vcxproj_file_name.txt
+
+# macOS
+macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Linux
+linux/flutter/generated_plugins.cmake
+linux/flutter/generated_plugins_toolchain.cmake
+
+# Coverage
+coverage/
+
+# Melos related
+melos_*.iml
+
+# Generated files
+.dart_tool/
+.packages
+pubspec.lock

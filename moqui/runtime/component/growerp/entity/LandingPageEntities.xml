@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Landing Page Entities for GrowERP Landing Page System
+Includes: LandingPage, PageSection, CredibilityInfo, CredibilityStatistic, PrimaryCTA
+Multi-tenant support via ownerPartyId
+Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+  <!-- LandingPage: Main landing page definition -->
+  <entity entity-name="LandingPage" package="growerp.landing" cache="true">
+    <field name="pageId" type="id" is-pk="true" />
+    <field name="pseudoId" type="id" />
+    <field name="ownerPartyId" type="id" />
+    <field name="assessmentId" type="id" />
+    <field name="title" type="text-medium" />
+    <field name="hookType" type="text-short" />
+    <field name="headline" type="text-long" />
+    <field name="subheading" type="text-long" />
+    <field name="status" type="text-short" />
+    <field name="privacyPolicyUrl" type="text-long" />
+    <field name="createdDate" type="date-time" />
+    <field name="createdByUserLogin" type="text-short" />
+    <field name="lastModifiedDate" type="date-time" />
+    <field name="lastModifiedByUserLogin" type="text-short" />
+
+    <!-- Indices -->
+    <index name="pageId_idx" unique="true">
+      <index-field name="pageId" />
+    </index>
+    <index name="pseudoId_idx">
+      <index-field name="pseudoId" />
+    </index>
+    <index name="pseudoId_ownerPartyId_idx" unique="true">
+      <index-field name="pseudoId" />
+      <index-field name="ownerPartyId" />
+    </index>
+    <index name="ownerPartyId_idx">
+      <index-field name="ownerPartyId" />
+    </index>
+    <index name="assessmentId_idx">
+      <index-field name="assessmentId" />
+    </index>
+  </entity>
+
+  <!-- PageSection: Content sections on landing page -->
+  <entity entity-name="PageSection" package="growerp.landing" cache="true">
+    <field name="sectionId" type="id" is-pk="true" />
+    <field name="pseudoId" type="id" />
+    <field name="pageId" type="id" is-pk="true" />
+    <field name="sectionSequence" type="number-integer" />
+    <field name="sectionTitle" type="text-medium" />
+    <field name="sectionDescription" type="text-long" />
+    <field name="sectionImageUrl" type="text-long" />
+    <field name="createdDate" type="date-time" />
+
+    <!-- Indices -->
+    <index name="sectionId_idx" unique="true">
+      <index-field name="sectionId" />
+    </index>
+    <index name="pseudoId_idx">
+      <index-field name="pseudoId" />
+    </index>
+    <index name="pseudoId_pageId_idx" unique="true">
+      <index-field name="pseudoId" />
+      <index-field name="pageId" />
+    </index>
+    <index name="pageId_idx">
+      <index-field name="pageId" />
+    </index>
+  </entity>
+
+  <!-- CredibilityInfo: Creator bio and background -->
+  <entity entity-name="CredibilityInfo" package="growerp.landing" cache="true">
+    <field name="credibilityId" type="id" is-pk="true" />
+    <field name="pseudoId" type="id" />
+    <field name="pageId" type="id" />
+    <field name="creatorBio" type="text-very-long" />
+    <field name="backgroundText" type="text-very-long" />
+    <field name="creatorImageUrl" type="text-long" />
+    <field name="createdDate" type="date-time" />
+    <field name="lastModifiedDate" type="date-time" />
+
+    <!-- Indices -->
+    <index name="credibilityId_idx" unique="true">
+      <index-field name="credibilityId" />
+    </index>
+    <index name="pseudoId_idx">
+      <index-field name="pseudoId" />
+    </index>
+    <index name="pseudoId_pageId_idx" unique="true">
+      <index-field name="pseudoId" />
+      <index-field name="pageId" />
+    </index>
+    <index name="pageId_idx">
+      <index-field name="pageId" />
+    </index>
+  </entity>
+
+  <!-- CredibilityStatistic: Supporting statistics/data for credibility -->
+  <entity entity-name="CredibilityStatistic" package="growerp.landing" cache="true">
+    <field name="statisticId" type="id" is-pk="true" />
+    <field name="pseudoId" type="id" />
+    <field name="credibilityId" type="id" is-pk="true" />
+    <field name="statistic" type="text-long" />
+    <field name="sequence" type="number-integer" />
+    <field name="createdDate" type="date-time" />
+
+    <!-- Indices -->
+    <index name="statisticId_idx" unique="true">
+      <index-field name="statisticId" />
+    </index>
+    <index name="pseudoId_idx">
+      <index-field name="pseudoId" />
+    </index>
+    <index name="pseudoId_credibilityId_idx" unique="true">
+      <index-field name="pseudoId" />
+      <index-field name="credibilityId" />
+    </index>
+    <index name="credibilityId_idx">
+      <index-field name="credibilityId" />
+    </index>
+  </entity>
+
+  <!-- PrimaryCTA: Primary call-to-action button configuration -->
+  <entity entity-name="PrimaryCTA" package="growerp.landing" cache="true">
+    <field name="ctaId" type="id" is-pk="true" />
+    <field name="pseudoId" type="id" />
+    <field name="pageId" type="id" />
+    <field name="buttonText" type="text-short" />
+    <field name="estimatedTime" type="text-short" />
+    <field name="cost" type="text-short" />
+    <field name="valuePromise" type="text-long" />
+    <field name="createdDate" type="date-time" />
+    <field name="lastModifiedDate" type="date-time" />
+
+    <!-- Indices -->
+    <index name="ctaId_idx" unique="true">
+      <index-field name="ctaId" />
+    </index>
+    <index name="pseudoId_idx">
+      <index-field name="pseudoId" />
+    </index>
+    <index name="pseudoId_pageId_idx" unique="true">
+      <index-field name="pseudoId" />
+      <index-field name="pageId" />
+    </index>
+    <index name="pageId_idx">
+      <index-field name="pageId" />
+    </index>
+  </entity>
+
+</entities>
