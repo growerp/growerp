@@ -115,13 +115,13 @@ class HomeFormState extends State<HomeForm> {
                   ),
                 ),
                 // hidden text be able to load demo data for testing
-                if (!kReleaseMode)
+                if (kDebugMode)
                   Text(
                     state.authenticate?.apiKey ?? '',
                     key: const Key('apiKey'),
                     style: const TextStyle(fontSize: 0),
                   ),
-                if (!kReleaseMode)
+                if (kDebugMode)
                   Text(
                     state.authenticate?.moquiSessionToken ?? '',
                     key: const Key('moquiSessionToken'),
