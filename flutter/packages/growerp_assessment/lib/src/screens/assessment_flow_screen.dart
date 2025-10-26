@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/assessment_bloc.dart';
 import 'lead_capture_screen.dart';
 import 'assessment_questions_screen.dart';
-import 'assessment_results_screen.dart';
+import 'assessment_results_screen_new.dart';
 
 /// Assessment Flow Container
 /// Manages the three-step assessment process and state transitions
@@ -96,6 +96,8 @@ class _AssessmentFlowScreenState extends State<AssessmentFlowScreen> {
             respondentCompany: _respondentCompany,
           ),
         );
+    // Move to results page
+    _moveToNextStep();
   }
 
   @override
@@ -131,10 +133,26 @@ class _AssessmentFlowScreenState extends State<AssessmentFlowScreen> {
           ),
 
           // Step 3: Results
-          AssessmentResultsScreen(
-            assessmentId: widget.assessmentId,
-            respondentName: _respondentName,
-            onComplete: widget.onComplete,
+          BlocBuilder<AssessmentBloc, AssessmentState>(
+            builder: (context, state) {
+              if (state.selectedAssessment != null) {
+                return AssessmentResultsScreen(
+                  assessment: state.selectedAssessment!,
+                  answers: _answers
+                      .map((key, value) => MapEntry(key, value.toString())),
+                );
+              }
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Loading results...'),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),

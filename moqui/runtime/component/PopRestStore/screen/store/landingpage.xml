@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+GrowERP Public Landing Page Screen
+Serves the public landing page Flutter app and assets
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    standalone="true" require-authentication="anonymous-all">
+
+    <widgets>
+        <render-mode>
+            <text type="html" location="component://PopRestStore/screen/store/landingpage/index.html"/>
+        </render-mode>
+    </widgets>
+</screen>

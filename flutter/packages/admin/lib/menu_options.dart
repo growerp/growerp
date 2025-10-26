@@ -20,9 +20,7 @@ import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_website/growerp_website.dart';
-import 'package:growerp_assessment/growerp_assessment.dart';
 import 'views/admin_db_form.dart' as local;
-import 'views/assessment_list_page.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -217,25 +215,6 @@ List<MenuOption> getMenuOptions(BuildContext context) => [
     title: CoreLocalizations.of(context)!.about,
     route: '/about',
     userGroups: [UserGroup.admin, UserGroup.employee],
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/infoGrey.png',
-    selectedImage: 'packages/growerp_core/images/info.png',
-    title: 'Assessment',
-    route: '/assessment',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    tabItems: [
-      TabItem(
-        form: const AssessmentFlowWrapper(),
-        label: 'Lead Capture',
-        icon: const Icon(Icons.assignment),
-      ),
-      TabItem(
-        form: const AssessmentResultsWrapper(),
-        label: 'Results',
-        icon: const Icon(Icons.assessment),
-      ),
-    ],
   ),
 ];
 

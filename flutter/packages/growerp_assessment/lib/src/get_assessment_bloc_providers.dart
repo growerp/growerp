@@ -3,11 +3,27 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../growerp_assessment.dart';
 
-/// Provides BLoC instances for the assessment module
-List<BlocProvider> getAssessmentBlocProviders(RestClient restClient) {
+/// Provides BLoC instances for the assessment module with landing page support
+List<BlocProvider> getAssessmentBlocProviders(RestClient restClient,
+    [String classificationId = 'AppAdmin']) {
   List<BlocProvider> blocProviders = [
     BlocProvider<AssessmentBloc>(
       create: (context) => AssessmentBloc(restClient),
+    ),
+    BlocProvider<LandingPageBloc>(
+      create: (context) => LandingPageBloc(
+        restClient: restClient,
+        classificationId: classificationId,
+      ),
+    ),
+    BlocProvider<PageSectionBloc>(
+      create: (context) => PageSectionBloc(restClient: restClient),
+    ),
+    BlocProvider<CredibilityBloc>(
+      create: (context) => CredibilityBloc(),
+    ),
+    BlocProvider<CTABloc>(
+      create: (context) => CTABloc(),
     ),
   ];
   return blocProviders;

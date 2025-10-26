@@ -831,4 +831,164 @@ abstract class RestClient {
     @Field() required String assessmentId,
     @Field() required String resultId,
   });
+
+  // Landing Page endpoints
+  @GET("rest/s1/growerp/100/LandingPage")
+  Future<LandingPages> getLandingPages({
+    @Query('pageId') String? pageId,
+    @Query('pseudoId') String? pseudoId,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('search') String? searchString,
+    @Query('statusId') String? statusId,
+  });
+
+  @GET("rest/s1/growerp/100/LandingPage/{pageId}")
+  Future<LandingPageResponse> getLandingPage({
+    @Path() required String pageId,
+    @Query('ownerPartyId') String? ownerPartyId,
+  });
+
+  @POST("rest/s1/growerp/100/LandingPage")
+  Future<LandingPage> createLandingPage({
+    @Field() required String title,
+    @Field() String? hookType,
+    @Field() String? headline,
+    @Field() String? subheading,
+    @Field() String? assessmentId,
+    @Field() String? privacyPolicyUrl,
+    @Field() String status = 'DRAFT',
+  });
+
+  @PATCH("rest/s1/growerp/100/LandingPage/{pageId}")
+  Future<LandingPage> updateLandingPage({
+    @Path() required String pageId,
+    @Field() String? title,
+    @Field() String? hookType,
+    @Field() String? headline,
+    @Field() String? subheading,
+    @Field() String? assessmentId,
+    @Field() String? privacyPolicyUrl,
+    @Field() String? status,
+  });
+
+  @DELETE("rest/s1/growerp/100/LandingPage/{pageId}")
+  Future<void> deleteLandingPage({@Path() required String pageId});
+
+  @POST("rest/s1/growerp/100/LandingPage/{pageId}/publish")
+  Future<LandingPage> publishLandingPage({@Path() required String pageId});
+
+  // Public Landing Page access (no authentication)
+  @GET("rest/s1/growerp/100/Public/LandingPage/{pageId}")
+  @Extra({'noApiKey': true})
+  Future<LandingPageResponse> getPublicLandingPage({
+    @Path() required String pageId,
+    @Query('ownerPartyId') String? ownerPartyId,
+  });
+
+  // ============================================
+  // PAGE SECTION ENDPOINTS
+  // ============================================
+
+  @GET("rest/s1/growerp/100/LandingPage/{pageId}/Section")
+  Future<List<LandingPageSection>> getPageSections({
+    @Path() required String pageId,
+  });
+
+  @POST("rest/s1/growerp/100/LandingPage/{pageId}/Section")
+  Future<LandingPageSection> createPageSection({
+    @Path() required String pageId,
+    @Field() required String sectionTitle,
+    @Field() String? sectionDescription,
+    @Field() String? sectionImageUrl,
+    @Field() int? sectionSequence,
+  });
+
+  @PATCH("rest/s1/growerp/100/LandingPage/{pageId}/Section/{sectionId}")
+  Future<LandingPageSection> updatePageSection({
+    @Path() required String pageId,
+    @Path() required String sectionId,
+    @Field() String? sectionTitle,
+    @Field() String? sectionDescription,
+    @Field() String? sectionImageUrl,
+    @Field() int? sectionSequence,
+  });
+
+  @DELETE("rest/s1/growerp/100/LandingPage/{pageId}/Section/{sectionId}")
+  Future<void> deletePageSection({
+    @Path() required String pageId,
+    @Path() required String sectionId,
+  });
+
+  // ============================================
+  // CREDIBILITY INFO ENDPOINTS (Nested under LandingPage)
+  // ============================================
+
+  @POST("rest/s1/growerp/100/LandingPage/{pageId}/Credibility")
+  Future<CredibilityElement> createCredibilityInfo({
+    @Path() required String pageId,
+    @Field() required String creatorBio,
+    @Field() String? backgroundText,
+    @Field() String? creatorImageUrl,
+  });
+
+  @PATCH("rest/s1/growerp/100/LandingPage/{pageId}/Credibility/{credibilityId}")
+  Future<CredibilityElement> updateCredibilityInfo({
+    @Path() required String pageId,
+    @Path() required String credibilityId,
+    @Field() String? creatorBio,
+    @Field() String? backgroundText,
+    @Field() String? creatorImageUrl,
+  });
+
+  @DELETE(
+    "rest/s1/growerp/100/LandingPage/{pageId}/Credibility/{credibilityId}",
+  )
+  Future<void> deleteCredibilityInfo({
+    @Path() required String pageId,
+    @Path() required String credibilityId,
+  });
+
+  // ============================================
+  // CREDIBILITY STATISTICS ENDPOINTS
+  // ============================================
+
+  @GET("rest/s1/growerp/100/CredibilityStatistic")
+  Future<dynamic> getCredibilityStatistics({
+    @Query('credibilityId') required String credibilityId,
+  });
+
+  @POST("rest/s1/growerp/100/CredibilityStatistic")
+  Future<dynamic> addCredibilityStatistic({
+    @Field() required String credibilityId,
+    @Field() required String statistic,
+  });
+
+  @DELETE("rest/s1/growerp/100/CredibilityStatistic/{statisticId}")
+  Future<void> removeCredibilityStatistic({
+    @Path() required String statisticId,
+  });
+
+  // ============================================
+  // PRIMARY CTA ENDPOINTS (Nested under LandingPage)
+  // ============================================
+
+  @POST("rest/s1/growerp/100/LandingPage/{pageId}/CallToAction")
+  Future<CallToAction> createPrimaryCTA({
+    @Path() required String pageId,
+    @Field() required String buttonText,
+    @Field() String? estimatedTime,
+    @Field() String? cost,
+    @Field() String? valuePromise,
+  });
+
+  @PATCH("rest/s1/growerp/100/LandingPage/{pageId}/CallToAction/{ctaId}")
+  Future<CallToAction> updatePrimaryCTA({
+    @Path() required String pageId,
+    @Path() required String ctaId,
+    @Field() String? buttonText,
+    @Field() String? estimatedTime,
+    @Field() String? cost,
+    @Field() String? valuePromise,
+  });
 }

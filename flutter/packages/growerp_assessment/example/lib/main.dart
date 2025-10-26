@@ -85,6 +85,14 @@ List<MenuOption> menuOptions(BuildContext context) => [
           ),
         ],
       ),
+      MenuOption(
+        image: 'packages/growerp_core/images/infoGrey.png',
+        selectedImage: 'packages/growerp_core/images/info.png',
+        title: 'Landing Pages',
+        route: '/landing-pages',
+        userGroups: [UserGroup.admin, UserGroup.employee],
+        child: const LandingPageListScreen(),
+      ),
     ];
 
 /// Route generation for navigation
@@ -165,6 +173,19 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           result: settings.arguments as AssessmentResult,
         ),
       );
+    case '/landing-pages':
+      return MaterialPageRoute(
+        builder: (context) => DisplayMenuOption(
+          menuList: menuOptions(context),
+          menuIndex: 3,
+        ),
+      );
+    case '/landing-page/detail':
+      return MaterialPageRoute(
+        builder: (context) => LandingPageDetailScreen(
+          landingPage: settings.arguments as LandingPage,
+        ),
+      );
     default:
       return MaterialPageRoute(
         builder: (context) => FatalErrorForm(
@@ -199,6 +220,11 @@ class MainMenu extends StatelessWidget {
                 "Assessments: 0",
                 "Leads: 0",
                 "Results: 0",
+              ]),
+              makeDashboardItem('dbLandingPages', context, options[3], [
+                "Landing Pages: 0",
+                "Active: 0",
+                "Draft: 0",
               ]),
             ],
           );

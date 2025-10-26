@@ -328,7 +328,14 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(8),
-          color: isSelected ? Colors.blue.withOpacity(0.1) : Colors.transparent,
+          color: isSelected
+              ? Color.fromARGB(
+                  (0.1 * 255).toInt(),
+                  ((Colors.blue.r * 255.0).round() & 0xff),
+                  ((Colors.blue.g * 255.0).round() & 0xff),
+                  ((Colors.blue.b * 255.0).round() & 0xff),
+                )
+              : Colors.transparent,
         ),
         child: Row(
           children: [

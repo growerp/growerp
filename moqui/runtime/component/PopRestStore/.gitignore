@@ -6,6 +6,7 @@ screen/store/components/*.min.js
 
 # Flutter web build artifacts
 screen/store/admin/
+screen/store/landingpage/
 
 # gradle/build files
 .gradle

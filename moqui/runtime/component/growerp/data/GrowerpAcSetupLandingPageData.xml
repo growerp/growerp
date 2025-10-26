@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Demo Landing Page Data for GrowERP
+This file contains comprehensive demo data for landing pages that can be integrated
+into PartyServices100.xml demo data loading process.
+
+Structure:
+- Landing Page: Main page configuration
+- Page Sections: Value proposition sections (3 sections)
+- Credibility Info: Creator bio and background  
+- Credibility Statistics: Supporting statistics (3 stats)
+- Primary CTA: Call-to-action button configuration
+
+Usage: Include this data in the demo data loading process within PartyServices100.xml
+-->
+
+<entity-facade-xml type="seed-initial">
+  <!-- Main Landing Page -->
+  <growerp.landing.LandingPage
+    pageId="demo-business-assessment"
+    pseudoId="business-assessment-demo"
+    ownerPartyId="DEMO"
+    title="Transform Your Business Performance"
+    hookType="problem"
+    headline="Is Your Business Operating at Peak Performance?"
+    subheading="Discover hidden inefficiencies, unlock growth opportunities, and get a clear roadmap to success with our comprehensive business assessment"
+    status="ACTIVE"
+    privacyPolicyUrl="https://www.growerp.com/privacy"
+    assessmentId="business-performance-assessment"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system"
+    lastModifiedDate="2024-10-26 00:00:00"
+    lastModifiedByUserLogin="system" />
+
+  <!-- Section 1: Problem Identification -->
+  <growerp.landing.PageSection
+    sectionId="demo-section-problem"
+    pseudoId="problem-identification"
+    pageId="demo-business-assessment"
+    sectionSequence="1"
+    sectionTitle="Identify Critical Business Gaps"
+    sectionDescription="Most businesses lose 20-30% of potential revenue due to unidentified inefficiencies. Our assessment pinpoints exactly where your business is bleeding money and missing opportunities."
+    sectionImageUrl="https://via.placeholder.com/500x300/4f46e5/ffffff?text=Business+Gaps"
+    createdDate="2024-10-26 00:00:00" />
+
+  <!-- Section 2: Solution Benefits -->
+  <growerp.landing.PageSection
+    sectionId="demo-section-solution"
+    pseudoId="solution-benefits"
+    pageId="demo-business-assessment"
+    sectionSequence="2"
+    sectionTitle="Get Actionable Growth Strategies"
+    sectionDescription="Receive a personalized action plan with specific recommendations tailored to your industry, business size, and current challenges. No generic advice - just proven strategies that work."
+    sectionImageUrl="https://via.placeholder.com/500x300/059669/ffffff?text=Growth+Strategies"
+    createdDate="2024-10-26 00:00:00" />
+
+  <!-- Section 3: Results Promise -->
+  <growerp.landing.PageSection
+    sectionId="demo-section-results"
+    pseudoId="results-promise"
+    pageId="demo-business-assessment"
+    sectionSequence="3"
+    sectionTitle="Measurable Results Within 90 Days"
+    sectionDescription="Our clients typically see 15-40% improvement in key performance metrics within 90 days of implementing our recommendations. Track your progress with built-in analytics and continuous support."
+    sectionImageUrl="https://via.placeholder.com/500x300/dc2626/ffffff?text=Results+Tracking"
+    createdDate="2024-10-26 00:00:00" />
+
+  <!-- Credibility Information -->
+  <growerp.landing.CredibilityInfo
+    credibilityId="demo-credibility-main"
+    pseudoId="expert-credentials"
+    pageId="demo-business-assessment"
+    creatorBio="Created by business optimization experts with over 20 years of combined experience helping companies scale from startups to Fortune 500 enterprises."
+    backgroundText="Our methodology has been refined through working with over 1,200 businesses across 50+ industries. We've helped companies achieve breakthrough growth by identifying and eliminating the bottlenecks that hold them back."
+    creatorImageUrl="https://via.placeholder.com/150x150/6366f1/ffffff?text=Expert"
+    createdDate="2024-10-26 00:00:00"
+    lastModifiedDate="2024-10-26 00:00:00" />
+
+  <!-- Credibility Statistics -->
+  <growerp.landing.CredibilityStatistic
+    statisticId="demo-stat-1"
+    credibilityId="demo-credibility-main"
+    statistic="1,200+ Businesses Transformed"
+    displayOrder="1"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.landing.CredibilityStatistic
+    statisticId="demo-stat-2"
+    credibilityId="demo-credibility-main"
+    statistic="Average 28% Revenue Increase"
+    displayOrder="2"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.landing.CredibilityStatistic
+    statisticId="demo-stat-3"
+    credibilityId="demo-credibility-main"
+    statistic="90-Day Success Guarantee"
+    displayOrder="3"
+    createdDate="2024-10-26 00:00:00" />
+
+  <!-- Primary CTA Configuration -->
+  <growerp.landing.PrimaryCTA
+    ctaId="demo-cta-main"
+    pseudoId="start-assessment-cta"
+    pageId="demo-business-assessment"
+    buttonText="Start Your Free Assessment"
+    estimatedTime="5 minutes"
+    cost="Completely Free"
+    valuePromise="Get your personalized business optimization report with specific action items and ROI projections"
+    createdDate="2024-10-26 00:00:00"
+    lastModifiedDate="2024-10-26 00:00:00" />
+
+  <!-- Additional Landing Page Variations -->
+
+  <!-- Tech Startup Landing Page -->
+  <growerp.landing.LandingPage
+    pageId="demo-tech-startup-assessment"
+    pseudoId="tech-startup-growth"
+    ownerPartyId="DEMO"
+    title="Scale Your Tech Startup Faster"
+    hookType="results"
+    headline="From MVP to Market Leader in 18 Months"
+    subheading="Join 500+ tech startups who used our assessment to identify critical growth levers and scale 3x faster than competitors"
+    status="ACTIVE"
+    privacyPolicyUrl="https://www.growerp.com/privacy"
+    assessmentId="tech-startup-assessment"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system"
+    lastModifiedDate="2024-10-26 00:00:00"
+    lastModifiedByUserLogin="system" />
+
+  <!-- Tech Startup Sections -->
+  <growerp.landing.PageSection
+    sectionId="tech-section-1"
+    pseudoId="tech-product-market-fit"
+    pageId="demo-tech-startup-assessment"
+    sectionSequence="1"
+    sectionTitle="Achieve Product-Market Fit Faster"
+    sectionDescription="Skip the guesswork. Our assessment identifies your ideal customer profile, validates market demand, and reveals the features that drive adoption."
+    sectionImageUrl="https://via.placeholder.com/500x300/6366f1/ffffff?text=Demo+Image"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.landing.PageSection
+    sectionId="tech-section-2"
+    pseudoId="tech-scaling-systems"
+    pageId="demo-tech-startup-assessment"
+    sectionSequence="2"
+    sectionTitle="Build Scalable Systems from Day One"
+    sectionDescription="Avoid the technical debt trap. Get a roadmap for building systems, processes, and team structures that scale with your growth."
+    sectionImageUrl="https://via.placeholder.com/500x300/6366f1/ffffff?text=Demo+Image"
+    createdDate="2024-10-26 00:00:00" />
+
+  <!-- E-commerce Landing Page -->
+  <growerp.landing.LandingPage
+    pageId="demo-ecommerce-assessment"
+    pseudoId="ecommerce-optimization"
+    ownerPartyId="DEMO"
+    title="Double Your E-commerce Revenue"
+    hookType="frustration"
+    headline="Tired of Competing on Price Alone?"
+    subheading="Discover the 7 hidden profit leaks in your e-commerce business and learn how to increase customer lifetime value by 150%"
+    status="ACTIVE"
+    privacyPolicyUrl="https://www.growerp.com/privacy"
+    assessmentId="ecommerce-optimization-assessment"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system"
+    lastModifiedDate="2024-10-26 00:00:00"
+    lastModifiedByUserLogin="system" />
+
+  <!-- E-commerce Sections -->
+  <growerp.landing.PageSection
+    sectionId="ecom-section-1"
+    pseudoId="ecom-conversion-optimization"
+    pageId="demo-ecommerce-assessment"
+    sectionSequence="1"
+    sectionTitle="Optimize Every Step of Your Funnel"
+    sectionDescription="From homepage to checkout, identify the micro-conversions that compound to massive revenue increases. Small changes, big impact."
+    sectionImageUrl="https://via.placeholder.com/500x300/6366f1/ffffff?text=Demo+Image"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.landing.PageSection
+    sectionId="ecom-section-2"
+    pseudoId="ecom-customer-retention"
+    pageId="demo-ecommerce-assessment"
+    sectionSequence="2"
+    sectionTitle="Turn One-Time Buyers into Loyal Advocates"
+    sectionDescription="Learn the exact email sequences, loyalty programs, and customer experience touchpoints that increase repeat purchase rates by 200%."
+    sectionImageUrl="https://via.placeholder.com/500x300/6366f1/ffffff?text=Demo+Image"
+    createdDate="2024-10-26 00:00:00" />
+
+  <!-- Service Business Landing Page -->
+  <growerp.landing.LandingPage
+    pageId="demo-service-business-assessment"
+    pseudoId="service-business-growth"
+    ownerPartyId="DEMO"
+    title="Scale Your Service Business Beyond Your Time"
+    hookType="problem"
+    headline="Stop Trading Time for Money"
+    subheading="Break free from the service business trap and build a scalable, profitable business that runs without your constant involvement"
+    status="ACTIVE"
+    privacyPolicyUrl="https://www.growerp.com/privacy"
+    assessmentId="service-business-assessment"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system"
+    lastModifiedDate="2024-10-26 00:00:00"
+    lastModifiedByUserLogin="system" />
+
+  <!-- Service Business Sections -->
+  <growerp.landing.PageSection
+    sectionId="service-section-1"
+    pseudoId="service-systematization"
+    pageId="demo-service-business-assessment"
+    sectionSequence="1"
+    sectionTitle="Systematize Your Service Delivery"
+    sectionDescription="Transform your expertise into repeatable processes that your team can execute consistently, maintaining quality while you focus on growth."
+    sectionImageUrl="https://via.placeholder.com/500x300/6366f1/ffffff?text=Demo+Image"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.landing.PageSection
+    sectionId="service-section-2"
+    pseudoId="service-premium-positioning"
+    pageId="demo-service-business-assessment"
+    sectionSequence="2"
+    sectionTitle="Command Premium Prices"
+    sectionDescription="Position yourself as the premium choice in your market. Learn how to justify higher prices and attract clients who value quality over cost."
+    sectionImageUrl="https://via.placeholder.com/500x300/6366f1/ffffff?text=Demo+Image"
+    createdDate="2024-10-26 00:00:00" />
+
+  <!-- Additional CTAs for different pages -->
+  <growerp.landing.PrimaryCTA
+    ctaId="tech-startup-cta"
+    pseudoId="tech-startup-assessment-cta"
+    pageId="demo-tech-startup-assessment"
+    buttonText="Get My Startup Growth Plan"
+    estimatedTime="7 minutes"
+    cost="Free"
+    valuePromise="Receive a custom roadmap for scaling your tech startup with specific milestones and metrics"
+    createdDate="2024-10-26 00:00:00"
+    lastModifiedDate="2024-10-26 00:00:00" />
+
+  <growerp.landing.PrimaryCTA
+    ctaId="ecommerce-cta"
+    pseudoId="ecommerce-optimization-cta"
+    pageId="demo-ecommerce-assessment"
+    buttonText="Find My Profit Leaks"
+    estimatedTime="6 minutes"
+    cost="No Cost"
+    valuePromise="Discover exactly where you're losing money and get a step-by-step plan to plug those leaks"
+    createdDate="2024-10-26 00:00:00"
+    lastModifiedDate="2024-10-26 00:00:00" />
+
+  <growerp.landing.PrimaryCTA
+    ctaId="service-business-cta"
+    pseudoId="service-business-growth-cta"
+    pageId="demo-service-business-assessment"
+    buttonText="Scale Beyond My Time"
+    estimatedTime="8 minutes"
+    cost="Completely Free"
+    valuePromise="Get your personalized scaling blueprint with systems, processes, and team structure recommendations"
+    createdDate="2024-10-26 00:00:00"
+    lastModifiedDate="2024-10-26 00:00:00" />
+
+  <!-- Additional Credibility Info for other pages -->
+  <growerp.landing.CredibilityInfo
+    credibilityId="tech-startup-credibility"
+    pseudoId="tech-startup-credentials"
+    pageId="demo-tech-startup-assessment"
+    creatorBio="Built by serial entrepreneurs who have founded, scaled, and successfully exited 3 tech startups with a combined valuation of $200M+"
+    backgroundText="Our framework is based on analyzing 10,000+ startups and identifying the key factors that separate unicorns from failures. Used by Y Combinator alumni and top-tier VCs."
+    creatorImageUrl="https://via.placeholder.com/500x300/6366f1/ffffff?text=Demo+Image"
+    createdDate="2024-10-26 00:00:00"
+    lastModifiedDate="2024-10-26 00:00:00" />
+
+  <growerp.landing.CredibilityInfo
+    credibilityId="ecommerce-credibility"
+    pseudoId="ecommerce-credentials"
+    pageId="demo-ecommerce-assessment"
+    creatorBio="Created by e-commerce optimization experts who have generated over $500M in additional revenue for online stores worldwide"
+    backgroundText="Our methodology combines data science, behavioral psychology, and conversion optimization to maximize every aspect of your e-commerce funnel."
+    creatorImageUrl="https://via.placeholder.com/500x300/6366f1/ffffff?text=Demo+Image"
+    createdDate="2024-10-26 00:00:00"
+    lastModifiedDate="2024-10-26 00:00:00" />
+
+  <growerp.landing.CredibilityInfo
+    credibilityId="service-business-credibility"
+    pseudoId="service-business-credentials"
+    pageId="demo-service-business-assessment"
+    creatorBio="Developed by business consultants who have helped 800+ service businesses scale from 6-figures to 8-figures without burning out"
+    backgroundText="We've cracked the code on service business scaling by studying the systems and processes of the most successful service companies across 25+ industries."
+    creatorImageUrl="https://via.placeholder.com/500x300/6366f1/ffffff?text=Demo+Image"
+    createdDate="2024-10-26 00:00:00"
+    lastModifiedDate="2024-10-26 00:00:00" />
+
+  <!-- Additional statistics for all credibility sections -->
+  <growerp.landing.CredibilityStatistic
+    statisticId="tech-stat-1"
+    credibilityId="tech-startup-credibility"
+    statistic="500+ Startups Scaled"
+    displayOrder="1"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.landing.CredibilityStatistic
+    statisticId="tech-stat-2"
+    credibilityId="tech-startup-credibility"
+    statistic="3x Faster Growth Rate"
+    displayOrder="2"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.landing.CredibilityStatistic
+    statisticId="ecom-stat-1"
+    credibilityId="ecommerce-credibility"
+    statistic="$500M+ Revenue Generated"
+    displayOrder="1"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.landing.CredibilityStatistic
+    statisticId="ecom-stat-2"
+    credibilityId="ecommerce-credibility"
+    statistic="150% CLV Increase"
+    displayOrder="2"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.landing.CredibilityStatistic
+    statisticId="service-stat-1"
+    credibilityId="service-business-credibility"
+    statistic="800+ Service Businesses"
+    displayOrder="1"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.landing.CredibilityStatistic
+    statisticId="service-stat-2"
+    credibilityId="service-business-credibility"
+    statistic="6 to 8-Figure Growth"
+    displayOrder="2"
+    createdDate="2024-10-26 00:00:00" />
+
+</entity-facade-xml>

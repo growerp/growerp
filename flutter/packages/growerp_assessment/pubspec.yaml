@@ -17,7 +17,6 @@ dependencies:
 
   # JSON serialization
   json_annotation: ^4.9.0
-  json_serializable: ^6.7.1
 
   # HTTP client for API calls
   retrofit: ^4.0.0
