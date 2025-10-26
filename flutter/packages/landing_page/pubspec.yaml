@@ -1,0 +1,43 @@
+name: landing_page
+version: 1.10.6+1
+repository: https://github.com/growerp/growerp
+homepage: https://www.growerp.com
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+  flutter: ^3.33.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  growerp_core: ^1.9.0
+  growerp_models: ^1.9.0
+  growerp_assessment:
+    path: ../growerp_assessment
+  package_info_plus: ^8.0.2
+  flutter_localizations:
+    sdk: flutter
+  universal_io: ^2.2.2
+  intl: ^0.20.2
+  url_launcher: ^6.1.14
+  cached_network_image: ^3.3.0
+  global_configuration: ^2.0.0
+  json_annotation: ^4.9.0
+  shared_preferences: ^2.3.2
+  flutter_bloc: ^8.1.3
+  http: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: ^2.4.6
+  json_serializable: ^6.7.1
+  flutter_lints: ^3.0.0
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/cfg/

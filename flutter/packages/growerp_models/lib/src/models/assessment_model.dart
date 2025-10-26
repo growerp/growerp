@@ -39,9 +39,6 @@ class Assessment {
   /// Tenant-unique identifier (user-facing, used in URLs)
   final String pseudoId;
 
-  /// Owner party ID for multi-tenant isolation
-  final String ownerPartyId;
-
   /// Assessment name/title
   final String assessmentName;
 
@@ -68,7 +65,6 @@ class Assessment {
   const Assessment({
     required this.assessmentId,
     required this.pseudoId,
-    required this.ownerPartyId,
     required this.assessmentName,
     this.description,
     required this.status,
@@ -82,7 +78,6 @@ class Assessment {
   Assessment copyWith({
     String? assessmentId,
     String? pseudoId,
-    String? ownerPartyId,
     String? assessmentName,
     String? description,
     String? status,
@@ -94,7 +89,6 @@ class Assessment {
     return Assessment(
       assessmentId: assessmentId ?? this.assessmentId,
       pseudoId: pseudoId ?? this.pseudoId,
-      ownerPartyId: ownerPartyId ?? this.ownerPartyId,
       assessmentName: assessmentName ?? this.assessmentName,
       description: description ?? this.description,
       status: status ?? this.status,

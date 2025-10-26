@@ -19,7 +19,6 @@ import 'package:flutter/material.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
-import 'package:growerp_assessment/growerp_assessment.dart';
 import 'acct_menu_options.dart';
 import 'menu_options.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -118,15 +117,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         settings: settings,
         builder: (context) =>
             PrintingForm(finDocIn: settings.arguments as FinDoc),
-      );
-    case '/assessment':
-      return MaterialPageRoute(
-        settings: settings,
-        builder: (context) => DisplayMenuOption(
-          menuList: getMenuOptions(context),
-          menuIndex: 6,
-          tabIndex: 0,
-        ),
       );
     case '/accounting':
       return MaterialPageRoute(

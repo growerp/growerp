@@ -14,9 +14,6 @@ class AssessmentResult {
   /// Assessment ID that was submitted
   final String assessmentId;
 
-  /// Tenant/company that owns this assessment
-  final String ownerPartyId;
-
   /// Final score calculated
   final double score;
 
@@ -45,7 +42,6 @@ class AssessmentResult {
     required this.resultId,
     required this.pseudoId,
     required this.assessmentId,
-    required this.ownerPartyId,
     required this.score,
     required this.leadStatus,
     required this.respondentName,
@@ -60,7 +56,6 @@ class AssessmentResult {
     String? resultId,
     String? pseudoId,
     String? assessmentId,
-    String? ownerPartyId,
     double? score,
     String? leadStatus,
     String? respondentName,
@@ -74,7 +69,6 @@ class AssessmentResult {
       resultId: resultId ?? this.resultId,
       pseudoId: pseudoId ?? this.pseudoId,
       assessmentId: assessmentId ?? this.assessmentId,
-      ownerPartyId: ownerPartyId ?? this.ownerPartyId,
       score: score ?? this.score,
       leadStatus: leadStatus ?? this.leadStatus,
       respondentName: respondentName ?? this.respondentName,

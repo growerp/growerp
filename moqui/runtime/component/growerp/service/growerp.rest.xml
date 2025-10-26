@@ -403,6 +403,86 @@ along with this software (see the LICENSE.md file). If not, see
             </id>
         </resource>
 
+        <!-- landing page -->
+        <resource name="LandingPage">
+            <method type="get">
+                <service name="growerp.100.LandingPageServices100.list#LandingPages" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.LandingPageServices100.create#LandingPage" />
+            </method>
+            <id name="pageId">
+                <method type="get" require-authentication="anonymous-all">
+                    <service name="growerp.100.LandingPageServices100.get#LandingPage" />
+                </method>
+                <method type="patch">
+                    <service name="growerp.100.LandingPageServices100.update#LandingPage" />
+                </method>
+                <method type="delete">
+                    <service name="growerp.100.LandingPageServices100.delete#LandingPage" />
+                </method>
+                <resource name="publish">
+                    <method type="post">
+                        <service name="growerp.100.LandingPageServices100.publish#LandingPage" />
+                    </method>
+                </resource>
+                <resource name="Section">
+                    <method type="get">
+                        <service name="growerp.100.LandingPageServices100.list#PageSections" />
+                    </method>
+                    <method type="post">
+                        <service name="growerp.100.LandingPageServices100.create#PageSection" />
+                    </method>
+                    <id name="sectionId">
+                        <method type="patch">
+                            <service
+                                name="growerp.100.LandingPageServices100.update#PageSection" />
+                        </method>
+                        <method type="delete">
+                            <service
+                                name="growerp.100.LandingPageServices100.delete#PageSection" />
+                        </method>
+                    </id>
+                </resource>
+                <resource name="Credibility">
+                    <method type="post">
+                        <service name="growerp.100.LandingPageServices100.create#CredibilityInfo" />
+                    </method>
+                    <id name="credibilityId">
+                        <method type="patch">
+                            <service
+                                name="growerp.100.LandingPageServices100.update#CredibilityInfo" />
+                        </method>
+                        <method type="delete">
+                            <service
+                                name="growerp.100.LandingPageServices100.delete#CredibilityInfo" />
+                        </method>
+                    </id>
+                </resource>
+                <resource name="CallToAction">
+                    <method type="post">
+                        <service name="growerp.100.LandingPageServices100.create#PrimaryCTA" />
+                    </method>
+                    <id name="ctaId">
+                        <method type="patch">
+                            <service name="growerp.100.LandingPageServices100.update#PrimaryCTA" />
+                        </method>
+                    </id>
+                </resource>
+            </id>
+        </resource>
+
+        <!-- Public landing page access (no authentication required) -->
+        <resource name="Public">
+            <resource name="LandingPage">
+                <id name="pageId" require-authentication="anonymous-all">
+                    <method type="get">
+                        <service name="growerp.100.LandingPageServices100.get#LandingPage" />
+                    </method>
+                </id>
+            </resource>
+        </resource>
+
         <!-- Direct Assessment endpoints for Flutter compatibility -->
         <resource name="AssessmentQuestion">
             <method type="get">

@@ -48,7 +48,6 @@ Service definitions for assessment management and completion
             </parameter>
         </out-parameters>
         <actions>
-            <log message="============get assessment" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="!ownerPartyId">

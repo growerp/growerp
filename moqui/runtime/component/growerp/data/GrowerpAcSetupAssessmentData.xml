@@ -1,0 +1,994 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Demo Assessment Data for GrowERP
+This file contains comprehensive demo data for assessments and landing pages that can be integrated
+into PartyServices100.xml demo data loading process.
+
+Structure:
+- Landing Pages: Demo landing pages linking to assessments
+- Assessments: Multiple assessment types (Business Performance, Tech Startup, E-commerce, Service
+Business)
+- Assessment Questions: 8-12 questions per assessment with various types
+- Question Options: Multiple choice answers with scoring
+- Scoring Thresholds: Lead qualification tiers
+- Sample Results: Example completed assessments
+
+Usage: Include this data in the demo data loading process within PartyServices100.xml
+-->
+
+<entity-facade-xml type="seed-initial">
+
+  <!-- ============================================ -->
+  <!-- DEMO LANDING PAGES -->
+  <!-- ============================================ -->
+
+  <!-- Landing Page 1: Business Performance Assessment -->
+  <LandingPage
+    pageId="lp-business-performance"
+    pseudoId="business-assessment"
+    ownerPartyId="DEMO"
+    title="Business Performance Assessment"
+    hookType="problem"
+    headline="Is Your Business Reaching Its Full Potential?"
+    subheading="Discover hidden opportunities and bottlenecks holding your business back with our comprehensive assessment."
+    assessmentId="business-performance-assessment"
+    status="ACTIVE"
+    createdDate="2024-10-26 00:00:00"
+    lastModifiedDate="2024-10-26 00:00:00" />
+
+  <!-- Landing Page 2: Tech Startup Assessment -->
+  <LandingPage
+    pageId="lp-tech-startup"
+    pseudoId="startup-readiness"
+    ownerPartyId="DEMO"
+    title="Startup Readiness Assessment"
+    hookType="opportunity"
+    headline="Ready to Scale Your Tech Startup?"
+    subheading="Find out if your startup has what it takes to attract investors and scale successfully."
+    assessmentId="tech-startup-assessment"
+    status="ACTIVE"
+    createdDate="2024-10-26 00:00:00"
+    lastModifiedDate="2024-10-26 00:00:00" />
+
+  <!-- Landing Page 3: E-commerce Assessment -->
+  <LandingPage
+    pageId="lp-ecommerce"
+    pseudoId="ecommerce-optimization"
+    ownerPartyId="DEMO"
+    title="E-commerce Optimization Assessment"
+    hookType="results"
+    headline="Boost Your Online Sales by 40% or More"
+    subheading="Identify the key areas holding back your e-commerce growth and get a personalized optimization plan."
+    assessmentId="ecommerce-assessment"
+    status="ACTIVE"
+    createdDate="2024-10-26 00:00:00"
+    lastModifiedDate="2024-10-26 00:00:00" />
+
+  <!-- Landing Page 4: Service Business Assessment -->
+  <LandingPage
+    pageId="lp-service-business"
+    pseudoId="service-efficiency"
+    ownerPartyId="DEMO"
+    title="Service Business Efficiency Assessment"
+    hookType="problem"
+    headline="Overwhelmed by Operations but Not Seeing Growth?"
+    subheading="Streamline your service delivery and unlock sustainable growth with our targeted assessment."
+    assessmentId="service-business-assessment"
+    status="DRAFT"
+    createdDate="2024-10-26 00:00:00"
+    lastModifiedDate="2024-10-26 00:00:00" />
+
+  <!-- ============================================ -->
+  <!-- BUSINESS PERFORMANCE ASSESSMENT -->
+  <!-- ============================================ -->
+
+  <!-- Main Assessment: Business Performance -->
+  <growerp.assessment.Assessment
+    assessmentId="business-performance-assessment"
+    pseudoId="business-performance"
+    ownerPartyId="DEMO"
+    assessmentName="Business Performance Assessment"
+    description="Comprehensive evaluation of business operations, growth potential, and optimization opportunities"
+    status="ACTIVE"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system"
+    lastModifiedDate="2024-10-26 00:00:00"
+    lastModifiedByUserLogin="system" />
+
+  <!-- Questions for Business Performance Assessment -->
+  <growerp.assessment.AssessmentQuestion
+    questionId="bp-q1"
+    pseudoId="revenue-growth"
+    assessmentId="business-performance-assessment"
+    questionSequence="1"
+    questionType="MULTIPLE_CHOICE"
+    questionText="What was your revenue growth rate last year?"
+    questionDescription="This helps us understand your current growth trajectory and identify acceleration opportunities."
+    isRequired="Y"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q1-o1"
+    pseudoId="revenue-decline"
+    questionId="bp-q1"
+    assessmentId="business-performance-assessment"
+    optionSequence="1"
+    optionText="Revenue declined or stayed flat"
+    optionScore="1"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q1-o2"
+    pseudoId="revenue-slow-growth"
+    questionId="bp-q1"
+    assessmentId="business-performance-assessment"
+    optionSequence="2"
+    optionText="1-10% growth"
+    optionScore="3"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q1-o3"
+    pseudoId="revenue-moderate-growth"
+    questionId="bp-q1"
+    assessmentId="business-performance-assessment"
+    optionSequence="3"
+    optionText="11-25% growth"
+    optionScore="7"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q1-o4"
+    pseudoId="revenue-high-growth"
+    questionId="bp-q1"
+    assessmentId="business-performance-assessment"
+    optionSequence="4"
+    optionText="25%+ growth"
+    optionScore="10"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestion
+    questionId="bp-q2"
+    pseudoId="profit-margins"
+    assessmentId="business-performance-assessment"
+    questionSequence="2"
+    questionType="MULTIPLE_CHOICE"
+    questionText="What are your current profit margins?"
+    questionDescription="Understanding profitability helps identify cost optimization and pricing opportunities."
+    isRequired="Y"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q2-o1"
+    pseudoId="margins-negative"
+    questionId="bp-q2"
+    assessmentId="business-performance-assessment"
+    optionSequence="1"
+    optionText="Breaking even or losing money"
+    optionScore="1"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q2-o2"
+    pseudoId="margins-low"
+    questionId="bp-q2"
+    assessmentId="business-performance-assessment"
+    optionSequence="2"
+    optionText="1-10% profit margins"
+    optionScore="4"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q2-o3"
+    pseudoId="margins-healthy"
+    questionId="bp-q2"
+    assessmentId="business-performance-assessment"
+    optionSequence="3"
+    optionText="11-20% profit margins"
+    optionScore="8"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q2-o4"
+    pseudoId="margins-excellent"
+    questionId="bp-q2"
+    assessmentId="business-performance-assessment"
+    optionSequence="4"
+    optionText="20%+ profit margins"
+    optionScore="10"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestion
+    questionId="bp-q3"
+    pseudoId="customer-acquisition"
+    assessmentId="business-performance-assessment"
+    questionSequence="3"
+    questionType="MULTIPLE_CHOICE"
+    questionText="How predictable is your customer acquisition?"
+    questionDescription="Predictable lead flow is crucial for sustainable growth and planning."
+    isRequired="Y"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q3-o1"
+    pseudoId="acquisition-unpredictable"
+    questionId="bp-q3"
+    assessmentId="business-performance-assessment"
+    optionSequence="1"
+    optionText="Very unpredictable, feast or famine"
+    optionScore="2"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q3-o2"
+    pseudoId="acquisition-somewhat"
+    questionId="bp-q3"
+    assessmentId="business-performance-assessment"
+    optionSequence="2"
+    optionText="Somewhat predictable with some systems"
+    optionScore="5"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q3-o3"
+    pseudoId="acquisition-predictable"
+    questionId="bp-q3"
+    assessmentId="business-performance-assessment"
+    optionSequence="3"
+    optionText="Mostly predictable with established channels"
+    optionScore="8"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q3-o4"
+    pseudoId="acquisition-systematic"
+    questionId="bp-q3"
+    assessmentId="business-performance-assessment"
+    optionSequence="4"
+    optionText="Highly systematic and scalable"
+    optionScore="10"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestion
+    questionId="bp-q4"
+    pseudoId="team-dependency"
+    assessmentId="business-performance-assessment"
+    questionSequence="4"
+    questionType="MULTIPLE_CHOICE"
+    questionText="How dependent is your business on you personally?"
+    questionDescription="Business owner dependency is often the biggest constraint to scaling."
+    isRequired="Y"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q4-o1"
+    pseudoId="dependency-complete"
+    questionId="bp-q4"
+    assessmentId="business-performance-assessment"
+    optionSequence="1"
+    optionText="Completely dependent - I am the business"
+    optionScore="1"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q4-o2"
+    pseudoId="dependency-high"
+    questionId="bp-q4"
+    assessmentId="business-performance-assessment"
+    optionSequence="2"
+    optionText="Highly dependent - most decisions require me"
+    optionScore="3"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q4-o3"
+    pseudoId="dependency-moderate"
+    questionId="bp-q4"
+    assessmentId="business-performance-assessment"
+    optionSequence="3"
+    optionText="Moderately independent with good team"
+    optionScore="7"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q4-o4"
+    pseudoId="dependency-minimal"
+    questionId="bp-q4"
+    assessmentId="business-performance-assessment"
+    optionSequence="4"
+    optionText="Minimal dependency - runs without me"
+    optionScore="10"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestion
+    questionId="bp-q5"
+    pseudoId="cash-flow"
+    assessmentId="business-performance-assessment"
+    questionSequence="5"
+    questionType="MULTIPLE_CHOICE"
+    questionText="How would you describe your cash flow situation?"
+    questionDescription="Cash flow management is critical for business stability and growth funding."
+    isRequired="Y"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q5-o1"
+    pseudoId="cashflow-struggling"
+    questionId="bp-q5"
+    assessmentId="business-performance-assessment"
+    optionSequence="1"
+    optionText="Struggling to pay bills, always tight"
+    optionScore="1"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q5-o2"
+    pseudoId="cashflow-variable"
+    questionId="bp-q5"
+    assessmentId="business-performance-assessment"
+    optionSequence="2"
+    optionText="Variable - good months and bad months"
+    optionScore="4"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q5-o3"
+    pseudoId="cashflow-stable"
+    questionId="bp-q5"
+    assessmentId="business-performance-assessment"
+    optionSequence="3"
+    optionText="Stable with 3-6 months runway"
+    optionScore="7"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="bp-q5-o4"
+    pseudoId="cashflow-strong"
+    questionId="bp-q5"
+    assessmentId="business-performance-assessment"
+    optionSequence="4"
+    optionText="Strong with 6+ months runway"
+    optionScore="10"
+    createdDate="2024-10-26 00:00:00" />
+
+  <!-- Scoring Thresholds for Business Performance Assessment -->
+  <growerp.assessment.ScoringThreshold
+    thresholdId="bp-threshold-1"
+    pseudoId="bp-emergency"
+    assessmentId="business-performance-assessment"
+    minScore="5"
+    maxScore="20"
+    leadStatus="HOT"
+    description="Emergency Situation - Immediate intervention needed"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.ScoringThreshold
+    thresholdId="bp-threshold-2"
+    pseudoId="bp-struggling"
+    assessmentId="business-performance-assessment"
+    minScore="21"
+    maxScore="35"
+    leadStatus="WARM"
+    description="Struggling Performance - Significant improvement potential"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.ScoringThreshold
+    thresholdId="bp-threshold-3"
+    pseudoId="bp-moderate"
+    assessmentId="business-performance-assessment"
+    minScore="36"
+    maxScore="45"
+    leadStatus="QUALIFIED"
+    description="Moderate Performance - Good optimization opportunities"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.ScoringThreshold
+    thresholdId="bp-threshold-4"
+    pseudoId="bp-excellent"
+    assessmentId="business-performance-assessment"
+    minScore="46"
+    maxScore="50"
+    leadStatus="LOW"
+    description="Excellent Performance - Fine-tuning opportunities"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <!-- ============================================ -->
+  <!-- TECH STARTUP ASSESSMENT -->
+  <!-- ============================================ -->
+
+  <growerp.assessment.Assessment
+    assessmentId="tech-startup-assessment"
+    pseudoId="tech-startup"
+    ownerPartyId="DEMO"
+    assessmentName="Tech Startup Growth Assessment"
+    description="Specialized assessment for technology startups focusing on product-market fit, scalability, and growth metrics"
+    status="ACTIVE"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system"
+    lastModifiedDate="2024-10-26 00:00:00"
+    lastModifiedByUserLogin="system" />
+
+  <growerp.assessment.AssessmentQuestion
+    questionId="ts-q1"
+    pseudoId="product-market-fit"
+    assessmentId="tech-startup-assessment"
+    questionSequence="1"
+    questionType="MULTIPLE_CHOICE"
+    questionText="How would you rate your product-market fit?"
+    questionDescription="Product-market fit is the foundation for sustainable startup growth."
+    isRequired="Y"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ts-q1-o1"
+    pseudoId="pmf-searching"
+    questionId="ts-q1"
+    assessmentId="tech-startup-assessment"
+    optionSequence="1"
+    optionText="Still searching for product-market fit"
+    optionScore="2"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ts-q1-o2"
+    pseudoId="pmf-early-signs"
+    questionId="ts-q1"
+    assessmentId="tech-startup-assessment"
+    optionSequence="2"
+    optionText="Early signs but not confirmed"
+    optionScore="5"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ts-q1-o3"
+    pseudoId="pmf-strong"
+    questionId="ts-q1"
+    assessmentId="tech-startup-assessment"
+    optionSequence="3"
+    optionText="Strong product-market fit with growing demand"
+    optionScore="8"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ts-q1-o4"
+    pseudoId="pmf-validated"
+    questionId="ts-q1"
+    assessmentId="tech-startup-assessment"
+    optionSequence="4"
+    optionText="Fully validated with strong retention"
+    optionScore="10"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestion
+    questionId="ts-q2"
+    pseudoId="monthly-growth"
+    assessmentId="tech-startup-assessment"
+    questionSequence="2"
+    questionType="MULTIPLE_CHOICE"
+    questionText="What's your monthly user/revenue growth rate?"
+    questionDescription="Growth rate indicates market traction and scalability potential."
+    isRequired="Y"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ts-q2-o1"
+    pseudoId="growth-declining"
+    questionId="ts-q2"
+    assessmentId="tech-startup-assessment"
+    optionSequence="1"
+    optionText="Declining or flat"
+    optionScore="1"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ts-q2-o2"
+    pseudoId="growth-slow"
+    questionId="ts-q2"
+    assessmentId="tech-startup-assessment"
+    optionSequence="2"
+    optionText="0-5% monthly growth"
+    optionScore="4"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ts-q2-o3"
+    pseudoId="growth-solid"
+    questionId="ts-q2"
+    assessmentId="tech-startup-assessment"
+    optionSequence="3"
+    optionText="5-15% monthly growth"
+    optionScore="7"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ts-q2-o4"
+    pseudoId="growth-explosive"
+    questionId="ts-q2"
+    assessmentId="tech-startup-assessment"
+    optionSequence="4"
+    optionText="15%+ monthly growth"
+    optionScore="10"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestion
+    questionId="ts-q3"
+    pseudoId="funding-runway"
+    assessmentId="tech-startup-assessment"
+    questionSequence="3"
+    questionType="MULTIPLE_CHOICE"
+    questionText="How much runway do you have?"
+    questionDescription="Runway determines how long you can operate and your fundraising urgency."
+    isRequired="Y"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ts-q3-o1"
+    pseudoId="runway-critical"
+    questionId="ts-q3"
+    assessmentId="tech-startup-assessment"
+    optionSequence="1"
+    optionText="Less than 3 months"
+    optionScore="2"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ts-q3-o2"
+    pseudoId="runway-short"
+    questionId="ts-q3"
+    assessmentId="tech-startup-assessment"
+    optionSequence="2"
+    optionText="3-6 months"
+    optionScore="4"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ts-q3-o3"
+    pseudoId="runway-comfortable"
+    questionId="ts-q3"
+    assessmentId="tech-startup-assessment"
+    optionSequence="3"
+    optionText="6-12 months"
+    optionScore="8"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ts-q3-o4"
+    pseudoId="runway-strong"
+    questionId="ts-q3"
+    assessmentId="tech-startup-assessment"
+    optionSequence="4"
+    optionText="12+ months or profitable"
+    optionScore="10"
+    createdDate="2024-10-26 00:00:00" />
+
+  <!-- Scoring Thresholds for Tech Startup Assessment -->
+  <growerp.assessment.ScoringThreshold
+    thresholdId="ts-threshold-1"
+    pseudoId="ts-critical"
+    assessmentId="tech-startup-assessment"
+    minScore="3"
+    maxScore="15"
+    leadStatus="HOT"
+    description="Critical Stage - Immediate strategic support needed"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.ScoringThreshold
+    thresholdId="ts-threshold-2"
+    pseudoId="ts-growth"
+    assessmentId="tech-startup-assessment"
+    minScore="16"
+    maxScore="25"
+    leadStatus="WARM"
+    description="Growth Stage - Scaling and optimization focus"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.ScoringThreshold
+    thresholdId="ts-threshold-3"
+    pseudoId="ts-mature"
+    assessmentId="tech-startup-assessment"
+    minScore="26"
+    maxScore="30"
+    leadStatus="QUALIFIED"
+    description="Mature Stage - Advanced growth strategies"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <!-- ============================================ -->
+  <!-- E-COMMERCE ASSESSMENT -->
+  <!-- ============================================ -->
+
+  <growerp.assessment.Assessment
+    assessmentId="ecommerce-optimization-assessment"
+    pseudoId="ecommerce-optimization"
+    ownerPartyId="DEMO"
+    assessmentName="E-commerce Optimization Assessment"
+    description="Comprehensive evaluation of e-commerce performance, conversion optimization, and growth opportunities"
+    status="ACTIVE"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system"
+    lastModifiedDate="2024-10-26 00:00:00"
+    lastModifiedByUserLogin="system" />
+
+  <growerp.assessment.AssessmentQuestion
+    questionId="ec-q1"
+    pseudoId="conversion-rate"
+    assessmentId="ecommerce-optimization-assessment"
+    questionSequence="1"
+    questionType="MULTIPLE_CHOICE"
+    questionText="What's your current overall conversion rate?"
+    questionDescription="Conversion rate is the most important metric for e-commerce optimization."
+    isRequired="Y"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ec-q1-o1"
+    pseudoId="conv-very-low"
+    questionId="ec-q1"
+    assessmentId="ecommerce-optimization-assessment"
+    optionSequence="1"
+    optionText="Less than 1%"
+    optionScore="2"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ec-q1-o2"
+    pseudoId="conv-low"
+    questionId="ec-q1"
+    assessmentId="ecommerce-optimization-assessment"
+    optionSequence="2"
+    optionText="1-2%"
+    optionScore="4"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ec-q1-o3"
+    pseudoId="conv-average"
+    questionId="ec-q1"
+    assessmentId="ecommerce-optimization-assessment"
+    optionSequence="3"
+    optionText="2-4%"
+    optionScore="7"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ec-q1-o4"
+    pseudoId="conv-excellent"
+    questionId="ec-q1"
+    assessmentId="ecommerce-optimization-assessment"
+    optionSequence="4"
+    optionText="4%+"
+    optionScore="10"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestion
+    questionId="ec-q2"
+    pseudoId="customer-ltv"
+    assessmentId="ecommerce-optimization-assessment"
+    questionSequence="2"
+    questionType="MULTIPLE_CHOICE"
+    questionText="What percentage of customers make repeat purchases?"
+    questionDescription="Customer lifetime value and retention are key to sustainable e-commerce growth."
+    isRequired="Y"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ec-q2-o1"
+    pseudoId="repeat-very-low"
+    questionId="ec-q2"
+    assessmentId="ecommerce-optimization-assessment"
+    optionSequence="1"
+    optionText="Less than 10%"
+    optionScore="2"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ec-q2-o2"
+    pseudoId="repeat-low"
+    questionId="ec-q2"
+    assessmentId="ecommerce-optimization-assessment"
+    optionSequence="2"
+    optionText="10-20%"
+    optionScore="5"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ec-q2-o3"
+    pseudoId="repeat-good"
+    questionId="ec-q2"
+    assessmentId="ecommerce-optimization-assessment"
+    optionSequence="3"
+    optionText="20-35%"
+    optionScore="8"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="ec-q2-o4"
+    pseudoId="repeat-excellent"
+    questionId="ec-q2"
+    assessmentId="ecommerce-optimization-assessment"
+    optionSequence="4"
+    optionText="35%+"
+    optionScore="10"
+    createdDate="2024-10-26 00:00:00" />
+
+  <!-- Scoring Thresholds for E-commerce Assessment -->
+  <growerp.assessment.ScoringThreshold
+    thresholdId="ec-threshold-1"
+    pseudoId="ec-needs-help"
+    assessmentId="ecommerce-optimization-assessment"
+    minScore="4"
+    maxScore="12"
+    leadStatus="HOT"
+    description="Significant Optimization Needed - High potential for improvement"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.ScoringThreshold
+    thresholdId="ec-threshold-2"
+    pseudoId="ec-good-potential"
+    assessmentId="ecommerce-optimization-assessment"
+    minScore="13"
+    maxScore="16"
+    leadStatus="WARM"
+    description="Good Performance - Clear optimization opportunities"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.ScoringThreshold
+    thresholdId="ec-threshold-3"
+    pseudoId="ec-optimized"
+    assessmentId="ecommerce-optimization-assessment"
+    minScore="17"
+    maxScore="20"
+    leadStatus="QUALIFIED"
+    description="Well Optimized - Advanced strategies for growth"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <!-- ============================================ -->
+  <!-- SERVICE BUSINESS ASSESSMENT -->
+  <!-- ============================================ -->
+
+  <growerp.assessment.Assessment
+    assessmentId="service-business-assessment"
+    pseudoId="service-business"
+    ownerPartyId="DEMO"
+    assessmentName="Service Business Scaling Assessment"
+    description="Assessment for service-based businesses focusing on systematization, scaling, and breaking free from time-for-money constraints"
+    status="ACTIVE"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system"
+    lastModifiedDate="2024-10-26 00:00:00"
+    lastModifiedByUserLogin="system" />
+
+  <growerp.assessment.AssessmentQuestion
+    questionId="sb-q1"
+    pseudoId="service-systematization"
+    assessmentId="service-business-assessment"
+    questionSequence="1"
+    questionType="MULTIPLE_CHOICE"
+    questionText="How systematized is your service delivery?"
+    questionDescription="Systematization is key to scaling service businesses beyond the owner's personal involvement."
+    isRequired="Y"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="sb-q1-o1"
+    pseudoId="sys-custom-every-time"
+    questionId="sb-q1"
+    assessmentId="service-business-assessment"
+    optionSequence="1"
+    optionText="Every project is custom, no standardization"
+    optionScore="1"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="sb-q1-o2"
+    pseudoId="sys-some-templates"
+    questionId="sb-q1"
+    assessmentId="service-business-assessment"
+    optionSequence="2"
+    optionText="Some templates and processes documented"
+    optionScore="4"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="sb-q1-o3"
+    pseudoId="sys-mostly-standardized"
+    questionId="sb-q1"
+    assessmentId="service-business-assessment"
+    optionSequence="3"
+    optionText="Mostly standardized with clear processes"
+    optionScore="8"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="sb-q1-o4"
+    pseudoId="sys-fully-systematic"
+    questionId="sb-q1"
+    assessmentId="service-business-assessment"
+    optionSequence="4"
+    optionText="Fully systematic with documented workflows"
+    optionScore="10"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestion
+    questionId="sb-q2"
+    pseudoId="pricing-strategy"
+    assessmentId="service-business-assessment"
+    questionSequence="2"
+    questionType="MULTIPLE_CHOICE"
+    questionText="How do you primarily price your services?"
+    questionDescription="Pricing strategy impacts profitability and scalability of service businesses."
+    isRequired="Y"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="sb-q2-o1"
+    pseudoId="price-hourly-low"
+    questionId="sb-q2"
+    assessmentId="service-business-assessment"
+    optionSequence="1"
+    optionText="Hourly rates competing on price"
+    optionScore="2"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="sb-q2-o2"
+    pseudoId="price-project-based"
+    questionId="sb-q2"
+    assessmentId="service-business-assessment"
+    optionSequence="2"
+    optionText="Project-based pricing"
+    optionScore="6"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="sb-q2-o3"
+    pseudoId="price-value-based"
+    questionId="sb-q2"
+    assessmentId="service-business-assessment"
+    optionSequence="3"
+    optionText="Value-based pricing focused on results"
+    optionScore="9"
+    createdDate="2024-10-26 00:00:00" />
+
+  <growerp.assessment.AssessmentQuestionOption
+    optionId="sb-q2-o4"
+    pseudoId="price-premium-retainer"
+    questionId="sb-q2"
+    assessmentId="service-business-assessment"
+    optionSequence="4"
+    optionText="Premium retainer or performance-based models"
+    optionScore="10"
+    createdDate="2024-10-26 00:00:00" />
+
+  <!-- Scoring Thresholds for Service Business Assessment -->
+  <growerp.assessment.ScoringThreshold
+    thresholdId="sb-threshold-1"
+    pseudoId="sb-stuck-solopreneur"
+    assessmentId="service-business-assessment"
+    minScore="3"
+    maxScore="10"
+    leadStatus="HOT"
+    description="Stuck Solopreneur - Need systematic approach to scaling"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.ScoringThreshold
+    thresholdId="sb-threshold-2"
+    pseudoId="sb-growing-business"
+    assessmentId="service-business-assessment"
+    minScore="11"
+    maxScore="16"
+    leadStatus="WARM"
+    description="Growing Business - Ready for systematization and scaling"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <growerp.assessment.ScoringThreshold
+    thresholdId="sb-threshold-3"
+    pseudoId="sb-scalable-business"
+    assessmentId="service-business-assessment"
+    minScore="17"
+    maxScore="20"
+    leadStatus="QUALIFIED"
+    description="Scalable Business - Advanced growth and optimization strategies"
+    createdDate="2024-10-26 00:00:00"
+    createdByUserLogin="system" />
+
+  <!-- ============================================ -->
+  <!-- SAMPLE ASSESSMENT RESULTS -->
+  <!-- ============================================ -->
+
+  <!-- Sample Result 1: Business Performance Assessment -->
+  <growerp.assessment.AssessmentResult
+    resultId="result-bp-001"
+    pseudoId="bp-result-john-doe"
+    assessmentId="business-performance-assessment"
+    ownerPartyId="DEMO"
+    score="18"
+    leadStatus="HOT"
+    respondentName="John Doe"
+    respondentEmail="john.doe@example.com"
+    respondentPhone="+1-555-0123"
+    respondentCompany="Doe Manufacturing"
+    resultData='{"totalScore": 18, "category": "Emergency Situation", "recommendations": ["Immediate cash flow management", "Customer acquisition system", "Profit margin optimization"]}'
+    answersData='{"bp-q1": 1, "bp-q2": 4, "bp-q3": 5, "bp-q4": 3, "bp-q5": 4}'
+    createdDate="2024-10-25 14:30:00"
+    createdByUserLogin="anonymous"
+    lastModifiedDate="2024-10-25 14:30:00" />
+
+  <!-- Sample Result 2: Tech Startup Assessment -->
+  <growerp.assessment.AssessmentResult
+    resultId="result-ts-001"
+    pseudoId="ts-result-sarah-tech"
+    assessmentId="tech-startup-assessment"
+    ownerPartyId="DEMO"
+    score="22"
+    leadStatus="WARM"
+    respondentName="Sarah Johnson"
+    respondentEmail="sarah@techstartup.com"
+    respondentPhone="+1-555-0456"
+    respondentCompany="TechStartup Inc"
+    resultData='{"totalScore": 22, "category": "Growth Stage", "recommendations": ["Scaling infrastructure", "Team building", "Fundraising preparation"]}'
+    answersData='{"ts-q1": 8, "ts-q2": 7, "ts-q3": 8}'
+    createdDate="2024-10-25 16:45:00"
+    createdByUserLogin="anonymous"
+    lastModifiedDate="2024-10-25 16:45:00" />
+
+  <!-- Sample Result 3: E-commerce Assessment -->
+  <growerp.assessment.AssessmentResult
+    resultId="result-ec-001"
+    pseudoId="ec-result-mike-shop"
+    assessmentId="ecommerce-optimization-assessment"
+    ownerPartyId="DEMO"
+    score="11"
+    leadStatus="HOT"
+    respondentName="Mike Wilson"
+    respondentEmail="mike@onlineshop.com"
+    respondentPhone="+1-555-0789"
+    respondentCompany="Wilson Online Store"
+    resultData='{"totalScore": 11, "category": "Significant Optimization Needed", "recommendations": ["Conversion rate optimization", "Customer retention programs", "Email marketing automation"]}'
+    answersData='{"ec-q1": 4, "ec-q2": 5}'
+    createdDate="2024-10-25 10:15:00"
+    createdByUserLogin="anonymous"
+    lastModifiedDate="2024-10-25 10:15:00" />
+
+  <!-- Sample Result 4: Service Business Assessment -->
+  <growerp.assessment.AssessmentResult
+    resultId="result-sb-001"
+    pseudoId="sb-result-lisa-consulting"
+    assessmentId="service-business-assessment"
+    ownerPartyId="DEMO"
+    score="14"
+    leadStatus="WARM"
+    respondentName="Lisa Chen"
+    respondentEmail="lisa@consultingfirm.com"
+    respondentPhone="+1-555-0321"
+    respondentCompany="Chen Consulting"
+    resultData='{"totalScore": 14, "category": "Growing Business", "recommendations": ["Service systematization", "Value-based pricing transition", "Team delegation framework"]}'
+    answersData='{"sb-q1": 6, "sb-q2": 8}'
+    createdDate="2024-10-24 13:20:00"
+    createdByUserLogin="anonymous"
+    lastModifiedDate="2024-10-24 13:20:00" />
+
+</entity-facade-xml>

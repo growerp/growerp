@@ -13,24 +13,35 @@ NC='\033[0m' # No Color
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo -e "${YELLOW}Building Flutter Admin Web Application...${NC}"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+LANDING_PAGE_DIR="$PROJECT_ROOT/flutter/packages/landing_page"
 
-# Clean previous build
+echo -e "${YELLOW}Building Flutter Admin Web Application...${NC}"
+pushd "$SCRIPT_DIR" > /dev/null
 echo -e "Cleaning previous build..."
 flutter clean
-
-# Get dependencies
 echo -e "Getting Flutter dependencies..."
 flutter pub get
+echo -e "Building for web (with source maps)..."
+flutter build web --release --source-maps
+popd > /dev/null
+echo -e "${GREEN}✓ Flutter Admin build completed successfully${NC}"
 
-# Build for web
-echo -e "Building for web..."
-flutter build web --release
+echo -e "\n${YELLOW}Deploying Admin web build to Moqui...${NC}"
+"$SCRIPT_DIR/deploy-web-to-moqui.sh" admin
 
-echo -e "${GREEN}✓ Flutter build completed successfully${NC}"
+echo -e "\n${YELLOW}Building Flutter Landing Page Web Application...${NC}"
+pushd "$LANDING_PAGE_DIR" > /dev/null
+echo -e "Cleaning previous build..."
+flutter clean
+echo -e "Getting Flutter dependencies..."
+flutter pub get
+echo -e "Building for web (with source maps)..."
+flutter build web --release --source-maps
+popd > /dev/null
+echo -e "${GREEN}✓ Landing Page build completed successfully${NC}"
 
-# Deploy to Moqui
-echo -e "\n${YELLOW}Deploying to Moqui...${NC}"
-"$SCRIPT_DIR/deploy-web-to-moqui.sh"
+echo -e "\n${YELLOW}Deploying Landing Page web build to Moqui...${NC}"
+"$SCRIPT_DIR/deploy-web-to-moqui.sh" landingpage
 
-echo -e "\n${GREEN}✓✓✓ Build and deployment completed successfully! ✓✓✓${NC}"
+echo -e "\n${GREEN}✓✓✓ Admin and Landing Page builds deployed successfully! ✓✓✓${NC}"
