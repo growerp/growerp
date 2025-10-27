@@ -23,7 +23,7 @@ flutter clean
 echo -e "Getting Flutter dependencies..."
 flutter pub get
 echo -e "Building for web (with source maps)..."
-flutter build web --release --source-maps
+flutter build web --release --wasm
 popd > /dev/null
 echo -e "${GREEN}✓ Flutter Admin build completed successfully${NC}"
 
@@ -37,7 +37,7 @@ flutter clean
 echo -e "Getting Flutter dependencies..."
 flutter pub get
 echo -e "Building for web (with source maps)..."
-flutter build web --release --source-maps
+flutter build web --release --wasm
 popd > /dev/null
 echo -e "${GREEN}✓ Landing Page build completed successfully${NC}"
 

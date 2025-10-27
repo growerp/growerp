@@ -49,7 +49,10 @@ RUN melos build --no-select
 # build flutter app
 WORKDIR /home/mobiledevops/growerp/flutter/packages/admin
 RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
-RUN flutter build web --release
+RUN flutter build web --release --wasm
+WORKDIR /home/mobiledevops/growerp/flutter/packages/landing_page
+RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
+RUN flutter build web --release --wasm
 
 #stage 2 -get files and build
 ARG DOCKER_TAG=NOTSET1
@@ -63,17 +66,17 @@ RUN apt-get update && \
     apt-get clean
 #RUN git clone --depth 1 https://github.com/growerp/growerp.git /root/growerp
 COPY --from=build-flutter /home/mobiledevops/growerp /root/growerp
-# install flutter admin files
 WORKDIR /root/growerp/moqui/runtime/component/PopRestStore/screen/store
-#get admin installed
 # Copy Flutter web build files
 RUN echo -e "Copying Flutter web files..."
 RUN cp -r /root/growerp/flutter/packages/admin/build/web admin
-# Fix the base href in index.html to work with /admin/ path
+RUN cp -r /root/growerp/flutter/packages/landing_page/build/web landingpage
+# Fix the base href in index.html to work with path
 RUN echo -e "Fixing base href in index.html..."
 RUN  sed -i 's|<base href="/">|<base href="/admin/">|g' "admin/index.html"
-# Remove service worker registration from index.html (it's registered in root.html.ftl)
+RUN  sed -i 's|<base href="/">|<base href="/landingpage/">|g' "landingpage/index.html" # Remove service worker registration from index.html (it's registered in root.html.ftl)
 RUN perl -i -0pe 's/<script>\s*if \(.serviceWorker. in navigator\).*?<\/script>\s*//gs' "admin/index.html"
+RUN perl -i -0pe 's/<script>\s*if \(.serviceWorker. in navigator\).*?<\/script>\s*//gs' "landingpage/index.html"
 
 WORKDIR /root/growerp/moqui
 RUN git clone --depth 1 https://$PAT@github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
