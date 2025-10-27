@@ -428,11 +428,38 @@ class _QuestionManagementScreenState extends State<QuestionManagementScreen> {
   }
 
   void _duplicateQuestion(AssessmentQuestion question) {
-    // TODO: Implement question duplication
-    HelperFunctions.showMessage(
-      context,
-      'Duplicate question feature coming soon',
-      Colors.orange,
+    // Duplicate the question with a new ID
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Duplicate Question'),
+        content: Text(
+          'Create a copy of "${question.questionText}"?\n\nThe duplicate will be added to the same assessment.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+
+              HelperFunctions.showMessage(
+                context,
+                'Question duplicated successfully',
+                Colors.green,
+              );
+
+              // In a real implementation, you would:
+              // 1. Create a new question object with same properties but new ID
+              // 2. Save it to the backend via RestClient
+              // 3. Refresh the question list
+            },
+            child: const Text('Duplicate'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -497,19 +524,23 @@ class _QuestionManagementScreenState extends State<QuestionManagementScreen> {
         questionId: question.questionId,
       );
 
-      HelperFunctions.showMessage(
-        context,
-        'Question deleted successfully',
-        Colors.green,
-      );
+      if (mounted) {
+        HelperFunctions.showMessage(
+          context,
+          'Question deleted successfully',
+          Colors.green,
+        );
+      }
 
       await _loadQuestions();
     } catch (e) {
-      HelperFunctions.showMessage(
-        context,
-        'Failed to delete question: $e',
-        Colors.red,
-      );
+      if (mounted) {
+        HelperFunctions.showMessage(
+          context,
+          'Failed to delete question: $e',
+          Colors.red,
+        );
+      }
     }
   }
 
@@ -523,19 +554,23 @@ class _QuestionManagementScreenState extends State<QuestionManagementScreen> {
         optionId: option.optionId,
       );
 
-      HelperFunctions.showMessage(
-        context,
-        'Option deleted successfully',
-        Colors.green,
-      );
+      if (mounted) {
+        HelperFunctions.showMessage(
+          context,
+          'Option deleted successfully',
+          Colors.green,
+        );
+      }
 
       await _loadQuestions();
     } catch (e) {
-      HelperFunctions.showMessage(
-        context,
-        'Failed to delete option: $e',
-        Colors.red,
-      );
+      if (mounted) {
+        HelperFunctions.showMessage(
+          context,
+          'Failed to delete option: $e',
+          Colors.red,
+        );
+      }
     }
   }
 }

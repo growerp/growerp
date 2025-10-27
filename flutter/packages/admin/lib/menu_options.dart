@@ -23,6 +23,7 @@ import 'package:growerp_website/growerp_website.dart';
 import 'views/admin_db_form.dart' as local;
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_assessment/growerp_assessment.dart';
 
 List<MenuOption> getMenuOptions(BuildContext context) => [
   MenuOption(
@@ -96,6 +97,16 @@ List<MenuOption> getMenuOptions(BuildContext context) => [
         ),
         label: CoreLocalizations.of(context)!.requests,
         icon: const Icon(Icons.question_answer),
+      ),
+      TabItem(
+        form: const LandingPageListScreen(),
+        label: 'Landing Pages',
+        icon: const Icon(Icons.language),
+      ),
+      TabItem(
+        form: const AssessmentListScreen(),
+        label: 'Assessments',
+        icon: const Icon(Icons.quiz),
       ),
     ],
   ),
@@ -291,6 +302,16 @@ List<MenuOption> menuOptions(BuildContext context) => [
         ),
         label: 'Requests',
         icon: const Icon(Icons.question_answer),
+      ),
+      TabItem(
+        form: const LandingPageListScreen(),
+        label: 'Landing Pages',
+        icon: const Icon(Icons.language),
+      ),
+      TabItem(
+        form: const AssessmentListScreen(),
+        label: 'Assessments',
+        icon: const Icon(Icons.quiz),
       ),
     ],
   ),

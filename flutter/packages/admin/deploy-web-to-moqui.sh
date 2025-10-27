@@ -48,6 +48,20 @@ MOQUI_SCREEN_FILE="$PROJECT_ROOT/moqui/runtime/component/PopRestStore/screen/sto
 
 echo -e "${YELLOW}Deploying Flutter ${APP_NAME^} Web Build to Moqui...${NC}"
 
+# Always rebuild admin and landing_page packages
+echo -e "${YELLOW}Building Flutter web with WASM for admin...${NC}"
+cd "$PROJECT_ROOT/flutter/packages/admin"
+flutter build web --wasm
+echo -e "${GREEN}✓ Admin web build completed${NC}"
+
+echo -e "${YELLOW}Building Flutter web with WASM for landing_page...${NC}"
+cd "$PROJECT_ROOT/flutter/packages/landing_page"
+flutter build web --wasm
+echo -e "${GREEN}✓ Landing page web build completed${NC}"
+
+# Reset to package directory for deployment
+cd "$PACKAGE_DIR"
+
 # Check if Flutter build directory exists
 if [ ! -d "$FLUTTER_BUILD_DIR" ]; then
     echo -e "${RED}Error: Flutter build directory not found at $FLUTTER_BUILD_DIR${NC}"

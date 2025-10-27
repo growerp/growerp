@@ -654,6 +654,13 @@ packages:
       relative: true
     source: path
     version: "1.10.5"
+  growerp_assessment:
+    dependency: "direct main"
+    description:
+      path: "../growerp_assessment"
+      relative: true
+    source: path
+    version: "1.9.0"
   growerp_catalog:
     dependency: "direct main"
     description:

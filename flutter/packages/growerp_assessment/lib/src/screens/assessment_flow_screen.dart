@@ -102,13 +102,12 @@ class _AssessmentFlowScreenState extends State<AssessmentFlowScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (_currentStep > 0) {
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (_currentStep > 0 && !didPop) {
           _moveToPreviousStep();
-          return false;
         }
-        return true;
       },
       child: PageView(
         controller: _pageController,

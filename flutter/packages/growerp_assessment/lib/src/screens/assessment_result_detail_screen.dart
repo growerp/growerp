@@ -79,8 +79,8 @@ class AssessmentResultDetailScreen extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              color.withOpacity(0.1),
-              color.withOpacity(0.05),
+              color.withAlpha((0.1 * 255).round()),
+              color.withAlpha((0.05 * 255).round()),
             ],
           ),
         ),
@@ -91,7 +91,7 @@ class AssessmentResultDetailScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.2),
+                    color: color.withAlpha((0.2 * 255).round()),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(

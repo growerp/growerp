@@ -156,10 +156,10 @@ class _CTAManagementScreenState extends State<CTAManagementScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                color: Theme.of(context).primaryColor.withAlpha((0.1 * 255).round()),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: Theme.of(context).primaryColor.withOpacity(0.3),
+                  color: Theme.of(context).primaryColor.withAlpha((0.3 * 255).round()),
                 ),
               ),
               child: Column(

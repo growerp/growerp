@@ -19,7 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_assessment/growerp_assessment.dart';
-import '../lib/main.dart';
+import 'package:assessment_example/main.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 // Static menuOptions for testing (no localization needed)

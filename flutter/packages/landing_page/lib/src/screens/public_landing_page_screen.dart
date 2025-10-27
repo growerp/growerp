@@ -14,7 +14,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_assessment/growerp_assessment.dart';
 
 class PublicLandingPageScreen extends StatefulWidget {
@@ -161,15 +160,15 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
           colors: [
             Color.fromARGB(
               (0.1 * 255).toInt(),
-              ((Theme.of(context).primaryColor.red * 255.0).round() & 0xff),
-              ((Theme.of(context).primaryColor.green * 255.0).round() & 0xff),
-              ((Theme.of(context).primaryColor.blue * 255.0).round() & 0xff),
+              ((Theme.of(context).primaryColor.r * 255.0).round() & 0xff),
+              ((Theme.of(context).primaryColor.g * 255.0).round() & 0xff),
+              ((Theme.of(context).primaryColor.b * 255.0).round() & 0xff),
             ),
             Color.fromARGB(
               (0.05 * 255).toInt(),
-              ((Theme.of(context).primaryColor.red * 255.0).round() & 0xff),
-              ((Theme.of(context).primaryColor.green * 255.0).round() & 0xff),
-              ((Theme.of(context).primaryColor.blue * 255.0).round() & 0xff),
+              ((Theme.of(context).primaryColor.r * 255.0).round() & 0xff),
+              ((Theme.of(context).primaryColor.g * 255.0).round() & 0xff),
+              ((Theme.of(context).primaryColor.b * 255.0).round() & 0xff),
             ),
           ],
         ),
@@ -334,7 +333,7 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
           end: Alignment.bottomRight,
           colors: [
             Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withOpacity(0.8),
+            Theme.of(context).primaryColor.withAlpha((0.8 * 255).round()),
           ],
         ),
         borderRadius: BorderRadius.circular(12),

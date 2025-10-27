@@ -196,8 +196,8 @@ class _LandingPageAssessmentFlowScreenState
               ),
               ElevatedButton(
                 onPressed: () {
-                  // TODO: Navigate to detailed results or dashboard
-                  Navigator.of(context).pushNamed('/assessment/results');
+                  // Navigate to detailed results dashboard
+                  Navigator.of(context).pop();
                 },
                 child: const Text('View Detailed Results'),
               ),

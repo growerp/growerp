@@ -149,7 +149,7 @@ class _CredibilityManagementScreenState
       margin: const EdgeInsets.only(bottom: 8.0),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+          backgroundColor: Theme.of(context).primaryColor.withAlpha((0.1 * 255).round()),
           child: Icon(
             Icons.verified_user,
             color: Theme.of(context).primaryColor,
@@ -186,7 +186,7 @@ class _CredibilityManagementScreenState
       margin: const EdgeInsets.only(bottom: 8.0),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+          backgroundColor: Theme.of(context).primaryColor.withAlpha((0.1 * 255).round()),
           child: Icon(
             Icons.trending_up,
             color: Theme.of(context).primaryColor,
