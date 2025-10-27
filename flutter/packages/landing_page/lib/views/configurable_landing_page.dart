@@ -12,9 +12,10 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_assessment/growerp_assessment.dart';
 
 class ConfigurableLandingPage extends StatefulWidget {
@@ -359,9 +360,11 @@ class _GoogleStitchLandingPage extends StatelessWidget {
             width: 300,
             height: 200,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withAlpha((0.1 * 255).round()),
               borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
+              border: Border.all(
+                color: Colors.white.withAlpha((0.2 * 255).round()),
+              ),
             ),
             child: Center(
               child: Column(
@@ -850,12 +853,45 @@ class _GoogleStitchLandingPage extends StatelessWidget {
             const SizedBox(height: 10),
             GestureDetector(
               onTap: () {
-                // TODO: Show privacy policy dialog
+                // Show privacy policy dialog
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
                     title: const Text('Privacy Policy'),
-                    content: const Text('Privacy policy content goes here...'),
+                    content: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Text(
+                            'Data Collection',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'We collect information you provide directly, such as contact information, assessment responses, and business details.',
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Data Usage',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Your information is used to provide assessment services, improve our platform, and communicate with you about your account.',
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Data Protection',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'We implement industry-standard security measures to protect your personal information.',
+                          ),
+                        ],
+                      ),
+                    ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),

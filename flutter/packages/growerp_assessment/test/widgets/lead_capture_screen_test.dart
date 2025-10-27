@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_assessment/src/screens/lead_capture_screen.dart';
 
+// ignore_for_file: deprecated_member_use
+
 void main() {
   group('LeadCaptureScreen Tests', () {
     late Function(
@@ -181,8 +183,6 @@ void main() {
 
       expect(find.byType(SingleChildScrollView), findsOneWidget);
       expect(find.byType(TextFormField), findsWidgets);
-
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
     });
   });
 }

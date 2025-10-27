@@ -118,6 +118,19 @@
             ]
         },
         {
+            "name": "Landingpage Web (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/landing_page",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "chrome",
+                "--web-port",
+                "55555"
+            ]
+        },
+        {
             "name": "Flutter Integration Test - User Employee",
             "type": "dart",
             "request": "launch",
@@ -226,6 +239,6 @@
             "request": "launch",
             "cwd": "flutter/packages/growerp_user_company/example",
             "program": "lib/main.dart"
-        }
+        },
     ]
 }

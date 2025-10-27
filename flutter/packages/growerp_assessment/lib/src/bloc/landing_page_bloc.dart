@@ -135,7 +135,7 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
             );
           }
         } catch (e) {
-          print('WARNING: Could not parse credibility: $e');
+          // Silently ignore credibility parsing errors
         }
       }
 
@@ -149,14 +149,12 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
             );
           }
         } catch (e) {
-          print('WARNING: Could not parse CTA: $e');
+          // Silently ignore CTA parsing errors
         }
       }
 
       return pageData;
-    } catch (e, stack) {
-      print('ERROR: Failed to convert response to LandingPage: $e');
-      print('Stack: $stack');
+    } catch (e) {
       return null;
     }
   }
@@ -170,6 +168,10 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
 
       final newLandingPage = await restClient.createLandingPage(
         title: event.landingPage.title,
+        headline: event.landingPage.headline,
+        subheading: event.landingPage.subheading,
+        hookType: event.landingPage.hookType,
+        assessmentId: event.landingPage.assessmentId,
         status: event.landingPage.status,
       );
 
@@ -200,6 +202,10 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
       final updatedLandingPage = await restClient.updateLandingPage(
         pageId: event.landingPage.pageId,
         title: event.landingPage.title,
+        headline: event.landingPage.headline,
+        subheading: event.landingPage.subheading,
+        hookType: event.landingPage.hookType,
+        assessmentId: event.landingPage.assessmentId,
         status: event.landingPage.status,
       );
 

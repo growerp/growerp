@@ -4,6 +4,7 @@ import 'package:growerp_models/growerp_models.dart';
 import '../bloc/landing_page_bloc.dart';
 import '../bloc/landing_page_event.dart';
 import '../bloc/landing_page_state.dart';
+import '../bloc/assessment_bloc.dart';
 import 'page_section_management_screen.dart';
 import 'credibility_management_screen.dart';
 import 'cta_management_screen.dart';
@@ -31,6 +32,7 @@ class _LandingPageDialogState extends State<LandingPageDialog> {
 
   String _selectedStatus = 'DRAFT';
   String? _selectedHookType;
+  String? _selectedAssessmentId;
 
   final List<String> _statusOptions = ['DRAFT', 'ACTIVE', 'INACTIVE'];
   final List<String> _hookTypeOptions = [
@@ -59,6 +61,7 @@ class _LandingPageDialogState extends State<LandingPageDialog> {
     _heroImageUrlController.text = landingPage.heroImageUrl ?? '';
     _selectedStatus = landingPage.status;
     _selectedHookType = landingPage.hookType;
+    _selectedAssessmentId = landingPage.assessmentId;
   }
 
   @override
@@ -223,6 +226,48 @@ class _LandingPageDialogState extends State<LandingPageDialog> {
                         },
                       ),
                       const SizedBox(height: 16),
+                      BlocBuilder<AssessmentBloc, AssessmentState>(
+                        builder: (context, state) {
+                          // Ensure the selected assessment ID is valid or null
+                          final validAssessmentIds = state.assessments
+                              .map((a) => a.assessmentId)
+                              .toSet();
+                          final selectedValue = _selectedAssessmentId != null &&
+                                  validAssessmentIds
+                                      .contains(_selectedAssessmentId)
+                              ? _selectedAssessmentId
+                              : null;
+
+                          return DropdownButtonFormField<String?>(
+                            isExpanded: true,
+                            initialValue: selectedValue,
+                            decoration: const InputDecoration(
+                              labelText: 'Associated Assessment',
+                              hintText:
+                                  'Select an assessment to link to this page',
+                              border: OutlineInputBorder(),
+                            ),
+                            items: [
+                              const DropdownMenuItem<String?>(
+                                value: null,
+                                child: Text('None'),
+                              ),
+                              ...state.assessments.map((assessment) {
+                                return DropdownMenuItem<String?>(
+                                  value: assessment.assessmentId,
+                                  child: Text(assessment.assessmentName),
+                                );
+                              }),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedAssessmentId = value;
+                              });
+                            },
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 16),
                       TextFormField(
                         controller: _descriptionController,
                         decoration: const InputDecoration(
@@ -345,6 +390,7 @@ class _LandingPageDialogState extends State<LandingPageDialog> {
           ? null
           : _heroImageUrlController.text.trim(),
       status: _selectedStatus,
+      assessmentId: _selectedAssessmentId,
     );
 
     final landingPageBloc = context.read<LandingPageBloc>();

@@ -20,7 +20,8 @@ Service definitions for landing page, sections, credibility, and CTA management
       <parameter name="pageId" type="String" required="true">
         <description>pageId or pseudoId (prefixed with 'pseudo_')</description>
       </parameter>
-      <parameter name="ownerPartyId" type="String">
+      <parameter name="ownerPartyId" type="String"><!-- currently productstoreId is received instead
+        of ownerPartyId-->
         <description>Optional owner party ID for public access without authentication</description>
       </parameter>
     </in-parameters>
@@ -40,7 +41,7 @@ Service definitions for landing page, sections, credibility, and CTA management
     </out-parameters>
     <actions>
       <log
-        message="=========Getting landing page for pageId: ${pageId}, ownerPartyId: ${ownerPartyId}" />
+        message="======1111===Getting landing page for pageId: ${pageId}, ownerPartyId: ${ownerPartyId}" />
       <if condition="!ownerPartyId">
         <service-call
           name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
@@ -50,17 +51,25 @@ Service definitions for landing page, sections, credibility, and CTA management
       <if condition="!ownerPartyId">
         <return error="true" message="Unable to resolve owner party for landing page request" />
       </if>
+      <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="store">
+        <field-map field-name="productStoreId" from="ownerPartyId" />
+      </entity-find-one>
+      <entity-find-one entity-name="mantle.party.Party" value-field="party">
+        <field-map field-name="partyId" from="store.organizationPartyId" />
+      </entity-find-one>
       <!-- Original database logic for other pages -->
       <if condition="pageId.startsWith('pseudo_')">
         <set field="pseudoId" from="pageId.substring(7)" />
+        <log message="=====1=looking for pseudoId $pseudoId and owner: ${party.ownerPartyId}" />
         <entity-find entity-name="growerp.landing.LandingPage" list="pageList">
           <econdition field-name="pseudoId" from="pseudoId" />
-          <econdition field-name="ownerPartyId" from="ownerPartyId" />
+          <econdition field-name="ownerPartyId" from="party.ownerPartyId" />
         </entity-find>
         <else>
+          <log message="=====2=looking for pageId $pageId and owner: ${party.ownerPartyId}" />
           <entity-find entity-name="growerp.landing.LandingPage" list="pageList">
             <econdition field-name="pageId" from="pageId" />
-            <econdition field-name="ownerPartyId" from="ownerPartyId" />
+            <econdition field-name="ownerPartyId" from="party.ownerPartyId" />
           </entity-find>
         </else>
       </if>

@@ -205,7 +205,7 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           gradient: LinearGradient(
-            colors: [scoreColor.withOpacity(0.2), scoreColor.withOpacity(0.05)],
+            colors: [scoreColor.withAlpha((0.2 * 255).round()), scoreColor.withAlpha((0.05 * 255).round())],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -259,7 +259,7 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
               height: 56,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: statusColor.withOpacity(0.2),
+                color: statusColor.withAlpha((0.2 * 255).round()),
               ),
               child: Center(
                 child: Icon(

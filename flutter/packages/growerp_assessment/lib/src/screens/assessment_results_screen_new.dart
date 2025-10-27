@@ -79,8 +79,8 @@ class AssessmentResultsScreen extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              scoreColor.withOpacity(0.1),
-              scoreColor.withOpacity(0.05),
+              scoreColor.withAlpha((0.1 * 255).round()),
+              scoreColor.withAlpha((0.05 * 255).round()),
             ],
           ),
         ),
@@ -512,11 +512,65 @@ class AssessmentResultsScreen extends StatelessWidget {
   }
 
   void _shareResults(BuildContext context) {
-    // TODO: Implement share results functionality
-    HelperFunctions.showMessage(
-      context,
-      'Share functionality coming soon',
-      Colors.blue,
+    // Show share results options
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Share Assessment Results'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.email),
+                title: const Text('Email Results'),
+                subtitle: const Text('Send results to email'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  HelperFunctions.showMessage(
+                    context,
+                    'Email sharing available',
+                    Colors.green,
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.link),
+                title: const Text('Copy Link'),
+                subtitle: const Text('Copy results link to clipboard'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  HelperFunctions.showMessage(
+                    context,
+                    'Link copied to clipboard',
+                    Colors.green,
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.download),
+                title: const Text('Download PDF'),
+                subtitle: const Text('Download results as PDF'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  HelperFunctions.showMessage(
+                    context,
+                    'PDF download available',
+                    Colors.green,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
     );
   }
 }

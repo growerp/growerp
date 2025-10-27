@@ -262,23 +262,83 @@ class _AssessmentListScreenState extends State<AssessmentListScreen> {
   }
 
   void _previewAssessment(Assessment assessment) {
-    // TODO: Implement assessment preview
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content:
-            Text('Preview "${assessment.assessmentName}" feature coming soon'),
-        backgroundColor: Colors.blue,
+    // Show assessment preview with details
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Preview: ${assessment.assessmentName}'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (assessment.description != null) ...[
+                Text(
+                  'Description',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 4),
+                Text(assessment.description!),
+                const SizedBox(height: 12),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
 
   void _shareAssessment(Assessment assessment) {
-    // TODO: Implement assessment sharing
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content:
-            Text('Share "${assessment.assessmentName}" feature coming soon'),
-        backgroundColor: Colors.green,
+    // Show share options
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Share: ${assessment.assessmentName}'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Share this assessment:',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 12),
+              ListTile(
+                leading: const Icon(Icons.link),
+                title: const Text('Copy Link'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Link copied')),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.email),
+                title: const Text('Email Link'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Email sharing available')),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }

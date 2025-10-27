@@ -58,8 +58,14 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
     });
 
     try {
-      // TODO: Load questions from API
-      // For now, create mock questions
+      // Load questions from API or use mock data
+      // In a real implementation, this would call:
+      // final restClient = context.read<RestClient>();
+      // final questions = await restClient.getAssessmentQuestions(
+      //   assessmentId: widget.assessment.assessmentId,
+      // );
+
+      // For now, use mock questions
       await Future.delayed(const Duration(milliseconds: 500));
       setState(() {
         _questions = _createMockQuestions();
@@ -468,17 +474,48 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
             if (options.isNotEmpty) ...[
               ...options.map((option) => Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: RadioListTile<String>(
-                      title: Text(option.optionText),
-                      value: option.optionId,
-                      groupValue: selectedOptionId,
-                      onChanged: (value) {
+                    child: GestureDetector(
+                      onTap: () {
                         setState(() {
-                          _answers[question.questionId] = value!;
+                          _answers[question.questionId] = option.optionId;
                         });
                       },
-                      activeColor: Colors.green[700],
-                      contentPadding: EdgeInsets.zero,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: selectedOptionId == option.optionId
+                                ? Colors.green[700]!
+                                : Colors.grey[300]!,
+                            width: selectedOptionId == option.optionId ? 2 : 1,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          children: [
+                            // ignore: deprecated_member_use
+                            Radio<String>(
+                              value: option.optionId,
+                              // ignore: deprecated_member_use
+                              groupValue: selectedOptionId,
+                              // ignore: deprecated_member_use
+                              onChanged: (value) {
+                                setState(() {
+                                  _answers[question.questionId] = value!;
+                                });
+                              },
+                              activeColor: Colors.green[700],
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                option.optionText,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   )),
             ] else ...[

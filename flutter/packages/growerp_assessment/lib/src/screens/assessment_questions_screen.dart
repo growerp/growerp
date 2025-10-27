@@ -337,21 +337,23 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
                 )
               : Colors.transparent,
         ),
-        child: Row(
-          children: [
-            Radio<bool>(
-              value: true,
-              groupValue: isSelected,
-              onChanged: (_) => onTap(),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                option.optionText,
-                style: Theme.of(context).textTheme.bodyMedium,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Row(
+            children: [
+              Checkbox(
+                value: isSelected,
+                onChanged: (_) => onTap(),
               ),
-            ),
-          ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  option.optionText,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
