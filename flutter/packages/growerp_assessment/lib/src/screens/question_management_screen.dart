@@ -637,94 +637,88 @@ class _QuestionFormDialogState extends State<QuestionFormDialog> {
       title: Text(_isEditing ? 'Edit Question' : 'Add Question'),
       content: SizedBox(
         width: MediaQuery.of(context).size.width * 0.8,
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                key: const Key('questionText'),
-                controller: _questionTextController,
-                decoration: const InputDecoration(
-                  labelText: 'Question Text *',
-                  hintText: 'Enter your question',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 2,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Question text is required';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description (Optional)',
-                  hintText: 'Additional context or instructions',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 2,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      initialValue: _selectedType,
-                      decoration: const InputDecoration(
-                        labelText: 'Question Type',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: _questionTypes.map((type) {
-                        return DropdownMenuItem(
-                          value: type,
-                          child: Text(_formatQuestionType(type)),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedType = value!;
-                        });
-                      },
-                    ),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  key: const Key('questionText'),
+                  controller: _questionTextController,
+                  decoration: const InputDecoration(
+                    labelText: 'Question Text *',
+                    hintText: 'Enter your question',
+                    border: OutlineInputBorder(),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _sequenceController,
-                      decoration: const InputDecoration(
-                        labelText: 'Sequence',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value != null && value.isNotEmpty) {
-                          final seq = int.tryParse(value);
-                          if (seq == null || seq < 1) {
-                            return 'Must be a positive number';
-                          }
-                        }
-                        return null;
-                      },
-                    ),
+                  maxLines: 2,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Question text is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Description (Optional)',
+                    hintText: 'Additional context or instructions',
+                    border: OutlineInputBorder(),
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              CheckboxListTile(
-                title: const Text('Required Question'),
-                value: _isRequired,
-                onChanged: (value) {
-                  setState(() {
-                    _isRequired = value ?? true;
-                  });
-                },
-                contentPadding: EdgeInsets.zero,
-              ),
-            ],
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedType,
+                  decoration: const InputDecoration(
+                    labelText: 'Question Type',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: _questionTypes.map((type) {
+                    return DropdownMenuItem(
+                      value: type,
+                      child: Text(_formatQuestionType(type)),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedType = value!;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _sequenceController,
+                  decoration: const InputDecoration(
+                    labelText: 'Sequence',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value != null && value.isNotEmpty) {
+                      final seq = int.tryParse(value);
+                      if (seq == null || seq < 1) {
+                        return 'Must be a positive number';
+                      }
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                CheckboxListTile(
+                  title: const Text('Required Question'),
+                  value: _isRequired,
+                  onChanged: (value) {
+                    setState(() {
+                      _isRequired = value ?? true;
+                    });
+                  },
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ],
+            ),
           ),
         ),
       ),

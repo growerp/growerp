@@ -95,8 +95,8 @@ Future main() async {
     PublicLandingPageApp(
       restClient: restClient,
       classificationId: classificationId,
-      initialPageId: routeInfo.pageId,
-      ownerPartyId: routeInfo.ownerPartyId,
+      initialPageId: 'erp-landing', //' routeInfo.pageId, // test: 'erp-landing'
+      ownerPartyId: '100000', //routeInfo.ownerPartyId, // test '100000'
       initialAssessmentId: routeInfo.assessmentId,
       startAssessmentFlow: routeInfo.startAssessmentFlow,
     ),

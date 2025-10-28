@@ -18,7 +18,7 @@ Service definitions for landing page, sections, credibility, and CTA management
     <description>Get landing page by ID (system-wide) or pseudoId (tenant-unique). Public access for display.</description>
     <in-parameters>
       <parameter name="pageId" type="String" required="true">
-        <description>pageId or pseudoId (prefixed with 'pseudo_')</description>
+        <description>landing page pseudoId</description>
       </parameter>
       <parameter name="ownerPartyId" type="String"><!-- currently productstoreId is received instead
         of ownerPartyId-->
@@ -41,7 +41,7 @@ Service definitions for landing page, sections, credibility, and CTA management
     </out-parameters>
     <actions>
       <log
-        message="======1111===Getting landing page for pageId: ${pageId}, ownerPartyId: ${ownerPartyId}" />
+        message="======1111===Getting landing page for pageId: ${pageId}, productStoreId: ${ownerPartyId}" />
       <if condition="!ownerPartyId">
         <service-call
           name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
@@ -58,21 +58,11 @@ Service definitions for landing page, sections, credibility, and CTA management
         <field-map field-name="partyId" from="store.organizationPartyId" />
       </entity-find-one>
       <!-- Original database logic for other pages -->
-      <if condition="pageId.startsWith('pseudo_')">
-        <set field="pseudoId" from="pageId.substring(7)" />
-        <log message="=====1=looking for pseudoId $pseudoId and owner: ${party.ownerPartyId}" />
-        <entity-find entity-name="growerp.landing.LandingPage" list="pageList">
-          <econdition field-name="pseudoId" from="pseudoId" />
-          <econdition field-name="ownerPartyId" from="party.ownerPartyId" />
-        </entity-find>
-        <else>
-          <log message="=====2=looking for pageId $pageId and owner: ${party.ownerPartyId}" />
-          <entity-find entity-name="growerp.landing.LandingPage" list="pageList">
-            <econdition field-name="pageId" from="pageId" />
-            <econdition field-name="ownerPartyId" from="party.ownerPartyId" />
-          </entity-find>
-        </else>
-      </if>
+      <log message="=====1=looking for pseudoId $pageId and owner: ${party.ownerPartyId}" />
+      <entity-find entity-name="growerp.landing.LandingPage" list="pageList">
+        <econdition field-name="pseudoId" from="pageId" />
+        <econdition field-name="ownerPartyId" from="party.ownerPartyId" />
+      </entity-find>
 
       <if condition="!pageList">
         <return error="true" message="Landing page not found: ${pageId}" />
@@ -142,7 +132,7 @@ Service definitions for landing page, sections, credibility, and CTA management
       </if>
 
       <!-- Build entity find for landing pages -->
-      <entity-find entity-name="LandingPage" list="pagesList">
+      <entity-find entity-name="growerp.landing.LandingPage" list="pagesList">
         <econdition field-name="ownerPartyId" from="ownerPartyId" />
         <econdition field-name="status" from="status" ignore-if-empty="true" />
         <econdition field-name="title" operator="like" from="search" ignore-if-empty="true" />
@@ -151,10 +141,10 @@ Service definitions for landing page, sections, credibility, and CTA management
       </entity-find>
 
       <!-- Get total count for pagination -->
-      <entity-find-count entity-name="LandingPage" count-field="totalResults">
+      <entity-find-count entity-name="growerp.landing.LandingPage" count-field="totalResults">
         <econdition field-name="ownerPartyId" from="ownerPartyId" />
         <econdition field-name="status" from="status" ignore-if-empty="true" />
-        <econdition field-name="title" operator="like" value="%${search}%" ignore-if-empty="true" />
+        <econdition field-name="title" operator="like" from="search" ignore-if-empty="true" />
       </entity-find-count>
 
       <!-- Convert entity values to maps -->

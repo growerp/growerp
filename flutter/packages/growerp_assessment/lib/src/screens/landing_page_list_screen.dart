@@ -107,6 +107,11 @@ class _LandingPageListScreenState extends State<LandingPageListScreen> {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showLandingPageDialog(),
+        tooltip: 'Add new landing page',
+        child: const Icon(Icons.add),
+      ),
     );
   }
 

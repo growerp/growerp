@@ -152,12 +152,19 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
     try {
       emit(state.copyWith(status: AssessmentStatus.loading));
 
-      final assessment = await restClient.updateAssessment(
-        assessmentId: event.assessment.assessmentId,
-        assessmentName: event.assessment.assessmentName,
-        description: event.assessment.description,
-        status: event.assessment.status,
-      );
+      final assessment = await restClient
+          .updateAssessment(
+            assessmentId: event.assessment.assessmentId,
+            pseudoId: event.assessment.pseudoId,
+            assessmentName: event.assessment.assessmentName,
+            description: event.assessment.description,
+            status: event.assessment.status,
+          )
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () =>
+                throw Exception('Assessment update timed out after 30 seconds'),
+          );
 
       final updatedAssessments = state.assessments
           .map(
@@ -173,6 +180,11 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
       emit(state.copyWith(
         status: AssessmentStatus.failure,
         message: await getDioError(e),
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: AssessmentStatus.failure,
+        message: e.toString(),
       ));
     }
   }

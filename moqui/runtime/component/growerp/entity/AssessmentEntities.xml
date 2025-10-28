@@ -48,6 +48,8 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
         <field name="questionText" type="text-long" />
         <field name="questionDescription" type="text-long" />
         <field name="isRequired" type="text-indicator" />
+        <field name="defaultOption" type="id" />
+        <field name="defaultValue" type="text-long" />
         <field name="createdDate" type="date-time" />
         <field name="createdByUserLogin" type="text-short" />
 

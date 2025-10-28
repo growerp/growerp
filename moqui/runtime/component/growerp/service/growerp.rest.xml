@@ -328,7 +328,7 @@ along with this software (see the LICENSE.md file). If not, see
         </resource>
         <!-- assessment -->
         <resource name="Assessment">
-            <method type="get">
+            <method type="get" require-authentication="anonymous-all">
                 <service name="growerp.100.AssessmentServices100.get#Assessment" />
             </method>
             <method type="post">
@@ -342,7 +342,7 @@ along with this software (see the LICENSE.md file). If not, see
             </method>
             <id name="assessmentId">
                 <resource name="Question">
-                    <method type="get">
+                    <method type="get" require-authentication="anonymous-all">
                         <service name="growerp.100.AssessmentServices100.get#Question" />
                     </method>
                     <method type="post">
@@ -356,7 +356,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </method>
                     <id name="questionId">
                         <resource name="Option">
-                            <method type="get">
+                            <method type="get" require-authentication="anonymous-all">
                                 <service name="growerp.100.AssessmentServices100.get#Option" />
                             </method>
                             <method type="post">
@@ -485,7 +485,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <!-- Direct Assessment endpoints for Flutter compatibility -->
         <resource name="AssessmentQuestion">
-            <method type="get">
+            <method type="get" require-authentication="anonymous-all">
                 <service name="growerp.100.AssessmentServices100.get#AssessmentQuestions" />
             </method>
             <method type="post">
@@ -500,7 +500,7 @@ along with this software (see the LICENSE.md file). If not, see
         </resource>
 
         <resource name="AssessmentQuestionOption">
-            <method type="get">
+            <method type="get" require-authentication="anonymous-all">
                 <service name="growerp.100.AssessmentServices100.get#AssessmentQuestionOptions" />
             </method>
             <method type="post">

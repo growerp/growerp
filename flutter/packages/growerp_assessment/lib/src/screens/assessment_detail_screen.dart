@@ -248,7 +248,8 @@ class _AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
                 Expanded(
                   child: _buildInfoItem(
                     'Created',
-                    _formatDate(widget.assessment.createdDate),
+                    _formatDate(
+                        widget.assessment.createdDate ?? DateTime.now()),
                     Icons.calendar_today,
                   ),
                 ),
