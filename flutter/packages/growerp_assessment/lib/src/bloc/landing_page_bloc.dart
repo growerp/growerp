@@ -43,8 +43,8 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
 
       final landingPages = event.start == 0
           ? List<LandingPage>.from(result.landingPages)
-          : List<LandingPage>.from(state.landingPages)
-        ..addAll(result.landingPages);
+          : (List<LandingPage>.from(state.landingPages)
+            ..addAll(result.landingPages));
 
       emit(state.copyWith(
         status: LandingPageStatus.success,

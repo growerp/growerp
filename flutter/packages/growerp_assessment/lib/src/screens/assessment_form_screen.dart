@@ -29,6 +29,7 @@ class CreateAssessmentDialog extends StatefulWidget {
 class _CreateAssessmentDialogState extends State<CreateAssessmentDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _pseudoIdController = TextEditingController();
   final _descriptionController = TextEditingController();
 
   String _selectedStatus = 'DRAFT';
@@ -43,6 +44,7 @@ class _CreateAssessmentDialogState extends State<CreateAssessmentDialog> {
   @override
   void dispose() {
     _nameController.dispose();
+    _pseudoIdController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
@@ -59,111 +61,134 @@ class _CreateAssessmentDialogState extends State<CreateAssessmentDialog> {
       ),
       content: SizedBox(
         width: MediaQuery.of(context).size.width * 0.8,
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextFormField(
-                key: const Key('name'),
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Assessment Name *',
-                  hintText: 'Enter a descriptive name',
-                  prefixIcon: Icon(Icons.title),
-                  border: OutlineInputBorder(),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  key: const Key('name'),
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Assessment Name *',
+                    hintText: 'Enter a descriptive name',
+                    prefixIcon: Icon(Icons.title),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Assessment name is required';
+                    }
+                    if (value.trim().length < 3) {
+                      return 'Name must be at least 3 characters';
+                    }
+                    if (value.trim().length > 100) {
+                      return 'Name must be less than 100 characters';
+                    }
+                    return null;
+                  },
+                  textCapitalization: TextCapitalization.words,
+                  maxLength: 100,
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Assessment name is required';
-                  }
-                  if (value.trim().length < 3) {
-                    return 'Name must be at least 3 characters';
-                  }
-                  if (value.trim().length > 100) {
-                    return 'Name must be less than 100 characters';
-                  }
-                  return null;
-                },
-                textCapitalization: TextCapitalization.words,
-                maxLength: 100,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                key: const Key('description'),
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  hintText: 'Describe what this assessment measures',
-                  prefixIcon: Icon(Icons.description),
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 16),
+                TextFormField(
+                  key: const Key('pseudoId'),
+                  controller: _pseudoIdController,
+                  decoration: const InputDecoration(
+                    labelText: 'ID',
+                    hintText: 'Optional identifier for this assessment',
+                    prefixIcon: Icon(Icons.badge),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value != null && value.trim().isNotEmpty) {
+                      if (value.trim().length > 50) {
+                        return 'ID must be less than 50 characters';
+                      }
+                    }
+                    return null;
+                  },
+                  textCapitalization: TextCapitalization.none,
                 ),
-                maxLines: 3,
-                maxLength: 500,
-                validator: (value) {
-                  if (value != null && value.trim().length > 500) {
-                    return 'Description must be less than 500 characters';
-                  }
-                  return null;
-                },
-                textCapitalization: TextCapitalization.sentences,
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedStatus,
-                decoration: const InputDecoration(
-                  labelText: 'Status',
-                  prefixIcon: Icon(Icons.flag),
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 16),
+                TextFormField(
+                  key: const Key('description'),
+                  controller: _descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Description',
+                    hintText: 'Describe what this assessment measures',
+                    prefixIcon: Icon(Icons.description),
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                  maxLength: 500,
+                  validator: (value) {
+                    if (value != null && value.trim().length > 500) {
+                      return 'Description must be less than 500 characters';
+                    }
+                    return null;
+                  },
+                  textCapitalization: TextCapitalization.sentences,
                 ),
-                items: _statusOptions.map((status) {
-                  return DropdownMenuItem(
-                    value: status,
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: _getStatusColor(status),
-                            shape: BoxShape.circle,
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedStatus,
+                  decoration: const InputDecoration(
+                    labelText: 'Status',
+                    prefixIcon: Icon(Icons.flag),
+                    border: OutlineInputBorder(),
+                  ),
+                  items: _statusOptions.map((status) {
+                    return DropdownMenuItem(
+                      value: status,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 12,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color: _getStatusColor(status),
+                              shape: BoxShape.circle,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(status),
-                      ],
-                    ),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedStatus = value!;
-                  });
-                },
-              ),
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue[200]!),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
-                    const SizedBox(width: 8),
-                    const Expanded(
-                      child: Text(
-                        'After creating the assessment, you can add questions and configure scoring.',
-                        style: TextStyle(fontSize: 12),
+                          const SizedBox(width: 8),
+                          Text(status),
+                        ],
                       ),
-                    ),
-                  ],
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedStatus = value!;
+                    });
+                  },
                 ),
-              ),
-            ],
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue[200]!),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline,
+                          color: Colors.blue[700], size: 20),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'After creating the assessment, you can add questions and configure scoring.',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -219,7 +244,9 @@ class _CreateAssessmentDialogState extends State<CreateAssessmentDialog> {
     try {
       final assessment = Assessment(
         assessmentId: '', // Will be generated by backend
-        pseudoId: '', // Will be generated by backend
+        pseudoId: _pseudoIdController.text.trim().isEmpty
+            ? '' // Will be generated by backend if empty
+            : _pseudoIdController.text.trim(),
         assessmentName: _nameController.text.trim(),
         description: _descriptionController.text.trim().isEmpty
             ? null
@@ -344,10 +371,11 @@ class _AssessmentFormScreenState extends State<AssessmentFormScreen> {
                                 ),
                       ),
                       const SizedBox(height: 8),
-                      _buildInfoRow('ID', widget.assessment!.assessmentId),
-                      _buildInfoRow('Pseudo ID', widget.assessment!.pseudoId),
-                      _buildInfoRow('Created',
-                          _formatDate(widget.assessment!.createdDate)),
+                      _buildInfoRow('ID', widget.assessment!.pseudoId),
+                      _buildInfoRow(
+                          'Created',
+                          _formatDate(widget.assessment!.createdDate ??
+                              DateTime.now())),
                       if (widget.assessment!.createdByUserLogin != null)
                         _buildInfoRow('Created By',
                             widget.assessment!.createdByUserLogin!),

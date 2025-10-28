@@ -706,6 +706,7 @@ abstract class RestClient {
   @PATCH("rest/s1/growerp/100/Assessment")
   Future<Assessment> updateAssessment({
     @Field() required String assessmentId,
+    @Field() String? pseudoId,
     @Field() String? assessmentName,
     @Field() String? description,
     @Field() String? status,

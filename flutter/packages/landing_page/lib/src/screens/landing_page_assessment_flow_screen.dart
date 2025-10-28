@@ -45,7 +45,6 @@ class LandingPageAssessmentFlowScreen extends StatefulWidget {
 class _LandingPageAssessmentFlowScreenState
     extends State<LandingPageAssessmentFlowScreen> {
   final PageController _pageController = PageController();
-  User? _capturedLead;
   String? _assessmentId;
 
   @override
@@ -81,21 +80,8 @@ class _LandingPageAssessmentFlowScreenState
       _assessmentId = landingPageState.selectedLandingPage!.assessmentId;
     }
 
-    // Navigate to lead capture
+    // Skip lead capture (already collected by landing page) and go directly to assessment
     _navigateToPage(1);
-  }
-
-  void _onLeadCaptured(User lead) {
-    setState(() {
-      _capturedLead = lead;
-    });
-
-    // Navigate to assessment
-    _navigateToPage(2);
-  }
-
-  void _goBackToLandingPage() {
-    _navigateToPage(0);
   }
 
   @override
@@ -109,14 +95,10 @@ class _LandingPageAssessmentFlowScreenState
           // Page 0: Landing Page
           _buildLandingPageStep(),
 
-          // Page 1: Lead Capture
-          _buildLeadCaptureStep(),
+          // Page 1: Assessment (skipped lead capture - already collected by landing page)
+          if (_assessmentId != null) _buildAssessmentStep(),
 
-          // Page 2: Assessment
-          if (_assessmentId != null && _capturedLead != null)
-            _buildAssessmentStep(),
-
-          // Page 3: Results & Next Steps
+          // Page 2: Results & Next Steps
           _buildResultsStep(),
         ],
       ),
@@ -141,15 +123,8 @@ class _LandingPageAssessmentFlowScreenState
     );
   }
 
-  Widget _buildLeadCaptureStep() {
-    return _CustomLeadCaptureWidget(
-      onLeadCaptured: _onLeadCaptured,
-      onBack: _goBackToLandingPage,
-    );
-  }
-
   Widget _buildAssessmentStep() {
-    if (_assessmentId == null || _capturedLead == null) {
+    if (_assessmentId == null) {
       return const Center(child: Text('Assessment not available'));
     }
 
@@ -157,7 +132,7 @@ class _LandingPageAssessmentFlowScreenState
       assessmentId: _assessmentId!,
       onComplete: () {
         // Navigate to results on assessment completion
-        _navigateToPage(3);
+        _navigateToPage(2);
       },
     );
   }
@@ -187,7 +162,7 @@ class _LandingPageAssessmentFlowScreenState
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               ElevatedButton(
-                onPressed: _goBackToLandingPage,
+                onPressed: () => _navigateToPage(0),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[300],
                   foregroundColor: Colors.black87,
@@ -204,178 +179,6 @@ class _LandingPageAssessmentFlowScreenState
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Custom lead capture widget for the landing page flow
-class _CustomLeadCaptureWidget extends StatefulWidget {
-  const _CustomLeadCaptureWidget({
-    required this.onLeadCaptured,
-    required this.onBack,
-  });
-
-  final Function(User) onLeadCaptured;
-  final VoidCallback onBack;
-
-  @override
-  State<_CustomLeadCaptureWidget> createState() =>
-      _CustomLeadCaptureWidgetState();
-}
-
-class _CustomLeadCaptureWidgetState extends State<_CustomLeadCaptureWidget> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _companyController = TextEditingController();
-  final _phoneController = TextEditingController();
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _companyController.dispose();
-    _phoneController.dispose();
-    super.dispose();
-  }
-
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      // Create a User object from the form data
-      final user = User(
-        partyId: 'lead-${DateTime.now().millisecondsSinceEpoch}',
-        pseudoId: 'lead-${DateTime.now().millisecondsSinceEpoch}',
-        loginName: _emailController.text.trim(),
-        firstName: _nameController.text.trim(),
-        email: _emailController.text.trim(),
-        telephoneNr: _phoneController.text.trim(),
-        company: Company(
-          partyId: 'company-${DateTime.now().millisecondsSinceEpoch}',
-          pseudoId: 'company-${DateTime.now().millisecondsSinceEpoch}',
-          name: _companyController.text.trim(),
-        ),
-      );
-
-      widget.onLeadCaptured(user);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Before we begin...'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: widget.onBack,
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Please provide your information to receive personalized results',
-                style: Theme.of(context).textTheme.titleLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Full Name',
-                  prefixIcon: Icon(Icons.person),
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter your name';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'Email Address',
-                  prefixIcon: Icon(Icons.email),
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  if (!RegExp(
-                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                  ).hasMatch(value)) {
-                    return 'Please enter a valid email';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _companyController,
-                decoration: const InputDecoration(
-                  labelText: 'Company Name',
-                  prefixIcon: Icon(Icons.business),
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter your company name';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Phone Number (Optional)',
-                  prefixIcon: Icon(Icons.phone),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              ElevatedButton(
-                onPressed: _submitForm,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text(
-                  'Continue to Assessment',
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              Text(
-                'Your information will be used to personalize your assessment results and provide you with relevant recommendations.',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

@@ -122,23 +122,37 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Hero Section
+          // 1. Hero Section (Hook + Subheading)
           _buildHeroSection(context, page),
 
-          // Sections
+          // 2. Value Proposition Section (if available)
           if (page.sections != null && page.sections!.isNotEmpty) ...[
             const SizedBox(height: 32),
-            ...page.sections!.map((section) => _buildSection(context, section)),
+            // Look for value proposition section
+            ...page.sections!
+                .where(
+                  (s) => s.sectionType?.toLowerCase() == 'value_proposition',
+                )
+                .map(
+                  (section) => _buildValuePropositionSection(context, section),
+                ),
+
+            // Other sections (features, benefits, etc.)
+            ...page.sections!
+                .where(
+                  (s) => s.sectionType?.toLowerCase() != 'value_proposition',
+                )
+                .map((section) => _buildSection(context, section)),
           ],
 
-          // Credibility Section
+          // 3. Credibility Section
           if (page.credibilityElements != null &&
               page.credibilityElements!.isNotEmpty) ...[
             const SizedBox(height: 32),
             _buildCredibilitySection(context, page.credibilityElements!.first),
           ],
 
-          // Call to Action
+          // 4. Call to Action
           if (page.callToAction != null) ...[
             const SizedBox(height: 32),
             _buildCtaSection(context, page.callToAction!),
@@ -384,6 +398,63 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildValuePropositionSection(
+    BuildContext context,
+    LandingPageSection section,
+  ) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor.withAlpha((0.1 * 255).round()),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).primaryColor.withAlpha((0.3 * 255).round()),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            section.title,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          if (section.description != null && section.description!.isNotEmpty)
+            Text(
+              section.description!,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          if (section.imageUrl != null && section.imageUrl!.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                section.imageUrl!,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: double.infinity,
+                    height: 200,
+                    color: Colors.grey[300],
+                    child: const Icon(
+                      Icons.image,
+                      size: 48,
+                      color: Colors.grey,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ],
       ),
     );

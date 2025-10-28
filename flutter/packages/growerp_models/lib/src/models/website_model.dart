@@ -82,35 +82,40 @@ Website csvToWebsite(String csvFile) {
       ],
       websiteContent: [
         Content(
-            path: row[15],
-            title: row[16],
-            text: row[17],
-            image: row[18].isNotEmpty ? base64.decode(row[18]) : null,
-            seqId: int.parse(row[19])),
+          path: row[15],
+          title: row[16],
+          text: row[17],
+          image: row[18].isNotEmpty ? base64.decode(row[18]) : null,
+          seqId: int.parse(row[19]),
+        ),
         Content(
-            path: row[20],
-            title: row[21],
-            text: row[22],
-            image: row[23].isNotEmpty ? base64.decode(row[23]) : null,
-            seqId: int.parse(row[24])),
+          path: row[20],
+          title: row[21],
+          text: row[22],
+          image: row[23].isNotEmpty ? base64.decode(row[23]) : null,
+          seqId: int.parse(row[24]),
+        ),
         Content(
-            path: row[25],
-            title: row[26],
-            text: row[27],
-            image: row[28].isNotEmpty ? base64.decode(row[28]) : null,
-            seqId: int.parse(row[29])),
+          path: row[25],
+          title: row[26],
+          text: row[27],
+          image: row[28].isNotEmpty ? base64.decode(row[28]) : null,
+          seqId: int.parse(row[29]),
+        ),
         Content(
-            path: row[30],
-            title: row[31],
-            text: row[32],
-            image: row[33].isNotEmpty ? base64.decode(row[33]) : null,
-            seqId: int.parse(row[34])),
+          path: row[30],
+          title: row[31],
+          text: row[32],
+          image: row[33].isNotEmpty ? base64.decode(row[33]) : null,
+          seqId: int.parse(row[34]),
+        ),
         Content(
-            path: row[35],
-            title: row[36],
-            text: row[37],
-            image: row[38].isNotEmpty ? base64.decode(row[38]) : null,
-            seqId: int.parse(row[39])),
+          path: row[35],
+          title: row[36],
+          text: row[37],
+          image: row[38].isNotEmpty ? base64.decode(row[38]) : null,
+          seqId: int.parse(row[39]),
+        ),
       ],
     );
   }
@@ -120,86 +125,93 @@ Website csvToWebsite(String csvFile) {
 // export
 String csvFromWebsite(Website website) {
   var csv = [websiteCsvFormat];
-  csv.add(createCsvRow([
-    website.hostName,
-    website.title,
-    website.colorJson,
-    website.measurementId,
-    website.websiteCategories.isNotEmpty
-        ? website.websiteCategories[0].categoryName
-        : '',
-    website.websiteCategories.length > 1
-        ? website.websiteCategories[1].categoryName
-        : '',
-    website.websiteCategories.length > 2
-        ? website.websiteCategories[2].categoryName
-        : '',
-    website.websiteCategories.length > 3
-        ? website.websiteCategories[3].categoryName
-        : '',
-    website.websiteCategories.length > 4
-        ? website.websiteCategories[4].categoryName
-        : '',
-    website.productCategories.isNotEmpty
-        ? website.productCategories[0].categoryName
-        : '',
-    website.productCategories.isNotEmpty
-        ? website.productCategories[1].categoryName
-        : '',
-    website.productCategories.isNotEmpty
-        ? website.productCategories[2].categoryName
-        : '',
-    website.productCategories.isNotEmpty
-        ? website.productCategories[3].categoryName
-        : '',
-    website.productCategories.isNotEmpty
-        ? website.productCategories[4].categoryName
-        : '',
-    website.websiteContent.isNotEmpty ? website.websiteContent[0].path : '',
-    website.websiteContent.isNotEmpty ? website.websiteContent[0].title : '',
-    website.websiteContent.isNotEmpty ? website.websiteContent[0].text : '',
-    website.websiteContent.isNotEmpty && website.websiteContent[0].image != null
-        ? base64.encode(website.websiteContent[0].image!)
-        : '',
-    website.websiteContent.isNotEmpty
-        ? website.websiteContent[0].seqId.toString()
-        : '',
-    website.websiteContent.length > 1 ? website.websiteContent[1].path : '',
-    website.websiteContent.length > 1 ? website.websiteContent[1].title : '',
-    website.websiteContent.length > 1 ? website.websiteContent[1].text : '',
-    website.websiteContent.length > 1 && website.websiteContent[1].image != null
-        ? base64.encode(website.websiteContent[1].image!)
-        : '',
-    website.websiteContent.length > 1
-        ? website.websiteContent[1].seqId.toString()
-        : '',
-    website.websiteContent.length > 2 ? website.websiteContent[2].path : '',
-    website.websiteContent.length > 2 ? website.websiteContent[2].title : '',
-    website.websiteContent.length > 2 ? website.websiteContent[2].text : '',
-    website.websiteContent.length > 2 && website.websiteContent[2].image != null
-        ? base64.encode(website.websiteContent[2].image!)
-        : '',
-    website.websiteContent.length > 2
-        ? website.websiteContent[2].seqId.toString()
-        : '',
-    website.websiteContent.length > 3 ? website.websiteContent[3].path : '',
-    website.websiteContent.length > 3 ? website.websiteContent[3].title : '',
-    website.websiteContent.length > 3 ? website.websiteContent[3].text : '',
-    website.websiteContent.length > 3 && website.websiteContent[3].image != null
-        ? base64.encode(website.websiteContent[3].image!)
-        : '',
-    website.websiteContent.length > 3
-        ? website.websiteContent[3].seqId.toString()
-        : '',
-    website.websiteContent.length > 4 ? website.websiteContent[4].path : '',
-    website.websiteContent.length > 4 ? website.websiteContent[4].title : '',
-    website.websiteContent.length > 4 ? website.websiteContent[4].text : '',
-    website.websiteContent.length > 4 && website.websiteContent[4].image != null
-        ? base64.encode(website.websiteContent[0].image!)
-        : '',
-    website.websiteContent.length > 4
-        ? website.websiteContent[4].seqId.toString()
-        : '',
-  ], websiteCsvLength));
+  csv.add(
+    createCsvRow([
+      website.hostName,
+      website.title,
+      website.colorJson,
+      website.measurementId,
+      website.websiteCategories.isNotEmpty
+          ? website.websiteCategories[0].categoryName
+          : '',
+      website.websiteCategories.length > 1
+          ? website.websiteCategories[1].categoryName
+          : '',
+      website.websiteCategories.length > 2
+          ? website.websiteCategories[2].categoryName
+          : '',
+      website.websiteCategories.length > 3
+          ? website.websiteCategories[3].categoryName
+          : '',
+      website.websiteCategories.length > 4
+          ? website.websiteCategories[4].categoryName
+          : '',
+      website.productCategories.isNotEmpty
+          ? website.productCategories[0].categoryName
+          : '',
+      website.productCategories.isNotEmpty
+          ? website.productCategories[1].categoryName
+          : '',
+      website.productCategories.isNotEmpty
+          ? website.productCategories[2].categoryName
+          : '',
+      website.productCategories.isNotEmpty
+          ? website.productCategories[3].categoryName
+          : '',
+      website.productCategories.isNotEmpty
+          ? website.productCategories[4].categoryName
+          : '',
+      website.websiteContent.isNotEmpty ? website.websiteContent[0].path : '',
+      website.websiteContent.isNotEmpty ? website.websiteContent[0].title : '',
+      website.websiteContent.isNotEmpty ? website.websiteContent[0].text : '',
+      website.websiteContent.isNotEmpty &&
+              website.websiteContent[0].image != null
+          ? base64.encode(website.websiteContent[0].image!)
+          : '',
+      website.websiteContent.isNotEmpty
+          ? website.websiteContent[0].seqId.toString()
+          : '',
+      website.websiteContent.length > 1 ? website.websiteContent[1].path : '',
+      website.websiteContent.length > 1 ? website.websiteContent[1].title : '',
+      website.websiteContent.length > 1 ? website.websiteContent[1].text : '',
+      website.websiteContent.length > 1 &&
+              website.websiteContent[1].image != null
+          ? base64.encode(website.websiteContent[1].image!)
+          : '',
+      website.websiteContent.length > 1
+          ? website.websiteContent[1].seqId.toString()
+          : '',
+      website.websiteContent.length > 2 ? website.websiteContent[2].path : '',
+      website.websiteContent.length > 2 ? website.websiteContent[2].title : '',
+      website.websiteContent.length > 2 ? website.websiteContent[2].text : '',
+      website.websiteContent.length > 2 &&
+              website.websiteContent[2].image != null
+          ? base64.encode(website.websiteContent[2].image!)
+          : '',
+      website.websiteContent.length > 2
+          ? website.websiteContent[2].seqId.toString()
+          : '',
+      website.websiteContent.length > 3 ? website.websiteContent[3].path : '',
+      website.websiteContent.length > 3 ? website.websiteContent[3].title : '',
+      website.websiteContent.length > 3 ? website.websiteContent[3].text : '',
+      website.websiteContent.length > 3 &&
+              website.websiteContent[3].image != null
+          ? base64.encode(website.websiteContent[3].image!)
+          : '',
+      website.websiteContent.length > 3
+          ? website.websiteContent[3].seqId.toString()
+          : '',
+      website.websiteContent.length > 4 ? website.websiteContent[4].path : '',
+      website.websiteContent.length > 4 ? website.websiteContent[4].title : '',
+      website.websiteContent.length > 4 ? website.websiteContent[4].text : '',
+      website.websiteContent.length > 4 &&
+              website.websiteContent[4].image != null
+          ? base64.encode(website.websiteContent[0].image!)
+          : '',
+      website.websiteContent.length > 4
+          ? website.websiteContent[4].seqId.toString()
+          : '',
+    ], websiteCsvLength),
+  );
   return csv.join();
 }

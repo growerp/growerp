@@ -1139,6 +1139,12 @@ along with this software (see the LICENSE.md file). If not, see
                                 <service-call name="growerp.100.CatalogServices100.create#Product"
                                     in-map="[classificationId: 'AppAdmin',product: product]" />
                             </iterate>
+                            <!-- standard GrowERP landing page and assesment -->
+                            <script><![CDATA[
+                                org.moqui.entity.EntityDataLoader edl = ec.entity.makeDataLoader()
+                                edl.location("component://growerp/data/ErpReadinessAssessmentData.xml")
+                                edl.load()
+                            ]]></script>
                             <else>
                                 <!-- demo data not for growerp itself-->
                                 <if condition="org.officeSiteName.split('/')[1] == 'true'">

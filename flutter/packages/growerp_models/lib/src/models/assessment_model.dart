@@ -34,23 +34,27 @@ class NullableTimestampConverter implements JsonConverter<DateTime?, int?> {
 @JsonSerializable()
 class Assessment {
   /// System-wide unique identifier
+  @JsonKey(defaultValue: 'unknown')
   final String assessmentId;
 
   /// Tenant-unique identifier (user-facing, used in URLs)
+  @JsonKey(defaultValue: 'unknown')
   final String pseudoId;
 
   /// Assessment name/title
+  @JsonKey(defaultValue: 'Unnamed Assessment')
   final String assessmentName;
 
   /// Assessment description/instructions
   final String? description;
 
   /// Assessment status: ACTIVE, INACTIVE, DRAFT
+  @JsonKey(defaultValue: 'ACTIVE')
   final String status;
 
   /// Timestamp when created
-  @TimestampConverter()
-  final DateTime createdDate;
+  @NullableTimestampConverter()
+  final DateTime? createdDate;
 
   /// Username who created this assessment
   final String? createdByUserLogin;
@@ -68,7 +72,7 @@ class Assessment {
     required this.assessmentName,
     this.description,
     required this.status,
-    required this.createdDate,
+    this.createdDate,
     this.createdByUserLogin,
     this.lastModifiedDate,
     this.lastModifiedByUserLogin,

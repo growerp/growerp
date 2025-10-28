@@ -14,7 +14,7 @@ Structure:
 Usage: Include this data in the demo data loading process within PartyServices100.xml
 -->
 
-<entity-facade-xml type="seed-initial">
+<entity-facade-xml type="demo">
   <!-- Main Landing Page -->
   <growerp.landing.LandingPage
     pageId="demo-business-assessment"
@@ -81,21 +81,21 @@ Usage: Include this data in the demo data loading process within PartyServices10
     statisticId="demo-stat-1"
     credibilityId="demo-credibility-main"
     statistic="1,200+ Businesses Transformed"
-    displayOrder="1"
+    sequence="1"
     createdDate="2024-10-26 00:00:00" />
 
   <growerp.landing.CredibilityStatistic
     statisticId="demo-stat-2"
     credibilityId="demo-credibility-main"
     statistic="Average 28% Revenue Increase"
-    displayOrder="2"
+    sequence="2"
     createdDate="2024-10-26 00:00:00" />
 
   <growerp.landing.CredibilityStatistic
     statisticId="demo-stat-3"
     credibilityId="demo-credibility-main"
     statistic="90-Day Success Guarantee"
-    displayOrder="3"
+    sequence="3"
     createdDate="2024-10-26 00:00:00" />
 
   <!-- Primary CTA Configuration -->
@@ -296,42 +296,42 @@ Usage: Include this data in the demo data loading process within PartyServices10
     statisticId="tech-stat-1"
     credibilityId="tech-startup-credibility"
     statistic="500+ Startups Scaled"
-    displayOrder="1"
+    sequence="1"
     createdDate="2024-10-26 00:00:00" />
 
   <growerp.landing.CredibilityStatistic
     statisticId="tech-stat-2"
     credibilityId="tech-startup-credibility"
     statistic="3x Faster Growth Rate"
-    displayOrder="2"
+    sequence="2"
     createdDate="2024-10-26 00:00:00" />
 
   <growerp.landing.CredibilityStatistic
     statisticId="ecom-stat-1"
     credibilityId="ecommerce-credibility"
     statistic="$500M+ Revenue Generated"
-    displayOrder="1"
+    sequence="1"
     createdDate="2024-10-26 00:00:00" />
 
   <growerp.landing.CredibilityStatistic
     statisticId="ecom-stat-2"
     credibilityId="ecommerce-credibility"
     statistic="150% CLV Increase"
-    displayOrder="2"
+    sequence="2"
     createdDate="2024-10-26 00:00:00" />
 
   <growerp.landing.CredibilityStatistic
     statisticId="service-stat-1"
     credibilityId="service-business-credibility"
     statistic="800+ Service Businesses"
-    displayOrder="1"
+    sequence="1"
     createdDate="2024-10-26 00:00:00" />
 
   <growerp.landing.CredibilityStatistic
     statisticId="service-stat-2"
     credibilityId="service-business-credibility"
     statistic="6 to 8-Figure Growth"
-    displayOrder="2"
+    sequence="2"
     createdDate="2024-10-26 00:00:00" />
 
 </entity-facade-xml>

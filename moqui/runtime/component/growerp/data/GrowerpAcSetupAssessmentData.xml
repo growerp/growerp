@@ -16,7 +16,7 @@ Business)
 Usage: Include this data in the demo data loading process within PartyServices100.xml
 -->
 
-<entity-facade-xml type="seed-initial">
+<entity-facade-xml type="demo">
 
   <!-- ============================================ -->
   <!-- DEMO LANDING PAGES -->
