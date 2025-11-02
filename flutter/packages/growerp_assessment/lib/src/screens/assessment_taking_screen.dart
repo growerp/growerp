@@ -13,8 +13,10 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import '../bloc/assessment_bloc.dart';
 import 'assessment_results_screen_new.dart';
 
 /// Screen for taking assessments - the user-facing experience
@@ -32,18 +34,22 @@ class AssessmentTakingScreen extends StatefulWidget {
 
 class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
   final PageController _pageController = PageController();
-
-  List<AssessmentQuestion> _questions = [];
   final Map<String, String> _answers = {}; // questionId -> optionId
   int _currentQuestionIndex = 0;
-  bool _isLoadingQuestions = false;
   bool _isSubmitting = false;
   bool _showAllQuestions = false;
 
   @override
   void initState() {
     super.initState();
-    _loadQuestions();
+    // Load complete assessment data with questions and options from BLoC
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AssessmentBloc>().add(
+            AssessmentFetchAll(
+              assessmentId: widget.assessment.assessmentId,
+            ),
+          );
+    });
   }
 
   @override
@@ -52,252 +58,58 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
     super.dispose();
   }
 
-  void _loadQuestions() async {
-    setState(() {
-      _isLoadingQuestions = true;
-    });
-
-    try {
-      // Load questions from API or use mock data
-      // In a real implementation, this would call:
-      // final restClient = context.read<RestClient>();
-      // final questions = await restClient.getAssessmentQuestions(
-      //   assessmentId: widget.assessment.assessmentId,
-      // );
-
-      // For now, use mock questions
-      await Future.delayed(const Duration(milliseconds: 500));
-      setState(() {
-        _questions = _createMockQuestions();
-        _isLoadingQuestions = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoadingQuestions = false;
-      });
-      if (mounted) {
-        HelperFunctions.showMessage(
-          context,
-          'Failed to load questions: $e',
-          Colors.red,
-        );
-      }
-    }
-  }
-
-  List<AssessmentQuestion> _createMockQuestions() {
-    return [
-      AssessmentQuestion(
-        questionId: '1',
-        pseudoId: '1',
-        assessmentId: widget.assessment.assessmentId,
-        questionText:
-            'How would you rate your overall business readiness for digital transformation?',
-        questionType: 'radio',
-        isRequired: true,
-        questionSequence: 1,
-        createdDate: DateTime.now(),
-      ),
-      AssessmentQuestion(
-        questionId: '2',
-        pseudoId: '2',
-        assessmentId: widget.assessment.assessmentId,
-        questionText: 'What is your current annual revenue?',
-        questionType: 'radio',
-        isRequired: true,
-        questionSequence: 2,
-        createdDate: DateTime.now(),
-      ),
-      AssessmentQuestion(
-        questionId: '3',
-        pseudoId: '3',
-        assessmentId: widget.assessment.assessmentId,
-        questionText: 'How many employees does your company have?',
-        questionType: 'radio',
-        isRequired: false,
-        questionSequence: 3,
-        createdDate: DateTime.now(),
-      ),
-    ];
-  }
-
-  Map<String, List<AssessmentQuestionOption>> _getMockOptions() {
-    return {
-      '1': [
-        AssessmentQuestionOption(
-          optionId: '1',
-          pseudoId: '1',
-          questionId: '1',
-          assessmentId: widget.assessment.assessmentId,
-          optionSequence: 1,
-          optionText: 'Not ready at all',
-          optionScore: 1,
-          createdDate: DateTime.now(),
-        ),
-        AssessmentQuestionOption(
-          optionId: '2',
-          pseudoId: '2',
-          questionId: '1',
-          assessmentId: widget.assessment.assessmentId,
-          optionSequence: 2,
-          optionText: 'Somewhat ready',
-          optionScore: 2,
-          createdDate: DateTime.now(),
-        ),
-        AssessmentQuestionOption(
-          optionId: '3',
-          pseudoId: '3',
-          questionId: '1',
-          assessmentId: widget.assessment.assessmentId,
-          optionSequence: 3,
-          optionText: 'Ready',
-          optionScore: 3,
-          createdDate: DateTime.now(),
-        ),
-        AssessmentQuestionOption(
-          optionId: '4',
-          pseudoId: '4',
-          questionId: '1',
-          assessmentId: widget.assessment.assessmentId,
-          optionSequence: 4,
-          optionText: 'Very ready',
-          optionScore: 4,
-          createdDate: DateTime.now(),
-        ),
-      ],
-      '2': [
-        AssessmentQuestionOption(
-          optionId: '5',
-          pseudoId: '5',
-          questionId: '2',
-          assessmentId: widget.assessment.assessmentId,
-          optionSequence: 1,
-          optionText: 'Less than \$100K',
-          optionScore: 1,
-          createdDate: DateTime.now(),
-        ),
-        AssessmentQuestionOption(
-          optionId: '6',
-          pseudoId: '6',
-          questionId: '2',
-          assessmentId: widget.assessment.assessmentId,
-          optionSequence: 2,
-          optionText: '\$100K - \$500K',
-          optionScore: 2,
-          createdDate: DateTime.now(),
-        ),
-        AssessmentQuestionOption(
-          optionId: '7',
-          pseudoId: '7',
-          questionId: '2',
-          assessmentId: widget.assessment.assessmentId,
-          optionSequence: 3,
-          optionText: '\$500K - \$1M',
-          optionScore: 3,
-          createdDate: DateTime.now(),
-        ),
-        AssessmentQuestionOption(
-          optionId: '8',
-          pseudoId: '8',
-          questionId: '2',
-          assessmentId: widget.assessment.assessmentId,
-          optionSequence: 4,
-          optionText: 'More than \$1M',
-          optionScore: 4,
-          createdDate: DateTime.now(),
-        ),
-      ],
-      '3': [
-        AssessmentQuestionOption(
-          optionId: '9',
-          pseudoId: '9',
-          questionId: '3',
-          assessmentId: widget.assessment.assessmentId,
-          optionSequence: 1,
-          optionText: '1-10 employees',
-          optionScore: 1,
-          createdDate: DateTime.now(),
-        ),
-        AssessmentQuestionOption(
-          optionId: '10',
-          pseudoId: '10',
-          questionId: '3',
-          assessmentId: widget.assessment.assessmentId,
-          optionSequence: 2,
-          optionText: '11-50 employees',
-          optionScore: 2,
-          createdDate: DateTime.now(),
-        ),
-        AssessmentQuestionOption(
-          optionId: '11',
-          pseudoId: '11',
-          questionId: '3',
-          assessmentId: widget.assessment.assessmentId,
-          optionSequence: 3,
-          optionText: '51-200 employees',
-          optionScore: 3,
-          createdDate: DateTime.now(),
-        ),
-        AssessmentQuestionOption(
-          optionId: '12',
-          pseudoId: '12',
-          questionId: '3',
-          assessmentId: widget.assessment.assessmentId,
-          optionSequence: 4,
-          optionText: 'More than 200 employees',
-          optionScore: 4,
-          createdDate: DateTime.now(),
-        ),
-      ],
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.assessment.assessmentName),
-        actions: [
-          IconButton(
-            icon: Icon(
-                _showAllQuestions ? Icons.view_agenda : Icons.view_carousel),
-            onPressed: _toggleViewMode,
-            tooltip: _showAllQuestions ? 'One at a time' : 'Show all questions',
-          ),
-          PopupMenuButton<String>(
-            onSelected: _handleMenuAction,
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'save_draft',
-                child: ListTile(
-                  leading: Icon(Icons.save),
-                  title: Text('Save Draft'),
-                  contentPadding: EdgeInsets.zero,
-                ),
+    return BlocBuilder<AssessmentBloc, AssessmentState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(widget.assessment.assessmentName),
+            actions: [
+              IconButton(
+                icon: Icon(_showAllQuestions
+                    ? Icons.view_agenda
+                    : Icons.view_carousel),
+                onPressed: _toggleViewMode,
+                tooltip:
+                    _showAllQuestions ? 'One at a time' : 'Show all questions',
               ),
-              const PopupMenuItem(
-                value: 'reset',
-                child: ListTile(
-                  leading: Icon(Icons.refresh),
-                  title: Text('Reset Answers'),
-                  contentPadding: EdgeInsets.zero,
-                ),
+              PopupMenuButton<String>(
+                onSelected: _handleMenuAction,
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'save_draft',
+                    child: ListTile(
+                      leading: Icon(Icons.save),
+                      title: Text('Save Draft'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'reset',
+                    child: ListTile(
+                      leading: Icon(Icons.refresh),
+                      title: Text('Reset Answers'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
-      body: _buildBody(),
-      bottomNavigationBar: _buildBottomNavigation(),
+          body: _buildBody(state),
+          bottomNavigationBar: _buildBottomNavigation(state),
+        );
+      },
     );
   }
 
-  Widget _buildBody() {
-    if (_isLoadingQuestions) {
+  Widget _buildBody(AssessmentState state) {
+    if (state.status == AssessmentStatus.loading) {
       return const Center(child: LoadingIndicator());
     }
 
-    if (_questions.isEmpty) {
+    if (state.questions.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -326,18 +138,19 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
 
     return Column(
       children: [
-        _buildProgressIndicator(),
+        _buildProgressIndicator(state),
         Expanded(
-          child:
-              _showAllQuestions ? _buildAllQuestions() : _buildSingleQuestion(),
+          child: _showAllQuestions
+              ? _buildAllQuestions(state)
+              : _buildSingleQuestion(state),
         ),
       ],
     );
   }
 
-  Widget _buildProgressIndicator() {
+  Widget _buildProgressIndicator(AssessmentState state) {
     final answeredCount = _answers.length;
-    final totalCount = _questions.length;
+    final totalCount = state.questions.length;
     final progress = totalCount > 0 ? answeredCount / totalCount : 0.0;
 
     return Container(
@@ -372,7 +185,7 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
     );
   }
 
-  Widget _buildSingleQuestion() {
+  Widget _buildSingleQuestion(AssessmentState state) {
     return PageView.builder(
       controller: _pageController,
       onPageChanged: (index) {
@@ -380,33 +193,37 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
           _currentQuestionIndex = index;
         });
       },
-      itemCount: _questions.length,
+      itemCount: state.questions.length,
       itemBuilder: (context, index) {
-        final question = _questions[index];
+        final question = state.questions[index];
         return Padding(
           padding: const EdgeInsets.all(16.0),
-          child: _buildQuestionCard(question, index),
+          child: _buildQuestionCard(question, index, state),
         );
       },
     );
   }
 
-  Widget _buildAllQuestions() {
+  Widget _buildAllQuestions(AssessmentState state) {
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
-      itemCount: _questions.length,
+      itemCount: state.questions.length,
       itemBuilder: (context, index) {
-        final question = _questions[index];
+        final question = state.questions[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: 24),
-          child: _buildQuestionCard(question, index),
+          child: _buildQuestionCard(question, index, state),
         );
       },
     );
   }
 
-  Widget _buildQuestionCard(AssessmentQuestion question, int index) {
-    final options = _getMockOptions()[question.questionId] ?? [];
+  Widget _buildQuestionCard(
+    AssessmentQuestion question,
+    int index,
+    AssessmentState state,
+  ) {
+    final options = state.options[question.questionId] ?? [];
     final selectedOptionId = _answers[question.questionId];
 
     return Card(
@@ -440,13 +257,13 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        question.questionText,
+                        question.questionText ?? 'Untitled Question',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      if (question.isRequired) ...[
+                      if (question.isRequired ?? false) ...[
                         const SizedBox(height: 4),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -477,7 +294,8 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
                     child: GestureDetector(
                       onTap: () {
                         setState(() {
-                          _answers[question.questionId] = option.optionId;
+                          _answers[question.questionId ?? ''] =
+                              option.optionId ?? '';
                         });
                       },
                       child: Container(
@@ -493,23 +311,41 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
                         padding: const EdgeInsets.all(12),
                         child: Row(
                           children: [
-                            // ignore: deprecated_member_use
-                            Radio<String>(
-                              value: option.optionId,
-                              // ignore: deprecated_member_use
-                              groupValue: selectedOptionId,
-                              // ignore: deprecated_member_use
-                              onChanged: (value) {
+                            GestureDetector(
+                              onTap: () {
                                 setState(() {
-                                  _answers[question.questionId] = value!;
+                                  _answers[question.questionId ?? ''] =
+                                      option.optionId ?? '';
                                 });
                               },
-                              activeColor: Colors.green[700],
+                              child: Container(
+                                width: 24,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.green[700]!,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: selectedOptionId == option.optionId
+                                    ? Center(
+                                        child: Container(
+                                          width: 12,
+                                          height: 12,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.green[700],
+                                          ),
+                                        ),
+                                      )
+                                    : null,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                option.optionText,
+                                option.optionText ?? 'Option',
                                 style: const TextStyle(fontSize: 14),
                               ),
                             ),
@@ -517,7 +353,7 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
                         ),
                       ),
                     ),
-                  )),
+                  ))
             ] else ...[
               Container(
                 padding: const EdgeInsets.all(16),
@@ -544,7 +380,7 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
     );
   }
 
-  Widget _buildBottomNavigation() {
+  Widget _buildBottomNavigation(AssessmentState state) {
     if (_showAllQuestions) {
       return Container(
         padding: const EdgeInsets.all(16),
@@ -563,7 +399,8 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: ElevatedButton(
-                onPressed: _canSubmit() ? _submitAssessment : null,
+                onPressed:
+                    _canSubmit(state) ? () => _submitAssessment(state) : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green[700],
                   foregroundColor: Colors.white,
@@ -602,19 +439,20 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
             const SizedBox(width: 16),
           ],
           Expanded(
-            child: _buildActionButton(),
+            child: _buildActionButton(state),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildActionButton() {
-    final bool isLastQuestion = _currentQuestionIndex >= _questions.length - 1;
+  Widget _buildActionButton(AssessmentState state) {
+    final bool isLastQuestion =
+        _currentQuestionIndex >= state.questions.length - 1;
 
     return ElevatedButton(
       onPressed: isLastQuestion
-          ? (_canSubmit() ? _submitAssessment : null)
+          ? (_canSubmit(state) ? () => _submitAssessment(state) : null)
           : _nextQuestion,
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.green[700],
@@ -692,12 +530,10 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
   }
 
   void _nextQuestion() {
-    if (_currentQuestionIndex < _questions.length - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
+    _pageController.nextPage(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   void _previousQuestion() {
@@ -709,8 +545,9 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
     }
   }
 
-  bool _canSubmit() {
-    final requiredQuestions = _questions.where((q) => q.isRequired).toList();
+  bool _canSubmit(AssessmentState state) {
+    final requiredQuestions =
+        state.questions.where((q) => (q.isRequired ?? false)).toList();
     for (final question in requiredQuestions) {
       if (!_answers.containsKey(question.questionId)) {
         return false;
@@ -719,8 +556,8 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
     return true;
   }
 
-  void _submitAssessment() async {
-    if (!_canSubmit()) {
+  void _submitAssessment(AssessmentState state) async {
+    if (!_canSubmit(state)) {
       HelperFunctions.showMessage(
         context,
         'Please answer all required questions',
@@ -734,27 +571,39 @@ class _AssessmentTakingScreenState extends State<AssessmentTakingScreen> {
     });
 
     try {
-      // Note: Backend AssessmentResult endpoints not available yet
-      // Just navigate to results screen directly
-      await Future.delayed(const Duration(seconds: 1));
-
+      // Submit the assessment through BLoC
       if (mounted) {
-        // Show success message
-        HelperFunctions.showMessage(
-          context,
-          'Assessment completed successfully!\n(Results will be saved when you use Save Results button)',
-          Colors.green,
-        );
+        context.read<AssessmentBloc>().add(
+              AssessmentSubmit(
+                assessmentId: widget.assessment.assessmentId,
+                answers: _answers,
+                respondentName: 'Anonymous',
+                respondentEmail: 'anonymous@example.com',
+                respondentPhone: '',
+                respondentCompany: '',
+              ),
+            );
 
-        // Navigate to results screen for display
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => AssessmentResultsScreen(
-              assessment: widget.assessment,
-              answers: _answers,
+        // Wait a moment for submission
+        await Future.delayed(const Duration(seconds: 1));
+
+        if (mounted) {
+          HelperFunctions.showMessage(
+            context,
+            'Assessment submitted successfully!',
+            Colors.green,
+          );
+
+          // Navigate to results screen
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => AssessmentResultsScreen(
+                assessment: widget.assessment,
+                answers: _answers,
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

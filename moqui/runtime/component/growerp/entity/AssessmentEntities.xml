@@ -169,4 +169,75 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
         </index>
     </entity>
 
+    <!-- View Entity: Complete assessment with questions, options, and thresholds -->
+    <view-entity entity-name="AssessmentComplete" package="growerp.assessment">
+        <description>Complete assessment view with questions, options, and scoring thresholds</description>
+
+        <!-- Assessment (main entity) -->
+        <member-entity entity-alias="ASM" entity-name="growerp.assessment.Assessment" />
+
+        <!-- Assessment Questions (optional - may have assessments without questions) -->
+        <member-entity entity-alias="AQ" entity-name="growerp.assessment.AssessmentQuestion"
+            join-from-alias="ASM">
+            <key-map field-name="assessmentId" />
+        </member-entity>
+
+        <!-- Question Options (optional - may have questions without options) -->
+        <member-entity entity-alias="AQO" entity-name="growerp.assessment.AssessmentQuestionOption"
+            join-from-alias="AQ" join-optional="true">
+            <key-map field-name="questionId" />
+            <key-map field-name="assessmentId" />
+        </member-entity>
+
+        <!-- Scoring Thresholds (optional - may have assessments without thresholds) -->
+        <member-entity entity-alias="ST" entity-name="growerp.assessment.ScoringThreshold"
+            join-from-alias="ASM" join-optional="true">
+            <key-map field-name="assessmentId" />
+        </member-entity>
+
+        <!-- Assessment fields -->
+        <alias entity-alias="ASM" name="assessmentId" />
+        <alias entity-alias="ASM" name="assessmentPseudoId" field="pseudoId" />
+        <alias entity-alias="ASM" name="ownerPartyId" />
+        <alias entity-alias="ASM" name="assessmentName" />
+        <alias entity-alias="ASM" name="assessmentDescription" field="description" />
+        <alias entity-alias="ASM" name="assessmentStatus" field="status" />
+        <alias entity-alias="ASM" name="assessmentCreatedDate" field="createdDate" />
+        <alias entity-alias="ASM" name="assessmentCreatedByUserLogin" field="createdByUserLogin" />
+        <alias entity-alias="ASM" name="assessmentLastModifiedDate" field="lastModifiedDate" />
+        <alias entity-alias="ASM" name="assessmentLastModifiedByUserLogin"
+            field="lastModifiedByUserLogin" />
+
+        <!-- Question fields -->
+        <alias entity-alias="AQ" name="questionId" />
+        <alias entity-alias="AQ" name="questionPseudoId" field="pseudoId" />
+        <alias entity-alias="AQ" name="questionSequence" />
+        <alias entity-alias="AQ" name="questionType" />
+        <alias entity-alias="AQ" name="questionText" />
+        <alias entity-alias="AQ" name="questionDescription" />
+        <alias entity-alias="AQ" name="isRequired" />
+        <alias entity-alias="AQ" name="defaultOption" />
+        <alias entity-alias="AQ" name="defaultValue" />
+        <alias entity-alias="AQ" name="questionCreatedDate" field="createdDate" />
+        <alias entity-alias="AQ" name="questionCreatedByUserLogin" field="createdByUserLogin" />
+
+        <!-- Option fields -->
+        <alias entity-alias="AQO" name="optionId" />
+        <alias entity-alias="AQO" name="optionPseudoId" field="pseudoId" />
+        <alias entity-alias="AQO" name="optionSequence" />
+        <alias entity-alias="AQO" name="optionText" />
+        <alias entity-alias="AQO" name="optionScore" />
+        <alias entity-alias="AQO" name="optionCreatedDate" field="createdDate" />
+
+        <!-- Threshold fields -->
+        <alias entity-alias="ST" name="thresholdId" />
+        <alias entity-alias="ST" name="thresholdPseudoId" field="pseudoId" />
+        <alias entity-alias="ST" name="minScore" />
+        <alias entity-alias="ST" name="maxScore" />
+        <alias entity-alias="ST" name="leadStatus" />
+        <alias entity-alias="ST" name="thresholdDescription" field="description" />
+        <alias entity-alias="ST" name="thresholdCreatedDate" field="createdDate" />
+        <alias entity-alias="ST" name="thresholdCreatedByUserLogin" field="createdByUserLogin" />
+    </view-entity>
+
 </entities>

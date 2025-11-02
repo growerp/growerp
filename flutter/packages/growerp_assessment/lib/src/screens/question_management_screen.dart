@@ -61,12 +61,12 @@ class _QuestionManagementScreenState extends State<QuestionManagementScreen> {
         try {
           final optionsResponse = await restClient.getAssessmentQuestionOptions(
             assessmentId: widget.assessment.assessmentId,
-            questionId: question.questionId,
+            questionId: question.questionId ?? '',
           );
-          optionsMap[question.questionId] = optionsResponse.options;
+          optionsMap[question.questionId ?? ''] = optionsResponse.options;
         } catch (e) {
           // If options fail to load, set empty list
-          optionsMap[question.questionId] = [];
+          optionsMap[question.questionId ?? ''] = [];
         }
       }
 
@@ -200,7 +200,7 @@ class _QuestionManagementScreenState extends State<QuestionManagementScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        question.questionText,
+                        question.questionText ?? 'Untitled Question',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -217,11 +217,11 @@ class _QuestionManagementScreenState extends State<QuestionManagementScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              question.questionType,
+                              question.questionType ?? 'text',
                               style: const TextStyle(fontSize: 10),
                             ),
                           ),
-                          if (question.isRequired) ...[
+                          if (question.isRequired ?? false) ...[
                             const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -324,7 +324,7 @@ class _QuestionManagementScreenState extends State<QuestionManagementScreen> {
             ),
           ),
           const SizedBox(width: 12),
-          Expanded(child: Text(option.optionText)),
+          Expanded(child: Text(option.optionText ?? 'Option')),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
@@ -521,7 +521,7 @@ class _QuestionManagementScreenState extends State<QuestionManagementScreen> {
       final RestClient restClient = context.read<RestClient>();
       await restClient.deleteAssessmentQuestion(
         assessmentId: widget.assessment.assessmentId,
-        questionId: question.questionId,
+        questionId: question.questionId ?? '',
       );
 
       if (mounted) {
@@ -550,8 +550,8 @@ class _QuestionManagementScreenState extends State<QuestionManagementScreen> {
       final RestClient restClient = context.read<RestClient>();
       await restClient.deleteAssessmentQuestionOption(
         assessmentId: widget.assessment.assessmentId,
-        questionId: question.questionId,
-        optionId: option.optionId,
+        questionId: question.questionId ?? '',
+        optionId: option.optionId ?? '',
       );
 
       if (mounted) {
@@ -615,11 +615,12 @@ class _QuestionFormDialogState extends State<QuestionFormDialog> {
   void initState() {
     super.initState();
     if (_isEditing) {
-      _questionTextController.text = widget.question!.questionText;
+      _questionTextController.text = widget.question!.questionText ?? '';
       _descriptionController.text = widget.question!.questionDescription ?? '';
-      _sequenceController.text = widget.question!.questionSequence.toString();
-      _selectedType = widget.question!.questionType;
-      _isRequired = widget.question!.isRequired;
+      _sequenceController.text =
+          (widget.question!.questionSequence ?? 0).toString();
+      _selectedType = widget.question!.questionType ?? 'radio';
+      _isRequired = widget.question!.isRequired ?? true;
     }
   }
 
@@ -796,19 +797,19 @@ class _QuestionFormDialogState extends State<QuestionFormDialog> {
       if (_isEditing) {
         await restClient.updateAssessmentQuestion(
           assessmentId: widget.assessment.assessmentId,
-          questionId: widget.question!.questionId,
-          questionText: questionData.questionText,
-          questionType: questionData.questionType,
-          questionSequence: questionData.questionSequence,
-          isRequired: questionData.isRequired ? 'Y' : 'N',
+          questionId: widget.question!.questionId ?? '',
+          questionText: questionData.questionText ?? '',
+          questionType: questionData.questionType ?? 'radio',
+          questionSequence: questionData.questionSequence ?? 0,
+          isRequired: (questionData.isRequired ?? false) ? 'Y' : 'N',
         );
       } else {
         await restClient.createAssessmentQuestion(
           assessmentId: widget.assessment.assessmentId,
-          questionText: questionData.questionText,
-          questionType: questionData.questionType,
-          questionSequence: questionData.questionSequence,
-          isRequired: questionData.isRequired ? 'Y' : 'N',
+          questionText: questionData.questionText ?? '',
+          questionType: questionData.questionType ?? 'radio',
+          questionSequence: questionData.questionSequence ?? 0,
+          isRequired: (questionData.isRequired ?? false) ? 'Y' : 'N',
         );
       }
 
@@ -873,9 +874,10 @@ class _OptionFormDialogState extends State<OptionFormDialog> {
   void initState() {
     super.initState();
     if (_isEditing) {
-      _optionTextController.text = widget.option!.optionText;
-      _scoreController.text = widget.option!.optionScore.toString();
-      _sequenceController.text = widget.option!.optionSequence.toString();
+      _optionTextController.text = widget.option!.optionText ?? '';
+      _scoreController.text = (widget.option!.optionScore ?? 0).toString();
+      _sequenceController.text =
+          (widget.option!.optionSequence ?? 0).toString();
     }
   }
 
@@ -1050,19 +1052,19 @@ class _OptionFormDialogState extends State<OptionFormDialog> {
       if (_isEditing) {
         await restClient.updateAssessmentQuestionOption(
           assessmentId: widget.assessment.assessmentId,
-          questionId: widget.question.questionId,
-          optionId: widget.option!.optionId,
-          optionText: optionData.optionText,
-          optionScore: optionData.optionScore,
-          optionSequence: optionData.optionSequence,
+          questionId: widget.question.questionId ?? '',
+          optionId: widget.option!.optionId ?? '',
+          optionText: optionData.optionText ?? '',
+          optionScore: optionData.optionScore ?? 0,
+          optionSequence: optionData.optionSequence ?? 0,
         );
       } else {
         await restClient.createAssessmentQuestionOption(
           assessmentId: widget.assessment.assessmentId,
-          questionId: widget.question.questionId,
-          optionText: optionData.optionText,
-          optionScore: optionData.optionScore,
-          optionSequence: optionData.optionSequence,
+          questionId: widget.question.questionId ?? '',
+          optionText: optionData.optionText ?? '',
+          optionScore: optionData.optionScore ?? 0,
+          optionSequence: optionData.optionSequence ?? 0,
         );
       }
 

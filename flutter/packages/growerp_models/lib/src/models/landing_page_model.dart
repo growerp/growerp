@@ -1,239 +1,196 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'assessment_model.dart';
 
 part 'landing_page_model.g.dart';
 
-/// Wrapper response for single landing page fetch from backend
-/// Backend returns: { "page": {...}, "sections": [...], "credibility": {...}, "cta": {...} }
-@JsonSerializable()
-class LandingPageResponse {
-  /// The main landing page object
-  final LandingPage page;
+/// Converts nullable Unix timestamp (milliseconds) to nullable DateTime
+class NullableTimestampConverter implements JsonConverter<DateTime?, int?> {
+  const NullableTimestampConverter();
 
-  /// Page sections (content blocks)
-  final List<LandingPageSection>? sections;
+  @override
+  DateTime? fromJson(int? timestamp) =>
+      timestamp != null ? DateTime.fromMillisecondsSinceEpoch(timestamp) : null;
 
-  /// Credibility elements (testimonials, logos, etc.)
-  final dynamic credibility;
-
-  /// Call-to-action configuration
-  final dynamic cta;
-
-  const LandingPageResponse({
-    required this.page,
-    this.sections,
-    this.credibility,
-    this.cta,
-  });
-
-  factory LandingPageResponse.fromJson(Map<String, dynamic> json) =>
-      _$LandingPageResponseFromJson(json);
-
-  Map<String, dynamic> toJson() => _$LandingPageResponseToJson(this);
+  @override
+  int? toJson(DateTime? dateTime) => dateTime?.millisecondsSinceEpoch;
 }
 
-/// Landing page model representing a configurable landing page
+/// Landing Page model representing a single landing page
 ///
 /// Supports dual-ID strategy:
 /// - pageId: System-wide unique identifier
-/// - pseudoId: Tenant-unique, user-facing identifier (used in URLs)
-@JsonSerializable()
+/// - pseudoId: Tenant-unique, user-facing identifier
+///
+/// When fetched via get#LandingPage service, includes nested sections, credibility, and CTA
+@JsonSerializable(explicitToJson: true)
 class LandingPage {
   /// System-wide unique identifier
+  @JsonKey(defaultValue: 'unknown')
   final String pageId;
 
   /// Tenant-unique identifier (user-facing, used in URLs)
+  @JsonKey(defaultValue: 'unknown')
   final String pseudoId;
 
-  /// Page title (SEO and display)
+  /// Landing page title
+  @JsonKey(defaultValue: 'Unnamed Page')
   final String title;
 
-  /// Hero headline (main attention-grabbing text)
-  final String headline;
-
-  /// Hook type: frustration, aspiration, curiosity
+  /// Hook type: frustration, results, custom
   final String? hookType;
 
-  /// Subheading (supporting text under headline)
+  /// Main headline for hero section
+  final String? headline;
+
+  /// Optional subheading
   final String? subheading;
 
-  /// Page description (SEO meta description)
-  final String? description;
-
-  /// Hero image URL
-  final String? heroImageUrl;
-
-  /// Background color or theme
-  final String? backgroundColor;
-
-  /// Text color theme
-  final String? textColor;
-
-  /// Page status: ACTIVE, INACTIVE, DRAFT
-  final String status;
-
-  /// Associated assessment ID for lead capture flow
+  /// Associated assessment ID
   final String? assessmentId;
 
-  /// Page sections (content blocks)
-  final List<LandingPageSection>? sections;
+  /// Privacy policy URL
+  final String? privacyPolicyUrl;
 
-  /// Credibility elements (testimonials, logos, etc.)
-  @JsonKey(name: 'credibility')
-  final List<CredibilityElement>? credibilityElements;
+  /// Landing page status: ACTIVE, INACTIVE, DRAFT
+  @JsonKey(defaultValue: 'DRAFT')
+  final String status;
 
-  /// Call-to-action configuration
-  @JsonKey(name: 'cta')
-  final CallToAction? callToAction;
-
-  /// Creation timestamp
-  @JsonKey(name: 'createdDate')
+  /// Timestamp when created
   @NullableTimestampConverter()
   final DateTime? createdDate;
 
-  /// Last update timestamp
-  @JsonKey(name: 'lastModifiedDate')
+  /// Username who created this landing page
+  final String? createdByUserLogin;
+
+  /// Timestamp when last modified
   @NullableTimestampConverter()
-  final DateTime? lastUpdated;
+  final DateTime? lastModifiedDate;
+
+  /// Username who last modified this landing page
+  final String? lastModifiedByUserLogin;
+
+  /// Page sections (only present when fetched via get#LandingPage)
+  final List<LandingPageSection>? sections;
+
+  /// Credibility info (only present when fetched via get#LandingPage)
+  final CredibilityElement? credibility;
+
+  /// Primary call-to-action (only present when fetched via get#LandingPage)
+  final CallToAction? cta;
 
   const LandingPage({
     required this.pageId,
     required this.pseudoId,
     required this.title,
-    required this.headline,
     this.hookType,
+    this.headline,
     this.subheading,
-    this.description,
-    this.heroImageUrl,
-    this.backgroundColor,
-    this.textColor,
-    this.status = 'ACTIVE',
     this.assessmentId,
-    this.sections,
-    this.credibilityElements,
-    this.callToAction,
+    this.privacyPolicyUrl,
+    required this.status,
     this.createdDate,
-    this.lastUpdated,
+    this.createdByUserLogin,
+    this.lastModifiedDate,
+    this.lastModifiedByUserLogin,
+    this.sections,
+    this.credibility,
+    this.cta,
   });
 
-  factory LandingPage.fromJson(Map<String, dynamic> json) =>
-      _$LandingPageFromJson(json);
-
-  Map<String, dynamic> toJson() => _$LandingPageToJson(this);
-
+  /// Creates a copy of this landing page with optionally replaced fields
   LandingPage copyWith({
     String? pageId,
     String? pseudoId,
     String? title,
-    String? headline,
     String? hookType,
+    String? headline,
     String? subheading,
-    String? description,
-    String? heroImageUrl,
-    String? backgroundColor,
-    String? textColor,
-    String? status,
     String? assessmentId,
-    List<LandingPageSection>? sections,
-    List<CredibilityElement>? credibilityElements,
-    CallToAction? callToAction,
+    String? privacyPolicyUrl,
+    String? status,
     DateTime? createdDate,
-    DateTime? lastUpdated,
+    String? createdByUserLogin,
+    DateTime? lastModifiedDate,
+    String? lastModifiedByUserLogin,
+    List<LandingPageSection>? sections,
+    CredibilityElement? credibility,
+    CallToAction? cta,
   }) {
     return LandingPage(
       pageId: pageId ?? this.pageId,
       pseudoId: pseudoId ?? this.pseudoId,
       title: title ?? this.title,
-      headline: headline ?? this.headline,
       hookType: hookType ?? this.hookType,
+      headline: headline ?? this.headline,
       subheading: subheading ?? this.subheading,
-      description: description ?? this.description,
-      heroImageUrl: heroImageUrl ?? this.heroImageUrl,
-      backgroundColor: backgroundColor ?? this.backgroundColor,
-      textColor: textColor ?? this.textColor,
-      status: status ?? this.status,
       assessmentId: assessmentId ?? this.assessmentId,
-      sections: sections ?? this.sections,
-      credibilityElements: credibilityElements ?? this.credibilityElements,
-      callToAction: callToAction ?? this.callToAction,
+      privacyPolicyUrl: privacyPolicyUrl ?? this.privacyPolicyUrl,
+      status: status ?? this.status,
       createdDate: createdDate ?? this.createdDate,
-      lastUpdated: lastUpdated ?? this.lastUpdated,
+      createdByUserLogin: createdByUserLogin ?? this.createdByUserLogin,
+      lastModifiedDate: lastModifiedDate ?? this.lastModifiedDate,
+      lastModifiedByUserLogin:
+          lastModifiedByUserLogin ?? this.lastModifiedByUserLogin,
+      sections: sections ?? this.sections,
+      credibility: credibility ?? this.credibility,
+      cta: cta ?? this.cta,
     );
   }
+
+  /// Converts JSON to LandingPage object
+  factory LandingPage.fromJson(Map<String, dynamic> json) =>
+      _$LandingPageFromJson(json['landingPage'] ?? json);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is LandingPage &&
           runtimeType == other.runtimeType &&
-          pageId == other.pageId &&
-          pseudoId == other.pseudoId;
+          pageId == other.pageId;
 
   @override
-  int get hashCode => pageId.hashCode ^ pseudoId.hashCode;
-
-  @override
-  String toString() =>
-      'LandingPage(pageId: $pageId, pseudoId: $pseudoId, title: $title)';
+  int get hashCode => pageId.hashCode;
 }
 
-/// Response wrapper for landing page list
+/// List wrapper for LandingPage objects
 @JsonSerializable()
 class LandingPages {
   final List<LandingPage> landingPages;
-  final int? totalResults;
-  final int? start;
-  final int? limit;
 
-  const LandingPages({
-    required this.landingPages,
-    this.totalResults,
-    this.start,
-    this.limit,
-  });
+  const LandingPages({required this.landingPages});
 
   factory LandingPages.fromJson(Map<String, dynamic> json) =>
       _$LandingPagesFromJson(json);
-
   Map<String, dynamic> toJson() => _$LandingPagesToJson(this);
 }
 
-/// Content section within a landing page
-@JsonSerializable()
+/// Landing Page Section model
+@JsonSerializable(explicitToJson: true)
 class LandingPageSection {
-  /// Section ID
-  final String sectionId;
+  /// Section unique identifier
+  final String? sectionId;
 
-  /// Section pseudo ID
-  final String pseudoId;
+  /// Tenant-unique identifier for section
+  final String? pseudoId;
 
   /// Section title
-  @JsonKey(name: 'sectionTitle')
-  final String title;
+  final String? sectionTitle;
 
-  /// Section content/description
-  @JsonKey(name: 'sectionDescription')
-  final String? description;
+  /// Section description/content
+  final String? sectionDescription;
 
   /// Section image URL
-  @JsonKey(name: 'sectionImageUrl')
-  final String? imageUrl;
+  final String? sectionImageUrl;
 
-  /// Display order
-  @JsonKey(name: 'sectionSequence')
-  final int sequenceNum;
-
-  /// Section type: hero, features, testimonials, etc.
-  final String? sectionType;
+  /// Display order/sequence
+  final int? sectionSequence;
 
   const LandingPageSection({
-    required this.sectionId,
-    required this.pseudoId,
-    required this.title,
-    this.description,
-    this.imageUrl,
-    this.sequenceNum = 0,
-    this.sectionType,
+    this.sectionId,
+    this.pseudoId,
+    this.sectionTitle,
+    this.sectionDescription,
+    this.sectionImageUrl,
+    this.sectionSequence,
   });
 
   factory LandingPageSection.fromJson(Map<String, dynamic> json) =>
@@ -242,54 +199,43 @@ class LandingPageSection {
   Map<String, dynamic> toJson() => _$LandingPageSectionToJson(this);
 
   @override
-  String toString() =>
-      'LandingPageSection(sectionId: $sectionId, title: $title)';
+  String toString() => 'LandingPageSection($sectionId, $sectionTitle)';
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LandingPageSection &&
+          runtimeType == other.runtimeType &&
+          sectionId == other.sectionId;
+
+  @override
+  int get hashCode => sectionId.hashCode;
 }
 
-/// Credibility element (testimonial, logo, certification, etc.)
-@JsonSerializable()
+/// Credibility Element model
+@JsonSerializable(explicitToJson: true)
 class CredibilityElement {
-  /// Credibility element ID
-  final String credibilityId;
+  /// Credibility unique identifier
+  final String? credibilityId;
 
-  /// Element pseudo ID
-  final String pseudoId;
+  /// Tenant-unique identifier for credibility
+  final String? pseudoId;
 
-  /// Element type: testimonial, logo, certification, statistic
-  final String? elementType;
+  /// Creator bio text
+  final String? creatorBio;
 
-  /// Element title
-  final String? title;
+  /// Background/experience text
+  final String? backgroundText;
 
-  /// Element content/description
-  final String? description;
-
-  /// Associated image URL
-  final String? imageUrl;
-
-  /// Author/source name (for testimonials)
-  final String? authorName;
-
-  /// Author title/position
-  final String? authorTitle;
-
-  /// Company/organization name
-  final String? companyName;
-
-  /// Display order
-  final int sequenceNum;
+  /// Creator image URL
+  final String? creatorImageUrl;
 
   const CredibilityElement({
-    required this.credibilityId,
-    required this.pseudoId,
-    this.elementType,
-    this.title,
-    this.description,
-    this.imageUrl,
-    this.authorName,
-    this.authorTitle,
-    this.companyName,
-    this.sequenceNum = 0,
+    this.credibilityId,
+    this.pseudoId,
+    this.creatorBio,
+    this.backgroundText,
+    this.creatorImageUrl,
   });
 
   factory CredibilityElement.fromJson(Map<String, dynamic> json) =>
@@ -298,34 +244,47 @@ class CredibilityElement {
   Map<String, dynamic> toJson() => _$CredibilityElementToJson(this);
 
   @override
-  String toString() =>
-      'CredibilityElement(credibilityId: $credibilityId, type: $elementType)';
+  String toString() => 'CredibilityElement($credibilityId)';
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CredibilityElement &&
+          runtimeType == other.runtimeType &&
+          credibilityId == other.credibilityId;
+
+  @override
+  int get hashCode => credibilityId.hashCode;
 }
 
-/// Call-to-action configuration
-@JsonSerializable()
+/// Call To Action model
+@JsonSerializable(explicitToJson: true)
 class CallToAction {
-  /// CTA button text
+  /// CTA unique identifier
+  final String? ctaId;
+
+  /// Tenant-unique identifier for CTA
+  final String? pseudoId;
+
+  /// Button text
   final String? buttonText;
 
-  /// CTA action type: assessment, form, external_link, etc.
-  final String? actionType;
+  /// Estimated time to complete
+  final String? estimatedTime;
 
-  /// Target URL or route
-  final String? actionTarget;
+  /// Cost (e.g., "Free")
+  final String? cost;
 
-  /// Button style/theme
-  final String? buttonStyle;
-
-  /// Additional CTA text/description
-  final String? description;
+  /// Value promise text
+  final String? valuePromise;
 
   const CallToAction({
+    this.ctaId,
+    this.pseudoId,
     this.buttonText,
-    this.actionType,
-    this.actionTarget,
-    this.buttonStyle,
-    this.description,
+    this.estimatedTime,
+    this.cost,
+    this.valuePromise,
   });
 
   factory CallToAction.fromJson(Map<String, dynamic> json) =>
@@ -334,6 +293,15 @@ class CallToAction {
   Map<String, dynamic> toJson() => _$CallToActionToJson(this);
 
   @override
-  String toString() =>
-      'CallToAction(buttonText: $buttonText, actionType: $actionType)';
+  String toString() => 'CallToAction($ctaId, $buttonText)';
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallToAction &&
+          runtimeType == other.runtimeType &&
+          ctaId == other.ctaId;
+
+  @override
+  int get hashCode => ctaId.hashCode;
 }

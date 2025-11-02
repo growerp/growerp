@@ -17,6 +17,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_assessment/growerp_assessment.dart';
+import '../src/screens/landing_page_assessment_flow_screen.dart';
 
 class ConfigurableLandingPage extends StatefulWidget {
   const ConfigurableLandingPage({
@@ -118,11 +119,12 @@ class _ConfigurableLandingPageState extends State<ConfigurableLandingPage> {
   }
 
   Widget _buildDefaultContent(BuildContext context) {
-    return const _GoogleStitchLandingPage(
-      landingPage: LandingPage(
+    return _GoogleStitchLandingPage(
+      landingPage: const LandingPage(
         pageId: 'default',
         pseudoId: 'default',
         title: 'Business Assessment',
+        status: 'ACTIVE',
         headline: 'Discover Your Business Potential',
         subheading:
             'Answer 15 questions to find out what\'s holding your business back and how to unlock its full potential.',
@@ -130,32 +132,28 @@ class _ConfigurableLandingPageState extends State<ConfigurableLandingPage> {
           LandingPageSection(
             sectionId: 'section1',
             pseudoId: 'value-props',
-            title: 'Three Key Areas We Assess',
-            description:
+            sectionTitle: 'Three Key Areas We Assess',
+            sectionDescription:
                 'Our comprehensive assessment evaluates your business across three critical dimensions: Business Strategy & Planning, Operations & Efficiency, and Market Position & Growth.',
           ),
         ],
-        credibilityElements: [
-          CredibilityElement(
-            credibilityId: 'cred1',
-            pseudoId: 'testimonial',
-            elementType: 'testimonial',
-            title: 'Trusted by 1000+ Businesses',
-            description:
-                'Our assessment methodology is based on proven business frameworks and has helped over 1,000 businesses identify growth opportunities and overcome challenges.',
-            authorName: 'Business Growth Institute',
-            authorTitle: 'Certified Business Consultants',
-          ),
-        ],
-        callToAction: CallToAction(
+        credibility: CredibilityElement(
+          credibilityId: 'cred1',
+          pseudoId: 'testimonial',
+          creatorBio: 'Trusted by 1000+ Businesses',
+          backgroundText:
+              'Our assessment methodology is based on proven business frameworks and has helped over 1,000 businesses identify growth opportunities and overcome challenges.',
+        ),
+        cta: CallToAction(
+          ctaId: 'cta1',
           buttonText: 'Start Free Assessment',
-          description:
+          valuePromise:
               'Get personalized recommendations in just 3 minutes - completely free!',
-          actionType: 'assessment',
-          actionTarget: '/assessment',
         ),
       ),
-      valuePropositions: [
+      pageId: widget.pageId,
+      ownerPartyId: widget.ownerPartyId,
+      valuePropositions: const [
         'Business Strategy & Planning',
         'Operations & Efficiency',
         'Market Position & Growth',
@@ -168,11 +166,11 @@ class _ConfigurableLandingPageState extends State<ConfigurableLandingPage> {
     List<String> valueProps = [];
     if (page.sections != null && page.sections!.isNotEmpty) {
       final section = page.sections!.first;
-      if (section.description != null) {
+      if (section.sectionDescription != null) {
         // Simple parsing - in a real implementation, this could be more sophisticated
         // For now, split by commas or use default values
-        if (section.description!.contains(',')) {
-          valueProps = section.description!
+        if (section.sectionDescription!.contains(',')) {
+          valueProps = section.sectionDescription!
               .split(',')
               .map((e) => e.trim())
               .toList();
@@ -189,6 +187,8 @@ class _ConfigurableLandingPageState extends State<ConfigurableLandingPage> {
 
     return _GoogleStitchLandingPage(
       landingPage: page,
+      pageId: widget.pageId,
+      ownerPartyId: widget.ownerPartyId,
       valuePropositions: valueProps.isNotEmpty ? valueProps : null,
     );
   }
@@ -197,10 +197,14 @@ class _ConfigurableLandingPageState extends State<ConfigurableLandingPage> {
 class _GoogleStitchLandingPage extends StatelessWidget {
   const _GoogleStitchLandingPage({
     required this.landingPage,
+    required this.pageId,
+    this.ownerPartyId,
     this.valuePropositions,
   });
 
   final LandingPage landingPage;
+  final String pageId;
+  final String? ownerPartyId;
   final List<String>? valuePropositions;
 
   @override
@@ -226,13 +230,12 @@ class _GoogleStitchLandingPage extends StatelessWidget {
             ),
 
           // Credibility Section
-          if (landingPage.credibilityElements != null &&
-              landingPage.credibilityElements!.isNotEmpty)
+          if (landingPage.credibility != null)
             _buildCredibilitySection(context, isDesktop, isTablet, isMobile),
 
-          // Final CTA Section
-          if (landingPage.callToAction != null)
-            _buildFinalCtaSection(context, isDesktop, isTablet, isMobile),
+          // CTA Section
+          if (landingPage.cta != null)
+            _buildPrimaryCta(context, landingPage, pageId, ownerPartyId),
 
           // Footer with Privacy Policy
           _buildFooter(context),
@@ -406,7 +409,7 @@ class _GoogleStitchLandingPage extends StatelessWidget {
       children: [
         // Hook/Headline
         Text(
-          landingPage.headline,
+          landingPage.headline ?? 'Welcome',
           style: TextStyle(
             color: Colors.white,
             fontSize: isDesktop ? 48 : 32,
@@ -438,13 +441,22 @@ class _GoogleStitchLandingPage extends StatelessWidget {
         const SizedBox(height: 40),
 
         // Primary CTA Button
-        if (landingPage.callToAction != null)
-          _buildPrimaryCta(context, landingPage.callToAction!),
+        if (landingPage.cta != null)
+          _buildPrimaryCta(context, landingPage, pageId, ownerPartyId),
       ],
     );
   }
 
-  Widget _buildPrimaryCta(BuildContext context, CallToAction cta) {
+  Widget _buildPrimaryCta(
+    BuildContext context,
+    LandingPage landingPage,
+    String pageId,
+    String? ownerPartyId,
+  ) {
+    if (landingPage.cta == null) {
+      return const SizedBox.shrink();
+    }
+    final cta = landingPage.cta!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -465,7 +477,17 @@ class _GoogleStitchLandingPage extends StatelessWidget {
           ),
           child: ElevatedButton(
             onPressed: () {
-              Navigator.pushNamed(context, cta.actionTarget ?? '/assessment');
+              // Navigate to assessment flow with current landing page
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => LandingPageAssessmentFlowScreen(
+                    pageId: pageId,
+                    ownerPartyId: ownerPartyId,
+                    assessmentId: null, // Will be loaded from landing page
+                    startAssessmentFlow: true,
+                  ),
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
@@ -495,7 +517,7 @@ class _GoogleStitchLandingPage extends StatelessWidget {
         const SizedBox(height: 16),
 
         // CTA Details
-        if (cta.description != null && cta.description!.isNotEmpty)
+        if (cta.valuePromise != null && cta.valuePromise!.isNotEmpty)
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -512,7 +534,7 @@ class _GoogleStitchLandingPage extends StatelessWidget {
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
-                  cta.description!,
+                  cta.valuePromise!,
                   style: TextStyle(
                     color: Color.fromARGB(
                       (0.8 * 255).toInt(),
@@ -536,129 +558,55 @@ class _GoogleStitchLandingPage extends StatelessWidget {
     bool isTablet,
     bool isMobile,
   ) {
-    final section = landingPage.sections!.first;
-
-    return Container(
-      width: double.infinity,
-      color: Colors.grey[50],
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: isDesktop ? 80 : (isTablet ? 40 : 20),
-          vertical: isDesktop ? 120 : (isTablet ? 80 : 60),
-        ),
-        child: Column(
-          children: [
-            // Section Title
-            Text(
-              section.title,
-              style: TextStyle(
-                fontSize: isDesktop ? 36 : 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-
-            // Section Description
-            if (section.description != null && section.description!.isNotEmpty)
-              Text(
-                section.description!,
-                style: TextStyle(
-                  fontSize: isDesktop ? 18 : 16,
-                  color: Colors.grey[600],
-                  height: 1.6,
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-            const SizedBox(height: 60),
-
-            // Three key areas
-            if (valuePropositions != null && valuePropositions!.isNotEmpty)
-              isDesktop
-                  ? _buildDesktopValueProps(valuePropositions!)
-                  : _buildMobileValueProps(valuePropositions!, isMobile),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDesktopValueProps(List<String> items) {
-    return Row(
-      children: items
-          .take(3)
-          .map(
-            (item) => Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: _buildValuePropCard(item),
-              ),
-            ),
-          )
-          .toList(),
-    );
-  }
-
-  Widget _buildMobileValueProps(List<String> items, bool isMobile) {
+    // Display all sections from the backend
     return Column(
-      children: items
-          .take(3)
-          .map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: _buildValuePropCard(item),
+      children: landingPage.sections!.asMap().entries.map((entry) {
+        final index = entry.key;
+        final section = entry.value;
+        return Container(
+          width: double.infinity,
+          color: index.isEven ? Colors.grey[50] : Colors.white,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isDesktop ? 80 : (isTablet ? 40 : 20),
+              vertical: isDesktop ? 80 : (isTablet ? 60 : 50),
             ),
-          )
-          .toList(),
-    );
-  }
+            child: Column(
+              children: [
+                // Section Title
+                Text(
+                  section.sectionTitle ?? 'Section',
+                  style: TextStyle(
+                    fontSize: isDesktop ? 36 : 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
 
-  Widget _buildValuePropCard(String title) {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Color.fromARGB(
-              (0.1 * 255).toInt(),
-              ((Colors.grey.r * 255.0).round() & 0xff),
-              ((Colors.grey.g * 255.0).round() & 0xff),
-              ((Colors.grey.b * 255.0).round() & 0xff),
+                // Section Description
+                if (section.sectionDescription != null &&
+                    section.sectionDescription!.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isDesktop ? 100 : (isTablet ? 50 : 20),
+                    ),
+                    child: Text(
+                      section.sectionDescription!,
+                      style: TextStyle(
+                        fontSize: isDesktop ? 18 : 16,
+                        color: Colors.grey[600],
+                        height: 1.6,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+              ],
             ),
-            blurRadius: 20,
-            offset: const Offset(0, 5),
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-              ),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: const Icon(Icons.trending_up, color: Colors.white, size: 30),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+        );
+      }).toList(),
     );
   }
 
@@ -668,7 +616,7 @@ class _GoogleStitchLandingPage extends StatelessWidget {
     bool isTablet,
     bool isMobile,
   ) {
-    final credibility = landingPage.credibilityElements!.first;
+    final credibility = landingPage.credibility;
 
     return Container(
       width: double.infinity,
@@ -681,7 +629,7 @@ class _GoogleStitchLandingPage extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              credibility.title ?? 'Credibility',
+              'Credibility',
               style: TextStyle(
                 fontSize: isDesktop ? 32 : 24,
                 fontWeight: FontWeight.bold,
@@ -700,10 +648,11 @@ class _GoogleStitchLandingPage extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  if (credibility.description != null &&
-                      credibility.description!.isNotEmpty)
+                  if (credibility != null &&
+                      credibility.creatorBio != null &&
+                      credibility.creatorBio!.isNotEmpty)
                     Text(
-                      '"${credibility.description!}"',
+                      '"${credibility.creatorBio!}"',
                       style: TextStyle(
                         fontSize: isDesktop ? 20 : 18,
                         fontStyle: FontStyle.italic,
@@ -715,10 +664,11 @@ class _GoogleStitchLandingPage extends StatelessWidget {
 
                   const SizedBox(height: 24),
 
-                  if (credibility.authorName != null &&
-                      credibility.authorName!.isNotEmpty)
+                  if (credibility != null &&
+                      credibility.backgroundText != null &&
+                      credibility.backgroundText!.isNotEmpty)
                     Text(
-                      '— ${credibility.authorName}${credibility.authorTitle != null ? ', ${credibility.authorTitle}' : ''}',
+                      '— ${credibility.backgroundText!}',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -727,108 +677,6 @@ class _GoogleStitchLandingPage extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                 ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFinalCtaSection(
-    BuildContext context,
-    bool isDesktop,
-    bool isTablet,
-    bool isMobile,
-  ) {
-    final cta = landingPage.callToAction!;
-
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: isDesktop ? 80 : (isTablet ? 40 : 20),
-          vertical: isDesktop ? 100 : (isTablet ? 60 : 50),
-        ),
-        child: Column(
-          children: [
-            Text(
-              'Ready to Get Started?',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: isDesktop ? 36 : 28,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-
-            if (cta.description != null && cta.description!.isNotEmpty)
-              Text(
-                cta.description!,
-                style: TextStyle(
-                  color: Color.fromARGB(
-                    (0.9 * 255).toInt(),
-                    ((Colors.white.r * 255.0).round() & 0xff),
-                    ((Colors.white.g * 255.0).round() & 0xff),
-                    ((Colors.white.b * 255.0).round() & 0xff),
-                  ),
-                  fontSize: isDesktop ? 18 : 16,
-                  height: 1.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-            const SizedBox(height: 40),
-
-            Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Color.fromARGB(
-                      (0.2 * 255).toInt(),
-                      ((Colors.black.r * 255.0).round() & 0xff),
-                      ((Colors.black.g * 255.0).round() & 0xff),
-                      ((Colors.black.b * 255.0).round() & 0xff),
-                    ),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    cta.actionTarget ?? '/assessment',
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: const Color(0xFF667eea),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isDesktop ? 50 : 40,
-                    vertical: isDesktop ? 25 : 20,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  cta.buttonText ?? 'Learn More',
-                  style: TextStyle(
-                    fontSize: isDesktop ? 20 : 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
               ),
             ),
           ],

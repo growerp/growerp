@@ -5,6 +5,8 @@ This file contains the complete landing page structure and assessment for busine
 Based on: flutter/packages/landing_page/general_landing_page.md
 Entities: LandingPage, PageSection, CredibilityInfo, CredibilityStatistic, PrimaryCTA, Assessment,
 AssessmentQuestion, AssessmentQuestionOption, ScoringThreshold
+
+this file is loaded for every owner who request demo data.
 -->
 <entity-facade-xml type="seed-initial">
 

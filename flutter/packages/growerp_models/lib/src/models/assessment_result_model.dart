@@ -33,10 +33,10 @@ class AssessmentResult {
   final String? respondentCompany;
 
   /// JSON encoded answers data
-  final String answersData;
+  final String? answersData;
 
   /// Timestamp when submitted
-  final DateTime createdDate;
+  final DateTime? createdDate;
 
   const AssessmentResult({
     required this.resultId,
@@ -48,8 +48,8 @@ class AssessmentResult {
     required this.respondentEmail,
     this.respondentPhone,
     this.respondentCompany,
-    required this.answersData,
-    required this.createdDate,
+    this.answersData,
+    this.createdDate,
   });
 
   AssessmentResult copyWith({

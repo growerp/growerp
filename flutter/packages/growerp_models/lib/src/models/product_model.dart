@@ -15,7 +15,6 @@
 import 'dart:convert';
 import 'package:universal_io/io.dart';
 
-import 'package:equatable/equatable.dart';
 import 'dart:typed_data';
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -28,7 +27,7 @@ part 'product_model.freezed.dart';
 part 'product_model.g.dart';
 
 @freezed
-abstract class Product extends Equatable with _$Product {
+abstract class Product with _$Product {
   const Product._();
   const factory Product({
     @Default("") String productId,
@@ -50,9 +49,6 @@ abstract class Product extends Equatable with _$Product {
 
   factory Product.fromJson(Map<String, dynamic> json) =>
       _$ProductFromJson(json['product'] ?? json);
-
-  @override
-  List<Object?> get props => [productId];
 
   @override
   String toString() => '$productName[$productId]';

@@ -149,15 +149,17 @@ class _CredibilityManagementScreenState
       margin: const EdgeInsets.only(bottom: 8.0),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: Theme.of(context).primaryColor.withAlpha((0.1 * 255).round()),
+          backgroundColor:
+              Theme.of(context).primaryColor.withAlpha((0.1 * 255).round()),
           child: Icon(
             Icons.verified_user,
             color: Theme.of(context).primaryColor,
           ),
         ),
-        title: Text(element.title ?? 'Credibility'),
-        subtitle:
-            element.description != null ? Text(element.description!) : null,
+        title: Text(element.creatorBio ?? 'Credibility'),
+        subtitle: element.backgroundText != null
+            ? Text(element.backgroundText!)
+            : null,
         trailing: PopupMenuButton<String>(
           onSelected: (value) => _handleCredibilityAction(value, element),
           itemBuilder: (context) => [
@@ -186,7 +188,8 @@ class _CredibilityManagementScreenState
       margin: const EdgeInsets.only(bottom: 8.0),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: Theme.of(context).primaryColor.withAlpha((0.1 * 255).round()),
+          backgroundColor:
+              Theme.of(context).primaryColor.withAlpha((0.1 * 255).round()),
           child: Icon(
             Icons.trending_up,
             color: Theme.of(context).primaryColor,
@@ -208,7 +211,7 @@ class _CredibilityManagementScreenState
         _showCredibilityDialog(element: element);
         break;
       case 'delete':
-        _deleteCredibilityElement(element.credibilityId);
+        _deleteCredibilityElement(element.credibilityId ?? '');
         break;
     }
   }
@@ -227,9 +230,10 @@ class _CredibilityManagementScreenState
   }
 
   void _showCredibilityDialog({CredibilityElement? element}) {
-    final titleController = TextEditingController(text: element?.title ?? '');
+    final titleController =
+        TextEditingController(text: element?.creatorBio ?? '');
     final descriptionController =
-        TextEditingController(text: element?.description ?? '');
+        TextEditingController(text: element?.backgroundText ?? '');
 
     showDialog(
       context: context,
@@ -278,7 +282,7 @@ class _CredibilityManagementScreenState
                 } else {
                   context.read<CredibilityBloc>().add(CredibilityInfoUpdate(
                         pageId: widget.pageId,
-                        infoId: element.credibilityId,
+                        infoId: element.credibilityId ?? '',
                         infoTitle: titleController.text.trim(),
                         infoDescription:
                             descriptionController.text.trim().isNotEmpty

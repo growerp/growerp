@@ -8,21 +8,23 @@
         status="Active" createdByUserLogin="admin" />
 
     <!-- Landing Page for ERP Readiness Assessment -->
-    <growerp.landing.LandingPage pageId="ERP_LANDING" pseudoId="erp-landing" ownerPartyId="GROWERP"
-        assessmentId="ERP_READINESS" title="ERP Readiness Assessment" hookType="ResultsHook"
+    <growerp.landing.LandingPage pageId="ERP_LANDING_PAGE"
+        pseudoId="erp-landing-page" ownerPartyId="GROWERP"
+        assessmentId="ERP_READINESS" title="ERP Readiness Assessment"
+        hookType="ResultsHook"
         headline="Are you ready to run a successful, seamless ERP implementation?"
         subheading="Answer 15 questions to find out why you might be experiencing complexity and what steps you need to take to guarantee ERP success."
         status="Published" privacyPolicyUrl="/privacy" createdByUserLogin="admin" />
 
     <!-- Value Proposition Section -->
-    <growerp.landing.PageSection sectionId="ERP_VP" pseudoId="erp-vp" pageId="ERP_LANDING"
+    <growerp.landing.PageSection sectionId="ERP_VP" pseudoId="erp-vp" pageId="ERP_LANDING_PAGE"
         sectionSequence="1"
         sectionTitle="Measure and Improve Three Key Areas"
         sectionDescription="Take this assessment so that we can measure and improve three key areas essential for successful enterprise transformation: Data Governance &amp; Quality, Process Standardization, and Organizational Change Management." />
 
     <!-- Credibility Section -->
     <growerp.landing.CredibilityInfo credibilityId="ERP_CRED" pseudoId="erp-cred"
-        pageId="ERP_LANDING"
+        pageId="ERP_LANDING_PAGE"
         creatorBio="This assessment was created by GrowERP, a team specialized in scaling businesses and optimizing enterprise systems."
         backgroundText="Our background involves two decades of scaling multiple companies and building lead generation systems. We have consulted on over 50 major system migrations across various industries." />
     <growerp.landing.CredibilityStatistic statisticId="ERP_STAT1" pseudoId="erp-stat1"
@@ -35,7 +37,7 @@
         sequence="2" />
 
     <!-- Call to Action -->
-    <growerp.landing.PrimaryCTA ctaId="ERP_CTA" pseudoId="erp-cta" pageId="ERP_LANDING"
+    <growerp.landing.PrimaryCTA ctaId="ERP_CTA" pseudoId="erp-cta" pageId="ERP_LANDING_PAGE"
         buttonText="Start the ERP Readiness Quiz Now!" estimatedTime="3 minutes" cost="Free"
         valuePromise="Get immediate, tailored recommendations on how you can improve your ERP readiness score." />
 

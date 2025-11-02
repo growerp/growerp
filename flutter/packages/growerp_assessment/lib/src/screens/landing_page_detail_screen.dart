@@ -160,14 +160,6 @@ class _LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                           ),
                         ],
                       ),
-                      if (widget.landingPage.description?.isNotEmpty ==
-                          true) ...[
-                        const SizedBox(height: 16),
-                        Text(
-                          widget.landingPage.description!,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
                     ],
                   ),
                 ),
@@ -198,18 +190,18 @@ class _LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                       ),
                       const SizedBox(height: 16),
                       _buildInfoRow('Pseudo ID', widget.landingPage.pseudoId),
-                      _buildInfoRow('Headline', widget.landingPage.headline),
                       _buildInfoRow(
-                          'Subheading', widget.landingPage.subheading),
-                      _buildInfoRow('Hook Type', widget.landingPage.hookType),
+                          'Headline', widget.landingPage.headline ?? ''),
                       _buildInfoRow(
-                          'Hero Image URL', widget.landingPage.heroImageUrl),
+                          'Subheading', widget.landingPage.subheading ?? ''),
+                      _buildInfoRow(
+                          'Hook Type', widget.landingPage.hookType ?? ''),
                       if (widget.landingPage.createdDate != null)
                         _buildInfoRow('Created',
                             _formatDate(widget.landingPage.createdDate!)),
-                      if (widget.landingPage.lastUpdated != null)
-                        _buildInfoRow('Last Updated',
-                            _formatDate(widget.landingPage.lastUpdated!)),
+                      if (widget.landingPage.lastModifiedDate != null)
+                        _buildInfoRow('Last Modified',
+                            _formatDate(widget.landingPage.lastModifiedDate!)),
                     ],
                   ),
                 ),
@@ -352,8 +344,6 @@ class _LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
       title: '${widget.landingPage.title} (Copy)',
       headline: widget.landingPage.headline,
       subheading: widget.landingPage.subheading,
-      description: widget.landingPage.description,
-      heroImageUrl: widget.landingPage.heroImageUrl,
       hookType: widget.landingPage.hookType,
       status: 'DRAFT', // Always start duplicates as draft
     );

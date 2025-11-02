@@ -14,7 +14,7 @@ Service definitions for landing page, sections, credibility, and CTA management
   <!-- ============================================ -->
 
   <!-- getLandingPage: Retrieve single landing page -->
-  <service verb="get" noun="LandingPage" authenticate="false">
+  <service verb="get" noun="LandingPage" authenticate="anonymous-view">
     <description>Get landing page by ID (system-wide) or pseudoId (tenant-unique). Public access for display.</description>
     <in-parameters>
       <parameter name="pageId" type="String" required="true">
@@ -26,17 +26,37 @@ Service definitions for landing page, sections, credibility, and CTA management
       </parameter>
     </in-parameters>
     <out-parameters>
-      <parameter name="page" type="Map">
+      <parameter name="landingPage" type="Map">
         <description>Landing page object with all fields, sections, credibility, CTA</description>
-      </parameter>
-      <parameter name="sections" type="List">
-        <description>List of page sections ordered by sequence</description>
-      </parameter>
-      <parameter name="credibility" type="Map">
-        <description>Credibility info with statistics</description>
-      </parameter>
-      <parameter name="cta" type="Map">
-        <description>Primary CTA button configuration</description>
+        <parameter name="pageId" type="String" />
+        <parameter name="pseudoId" type="String" />
+        <parameter name="title" type="String" />
+        <parameter name="headline" type="String" />
+        <parameter name="description" type="String" />
+        <parameter name="status" type="String" />
+        <parameter name="createdDate" type="Timestamp" />
+        <parameter name="lastModifiedDate" type="Timestamp" />
+        <parameter name="sections" type="List">
+          <description>List of page sections</description>
+          <parameter name="sectionId" type="String" />
+          <parameter name="sectionTitle" type="String" />
+          <parameter name="sectionSequence" type="Integer" />
+          <parameter name="sectionText" type="String" />
+        </parameter>
+        <parameter name="credibility" type="Map">
+          <description>Credibility/bio section</description>
+          <parameter name="credibilityId" type="String" />
+          <parameter name="creatorBio" type="String" />
+          <parameter name="backgroundText" type="String" />
+          <parameter name="creatorImageUrl" type="String" />
+        </parameter>
+        <parameter name="cta" type="Map">
+          <description>Primary call-to-action</description>
+          <parameter name="ctaId" type="String" />
+          <parameter name="buttonText" type="String" />
+          <parameter name="estimatedTime" type="String" />
+          <parameter name="cost" type="String" />
+        </parameter>
       </parameter>
     </out-parameters>
     <actions>
@@ -51,17 +71,11 @@ Service definitions for landing page, sections, credibility, and CTA management
       <if condition="!ownerPartyId">
         <return error="true" message="Unable to resolve owner party for landing page request" />
       </if>
-      <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="store">
-        <field-map field-name="productStoreId" from="ownerPartyId" />
-      </entity-find-one>
-      <entity-find-one entity-name="mantle.party.Party" value-field="party">
-        <field-map field-name="partyId" from="store.organizationPartyId" />
-      </entity-find-one>
       <!-- Original database logic for other pages -->
-      <log message="=====1=looking for pseudoId $pageId and owner: ${party.ownerPartyId}" />
+      <log message="=====1=looking for pseudoId $pageId and owner: $ownerPartyId" />
       <entity-find entity-name="growerp.landing.LandingPage" list="pageList">
         <econdition field-name="pseudoId" from="pageId" />
-        <econdition field-name="ownerPartyId" from="party.ownerPartyId" />
+        <econdition field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find>
 
       <if condition="!pageList">
@@ -75,6 +89,11 @@ Service definitions for landing page, sections, credibility, and CTA management
         <econdition field-name="pageId" from="page.pageId" />
         <order-by field-name="sectionSequence" />
       </entity-find>
+      <log level="info" message="Found ${sections?.size() ?: 0} sections for page ${page.pageId}" />
+      <iterate list="sections" entry="section">
+        <log level="info"
+          message="  - Section: ${section.sectionTitle} (${section.sectionId}, seq=${section.sectionSequence})" />
+      </iterate>
 
       <!-- Get credibility info -->
       <entity-find entity-name="growerp.landing.CredibilityInfo" list="credibilityList">
@@ -88,6 +107,15 @@ Service definitions for landing page, sections, credibility, and CTA management
       </entity-find>
       <set field="cta"
         from="ctaList ? ctaList[0] : [buttonText: 'Get Started', estimatedTime: '5 min', cost: 'Free']" />
+
+      <!-- Build unified landingPage response with page data + nested dependents -->
+      <script>
+        Map pageMap = page.getMap()
+        pageMap.put('sections', sections ?: [])
+        pageMap.put('credibility', credibility ?: [:])
+        pageMap.put('cta', cta ?: [:])
+        context.landingPage = pageMap
+      </script>
     </actions>
   </service>
 
@@ -111,6 +139,17 @@ Service definitions for landing page, sections, credibility, and CTA management
     <out-parameters>
       <parameter name="landingPages" type="List">
         <description>List of landing page objects</description>
+        <parameter name="pageId" type="String" />
+        <parameter name="pseudoId" type="String" />
+        <parameter name="title" type="String" />
+        <parameter name="hookType" type="String" />
+        <parameter name="headline" type="String" />
+        <parameter name="subheading" type="String" />
+        <parameter name="assessmentId" type="String" />
+        <parameter name="privacyPolicyUrl" type="String" />
+        <parameter name="status" type="String" />
+        <parameter name="createdDate" type="Timestamp" />
+        <parameter name="lastUpdated" type="Timestamp" />
       </parameter>
       <parameter name="totalResults" type="Integer">
         <description>Total number of landing pages matching filter</description>
@@ -631,6 +670,14 @@ Service definitions for landing page, sections, credibility, and CTA management
     <out-parameters>
       <parameter name="sections" type="List">
         <description>List of page sections ordered by sequence</description>
+        <parameter name="sectionId" type="String" />
+        <parameter name="pageId" type="String" />
+        <parameter name="sectionSequence" type="Integer" />
+        <parameter name="sectionName" type="String" />
+        <parameter name="sectionText" type="String" />
+        <parameter name="sectionType" type="String" />
+        <parameter name="isActive" type="String" />
+        <parameter name="createdDate" type="Timestamp" />
       </parameter>
     </out-parameters>
     <actions>

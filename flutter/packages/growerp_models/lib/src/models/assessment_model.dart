@@ -1,4 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'assessment_question_model.dart';
+import 'scoring_threshold_model.dart';
 
 part 'assessment_model.g.dart';
 
@@ -31,7 +33,9 @@ class NullableTimestampConverter implements JsonConverter<DateTime?, int?> {
 /// Supports dual-ID strategy:
 /// - assessmentId: System-wide unique identifier
 /// - pseudoId: Tenant-unique, user-facing identifier
-@JsonSerializable()
+///
+/// When fetched via get#Assessment service, includes nested questions and thresholds
+@JsonSerializable(explicitToJson: true)
 class Assessment {
   /// System-wide unique identifier
   @JsonKey(defaultValue: 'unknown')
@@ -66,6 +70,12 @@ class Assessment {
   /// Username who last modified this assessment
   final String? lastModifiedByUserLogin;
 
+  /// Questions with nested options (only present when fetched via get#Assessment)
+  final List<AssessmentQuestion>? questions;
+
+  /// Scoring thresholds (only present when fetched via get#Assessment)
+  final List<ScoringThreshold>? thresholds;
+
   const Assessment({
     required this.assessmentId,
     required this.pseudoId,
@@ -76,6 +86,8 @@ class Assessment {
     this.createdByUserLogin,
     this.lastModifiedDate,
     this.lastModifiedByUserLogin,
+    this.questions,
+    this.thresholds,
   });
 
   /// Creates a copy of this assessment with optionally replaced fields
@@ -89,6 +101,8 @@ class Assessment {
     String? createdByUserLogin,
     DateTime? lastModifiedDate,
     String? lastModifiedByUserLogin,
+    List<AssessmentQuestion>? questions,
+    List<ScoringThreshold>? thresholds,
   }) {
     return Assessment(
       assessmentId: assessmentId ?? this.assessmentId,
@@ -101,12 +115,14 @@ class Assessment {
       lastModifiedDate: lastModifiedDate ?? this.lastModifiedDate,
       lastModifiedByUserLogin:
           lastModifiedByUserLogin ?? this.lastModifiedByUserLogin,
+      questions: questions ?? this.questions,
+      thresholds: thresholds ?? this.thresholds,
     );
   }
 
   /// Converts JSON to Assessment object
   factory Assessment.fromJson(Map<String, dynamic> json) =>
-      _$AssessmentFromJson(json);
+      _$AssessmentFromJson(json['assessment'] ?? json);
 
   /// Converts Assessment object to JSON
   Map<String, dynamic> toJson() => _$AssessmentToJson(this);

@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../bloc/assessment_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 /// Step 2: Assessment Questions Screen
 /// Displays assessment questions and collects answers
+/// Questions are already loaded by parent via AssessmentFetchAll
 class AssessmentQuestionsScreen extends StatefulWidget {
-  final String assessmentId;
+  final Assessment assessment;
   final Function(Map<String, dynamic>) onAnswersCollected;
   final VoidCallback onNext;
   final VoidCallback onPrevious;
 
   const AssessmentQuestionsScreen({
     Key? key,
-    required this.assessmentId,
+    required this.assessment,
     required this.onAnswersCollected,
     required this.onNext,
     required this.onPrevious,
@@ -29,27 +28,16 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
   int _currentQuestionIndex = 0;
   final Map<String, dynamic> _answers = {};
 
-  List<AssessmentQuestion> _questions = [];
-  bool _isLoading = true;
-
   @override
   void initState() {
     super.initState();
     _questionPageController = PageController();
-    _loadQuestions();
   }
 
   @override
   void dispose() {
     _questionPageController.dispose();
     super.dispose();
-  }
-
-  void _loadQuestions() {
-    // Load questions from backend via BLoC
-    context.read<AssessmentBloc>().add(
-          AssessmentFetchQuestions(assessmentId: widget.assessmentId),
-        );
   }
 
   void _answerQuestion(String questionId, String selectedOptionId) {
@@ -59,7 +47,8 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
   }
 
   void _nextQuestion() {
-    if (_currentQuestionIndex < _questions.length - 1) {
+    final questions = widget.assessment.questions ?? [];
+    if (_currentQuestionIndex < questions.length - 1) {
       _questionPageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -84,67 +73,23 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AssessmentBloc, AssessmentState>(
-      listener: (context, state) {
-        if (state.status == AssessmentStatus.success &&
-            state.questions.isNotEmpty) {
-          setState(() {
-            _questions = state.questions;
-            _isLoading = false;
-          });
-        } else if (state.status == AssessmentStatus.failure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                  'Error loading questions: ${state.message ?? 'Unknown error'}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Assessment - Step 2: Questions'),
-          elevation: 0,
-        ),
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _questions.isEmpty
-                ? _buildEmptyState(context)
-                : _buildQuestionView(context),
+    final questions = widget.assessment.questions ?? [];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Assessment - Step 2: Questions'),
+        elevation: 0,
       ),
+      body: questions.isEmpty
+          ? const Center(
+              child: Text('No questions available'),
+            )
+          : _buildQuestionView(context, questions),
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.info_outline, size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          Text(
-            'No questions available',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Please check back later',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton(
-            onPressed: widget.onPrevious,
-            child: const Text('Go Back'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuestionView(BuildContext context) {
+  Widget _buildQuestionView(
+      BuildContext context, List<AssessmentQuestion> questions) {
     final isMobile = MediaQuery.of(context).size.width < 600;
 
     return SingleChildScrollView(
@@ -164,7 +109,7 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
                 onPageChanged: (index) {
                   setState(() => _currentQuestionIndex = index);
                 },
-                children: _questions
+                children: questions
                     .map((question) => _buildQuestionCard(question))
                     .toList(),
               ),
@@ -181,6 +126,8 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
   }
 
   Widget _buildProgressIndicator() {
+    final questions = widget.assessment.questions ?? [];
+
     return Column(
       children: [
         Row(
@@ -206,7 +153,7 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Step 2 of 3 - Question ${_currentQuestionIndex + 1} of ${_questions.length}',
+          'Step 2 of 3 - Question ${_currentQuestionIndex + 1} of ${questions.length}',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.grey[600],
               ),
@@ -258,12 +205,14 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              question.questionText,
+              question.questionText ?? 'Untitled Question',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 24),
             Expanded(
-              child: _buildOptionsView(question),
+              child: question.questionType == 'OpenText'
+                  ? _buildOpenTextInput(question)
+                  : _buildOptionsView(question),
             ),
           ],
         ),
@@ -271,46 +220,82 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
     );
   }
 
-  Widget _buildOptionsView(AssessmentQuestion question) {
-    return FutureBuilder<List<AssessmentQuestionOption>>(
-      future: _loadOptions(question.questionId),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+  Widget _buildOpenTextInput(AssessmentQuestion question) {
+    final currentAnswer = _answers[question.questionId] as String? ?? '';
 
-        if (snapshot.hasError) {
-          return Center(
-            child: Text('Error loading options: ${snapshot.error}'),
-          );
-        }
-
-        final options = snapshot.data ?? [];
-        final selectedOptionId = _answers[question.questionId];
-
-        return ListView.separated(
-          itemCount: options.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final option = options[index];
-            final isSelected = selectedOptionId == option.optionId;
-
-            return _buildOptionTile(
-              option: option,
-              isSelected: isSelected,
-              onTap: () =>
-                  _answerQuestion(question.questionId, option.optionId),
-            );
-          },
-        );
-      },
+    return Column(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: TextEditingController(text: currentAnswer),
+            maxLines: null,
+            expands: true,
+            textAlignVertical: TextAlignVertical.top,
+            decoration: InputDecoration(
+              hintText: 'Enter your response here...',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              contentPadding: const EdgeInsets.all(16),
+            ),
+            onChanged: (value) {
+              setState(() {
+                _answers[question.questionId ?? ''] = value;
+              });
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          question.isRequired == true ? 'This field is required' : 'Optional',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey[600],
+              ),
+        ),
+      ],
     );
   }
 
-  Future<List<AssessmentQuestionOption>> _loadOptions(String questionId) async {
-    // In a real implementation, fetch from repository
-    // For now, return empty list
-    return [];
+  Widget _buildOptionsView(AssessmentQuestion question) {
+    // Options are already nested in the question from backend response
+    // Backend handles deduplication by optionId and sorts by optionSequence
+    final options = question.options ?? [];
+    final selectedOptionId = _answers[question.questionId];
+
+    if (options.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.warning, size: 48, color: Colors.orange[700]),
+            const SizedBox(height: 16),
+            Text(
+              'No options available for this question',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.orange[700],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      itemCount: options.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final option = options[index];
+        final isSelected = selectedOptionId == option.optionId;
+
+        return _buildOptionTile(
+          option: option,
+          isSelected: isSelected,
+          onTap: () =>
+              _answerQuestion(question.questionId ?? '', option.optionId ?? ''),
+        );
+      },
+    );
   }
 
   Widget _buildOptionTile({
@@ -348,7 +333,7 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  option.optionText,
+                  option.optionText ?? 'Option',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ),
@@ -360,7 +345,8 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
   }
 
   Widget _buildNavigationButtons(BuildContext context) {
-    final isLastQuestion = _currentQuestionIndex == _questions.length - 1;
+    final questions = widget.assessment.questions ?? [];
+    final isLastQuestion = _currentQuestionIndex == questions.length - 1;
 
     return Wrap(
       spacing: 12,

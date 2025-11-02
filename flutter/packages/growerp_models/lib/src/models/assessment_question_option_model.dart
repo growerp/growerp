@@ -6,38 +6,38 @@ part 'assessment_question_option_model.g.dart';
 @JsonSerializable()
 class AssessmentQuestionOption {
   /// System-wide unique identifier
-  final String optionId;
+  final String? optionId;
 
   /// Tenant-unique identifier
-  final String pseudoId;
+  final String? pseudoId;
 
   /// Question ID this option belongs to
-  final String questionId;
+  final String? questionId;
 
   /// Assessment ID (for context)
-  final String assessmentId;
+  final String? assessmentId;
 
   /// Display order within question
-  final int optionSequence;
+  final int? optionSequence;
 
   /// Option text/label
-  final String optionText;
+  final String? optionText;
 
   /// Score value for this option
-  final double optionScore;
+  final double? optionScore;
 
   /// Timestamp when created
-  final DateTime createdDate;
+  final DateTime? createdDate;
 
   const AssessmentQuestionOption({
-    required this.optionId,
-    required this.pseudoId,
-    required this.questionId,
-    required this.assessmentId,
-    required this.optionSequence,
-    required this.optionText,
-    required this.optionScore,
-    required this.createdDate,
+    this.optionId,
+    this.pseudoId,
+    this.questionId,
+    this.assessmentId,
+    this.optionSequence,
+    this.optionText,
+    this.optionScore,
+    this.createdDate,
   });
 
   AssessmentQuestionOption copyWith({

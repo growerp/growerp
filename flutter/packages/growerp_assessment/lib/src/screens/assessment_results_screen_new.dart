@@ -31,38 +31,42 @@ class AssessmentResultsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final score = _calculateScore();
-    final maxScore = _getMaxScore();
-    final percentage = maxScore > 0 ? (score / maxScore * 100).round() : 0;
+    return BlocBuilder<AssessmentBloc, AssessmentState>(
+      builder: (context, state) {
+        final score = _calculateScore(state);
+        final maxScore = _getMaxScore(state);
+        final percentage = maxScore > 0 ? (score / maxScore * 100).round() : 0;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Assessment Results'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () => _shareResults(context),
-            tooltip: 'Share Results',
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Assessment Results'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.share),
+                onPressed: () => _shareResults(context),
+                tooltip: 'Share Results',
+              ),
+            ],
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildScoreCard(score, maxScore, percentage),
-            const SizedBox(height: 24),
-            _buildAssessmentInfo(),
-            const SizedBox(height: 24),
-            _buildScoreBreakdown(),
-            const SizedBox(height: 24),
-            _buildRecommendations(percentage),
-            const SizedBox(height: 24),
-            _buildActionButtons(context),
-          ],
-        ),
-      ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildScoreCard(score, maxScore, percentage),
+                const SizedBox(height: 24),
+                _buildAssessmentInfo(),
+                const SizedBox(height: 24),
+                _buildScoreBreakdown(state),
+                const SizedBox(height: 24),
+                _buildRecommendations(percentage),
+                const SizedBox(height: 24),
+                _buildActionButtons(context, state),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -212,7 +216,7 @@ class AssessmentResultsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildScoreBreakdown() {
+  Widget _buildScoreBreakdown(AssessmentState state) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -230,7 +234,7 @@ class AssessmentResultsScreen extends StatelessWidget {
             ...answers.entries.map((entry) {
               final questionId = entry.key;
               final optionId = entry.value;
-              final score = _getOptionScore(questionId, optionId);
+              final score = _getOptionScore(questionId, optionId, state);
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Row(
@@ -332,7 +336,7 @@ class AssessmentResultsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
+  Widget _buildActionButtons(BuildContext context, AssessmentState state) {
     return Column(
       children: [
         SizedBox(
@@ -353,7 +357,7 @@ class AssessmentResultsScreen extends StatelessWidget {
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: () => _saveResults(context),
+                onPressed: () => _saveResults(context, state),
                 icon: const Icon(Icons.save),
                 label: const Text('Save Results'),
               ),
@@ -382,42 +386,54 @@ class AssessmentResultsScreen extends StatelessWidget {
     );
   }
 
-  double _calculateScore() {
+  double _calculateScore(AssessmentState state) {
     double totalScore = 0;
     for (final entry in answers.entries) {
       final questionId = entry.key;
       final optionId = entry.value;
-      totalScore += _getOptionScore(questionId, optionId);
+      totalScore += _getOptionScore(questionId, optionId, state);
     }
     return totalScore;
   }
 
-  double _getMaxScore() {
-    // Mock calculation - in real implementation, get from API
-    return answers.length * 4.0; // Assuming max score per question is 4
+  double _getMaxScore(AssessmentState state) {
+    // Calculate max score from all question options in assessment
+    double maxScore = 0.0;
+    for (final questionOptions in state.options.values) {
+      double maxPerQuestion = 0.0;
+      for (final option in questionOptions) {
+        if ((option.optionScore ?? 0) > maxPerQuestion) {
+          maxPerQuestion = option.optionScore ?? 0;
+        }
+      }
+      maxScore += maxPerQuestion;
+    }
+    return maxScore > 0
+        ? maxScore
+        : (answers.length * 4.0); // Fallback to 4 per question
   }
 
-  double _getOptionScore(String questionId, String optionId) {
-    // Mock scoring - in real implementation, get from API
-    switch (optionId) {
-      case '1':
-      case '5':
-      case '9':
-        return 1.0;
-      case '2':
-      case '6':
-      case '10':
-        return 2.0;
-      case '3':
-      case '7':
-      case '11':
-        return 3.0;
-      case '4':
-      case '8':
-      case '12':
-        return 4.0;
-      default:
-        return 0.0;
+  double _getOptionScore(
+      String questionId, String optionId, AssessmentState state) {
+    // Get actual score from backend option data
+    try {
+      final options = state.options[questionId] ?? [];
+      final option = options.firstWhere(
+        (o) => o.optionId == optionId,
+        orElse: () => AssessmentQuestionOption(
+          optionId: optionId,
+          pseudoId: 'opt_$optionId',
+          questionId: questionId,
+          assessmentId: '',
+          optionSequence: 0,
+          optionText: 'Option $optionId',
+          optionScore: 0.0,
+          createdDate: DateTime.now(),
+        ),
+      );
+      return option.optionScore ?? 0.0;
+    } catch (e) {
+      return 0.0;
     }
   }
 
@@ -469,7 +485,7 @@ class AssessmentResultsScreen extends StatelessWidget {
     );
   }
 
-  void _saveResults(BuildContext context) {
+  void _saveResults(BuildContext context, AssessmentState state) {
     try {
       // Submit assessment results to backend via BLoC
       final authState = context.read<AuthBloc>().state;
@@ -499,7 +515,7 @@ class AssessmentResultsScreen extends StatelessWidget {
       // Show success message
       HelperFunctions.showMessage(
         context,
-        'Assessment results submitted successfully!\nScore: ${_calculateScore().toStringAsFixed(1)}',
+        'Assessment results submitted successfully!\nScore: ${_calculateScore(state).toStringAsFixed(1)}',
         Colors.green,
       );
     } catch (e) {

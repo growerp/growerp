@@ -38,6 +38,7 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
       _onAssessmentFetch,
       transformer: assessmentDroppable(const Duration(milliseconds: 100)),
     );
+    on<AssessmentFetchAll>(_onAssessmentFetchAll);
     on<AssessmentCreate>(_onAssessmentCreate);
     on<AssessmentUpdate>(_onAssessmentUpdate);
     on<AssessmentDelete>(_onAssessmentDelete);
@@ -68,53 +69,52 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
       emit(state.copyWith(status: AssessmentStatus.loading));
 
       final response = await restClient.getAssessment(
-        assessmentId: event.assessmentId,
         start: start,
         limit: event.limit,
         statusId: event.statusId,
         searchString: event.searchString.isEmpty ? null : event.searchString,
       );
 
-      if (event.assessmentId != null && response.assessments.isNotEmpty) {
-        // Single assessment fetch with questions and thresholds
-        final assessment = response.assessments.first;
-        final questionsResponse = await restClient.getAssessmentQuestions(
-          assessmentId: assessment.assessmentId,
-        );
-        final thresholdsResponse = await restClient.getAssessmentThresholds(
-          assessmentId: assessment.assessmentId,
-        );
-
-        // Get options for each question
-        final optionsMap = <String, List<AssessmentQuestionOption>>{};
-        for (final question in questionsResponse.questions) {
-          final optionsResponse = await restClient.getAssessmentQuestionOptions(
-            assessmentId: assessment.assessmentId,
-            questionId: question.questionId,
-          );
-          optionsMap[question.questionId] = optionsResponse.options;
-        }
-
-        emit(state.copyWith(
-          status: AssessmentStatus.success,
-          selectedAssessment: assessment,
-          questions: questionsResponse.questions,
-          thresholds: thresholdsResponse.thresholds,
-          options: optionsMap,
-        ));
-      } else {
-        // List assessments
-        emit(state.copyWith(
-          status: AssessmentStatus.success,
-          assessments: current..addAll(response.assessments),
-          hasReachedMax: response.assessments.length < event.limit,
-          searchString: event.searchString,
-        ));
-      }
+      emit(state.copyWith(
+        status: AssessmentStatus.success,
+        assessments: current..addAll(response.assessments),
+        hasReachedMax: response.assessments.length < event.limit,
+        searchString: event.searchString,
+      ));
     } on DioException catch (e) {
       emit(state.copyWith(
         status: AssessmentStatus.failure,
         message: await getDioError(e),
+      ));
+    }
+  }
+
+  Future<void> _onAssessmentFetchAll(
+    AssessmentFetchAll event,
+    Emitter<AssessmentState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: AssessmentStatus.loading));
+
+      final assessment = await restClient.getAssessmentComplete(
+        assessmentId: event.assessmentId,
+        pseudoId: event.pseudoId,
+        ownerPartyId: event.ownerPartyId,
+      );
+
+      emit(state.copyWith(
+        status: AssessmentStatus.success,
+        selectedAssessment: assessment,
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+        status: AssessmentStatus.failure,
+        message: await getDioError(e),
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: AssessmentStatus.failure,
+        message: e.toString(),
       ));
     }
   }

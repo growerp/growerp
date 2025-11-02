@@ -58,7 +58,8 @@ class PageSectionBloc extends Bloc<PageSectionEvent, PageSectionState> {
 
       final updatedSections = List<LandingPageSection>.from(state.sections)
         ..add(newSection)
-        ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
+        ..sort((a, b) =>
+            (a.sectionSequence ?? 0).compareTo(b.sectionSequence ?? 0));
 
       emit(state.copyWith(
         status: PageSectionStatus.success,
@@ -95,7 +96,8 @@ class PageSectionBloc extends Bloc<PageSectionEvent, PageSectionState> {
               ? updatedSection
               : section)
           .toList()
-        ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
+        ..sort((a, b) =>
+            (a.sectionSequence ?? 0).compareTo(b.sectionSequence ?? 0));
 
       emit(state.copyWith(
         status: PageSectionStatus.success,
