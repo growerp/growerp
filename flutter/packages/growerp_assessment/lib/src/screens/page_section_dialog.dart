@@ -35,10 +35,10 @@ class _PageSectionDialogState extends State<PageSectionDialog> {
   }
 
   void _populateFields(LandingPageSection section) {
-    _titleController.text = section.title;
-    _descriptionController.text = section.description ?? '';
-    _imageUrlController.text = section.imageUrl ?? '';
-    _sequenceController.text = section.sequenceNum.toString();
+    _titleController.text = section.sectionTitle ?? '';
+    _descriptionController.text = section.sectionDescription ?? '';
+    _imageUrlController.text = section.sectionImageUrl ?? '';
+    _sequenceController.text = (section.sectionSequence ?? 0).toString();
   }
 
   @override
@@ -241,7 +241,7 @@ class _PageSectionDialogState extends State<PageSectionDialog> {
     if (widget.section != null) {
       // Update existing section
       sectionBloc.add(PageSectionUpdate(
-        sectionId: widget.section!.sectionId,
+        sectionId: widget.section!.sectionId ?? '',
         sectionTitle: _titleController.text.trim(),
         sectionDescription: _descriptionController.text.trim().isEmpty
             ? null

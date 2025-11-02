@@ -13,8 +13,10 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import '../bloc/assessment_bloc.dart';
 import 'question_management_screen.dart';
 import 'assessment_taking_screen.dart';
 
@@ -47,13 +49,14 @@ class _AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
     });
 
     try {
-      // Note: Backend AssessmentQuestion endpoints not available yet
-      // Using mock questions for now
-      await Future.delayed(const Duration(milliseconds: 500));
-      setState(() {
-        _questions = _createMockQuestions();
-        _isLoadingQuestions = false;
-      });
+      // Fetch complete assessment data with questions and options using BLoC
+      if (mounted) {
+        context.read<AssessmentBloc>().add(
+              AssessmentFetchAll(
+                assessmentId: widget.assessment.assessmentId,
+              ),
+            );
+      }
     } catch (e) {
       setState(() {
         _isLoadingQuestions = false;
@@ -68,103 +71,84 @@ class _AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
     }
   }
 
-  List<AssessmentQuestion> _createMockQuestions() {
-    return [
-      AssessmentQuestion(
-        questionId: '1',
-        pseudoId: 'Q1',
-        assessmentId: widget.assessment.assessmentId,
-        questionSequence: 1,
-        questionText: 'How digitally mature is your organization?',
-        questionType: 'MULTIPLE_CHOICE',
-        isRequired: true,
-        createdDate: DateTime.now(),
-      ),
-      AssessmentQuestion(
-        questionId: '2',
-        pseudoId: 'Q2',
-        assessmentId: widget.assessment.assessmentId,
-        questionSequence: 2,
-        questionText: 'What is your current technology adoption level?',
-        questionType: 'MULTIPLE_CHOICE',
-        isRequired: true,
-        createdDate: DateTime.now(),
-      ),
-      AssessmentQuestion(
-        questionId: '3',
-        pseudoId: 'Q3',
-        assessmentId: widget.assessment.assessmentId,
-        questionSequence: 3,
-        questionText: 'How would you rate your data analytics capabilities?',
-        questionType: 'MULTIPLE_CHOICE',
-        isRequired: true,
-        createdDate: DateTime.now(),
-      ),
-    ];
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.assessment.assessmentName),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: _editAssessment,
-            tooltip: 'Edit Assessment',
-          ),
-          PopupMenuButton<String>(
-            onSelected: _handleMenuAction,
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'add_question',
-                child: ListTile(
-                  leading: Icon(Icons.edit),
-                  title: Text('Manage Questions'),
-                  contentPadding: EdgeInsets.zero,
-                ),
+    return BlocBuilder<AssessmentBloc, AssessmentState>(
+      builder: (context, state) {
+        // Update local state from BLoC - get questions from selectedAssessment
+        if (state.status == AssessmentStatus.success &&
+            state.selectedAssessment != null &&
+            state.selectedAssessment!.questions != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            setState(() {
+              _questions = state.selectedAssessment!.questions!;
+              _isLoadingQuestions = false;
+            });
+          });
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(widget.assessment.assessmentName),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: _editAssessment,
+                tooltip: 'Edit Assessment',
               ),
-              const PopupMenuItem(
-                value: 'preview',
-                child: ListTile(
-                  leading: Icon(Icons.preview),
-                  title: Text('Preview'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'share',
-                child: ListTile(
-                  leading: Icon(Icons.share),
-                  title: Text('Share'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'duplicate',
-                child: ListTile(
-                  leading: Icon(Icons.copy),
-                  title: Text('Duplicate'),
-                  contentPadding: EdgeInsets.zero,
-                ),
+              PopupMenuButton<String>(
+                onSelected: _handleMenuAction,
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'add_question',
+                    child: ListTile(
+                      leading: Icon(Icons.edit),
+                      title: Text('Manage Questions'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'preview',
+                    child: ListTile(
+                      leading: Icon(Icons.preview),
+                      title: Text('Preview'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'share',
+                    child: ListTile(
+                      leading: Icon(Icons.share),
+                      title: Text('Share'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'duplicate',
+                    child: ListTile(
+                      leading: Icon(Icons.copy),
+                      title: Text('Duplicate'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
-      body: _buildBody(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _takeAssessment,
-        icon: const Icon(Icons.play_arrow),
-        label: const Text('Take Assessment'),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-      ),
+          body: _buildBody(state),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: _takeAssessment,
+            icon: const Icon(Icons.play_arrow),
+            label: const Text('Take Assessment'),
+            backgroundColor: Colors.green,
+            foregroundColor: Colors.white,
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(AssessmentState state) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -172,7 +156,7 @@ class _AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
         children: [
           _buildAssessmentInfo(),
           const SizedBox(height: 24),
-          _buildQuestionsSection(),
+          _buildQuestionsSection(state),
         ],
       ),
     );
@@ -295,7 +279,7 @@ class _AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
     );
   }
 
-  Widget _buildQuestionsSection() {
+  Widget _buildQuestionsSection(AssessmentState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -394,7 +378,7 @@ class _AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        question.questionText,
+                        question.questionText ?? 'Untitled Question',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -411,11 +395,11 @@ class _AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              question.questionType,
+                              question.questionType ?? 'text',
                               style: const TextStyle(fontSize: 10),
                             ),
                           ),
-                          if (question.isRequired) ...[
+                          if (question.isRequired ?? false) ...[
                             const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(

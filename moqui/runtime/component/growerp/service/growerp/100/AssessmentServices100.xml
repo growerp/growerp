@@ -13,9 +13,9 @@ Service definitions for assessment management and completion
     <!-- ASSESSMENT SERVICES (6 services) -->
     <!-- ============================================ -->
 
-    <!-- getAssessment: Retrieve single assessment or list assessments -->
-    <service verb="get" noun="Assessment" authenticate="true">
-        <description>Get single assessment by ID/pseudoId, or list all assessments for tenant. When assessmentId/pseudoId provided, returns single assessment. When not provided, returns list of assessments for authenticated user's tenant.</description>
+    <!-- getAssessment: Retrieve single assessment with all related data -->
+    <service verb="get" noun="Assessment" authenticate="false">
+        <description>Get single assessment by ID or pseudoId with all questions, options, and thresholds. Anonymous users can view assessments.</description>
         <in-parameters>
             <parameter name="assessmentId" type="String">
                 <description>System-wide unique assessment ID</description>
@@ -23,118 +23,233 @@ Service definitions for assessment management and completion
             <parameter name="pseudoId" type="String">
                 <description>Tenant-unique assessment pseudoId</description>
             </parameter>
-            <parameter name="start" type="Integer" default="0">
-                <description>Start index for pagination</description>
-            </parameter>
-            <parameter name="limit" type="Integer" default="20">
-                <description>Maximum number of results</description>
-            </parameter>
-            <parameter name="search" type="String">
-                <description>Search text for assessment name/description</description>
-            </parameter>
-            <parameter name="status" type="String">
-                <description>Filter by status (ACTIVE, INACTIVE, etc.)</description>
+            <parameter name="ownerPartyId" type="String">
+                <description>Owner party ID for multi-tenant isolation (optional for anonymous access)</description>
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="assessment" type="Map">
-                <description>Single assessment object (when ID provided)</description>
-            </parameter>
-            <parameter name="assessments" type="List">
-                <description>List of assessments (when no ID provided)</description>
-            </parameter>
-            <parameter name="assessmentCount" type="Long">
-                <description>Total count of assessments matching criteria</description>
+                <description>Assessment object with nested questions, options, and thresholds</description>
+                <auto-parameters entity-name="growerp.assessment.Assessment" include="all" />
+                <parameter name="assessmentId" type="String" />
+                <parameter name="pseudoId" type="String" />
+                <parameter name="assessmentName" type="String" />
+                <parameter name="description" type="String" />
+                <parameter name="status" type="String" />
+                <parameter name="createdDate" type="Timestamp" />
+                <parameter name="createdByUserLogin" type="String" />
+                <parameter name="lastModifiedDate" type="Timestamp" />
+                <parameter name="lastModifiedByUserLogin" type="String" />
+                <parameter name="questions" type="List">
+                    <description>List of assessment questions with nested options</description>
+                    <parameter name="questionId" type="String" />
+                    <parameter name="pseudoId" type="String" />
+                    <parameter name="assessmentId" type="String" />
+                    <parameter name="questionSequence" type="Integer" />
+                    <parameter name="questionType" type="String" />
+                    <parameter name="questionText" type="String" />
+                    <parameter name="questionDescription" type="String" />
+                    <parameter name="isRequired" type="String" />
+                    <parameter name="defaultOption" type="String" />
+                    <parameter name="defaultValue" type="String" />
+                    <parameter name="createdDate" type="Timestamp" />
+                    <parameter name="createdByUserLogin" type="String" />
+                    <parameter name="options" type="List">
+                        <description>List of answer options for this question</description>
+                        <parameter name="optionId" type="String" />
+                        <parameter name="pseudoId" type="String" />
+                        <parameter name="questionId" type="String" />
+                        <parameter name="assessmentId" type="String" />
+                        <parameter name="optionSequence" type="Integer" />
+                        <parameter name="optionText" type="String" />
+                        <parameter name="optionScore" type="BigDecimal" />
+                        <parameter name="createdDate" type="Timestamp" />
+                    </parameter>
+                </parameter>
+                <parameter name="thresholds" type="List">
+                    <description>List of scoring thresholds</description>
+                    <parameter name="thresholdId" type="String" />
+                    <parameter name="pseudoId" type="String" />
+                    <parameter name="assessmentId" type="String" />
+                    <parameter name="minScore" type="BigDecimal" />
+                    <parameter name="maxScore" type="BigDecimal" />
+                    <parameter name="leadStatus" type="String" />
+                    <parameter name="description" type="String" />
+                    <parameter name="createdDate" type="Timestamp" />
+                    <parameter name="createdByUserLogin" type="String" />
+                </parameter>
             </parameter>
         </out-parameters>
         <actions>
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <log
+                message="=========get assessment serv owner: ${ownerPartyId} asses: ${assessmentId ?: pseudoId}" />
+            <!-- For anonymous access, ownerPartyId must be provided as parameter -->
+            <!-- For authenticated access, get it from user context -->
             <if condition="!ownerPartyId">
-                <return error="true" message="User not authenticated or no party associated" />
+                <service-call out-map="context"
+                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             </if>
 
-            <!-- Check if this is a single assessment request or list request -->
-            <if condition="assessmentId || pseudoId">
-                <!-- SINGLE ASSESSMENT RETRIEVAL -->
-                <if condition="assessmentId">
-                    <entity-find entity-name="growerp.assessment.Assessment" list="assessmentList">
-                        <econdition field-name="assessmentId" from="assessmentId" />
-                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                    </entity-find>
-                    <else>
-                        <entity-find entity-name="growerp.assessment.Assessment"
-                            list="assessmentList">
-                            <econdition field-name="pseudoId" from="pseudoId" />
-                            <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                        </entity-find>
-                    </else>
-                </if>
-
-                <if condition="!assessmentList">
-                    <return error="true" message="Assessment not found or access denied" />
-                </if>
-
-                <!-- Create a map from the assessment entity to allow adding questions -->
-                <set field="assessment" from="assessmentList[0].getMap()" />
-
-                <!-- Get associated questions -->
-                <entity-find entity-name="growerp.assessment.AssessmentQuestion" list="questions">
-                    <econdition field-name="assessmentId" from="assessment.assessmentId" />
-                    <order-by field-name="questionSequence" />
-                </entity-find>
-
-                <!-- Get options for each question -->
-                <set field="questionsWithOptions" from="[]" />
-                <iterate list="questions" entry="question">
-                    <entity-find entity-name="growerp.assessment.AssessmentQuestionOption"
-                        list="options">
-                        <econdition field-name="questionId" from="question.questionId" />
-                        <order-by field-name="optionSequence" />
-                    </entity-find>
-                    <!-- Create a new map to avoid modifying entity directly -->
-                    <set field="questionMap" from="question.getMap()" />
-                    <set field="questionMap.options" from="options" />
-                    <script>questionsWithOptions.add(questionMap)</script>
-                </iterate>
-
-                <set field="assessment.questions" from="questionsWithOptions" />
-
-                <else>
-                    <!-- LIST ASSESSMENTS FOR TENANT -->
-                    <entity-find entity-name="growerp.assessment.Assessment" list="assessments"
-                        limit="limit" offset="start">
-                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                        <order-by field-name="createdDate" />
-                    </entity-find>
-
-                    <!-- Get total count for pagination -->
-                    <entity-find-count entity-name="growerp.assessment.Assessment"
-                        count-field="assessmentCount">
-                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                    </entity-find-count>
-                </else>
+            <!-- SINGLE ASSESSMENT RETRIEVAL using AssessmentComplete view -->
+            <if condition="!assessmentId &amp;&amp; !pseudoId">
+                <return error="true" message="Either assessmentId or pseudoId is required" />
             </if>
+
+            <!-- pseudoId requires ownerPartyId for tenant isolation -->
+            <if condition="pseudoId &amp;&amp; !ownerPartyId">
+                <return error="true" message="ownerPartyId is required when using pseudoId" />
+            </if>
+
+            <entity-find entity-name="growerp.assessment.AssessmentComplete" list="completeData">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true" />
+                <econdition field-name="assessmentId" from="assessmentId" ignore-if-empty="true" />
+                <econdition field-name="assessmentPseudoId" from="pseudoId" ignore-if-empty="true" />
+                <order-by field-name="questionSequence" />
+                <order-by field-name="optionSequence" />
+            </entity-find>
+
+            <if condition="!completeData">
+                <return error="true" message="Assessment not found" />
+            </if>
+
+            <!-- Build assessment structure from view results -->
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                
+                // Get first row for assessment data
+                def firstRow = completeData[0]
+                
+                // Build assessment object
+                def assessment = [
+                    assessmentId: firstRow.assessmentId,
+                    pseudoId: firstRow.assessmentPseudoId,
+                    assessmentName: firstRow.assessmentName,
+                    description: firstRow.assessmentDescription,
+                    status: firstRow.assessmentStatus,
+                    createdDate: firstRow.assessmentCreatedDate,
+                    createdByUserLogin: firstRow.assessmentCreatedByUserLogin,
+                    lastModifiedDate: firstRow.assessmentLastModifiedDate,
+                    lastModifiedByUserLogin: firstRow.assessmentLastModifiedByUserLogin
+                ]
+                
+                // Build questions with options and thresholds
+                def questionsMap = [:]
+                def optionsMap = [:] // Map to deduplicate options by optionId
+                def thresholdsMap = [:]
+                
+                completeData.each { row ->
+                    // Process question if present
+                    if (row.questionId) {
+                        if (!questionsMap.containsKey(row.questionId)) {
+                            questionsMap[row.questionId] = [
+                                questionId: row.questionId,
+                                pseudoId: row.questionPseudoId,
+                                assessmentId: row.assessmentId,
+                                questionSequence: row.questionSequence,
+                                questionType: row.questionType,
+                                questionText: row.questionText,
+                                questionDescription: row.questionDescription,
+                                isRequired: row.isRequired,
+                                defaultOption: row.defaultOption,
+                                defaultValue: row.defaultValue,
+                                createdDate: row.questionCreatedDate,
+                                createdByUserLogin: row.questionCreatedByUserLogin,
+                                options: []
+                            ]
+                        }
+                        
+                        // Add option to question if present - deduplicate by optionId
+                        if (row.optionId) {
+                            def optionKey = row.questionId + ':' + row.optionId
+                            if (!optionsMap.containsKey(optionKey)) {
+                                optionsMap[optionKey] = [
+                                    optionId: row.optionId,
+                                    pseudoId: row.optionPseudoId,
+                                    questionId: row.questionId,
+                                    assessmentId: row.assessmentId,
+                                    optionSequence: row.optionSequence,
+                                    optionText: row.optionText,
+                                    optionScore: row.optionScore,
+                                    createdDate: row.optionCreatedDate
+                                ]
+                                questionsMap[row.questionId].options.add(optionsMap[optionKey])
+                            }
+                        }
+                    }
+                    
+                    // Process threshold if present (deduplicate by thresholdId)
+                    if (row.thresholdId && !thresholdsMap.containsKey(row.thresholdId)) {
+                        thresholdsMap[row.thresholdId] = [
+                            thresholdId: row.thresholdId,
+                            pseudoId: row.thresholdPseudoId,
+                            assessmentId: row.assessmentId,
+                            minScore: row.minScore,
+                            maxScore: row.maxScore,
+                            leadStatus: row.leadStatus,
+                            description: row.thresholdDescription,
+                            createdDate: row.thresholdCreatedDate,
+                            createdByUserLogin: row.thresholdCreatedByUserLogin
+                        ]
+                    }
+                }
+                
+                // Convert questions map to sorted list
+                assessment.questions = questionsMap.values().sort { it.questionSequence }
+                
+                // Sort options within each question by optionSequence
+                assessment.questions.each { question ->
+                    question.options = question.options.sort { it.optionSequence }
+                }
+                
+                // Convert thresholds map to sorted list
+                assessment.thresholds = thresholdsMap.values().sort { it.minScore }
+                
+                context.assessment = assessment
+            ]]></script>
+
+            <log level="info"
+                message="Assessment ${assessment.assessmentId}: Loaded ${assessment.questions?.size() ?: 0} questions and ${assessment.thresholds?.size() ?: 0} thresholds" />
         </actions>
     </service>
 
-    <!-- listAssessments: Get all assessments for tenant -->
+    <!-- listAssessments: Get all assessments OR single assessment WITHOUT nested data -->
     <service verb="list" noun="Assessments" authenticate="true">
-        <description>List all assessments for tenant with pagination and optional filtering. Results automatically filtered by authenticated user's company.</description>
+        <description>
+            List assessments for maintenance screens WITHOUT nested data (questions/options/thresholds).
+            When assessmentId or pseudoId provided: Returns single assessment basic info only.
+            When neither provided: Returns paginated list of assessments.
+            Results automatically filtered by authenticated user's company.
+            For full nested data (taking assessments), use get#Assessment instead.
+        </description>
         <in-parameters>
+            <parameter name="assessmentId" type="String">
+                <description>Optional: Get specific assessment by system-wide ID (basic info only)</description>
+            </parameter>
+            <parameter name="pseudoId" type="String">
+                <description>Optional: Get specific assessment by tenant-unique pseudoId (basic info only)</description>
+            </parameter>
             <parameter name="status" type="String">
                 <description>Optional status filter: ACTIVE, INACTIVE, DRAFT</description>
             </parameter>
             <parameter name="pageNumber" type="Integer" default-value="1">
-                <description>Page number (1-based)</description>
+                <description>Page number (1-based, only for list mode)</description>
             </parameter>
             <parameter name="pageSize" type="Integer" default-value="20">
-                <description>Results per page</description>
+                <description>Results per page (only for list mode)</description>
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="assessments" type="List">
-                <description>List of assessment objects</description>
+                <description>List of assessment objects (basic info only, no nested questions/options/thresholds)</description>
+                <parameter name="assessmentId" type="String" />
+                <parameter name="pseudoId" type="String" />
+                <parameter name="assessmentName" type="String" />
+                <parameter name="description" type="String" />
+                <parameter name="status" type="String" />
+                <parameter name="createdDate" type="Timestamp" />
+                <parameter name="createdByUserLogin" type="String" />
+                <parameter name="lastModifiedDate" type="Timestamp" />
+                <parameter name="lastModifiedByUserLogin" type="String" />
             </parameter>
             <parameter name="totalCount" type="Integer">
                 <description>Total number of assessments matching filter</description>
@@ -150,6 +265,28 @@ Service definitions for assessment management and completion
                 <return error="true" message="User not authenticated or no party associated" />
             </if>
 
+            <!-- MODE 1: Get single assessment WITHOUT nested data -->
+            <if condition="assessmentId || pseudoId">
+                <entity-find entity-name="growerp.assessment.Assessment" list="assessments">
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                    <econdition field-name="assessmentId" from="assessmentId" ignore-if-empty="true" />
+                    <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
+                </entity-find>
+
+                <if condition="!assessments">
+                    <return error="true" message="Assessment not found or access denied" />
+                </if>
+
+                <set field="totalCount" from="1" />
+                <set field="pageCount" from="1" />
+
+                <log level="info"
+                    message="list#Assessments (single): Loaded assessment ${assessmentId ?: pseudoId} basic info only" />
+
+                <return />
+            </if>
+
+            <!-- MODE 2: List all assessments without nested data -->
             <!-- Count total assessments for pagination -->
             <entity-find entity-name="growerp.assessment.Assessment" list="countList">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
@@ -167,6 +304,9 @@ Service definitions for assessment management and completion
                 <econdition field-name="status" from="status" ignore-if-empty="true" />
                 <order-by field-name="createdDate" />
             </entity-find>
+
+            <log level="info"
+                message="list#Assessments (list): Returned ${assessments.size()} assessments (page ${pageNumber} of ${pageCount})" />
         </actions>
     </service>
 
@@ -528,6 +668,15 @@ Service definitions for assessment management and completion
         <out-parameters>
             <parameter name="thresholds" type="List">
                 <description>List of thresholds with minScore, maxScore, leadStatus</description>
+                <parameter name="thresholdId" type="String" />
+                <parameter name="pseudoId" type="String" />
+                <parameter name="assessmentId" type="String" />
+                <parameter name="minScore" type="BigDecimal" />
+                <parameter name="maxScore" type="BigDecimal" />
+                <parameter name="leadStatus" type="String" />
+                <parameter name="description" type="String" />
+                <parameter name="createdDate" type="Timestamp" />
+                <parameter name="createdByUserLogin" type="String" />
             </parameter>
         </out-parameters>
         <actions>
@@ -564,7 +713,18 @@ Service definitions for assessment management and completion
             <parameter name="assessmentId" type="String" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="thresholds" type="List" />
+            <parameter name="thresholds" type="List">
+                <description>List of thresholds for the assessment</description>
+                <parameter name="thresholdId" type="String" />
+                <parameter name="pseudoId" type="String" />
+                <parameter name="assessmentId" type="String" />
+                <parameter name="minScore" type="BigDecimal" />
+                <parameter name="maxScore" type="BigDecimal" />
+                <parameter name="leadStatus" type="String" />
+                <parameter name="description" type="String" />
+                <parameter name="createdDate" type="Timestamp" />
+                <parameter name="createdByUserLogin" type="String" />
+            </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -687,7 +847,15 @@ Service definitions for assessment management and completion
         <description>Update assessment scoring thresholds</description>
         <in-parameters>
             <parameter name="assessmentId" type="String" required="true" />
-            <parameter name="thresholds" type="List" required="true" />
+            <parameter name="thresholds" type="List" required="true">
+                <description>List of thresholds to create or update</description>
+                <parameter name="thresholdId" type="String" />
+                <parameter name="pseudoId" type="String" />
+                <parameter name="minScore" type="BigDecimal" />
+                <parameter name="maxScore" type="BigDecimal" />
+                <parameter name="leadStatus" type="String" />
+                <parameter name="description" type="String" />
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="updatedCount" type="Integer" />
@@ -724,16 +892,42 @@ Service definitions for assessment management and completion
     <!-- QUESTION SERVICES -->
     <!-- ============================================ -->
 
-    <!-- getAssessmentQuestions: Get all questions for an assessment -->
-    <service verb="get" noun="AssessmentQuestions" authenticate="true">
-        <description>Get all questions for an assessment</description>
+    <!-- getAssessmentQuestions: Get all questions for an assessment with nested options -->
+    <service verb="get" noun="Questions" authenticate="anonymous-all">
+        <description>Get all questions for an assessment, with options nested under each question</description>
         <in-parameters>
             <parameter name="assessmentId" type="String" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="questions" type="List" />
+            <parameter name="questions" type="List">
+                <description>List of questions with nested options</description>
+                <parameter name="questionId" type="String" />
+                <parameter name="pseudoId" type="String" />
+                <parameter name="assessmentId" type="String" />
+                <parameter name="questionSequence" type="Integer" />
+                <parameter name="questionType" type="String" />
+                <parameter name="questionText" type="String" />
+                <parameter name="questionDescription" type="String" />
+                <parameter name="isRequired" type="String" />
+                <parameter name="defaultOption" type="String" />
+                <parameter name="defaultValue" type="String" />
+                <parameter name="createdDate" type="Timestamp" />
+                <parameter name="createdByUserLogin" type="String" />
+                <parameter name="options" type="List">
+                    <description>List of answer options for this question</description>
+                    <parameter name="optionId" type="String" />
+                    <parameter name="pseudoId" type="String" />
+                    <parameter name="questionId" type="String" />
+                    <parameter name="assessmentId" type="String" />
+                    <parameter name="optionSequence" type="Integer" />
+                    <parameter name="optionText" type="String" />
+                    <parameter name="optionScore" type="BigDecimal" />
+                    <parameter name="createdDate" type="Timestamp" />
+                </parameter>
+            </parameter>
         </out-parameters>
         <actions>
+            <log message="=====question and options" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
@@ -748,35 +942,116 @@ Service definitions for assessment management and completion
             </if>
 
             <!-- Get questions for this assessment -->
-            <entity-find entity-name="growerp.assessment.AssessmentQuestion" list="questions">
+            <entity-find entity-name="growerp.assessment.AssessmentQuestion" list="questionList">
                 <econdition field-name="assessmentId" from="assessmentId" />
                 <order-by field-name="questionSequence" />
             </entity-find>
+
+            <!-- Get options for each question and nest them -->
+            <set field="questions" from="[]" />
+            <iterate list="questionList" entry="question">
+                <entity-find entity-name="growerp.assessment.AssessmentQuestionOption"
+                    list="options">
+                    <econdition field-name="questionId" from="question.questionId" />
+                    <order-by field-name="optionSequence" />
+                </entity-find>
+                <log level="info"
+                    message="Question ${question.questionId}: Found ${options?.size() ?: 0} options" />
+                <!-- Create a new map to include options -->
+                <set field="questionMap" from="question.getMap()" />
+                <!-- Convert options entities to maps for proper JSON serialization -->
+                <set field="optionsList" from="[]" />
+                <iterate list="options" entry="option">
+                    <script>optionsList.add(option.getMap())</script>
+                </iterate>
+                <set field="questionMap.options" from="optionsList" />
+                <log level="info"
+                    message="Question ${question.questionId}: Added ${optionsList.size()} options to question map" />
+                <script>questions.add(questionMap)</script>
+            </iterate>
         </actions>
     </service>
 
     <!-- getQuestion: Get question details -->
-    <service verb="get" noun="Question" authenticate="true">
-        <description>Get question by ID</description>
+    <service verb="get" noun="Question" authenticate="false">
+        <description>Get question by ID or list all questions for an assessment. When questionId provided, returns single question. When not provided, returns list of all questions for the assessment. Public endpoint - accessible without authentication.</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true" />
-            <parameter name="questionId" type="String" required="true" />
+            <parameter name="assessmentId" type="String" required="true">
+                <description>Assessment ID - required for list context</description>
+            </parameter>
+            <parameter name="questionId" type="String">
+                <description>Question ID - optional, when provided returns single question</description>
+            </parameter>
+            <parameter name="start" type="Integer" default="0">
+                <description>Start index for pagination (used in list mode)</description>
+            </parameter>
+            <parameter name="limit" type="Integer" default="100">
+                <description>Maximum number of results (used in list mode)</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="question" type="Map" />
+            <parameter name="question" type="Map">
+                <description>Single question object (when questionId provided)</description>
+                <parameter name="questionId" type="String" />
+                <parameter name="pseudoId" type="String" />
+                <parameter name="assessmentId" type="String" />
+                <parameter name="questionSequence" type="Integer" />
+                <parameter name="questionType" type="String" />
+                <parameter name="questionText" type="String" />
+                <parameter name="questionDescription" type="String" />
+                <parameter name="isRequired" type="String" />
+                <parameter name="defaultOption" type="String" />
+                <parameter name="defaultValue" type="String" />
+                <parameter name="createdDate" type="Timestamp" />
+                <parameter name="createdByUserLogin" type="String" />
+            </parameter>
+            <parameter name="questions" type="List">
+                <description>List of questions (when no questionId provided)</description>
+                <parameter name="questionId" type="String" />
+                <parameter name="pseudoId" type="String" />
+                <parameter name="assessmentId" type="String" />
+                <parameter name="questionSequence" type="Integer" />
+                <parameter name="questionType" type="String" />
+                <parameter name="questionText" type="String" />
+                <parameter name="questionDescription" type="String" />
+                <parameter name="isRequired" type="String" />
+                <parameter name="defaultOption" type="String" />
+                <parameter name="defaultValue" type="String" />
+                <parameter name="createdDate" type="Timestamp" />
+                <parameter name="createdByUserLogin" type="String" />
+            </parameter>
+            <parameter name="questionCount" type="Long">
+                <description>Total count of questions for this assessment</description>
+            </parameter>
         </out-parameters>
         <actions>
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- Check if this is a single question request or list request -->
+            <if condition="questionId">
+                <!-- SINGLE QUESTION RETRIEVAL -->
+                <entity-find-one entity-name="growerp.assessment.AssessmentQuestion"
+                    value-field="question">
+                    <field-map field-name="questionId" from="questionId" />
+                    <field-map field-name="assessmentId" from="assessmentId" />
+                </entity-find-one>
 
-            <entity-find-one entity-name="growerp.assessment.AssessmentQuestion"
-                value-field="question">
-                <field-map field-name="questionId" from="questionId" />
-                <field-map field-name="assessmentId" from="assessmentId" />
-            </entity-find-one>
+                <if condition="!question">
+                    <return error="true" message="Question not found" />
+                </if>
 
-            <if condition="!question">
-                <return error="true" message="Question not found" />
+                <else>
+                    <!-- LIST QUESTIONS FOR ASSESSMENT -->
+                    <entity-find entity-name="growerp.assessment.AssessmentQuestion"
+                        list="questions"
+                        limit="limit" offset="start">
+                        <econdition field-name="assessmentId" from="assessmentId" />
+                        <order-by field-name="questionSequence" />
+                    </entity-find>
+
+                    <entity-find-count entity-name="growerp.assessment.AssessmentQuestion"
+                        count-field="questionCount">
+                        <econdition field-name="assessmentId" from="assessmentId" />
+                    </entity-find-count>
+                </else>
             </if>
         </actions>
     </service>
@@ -927,7 +1202,17 @@ Service definitions for assessment management and completion
             <parameter name="questionId" type="String" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="options" type="List" />
+            <parameter name="options" type="List">
+                <description>List of options for the question</description>
+                <parameter name="optionId" type="String" />
+                <parameter name="pseudoId" type="String" />
+                <parameter name="questionId" type="String" />
+                <parameter name="assessmentId" type="String" />
+                <parameter name="optionSequence" type="Integer" />
+                <parameter name="optionText" type="String" />
+                <parameter name="optionScore" type="BigDecimal" />
+                <parameter name="createdDate" type="Timestamp" />
+            </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -943,23 +1228,84 @@ Service definitions for assessment management and completion
     </service>
 
     <!-- getOption: Get option details -->
-    <service verb="get" noun="Option" authenticate="true">
-        <description>Get option by ID</description>
+    <service verb="get" noun="Option" authenticate="false">
+        <description>Get option by ID or list all options for a question. When optionId provided, returns single option. When not provided, returns list of all options for the question. Public endpoint - accessible without authentication.</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true" />
-            <parameter name="questionId" type="String" required="true" />
-            <parameter name="optionId" type="String" required="true" />
+            <parameter name="assessmentId" type="String" required="true">
+                <description>Assessment ID - required for context</description>
+            </parameter>
+            <parameter name="questionId" type="String" required="true">
+                <description>Question ID - required for context</description>
+            </parameter>
+            <parameter name="optionId" type="String">
+                <description>Option ID - optional, when provided returns single option</description>
+            </parameter>
+            <parameter name="start" type="Integer" default="0">
+                <description>Start index for pagination (used in list mode)</description>
+            </parameter>
+            <parameter name="limit" type="Integer" default="100">
+                <description>Maximum number of results (used in list mode)</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="option" type="Map" />
+            <parameter name="option" type="Map">
+                <description>Single option object (when optionId provided)</description>
+                <parameter name="optionId" type="String" />
+                <parameter name="pseudoId" type="String" />
+                <parameter name="questionId" type="String" />
+                <parameter name="assessmentId" type="String" />
+                <parameter name="optionSequence" type="Integer" />
+                <parameter name="optionText" type="String" />
+                <parameter name="optionScore" type="BigDecimal" />
+                <parameter name="createdDate" type="Timestamp" />
+            </parameter>
+            <parameter name="options" type="List">
+                <description>List of options (when no optionId provided)</description>
+                <parameter name="optionId" type="String" />
+                <parameter name="pseudoId" type="String" />
+                <parameter name="questionId" type="String" />
+                <parameter name="assessmentId" type="String" />
+                <parameter name="optionSequence" type="Integer" />
+                <parameter name="optionText" type="String" />
+                <parameter name="optionScore" type="BigDecimal" />
+                <parameter name="createdDate" type="Timestamp" />
+            </parameter>
+            <parameter name="optionCount" type="Long">
+                <description>Total count of options for this question</description>
+            </parameter>
         </out-parameters>
         <actions>
-            <entity-find-one entity-name="growerp.assessment.AssessmentQuestionOption"
-                value-field="option">
-                <field-map field-name="optionId" from="optionId" />
-                <field-map field-name="questionId" from="questionId" />
-                <field-map field-name="assessmentId" from="assessmentId" />
-            </entity-find-one>
+            <!-- Check if this is a single option request or list request -->
+            <if condition="optionId">
+                <!-- SINGLE OPTION RETRIEVAL -->
+                <entity-find-one entity-name="growerp.assessment.AssessmentQuestionOption"
+                    value-field="option">
+                    <field-map field-name="optionId" from="optionId" />
+                    <field-map field-name="questionId" from="questionId" />
+                    <field-map field-name="assessmentId" from="assessmentId" />
+                </entity-find-one>
+
+                <if condition="!option">
+                    <return error="true" message="Option not found" />
+                </if>
+
+                <else>
+                    <!-- LIST OPTIONS FOR QUESTION -->
+                    <entity-find entity-name="growerp.assessment.AssessmentQuestionOption"
+                        list="options"
+                        limit="limit" offset="start">
+                        <econdition field-name="questionId" from="questionId" />
+                        <econdition field-name="assessmentId" from="assessmentId" />
+                        <order-by field-name="optionSequence" />
+                    </entity-find>
+
+                    <entity-find-count entity-name="growerp.assessment.AssessmentQuestionOption"
+                        count-field="optionCount">
+                        <econdition field-name="questionId" from="questionId" />
+                        <econdition field-name="assessmentId" from="assessmentId" />
+                    </entity-find-count>
+                </else>
+            </if>
         </actions>
     </service>
 
@@ -1085,23 +1431,33 @@ Service definitions for assessment management and completion
     <!-- ============================================ -->
 
     <!-- getResult: Get assessment result -->
-    <service verb="get" noun="Result" authenticate="true">
-        <description>Get assessment result</description>
+    <service verb="get" noun="Result" authenticate="false">
+        <description>Get assessment result (allows anonymous users)</description>
         <in-parameters>
             <parameter name="assessmentId" type="String" required="true" />
             <parameter name="resultId" type="String" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="result" type="Map" />
+            <parameter name="result" type="Map">
+                <description>Assessment result object</description>
+                <parameter name="resultId" type="String" />
+                <parameter name="pseudoId" type="String" />
+                <parameter name="assessmentId" type="String" />
+                <parameter name="score" type="BigDecimal" />
+                <parameter name="leadStatus" type="String" />
+                <parameter name="respondentName" type="String" />
+                <parameter name="respondentEmail" type="String" />
+                <parameter name="respondentPhone" type="String" />
+                <parameter name="respondentCompany" type="String" />
+                <parameter name="answersData" type="String" />
+                <parameter name="createdDate" type="Timestamp" />
+            </parameter>
         </out-parameters>
         <actions>
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-
+            <!-- Don't require owner lookup for anonymous result retrieval -->
             <entity-find-one entity-name="growerp.assessment.AssessmentResult" value-field="result">
                 <field-map field-name="resultId" from="resultId" />
                 <field-map field-name="assessmentId" from="assessmentId" />
-                <field-map field-name="ownerPartyId" from="ownerPartyId" />
             </entity-find-one>
         </actions>
     </service>
@@ -1119,7 +1475,20 @@ Service definitions for assessment management and completion
             <parameter name="userPartyId" type="String" />
         </in-parameters>
         <out-parameters>
-            <parameter name="results" type="List" />
+            <parameter name="results" type="List">
+                <description>List of assessment results</description>
+                <parameter name="resultId" type="String" />
+                <parameter name="pseudoId" type="String" />
+                <parameter name="assessmentId" type="String" />
+                <parameter name="score" type="BigDecimal" />
+                <parameter name="leadStatus" type="String" />
+                <parameter name="respondentName" type="String" />
+                <parameter name="respondentEmail" type="String" />
+                <parameter name="respondentPhone" type="String" />
+                <parameter name="respondentCompany" type="String" />
+                <parameter name="answersData" type="String" />
+                <parameter name="createdDate" type="Timestamp" />
+            </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -1150,7 +1519,20 @@ Service definitions for assessment management and completion
             <parameter name="limit" type="Integer" default="20" />
         </in-parameters>
         <out-parameters>
-            <parameter name="results" type="List" />
+            <parameter name="results" type="List">
+                <description>List of all assessment results</description>
+                <parameter name="resultId" type="String" />
+                <parameter name="pseudoId" type="String" />
+                <parameter name="assessmentId" type="String" />
+                <parameter name="score" type="BigDecimal" />
+                <parameter name="leadStatus" type="String" />
+                <parameter name="respondentName" type="String" />
+                <parameter name="respondentEmail" type="String" />
+                <parameter name="respondentPhone" type="String" />
+                <parameter name="respondentCompany" type="String" />
+                <parameter name="answersData" type="String" />
+                <parameter name="createdDate" type="Timestamp" />
+            </parameter>
             <parameter name="resultCount" type="Integer" />
         </out-parameters>
         <actions>
@@ -1182,12 +1564,16 @@ Service definitions for assessment management and completion
     </service>
 
     <!-- createResult: Create assessment result -->
-    <service verb="create" noun="Result" authenticate="true">
-        <description>Create assessment result</description>
+    <service verb="create" noun="Result" authenticate="false">
+        <description>Create assessment result (allows anonymous users)</description>
         <in-parameters>
             <parameter name="assessmentId" type="String" required="true" />
             <parameter name="userPartyId" type="String" />
-            <parameter name="responses" type="List" required="true" />
+            <parameter name="responses" type="List" required="true">
+                <description>List of question responses</description>
+                <parameter name="questionId" type="String" />
+                <parameter name="optionId" type="String" />
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="resultId" type="String" />
@@ -1195,11 +1581,9 @@ Service definitions for assessment management and completion
             <parameter name="interpretation" type="String" />
         </out-parameters>
         <actions>
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-
+            <!-- Don't require user/owner lookup for anonymous submissions -->
             <if condition="!userPartyId">
-                <set field="userPartyId" from="ec.user.userAccount.partyId" />
+                <set field="userPartyId" from="ec.user.userAccount.partyId ?: '_NA_'" />
             </if>
 
             <service-call name="growerp.100.AssessmentServices100.submit#Assessment"
@@ -1276,6 +1660,60 @@ Service definitions for assessment management and completion
             <!-- Delete the result -->
             <entity-delete value-field="resultList[0]" />
             <set field="deleted" from="true" />
+        </actions>
+    </service>
+
+    <!-- getAllAssessmentResults: Get all assessment results across all assessments -->
+    <service verb="get" noun="AllAssessmentResults" authenticate="true">
+        <description>Get all assessment results across all assessments. Requires authentication.</description>
+        <in-parameters>
+            <parameter name="start" type="Integer" default="0">
+                <description>Start index for pagination</description>
+            </parameter>
+            <parameter name="limit" type="Integer" default="100">
+                <description>Maximum number of results</description>
+            </parameter>
+            <parameter name="status" type="String">
+                <description>Optional filter by status</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="assessmentResults" type="List">
+                <description>List of all assessment results</description>
+                <parameter name="resultId" type="String" />
+                <parameter name="pseudoId" type="String" />
+                <parameter name="assessmentId" type="String" />
+                <parameter name="score" type="BigDecimal" />
+                <parameter name="leadStatus" type="String" />
+                <parameter name="respondentName" type="String" />
+                <parameter name="respondentEmail" type="String" />
+                <parameter name="respondentPhone" type="String" />
+                <parameter name="respondentCompany" type="String" />
+                <parameter name="answersData" type="String" />
+                <parameter name="createdDate" type="Timestamp" />
+            </parameter>
+            <parameter name="assessmentResultCount" type="Long">
+                <description>Total count of all results</description>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <!-- Verify user is authenticated -->
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="!ownerPartyId">
+                <return error="true" message="User not authenticated or no party associated" />
+            </if>
+
+            <!-- Get all results for user's company -->
+            <entity-find entity-name="growerp.assessment.AssessmentResult" list="assessmentResults"
+                limit="limit" offset="start">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <order-by field-name="submittedDate" />
+            </entity-find>
+            <entity-find-count entity-name="growerp.assessment.AssessmentResult"
+                count-field="assessmentResultCount">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+            </entity-find-count>
         </actions>
     </service>
 

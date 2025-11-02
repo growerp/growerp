@@ -13,9 +13,11 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'dart:convert';
+import '../bloc/assessment_bloc.dart';
 
 /// Detailed view of an assessment result showing individual answers and scoring
 class AssessmentResultDetailScreen extends StatelessWidget {
@@ -28,40 +30,45 @@ class AssessmentResultDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final answers = _parseAnswers(result.answersData);
-    final score = result.score;
-    final percentage = (score / 100 * 100).round(); // Assuming max score is 100
+    return BlocBuilder<AssessmentBloc, AssessmentState>(
+      builder: (context, state) {
+        final answers = _parseAnswers(result.answersData ?? '{}');
+        final score = result.score;
+        final percentage =
+            (score / 100 * 100).round(); // Assuming max score is 100
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Result Details'),
-        backgroundColor: _getScoreColor(percentage),
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () => _shareResultDetails(context),
-            tooltip: 'Share Details',
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Result Details'),
+            backgroundColor: _getScoreColor(percentage),
+            foregroundColor: Colors.white,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.share),
+                onPressed: () => _shareResultDetails(context),
+                tooltip: 'Share Details',
+              ),
+            ],
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildResultSummary(score, percentage),
-            const SizedBox(height: 24),
-            _buildRespondentInfo(),
-            const SizedBox(height: 24),
-            _buildAnswersSection(answers),
-            const SizedBox(height: 24),
-            _buildScoreBreakdown(answers),
-            const SizedBox(height: 24),
-            _buildActionButtons(context),
-          ],
-        ),
-      ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildResultSummary(score, percentage),
+                const SizedBox(height: 24),
+                _buildRespondentInfo(),
+                const SizedBox(height: 24),
+                _buildAnswersSection(answers, state),
+                const SizedBox(height: 24),
+                _buildScoreBreakdown(answers, state),
+                const SizedBox(height: 24),
+                _buildActionButtons(context),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -209,7 +216,11 @@ class AssessmentResultDetailScreen extends StatelessWidget {
               _buildInfoRow('Phone', result.respondentPhone!),
             if (result.respondentCompany?.isNotEmpty == true)
               _buildInfoRow('Company', result.respondentCompany!),
-            _buildInfoRow('Completed', _formatDate(result.createdDate)),
+            _buildInfoRow(
+                'Completed',
+                result.createdDate != null
+                    ? _formatDate(result.createdDate!)
+                    : 'N/A'),
             _buildInfoRow('Result ID', result.pseudoId),
           ],
         ),
@@ -246,7 +257,8 @@ class AssessmentResultDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAnswersSection(Map<String, String> answers) {
+  Widget _buildAnswersSection(
+      Map<String, String> answers, AssessmentState state) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -276,19 +288,20 @@ class AssessmentResultDetailScreen extends StatelessWidget {
                 ),
               )
             else
-              ...answers.entries
-                  .map((entry) => _buildAnswerItem(entry.key, entry.value)),
+              ...answers.entries.map(
+                  (entry) => _buildAnswerItem(entry.key, entry.value, state)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAnswerItem(String questionId, String selectedOption) {
-    final question = _getQuestionText(questionId);
-    final optionText = _getOptionText(questionId, selectedOption);
-    final isCorrect = _isAnswerCorrect(questionId, selectedOption);
-    final points = _getOptionScore(questionId, selectedOption);
+  Widget _buildAnswerItem(
+      String questionId, String selectedOption, AssessmentState state) {
+    final question = _getQuestionText(questionId, state);
+    final optionText = _getOptionText(questionId, selectedOption, state);
+    final isCorrect = _isAnswerCorrect(questionId, selectedOption, state);
+    final points = _getOptionScore(questionId, selectedOption, state);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -371,7 +384,8 @@ class AssessmentResultDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildScoreBreakdown(Map<String, String> answers) {
+  Widget _buildScoreBreakdown(
+      Map<String, String> answers, AssessmentState state) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -499,64 +513,97 @@ class AssessmentResultDetailScreen extends StatelessWidget {
     return answers;
   }
 
-  String _getQuestionText(String questionId) {
-    // Mock question texts - in real app, fetch from assessment data
-    final questions = {
-      '1': 'How digitally mature is your organization?',
-      '2': 'What is your current technology adoption level?',
-      '3': 'How would you rate your data analytics capabilities?',
-      '4': 'What is your approach to digital transformation?',
-      '5': 'How do you handle customer digital interactions?',
-    };
-    return questions[questionId] ?? 'Question $questionId';
+  String _getQuestionText(String questionId, AssessmentState state) {
+    // Get question text from BLoC assessment data
+    try {
+      final question = state.questions
+          .firstWhere((q) => q.questionId == questionId, orElse: () {
+        // Fallback for questions not in current state
+        return AssessmentQuestion(
+          questionId: questionId,
+          pseudoId: 'q_$questionId',
+          assessmentId: '',
+          questionSequence: 0,
+          questionType: 'text',
+          questionText: 'Question $questionId',
+          isRequired: false,
+        );
+      });
+      return question.questionText ?? 'Question $questionId';
+    } catch (e) {
+      return 'Question $questionId';
+    }
   }
 
-  String _getOptionText(String questionId, String optionId) {
-    // Mock option texts - in real app, fetch from assessment data
-    final options = {
-      '1': 'Just starting digital transformation',
-      '2': 'Some digital processes in place',
-      '3': 'Advanced digital capabilities',
-      '4': 'Fully digital organization',
-      '5': 'Basic technology tools',
-      '6': 'Moderate technology adoption',
-      '7': 'Advanced technology integration',
-      '8': 'Cutting-edge technology leader',
-      '9': 'Limited data collection',
-      '10': 'Basic reporting capabilities',
-      '11': 'Advanced analytics and insights',
-      '12': 'AI-powered data intelligence',
-    };
-    return options[optionId] ?? 'Option $optionId';
+  String _getOptionText(
+      String questionId, String optionId, AssessmentState state) {
+    // Get option text from BLoC assessment data
+    try {
+      final options = state.options[questionId] ?? [];
+      final option = options.firstWhere(
+        (o) => o.optionId == optionId,
+        orElse: () => AssessmentQuestionOption(
+          optionId: optionId,
+          pseudoId: 'opt_$optionId',
+          questionId: questionId,
+          assessmentId: '',
+          optionSequence: 0,
+          optionText: 'Option $optionId',
+          optionScore: 0.0,
+          createdDate: DateTime.now(),
+        ),
+      );
+      return option.optionText ?? 'Option $optionId';
+    } catch (e) {
+      return 'Option $optionId';
+    }
   }
 
-  bool _isAnswerCorrect(String questionId, String optionId) {
-    // Mock scoring - in real app, determine based on scoring rules
-    final optionPoints = _getOptionScore(questionId, optionId);
-    return optionPoints >= 3.0; // Consider 3+ points as "good" answers
+  bool _isAnswerCorrect(
+      String questionId, String optionId, AssessmentState state) {
+    // Determine correctness based on option score from backend
+    try {
+      final options = state.options[questionId] ?? [];
+      final option = options.firstWhere(
+        (o) => o.optionId == optionId,
+        orElse: () => AssessmentQuestionOption(
+          optionId: optionId,
+          pseudoId: 'opt_$optionId',
+          questionId: questionId,
+          assessmentId: '',
+          optionSequence: 0,
+          optionText: 'Option $optionId',
+          optionScore: 0.0,
+          createdDate: DateTime.now(),
+        ),
+      );
+      return (option.optionScore ?? 0) >= 3.0; // 3+ points considered correct
+    } catch (e) {
+      return false;
+    }
   }
 
-  double _getOptionScore(String questionId, String optionId) {
-    // Mock scoring system - in real app, get from assessment configuration
-    switch (optionId) {
-      case '1':
-      case '5':
-      case '9':
-        return 1.0;
-      case '2':
-      case '6':
-      case '10':
-        return 2.0;
-      case '3':
-      case '7':
-      case '11':
-        return 3.0;
-      case '4':
-      case '8':
-      case '12':
-        return 4.0;
-      default:
-        return 0.0;
+  double _getOptionScore(
+      String questionId, String optionId, AssessmentState state) {
+    // Get score from backend option data
+    try {
+      final options = state.options[questionId] ?? [];
+      final option = options.firstWhere(
+        (o) => o.optionId == optionId,
+        orElse: () => AssessmentQuestionOption(
+          optionId: optionId,
+          pseudoId: 'opt_$optionId',
+          questionId: questionId,
+          assessmentId: '',
+          optionSequence: 0,
+          optionText: 'Option $optionId',
+          optionScore: 0.0,
+          createdDate: DateTime.now(),
+        ),
+      );
+      return option.optionScore ?? 0.0;
+    } catch (e) {
+      return 0.0;
     }
   }
 

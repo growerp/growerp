@@ -669,7 +669,7 @@ class RestApi {
                         return idNode.visit(pathList, nextPathIndex, ec)
                     } else {
                         // not a resource and no idNode, is a bad path
-                        throw new ResourceNotFoundException("Resource ${nextPath} not valid, index ${pathIndex} in path ${pathList}; resources available are ${resourceMap.keySet()}")
+                        throw new ResourceNotFoundException("Resource ${nextPath} not valid1, index ${pathIndex} in path ${pathList}; resources available are ${resourceMap.keySet()}")
                     }
                 } else {
                     return runByMethod(pathList, ec)

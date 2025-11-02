@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'landing_page_event.dart';
@@ -67,95 +66,20 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
     Emitter<LandingPageState> emit,
   ) async {
     emit(state.copyWith(status: LandingPageStatus.loading));
-
-    LandingPage? landingPage;
-    dynamic lastError;
-
     try {
-      final response = await restClient.getLandingPage(
+      final landingPage = await restClient.getLandingPage(
         pageId: event.pageId,
         ownerPartyId: event.ownerPartyId,
       );
-      landingPage = _convertResponseToLandingPage(response);
-    } on DioException catch (error) {
-      lastError = error;
-      if (event.ownerPartyId != null) {
-        try {
-          final response = await restClient.getPublicLandingPage(
-            pageId: event.pageId,
-            ownerPartyId: event.ownerPartyId,
-          );
-          landingPage = _convertResponseToLandingPage(response);
-          lastError = null;
-        } on DioException catch (publicError) {
-          lastError = publicError;
-        } catch (publicError) {
-          lastError = publicError;
-        }
-      }
-    } catch (error) {
-      lastError = error;
-    }
-
-    if (landingPage != null) {
       emit(state.copyWith(
         status: LandingPageStatus.success,
         selectedLandingPage: landingPage,
       ));
-      return;
-    }
-
-    final errorMessage = await getDioError(
-      lastError ?? Exception('Landing page request failed'),
-    );
-
-    emit(state.copyWith(
-      status: LandingPageStatus.failure,
-      message: errorMessage,
-    ));
-  }
-
-  /// Convert landing page response to LandingPage model with nested objects
-  LandingPage? _convertResponseToLandingPage(LandingPageResponse response) {
-    try {
-      var pageData = response.page;
-
-      // Add sections if present
-      if (response.sections != null && response.sections!.isNotEmpty) {
-        pageData = pageData.copyWith(sections: response.sections);
-      }
-
-      // Add credibility elements if present
-      if (response.credibility != null && response.credibility is Map) {
-        try {
-          final credMap = response.credibility as Map<String, dynamic>;
-          if (credMap.isNotEmpty) {
-            pageData = pageData.copyWith(
-              credibilityElements: [CredibilityElement.fromJson(credMap)],
-            );
-          }
-        } catch (e) {
-          // Silently ignore credibility parsing errors
-        }
-      }
-
-      // Add CTA if present
-      if (response.cta != null && response.cta is Map) {
-        try {
-          final ctaMap = response.cta as Map<String, dynamic>;
-          if (ctaMap.isNotEmpty) {
-            pageData = pageData.copyWith(
-              callToAction: CallToAction.fromJson(ctaMap),
-            );
-          }
-        } catch (e) {
-          // Silently ignore CTA parsing errors
-        }
-      }
-
-      return pageData;
-    } catch (e) {
-      return null;
+    } catch (error) {
+      emit(state.copyWith(
+        status: LandingPageStatus.failure,
+        message: await getDioError(error),
+      ));
     }
   }
 

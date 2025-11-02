@@ -132,22 +132,22 @@ class _PageSectionManagementScreenState
           ),
         ),
         title: Text(
-          section.title,
+          section.sectionTitle ?? 'Section',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (section.description != null) ...[
+            if (section.sectionDescription != null) ...[
               Text(
-                section.description!,
+                section.sectionDescription!,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
             ],
             Text(
-              'ID: ${section.pseudoId} • Order: ${section.sequenceNum}',
+              'ID: ${section.pseudoId} • Order: ${section.sectionSequence ?? 0}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -214,10 +214,10 @@ class _PageSectionManagementScreenState
   void _duplicateSection(LandingPageSection section) {
     _pageSectionBloc.add(PageSectionCreate(
       pageId: widget.pageId,
-      sectionTitle: '${section.title} (Copy)',
-      sectionDescription: section.description,
-      sectionImageUrl: section.imageUrl,
-      sectionSequence: section.sequenceNum + 1,
+      sectionTitle: '${section.sectionTitle ?? 'Section'} (Copy)',
+      sectionDescription: section.sectionDescription,
+      sectionImageUrl: section.sectionImageUrl,
+      sectionSequence: (section.sectionSequence ?? 0) + 1,
     ));
   }
 
@@ -227,7 +227,7 @@ class _PageSectionManagementScreenState
       builder: (context) => AlertDialog(
         title: const Text('Delete Section'),
         content: Text(
-          'Are you sure you want to delete "${section.title}"? This action cannot be undone.',
+          'Are you sure you want to delete "${section.sectionTitle ?? 'Section'}"? This action cannot be undone.',
         ),
         actions: [
           TextButton(
@@ -237,7 +237,7 @@ class _PageSectionManagementScreenState
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _pageSectionBloc.add(PageSectionDelete(section.sectionId));
+              _pageSectionBloc.add(PageSectionDelete(section.sectionId ?? ''));
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete'),
@@ -252,9 +252,9 @@ class _PageSectionManagementScreenState
     final section = sections[oldIndex];
     final newSequenceNum = newIndex + 1;
 
-    if (section.sequenceNum != newSequenceNum) {
+    if ((section.sectionSequence ?? 0) != newSequenceNum) {
       _pageSectionBloc.add(PageSectionUpdate(
-        sectionId: section.sectionId,
+        sectionId: section.sectionId ?? '',
         sectionSequence: newSequenceNum,
       ));
     }

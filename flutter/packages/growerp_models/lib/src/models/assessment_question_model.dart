@@ -1,6 +1,22 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'assessment_question_option_model.dart';
 
 part 'assessment_question_model.g.dart';
+
+/// Converter to handle Moqui's Y/N string booleans
+class StringBoolConverter implements JsonConverter<bool, dynamic> {
+  const StringBoolConverter();
+
+  @override
+  bool fromJson(dynamic json) {
+    if (json is bool) return json;
+    if (json is String) return json.toUpperCase() == 'Y';
+    return false;
+  }
+
+  @override
+  dynamic toJson(bool object) => object ? 'Y' : 'N';
+}
 
 /// Assessment question model
 ///
@@ -8,46 +24,51 @@ part 'assessment_question_model.g.dart';
 @JsonSerializable()
 class AssessmentQuestion {
   /// System-wide unique identifier
-  final String questionId;
+  final String? questionId;
 
   /// Tenant-unique identifier
-  final String pseudoId;
+  final String? pseudoId;
 
   /// Assessment ID this question belongs to
-  final String assessmentId;
+  final String? assessmentId;
 
   /// Display order within assessment
-  final int questionSequence;
+  final int? questionSequence;
 
   /// Question type: text, email, radio, dropdown, yes_no
-  final String questionType;
+  final String? questionType;
 
   /// Question text/prompt
-  final String questionText;
+  final String? questionText;
 
   /// Optional question description
   final String? questionDescription;
 
-  /// Whether this question is required
-  final bool isRequired;
+  /// Whether this question is required (Moqui sends as 'Y' or 'N')
+  @StringBoolConverter()
+  final bool? isRequired;
 
   /// Timestamp when created
-  final DateTime createdDate;
+  final DateTime? createdDate;
 
   /// Username who created this question
   final String? createdByUserLogin;
 
+  /// Answer options for this question (when fetched with nested options)
+  final List<AssessmentQuestionOption>? options;
+
   const AssessmentQuestion({
-    required this.questionId,
-    required this.pseudoId,
-    required this.assessmentId,
-    required this.questionSequence,
-    required this.questionType,
-    required this.questionText,
+    this.questionId,
+    this.pseudoId,
+    this.assessmentId,
+    this.questionSequence,
+    this.questionType,
+    this.questionText,
     this.questionDescription,
-    required this.isRequired,
-    required this.createdDate,
+    this.isRequired,
+    this.createdDate,
     this.createdByUserLogin,
+    this.options,
   });
 
   /// Creates a copy with optionally replaced fields
@@ -62,6 +83,7 @@ class AssessmentQuestion {
     bool? isRequired,
     DateTime? createdDate,
     String? createdByUserLogin,
+    List<AssessmentQuestionOption>? options,
   }) {
     return AssessmentQuestion(
       questionId: questionId ?? this.questionId,
@@ -74,6 +96,7 @@ class AssessmentQuestion {
       isRequired: isRequired ?? this.isRequired,
       createdDate: createdDate ?? this.createdDate,
       createdByUserLogin: createdByUserLogin ?? this.createdByUserLogin,
+      options: options ?? this.options,
     );
   }
 

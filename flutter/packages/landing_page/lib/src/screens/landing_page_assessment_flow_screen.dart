@@ -14,14 +14,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_assessment/growerp_assessment.dart';
 import 'public_landing_page_screen.dart';
 
 /// Integrated landing page to assessment flow screen
 ///
 /// This screen manages the complete user journey:
-/// 1. Display landing page
+/// 1. Display landing page (optional - skip if startAssessmentFlow=true)
 /// 2. Capture lead information on CTA click
 /// 3. Launch assessment
 /// 4. Show results and next steps
@@ -31,11 +30,13 @@ class LandingPageAssessmentFlowScreen extends StatefulWidget {
     required this.pageId,
     this.ownerPartyId,
     this.assessmentId,
+    this.startAssessmentFlow = false,
   });
 
   final String pageId;
   final String? ownerPartyId;
   final String? assessmentId;
+  final bool startAssessmentFlow;
 
   @override
   State<LandingPageAssessmentFlowScreen> createState() =>
@@ -56,6 +57,13 @@ class _LandingPageAssessmentFlowScreenState
     context.read<LandingPageBloc>().add(
       LandingPageFetch(widget.pageId, ownerPartyId: widget.ownerPartyId),
     );
+
+    // If direct assessment flow requested, skip landing page and go straight to assessment
+    if (widget.startAssessmentFlow) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _navigateToPage(1);
+      });
+    }
   }
 
   @override
@@ -77,11 +85,22 @@ class _LandingPageAssessmentFlowScreenState
     final landingPageState = context.read<LandingPageBloc>().state;
     if (landingPageState.status == LandingPageStatus.success &&
         landingPageState.selectedLandingPage?.assessmentId != null) {
-      _assessmentId = landingPageState.selectedLandingPage!.assessmentId;
+      setState(() {
+        _assessmentId = landingPageState.selectedLandingPage!.assessmentId;
+      });
+      // Navigate to assessment after setState completes
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _navigateToPage(1);
+      });
+    } else {
+      // If assessment ID not available, show error or retry
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Assessment not available for this landing page'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
-
-    // Skip lead capture (already collected by landing page) and go directly to assessment
-    _navigateToPage(1);
   }
 
   @override
@@ -130,6 +149,7 @@ class _LandingPageAssessmentFlowScreenState
 
     return AssessmentFlowScreen(
       assessmentId: _assessmentId!,
+      ownerPartyId: widget.ownerPartyId,
       onComplete: () {
         // Navigate to results on assessment completion
         _navigateToPage(2);

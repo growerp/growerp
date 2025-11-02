@@ -6,6 +6,8 @@ class LandingPageState {
   final LandingPageStatus status;
   final List<LandingPage> landingPages;
   final LandingPage? selectedLandingPage;
+  final List<AssessmentQuestion>? questions;
+  final List<CredibilityElement>? credibility;
   final String? message;
   final bool hasReachedMax;
   final int start;
@@ -16,6 +18,8 @@ class LandingPageState {
     this.status = LandingPageStatus.initial,
     this.landingPages = const [],
     this.selectedLandingPage,
+    this.questions,
+    this.credibility,
     this.message,
     this.hasReachedMax = false,
     this.start = 0,
@@ -27,6 +31,8 @@ class LandingPageState {
     LandingPageStatus? status,
     List<LandingPage>? landingPages,
     LandingPage? selectedLandingPage,
+    List<AssessmentQuestion>? questions,
+    List<CredibilityElement>? credibility,
     String? message,
     bool? hasReachedMax,
     int? start,
@@ -40,6 +46,8 @@ class LandingPageState {
       selectedLandingPage: clearSelectedLandingPage
           ? null
           : selectedLandingPage ?? this.selectedLandingPage,
+      questions: questions ?? this.questions,
+      credibility: credibility ?? this.credibility,
       message: message ?? this.message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       start: start ?? this.start,
@@ -54,6 +62,8 @@ class LandingPageState {
         'status: $status, '
         'landingPages: ${landingPages.length}, '
         'selectedLandingPage: $selectedLandingPage, '
+        'questions: ${questions?.length}, '
+        'credibility: ${credibility?.length}, '
         'message: $message, '
         'hasReachedMax: $hasReachedMax, '
         'start: $start, '
@@ -69,6 +79,8 @@ class LandingPageState {
         other.status == status &&
         other.landingPages == landingPages &&
         other.selectedLandingPage == selectedLandingPage &&
+        other.questions == questions &&
+        other.credibility == credibility &&
         other.message == message &&
         other.hasReachedMax == hasReachedMax &&
         other.start == start &&
@@ -81,6 +93,8 @@ class LandingPageState {
     return status.hashCode ^
         landingPages.hashCode ^
         selectedLandingPage.hashCode ^
+        questions.hashCode ^
+        credibility.hashCode ^
         message.hashCode ^
         hasReachedMax.hashCode ^
         start.hashCode ^

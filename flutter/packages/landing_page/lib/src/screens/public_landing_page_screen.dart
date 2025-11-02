@@ -125,37 +125,23 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
           // 1. Hero Section (Hook + Subheading)
           _buildHeroSection(context, page),
 
-          // 2. Value Proposition Section (if available)
+          // 2. Page Sections (if available)
           if (page.sections != null && page.sections!.isNotEmpty) ...[
             const SizedBox(height: 32),
-            // Look for value proposition section
-            ...page.sections!
-                .where(
-                  (s) => s.sectionType?.toLowerCase() == 'value_proposition',
-                )
-                .map(
-                  (section) => _buildValuePropositionSection(context, section),
-                ),
-
-            // Other sections (features, benefits, etc.)
-            ...page.sections!
-                .where(
-                  (s) => s.sectionType?.toLowerCase() != 'value_proposition',
-                )
-                .map((section) => _buildSection(context, section)),
+            // Display all sections ordered by sequence
+            ...page.sections!.map((section) => _buildSection(context, section)),
           ],
 
           // 3. Credibility Section
-          if (page.credibilityElements != null &&
-              page.credibilityElements!.isNotEmpty) ...[
+          if (page.credibility != null) ...[
             const SizedBox(height: 32),
-            _buildCredibilitySection(context, page.credibilityElements!.first),
+            _buildCredibilitySection(context, page.credibility!),
           ],
 
           // 4. Call to Action
-          if (page.callToAction != null) ...[
+          if (page.cta != null) ...[
             const SizedBox(height: 32),
-            _buildCtaSection(context, page.callToAction!),
+            _buildCtaSection(context, page.cta!),
           ],
 
           const SizedBox(height: 32),
@@ -191,7 +177,7 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            page.headline,
+            page.headline ?? 'Welcome',
             style: Theme.of(
               context,
             ).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -216,23 +202,25 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            section.title,
+            section.sectionTitle ?? '',
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          if (section.description != null && section.description!.isNotEmpty)
+          if (section.sectionDescription != null &&
+              section.sectionDescription!.isNotEmpty)
             Text(
-              section.description!,
+              section.sectionDescription!,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
-          if (section.imageUrl != null && section.imageUrl!.isNotEmpty) ...[
+          if (section.sectionImageUrl != null &&
+              section.sectionImageUrl!.isNotEmpty) ...[
             const SizedBox(height: 16),
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
-                section.imageUrl!,
+                section.sectionImageUrl!,
                 width: double.infinity,
                 height: 200,
                 fit: BoxFit.cover,
@@ -272,7 +260,7 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            credibility.title ?? 'Credibility',
+            'Credibility',
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
@@ -281,12 +269,12 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (credibility.imageUrl != null &&
-                  credibility.imageUrl!.isNotEmpty) ...[
+              if (credibility.creatorImageUrl != null &&
+                  credibility.creatorImageUrl!.isNotEmpty) ...[
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
-                    credibility.imageUrl!,
+                    credibility.creatorImageUrl!,
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,
@@ -310,17 +298,17 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (credibility.description != null &&
-                        credibility.description!.isNotEmpty)
+                    if (credibility.creatorBio != null &&
+                        credibility.creatorBio!.isNotEmpty)
                       Text(
-                        credibility.description!,
+                        credibility.creatorBio!,
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
-                    if (credibility.authorName != null &&
-                        credibility.authorName!.isNotEmpty) ...[
+                    if (credibility.backgroundText != null &&
+                        credibility.backgroundText!.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       Text(
-                        '- ${credibility.authorName}${credibility.authorTitle != null ? ', ${credibility.authorTitle}' : ''}',
+                        credibility.backgroundText!,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontStyle: FontStyle.italic,
                           color: Colors.grey[600],
@@ -354,9 +342,9 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
       ),
       child: Column(
         children: [
-          if (cta.description != null && cta.description!.isNotEmpty)
+          if (cta.valuePromise != null && cta.valuePromise!.isNotEmpty)
             Text(
-              cta.description!,
+              cta.valuePromise!,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -371,14 +359,6 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
                 // Use callback if provided, otherwise use default navigation
                 if (widget.onCtaPressed != null) {
                   widget.onCtaPressed!(cta);
-                } else {
-                  // Handle different action types
-                  if (cta.actionType == 'assessment' ||
-                      cta.actionTarget != null) {
-                    Navigator.of(
-                      context,
-                    ).pushNamed(cta.actionTarget ?? '/assessment');
-                  }
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -398,63 +378,6 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildValuePropositionSection(
-    BuildContext context,
-    LandingPageSection section,
-  ) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withAlpha((0.1 * 255).round()),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).primaryColor.withAlpha((0.3 * 255).round()),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            section.title,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          if (section.description != null && section.description!.isNotEmpty)
-            Text(
-              section.description!,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          if (section.imageUrl != null && section.imageUrl!.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                section.imageUrl!,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: double.infinity,
-                    height: 200,
-                    color: Colors.grey[300],
-                    child: const Icon(
-                      Icons.image,
-                      size: 48,
-                      color: Colors.grey,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
         ],
       ),
     );

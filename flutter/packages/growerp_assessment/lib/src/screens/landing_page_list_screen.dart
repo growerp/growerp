@@ -166,7 +166,7 @@ class _LandingPageListScreenState extends State<LandingPageListScreen> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(landingPage.headline),
+            Text(landingPage.headline ?? 'No headline'),
             const SizedBox(height: 4),
             Text(
               'ID: ${landingPage.pseudoId} • Status: ${landingPage.status}',

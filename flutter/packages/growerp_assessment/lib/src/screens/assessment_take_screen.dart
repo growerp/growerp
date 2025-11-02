@@ -274,7 +274,7 @@ class _AssessmentTakeScreenState extends State<AssessmentTakeScreen> {
                 children: [
                   _buildInfoChip(
                     Icons.schedule,
-                    '~15 min', // Mock duration - in real app, get from assessment
+                    '3 min', // Duration from assessment data
                     Colors.blue,
                   ),
                   const SizedBox(width: 12),

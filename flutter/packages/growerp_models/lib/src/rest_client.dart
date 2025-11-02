@@ -686,6 +686,13 @@ abstract class RestClient {
   });
 
   // Assessment endpoints
+  @GET("rest/s1/growerp/100/AssessmentComplete")
+  Future<Assessment> getAssessmentComplete({
+    @Query('assessmentId') String? assessmentId,
+    @Query('pseudoId') String? pseudoId,
+    @Query('ownerPartyId') String? ownerPartyId,
+  });
+
   @GET("rest/s1/growerp/100/Assessment")
   Future<Assessments> getAssessment({
     @Query('assessmentId') String? assessmentId,
@@ -726,14 +733,22 @@ abstract class RestClient {
   });
 
   // Assessment Question endpoints
-  @GET("rest/s1/growerp/100/AssessmentQuestion")
+  // question and options
+  @GET("rest/s1/growerp/100/Assessment/Questions")
   Future<AssessmentQuestions> getAssessmentQuestions({
     @Query('assessmentId') required String assessmentId,
     @Query('start') int? start,
     @Query('limit') int? limit,
   });
 
-  @POST("rest/s1/growerp/100/AssessmentQuestion")
+  @GET("rest/s1/growerp/100/Assessment/Question")
+  Future<AssessmentQuestions> getAssessmentQuestion({
+    @Query('assessmentId') required String assessmentId,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/Assessment/Question")
   Future<AssessmentQuestion> createAssessmentQuestion({
     @Field() required String assessmentId,
     @Field() required String questionText,
@@ -742,7 +757,7 @@ abstract class RestClient {
     @Field() String? isRequired,
   });
 
-  @PATCH("rest/s1/growerp/100/AssessmentQuestion")
+  @PATCH("rest/s1/growerp/100/Assessment/Question")
   Future<AssessmentQuestion> updateAssessmentQuestion({
     @Field() required String assessmentId,
     @Field() required String questionId,
@@ -752,14 +767,14 @@ abstract class RestClient {
     @Field() String? isRequired,
   });
 
-  @DELETE("rest/s1/growerp/100/AssessmentQuestion")
+  @DELETE("rest/s1/growerp/100/Assessment/Question")
   Future<void> deleteAssessmentQuestion({
     @Field() required String assessmentId,
     @Field() required String questionId,
   });
 
   // Assessment Question Option endpoints
-  @GET("rest/s1/growerp/100/AssessmentQuestionOption")
+  @GET("rest/s1/growerp/100/Assessment/Question/Option")
   Future<AssessmentQuestionOptions> getAssessmentQuestionOptions({
     @Query('assessmentId') required String assessmentId,
     @Query('questionId') required String questionId,
@@ -767,7 +782,7 @@ abstract class RestClient {
     @Query('limit') int? limit,
   });
 
-  @POST("rest/s1/growerp/100/AssessmentQuestionOption")
+  @POST("rest/s1/growerp/100/Assessment/Question/Option")
   Future<AssessmentQuestionOption> createAssessmentQuestionOption({
     @Field() required String assessmentId,
     @Field() required String questionId,
@@ -776,7 +791,7 @@ abstract class RestClient {
     @Field() int? optionSequence,
   });
 
-  @PATCH("rest/s1/growerp/100/AssessmentQuestionOption")
+  @PATCH("rest/s1/growerp/100/Assessment/Question/Option")
   Future<AssessmentQuestionOption> updateAssessmentQuestionOption({
     @Field() required String assessmentId,
     @Field() required String questionId,
@@ -786,7 +801,7 @@ abstract class RestClient {
     @Field() int? optionSequence,
   });
 
-  @DELETE("rest/s1/growerp/100/AssessmentQuestionOption")
+  @DELETE("rest/s1/growerp/100/Assessment/Question/Option")
   Future<void> deleteAssessmentQuestionOption({
     @Field() required String assessmentId,
     @Field() required String questionId,
@@ -794,12 +809,12 @@ abstract class RestClient {
   });
 
   // Assessment Scoring Threshold endpoints
-  @GET("rest/s1/growerp/100/AssessmentThreshold")
+  @GET("rest/s1/growerp/100/Assessment/Threshold")
   Future<ScoringThresholds> getAssessmentThresholds({
     @Query('assessmentId') required String assessmentId,
   });
 
-  @PATCH("rest/s1/growerp/100/AssessmentThreshold")
+  @PATCH("rest/s1/growerp/100/Assessment/Threshold")
   Future<ScoringThresholds> updateAssessmentThresholds({
     @Field() required String assessmentId,
     @Field() required List<ScoringThreshold> thresholds,
@@ -812,7 +827,7 @@ abstract class RestClient {
   });
 
   // Assessment Result endpoints
-  @GET("rest/s1/growerp/100/AssessmentResult")
+  @GET("rest/s1/growerp/100/Assessment/Result")
   Future<AssessmentResults> getAssessmentResults({
     @Query('assessmentId') String? assessmentId,
     @Query('resultId') String? resultId,
@@ -821,13 +836,13 @@ abstract class RestClient {
     @Query('statusId') String? statusId,
   });
 
-  @GET("rest/s1/growerp/100/AllAssessmentResults")
+  @GET("rest/s1/growerp/100/AllAssessment/Results")
   Future<AssessmentResults> getAllAssessmentResults({
     @Query('start') int? start,
     @Query('limit') int? limit,
   });
 
-  @DELETE("rest/s1/growerp/100/AssessmentResult")
+  @DELETE("rest/s1/growerp/100/Assessment/Result")
   Future<void> deleteAssessmentResult({
     @Field() required String assessmentId,
     @Field() required String resultId,
@@ -844,9 +859,10 @@ abstract class RestClient {
     @Query('statusId') String? statusId,
   });
 
-  @GET("rest/s1/growerp/100/LandingPage/{pageId}")
-  Future<LandingPageResponse> getLandingPage({
-    @Path() required String pageId,
+  // Public landing page endpoint (anonymous access)
+  @GET("rest/s1/growerp/100/LandingPagePublic")
+  Future<LandingPage> getLandingPage({
+    @Query('pageId') required String pageId,
     @Query('ownerPartyId') String? ownerPartyId,
   });
 
@@ -878,14 +894,6 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/LandingPage/{pageId}/publish")
   Future<LandingPage> publishLandingPage({@Path() required String pageId});
-
-  // Public Landing Page access (no authentication)
-  @GET("rest/s1/growerp/100/Public/LandingPage/{pageId}")
-  @Extra({'noApiKey': true})
-  Future<LandingPageResponse> getPublicLandingPage({
-    @Path() required String pageId,
-    @Query('ownerPartyId') String? ownerPartyId,
-  });
 
   // ============================================
   // PAGE SECTION ENDPOINTS

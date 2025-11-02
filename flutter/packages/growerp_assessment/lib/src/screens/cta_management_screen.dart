@@ -156,10 +156,14 @@ class _CTAManagementScreenState extends State<CTAManagementScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withAlpha((0.1 * 255).round()),
+                color: Theme.of(context)
+                    .primaryColor
+                    .withAlpha((0.1 * 255).round()),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: Theme.of(context).primaryColor.withAlpha((0.3 * 255).round()),
+                  color: Theme.of(context)
+                      .primaryColor
+                      .withAlpha((0.3 * 255).round()),
                 ),
               ),
               child: Column(
@@ -191,13 +195,11 @@ class _CTAManagementScreenState extends State<CTAManagementScreen> {
             const SizedBox(height: 16),
             // CTA Details
             _buildDetailRow('Button Text', cta.buttonText ?? 'N/A'),
-            _buildDetailRow('Action Type', cta.actionType ?? 'N/A'),
-            if (cta.actionTarget != null)
-              _buildDetailRow('Action Target', cta.actionTarget!),
-            if (cta.buttonStyle != null)
-              _buildDetailRow('Button Style', cta.buttonStyle!),
-            if (cta.description != null)
-              _buildDetailRow('Description', cta.description!),
+            if (cta.estimatedTime != null)
+              _buildDetailRow('Estimated Time', cta.estimatedTime!),
+            if (cta.cost != null) _buildDetailRow('Cost', cta.cost!),
+            if (cta.valuePromise != null)
+              _buildDetailRow('Value Promise', cta.valuePromise!),
           ],
         ),
       ),
@@ -266,14 +268,11 @@ class _CTAManagementScreenState extends State<CTAManagementScreen> {
   void _showCTADialog({CallToAction? cta}) {
     final buttonTextController =
         TextEditingController(text: cta?.buttonText ?? '');
-    final actionTypeController =
-        TextEditingController(text: cta?.actionType ?? '');
-    final actionTargetController =
-        TextEditingController(text: cta?.actionTarget ?? '');
-    final buttonStyleController =
-        TextEditingController(text: cta?.buttonStyle ?? '');
-    final descriptionController =
-        TextEditingController(text: cta?.description ?? '');
+    final estimatedTimeController =
+        TextEditingController(text: cta?.estimatedTime ?? '');
+    final costController = TextEditingController(text: cta?.cost ?? '');
+    final valuePromiseController =
+        TextEditingController(text: cta?.valuePromise ?? '');
 
     showDialog(
       context: context,
@@ -314,38 +313,28 @@ class _CTAManagementScreenState extends State<CTAManagementScreen> {
                       ),
                       const SizedBox(height: 16),
                       TextField(
-                        controller: actionTypeController,
+                        controller: estimatedTimeController,
                         decoration: const InputDecoration(
-                          labelText: 'Action Type *',
-                          hintText:
-                              'e.g., "assessment", "form", "external_link"',
+                          labelText: 'Estimated Time',
+                          hintText: 'e.g., "3 minutes", "15 mins"',
                           border: OutlineInputBorder(),
                         ),
                       ),
                       const SizedBox(height: 16),
                       TextField(
-                        controller: actionTargetController,
+                        controller: costController,
                         decoration: const InputDecoration(
-                          labelText: 'Action Target',
-                          hintText: 'URL or route target',
+                          labelText: 'Cost',
+                          hintText: 'e.g., Free, 99 dollars',
                           border: OutlineInputBorder(),
                         ),
                       ),
                       const SizedBox(height: 16),
                       TextField(
-                        controller: buttonStyleController,
+                        controller: valuePromiseController,
                         decoration: const InputDecoration(
-                          labelText: 'Button Style',
-                          hintText: 'CSS class or style name',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: descriptionController,
-                        decoration: const InputDecoration(
-                          labelText: 'Description',
-                          hintText: 'Additional CTA description',
+                          labelText: 'Value Promise',
+                          hintText: 'What value does this CTA provide?',
                           border: OutlineInputBorder(),
                         ),
                         maxLines: 3,
@@ -365,21 +354,20 @@ class _CTAManagementScreenState extends State<CTAManagementScreen> {
                   const SizedBox(width: 16),
                   ElevatedButton(
                     onPressed: () {
-                      if (buttonTextController.text.trim().isNotEmpty &&
-                          actionTypeController.text.trim().isNotEmpty) {
+                      if (buttonTextController.text.trim().isNotEmpty) {
                         if (cta == null) {
                           context.read<CTABloc>().add(CTACreate(
                                 pageId: widget.pageId,
                                 buttonText: buttonTextController.text.trim(),
-                                actionType: actionTypeController.text.trim(),
-                                actionTarget: actionTargetController.text
+                                actionType: 'default', // Required field
+                                actionTarget: estimatedTimeController.text
                                         .trim()
                                         .isNotEmpty
-                                    ? actionTargetController.text.trim()
+                                    ? estimatedTimeController.text.trim()
                                     : null,
                                 buttonStyle:
-                                    buttonStyleController.text.trim().isNotEmpty
-                                        ? buttonStyleController.text.trim()
+                                    costController.text.trim().isNotEmpty
+                                        ? costController.text.trim()
                                         : null,
                               ));
                         } else {
@@ -388,15 +376,15 @@ class _CTAManagementScreenState extends State<CTAManagementScreen> {
                                 ctaId:
                                     'cta_id_placeholder', // We don't have the CTA ID in the model
                                 buttonText: buttonTextController.text.trim(),
-                                actionType: actionTypeController.text.trim(),
-                                actionTarget: actionTargetController.text
+                                actionType: 'default', // Required field
+                                actionTarget: estimatedTimeController.text
                                         .trim()
                                         .isNotEmpty
-                                    ? actionTargetController.text.trim()
+                                    ? estimatedTimeController.text.trim()
                                     : null,
                                 buttonStyle:
-                                    buttonStyleController.text.trim().isNotEmpty
-                                        ? buttonStyleController.text.trim()
+                                    costController.text.trim().isNotEmpty
+                                        ? costController.text.trim()
                                         : null,
                               ));
                         }

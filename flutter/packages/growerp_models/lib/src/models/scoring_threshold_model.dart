@@ -6,38 +6,38 @@ part 'scoring_threshold_model.g.dart';
 @JsonSerializable()
 class ScoringThreshold {
   /// System-wide unique identifier
-  final String thresholdId;
+  final String? thresholdId;
 
   /// Tenant-unique identifier
-  final String pseudoId;
+  final String? pseudoId;
 
   /// Assessment ID this threshold belongs to
-  final String assessmentId;
+  final String? assessmentId;
 
   /// Minimum score for this threshold (inclusive)
-  final double minScore;
+  final double? minScore;
 
   /// Maximum score for this threshold (inclusive)
-  final double maxScore;
+  final double? maxScore;
 
   /// Lead status/category assigned at this score range
-  final String leadStatus;
+  final String? leadStatus;
 
   /// Description of this score range outcome
   final String? description;
 
   /// Timestamp when created
-  final DateTime createdDate;
+  final DateTime? createdDate;
 
   const ScoringThreshold({
-    required this.thresholdId,
-    required this.pseudoId,
-    required this.assessmentId,
-    required this.minScore,
-    required this.maxScore,
-    required this.leadStatus,
+    this.thresholdId,
+    this.pseudoId,
+    this.assessmentId,
+    this.minScore,
+    this.maxScore,
+    this.leadStatus,
     this.description,
-    required this.createdDate,
+    this.createdDate,
   });
 
   ScoringThreshold copyWith({

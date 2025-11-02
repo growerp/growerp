@@ -327,9 +327,14 @@ along with this software (see the LICENSE.md file). If not, see
             </method>
         </resource>
         <!-- assessment -->
-        <resource name="Assessment">
-            <method type="get" require-authentication="anonymous-all">
+        <resource name="AssessmentComplete" require-authentication="anonymous-all">
+            <method type="get">
                 <service name="growerp.100.AssessmentServices100.get#Assessment" />
+            </method>
+        </resource>
+        <resource name="Assessment">
+            <method type="get">
+                <service name="growerp.100.AssessmentServices100.list#Assessments" />
             </method>
             <method type="post">
                 <service name="growerp.100.AssessmentServices100.create#Assessment" />
@@ -340,67 +345,75 @@ along with this software (see the LICENSE.md file). If not, see
             <method type="delete">
                 <service name="growerp.100.AssessmentServices100.delete#Assessment" />
             </method>
-            <id name="assessmentId">
-                <resource name="Question">
+            <resource name="Questions"><!-- question and options -->
+                <method type="get">
+                    <service name="growerp.100.AssessmentServices100.get#Questions" />
+                </method>
+            </resource>
+            <resource name="Question">
+                <method type="get">
+                    <service name="growerp.100.AssessmentServices100.get#Question" />
+                </method>
+                <method type="post">
+                    <service name="growerp.100.AssessmentServices100.create#Question" />
+                </method>
+                <method type="patch">
+                    <service name="growerp.100.AssessmentServices100.update#Question" />
+                </method>
+                <method type="delete">
+                    <service name="growerp.100.AssessmentServices100.delete#Question" />
+                </method>
+                <resource name="Option" require-authentication="anonymous-all">
                     <method type="get" require-authentication="anonymous-all">
-                        <service name="growerp.100.AssessmentServices100.get#Question" />
+                        <service name="growerp.100.AssessmentServices100.get#Option" />
                     </method>
                     <method type="post">
-                        <service name="growerp.100.AssessmentServices100.create#Question" />
+                        <service name="growerp.100.AssessmentServices100.create#Option" />
                     </method>
                     <method type="patch">
-                        <service name="growerp.100.AssessmentServices100.update#Question" />
+                        <service name="growerp.100.AssessmentServices100.update#Option" />
                     </method>
                     <method type="delete">
-                        <service name="growerp.100.AssessmentServices100.delete#Question" />
-                    </method>
-                    <id name="questionId">
-                        <resource name="Option">
-                            <method type="get" require-authentication="anonymous-all">
-                                <service name="growerp.100.AssessmentServices100.get#Option" />
-                            </method>
-                            <method type="post">
-                                <service name="growerp.100.AssessmentServices100.create#Option" />
-                            </method>
-                            <method type="patch">
-                                <service name="growerp.100.AssessmentServices100.update#Option" />
-                            </method>
-                            <method type="delete">
-                                <service name="growerp.100.AssessmentServices100.delete#Option" />
-                            </method>
-                        </resource>
-                    </id>
-                </resource>
-                <resource name="Threshold">
-                    <method type="get">
-                        <service name="growerp.100.AssessmentServices100.get#Thresholds" />
-                    </method>
-                    <method type="patch">
-                        <service name="growerp.100.AssessmentServices100.update#Thresholds" />
+                        <service name="growerp.100.AssessmentServices100.delete#Option" />
                     </method>
                 </resource>
-                <resource name="CalculateScore">
-                    <method type="post">
-                        <service name="growerp.100.AssessmentServices100.calculate#Score" />
-                    </method>
-                </resource>
-                <resource name="Result">
-                    <method type="get">
-                        <service name="growerp.100.AssessmentServices100.get#Result" />
-                    </method>
-                    <method type="post">
-                        <service name="growerp.100.AssessmentServices100.create#Result" />
-                    </method>
-                    <method type="delete">
-                        <service name="growerp.100.AssessmentServices100.delete#Result" />
-                    </method>
-                </resource>
-                <resource name="submit" require-authentication="anonymous-all">
-                    <method type="post">
-                        <service name="growerp.100.AssessmentServices100.submit#Assessment" />
-                    </method>
-                </resource>
-            </id>
+            </resource>
+            <resource name="Threshold">
+                <method type="get">
+                    <service name="growerp.100.AssessmentServices100.get#Thresholds" />
+                </method>
+                <method type="patch">
+                    <service name="growerp.100.AssessmentServices100.update#Thresholds" />
+                </method>
+            </resource>
+            <resource name="CalculateScore">
+                <method type="post">
+                    <service name="growerp.100.AssessmentServices100.calculate#Score" />
+                </method>
+            </resource>
+            <resource name="Result" require-authentication="false">
+                <method type="get" require-authentication="false">
+                    <service name="growerp.100.AssessmentServices100.get#Result" />
+                </method>
+                <method type="post" require-authentication="false">
+                    <service name="growerp.100.AssessmentServices100.create#Result" />
+                </method>
+                <method type="delete" require-authentication="false">
+                    <service name="growerp.100.AssessmentServices100.delete#Result" />
+                </method>
+            </resource>
+            <resource name="submit" require-authentication="anonymous-all">
+                <method type="post">
+                    <service name="growerp.100.AssessmentServices100.submit#Assessment" />
+                </method>
+            </resource>
+        </resource>
+
+        <!-- Public landing page -->
+        <resource name="LandingPagePublic" require-authentication="anonymous-view">
+            <method type="get">
+                <service name="growerp.100.LandingPageServices100.get#LandingPage" />
+            </method>
         </resource>
 
         <!-- landing page -->
@@ -411,125 +424,54 @@ along with this software (see the LICENSE.md file). If not, see
             <method type="post">
                 <service name="growerp.100.LandingPageServices100.create#LandingPage" />
             </method>
-            <id name="pageId">
-                <method type="get" require-authentication="anonymous-all">
-                    <service name="growerp.100.LandingPageServices100.get#LandingPage" />
+            <method type="patch">
+                <service name="growerp.100.LandingPageServices100.update#LandingPage" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.LandingPageServices100.delete#LandingPage" />
+            </method>
+            <resource name="publish">
+                <method type="post">
+                    <service name="growerp.100.LandingPageServices100.publish#LandingPage" />
+                </method>
+            </resource>
+            <resource name="Section">
+                <method type="get">
+                    <service name="growerp.100.LandingPageServices100.list#PageSections" />
+                </method>
+                <method type="post">
+                    <service name="growerp.100.LandingPageServices100.create#PageSection" />
                 </method>
                 <method type="patch">
-                    <service name="growerp.100.LandingPageServices100.update#LandingPage" />
+                    <service
+                        name="growerp.100.LandingPageServices100.update#PageSection" />
                 </method>
                 <method type="delete">
-                    <service name="growerp.100.LandingPageServices100.delete#LandingPage" />
+                    <service
+                        name="growerp.100.LandingPageServices100.delete#PageSection" />
                 </method>
-                <resource name="publish">
-                    <method type="post">
-                        <service name="growerp.100.LandingPageServices100.publish#LandingPage" />
-                    </method>
-                </resource>
-                <resource name="Section">
-                    <method type="get">
-                        <service name="growerp.100.LandingPageServices100.list#PageSections" />
-                    </method>
-                    <method type="post">
-                        <service name="growerp.100.LandingPageServices100.create#PageSection" />
-                    </method>
-                    <id name="sectionId">
-                        <method type="patch">
-                            <service
-                                name="growerp.100.LandingPageServices100.update#PageSection" />
-                        </method>
-                        <method type="delete">
-                            <service
-                                name="growerp.100.LandingPageServices100.delete#PageSection" />
-                        </method>
-                    </id>
-                </resource>
-                <resource name="Credibility">
-                    <method type="post">
-                        <service name="growerp.100.LandingPageServices100.create#CredibilityInfo" />
-                    </method>
-                    <id name="credibilityId">
-                        <method type="patch">
-                            <service
-                                name="growerp.100.LandingPageServices100.update#CredibilityInfo" />
-                        </method>
-                        <method type="delete">
-                            <service
-                                name="growerp.100.LandingPageServices100.delete#CredibilityInfo" />
-                        </method>
-                    </id>
-                </resource>
-                <resource name="CallToAction">
-                    <method type="post">
-                        <service name="growerp.100.LandingPageServices100.create#PrimaryCTA" />
-                    </method>
-                    <id name="ctaId">
-                        <method type="patch">
-                            <service name="growerp.100.LandingPageServices100.update#PrimaryCTA" />
-                        </method>
-                    </id>
-                </resource>
-            </id>
-        </resource>
-
-        <!-- Public landing page access (no authentication required) -->
-        <resource name="Public">
-            <resource name="LandingPage">
-                <id name="pageId" require-authentication="anonymous-all">
-                    <method type="get">
-                        <service name="growerp.100.LandingPageServices100.get#LandingPage" />
-                    </method>
-                </id>
             </resource>
-        </resource>
-
-        <!-- Direct Assessment endpoints for Flutter compatibility -->
-        <resource name="AssessmentQuestion">
-            <method type="get" require-authentication="anonymous-all">
-                <service name="growerp.100.AssessmentServices100.get#AssessmentQuestions" />
-            </method>
-            <method type="post">
-                <service name="growerp.100.AssessmentServices100.create#Question" />
-            </method>
-            <method type="patch">
-                <service name="growerp.100.AssessmentServices100.update#Question" />
-            </method>
-            <method type="delete">
-                <service name="growerp.100.AssessmentServices100.delete#Question" />
-            </method>
-        </resource>
-
-        <resource name="AssessmentQuestionOption">
-            <method type="get" require-authentication="anonymous-all">
-                <service name="growerp.100.AssessmentServices100.get#AssessmentQuestionOptions" />
-            </method>
-            <method type="post">
-                <service name="growerp.100.AssessmentServices100.create#Option" />
-            </method>
-            <method type="patch">
-                <service name="growerp.100.AssessmentServices100.update#Option" />
-            </method>
-            <method type="delete">
-                <service name="growerp.100.AssessmentServices100.delete#Option" />
-            </method>
-        </resource>
-
-        <resource name="AssessmentResult">
-            <method type="get">
-                <service name="growerp.100.AssessmentServices100.get#AssessmentResults" />
-            </method>
-            <method type="post">
-                <service name="growerp.100.AssessmentServices100.submit#Assessment" />
-            </method>
-            <method type="delete">
-                <service name="growerp.100.AssessmentServices100.delete#Result" />
-            </method>
-        </resource>
-
-        <resource name="AllAssessmentResults">
-            <method type="get">
-                <service name="growerp.100.AssessmentServices100.get#AllAssessmentResults" />
-            </method>
+            <resource name="Credibility">
+                <method type="post">
+                    <service name="growerp.100.LandingPageServices100.create#CredibilityInfo" />
+                </method>
+                <method type="patch">
+                    <service
+                        name="growerp.100.LandingPageServices100.update#CredibilityInfo" />
+                </method>
+                <method type="delete">
+                    <service
+                        name="growerp.100.LandingPageServices100.delete#CredibilityInfo" />
+                </method>
+            </resource>
+            <resource name="CallToAction">
+                <method type="post">
+                    <service name="growerp.100.LandingPageServices100.create#PrimaryCTA" />
+                </method>
+                <method type="patch">
+                    <service name="growerp.100.LandingPageServices100.update#PrimaryCTA" />
+                </method>
+            </resource>
         </resource>
 
         <resource name="AssessmentThreshold">
@@ -540,6 +482,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.AssessmentServices100.update#Thresholds" />
             </method>
         </resource>
+
+        <resource name="AllAssessmentResults">
+            <method type="get">
+                <service name="growerp.100.AssessmentServices100.get#AllAssessmentResults" />
+            </method>
+        </resource>
+
         <!-- Accounting -->
         <resource name="GlAccount">
             <method type="get">

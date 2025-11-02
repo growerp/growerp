@@ -1142,7 +1142,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <!-- standard GrowERP landing page and assesment -->
                             <script><![CDATA[
                                 org.moqui.entity.EntityDataLoader edl = ec.entity.makeDataLoader()
-                                edl.location("component://growerp/data/ErpReadinessAssessmentData.xml")
+                                edl.location("component://growerp/data/ErpLandingPageData.xml")
                                 edl.load()
                             ]]></script>
                             <else>

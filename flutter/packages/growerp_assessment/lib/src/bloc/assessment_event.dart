@@ -23,22 +23,34 @@ abstract class AssessmentEvent extends Equatable {
 
 class AssessmentFetch extends AssessmentEvent {
   const AssessmentFetch({
-    this.assessmentId,
     this.searchString = '',
     this.statusId,
     this.refresh = false,
     this.limit = 20,
   });
 
-  final String? assessmentId;
   final String searchString;
   final String? statusId;
   final bool refresh;
   final int limit;
 
   @override
-  List<Object?> get props =>
-      [assessmentId, searchString, statusId, refresh, limit];
+  List<Object?> get props => [searchString, statusId, refresh, limit];
+}
+
+class AssessmentFetchAll extends AssessmentEvent {
+  const AssessmentFetchAll({
+    this.assessmentId,
+    this.pseudoId,
+    this.ownerPartyId,
+  });
+
+  final String? assessmentId;
+  final String? pseudoId;
+  final String? ownerPartyId;
+
+  @override
+  List<Object?> get props => [assessmentId, pseudoId, ownerPartyId];
 }
 
 class AssessmentCreate extends AssessmentEvent {

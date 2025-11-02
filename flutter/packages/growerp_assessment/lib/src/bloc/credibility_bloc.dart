@@ -158,7 +158,7 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
       }
 
       final restClient = RestClient(await buildDioClient());
-      final credibilityId = state.credibilityElements.first.credibilityId;
+      final credibilityId = state.credibilityElements.first.credibilityId ?? '';
 
       final newStatistic = await restClient.addCredibilityStatistic(
         credibilityId: credibilityId,

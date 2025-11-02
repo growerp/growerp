@@ -22,6 +22,7 @@ along with this software (see the LICENSE.md file). If not, see
         </in-parameters>
         <out-parameters>
             <parameter name="company" type="Map">
+                <parameter name="ownerPartyId" />
                 <parameter name="partyId" />
                 <parameter name="pseudoId" />
                 <parameter name="name" />
@@ -202,6 +203,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="companies" type="List">
                 <parameter name="company" type="Map">
+                    <parameter name="owenerPartyId" />
                     <parameter name="partyId" />
                     <parameter name="pseudoId" />
                     <parameter name="name" />
@@ -418,6 +420,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <else>
                             <set field="company"
                                 from="[
+                                    ownerpartyId: item.companyPartyId,
                                     partyId: item.companyPartyId,
                                     pseudoId: item.companyPseudoId ?:'',
                                     name: item.companyName,

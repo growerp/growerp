@@ -30,6 +30,7 @@ part 'company_model.g.dart';
 abstract class Company with _$Company {
   Company._();
   factory Company({
+    String? ownerPartyId,
     String? partyId,
     String? pseudoId,
     @RoleConverter() Role? role,
@@ -52,7 +53,8 @@ abstract class Company with _$Company {
       _$CompanyFromJson(json["company"] ?? json);
 
   @override
-  String toString() => 'Company name: $name[$partyId] '
+  String toString() =>
+      'Company name: $name[$partyId] '
       'Curr: ${currency?.currencyId} '
       'imgSize: ${image?.length}'
       '#Empl: ${employees.length}';
@@ -78,31 +80,36 @@ List<Company> csvToCompanies(String csvFile) {
       image = file.readAsBytesSync();
     }
 
-    companies.add(Company(
-      pseudoId: row[0],
-      role: Role.getByValue(row[1]),
-      name: row[2],
-      email: row[3].contains('@example.com') // avoid duplicated emails
-          ? (Random().nextInt(1000).toString() + row[3])
-          : row[3],
-      telephoneNr: row[4],
-      currency: Currency(currencyId: row[5]),
-      image: image,
-      address: Address(
+    companies.add(
+      Company(
+        pseudoId: row[0],
+        role: Role.getByValue(row[1]),
+        name: row[2],
+        email:
+            row[3].contains('@example.com') // avoid duplicated emails
+            ? (Random().nextInt(1000).toString() + row[3])
+            : row[3],
+        telephoneNr: row[4],
+        currency: Currency(currencyId: row[5]),
+        image: image,
+        address: Address(
           address1: row[7],
           address2: row[8],
           postalCode: row[9],
           city: row[10],
           province: row[11],
-          country: row[12]),
-      paymentMethod: PaymentMethod(
+          country: row[12],
+        ),
+        paymentMethod: PaymentMethod(
           ccDescription: row[13],
           creditCardType: CreditCardType.getByValue(row[14]),
           expireMonth: row[15],
-          expireYear: row[16]),
-      vatPerc: row[17] != '' ? Decimal.parse(row[17]) : null,
-      salesPerc: row[18] != '' ? Decimal.parse(row[18]) : null,
-    ));
+          expireYear: row[16],
+        ),
+        vatPerc: row[17] != '' ? Decimal.parse(row[17]) : null,
+        salesPerc: row[18] != '' ? Decimal.parse(row[18]) : null,
+      ),
+    );
   }
 
   return companies;
@@ -111,27 +118,29 @@ List<Company> csvToCompanies(String csvFile) {
 String csvFromCompanies(List<Company> companies) {
   var csv = [companyCsvFormat];
   for (Company company in companies) {
-    csv.add(createCsvRow([
-      company.pseudoId ?? '',
-      company.role.toString(),
-      company.name ?? '',
-      company.email ?? '',
-      company.currency?.currencyId ?? '',
-      company.image != null ? base64.encode(company.image!) : '',
-      company.address?.address1 ?? '',
-      company.address?.address2 ?? '',
-      company.address?.postalCode ?? '',
-      company.address?.city ?? '',
-      company.address?.province ?? '',
-      company.address?.country ?? '',
-      company.paymentMethod?.ccDescription ?? '',
-      company.paymentMethod?.creditCardType!.value ?? '',
-      company.paymentMethod?.creditCardNumber ?? '',
-      company.paymentMethod?.expireMonth ?? '',
-      company.paymentMethod?.expireYear ?? '',
-      company.vatPerc.toString(),
-      company.salesPerc.toString(),
-    ], companyCsvLength));
+    csv.add(
+      createCsvRow([
+        company.pseudoId ?? '',
+        company.role.toString(),
+        company.name ?? '',
+        company.email ?? '',
+        company.currency?.currencyId ?? '',
+        company.image != null ? base64.encode(company.image!) : '',
+        company.address?.address1 ?? '',
+        company.address?.address2 ?? '',
+        company.address?.postalCode ?? '',
+        company.address?.city ?? '',
+        company.address?.province ?? '',
+        company.address?.country ?? '',
+        company.paymentMethod?.ccDescription ?? '',
+        company.paymentMethod?.creditCardType!.value ?? '',
+        company.paymentMethod?.creditCardNumber ?? '',
+        company.paymentMethod?.expireMonth ?? '',
+        company.paymentMethod?.expireYear ?? '',
+        company.vatPerc.toString(),
+        company.salesPerc.toString(),
+      ], companyCsvLength),
+    );
   }
   return csv.join();
 }

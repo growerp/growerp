@@ -204,7 +204,9 @@ class _AssessmentResultsListScreenState
                     const SizedBox(width: 16),
                     _buildInfoItem(
                       Icons.schedule,
-                      _formatDate(result.createdDate),
+                      result.createdDate != null
+                          ? _formatDate(result.createdDate!)
+                          : 'N/A',
                     ),
                   ],
                 ),

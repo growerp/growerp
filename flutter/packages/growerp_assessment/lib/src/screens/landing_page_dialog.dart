@@ -27,8 +27,6 @@ class _LandingPageDialogState extends State<LandingPageDialog> {
   final _pseudoIdController = TextEditingController();
   final _headlineController = TextEditingController();
   final _subheadingController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _heroImageUrlController = TextEditingController();
 
   String _selectedStatus = 'DRAFT';
   String? _selectedHookType;
@@ -55,10 +53,8 @@ class _LandingPageDialogState extends State<LandingPageDialog> {
   void _populateFields(LandingPage landingPage) {
     _titleController.text = landingPage.title;
     _pseudoIdController.text = landingPage.pseudoId;
-    _headlineController.text = landingPage.headline;
+    _headlineController.text = landingPage.headline ?? '';
     _subheadingController.text = landingPage.subheading ?? '';
-    _descriptionController.text = landingPage.description ?? '';
-    _heroImageUrlController.text = landingPage.heroImageUrl ?? '';
     _selectedStatus = landingPage.status;
     _selectedHookType = landingPage.hookType;
     _selectedAssessmentId = landingPage.assessmentId;
@@ -70,8 +66,6 @@ class _LandingPageDialogState extends State<LandingPageDialog> {
     _pseudoIdController.dispose();
     _headlineController.dispose();
     _subheadingController.dispose();
-    _descriptionController.dispose();
-    _heroImageUrlController.dispose();
     super.dispose();
   }
 
@@ -267,25 +261,6 @@ class _LandingPageDialogState extends State<LandingPageDialog> {
                           );
                         },
                       ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _descriptionController,
-                        decoration: const InputDecoration(
-                          labelText: 'Description',
-                          hintText: 'SEO meta description and page summary',
-                          border: OutlineInputBorder(),
-                        ),
-                        maxLines: 3,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _heroImageUrlController,
-                        decoration: const InputDecoration(
-                          labelText: 'Hero Image URL',
-                          hintText: 'URL of the main hero image',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
                       const SizedBox(height: 24),
 
                       // Component Management Section (only for existing pages)
@@ -378,17 +353,13 @@ class _LandingPageDialogState extends State<LandingPageDialog> {
       pageId: widget.landingPage?.pageId ?? '',
       pseudoId: _pseudoIdController.text.trim(),
       title: _titleController.text.trim(),
-      headline: _headlineController.text.trim(),
+      headline: _headlineController.text.trim().isEmpty
+          ? null
+          : _headlineController.text.trim(),
       hookType: _selectedHookType,
       subheading: _subheadingController.text.trim().isEmpty
           ? null
           : _subheadingController.text.trim(),
-      description: _descriptionController.text.trim().isEmpty
-          ? null
-          : _descriptionController.text.trim(),
-      heroImageUrl: _heroImageUrlController.text.trim().isEmpty
-          ? null
-          : _heroImageUrlController.text.trim(),
       status: _selectedStatus,
       assessmentId: _selectedAssessmentId,
     );

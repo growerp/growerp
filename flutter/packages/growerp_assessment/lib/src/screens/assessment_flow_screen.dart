@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/assessment_bloc.dart';
+import 'package:growerp_assessment/growerp_assessment.dart';
 import 'lead_capture_screen.dart';
 import 'assessment_questions_screen.dart';
 import 'assessment_results_screen_new.dart';
@@ -9,11 +10,13 @@ import 'assessment_results_screen_new.dart';
 /// Manages the three-step assessment process and state transitions
 class AssessmentFlowScreen extends StatefulWidget {
   final String assessmentId;
+  final String? ownerPartyId;
   final VoidCallback onComplete;
 
   const AssessmentFlowScreen({
     Key? key,
     required this.assessmentId,
+    this.ownerPartyId,
     required this.onComplete,
   }) : super(key: key);
 
@@ -42,6 +45,14 @@ class _AssessmentFlowScreenState extends State<AssessmentFlowScreen> {
     _respondentEmail = '';
     _respondentCompany = '';
     _respondentPhone = '';
+
+    // Fetch complete assessment data with questions, options, and thresholds
+    context.read<AssessmentBloc>().add(
+          AssessmentFetchAll(
+            assessmentId: widget.assessmentId,
+            ownerPartyId: widget.ownerPartyId,
+          ),
+        );
   }
 
   @override
@@ -102,58 +113,130 @@ class _AssessmentFlowScreenState extends State<AssessmentFlowScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: true,
-      onPopInvokedWithResult: (didPop, result) {
-        if (_currentStep > 0 && !didPop) {
-          _moveToPreviousStep();
+    return BlocListener<AssessmentBloc, AssessmentState>(
+      listener: (context, state) {
+        // Show error message if fetch fails
+        if (state.status == AssessmentStatus.failure && state.message != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error loading assessment: ${state.message}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+            ),
+          );
         }
       },
-      child: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() => _currentStep = index);
+      child: PopScope(
+        canPop: true,
+        onPopInvokedWithResult: (didPop, result) {
+          if (_currentStep > 0 && !didPop) {
+            _moveToPreviousStep();
+          }
         },
-        physics: const NeverScrollableScrollPhysics(), // Control via buttons
-        children: [
-          // Step 1: Lead Capture
-          LeadCaptureScreen(
-            assessmentId: widget.assessmentId,
-            onRespondentDataCollected: _storeRespondentData,
-            onNext: _moveToNextStep,
-          ),
+        child: PageView(
+          controller: _pageController,
+          onPageChanged: (index) {
+            setState(() => _currentStep = index);
+          },
+          physics: const NeverScrollableScrollPhysics(), // Control via buttons
+          children: [
+            // Step 1: Lead Capture
+            LeadCaptureScreen(
+              assessmentId: widget.assessmentId,
+              onRespondentDataCollected: _storeRespondentData,
+              onNext: _moveToNextStep,
+            ),
 
-          // Step 2: Assessment Questions
-          AssessmentQuestionsScreen(
-            assessmentId: widget.assessmentId,
-            onAnswersCollected: _storeAnswers,
-            onNext: _submitAssessment,
-            onPrevious: _moveToPreviousStep,
-          ),
+            // Step 2: Assessment Questions
+            BlocBuilder<AssessmentBloc, AssessmentState>(
+              builder: (context, state) {
+                // Handle error state first
+                if (state.status == AssessmentStatus.failure) {
+                  return Scaffold(
+                    appBar: AppBar(title: const Text('Assessment - Step 2')),
+                    body: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error, color: Colors.red, size: 64),
+                          const SizedBox(height: 16),
+                          const Text('Error loading assessment'),
+                          if (state.message != null) ...[
+                            const SizedBox(height: 8),
+                            Text(state.message!,
+                                style: const TextStyle(color: Colors.red),
+                                textAlign: TextAlign.center),
+                          ],
+                          const SizedBox(height: 24),
+                          ElevatedButton(
+                            onPressed: _moveToPreviousStep,
+                            child: const Text('Go Back'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
 
-          // Step 3: Results
-          BlocBuilder<AssessmentBloc, AssessmentState>(
-            builder: (context, state) {
-              if (state.selectedAssessment != null) {
-                return AssessmentResultsScreen(
+                // Wait for assessment data to load before showing questions screen
+                if (state.selectedAssessment == null ||
+                    state.selectedAssessment!.questions == null ||
+                    state.selectedAssessment!.questions!.isEmpty) {
+                  return Scaffold(
+                    appBar: AppBar(title: const Text('Assessment - Step 2')),
+                    body: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: 16),
+                          Text(
+                              'Loading assessment questions... Status: ${state.status}'),
+                          if (state.message != null) ...[
+                            const SizedBox(height: 8),
+                            Text('Error: ${state.message}',
+                                style: const TextStyle(color: Colors.red)),
+                          ],
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                // Pass the complete assessment object with all nested data
+                return AssessmentQuestionsScreen(
                   assessment: state.selectedAssessment!,
-                  answers: _answers
-                      .map((key, value) => MapEntry(key, value.toString())),
+                  onAnswersCollected: _storeAnswers,
+                  onNext: _submitAssessment,
+                  onPrevious: _moveToPreviousStep,
                 );
-              }
-              return const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Loading results...'),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
+              },
+            ),
+
+            // Step 3: Results
+            BlocBuilder<AssessmentBloc, AssessmentState>(
+              builder: (context, state) {
+                if (state.selectedAssessment != null) {
+                  return AssessmentResultsScreen(
+                    assessment: state.selectedAssessment!,
+                    answers: _answers
+                        .map((key, value) => MapEntry(key, value.toString())),
+                  );
+                }
+                return const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Loading results...'),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
