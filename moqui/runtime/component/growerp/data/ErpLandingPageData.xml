@@ -5,7 +5,8 @@
   <!-- Based on flutter/packages/landing_page/erp_landing_page.md -->
 
   <!-- Assessment: ERP Readiness -->
-  <growerp.assessment.Assessment assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.Assessment
+    assessmentId="ERP_READINESS_ASSESSMENT"
     pseudoId="erp-readiness-assessment"
     ownerPartyId="GROWERP"
     assessmentName="ERP Readiness Assessment"
@@ -21,7 +22,8 @@
     status="Published" privacyPolicyUrl="/privacy" createdByUserLogin="admin" />
 
   <!-- Value Proposition Section -->
-  <growerp.landing.PageSection sectionId="ERP_VP_SECTION" pseudoId="erp-vp-section"
+  <growerp.landing.PageSection
+    sectionId="ERP_VP_SECTION" pseudoId="erp-vp-section"
     pageId="ERP_LANDING_PAGE" sectionSequence="1"
     sectionTitle="Rapid Deployment: Modular, Open-Source Architecture"
     sectionDescription="Discover how our modular, open-source architecture enables a full implementation in just 1-3 months for a fixed fee. This is up to 50% faster than traditional application development." />
