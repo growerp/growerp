@@ -47,25 +47,19 @@ Future main() async {
   Company? company;
   final uri = Uri.base;
   try {
-    company = await restClient.getCompanyFromHost(uri.toString());
+    company = await restClient.getCompanyFromHost(uri.host);
   } on DioException catch (e) {
     debugPrint("getting hostname error: ${await getDioError(e)}");
   }
 
+  debugPrint("=====company owner: ${company?.ownerPartyId}");
+
   // Resolve route parameters from URL and company data
-  String pageId = 'erp-landing-page';
-  String? ownerPartyId = company?.ownerPartyId ?? 'GROWERP';
-
-  // Check query parameters (highest priority)
   final query = uri.queryParameters;
-  pageId = query['pageId'] ?? pageId;
+  String pageId = query['pageId'] ?? '100000';
+  String? ownerPartyId = company?.ownerPartyId ?? '100002';
 
-  if (pageId.isEmpty) {
-    pageId = 'default';
-  }
-
-  debugPrint('=== Resolved landing page route:');
-  debugPrint('=== pageId: $pageId');
+  debugPrint('=== landing page: $pageId');
   debugPrint('=== ownerPartyId: $ownerPartyId');
 
   runApp(

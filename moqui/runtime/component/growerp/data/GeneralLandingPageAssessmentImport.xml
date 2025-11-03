@@ -360,7 +360,8 @@ this file is loaded for every owner who request demo data.
        LANDING PAGE: Business Readiness Assessment Landing Page
        ============================================================ -->
 
-  <growerp.landing.LandingPage pageId="PAGE_BUSI_READINESS_001"
+  <growerp.landing.LandingPage
+    pageId="PAGE_BUSI_READINESS_001"
     pseudoId="business-readiness-landing"
     ownerPartyId="DEMO"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
@@ -378,7 +379,8 @@ this file is loaded for every owner who request demo data.
        ============================================================ -->
 
   <!-- Section 1: The Hook -->
-  <growerp.landing.PageSection sectionId="SECTION_HOOK_001"
+  <growerp.landing.PageSection
+    sectionId="SECTION_HOOK_001"
     pseudoId="section-hook"
     pageId="PAGE_BUSI_READINESS_001"
     sectionSequence="1"
@@ -387,7 +389,8 @@ this file is loaded for every owner who request demo data.
     createdDate="2025-01-01 00:00:00" />
 
   <!-- Section 2: The Subheading / Call to Action Intro -->
-  <growerp.landing.PageSection sectionId="SECTION_SUBHEADING_001"
+  <growerp.landing.PageSection
+    sectionId="SECTION_SUBHEADING_001"
     pseudoId="section-subheading"
     pageId="PAGE_BUSI_READINESS_001"
     sectionSequence="2"

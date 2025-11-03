@@ -32,16 +32,24 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <log message="====get company from host: $hostName" />
             <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="hostNames">
                 <econdition field-name="settingTypeEnumId" value="PsstHostname" />
                 <econdition field-name="settingValue" from="hostName" />
                 <date-filter />
             </entity-find>
             <if condition="!hostNames">
-                <return />
+                <!-- if not found, check if subdomain is productStoreId -->
+                <if condition="hostName.indexOf('.') != -1">
+                    <set field="productStoreId" from="hostName.substring(0, hostName.indexOf('.'))" />
+                </if>
+                <else>
+                    <set field="productStoreId" from="hostNames[0].productStoreId" />
+                </else>
             </if>
+            <log message="=====get productStoreid; $productStoreId" />
             <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
-                <econdition field-name="productStoreId" from="hostNames[0].productStoreId" />
+                <econdition field-name="productStoreId" />
             </entity-find>
             <if condition="stores">
                 <service-call name="growerp.100.PartyServices100.get#Company"
@@ -3765,9 +3773,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                         in-map="[ownerPartyId: ownerPartyId, seqName: 'pageSection']"
                         out-map="context" />
-                    <set field="section"
-                        from="section + [pageId: newPage.pageId,sectionId: null, pseudoId: seqNum]" />
-                    <entity-create value-field="section" />
+                    <service-call name="create#growerp.landing.PageSection"
+                        in-map="[section + [sectionId: null, pageId: newPage.pageId, pseudoId: seqNum]]"
+                        out-map="context" />
                 </iterate>
                 <!-- credibility info-->
                 <entity-find entity-name="growerp.landing.CredibilityInfo" list="credibilities">
@@ -3785,8 +3793,9 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="credibilityId" from="credibilities[0].credibilityId" />
                     </entity-find>
                     <iterate list="stats" entry="statistic">
-                        <entity-create
-                            value-field="statistic + [credibilityId: credibilityId, statisticId: null]" />
+                        <service-call name="create#growerp.landing.CredibilityStatistic"
+                            in-map="[statistic + [credibilityId: credibilityId, statisticId: null]]"
+                            out-map="context" />
                     </iterate>
                 </if>
                 <!-- CTA -->
@@ -3797,8 +3806,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                         in-map="[ownerPartyId: ownerPartyId, seqName: 'primaryCTA']"
                         out-map="context" />
-                    <entity-create
-                        value-field="ctas[0] + [ctaId: null, pseudoId: seqNum, pageId: newPage.pageId]" />
+                    <service-call name="create#growerp.landing.PrimaryCTA"
+                        in-map="[ctas[0] + [ctaId: null, pageId: newPage.pageId, pseudoId: seqNum]]"
+                        out-map="context" />
                 </if>
             </iterate>
             <!-- load assessment demo data -->
@@ -3806,6 +3816,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="ownerPartyId" value="DEMO" />
             </entity-find>
             <iterate list="assessments" entry="assessment">
+                <!-- assessment demo data -->
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                     in-map="[ownerPartyId: ownerPartyId, seqName: 'assessment']" out-map="context" />
                 <service-call name="create#growerp.assessment.Assessment"

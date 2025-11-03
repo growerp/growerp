@@ -61,7 +61,7 @@ Service definitions for landing page, sections, credibility, and CTA management
     </out-parameters>
     <actions>
       <log
-        message="======1111===Getting landing page for pageId: ${pageId}, productStoreId: ${ownerPartyId}" />
+        message="======1111===Getting landing page for pageId: ${pageId}, ownerPartyId: ${ownerPartyId}" />
       <if condition="!ownerPartyId">
         <service-call
           name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
