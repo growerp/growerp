@@ -43,8 +43,9 @@ class QuestionState extends Equatable {
     return QuestionState(
       status: status ?? this.status,
       questions: questions ?? this.questions,
-      selectedQuestion:
-          clearSelectedQuestion ? null : selectedQuestion ?? this.selectedQuestion,
+      selectedQuestion: clearSelectedQuestion
+          ? null
+          : selectedQuestion ?? this.selectedQuestion,
       assessmentId: assessmentId ?? this.assessmentId,
       message: message,
     );

@@ -940,7 +940,8 @@ Service definitions for assessment management and completion
             </if>
 
             <!-- Use QuestionAndOptions view for efficient single-query retrieval -->
-            <entity-find entity-name="growerp.assessment.QuestionAndOptions" list="questionAndOptionsRows">
+            <entity-find entity-name="growerp.assessment.QuestionAndOptions"
+                list="questionAndOptionsRows">
                 <econdition field-name="assessmentId" from="assessmentId" />
                 <order-by field-name="questionSequence" />
                 <order-by field-name="optionSequence" />

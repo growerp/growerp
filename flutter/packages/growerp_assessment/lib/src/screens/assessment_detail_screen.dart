@@ -160,7 +160,10 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
                           key: const Key("questions"),
                           tooltip: 'Questions',
                           heroTag: "questions",
-                          backgroundColor: widget.assessment.assessmentId == 'unknown' ? Colors.grey : null,
+                          backgroundColor:
+                              widget.assessment.assessmentId == 'unknown'
+                                  ? Colors.grey
+                                  : null,
                           onPressed: widget.assessment.assessmentId == 'unknown'
                               ? () {
                                   HelperFunctions.showMessage(
@@ -333,7 +336,8 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
             if (ResponsiveBreakpoints.of(context).isMobile) _updateButton(),
             if (ResponsiveBreakpoints.of(context).isMobile)
               const SizedBox(height: 20),
-            if (ResponsiveBreakpoints.of(context).isMobile) _buildMobileActionButtons(),
+            if (ResponsiveBreakpoints.of(context).isMobile)
+              _buildMobileActionButtons(),
             if (ResponsiveBreakpoints.of(context).isMobile)
               const SizedBox(height: 20),
           ],

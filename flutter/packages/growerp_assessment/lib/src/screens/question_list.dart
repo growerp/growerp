@@ -167,7 +167,8 @@ class QuestionListScreenState extends State<QuestionListScreen> {
                           );
                           if (confirmed == true) {
                             _questionBloc.add(
-                              QuestionDelete(question.assessmentQuestionId ?? ''),
+                              QuestionDelete(
+                                  question.assessmentQuestionId ?? ''),
                             );
                           }
                         },

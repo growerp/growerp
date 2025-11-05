@@ -56,22 +56,24 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
     super.initState();
     _questionTextController =
         TextEditingController(text: widget.question.questionText ?? '');
-    _questionDescriptionController = TextEditingController(
-        text: widget.question.questionDescription ?? '');
-    
+    _questionDescriptionController =
+        TextEditingController(text: widget.question.questionDescription ?? '');
+
     // Ensure question type is in the list, default to 'text' if not
     final incomingType = widget.question.questionType ?? 'text';
-    _questionType = _questionTypes.contains(incomingType) ? incomingType : 'text';
-    
+    _questionType =
+        _questionTypes.contains(incomingType) ? incomingType : 'text';
+
     _isRequired = widget.question.isRequired ?? false;
 
     // Initialize options list with existing data
     _options = (widget.question.options ?? [])
         .map((opt) => {
               'id': opt.assessmentQuestionOptionId,
-              'textController': TextEditingController(text: opt.optionText ?? ''),
-              'scoreController':
-                  TextEditingController(text: opt.optionScore?.toString() ?? '0'),
+              'textController':
+                  TextEditingController(text: opt.optionText ?? ''),
+              'scoreController': TextEditingController(
+                  text: opt.optionScore?.toString() ?? '0'),
               'sequence': opt.optionSequence ?? 0,
             })
         .toList();
@@ -230,7 +232,7 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
                     // Question Type Dropdown
                     DropdownButtonFormField<String>(
                       key: const Key('questionType'),
-                      value: _questionType,
+                      initialValue: _questionType,
                       decoration: const InputDecoration(
                         labelText: 'Question Type',
                         border: OutlineInputBorder(),
