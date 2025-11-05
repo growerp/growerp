@@ -55,8 +55,8 @@ RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
 RUN flutter build web --release --wasm
 
 #stage 2 -get files and build
+FROM eclipse-temurin:11-jdk AS build-env
 ARG DOCKER_TAG=NOTSET1
-FROM openjdk:11-jdk AS build-env
 
 RUN echo "DockerTag version: $DOCKER_TAG"
 RUN echo "Pat: $PAT"
@@ -94,7 +94,7 @@ RUN ./gradlew addRunTime
 WORKDIR /opt/moqui
 RUN unzip -q /root/growerp/moqui/moqui-plus-runtime.war
 # stage 2 create image
-FROM openjdk:11-jdk
+FROM eclipse-temurin:11-jdk
 ARG DOCKER_TAG=NOTSET1
 RUN apt-get update && apt-get install -y apt-transport-https nano && apt-get clean
 COPY --from=build-env /opt/moqui /opt/moqui
