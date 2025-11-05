@@ -901,69 +901,66 @@ abstract class RestClient {
   // PAGE SECTION ENDPOINTS
   // ============================================
 
-  @GET("rest/s1/growerp/100/LandingPage/{landingPageId}/Section")
-  Future<List<LandingPageSection>> getPageSections({
-    @Path() required String landingPageId,
+  @GET("rest/s1/growerp/100/LandingPage/Section")
+  Future<LandingPageSections> getPageSections({
+    @Query('landingPageId') required String landingPageId,
   });
 
-  @POST("rest/s1/growerp/100/LandingPage/{landingPageId}/Section")
+  @POST("rest/s1/growerp/100/LandingPage/Section")
   Future<LandingPageSection> createPageSection({
-    @Path() required String landingPageId,
+    @Field() required String landingPageId,
     @Field() required String sectionTitle,
     @Field() String? sectionDescription,
     @Field() String? sectionImageUrl,
     @Field() int? sectionSequence,
   });
 
-  @PATCH(
-    "rest/s1/growerp/100/LandingPage/{landingPageId}/Section/{pageSectionId}",
-  )
+  @PATCH("rest/s1/growerp/100/LandingPage/Section")
   Future<LandingPageSection> updatePageSection({
-    @Path() required String landingPageId,
-    @Path() required String pageSectionId,
+    @Field() required String landingPageId,
+    @Field() required String pageSectionId,
     @Field() String? sectionTitle,
     @Field() String? sectionDescription,
     @Field() String? sectionImageUrl,
     @Field() int? sectionSequence,
   });
 
-  @DELETE(
-    "rest/s1/growerp/100/LandingPage/{landingPageId}/Section/{pageSectionId}",
-  )
+  @DELETE("rest/s1/growerp/100/LandingPage/Section")
   Future<void> deletePageSection({
-    @Path() required String landingPageId,
-    @Path() required String pageSectionId,
+    @Field() required String landingPageId,
+    @Field() required String pageSectionId,
   });
 
   // ============================================
   // CREDIBILITY INFO ENDPOINTS (Nested under LandingPage)
   // ============================================
 
-  @POST("rest/s1/growerp/100/LandingPage/{landingPageId}/Credibility")
-  Future<CredibilityInfo> createCredibilityInfo({
-    @Path() required String landingPageId,
-    @Field() required String creatorBio,
-    @Field() String? backgroundText,
-    @Field() String? creatorImageUrl,
+  @GET("rest/s1/growerp/100/LandingPage/Credibility")
+  Future<CredibilityInfoList> getCredibilityInfo({
+    @Query('landingPageId') required String landingPageId,
   });
 
-  @PATCH(
-    "rest/s1/growerp/100/LandingPage/{landingPageId}/Credibility/{credibilityInfoId}",
-  )
-  Future<CredibilityInfo> updateCredibilityInfo({
-    @Path() required String landingPageId,
-    @Path() required String credibilityInfoId,
+  @POST("rest/s1/growerp/100/LandingPage/Credibility")
+  Future<CredibilityInfo> createCredibilityInfo({
+    @Field() required String landingPageId,
     @Field() String? creatorBio,
     @Field() String? backgroundText,
     @Field() String? creatorImageUrl,
   });
 
-  @DELETE(
-    "rest/s1/growerp/100/LandingPage/{landingPageId}/Credibility/{credibilityInfoId}",
-  )
+  @PATCH("rest/s1/growerp/100/LandingPage/Credibility")
+  Future<CredibilityInfo> updateCredibilityInfo({
+    @Field() required String landingPageId,
+    @Field() required String credibilityInfoId,
+    @Field() String? creatorBio,
+    @Field() String? backgroundText,
+    @Field() String? creatorImageUrl,
+  });
+
+  @DELETE("rest/s1/growerp/100/LandingPage/Credibility")
   Future<void> deleteCredibilityInfo({
-    @Path() required String landingPageId,
-    @Path() required String credibilityInfoId,
+    @Field() required String landingPageId,
+    @Field() required String credibilityInfoId,
   });
 
   // ============================================

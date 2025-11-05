@@ -20,7 +20,10 @@ List<BlocProvider> getAssessmentBlocProviders(RestClient restClient,
       create: (context) => PageSectionBloc(restClient: restClient),
     ),
     BlocProvider<CredibilityBloc>(
-      create: (context) => CredibilityBloc(),
+      create: (context) => CredibilityBloc(restClient: restClient),
+    ),
+    BlocProvider<QuestionBloc>(
+      create: (context) => QuestionBloc(restClient: restClient),
     ),
   ];
   return blocProviders;

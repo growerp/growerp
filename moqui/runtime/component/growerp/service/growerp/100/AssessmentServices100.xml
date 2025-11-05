@@ -925,7 +925,7 @@ Service definitions for assessment management and completion
             </parameter>
         </out-parameters>
         <actions>
-            <log message="=====question and options" />
+            <log message="=====question and options using QuestionAndOptions view" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
@@ -939,34 +939,57 @@ Service definitions for assessment management and completion
                 <return error="true" message="Assessment not found or access denied" />
             </if>
 
-            <!-- Get questions for this assessment -->
-            <entity-find entity-name="growerp.assessment.AssessmentQuestion" list="questionList">
+            <!-- Use QuestionAndOptions view for efficient single-query retrieval -->
+            <entity-find entity-name="growerp.assessment.QuestionAndOptions" list="questionAndOptionsRows">
                 <econdition field-name="assessmentId" from="assessmentId" />
                 <order-by field-name="questionSequence" />
+                <order-by field-name="optionSequence" />
             </entity-find>
 
-            <!-- Get options for each question and nest them -->
-            <set field="questions" from="[]" />
-            <iterate list="questionList" entry="question">
-                <entity-find entity-name="growerp.assessment.AssessmentQuestionOption"
-                    list="options">
-                    <econdition field-name="questionId" from="question.questionId" />
-                    <order-by field-name="optionSequence" />
-                </entity-find>
-                <log level="info"
-                    message="Question ${question.questionId}: Found ${options?.size() ?: 0} options" />
-                <!-- Create a new map to include options -->
-                <set field="questionMap" from="question.getMap()" />
-                <!-- Convert options entities to maps for proper JSON serialization -->
-                <set field="optionsList" from="[]" />
-                <iterate list="options" entry="option">
-                    <script>optionsList.add(option.getMap())</script>
-                </iterate>
-                <set field="questionMap.options" from="optionsList" />
-                <log level="info"
-                    message="Question ${question.questionId}: Added ${optionsList.size()} options to question map" />
-                <script>questions.add(questionMap)</script>
-            </iterate>
+            <!-- Group rows by question and nest options -->
+            <script><![CDATA[
+                def questionsMap = [:]
+                
+                questionAndOptionsRows.each { row ->
+                    def questionId = row.assessmentQuestionId
+                    
+                    // Create question entry if not exists
+                    if (!questionsMap.containsKey(questionId)) {
+                        questionsMap[questionId] = [
+                            assessmentQuestionId: row.assessmentQuestionId,
+                            pseudoId: row.pseudoId,
+                            assessmentId: row.assessmentId,
+                            questionSequence: row.questionSequence,
+                            questionType: row.questionType,
+                            questionText: row.questionText,
+                            questionDescription: row.questionDescription,
+                            isRequired: row.isRequired,
+                            defaultOption: row.defaultOption,
+                            defaultValue: row.defaultValue,
+                            createdDate: row.createdDate,
+                            createdByUserLogin: row.createdByUserLogin,
+                            options: []
+                        ]
+                    }
+                    
+                    // Add option if present (LEFT JOIN may have null options)
+                    if (row.optionId) {
+                        questionsMap[questionId].options.add([
+                            assessmentQuestionOptionId: row.optionId,
+                            pseudoId: row.optionPseudoId,
+                            assessmentQuestionId: row.assessmentQuestionId,
+                            assessmentId: row.assessmentId,
+                            optionSequence: row.optionSequence,
+                            optionText: row.optionText,
+                            optionScore: row.optionScore,
+                            createdDate: row.optionCreatedDate
+                        ])
+                    }
+                }
+                
+                // Convert to sorted list
+                questions = questionsMap.values().sort { it.questionSequence }
+            ]]></script>
         </actions>
     </service>
 

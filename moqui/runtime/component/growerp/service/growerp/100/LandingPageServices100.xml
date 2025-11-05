@@ -672,13 +672,14 @@ Service definitions for landing page, sections, credibility, and CTA management
     <out-parameters>
       <parameter name="sections" type="List">
         <description>List of page sections ordered by sequence</description>
+        <parameter name="landingPageSectionId" />
         <parameter name="pageSectionId" />
+        <parameter name="pseudoId" />
         <parameter name="landingPageId" />
         <parameter name="sectionSequence" type="Integer" />
-        <parameter name="sectionName" />
-        <parameter name="sectionText" />
-        <parameter name="sectionType" />
-        <parameter name="isActive" />
+        <parameter name="sectionTitle" />
+        <parameter name="sectionDescription" />
+        <parameter name="sectionImageUrl" />
         <parameter name="createdDate" type="Timestamp" />
       </parameter>
     </out-parameters>
@@ -688,16 +689,108 @@ Service definitions for landing page, sections, credibility, and CTA management
         out-map="context" />
 
       <!-- Find all sections for the landing page -->
-      <entity-find entity-name="PageSection" list="sections">
+      <entity-find entity-name="PageSection" list="sectionsList">
         <econdition field-name="landingPageId" from="landingPageId" />
         <order-by field-name="sectionSequence" />
       </entity-find>
+
+      <!-- Map pageSectionId to landingPageSectionId for frontend compatibility -->
+      <set field="sections" from="[]" />
+      <iterate list="sectionsList" entry="section">
+        <script>
+          Map sectionMap = section.getMap()
+          sectionMap.put('landingPageSectionId', section.pageSectionId)
+          sections.add(sectionMap)
+        </script>
+      </iterate>
     </actions>
   </service>
 
   <!-- ============================================ -->
-  <!-- CREDIBILITY SERVICES (3 services) -->
+  <!-- CREDIBILITY SERVICES (4 services) -->
   <!-- ============================================ -->
+
+  <!-- getCredibilityInfo: Get credibility info for a landing page -->
+  <service verb="get" noun="CredibilityInfo" authenticate="false">
+    <description>Get credibility information for a landing page, including statistics</description>
+    <in-parameters>
+      <parameter name="landingPageId" type="String" required="true">
+        <description>Landing page ID</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="credibilityInfoList" type="List">
+        <description>List of credibility info (typically one per page)</description>
+        <parameter name="credibilityInfoId" />
+        <parameter name="pseudoId" />
+        <parameter name="landingPageId" />
+        <parameter name="creatorBio" />
+        <parameter name="backgroundText" />
+        <parameter name="creatorImageUrl" />
+        <parameter name="createdDate" type="Timestamp" />
+        <parameter name="statistics" type="List">
+          <description>List of credibility statistics</description>
+          <parameter name="credibilityStatisticId" />
+          <parameter name="statistic" />
+          <parameter name="sequence" type="Integer" />
+          <parameter name="createdDate" type="Timestamp" />
+        </parameter>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Use view entity to get credibility info with statistics in one query -->
+      <entity-find entity-name="growerp.landing.CredibilityInfoAndStatistics" list="viewResults">
+        <econdition field-name="landingPageId" from="landingPageId" />
+        <order-by field-name="credibilityInfoId" />
+        <order-by field-name="sequence" />
+      </entity-find>
+
+      <!-- Group results by credibilityInfoId and nest statistics -->
+      <script><![CDATA[
+        credibilityInfoList = []
+        Map<String, Map> credibilityMap = [:]
+        
+        for (def row : viewResults) {
+          String credInfoId = row.credibilityInfoId
+          
+          // Create or get credibility info entry
+          if (!credibilityMap.containsKey(credInfoId)) {
+            Map credInfo = [
+              credibilityInfoId: row.credibilityInfoId,
+              pseudoId: row.pseudoId,
+              landingPageId: row.landingPageId,
+              creatorBio: row.creatorBio,
+              backgroundText: row.backgroundText,
+              creatorImageUrl: row.creatorImageUrl,
+              createdDate: row.createdDate,
+              statistics: []
+            ]
+            credibilityMap.put(credInfoId, credInfo)
+            credibilityInfoList.add(credInfo)
+          }
+          
+          // Add statistic if present (join is optional, so may be null)
+          if (row.credibilityStatisticId) {
+            Map statistic = [
+              credibilityStatisticId: row.credibilityStatisticId,
+              pseudoId: row.statisticPseudoId,
+              statistic: row.statistic,
+              sequence: row.sequence,
+              createdDate: row.statisticCreatedDate
+            ]
+            credibilityMap.get(credInfoId).statistics.add(statistic)
+          }
+        }
+      ]]></script>
+
+      <log level="info"
+        message="Retrieved ${credibilityInfoList.size()} credibility info records for landing page ${landingPageId}" />
+    </actions>
+  </service>
 
   <!-- createCredibilityInfo: Add credibility section -->
   <service verb="create" noun="CredibilityInfo" authenticate="true">

@@ -25,7 +25,7 @@ TableData getLandingPageListTableData(Bloc bloc, String classificationId,
   if (isPhone) {
     rowContent.add(TableRowContent(
       name: 'ID',
-      width: isPhone ? 10 : 5,
+      width: 15,
       value: CircleAvatar(
         child: Text(
           item.pseudoId == null ? '' : item.pseudoId!.lastChar(3),
@@ -35,7 +35,7 @@ TableData getLandingPageListTableData(Bloc bloc, String classificationId,
     ));
     rowContent.add(TableRowContent(
         name: const Text('ID\nTitle\nStatus', textAlign: TextAlign.start),
-        width: 40,
+        width: 85,
         value: Column(
           key: Key('item$index'),
           crossAxisAlignment: CrossAxisAlignment.start,

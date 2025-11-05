@@ -94,4 +94,30 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
     </index>
   </entity>
 
+  <!-- CredibilityInfoAndStatistics: View combining CredibilityInfo with its statistics -->
+  <view-entity entity-name="CredibilityInfoAndStatistics" package="growerp.landing">
+    <member-entity entity-alias="CI" entity-name="growerp.landing.CredibilityInfo" />
+    <member-entity entity-alias="CS" entity-name="growerp.landing.CredibilityStatistic"
+      join-from-alias="CI" join-optional="true">
+      <key-map field-name="credibilityInfoId" />
+    </member-entity>
+
+    <!-- CredibilityInfo fields -->
+    <alias entity-alias="CI" name="credibilityInfoId" />
+    <alias entity-alias="CI" name="pseudoId" field="pseudoId" />
+    <alias entity-alias="CI" name="landingPageId" />
+    <alias entity-alias="CI" name="creatorBio" />
+    <alias entity-alias="CI" name="backgroundText" />
+    <alias entity-alias="CI" name="creatorImageUrl" />
+    <alias entity-alias="CI" name="createdDate" field="createdDate" />
+    <alias entity-alias="CI" name="lastModifiedDate" />
+
+    <!-- CredibilityStatistic fields -->
+    <alias entity-alias="CS" name="credibilityStatisticId" />
+    <alias entity-alias="CS" name="statisticPseudoId" field="pseudoId" />
+    <alias entity-alias="CS" name="statistic" />
+    <alias entity-alias="CS" name="sequence" />
+    <alias entity-alias="CS" name="statisticCreatedDate" field="createdDate" />
+  </view-entity>
+
 </entities>
