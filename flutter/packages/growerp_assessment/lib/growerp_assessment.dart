@@ -30,6 +30,9 @@ export 'src/bloc/page_section_state.dart';
 export 'src/bloc/credibility_bloc.dart';
 export 'src/bloc/credibility_event.dart';
 export 'src/bloc/credibility_state.dart';
+export 'src/bloc/question_bloc.dart';
+export 'src/bloc/question_event.dart';
+export 'src/bloc/question_state.dart';
 
 export 'src/get_assessment_bloc_providers.dart';
 

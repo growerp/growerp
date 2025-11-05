@@ -1,11 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'credibility_event.dart';
 import 'credibility_state.dart';
 
 class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
-  CredibilityBloc() : super(const CredibilityState()) {
+  final RestClient restClient;
+
+  CredibilityBloc({required this.restClient})
+      : super(const CredibilityState()) {
     on<CredibilityLoad>(_onCredibilityLoad);
     on<CredibilityInfoCreate>(_onCredibilityInfoCreate);
     on<CredibilityInfoUpdate>(_onCredibilityInfoUpdate);
@@ -23,18 +25,19 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
     emit(state.copyWith(status: CredibilityStatus.loading));
 
     try {
-      // For now, just emit an empty state as credibility elements
-      // will be loaded as part of the landing page data
+      final response = await restClient.getCredibilityInfo(
+        landingPageId: event.landingPageId,
+      );
+
       emit(state.copyWith(
         status: CredibilityStatus.success,
-        credibilityElements: const [],
-        credibilityStatistics: const [],
+        credibilityElements: response.credibilityInfoList,
         message: 'Credibility data loaded successfully',
       ));
     } catch (error) {
       emit(state.copyWith(
         status: CredibilityStatus.failure,
-        message: 'Failed to load credibility data: ${error.toString()}',
+        message: await getDioError(error),
       ));
     }
   }
@@ -46,8 +49,6 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
     emit(state.copyWith(status: CredibilityStatus.loading));
 
     try {
-      final restClient = RestClient(await buildDioClient());
-
       final newCredibilityElement = await restClient.createCredibilityInfo(
         landingPageId: event.landingPageId,
         creatorBio: event.infoTitle, // Using title as bio for now
@@ -67,7 +68,7 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
     } catch (error) {
       emit(state.copyWith(
         status: CredibilityStatus.failure,
-        message: 'Failed to create credibility element: ${error.toString()}',
+        message: await getDioError(error),
       ));
     }
   }
@@ -79,8 +80,6 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
     emit(state.copyWith(status: CredibilityStatus.loading));
 
     try {
-      final restClient = RestClient(await buildDioClient());
-
       final updatedCredibilityInfo = await restClient.updateCredibilityInfo(
         landingPageId: event.landingPageId,
         credibilityInfoId: event.credibilityInfoId,
@@ -104,7 +103,7 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
     } catch (error) {
       emit(state.copyWith(
         status: CredibilityStatus.failure,
-        message: 'Failed to update credibility element: ${error.toString()}',
+        message: await getDioError(error),
       ));
     }
   }
@@ -116,8 +115,6 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
     emit(state.copyWith(status: CredibilityStatus.loading));
 
     try {
-      final restClient = RestClient(await buildDioClient());
-
       await restClient.deleteCredibilityInfo(
         landingPageId: event.landingPageId,
         credibilityInfoId: event.credibilityInfoId,
@@ -136,7 +133,7 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
     } catch (error) {
       emit(state.copyWith(
         status: CredibilityStatus.failure,
-        message: 'Failed to delete credibility element: ${error.toString()}',
+        message: await getDioError(error),
       ));
     }
   }
@@ -158,7 +155,6 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
         return;
       }
 
-      final restClient = RestClient(await buildDioClient());
       final credibilityId =
           state.credibilityElements.first.credibilityInfoId ?? '';
 
@@ -180,7 +176,7 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
     } catch (error) {
       emit(state.copyWith(
         status: CredibilityStatus.failure,
-        message: 'Failed to create credibility statistic: ${error.toString()}',
+        message: await getDioError(error),
       ));
     }
   }
@@ -204,8 +200,6 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
     emit(state.copyWith(status: CredibilityStatus.loading));
 
     try {
-      final restClient = RestClient(await buildDioClient());
-
       await restClient.removeCredibilityStatistic(
         credibilityStatisticId: event.credibilityStatisticId,
       );
@@ -223,7 +217,7 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
     } catch (error) {
       emit(state.copyWith(
         status: CredibilityStatus.failure,
-        message: 'Failed to delete credibility statistic: ${error.toString()}',
+        message: await getDioError(error),
       ));
     }
   }

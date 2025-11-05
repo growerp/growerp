@@ -169,6 +169,30 @@ class LandingPages {
   Map<String, dynamic> toJson() => _$LandingPagesToJson(this);
 }
 
+/// List wrapper for LandingPageSection objects
+@JsonSerializable(explicitToJson: true)
+class LandingPageSections {
+  final List<LandingPageSection> sections;
+
+  const LandingPageSections({required this.sections});
+
+  factory LandingPageSections.fromJson(Map<String, dynamic> json) =>
+      _$LandingPageSectionsFromJson(json);
+  Map<String, dynamic> toJson() => _$LandingPageSectionsToJson(this);
+}
+
+/// List wrapper for CredibilityInfo objects
+@JsonSerializable(explicitToJson: true)
+class CredibilityInfoList {
+  final List<CredibilityInfo> credibilityInfoList;
+
+  const CredibilityInfoList({required this.credibilityInfoList});
+
+  factory CredibilityInfoList.fromJson(Map<String, dynamic> json) =>
+      _$CredibilityInfoListFromJson(json);
+  Map<String, dynamic> toJson() => _$CredibilityInfoListToJson(this);
+}
+
 /// Landing Page Section model
 @JsonSerializable(explicitToJson: true)
 class LandingPageSection {

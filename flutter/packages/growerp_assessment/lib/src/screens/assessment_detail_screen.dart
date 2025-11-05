@@ -20,6 +20,8 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../bloc/assessment_bloc.dart';
+import '../bloc/question_bloc.dart';
+import 'question_list.dart';
 
 class AssessmentDetailScreen extends StatefulWidget {
   final Assessment assessment;
@@ -53,7 +55,7 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    top = -100;
+    top = 100;
     isVisible = true;
 
     // Initialize form controllers
@@ -154,6 +156,37 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
                     },
                     child: Column(
                       children: [
+                        FloatingActionButton(
+                          key: const Key("questions"),
+                          tooltip: 'Questions',
+                          heroTag: "questions",
+                          backgroundColor: widget.assessment.assessmentId == 'unknown' ? Colors.grey : null,
+                          onPressed: widget.assessment.assessmentId == 'unknown'
+                              ? () {
+                                  HelperFunctions.showMessage(
+                                    context,
+                                    'Please save the assessment first',
+                                    Colors.orange,
+                                  );
+                                }
+                              : () async => await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return Dialog(
+                                        child: popUp(
+                                          context: context,
+                                          title: 'Questions',
+                                          height: 600,
+                                          width: 400,
+                                          child: _buildQuestionsPlaceholder(),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                          child: const Icon(Icons.quiz),
+                        ),
+                        const SizedBox(height: 10),
                         FloatingActionButton(
                           key: const Key("deleteAssessment"),
                           tooltip: 'Delete Assessment',
@@ -300,9 +333,59 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
             if (ResponsiveBreakpoints.of(context).isMobile) _updateButton(),
             if (ResponsiveBreakpoints.of(context).isMobile)
               const SizedBox(height: 20),
+            if (ResponsiveBreakpoints.of(context).isMobile) _buildMobileActionButtons(),
+            if (ResponsiveBreakpoints.of(context).isMobile)
+              const SizedBox(height: 20),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildMobileActionButtons() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: OutlinedButton.icon(
+        key: const Key("mobileQuestions"),
+        icon: const Icon(Icons.quiz),
+        label: const Text('Questions'),
+        style: widget.assessment.assessmentId == 'unknown'
+            ? OutlinedButton.styleFrom(
+                foregroundColor: Colors.grey,
+                side: const BorderSide(color: Colors.grey),
+              )
+            : null,
+        onPressed: widget.assessment.assessmentId == 'unknown'
+            ? () {
+                HelperFunctions.showMessage(
+                  context,
+                  'Please save the assessment first',
+                  Colors.orange,
+                );
+              }
+            : () async => await showDialog(
+                  barrierDismissible: true,
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Dialog(
+                      child: popUp(
+                        context: context,
+                        title: 'Questions',
+                        height: 600,
+                        width: 400,
+                        child: _buildQuestionsPlaceholder(),
+                      ),
+                    );
+                  },
+                ),
+      ),
+    );
+  }
+
+  Widget _buildQuestionsPlaceholder() {
+    return BlocProvider.value(
+      value: context.read<QuestionBloc>(),
+      child: QuestionListScreen(assessmentId: widget.assessment.assessmentId),
     );
   }
 

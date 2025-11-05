@@ -24,6 +24,8 @@ import '../bloc/landing_page_bloc.dart';
 import '../bloc/landing_page_event.dart';
 import '../bloc/landing_page_state.dart';
 import '../bloc/assessment_bloc.dart';
+import 'page_section_list.dart';
+import 'credibility_info_list.dart';
 
 /// Maps backend hookType format to dropdown values
 /// Backend returns formats like 'ResultsHook', 'FrustrationHook'
@@ -77,7 +79,7 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    top = -100;
+    top = 250; // Start lower on the screen
     isVisible = true;
 
     // Initialize form controllers
@@ -182,6 +184,93 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                     return _buildContent();
                   },
                 ),
+                if (!isPhone)
+                  Positioned(
+                    right: right,
+                    top: top,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          top += details.delta.dy;
+                          right = right! - details.delta.dx;
+                        });
+                      },
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 10),
+                          FloatingActionButton(
+                            key: const Key("sections"),
+                            tooltip: 'Page Sections',
+                            heroTag: "pageSections",
+                            backgroundColor:
+                                widget.landingPage.landingPageId == null
+                                    ? Colors.grey
+                                    : null,
+                            onPressed: widget.landingPage.landingPageId == null
+                                ? () {
+                                    HelperFunctions.showMessage(
+                                      context,
+                                      'Please save the landing page first',
+                                      Colors.orange,
+                                    );
+                                  }
+                                : () async => await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return Dialog(
+                                          child: popUp(
+                                            context: context,
+                                            title: 'Page Sections',
+                                            height: 600,
+                                            width: 800,
+                                            child: _buildSectionsPlaceholder(),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                            child: const Icon(Icons.view_list),
+                          ),
+                          const SizedBox(height: 10),
+                          FloatingActionButton(
+                            key: const Key("credibility"),
+                            tooltip: 'Credibility Info',
+                            heroTag: "credibilityInfo",
+                            backgroundColor:
+                                widget.landingPage.landingPageId == null
+                                    ? Colors.grey
+                                    : null,
+                            onPressed: widget.landingPage.landingPageId == null
+                                ? () {
+                                    HelperFunctions.showMessage(
+                                      context,
+                                      'Please save the landing page first',
+                                      Colors.orange,
+                                    );
+                                  }
+                                : () async => await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return Dialog(
+                                          child: popUp(
+                                            context: context,
+                                            title: 'Credibility Information',
+                                            height: 600,
+                                            width: 800,
+                                            child:
+                                                _buildCredibilityPlaceholder(),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                            child: const Icon(Icons.verified_user),
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -578,6 +667,8 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
               ),
             ),
             const SizedBox(height: 20),
+            if (isPhone) _buildMobileActionButtons(),
+            if (isPhone) const SizedBox(height: 20),
             _updateButton(),
             const SizedBox(height: 20),
           ],
@@ -658,6 +749,101 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMobileActionButtons() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              key: const Key("mobileSections"),
+              icon: const Icon(Icons.view_list),
+              label: const Text('Sections'),
+              style: widget.landingPage.landingPageId == null
+                  ? OutlinedButton.styleFrom(
+                      foregroundColor: Colors.grey,
+                      side: const BorderSide(color: Colors.grey),
+                    )
+                  : null,
+              onPressed: widget.landingPage.landingPageId == null
+                  ? () {
+                      HelperFunctions.showMessage(
+                        context,
+                        'Please save the landing page first',
+                        Colors.orange,
+                      );
+                    }
+                  : () async => await showDialog(
+                        barrierDismissible: true,
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Dialog(
+                            child: popUp(
+                              context: context,
+                              title: 'Page Sections',
+                              height: 600,
+                              width: 400,
+                              child: _buildSectionsPlaceholder(),
+                            ),
+                          );
+                        },
+                      ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: OutlinedButton.icon(
+              key: const Key("mobileCredibility"),
+              icon: const Icon(Icons.verified_user),
+              label: const Text('Credibility'),
+              style: widget.landingPage.landingPageId == null
+                  ? OutlinedButton.styleFrom(
+                      foregroundColor: Colors.grey,
+                      side: const BorderSide(color: Colors.grey),
+                    )
+                  : null,
+              onPressed: widget.landingPage.landingPageId == null
+                  ? () {
+                      HelperFunctions.showMessage(
+                        context,
+                        'Please save the landing page first',
+                        Colors.orange,
+                      );
+                    }
+                  : () async => await showDialog(
+                        barrierDismissible: true,
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Dialog(
+                            child: popUp(
+                              context: context,
+                              title: 'Credibility Info',
+                              height: 600,
+                              width: 400,
+                              child: _buildCredibilityPlaceholder(),
+                            ),
+                          );
+                        },
+                      ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionsPlaceholder() {
+    return PageSectionList(
+      landingPageId: widget.landingPage.landingPageId ?? '',
+    );
+  }
+
+  Widget _buildCredibilityPlaceholder() {
+    return CredibilityInfoListScreen(
+      landingPageId: widget.landingPage.landingPageId ?? '',
     );
   }
 }

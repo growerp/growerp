@@ -6,7 +6,7 @@ environment:
   sdk: ^3.9.0
   flutter: ^3.33.0
 dependencies:
-  flutter: 
+  flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
@@ -16,7 +16,7 @@ dependencies:
 dev_dependencies:
   flutter_lints: ^4.0.0
   melos: ^6.1.0
-  analyzer: ^8.1.1
+  analyzer: ^9.0.0
 
 flutter:
   generate: true

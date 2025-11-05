@@ -127,6 +127,43 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
         </index>
     </entity>
 
+    <!-- View Entity: Questions with Options (for efficient question list retrieval) -->
+    <view-entity entity-name="QuestionAndOptions" package="growerp.assessment">
+        <description>Assessment questions with their options in a single query</description>
+
+        <!-- Assessment Questions (main entity) -->
+        <member-entity entity-alias="AQ" entity-name="growerp.assessment.AssessmentQuestion" />
+
+        <!-- Question Options (LEFT JOIN - questions may have no options) -->
+        <member-entity entity-alias="AQO" entity-name="growerp.assessment.AssessmentQuestionOption"
+            join-from-alias="AQ" join-optional="true">
+            <key-map field-name="assessmentQuestionId" />
+            <key-map field-name="assessmentId" />
+        </member-entity>
+
+        <!-- Question fields -->
+        <alias entity-alias="AQ" name="assessmentQuestionId" />
+        <alias entity-alias="AQ" name="pseudoId" />
+        <alias entity-alias="AQ" name="assessmentId" />
+        <alias entity-alias="AQ" name="questionSequence" />
+        <alias entity-alias="AQ" name="questionType" />
+        <alias entity-alias="AQ" name="questionText" />
+        <alias entity-alias="AQ" name="questionDescription" />
+        <alias entity-alias="AQ" name="isRequired" />
+        <alias entity-alias="AQ" name="defaultOption" />
+        <alias entity-alias="AQ" name="defaultValue" />
+        <alias entity-alias="AQ" name="createdDate" />
+        <alias entity-alias="AQ" name="createdByUserLogin" />
+
+        <!-- Option fields (aliased to avoid conflicts) -->
+        <alias entity-alias="AQO" name="optionId" field="assessmentQuestionOptionId" />
+        <alias entity-alias="AQO" name="optionPseudoId" field="pseudoId" />
+        <alias entity-alias="AQO" name="optionSequence" />
+        <alias entity-alias="AQO" name="optionText" />
+        <alias entity-alias="AQO" name="optionScore" />
+        <alias entity-alias="AQO" name="optionCreatedDate" field="createdDate" />
+    </view-entity>
+
     <!-- View Entity: Complete assessment with questions, options, and thresholds -->
     <view-entity entity-name="AssessmentComplete" package="growerp.assessment">
         <description>Complete assessment view with questions, options, and scoring thresholds</description>

@@ -26,12 +26,12 @@ class PageSectionBloc extends Bloc<PageSectionEvent, PageSectionState> {
         pageId: event.landingPageId,
       ));
 
-      final sections =
+      final response =
           await restClient.getPageSections(landingPageId: event.landingPageId);
 
       emit(state.copyWith(
         status: PageSectionStatus.success,
-        sections: sections,
+        sections: response.sections,
         pageId: event.landingPageId,
       ));
     } catch (error) {
